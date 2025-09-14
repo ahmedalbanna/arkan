@@ -67,11 +67,10 @@ export default function GeneralTab({ isComplexPrompt, isPending, categories }: G
                     <FormItem>
                         <FormLabel>{t('agentEditor.categoryLabel')}</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value as string} disabled={isPending}>
-                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger><SelectValue placeholder={t('agentManager.createDialog.selectCategoryPlaceholder')} /></SelectTrigger></FormControl>
                             <SelectContent>
                                 {categories?.map(cat => (
-                                <SelectItem key={cat as string} value={cat as string}>{cat as string}</SelectItem>
-
+                                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>

@@ -13,7 +13,7 @@ import { RecentActivity } from './RecentActivity';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
-import { useAdminDashboard } from '@/hooks/use-dashboard';
+import { useAdminDashboard } from '@/hooks';
 
 
 function DashboardSkeleton() {

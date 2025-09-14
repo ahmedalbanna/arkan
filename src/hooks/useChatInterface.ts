@@ -8,11 +8,12 @@ import { useAuth } from '@/context/AuthContext';
 import { useChatStore } from '@/hooks';
 import { createConversationApi } from '@/services';
 import { toast } from '@/hooks';
+import { Chat } from '@/lib/models/chat';
 
 export function useChatInterface() {
   const { agents } = useAgents();
   const {
-    selectedChat,
+    getSelectedChat,
     setSelectedChat,
     getChats,
     createConversation,
@@ -20,6 +21,7 @@ export function useChatInterface() {
     isInitialized
   } = useChatStore();
   const chats = getChats();
+  const selectedChat = getSelectedChat();
   const { firebaseUser, userProfile } = useAuth();
 
   useEffect(() => {
@@ -31,12 +33,12 @@ export function useChatInterface() {
   // Effect to select the first chat once loaded, if none is selected
   useEffect(() => {
     if (!selectedChat && chats.length > 0) {
-      setSelectedChat(chats[0]);
+      setSelectedChat(chats[0].toPlainObject());
     }
   }, [chats, selectedChat, setSelectedChat]);
 
   const handleSelectChat = (chat: any) => {
-    setSelectedChat(chat);
+    setSelectedChat(chat.toPlainObject());
   }
 
   const handleSelectAgent = async (agent: Agent) => {
@@ -48,7 +50,7 @@ export function useChatInterface() {
     // Check if a chat with this agent already exists
     const existingChat = chats.find(c => c.agent?.id === agent.id);
     if (existingChat) {
-        setSelectedChat(existingChat);
+        setSelectedChat(existingChat.toPlainObject());
         return;
     }
 
@@ -75,7 +77,7 @@ export function useChatInterface() {
   return {
     agents,
     chats,
-    selectedChat: useChatStore().getSelectedChat(), // Use the selector
+    selectedChat, // This is now a Chat class instance or null
     handleSelectChat,
     handleSelectAgent,
   };

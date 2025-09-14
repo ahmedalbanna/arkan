@@ -5,12 +5,11 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore } from '@/hooks'; // NEW: Use useBuilderStore
+import { useBuilderStore } from '@/hooks';
 import { useAnalyzeAcademicDocument, useSolveAcademicDocument } from '@/hooks';
 import { exportDocumentAsDocx } from '@/lib/academic-exporter';
 import { AnalyzedDocument, SolvedDocument, AcademicDocumentType } from '@/ai/schemas';
 import { AcademicSolverStage } from '@/lib/types';
-import { Project } from '@/lib/models/project';
 
 export interface ExternalContext {
   fileName: string;
@@ -27,8 +26,8 @@ export function useAcademicSolverLogic() {
     const { firebaseUser, userProfile } = useAuth();
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
-    // Get project and setters from useBuilderStore
-    const { project, setProject } = useBuilderStore();
+    // Get project and updater from useBuilderStore
+    const { project, updateProject } = useBuilderStore();
 
     // Destructure academicSolver state from the project
     const academicSolverState = project?.academicSolver;
@@ -53,20 +52,18 @@ export function useAcademicSolverLogic() {
             return;
         }
         
-        project.setAcademicSolverStage('analyzing');
-        setProject(new Project(project));
+        updateProject(p => p.setAcademicSolverStage('analyzing'));
 
-        const combinedQuestionContent = academicSolverState.questionDocuments.map(doc => `--- Content from: ${doc.fileName} ---\n${doc.content}`).join('\n\n');
+        const combinedQuestionContent = academicSolverState.questionDocuments.map(doc => `--- Content from: ${doc.fileName} ---
+${doc.content}`).join('\n\n');
 
         analyzeMutation.mutate({ markdown: combinedQuestionContent, documentType: academicSolverState.documentType }, {
             onSuccess: (data) => {
-                project.setAcademicSolverAnalyzedDocument(data);
-                setProject(new Project(project)); 
+                updateProject(p => p.setAcademicSolverAnalyzedDocument(data));
                 toast({ title: t('builder.academicSolver.toasts.analysisSuccess') });
             },
             onError: (error: any) => {
-                project.setAcademicSolverStage('idle');
-                setProject(new Project(project)); 
+                updateProject(p => p.setAcademicSolverStage('idle'));
                 toast({ title: t('builder.toasts.errorTitle'), description: error.message, variant: 'destructive' });
             }
         });
@@ -77,23 +74,21 @@ export function useAcademicSolverLogic() {
             toast({ title: t('builder.academicSolver.toasts.analysisMissing'), variant: 'destructive' });
             return;
         }
-        project.setAcademicSolverStage('solving');
-        setProject(new Project(project));
+        updateProject(p => p.setAcademicSolverStage('solving'));
 
         let contextMarkdown: string | undefined = undefined;
         if (academicSolverState.externalContext && academicSolverState.externalContext.length > 0) {
-            contextMarkdown = academicSolverState.externalContext.map(c => `--- Context from: ${c.fileName} ---\n${c.content}`).join('\n\n');
+            contextMarkdown = academicSolverState.externalContext.map(c => `--- Context from: ${c.fileName} ---
+${c.content}`).join('\n\n');
         }
 
         solveMutation.mutate({ analyzedDocument: academicSolverState.analyzedDocument, contextMarkdown }, {
             onSuccess: (data) => {
-                project.setAcademicSolverSolvedDocument(data);
-                setProject(new Project(project));
+                updateProject(p => p.setAcademicSolverSolvedDocument(data));
                 toast({ title: t('builder.academicSolver.toasts.solvingSuccess') });
             },
             onError: (error: any) => {
-                project.setAcademicSolverStage('readyToSolve');
-                setProject(new Project(project));
+                updateProject(p => p.setAcademicSolverStage('readyToSolve'));
                 toast({ title: t('builder.toasts.errorTitle'), description: error.message, variant: 'destructive' });
             }
         });
@@ -124,39 +119,27 @@ export function useAcademicSolverLogic() {
     };
 
     const setDocumentType = (newType: AcademicDocumentType | null) => {
-        if (!project) return;
-        project.setAcademicSolverDocumentType(newType);
-        setProject(new Project(project));
+        updateProject(p => p.setAcademicSolverDocumentType(newType));
     };
 
     const addQuestionDocument = (fileName: string, content: string) => {
-        if (!project) return;
-        project.addAcademicSolverQuestionDocument(fileName, content);
-        setProject(new Project(project));
+        updateProject(p => p.addAcademicSolverQuestionDocument(fileName, content));
     };
     
     const removeQuestionDocument = (index: number) => {
-        if (!project) return;
-        project.removeAcademicSolverQuestionDocument(index);
-        setProject(new Project(project));
+        updateProject(p => p.removeAcademicSolverQuestionDocument(index));
     };
     
     const addExternalContext = (fileName: string, content: string) => {
-        if (!project) return;
-        project.addAcademicSolverExternalContext(fileName, content);
-        setProject(new Project(project));
+        updateProject(p => p.addAcademicSolverExternalContext(fileName, content));
     };
     
     const removeExternalContext = (index: number) => {
-        if (!project) return;
-        project.removeAcademicSolverExternalContext(index);
-        setProject(new Project(project));
+        updateProject(p => p.removeAcademicSolverExternalContext(index));
     };
 
     const resetCurrent = () => {
-        if (!project) return;
-        project.resetAcademicSolver();
-        setProject(new Project(project));
+        updateProject(p => p.resetAcademicSolver());
     };
 
 

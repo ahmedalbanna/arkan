@@ -9,7 +9,7 @@ import { Project, type ProjectProperties } from '@/lib/models/project'; // Impor
 export function useCreateProjectDialog() {
     const [isOpen, setIsOpen] = useState(false);
     const router = useRouter();
-    const { project, setProject } = useBuilderStore(); // Get project and setProject
+    const { project, setProject, newSession } = useBuilderStore(); // Get project and setProject
 
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -28,10 +28,7 @@ export function useCreateProjectDialog() {
     }
 
     const handleCreateNewProject = () => {
-        if(project) {
-          project.newSession();
-          setProject(new Project(project.toStateObject()));
-        }
+        newSession();
         setName('');
         setDescription('');
         setIsOpen(true);

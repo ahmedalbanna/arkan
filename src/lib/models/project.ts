@@ -1,38 +1,34 @@
 
+import type { ProjectState, SavedProject, DiagramType, PresentationHistoryEntry, ContextFileType, AnyProjectProposal, ProjectPlan } from '@/lib/types';
+import type { DiagramData } from '@/hooks/useDiagramStore';
 
-// We need to import the types that SavedProject is composed of.
-import type { ProjectState, SavedProject, DiagramType, PresentationHistoryEntry, ContextFileType } from '@/lib/types';
-import type { DiagramData } from '@/hooks/useDiagramStore'; // We'll get the type from here for now
-
-// The properties of our class will be the same as the SavedProject interface.
 export type ProjectProperties = SavedProject;
 
 type SectionName = keyof NonNullable<ProjectState['sections']>;
 
 export class Project implements SavedProject {
-    // Properties from SavedProject
     public id: string;
     public userId: string;
     public createdAt: string;
     public updatedAt: string;
+    public hasUnsavedChanges?: boolean;
 
-    // Properties from ProjectState
-    public name?: string | undefined;
-    public projectIdea?: string | undefined;
-    public proposal: import('@/ai/schemas').AnyProjectProposal | null;
-    public reportConfig?: import('@/lib/types').FullReportModeConfig | null | undefined;
-    public generatedProposalState?: import('@/lib/types').SavedProposalState | null | undefined;
+    public name?: string;
+    public projectIdea?: string;
+    public proposal: AnyProjectProposal | null;
+    public reportConfig?: import('@/lib/types').FullReportModeConfig | null;
+    public generatedProposalState?: import('@/lib/types').SavedProposalState | null;
     public sections?: ProjectState['sections'];
     public translatedSections?: ProjectState['translatedSections'];
-    public evaluation?: import('@/ai/schemas').EvaluateReportOutput | null | undefined;
+    public evaluation?: import('@/ai/schemas').EvaluateReportOutput | null;
     public diagrams?: ProjectState['diagrams'];
-    public presentation?: { history: PresentationHistoryEntry[]; } | undefined;
+    public presentation?: { history: PresentationHistoryEntry[]; };
     public codeGenerator?: any;
     public academicSolver?: any;
     public codebase?: any;
-    public externalContext?: any[] | undefined;
-    public teamId?: string | null | undefined;
-    public projectPlan: import('@/ai/schemas').ProjectPlan | null;
+    public externalContext?: any[];
+    public teamId?: string | null;
+    public projectPlan: ProjectPlan | null;
 
     constructor(props: ProjectProperties) {
         this.id = props.id;
@@ -44,11 +40,11 @@ export class Project implements SavedProject {
         this.proposal = props.proposal;
         this.reportConfig = props.reportConfig;
         this.generatedProposalState = props.generatedProposalState;
-        this.sections = props.sections;
-        this.translatedSections = props.translatedSections;
+        this.sections = props.sections ?? {};
+        this.translatedSections = props.translatedSections ?? {};
         this.evaluation = props.evaluation;
-        this.diagrams = props.diagrams;
-        this.presentation = props.presentation;
+        this.diagrams = props.diagrams ?? {};
+        this.presentation = props.presentation ?? { history: [] };
         this.codeGenerator = props.codeGenerator;
         this.academicSolver = props.academicSolver;
         this.codebase = props.codebase;
@@ -57,8 +53,12 @@ export class Project implements SavedProject {
         this.projectPlan = props.projectPlan;
     }
 
-    public toStateObject(): ProjectState {
+    public toPlainObject(): SavedProject {
         return {
+            id: this.id,
+            userId: this.userId,
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt,
             name: this.name,
             projectIdea: this.projectIdea,
             proposal: this.proposal,
@@ -78,10 +78,30 @@ export class Project implements SavedProject {
         };
     }
 
+    public toStateObject(): ProjectState {
+        return this.toPlainObject(); // Can be expanded if state differs from saved
+    }
+
+    public newSession(): void {
+        this.name = undefined;
+        this.projectIdea = undefined;
+        this.proposal = null;
+        this.sections = {};
+        this.translatedSections = {};
+        this.evaluation = null;
+        this.diagrams = {};
+        this.presentation = { history: [] };
+        this.codeGenerator = undefined;
+        this.academicSolver = undefined;
+        this.codebase = undefined;
+        this.externalContext = [];
+        this.projectPlan = null;
+        this.hasUnsavedChanges = false;
+    }
+
     // --- Proposal Methods ---
-    public setProposal(proposal: import('@/ai/schemas').AnyProjectProposal | null): void {
+    public setProposal(proposal: AnyProjectProposal | null): void {
         this.proposal = proposal;
-        // If the proposal has a title, also update the project name
         if (proposal?.title) {
             this.name = proposal.title;
         }
@@ -146,7 +166,7 @@ export class Project implements SavedProject {
     }
 
     // --- Project Plan Methods ---
-    public setProjectPlan(plan: import('@/ai/schemas').ProjectPlan | null): void {
+    public setProjectPlan(plan: ProjectPlan | null): void {
         this.projectPlan = plan;
     }
 

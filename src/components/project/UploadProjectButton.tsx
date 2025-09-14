@@ -1,9 +1,10 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { Input } from '../ui/input';
-import { useUploadProject } from '@/hooks';
+import { useUploadProjectLogic } from '@/hooks';
 
 export function UploadProjectButton() {
     const {
@@ -11,7 +12,7 @@ export function UploadProjectButton() {
         handleUploadClick,
         onFileChange,
         t
-    } = useUploadProject();
+    } = useUploadProjectLogic();
 
     return (
         <>

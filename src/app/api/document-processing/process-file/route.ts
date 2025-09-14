@@ -39,7 +39,7 @@ export const POST = withAuth(async ({ request, user }) => {
             const base64 = Buffer.from(fileArrayBuffer).toString('base64');
             const dataUri = `data:${file.type};base64,${base64}`;
             agentId = 'pdf-to-markdown';
-            creditCost = 2;
+            creditCost = 2; // AI processing required
             result = await rewriteDocumentToMarkdown({ pdfDataUri: dataUri });
             markdownContent = 'markdown' in result ? result.markdown : '';
         } else if (file.type.startsWith('image/')) {
@@ -47,7 +47,7 @@ export const POST = withAuth(async ({ request, user }) => {
             const base64 = Buffer.from(fileArrayBuffer).toString('base64');
             const dataUri = `data:${file.type};base64,${base64}`;
             agentId = 'image-to-text';
-            creditCost = 2;
+            creditCost = 1; // AI processing required
             result = await imageToText({ imageDataUri: dataUri });
             markdownContent = 'text' in result ? result.text : '';
         } else {

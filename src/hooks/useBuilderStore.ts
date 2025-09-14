@@ -19,6 +19,7 @@ interface BuilderActions {
   newSession: () => void;
   loadProject: (savedProject: SavedProject) => void;
   setProject: (project: Project) => void; // To update the project instance
+  updateProject: (updater: (project: Project) => void) => void; // NEW: Helper for updates
   setHasUnsavedChanges: (status: boolean) => void;
   getProjectState: () => ProjectState | null;
 
@@ -63,6 +64,14 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
 
       setProject: (project) => {
         set({ project, hasUnsavedChanges: true });
+      },
+
+      // NEW: Centralized update helper
+      updateProject: (updater) => {
+        const project = get().project;
+        if (!project) return;
+        updater(project);
+        get().setProject(new Project(project.toStateObject() as ProjectProperties));
       },
 
       setHasUnsavedChanges: (status) => set({ hasUnsavedChanges: status }),

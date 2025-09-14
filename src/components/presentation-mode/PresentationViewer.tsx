@@ -50,16 +50,8 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
     );
   }
 
-
-  const handleNext = () => {
-    setCurrentSlide((prev) => (prev < slides.length - 1 ? prev + 1 : prev));
-  };
-
-  const handlePrev = () => {
-    setCurrentSlide((prev) => (prev > 0 ? prev - 1 : prev));
-  };
-
-  const slide = slides?.[currentSlide];
+  const { slides } = activePresentation;
+  const slide = slides[currentSlide];
 
   if (!slide) {
     return (
@@ -71,6 +63,15 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
       </Card>
     );
   }
+
+  const handleNext = () => {
+    setCurrentSlide((prev) => (prev < slides.length - 1 ? prev + 1 : prev));
+  };
+
+  const handlePrev = () => {
+    setCurrentSlide((prev) => (prev > 0 ? prev - 1 : prev));
+  };
+
 
   return (
     <div className="flex flex-col h-full">

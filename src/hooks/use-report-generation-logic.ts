@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/use-report-generation-logic.md
 
 'use client';
@@ -159,7 +160,7 @@ export function useReportGenerationLogic() {
                 existingSections: project.sections,
                 existingDiagrams: Object.fromEntries(Object.entries(project.diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
                 sectionsToGenerate,
-                externalContext: project.externalContext,
+                externalContext: project.externalContext, // Correctly pass the external context
             };
             return await evaluateContextApi(evaluationBody, token);
         } catch (error: any) {

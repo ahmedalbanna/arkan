@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -22,9 +23,9 @@ import { Team, type TeamProperties } from '@/lib/models/team';
  */
 export function useTeams() {
     const { firebaseUser } = useAuth();
-    return useQuery({
+    return useQuery<TeamWithMembers[], Error, Team[]>({
         queryKey: teamKeys.lists(),
-        queryFn: async (): Promise<TeamWithMembers[]> => {
+        queryFn: async () => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
             return fetchUserTeams(token);

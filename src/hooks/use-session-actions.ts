@@ -6,7 +6,7 @@ import { useBuilderStore, useSaveProject, useUpdateProject, useToast } from '@/h
 import { useLocalization } from '@/context/LocalizationContext';
 import { saveAs } from 'file-saver';
 import type { ProjectState, SavedProject } from '@/lib/types';
-import { Project } from '@/lib/models/project';
+import { Project, type ProjectProperties } from '@/lib/models/project';
 
 function hasAnyContent(project: Project | null): boolean {
     if (!project) return false;
@@ -31,17 +31,14 @@ export function useSessionActions() {
     const [isSavePromptOpen, setIsSavePromptOpen] = useState(false);
     const [projectName, setProjectName] = useState('');
 
-    const { project, loadProject, setProject } = useBuilderStore();
+    const { project, loadProject, newSession } = useBuilderStore();
     const saveProjectMutation = useSaveProject();
     const updateProjectMutation = useUpdateProject();
 
     const isSaving = saveProjectMutation.isPending || updateProjectMutation.isPending;
 
     const handleUploadClick = () => {
-        if(project) {
-            project.newSession();
-            setProject(new Project(project.toStateObject()));
-        }
+        newSession();
         fileInputRef.current?.click();
     };
 
@@ -71,7 +68,7 @@ export function useSessionActions() {
     const handleSaveProjectFile = (name?: string) => {
         if (!project || !hasAnyContent(project)) return;
         const finalName = name?.trim() || project.name || (project.proposal as any)?.title || 'arkan_project';
-        const jsonString = JSON.stringify(project.toPlainObject());
+        const jsonString = JSON.stringify(project.toStateObject());
         const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
         const blob = new Blob([encodedData], { type: 'text/plain;charset=utf-8' });
         saveAs(blob, `${finalName}.arkan`);
@@ -83,7 +80,7 @@ export function useSessionActions() {
             return;
         }
 
-        const projectData = project.toPlainObject();
+        const projectData = project.toStateObject();
         const finalName = name || project.name || (project.proposal as any)?.title || 'Untitled Project';
         const saveData = { ...projectData, name: finalName };
 
@@ -120,7 +117,7 @@ export function useSessionActions() {
 
     const handleSaveAsCloud = () => {
         if (!project) return;
-        const projectData = project.toPlainObject();
+        const projectData = project.toStateObject();
         const finalSaveAsName = saveAsName.trim() || project.name || (project.proposal as any)?.title || 'Untitled Project';
         const saveData = { ...projectData, name: String(finalSaveAsName) };
         saveProjectMutation.mutate(saveData, {

@@ -1,5 +1,4 @@
 
-
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal, ProjectPlan } from '@/ai/schemas';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { PptxTemplateSchema, ProposalTemplateSchema, ReportGenerationTemplateSchema, PresentationGenerationTemplateSchema, DocxStyleOptionsSchema } from '@/ai/schemas/template-schemas';
@@ -34,7 +33,7 @@ export const DocxTemplateSchema = z.object({ // Replace with BaseTemplateSchema.
   description: z.string(),
   styles: DocxStyleOptionsSchema, // Now uses the comprehensive style schema
   customStyles: CustomStylesSchema, // Added custom styles schema
-  imageUrl: z.string().url(),
+  imageUrl: z.string(),
   dataAiHint: z.string(),
 });
 
@@ -90,7 +89,7 @@ export type {
 } from '@/ai/schemas';
 
 export type { HistoryEntry } from '@/hooks/use-history';
-export type { UpdateAgentPayload, UpdateAgentVariables, CreateAgentVariables } from '@/hooks';
+export type { UpdateAgentVariables, CreateAgentVariables } from '@/hooks';
 
 export type { VerifyPaymentVariables } from '@/hooks';
 

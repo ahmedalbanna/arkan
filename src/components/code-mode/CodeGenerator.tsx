@@ -19,9 +19,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useMutation } from '@tanstack/react-query';
 import type { GenerateCodeOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useCodeGeneratorStore } from '@/hooks';
-import type { Codebase } from '@/ai/schemas';
 import { useBuilderStore } from '@/hooks';
+import type { Codebase } from '@/ai/schemas';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 // --- Start of inlined FileTreeView component logic ---
@@ -95,8 +94,8 @@ function FileTreeView({ codebase }: { codebase: Codebase }) {
     } catch (error) {
       console.error('Error creating ZIP file:', error);
       toast({
-        title: t('builder.codeGenerator.toasts.zipFailed'),
-        description: t('builder.codeGenerator.toasts.zipFailedDesc'),
+        title: t('builder.codeGenerator.codebaseGenerator.toasts.zipFailed'),
+        description: t('builder.codeGenerator.codebaseGenerator.toasts.zipFailedDesc'),
         variant: 'destructive',
       });
     } finally {
@@ -194,14 +193,10 @@ function CodeDisplay({ code, language }: { code: string; language: string; }) {
 
 function ComponentGenerator() {
     const { t, locale } = useLocalization();
-    const {
-        prompt,
-        html,
-        css,
-        javascript,
-        setCodePrompt,
-        setGeneratedCode,
-    } = useCodeGeneratorStore();
+    const { project, updateProject } = useBuilderStore();
+
+    const codeGeneratorState = project?.codeGenerator;
+    const { prompt = '', html = '', css = '', javascript = '' } = codeGeneratorState || {};
 
     const { firebaseUser, refetchUser } = useAuth();
     const [srcDoc, setSrcDoc] = useState('');
@@ -210,10 +205,11 @@ function ComponentGenerator() {
     const [isDownloading, setIsDownloading] = useState(false);
     const { toast } = useToast();
     const [isExpanded, setIsExpanded] = useState(false);
+
     const mutation = useMutation({
         mutationFn: generateCodeApi,
         onSuccess: (data) => {
-            setGeneratedCode(data);
+            updateProject(p => p.setGeneratedCode(data));
             refetchUser(); // Invalidate user query to update credits
             toast({ title: t('builder.codeGenerator.componentGenerator.toasts.success') });
         },
@@ -349,7 +345,7 @@ function ComponentGenerator() {
                                 rows={8}
                                 required
                                 value={prompt}
-                                onChange={(e) => setCodePrompt(e.target.value)}
+                                onChange={(e) => updateProject(p => p.setCodeGeneratorPrompt(e.target.value))}
                                 disabled={mutation.isPending}
                             />
                             {mutation.isError && (
@@ -454,12 +450,14 @@ function FullCodebaseGenerator() {
   const { t, locale } = useLocalization();
   const { toast } = useToast();
   const { firebaseUser, refetchUser } = useAuth();
-  const { proposal } = useBuilderStore();
-  const { codebase, setCodebase } = useCodeGeneratorStore();
+  const { project, updateProject } = useBuilderStore();
+  const codebase = project?.codebase;
+  const proposal = project?.proposal;
+  
   const mutation = useMutation({
     mutationFn: generateCodebaseApi,
     onSuccess: (data) => {
-      setCodebase(data);
+      updateProject(p => p.setCodebase(data));
       refetchUser(); // To update credits
       toast({
         title: t('builder.codeGenerator.codebaseGenerator.toasts.successTitle'),

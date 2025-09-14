@@ -11,13 +11,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { processFileApi } from '@/services';
 import { useAuth } from '@/context/AuthContext';
-import { useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { ExternalContext } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
+import { processFileApi } from '@/services'; // Still needed for text files if we want that flow, but we will bypass for now.
 
 interface AcademicUploadersProps {
     title: string;
@@ -28,33 +27,46 @@ interface AcademicUploadersProps {
     isContext?: boolean; // Flag to differentiate between question and context documents
 }
 
+/**
+ * Converts a File object to a data URI string.
+ * @param file The file to convert.
+ * @returns A promise that resolves with the data URI.
+ */
+function fileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
+}
+
+
 export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isProcessing, uploadedContent, isContext = false }: AcademicUploadersProps) => {
     const { toast } = useToast();
-    const { firebaseUser, refetchUser } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const { t } = useLocalization();
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         setIsLoading(true);
         for (const file of acceptedFiles) {
-            if (!firebaseUser) {
-                toast({ title: t('builder.academicSolver.toasts.authError'), variant: "destructive" });
-                continue;
-            }
-            try {
-                const token = await firebaseUser.getIdToken();
-                const formData = new FormData();
-                formData.append('file', file);
-                const result = await processFileApi(formData, token);
-                onContentAdded(file.name, result.markdown);
-                toast({ title: t('builder.academicSolver.toasts.fileProcessed'), description: t('builder.academicSolver.toasts.fileAddedDesc').replace('{fileName}', file.name) });
-                refetchUser();
+             try {
+                // For PDF and images, we just need the data URI. For text, we read it.
+                if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+                    const dataUrl = await fileToDataUrl(file);
+                    onContentAdded(file.name, dataUrl);
+                } else {
+                    const textContent = await file.text();
+                    onContentAdded(file.name, textContent);
+                }
+                toast({ title: t('builder.academicSolver.toasts.fileAdded'), description: t('builder.academicSolver.toasts.fileAddedDesc').replace('{fileName}', file.name) });
+
             } catch (error: any) {
                 toast({ title: t('builder.academicSolver.toasts.uploadFailed'), description: error.message, variant: "destructive" });
             }
         }
         setIsLoading(false);
-    }, [firebaseUser, onContentAdded, refetchUser, toast, t]);
+    }, [onContentAdded, toast, t]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -64,6 +76,8 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
             'image/jpeg': ['.jpeg', '.jpg'],
             'image/png': ['.png'],
             'image/webp': ['.webp'],
+            'text/plain': ['.txt'],
+            'text/markdown': ['.md'],
         }
     });
 

@@ -7,12 +7,12 @@ import { MessageSquare, Send, X, Bot, User, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useChatStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { useBuilderStore } from '@/hooks';
 import { runFlow } from '@genkit-ai/next/client';
 import { projectChat } from '@/ai/flows/project-chat';
+import { Project } from '@/lib/models/project';
 
 function Message({ role, content }: { role: 'user' | 'assistant', content: string }) {
     const isUser = role === 'user';
@@ -47,7 +47,7 @@ export default function ProjectChat() {
     const [isRunning, setIsRunning] = useState(false);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-    const getFullState = useBuilderStore(state => state.getFullState);
+    const { project } = useBuilderStore();
 
     const handleToggleChat = () => setIsChatOpen(prev => !prev);
     const handleCloseChat = () => setIsChatOpen(false);
@@ -68,14 +68,17 @@ export default function ProjectChat() {
         const userMessage = { role: 'user', content: input };
         setMessages(prev => [...prev, userMessage]);
 
-        const projectState = getFullState();
+        const projectState = project?.toStateObject() ?? null;
         setInput('');
         setIsRunning(true);
 
         try {
             const flow = await runFlow({
-                input: input,
-                url: ''
+                input: {
+                    message: input,
+                    projectState: projectState
+                },
+                url: '' // This might need to be set based on your setup
             });
 
             let finalContent = '';

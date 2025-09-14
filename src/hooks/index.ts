@@ -11,6 +11,7 @@ export * from './use-create-category-dialog';
 export * from './use-create-project-dialog';
 export * from './use-create-user-dialog';
 export * from './use-debounce';
+export * from './use-diagram-generation-tools';
 export * from './use-diagram-generator';
 export * from './use-diagram-viewer';
 export * from './use-diagrams';
@@ -43,26 +44,19 @@ export * from './use-toast';
 export * from './use-transactions';
 export * from './use-translation-view-logic';
 export * from './use-translation';
-export * from './use-upload-project';
 export * from './use-user';
 export * from './use-writing-tools';
-export * from './use-user-management-console';
-export * from './use-dashboard';
 export * from './use-new-chat-dialog';
 export * from './use-docx-template-manager';
 export * from './use-presentation-template-manager';
+export * from './use-user-management-console';
+export * from './use-upload-project-logic';
 
 // Store hooks
-export * from './useAcademicSolverStore';
-export * from './useSectionStore'; // Export DynamicSection
 export * from './useAgentStore';
 export * from './useBuilderStore';
 export * from './useChatInterface';
 export * from './useChatStore';
-export * from './useCodebaseStore';
-export * from './useCodeGeneratorStore';
-export * from './useDiagramStore';
 export * from './usePresentationStore';
-export * from './useProjectPlanStore';
 export * from './useProposalGenerationStore';
 export * from './useReportStore';
