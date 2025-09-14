@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { DynamicSection } from '@/hooks';
+
 import { SectionFormDialog } from './SectionFormDialog';
 import { useDeleteSection } from '@/hooks';
 import {
@@ -25,9 +25,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { SectionProperties } from '@/lib/models/section';
 
 interface SectionActionsProps {
-  section: DynamicSection;
+  section: SectionProperties;
 }
 
 export function SectionActions({ section }: SectionActionsProps) {

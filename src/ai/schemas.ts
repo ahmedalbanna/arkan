@@ -1082,6 +1082,7 @@ const academicSolverContextFileSchema = z.object({
 });
 
 export const ProjectStateSchema = z.object({
+    currentProjectId: z.string().nullable().optional(),
     name: z.string().optional(),
     projectIdea: z.string().optional(),
     proposal: z.any().nullable(),

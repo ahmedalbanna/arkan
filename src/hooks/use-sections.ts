@@ -11,7 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from './use-toast';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { type DynamicSection } from './useSectionStore'; // Keep for API types
+
 import { sectionKeys } from '@/lib/query-keys';
 import { Section, type SectionProperties } from '@/lib/models/section'; // NEW: Import our class
 
@@ -23,14 +23,14 @@ export function useSections() {
   const { firebaseUser } = useAuth();
   return useQuery({
     queryKey: sectionKeys.lists(),
-    queryFn: async (): Promise<DynamicSection[]> => {
+    queryFn: async (): Promise<SectionProperties[]> => {
       const token = await getAuthenticatedToken(firebaseUser);
       return fetchSectionsApi(token);
     },
     enabled: !!firebaseUser,
     staleTime: 1000 * 60 * 5, // 5 minutes
     // NEW: Transform the raw data into an array of Section instances
-    select: (data: DynamicSection[]): Section[] => {
+    select: (data: SectionProperties[]): Section[] => {
       if (!data) return [];
       return data.map(s => new Section(s as SectionProperties));
     }
@@ -40,8 +40,8 @@ export function useSections() {
 export function useCreateSection() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
-  // Mutation still works with the plain DynamicSection object for the API
-  return useMutation<DynamicSection, Error, Omit<DynamicSection, 'id'> & { id: string }>({
+  // Mutation still works with the plain SectionProperties object for the API
+  return useMutation<SectionProperties, Error, Omit<SectionProperties, 'id'> & { id: string }>({
     mutationFn: async (data) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return createSectionApi(data, token);
@@ -57,7 +57,7 @@ export function useCreateSection() {
 export function useUpdateSection() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
-  return useMutation<DynamicSection, Error, { sectionId: string; data: Partial<DynamicSection> }>({
+  return useMutation<SectionProperties, Error, { sectionId: string; data: Partial<SectionProperties> }>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return updateSectionApi(variables.sectionId, variables.data, token);

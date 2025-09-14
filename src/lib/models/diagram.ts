@@ -1,60 +1,54 @@
-export interface Node {
-  id: string;
-  label: string;
-  position: { x: number; y: number };
-}
-
-export interface Edge {
-  id: string;
-  source: string; // Node ID
-  target: string; // Node ID
-}
-
+/**
+ * The properties required to create a new Diagram instance.
+ * This is the plain object representation of a diagram's data.
+ */
 export interface DiagramProperties {
-  id: string;
-  nodes?: Node[];
-  edges?: Edge[];
+    plantUmlCode: string;
+    imageUrl: string;
+    explanation?: string;
 }
 
+/**
+ * Represents a single diagram within a project.
+ * It encapsulates the data and logic for a diagram generated from PlantUML.
+ */
 export class Diagram {
-  public id: string;
-  public nodes: Node[];
-  public edges: Edge[];
+    public plantUmlCode: string;
+    public imageUrl: string;
+    public explanation?: string;
 
-  constructor(props: DiagramProperties) {
-    this.id = props.id;
-    this.nodes = props.nodes || [];
-    this.edges = props.edges || [];
-  }
-
-  /**
-   * Adds a node to the diagram.
-   * @param node The node to add.
-   */
-  public addNode(node: Node): void {
-    if (!this.nodes.find(n => n.id === node.id)) {
-      this.nodes.push(node);
+    constructor(props: DiagramProperties) {
+        this.plantUmlCode = props.plantUmlCode;
+        this.imageUrl = props.imageUrl;
+        this.explanation = props.explanation;
     }
-  }
 
-  /**
-   * Adds an edge to the diagram.
-   * @param edge The edge to add.
-   */
-  public addEdge(edge: Edge): void {
-    if (!this.edges.find(e => e.id === edge.id)) {
-      this.edges.push(edge);
+    /**
+     * Updates the PlantUML code for the diagram.
+     * @param newCode The new PlantUML code.
+     */
+    public updateCode(newCode: string): void {
+        this.plantUmlCode = newCode;
+        // The image URL will become outdated. It should be updated by a separate process.
     }
-  }
 
-  /**
-   * Placeholder for an auto-layout algorithm.
-   */
-  public autoLayout(): void {
-    console.log(`Applying auto-layout to diagram ${this.id}`);
-    // In a real app, this would contain complex graph layout logic (e.g., force-directed).
-    this.nodes.forEach((node, index) => {
-      node.position = { x: index * 150, y: 100 };
-    });
-  }
+    /**
+     * Updates the explanation for the diagram.
+     * @param newExplanation The new explanation text.
+     */
+    public setExplanation(newExplanation: string): void {
+        this.explanation = newExplanation;
+    }
+
+    /**
+     * Converts the Diagram instance to a plain object for serialization.
+     * @returns A plain object representing the diagram's state.
+     */
+    public toStateObject(): DiagramProperties {
+        return {
+            plantUmlCode: this.plantUmlCode,
+            imageUrl: this.imageUrl,
+            explanation: this.explanation,
+        };
+    }
 }

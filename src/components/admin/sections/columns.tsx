@@ -2,12 +2,13 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { useAgentStore, type DynamicSection } from '@/hooks'; // Import from hooks
+import { useAgentStore } from '@/hooks'; // Import from hooks
 import { Badge } from '@/components/ui/badge';
 import { SectionActions } from './SectionActions';
 import { GitGraph } from 'lucide-react';
+import { SectionProperties } from '@/lib/models/section';
 
-export const columns: ColumnDef<DynamicSection>[] = [
+export const columns: ColumnDef<SectionProperties>[] = [
   {
     accessorKey: 'icon',
     header: 'Icon',

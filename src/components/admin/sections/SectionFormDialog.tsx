@@ -17,10 +17,11 @@ import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { DynamicSection } from '@/hooks';
+
 import { useCreateSection, useUpdateSection } from '@/hooks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAgents } from '@/hooks';
+import { SectionProperties } from '@/lib/models/section';
 
 const SectionSchema = z.object({
   id: z.string().min(3, 'ID must be at least 3 characters').regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'ID must be lowercase and kebab-case.'),
@@ -33,7 +34,7 @@ const SectionSchema = z.object({
 type SectionFormData = z.infer<typeof SectionSchema>;
 
 interface SectionFormDialogProps {
-  sectionToEdit?: DynamicSection;
+  sectionToEdit?: SectionProperties;
   children?: React.ReactNode;
 }
 

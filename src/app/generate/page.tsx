@@ -85,12 +85,12 @@ async function markOnboardingComplete(userId: string, token: string) {
 
 function GeneratePageContent() {
   const [activeTab, setActiveTab] = useState("proposal");
-  const { project, currentProjectId, loadProject } = useBuilderStore();
+  const { project, loadProject } = useBuilderStore();
   const { t, locale } = useLocalization();
   const { firebaseUser, userProfile, refetchUser } = useAuth();
   const queryClient = useQueryClient();
   const { features, isLoaded: featuresLoaded } = useFeatures();
-  const { data: projectData, isSuccess } = useProject(currentProjectId!);
+  const { data: projectData, isSuccess } = useProject(project?.id!);
 
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasLoadedProject, setHasLoadedProject] = useState(false);

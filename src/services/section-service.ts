@@ -1,9 +1,11 @@
 // C:\Users\ahmed\source\repos\arkan\src\services\section-service.ts
 'use client';
 
-import type { DynamicSection } from '@/hooks';
+import { SectionProperties } from "@/lib/models/section";
 
-export async function fetchSections(token: string): Promise<DynamicSection[]> {
+
+
+export async function fetchSections(token: string): Promise<SectionProperties[]> {
   const response = await fetch('/api/admin/sections', {
     headers: { 'Authorization': `Bearer ${token}` },
   });
@@ -11,7 +13,7 @@ export async function fetchSections(token: string): Promise<DynamicSection[]> {
   return response.json();
 }
 
-export async function createSection(data: Omit<DynamicSection, 'id'> & { id: string }, token: string): Promise<DynamicSection> {
+export async function createSection(data: Omit<SectionProperties, 'id'> & { id: string }, token: string): Promise<SectionProperties> {
   const response = await fetch('/api/admin/sections', {
     method: 'POST',
     headers: {
@@ -27,7 +29,7 @@ export async function createSection(data: Omit<DynamicSection, 'id'> & { id: str
   return response.json();
 }
 
-export async function updateSection(sectionId: string, data: Partial<DynamicSection>, token: string): Promise<DynamicSection> {
+export async function updateSection(sectionId: string, data: Partial<SectionProperties>, token: string): Promise<SectionProperties> {
   const response = await fetch(`/api/admin/sections/${sectionId}`, {
     method: 'PUT',
     headers: {
