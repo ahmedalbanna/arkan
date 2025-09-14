@@ -11,9 +11,10 @@ import {
   updateDocxTemplate,
   createDocxTemplate,
   deleteDocxTemplate,
+  type DocxTemplate as DocxTemplateType,
+  type DocxTemplatesRecord,
 } from "@/services";
-import type { DocxTemplate as DocxTemplateType, DocxTemplatesRecord } from '@/services'; // Keep original type for API
-import { DocxTemplate } from '@/lib/models/docxTemplate'; // NEW: Import our DocxTemplate class
+import { DocxTemplate, type DocxTemplateProperties } from '@/lib/models/docxTemplate';
 import type { IStylesOptions } from 'docx';
 import { templates as defaultTemplates } from '@/lib/docx-styles';
 
@@ -32,21 +33,27 @@ export function useDocxStyles() {
     const [localChanges, setLocalChanges] = React.useState<Record<string, IStylesOptions>>({});
 
 
-    const { data: templates, isLoading } = useQuery({
+    const { data: templates, isLoading } = useQuery<Record<string, DocxTemplate>, Error>({
         queryKey: docxTemplateKeys.lists(),
-        queryFn: fetchDocxTemplatesApi,
+        queryFn: async () => {
+            const data = await fetchDocxTemplatesApi();
+            const instances: Record<string, DocxTemplate> = {};
+            for (const key in data) {
+                instances[key] = new DocxTemplate(data[key] as DocxTemplateProperties);
+            }
+            return instances;
+        },
         staleTime: 1000 * 60 * 5, // 5 minutes
-        initialData: defaultTemplates as Record<string, DocxTemplateType>, // Use original type for initialData
+        initialData: () => {
+            const initialInstances: Record<string, DocxTemplate> = {};
+            for (const key in defaultTemplates) {
+                initialInstances[key] = new DocxTemplate(defaultTemplates[key] as DocxTemplateProperties);
+            }
+            return initialInstances;
+        },
         meta: {
             onError: (error: Error) => handleErrorUtility(error, "Failed to fetch DOCX templates"),
         },
-        // NEW: Transform the raw data into a Record of DocxTemplate class instances
-        select: (data: DocxTemplatesRecord): Record<string, DocxTemplate> => {
-            return Object.keys(data).reduce((acc, key) => {
-                acc[key] = new DocxTemplate(data[key]);
-                return acc;
-            }, {} as Record<string, DocxTemplate>);
-        }
     });
 
     const mutation = useMutation({

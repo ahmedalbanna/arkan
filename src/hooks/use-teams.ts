@@ -23,7 +23,7 @@ import { Team, type TeamProperties } from '@/lib/models/team';
  */
 export function useTeams() {
     const { firebaseUser } = useAuth();
-    return useQuery<TeamWithMembers[], Error, Team[]>({
+    const queryInfo = useQuery<TeamWithMembers[], Error, Team[]>({
         queryKey: teamKeys.lists(),
         queryFn: async () => {
             if (!firebaseUser) throw new Error("User not authenticated");
@@ -38,6 +38,12 @@ export function useTeams() {
             return data.map(t => new Team(t as TeamProperties));
         }
     });
+
+    return {
+        ...queryInfo,
+        // The `data` property from queryInfo is now `Team[] | undefined`
+        teams: queryInfo.data,
+    }
 }
 
 

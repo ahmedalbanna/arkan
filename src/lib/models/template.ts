@@ -4,7 +4,7 @@ export interface BaseTemplateProperties<TContent = any> {
   id: string;
   name: string;
   description: string;
-  content?: TContent; // Add optional content property
+  content?: TContent;
 }
 
 export class Template<TContent = any> implements BaseTemplateProperties<TContent> {

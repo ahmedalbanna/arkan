@@ -3,15 +3,15 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
-import type { TeamWithMembers } from '@/services';
 import { useAuth } from '@/context/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { InviteMemberForm } from './InviteMemberForm';
 import { useLocalization } from '@/context/LocalizationContext';
+import type { Team } from '@/lib/models/team';
 
 interface TeamCardProps {
-    team: TeamWithMembers;
+    team: Team;
 }
 
 export function TeamCard({ team }: TeamCardProps) {
@@ -35,10 +35,10 @@ export function TeamCard({ team }: TeamCardProps) {
                         <h4 className="font-semibold mb-2">{t('team.members')}</h4>
                         <div className="space-y-4">
                             {members.map(member => (
-                                <div key={member.userId} className="flex items-center gap-4">
+                                <div key={member.id} className="flex items-center gap-4">
                                     <Avatar>
                                         <AvatarImage src={member.profilePictureUrl} />
-                                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                        <AvatarFallback>{member.getInitials()}</AvatarFallback>
                                     </Avatar>
                                     <div className="flex-grow">
                                         <p className="font-medium">{member.name}</p>

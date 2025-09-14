@@ -13,9 +13,10 @@ import {
   createPptxTemplate,
   deletePptxTemplate,
   uploadPptxTemplateFile as uploadPptxTemplateFileApi,
-  type PptxTemplate,
+  type PptxTemplate as PptxTemplateType,
 } from "@/services";
 import { PptxStyleOptions } from '@/lib/types';
+import { PptxTemplate, type PptxTemplateProperties } from '@/lib/models/pptxTemplate';
 
 
 export type PptxTemplateKey = 'modern' | 'dark' | 'professional' | string;
@@ -30,9 +31,16 @@ export function usePptxStyles() {
     const { firebaseUser } = useAuth();
     const [localChanges, setLocalChanges] = React.useState<Record<string, PptxStyleOptions>>({});
 
-    const { data: templates, isLoading, isError } = useQuery<Record<string, PptxTemplate>>({
+    const { data: templates, isLoading } = useQuery<Record<string, PptxTemplate>, Error>({
         queryKey: pptxTemplateKeys.lists(),
-        queryFn: fetchPptxTemplates, // This is a public endpoint now, no token needed
+        queryFn: async () => {
+            const data = await fetchPptxTemplates();
+            const instances: Record<string, PptxTemplate> = {};
+            for (const key in data) {
+                instances[key] = new PptxTemplate(data[key] as PptxTemplateProperties);
+            }
+            return instances;
+        },
         staleTime: 1000 * 60 * 5, // 5 minutes
         meta: {
             onError: (error: Error) => handleErrorUtility(error, "Failed to fetch PPTX templates"),
@@ -72,9 +80,9 @@ export function usePptxStyles() {
         }
     });
 
-    const updateStyle = (DocxTemplateKey : string, path: string, value: any) => {
+    const updateStyle = (key: string, path: string, value: any) => {
         setLocalChanges(prev => {
-            const newStyles = JSON.parse(JSON.stringify(prev[DocxTemplateKey ] || templates?.[DocxTemplateKey ]?.styles || {}));
+            const newStyles = JSON.parse(JSON.stringify(prev[key] || templates?.[key]?.styles || {}));
 
             let current = newStyles;
             const keys = path.split('.');
@@ -84,7 +92,7 @@ export function usePptxStyles() {
             }
             current[keys[keys.length - 1]] = value;
 
-            return { ...prev, [DocxTemplateKey ]: newStyles };
+            return { ...prev, [key]: newStyles };
         });
     };
 
@@ -99,7 +107,9 @@ export function usePptxStyles() {
         const combined = { ...templates };
         for (const key in localChanges) {
             if (combined[key]) {
-                combined[key] = { ...combined[key], styles: localChanges[key] };
+                const newStyles = localChanges[key];
+                // Need to create a new instance to make React re-render
+                combined[key] = new PptxTemplate({ ...combined[key].toPlainObject(), styles: newStyles });
             }
         }
         return combined;
@@ -138,13 +148,13 @@ export function useDeletePptxTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
     return useMutation({
-        mutationFn: async (DocxTemplateKey : string) => {
+        mutationFn: async (key: string) => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return deletePptxTemplate(DocxTemplateKey , token);
+            return deletePptxTemplate(key, token);
         },
-        onSuccess: (data, DocxTemplateKey ) => {
+        onSuccess: (data, key) => {
             queryClient.invalidateQueries({ queryKey: pptxTemplateKeys.lists() });
-            toast({ title: "Template Deleted", description: `Template "${DocxTemplateKey }" has been deleted.` });
+            toast({ title: "Template Deleted", description: `Template "${key}" has been deleted.` });
         },
         onError: (error: Error) => {
             handleErrorUtility(error, "Failed to delete template");

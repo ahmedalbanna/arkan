@@ -1,13 +1,12 @@
-
 'use client';
 
 import {
   Table,
   TableBody,
+  TableCell,
+  TableHead,
   TableHeader,
   TableRow,
-  TableHead,
-  TableCell,
 } from "@/components/ui/table";
 import { useLocalization } from "@/context/LocalizationContext";
 import type { User } from "@/lib/models/user";

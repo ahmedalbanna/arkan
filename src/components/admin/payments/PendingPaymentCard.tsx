@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format } from 'date-fns';
 import { Check, ExternalLink, Loader2, ThumbsDown } from "lucide-react";
-import type { TransactionData } from "@/lib/types";
 import { useVerifyPayment } from "@/hooks";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocalization } from "@/context/LocalizationContext";
+import { Transaction } from "@/lib/models/transaction";
 
 interface PendingPaymentCardProps {
-    transaction: TransactionData;
+    transaction: Transaction;
 }
 
 export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
@@ -46,7 +45,7 @@ export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
             </CardHeader>
             <CardContent className="flex-grow space-y-3 text-sm">
                 <p><strong>{t('managePayments.userLabel')}:</strong> {transaction.userName} ({transaction.userEmail})</p>
-                <p><strong>{t('managePayments.amountLabel')}:</strong> ${transaction.price.toFixed(2)}</p>
+                <p><strong>{t('managePayments.amountLabel')}:</strong> ${transaction.getFormattedPrice()}</p>
                 <p><strong>{t('managePayments.creditsLabel')}:</strong> {transaction.credits}</p>
                 <Button asChild size="sm" variant="outline">
                     <a href={transaction.proofUrl} target="_blank" rel="noopener noreferrer">

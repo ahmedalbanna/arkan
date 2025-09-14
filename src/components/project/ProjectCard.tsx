@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,8 +40,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
         )}>
             <CardHeader>
                 <div className="flex justify-between items-start gap-2">
-                    <CardTitle className="font-headline text-lg truncate" title={projectTitle as string}>
-                        {projectTitle as React.ReactNode}
+                    <CardTitle className="font-headline text-lg truncate" title={projectTitle}>
+                        {projectTitle}
                     </CardTitle>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -54,7 +53,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                             <AlertDialogHeader>
                                 <AlertDialogTitle>{t('projects.deleteDialogTitle')}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    {t('projects.deleteDialogDescription').replace('{projectTitle}', projectTitle as string)}
+                                    {t('projects.deleteDialogDescription').replace('{projectTitle}', projectTitle)}
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -70,7 +69,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
             </CardHeader>
             <CardContent className="flex-grow">
                 <p className="text-sm text-muted-foreground line-clamp-3">
-                    {(project.proposal?.executiveSummary || project.projectIdea || t('projects.noDescription')) as React.ReactNode}
+                    {project.proposal?.executiveSummary || project.projectIdea || t('projects.noDescription')}
                 </p>
             </CardContent>
             <CardFooter>

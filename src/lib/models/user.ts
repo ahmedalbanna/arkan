@@ -1,3 +1,4 @@
+
 import type { UserProfile, TeamMember } from '@/lib/types';
 
 // A more comprehensive role type that covers different contexts

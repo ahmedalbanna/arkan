@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, use, useActionState, useState } from 'react';
@@ -6,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import type { UserProfile } from '@/lib/types';
 import { handleUpdateUser, handleDeleteUser } from '@/app/manage-users/actions';
 
 import { Button } from '@/components/ui/button';
@@ -36,6 +34,7 @@ import { useSendPasswordReset } from '@/hooks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { userKeys } from '@/lib/query-keys';
+import type { User } from '@/lib/models/user';
 
 const editUserSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -81,7 +80,7 @@ async function uploadProfilePictureApi(variables: { userId: string, file: File, 
 }
 
 
-export default function EditUserForm({ user }: { user: UserProfile }) {
+export default function EditUserForm({ user }: { user: User }) {
   const { toast } = useToast();
   const { t } = useLocalization();
   const router = useRouter();

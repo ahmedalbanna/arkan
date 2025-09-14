@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useTeams } from '@/hooks';
@@ -9,7 +8,6 @@ import { Accordion } from '@/components/ui/accordion';
 import { TeamCard } from './TeamCard';
 import { CreateTeamForm } from './CreateTeamForm';
 import { useLocalization } from '@/context/LocalizationContext';
-import { Team } from '@/lib/models/team';
 
 function TeamManagerSkeleton() {
     return (

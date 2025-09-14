@@ -1,4 +1,5 @@
 
+
 // code explantion in docs/hooks/use-user.md
 
 "use client";
@@ -8,12 +9,19 @@ import { userKeys } from "@/lib/query-keys";
 import type { UserProfile, PricingPlan } from '@/lib/types';
 import { toast } from "@/hooks";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase/client-init";
+import { auth, app } from '@/lib/firebase/client-init';
 import {
+  signInWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  GoogleAuthProvider,
+  signInWithPopup,
   RecaptchaVerifier,
   signInWithPhoneNumber,
   ConfirmationResult,
 } from "firebase/auth";
+import type { SignupCredentials } from "@/components/auth/SignupForm";
+import { getFirestore, doc, onSnapshot, setDoc } from "firebase/firestore";
 import {
   fetchUsers as fetchUsersApi,
   subscribeToUserProfile,
@@ -39,9 +47,13 @@ import { User, type UserProperties } from '@/lib/models/user'; // NEW: Import ou
 // --- Custom Hooks ---
 const USERS_PER_PAGE = 10;
 
+/**
+ * Fetches a paginated list of all users from the API.
+ * Returns instances of the User CLASS.
+ */
 export function useUsers() {
     const { firebaseUser } = useAuth();
-    return useInfiniteQuery<UserListResponse, Error, UserListResponse, (string | undefined)[], string | undefined>({
+    return useInfiniteQuery({
         queryKey: userKeys.lists(),
         queryFn: async ({ pageParam }) => {
             const token = await getAuthenticatedToken(firebaseUser);
@@ -61,9 +73,13 @@ export function useUsers() {
     });
 }
 
+/**
+ * Fetches all admin users.
+ * Returns instances of the User CLASS.
+ */
 export function useAdmins() {
   const { firebaseUser } = useAuth();
-  return useQuery<UserProfile[], Error, User[]>({
+  return useQuery({
     queryKey: userKeys.admins(),
     queryFn: async () => {
         const token = await getAuthenticatedToken(firebaseUser);
@@ -80,6 +96,10 @@ export function useAdmins() {
   });
 }
 
+/**
+ * Fetches a single user profile and keeps it updated in real-time.
+ * Returns an instance of the User CLASS.
+ */
 export function useUserProfile(userId: string) {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
@@ -99,7 +119,7 @@ export function useUserProfile(userId: string) {
 
   // The component will use the data from the cache, which is kept up-to-date
   // by the real-time listener.
-  return useQuery<UserProfile | null, Error, User | null>({
+  return useQuery({
     queryKey: userKeys.profile(userId),
     // The queryFn will run on initial load or if the listener fails for some reason
     queryFn: async () => {

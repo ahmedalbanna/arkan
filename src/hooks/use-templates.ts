@@ -98,6 +98,7 @@ export function useCreateProposalTemplate() {
             queryClient.invalidateQueries({ queryKey: templateKeys.proposals() });
         },
         onError: (error: any) => {
+            // Re-throw for form handling
             throw error;
         }
     });

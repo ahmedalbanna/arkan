@@ -10,11 +10,12 @@ import type { Project } from '@/lib/models/project'; // Import the Project class
 export function useProjectCardLogic(project: Project) { // Changed type to Project
     const router = useRouter();
     const { t } = useLocalization();
-    const { loadProject } = useBuilderStore(); // Changed from loadState
+    const { loadProject } = useBuilderStore();
+
     const deleteProjectMutation = useDeleteProject();
 
     const handleLoadProject = () => {
-        // loadProject expects a plain object matching SavedProject interface
+        // The store's loadProject action expects a plain object
         loadProject(project.toPlainObject()); 
         router.push('/generate');
     };

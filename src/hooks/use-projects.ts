@@ -12,7 +12,7 @@ import {
   createProject,
   deleteProject,
   updateProject,
-  type SavedProject, // Keep this type for API interactions
+  type SavedProject,
 } from "@/services";
 import { useBuilderStore } from "./useBuilderStore";
 import { handleErrorUtility } from "@/lib/errorUtils";
@@ -91,22 +91,19 @@ export function useProject(projectId: string) {
 export function useSaveProject() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
-  const setCurrentProjectId = useBuilderStore(
-    (state) => state.setCurrentProjectId
-  );
-  const setHasUnsavedChanges = useBuilderStore(
-    (state) => state.setHasUnsavedChanges
-  );
+  const { setProject } = useBuilderStore(); // Use setProject from the store
 
   return useMutation<SavedProject, Error, SaveProjectVariables>({
     mutationFn: async (data) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return createProject(data, token);
     },
-    onSuccess: (newProject) => {
+    onSuccess: (newProjectData) => {
+      const newProject = new Project(newProjectData as ProjectProperties);
+      // Invalidate the list of projects
       queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
-      setCurrentProjectId(newProject.id); // Set the ID in the store for subsequent saves
-      setHasUnsavedChanges(false);
+      // Set the newly created project as the active one in the builder store
+      setProject(newProject);
       toast({
         title: "Project Saved",
         description: `"${newProject.name}" has been successfully saved.`,
@@ -121,22 +118,25 @@ export function useSaveProject() {
 export function useUpdateProject() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
-  const setHasUnsavedChanges = useBuilderStore(
-    (state) => state.setHasUnsavedChanges
-  );
+  const { setProject } = useBuilderStore();
 
   return useMutation<SavedProject, Error, UpdateProjectVariables>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return updateProject(variables.projectId, variables.data, token);
     },
-    onSuccess: (updatedProject) => {
+    onSuccess: (updatedProjectData) => {
+      const updatedProject = new Project(updatedProjectData as ProjectProperties);
+      
+      // Invalidate the main project list
       queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
-      // When we set query data, we should use the plain object, not the class instance,
-      // to ensure the cache remains serializable.
-      queryClient.setQueryData(projectKeys.detail(updatedProject.id), updatedProject);
-      setHasUnsavedChanges(false);
-      // Add a toast notification for manual saves.
+
+      // Update the specific project's query data in the cache
+      queryClient.setQueryData(projectKeys.detail(updatedProject.id), updatedProjectData);
+      
+      // Update the active project in the builder store
+      setProject(updatedProject);
+
       toast({
         title: "Project Updated",
         description: `Your changes to "${updatedProject.name}" have been saved.`,
