@@ -19,6 +19,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { markdownComponents } from '@/lib/markdown-styles';
 import ReactMarkdown from 'react-markdown';
 import { useSections } from '@/hooks';
+import { useLocalization } from '@/context/LocalizationContext';
 
 interface GenerationToolsProps {
     onTranslateAll: (targetLang: 'en' | 'ar') => void;
