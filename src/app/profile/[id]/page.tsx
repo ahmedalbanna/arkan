@@ -1,15 +1,20 @@
 'use client';
 
 import { notFound } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Mail, Gem, Calendar } from 'lucide-react';
+import { Mail, Gem, Calendar, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useUserProfile } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
-import { use } from 'react';
+import { use, Suspense, lazy } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+
+const EditUserForm = lazy(() => import('@/components/admin/EditUserForm'));
 
 function ProfileSkeleton() {
     return (
@@ -26,6 +31,9 @@ function ProfileSkeleton() {
                     <Skeleton className="h-10 w-4/5" />
                 </div>
             </CardContent>
+            <CardFooter>
+                 <Skeleton className="h-10 w-32 ml-auto" />
+            </CardFooter>
         </Card>
     );
 }
@@ -33,6 +41,9 @@ function ProfileSkeleton() {
 function ProfilePageContent({ userId }: { userId: string }) {
   const { t } = useLocalization();
   const { data: user, isLoading } = useUserProfile(userId);
+  const { userProfile: currentUser, firebaseUser } = useAuth();
+  
+  const canEdit = currentUser?.role === 'admin' || currentUser?.id === userId;
 
   if (isLoading) {
     return (
@@ -53,7 +64,7 @@ function ProfilePageContent({ userId }: { userId: string }) {
             <Avatar className="w-24 h-24 mx-auto mb-4 border-4 border-primary/20">
               <AvatarImage src={user.profilePictureUrl ?? ''} alt={user.name} />
               <AvatarFallback className="text-3xl">
-                {user.name.charAt(0).toUpperCase()}
+                {user.getInitials()}
               </AvatarFallback>
             </Avatar>
           <CardTitle className="text-3xl font-headline">{user.name}</CardTitle>
@@ -89,6 +100,16 @@ function ProfilePageContent({ userId }: { userId: string }) {
            </div>
 
         </CardContent>
+        {canEdit && (
+            <CardFooter className="justify-end">
+                <Button asChild>
+                    <Link href={`/admin/manage-users/${userId}/edit`}>
+                        <Pencil className="me-2 h-4 w-4" />
+                        Edit Profile
+                    </Link>
+                </Button>
+            </CardFooter>
+        )}
       </Card>
     </div>
   );

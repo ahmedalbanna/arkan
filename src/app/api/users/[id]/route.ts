@@ -96,4 +96,3 @@ export const DELETE = withAuth(async ({ params }) => {
         return handleApiError(error);
     }
 }, { requireAdmin: true });
-

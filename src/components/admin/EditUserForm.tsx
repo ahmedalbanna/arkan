@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, use, useActionState, useState } from 'react';
@@ -173,6 +172,7 @@ export default function EditUserForm({ user }: { user: User }) {
   };
 
   const isAdmin = currentUserProfile?.role === 'admin';
+  const isSelf = currentUserProfile?.id === user.id;
   const isPending = deleteUserMutation.isPending || passwordResetMutation.isPending || uploadMutation.isPending;
 
   return (
@@ -221,19 +221,6 @@ export default function EditUserForm({ user }: { user: User }) {
                         </FormItem>
                     )}
                 />
-                <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>{t('editUser.emailLabel')}</FormLabel>
-                        <FormControl>
-                            <Input type="email" {...field} disabled={!isAdmin || isPending} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
                  <FormField
                     control={form.control}
                     name="bio"
@@ -247,50 +234,70 @@ export default function EditUserForm({ user }: { user: User }) {
                         </FormItem>
                     )}
                 />
-                <FormField
-                    control={form.control}
-                    name="credits"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>{t('editUser.creditsLabel')}</FormLabel>
-                        <FormControl>
-                            <Input type="number" {...field} disabled={!isAdmin || isPending} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                 <FormField
-                    control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Role</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} name={field.name} disabled={!isAdmin || isPending}>
-                            <FormControl>
-                                <SelectTrigger><SelectValue placeholder="Select a role" /></SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                                <SelectItem value="user">User</SelectItem>
-                                <SelectItem value="admin">Admin</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                
+                {isAdmin && (
+                    <>
+                         <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>{t('editUser.emailLabel')}</FormLabel>
+                                <FormControl>
+                                    <Input type="email" {...field} disabled={isPending} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="credits"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>{t('editUser.creditsLabel')}</FormLabel>
+                                <FormControl>
+                                    <Input type="number" {...field} disabled={isPending} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="role"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Role</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} name={field.name} disabled={isPending}>
+                                    <FormControl>
+                                        <SelectTrigger><SelectValue placeholder="Select a role" /></SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="user">User</SelectItem>
+                                        <SelectItem value="admin">Admin</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </>
+                )}
             </CardContent>
             <CardFooter className="justify-between">
                  <Button type="submit" disabled={isPending} className="font-headline">
                     <Save className="me-2 h-4 w-4" />
                     {t('editUser.saveButton')}
                 </Button>
-                 <Button asChild variant="outline">
-                    <Link href="/admin/manage-users">
-                        <ArrowLeft className="me-2 h-4 w-4" />
-                        Back to Manage Users
-                    </Link>
-                </Button>
+                {isAdmin && (
+                    <Button asChild variant="outline">
+                        <Link href="/admin/manage-users">
+                            <ArrowLeft className="me-2 h-4 w-4" />
+                            Back to Manage Users
+                        </Link>
+                    </Button>
+                )}
             </CardFooter>
             </Card>
         </form>
@@ -307,7 +314,7 @@ export default function EditUserForm({ user }: { user: User }) {
                     {passwordResetMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <MailQuestion className="me-2 h-4 w-4" />}
                     Send Password Reset
                 </Button>
-                {user.id !== firebaseUser?.uid && (
+                {!isSelf && (
                     <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button variant="destructive" type="button" disabled={isPending}>
