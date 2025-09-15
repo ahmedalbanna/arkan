@@ -4,7 +4,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, FileText, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, PanelLeftClose, PanelRightOpen, Code, File } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { useProposalModeGeneratorLogic } from '@/hooks';
