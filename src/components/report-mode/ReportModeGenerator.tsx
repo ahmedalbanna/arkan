@@ -12,7 +12,7 @@ function ReportResultsSkeleton() {
     );
 }
 
-const ReportResults = lazy(() => import('./ReportResults').then(mod => ({ default: mod.ReportResults })));
+const ReportResults = lazy(() => import('./ReportResults'));
 
 export default function ReportModeGenerator() {
     const { handleSectionUpdate } = useReportModeGenerator();
