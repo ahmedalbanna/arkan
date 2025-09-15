@@ -6,6 +6,7 @@ import { useUsers, toast, useChatStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import type { UserProfile } from '@/lib/types';
 import { createConversationApi } from '@/services';
+import type { User } from '@/lib/models/user';
 
 
 export function useNewChatDialog() {
@@ -24,7 +25,7 @@ export function useNewChatDialog() {
 
     const allUsers = data?.pages.flatMap(page => page.users) ?? [];
 
-    const onSelectUser = async (user: UserProfile) => {
+    const onSelectUser = async (user: User) => {
         if (!firebaseUser || !adminProfile) return;
         setIsCreating(true);
         try {
