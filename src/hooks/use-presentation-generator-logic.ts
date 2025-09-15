@@ -11,16 +11,15 @@ import { toast } from '@/hooks';
 import { useBuilderStore } from './useBuilderStore';
 import { Project } from '@/lib/models/project';
 import { useGenerationUIStore } from './useGenerationUIStore';
+import type { PresentationHistoryEntry } from '@/ai/schemas';
 
 export function usePresentationGeneratorLogic() {
     const { t, locale } = useLocalization();
     const { firebaseUser } = useAuth();
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     
-    // Get project data from the central store
     const { project, setProject } = useBuilderStore();
     
-    // Get UI state from the presentation-specific store
     const { activePresentationId } = useGenerationUIStore();
 
     const generationMutation = useGeneratePresentation();
@@ -29,9 +28,14 @@ export function usePresentationGeneratorLogic() {
         mutationFn: translatePresentationApi,
         onSuccess: (data) => {
             if (!project) return;
-            // Update the presentation in the main project object
-            project.presentation = { history: project.presentation?.history.map(p => p.id === data.id ? data : p) || [] };
-            setProject(new Project(project.toStateObject()));
+
+            const updatedHistory = project.presentation?.history.map(p => 
+                p.id === data.id ? data : p
+            ) || [];
+            
+            updateProject(p => {
+                p.presentation!.history = updatedHistory;
+            });
             
             toast({
                 title: t('builder.presentationGenerator.toasts.translateAllSuccess'),
@@ -69,7 +73,6 @@ export function usePresentationGeneratorLogic() {
         translateMutation.mutate({ presentation: activePresentation, targetLang, token });
     };
 
-    // The presentation to be displayed is derived from the project state and the active ID
     const activePresentation = project?.presentation?.history.find(p => p.id === activePresentationId);
 
     return {

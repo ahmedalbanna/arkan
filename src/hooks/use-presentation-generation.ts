@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -11,6 +10,7 @@ import { useBuilderStore } from './useBuilderStore';
 import { useLocalization } from '@/context/LocalizationContext';
 import { userKeys } from '@/lib/query-keys';
 import { Project } from '@/lib/models/project';
+import { useGenerationUIStore } from './useGenerationUIStore';
 
 interface GeneratePresentationVariables {
     body: any;
@@ -21,22 +21,24 @@ export function useGeneratePresentation() {
     const { t } = useLocalization();
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
-    const { project, updateProject } = useBuilderStore();
+    const { updateProject } = useBuilderStore();
+    const { setActivePresentationId } = useGenerationUIStore();
 
     return useMutation<GeneratePresentationOutput, Error, GeneratePresentationVariables>({
         mutationFn: generatePresentationApi,
         onSuccess: (data) => {
-            if (!project) return;
+            
             const newEntry: PresentationHistoryEntry = {
                 id: new Date().toISOString(),
                 name: `Presentation - ${new Date().toLocaleTimeString()}`,
                 slides: data.slides,
             };
             
-            // Use the new updater function to call the model's method
             updateProject(p => {
                 p.addPresentationToHistory(newEntry);
             });
+
+            setActivePresentationId(newEntry.id);
 
             if (firebaseUser) {
                 queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });

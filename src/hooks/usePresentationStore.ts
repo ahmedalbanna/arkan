@@ -1,3 +1,2 @@
-
-// This file is no longer needed and will be removed.
+// This file is no longer needed and can be removed.
 // All its functionality has been consolidated into `useGenerationUIStore`.

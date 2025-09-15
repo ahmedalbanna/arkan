@@ -24,6 +24,7 @@ export * from './use-features';
 export * from './use-guideline-editor'; // Export new hook
 export * from './use-pptx-styles';
 export * from './use-presentation-generation';
+export * from './use-presentation-generator-logic';
 export * from './use-projects';
 export * from './use-proposal-generation';
 export * from './use-proposal-mode-generator-logic';

@@ -8,26 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { usePresentationStore } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useExport } from '@/hooks';
-import { PptxTemplateKey } from '@/lib/types';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { PresentationActions } from './PresentationActions';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PresentationViewerProps {
   activePresentation: PresentationHistoryEntry;
-  onTranslateAll: (targetLang: 'en' | 'ar') => void;
-  isTranslating: boolean;
 }
 
-export default function PresentationViewer({ activePresentation, onTranslateAll, isTranslating }: PresentationViewerProps) {
+export default function PresentationViewer({ activePresentation }: PresentationViewerProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { t } = useLocalization();
 
@@ -78,7 +66,6 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
         <CardHeader className="pb-4">
             <div className="flex justify-between items-center flex-wrap gap-2">
                 <h2 className="font-headline text-2xl text-primary">{activePresentation.name}</h2>
-                <PresentationActions isGenerating={isTranslating} onTranslateAll={onTranslateAll} isTranslating={isTranslating} />
             </div>
             <CardDescription>
             {t('builder.presentationGenerator.slideLabel', {current: currentSlide + 1, total: slides.length})}

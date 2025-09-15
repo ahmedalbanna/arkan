@@ -1,9 +1,8 @@
 
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Presentation, PanelRightOpen } from 'lucide-react';
+import { Loader2, Presentation, PanelRightOpen, PanelLeftClose } from 'lucide-react';
 import { PresentationGenerationTools } from './PresentationGenerationTools';
 import { lazy, Suspense } from 'react';
 import { cn } from '@/lib/utils';
@@ -57,6 +56,8 @@ export default function PresentationGenerator() {
                     isGenerating={generationMutation.isPending}
                     onGenerate={onGenerate}
                     onCollapseToggle={() => setIsPanelCollapsed(true)}
+                    onTranslateAll={handleTranslateAll}
+                    isTranslating={translateMutation.isPending}
                 />
             </div>
 
@@ -66,8 +67,6 @@ export default function PresentationGenerator() {
                         <DynamicPresentationViewer
                             key={activePresentation.id}
                             activePresentation={activePresentation}
-                            onTranslateAll={handleTranslateAll}
-                            isTranslating={translateMutation.isPending}
                         />
                     ) : (
                         <Card className="flex items-center justify-center h-full min-h-[300px]">

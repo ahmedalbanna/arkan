@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -36,12 +35,15 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { Project } from '@/lib/models/project';
+import { PresentationActions } from './PresentationActions';
 
 interface PresentationGenerationToolsProps {
     isDisabled: boolean;
     isGenerating: boolean;
     onGenerate: (variables: any) => void;
     onCollapseToggle: () => void;
+    onTranslateAll: (targetLang: 'en' | 'ar') => void;
+    isTranslating: boolean;
 }
 
 function ToolsSkeleton() {
@@ -130,7 +132,7 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
 
 export const PresentationGenerationTools = (props: PresentationGenerationToolsProps) => {
     const { t } = useLocalization();
-    const { isDisabled, isGenerating, onGenerate, onCollapseToggle } = props;
+    const { isDisabled, isGenerating, onGenerate, onCollapseToggle, onTranslateAll, isTranslating } = props;
     const { toast } = useToast();
 
     const { project, setProject } = useBuilderStore();
@@ -154,13 +156,9 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
     const [tone, setTone] = useState('');
     const [complexity, setComplexity] = useState('');
-    const [isPlanning, setIsPlanning] = React.useState(false);
-    const [generationPlan, setGenerationPlan] = React.useState<EvaluateContextOutput | null>(null);
 
     const agent = agents.find(a => a.id === 'generate-presentation');
-
     const presentations = project?.presentation?.history || [];
-
     const currentSelection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
     const hasContent = externalContext.length > 0 || currentSelection.proposal || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v);
 
@@ -175,7 +173,6 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         project.removeExternalContext(index);
         setProject(new Project(project.toStateObject()));
     }
-
 
     const handleGenerateClick = () => {
         if (!selectedPresentationTemplateId) {
@@ -238,7 +235,6 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
     return (
         <Card className={cn("flex flex-col h-full", isDisabled && 'opacity-50 pointer-events-none')}>
-            <PlanViewerDialog plan={generationPlan} onOpenChange={() => setGenerationPlan(null)} />
             <CardHeader>
                  <div className="flex justify-between items-center">
                     <div>
@@ -348,35 +344,6 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                 </AccordionItem>
                             </Accordion>
                         </div>
-
-                        <div className="pt-2">
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <div className="w-full">
-                                            <Button
-                                                type="button"
-                                                onClick={handleGenerateClick}
-                                                disabled={isDisabled || isGenerating || !hasCreditsForGeneration || !hasContent}
-                                                className="font-headline w-full"
-                                            >
-                                                {isGenerating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-                                                {t('builder.presentationGenerator.generateButton')}
-                                            </Button>
-                                        </div>
-                                    </TooltipTrigger>
-                                    {!hasCreditsForGeneration ? (
-                                        <TooltipContent>
-                                            <p>{t('builder.toasts.insufficientCredits')}</p>
-                                        </TooltipContent>
-                                    ) : !hasContent ? (
-                                        <TooltipContent>
-                                            <p>{t('builder.presentationGenerator.tooltips.noContent')}</p>
-                                        </TooltipContent>
-                                    ): null}
-                                </Tooltip>
-                            </TooltipProvider>
-                        </div>
                     </TabsContent>
                     <TabsContent value="history" className="pt-6">
                         <ScrollArea className="h-96">
@@ -413,6 +380,39 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                     </TabsContent>
                 </Tabs>
             </CardContent>
+            <CardFooter className="flex flex-col gap-2">
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="w-full">
+                                <Button
+                                    type="button"
+                                    onClick={handleGenerateClick}
+                                    disabled={isDisabled || isGenerating || !hasCreditsForGeneration || !hasContent}
+                                    className="font-headline w-full"
+                                >
+                                    {isGenerating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
+                                    {t('builder.presentationGenerator.generateButton')}
+                                </Button>
+                            </div>
+                        </TooltipTrigger>
+                        {!hasCreditsForGeneration ? (
+                            <TooltipContent>
+                                <p>{t('builder.toasts.insufficientCredits')}</p>
+                            </TooltipContent>
+                        ) : !hasContent ? (
+                            <TooltipContent>
+                                <p>{t('builder.presentationGenerator.tooltips.noContent')}</p>
+                            </TooltipContent>
+                        ): null}
+                    </Tooltip>
+                </TooltipProvider>
+                 <PresentationActions
+                    isGenerating={isGenerating}
+                    isTranslating={isTranslating}
+                    onTranslateAll={onTranslateAll}
+                />
+            </CardFooter>
         </Card>
     );
 };
