@@ -1,3 +1,4 @@
+
 import { table } from 'console';
 import { sub } from 'date-fns';
 import { z } from 'zod';
@@ -22,7 +23,7 @@ export const AgentPromptSchema = z.object({
 
 // DOCX Styles
 // Helper for common run properties (IRunOptions)
-const DocxRunPropertiesSchema = z.object({
+export const DocxRunPropertiesSchema = z.object({
   size: z.union([z.number(), z.string()]).optional(),
   bold: z.boolean().optional(),
   italics: z.boolean().optional(),
@@ -32,7 +33,7 @@ const DocxRunPropertiesSchema = z.object({
 }).passthrough();
 
 // Helper for common paragraph properties (Omit<IParagraphOptions, 'children'>)
-const DocxParagraphPropertiesSchema = z.object({
+export const DocxParagraphPropertiesSchema = z.object({
   spacing: z.object({
     after: z.number().optional(),
     before: z.number().optional(),

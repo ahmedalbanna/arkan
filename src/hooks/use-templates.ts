@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -41,14 +42,15 @@ export function useProposalTemplates() {
     queryKey: templateKeys.proposals(),
     queryFn: async () => {
         const token = await getAuthenticatedToken(firebaseUser);
-        return fetchProposalTemplates(token);
+        const data = await fetchProposalTemplates(token);
+        // Transform plain objects into class instances
+        return data.map(t => new ProposalTemplate(t as ProposalTemplateProperties));
     },
     enabled: !!firebaseUser,
     staleTime: 1000 * 60 * 5,
     meta: {
       onError: (error: Error) => handleErrorUtility(error, "Failed to fetch proposal templates"),
     },
-    select: (data: ProposalTemplateType[]) => data.map(t => new ProposalTemplate(t as ProposalTemplateProperties)),
   });
 }
 
@@ -58,14 +60,14 @@ export function useReportTemplates() {
     queryKey: templateKeys.reports(),
     queryFn: async () => {
         const token = await getAuthenticatedToken(firebaseUser);
-        return fetchReportTemplates(token);
+        const data = await fetchReportTemplates(token);
+        return data.map(t => new ReportTemplate(t as ReportTemplateProperties));
     },
     enabled: !!firebaseUser,
     staleTime: 1000 * 60 * 5,
     meta: {
       onError: (error: Error) => handleErrorUtility(error, "Failed to fetch report templates"),
     },
-    select: (data: ReportTemplateType[]) => data.map(t => new ReportTemplate(t as ReportTemplateProperties)),
   });
 }
 
@@ -75,14 +77,14 @@ export function usePresentationTemplates() {
     queryKey: templateKeys.presentations(),
     queryFn: async () => {
         const token = await getAuthenticatedToken(firebaseUser);
-        return fetchPresentationTemplates(token);
+        const data = await fetchPresentationTemplates(token);
+        return data.map(t => new PresentationTemplate(t as PresentationTemplateProperties));
     },
     enabled: !!firebaseUser,
     staleTime: 1000 * 60 * 5,
     meta: {
       onError: (error: Error) => handleErrorUtility(error, "Failed to fetch presentation templates"),
     },
-    select: (data: PresentationTemplateType[]) => data.map(t => new PresentationTemplate(t as PresentationTemplateProperties)),
   });
 }
 

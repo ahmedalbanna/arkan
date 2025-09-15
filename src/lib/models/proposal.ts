@@ -1,3 +1,4 @@
+
 import { GeneratableDocument, GeneratableDocumentProperties } from './generatableDocument';
 
 // Define what a proposal's result looks like
