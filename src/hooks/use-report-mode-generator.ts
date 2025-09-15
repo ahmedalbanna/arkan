@@ -50,15 +50,8 @@ export const useReportModeGenerator = () => {
                 console.error(`Failed to translate section ${result.key}:`, result.error);
             }
         });
-
-        // Use the centralized updater to modify the project state
-        setProject(new Project({
-            ...project.toPlainObject(),
-            translatedSections: {
-                ...project.translatedSections,
-                ...translatedMap
-            }
-        }));
+        
+        setProject(new Project({ ...project.toPlainObject(), translatedSections: { ...project.translatedSections, ...translatedMap } }));
         
         setIsTranslatingAll(false);
         toast({

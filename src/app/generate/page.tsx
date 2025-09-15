@@ -38,7 +38,7 @@ const ProposalModeGenerator = dynamic(() => import('@/components/proposal-mode/P
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
-const ReportGenerator = dynamic(() => import('@/components/report-mode/ReportModeGenerator'), {
+const ReportGenerator = dynamic(() => import('@/components/report-mode/ReportResults'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
