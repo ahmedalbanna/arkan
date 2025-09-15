@@ -17,7 +17,7 @@ import type { TeamWithMembers, TeamMember } from '@/services';
 // Import our new class
 import { Team, type TeamProperties } from '@/lib/models/team'; 
 import { useEffect } from 'react';
-import { getFirestore, collection, onSnapshot, query, where } from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, query, where, getDocs } from 'firebase/firestore';
 import { app } from '@/lib';
 
 /**
@@ -37,29 +37,22 @@ export function useTeams() {
 
         const teamsCollectionRef = collection(getFirestore(app), 'teams');
         // Listen to teams where the current user is a member
-        const q = query(teamsCollectionRef, where('memberIds', 'array-contains', firebaseUser.uid));
+        const q = query(teamsCollectionRef, where("memberIds", "array-contains", firebaseUser.uid));
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const teams: Team[] = [];
-            const memberPromises: Promise<any>[] = [];
-
-            snapshot.forEach(doc => {
+        const unsubscribe = onSnapshot(q, async (snapshot) => {
+            const teamPromises = snapshot.docs.map(async (doc) => {
                 const teamData = { id: doc.id, ...doc.data() } as TeamProperties;
                 const membersCollectionRef = collection(doc.ref, 'members');
-                // Fetch members for each team
-                const promise = getDocs(membersCollectionRef).then(membersSnapshot => {
-                    const members = membersSnapshot.docs.map(memberDoc => memberDoc.data() as TeamMember);
-                    teamData.members = members;
-                    teams.push(new Team(teamData));
-                });
-                memberPromises.push(promise);
+                const membersSnapshot = await getDocs(membersCollectionRef);
+                const members = membersSnapshot.docs.map(memberDoc => memberDoc.data() as TeamMember);
+                teamData.members = members;
+                return new Team(teamData);
             });
             
-            // Once all members for all teams are fetched, update the query cache
-            Promise.all(memberPromises).then(() => {
-                 teams.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-                 queryClient.setQueryData(queryKey, teams);
-            });
+            const teams = await Promise.all(teamPromises);
+            teams.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            queryClient.setQueryData(queryKey, teams);
+
         }, (error) => {
             console.error("Error listening to teams collection:", error);
             handleErrorUtility(error, "Failed to fetch real-time team data");

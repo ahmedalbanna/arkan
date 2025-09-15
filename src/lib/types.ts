@@ -206,7 +206,8 @@ export interface Team {
 }
 
 export interface TeamMember {
-  id: string;
+  userId: string; // This is the ID from the `users` collection
+  teamId: string;
   role: 'owner' | 'member';
   joinedAt: string;
   // Denormalized fields for efficiency
