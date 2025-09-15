@@ -11,13 +11,12 @@ import { useLocalization } from '@/context/LocalizationContext';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@/context/AuthContext';
-import { useLogout } from '@/hooks';
+import { useLogout, useMarkNotificationsAsRead, useClearAllNotifications } from '@/hooks';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from '@/components/ui/dropdown-menu';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { useNotifications, useMarkNotificationsAsRead, useClearAllNotifications } from '@/hooks/use-notifications';
 import { formatDistanceToNow } from 'date-fns';
 import type { Notification, UserProfile } from '@/lib/types';
 import { useChatStore } from '@/hooks';
@@ -51,7 +50,9 @@ export function Header() {
   const logoutMutation = useLogout();
   const [isClient, setIsClient] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const { data: notifications } = useNotifications();
+  
+  const notifications = useChatStore(state => state.notifications); // Get notifications from the store
+
   const markAsReadMutation = useMarkNotificationsAsRead();
   const clearAllMutation = useClearAllNotifications();
   const { createConversation, openChat } = useChatStore();

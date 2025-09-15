@@ -23,6 +23,7 @@ export * from './use-export';
 export * from './use-features';
 export * from './use-guideline-editor'; // Export new hook
 export * from './use-mobile';
+export * from './use-notifications';
 export * from './use-pptx-styles';
 export * from './use-presentation-generation';
 export * from './use-presentation-generator-logic';

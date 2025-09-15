@@ -1,14 +1,17 @@
+
 'use client';
 
 import { create } from 'zustand';
 import type { User as FirebaseUser } from "firebase/auth";
-import { ref, onValue, off, query, update, get as getDbData, type DataSnapshot } from 'firebase/database';
+import { ref, onValue, off, query, update, get as getDbData, type DataSnapshot, serverTimestamp, push, orderByChild, limitToLast } from 'firebase/database';
 import { RealtimeDatabase } from '@/lib/firebase/client-init';
 import { v4 as uuidv4 } from 'uuid';
 import { initiateSupportChat, createConversationApi } from '@/services';
 import { Agent, type AgentProperties } from '@/lib/models/agent';
 import { Chat, type ChatProperties } from '@/lib/models/chat';
-import { ChatMessage, type ChatMessageProperties } from '@/lib/models/chatMessage'; // Import ChatMessage model
+import { ChatMessage, type ChatMessageProperties } from '@/lib/models/chatMessage';
+import type { Notification } from '@/lib/types';
+
 
 // Keep original types for API/DB interactions
 export interface RawChatMessage {
@@ -32,7 +35,8 @@ export interface RawChatSession {
 
 
 interface ChatState {
-  chats: Chat[]; // Now stores Chat instances
+  chats: Chat[];
+  notifications: Notification[];
   selectedChatId: string | null;
   input: string;
   isChatOpen: boolean;
@@ -51,12 +55,12 @@ interface ChatActions {
   toggleChat: () => void;
   removeChat: (chatId: string) => void;
   resetUnreadCount: (chatId: string) => void;
-  // Selectors are now simpler
   getSelectedChat: () => Chat | null;
 }
 
 const getInitialState = (): ChatState => ({
   chats: [],
+  notifications: [],
   selectedChatId: null,
   input: '',
   isChatOpen: false,
@@ -72,11 +76,13 @@ export const useChatStore = create<ChatState & ChatActions>()(
     initialize: (firebaseUser) => {
         if (get().isInitialized || !firebaseUser) return;
         set({ isInitialized: true });
-        const userConversationsRef = query(ref(RealtimeDatabase, `userConversations/${firebaseUser.uid}`));
+        const uid = firebaseUser.uid;
 
-        const listener = onValue(userConversationsRef, async (snapshot: DataSnapshot) => {
+        // Listener for conversations
+        const userConversationsRef = query(ref(RealtimeDatabase, `userConversations/${uid}`));
+        const convoListener = onValue(userConversationsRef, async (snapshot: DataSnapshot) => {
             if (!snapshot.exists()) {
-                set({ chats: [], selectedChatId: null });
+                set({ chats: [] });
                 return;
             }
             const conversationIds = Object.keys(snapshot.val());
@@ -85,22 +91,31 @@ export const useChatStore = create<ChatState & ChatActions>()(
                     convoSnapshot.exists() ? { id, ...convoSnapshot.val() } : null
                 )
             );
-
             const rawConversations = (await Promise.all(conversationPromises)).filter(Boolean) as RawChatSession[];
-            
-            // Convert to Chat instances and sort
             const conversations = rawConversations.map(c => new Chat(c as ChatProperties));
             conversations.sort((a, b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime());
-
-            set(state => {
-                 const currentSelectedId = state.selectedChatId;
-                 const newSelectedChat = currentSelectedId ? conversations.find(c => c.id === currentSelectedId) : conversations[0];
-                 return { chats: conversations, selectedChatId: newSelectedChat?.id || state.selectedChatId || null };
-            });
-        }, (error) => {
-            console.error("Error listening to user conversations:", error);
-            set({ chats: [], selectedChatId: null, isInitialized: false });
+            set({ chats: conversations });
         });
+
+        // Listener for notifications
+        const notificationsRef = query(ref(RealtimeDatabase, `notifications/${uid}`), orderByChild('createdAt'), limitToLast(20));
+        const notificationListener = onValue(notificationsRef, (snapshot) => {
+            const data = snapshot.val();
+            const notificationsList: Notification[] = [];
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    notificationsList.push({ id: key, ...data[key] });
+                });
+                notificationsList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            }
+            set({ notifications: notificationsList });
+        });
+
+        // Store unsubscribe functions to be called on cleanup
+        get()._unsubscribe = () => {
+            off(userConversationsRef, 'value', convoListener);
+            off(notificationsRef, 'value', notificationListener);
+        };
     },
 
     createConversation: (rawConversation) => {
@@ -135,7 +150,6 @@ export const useChatStore = create<ChatState & ChatActions>()(
 
       set((state) => {
         const isChatSelected = state.selectedChatId === chatId;
-        // The list is already sorted, we just need to find and move the updated chat to the top
         let chatToUpdate = state.chats.find(c => c.id === chatId);
         if (chatToUpdate) {
             chatToUpdate.lastMessage = message.content;
@@ -179,10 +193,21 @@ export const useChatStore = create<ChatState & ChatActions>()(
         }));
     },
     
-    // NEW SIMPLIFIED SELECTOR
     getSelectedChat: () => {
       const { chats, selectedChatId } = get();
       return chats.find(c => c.id === selectedChatId) || null;
     },
+    // Internal property for cleanup
+    _unsubscribe: null as (() => void) | null,
   })
 );
+
+// Cleanup listeners when the app is closed or the user logs out
+if (typeof window !== 'undefined') {
+    window.addEventListener('beforeunload', () => {
+        const unsubscribe = useChatStore.getState()._unsubscribe;
+        if (unsubscribe) {
+            unsubscribe();
+        }
+    });
+}

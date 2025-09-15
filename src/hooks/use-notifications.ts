@@ -1,14 +1,12 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
-
-import { ref, onValue, off, query, orderByChild, limitToLast } from 'firebase/database';
-import { RealtimeDatabase } from '@/lib/firebase/client-init';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { handleErrorUtility } from '@/lib/errorUtils';
+
+// Note: The `useNotifications` hook which used `onValue` is now integrated into `useChatStore`.
+// This file is kept for the mutation hooks which are still relevant.
 
 export interface Notification {
   id: string;
@@ -52,69 +50,19 @@ async function clearNotificationsApi(notificationIds: string[], token: string): 
 }
 
 /**
- * Custom hook to fetch notifications for the current user using Realtime Database.
- */
-export function useNotifications() {
-  const { firebaseUser } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    if (!firebaseUser) {
-      setNotifications([]);
-      setIsLoading(false);
-      setError(null);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    const notificationsRef = query(
-      ref(RealtimeDatabase, 'notifications/' + firebaseUser.uid),
-        orderByChild('createdAt'),
-        limitToLast(20)
-    );
-
-    const unsubscribe = onValue(notificationsRef, (snapshot) => {
-      const data = snapshot.val();
-      const notificationsList: Notification[] = [];
-      if (data) {
-        Object.keys(data).forEach(key => {
-          notificationsList.push({
-            id: key,
-            ...data[key]
-          } as Notification);
-        });
-        notificationsList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      }
-      setNotifications(notificationsList);
-      setIsLoading(false);
-    }, (err) => {
-      console.error("Error fetching notifications from Realtime Database:", err);
-      setError(err);
-      setIsLoading(false);
-    });
-
-    return () => {
-      off(notificationsRef, 'value', unsubscribe);
-    };
-  }, [firebaseUser]);
-
-  return { data: notifications, isLoading, isError: !!error };
-}
-
-/**
  * Custom mutation hook to mark notifications as read in the Realtime Database.
  */
 export function useMarkNotificationsAsRead() {
-    const { firebaseUser } = useAuth();
-
+    // This hook doesn't need to invalidate queries anymore because the real-time listener will handle UI updates.
     return useMutation<any, Error, string[]>({
         mutationFn: async (notificationIds) => {
             if (notificationIds.length === 0) return;
-            const token = await getAuthenticatedToken(firebaseUser);
+            // The token is now fetched within the component/action that calls the mutation
+            // This is a placeholder for where the auth logic would be.
+            const { getAuth } = await import('firebase/auth');
+            const auth = getAuth();
+            const user = auth.currentUser;
+            const token = await getAuthenticatedToken(user);
             return markNotificationsAsReadApi(notificationIds, token);
         },
         onError: (error) => {
@@ -128,12 +76,14 @@ export function useMarkNotificationsAsRead() {
  * Custom mutation hook to clear a specific list of notifications for the current user.
  */
 export function useClearAllNotifications() {
-    const { firebaseUser } = useAuth();
-
+     // This hook doesn't need to invalidate queries anymore because the real-time listener will handle UI updates.
     return useMutation<any, Error, string[]>({
         mutationFn: async (notificationIds) => {
             if (notificationIds.length === 0) return;
-            const token = await getAuthenticatedToken(firebaseUser);
+             const { getAuth } = await import('firebase/auth');
+            const auth = getAuth();
+            const user = auth.currentUser;
+            const token = await getAuthenticatedToken(user);
             return clearNotificationsApi(notificationIds, token);
         },
         onError: (error) => {
