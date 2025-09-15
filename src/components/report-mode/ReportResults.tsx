@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Section } from '../section/SectionView';
 import type { SectionName } from '@/ai/schemas';
 import { FileText, ChevronLeft, ChevronRight, Wand2, Scale } from 'lucide-react';
