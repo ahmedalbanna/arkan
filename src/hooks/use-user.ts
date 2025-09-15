@@ -1,4 +1,3 @@
-
 // code explantion in docs/hooks/use-user.md
 
 "use client";
@@ -315,6 +314,7 @@ export function usePhoneSignIn() {
     } catch (e: any) {
       console.error("Error sending OTP:", e);
       handleErrorUtility(e, "Failed to send OTP");
+      setError(e.message || "Failed to send OTP.");
       return null;
     } finally {
       setIsLoading(false);
@@ -343,6 +343,7 @@ export function usePhoneSignIn() {
     } catch (e: any) {
       console.error("Error verifying OTP:", e);
       handleErrorUtility(e, "Failed to verify OTP");
+      setError(e.message || "Failed to verify OTP.");
     } finally {
       setIsLoading(false);
     }

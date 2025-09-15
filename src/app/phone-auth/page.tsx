@@ -1,4 +1,3 @@
-
 'use client';
 
 import PhoneAuthForm from '@/components/auth/PhoneAuthForm';
