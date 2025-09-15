@@ -1,17 +1,15 @@
 
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Accordion } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
-import { Loader2, Sparkles, Eye, PanelLeftClose } from 'lucide-react';
+import { Loader2, Sparkles, Eye } from 'lucide-react';
 import { ReportActions } from './ReportActions';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Skeleton } from '@/components/ui/skeleton';
 import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
 import { useReportGenerationLogic } from '@/hooks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -21,12 +19,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { markdownComponents } from '@/lib/markdown-styles';
 import ReactMarkdown from 'react-markdown';
 import { useSections } from '@/hooks';
-import { useLocalization } from '@/context/LocalizationContext';
 
 interface GenerationToolsProps {
     onTranslateAll: (targetLang: 'en' | 'ar') => void;
     isTranslating: boolean;
-    onCollapseToggle: () => void;
 }
 
 function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput | null, onOpenChange: (open: boolean) => void }) {
@@ -85,36 +81,7 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
     )
 }
 
-function ToolsSkeleton() {
-    return (
-        <div className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-full" />
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <Skeleton className="h-24 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <Skeleton className="h-6 w-1/2" />
-                    <Skeleton className="h-4 w-full" />
-                </CardHeader>
-                <CardContent>
-                    <Skeleton className="h-10 w-full" />
-                </CardContent>
-                <CardFooter>
-                    <Skeleton className="h-10 w-full" />
-                </CardFooter>
-            </Card>
-        </div>
-    )
-}
-
-export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggle }: GenerationToolsProps) => {
+export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToolsProps) => {
     const { t } = useLocalization();
     const {
         isAnythingGenerating,
@@ -127,23 +94,14 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
         handleViewPlan,
         canGenerateFullReport,
         hasCreditsForSingleSection,
-        agentsLoaded,
-        sectionsLoading,
-        templatesLoading,
         reportTemplates,
         selectedReportTemplateId,
         setSelectedReportTemplateId,
         fullReportCreditCost,
         orderedSections,
-        project,
     } = useReportGenerationLogic();
-    const sections = project?.sections || {};
 
     const isDisabled = isAnythingGenerating || isTranslating || isPlanning;
-
-    if (!agentsLoaded || sectionsLoading || templatesLoading) {
-        return <ToolsSkeleton />;
-    }
 
     return (
         <Card className={cn("flex flex-col h-full", (isDisabled || isTranslating) && 'opacity-50 pointer-events-none')}>
@@ -154,82 +112,70 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                         <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
                         <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={onCollapseToggle}>
-                        <PanelLeftClose className="h-5 w-5" />
-                    </Button>
                 </div>
             </CardHeader>
             <CardContent className="flex-grow overflow-y-auto pr-2">
-                <Tabs defaultValue="generate" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="generate">Generate</TabsTrigger>
-                        <TabsTrigger value="actions" disabled={!Object.values(sections).some(s => !!s)}>Actions</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="generate" className="pt-6">
-                        <div className="space-y-2 mb-4">
-                            <Label htmlFor="report-template-select">{t('builder.reportGenerator.report_template')}</Label>
-                            <Select value={selectedReportTemplateId || ''} onValueChange={(value) => setSelectedReportTemplateId(value as string)}>
-                                <SelectTrigger id="report-template-select">
-                                    <SelectValue placeholder="Select a report template" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {reportTemplates?.map((template) => (
-                                        <TooltipProvider key={template.id}>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <SelectItem value={template.id}>{template.name}</SelectItem>
-                                                </TooltipTrigger>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="pt-2">
-                            <div className="flex gap-2">
-                                <Button
-                                    onClick={onGenerateFullReport}
-                                    className="w-full mb-4 font-headline flex-grow"
-                                    disabled={!canGenerateFullReport || isDisabled}
-                                >
-                                    {activeMutationKey === 'full-report' ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-                                    {fullReportCreditCost > 1 ? `${t('builder.reportGenerator.GenerateFullReport')} (${fullReportCreditCost} Credits)` : 'Report Complete'}
-                                </Button>
-                                <TooltipProvider>
+                <div className="space-y-2 mb-4">
+                    <Label htmlFor="report-template-select">{t('builder.reportGenerator.report_template')}</Label>
+                    <Select value={selectedReportTemplateId || ''} onValueChange={(value) => setSelectedReportTemplateId(value as string)}>
+                        <SelectTrigger id="report-template-select">
+                            <SelectValue placeholder="Select a report template" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {reportTemplates?.map((template) => (
+                                <TooltipProvider key={template.id}>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                             <Button variant="outline" size="icon" onClick={handleViewPlan} disabled={isDisabled || fullReportCreditCost <= 1}>
-                                                {isPlanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
-                                            </Button>
+                                            <SelectItem value={template.id}>{template.name}</SelectItem>
                                         </TooltipTrigger>
-                                        <TooltipContent><p>View Generation Plan</p></TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
-                            </div>
-                        </div>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="pt-2">
+                    <div className="flex gap-2">
+                        <Button
+                            onClick={onGenerateFullReport}
+                            className="w-full mb-4 font-headline flex-grow"
+                            disabled={!canGenerateFullReport || isDisabled}
+                        >
+                            {activeMutationKey === 'full-report' ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
+                            {fullReportCreditCost > 1 ? `${t('builder.reportGenerator.GenerateFullReport')} (${fullReportCreditCost} Credits)` : 'Report Complete'}
+                        </Button>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                     <Button variant="outline" size="icon" onClick={handleViewPlan} disabled={isDisabled || fullReportCreditCost <= 1}>
+                                        {isPlanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent><p>View Generation Plan</p></TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+                </div>
 
-                        <Accordion type="multiple" className="w-full space-y-1">
-                          {orderedSections.map((key) => {
-                              const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
-                              return (
-                                  <SectionAccordionItem
-                                      key={key}
-                                      sectionKey={key as SectionNameType}
-                                      onGenerate={onGenerateSection}
-                                      isGenerating={isGeneratingThis}
-                                      isAnythingGenerating={isAnythingGenerating}
-                                      hasCredits={hasCreditsForSingleSection}
-                                  />
-                              );
-                          })}
-                        </Accordion>
-
-                    </TabsContent>
-                    <TabsContent value="actions" className="pt-6">
-                        <ReportActions onTranslateAll={onTranslateAll} isTranslating={isTranslating} />
-                    </TabsContent>
-                </Tabs>
+                <Accordion type="multiple" className="w-full space-y-1">
+                  {orderedSections.map((key) => {
+                      const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
+                      return (
+                          <SectionAccordionItem
+                              key={key}
+                              sectionKey={key as SectionNameType}
+                              onGenerate={onGenerateSection}
+                              isGenerating={isGeneratingThis}
+                              isAnythingGenerating={isAnythingGenerating}
+                              hasCredits={hasCreditsForSingleSection}
+                          />
+                      );
+                  })}
+                </Accordion>
             </CardContent>
+            <CardFooter>
+                 <ReportActions onTranslateAll={onTranslateAll} isTranslating={isTranslating} />
+            </CardFooter>
         </Card>
     );
 };

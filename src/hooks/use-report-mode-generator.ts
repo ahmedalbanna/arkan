@@ -11,7 +11,6 @@ import { Project } from '@/lib/models/project';
 
 export const useReportModeGenerator = () => {
     const { t, locale } = useLocalization();
-    const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     const { project, setProject } = useBuilderStore();
     const translateMutation = useTranslate();
     const [isTranslatingAll, setIsTranslatingAll] = useState(false);
@@ -52,8 +51,14 @@ export const useReportModeGenerator = () => {
             }
         });
 
-        project.translatedSections = { ...project.translatedSections, ...translatedMap };
-        setProject(new Project(project.toStateObject()));
+        // Use the centralized updater to modify the project state
+        setProject(new Project({
+            ...project.toPlainObject(),
+            translatedSections: {
+                ...project.translatedSections,
+                ...translatedMap
+            }
+        }));
         
         setIsTranslatingAll(false);
         toast({
@@ -65,8 +70,6 @@ export const useReportModeGenerator = () => {
     return {
         t,
         locale,
-        isPanelCollapsed,
-        setIsPanelCollapsed,
         handleSectionUpdate,
         handleTranslateAll,
         isTranslatingAll,
