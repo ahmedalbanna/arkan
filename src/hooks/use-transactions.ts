@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
 import { handleErrorUtility } from '@/lib/errorUtils';
