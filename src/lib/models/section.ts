@@ -1,7 +1,4 @@
 
-
-
-
 export type SectionType = 'report' | 'diagram' | 'presentation';
 
 export interface SectionProperties {

@@ -13,7 +13,7 @@ import { useAgentStore } from './useAgentStore'; // Correct hook for agent icons
 
 const defaultSelection = { sections: {}, diagrams: {}, externalContext: [], proposal: false, projectPlan: true };
 
-export const useSectionAccordionItemLogic = (sectionKey: SectionNameType, hasCredits: boolean) => {
+export const useSectionAccordionItemLogic = (sectionKey: SectionNameType) => {
     const { t } = useLocalization();
     const { data: sectionConfigs } = useSections(); // Use the correct hook
     const getIconComponent = useAgentStore((state) => state.getIconComponent); // Get icon utility from agent store
@@ -50,6 +50,8 @@ export const useSectionAccordionItemLogic = (sectionKey: SectionNameType, hasCre
             hasDiagrams ||
             hasExternal;
     }, [project, currentSelection]);
+
+    const hasCredits = (userProfile?.credits ?? 0) >= 1;
 
     const disabledReason = !hasCredits ? t('builder.toasts.insufficientCredits')
         : !hasSelectedContext ? "Please select a context (like the proposal) to generate this section."

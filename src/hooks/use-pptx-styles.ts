@@ -129,8 +129,8 @@ export function usePptxStyles() {
 export function useCreatePptxTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async (data: {id: string, name: string, description: string}) => {
+    return useMutation<PptxTemplateType, Error, {id: string, name: string, description: string}>({
+        mutationFn: async (data) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return createPptxTemplate(data, token);
         },

@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -12,7 +13,6 @@ import {
   createDocxTemplate,
   deleteDocxTemplate,
   type DocxTemplate as DocxTemplateType,
-  type DocxTemplatesRecord,
 } from "@/services";
 import { DocxTemplate, type DocxTemplateProperties } from '@/lib/models/docxTemplate';
 import type { IStylesOptions } from 'docx';
@@ -44,13 +44,6 @@ export function useDocxStyles() {
             return instances;
         },
         staleTime: 1000 * 60 * 5, // 5 minutes
-        initialData: () => {
-            const initialInstances: Record<string, DocxTemplate> = {};
-            for (const key in defaultTemplates) {
-                initialInstances[key] = new DocxTemplate(defaultTemplates[key] as DocxTemplateProperties);
-            }
-            return initialInstances;
-        },
         meta: {
             onError: (error: Error) => handleErrorUtility(error, "Failed to fetch DOCX templates"),
         },

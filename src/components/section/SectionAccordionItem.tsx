@@ -36,7 +36,7 @@ export const SectionAccordionItem = ({
         userProfile,
         hasSelectedContext,
         disabledReason,
-    } = useSectionAccordionItemLogic(sectionKey, hasCredits);
+    } = useSectionAccordionItemLogic(sectionKey);
 
 
     return (

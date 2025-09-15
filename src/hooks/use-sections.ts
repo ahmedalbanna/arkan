@@ -22,19 +22,16 @@ import { Section, type SectionProperties } from '@/lib/models/section'; // NEW: 
  */
 export function useSections() {
   const { firebaseUser } = useAuth();
-  return useQuery<Section[], Error, SectionProperties[]>({
+  return useQuery<Section[]>({ // Return type is now Section[]
     queryKey: sectionKeys.lists(),
     queryFn: async () => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return fetchSectionsApi(token);
+      const data = await fetchSectionsApi(token);
+      // Transform plain objects to class instances
+      return data.map(s => new Section(s as SectionProperties));
     },
     enabled: !!firebaseUser,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    // NEW: Transform the raw data into an array of Section instances
-    select: (data): Section[] => {
-      if (!data) return [];
-      return data.map(s => new Section(s));
-    }
   });
 }
 
