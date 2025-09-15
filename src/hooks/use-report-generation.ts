@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -14,7 +13,7 @@ import { Project } from '@/lib/models/project';
 
 export function useGenerateReportSection() {
   const { firebaseUser, refetchUser } = useAuth();
-  const { project, updateProject } = useBuilderStore(); // Use updateProject
+  const { updateProject } = useBuilderStore(); // Use updateProject
 
   return useMutation({
     mutationFn: async (variables: { body: any }) => {
@@ -22,8 +21,6 @@ export function useGenerateReportSection() {
       return generateReportSectionApi(variables.body, token);
     },
     onSuccess: (data, variables) => {
-      if (!project) return;
-      
       const sectionKey = variables.body.sectionToGenerate as SectionName;
       const content = Object.values(data)[0] as string;
       
@@ -43,7 +40,7 @@ export function useGenerateReportSection() {
 
 export function useGenerateFullReport() {
     const { firebaseUser, refetchUser } = useAuth();
-    const { project, updateProject } = useBuilderStore(); // Use updateProject
+    const { updateProject } = useBuilderStore(); // Use updateProject
     
     return useMutation({
         mutationFn: async (body: any) => {
@@ -51,7 +48,6 @@ export function useGenerateFullReport() {
             return generateFullReportApi(body, token);
         },
         onSuccess: (data) => {
-             if (!project) return;
              // Use the new updater function
              updateProject(p => {
                 Object.keys(data).forEach(key => {

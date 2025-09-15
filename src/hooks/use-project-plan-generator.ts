@@ -13,7 +13,7 @@ export function useProjectPlanGenerator() {
     const { toast } = useToast();
     const { t } = useLocalization();
     const { firebaseUser, userProfile } = useAuth();
-    const { project } = useBuilderStore(); // Get the whole project object
+    const { project } = useBuilderStore();
     const proposal = project?.proposal;
     const projectIdea = project?.projectIdea;
 
@@ -25,9 +25,9 @@ export function useProjectPlanGenerator() {
     useEffect(() => {
         // Pre-fill from proposal if available
         if (proposal) {
-            setDescription(String((proposal as any).objective) || '');
-            const outcome = (proposal as any).expected_outcome;
-            setDeliverables(Array.isArray(outcome) ? outcome.join('\n') : String(outcome || ''));
+            setDescription(String(proposal.proposedSolution?.overview) || '');
+            const outcome = proposal.projectPlan?.keyDeliverables;
+            setDeliverables(typeof outcome === 'string' ? outcome : '');
         } else if (projectIdea) {
             setDescription(projectIdea);
         }
@@ -37,7 +37,6 @@ export function useProjectPlanGenerator() {
         mutationFn: async () => {
             if (!proposal) throw new Error("A proposal is required to generate suggestions.");
             const token = await getAuthenticatedToken(firebaseUser);
-            // This API endpoint is actually `summarizeFullProject` in the backend
             return summarizeProjectApi({ body: { proposal, reportMarkdown: '' }, token });
         },
         onSuccess: (data: any) => { 

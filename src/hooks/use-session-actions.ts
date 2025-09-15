@@ -68,7 +68,7 @@ export function useSessionActions() {
     const handleSaveProjectFile = (name?: string) => {
         if (!project || !hasAnyContent(project)) return;
         const finalName = name?.trim() || project.name || (project.proposal as any)?.title || 'arkan_project';
-        const jsonString = JSON.stringify(project.toPlainObject());
+        const jsonString = JSON.stringify(project.toJSON());
         const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
         const blob = new Blob([encodedData], { type: 'text/plain;charset=utf-8' });
         saveAs(blob, `${finalName}.arkan`);
@@ -126,7 +126,7 @@ export function useSessionActions() {
 
     const handleSaveAsCloud = () => {
         if (!project) return;
-        const projectData = project.toPlainObject();
+        const projectData = project.toJSON();
         const finalSaveAsName = saveAsName.trim() || project.name || (project.proposal as any)?.title || 'Untitled Project';
         // Create a new object for saving, without modifying the current project's ID
         const saveData = { ...projectData, name: String(finalSaveAsName), id: '' };
@@ -160,7 +160,7 @@ export function useSessionActions() {
         setProjectName,
         saveAsName,
         setSaveAsName,
-        project,
+        project, // Changed from store
         isSaving,
         handleUploadClick,
         onFileChange,

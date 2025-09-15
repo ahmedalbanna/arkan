@@ -15,13 +15,14 @@ export function useProposalGenerationToolsLogic() {
     const { data: templates, isLoading: templatesLoading } = useProposalTemplates();
     const [activeTab, setActiveTab] = useState<'simple' | 'advanced'>('simple');
 
-    // Correctly get the project object and the setter method
-    const { project, setProjectIdea: setProjectIdeaInStore } = useBuilderStore();
-    // The setter is now on the project object itself
+    // Get the project object and the central updater function
+    const { project, updateProject } = useBuilderStore();
+    // Derive projectIdea from the project object
+    const projectIdea = project?.projectIdea;
+    // Define the setter which will use the updater
     const setProjectIdea = (idea: string) => {
-        setProjectIdeaInStore(idea);
-    }
-    const projectIdea = project?.projectIdea; // Derive projectIdea from the project object
+        updateProject(p => { p.projectIdea = idea; });
+    };
 
     const {
         selectedTemplateId,
@@ -66,7 +67,7 @@ export function useProposalGenerationToolsLogic() {
         activeTab,
         setActiveTab,
         projectIdea,
-        setProjectIdea, // The setter from the store is used directly
+        setProjectIdea,
         selectedTemplateId,
         setSelectedTemplateId,
         customGuidelines,

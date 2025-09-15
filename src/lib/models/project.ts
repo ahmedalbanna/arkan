@@ -7,51 +7,51 @@ export type ProjectProperties = SavedProject;
 type SectionName = keyof NonNullable<ProjectState['sections']>;
 
 export class Project implements SavedProject {
-    public id: string;
-    public userId: string;
-    public createdAt: string;
-    public updatedAt: string;
+    private _id: string;
+    private _userId: string;
+    private _createdAt: string;
+    private _updatedAt: string;
     public hasUnsavedChanges?: boolean;
 
-    public name?: string;
-    public projectIdea?: string;
-    public proposal: AnyProjectProposal | null;
-    public reportConfig?: import('@/lib/types').FullReportModeConfig | null;
-    public generatedProposalState?: import('@/lib/types').SavedProposalState | null;
-    public sections?: ProjectState['sections'];
-    public translatedSections?: ProjectState['translatedSections'];
-    public evaluation?: import('@/ai/schemas').EvaluateReportOutput | null;
-    public diagrams: Partial<Record<DiagramType, Diagram>>;
-    public presentation?: { history: PresentationHistoryEntry[]; };
-    public codeGenerator?: any;
-    public academicSolver?: any;
-    public codebase?: any;
-    public externalContext?: any[];
-    public teamId?: string | null;
-    public projectPlan: ProjectPlan | null;
+    private _name?: string;
+    private _projectIdea?: string;
+    private _proposal: AnyProjectProposal | null;
+    private _reportConfig?: import('@/lib/types').FullReportModeConfig | null;
+    private _generatedProposalState?: import('@/lib/types').SavedProposalState | null;
+    private _sections?: ProjectState['sections'];
+    private _translatedSections?: ProjectState['translatedSections'];
+    private _evaluation?: import('@/ai/schemas').EvaluateReportOutput | null;
+    private _diagrams: Partial<Record<DiagramType, Diagram>>;
+    private _presentation?: { history: PresentationHistoryEntry[]; };
+    private _codeGenerator?: any;
+    private _academicSolver?: any;
+    private _codebase?: any;
+    private _externalContext?: any[];
+    private _teamId?: string | null;
+    private _projectPlan: ProjectPlan | null;
 
     constructor(props: ProjectProperties) {
-        this.id = props.id;
-        this.userId = props.userId;
-        this.createdAt = props.createdAt;
-        this.updatedAt = props.updatedAt;
-        this.name = props.name;
-        this.projectIdea = props.projectIdea;
-        this.proposal = props.proposal;
-        this.reportConfig = props.reportConfig;
-        this.generatedProposalState = props.generatedProposalState;
-        this.sections = props.sections ?? {};
-        this.translatedSections = props.translatedSections ?? {};
-        this.evaluation = props.evaluation;
-        this.diagrams = {};
+        this._id = props.id;
+        this._userId = props.userId;
+        this._createdAt = props.createdAt;
+        this._updatedAt = props.updatedAt;
+        this._name = props.name;
+        this._projectIdea = props.projectIdea;
+        this._proposal = props.proposal;
+        this._reportConfig = props.reportConfig;
+        this._generatedProposalState = props.generatedProposalState;
+        this._sections = props.sections ?? {};
+        this._translatedSections = props.translatedSections ?? {};
+        this._evaluation = props.evaluation;
+        this._diagrams = {};
         if (props.diagrams) {
             for (const key in props.diagrams) {
-                this.diagrams[key as DiagramType] = new Diagram(props.diagrams[key as DiagramType] as DiagramProperties);
+                this._diagrams[key as DiagramType] = new Diagram(props.diagrams[key as DiagramType] as DiagramProperties);
             }
         }
-        this.presentation = props.presentation ?? { history: [] };
-        this.codeGenerator = props.codeGenerator;
-        this.academicSolver = props.academicSolver ?? {
+        this._presentation = props.presentation ?? { history: [] };
+        this._codeGenerator = props.codeGenerator;
+        this._academicSolver = props.academicSolver ?? {
             stage: "idle",
             documentType: null,
             analyzedDocument: null,
@@ -59,57 +59,90 @@ export class Project implements SavedProject {
             questionDocuments: [],
             externalContext: [],
         };
-        this.codebase = props.codebase;
-        this.externalContext = props.externalContext || [];
-        this.teamId = props.teamId;
-        this.projectPlan = props.projectPlan;
+        this._codebase = props.codebase;
+        this._externalContext = props.externalContext || [];
+        this._teamId = props.teamId;
+        this._projectPlan = props.projectPlan;
     }
 
-    public toPlainObject(): SavedProject {
+    // --- Public Getters ---
+    get id() { return this._id; }
+    get userId() { return this._userId; }
+    get createdAt() { return this._createdAt; }
+    get updatedAt() { return this._updatedAt; }
+    get name() { return this._name; }
+    get projectIdea() { return this._projectIdea; }
+    get proposal() { return this._proposal; }
+    get reportConfig() { return this._reportConfig; }
+    get generatedProposalState() { return this._generatedProposalState; }
+    get sections() { return this._sections; }
+    get translatedSections() { return this._translatedSections; }
+    set translatedSections(value) { this._translatedSections = value; }
+    get evaluation() { return this._evaluation; }
+    set evaluation(value) { this._evaluation = value; }
+    get diagrams() { return this._diagrams; }
+    get presentation() { return this._presentation; }
+    get codeGenerator() { return this._codeGenerator; }
+    get academicSolver() { return this._academicSolver; }
+    get codebase() { return this._codebase; }
+    get externalContext() { return this._externalContext; }
+    get teamId() { return this._teamId; }
+    get projectPlan() { return this._projectPlan; }
+
+    // --- Public Setters ---
+    set name(value: string | undefined) { this._name = value; }
+    set projectIdea(value: string | undefined) { this._projectIdea = value; }
+
+    /**
+     * Converts the Project instance to a plain JSON object for serialization.
+     * This method is automatically used by `JSON.stringify`.
+     */
+    public toJSON(): SavedProject {
         const plainDiagrams: Partial<Record<DiagramType, DiagramProperties>> = {};
-        for (const key in this.diagrams) {
-            plainDiagrams[key as DiagramType] = this.diagrams[key as DiagramType]?.toStateObject();
+        for (const key in this._diagrams) {
+            plainDiagrams[key as DiagramType] = this._diagrams[key as DiagramType]?.toStateObject();
         }
 
         return {
-            id: this.id,
-            userId: this.userId,
-            createdAt: this.createdAt,
-            updatedAt: this.updatedAt,
-            name: this.name,
-            projectIdea: this.projectIdea,
-            proposal: this.proposal,
-            reportConfig: this.reportConfig,
-            generatedProposalState: this.generatedProposalState,
-            sections: this.sections,
-            translatedSections: this.translatedSections,
-            evaluation: this.evaluation,
+            id: this._id,
+            userId: this._userId,
+            createdAt: this._createdAt,
+            updatedAt: this._updatedAt,
+            name: this._name,
+            projectIdea: this._projectIdea,
+            proposal: this._proposal,
+            reportConfig: this._reportConfig,
+            generatedProposalState: this._generatedProposalState,
+            sections: this._sections,
+            translatedSections: this._translatedSections,
+            evaluation: this._evaluation,
             diagrams: plainDiagrams,
-            presentation: this.presentation,
-            codeGenerator: this.codeGenerator,
-            academicSolver: this.academicSolver,
-            codebase: this.codebase,
-            externalContext: this.externalContext,
-            teamId: this.teamId,
-            projectPlan: this.projectPlan,
+            presentation: this._presentation,
+            codeGenerator: this._codeGenerator,
+            academicSolver: this._academicSolver,
+            codebase: this._codebase,
+            externalContext: this._externalContext,
+            teamId: this._teamId,
+            projectPlan: this._projectPlan,
         };
     }
-
+    
     public toStateObject(): ProjectState {
-        return this.toPlainObject(); // Can be expanded if state differs from saved
+        return this.toJSON();
     }
 
+
     public newSession(): void {
-        this.name = undefined;
-        this.projectIdea = undefined;
-        this.proposal = null;
-        this.sections = {};
-        this.translatedSections = {};
-        this.evaluation = null;
-        this.diagrams = {};
-        this.presentation = { history: [] };
-        this.codeGenerator = undefined;
-        this.academicSolver = {
+        this._name = undefined;
+        this._projectIdea = undefined;
+        this._proposal = null;
+        this._sections = {};
+        this._translatedSections = {};
+        this._evaluation = null;
+        this._diagrams = {};
+        this._presentation = { history: [] };
+        this._codeGenerator = undefined;
+        this._academicSolver = {
             stage: "idle",
             documentType: null,
             analyzedDocument: null,
@@ -117,60 +150,60 @@ export class Project implements SavedProject {
             questionDocuments: [],
             externalContext: [],
         };
-        this.codebase = undefined;
-        this.externalContext = [];
-        this.projectPlan = null;
+        this._codebase = undefined;
+        this._externalContext = [];
+        this._projectPlan = null;
         this.hasUnsavedChanges = false;
     }
 
     // --- Proposal Methods ---
     public setProposal(proposal: AnyProjectProposal | null): void {
-        this.proposal = proposal;
+        this._proposal = proposal;
         if (proposal?.title) {
-            this.name = proposal.title;
+            this._name = proposal.title;
         }
     }
 
 
     // --- Section Methods ---
     public getSectionContent(sectionName: SectionName): string | undefined {
-        return this.sections?.[sectionName];
+        return this._sections?.[sectionName];
     }
 
     public updateSectionContent(sectionName: SectionName, newContent: string): void {
-        this.sections = { ...this.sections, [sectionName]: newContent };
+        this._sections = { ...this._sections, [sectionName]: newContent };
     }
 
     // --- Diagram Methods ---
     public setDiagram(key: DiagramType, data: DiagramProperties): void {
-        this.diagrams[key] = new Diagram(data);
+        this._diagrams[key] = new Diagram(data);
     }
 
     public setDiagramExplanation(key: DiagramType, explanation: string): void {
-        if (!this.diagrams?.[key]) return;
-        this.diagrams[key]!.setExplanation(explanation);
+        if (!this._diagrams?.[key]) return;
+        this._diagrams[key]!.setExplanation(explanation);
     }
 
     public updateDiagramCode(key: DiagramType, code: string): void {
-        if (!this.diagrams?.[key]) return;
-        this.diagrams[key]!.updateCode(code);
+        if (!this._diagrams?.[key]) return;
+        this._diagrams[key]!.updateCode(code);
     }
 
     // --- Presentation Methods ---
     public addPresentationToHistory(entry: PresentationHistoryEntry): void {
-        if (!this.presentation) {
-            this.presentation = { history: [] };
+        if (!this._presentation) {
+            this._presentation = { history: [] };
         }
-        this.presentation.history = [entry, ...this.presentation.history];
+        this._presentation.history = [entry, ...this._presentation.history];
     }
 
     public updatePresentationSlide(activeId: string, slideIndex: number, field: "title" | "content", value: string, contentIndex?: number): void {
-        if (!this.presentation) return;
+        if (!this._presentation) return;
 
-        const entryIndex = this.presentation.history.findIndex(e => e.id === activeId);
+        const entryIndex = this._presentation.history.findIndex(e => e.id === activeId);
         if (entryIndex === -1) return;
 
-        const entry = this.presentation.history[entryIndex];
+        const entry = this._presentation.history[entryIndex];
         const newSlides = [...entry.slides];
         const slideToUpdate = { ...newSlides[slideIndex] };
 
@@ -183,100 +216,100 @@ export class Project implements SavedProject {
         }
         
         newSlides[slideIndex] = slideToUpdate;
-        this.presentation.history[entryIndex] = { ...entry, slides: newSlides };
+        this._presentation.history[entryIndex] = { ...entry, slides: newSlides };
     }
 
     // --- Project Plan Methods ---
     public setProjectPlan(plan: ProjectPlan | null): void {
-        this.projectPlan = plan;
+        this._projectPlan = plan;
     }
 
     // --- Code Generator Methods ---
     public setCodeGeneratorPrompt(prompt: string): void {
-        if (!this.codeGenerator) {
-            this.codeGenerator = { prompt: '', html: '', css: '', javascript: '', codebase: null };
+        if (!this._codeGenerator) {
+            this._codeGenerator = { prompt: '', html: '', css: '', javascript: '', codebase: null };
         }
-        this.codeGenerator.prompt = prompt;
+        this._codeGenerator.prompt = prompt;
     }
 
     public setGeneratedCode(code: { html: string; css: string; javascript?: string }): void {
-        if (!this.codeGenerator) {
-            this.codeGenerator = { prompt: '', html: '', css: '', javascript: '', codebase: null };
+        if (!this._codeGenerator) {
+            this._codeGenerator = { prompt: '', html: '', css: '', javascript: '', codebase: null };
         }
-        this.codeGenerator.html = code.html;
-        this.codeGenerator.css = code.css;
-        this.codeGenerator.javascript = code.javascript || '';
+        this._codeGenerator.html = code.html;
+        this._codeGenerator.css = code.css;
+        this._codeGenerator.javascript = code.javascript || '';
     }
 
     public setCodebase(codebase: import('@/ai/schemas').Codebase | null): void {
-        if (!this.codeGenerator) {
-            this.codeGenerator = { prompt: '', html: '', css: '', javascript: '', codebase: null };
+        if (!this._codeGenerator) {
+            this._codeGenerator = { prompt: '', html: '', css: '', javascript: '', codebase: null };
         }
-        this.codeGenerator.codebase = codebase;
+        this._codeGenerator.codebase = codebase;
     }
 
     // --- External Context Methods ---
     public addExternalContext(fileName: string, content: string, type: ContextFileType): void {
-        this.externalContext = [...(this.externalContext || []), { fileName, content, type }];
+        this._externalContext = [...(this._externalContext || []), { fileName, content, type }];
     }
 
     public removeExternalContext(index: number): void {
-        this.externalContext = (this.externalContext || []).filter((_, i) => i !== index);
+        this._externalContext = (this._externalContext || []).filter((_, i) => i !== index);
     }
 
     public updateExternalContextType(index: number, type: ContextFileType): void {
-        if (!this.externalContext || !this.externalContext[index]) return;
-        this.externalContext[index].type = type;
+        if (!this._externalContext || !this._externalContext[index]) return;
+        this._externalContext[index].type = type;
     }
 
     // --- Academic Solver Methods ---
     public setAcademicSolverStage(stage: import('@/lib/types').AcademicSolverStage): void {
-        if (!this.academicSolver) this.initializeAcademicSolver();
-        this.academicSolver.stage = stage;
+        if (!this._academicSolver) this.initializeAcademicSolver();
+        this._academicSolver.stage = stage;
     }
 
     public setAcademicSolverDocumentType(type: import('@/ai/schemas').AcademicDocumentType | null): void {
-        if (!this.academicSolver) this.initializeAcademicSolver();
-        this.academicSolver.documentType = type;
+        if (!this._academicSolver) this.initializeAcademicSolver();
+        this._academicSolver.documentType = type;
     }
 
     public setAcademicSolverAnalyzedDocument(document: import('@/ai/schemas').AnalyzedDocument | null): void {
-        if (!this.academicSolver) this.initializeAcademicSolver();
-        this.academicSolver.analyzedDocument = document;
-        this.academicSolver.solvedDocument = null; // Reset solved document on new analysis
-        this.academicSolver.stage = document ? "readyToSolve" : "idle";
+        if (!this._academicSolver) this.initializeAcademicSolver();
+        this._academicSolver.analyzedDocument = document;
+        this._academicSolver.solvedDocument = null; // Reset solved document on new analysis
+        this._academicSolver.stage = document ? "readyToSolve" : "idle";
     }
 
     public setAcademicSolverSolvedDocument(solution: import('@/ai/schemas').SolvedDocument | null): void {
-        if (!this.academicSolver) this.initializeAcademicSolver();
-        this.academicSolver.solvedDocument = solution;
-        this.academicSolver.stage = solution ? "solved" : "readyToSolve";
+        if (!this._academicSolver) this.initializeAcademicSolver();
+        this._academicSolver.solvedDocument = solution;
+        this._academicSolver.stage = solution ? "solved" : "readyToSolve";
     }
 
     public addAcademicSolverQuestionDocument(fileName: string, content: string): void {
-        if (!this.academicSolver) this.initializeAcademicSolver();
-        this.academicSolver.questionDocuments.push({ fileName, content, type: 'question' });
-        this.academicSolver.analyzedDocument = null; // Reset analysis on new question
-        this.academicSolver.solvedDocument = null;
+        if (!this._academicSolver) this.initializeAcademicSolver();
+        this._academicSolver.questionDocuments.push({ fileName, content, type: 'question' });
+        this._academicSolver.analyzedDocument = null; // Reset analysis on new question
+        this._academicSolver.solvedDocument = null;
     }
 
     public removeAcademicSolverQuestionDocument(index: number): void {
-        if (!this.academicSolver?.questionDocuments) return;
-        this.academicSolver.questionDocuments.splice(index, 1);
+        if (!this._academicSolver?.questionDocuments) return;
+        this._academicSolver.questionDocuments.splice(index, 1);
     }
 
     public addAcademicSolverExternalContext(fileName: string, content: string): void {
-        if (!this.academicSolver) this.initializeAcademicSolver();
-        this.academicSolver.externalContext.push({ fileName, content, type: 'context' });
+        if (!this._academicSolver) this.initializeAcademicSolver();
+        this._academicSolver.externalContext.push({ fileName, content, type: 'context' });
     }
 
     public removeAcademicSolverExternalContext(index: number): void {
-        if (!this.academicSolver?.externalContext) return;
-        this.academicSolver.externalContext.splice(index, 1);
+        if (!this._academicSolver?.externalContext) return;
+        this._academicSolver.externalContext.splice(index, 1);
     }
 
     public resetAcademicSolver(): void {
-        this.academicSolver = {
+        this._academicSolver = {
             stage: "idle",
             documentType: null,
             analyzedDocument: null,
@@ -287,7 +320,7 @@ export class Project implements SavedProject {
     }
 
     private initializeAcademicSolver(): void {
-        this.academicSolver = {
+        this._academicSolver = {
             stage: "idle",
             documentType: null,
             analyzedDocument: null,

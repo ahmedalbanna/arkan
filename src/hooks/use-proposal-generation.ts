@@ -28,7 +28,21 @@ export function useGenerateProposal() {
     return useMutation<any, Error, GenerateProposalBody>({
         mutationFn: async (body) => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return generateProposalApi({ body, token });
+            const response = await generateProposalApi({ body, token });
+
+            // Try to parse JSON from a potentially dirty response
+            if (typeof response === 'string') {
+                try {
+                    const match = response.match(/\{[\s\S]*\}/);
+                    if (match) {
+                        return JSON.parse(match[0]);
+                    }
+                } catch (e) {
+                    console.error("Failed to parse JSON from AI response", e);
+                    throw new Error("The AI returned an invalid proposal format.");
+                }
+            }
+            return response;
         },
         onSuccess: (data) => {
             // Use the updater function to call the model's method
