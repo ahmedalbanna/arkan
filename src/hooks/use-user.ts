@@ -56,19 +56,16 @@ export function useUsers() {
         queryKey: userKeys.lists(),
         queryFn: async ({ pageParam }) => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return fetchUsersApi(USERS_PER_PAGE, pageParam as string | undefined, token);
+            const result = await fetchUsersApi(USERS_PER_PAGE, pageParam as string | undefined, token);
+            // Transform plain objects to User instances here
+            return {
+              ...result,
+              users: result.users.map(u => new User(u as UserProperties))
+            };
         },
         initialPageParam: undefined,
         getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
         enabled: !!firebaseUser,
-        // NEW: Transform the data into User instances
-        select: (data) => ({
-            ...data,
-            pages: data.pages.map(page => ({
-                ...page,
-                users: page.users.map(u => new User(u as UserProperties))
-            }))
-        })
     });
 }
 
@@ -78,21 +75,19 @@ export function useUsers() {
  */
 export function useAdmins() {
   const { firebaseUser } = useAuth();
-  return useQuery({
+  return useQuery<User[]>({ // Explicitly set the return type to User[]
     queryKey: userKeys.admins(),
     queryFn: async () => {
         const token = await getAuthenticatedToken(firebaseUser);
-        return fetchAdminsApi(token);
+        const data = await fetchAdminsApi(token);
+        // Transform plain objects to User instances
+        if (!data) return [];
+        return data.map(u => new User(u as UserProperties));
     },
     staleTime: 1000 * 60 * 15, // 15 minutes
     meta: {
       onError: (error: Error) => handleErrorUtility(error, "Failed to fetch administrators"),
     },
-    // NEW: Transform the data into User instances
-    select: (data: UserProfile[]): User[] => {
-        if (!data) return [];
-        return data.map(u => new User(u as UserProperties));
-    }
   });
 }
 
@@ -119,21 +114,19 @@ export function useUserProfile(userId: string) {
 
   // The component will use the data from the cache, which is kept up-to-date
   // by the real-time listener.
-  return useQuery({
+  return useQuery<User | null>({ // Ensure the query hook also expects User | null
     queryKey: userKeys.profile(userId),
     // The queryFn will run on initial load or if the listener fails for some reason
     queryFn: async () => {
         if (!firebaseUser) return null; // Or handle this case as needed
         const token = await getAuthenticatedToken(firebaseUser);
-        return fetchUserProfileApi(userId, token);
+        const data = await fetchUserProfileApi(userId, token);
+        if (!data) return null;
+        // Transform the fetched data into a User instance
+        return new User(data as UserProperties);
     },
     staleTime: Infinity, // Data is live, so it's always "fresh"
     enabled: !!userId && !!firebaseUser, // Only run if we have IDs
-    // NEW: Transform the data into a User instance
-    select: (data: UserProfile | null): User | null => {
-        if (!data) return null;
-        return new User(data as UserProperties);
-    }
   });
 }
 
@@ -380,3 +373,5 @@ export function usePurchaseCredits() {
     },
   });
 }
+
+    
