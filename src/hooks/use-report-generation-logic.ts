@@ -1,4 +1,3 @@
-
 // code explantion in docs/hooks/use-report-generation-logic.md
 
 'use client';
@@ -17,7 +16,7 @@ import { useReportTemplates } from './use-templates';
 import { AgentPrompt } from '@/lib/types';
 import { useSections } from './use-sections';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useReportStore } from './useReportStore';
+import { useGenerationUIStore } from './useGenerationUIStore';
 
 // Helper function to generate instruction text from control state
 const generateInstructionText = (controls: any, oneTimeInstruction: string): string => {
@@ -52,7 +51,7 @@ export function useReportGenerationLogic() {
         selectedReportTemplateId,
         setSelectedReportTemplateId,
         initializeDependentStates,
-    } = useReportStore();
+    } = useGenerationUIStore();
     
     const { data: sectionConfigs, isLoading: sectionsLoading } = useSections();
     const { agents, isLoaded: agentsLoaded } = useAgents();

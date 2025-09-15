@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useReportStore } from '@/hooks';
+import { useGenerationUIStore } from '@/hooks';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -11,7 +11,7 @@ import { SectionName as SectionNameType } from '@/ai/schemas';
 
 export const SectionGenerationControls = ({ sectionKey }: { sectionKey: SectionNameType }) => {
     const { t } = useLocalization();
-    const { controlState, handleControlChange } = useReportStore();
+    const { controlState, handleControlChange } = useGenerationUIStore();
     const controls = controlState[sectionKey];
 
     if (!controls) {

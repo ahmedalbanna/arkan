@@ -21,6 +21,7 @@ export * from './use-evaluation-tools';
 export * from './use-evaluation';
 export * from './use-export';
 export * from './use-features';
+export * from './use-guideline-editor'; // Export new hook
 export * from './use-pptx-styles';
 export * from './use-presentation-generation';
 export * from './use-projects';
@@ -31,7 +32,7 @@ export * from './use-report-generation-logic';
 export * from './use-report-generation';
 export * from './use-report-mode-generator';
 export * from './use-report-results';
-export * from './use-section-accordion-item-logic';
+export * from './use-section-accordion-item-logic'; // Export new hook
 export * from './use-section-logic';
 export * from './use-sections';
 export * from './use-session-actions';

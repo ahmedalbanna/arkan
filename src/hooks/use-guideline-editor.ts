@@ -1,8 +1,7 @@
 
-
 'use client';
 
-import { useReportStore } from '@/hooks';
+import { useGenerationUIStore } from '@/hooks';
 import { useAgents } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import type { AgentPrompt } from '@/lib/types';
@@ -28,7 +27,7 @@ export const useGuidelineEditor = (itemKey: string, agentId: string) => {
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
         setOneTimeInstruction,
-    } = useReportStore();
+    } = useGenerationUIStore();
 
     // agent is now an instance of our Agent class
     const agent = agents.find(a => a.id === agentId);
