@@ -1,4 +1,4 @@
-// C:\Users\ahmed\source\repos\arkan\src\components\admin\sections\SectionActions.tsx
+
 'use client';
 
 import { MoreHorizontal } from 'lucide-react';

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -21,18 +22,18 @@ import { Section, type SectionProperties } from '@/lib/models/section'; // NEW: 
  */
 export function useSections() {
   const { firebaseUser } = useAuth();
-  return useQuery({
+  return useQuery<Section[], Error, SectionProperties[]>({
     queryKey: sectionKeys.lists(),
-    queryFn: async (): Promise<SectionProperties[]> => {
+    queryFn: async () => {
       const token = await getAuthenticatedToken(firebaseUser);
       return fetchSectionsApi(token);
     },
     enabled: !!firebaseUser,
     staleTime: 1000 * 60 * 5, // 5 minutes
     // NEW: Transform the raw data into an array of Section instances
-    select: (data: SectionProperties[]): Section[] => {
+    select: (data): Section[] => {
       if (!data) return [];
-      return data.map(s => new Section(s as SectionProperties));
+      return data.map(s => new Section(s));
     }
   });
 }

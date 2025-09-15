@@ -1,4 +1,4 @@
-// C:\Users\ahmed\source\repos\arkan\src\components\admin\sections\SectionFormDialog.tsx
+
 'use client';
 
 import { useState } from 'react';

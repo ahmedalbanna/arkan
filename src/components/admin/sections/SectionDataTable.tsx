@@ -1,4 +1,4 @@
-// C:\Users\ahmed\source\repos\arkan\src\components\admin\sections\SectionDataTable.tsx
+
 'use client';
 
 import React from 'react';
