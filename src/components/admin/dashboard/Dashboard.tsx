@@ -1,9 +1,7 @@
+
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext';
-import { adminKeys } from '@/lib/query-keys';
-import { fetchDashboardStats, type DashboardStats } from '@/services/admin-service';
+import { useAdminDashboard } from '@/hooks/use-admin-dashboard';
 import { AlertCircle, Bot, CreditCard, Users } from 'lucide-react';
 import { StatCard } from './StatCard';
 import { AgentUsageChart } from './AgentUsageChart';
@@ -72,17 +70,7 @@ function RecentActivitySkeleton() {
 
 export default function Dashboard() {
     const { t } = useLocalization();
-    const { firebaseUser } = useAuth();
-    const { data, isLoading, isError, error } = useQuery<DashboardStats>({
-        queryKey: adminKeys.dashboardStats(),
-        queryFn: async () => {
-            if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
-            return fetchDashboardStats(token);
-        },
-        enabled: !!firebaseUser,
-        staleTime: 1000 * 60 * 2, // 2 minutes
-    });
+    const { data, isLoading, isError, error } = useAdminDashboard();
 
 
     if (isLoading) {
