@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { db } from '@/lib/firebase/client-init';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import {
   LucideIcon, FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText as BookTextIcon, Presentation, DatabaseZap, History, FileHeart, Hand, DraftingCompass, Files, LayoutGrid, Scale, Megaphone, PencilRuler, Users
 } from 'lucide-react';
@@ -24,38 +24,52 @@ interface AgentState {
   isLoaded: boolean;
   isLoading: boolean;
   error: string | null;
-  fetchAgents: () => Promise<void>;
+  fetchAgents: () => void;
   getIconComponent: (iconName: string) => LucideIcon | undefined;
 }
+
+let unsubscribe: (() => void) | null = null;
 
 export const useAgentStore = create<AgentState>((set, get) => ({
   agents: {},
   isLoaded: false,
   isLoading: false,
   error: null,
-  fetchAgents: async () => {
-    // Prevent re-fetching if already loaded or currently fetching.
-    if (get().isLoading || get().isLoaded) return;
+  fetchAgents: () => {
+    const { isLoading, isLoaded } = get();
+    // Prevent re-fetching if already loading.
+    // Allow re-fetching if already loaded to get fresh data.
+    if (isLoading) return;
+
     set({ isLoading: true, error: null });
+
+    // If a listener is already active, unsubscribe first.
+    if (unsubscribe) {
+      unsubscribe();
+    }
+
     try {
       const agentsCollectionRef = collection(db, 'agents');
       const q = query(agentsCollectionRef, where("isEnabled", "==", true));
-      const querySnapshot = await getDocs(q);
 
-      const fetchedAgents: Record<string, AgentWithComponent> = {};
-      querySnapshot.forEach((doc) => {
-        const data = doc.data() as Omit<DynamicAgent, 'id'>;
-        const agent: AgentWithComponent = {
-          id: doc.id,
-          ...data,
-          iconComponent: iconMap[data.icon] || FileText,
-        };
-        fetchedAgents[doc.id] = agent;
+      unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const fetchedAgents: Record<string, AgentWithComponent> = {};
+        querySnapshot.forEach((doc) => {
+          const data = doc.data() as Omit<DynamicAgent, 'id'>;
+          const agent: AgentWithComponent = {
+            id: doc.id,
+            ...data,
+            iconComponent: iconMap[data.icon] || FileText,
+          };
+          fetchedAgents[doc.id] = agent;
+        });
+        set({ agents: fetchedAgents, isLoaded: true, isLoading: false });
+      }, (error) => {
+        console.error("Error fetching agents with real-time listener:", error);
+        set({ isLoaded: false, isLoading: false, error: error.message });
       });
-
-      set({ agents: fetchedAgents, isLoaded: true, isLoading: false });
     } catch (e: any) {
-      console.error("Error fetching agents:", e);
+      console.error("Error setting up agent listener:", e);
       set({ isLoaded: false, isLoading: false, error: e.message });
     }
   },
