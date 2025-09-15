@@ -18,6 +18,9 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
+    
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
 
     const agentInput = validation.data;
 
@@ -37,9 +40,6 @@ export const POST = withAuth(async ({ request, user }) => {
     }
 
     const result = await generateReportSection(agentInput);
-
-    const creditCost = 1;
-    await deductCredit(user.id, creditCost);
 
     const transformedOutput = { [result.sectionName]: result.content };
 

@@ -72,12 +72,12 @@ export const POST = withAuth(async ({ request, user }) => {
       return handleApiError(validation.error);
     }
 
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
+
     const agentInput = validation.data;
     const result = await generateDiagram(agentInput);
     const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
-
-    const creditCost = 1;
-    await deductCredit(user.id, creditCost);
 
     const finalOutput = {
       plantUmlCode: result.plantUmlCode,

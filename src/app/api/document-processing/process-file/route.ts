@@ -28,26 +28,28 @@ export const POST = withAuth(async ({ request, user }) => {
         if (!SUPPORTED_MIME_TYPES.includes(file.type)) {
             return handleApiError({ message: `Invalid file type. Supported types are: ${SUPPORTED_MIME_TYPES.join(', ')}` }, 400);
         }
-
+        
         let result: { markdown: string } | { text: string };
         let agentId: string;
         let markdownContent: string;
         let creditCost = 0;
 
         if (file.type === 'application/pdf') {
+            creditCost = 2; // AI processing required
+            await deductCredit(user.id, creditCost);
             const fileArrayBuffer = await file.arrayBuffer();
             const base64 = Buffer.from(fileArrayBuffer).toString('base64');
             const dataUri = `data:${file.type};base64,${base64}`;
             agentId = 'pdf-to-markdown';
-            creditCost = 2; // AI processing required
             result = await rewriteDocumentToMarkdown({ pdfDataUri: dataUri });
             markdownContent = 'markdown' in result ? result.markdown : '';
         } else if (file.type.startsWith('image/')) {
+            creditCost = 1; // AI processing required
+            await deductCredit(user.id, creditCost);
             const fileArrayBuffer = await file.arrayBuffer();
             const base64 = Buffer.from(fileArrayBuffer).toString('base64');
             const dataUri = `data:${file.type};base64,${base64}`;
             agentId = 'image-to-text';
-            creditCost = 1; // AI processing required
             result = await imageToText({ imageDataUri: dataUri });
             markdownContent = 'text' in result ? result.text : '';
         } else {
@@ -56,11 +58,6 @@ export const POST = withAuth(async ({ request, user }) => {
             agentId = 'text-file-to-markdown';
             markdownContent = Buffer.from(await file.arrayBuffer()).toString('utf-8');
             result = { markdown: markdownContent };
-        }
-
-        // Deduct credit only after a successful AI generation
-        if (creditCost > 0) {
-            await deductCredit(user.id, creditCost);
         }
 
         await logGeneration({

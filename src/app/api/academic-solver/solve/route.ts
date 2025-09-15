@@ -17,15 +17,15 @@ export const POST = withAuth(async ({ request, user }) => {
     }
 
     const { analyzedDocument, contextMarkdown } = validation.data;
+    
+    // Deduct credit before the AI call
+    const creditCost = analyzedDocument.documentType === 'exam' ? 3 : 2;
+    await deductCredit(user.id, creditCost);
 
     const result = await solveAcademicDocument({
       analyzedDocument,
       contextMarkdown
     });
-
-    // Deduct credit only after a successful generation
-    const creditCost = analyzedDocument.documentType === 'exam' ? 3 : 2;
-    await deductCredit(user.id, creditCost);
 
     await logGeneration({
         agentId: `solve-${analyzedDocument.documentType}`,

@@ -12,9 +12,10 @@ export async function deductCredit(userId: string, amount: number = 1) {
     if (!user) {
         throw new Error("User not found to deduct credits.");
     }
-    // The credits check is now handled within the database transaction
-    // if (user.credits < amount) {
-    //     throw { status: 402, message: "Insufficient credits. Please purchase more credits to continue." };
-    // }
+    // Pre-check credits before attempting the transaction
+    if (user.credits === undefined || user.credits < amount) {
+        throw { status: 402, message: "Insufficient credits. Please purchase more to continue." };
+    }
+    
     await deductUserCredits(userId, amount);
 }
