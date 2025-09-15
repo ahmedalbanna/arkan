@@ -7,7 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { A4Page } from './A4Page';
+import A4Page from '@/components/shared/A4Page';
 import type { AnalyzedDocument, SolvedDocument } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 

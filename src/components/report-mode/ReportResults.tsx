@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -12,17 +11,11 @@ import { useReportResults } from '@/hooks';
 import { GenerationTools } from './ReportGenerationTools';
 import { EvaluationTools } from '../evaluation/EvaluationTools';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import A4Page from '@/components/shared/A4Page';
 
 interface ReportResultsProps {
   onSectionUpdate: (key: SectionName, value: string) => void;
 }
-
-const A4Page = ({ children, title }: { children: React.ReactNode, title: string }) => (
-    <div className="a4-page-max bg-background shadow-lg p-8 md:p-12">
-        <h2 className="text-2xl font-bold font-headline text-primary border-b pb-2 mb-6">{title}</h2>
-        {children}
-    </div>
-);
 
 export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
   const {
@@ -56,19 +49,6 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
     }
     return (
         <div className="h-full bg-slate-200 dark:bg-slate-900/50 p-4 gap-4 rounded-lg flex flex-col mt-4">
-            <div className="flex w-full gap-1 rtl:flex-row-reverse justify-center items-center p-4 border-t bg-background rounded-b-lg mx-auto max-w-a4">
-                <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost">
-                    <ChevronLeft className="h-4 w-4 mr-2" />
-                    {t('builder.presentationGenerator.prev')}
-                </Button>
-                <span className="text-sm font-medium text-muted-foreground">
-                    Page {currentPage + 1} of {totalPages}
-                </span>
-                <Button onClick={handleNextPage} disabled={currentPage === totalPages - 1} variant="ghost">
-                    {t('builder.presentationGenerator.next')}
-                    <ChevronRight className="h-4 w-4 ml-2" />
-                </Button>
-            </div>
             <ScrollArea className="flex-grow">
                 {currentSectionKey && (
                     <A4Page key={currentSectionKey} title={getSectionTitle(currentSectionKey)}>
@@ -82,6 +62,21 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
                     </A4Page>
                 )}
             </ScrollArea>
+             {totalPages > 1 && (
+                <div className="flex w-full justify-center items-center p-2 border-t bg-background rounded-b-lg max-w-a4 mx-auto">
+                    <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost">
+                        <ChevronLeft className="h-4 w-4 mr-2" />
+                        {t('builder.presentationGenerator.prev')}
+                    </Button>
+                    <span className="text-sm font-medium text-muted-foreground mx-4">
+                        Page {currentPage + 1} of {totalPages}
+                    </span>
+                    <Button onClick={handleNextPage} disabled={currentPage === totalPages - 1} variant="ghost">
+                        {t('builder.presentationGenerator.next')}
+                        <ChevronRight className="h-4 w-4 ml-2" />
+                    </Button>
+                </div>
+            )}
         </div>
     );
   }
