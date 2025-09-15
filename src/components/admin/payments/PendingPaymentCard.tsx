@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format } from 'date-fns';
 import { Check, ExternalLink, Loader2, ThumbsDown } from "lucide-react";
-import { useVerifyPayment } from "@/hooks";
+import { useVerifyPayment } from "@/hooks/use-payment";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocalization } from "@/context/LocalizationContext";

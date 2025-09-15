@@ -53,6 +53,7 @@ export * from './use-presentation-template-manager';
 export * from './use-user-management-console';
 export * from './use-upload-project-logic';
 export * from './use-admin-dashboard';
+export * from './use-payment';
 
 // Store hooks
 export * from './useAgentStore';

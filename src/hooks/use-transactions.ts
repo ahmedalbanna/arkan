@@ -7,16 +7,13 @@ import { getTransactions as getTransactionsApi } from '@/services';
 import { useAuth } from '@/context/AuthContext';
 import { TransactionStatus, type TransactionData } from '@/services';
 import { Transaction, type TransactionProperties } from '@/lib/models/transaction';
-import { useVerifyPayment } from './use-payment'; // Import the new hook
 
-
-export type { VerifyPaymentVariables } from './use-payment'; // Re-export for convenience
 
 const TRANSACTIONS_PER_PAGE = 6;
 
 // Define the shape of the API response
-interface TransactionsPage { 
-    transactions: TransactionData[], 
+interface TransactionsPage {
+    transactions: TransactionData[],
     hasNextPage: boolean,
     lastVisibleId?: string | null;
 };
@@ -29,7 +26,7 @@ export function useTransactions(status: TransactionStatus) {
     const queryKey = transactionKeys.list(status);
 
     const queryInfo = useInfiniteQuery({
-        queryKey: queryKey, 
+        queryKey: queryKey,
         queryFn: async ({ pageParam }) => {
             if (!firebaseUser) throw new Error("User not authenticated.");
             const token = await firebaseUser.getIdToken();
@@ -54,5 +51,3 @@ export function useTransactions(status: TransactionStatus) {
 
     return queryInfo;
 }
-
-    
