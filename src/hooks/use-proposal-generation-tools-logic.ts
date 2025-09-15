@@ -26,7 +26,7 @@ export function useProposalGenerationToolsLogic() {
     const {
         selectedProposalTemplateId,
         setSelectedProposalTemplateId,
-        advancedFields,
+        advancedProposalFields,
         setAdvancedField,
     } = useGenerationUIStore();
     
