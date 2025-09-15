@@ -1,4 +1,6 @@
 
+'use server';
+
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import { handleApiError, withAuth, createApiResponse } from '@/lib/api-utils';
 

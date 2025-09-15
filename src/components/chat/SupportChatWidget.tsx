@@ -3,8 +3,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Send, X, Bot, User, Loader2, LifeBuoy, ChevronDown, ChevronLeft } from 'lucide-react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { MessageSquare, Send, X, Bot, User, Loader2, LifeBuoy, ChevronDown } from 'lucide-react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatStore } from '@/hooks';
@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { getDatabase, ref, onValue, off, push, serverTimestamp, update } from 'firebase/database';
 import { app } from '@/lib';
 import { RawChatMessage, RawChatSession } from '@/hooks';
-import { initiateSupportChat, createConversationApi } from '@/services';
+import { initiateSupportChat } from '@/services';
 import { toast } from '@/hooks';
 import {
   DropdownMenu,
@@ -26,7 +26,6 @@ import {
 import type { UserProfile } from '@/lib/types';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { useAdmins } from '@/hooks';
 
 
 function Message({ role, content }: { role: 'user' | 'assistant', content: string }) {
@@ -54,35 +53,6 @@ function Message({ role, content }: { role: 'user' | 'assistant', content: strin
     )
 }
 
-function AdminSelectionView({ onSelectAdmin }: { onSelectAdmin: (admin: UserProfile) => void }) {
-    const { data: admins, isLoading } = useAdmins();
-
-    return (
-         <div className="p-4">
-            <h3 className="font-semibold text-center mb-4">Start a new chat with...</h3>
-            {isLoading ? (
-                <div className="flex justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>
-            ) : (
-                <ScrollArea className="h-[450px]">
-                    <div className="space-y-2">
-                        {admins?.map(admin => (
-                            <Button key={admin.id} variant="ghost" className="w-full justify-start h-auto" onClick={() => onSelectAdmin(admin as UserProfile)}>
-                                <div className="flex items-center gap-3">
-                                    <Avatar>
-                                        <AvatarImage src={admin.profilePictureUrl} />
-                                        <AvatarFallback>{admin.name.charAt(0)}</AvatarFallback>
-                                    </Avatar>
-                                    <p>{admin.name}</p>
-                                </div>
-                            </Button>
-                        ))}
-                    </div>
-                </ScrollArea>
-            )}
-        </div>
-    )
-}
-
 
 export default function SupportChatWidget() {
     const {
@@ -104,7 +74,6 @@ export default function SupportChatWidget() {
     const [messages, setMessages] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
-    const [view, setView] = useState<'chat' | 'new_chat_selection'>('chat');
 
 
     // Initialize the store with server data once user is available
@@ -145,30 +114,20 @@ export default function SupportChatWidget() {
 
     const handleToggleChat = () => {
         if (!isChatOpen && !selectedChat) {
-            const latestChat = chats.length > 0 ? chats[0] : null;
-            setSelectedChat(latestChat);
-            setView('chat');
+            const latestSupportChat = chats.find(c => c.isSupportChat) || null;
+            setSelectedChat(latestSupportChat?.toPlainObject() ?? null);
         }
         toggleChat();
     }
 
-    const handleNewChatSelection = () => {
-        setView('new_chat_selection');
-    }
 
-    const handleAdminSelected = async (admin: UserProfile) => {
+    const handleNewSupportChat = async () => {
         if (!firebaseUser || !userProfile) return;
 
         try {
             const token = await firebaseUser.getIdToken();
-            const newConversation = await createConversationApi({
-                participantIds: [firebaseUser.uid, admin.id],
-                participantNames: { [firebaseUser.uid]: userProfile.name, [admin.id]: admin.name },
-                title: `Chat with ${admin.name}`,
-                isSupportChat: true
-            }, token);
-            createConversation(newConversation);
-            setView('chat'); // Switch back to chat view
+            const newConversation = await initiateSupportChat(token);
+            createConversation(newConversation); // This will also select the new chat
         } catch (error: any) {
              toast({ title: 'Error starting chat', description: error.message, variant: 'destructive' });
         }
@@ -234,11 +193,6 @@ export default function SupportChatWidget() {
             <Card className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 w-[calc(100vw-2rem)] h-[calc(100vh-8rem)] sm:w-[400px] sm:h-[600px] shadow-lg z-50 flex flex-col">
                 <CardHeader className="flex flex-row items-center justify-between">
                      <div className="flex items-center gap-1">
-                        {view === 'new_chat_selection' && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setView('chat')}>
-                                <ChevronLeft className="h-4 w-4" />
-                            </Button>
-                        )}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="flex items-start gap-2 h-auto flex-col p-1 text-left">
@@ -247,23 +201,18 @@ export default function SupportChatWidget() {
                                         <h2 className="text-lg font-semibold">{selectedChat?.title || 'Support Chat'}</h2>
                                         <ChevronDown className="h-4 w-4 text-muted-foreground" />
                                     </div>
-                                     {selectedChat && (
-                                        <p className="text-xs text-muted-foreground truncate max-w-[250px] font-normal">
-                                            {`Participants: ${participants.join(', ')}`}
-                                        </p>
-                                     )}
                                 </Button>
                             </DropdownMenuTrigger>
                              <DropdownMenuContent>
-                                <DropdownMenuLabel>Recent Chats</DropdownMenuLabel>
+                                <DropdownMenuLabel>Support Chats</DropdownMenuLabel>
                                 <DropdownMenuSeparator/>
-                                {chats.map(chat => (
-                                    <DropdownMenuItem key={chat.id} onSelect={() => { setSelectedChat(chat); setView('chat'); }}>
+                                {chats.filter(c => c.isSupportChat).map(chat => (
+                                    <DropdownMenuItem key={chat.id} onSelect={() => setSelectedChat(chat.toPlainObject())}>
                                         {chat.title}
                                     </DropdownMenuItem>
                                 ))}
                                  <DropdownMenuSeparator/>
-                                 <DropdownMenuItem onSelect={handleNewChatSelection}>
+                                 <DropdownMenuItem onSelect={handleNewSupportChat}>
                                     New Support Chat
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -275,15 +224,16 @@ export default function SupportChatWidget() {
                     </Button>
                 </CardHeader>
 
-                {view === 'new_chat_selection' ? (
-                     <AdminSelectionView onSelectAdmin={handleAdminSelected} />
-                ) : !selectedChat ? (
+                {!selectedChat ? (
                      <div className="flex h-full flex-col items-center justify-center bg-background p-8">
                         <div className="text-center">
-                            <h2 className="text-2xl font-semibold">Start a conversation</h2>
+                            <h2 className="text-2xl font-semibold">Welcome to Support</h2>
                             <p className="mt-2 text-muted-foreground max-w-sm">
-                                Select "New Support Chat" from the menu above to begin.
+                                Start a new conversation to get help from our admin team.
                             </p>
+                            <Button onClick={handleNewSupportChat} className="mt-4">
+                                Start New Chat
+                            </Button>
                         </div>
                     </div>
                 ) : (
