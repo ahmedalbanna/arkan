@@ -5,7 +5,7 @@ import {
   Packer,
   IStylesOptions,
   INumberingOptions,
-  AlignmentType, // <--- تم إضافة استيراد AlignmentType
+  AlignmentType,
 } from 'docx';
 import { saveAs } from 'file-saver';
 import { unified } from 'unified';
@@ -13,7 +13,7 @@ import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import { Root } from 'mdast';
 import { processPlantUml } from '@/lib/utils';
-import { ConversionOptions, DocxObject } from './word-converter/types'; // تم إزالة FontOptions حيث أنها جزء من ConversionOptions
+import { ConversionOptions, DocxObject } from './word-converter/types';
 import { processFootnotes } from './word-converter/node-handlers';
 import { convertAstToDocxObjects } from './word-converter/ast-converter';
 import { prepareHeadersAndFooters, buildDocumentSections } from './word-converter/document-builder';
@@ -24,13 +24,12 @@ import { prepareHeadersAndFooters, buildDocumentSections } from './word-converte
  * @param options The conversion options.
  * @returns An object containing the generated docxObjects and docxFootnotes.
  */
-export async function createDocxContent(markdown: string, options: ConversionOptions = {}) { // <--- تم تعديل توقيع الدالة
+export async function createDocxContent(markdown: string, options: ConversionOptions = {}) {
   const processedMarkdown = processPlantUml(markdown);
   const ast = unified().use(remarkParse).use(remarkGfm).parse(processedMarkdown) as Root;
 
-  // تمرير كائن options بالكامل
-  const { footnoteIdMap, docxFootnotes } = await processFootnotes(ast, options); // <--- تم تحديث الاستدعاء
-  const docxObjects = await convertAstToDocxObjects(ast, footnoteIdMap, options); // <--- تم تحديث الاستدعاء
+  const { footnoteIdMap, docxFootnotes } = await processFootnotes(ast, options);
+  const docxObjects = await convertAstToDocxObjects(ast, footnoteIdMap, options);
 
   return { docxObjects, docxFootnotes };
 }
@@ -40,10 +39,10 @@ const numbering: INumberingOptions = {
     {
       reference: "default-numbering",
       levels: [
-        { level: 0, format: "decimal", text: "%1.", alignment: "start" },
-        { level: 1, format: "lowerLetter", text: "%2)", alignment: "start" },
-        { level: 2, format: "lowerRoman", text: "%3.", alignment: "start" },
-        { level: 3, format: "upperLetter", text: "%4)", alignment: "start" },
+        { level: 0, format: "decimal", text: "%1.", alignment: AlignmentType.START },
+        { level: 1, format: "lowerLetter", text: "%2)", alignment: AlignmentType.START },
+        { level: 2, format: "lowerRoman", text: "%3.", alignment: AlignmentType.START },
+        { level: 3, format: "upperLetter", text: "%4)", alignment: AlignmentType.START },
       ],
     },
   ],
@@ -60,19 +59,16 @@ export async function convertMarkdownToWord(
   fileName: string,
   options: ConversionOptions = {}
 ) {
-  const { styles, coverPageMarkdown } = options; // تم إزالة isRtl و fonts حيث أنها جزء من options
+  const { styles, coverPageMarkdown } = options;
 
-  // إنشاء نسخة قابلة للتعديل من الأنماط لتجنب الآثار الجانبية على كائن options الأصلي
-  // التأكد من أن paragraphStyles هي مصفوفة قابلة للتعديل
   const finalStyles: IStylesOptions = {
     ...styles,
-    paragraphStyles: [...(styles?.paragraphStyles || [])], // <--- يضمن أنها مصفوفة قابلة للتعديل
+    paragraphStyles: [...(styles?.paragraphStyles || [])],
   };
 
-  // التأكد من وجود نمط Caption لتعليقات الجداول والأشكال
   const captionStyleExists = finalStyles.paragraphStyles!.some(style => style.id === 'Caption');
   if (!captionStyleExists) {
-    finalStyles.paragraphStyles!.push({ // <--- هذا الـ push سيعمل الآن
+    finalStyles.paragraphStyles!.push({
       id: 'Caption',
       name: 'Caption',
       basedOn: 'Normal',
@@ -81,12 +77,12 @@ export async function convertMarkdownToWord(
       run: { size: 18, italics: true, color: '595959' }, // 9pt, Italic, Grey
       paragraph: {
         alignment: AlignmentType.CENTER,
-        spacing: { before: 120, after: 240 }, // 6pt before, 12pt after
+        spacing: { before: 120, after: 240 },
       },
     });
   }
 
-  const { docxObjects, docxFootnotes } = await createDocxContent(markdown, options); // <--- تم تحديث الاستدعاء
+  const { docxObjects, docxFootnotes } = await createDocxContent(markdown, options);
 
   let coverPageDocxObjects: DocxObject[] = [];
   if (coverPageMarkdown && coverPageMarkdown.trim().length > 0) {
@@ -96,7 +92,6 @@ export async function convertMarkdownToWord(
 
   const { headerConfiguration, footerConfiguration } = prepareHeadersAndFooters(options);
 
-  // <--- تم تحديث الاستدعاء لـ buildDocumentSections مع coverPageDocxObjects والترتيب الصحيح
   const sections = await buildDocumentSections(docxObjects, coverPageDocxObjects, options, headerConfiguration, footerConfiguration);
 
   const doc = new Document({

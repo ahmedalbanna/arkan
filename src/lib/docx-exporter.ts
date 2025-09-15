@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Document, Packer, Paragraph, HeadingLevel, SectionType, Header, Footer, PageNumber, AlignmentType, Table, TextRun, TableRow, TableCell, WidthType, ImageRun, IStylesOptions, INumberingOptions } from 'docx';
+import { Document, Packer, Paragraph, AlignmentType, Table, TextRun, Header, Footer, PageNumber, SectionType } from 'docx';
 import { saveAs } from 'file-saver';
 import { type ProjectProposal } from '@/ai/schemas';
 import { templates, type DocxTemplateKey } from './docx-styles';
@@ -37,7 +37,6 @@ async function renderDocxValue(data: any, level: number = 1): Promise<(Paragraph
     if (Array.isArray(data)) {
         const listItems = await Promise.all(data.map(async item => {
             if (typeof item === 'object' && item !== null) {
-                // Render objects in arrays as nested content
                 return new Paragraph({
                     children: await renderDocxValue(item, level + 1),
                     bullet: { level: 0 },
@@ -78,7 +77,6 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, docxTemplat
     const styles = allTemplates[docxTemplateKey]?.styles || templates.modern.styles;
 
     const container = document.createElement('div');
-    // Styling for PDF rendering... (implementation omitted for brevity, assuming it exists)
     document.body.appendChild(container);
     await exportComponentAsPDF(container, `${proposal.title.replace(/\s+/g, '_')}_proposal.pdf`);
     document.body.removeChild(container);
@@ -138,11 +136,9 @@ export async function exportReportAsDocx(
     translatedTitles: { [key in string]?: string; },
     sectionsToInclude?: string[]
 ) {
-    // This function's implementation is complex and assumed to be correct for this refactoring.
-    // It remains unchanged as it's not the focus of this improvement.
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[docxTemplateKey]?.styles || templates.modern.styles;
-    const doc = new Document({ styles }); // Simplified for brevity
+    const doc = new Document({ styles });
     const blob = await Packer.toBlob(doc);
     saveAs(blob, "project-report.docx");
 }

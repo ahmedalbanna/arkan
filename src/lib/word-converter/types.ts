@@ -55,4 +55,5 @@ export interface ConversionOptions {
   pageNumbers?: boolean;
   isRtl?: boolean;
   fonts?: FontOptions;
+  includeToc?: boolean;
 }

@@ -193,7 +193,7 @@ describe('pptx-renderer', () => {
             expect(mockSlide.addImage).toHaveBeenCalledTimes(1);
             expect(mockSlide.addImage).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    data: 'data:image/png;base64,fake-base-string',
+                    data: 'data:image/png;base64,fake-base64-string',
                 })
             );
             expect(getProxiedImageBuffer).toHaveBeenCalledWith(imageUrl);

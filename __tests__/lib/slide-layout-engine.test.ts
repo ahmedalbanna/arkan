@@ -5,7 +5,7 @@ import type { PptxStyleOptions } from '@/lib/types';
 
 // Mock the entire renderer module. We don't want to test its implementation here,
 // only that the layout engine calls it correctly for unsplittable nodes.
-jest.mock('@/lib/pptx-renderer', () => ({
+jest.mock('@/lib/pptx-convert/pptx-renderer', () => ({
     renderNodeOnSlide: jest.fn(),
     // Mock transformInlinesToPptxText to return a predictable, simple structure.
     transformInlinesToPptxText: jest.fn(async (nodes) => {

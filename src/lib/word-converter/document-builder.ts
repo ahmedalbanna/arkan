@@ -15,7 +15,6 @@ import {
 } from 'docx';
 import { ConversionOptions, DocxObject } from './types';
 
-// ... prepareHeadersAndFooters remains the same ...
 export function prepareHeadersAndFooters(options: ConversionOptions): {
   headerConfiguration: { first?: Header; default?: Header };
   footerConfiguration: { first?: Footer; default?: Footer };
@@ -56,7 +55,7 @@ export function prepareHeadersAndFooters(options: ConversionOptions): {
         children: [
           new TextRun({
             rightToLeft: isRtl,
-            children: [PageNumber.CURRENT, " / ", PageNumber.TOTAL_PAGES],
+            children: [PageNumber.CURRENT, " | ", PageNumber.TOTAL_PAGES],
             ...(defaultFont && { font: { name: defaultFont } }),
           }),
         ],
@@ -72,24 +71,17 @@ export function prepareHeadersAndFooters(options: ConversionOptions): {
 
 export async function buildDocumentSections(
   docxObjects: DocxObject[],
-  coverPageDocxObjects: DocxObject[], // Changed from coverPageMarkdown
+  coverPageDocxObjects: DocxObject[],
   options: ConversionOptions,
   headerConfiguration: { first?: Header; default?: Header },
   footerConfiguration: { first?: Footer; default?: Footer }
 ): Promise<ISectionOptions[]> {
-  const { paper } = options;
+  const { paper, includeToc } = options;
   const sections: ISectionOptions[] = [];
 
   // 1. Add Cover Page section if it exists
   if (coverPageDocxObjects.length > 0) {
     const coverPageChildren = coverPageDocxObjects.filter((obj): obj is Paragraph | Table => !('_type' in obj));
-
-    // Find the first paragraph and style it as a Title
-    const titleParagraph = coverPageChildren.find((p): p is Paragraph => p instanceof Paragraph);
-    // if (titleParagraph) {
-    //   titleParagraph.style('Title');
-    // }
-
     sections.push({
       properties: {
         type: SectionType.NEXT_PAGE,
@@ -118,19 +110,21 @@ export async function buildDocumentSections(
     contentChunks.push({ children: currentChunkChildren, orientation: currentOrientation });
   }
 
-  // 3. Add Table of Contents to the first content chunk
-  const toc = new TableOfContents("Table of Contents", {
-    hyperlink: true,
-    headingStyleRange: "1-6",
-  });
-
-  if (contentChunks.length > 0) {
-    contentChunks[0].children.unshift(toc);
-  } else {
-    contentChunks.push({
-      children: [toc],
-      orientation: paper?.orientation || 'portrait'
+  // 3. Add Table of Contents to the first content chunk if requested
+  if (includeToc) {
+    const toc = new TableOfContents("Table of Contents", {
+      hyperlink: true,
+      headingStyleRange: "1-6",
     });
+
+    if (contentChunks.length > 0) {
+      contentChunks[0].children.unshift(new Paragraph({ text: "" }), toc, new Paragraph({ pageBreakBefore: true }));
+    } else {
+      contentChunks.push({
+        children: [toc],
+        orientation: paper?.orientation || 'portrait'
+      });
+    }
   }
 
   // 4. Create a docx section for each content chunk

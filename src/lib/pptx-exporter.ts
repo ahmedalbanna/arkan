@@ -11,6 +11,7 @@ interface FontOptions {
 import type { PresentationSlide } from "@/ai/schemas";
 import { templates, type PptxTemplateKey } from "./pptx-styles";
 import { saveAs } from 'file-saver';
+import { convertMarkdownToPptx } from './markdown-to-pptx-converter';
 // Helper function to remove markdown characters for a cleaner text output
 function stripMarkdown(text: string): string {
     return text
@@ -37,68 +38,30 @@ async function getTemplatesFromStorage(): Promise<Record<PptxTemplateKey, any>> 
 
 export async function exportPresentationAsPptx(
     slides: PresentationSlide[],
-    DocxTemplateKey : PptxTemplateKey,
+    pptxTemplateKey : PptxTemplateKey,
     options: { isRtl?: boolean, fonts?: FontOptions } = {}
 ) {
     const allTemplates = await getTemplatesFromStorage();
-    const template = allTemplates[DocxTemplateKey ];
+    const template = allTemplates[pptxTemplateKey ];
 
     if (!template) {
-        console.error(`Template with key "${DocxTemplateKey }" not found.`);
+        console.error(`Template with key "${pptxTemplateKey }" not found.`);
         return;
     }
+    
+    // Combine slides into a single markdown string
+    const markdown = slides.map(slide => {
+        let slideContent = `# ${slide.title}\n\n`;
+        slideContent += slide.content.map(item => `- ${item}`).join('\n');
+        slideContent += `\n\n> Notes:\n> ${slide.speakerNotes}`;
+        return slideContent;
+    }).join('\n\n---\n\n');
 
-    const { isRtl, fonts = {} } = options;
-
-    // Fallback to pptxgenjs if no template URL or if automizer fails
-    const { default: pptxgen } = await import('pptxgenjs');
-    let pptx = new pptxgen();
-    pptx.rtlMode = !!isRtl;
-    pptx.layout = "LAYOUT_16x9";
-    pptx.author = "Arkan AI";
-    pptx.company = "Firebase Studio";
-    pptx.subject = "Project Presentation";
-    pptx.title = slides[0]?.title || "Presentation";
-
-    const styles = template.styles || templates.modern.styles;
-    const defaultFont = isRtl ? fonts.rtl : fonts.default;
-
-    for (const slideData of slides) {
-        const slide = pptx.addSlide();
-
-        const titleStyle = { ...styles.title };
-        if (defaultFont) titleStyle.fontFace = defaultFont;
-
-        // Add Slide Title
-        slide.addText(stripMarkdown(slideData.title), {
-            x: 0.5, y: 0.25, w: "90%", h: 1, ...titleStyle,
-            rtlMode: !!isRtl,
-            align: isRtl ? 'right' : styles.title.align,
-        });
-
-        // Combine all content items into a single string with newlines for bullet points
-        const combinedContent = slideData.content.map(item => stripMarkdown(item)).join('\n');
-
-        const bodyStyle = { ...styles.body };
-        if (defaultFont) bodyStyle.fontFace = defaultFont;
-
-        // Determine content position and dimensions based on layout
-        let contentX = 0.5;
-        let contentY = 1.5;
-        let contentW = "90%";
-        let contentH = 4;
-        slide.addText(combinedContent, { x: contentX, y: contentY, w: contentW, h: contentH, ...bodyStyle,
-            lineSpacing: 36,
-            rtlMode: !!isRtl,
-            align: isRtl ? 'right' : styles.body.align,
-            bullet: styles.bullet.type === 'bullet' ? true : undefined, // Apply bullet to the whole text block
-            numbering: styles.bullet.type === 'number' ? { type: 'numbered' } : undefined, // Apply numbering to the whole text block
-        });
-
-        slide.addNotes(stripMarkdown(slideData.speakerNotes));
-    }
-
-    pptx.writeFile({ fileName: `presentation.pptx` }).catch(err => {
-        console.error("Error writing PPTX file with pptxgenjs:", err);
+    await convertMarkdownToPptx(markdown, "presentation", {
+        styles: template.styles,
+        isRtl: options.isRtl,
+        fonts: options.fonts,
+        includeToc: false, // Don't include a TOC for presentations by default
+        title: slides[0]?.title || "Presentation"
     });
 }

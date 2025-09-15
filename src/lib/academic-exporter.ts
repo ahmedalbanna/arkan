@@ -24,10 +24,10 @@ async function getStylesFromServer(): Promise<Record<DocxTemplateKey , { styles:
 export async function exportDocumentAsDocx(
     analyzedDocument: AnalyzedDocument,
     solvedDocument: SolvedDocument,
-    DocxTemplateKey : DocxTemplateKey  = 'modern'
+    docxTemplateKey : DocxTemplateKey  = 'modern'
 ) {
     const allTemplates = await getStylesFromServer();
-    const styles = allTemplates[DocxTemplateKey ]?.styles || templates.modern.styles;
+    const styles = allTemplates[docxTemplateKey ]?.styles || templates.modern.styles;
 
     const docxContent = [];
 
