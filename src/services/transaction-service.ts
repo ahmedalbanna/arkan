@@ -6,15 +6,14 @@ import type { VerifyPaymentVariables } from '@/lib/types';
 
 export type TransactionStatus = 'pending' | 'verified' | 'rejected';
 interface FetchTransactionsParams {
-  token: Promise<string>;
+  token: string;
   status: TransactionStatus;
   limit: number;
   lastVisibleId?: string;
 }
 
 export async function getTransactions(params: FetchTransactionsParams): Promise<{ transactions: TransactionData[], hasNextPage: boolean, lastVisibleId?: string | null }> {
-    const { token: tokenPromise, status, limit, lastVisibleId } = params;
-    const token = await tokenPromise;
+    const { token, status, limit, lastVisibleId } = params;
     if (!token) {
         throw new Error("Authentication token is required.");
     }

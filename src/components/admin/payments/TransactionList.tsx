@@ -1,14 +1,9 @@
 
 'use client';
 
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import { transactionKeys } from '@/lib/query-keys';
-import { getTransactions } from '@/services';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { PendingPaymentCard } from './PendingPaymentCard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAuth } from '@/context/AuthContext';
-import { useEffect } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Button } from '@/components/ui/button';
 import { useTransactions } from '@/hooks';
