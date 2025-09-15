@@ -1,101 +1,61 @@
-// firebaseErrors.ts
 
-import { FirebaseError as AdminFirebaseError } from 'firebase-admin';
-import { FirebaseError as ClientFirebaseError } from 'firebase/app'; // Assuming you might use client-side Firebase too
+import { FirebaseError as AdminFirebaseError } from 'firebase-admin/app';
+import { FirebaseError as ClientFirebaseError } from 'firebase/app';
 
 /**
- * Custom error class for wrapping Firebase errors.
+ * Custom error class for wrapping Firebase errors to be identified easily.
  */
 export class CustomFirebaseError extends Error {
   public code: string;
-  public originalError: AdminFirebaseError | ClientFirebaseError | any;
+  public originalError?: any;
 
-  constructor(code: string, message: string, originalError?: AdminFirebaseError | ClientFirebaseError | any) {
+  constructor(code: string, message: string, originalError?: any) {
     super(message);
     this.code = code;
     this.name = 'CustomFirebaseError';
     this.originalError = originalError;
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, CustomFirebaseError.prototype);
   }
 }
 
 /**
- * A utility function to check if an error is a Firebase Admin SDK error.
+ * Checks if an error is a Firebase Admin or Client SDK error.
  * @param error The error to check.
- * @returns True if the error is a Firebase Admin SDK error, false otherwise.
+ * @returns True if the error has a 'code' property, which is characteristic of Firebase errors.
  */
-export function isAdminFirebaseError(error: any): error is AdminFirebaseError {
-  return error instanceof Error && typeof (error as any).code === 'string';
+function isFirebaseError(error: any): error is AdminFirebaseError | ClientFirebaseError {
+  return error && typeof error.code === 'string' && typeof error.message === 'string';
 }
 
 /**
- * A utility function to check if an error is a Firebase Client SDK error.
- * @param error The error to check.
- * @returns True if the error is a Firebase Client SDK error, false otherwise.
- */
-export function isClientFirebaseError(error: any): error is ClientFirebaseError {
-  // This is a basic check, you might need to refine it based on the actual client SDK structure
-  return error && typeof error.code === 'string' && typeof error.message === 'string' && error.name === 'FirebaseError';
-}
-
-/**
- * Utility function to handle and potentially wrap Firebase errors.
+ * Utility function to handle and normalize Firebase errors.
+ * If the error is a known Firebase error, it's wrapped in a CustomFirebaseError.
  * @param error The caught error.
- * @param defaultMessage A default message if the error is not a recognized Firebase error.
- * @returns A CustomFirebaseError or a standard Error.
+ * @returns A CustomFirebaseError if the error is from Firebase, otherwise returns the original error.
  */
-export function handleFirebaseError(error: any, defaultMessage: string = 'An unexpected Firebase error occurred.'): CustomFirebaseError | Error {
-  if (isAdminFirebaseError(error) || isClientFirebaseError(error)) {
-    console.error('Caught Firebase Error:', error.code, error.message, error);
-    return new CustomFirebaseError(error.code, error.message, error);
-  } else {
-    console.error('Caught Non-Firebase Error:', error);
-    // You might want to inspect other types of errors here
-    return new Error(defaultMessage);
-  }
-}
-
-// Example Usage (Illustrative - this code won't run without Firebase setup)
-
-/*
-import { handleFirebaseError, CustomFirebaseError } from './firebaseErrors';
-import { adminDb } from './firebase/server-init'; // Assuming your admin initialization
-
-async function fetchDataFromFirestore() {
-  try {
-    const docRef = adminDb.collection('some_collection').doc('some_doc_that_might_not_exist');
-    const doc = await docRef.get();
-    if (!doc.exists) {
-      console.log('Document does not exist.');
-    } else {
-      console.log('Document data:', doc.data());
+export function handleFirebaseError(error: any): CustomFirebaseError | any {
+  if (isFirebaseError(error)) {
+    let message = error.message;
+    // Provide more user-friendly messages for common auth errors
+    switch (error.code) {
+        case 'auth/id-token-expired':
+            message = 'Your session has expired. Please log in again.';
+            break;
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+        case 'auth/invalid-email':
+            message = 'Invalid email or password.';
+            break;
+        case 'auth/email-already-exists':
+            message = 'An account with this email address already exists.';
+            break;
+        case 'auth/weak-password':
+            message = 'The password is too weak. It must be at least 6 characters long.';
+            break;
     }
-  } catch (error) {
-    const handledError = handleFirebaseError(error, 'Failed to fetch data.');
-
-    if (handledError instanceof CustomFirebaseError) {
-      console.error('Handled Firebase Error (Custom):', handledError.code, handledError.message);
-      // You can access handledError.originalError for the original Firebase error object
-    } else {
-      console.error('Handled Non-Firebase Error:', handledError.message);
-    }
+    return new CustomFirebaseError(error.code, message, error);
   }
+  // If it's not a Firebase error, return it as-is to be handled by the next part of the chain.
+  return error;
 }
-
-// Example with a potential Realtime Database error (if you were using it)
-// import admin from 'firebase-admin';
-// async function writeToRealtimeDatabase() {
-//   try {
-//     await admin.database().ref('some/path').set({ data: 'test' });
-//   } catch (error) {
-//      const handledError = handleFirebaseError(error, 'Failed to write to RTDB.');
-//      if (handledError instanceof CustomFirebaseError) {
-//         console.error('Handled RTDB Error (Custom):', handledError.code, handledError.message);
-//      }
-//   }
-// }
-
-// fetchDataFromFirestore();
-*/

@@ -3,6 +3,8 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { ZodError } from 'zod';
 import { adminAuth } from '@/lib/firebase/server-init';
 import { getUserProfile } from '@/lib/db/queries';
+import { handleFirebaseError, CustomFirebaseError } from '@/lib/firebase/error';
+
 
 interface ApiHandlerOptions {
   requireAdmin?: boolean;
@@ -52,13 +54,8 @@ export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) =
 
       return handler({ request, user, token, params });
     } catch (error: any) {
-      if(error.code === 'auth/id-token-expired') {
-        return handleApiError({ message: 'Your session has expired. Please log in again.' }, 401);
-      }
-       if (error.status && error.message) {
-         return handleApiError({ message: error.message }, error.status);
-       }
-      return handleApiError(error);
+       // All errors, including auth errors, are now piped through the central handler
+       return handleApiError(error);
     }
   };
 };
@@ -66,43 +63,39 @@ export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) =
 /**
  * Standardized error handler for API routes.
  * @param error - The error object.
- * @param status - The HTTP status code.
+ * @param defaultStatus - The HTTP status code to use if none is found on the error.
  * @returns A NextResponse object with a standardized error format.
  */
 export const handleApiError = (error: any, defaultStatus = 500) => {
   console.error("API Route Error:", error);
 
+  // 1. Handle Zod validation errors specifically
   if (error instanceof ZodError) {
     return NextResponse.json({ message: 'Validation failed', errors: error.flatten().fieldErrors }, { status: 400 });
   }
 
-  const status = error.status || defaultStatus;
+  // 2. Attempt to handle as a Firebase error
+  const firebaseError = handleFirebaseError(error);
+  if (firebaseError instanceof CustomFirebaseError) {
+      let status = 400; // Default for many auth errors
+      if (firebaseError.code.includes('not-found')) status = 404;
+      if (firebaseError.code.includes('permission-denied')) status = 403;
+      if (firebaseError.code.includes('already-exists')) status = 409;
+      if (firebaseError.code.includes('unauthenticated') || firebaseError.code.includes('token-expired')) status = 401;
 
-  // Provide more specific default messages for common Firebase auth errors
-  let message = error.message || 'An unexpected server error occurred.';
-  if (error.code) {
-      switch (error.code) {
-          case 'auth/id-token-expired':
-              message = 'Your session has expired. Please log in again.';
-              break;
-          case 'auth/user-not-found':
-          case 'auth/wrong-password':
-          case 'auth/invalid-credential':
-          case 'auth/invalid-email':
-              message = 'Invalid email or password.';
-              break;
-          case 'auth/email-already-exists':
-              message = 'An account with this email address already exists.';
-              break;
-          case 'auth/weak-password':
-              message = 'The password is too weak. It must be at least 6 characters long.';
-              break;
-      }
+      return NextResponse.json({ message: firebaseError.message, code: firebaseError.code }, { status });
   }
 
-  const errors = error.errors || undefined;
+  // 3. Handle custom thrown errors (e.g., from our own logic)
+  if (error.status && error.message) {
+    return NextResponse.json({ message: error.message }, { status: error.status });
+  }
 
-  return NextResponse.json({ message, errors }, { status });
+  // 4. Fallback for generic/unexpected errors
+  const message = error.message || 'An unexpected server error occurred.';
+  const status = error.status || defaultStatus;
+
+  return NextResponse.json({ message }, { status });
 };
 
 
@@ -116,11 +109,13 @@ export const createApiResponse = (data: any, status: number) => {
   return NextResponse.json(data, { status });
 };
 
+// --- This part is client-side specific and should not be in api-utils.ts ---
+// Moving it to firebase/client-init.ts is a better pattern, but for now we keep it
+// as the project structure has it this way. If refactoring client/server utils, this would move.
+
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -132,7 +127,6 @@ const firebaseConfig = {
   databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
 };
 
-// Initialize Firebase
 function getFirebaseClientApp() {
   if (!getApps().length) {
     return initializeApp(firebaseConfig);
