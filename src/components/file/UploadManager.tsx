@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useCallback } from 'react';
@@ -25,6 +26,7 @@ import { PdfPreview } from '@/components/file/PdfPreview';
 import { useDropzone } from 'react-dropzone';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Project } from '@/lib/models/project';
+import { Badge } from '@/components/ui/badge';
 
 interface UploadManagerProps {
     onCollapseToggle: () => void;
@@ -228,21 +230,31 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
                                         <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                                         <span className="truncate font-medium text-sm" style={{ maxWidth: '200px' }}>{item.fileName}</span>
                                     </div>
-                                    <div className="flex items-center">
+                                    <div className="flex items-center gap-1">
                                         {isProcessable && (
                                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleProcessFile(index)} disabled={processingFileIndex === index}>
                                                 {processingFileIndex === index ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
                                             </Button>
                                         )}
                                         <Select value={item.type} onValueChange={(value: ContextFileType) => updateExternalContextType(index, value)}>
-                                            <SelectTrigger className={cn("text-xs h-7 w-[110px]", {
-                                                'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800': item.type === 'context',
-                                                'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200 border-green-200 dark:border-green-800': item.type === 'example',
-                                                'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800': item.type === 'question',
-                                                'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-800': item.type === 'textbook',
-                                                'bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600': item.type === 'guidelines',
+                                            <SelectTrigger className={cn("text-xs h-7 w-auto p-0 border-0 bg-transparent focus:ring-0", {
+                                                'text-blue-800 dark:text-blue-200': item.type === 'context',
+                                                'text-green-800 dark:text-green-200': item.type === 'example',
+                                                'text-yellow-800 dark:text-yellow-200': item.type === 'question',
+                                                'text-purple-800 dark:text-purple-200': item.type === 'textbook',
+                                                'text-gray-800 dark:text-gray-200': item.type === 'guidelines',
                                             })}>
-                                                <SelectValue />
+                                                <SelectValue asChild>
+                                                    <Badge variant="secondary" className={cn("capitalize cursor-pointer", {
+                                                        'bg-blue-100 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800': item.type === 'context',
+                                                        'bg-green-100 dark:bg-green-900/50 border-green-200 dark:border-green-800': item.type === 'example',
+                                                        'bg-yellow-100 dark:bg-yellow-900/50 border-yellow-200 dark:border-yellow-800': item.type === 'question',
+                                                        'bg-purple-100 dark:bg-purple-900/50 border-purple-200 dark:border-purple-800': item.type === 'textbook',
+                                                        'bg-gray-100 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600': item.type === 'guidelines',
+                                                    })}>
+                                                        {item.type}
+                                                    </Badge>
+                                                </SelectValue>
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {fileTypes.map(type => (

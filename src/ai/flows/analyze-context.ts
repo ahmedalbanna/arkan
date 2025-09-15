@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -28,7 +29,9 @@ const analysisPrompt = ai.definePrompt({
     *   Provide this Zod schema as a single string in the \`schema\` field of your response.
 
 2.  **Extract and Structure the Data**:
-    *   Next, thoroughly analyze all the provided context files (both text and media).
+    *   Next, thoroughly analyze all the provided context files (both text and media). Each file is tagged with a 'type' (e.g., 'context', 'example', 'question', 'textbook') which tells you how to use it.
+    *   Use files tagged as **'example'** as a reference for writing style, tone, and structure.
+    *   Use files tagged as **'context'**, **'question'**, or **'textbook'** for factual data and information.
     *   Extract the relevant pieces of information that match the user's prompt.
     *   Populate a JSON object with this extracted data, ensuring it **strictly conforms** to the Zod schema you just designed.
     *   Place this JSON object in the \`data\` field of your response.

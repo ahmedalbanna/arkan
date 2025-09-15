@@ -1,4 +1,5 @@
 
+
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal, ProjectPlan } from '@/ai/schemas';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { PptxTemplateSchema, ProposalTemplateSchema, ReportGenerationTemplateSchema, PresentationGenerationTemplateSchema, DocxStyleOptionsSchema } from '@/ai/schemas/template-schemas';
