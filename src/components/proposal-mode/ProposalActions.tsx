@@ -5,14 +5,14 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Languages, Loader2, Clipboard, ClipboardCheck, BrainCircuit, FileText, FileCode } from 'lucide-react';
-import type { DocxTemplateKey  } from '@/lib/docx-styles';
+import type { DocxTemplateKey } from '@/lib/docx-styles';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from '@/hooks';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useProposalActionsLogic } from '@/hooks/use-proposal-actions-logic';
+import { useProposalModeGeneratorLogic } from '@/hooks';
 
 
 interface ProposalActionsProps {
@@ -33,7 +33,7 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
         handleDocxTemplateChange,
         handleExport,
         handleSummarizeProject,
-    } = useProposalActionsLogic();
+    } = useProposalModeGeneratorLogic();
     const [isCopied, setIsCopied] = useState(false);
 
     useEffect(() => {

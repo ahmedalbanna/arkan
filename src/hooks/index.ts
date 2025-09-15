@@ -22,6 +22,7 @@ export * from './use-evaluation';
 export * from './use-export';
 export * from './use-features';
 export * from './use-guideline-editor'; // Export new hook
+export * from './use-mobile';
 export * from './use-pptx-styles';
 export * from './use-presentation-generation';
 export * from './use-presentation-generator-logic';
@@ -57,7 +58,6 @@ export * from './use-admin-dashboard';
 export * from './use-payment';
 export * from './use-project-plan';
 export * from './use-project-plan-generator';
-export * from './use-proposal-actions-logic';
 export * from './use-proposal-generation-tools-logic';
 
 // Store hooks
