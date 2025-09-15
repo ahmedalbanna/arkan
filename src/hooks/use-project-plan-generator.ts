@@ -8,13 +8,14 @@ import { useGenerateProjectPlan } from '@/hooks/use-project-plan';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { summarizeProjectApi } from '@/services';
 import { useLocalization } from '@/context/LocalizationContext';
+import type { AnyProjectProposal } from '@/ai/schemas';
 
 export function useProjectPlanGenerator() {
     const { toast } = useToast();
     const { t } = useLocalization();
     const { firebaseUser, userProfile } = useAuth();
     const { project } = useBuilderStore();
-    const proposal = project?.proposal;
+    const proposal = project?.proposal as AnyProjectProposal | null; // Cast for easier use
     const projectIdea = project?.projectIdea;
 
     const [description, setDescription] = useState('');
@@ -37,10 +38,12 @@ export function useProjectPlanGenerator() {
         mutationFn: async () => {
             if (!proposal) throw new Error("A proposal is required to generate suggestions.");
             const token = await getAuthenticatedToken(firebaseUser);
+            // The API expects `body` and `token` properties.
             return summarizeProjectApi({ body: { proposal, reportMarkdown: '' }, token });
         },
-        onSuccess: (data: any) => { 
-            const parts = data.summary.split("Key Deliverables:");
+        onSuccess: (data: any) => {
+            const summaryText = data.summary || '';
+            const parts = summaryText.split("Key Deliverables:");
             setDescription(parts[0]?.replace('Project Summary:', '').trim() || '');
             setDeliverables(parts[1]?.trim() || '');
             toast({ title: "Suggestion Applied", description: "The AI has filled in the details from your proposal." });
@@ -66,6 +69,10 @@ export function useProjectPlanGenerator() {
         planGenerationMutation.mutate({ projectDescription: description, keyDeliverables: deliverables });
     };
 
+    const handleGetSuggestion = () => {
+        suggestionMutation.mutate();
+    }
+
     const creditCost = 2;
     const isProcessing = planGenerationMutation.isPending || suggestionMutation.isPending;
     const canGenerate = (!!description.trim() && !!deliverables.trim()) && !isProcessing && (userProfile?.credits ?? 0) >= creditCost;
@@ -77,7 +84,7 @@ export function useProjectPlanGenerator() {
         deliverables,
         setDeliverables,
         handleGeneratePlan,
-        handleGetSuggestion: suggestionMutation.mutate,
+        handleGetSuggestion,
         planGenerationMutation,
         isProcessing,
         canGenerate,

@@ -12,7 +12,6 @@ import { useLocalization } from '@/context/LocalizationContext';
 function TaskCard({ task }: { task: ProjectTask }) {
   const { t } = useLocalization();
   return (
-    // card into content project plan
     <Card className="bg-background/50 h-full rounded-lg shadow-lg hover:shadow-xl">
       <CardHeader className="p-4">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
@@ -83,7 +82,7 @@ export default function ProjectPlanViewer({ projectPlan }: { projectPlan: Projec
         </CardDescription>
       </CardHeader>
       <div className="flex-grow bg-slate-200 dark:bg-slate-900/50 p-4 rounded-b-lg">
-        <ScrollArea className="h-full">
+        <ScrollArea className="h-[calc(100vh-270px)]">
             {currentPhase ? (
                  <A4Page key={currentPhase.phaseName} title={currentPhase.phaseName}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
