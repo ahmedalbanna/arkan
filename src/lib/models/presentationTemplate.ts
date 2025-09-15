@@ -1,3 +1,4 @@
+
 import { Template, type BaseTemplateProperties } from './template';
 
 // Corresponds to PresentationGenerationTemplateSchema from the Zod schemas

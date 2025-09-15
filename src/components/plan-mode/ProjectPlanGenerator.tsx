@@ -17,7 +17,7 @@ import { useProjectPlanGenerator } from '@/hooks/use-project-plan-generator';
 export default function ProjectPlanGenerator() {
   const { t, locale } = useLocalization();
   const { project } = useBuilderStore();
-  const projectPlan = project?.projectPlan;
+  const projectPlan = project?.projectPlan; // Get projectPlan from the project model
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
   const {

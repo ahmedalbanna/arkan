@@ -1,4 +1,3 @@
-
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal, ProjectPlan } from '@/ai/schemas';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { PptxTemplateSchema, ProposalTemplateSchema, ReportGenerationTemplateSchema, PresentationGenerationTemplateSchema, DocxStyleOptionsSchema } from '@/ai/schemas/template-schemas';
@@ -95,7 +94,6 @@ export type { VerifyPaymentVariables } from '@/hooks';
 
 export type { Codebase } from '@/ai/schemas';
 export type { AcademicSolverState, ExternalContext as AcademicContextFile, AcademicSolverStage } from '@/hooks';
-export type { TeamWithMembers } from '@/services';
 
 export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks';
 
@@ -209,8 +207,7 @@ export interface Team {
 }
 
 export interface TeamMember {
-  userId: string;
-  teamId: string;
+  id: string;
   role: 'owner' | 'member';
   joinedAt: string;
   // Denormalized fields for efficiency
@@ -218,6 +215,11 @@ export interface TeamMember {
   email: string;
   profilePictureUrl?: string;
 }
+
+export interface TeamWithMembers extends Team {
+    members: TeamMember[];
+}
+
 
 export interface TransactionData {
   id: string; // Firestore document ID
@@ -414,15 +416,7 @@ export interface ProjectState {
         appendices?: string | undefined;
     } | undefined;
     evaluation?: import("@/ai/schemas").EvaluateReportOutput | null | undefined;
-    diagrams?: {
-        "useCase"?: import("@/hooks").DiagramData | undefined;
-        class?: import("@/hooks").DiagramData | undefined;
-        sequence?: import("@/hooks").DiagramData | undefined;
-        activity?: import("@/hooks").DiagramData | undefined;
-        component?: import("@/hooks").DiagramData | undefined;
-        archimate?: import("@/hooks").DiagramData | undefined;
-        er?: import("@/hooks").DiagramData | undefined;
-    } | undefined;
+    diagrams?: Partial<Record<DiagramType, import('./models/diagram').DiagramProperties>>;
     presentation?: {
         history: PresentationHistoryEntry[];
     } | undefined;

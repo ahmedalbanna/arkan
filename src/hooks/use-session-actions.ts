@@ -5,7 +5,7 @@ import { useRef, useState } from 'react';
 import { useBuilderStore, useSaveProject, useUpdateProject, useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { saveAs } from 'file-saver';
-import type { ProjectState, SavedProject } from '@/lib/types';
+import type { SavedProject } from '@/lib/types';
 import { Project, type ProjectProperties } from '@/lib/models/project';
 
 function hasAnyContent(project: Project | null): boolean {
@@ -31,7 +31,7 @@ export function useSessionActions() {
     const [isSavePromptOpen, setIsSavePromptOpen] = useState(false);
     const [projectName, setProjectName] = useState('');
 
-    const { project, loadProject, newSession } = useBuilderStore();
+    const { project, loadProject, newSession, updateProject } = useBuilderStore();
     const saveProjectMutation = useSaveProject();
     const updateProjectMutation = useUpdateProject();
 
@@ -68,7 +68,7 @@ export function useSessionActions() {
     const handleSaveProjectFile = (name?: string) => {
         if (!project || !hasAnyContent(project)) return;
         const finalName = name?.trim() || project.name || (project.proposal as any)?.title || 'arkan_project';
-        const jsonString = JSON.stringify(project.toStateObject());
+        const jsonString = JSON.stringify(project.toPlainObject());
         const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
         const blob = new Blob([encodedData], { type: 'text/plain;charset=utf-8' });
         saveAs(blob, `${finalName}.arkan`);
@@ -80,12 +80,20 @@ export function useSessionActions() {
             return;
         }
 
-        const projectData = project.toStateObject();
-        const finalName = name || project.name || (project.proposal as any)?.title || 'Untitled Project';
+        // Update the name before saving if a new name is provided
+        if (name) {
+            updateProject(p => { p.name = name; });
+        }
+
+        // The store now holds the most up-to-date project instance
+        const projectToSave = useBuilderStore.getState().project!;
+        const projectData = projectToSave.toStateObject();
+        const finalName = projectToSave.name || 'Untitled Project';
         const saveData = { ...projectData, name: finalName };
 
-        if (project.id && !project.id.startsWith('temp-')) {
-            updateProjectMutation.mutate({ projectId: project.id, data: saveData });
+
+        if (projectToSave.id && !projectToSave.id.startsWith('temp-')) {
+            updateProjectMutation.mutate({ projectId: projectToSave.id, data: saveData });
         } else {
             saveProjectMutation.mutate(saveData);
         }
@@ -98,6 +106,7 @@ export function useSessionActions() {
             performSave();
         } else if (hasAnyContent(project)) {
             // If it's a new project with content, prompt for a name.
+            setProjectName(project.name || '');
             setIsSavePromptOpen(true);
         } else {
             // If it's a new, empty project, don't allow saving.
@@ -117,14 +126,16 @@ export function useSessionActions() {
 
     const handleSaveAsCloud = () => {
         if (!project) return;
-        const projectData = project.toStateObject();
+        const projectData = project.toPlainObject();
         const finalSaveAsName = saveAsName.trim() || project.name || (project.proposal as any)?.title || 'Untitled Project';
-        const saveData = { ...projectData, name: String(finalSaveAsName) };
+        // Create a new object for saving, without modifying the current project's ID
+        const saveData = { ...projectData, name: String(finalSaveAsName), id: '' };
+        
         saveProjectMutation.mutate(saveData, {
-            onSuccess: (newProject) => {
+            onSuccess: (newProjectData) => {
                  toast({
                     title: t("projects.projectSavedAsToastTitle"),
-                    description: t("projects.projectSavedAsToastDesc").replace('{name}', newProject.name),
+                    description: t("projects.projectSavedAsToastDesc").replace('{name}', newProjectData.name),
                 });
                 setIsSaveAsOpen(false);
                 setSaveAsName('');

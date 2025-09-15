@@ -1,3 +1,4 @@
+
 // Base class for all template types, based on BaseTemplateSchema
 
 export interface BaseTemplateProperties<TContent = any> {

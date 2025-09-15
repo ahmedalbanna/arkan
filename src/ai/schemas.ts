@@ -862,12 +862,8 @@ export type ExternalContext = z.infer<typeof ExternalContextSchema>;
 export const EvaluateContextInputSchema = z.object({
   proposal: ProjectProposalSchema.optional().nullable().describe("The original project proposal."),
   projectPlan: ProjectPlanSchema.optional().nullable().describe("The detailed project plan with phases and tasks."),
-  existingSections: z.object({}).passthrough().refine(obj => {
-    return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);
-  }, "All keys must be a valid SectionName").optional().describe("A map of previously generated text sections."),
-  existingDiagrams: z.object({}).passthrough().refine(obj => {
-    return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
-  }, "All keys must be a valid DiagramType").optional().describe("A map of previously generated PlantUML diagrams."),
+  existingSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections."),
+  existingDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams."),
   sectionsToGenerate: z.array(SectionNameSchema).describe("A list of the target sections that need to be generated."),
   externalContext: z.array(ExternalContextSchema).optional().describe("An array of external documents provided by the user, categorized as 'context' (for facts) or 'example' (for style)."),
 });

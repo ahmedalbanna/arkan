@@ -1,3 +1,7 @@
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 import { Template, type BaseTemplateProperties } from './template';
 import type { PptxStyleOptions } from '@/lib/types';
 

@@ -1,9 +1,10 @@
 
+
 'use server';
 
 import { z } from 'zod';
 import { evaluateAndSelectContext } from '@/ai/flows/evaluate-and-select-context';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, ProjectPlanSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, ProjectPlanSchema, ExternalContextSchema } from '@/ai/schemas';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
@@ -14,11 +15,7 @@ const evaluateContextSchema = z.object({
     existingSections: z.record(SectionNameSchema, z.string()).optional(),
     existingDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
     sectionsToGenerate: z.array(SectionNameSchema),
-    externalContext: z.array(z.object({
-        fileName: z.string(),
-        content: z.string(),
-        type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines'])
-    })).optional(),
+    externalContext: z.array(ExternalContextSchema).optional(),
 });
 
 export const POST = withAuth(async ({ request, user }) => {

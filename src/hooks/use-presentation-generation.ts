@@ -21,7 +21,7 @@ export function useGeneratePresentation() {
     const { t } = useLocalization();
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
-    const { project, setProject } = useBuilderStore();
+    const { project, updateProject } = useBuilderStore();
 
     return useMutation<GeneratePresentationOutput, Error, GeneratePresentationVariables>({
         mutationFn: generatePresentationApi,
@@ -33,8 +33,10 @@ export function useGeneratePresentation() {
                 slides: data.slides,
             };
             
-            project.addPresentationToHistory(newEntry);
-            setProject(new Project(project.toStateObject()));
+            // Use the new updater function to call the model's method
+            updateProject(p => {
+                p.addPresentationToHistory(newEntry);
+            });
 
             if (firebaseUser) {
                 queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });

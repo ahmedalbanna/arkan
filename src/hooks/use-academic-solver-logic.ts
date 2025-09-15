@@ -10,6 +10,7 @@ import { useAnalyzeAcademicDocument, useSolveAcademicDocument } from '@/hooks';
 import { exportDocumentAsDocx } from '@/lib/academic-exporter';
 import { AnalyzedDocument, SolvedDocument, AcademicDocumentType } from '@/ai/schemas';
 import { AcademicSolverStage } from '@/lib/types';
+import { Project } from '@/lib/models/project';
 
 export interface ExternalContext {
   fileName: string;
@@ -26,10 +27,10 @@ export function useAcademicSolverLogic() {
     const { firebaseUser, userProfile } = useAuth();
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
-    // Get project and updater from useBuilderStore
+    // Get project and the central updater function from useBuilderStore
     const { project, updateProject } = useBuilderStore();
 
-    // Destructure academicSolver state from the project
+    // The entire academicSolver state is now derived directly from the project model
     const academicSolverState = project?.academicSolver;
 
     const [currentPage, setCurrentPage] = useState(0);
@@ -46,16 +47,14 @@ export function useAcademicSolverLogic() {
     const creditCostSolve = academicSolverState?.analyzedDocument?.documentType === 'exam' ? 3 : 2;
 
     const handleAnalyze = async () => {
-        if (!project || !academicSolverState) return; // Ensure project and academicSolver exist
-        if (academicSolverState.questionDocuments.length === 0 || !academicSolverState.documentType || !firebaseUser) {
+        if (!academicSolverState?.questionDocuments || academicSolverState.questionDocuments.length === 0 || !academicSolverState.documentType || !firebaseUser) {
             toast({ title: t('builder.academicSolver.toasts.analysisError'), description: t('builder.academicSolver.toasts.analysisErrorDesc'), variant: 'destructive' });
             return;
         }
         
         updateProject(p => p.setAcademicSolverStage('analyzing'));
 
-        const combinedQuestionContent = academicSolverState.questionDocuments.map(doc => `--- Content from: ${doc.fileName} ---
-${doc.content}`).join('\n\n');
+        const combinedQuestionContent = academicSolverState.questionDocuments.map(doc => `--- Content from: ${doc.fileName} ---\n${doc.content}`).join('\n\n');
 
         analyzeMutation.mutate({ markdown: combinedQuestionContent, documentType: academicSolverState.documentType }, {
             onSuccess: (data) => {
@@ -70,7 +69,7 @@ ${doc.content}`).join('\n\n');
     };
 
     const handleSolve = async () => {
-        if (!project || !academicSolverState || !academicSolverState.analyzedDocument || !firebaseUser) {
+        if (!academicSolverState?.analyzedDocument || !firebaseUser) {
             toast({ title: t('builder.academicSolver.toasts.analysisMissing'), variant: 'destructive' });
             return;
         }
@@ -78,8 +77,7 @@ ${doc.content}`).join('\n\n');
 
         let contextMarkdown: string | undefined = undefined;
         if (academicSolverState.externalContext && academicSolverState.externalContext.length > 0) {
-            contextMarkdown = academicSolverState.externalContext.map(c => `--- Context from: ${c.fileName} ---
-${c.content}`).join('\n\n');
+            contextMarkdown = academicSolverState.externalContext.map(c => `--- Context from: ${c.fileName} ---\n${c.content}`).join('\n\n');
         }
 
         solveMutation.mutate({ analyzedDocument: academicSolverState.analyzedDocument, contextMarkdown }, {
@@ -118,30 +116,13 @@ ${c.content}`).join('\n\n');
         }
     };
 
-    const setDocumentType = (newType: AcademicDocumentType | null) => {
-        updateProject(p => p.setAcademicSolverDocumentType(newType));
-    };
-
-    const addQuestionDocument = (fileName: string, content: string) => {
-        updateProject(p => p.addAcademicSolverQuestionDocument(fileName, content));
-    };
-    
-    const removeQuestionDocument = (index: number) => {
-        updateProject(p => p.removeAcademicSolverQuestionDocument(index));
-    };
-    
-    const addExternalContext = (fileName: string, content: string) => {
-        updateProject(p => p.addAcademicSolverExternalContext(fileName, content));
-    };
-    
-    const removeExternalContext = (index: number) => {
-        updateProject(p => p.removeAcademicSolverExternalContext(index));
-    };
-
-    const resetCurrent = () => {
-        updateProject(p => p.resetAcademicSolver());
-    };
-
+    // Use the central `updateProject` helper to call methods on the Project model
+    const setDocumentType = (newType: AcademicDocumentType | null) => updateProject(p => p.setAcademicSolverDocumentType(newType));
+    const addQuestionDocument = (fileName: string, content: string) => updateProject(p => p.addAcademicSolverQuestionDocument(fileName, content));
+    const removeQuestionDocument = (index: number) => updateProject(p => p.removeAcademicSolverQuestionDocument(index));
+    const addExternalContext = (fileName: string, content: string) => updateProject(p => p.addAcademicSolverExternalContext(fileName, content));
+    const removeExternalContext = (index: number) => updateProject(p => p.removeAcademicSolverExternalContext(index));
+    const resetCurrent = () => updateProject(p => p.resetAcademicSolver());
 
     return {
         t,

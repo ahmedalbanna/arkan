@@ -1,3 +1,4 @@
+
 import { Template, type BaseTemplateProperties } from './template';
 
 // Corresponds to ProposalTemplateSchema from the Zod schemas

@@ -7,28 +7,68 @@ import { userKeys } from "@/lib/query-keys";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import { toast } from "./use-toast";
-import type { GenerateDiagramOutput } from '@/ai/schemas';
+import type { GenerateDiagramOutput, ImageToTextInput } from '@/ai/schemas';
 import {
     generateDiagramApi,
     updateDiagramApi,
+    explainDiagramApi,
 } from "@/services";
+import { useBuilderStore } from "./useBuilderStore";
+import { type DiagramType } from "@/ai/schemas";
+import { Project } from "@/lib/models/project";
+
+interface ExplainDiagramVariables extends ImageToTextInput {
+    prompt: string;
+}
+
+/**
+ * Custom mutation hook to explain a diagram image.
+ */
+export function useExplainDiagram(diagramKey: DiagramType, options?: { onSuccess?: (data: any, variables: ExplainDiagramVariables) => void; onError?: (error: any, variables: ExplainDiagramVariables) => void; }) {
+  const { firebaseUser, refetchUser } = useAuth();
+
+  return useMutation({
+    mutationFn: async (variables: ExplainDiagramVariables) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return explainDiagramApi({ imageDataUri: variables.imageDataUri, prompt: variables.prompt }, token);
+    },
+    onSuccess: (data, variables) => {
+      refetchUser(); // To update credits
+      options?.onSuccess?.(data, variables);
+    },
+    onError: (error, variables) => {
+      handleErrorUtility(error, "Diagram Explanation Failed");
+      options?.onError?.(error, variables);
+    },
+  });
+}
+
 
 /**
  * Custom mutation hook to generate a new diagram using an AI flow.
  */
-export function useGenerateDiagram(onSuccessCallback?: (data: GenerateDiagramOutput & { imageUrl: string }, variables: any) => void) {
+export function useGenerateDiagram() {
   const { firebaseUser, refetchUser } = useAuth();
+  const { updateProject } = useBuilderStore();
 
   return useMutation({
     mutationFn: async (body: any) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return generateDiagramApi(body, token);
     },
-    onSuccess: (data, variables) => {
-      refetchUser();
-      if(onSuccessCallback) {
-        onSuccessCallback(data, variables);
-      }
+    onSuccess: (data: GenerateDiagramOutput & { imageUrl: string }, variables: any) => {
+        const diagramKey = variables.diagramToGenerate as DiagramType;
+        
+        updateProject(p => {
+            p.setDiagram(diagramKey, {
+                plantUmlCode: data.plantUmlCode,
+                imageUrl: data.imageUrl,
+                explanation: data.explanation
+            });
+        });
+        
+        refetchUser();
+        toast({ title: "Diagram Generated", description: `Successfully created the ${diagramKey} diagram.` });
     },
     onError: (error: Error, variables) => {
       handleErrorUtility(error, `Failed to generate ${variables.diagramToGenerate} diagram`);

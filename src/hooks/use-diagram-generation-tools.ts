@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -22,7 +21,7 @@ export const useDiagramGenerationTools = () => {
     const { userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
     const { project, setProject } = useBuilderStore();
-    const { contextSelection, initializeDependentStates } = useReportStore();
+    const { contextSelection, guidelineState, initializeDependentStates } = useReportStore();
     const { data: sectionConfigs, isLoading: sectionsLoading } = useSections();
 
     const diagramSections = useMemo(() => {
@@ -42,23 +41,7 @@ export const useDiagramGenerationTools = () => {
 
     const getIconComponent = useAgentStore(state => state.getIconComponent);
 
-    const diagramMutation = useGenerateDiagram((data, variables) => {
-        if (!project) return;
-        const diagramKey = variables.diagramToGenerate as DiagramType;
-        const agent = agents.find(a => a.id === `generate-${diagramKey}-diagram`);
-        const translatedTitle = agent ? t(agent.name) : diagramKey;
-
-        const newProject = new Project(project.toStateObject());
-        newProject.setDiagram(diagramKey, { 
-            plantUmlCode: data.plantUmlCode, 
-            imageUrl: data.imageUrl, 
-            explanation: data.explanation 
-        });
-        setProject(newProject);
-
-        toast({ title: t('builder.diagramGenerator.toasts.success', { title: translatedTitle } as any) });
-        setActiveMutationKey(null);
-    });
+    const diagramMutation = useGenerateDiagram();
 
     const isAnythingGenerating = diagramMutation.isPending;
     const isDisabled = isAnythingGenerating;
@@ -77,7 +60,7 @@ export const useDiagramGenerationTools = () => {
             diagramToGenerate: diagramType,
             otherSections: Object.keys(selectedContext.sections).filter(k => selectedContext.sections[k]).reduce((acc, k) => ({ ...acc, [k]: project.sections?.[k as SectionName] }), {}),
             otherDiagrams: Object.keys(selectedContext.diagrams).filter(k => selectedContext.diagrams[k]).reduce((acc, k) => ({ ...acc, [k]: project.diagrams?.[k as DiagramType]?.plantUmlCode }), {}),
-            guidelines: getSelectedGuidelines(agent, useReportStore.getState().guidelineState[diagramType]),
+            guidelines: getSelectedGuidelines(agent, guidelineState[diagramType]),
             externalContext: selectedExternalContext,
         };
         setActiveMutationKey(diagramType);

@@ -72,7 +72,7 @@ export async function evaluateAndSelectContext(input: EvaluateContextInput): Pro
     *   **Instruction Selection**: Choose the best \`tone\` and \`formality\` based on the project's nature and any provided 'example' files.
 
 **CRITICAL INSTRUCTIONS:**
-- Your final output must be a JSON object that strictly adheres to the provided schema.
+- Your final output must be a JSON object that strictly adheres to the provided output schema.
 - For each section in the input \`sectionsToGenerate\` array, you must provide a corresponding configuration object in the output \`configs\` array.
 
 --- AVAILABLE PROJECT DATA ---

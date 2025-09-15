@@ -1,3 +1,4 @@
+
 import { User } from './user';
 import type { TeamWithMembers, TeamMember } from '@/lib/types';
 

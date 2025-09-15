@@ -1,6 +1,5 @@
 
 
-// For a detailed explanation of the data flow, see docs/data-flows/report-section-generation.md
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -15,7 +14,7 @@ import { Project } from '@/lib/models/project';
 
 export function useGenerateReportSection() {
   const { firebaseUser, refetchUser } = useAuth();
-  const { project, setProject } = useBuilderStore(); // Get project and setProject from the main store
+  const { project, updateProject } = useBuilderStore(); // Use updateProject
 
   return useMutation({
     mutationFn: async (variables: { body: any }) => {
@@ -28,11 +27,10 @@ export function useGenerateReportSection() {
       const sectionKey = variables.body.sectionToGenerate as SectionName;
       const content = Object.values(data)[0] as string;
       
-      // Use the Project model's method to update the content
-      project.updateSectionContent(sectionKey, content);
-      
-      // Set the updated project instance back into the store
-      setProject(new Project(project.toStateObject()));
+      // Use the new updater function for safe and centralized state updates
+      updateProject(p => {
+        p.updateSectionContent(sectionKey, content);
+      });
 
       refetchUser(); // To update credits
     },
@@ -45,7 +43,7 @@ export function useGenerateReportSection() {
 
 export function useGenerateFullReport() {
     const { firebaseUser, refetchUser } = useAuth();
-    const { project, setProject } = useBuilderStore();
+    const { project, updateProject } = useBuilderStore(); // Use updateProject
     
     return useMutation({
         mutationFn: async (body: any) => {
@@ -53,14 +51,13 @@ export function useGenerateFullReport() {
             return generateFullReportApi(body, token);
         },
         onSuccess: (data) => {
-            if (!project) return;
-
-            // Update all sections returned from the API
-            Object.keys(data).forEach(key => {
-                project.updateSectionContent(key as SectionName, data[key]);
-            });
-
-            setProject(new Project(project.toStateObject()));
+             if (!project) return;
+             // Use the new updater function
+             updateProject(p => {
+                Object.keys(data).forEach(key => {
+                    p.updateSectionContent(key as SectionName, data[key]);
+                });
+             });
              
              refetchUser();
              toast({ title: "Full Report Generated", description: "All selected sections have been created." });

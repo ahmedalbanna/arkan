@@ -18,7 +18,7 @@ interface GeneratePlanVariables {
 
 export function useGenerateProjectPlan() {
     const { firebaseUser, refetchUser } = useAuth();
-    const { project, setProject } = useBuilderStore();
+    const { updateProject } = useBuilderStore();
 
     return useMutation<ProjectPlan, Error, GeneratePlanVariables>({
         mutationFn: async (variables) => {
@@ -26,9 +26,8 @@ export function useGenerateProjectPlan() {
             return generateProjectPlanApi({ ...variables, token });
         },
         onSuccess: (data) => {
-            if (!project) return;
-            project.setProjectPlan(data);
-            setProject(new Project(project.toStateObject()));
+            // Use the updater function to call the model's method
+            updateProject(p => p.setProjectPlan(data));
 
             refetchUser(); // To update credits
             toast({ title: 'Project Plan Generated', description: 'Your project has been broken down into phases and tasks.' });

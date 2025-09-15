@@ -23,8 +23,7 @@ export interface GenerateProposalBody {
 
 export function useGenerateProposal() {
     const { firebaseUser, refetchUser } = useAuth();
-    const { project, setProject } = useBuilderStore(); // Get project and setProject from the main store
-    const queryClient = useQueryClient();
+    const { updateProject } = useBuilderStore(); // Get the central updater function
 
     return useMutation<any, Error, GenerateProposalBody>({
         mutationFn: async (body) => {
@@ -32,11 +31,12 @@ export function useGenerateProposal() {
             return generateProposalApi({ body, token });
         },
         onSuccess: (data) => {
-            if (!project) return;
-            project.setProposal(data);
-            setProject(new Project(project)); // Update store with new instance
+            // Use the updater function to call the model's method
+            updateProject(p => {
+                p.setProposal(data);
+            });
 
-            refetchUser();
+            refetchUser(); // To update credits
             toast({
                 title: "Proposal Generated",
                 description: "Your project proposal has been successfully created.",

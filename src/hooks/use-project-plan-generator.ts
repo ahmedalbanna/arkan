@@ -13,7 +13,7 @@ export function useProjectPlanGenerator() {
     const { toast } = useToast();
     const { t } = useLocalization();
     const { firebaseUser, userProfile } = useAuth();
-    const { project } = useBuilderStore();
+    const { project } = useBuilderStore(); // Get the whole project object
     const proposal = project?.proposal;
     const projectIdea = project?.projectIdea;
 
@@ -26,7 +26,8 @@ export function useProjectPlanGenerator() {
         // Pre-fill from proposal if available
         if (proposal) {
             setDescription(String((proposal as any).objective) || '');
-            setDeliverables(Array.isArray((proposal as any).expected_outcome) ? (proposal as any).expected_outcome.join('\n') : String((proposal as any).expected_outcome) || '');
+            const outcome = (proposal as any).expected_outcome;
+            setDeliverables(Array.isArray(outcome) ? outcome.join('\n') : String(outcome || ''));
         } else if (projectIdea) {
             setDescription(projectIdea);
         }
@@ -36,11 +37,10 @@ export function useProjectPlanGenerator() {
         mutationFn: async () => {
             if (!proposal) throw new Error("A proposal is required to generate suggestions.");
             const token = await getAuthenticatedToken(firebaseUser);
-            // Assuming summarizeProjectApi is a valid function that calls the right endpoint.
-            // The API it calls seems to be `/api/summarize-project`, which is actually summarizeFullProject.
-            return summarizeProjectApi({ body: { proposal }, token });
+            // This API endpoint is actually `summarizeFullProject` in the backend
+            return summarizeProjectApi({ body: { proposal, reportMarkdown: '' }, token });
         },
-        onSuccess: (data: any) => { // Assuming data has a summary property
+        onSuccess: (data: any) => { 
             const parts = data.summary.split("Key Deliverables:");
             setDescription(parts[0]?.replace('Project Summary:', '').trim() || '');
             setDeliverables(parts[1]?.trim() || '');

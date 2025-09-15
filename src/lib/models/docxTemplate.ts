@@ -1,3 +1,4 @@
+
 import { Template, type BaseTemplateProperties } from './template';
 import type { DocxStyleOptions } from '@/ai/schemas/template-schemas';
 

@@ -5,12 +5,11 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useUpdateDiagram, useSections, useAgentStore } from '@/hooks';
 import { type DiagramType, DiagramTypeSchema } from '@/ai/schemas';
 import { useBuilderStore } from '@/hooks';
-import { Project } from '@/lib/models/project';
 
 export const useDiagramGenerator = () => {
     const { t, locale } = useLocalization();
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
-    const { project, setProject } = useBuilderStore();
+    const { project, updateProject } = useBuilderStore();
     const { data: sectionConfigs, isLoaded: sectionsLoaded } = useSections();
     const getIconComponent = useAgentStore(state => state.getIconComponent);
 
@@ -20,8 +19,9 @@ export const useDiagramGenerator = () => {
         if (!project) return;
         const diagramKey = (Object.keys(diagrams) as DiagramType[]).find(key => diagrams[key]?.plantUmlCode === plantUmlCode);
         if (diagramKey) {
-            project.setDiagram(diagramKey, { ...diagrams[diagramKey]!, plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl, explanation: '' });
-            setProject(new Project(project.toStateObject()));
+            updateProject(p => {
+                p.setDiagram(diagramKey, { ...data, explanation: '' }); // Explanation should be cleared on code update
+            });
         }
     });
 
@@ -41,15 +41,15 @@ export const useDiagramGenerator = () => {
     const generatedDiagrams = useMemo(() => orderedDiagrams.filter(key => diagrams?.[key]), [orderedDiagrams, diagrams]);
 
     const handleDiagramCodeUpdate = (key: DiagramType, code: string) => {
-        if (!project) return;
-        project.updateDiagramCode(key, code);
-        setProject(new Project(project.toStateObject()));
+        updateProject(p => {
+            p.updateDiagramCode(key, code);
+        });
     };
 
     const setDiagramExplanation = (key: DiagramType, explanation: string) => {
-        if (!project) return;
-        project.setDiagramExplanation(key, explanation);
-        setProject(new Project(project.toStateObject()));
+        updateProject(p => {
+            p.setDiagramExplanation(key, explanation);
+        });
     };
 
     return {

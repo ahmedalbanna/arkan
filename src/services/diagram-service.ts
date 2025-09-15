@@ -2,7 +2,7 @@
 
 'use client';
 
-import type { GenerateDiagramOutput } from '@/ai/schemas';
+import type { GenerateDiagramOutput, ImageToTextOutput } from '@/ai/schemas';
 
 /**
  * Calls the API to generate a new diagram.
@@ -41,6 +41,26 @@ export async function updateDiagramApi(plantUmlCode: string, token: string): Pro
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to update diagram');
+    }
+    return await response.json();
+}
+
+
+/**
+ * Calls the API to get an explanation for a diagram image.
+ * @param body - The request body containing the image data URI and a prompt.
+ * @param token - The user's authentication token.
+ * @returns A promise that resolves to the explanation text.
+ */
+export async function explainDiagramApi(body: { imageDataUri: string, prompt: string }, token: string): Promise<ImageToTextOutput> {
+    const response = await fetch('/api/explain-diagram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to explain diagram');
     }
     return await response.json();
 }

@@ -1,3 +1,4 @@
+
 import type { TransactionData } from '@/lib/types';
 
 // The properties are now based on the TransactionData interface

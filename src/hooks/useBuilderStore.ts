@@ -1,4 +1,5 @@
 
+
 // code explantion in docs/hooks/useBuilderStore.md
 
 "use client";
@@ -6,7 +7,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { toast } from "@/hooks";
-import { Project, type ProjectProperties } from "@/lib/models/project"; // NEW: Import our main model
+import { Project, type ProjectProperties } from "@/lib/models/project";
 import type { ProjectState, SavedProject, AnyProjectProposal, ContextFileType } from "@/lib/types";
 
 // The new state is dramatically simplified
@@ -23,7 +24,7 @@ interface BuilderActions {
   setHasUnsavedChanges: (status: boolean) => void;
   getProjectState: () => ProjectState | null;
 
-  // Setters for convenience
+  // Setters for convenience, now using updateProject
   setProjectName: (name: string) => void;
   setProjectIdea: (idea: string) => void;
   setProposal: (proposal: AnyProjectProposal | null) => void;
@@ -68,10 +69,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
 
       // NEW: Centralized update helper
       updateProject: (updater) => {
-        const project = get().project;
-        if (!project) return;
+        const project = get().project ?? new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as ProjectProperties);
         updater(project);
-        get().setProject(new Project(project.toStateObject() as ProjectProperties));
+        get().setProject(new Project(project.toPlainObject() as ProjectProperties));
       },
 
       setHasUnsavedChanges: (status) => set({ hasUnsavedChanges: status }),
@@ -82,37 +82,21 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
 
       // --- Actions that modify the project instance ---
       setProjectName: (name) => {
-        const project = get().project;
-        if (!project) return;
-        project.name = name;
-        // Create a new instance to trigger re-render
-        get().setProject(new Project(project.toStateObject() as ProjectProperties));
+        get().updateProject(p => { p.name = name; });
       },
 
       setProjectIdea: (idea) => {
-        const currentProject = get().project;
-        // If there's no project, create a new one to hold the idea
-        const project = currentProject ?? new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as ProjectProperties);
-        project.projectIdea = idea;
-        get().setProject(new Project(project.toStateObject() as ProjectProperties));
+         get().updateProject(p => { p.projectIdea = idea; });
       },
 
       setProposal: (proposal) => {
-        const project = get().project;
-        if (!project) return;
-        project.setProposal(proposal);
-        get().setProject(new Project(project.toStateObject() as ProjectProperties));
+         get().updateProject(p => { p.setProposal(proposal); });
       },
       addExternalContext: (fileName, content, type) => {
-        const project = get().project ?? new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as ProjectProperties);
-        project.addExternalContext(fileName, content, type);
-        get().setProject(new Project(project.toStateObject() as ProjectProperties));
+         get().updateProject(p => { p.addExternalContext(fileName, content, type); });
       },
       removeExternalContext: (index) => {
-        const project = get().project;
-        if (!project) return;
-        project.removeExternalContext(index);
-        get().setProject(new Project(project.toStateObject() as ProjectProperties));
+         get().updateProject(p => { p.removeExternalContext(index); });
       },
     }),
     {
@@ -121,7 +105,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
 
       // Persist the plain object version of the project
       partialize: (state) => ({
-        project: state.project?.toStateObject(),
+        project: state.project?.toPlainObject(),
       }),
 
       // On rehydration, create a new Project instance from the persisted plain object
