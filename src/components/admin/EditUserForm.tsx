@@ -191,7 +191,7 @@ export default function EditUserForm({ user }: { user: User }) {
                 <div className="flex flex-col items-center gap-4">
                     <Avatar className="h-32 w-32 border-4 border-primary/20">
                         <AvatarImage src={previewImageUrl || undefined} alt={user.name} />
-                        <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback className="text-4xl">{user.getInitials()}</AvatarFallback>
                     </Avatar>
                     <div className="flex gap-2">
                         <Button asChild variant="outline">
