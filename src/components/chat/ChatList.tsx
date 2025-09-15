@@ -23,7 +23,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAgents } from '@/hooks';
 import { useNewChatDialog } from '@/hooks/use-new-chat-dialog';
-import { Agent } from '@/lib/models/agent';
+import { Agent, type AgentProperties } from '@/lib/models/agent';
 import { Chat } from '@/lib/models/chat';
 
 
@@ -68,15 +68,15 @@ function NewChatDialog() {
                         <CommandEmpty>No users found.</CommandEmpty>
                         <CommandGroup>
                             {usersLoading && !allUsers.length && <CommandItem><Loader2 className="me-2 h-4 w-4 animate-spin" />Loading users...</CommandItem>}
-                            {allUsers?.map((user: UserProfile) => (
-                                <CommandItem key={user.id} onSelect={() => onSelectUser(user)} disabled={isCreating}>
+                            {allUsers?.map((user: AgentProperties) => (
+                                <CommandItem key={user.id} onSelect={() => onSelectUser(user as UserProfile)} disabled={isCreating}>
                                     <Avatar className="me-2 h-6 w-6">
-                                        <AvatarImage src={user.profilePictureUrl}/>
+                                        <AvatarImage src={(user as any).profilePictureUrl}/>
                                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                     <div className="flex-grow">
                                         <span>{user.name}</span>
-                                        <span className="text-xs text-muted-foreground ml-2">{user.email}</span>
+                                        <span className="text-xs text-muted-foreground ml-2">{(user as any).email}</span>
                                     </div>
                                     {isCreating && <Loader2 className="h-4 w-4 animate-spin" />}
                                 </CommandItem>

@@ -27,7 +27,7 @@ export interface UserListResponse {
  * This is a public endpoint used to initiate support chats.
  * @returns A promise that resolves to an array of admin UserProfile objects.
  */
-export async function fetchAdmins(): Promise<UserProfile[]> {
+export async function fetchAdminsApi(): Promise<UserProfile[]> {
     const response = await fetch('/api/admins');
     if (!response.ok) {
         throw new Error('Failed to fetch admins');
@@ -41,7 +41,7 @@ export async function fetchAdmins(): Promise<UserProfile[]> {
  * @param token The admin user's authentication token.
  * @returns A promise that resolves to an array of UserProfile objects.
  */
-export async function fetchUsers(limit: number, lastVisibleId: string | undefined, token: string): Promise<UserListResponse> {
+export async function fetchUsersApi(limit: number, lastVisibleId: string | undefined, token: string): Promise<UserListResponse> {
     const params = new URLSearchParams({ limit: String(limit) });
     if (lastVisibleId) {
         params.append('lastVisibleId', lastVisibleId);
@@ -157,7 +157,7 @@ export async function serviceSignupUser(credentials: SignupCredentials) {
   return response.json();
 }
 
-export async function createUserService(data: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'> & { password?: string }, token: string) {
+export async function createUserService(data: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt' | 'hasCompletedOnboarding'> & { password?: string }, token: string) {
     const response = await fetch('/api/admin/users', {
         method: 'POST',
         headers: {

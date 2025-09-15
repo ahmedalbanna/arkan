@@ -46,3 +46,6 @@ firestore-debug.log
 sqlite.db
 database-debug.log
 database-debug.log
+
+dataconnect-generated
+dataconnect

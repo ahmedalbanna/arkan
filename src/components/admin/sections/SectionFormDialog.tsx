@@ -21,7 +21,7 @@ import { z } from 'zod';
 import { useCreateSection, useUpdateSection } from '@/hooks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAgents } from '@/hooks';
-import { SectionProperties } from '@/lib/models/section';
+import { Section, type SectionProperties } from '@/lib/models/section';
 
 const SectionSchema = z.object({
   id: z.string().min(3, 'ID must be at least 3 characters').regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'ID must be lowercase and kebab-case.'),
@@ -34,7 +34,7 @@ const SectionSchema = z.object({
 type SectionFormData = z.infer<typeof SectionSchema>;
 
 interface SectionFormDialogProps {
-  sectionToEdit?: SectionProperties;
+  sectionToEdit?: Section;
   children?: React.ReactNode;
 }
 

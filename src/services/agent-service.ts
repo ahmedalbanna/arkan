@@ -1,10 +1,11 @@
 
 'use client';
 
-import type { UpdateAgentVariables, CreateAgentVariables, AgentCategory } from '@/hooks';
+import type { UpdateAgentVariables, CreateAgentVariables } from '@/hooks';
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
-import { Agent } from '@/lib/types';
 import { GenerateAgentConfigOutput } from '@/ai/schemas';
+import type { Agent, AgentCategory } from '@/lib/types';
+
 
 /**
  * Fetches the full list of agent categories from the API.
@@ -129,7 +130,7 @@ export async function createAgentApi(data: CreateAgentVariables, token: string):
         // Throwing it allows useMutation's onError to catch it.
         throw error;
     }
-    return response.json();
+    return await response.json();
 }
 
 

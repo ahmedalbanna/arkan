@@ -25,10 +25,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { SectionProperties } from '@/lib/models/section';
+import { Section } from '@/lib/models/section';
 
 interface SectionActionsProps {
-  section: SectionProperties;
+  section: Section;
 }
 
 export function SectionActions({ section }: SectionActionsProps) {

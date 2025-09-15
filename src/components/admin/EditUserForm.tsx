@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, use, useActionState, useState } from 'react';
@@ -110,7 +111,7 @@ export default function EditUserForm({ user }: { user: User }) {
       toast({ title: t('editUser.successToastTitle'), description: updateState.message });
     }
     // Check if updateState.errors exists and has the _form property
-    if (updateState.errors && '_form' in updateState.errors) {
+    if (updateState.errors && '_form' in updateState.errors && typeof updateState.errors._form === 'string') {
       toast({ title: t('editUser.errorToastTitle'), description: updateState.errors._form, variant: 'destructive' });
     }
   }, [updateState, t, toast]);

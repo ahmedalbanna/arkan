@@ -37,7 +37,7 @@ export interface UpdateAgentVariables {
 
 // The original Agent type from types.ts is used here for the creation payload.
 // This is fine, as the API expects a plain object.
-export type CreateAgentVariables = Omit<import('@/lib/types').Agent, 'isEnabled' | 'category'> & { category: string; knowledge?: AgentKnowledgeSource[] };
+export type CreateAgentVariables = Omit<import('@/lib/types').Agent, 'isEnabled' | 'category' | 'id'> & { id: string, category: string; knowledge?: AgentKnowledgeSource[] };
 
 
 
@@ -48,7 +48,7 @@ export type CreateAgentVariables = Omit<import('@/lib/types').Agent, 'isEnabled'
 export function useAgentCategories() {
   const { firebaseUser } = useAuth();
 
-  return useQuery<AgentCategory[]>({
+  return useQuery<import('@/lib/types').AgentCategory[]>({
     queryKey: categoryKeys.lists(),
     queryFn: async () => {
       const token = await getAuthenticatedToken(firebaseUser);
@@ -69,7 +69,7 @@ export function useCreateAgentCategory() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
 
-  return useMutation<AgentCategory, Error, { id: string; name: string }>({
+  return useMutation<import('@/lib/types').AgentCategory, Error, { id: string; name: string }>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return createAgentCategoryApi(variables, token);
@@ -222,7 +222,7 @@ export function useCreateAgent() {
             const tempAgent: AgentWithComponent = {
                 ...newAgent,
                 isEnabled: true, // Assume enabled on creation
-                iconComponent: getIconComponent(newAgent.icon) || FileText,
+                iconComponent: getIconComponent(newAgent.icon || 'FileText') || FileText,
             };
 
             // Optimistically update the store

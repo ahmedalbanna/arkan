@@ -1,3 +1,4 @@
+
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal, ProjectPlan } from '@/ai/schemas';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { PptxTemplateSchema, ProposalTemplateSchema, ReportGenerationTemplateSchema, PresentationGenerationTemplateSchema, DocxStyleOptionsSchema } from '@/ai/schemas/template-schemas';
@@ -129,6 +130,7 @@ export enum AgentCategory {
 }
 
 export interface AgentCategoryDetails {
+  id: string;
   name: string;
   icon: LucideIcon;
   description: string;
@@ -172,11 +174,8 @@ export interface Agent{
   language?: string;
   model?: string;
   isDefault?: boolean;
-  icon?: LucideIcon;
+  icon?: string;
   iconComponent?: LucideIcon;
-  updatePrompt(newPrompt: AgentPrompt | string): void;
-  execute(context: any): Promise<any>;
-  toggleEnabled(): void;
 }
 export type { Notification } from '@/hooks/use-notifications';
 export type { Feature, UpdateFeatureVariables } from "@/hooks";

@@ -2,7 +2,7 @@
 'use client';
 
 import type { ChatSession } from "@/hooks";
-import { Agent } from '@/hooks';
+import { AgentProperties } from '@/lib/models/agent';
 
 
 interface CreateConversationData {
@@ -10,7 +10,7 @@ interface CreateConversationData {
     participantNames: Record<string, string>;
     title?: string;
     isSupportChat?: boolean;
-    agent?: Agent;
+    agent?: AgentProperties;
 }
 
 export async function createConversationApi(data: CreateConversationData, token: string): Promise<ChatSession> {

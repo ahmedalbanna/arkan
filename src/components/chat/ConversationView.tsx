@@ -12,7 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { RawChatMessage, RawChatSession } from '@/hooks/useChatStore';
-import { getDatabase, ref, onValue, off, push, serverTimestamp, update } from 'firebase/database';
+import { getDatabase, ref, onValue, off, push, serverTimestamp, update, query, orderByChild } from 'firebase/database';
 import { useAgentChat } from '@/hooks';
 import { Chat } from '@/lib/models/chat';
 import { ChatMessage, type ChatMessageProperties } from '@/lib/models/chatMessage';
@@ -51,7 +51,7 @@ export function ConversationView({ chat }: { chat: Chat | null }) {
     }
 
     const db = getDatabase();
-    const messagesRef = ref(db, `conversations/${chat.id}/messages`);
+    const messagesRef = query(ref(db, `messages/${chat.id}`), orderByChild('timestamp'));
     
     const listener = onValue(messagesRef, (snapshot) => {
         const messagesData = snapshot.val();
@@ -59,8 +59,6 @@ export function ConversationView({ chat }: { chat: Chat | null }) {
             const messagesList = Object.entries(messagesData).map(([id, msgData]) => {
                 return new ChatMessage({ id, ...(msgData as Omit<ChatMessageProperties, 'id'>) });
             });
-            // Sort messages by timestamp before setting
-            messagesList.sort((a, b) => a.timestamp - b.timestamp);
             setMessages(messagesList);
         } else {
             setMessages([]);

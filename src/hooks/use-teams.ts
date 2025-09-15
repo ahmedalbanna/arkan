@@ -13,7 +13,7 @@ import {
     fetchUserTeams,
 } from '@/services';
 // Import the plain object type for API responses
-import type { Team as TeamType, TeamWithMembers } from '@/lib/types'; 
+import type { TeamWithMembers } from '@/services'; 
 // Import our new class
 import { Team, type TeamProperties } from '@/lib/models/team'; 
 
@@ -51,7 +51,7 @@ export function useCreateTeam() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
 
-    return useMutation<TeamType, Error, { name: string }>({
+    return useMutation<TeamProperties, Error, { name: string }>({
         mutationFn: async (variables) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return createTeamApi({ ...variables, token });

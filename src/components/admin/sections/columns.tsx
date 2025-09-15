@@ -6,9 +6,9 @@ import { useAgentStore } from '@/hooks'; // Import from hooks
 import { Badge } from '@/components/ui/badge';
 import { SectionActions } from './SectionActions';
 import { GitGraph } from 'lucide-react';
-import { SectionProperties } from '@/lib/models/section';
+import { Section } from '@/lib/models/section';
 
-export const columns: ColumnDef<SectionProperties>[] = [
+export const columns: ColumnDef<Section>[] = [
   {
     accessorKey: 'icon',
     header: 'Icon',

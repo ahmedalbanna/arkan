@@ -1,11 +1,10 @@
 
-
 // code explantion in docs/hooks/use-user.md
 
 "use client";
 
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
-import { userKeys } from "@/lib/query-keys";
+import { userKeys } from '@/lib/query-keys';
 import type { UserProfile, PricingPlan } from '@/lib/types';
 import { toast } from "@/hooks";
 import { useRouter } from "next/navigation";
@@ -18,12 +17,12 @@ import {
   signInWithPopup,
   RecaptchaVerifier,
   signInWithPhoneNumber,
-  ConfirmationResult,
+  type ConfirmationResult,
 } from "firebase/auth";
 import type { SignupCredentials } from "@/components/auth/SignupForm";
 import { getFirestore, doc, onSnapshot, setDoc } from "firebase/firestore";
 import {
-  fetchUsers as fetchUsersApi,
+  fetchUsersApi,
   subscribeToUserProfile,
   createUserService,
   loginWithEmail,
@@ -35,7 +34,7 @@ import {
   forgotPasswordService,
   purchaseCreditsApi,
   type UserListResponse,
-  fetchAdmins as fetchAdminsApi,
+  fetchAdminsApi,
 } from "@/services";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useCallback, useEffect } from "react";
@@ -91,6 +90,7 @@ export function useAdmins() {
     },
     // NEW: Transform the data into User instances
     select: (data: UserProfile[]): User[] => {
+        if (!data) return [];
         return data.map(u => new User(u as UserProperties));
     }
   });

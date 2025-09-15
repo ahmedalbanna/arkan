@@ -1,9 +1,10 @@
 
 'use client';
 
-import { Team, TeamMember } from '@/lib/types';
+import { TeamMember } from '@/lib/types';
+import { TeamProperties } from '@/lib/models/team';
 
-export interface TeamWithMembers extends Team {
+export interface TeamWithMembers extends TeamProperties {
     members: TeamMember[];
 }
 
@@ -20,7 +21,7 @@ export async function fetchUserTeams(token: string): Promise<TeamWithMembers[]> 
     return await response.json();
 }
 
-export async function createTeam({ name, token }: { name: string, token: string }): Promise<Team> {
+export async function createTeam({ name, token }: { name: string, token: string }): Promise<TeamProperties> {
     if (!token) throw new Error('User not authenticated');
 
     const response = await fetch('/api/teams', {

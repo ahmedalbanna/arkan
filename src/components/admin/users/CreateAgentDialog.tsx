@@ -74,7 +74,7 @@ export function CreateAgentDialog() {
                          <FormField control={form.control} name="prompt" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>{t('agentManager.createDialog.promptLabel')}</FormLabel>
-                                <FormControl><Textarea {...field} rows={5} className="font-mono text-xs" disabled={mutation.isPending} /></FormControl>
+                                <FormControl><Textarea {...field} value={field.value as string} rows={5} className="font-mono text-xs" disabled={mutation.isPending} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
