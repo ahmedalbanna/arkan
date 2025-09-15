@@ -1,16 +1,15 @@
 
 'use client';
 
-import { useCreateDocxTemplate } from '@/hooks';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Save, PlusCircle, Trash2, RefreshCw } from 'lucide-react';
-import type { DocxTemplate, DocxTemplateKey  } from '@/lib/types';
+import type { DocxTemplate, DocxTemplateKey } from '@/lib/types';
 import { Accordion } from '@/components/ui/accordion';
-import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogFooter } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';import { useState } from 'react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,8 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import componentStyles from './DocxTemplateManager.module.css';
 import { StyleEditor } from '@/components/design/StyleEditor';
-import { useDocxTemplateManager } from '@/hooks';
-
+import { useDocxTemplateManager, useCreateDocxTemplate } from '@/hooks';
 
 const createDocxTemplateSchema = z.object({
   id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID can only contain lowercase letters, numbers, and hyphens."),
@@ -29,9 +27,8 @@ const createDocxTemplateSchema = z.object({
 });
 type CreateDocxTemplateValues = z.infer<typeof createDocxTemplateSchema>;
 
-
 function CreateTemplateDialog() {
-    const { t } = useLocalization();
+    const { t } = useDocxTemplateManager();
     const [isOpen, setIsOpen] = useState(false);
     const createMutation = useCreateDocxTemplate();
 
@@ -161,8 +158,8 @@ function TemplatePreview({ styles }: { styles: any }) {
 }
 
 export default function DocxTemplateManager() {
-  const { t } = useLocalization();
   const {
+    t,
     templates,
     isLoaded,
     isSaving,
@@ -190,7 +187,7 @@ export default function DocxTemplateManager() {
         <CreateTemplateDialog />
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {(Object.keys(templates || {}) as DocxTemplateKey []).map((key) => {
+      {(Object.keys(templates || {}) as DocxTemplateKey[]).map((key) => {
         const template = templates?.[key];
         if (!template) return null;
         const isDefaultTemplate = ['modern', 'classic', 'academic'].includes(key);
@@ -242,10 +239,10 @@ export default function DocxTemplateManager() {
                     </Button>
                 </div>
               <Accordion type="multiple" className="w-full" defaultValue={['general', 'heading1']}>
-                  <StyleEditor heading="General Document Styles" styleKey="document" DocxTemplateKey ={key} onChange={handleStyleChange} styles={template.styles} />
-                  <StyleEditor heading="Heading 1" styleKey="heading1" DocxTemplateKey ={key} onChange={handleStyleChange} styles={template.styles} />
-                  <StyleEditor heading="Heading 2" styleKey="heading2" DocxTemplateKey ={key} onChange={handleStyleChange} styles={template.styles} />
-                  <StyleEditor heading="Heading 3" styleKey="heading3" DocxTemplateKey ={key} onChange={handleStyleChange} styles={template.styles} />
+                  <StyleEditor heading="General Document Styles" styleKey="document" DocxTemplateKey={key} styles={template.styles} onChange={handleStyleChange} />
+                  <StyleEditor heading="Heading 1" styleKey="heading1" DocxTemplateKey={key} styles={template.styles} onChange={handleStyleChange} />
+                  <StyleEditor heading="Heading 2" styleKey="heading2" DocxTemplateKey={key} styles={template.styles} onChange={handleStyleChange} />
+                  <StyleEditor heading="Heading 3" styleKey="heading3" DocxTemplateKey={key} styles={template.styles} onChange={handleStyleChange} />
               </Accordion>
             </CardContent>
             <CardFooter>

@@ -2,8 +2,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useDocxStyles, useDeleteDocxTemplate, useRefreshTemplateImage } from '@/hooks';
+import { useDocxStyles, useDeleteDocxTemplate } from '@/hooks';
 import type { DocxTemplateKey } from '@/lib/types';
+import { useMutation } from '@tanstack/react-query';
+import { getAuthenticatedToken } from '@/lib/authUtils';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from './use-toast';
+import { useRefreshTemplateImage } from './use-templates';
 import { useLocalization } from '@/context/LocalizationContext';
 
 export function useDocxTemplateManager() {
@@ -51,7 +56,7 @@ export function useDocxTemplateManager() {
     isLoaded,
     isSaving,
     deleteMutation,
-    refreshImageMutation, // This was missing from the return object.
+    refreshImageMutation,
     handleStyleChange,
     handleSave,
     handleDelete,

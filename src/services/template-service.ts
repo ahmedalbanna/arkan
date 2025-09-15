@@ -72,7 +72,7 @@ export async function fetchReportTemplates(token: string): Promise<ReportGenerat
     return await response.json();
 }
 
-export async function createReportTemplate(data: Omit<ReportGenerationTemplate, 'createdAt'> & {id: string}, token: string): Promise<ReportGenerationTemplate> {
+export async function createReportTemplate(data: Omit<ReportGenerationTemplate, 'isDefault' | 'createdAt'> & {id: string}, token: string): Promise<ReportGenerationTemplate> {
      const response = await fetch('/api/admin/templates/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -170,7 +170,7 @@ export async function deletePresentationTemplate(id: string, token: string): Pro
 // --- DOCX Templates ---
 
 export async function fetchDocxTemplates(): Promise<DocxTemplatesRecord> {
-  const response = await fetch("/api/templates/docx");
+  const response = await fetch("/api/admin/templates/docx");
   if (!response.ok) {
     throw new Error("Failed to fetch DOCX templates");
   }
@@ -226,7 +226,7 @@ export async function deleteDocxTemplate(key: string, token: string): Promise<{ 
 // --- PPTX Templates ---
 
 export async function fetchPptxTemplates(): Promise<Record<string, PptxTemplate>> {
-  const response = await fetch("/api/templates/pptx");
+  const response = await fetch("/api/admin/templates/pptx");
   if (!response.ok) {
     throw new Error("Failed to fetch PPTX templates");
   }
