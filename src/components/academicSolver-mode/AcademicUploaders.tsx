@@ -1,22 +1,19 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UploadCloud, FileText, X } from 'lucide-react';
-import { useDropzone } from 'react-dropzone';
+import { X, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/context/AuthContext';
-import { Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { FileUploadZone } from './FileUploadZone';
 import type { ExternalContext } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
-import { processFileApi } from '@/services'; // Still needed for text files if we want that flow, but we will bypass for now.
 
 interface AcademicUploadersProps {
     title: string;
@@ -24,63 +21,11 @@ interface AcademicUploadersProps {
     onContentRemoved: (index: number) => void;
     isProcessing: boolean;
     uploadedContent: ExternalContext[];
-    isContext?: boolean; // Flag to differentiate between question and context documents
 }
 
-/**
- * Converts a File object to a data URI string.
- * @param file The file to convert.
- * @returns A promise that resolves with the data URI.
- */
-function fileToDataUrl(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = error => reject(error);
-        reader.readAsDataURL(file);
-    });
-}
-
-
-export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isProcessing, uploadedContent, isContext = false }: AcademicUploadersProps) => {
+export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isProcessing, uploadedContent }: AcademicUploadersProps) => {
     const { toast } = useToast();
-    const [isLoading, setIsLoading] = useState(false);
     const { t } = useLocalization();
-
-    const onDrop = useCallback(async (acceptedFiles: File[]) => {
-        setIsLoading(true);
-        for (const file of acceptedFiles) {
-             try {
-                // For PDF and images, we just need the data URI. For text, we read it.
-                if (file.type.startsWith('image/') || file.type === 'application/pdf') {
-                    const dataUrl = await fileToDataUrl(file);
-                    onContentAdded(file.name, dataUrl);
-                } else {
-                    const textContent = await file.text();
-                    onContentAdded(file.name, textContent);
-                }
-                toast({ title: t('builder.academicSolver.toasts.fileAdded'), description: t('builder.academicSolver.toasts.fileAddedDesc').replace('{fileName}', file.name) });
-
-            } catch (error: any) {
-                toast({ title: t('builder.academicSolver.toasts.uploadFailed'), description: error.message, variant: "destructive" });
-            }
-        }
-        setIsLoading(false);
-    }, [onContentAdded, toast, t]);
-
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        onDrop,
-        multiple: true,
-        accept: {
-            'application/pdf': ['.pdf'],
-            'image/jpeg': ['.jpeg', '.jpg'],
-            'image/png': ['.png'],
-            'image/webp': ['.webp'],
-            'text/plain': ['.txt'],
-            'text/markdown': ['.md'],
-        }
-    });
-
     const [pastedText, setPastedText] = useState('');
     const [pastedTitle, setPastedTitle] = useState('');
 
@@ -92,6 +37,7 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
         onContentAdded(`${pastedTitle}.md`, pastedText);
         setPastedText('');
         setPastedTitle('');
+        toast({ title: t('builder.academicSolver.toasts.contextAddedToastTitle'), description: t('builder.academicSolver.toasts.contextAddedToastDesc').replace('{fileName}', `${pastedTitle}.md`) });
     };
 
     return (
@@ -106,11 +52,7 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
                         <TabsTrigger value="paste">{t('builder.academicSolver.uploaders.pasteText')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="upload" className="mt-4">
-                        <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer ${isDragActive ? 'border-primary' : ''}`}>
-                            <input {...getInputProps()} />
-                            <UploadCloud className="mx-auto h-8 w-8 text-muted-foreground" />
-                            <p className="mt-2 text-sm text-muted-foreground">{isDragActive ? t('builder.academicSolver.toasts.dropHere') : t('builder.academicSolver.uploaders.dropzoneHint')}</p>
-                        </div>
+                        <FileUploadZone onFileAdded={onContentAdded} />
                     </TabsContent>
                     <TabsContent value="paste" className="mt-4 space-y-2">
                         <Label htmlFor="paste-title">{t('builder.academicSolver.uploaders.pasteTitle')}</Label>
@@ -121,7 +63,7 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
                     </TabsContent>
                 </Tabs>
 
-                {(isLoading || isProcessing) && <div className="flex justify-center mt-2"><Loader2 className="h-5 w-5 animate-spin" /></div>}
+                {isProcessing && <div className="flex justify-center mt-2"><Loader2 className="h-5 w-5 animate-spin" /></div>}
 
                 {uploadedContent.length > 0 && (
                     <div className="mt-4 space-y-2">

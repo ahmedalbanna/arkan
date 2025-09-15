@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -81,7 +82,6 @@ export function ControlPanel({
                     onContentRemoved={removeQuestionDocument}
                     isProcessing={isProcessing}
                     uploadedContent={questionDocuments}
-                    isContext={false}
                 />
 
                 <AcademicUploaders
@@ -90,7 +90,6 @@ export function ControlPanel({
                     onContentRemoved={removeExternalContext}
                     isProcessing={isProcessing}
                     uploadedContent={externalContext}
-                    isContext
                 />
 
                 <Button onClick={handleAnalyze} disabled={!canAnalyze} className="w-full">

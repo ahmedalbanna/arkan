@@ -8,9 +8,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { useAnalyzeAcademicDocument, useSolveAcademicDocument } from '@/hooks';
 import { exportDocumentAsDocx } from '@/lib/academic-exporter';
-import { AnalyzedDocument, SolvedDocument, AcademicDocumentType } from '@/ai/schemas';
-import { AcademicSolverStage } from '@/lib/types';
-import { Project } from '@/lib/models/project';
+import { AcademicDocumentType } from '@/ai/schemas';
 
 export interface ExternalContext {
   fileName: string;
@@ -27,10 +25,7 @@ export function useAcademicSolverLogic() {
     const { firebaseUser, userProfile } = useAuth();
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
-    // Get project and the central updater function from useBuilderStore
     const { project, updateProject } = useBuilderStore();
-
-    // The entire academicSolver state is now derived directly from the project model
     const academicSolverState = project?.academicSolver;
 
     const [currentPage, setCurrentPage] = useState(0);
@@ -38,7 +33,6 @@ export function useAcademicSolverLogic() {
     const analyzeMutation = useAnalyzeAcademicDocument();
     const solveMutation = useSolveAcademicDocument();
 
-    // Reset to first page when content changes
     useEffect(() => {
         setCurrentPage(0);
     }, [academicSolverState?.analyzedDocument, academicSolverState?.solvedDocument]);
@@ -51,7 +45,7 @@ export function useAcademicSolverLogic() {
             toast({ title: t('builder.academicSolver.toasts.analysisError'), description: t('builder.academicSolver.toasts.analysisErrorDesc'), variant: 'destructive' });
             return;
         }
-        
+
         updateProject(p => p.setAcademicSolverStage('analyzing'));
 
         const combinedQuestionContent = academicSolverState.questionDocuments.map(doc => `--- Content from: ${doc.fileName} ---\n${doc.content}`).join('\n\n');
@@ -116,14 +110,6 @@ export function useAcademicSolverLogic() {
         }
     };
 
-    // Use the central `updateProject` helper to call methods on the Project model
-    const setDocumentType = (newType: AcademicDocumentType | null) => updateProject(p => p.setAcademicSolverDocumentType(newType));
-    const addQuestionDocument = (fileName: string, content: string) => updateProject(p => p.addAcademicSolverQuestionDocument(fileName, content));
-    const removeQuestionDocument = (index: number) => updateProject(p => p.removeAcademicSolverQuestionDocument(index));
-    const addExternalContext = (fileName: string, content: string) => updateProject(p => p.addAcademicSolverExternalContext(fileName, content));
-    const removeExternalContext = (index: number) => updateProject(p => p.removeAcademicSolverExternalContext(index));
-    const resetCurrent = () => updateProject(p => p.resetAcademicSolver());
-
     return {
         t,
         locale,
@@ -135,12 +121,12 @@ export function useAcademicSolverLogic() {
         solvedDocument: academicSolverState?.solvedDocument || null,
         questionDocuments: academicSolverState?.questionDocuments || [],
         externalContext: academicSolverState?.externalContext || [],
-        setDocumentType,
-        addQuestionDocument,
-        removeQuestionDocument,
-        addExternalContext,
-        removeExternalContext,
-        resetCurrent,
+        setDocumentType: (newType: AcademicDocumentType | null) => updateProject(p => p.setAcademicSolverDocumentType(newType)),
+        addQuestionDocument: (fileName: string, content: string) => updateProject(p => p.addAcademicSolverQuestionDocument(fileName, content)),
+        removeQuestionDocument: (index: number) => updateProject(p => p.removeAcademicSolverQuestionDocument(index)),
+        addExternalContext: (fileName: string, content: string) => updateProject(p => p.addAcademicSolverExternalContext(fileName, content)),
+        removeExternalContext: (index: number) => updateProject(p => p.removeAcademicSolverExternalContext(index)),
+        resetCurrent: () => updateProject(p => p.resetAcademicSolver()),
         currentPage,
         analyzeMutation,
         solveMutation,
