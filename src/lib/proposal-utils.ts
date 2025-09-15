@@ -4,6 +4,10 @@ export const hasContent = (value: any): boolean => {
     if (typeof value === 'string' && value.trim() === '') return false;
     if (Array.isArray(value) && value.length === 0) return false;
     if (typeof value === 'object' && Object.keys(value).length === 0) return false;
+    // Check if an object's properties are all empty
+    if (typeof value === 'object' && !Array.isArray(value)) {
+        return Object.values(value).some(hasContent);
+    }
     return true;
 };
 

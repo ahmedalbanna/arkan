@@ -1,12 +1,9 @@
-
-
 'use client';
 
 import React, { useMemo } from 'react';
 import { type ProjectProposal, ProjectProposalSchema } from '@/ai/schemas';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { useLocalization } from '@/context/LocalizationContext';
 import { cn } from '@/lib/utils';
 import remarkGfm from 'remark-gfm';
 import { hasContent, formatKeyToTitle } from '@/lib/proposal-utils';
