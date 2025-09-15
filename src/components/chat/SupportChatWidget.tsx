@@ -59,16 +59,16 @@ export default function SupportChatWidget() {
       isChatOpen,
       closeChat,
       toggleChat,
-      selectedChat,
-      setSelectedChat,
-      getChats,
+      getSelectedChat,
+      setSelectedChatId,
+      chats,
       createConversation,
       initialize,
       isInitialized,
       addMessage,
       unreadCounts,
     } = useChatStore();
-    const chats = getChats();
+    const selectedChat = getSelectedChat();
     const { firebaseUser, userProfile } = useAuth();
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<any[]>([]);
@@ -115,7 +115,7 @@ export default function SupportChatWidget() {
     const handleToggleChat = () => {
         if (!isChatOpen && !selectedChat) {
             const latestSupportChat = chats.find(c => c.isSupportChat) || null;
-            setSelectedChat(latestSupportChat?.toPlainObject() ?? null);
+            setSelectedChatId(latestSupportChat?.id ?? null);
         }
         toggleChat();
     }
@@ -207,7 +207,7 @@ export default function SupportChatWidget() {
                                 <DropdownMenuLabel>Support Chats</DropdownMenuLabel>
                                 <DropdownMenuSeparator/>
                                 {chats.filter(c => c.isSupportChat).map(chat => (
-                                    <DropdownMenuItem key={chat.id} onSelect={() => setSelectedChat(chat.toPlainObject())}>
+                                    <DropdownMenuItem key={chat.id} onSelect={() => setSelectedChatId(chat.id)}>
                                         {chat.title}
                                     </DropdownMenuItem>
                                 ))}

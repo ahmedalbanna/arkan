@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -29,8 +28,8 @@ import { Chat } from '@/lib/models/chat';
 
 interface ChatListProps {
   agents: Agent[];
-  liveChats: Chat[];
-  selectedChat: Chat | null;
+  liveChats: Chat[]; // Now expects Chat[]
+  selectedChat: Chat | null; // Now expects Chat | null
   onSelectChat: (chat: Chat) => void;
   onSelectAgent: (agent: Agent) => void;
 }
@@ -68,15 +67,15 @@ function NewChatDialog() {
                         <CommandEmpty>No users found.</CommandEmpty>
                         <CommandGroup>
                             {usersLoading && !allUsers.length && <CommandItem><Loader2 className="me-2 h-4 w-4 animate-spin" />Loading users...</CommandItem>}
-                            {allUsers?.map((user: AgentProperties) => (
-                                <CommandItem key={user.id} onSelect={() => onSelectUser(user as UserProfile)} disabled={isCreating}>
+                            {allUsers?.map((user) => (
+                                <CommandItem key={user.id} onSelect={() => onSelectUser(user)} disabled={isCreating}>
                                     <Avatar className="me-2 h-6 w-6">
-                                        <AvatarImage src={(user as any).profilePictureUrl}/>
-                                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                        <AvatarImage src={user.profilePictureUrl}/>
+                                        <AvatarFallback>{user.getInitials()}</AvatarFallback>
                                     </Avatar>
                                     <div className="flex-grow">
                                         <span>{user.name}</span>
-                                        <span className="text-xs text-muted-foreground ml-2">{(user as any).email}</span>
+                                        <span className="text-xs text-muted-foreground ml-2">{user.email}</span>
                                     </div>
                                     {isCreating && <Loader2 className="h-4 w-4 animate-spin" />}
                                 </CommandItem>
@@ -113,7 +112,7 @@ function LiveChatListItem({ chat, isSelected, onSelect }: { chat: Chat, isSelect
             </div>
             {chat.lastMessageTimestamp && (
                  <p className="text-xs text-muted-foreground self-start shrink-0">
-                    {formatDistanceToNow(new Date(chat.lastMessageTimestamp), { addSuffix: true })}
+                    {formatDistanceToNow(chat.lastMessageDate, { addSuffix: true })}
                 </p>
             )}
         </button>

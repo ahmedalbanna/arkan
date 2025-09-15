@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect } from 'react';
@@ -13,15 +12,15 @@ import { Chat } from '@/lib/models/chat';
 export function useChatInterface() {
   const { agents } = useAgents();
   const {
+    chats, // This is now Chat[]
     getSelectedChat,
-    setSelectedChat,
-    getChats,
+    setSelectedChatId,
     createConversation,
     initialize,
     isInitialized
   } = useChatStore();
-  const chats = getChats();
-  const selectedChat = getSelectedChat();
+  
+  const selectedChat = getSelectedChat(); // This is now a Chat instance or null
   const { firebaseUser, userProfile } = useAuth();
 
   useEffect(() => {
@@ -33,12 +32,12 @@ export function useChatInterface() {
   // Effect to select the first chat once loaded, if none is selected
   useEffect(() => {
     if (!selectedChat && chats.length > 0) {
-      setSelectedChat(chats[0].toPlainObject());
+      setSelectedChatId(chats[0].id);
     }
-  }, [chats, selectedChat, setSelectedChat]);
+  }, [chats, selectedChat, setSelectedChatId]);
 
-  const handleSelectChat = (chat: any) => {
-    setSelectedChat(chat.toPlainObject());
+  const handleSelectChat = (chat: Chat) => { // Expect a Chat instance
+    setSelectedChatId(chat.id);
   }
 
   const handleSelectAgent = async (agent: Agent) => {
@@ -50,7 +49,7 @@ export function useChatInterface() {
     // Check if a chat with this agent already exists
     const existingChat = chats.find(c => c.agent?.id === agent.id);
     if (existingChat) {
-        setSelectedChat(existingChat.toPlainObject());
+        setSelectedChatId(existingChat.id);
         return;
     }
 
@@ -68,7 +67,7 @@ export function useChatInterface() {
             agent: agent as AgentProperties, // Pass plain object to API
         };
         const conversation = await createConversationApi(newConversationData, token);
-        createConversation(conversation);
+        createConversation(conversation); // Store will handle instance creation
     } catch (error: any) {
         toast({ title: "Error starting chat", description: error.message, variant: "destructive" });
     }
@@ -76,8 +75,8 @@ export function useChatInterface() {
 
   return {
     agents,
-    chats,
-    selectedChat, // This is now a Chat class instance or null
+    chats, // Now Chat[]
+    selectedChat, // Now Chat | null
     handleSelectChat,
     handleSelectAgent,
   };

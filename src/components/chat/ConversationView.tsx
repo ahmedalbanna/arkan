@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -11,8 +10,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { RawChatMessage, RawChatSession } from '@/hooks/useChatStore';
-import { getDatabase, ref, onValue, off, push, serverTimestamp, update, query, orderByChild } from 'firebase/database';
+import { getDatabase, ref, onValue, off, query, orderByChild } from 'firebase/database';
 import { useAgentChat } from '@/hooks';
 import { Chat } from '@/lib/models/chat';
 import { ChatMessage, type ChatMessageProperties } from '@/lib/models/chatMessage';
