@@ -7,6 +7,7 @@ import { markdownComponents } from '@/lib/markdown-styles';
 import { cn } from '@/lib/utils';
 import remarkGfm from 'remark-gfm';
 import { hasContent, formatKeyToTitle } from '@/lib/proposal-utils';
+import { useLocalization } from '@/context/LocalizationContext';
 
 /**
  * This file contains a set of components designed to render a structured
