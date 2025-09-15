@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,9 +7,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { lazy, Suspense } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { CollapsibleSidePanel } from '@/components/ui/CollapsibleSidePanel';
 import { useProposalModeGeneratorLogic } from '@/hooks';
 import { ProposalActions } from './ProposalActions';
+import { ProposalGenerationTools } from './ProposalGenerationTools'; // Import the new component
+import { cn } from '@/lib/utils';
 
 const FormattedProposalView = lazy(() => import('./FormattedProposalView'));
 
@@ -59,7 +59,8 @@ export function ProposalModeGenerator() {
         isMobile,
         handleNextPage,
         handlePrevPage,
-        toolPanels,
+        isPanelCollapsed,
+        setIsPanelCollapsed,
     } = useProposalModeGeneratorLogic();
 
     return (
@@ -70,14 +71,19 @@ export function ProposalModeGenerator() {
                     <p className="text-muted-foreground">{t('builder.proposalGenerator.toasts.generatingDesc')}</p>
                 </div>
             )}
+            
+            <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
+                <ProposalGenerationTools isDisabled={generationMutation.isPending || translateMutation.isPending} />
+            </div>
 
-            <CollapsibleSidePanel panels={toolPanels} defaultActiveKey="generator" className="col-span-4" />
-
-            <div className="lg:col-span-8">
+            <div className={cn("lg:overflow-y-auto pr-2", isPanelCollapsed ? "lg:col-span-12" : "lg:col-span-8")}>
                  <Card className="h-full flex flex-col overflow-hidden">
                      <CardHeader>
                         <div className="flex justify-between items-start gap-4">
                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setIsPanelCollapsed(!isPanelCollapsed)}>
+                                    {isPanelCollapsed ? <PanelRightOpen className="h-5 w-5"/> : <PanelLeftClose className="h-5 w-5"/>}
+                                </Button>
                                 <div className="flex-1 min-w-0">
                                     <CardTitle className="font-headline text-2xl text-primary truncate" title={proposal?.title || "Generated Proposal"}>
                                         {proposal?.title || "Generated Proposal"}

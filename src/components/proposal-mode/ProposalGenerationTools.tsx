@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal, Wand2, Scale } from 'lucide-react';
 import type { AdvancedProposalFields } from '@/hooks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -18,6 +18,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useProposalGenerationToolsLogic } from '@/hooks/use-proposal-generation-tools-logic';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
+import { EvaluationTools } from '../evaluation/EvaluationTools';
+
 
 interface GenerateButtonProps {
     isGenerating: boolean;
@@ -175,110 +177,125 @@ export const ProposalGenerationTools = ({
     }
 
     return (
-        <Card className={cn("flex flex-col h-full", isDisabled && 'opacity-50 pointer-events-none')}>
-            <CardHeader>
-                <div className="flex justify-between items-center">
-                    <div>
+        <Tabs defaultValue="generator">
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="generator" className="gap-2"><Wand2 className="h-4 w-4" /> {t('builder.proposalGenerator.tools.title')}</TabsTrigger>
+                <TabsTrigger value="evaluator" className="gap-2"><Scale className="h-4 w-4" /> {t('builder.evaluation.title')}</TabsTrigger>
+            </TabsList>
+            <TabsContent value="generator">
+                <Card className={cn("flex flex-col h-full", isDisabled && 'opacity-50 pointer-events-none')}>
+                    <CardHeader>
                         <CardTitle className="font-headline">{t('builder.proposalGenerator.toolsTitle')}</CardTitle>
                         <CardDescription>{t('builder.proposalGenerator.toolsDescription')}</CardDescription>
-                    </div>
-                </div>
-            </CardHeader>
-            <CardContent className="flex-grow overflow-y-auto pr-2 space-y-4">
-                <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'simple' | 'advanced')} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="simple">Simple</TabsTrigger>
-                        <TabsTrigger value="advanced">Advanced</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="simple" className="pt-4">
-                         <div>
-                            <Label htmlFor="project-idea">{t('builder.proposalGenerator.mainSubjectLabel')}</Label>
-                            <Textarea
-                                id="project-idea"
-                                name="projectIdea"
-                                placeholder={t('builder.proposalGenerator.placeholder')}
-                                rows={5}
-                                required
-                                value={projectIdea || ''}
-                                onChange={(e) => setProjectIdea(e.target.value)}
-                                disabled={generationMutation.isPending}
-                                className="mt-1"
-                            />
-                        </div>
-                    </TabsContent>
-                    <TabsContent value="advanced" className="pt-4">
-                        <AdvancedFieldsForm />
-                    </TabsContent>
-                </Tabs>
+                    </CardHeader>
+                    <CardContent className="flex-grow overflow-y-auto pr-2 space-y-4">
+                        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'simple' | 'advanced')} className="w-full">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="simple">Simple</TabsTrigger>
+                                <TabsTrigger value="advanced">Advanced</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="simple" className="pt-4">
+                                <div>
+                                    <Label htmlFor="project-idea">{t('builder.proposalGenerator.mainSubjectLabel')}</Label>
+                                    <Textarea
+                                        id="project-idea"
+                                        name="projectIdea"
+                                        placeholder={t('builder.proposalGenerator.placeholder')}
+                                        rows={5}
+                                        required
+                                        value={projectIdea || ''}
+                                        onChange={(e) => setProjectIdea(e.target.value)}
+                                        disabled={generationMutation.isPending}
+                                        className="mt-1"
+                                    />
+                                </div>
+                            </TabsContent>
+                            <TabsContent value="advanced" className="pt-4">
+                                <AdvancedFieldsForm />
+                            </TabsContent>
+                        </Tabs>
 
-                 <Accordion type="multiple" className="w-full space-y-4">
-                    <AccordionItem value="item-1">
-                        <AccordionTrigger className="font-semibold text-base"><SlidersHorizontal className="me-2 h-4 w-4"/>{t('builder.proposalGenerator.generationSettings')}</AccordionTrigger>
-                        <AccordionContent className="pt-4 space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="proposal-template">{t('builder.proposalGenerator.templateLabel')}</Label>
-                                <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId} disabled={generationMutation.isPending}>
-                                    <SelectTrigger id="proposal-template">
-                                        <SelectValue placeholder="Select a template" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {templates?.map(template => (
-                                            <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            
-                            {selectedTemplate && (
-                                <div className="space-y-4">
+                        <Accordion type="multiple" className="w-full space-y-4">
+                            <AccordionItem value="item-1">
+                                <AccordionTrigger className="font-semibold text-base"><SlidersHorizontal className="me-2 h-4 w-4"/>{t('builder.proposalGenerator.generationSettings')}</AccordionTrigger>
+                                <AccordionContent className="pt-4 space-y-4">
                                     <div className="space-y-2">
-                                        <Label className="text-xs font-semibold text-muted-foreground">Base Prompt</Label>
-                                        <div className="p-3 rounded-md border bg-muted text-xs">
-                                            <ReactMarkdown components={markdownComponents}>{selectedTemplate.prompt}</ReactMarkdown>
-                                        </div>
+                                        <Label htmlFor="proposal-template">{t('builder.proposalGenerator.templateLabel')}</Label>
+                                        <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId} disabled={generationMutation.isPending}>
+                                            <SelectTrigger id="proposal-template">
+                                                <SelectValue placeholder="Select a template" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {templates?.map(template => (
+                                                    <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
+                                    
+                                    {selectedTemplate && (
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-semibold text-muted-foreground">Base Prompt</Label>
+                                                <div className="p-3 rounded-md border bg-muted text-xs">
+                                                    <ReactMarkdown components={markdownComponents}>{selectedTemplate.prompt}</ReactMarkdown>
+                                                </div>
+                                            </div>
 
-                                    {selectedTemplate.guidelines && selectedTemplate.guidelines.length > 0 && (
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-semibold text-muted-foreground">Default Guidelines</Label>
-                                            <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
-                                                {selectedTemplate.guidelines.map((g, i) => <li key={i}>{g}</li>)}
-                                            </ul>
+                                            {selectedTemplate.guidelines && selectedTemplate.guidelines.length > 0 && (
+                                                <div className="space-y-2">
+                                                    <Label className="text-xs font-semibold text-muted-foreground">Default Guidelines</Label>
+                                                    <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+                                                        {selectedTemplate.guidelines.map((g, i) => <li key={i}>{g}</li>)}
+                                                    </ul>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
-                                </div>
-                            )}
 
-                            <div className="space-y-2">
-                                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.proposalGenerator.customGuidelinesLabel')}</Label>
-                                {customGuidelines.map((custom, index) => (
-                                    <div key={index} className="flex items-center gap-2 text-sm">
-                                        <span>- {custom}</span>
-                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => removeCustomGuideline(index)} disabled={generationMutation.isPending}>
-                                            <Trash2 className="h-3 w-3 text-destructive" />
-                                        </Button>
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-semibold text-muted-foreground">{t('builder.proposalGenerator.customGuidelinesLabel')}</Label>
+                                        {customGuidelines.map((custom, index) => (
+                                            <div key={index} className="flex items-center gap-2 text-sm">
+                                                <span>- {custom}</span>
+                                                <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => removeCustomGuideline(index)} disabled={generationMutation.isPending}>
+                                                    <Trash2 className="h-3 w-3 text-destructive" />
+                                                </Button>
+                                            </div>
+                                        ))}
+                                        <div className="flex gap-2">
+                                            <Input
+                                                placeholder={t('builder.proposalGenerator.addGuidelinePlaceholder')}
+                                                value={customGuidelineInput}
+                                                onChange={(e) => setCustomGuidelineInput(e.target.value)}
+                                                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddGuideline())}
+                                                disabled={generationMutation.isPending}
+                                            />
+                                            <Button type="button" variant="secondary" onClick={handleAddGuideline} disabled={generationMutation.isPending}>
+                                                <Plus className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </div>
-                                ))}
-                                <div className="flex gap-2">
-                                    <Input
-                                        placeholder={t('builder.proposalGenerator.addGuidelinePlaceholder')}
-                                        value={customGuidelineInput}
-                                        onChange={(e) => setCustomGuidelineInput(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddGuideline())}
-                                        disabled={generationMutation.isPending}
-                                    />
-                                    <Button type="button" variant="secondary" onClick={handleAddGuideline} disabled={generationMutation.isPending}>
-                                        <Plus className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                 </Accordion>
-            </CardContent>
-            <CardFooter>
-                <GenerateButton isGenerating={generationMutation.isPending} generationMode={activeTab} />
-            </CardFooter>
-        </Card>
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
+                    </CardContent>
+                    <CardFooter>
+                        <GenerateButton isGenerating={generationMutation.isPending} generationMode={activeTab} />
+                    </CardFooter>
+                </Card>
+            </TabsContent>
+            <TabsContent value="evaluator">
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline">{t('builder.evaluation.title')}</CardTitle>
+                        <CardDescription>{t('builder.evaluation.description')}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <EvaluationTools />
+                    </CardContent>
+                </Card>
+            </TabsContent>
+        </Tabs>
     );
 };

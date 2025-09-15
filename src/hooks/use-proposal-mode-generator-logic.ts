@@ -11,26 +11,22 @@ import { useGenerateProposal } from '@/hooks';
 import { translateProposalApi } from '@/services';
 import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { EvaluationTools } from '@/components/evaluation/EvaluationTools';
-import { ProposalGenerationTools } from '@/components/proposal-mode/ProposalGenerationTools';
-import { Wand2, Scale } from 'lucide-react';
+import { Project } from '@/lib/models/project';
 
 export function useProposalModeGeneratorLogic() {
     const { t, locale } = useLocalization();
     const { firebaseUser } = useAuth();
-    const { project } = useBuilderStore();
+    const { project, setProject } = useBuilderStore();
     const generationMutation = useGenerateProposal();
 
-    // Use a local state for the translated proposal to avoid overwriting the main state
     const [translatedProposal, setTranslatedProposal] = useState<ProjectProposal | null>(null);
 
-    // The proposal to display is either the translated one or the original one from the store
     const proposal = translatedProposal || project?.proposal as ProjectProposal | null;
 
     const translateMutation = useMutation({
         mutationFn: translateProposalApi,
         onSuccess: (data: ProjectProposal) => {
-            setTranslatedProposal(data); // Set the local state for the translated version
+            setTranslatedProposal(data);
             toast({
                 title: t('builder.proposalGenerator.toasts.translateAllSuccess'),
                 description: t('builder.proposalGenerator.toasts.translateAllSuccessDesc'),
@@ -59,18 +55,17 @@ export function useProposalModeGeneratorLogic() {
 
     const totalPages = useMemo(() => {
         if (!proposal) return 0;
-        // Count keys in the Zod schema, excluding title and category which are on the cover.
         return Object.keys(ProjectProposalSchema.shape).filter(k => k !== 'title' && k !== 'category').length + 1;
     }, [proposal]);
-
 
     const [currentPage, setCurrentPage] = useState(0);
     const [zoom, setZoom] = useState(1);
     const isMobile = useIsMobile();
+    const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
     useEffect(() => {
         setCurrentPage(0);
-        setTranslatedProposal(null); // Reset translation when original proposal changes
+        setTranslatedProposal(null);
     }, [project?.proposal]);
 
     const handleNextPage = () => {
@@ -85,27 +80,11 @@ export function useProposalModeGeneratorLogic() {
         }
     };
 
-    const isBusy = generationMutation.isPending || translateMutation.isPending;
-
-    const toolPanels = useMemo(() => [
-        {
-            key: 'generator',
-            title: t('builder.proposalGenerator.tools.title'),
-            icon: React.createElement(Wand2, { className: "h-5 w-5" }),
-            content: React.createElement(ProposalGenerationTools, { isDisabled: isBusy })
-        },
-        {
-            key: 'evaluator',
-            title: t('builder.evaluation.title'),
-            icon: React.createElement(Scale, { className: "h-5 w-5" }),
-            content: React.createElement(EvaluationTools)
-        }
-    ], [t, isBusy]);
-
     return {
         t,
         locale,
-        isBusy,
+        isPanelCollapsed,
+        setIsPanelCollapsed,
         proposal,
         generationMutation,
         translateMutation,
@@ -117,6 +96,5 @@ export function useProposalModeGeneratorLogic() {
         isMobile,
         handleNextPage,
         handlePrevPage,
-        toolPanels,
     };
 }
