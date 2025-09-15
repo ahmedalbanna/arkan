@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import type { GenerateDiagramOutput, ImageToTextOutput } from '@/ai/schemas';

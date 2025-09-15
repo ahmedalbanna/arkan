@@ -31,3 +31,4 @@ export * from './transaction-service';
 export * from './translation-service';
 export * from './user-service';
 export * from './writing-tools-service';
+export * from './ai-researcher-service';
