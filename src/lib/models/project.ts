@@ -254,13 +254,20 @@ export class Project implements SavedProject {
         this._externalContext = [...(this._externalContext || []), { fileName, content, type }];
     }
 
-    public removeExternalContext(index: number): void {
+    public removeExternalContext(index: number): Project {
         this._externalContext = (this._externalContext || []).filter((_, i) => i !== index);
+        return this;
     }
 
-    public updateExternalContextType(index: number, type: ContextFileType): void {
+    public replaceExternalContext(index: number, newItem: { fileName: string, content: string, type: ContextFileType }): void {
         if (!this._externalContext || !this._externalContext[index]) return;
+        this._externalContext[index] = newItem;
+    }
+
+    public updateExternalContextType(index: number, type: ContextFileType): Project {
+        if (!this._externalContext || !this._externalContext[index]) return this;
         this._externalContext[index].type = type;
+        return this;
     }
 
     // --- Academic Solver Methods ---

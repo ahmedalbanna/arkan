@@ -5,7 +5,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { toast } from "@/hooks";
 import { Project, type ProjectProperties } from "@/lib/models/project";
-import type { SavedProject } from "@/lib/types";
+import type { SavedProject, ContextFileType } from "@/lib/types";
 
 // The new state is dramatically simplified
 export interface BuilderState {
@@ -19,6 +19,9 @@ interface BuilderActions {
   setProject: (project: Project) => void; // To update the project instance
   updateProject: (updater: (project: Project) => void) => void;
   setHasUnsavedChanges: (status: boolean) => void;
+  // Add new actions for direct manipulation, which will call the updater
+  addExternalContext: (fileName: string, content: string, type: ContextFileType) => void;
+  replaceExternalContext: (index: number, newItem: { fileName: string, content: string, type: ContextFileType }) => void;
 }
 
 const initialState: BuilderState = {
@@ -33,7 +36,6 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
 
       newSession: () => {
         set({ project: new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as ProjectProperties), hasUnsavedChanges: false });
-        // We don't clear storage here to allow easy access to recent projects.
         toast({
           title: "New Session Started",
           description: "All project content has been cleared.",
@@ -59,8 +61,19 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       updateProject: (updater) => {
         const currentProject = get().project ?? new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as ProjectProperties);
         updater(currentProject);
-        // Create a new instance to ensure React detects the change
         get().setProject(new Project(currentProject.toJSON() as ProjectProperties));
+      },
+
+      addExternalContext: (fileName: string, content: string, type: ContextFileType) => {
+        get().updateProject(p => p.addExternalContext(fileName, content, type));
+      },
+
+      replaceExternalContext: (index: number, newItem: { fileName: string, content: string, type: ContextFileType }) => {
+        get().updateProject(p => {
+            if (p.externalContext) {
+                p.externalContext[index] = newItem;
+            }
+        });
       },
 
       setHasUnsavedChanges: (status) => set({ hasUnsavedChanges: status }),
@@ -70,7 +83,6 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       storage: createJSONStorage(() => localStorage),
 
       partialize: (state) => ({
-        // Use the new toJSON method for serialization
         project: state.project?.toJSON(),
       }),
 

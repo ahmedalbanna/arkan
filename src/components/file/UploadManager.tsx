@@ -4,7 +4,7 @@
 import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UploadCloud, FileText, X, ImageIcon, PanelLeftClose } from 'lucide-react';
+import { UploadCloud, FileText, X, ImageIcon, PanelLeftClose, Wand2 } from 'lucide-react';
 import { PasteTextUploader } from './PasteTextUploader';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -65,37 +65,31 @@ function ViewContextDialog({ item }: { item: { fileName: string, content: string
 function FileDropzone() {
     const { t } = useLocalization();
     const { toast } = useToast();
-    const { firebaseUser, refetchUser } = useAuth();
-    const { addExternalContext } = useBuilderStore();
+    const { firebaseUser } = useAuth();
+    const { updateProject } = useBuilderStore();
     const [isLoading, setIsLoading] = useState(false);
 
-    const processAndAddFile = async (file: File) => {
+    const onDrop = useCallback(async (acceptedFiles: File[]) => {
         if (!firebaseUser) {
             toast({ title: t('builder.files.toasts.authError'), variant: "destructive" });
             return;
         }
 
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onloadend = () => {
-            const content = reader.result as string;
-            // The type is initially 'context' and can be changed by the user.
-            addExternalContext(file.name, content, 'context');
-            toast({ title: t('builder.files.toasts.fileAdded'), description: t('builder.files.toasts.fileAddedDesc').replace('{fileName}', file.name) });
-        };
-        reader.onerror = () => {
-            toast({ title: t('builder.files.toasts.fileReadError'), description: t('builder.files.toasts.fileReadErrorDesc'), variant: "destructive" });
-        }
-    };
-
-
-    const onDrop = useCallback(async (acceptedFiles: File[]) => {
         setIsLoading(true);
         for (const file of acceptedFiles) {
-           await processAndAddFile(file);
+             const reader = new FileReader();
+             reader.readAsDataURL(file);
+             reader.onloadend = () => {
+                 const content = reader.result as string;
+                 updateProject(p => p.addExternalContext(file.name, content, 'context'));
+                 toast({ title: t('builder.files.toasts.fileAdded'), description: t('builder.files.toasts.fileAddedDesc').replace('{fileName}', file.name) });
+             };
+             reader.onerror = () => {
+                 toast({ title: t('builder.files.toasts.fileReadError'), description: t('builder.files.toasts.fileReadErrorDesc'), variant: "destructive" });
+             }
         }
         setIsLoading(false);
-    }, [firebaseUser, addExternalContext, toast, t]);
+    }, [firebaseUser, updateProject, toast, t]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -141,19 +135,52 @@ function FileDropzone() {
 export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
     const { t } = useLocalization();
     const { project, setProject } = useBuilderStore();
+    const [processingFileIndex, setProcessingFileIndex] = useState<number | null>(null);
+    const { firebaseUser, refetchUser } = useAuth();
+    const { toast } = useToast();
+
     const externalContext = project?.externalContext || [];
     
     const removeExternalContext = (index: number) => {
         if (!project) return;
-        project.removeExternalContext(index);
-        setProject(new Project(project.toStateObject()));
-    }
+        setProject(new Project(project.toPlainObject()).removeExternalContext(index));
+    };
 
     const updateExternalContextType = (index: number, type: ContextFileType) => {
         if (!project) return;
-        project.updateExternalContextType(index, type);
-        setProject(new Project(project.toStateObject()));
-    }
+        setProject(new Project(project.toPlainObject()).updateExternalContextType(index, type));
+    };
+
+    const handleProcessFile = async (index: number) => {
+        const fileToProcess = externalContext[index];
+        if (!fileToProcess || !fileToProcess.content.startsWith('data:') || !firebaseUser) return;
+
+        setProcessingFileIndex(index);
+        try {
+            const token = await firebaseUser.getIdToken();
+            const blob = await fetch(fileToProcess.content).then(res => res.blob());
+            const file = new File([blob], fileToProcess.fileName, { type: blob.type });
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const result = await processFileApi(formData, token);
+            setProject(new Project(project.toPlainObject()).replaceExternalContext(index, {
+                fileName: fileToProcess.fileName.replace(/\.[^/.]+$/, "") + ".md",
+                content: result.markdown,
+                type: 'context',
+            }));
+
+            refetchUser();
+            toast({ title: "File Processed", description: `"${fileToProcess.fileName}" has been converted to Markdown.` });
+
+        } catch (error: any) {
+            toast({ title: "Processing Failed", description: error.message, variant: "destructive" });
+        } finally {
+            setProcessingFileIndex(null);
+        }
+    };
+
 
     const fileTypes: ContextFileType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
 
@@ -189,13 +216,24 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
                     <h3 className="text-sm font-medium text-muted-foreground">{t('builder.files.toasts.uploadedContext')}</h3>
                     <ScrollArea className="flex-grow border rounded-lg">
                         <ul className="space-y-1 list-none p-2">
-                            {externalContext.map((item, index) => (
+                            {externalContext.map((item, index) => {
+                                const isDataUri = item.content.startsWith('data:');
+                                const isImage = isDataUri && item.content.startsWith('data:image');
+                                const isPdf = isDataUri && item.content.startsWith('data:application/pdf');
+                                const isProcessable = isPdf || isImage;
+                                
+                                return (
                                 <li key={index} className="flex items-center justify-between p-2 rounded-md hover:bg-muted">
                                     <div className="flex items-center gap-2 truncate ">
                                         <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                                         <span className="truncate font-medium text-sm" style={{ maxWidth: '200px' }}>{item.fileName}</span>
                                     </div>
                                     <div className="flex items-center">
+                                        {isProcessable && (
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleProcessFile(index)} disabled={processingFileIndex === index}>
+                                                {processingFileIndex === index ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                                            </Button>
+                                        )}
                                         <Select value={item.type} onValueChange={(value: ContextFileType) => updateExternalContextType(index, value)}>
                                             <SelectTrigger className={cn("text-xs h-7 w-[110px]", {
                                                 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800': item.type === 'context',
@@ -216,7 +254,7 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
                                         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeExternalContext(index)}><X className="h-4 w-4 text-destructive" /></Button>
                                     </div>
                                 </li>
-                            ))}
+                            )})}
                         </ul>
                     </ScrollArea>
                 </div>
