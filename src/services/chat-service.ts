@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { ChatSession } from "@/hooks";
+import type { RawChatSession } from "@/hooks";
 import { AgentProperties } from '@/lib/models/agent';
 
 
@@ -13,7 +13,7 @@ interface CreateConversationData {
     agent?: AgentProperties;
 }
 
-export async function createConversationApi(data: CreateConversationData, token: string): Promise<ChatSession> {
+export async function createConversationApi(data: CreateConversationData, token: string): Promise<RawChatSession> {
     if (!token) throw new Error("User not authenticated");
 
     const response = await fetch('/api/conversations', {
@@ -31,7 +31,7 @@ export async function createConversationApi(data: CreateConversationData, token:
     return await response.json();
 }
 
-export async function initiateSupportChat(token: string): Promise<ChatSession> {
+export async function initiateSupportChat(token: string): Promise<RawChatSession> {
     if (!token) throw new Error("User not authenticated");
 
     const response = await fetch('/api/support-chat/initiate', {

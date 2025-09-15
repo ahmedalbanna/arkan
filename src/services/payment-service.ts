@@ -1,3 +1,4 @@
+
 export async function submitPaymentProof({ formData, token }: { formData: FormData, token: string }) {
     if (!token) throw new Error("User not authenticated");
 

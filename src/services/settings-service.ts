@@ -1,3 +1,4 @@
+
 // This function now fetches public settings, no token needed.
 export async function fetchPublicSettings() {
     const response = await fetch('/api/admin/settings');
