@@ -32,8 +32,8 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       ...initialState,
 
       newSession: () => {
-        set(initialState);
-        useBuilderStore.persist.clearStorage();
+        set({ project: new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as ProjectProperties), hasUnsavedChanges: false });
+        // We don't clear storage here to allow easy access to recent projects.
         toast({
           title: "New Session Started",
           description: "All project content has been cleared.",
@@ -57,9 +57,10 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       },
 
       updateProject: (updater) => {
-        const project = get().project ?? new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as ProjectProperties);
-        updater(project);
-        get().setProject(new Project(project.toJSON() as ProjectProperties));
+        const currentProject = get().project ?? new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as ProjectProperties);
+        updater(currentProject);
+        // Create a new instance to ensure React detects the change
+        get().setProject(new Project(currentProject.toJSON() as ProjectProperties));
       },
 
       setHasUnsavedChanges: (status) => set({ hasUnsavedChanges: status }),
@@ -69,6 +70,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       storage: createJSONStorage(() => localStorage),
 
       partialize: (state) => ({
+        // Use the new toJSON method for serialization
         project: state.project?.toJSON(),
       }),
 

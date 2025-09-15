@@ -57,6 +57,4 @@ export * from './useAgentStore';
 export * from './useBuilderStore';
 export * from './useChatInterface';
 export * from './useChatStore';
-export * from './usePresentationStore';
-export * from './useProposalGenerationStore';
-export * from './useReportStore';
+export * from './useGenerationUIStore';

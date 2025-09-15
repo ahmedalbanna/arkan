@@ -1,25 +1,32 @@
+
 // code explantion in docs/hooks/use-translation-view-logic.md
 
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useReportStore } from '@/hooks';
 import { useTranslate } from '@/hooks';
 import { useToast } from '@/hooks';
 import { SectionName } from '@/ai/schemas';
+import { useBuilderStore } from './useBuilderStore';
+import { Project } from '@/lib/models/project';
 
 export const useTranslationViewLogic = (sectionKey: SectionName, originalContent: string) => {
     const { t, locale } = useLocalization();
-    const { translatedSections, setTranslatedSection } = useReportStore();
+    const { project, updateProject } = useBuilderStore();
     const translateMutation = useTranslate();
     const { toast } = useToast();
-    const translatedContent = translatedSections[sectionKey];
+    const translatedContent = project?.translatedSections?.[sectionKey];
 
     const handleTranslate = async () => {
         const targetLang = locale === 'en' ? 'ar' : 'en';
         translateMutation.mutate({ text: originalContent, targetLang }, {
             onSuccess: (data) => {
-                setTranslatedSection(sectionKey, data.translatedText);
+                updateProject(p => {
+                    p.translatedSections = {
+                        ...(p.translatedSections || {}),
+                        [sectionKey]: data.translatedText
+                    };
+                });
                 toast({ title: t('builder.Section.toasts.translateSuccess') });
             },
             onError: (error: Error) => {

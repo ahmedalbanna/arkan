@@ -15,8 +15,7 @@ import { useToast } from '@/hooks';
 import { useBuilderStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useReportStore } from '@/hooks';
-import { usePresentationStore } from '@/hooks';
+import { useGenerationUIStore } from '@/hooks';
 import { usePresentationTemplates } from '@/hooks';
 import { formatDistanceToNow } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -138,16 +137,13 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     const {
         activePresentationId,
         setActivePresentationId,
-    } = usePresentationStore();
-    const { userProfile, firebaseUser } = useAuth();
-    const hasCreditsForGeneration = userProfile ? userProfile.credits >= 1 : false;
-
-    const {
         guidelineState,
         contextSelection,
         selectedPresentationTemplateId,
         setSelectedPresentationTemplateId,
-     } = useReportStore();
+    } = useGenerationUIStore();
+    const { userProfile, firebaseUser } = useAuth();
+    const hasCreditsForGeneration = userProfile ? userProfile.credits >= 1 : false;
 
     const sections = project?.sections || {};
     const diagrams = project?.diagrams || {};

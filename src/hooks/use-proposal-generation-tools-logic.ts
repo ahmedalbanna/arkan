@@ -4,10 +4,9 @@
 import { useState } from 'react';
 import { useProposalTemplates } from '@/hooks';
 import { useBuilderStore } from '@/hooks';
-import { useProposalGenerationStore, type AdvancedProposalFields } from '@/hooks';
+import { useGenerationUIStore, type AdvancedProposalFields } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useGenerateProposal } from '@/hooks';
-import { useReportStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 
 export function useProposalGenerationToolsLogic() {
@@ -25,16 +24,15 @@ export function useProposalGenerationToolsLogic() {
     };
 
     const {
-        selectedTemplateId,
-        setSelectedTemplateId,
-        customGuidelines,
-        addCustomGuideline,
-        removeCustomGuideline,
-        customGuidelineInput,
-        setCustomGuidelineInput,
+        selectedProposalTemplateId,
+        setSelectedProposalTemplateId,
         advancedFields,
         setAdvancedField,
-    } = useProposalGenerationStore();
+    } = useGenerationUIStore();
+    
+    // Note: Guideline management is now also part of useGenerationUIStore, 
+    // but for this hook, we only need what's passed to the mutation, 
+    // so we'll get it directly from the store state inside handleGenerateClick.
 
     const { externalContext } = project ?? {};
     const generationMutation = useGenerateProposal();
@@ -42,7 +40,9 @@ export function useProposalGenerationToolsLogic() {
     const hasCredits = (userProfile?.credits ?? 0) >= 1;
 
     const handleAddGuideline = () => {
-        addCustomGuideline();
+        // This logic is now internal to the component that uses it, or should be.
+        // For now, we assume custom guidelines are handled elsewhere if needed,
+        // or we retrieve them from the store just-in-time.
     };
 
     const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -50,9 +50,14 @@ export function useProposalGenerationToolsLogic() {
     };
 
     const handleGenerateClick = () => {
+        const { guidelineState, customGuidelineInput } = useGenerationUIStore.getState();
+        
+        // This logic might need to be more specific if guidelines are per-item
+        const customGuidelines = guidelineState['proposal']?.custom || [];
+
         const payload = activeTab === 'simple'
-            ? { projectIdea: projectIdea || '', templateId: selectedTemplateId, customGuidelines, externalContext }
-            : { projectIdea: advancedFields.projectTitle, templateId: selectedTemplateId, customGuidelines, externalContext, advancedFields };
+            ? { projectIdea: projectIdea || '', templateId: selectedProposalTemplateId, customGuidelines, externalContext }
+            : { projectIdea: advancedFields.projectTitle, templateId: selectedProposalTemplateId, customGuidelines, externalContext, advancedFields };
 
         generationMutation.mutate(payload as any);
     };
@@ -68,14 +73,14 @@ export function useProposalGenerationToolsLogic() {
         setActiveTab,
         projectIdea,
         setProjectIdea,
-        selectedTemplateId,
-        setSelectedTemplateId,
-        customGuidelines,
-        addCustomGuideline,
-        removeCustomGuideline,
-        customGuidelineInput,
-        setCustomGuidelineInput,
-        handleAddGuideline,
+        selectedTemplateId: selectedProposalTemplateId,
+        setSelectedTemplateId: setSelectedProposalTemplateId,
+        customGuidelines: useGenerationUIStore.getState().guidelineState['proposal']?.custom || [],
+        addCustomGuideline: () => useGenerationUIStore.getState().handleAddCustomGuidelineForItem('proposal'),
+        removeCustomGuideline: (index: number) => useGenerationUIStore.getState().handleRemoveCustomGuidelineForItem('proposal', index),
+        customGuidelineInput: useGenerationUIStore.getState().customGuidelineInput['proposal'] || '',
+        setCustomGuidelineInput: (value: string) => useGenerationUIStore.getState().setCustomGuidelineInputForItem('proposal', value),
+        handleAddGuideline: () => useGenerationUIStore.getState().handleAddCustomGuidelineForItem('proposal'),
         advancedFields,
         handleFieldChange,
         generationMutation,

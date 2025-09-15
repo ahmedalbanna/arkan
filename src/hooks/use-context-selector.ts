@@ -1,16 +1,18 @@
+
 'use client';
 
 import { useMemo } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useReportStore, useSections } from '@/hooks';
+import { useBuilderStore, useSections } from '@/hooks';
 import { type SectionName, type DiagramType } from '@/ai/schemas';
+import { useGenerationUIStore } from './useGenerationUIStore';
 
 const emptySelection = { sections: {}, diagrams: {}, externalContext: [], proposal: false, projectPlan: false };
 
 export const useContextSelector = (itemKey: string) => {
     const { t } = useLocalization();
     const { project } = useBuilderStore();
-    const { toggleContextSelection, contextSelection } = useReportStore();
+    const { toggleContextSelection, contextSelection } = useGenerationUIStore();
     const { data: sectionConfigs } = useSections();
 
     // Access data directly from the project instance

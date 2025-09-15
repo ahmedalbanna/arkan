@@ -1,4 +1,5 @@
 
+
 import type { ProjectState, SavedProject, DiagramType, PresentationHistoryEntry, ContextFileType, AnyProjectProposal, ProjectPlan } from '@/lib/types';
 import { Diagram, type DiagramProperties } from './diagram';
 

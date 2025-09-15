@@ -5,12 +5,12 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { usePresentationStore } from '@/hooks';
 import { useGeneratePresentation } from '@/hooks';
 import { translatePresentationApi } from '@/services';
 import { toast } from '@/hooks';
 import { useBuilderStore } from './useBuilderStore';
 import { Project } from '@/lib/models/project';
+import { useGenerationUIStore } from './useGenerationUIStore';
 
 export function usePresentationGeneratorLogic() {
     const { t, locale } = useLocalization();
@@ -21,7 +21,7 @@ export function usePresentationGeneratorLogic() {
     const { project, setProject } = useBuilderStore();
     
     // Get UI state from the presentation-specific store
-    const { activePresentationId } = usePresentationStore();
+    const { activePresentationId } = useGenerationUIStore();
 
     const generationMutation = useGeneratePresentation();
 

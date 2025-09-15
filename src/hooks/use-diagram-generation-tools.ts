@@ -10,7 +10,7 @@ import { useBuilderStore } from '@/hooks';
 import { useGenerateDiagram } from '@/hooks';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { type DiagramType, type SectionName } from '@/ai/schemas';
-import { useReportStore } from './useReportStore';
+import { useGenerationUIStore } from './useGenerationUIStore';
 import { useAgentStore } from './useAgentStore';
 import { Project } from '@/lib/models/project';
 
@@ -21,7 +21,7 @@ export const useDiagramGenerationTools = () => {
     const { userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
     const { project, setProject } = useBuilderStore();
-    const { contextSelection, guidelineState, initializeDependentStates } = useReportStore();
+    const { contextSelection, guidelineState, initializeDependentStates } = useGenerationUIStore();
     const { data: sectionConfigs, isLoading: sectionsLoading } = useSections();
 
     const diagramSections = useMemo(() => {
@@ -69,7 +69,7 @@ export const useDiagramGenerationTools = () => {
 
     const checkHasSelectedContext = (key: DiagramType) => {
         if (!project) return false;
-        const { contextSelection } = useReportStore.getState();
+        const { contextSelection } = useGenerationUIStore.getState();
         const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
         return !!project.proposal || !!project.projectPlan || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || (project.externalContext?.length > 0 && currentSelection.externalContext.some(v => v));
     };

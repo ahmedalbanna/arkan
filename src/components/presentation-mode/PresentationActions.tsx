@@ -3,7 +3,7 @@
 
 import { Button } from '@/components/ui/button';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, usePresentationStore } from '@/hooks';
+import { useBuilderStore, useGenerationUIStore } from '@/hooks';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Loader2, Languages, Download, FileText } from 'lucide-react';
 import { useExport } from '@/hooks';
@@ -24,7 +24,7 @@ const PPTX_TEMPLATE_KEY = 'arkan-pptx-template';
 export const PresentationActions = ({ isGenerating, onTranslateAll, isTranslating }: PresentationActionsProps) => {
   const { t, locale } = useLocalization();
   const { project } = useBuilderStore();
-  const { activePresentationId } = usePresentationStore();
+  const { activePresentationId } = useGenerationUIStore();
   const { templates: pptxTemplates, isLoaded: pptxLoaded } = usePptxStyles();
   const { exportPresentationPptx, isExporting } = useExport();
   const [selectedPptxTemplate, setSelectedPptxTemplate] = useState<PptxTemplateKey>('modern');
