@@ -80,12 +80,10 @@ export function useSessionActions() {
             return;
         }
 
-        // Update the name before saving if a new name is provided
         if (name) {
             updateProject(p => { p.name = name; });
         }
 
-        // The store now holds the most up-to-date project instance
         const projectToSave = useBuilderStore.getState().project!;
         const projectData = projectToSave.toStateObject();
         const finalName = projectToSave.name || 'Untitled Project';
@@ -101,15 +99,14 @@ export function useSessionActions() {
 
     const handleSave = () => {
         if (!project) return;
-        // If the project has a real ID, save it directly.
+        
         if (project.id && !project.id.startsWith('temp-')) {
             performSave();
         } else if (hasAnyContent(project)) {
-            // If it's a new project with content, prompt for a name.
+            
             setProjectName(project.name || '');
             setIsSavePromptOpen(true);
         } else {
-            // If it's a new, empty project, don't allow saving.
             toast({ title: t("projects.cannotSaveToastTitle"), description: t("projects.cannotSaveToastDesc"), variant: 'destructive' });
         }
     }
@@ -128,7 +125,7 @@ export function useSessionActions() {
         if (!project) return;
         const projectData = project.toJSON();
         const finalSaveAsName = saveAsName.trim() || project.name || (project.proposal as any)?.title || 'Untitled Project';
-        // Create a new object for saving, without modifying the current project's ID
+        
         const saveData = { ...projectData, name: String(finalSaveAsName), id: '' };
         
         saveProjectMutation.mutate(saveData, {
@@ -160,7 +157,7 @@ export function useSessionActions() {
         setProjectName,
         saveAsName,
         setSaveAsName,
-        project, // Changed from store
+        project,
         isSaving,
         handleUploadClick,
         onFileChange,

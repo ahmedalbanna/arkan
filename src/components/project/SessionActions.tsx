@@ -37,7 +37,7 @@ export const SessionActions = () => {
         setProjectName,
         saveAsName,
         setSaveAsName,
-        project, // Changed from store
+        project,
         isSaving,
         handleUploadClick,
         onFileChange,
@@ -81,7 +81,7 @@ export const SessionActions = () => {
                     variant="default"
                     size="icon"
                     onClick={handleSave}
-                    disabled={!project?.hasUnsavedChanges || isSaving} // Changed from store
+                    disabled={!project?.hasUnsavedChanges || isSaving}
                     className="h-8 w-8 md:w-auto md:px-3"
                 >
                     {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
@@ -153,7 +153,7 @@ export const SessionActions = () => {
                        <Button
                             variant="destructive"
                             size="icon"
-                            onClick={() => project?.newSession()} // Changed from store
+                            onClick={() => project?.newSession()}
                             className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <Trash2 className="h-4 w-4" />
