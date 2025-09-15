@@ -1,8 +1,7 @@
 
 'use client';
 
-import type { TransactionData } from '@/lib/types';
-import type { VerifyPaymentVariables } from '@/lib/types';
+import type { TransactionData, VerifyPaymentVariables } from '@/lib/types';
 
 export type TransactionStatus = 'pending' | 'verified' | 'rejected';
 interface FetchTransactionsParams {

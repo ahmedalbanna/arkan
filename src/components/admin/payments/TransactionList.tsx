@@ -8,6 +8,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { Button } from '@/components/ui/button';
 import { useTransactions } from '@/hooks';
 import type { TransactionStatus } from '@/services';
+import { Transaction } from '@/lib/models/transaction';
 
 
 function ConsoleSkeleton() {
@@ -70,7 +71,7 @@ export function TransactionList({ status }: { status: TransactionStatus }) {
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {allTransactions.map(transaction => (
+                {allTransactions.map((transaction: Transaction) => (
                     <PendingPaymentCard key={transaction.id} transaction={transaction} />
                 ))}
             </div>

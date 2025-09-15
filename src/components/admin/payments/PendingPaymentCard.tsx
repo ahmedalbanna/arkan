@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format } from 'date-fns';
 import { Check, ExternalLink, Loader2, ThumbsDown } from "lucide-react";
-import { useVerifyPayment } from "@/hooks/use-payment";
+import { useVerifyPayment } from "@/hooks";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocalization } from "@/context/LocalizationContext";
@@ -41,12 +41,12 @@ export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
                     </Badge>
                 </div>
                 <CardDescription>
-                    {format(new Date(transaction.createdAt), 'd MMM yyyy, h:mm a')}
+                    {transaction.getFormattedDate()}
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-3 text-sm">
                 <p><strong>{t('managePayments.userLabel')}:</strong> {transaction.userName} ({transaction.userEmail})</p>
-                <p><strong>{t('managePayments.amountLabel')}:</strong> ${transaction.getFormattedPrice()}</p>
+                <p><strong>{t('managePayments.amountLabel')}:</strong> {transaction.getFormattedPrice()}</p>
                 <p><strong>{t('managePayments.creditsLabel')}:</strong> {transaction.credits}</p>
                 <Button asChild size="sm" variant="outline">
                     <a href={transaction.proofUrl} target="_blank" rel="noopener noreferrer">

@@ -1,18 +1,13 @@
 
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext';
+import { useUserTransactions } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, CreditCard, History } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import type { TransactionData } from '@/lib/types';
-import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
-import { getAuthenticatedToken } from '@/lib/authUtils';
-import { fetchUserTransactions } from '@/services';
-import { transactionKeys } from '@/lib/query-keys';
+import type { Transaction } from '@/lib/models/transaction';
 
 function PaymentHistorySkeleton() {
     return (
@@ -50,16 +45,7 @@ function PaymentHistorySkeleton() {
 }
 
 export default function PaymentHistoryPage() {
-    const { firebaseUser, isLoading: authLoading } = useAuth();
-
-    const { data: transactions, isLoading, isError, error } = useQuery<TransactionData[]>({
-        queryKey: transactionKeys.list(firebaseUser?.uid || 'user'),
-        queryFn: async () => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return fetchUserTransactions(token);
-        },
-        enabled: !authLoading && !!firebaseUser,
-    });
+    const { data: transactions, isLoading, isError, error } = useUserTransactions();
 
     return (
         <div className="container mx-auto max-w-4xl px-4 py-12">
@@ -73,7 +59,7 @@ export default function PaymentHistoryPage() {
                 </p>
             </div>
 
-            {isLoading || authLoading ? (
+            {isLoading ? (
                 <PaymentHistorySkeleton />
             ) : isError ? (
                 <Card>
@@ -100,11 +86,11 @@ export default function PaymentHistoryPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {transactions.map((t) => (
+                                    {transactions.map((t: Transaction) => (
                                         <TableRow key={t.id}>
-                                            <TableCell>{format(new Date(t.createdAt), 'd MMM yyyy')}</TableCell>
+                                            <TableCell>{t.getFormattedDate()}</TableCell>
                                             <TableCell className="font-medium">{t.planName} (+{t.credits} credits)</TableCell>
-                                            <TableCell>${t.price.toFixed(2)}</TableCell>
+                                            <TableCell>{t.getFormattedPrice()}</TableCell>
                                             <TableCell>
                                                 <Badge variant={
                                                     t.status === 'verified' ? 'default'
