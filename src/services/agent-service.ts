@@ -46,24 +46,6 @@ export async function createAgentCategoryApi(data: { id: string; name: string },
 
 
 /**
- * Fetches the full list of agents from the API.
- * Requires admin authentication.
- * @param token The admin user's authentication token.
- * @returns A promise that resolves to an array of Agent objects.
- */
-export async function fetchAgentsApi(token: string): Promise<Agent[]> {
-    const response = await fetch('/api/agents', {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch agents');
-    }
-    return response.json();
-}
-
-
-/**
  * Fetches the configuration for a single agent by its ID.
  * Requires admin authentication.
  * @param agentId The ID of the agent to fetch.
