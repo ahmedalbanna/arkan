@@ -1,12 +1,10 @@
-
 'use server';
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminAuth, adminDb } from '@/lib/firebase/server-init';
+import { adminAuth, adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import type { UserRole } from '@/lib/types';
 import { getUserProfile } from '@/lib/db/queries';
-import { getDatabase } from 'firebase-admin/database';
 import { handleApiError, createApiResponse } from '@/lib/api-utils';
 
 const signupSchema = z.object({
@@ -39,7 +37,7 @@ async function notifyAdminsOfNewUser(user: { name?: string | null, email?: strin
     const adminsSnapshot = await adminDb.collection('users').where('role', '==', 'admin').get();
     if (adminsSnapshot.empty) return;
 
-    const rtdb = getDatabase();
+    const rtdb = adminRealtimeDb;
     const notificationPayload = {
         title: "New User Signed Up",
         description: `A new user, ${user.name || user.email}, has joined the platform.`,
