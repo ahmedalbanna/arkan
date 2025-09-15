@@ -11,7 +11,6 @@ import { Loader2, Sparkles, Eye } from 'lucide-react';
 import { ReportActions } from './ReportActions';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
-import { useReportGenerationLogic } from '@/hooks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -20,6 +19,7 @@ import { markdownComponents } from '@/lib/markdown-styles';
 import ReactMarkdown from 'react-markdown';
 import { useSections } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useReportGenerationLogic } from '@/hooks';
 
 interface GenerationToolsProps {
     onTranslateAll: (targetLang: 'en' | 'ar') => void;
@@ -83,8 +83,8 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
 }
 
 export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToolsProps) => {
-    const { t } = useLocalization();
     const {
+        t,
         isAnythingGenerating,
         isPlanning,
         activeMutationKey,

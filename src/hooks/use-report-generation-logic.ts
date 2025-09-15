@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/use-report-generation-logic.md
 
 'use client';
