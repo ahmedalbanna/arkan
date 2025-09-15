@@ -1,6 +1,3 @@
-
-// code explantion in docs/hooks/use-writing-tools.md
-
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -17,7 +14,7 @@ import { handleErrorUtility } from '@/lib/errorUtils';
  * @returns The result of the useMutation hook.
  */
 export function useWritingTool<TData = any, TVariables = any>(
-  endpoint: string,
+  tool: string,
   options?: {
     onSuccess?: (data: TData, variables: TVariables) => void;
     onError?: (error: Error, variables: TVariables) => void;
@@ -28,7 +25,7 @@ export function useWritingTool<TData = any, TVariables = any>(
   return useMutation<TData, Error, TVariables>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return writingToolApi(endpoint, { data: variables, token });
+      return writingToolApi(tool, { data: variables, token });
     },
     onSuccess: (data, variables) => {
         refetchUser(); // Invalidate user to update credits

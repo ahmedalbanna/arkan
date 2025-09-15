@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { ParaphraseMode, SummarizeLength, CitationStyle } from "@/ai/schemas";
@@ -15,6 +14,7 @@ export interface SummarizeTextVariables {
 export interface GenerateQuizVariables {
     text: string;
     numQuestions: number;
+    questionType: 'multiple-choice' | 'true-false' | 'direct-question';
 }
 export interface HumanizeTextVariables {
     text: string;
@@ -55,26 +55,35 @@ export interface WriteDocumentVariables {
     knowledge?: string;
     tableOfContents?: string[];
 }
-export interface GenerateIdeasVariables {
+export interface IdeaGenerationVariables {
     specialization: string;
     domain?: string;
     region?: string;
     circumstances?: string;
     additionalContext?: string;
 }
+export interface GeneratePresentationOutlineVariables {
+    prompt: string;
+    documentation?: string;
+}
+export interface GeneratePlantUMLVariables {
+    description: string;
+    diagramType: 'useCase' | 'class' | 'sequence' | 'activity' | 'component' | 'archimate' | 'er';
+}
+
 
 /**
  * A generic API handler for all writing tools.
- * @param endpoint The API endpoint to call (e.g., '/api/writing-tools/paraphrase').
+ * @param endpoint The specific tool name (e.g., 'summarize', 'paraphrase').
  * @param variables An object containing the request body and the auth token.
  * @returns A promise that resolves to the API response.
  */
 export async function writingToolApi<TRequest, TResponse>(
-  endpoint: string,
+  tool: string,
   variables: { data: TRequest; token: string }
 ): Promise<TResponse> {
   const { token, data } = variables;
-  const response = await fetch(endpoint, {
+  const response = await fetch(`/api/writing-tools/${tool}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -85,7 +94,7 @@ export async function writingToolApi<TRequest, TResponse>(
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || `API call to ${endpoint} failed.`);
+    throw new Error(error.message || `API call to ${tool} failed.`);
   }
 
   return response.json();
