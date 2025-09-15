@@ -44,7 +44,6 @@ export const useDiagramGenerationTools = () => {
     const diagramMutation = useGenerateDiagram();
 
     const isAnythingGenerating = diagramMutation.isPending;
-    const isDisabled = isAnythingGenerating;
     const hasCreditsForGeneration = userProfile ? userProfile.credits >= 1 : false;
 
     const onGenerateDiagram = (diagramType: DiagramType) => {
@@ -67,26 +66,13 @@ export const useDiagramGenerationTools = () => {
         diagramMutation.mutate(body);
     };
 
-    const checkHasSelectedContext = (key: DiagramType) => {
-        if (!project) return false;
-        const { contextSelection } = useGenerationUIStore.getState();
-        const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-        return !!project.proposal || !!project.projectPlan || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || (project.externalContext?.length > 0 && currentSelection.externalContext.some(v => v));
-    };
-
     return {
         t,
-        agents,
         agentsLoaded,
-        userProfile,
-        activeMutationKey,
         isAnythingGenerating,
-        isDisabled,
-        hasCreditsForGeneration,
         onGenerateDiagram,
-        checkHasSelectedContext,
         diagramSections,
         getIconComponent,
-        diagrams: project?.diagrams || {},
+        hasCreditsForGeneration,
     };
 };

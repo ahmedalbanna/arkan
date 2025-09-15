@@ -2,18 +2,14 @@
 'use client';
 
 import React from 'react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Button } from '@/components/ui/button';
+import { Accordion } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { DiagramTypeSchema, SectionName, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, GitGraph, PanelLeftClose } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { GuidelineEditor } from '../section/SectionGuidelineEditor';
-import { ContextSelector } from '../section/SectionContextSelector';
+import { DiagramTypeSchema } from '@/ai/schemas';
+import { Loader2, PanelLeftClose } from 'lucide-react';
 import { useDiagramGenerationTools } from '@/hooks/use-diagram-generation-tools';
-import { SectionAccordionItem } from '../section/SectionAccordionItem';
+import { DiagramAccordionItem } from './DiagramAccordionItem';
+import { Button } from '@/components/ui/button';
 
 const orderedDiagrams = DiagramTypeSchema.options;
 
@@ -28,8 +24,7 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
         isAnythingGenerating,
         onGenerateDiagram,
         diagramSections,
-        getIconComponent,
-        hasCreditsForGeneration
+        hasCreditsForGeneration,
     } = useDiagramGenerationTools();
 
     if (!agentsLoaded) {
@@ -37,7 +32,7 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
     }
 
     return (
-        <Card className={cn(isAnythingGenerating && 'opacity-50 pointer-events-none')}>
+        <Card className={cn("flex flex-col h-full", isAnythingGenerating && 'opacity-50 pointer-events-none')}>
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <div>
@@ -49,19 +44,18 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
                     </Button>
                 </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-grow overflow-y-auto pr-2">
                 <Accordion type="multiple" className="w-full space-y-1">
                     {orderedDiagrams.map((key) => {
                         const diagramConfig = diagramSections[key];
                         if (!diagramConfig) return null;
                         
                         return (
-                             <SectionAccordionItem
+                            <DiagramAccordionItem
                                 key={key}
-                                sectionKey={key as SectionName} // Cast for compatibility
-                                onGenerate={() => onGenerateDiagram(key as DiagramType)}
-                                isGenerating={false} // Specific logic is handled in useDiagramGenerationTools
-                                isAnythingGenerating={isAnythingGenerating}
+                                diagramType={key}
+                                onGenerate={onGenerateDiagram}
+                                isGenerating={isAnythingGenerating}
                                 hasCredits={hasCreditsForGeneration}
                             />
                         );
