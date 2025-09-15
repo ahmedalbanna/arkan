@@ -38,7 +38,7 @@ interface UpdateTemplateVariables<T> {
 
 export function useProposalTemplates() {
   const { firebaseUser } = useAuth();
-  return useQuery({
+  return useQuery<ProposalTemplate[], Error>({
     queryKey: templateKeys.proposals(),
     queryFn: async () => {
         const token = await getAuthenticatedToken(firebaseUser);
@@ -56,7 +56,7 @@ export function useProposalTemplates() {
 
 export function useReportTemplates() {
   const { firebaseUser } = useAuth();
-  return useQuery({
+  return useQuery<ReportTemplate[], Error>({
     queryKey: templateKeys.reports(),
     queryFn: async () => {
         const token = await getAuthenticatedToken(firebaseUser);
