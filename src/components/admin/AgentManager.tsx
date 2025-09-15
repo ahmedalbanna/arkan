@@ -17,9 +17,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { CreateAgentDialog } from '@/components/admin/users/CreateAgentDialog';
 import { CreateCategoryDialog } from '@/components/admin/users/CreateCategoryDialog';
 import { Input } from '@/components/ui/input';
-
-// ...
-
+import { useAgentStore } from '@/hooks/useAgentStore';
 
 function AgentSkeleton() {
   return (
@@ -36,8 +34,9 @@ function AgentCard({ agent }: { agent: Agent }) {
   const { id, name, description, isEnabled } = agent;
   const updateAgentMutation = useUpdateAgent();
   const { t } = useLocalization();
+  const getIconComponent = useAgentStore(state => state.getIconComponent);
 
-  const Icon = agent.iconComponent || AlertCircle; // Use iconComponent directly
+  const Icon = getIconComponent(agent.icon as string) || AlertCircle;
 
   const handleToggle = (checked: boolean) => {
     updateAgentMutation.mutate({ agentId: id, payload: { isEnabled: checked } });

@@ -1,9 +1,7 @@
-// code explantion in docs/hooks/use-agents.md
 
 "use client";
 
-import { useQuery, useMutation, useQueryClient, type UseQueryOptions } from "@tanstack/react-query";
-import { FileText, type LucideIcon } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { agentKeys, categoryKeys } from "@/lib/query-keys";
 import { Agent, type AgentProperties } from '@/lib/models/agent';
@@ -26,7 +24,10 @@ import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgent
 import { useAgentStore } from "@/hooks/useAgentStore";
 
 export { Agent };
-export type UpdateAgentPayload = Partial<AgentEditorFormValues>;
+export type UpdateAgentVariables = {
+  agentId: string;
+  payload: AgentEditorFormValues;
+};
 export type CreateAgentVariables = Omit<import('@/lib/types').Agent, 'isEnabled' | 'category' | 'id'> & { id: string, category: string; knowledge?: AgentKnowledgeSource[] };
 
 /**
@@ -87,38 +88,29 @@ export function useAgents() {
   return { agents: agentList, isLoaded, isError: !!error };
 }
 
-type UseAgentOptions = Omit<
-  UseQueryOptions<Agent | null, Error>,
-  "queryKey" | "queryFn" | "enabled"
->;
-
 /**
  * Custom hook to fetch a single agent by its ID.
  * Returns an instance of the Agent CLASS.
  */
-export function useAgent(agentId: string, options?: UseAgentOptions) {
+export function useAgent(agentId: string) {
   const { firebaseUser } = useAuth();
   
-  const queryResult = useQuery({
+  return useQuery<Agent | null>({
     queryKey: agentKeys.detail(agentId),
     queryFn: async () => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return fetchAgentApi(agentId, token); 
+      const data = await fetchAgentApi(agentId, token); 
+      if (!data) return null;
+      return new Agent(data as AgentProperties);
     },
     enabled: !!firebaseUser && !!agentId,
-    ...options,
     meta: {
       onError: (error: Error) =>
         handleErrorUtility(error, `Failed to fetch agent ${agentId}`),
     },
-    select: (data): Agent | null => {
-      if (!data) return null;
-      return new Agent(data as AgentProperties);
-    },
   });
-
-  return queryResult;
 }
+
 
 /**
  * Custom mutation hook to update an agent's configuration.

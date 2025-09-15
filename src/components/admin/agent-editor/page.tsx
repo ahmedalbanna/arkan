@@ -1,12 +1,11 @@
 
 'use client';
 
-
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAgent, useAgentCategories, useAgents } from '@/hooks';
 import { AlertCircle, Bot, Loader2 } from 'lucide-react';
 import React, { Suspense, lazy } from 'react';
-import { Agent as AgentModel } from '@/lib/models/agent';
+import { type Agent as AgentModel } from '@/lib/models/agent';
 
 const AgentEditor = lazy(() => import('@/components/admin/agent-editor/AgentEditor'));
 
