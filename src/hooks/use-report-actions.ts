@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useReportStore, useDocxStyles, useExport, useSections } from '@/hooks';
+import { useBuilderStore, useDocxStyles, useExport, useSections } from '@/hooks';
 import type { SectionName } from '@/ai/schemas';
 import type { DocxTemplateKey } from '@/lib/docx-styles';
 
