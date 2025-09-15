@@ -46,7 +46,7 @@ export function useProposalGenerationToolsLogic() {
 
         const payload = activeTab === 'simple'
             ? { projectIdea: projectIdea || '', templateId: selectedProposalTemplateId, customGuidelines, externalContext }
-            : { projectIdea: advancedProposalFields.projectTitle, templateId: selectedProposalTemplateId, customGuidelines, externalContext, advancedFields };
+            : { projectIdea: advancedProposalFields.projectTitle, templateId: selectedProposalTemplateId, customGuidelines, externalContext, advancedFields: advancedProposalFields };
 
         generationMutation.mutate(payload as any);
     };
@@ -70,7 +70,7 @@ export function useProposalGenerationToolsLogic() {
         customGuidelineInput: customGuidelineInput['proposal'] || '',
         setCustomGuidelineInput: (value: string) => setCustomGuidelineInputForItem('proposal', value),
         handleAddGuideline: handleAddGuideline,
-        advancedFields,
+        advancedFields: advancedProposalFields,
         handleFieldChange,
         generationMutation,
         handleGenerateClick,
