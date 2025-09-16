@@ -51,8 +51,6 @@ export default function ReportModeGenerator() {
             )}
              <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
                 <GenerationTools
-                    onTranslateAll={handleTranslateAll}
-                    isTranslating={isTranslatingAll}
                     onCollapseToggle={() => setIsPanelCollapsed(true)}
                 />
             </div>
