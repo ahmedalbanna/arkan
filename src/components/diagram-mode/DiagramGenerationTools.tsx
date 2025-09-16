@@ -27,7 +27,7 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
         hasCreditsForGeneration,
     } = useDiagramGenerationTools();
 
-    if (!agentsLoaded) {
+    if (!agentsLoaded || Object.keys(diagramSections).length === 0) {
         return <Card><CardHeader><CardTitle>{t('builder.diagramGenerator.toolsLoading')}</CardTitle><CardContent><Loader2 className="animate-spin" /></CardContent></CardHeader></Card>;
     }
 
