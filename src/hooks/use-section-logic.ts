@@ -12,7 +12,7 @@ import { useTextToSpeech } from '@/hooks';
 import { useWritingTool } from '@/hooks';
 import { computeDiff, DiffPart } from '@/lib/diff';
 import { processPlantUml } from '@/lib/utils';
-import { manipulateTextApi } from '@/services';
+import { writingToolApi } from '@/services';
 
 
 // Helper to calculate word and character counts
@@ -35,56 +35,28 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
     const { t } = useLocalization();
     const ttsMutation = useTextToSpeech();
 
-    const rewriteMutation = useWritingTool('/api/writing-tools/rewrite-text');
-    const humanizeMutation = useWritingTool('/api/writing-tools/humanize');
-
-    useEffect(() => {
-        setLocalContent(content);
-    }, [content]);
-
-    const manipulateMutation = useMutation({
-        mutationFn: manipulateTextApi,
-        onSuccess: (data) => {
-            setAiSuggestion(data.rewrittenText);
-            setDiff(computeDiff(content, data.rewrittenText));
-            refetchUser();
+    const aiActionMutation = useWritingTool('rewrite-text', {
+        onSuccess: (data: any) => {
+            const resultText = data.rewrittenText;
+            setAiSuggestion(resultText);
+            setDiff(computeDiff(content, resultText));
             toast({ title: t('builder.Section.toasts.suggestionReadyTitle'), description: t('builder.Section.toasts.suggestionReadyDesc') });
         },
-        onError: (error: Error) => {
-            const isCreditError = error.message.toLowerCase().includes('credit');
+        onError: (error: any) => {
+             const isCreditError = error.message.toLowerCase().includes('credit');
             toast({
                 title: isCreditError ? t('builder.toasts.insufficientCredits') : t('builder.toasts.generationFailed'),
                 description: error.message,
                 variant: "destructive"
             });
-        },
+        }
     });
 
-    const handleRewriteAction = (style: string) => {
-        setAiSuggestion(null);
-        setDiff(null);
-        rewriteMutation.mutate({ text: content, style }, {
-            onSuccess: (data: any) => {
-                setAiSuggestion(data.rewrittenText);
-                setDiff(computeDiff(content, data.rewrittenText));
-            },
-            onError: (error: any) => toast({ title: t('builder.Section.toasts.rewriteFailed'), description: error.message, variant: "destructive"})
-        });
-    }
+    useEffect(() => {
+        setLocalContent(content);
+    }, [content]);
 
-    const handleHumanizeAction = () => {
-        setAiSuggestion(null);
-        setDiff(null);
-        humanizeMutation.mutate({ text: content }, {
-            onSuccess: (data: any) => {
-                setAiSuggestion(data.humanizedText);
-                setDiff(computeDiff(content, data.humanizedText));
-            },
-            onError: (error: any) => toast({ title: t('builder.Section.toasts.humanizeFailed'), description: error.message, variant: "destructive"})
-        });
-    }
-
-    const isProcessingAi = manipulateMutation.isPending || ttsMutation.isPending || rewriteMutation.isPending || humanizeMutation.isPending;
+    const isProcessingAi = aiActionMutation.isPending || ttsMutation.isPending;
 
     // Effect to play audio when src changes
     useEffect(() => {
@@ -94,16 +66,19 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
     }, [audioSrc, showAudioPlayer]);
 
 
-    const handleAiAction = async (command: string) => {
+    const handleAiAction = (styleOrCommand: string, isCommand: boolean = true) => {
         if (!firebaseUser) {
             toast({ title: t('builder.toasts.authError'), variant: "destructive" });
             return;
         }
         setAiSuggestion(null);
         setDiff(null);
-        const token = await firebaseUser.getIdToken();
-        const data = { textToManipulate: content, command };
-        manipulateMutation.mutate({ data, token });
+
+        const variables = isCommand
+            ? { text: content, style: `command: ${styleOrCommand}` }
+            : { text: content, style: styleOrCommand };
+
+        aiActionMutation.mutate(variables);
     };
 
     const handleReadAloud = () => {
@@ -148,8 +123,6 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
         t,
         isProcessingAi,
         ttsMutation,
-        handleRewriteAction,
-        handleHumanizeAction,
         handleAiAction,
         handleReadAloud,
         handleAcceptSuggestion,

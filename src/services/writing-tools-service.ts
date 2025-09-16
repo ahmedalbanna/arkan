@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { ParaphraseMode, SummarizeLength, CitationStyle } from "@/ai/schemas";
@@ -69,6 +70,11 @@ export interface GeneratePresentationOutlineVariables {
 export interface GeneratePlantUMLVariables {
     description: string;
     diagramType: 'useCase' | 'class' | 'sequence' | 'activity' | 'component' | 'archimate' | 'er';
+}
+
+export interface ManipulateTextVariables {
+    textToManipulate: string;
+    command: string;
 }
 
 

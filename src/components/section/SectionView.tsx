@@ -54,8 +54,6 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         t,
         isProcessingAi,
         ttsMutation,
-        handleRewriteAction,
-        handleHumanizeAction,
         handleAiAction,
         handleReadAloud,
         handleAcceptSuggestion,
@@ -142,18 +140,18 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                                 <DropdownMenuItem onClick={() => handleAiAction(t('builder.Section.aiActions.summarizePrompt'))}><BookText className="me-2 h-4 w-4" />{t('builder.Section.aiActions.summarize')}</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleAiAction(t('builder.Section.aiActions.expandPrompt'))}><Maximize className="me-2 h-4 w-4" />{t('builder.Section.aiActions.expand')}</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleAiAction(t('builder.Section.aiActions.checkGrammarPrompt'))}><SpellCheck className="me-2 h-4 w-4" />{t('builder.Section.aiActions.checkGrammar')}</DropdownMenuItem>
-                                <DropdownMenuItem onClick={handleHumanizeAction}><UserCheck className="me-2 h-4 w-4" />{t('builder.Section.aiActions.humanize')}</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleAiAction('Humanize', false)}><UserCheck className="me-2 h-4 w-4" />{t('builder.Section.aiActions.humanize')}</DropdownMenuItem>
                                 <DropdownMenuItem><GitCommitVertical className="me-2 h-4 w-4" />{t('builder.Section.aiActions.versionHistory')}</DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuSub>
                                     <DropdownMenuSubTrigger><Brush className="me-2 h-4 w-4" />{t('builder.Section.aiActions.rewrite')}</DropdownMenuSubTrigger>
                                     <DropdownMenuSubContent>
-                                        <DropdownMenuItem onClick={() => handleRewriteAction('Formal')}>{t('builder.Section.aiActions.styles.formal')}</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleRewriteAction('Friendly')}>{t('builder.Section.aiActions.styles.friendly')}</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleRewriteAction('Simple')}>{t('builder.Section.aiActions.styles.simple')}</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleRewriteAction('Creative')}>{t('builder.Section.aiActions.styles.creative')}</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleRewriteAction('Professional')}>{t('builder.Section.aiActions.styles.professional')}</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleRewriteAction('Academic')}>{t('builder.Section.aiActions.styles.academic')}</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleAiAction('Formal', false)}>{t('builder.Section.aiActions.styles.formal')}</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleAiAction('Friendly', false)}>{t('builder.Section.aiActions.styles.friendly')}</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleAiAction('Simple', false)}>{t('builder.Section.aiActions.styles.simple')}</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleAiAction('Creative', false)}>{t('builder.Section.aiActions.styles.creative')}</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleAiAction('Professional', false)}>{t('builder.Section.aiActions.styles.professional')}</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleAiAction('Academic', false)}>{t('builder.Section.aiActions.styles.academic')}</DropdownMenuItem>
                                     </DropdownMenuSubContent>
                                 </DropdownMenuSub>
                             </DropdownMenuContent>
