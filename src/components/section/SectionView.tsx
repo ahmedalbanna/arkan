@@ -7,13 +7,10 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs } from '@/components/ui/tabs';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { BookText, Brush, Check, GitCommitVertical, Loader2, Maximize, SpellCheck, ThumbsDown, UserCheck, Volume2, Wand2, X } from 'lucide-react';
+import { BookText, Brush, Check, GitCommitVertical, Maximize, SpellCheck, ThumbsDown, UserCheck, Wand2, X } from 'lucide-react';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSectionLogic } from '@/hooks';
 import { DiffPart } from '@/lib/diff';
 import { cn } from '@/lib/utils';
@@ -43,38 +40,18 @@ const DiffView = ({ diff }: { diff: DiffPart[] }) => {
 
 export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: SectionProps) => {
     const {
-        audioRef,
-        localContent,
-        setLocalContent,
         aiSuggestion,
         diff,
-        showAudioPlayer,
-        setShowAudioPlayer,
-        audioSrc,
         t,
-        isProcessingAi,
-        ttsMutation,
-        handleAiAction,
-        handleReadAloud,
         handleAcceptSuggestion,
         handleRejectSuggestion,
-        words,
-        chars,
         processedContent,
     } = useSectionLogic(sectionKey, content, onUpdate);
 
     return (
         <Tabs defaultValue="view">
             <div className="group relative space-y-4">
-                {showAudioPlayer && audioSrc && (
-                    <div className="flex items-center gap-2 my-2 p-2 rounded-md bg-muted">
-                        <audio ref={audioRef} src={audioSrc} controls className="w-full h-8" />
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowAudioPlayer(false)}>
-                            <X className="h-4 w-4" />
-                        </Button>
-                    </div>
-                )}
-                <ScrollArea className="h-[calc(70vh)] rounded-md border p-4">
+                <ScrollArea className="h-full">
                     <div className="prose dark:prose-invert max-w-none">
                         <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{processedContent}</ReactMarkdown>
                     </div>
@@ -106,58 +83,6 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                         </CardFooter>
                     </Card>
                 )}
-
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center text-xs text-muted-foreground">
-                        <span>{words} {t('builder.Section.words')}</span>
-                        <span className="mx-2">|</span>
-                        <span>{chars} {t('builder.Section.characters')}</span>
-                    </div>
-                    <div className="flex items-center">
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <span tabIndex={0}> {/* Wrapper for disabled button */}
-                                        <Button variant="ghost" size="sm" onClick={handleReadAloud} disabled={ttsMutation.isPending}>
-                                            {ttsMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Volume2 className="h-4 w-4 mr-2" />}
-                                            {t('builder.Section.readAloud')}
-                                        </Button>
-                                    </span>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>{t('builder.Section.tooltips.readAloud')}</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" disabled={isProcessingAi}>
-                                    {isProcessingAi ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Wand2 className="h-4 w-4 mr-2" />} {t('builder.Section.aiActions.title')}
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => handleAiAction(t('builder.Section.aiActions.summarizePrompt'))}><BookText className="me-2 h-4 w-4" />{t('builder.Section.aiActions.summarize')}</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleAiAction(t('builder.Section.aiActions.expandPrompt'))}><Maximize className="me-2 h-4 w-4" />{t('builder.Section.aiActions.expand')}</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleAiAction(t('builder.Section.aiActions.checkGrammarPrompt'))}><SpellCheck className="me-2 h-4 w-4" />{t('builder.Section.aiActions.checkGrammar')}</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleAiAction('Humanize', false)}><UserCheck className="me-2 h-4 w-4" />{t('builder.Section.aiActions.humanize')}</DropdownMenuItem>
-                                <DropdownMenuItem><GitCommitVertical className="me-2 h-4 w-4" />{t('builder.Section.aiActions.versionHistory')}</DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuSub>
-                                    <DropdownMenuSubTrigger><Brush className="me-2 h-4 w-4" />{t('builder.Section.aiActions.rewrite')}</DropdownMenuSubTrigger>
-                                    <DropdownMenuSubContent>
-                                        <DropdownMenuItem onClick={() => handleAiAction('Formal', false)}>{t('builder.Section.aiActions.styles.formal')}</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleAiAction('Friendly', false)}>{t('builder.Section.aiActions.styles.friendly')}</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleAiAction('Simple', false)}>{t('builder.Section.aiActions.styles.simple')}</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleAiAction('Creative', false)}>{t('builder.Section.aiActions.styles.creative')}</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleAiAction('Professional', false)}>{t('builder.Section.aiActions.styles.professional')}</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleAiAction('Academic', false)}>{t('builder.Section.aiActions.styles.academic')}</DropdownMenuItem>
-                                    </DropdownMenuSubContent>
-                                </DropdownMenuSub>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                </div>
             </div>
         </Tabs>
     );

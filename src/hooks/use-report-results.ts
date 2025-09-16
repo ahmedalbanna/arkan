@@ -11,6 +11,8 @@ import { useAgentStore } from './useAgentStore';
 import { useTranslate } from './use-translation';
 import { toast } from './use-toast';
 import { Project } from '@/lib/models/project';
+import { useSectionLogic } from './use-section-logic';
+
 
 export const useReportResults = () => {
   const { project, setProject } = useBuilderStore();
@@ -21,6 +23,7 @@ export const useReportResults = () => {
   const [currentPage, setCurrentPage] = useState(0);
 
   const sections = project?.sections || {};
+  const translatedSections = project?.translatedSections || {};
 
   const generatedSections = useMemo(
     () => (Object.keys(sections) as SectionName[]).filter(key => sections[key]),
@@ -57,13 +60,33 @@ export const useReportResults = () => {
   }, [sectionConfigs]);
 
   const getSectionTitle = (key: SectionName): string => {
-    return sectionConfigMap[key]?.title || key;
+    return t(sectionConfigMap[key]?.title) || key;
   };
 
   const getSectionIcon = (key: SectionName) => {
     const iconName = sectionConfigMap[key]?.icon;
     return getIconComponent(iconName) || FileText;
   };
+
+  // Logic from useSectionLogic is now integrated here
+  const {
+      isProcessingAi,
+      handleAiAction,
+      handleReadAloud,
+      ttsMutation,
+      words,
+      chars
+  } = useSectionLogic(
+      currentSectionKey!,
+      currentSectionKey ? sections[currentSectionKey!]! : '',
+      (key, value) => {
+          if (project) {
+              project.updateSectionContent(key, value);
+              setProject(new Project(project.toStateObject()));
+          }
+      }
+  );
+
 
   return {
     t,
@@ -76,5 +99,11 @@ export const useReportResults = () => {
     currentSectionKey,
     getSectionTitle,
     getSectionIcon,
+    isProcessingAi,
+    handleAiAction,
+    handleReadAloud,
+    ttsMutation,
+    words,
+    chars
   };
 };
