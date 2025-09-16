@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -39,7 +40,7 @@ const ObjectRenderer = React.memo(({ data }: { data: Record<string, any> }) => {
         if (!hasContent(value)) return null;
 
         return (
-            <div key={key} className="mb-4">
+            <div key={key} className="mb-4 last:mb-0">
                 <strong className="block font-semibold text-foreground/80">{formatKeyToTitle(key)}:</strong>
                 <div className="pl-2 mt-1">
                     <ValueRenderer value={value} />
