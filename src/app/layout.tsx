@@ -1,51 +1,95 @@
 
 
-import type { Metadata } from 'next';
-import { Poppins, PT_Sans, Cairo, Almarai } from 'next/font/google';
-import './globals.css';
-import { cn } from '@/lib/utils';
-import { Header } from '@/components/layout/Header';
-import { Toaster } from '@/components/ui/toaster';
-import { LocalizationProvider } from '@/context/LocalizationContext';
-import LanguageDirectionManager from '@/components/LanguageDirectionManager';
-import { ThemeProvider } from '@/components/ThemeProvider';
-import { AuthProvider } from '@/context/AuthContext';
-import { Footer } from '@/components/layout/Footer';
-import QueryProvider from '@/components/QueryProvider';
-import { cookies, headers } from 'next/headers';
-import { redirect } from 'next/dist/client/components/navigation';
-import { adminAuth } from '@/lib/firebase/server-init';
 import SupportChatWidget from '@/components/chat/SupportChatWidget';
 import FirebaseMessagingProvider from '@/components/FirebaseMessagingProvider';
+import LanguageDirectionManager from '@/components/LanguageDirectionManager';
+import { Header } from '@/components/layout/Header';
+import QueryProvider from '@/components/QueryProvider';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { Toaster } from '@/components/ui/toaster';
+import { AuthProvider } from '@/context/AuthContext';
+import { LocalizationProvider } from '@/context/LocalizationContext';
+import { adminAuth } from '@/lib/firebase/server-init';
+import { cn } from '@/lib/utils';
+import type { Metadata } from 'next';
+import { redirect } from 'next/dist/client/components/navigation';
+import localFont from 'next/font/local';
+import { cookies, headers } from 'next/headers';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Arkan - Professional Portfolio Platform',
   description: 'Showcase your work, discover talent, and interact with a community of professionals.',
 };
 
-const fontBody = PT_Sans({
-  subsets: ['latin'],
-  weight: ['400', '700'],
+const fontBody = localFont({
+  src: [
+    {
+      path: '../../public/fonts/pt-sans-v18-cyrillic_cyrillic-ext_latin_latin-ext-regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../../public/fonts/pt-sans-v18-cyrillic_cyrillic-ext_latin_latin-ext-700.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+  ],
   variable: '--font-body',
 });
 
-const fontHeadline = Poppins({
-  subsets: ['latin'],
-  weight: ['400', '600', '700'],
+const fontHeadline = localFont({
+  src: [
+    {
+      path: '../../public/fonts/poppins-v23-devanagari_latin_latin-ext-regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../../public/fonts/poppins-v23-devanagari_latin_latin-ext-600.woff2',
+      weight: '600',
+      style: 'normal',
+    },
+    {
+      path: '../../public/fonts/poppins-v23-devanagari_latin_latin-ext-700.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+  ],
   variable: '--font-headline',
 });
 
-const fontAlmarai = Almarai({
-  subsets: ['arabic'],
-  weight: ['400', '700'],
+const fontAlmarai = localFont({
+  src: [
+    {
+      path: '../../public/fonts/almarai-v19-arabic_latin-regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../../public/fonts/almarai-v19-arabic_latin-700.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+  ],
   variable: '--font-almarai',
 });
 
-const fontCairo = Cairo({
-    subsets: ['arabic'],
-    weight: ['400', '700'],
-    variable: '--font-cairo'
-})
+const fontCairo = localFont({
+  src: [
+    {
+      path: '../../public/fonts/cairo-v30-arabic_latin_latin-ext-regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../../public/fonts/cairo-v30-arabic_latin_latin-ext-700.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+  ],
+  variable: '--font-cairo',
+});
 
 // List of public paths that do not require authentication
 const PUBLIC_PATHS = ['/login', '/signup', '/forgot-password', '/design', '/docs', '/request'];
@@ -56,13 +100,13 @@ async function handleAuthRedirects(pathname: string) {
   const sessionCookie = (await cookies()).get('__session')?.value;
 
   let isAuthenticated = false;
-  if(sessionCookie) {
+  if (sessionCookie) {
     try {
-        await adminAuth.verifySessionCookie(sessionCookie, true);
-        isAuthenticated = true;
+      await adminAuth.verifySessionCookie(sessionCookie, true);
+      isAuthenticated = true;
     } catch (error) {
-       // Ignore verification errors, treat as not authenticated
-       isAuthenticated = false;
+      // Ignore verification errors, treat as not authenticated
+      isAuthenticated = false;
     }
   }
 
@@ -104,12 +148,12 @@ export default async function RootLayout({
             <LocalizationProvider>
               <AuthProvider>
                 <FirebaseMessagingProvider>
-                    <LanguageDirectionManager>
+                  <LanguageDirectionManager>
                     <Header />
                     <main className="flex-grow">{children}</main>
                     <SupportChatWidget />
                     <Toaster />
-                    </LanguageDirectionManager>
+                  </LanguageDirectionManager>
                 </FirebaseMessagingProvider>
               </AuthProvider>
             </LocalizationProvider>

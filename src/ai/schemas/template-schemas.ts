@@ -1,6 +1,4 @@
 
-import { table } from 'console';
-import { sub } from 'date-fns';
 import { z } from 'zod';
 
 // Base schema for common template fields
@@ -12,12 +10,12 @@ const BaseTemplateSchema = z.object({
 
 // Agent Prompt schema
 export const AgentPromptSchema = z.object({
-    base: z.string().min(1, "Base prompt is required."),
-    guidelines: z.array(z.object({
-        text: z.string(),
-        isDefault: z.boolean(),
-    })).optional(),
-    jsonStructure: z.any().optional(),
+  base: z.string().min(1, "Base prompt is required."),
+  guidelines: z.array(z.object({
+    text: z.string(),
+    isDefault: z.boolean(),
+  })).optional(),
+  jsonStructure: z.any().optional(),
 });
 
 
@@ -213,7 +211,7 @@ export const ProposalTemplateSchema = BaseTemplateSchema.extend({
   jsonStructure: z.any().optional(),
 });
 export const CreateProposalTemplateSchema = ProposalTemplateSchema.omit({ id: true }).extend({
-    id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID can only contain lowercase letters, numbers, and hyphens."),
+  id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID can only contain lowercase letters, numbers, and hyphens."),
 });
 export const UpdateProposalTemplateSchema = ProposalTemplateSchema.omit({ id: true }).partial();
 
@@ -223,7 +221,7 @@ export const ReportGenerationTemplateSchema = BaseTemplateSchema.extend({
   isDefault: z.boolean().optional(),
 });
 export const CreateReportTemplateSchema = ReportGenerationTemplateSchema.omit({ id: true }).extend({
-    id: z.string().min(3).regex(/^[a-z0-9-]+$/),
+  id: z.string().min(3).regex(/^[a-z0-9-]+$/),
 });
 export const UpdateReportTemplateSchema = ReportGenerationTemplateSchema.omit({ id: true }).partial();
 
@@ -235,6 +233,6 @@ export const PresentationGenerationTemplateSchema = BaseTemplateSchema.extend({
   isDefault: z.boolean().optional(),
 });
 export const CreatePresentationTemplateSchema = PresentationGenerationTemplateSchema.omit({ id: true }).extend({
-    id: z.string().min(3).regex(/^[a-z0-9-]+$/),
+  id: z.string().min(3).regex(/^[a-z0-9-]+$/),
 });
 export const UpdatePresentationTemplateSchema = PresentationGenerationTemplateSchema.omit({ id: true }).partial();
