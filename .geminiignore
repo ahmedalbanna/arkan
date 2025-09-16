@@ -5,3 +5,10 @@
 /.vscode/
 /dataconnect/
 /node_modules/
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
