@@ -1,8 +1,9 @@
 
 import { adminDb } from '@/lib/firebase/server-init';
-import type { Agent } from '@/lib/types';
+import { AgentProperties } from '@/lib/models/agent';
 
-let allAgents: Agent[] | null = null;
+
+let allAgents: AgentProperties[] | null = null;
 let lastFetchTimestamp = 0;
 const CACHE_DURATION = 1000 * 60 * 5; // 5 minutes
 
@@ -11,7 +12,7 @@ const CACHE_DURATION = 1000 * 60 * 5; // 5 minutes
  * Implements a simple in-memory cache to reduce Firestore reads.
  * @returns A promise that resolves to an array of Agent objects.
  */
-export async function getEnabledAgents(): Promise<Agent[]> {
+export async function getEnabledAgents(): Promise<AgentProperties[]> {
   const now = Date.now();
   // Return cached data if it's not stale
   if (allAgents && (now - lastFetchTimestamp < CACHE_DURATION)) {
@@ -27,11 +28,11 @@ export async function getEnabledAgents(): Promise<Agent[]> {
       return [];
     }
 
-    const fetchedAgents: Agent[] = [];
+    const fetchedAgents: AgentProperties[] = [];
     querySnapshot.forEach((doc) => {
       // We cast to Agent, assuming the data in Firestore matches the type.
       // Add validation here if needed (e.g., with Zod).
-      fetchedAgents.push({ id: doc.id, ...doc.data() } as Agent);
+      fetchedAgents.push({ id: doc.id, ...doc.data() } as AgentProperties);
     });
     
     // Update cache

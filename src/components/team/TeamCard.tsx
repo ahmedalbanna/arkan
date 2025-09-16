@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { InviteMemberForm } from './InviteMemberForm';
 import { useLocalization } from '@/context/LocalizationContext';
 import type { Team } from '@/lib/models/team';
+import type { User, TeamMember } from '@/lib/models/user';
 
 interface TeamCardProps {
     team: Team;
@@ -20,7 +21,11 @@ export function TeamCard({ team }: TeamCardProps) {
     const { t } = useLocalization();
 
     const isOwner = useMemo(() => team.ownerId === firebaseUser?.uid, [team, firebaseUser]);
-    const members = useMemo(() => team.members.sort((a, b) => a.name.localeCompare(b.name)), [team.members]);
+    const members = useMemo(() => {
+        // The team object from the hook now has members as User[] instances
+        const teamMembers = (team.members || []) as unknown as User[];
+        return teamMembers.sort((a, b) => a.name.localeCompare(b.name));
+    }, [team.members]);
 
     return (
         <AccordionItem value={team.id} className="border rounded-lg bg-card">
@@ -45,8 +50,8 @@ export function TeamCard({ team }: TeamCardProps) {
                                         <p className="font-medium">{member.name}</p>
                                         <p className="text-sm text-muted-foreground">{member.email}</p>
                                     </div>
-                                    <Badge variant={member.role === 'owner' ? 'default' : 'secondary'}>
-                                        {t(`team.roles.${member.role}`)}
+                                    <Badge variant={(member as any).role === 'owner' ? 'default' : 'secondary'}>
+                                        {t(`team.roles.${(member as any).role}`)}
                                     </Badge>
                                 </div>
                             ))}

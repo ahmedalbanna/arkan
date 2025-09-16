@@ -1,11 +1,9 @@
 'use client';
 
-import { TeamMember } from '@/lib/types';
-import { TeamProperties } from '@/lib/models/team';
+import { TeamProperties, TeamWithMembers } from '@/lib/models/team';
+import { TeamMember, UserProfile } from '@/lib/models/user';
 
-export interface TeamWithMembers extends TeamProperties {
-    members: TeamMember[];
-}
+export { type TeamWithMembers };
 
 export async function fetchUserTeams(token: string): Promise<TeamWithMembers[]> {
     if (!token) throw new Error('User not authenticated');

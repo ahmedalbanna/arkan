@@ -10,13 +10,14 @@ import {
     inviteMember as inviteMemberApi
 } from '@/services';
 import { useMutation, useQuery, useQueryClient, useQueryClient as useTanstackQueryClient } from '@tanstack/react-query';
-// Import the plain object type for API responses
-import type { TeamMember } from '@/lib/types';
 // Import our new class
 import { app } from '@/lib';
-import { Team, type TeamProperties } from '@/lib/models/team';
+import { Team, type TeamProperties, TeamWithMembers } from '@/lib/models/team';
 import { collection, getDocs, getFirestore, onSnapshot, query, where } from 'firebase/firestore';
 import { useEffect } from 'react';
+import type { TeamMember } from '@/lib/models/user';
+
+export { type TeamWithMembers };
 
 /**
  * Fetches the user's teams in real-time.
@@ -112,5 +113,3 @@ export function useInviteMember() {
         }
     })
 }
-
-

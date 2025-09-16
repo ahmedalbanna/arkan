@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
 
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-import { AgentPromptSchema } from '@/ai/schemas/template-schemas';
+import { AgentPromptSchema } from '@/lib/models/agent';
 
 // GET /api/agents
 export const GET = withAuth(async () => {

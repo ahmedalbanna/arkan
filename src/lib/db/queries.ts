@@ -1,10 +1,17 @@
 
-
 'use server';
 import { adminAuth, adminDb } from '@/lib/firebase/server-init';
 import { FieldValue } from 'firebase-admin/firestore';
-import type { Agent, Team, TeamMember, TransactionData, UserProfile } from '@/lib/types';
-import type { ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate, DocxTemplate, PptxTemplate } from '@/lib/types';
+import type { UserProfile } from '@/lib/models/user';
+import type { TeamProperties } from '@/lib/models/team';
+import type { TeamMember } from '@/lib/models/user';
+import type { ProposalTemplateProperties } from '@/lib/models/proposalTemplate';
+import type { ReportTemplateProperties } from '@/lib/models/reportTemplate';
+import type { PresentationTemplateProperties } from '@/lib/models/presentationTemplate';
+import type { DocxTemplateProperties } from '@/lib/models/docxTemplate';
+import type { PptxTemplateProperties } from '@/lib/models/pptxTemplate';
+import { AgentProperties } from '../models/agent';
+import { TransactionProperties } from '../models/transaction';
 
 
 // === User Queries ===
@@ -123,7 +130,7 @@ export async function deductUserCredits(userId: string, creditsToDeduct: number)
 
 // === Transaction Queries ===
 
-export async function createTransaction(data: Omit<TransactionData, 'createdAt' | 'id'>) {
+export async function createTransaction(data: Omit<TransactionProperties, 'createdAt' | 'id'>) {
     const transactionRef = adminDb.collection('transactions').doc();
     await transactionRef.set({
         ...data,
@@ -132,7 +139,7 @@ export async function createTransaction(data: Omit<TransactionData, 'createdAt' 
     return { id: transactionRef.id };
 }
 
-export async function getTransactionsByStatus({ status, limit, lastVisibleId }: { status: 'pending' | 'verified' | 'rejected', limit: number, lastVisibleId?: string }): Promise<{ transactions: TransactionData[], hasNextPage: boolean, lastVisibleId?: string | null }> {
+export async function getTransactionsByStatus({ status, limit, lastVisibleId }: { status: 'pending' | 'verified' | 'rejected', limit: number, lastVisibleId?: string }): Promise<{ transactions: TransactionProperties[], hasNextPage: boolean, lastVisibleId?: string | null }> {
     let query = adminDb.collection('transactions')
         .where('status', '==', status)
         .orderBy('createdAt', 'desc')
@@ -147,7 +154,7 @@ export async function getTransactionsByStatus({ status, limit, lastVisibleId }: 
 
     const snapshot = await query.get();
 
-    const transactions = snapshot.docs.slice(0, limit).map(doc => ({ id: doc.id, ...doc.data() } as TransactionData));
+    const transactions = snapshot.docs.slice(0, limit).map(doc => ({ id: doc.id, ...doc.data() } as TransactionProperties));
     const hasNextPage = snapshot.docs.length > limit;
     const newLastVisibleId = hasNextPage ? transactions[transactions.length - 1].id : null;
 
@@ -155,23 +162,23 @@ export async function getTransactionsByStatus({ status, limit, lastVisibleId }: 
 }
 
 
-export async function getTransactionsByUserId(userId: string): Promise<TransactionData[]> {
+export async function getTransactionsByUserId(userId: string): Promise<TransactionProperties[]> {
     const snapshot = await adminDb.collection('transactions')
         .where('userId', '==', userId)
         .orderBy('createdAt', 'desc')
         .get();
 
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as TransactionData);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as TransactionProperties);
 }
 
-export async function getTransactionsByDateRange(startDate: string, endDate: string): Promise<TransactionData[]> {
+export async function getTransactionsByDateRange(startDate: string, endDate: string): Promise<TransactionProperties[]> {
     const snapshot = await adminDb.collection('transactions')
         .where('createdAt', '>=', startDate)
         .where('createdAt', '<=', endDate)
         .orderBy('createdAt', 'desc')
         .get();
 
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as TransactionData);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as TransactionProperties);
 }
 
 // --- Team Queries ---
@@ -186,7 +193,7 @@ export async function getUserTeams(userId: string) {
         const teamDoc = await adminDb.collection('teams').doc(teamId).get();
         if (!teamDoc.exists) return null;
 
-        const teamData = { id: teamDoc.id, ...teamDoc.data() } as Team;
+        const teamData = { id: teamDoc.id, ...teamDoc.data() } as TeamProperties;
 
         const membersSnapshot = await adminDb.collection('teams').doc(teamId).collection('members').get();
         const members = membersSnapshot.docs.map(doc => doc.data() as TeamMember);
@@ -199,17 +206,17 @@ export async function getUserTeams(userId: string) {
     // Sort teams by most recent activity (if a field for that exists) or creation date
     teams.sort((a, b) => new Date(b!.createdAt).getTime() - new Date(a!.createdAt).getTime());
 
-    return teams as (Team & { members: TeamMember[] })[];
+    return teams as (TeamProperties & { members: TeamMember[] })[];
 }
 
 
-export async function createTeamForUser(userId: string, teamName: string): Promise<Team> {
+export async function createTeamForUser(userId: string, teamName: string): Promise<TeamProperties> {
   const teamRef = adminDb.collection('teams').doc();
   const userRef = adminDb.collection('users').doc(userId);
   const userProfile = await getUserProfile(userId);
   if (!userProfile) throw new Error("User not found.");
 
-  const newTeam: Omit<Team, 'id'> = {
+  const newTeam: Omit<TeamProperties, 'id' | 'members'> = {
       name: teamName,
       ownerId: userId,
       createdAt: new Date().toISOString(),
@@ -232,16 +239,16 @@ export async function createTeamForUser(userId: string, teamName: string): Promi
 
   await batch.commit();
 
-  return { id: teamRef.id, ...newTeam };
+  return { id: teamRef.id, ...newTeam, members: [newMember] };
 }
 
 // --- Agent Queries ---
-export async function getAgent(agentId: string): Promise<Agent | null> {
+export async function getAgent(agentId: string): Promise<AgentProperties | null> {
     try {
         const agentDoc = await adminDb.collection('agents').doc(agentId).get();
 
         if (agentDoc.exists) {
-            return agentDoc.data() as Agent;
+            return agentDoc.data() as AgentProperties;
         }
 
         console.warn(`Agent with ID '${agentId}' not found in Firestore.`);
@@ -256,7 +263,7 @@ export async function getAgent(agentId: string): Promise<Agent | null> {
 
 // --- Template Queries ---
 export type TemplateType = 'proposal' | 'report' | 'presentation' | 'docx' | 'pptx';
-export type TemplateData = ProposalTemplate | ReportGenerationTemplate | PresentationGenerationTemplate | DocxTemplate | PptxTemplate;
+export type TemplateData = ProposalTemplateProperties | ReportTemplateProperties | PresentationTemplateProperties | DocxTemplateProperties | PptxTemplateProperties;
 
 export async function createGenerativeTemplate(templateType: TemplateType, id: string, data: Omit<TemplateData, 'id' | 'createdAt'>): Promise<TemplateData> {
     const collectionName = ['docx', 'pptx'].includes(templateType) ? 'styles' : 'items';

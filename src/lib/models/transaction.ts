@@ -1,10 +1,26 @@
 
-import type { TransactionData } from '@/lib/types';
+'use client';
 
-// The properties are now based on the TransactionData interface
-export type TransactionProperties = TransactionData;
+import { format } from 'date-fns';
 
-export class Transaction implements TransactionData {
+export interface TransactionProperties {
+  id: string; // Firestore document ID
+  userId: string;
+  planId: string;
+  planName: string;
+  credits: number;
+  price: number;
+  userName: string;
+  userEmail: string;
+  status: 'pending' | 'verified' | 'rejected';
+  proofUrl: string;
+  createdAt: string;
+  adminNotes?: string;
+  verifiedAt?: string;
+  verifiedBy?: string;
+}
+
+export class Transaction implements TransactionProperties {
     public id: string;
     public userId: string;
     public planId: string;

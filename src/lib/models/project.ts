@@ -1,7 +1,164 @@
 
 
-import type { ProjectState, SavedProject, DiagramType, PresentationHistoryEntry, ContextFileType, AnyProjectProposal, ProjectPlan } from '@/lib/types';
+import type { DiagramType, PresentationHistoryEntry, AnyProjectProposal, ProjectPlan } from '@/ai/schemas';
 import { Diagram, type DiagramProperties } from './diagram';
+
+// --- Types moved from types.ts ---
+
+export interface FullReportModeConfig {
+  mode: "Full Report Mode";
+  reportTitle?: string;
+  language?: string;
+  version?: string;
+  author?: {
+    name?: string;
+    id?: string;
+  };
+  metadata?: {
+    creationDate?: string;
+    lastModifiedDate?: string;
+    tags?: string[];
+  };
+  styling?: {
+    template?: string;
+    colors?: {
+      primary?: string;
+      background?: string;
+      accent?: string;
+    };
+    fonts?: {
+      headline?: string;
+      body?: string;
+      code?: string;
+    };
+  };
+  sections: ReportSectionConfig[];
+  postProcessing?: PostProcessingStep[];
+}
+
+export interface ReportSectionConfig {
+  sectionName: string;
+  agentId: string;
+  prompt: {
+    base: string;
+    guidelines: { text: string; isDefault: boolean; }[];
+  };
+  contexts: any[];
+  controlOutput?: {
+    format?: string;
+    maxLength?: number;
+  };
+  dependencies?: string[];
+}
+
+export interface PostProcessingStep {
+  type: string;
+  agentId?: string;
+  criteria?: string[];
+  format?: string;
+  template?: string;
+}
+
+export interface LinkedAsset {
+  type: string;
+  assetId: string;
+  description?: string;
+}
+export interface GeneratedProposalSection {
+  sectionName: string;
+  generatedContent: string;
+  generationDetails?: {
+    agentId?: string;
+    promptUsed?: {
+      base?: string;
+      guidelines?: { text: string; isDefault: boolean; }[];
+    };
+    contextsUsed?: any[];
+    outputControl?: {
+      format?: string;
+      maxLength?: number;
+    };
+  };
+  order?: number;
+  wordCount?: number;
+  linkedAssets?: LinkedAsset[];
+}
+
+export interface PostProcessingStepResult {
+  type: string;
+  status: string;
+  result?: any;
+  errorMessage?: string | null;
+  timestamp?: string;
+}
+
+export interface ProposalVersionHistory {
+  version: string;
+  timestamp: string;
+  notes?: string;
+  changes?: string[];
+}
+
+export interface SavedProposalState {
+  proposalTitle?: string;
+  language?: string;
+  status?: string;
+  errorMessage?: string | null;
+  generationMetadata?: {
+    timestamp?: string;
+    templateUsed?: string;
+    modelVersion?: string;
+    totalCostCredits?: number;
+    durationSeconds?: number;
+  };
+  authorId?: string;
+  targetAudience?: string;
+  desiredTone?: string;
+  sections?: GeneratedProposalSection[];
+  postProcessing?: PostProcessingStepResult[];
+  versionHistory?: ProposalVersionHistory[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type ContextFileType = 'context' | 'example' | 'question' | 'textbook' | 'guidelines';
+
+
+// --- Main Project State Interfaces ---
+
+export interface ProjectState {
+  name?: string | undefined;
+  projectIdea?: string | undefined;
+  proposal: AnyProjectProposal | null;
+  reportConfig?: FullReportModeConfig | null;
+  generatedProposalState?: SavedProposalState | null;
+  sections?: Partial<Record<import('@/ai/schemas').SectionName, string>>;
+  translatedSections?: Partial<Record<import('@/ai/schemas').SectionName, string>>;
+  evaluation?: import("@/ai/schemas").EvaluateReportOutput | null | undefined;
+  diagrams?: Partial<Record<DiagramType, DiagramProperties>>;
+  presentation?: {
+    history: PresentationHistoryEntry[];
+  } | undefined;
+  codeGenerator?: any;
+  academicSolver?: any;
+  codebase?: any;
+  externalContext?: {
+    fileName: string;
+    content: string;
+    type: ContextFileType;
+  }[] | undefined;
+  teamId?: string | null | undefined;
+  projectPlan: ProjectPlan | null;
+}
+export interface SavedProject extends ProjectState {
+  id: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- End of moved types ---
+
 
 export type ProjectProperties = SavedProject;
 
@@ -17,8 +174,8 @@ export class Project implements SavedProject {
     private _name?: string;
     private _projectIdea?: string;
     private _proposal: AnyProjectProposal | null;
-    private _reportConfig?: import('@/lib/types').FullReportModeConfig | null;
-    private _generatedProposalState?: import('@/lib/types').SavedProposalState | null;
+    private _reportConfig?: import('@/lib/models/project').FullReportModeConfig | null;
+    private _generatedProposalState?: import('@/lib/models/project').SavedProposalState | null;
     private _sections?: ProjectState['sections'];
     private _translatedSections?: ProjectState['translatedSections'];
     private _evaluation?: import('@/ai/schemas').EvaluateReportOutput | null;
@@ -271,7 +428,7 @@ export class Project implements SavedProject {
     }
 
     // --- Academic Solver Methods ---
-    public setAcademicSolverStage(stage: import('@/lib/types').AcademicSolverStage): void {
+    public setAcademicSolverStage(stage: import('@/lib/models/project').AcademicSolverStage): void {
         if (!this._academicSolver) this.initializeAcademicSolver();
         this._academicSolver.stage = stage;
     }

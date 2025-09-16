@@ -29,17 +29,17 @@ ${schemaString}
 {{#if advancedFields}}
 --- DETAILED PROJECT REQUIREMENTS ---
 The user has provided the following structured details for the project. Use this as the primary source of information.
-- **Project Title**: \'\'\'{{advancedFields.projectTitle}}\'\'\'
-- **Project Objective**: \'\'\'{{advancedFields.projectObjective}}\'\'\'
-- **Expected Outcomes**: \'\'\'{{advancedFields.expectedOutcomes}}\'\'\'
-- **Methodology**: \'\'\'{{advancedFields.methodology}}\'\'\'
-- **Timeline**: \'\'\'{{advancedFields.timeline}}\'\'\'
-- **Budget**: \'\'\'{{advancedFields.budget}}\'\'\'
-- **Stakeholders**: \'\'\'{{advancedFields.stakeholders}}\'\'\'
-- **Project Rationale**: \'\'\'{{advancedFields.projectRationale}}\'\'\'
-- **Project Context**: \'\'\'{{advancedFields.projectContext}}\'\'\'
-- **Risks & Challenges**: \'\'\'{{advancedFields.risksAndChallenges}}\'\'\'
-- **Additional Context**: \'\'\'{{advancedFields.additionalContext}}\'\'\'
+- **Project Title**: '''{{advancedFields.projectTitle}}'''
+- **Project Objective**: '''{{advancedFields.projectObjective}}'''
+- **Expected Outcomes**: '''{{advancedFields.expectedOutcomes}}'''
+- **Methodology**: '''{{advancedFields.methodology}}'''
+- **Timeline**: '''{{advancedFields.timeline}}'''
+- **Budget**: '''{{advancedFields.budget}}'''
+- **Stakeholders**: '''{{advancedFields.stakeholders}}'''
+- **Project Rationale**: '''{{advancedFields.projectRationale}}'''
+- **Project Context**: '''{{advancedFields.projectContext}}'''
+- **Risks & Challenges**: '''{{advancedFields.risksAndChallenges}}'''
+- **Additional Context**: '''{{advancedFields.additionalContext}}'''
 {{else}}
 --- Main Input: Project Idea ---
 {{{projectIdea}}}

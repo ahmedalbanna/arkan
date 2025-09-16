@@ -3,7 +3,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { adminAuth, adminDb } from '@/lib/firebase/server-init';
-import { type Team, type TeamMember } from '@/lib/types';
+import { TeamProperties } from '@/lib/models/team';
+import { TeamMember } from '@/lib/models/user';
 import { getUserProfile } from '@/lib/db/queries';
 import { FieldValue } from 'firebase-admin/firestore';
 
@@ -26,7 +27,7 @@ async function verifyTeamOwner(request: Request, teamId: string) {
     if (!teamDoc.exists) {
         return { authorized: false, message: 'Team not found' };
     }
-    const team = teamDoc.data() as Team;
+    const team = teamDoc.data() as TeamProperties;
 
     if (team.ownerId !== requesterId) {
         return { authorized: false, message: 'Forbidden: Only the team owner can invite members' };

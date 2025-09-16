@@ -4,8 +4,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { agentKeys, categoryKeys } from "@/lib/query-keys";
-import { Agent, type AgentProperties } from '@/lib/models/agent';
-import { type AgentPrompt, type AgentKnowledgeSource } from '@/lib/types';
+import { Agent, type AgentProperties, AgentCategory, AgentPrompt, AgentKnowledgeSource } from '@/lib/models/agent';
 import { useAuth } from "@/context/AuthContext";
 import { useMemo } from "react";
 import { handleErrorUtility } from "@/lib/errorUtils";
@@ -22,13 +21,14 @@ import {
 import { type AgentEditorFormValues } from "@/lib/agent-editor-schema";
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
 import { useAgentStore } from "@/hooks/useAgentStore";
+import { AgentCategoryDetails } from "@/lib/models/agent";
 
 export { Agent };
 export type UpdateAgentVariables = {
   agentId: string;
   payload: AgentEditorFormValues;
 };
-export type CreateAgentVariables = Omit<import('@/lib/types').Agent, 'isEnabled' | 'category' | 'id'> & { id: string, category: string; knowledge?: AgentKnowledgeSource[] };
+export type CreateAgentVariables = Omit<AgentProperties, 'isEnabled' | 'category' | 'id' | 'pageUrl'> & { id: string, category: string, pageUrl: string; knowledge?: AgentKnowledgeSource[] };
 
 /**
  * Custom hook to fetch the list of all AI agent categories.
@@ -36,7 +36,7 @@ export type CreateAgentVariables = Omit<import('@/lib/types').Agent, 'isEnabled'
 export function useAgentCategories() {
   const { firebaseUser } = useAuth();
 
-  return useQuery<import('@/lib/types').AgentCategoryDetails[]>({
+  return useQuery<AgentCategoryDetails[]>({
     queryKey: categoryKeys.lists(),
     queryFn: async () => {
       const token = await getAuthenticatedToken(firebaseUser);
@@ -57,7 +57,7 @@ export function useCreateAgentCategory() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
 
-  return useMutation<import('@/lib/types').AgentCategory, Error, { id: string; name: string }>({
+  return useMutation<AgentCategoryDetails, Error, { id: string; name: string }>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return createAgentCategoryApi(variables, token);
@@ -122,7 +122,7 @@ export function useUpdateAgent() {
   const { firebaseUser } = useAuth();
   const { fetchAgents } = useAgentStore.getState();
 
-  return useMutation<import('@/lib/types').Agent, Error, UpdateAgentVariables>({
+  return useMutation<AgentProperties, Error, UpdateAgentVariables>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return updateAgentApi(variables, token);
@@ -149,7 +149,7 @@ export function useCreateAgent() {
     const { firebaseUser } = useAuth();
     const { fetchAgents } = useAgentStore.getState();
 
-    return useMutation<import('@/lib/types').Agent, Error, CreateAgentVariables>({
+    return useMutation<AgentProperties, Error, CreateAgentVariables>({
         mutationFn: async (variables) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return createAgentApi(variables, token);

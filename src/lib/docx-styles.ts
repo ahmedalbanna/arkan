@@ -1,11 +1,11 @@
-// src/lib/docx-styles.ts
 
 'use client';
 
 import { AlignmentType, ShadingType } from 'docx';
 import type { IStylesOptions } from 'docx';
-// Import the new types and schemas from your types file
-import { DocxTemplate, CustomStyles } from '@/lib/types';
+import { DocxTemplateProperties, DocxStyleOptionsSchema } from '@/lib/models/docxTemplate';
+import { CustomStyles } from '@/lib/word-converter/types';
+
 
 const commonParagraphStyles = [
     {
@@ -257,11 +257,10 @@ const academicStyles: IStylesOptions = {
 };
 
 // Ensure the 'templates' object conforms to the DocxTemplate schema
-export const templates: Record<string, DocxTemplate> = {
+export const templates: Record<string, Omit<DocxTemplateProperties, 'id'>> = {
     modern: {
         name: 'templates.modern.name',
-        id: 'modern',
-        styles: modernStyles as DocxTemplate['styles'],
+        styles: modernStyles as IStylesOptions,
         customStyles: modernCustomStyles,
         description: 'templates.modern.description',
         imageUrl: '',
@@ -269,8 +268,7 @@ export const templates: Record<string, DocxTemplate> = {
     },
     classic: {
         name: 'templates.classic.name',
-        id: 'classic',
-        styles: classicStyles as DocxTemplate['styles'],
+        styles: classicStyles as IStylesOptions,
         customStyles: classicCustomStyles,
         description: 'templates.classic.description',
         imageUrl: '',
@@ -278,8 +276,7 @@ export const templates: Record<string, DocxTemplate> = {
     },
     academic: {
         name: 'templates.academic.name',
-        id: 'academic',
-        styles: academicStyles as DocxTemplate['styles'],
+        styles: academicStyles as IStylesOptions,
         customStyles: academicCustomStyles,
         description: 'templates.academic.description',
         imageUrl: '',

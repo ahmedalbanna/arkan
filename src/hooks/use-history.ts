@@ -1,9 +1,10 @@
+
 // code explantion in docs/hooks/use-history.md
 
 "use client";
 
 import type { AnyProjectProposal } from "@/ai/schemas";
-import type { ProjectState } from '@/lib/types'; // For ProjectState
+import type { ProjectState } from '@/lib/models/project'; // Import from model
 import { useCallback, useEffect, useState } from "react";
 
 

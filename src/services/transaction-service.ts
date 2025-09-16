@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { TransactionData, VerifyPaymentVariables } from '@/lib/types';
+import type { TransactionProperties, VerifyPaymentVariables } from '@/lib/types';
 
 export type TransactionStatus = 'pending' | 'verified' | 'rejected';
 interface FetchTransactionsParams {
@@ -11,7 +11,7 @@ interface FetchTransactionsParams {
   lastVisibleId?: string;
 }
 
-export async function getTransactions(params: FetchTransactionsParams): Promise<{ transactions: TransactionData[], hasNextPage: boolean, lastVisibleId?: string | null }> {
+export async function getTransactions(params: FetchTransactionsParams): Promise<{ transactions: TransactionProperties[], hasNextPage: boolean, lastVisibleId?: string | null }> {
     const { token, status, limit, lastVisibleId } = params;
     if (!token) {
         throw new Error("Authentication token is required.");
@@ -63,7 +63,7 @@ interface FetchReportParams {
   endDate: string;
 }
 
-export async function fetchTransactionsForReport(params: FetchReportParams): Promise<TransactionData[]> {
+export async function fetchTransactionsForReport(params: FetchReportParams): Promise<TransactionProperties[]> {
     const { token, startDate, endDate } = params;
     if (!token) {
         throw new Error("Authentication token is required.");
@@ -87,7 +87,7 @@ export async function fetchTransactionsForReport(params: FetchReportParams): Pro
  * @param token The authentication token of the user.
  * @returns A promise that resolves to an array of TransactionData objects.
  */
-export async function fetchUserTransactions(token: string): Promise<TransactionData[]> {
+export async function fetchUserTransactions(token: string): Promise<TransactionProperties[]> {
     if (!token) throw new Error("Authentication token is required.");
     const response = await fetch('/api/user-transactions', {
         headers: { 'Authorization': `Bearer ${token}` }

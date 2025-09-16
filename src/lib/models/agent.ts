@@ -1,6 +1,48 @@
 import type { LucideIcon } from 'lucide-react';
-// Note: Adjust the import path based on your project's structure if needed.
-import type { AgentCategory, AgentKnowledgeSource, AgentPrompt } from '../types';
+
+// --- Types moved from types.ts ---
+
+export enum AgentCategory {
+  ContentGeneration = 'content-generation',
+  ProposalGeneration = 'proposal-generation',
+  ReportGeneration = 'report-generation',
+  DiagramGeneration = 'diagram-generation',
+  PresentationGeneration = 'presentation-generation',
+  CodeGeneration = 'code-generation',
+  Marketing = 'marketing',
+  Legal = 'legal',
+  AdminTools = 'admin-tools',
+  AgentManagement = 'agent-management',
+}
+
+export interface AgentCategoryDetails {
+  id: string;
+  name: string;
+  icon: LucideIcon;
+  description: string;
+  pageUrl: string;
+}
+
+export interface AgentGuideline {
+  text: string;
+  isDefault: boolean;
+}
+
+export interface AgentKnowledgeSource {
+  name: string;
+  type: 'file' | 'text' | 'web';
+  content: string; // content, data URI, or URL
+}
+
+export interface AgentPrompt {
+  base: string;
+  guidelines?: AgentGuideline[];
+  jsonStructure?: any;
+  defaultContext?: ('proposal' | 'projectPlan' | string)[]; // Array of agent IDs or keywords
+}
+
+// --- End of moved types ---
+
 
 // This interface is now compatible with the one in `types.ts`
 export interface AgentProperties {

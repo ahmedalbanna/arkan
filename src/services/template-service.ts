@@ -1,16 +1,19 @@
 
 'use client';
 
-import type { DocxTemplate, PptxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate } from '@/lib/types';
-import { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
+import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
+import { DocxTemplateProperties } from '@/lib/models/docxTemplate';
+import { PptxTemplateProperties } from '@/lib/models/pptxTemplate';
+import { PresentationTemplateProperties } from '@/lib/models/presentationTemplate';
+import { ProposalTemplateProperties } from '@/lib/models/proposalTemplate';
+import { ReportTemplateProperties } from '@/lib/models/reportTemplate';
 
-export type { DocxTemplate, PptxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate };
 
-export type DocxTemplatesRecord = Record<string, DocxTemplate>;
-export type PptxTemplatesRecord = Record<string, PptxTemplate>;
+export type DocxTemplatesRecord = Record<string, DocxTemplateProperties>;
+export type PptxTemplatesRecord = Record<string, PptxTemplateProperties>;
 
 // --- Proposal Templates ---
-export async function fetchProposalTemplates(token: string): Promise<ProposalTemplate[]> {
+export async function fetchProposalTemplates(token: string): Promise<ProposalTemplateProperties[]> {
     const response = await fetch('/api/admin/templates/proposal', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -20,7 +23,7 @@ export async function fetchProposalTemplates(token: string): Promise<ProposalTem
     return await response.json();
 }
 
-export async function createProposalTemplate(data: Omit<ProposalTemplate, 'id' | 'createdAt'> & {id: string}, token: string): Promise<ProposalTemplate> {
+export async function createProposalTemplate(data: Omit<ProposalTemplateProperties, 'id' | 'createdAt'> & {id: string}, token: string): Promise<ProposalTemplateProperties> {
     const response = await fetch('/api/admin/templates/proposal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -33,7 +36,7 @@ export async function createProposalTemplate(data: Omit<ProposalTemplate, 'id' |
     return await response.json();
 }
 
-export async function updateProposalTemplate(id: string, data: Partial<ProposalTemplate>, token: string): Promise<ProposalTemplate> {
+export async function updateProposalTemplate(id: string, data: Partial<ProposalTemplateProperties>, token: string): Promise<ProposalTemplateProperties> {
     const response = await fetch(`/api/admin/templates/proposal/${id}`, {
         method: 'PUT',
         headers: {
@@ -62,7 +65,7 @@ export async function deleteProposalTemplate(id: string, token: string): Promise
 }
 
 // --- Report Templates ---
-export async function fetchReportTemplates(token: string): Promise<ReportGenerationTemplate[]> {
+export async function fetchReportTemplates(token: string): Promise<ReportTemplateProperties[]> {
     const response = await fetch('/api/admin/templates/report', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -72,7 +75,7 @@ export async function fetchReportTemplates(token: string): Promise<ReportGenerat
     return await response.json();
 }
 
-export async function createReportTemplate(data: Omit<ReportGenerationTemplate, 'isDefault' | 'createdAt'> & {id: string}, token: string): Promise<ReportGenerationTemplate> {
+export async function createReportTemplate(data: Omit<ReportTemplateProperties, 'isDefault' | 'createdAt'> & {id: string}, token: string): Promise<ReportTemplateProperties> {
      const response = await fetch('/api/admin/templates/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -86,7 +89,7 @@ export async function createReportTemplate(data: Omit<ReportGenerationTemplate, 
 }
 
 
-export async function updateReportTemplate(id: string, data: Partial<ReportGenerationTemplate>, token: string): Promise<ReportGenerationTemplate> {
+export async function updateReportTemplate(id: string, data: Partial<ReportTemplateProperties>, token: string): Promise<ReportTemplateProperties> {
     const response = await fetch(`/api/admin/templates/report/${id}`, {
         method: 'PUT',
         headers: {
@@ -115,7 +118,7 @@ export async function deleteReportTemplate(id: string, token: string): Promise<{
 }
 
 // --- Presentation Templates ---
-export async function fetchPresentationTemplates(token: string): Promise<PresentationGenerationTemplate[]> {
+export async function fetchPresentationTemplates(token: string): Promise<PresentationTemplateProperties[]> {
     const response = await fetch('/api/admin/templates/presentation', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -125,7 +128,7 @@ export async function fetchPresentationTemplates(token: string): Promise<Present
     return await response.json();
 }
 
-export async function createPresentationTemplate(data: Omit<PresentationGenerationTemplate, 'createdAt'> & {id: string}, token: string): Promise<PresentationGenerationTemplate> {
+export async function createPresentationTemplate(data: Omit<PresentationTemplateProperties, 'createdAt'> & {id: string}, token: string): Promise<PresentationTemplateProperties> {
      const response = await fetch('/api/admin/templates/presentation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -138,7 +141,7 @@ export async function createPresentationTemplate(data: Omit<PresentationGenerati
     return await response.json();
 }
 
-export async function updatePresentationTemplate(id: string, data: Partial<PresentationGenerationTemplate>, token: string): Promise<PresentationGenerationTemplate> {
+export async function updatePresentationTemplate(id: string, data: Partial<PresentationTemplateProperties>, token: string): Promise<PresentationTemplateProperties> {
     const response = await fetch(`/api/admin/templates/presentation/${id}`, {
         method: 'PUT',
         headers: {
@@ -177,7 +180,7 @@ export async function fetchDocxTemplates(): Promise<DocxTemplatesRecord> {
   return await response.json();
 }
 
-export async function createDocxTemplate(data: {id: string, name: string, description: string}, token: string): Promise<DocxTemplate> {
+export async function createDocxTemplate(data: {id: string, name: string, description: string}, token: string): Promise<DocxTemplateProperties> {
     const response = await fetch('/api/admin/templates/docx', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -225,7 +228,7 @@ export async function deleteDocxTemplate(key: string, token: string): Promise<{ 
 
 // --- PPTX Templates ---
 
-export async function fetchPptxTemplates(): Promise<Record<string, PptxTemplate>> {
+export async function fetchPptxTemplates(): Promise<Record<string, PptxTemplateProperties>> {
   const response = await fetch("/api/admin/templates/pptx");
   if (!response.ok) {
     throw new Error("Failed to fetch PPTX templates");
@@ -233,7 +236,7 @@ export async function fetchPptxTemplates(): Promise<Record<string, PptxTemplate>
   return await response.json();
 }
 
-export async function createPptxTemplate(data: {id: string, name: string, description: string}, token: string): Promise<PptxTemplate> {
+export async function createPptxTemplate(data: {id: string, name: string, description: string}, token: string): Promise<PptxTemplateProperties> {
     const response = await fetch('/api/admin/templates/pptx', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },

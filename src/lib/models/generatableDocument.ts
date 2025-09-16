@@ -1,3 +1,4 @@
+
 export type GenerationStatus = 'idle' | 'generating' | 'success' | 'error';
 
 export interface GeneratableDocumentProperties<T> {

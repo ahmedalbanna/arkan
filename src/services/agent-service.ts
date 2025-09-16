@@ -4,7 +4,7 @@
 import type { UpdateAgentVariables, CreateAgentVariables } from '@/hooks';
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
 import { GenerateAgentConfigOutput } from '@/ai/schemas';
-import type { Agent, AgentCategory, AgentCategoryDetails } from '@/lib/types';
+import type { AgentProperties, AgentCategoryDetails } from '@/lib/models/agent';
 
 
 /**
@@ -52,7 +52,7 @@ export async function createAgentCategoryApi(data: { id: string; name: string },
  * @param token The admin user's authentication token.
  * @returns A promise that resolves to the Agent object, or null if not found.
  */
-export async function fetchAgentApi(agentId: string, token: string): Promise<Agent | null> {
+export async function fetchAgentApi(agentId: string, token: string): Promise<AgentProperties | null> {
     if (!agentId) return null;
     const response = await fetch(`/api/admin/agents/${agentId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -75,7 +75,7 @@ export async function fetchAgentApi(agentId: string, token: string): Promise<Age
 export async function updateAgentApi(
     variables: UpdateAgentVariables,
     token: string
-): Promise<Agent> {
+): Promise<AgentProperties> {
     const { agentId, payload } = variables;
     const response = await fetch(`/api/admin/agents/${agentId}`, {
         method: 'PUT',
@@ -100,7 +100,7 @@ export async function updateAgentApi(
  * @param token The admin user's authentication token.
  * @returns A promise that resolves to the newly created Agent object.
  */
-export async function createAgentApi(data: CreateAgentVariables, token: string): Promise<Agent> {
+export async function createAgentApi(data: CreateAgentVariables, token: string): Promise<AgentProperties> {
     const response = await fetch('/api/admin/agents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },

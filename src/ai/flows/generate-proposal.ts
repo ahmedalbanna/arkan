@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -18,8 +19,9 @@ export const generateProposal = ai.defineFlow(
     outputSchema: ProjectProposalSchema,
   },
   async (input): Promise<ProjectProposal> => {
-    const { projectIdea, guidelines, externalContext } = input;
+    const { projectIdea, guidelines, externalContext, advancedFields } = input;
 
+    // Separate media from text files for the prompt
     const textContext = externalContext?.filter(f => !f.content.startsWith('data:')) || [];
     const mediaContext = externalContext?.filter(f => f.content.startsWith('data:')) || [];
 
@@ -28,6 +30,7 @@ export const generateProposal = ai.defineFlow(
       guidelines,
       textContext,
       mediaContext,
+      advancedFields, // Pass the advanced fields to the prompt
     });
 
     if (!output) {

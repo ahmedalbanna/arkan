@@ -1,29 +1,18 @@
 
 
 
+
 'use client';
 import type { AnyProjectProposal, ProjectPlan, ExternalContext } from "@/ai/schemas";
 import { app } from '@/lib';
 import { getFirestore, collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
-import type { ProjectState as FullProjectState, FullReportModeConfig, SavedProposalState } from "@/lib/types";
+import type { ProjectState, SavedProject } from "@/lib/models/project"; // Import from model
 
 
 // This represents the full state of a project that can be saved or loaded.
 // It is a combination of states from various Zustand stores.
-export type ProjectState = FullProjectState;
+export type { ProjectState, SavedProject };
 
-
-// Represents a project document saved in Firestore
-export interface SavedProject extends ProjectState {
-    id: string;
-    userId: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-    proposal: AnyProjectProposal | null;
-    reportConfig?: FullReportModeConfig | null;
-    generatedProposalState?: SavedProposalState | null;
-}
 
 // Fetch all projects for the current user
 export async function fetchProjects(token: string): Promise<SavedProject[]> {
@@ -98,7 +87,7 @@ export async function deleteProject(projectId: string, token: string): Promise<{
 }
 
 // Add a context file to a project
-export async function addContextToProjectApi({ projectId, contextFile, token }: { projectId: string, contextFile: ExternalContext, token: string }): Promise<{ message: string }> {
+export async function addContextToProjectApi({ projectId, contextFile, token }: { projectId: string, contextFile: any, token: string }): Promise<{ message: string }> {
     if (!token) throw new Error("User not authenticated");
     const response = await fetch(`/api/projects/${projectId}`, {
         method: 'PATCH',

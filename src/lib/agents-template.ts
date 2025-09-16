@@ -1,7 +1,8 @@
 
 
-import { Agent, AgentCategory } from '@/lib/types';
-import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText, Presentation, DatabaseZap, History, FileHeart, Hand, DraftingCompass, Pencil, Files, LayoutGrid, Scale, Megaphone, FileJson, PencilRuler, Users } from 'lucide-react';
+import { AgentCategory } from '@/lib/models/agent';
+import { Agent, AgentProperties } from '@/lib/models/agent';
+import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, Hand, DraftingCompass, Files, Presentation, DatabaseZap, History, FileHeart, LayoutGrid, Scale, Megaphone, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 const diagramBasePrompt = `You are an expert systems analyst specializing in PlantUML. Your task is to generate a complete and valid PlantUML diagram based on the provided project proposal and other context.
@@ -21,13 +22,13 @@ You will be provided with the full project proposal in JSON format, as well as a
 `;
 
 
-export const AGENTS: Agent[] = [
+export const AGENTS: AgentProperties[] = [
   {
     id: 'summarize-project',
     name: 'Project Summarizer Agent',
     description: 'Generates a concise project summary from a detailed description, highlighting key aspects and technologies used.',
     category: AgentCategory.ContentGeneration,
-    icon: BrainCircuit,
+    icon: 'BrainCircuit',
     pageUrl: '/summarize',
     isEnabled: true,
     prompt: `You are an AI assistant designed to analyze software project descriptions. Your tasks are:
@@ -46,7 +47,7 @@ Description: {{{projectDescription}}}`,
     name: 'UI Agent',
     description: 'Creates UI components from a text description.',
     category: AgentCategory.CodeGeneration,
-    icon: LayoutGrid,
+    icon: 'LayoutGrid',
     pageUrl: '/ui-agent',
     isEnabled: true,
     prompt: `You are an expert frontend developer specializing in modern UI design. Your task is to generate the HTML and CSS for a UI component based on a user's prompt.
@@ -66,7 +67,7 @@ User Prompt: {{{prompt}}}
     name: 'Project Proposal Agent',
     description: 'Creates a comprehensive, professional project proposal from a single project idea, complete with timelines, budget, and risks.',
     category: AgentCategory.ProposalGeneration,
-    icon: FileText,
+    icon: 'FileText',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -90,7 +91,7 @@ Project Idea: {{{projectIdea}}}`,
     name: 'Marketing Ad Copy Agent',
     description: 'Generates compelling ad copy for a product or service.',
     category: AgentCategory.Marketing,
-    icon: Megaphone,
+    icon: 'Megaphone',
     pageUrl: '/generate', // This could be a new page later
     isEnabled: true,
     prompt: `You are a professional copywriter specializing in high-converting ad copy. A user will provide a product name and description. Your task is to generate 3 distinct ad copy variations (Headline and Body) for a social media campaign.
@@ -107,7 +108,7 @@ Target Audience: {{{targetAudience}}}`,
     name: 'Legal NDA Agent',
     description: 'Generates a standard Non-Disclosure Agreement between two parties.',
     category: AgentCategory.Legal,
-    icon: Scale,
+    icon: 'Scale',
     pageUrl: '/generate', // This could be a new page later
     isEnabled: true,
     prompt: `You are a legal assistant AI. Based on the user's input, generate a standard, basic Non-Disclosure Agreement (NDA).
@@ -126,7 +127,7 @@ Generate the NDA text. IMPORTANT: Include a disclaimer that this is not legal ad
     name: 'Abstract Agent',
     description: 'Writes a concise abstract summarizing the entire training report.',
     category: AgentCategory.ReportGeneration,
-    icon: FileText,
+    icon: 'FileText',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -148,7 +149,7 @@ Generate the NDA text. IMPORTANT: Include a disclaimer that this is not legal ad
     name: 'Acknowledgment Agent',
     description: 'Drafts a professional acknowledgment section to thank individuals and organizations.',
     category: AgentCategory.ReportGeneration,
-    icon: FileHeart,
+    icon: 'FileHeart',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -169,7 +170,7 @@ Generate the NDA text. IMPORTANT: Include a disclaimer that this is not legal ad
     name: 'Introduction Agent',
     description: 'Writes a professional introduction for a project report based on the full proposal data.',
     category: AgentCategory.ReportGeneration,
-    icon: BookMarked,
+    icon: 'BookMarked',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -200,7 +201,7 @@ The introduction should be well-structured, engaging, and must heading include:`
     name: 'Training Program Agent',
     description: 'Details the training program, including objectives, structure, and timeline.',
     category: AgentCategory.ReportGeneration,
-    icon: Library,
+    icon: 'Library',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -222,7 +223,7 @@ The introduction should be well-structured, engaging, and must heading include:`
     name: 'Technical Experience Agent',
     description: 'Describes the technical skills and knowledge gained during the training period.',
     category: AgentCategory.ReportGeneration,
-    icon: TestTube2,
+    icon: 'TestTube2',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -244,7 +245,7 @@ The introduction should be well-structured, engaging, and must heading include:`
     name: 'Recommendations Agent',
     description: 'Provides actionable recommendations based on the training experience.',
     category: AgentCategory.ReportGeneration,
-    icon: Hand,
+    icon: 'Hand',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -265,7 +266,7 @@ The introduction should be well-structured, engaging, and must heading include:`
     name: 'References Agent',
     description: 'Generates a list of references or a bibliography in a consistent citation style.',
     category: AgentCategory.ReportGeneration,
-    icon: DraftingCompass,
+    icon: 'DraftingCompass',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -286,7 +287,7 @@ The introduction should be well-structured, engaging, and must heading include:`
     name: 'Appendices Agent',
     description: 'Creates appendices for supplementary materials like code snippets, datasheets, or detailed logs.',
     category: AgentCategory.ReportGeneration,
-    icon: Files,
+    icon: 'Files',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -307,7 +308,7 @@ The introduction should be well-structured, engaging, and must heading include:`
     name: 'Literature Review Agent',
     description: 'Generates an academic and technical literature review section for the project report.',
     category: AgentCategory.ReportGeneration,
-    icon: Library,
+    icon: 'Library',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -337,7 +338,7 @@ The literature review should be well-structured, engaging, and must heading incl
     name: 'System Analysis Agent',
     description: 'Generates the system analysis section, including functional and non-functional requirements.',
     category: AgentCategory.ReportGeneration,
-    icon: Waypoints,
+    icon: 'Waypoints',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -369,7 +370,7 @@ The analysis should be well-structured, engaging, and must heading include:`,
     name: 'Design Strategy Agent',
     description: 'Generates the design strategy section, focusing on user experience and user interface.',
     category: AgentCategory.ReportGeneration,
-    icon: BookText,
+    icon: 'BookText',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -399,7 +400,7 @@ The strategist should be well-structured, engaging, and must heading include:`,
     name: 'System Design Agent',
     description: 'Generates the system design section, defining the architecture, data model, and components.',
     category: AgentCategory.ReportGeneration,
-    icon: Code,
+    icon: 'Code',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -426,7 +427,7 @@ The architect should be well-structured, engaging, and must heading include:`,
     name: 'System Programming Agent',
     description: 'Generates the system programming and implementation section, defining workflow and standards.',
     category: AgentCategory.ReportGeneration,
-    icon: Code,
+    icon: 'Code',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -452,7 +453,7 @@ Synthesize information from the entire proposal and the provided context to crea
     name: 'System Testing Agent',
     description: 'Generates the system testing section, defining the testing strategy, tools, and metrics.',
     category: AgentCategory.ReportGeneration,
-    icon: TestTube2,
+    icon: 'TestTube2',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -482,7 +483,7 @@ The system testing should be well-structured, engaging, and must heading include
     name: 'Conclusion Agent',
     description: 'Writes a concise and impactful conclusion for the final project report.',
     category: AgentCategory.ReportGeneration,
-    icon: Flag,
+    icon: 'Flag',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -508,7 +509,7 @@ The conclusion should:`,
     name: 'Presentation Agent',
     description: 'Creates a slide deck from project proposal and report content.',
     category: AgentCategory.PresentationGeneration,
-    icon: Presentation,
+    icon: 'Presentation',
     pageUrl: '/generate', // This agent is used on the project page directly
     isEnabled: true,
     prompt: {
@@ -536,7 +537,7 @@ You will be provided with the full project proposal in JSON format, and may also
     name: 'Use Case Diagram Agent',
     description: 'Produces a PlantUML Use Case diagram to identify actors and use cases.',
     category: AgentCategory.DiagramGeneration,
-    icon: GitGraph,
+    icon: 'GitGraph',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -558,7 +559,7 @@ You will be provided with the full project proposal in JSON format, and may also
     name: 'Class Diagram Agent',
     description: 'Produces a PlantUML Class diagram showing classes, attributes, methods, and relationships.',
     category: AgentCategory.DiagramGeneration,
-    icon: GitGraph,
+    icon: 'GitGraph',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -580,7 +581,7 @@ You will be provided with the full project proposal in JSON format, and may also
     name: 'Sequence Diagram Agent',
     description: 'Produces a PlantUML Sequence diagram to illustrate object interactions in a specific scenario.',
     category: AgentCategory.DiagramGeneration,
-    icon: GitGraph,
+    icon: 'GitGraph',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -603,7 +604,7 @@ You will be provided with the full project proposal in JSON format, and may also
     name: 'Activity Diagram Agent',
     description: 'Produces a PlantUML Activity diagram to model the workflow of system processes.',
     category: AgentCategory.DiagramGeneration,
-    icon: GitGraph,
+    icon: 'GitGraph',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -626,7 +627,7 @@ You will be provided with the full project proposal in JSON format, and may also
     name: 'Component Diagram Agent',
     description: 'Produces a PlantUML Component diagram depicting the system architecture in terms of components.',
     category: AgentCategory.DiagramGeneration,
-    icon: GitGraph,
+    icon: 'GitGraph',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -648,7 +649,7 @@ You will be provided with the full project proposal in JSON format, and may also
     name: 'ArchiMate Diagram Agent',
     description: 'Produces a PlantUML ArchiMate diagram to model enterprise architecture across multiple layers.',
     category: AgentCategory.DiagramGeneration,
-    icon: GitGraph,
+    icon: 'GitGraph',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -671,7 +672,7 @@ You will be provided with the full project proposal in JSON format, and may also
     name: 'ER Diagram Agent',
     description: 'Produces a PlantUML Entity-Relationship (ER) diagram to model the database schema.',
     category: AgentCategory.DiagramGeneration,
-    icon: DatabaseZap,
+    icon: 'DatabaseZap',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -693,7 +694,7 @@ You will be provided with the full project proposal in JSON format, and may also
     name: 'Activity History',
     description: 'View the logs of all agent generations for administrative review.',
     category: AgentCategory.AdminTools,
-    icon: History,
+    icon: 'History',
     pageUrl: '/admin/manage-generations',
     isEnabled: true, // Typically for admins only, controlled by UI
     prompt: '',

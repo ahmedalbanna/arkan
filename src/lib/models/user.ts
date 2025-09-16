@@ -1,8 +1,35 @@
+import type { LucideIcon } from 'lucide-react';
 
-import type { UserProfile, TeamMember } from '@/lib/types';
+// --- Types moved from types.ts ---
 
-// A more comprehensive role type that covers different contexts
 export type UserRole = 'admin' | 'user' | 'owner' | 'member' | 'team_lead';
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  credits?: number;
+  role: UserRole;
+  createdAt: string;
+  updatedAt: string;
+  teams?: string[];
+  bio?: string;
+  profilePictureUrl?: string;
+  hasCompletedOnboarding?: boolean;
+}
+
+export interface TeamMember {
+  userId: string;
+  teamId: string;
+  role: 'owner' | 'member';
+  joinedAt: string;
+  name: string;
+  email: string;
+  profilePictureUrl?: string;
+}
+
+// --- End of moved types ---
+
 
 // The properties can be a union of UserProfile and a modified TeamMember
 // This allows constructing a User object from different data sources.

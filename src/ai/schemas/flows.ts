@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 import {
     AcademicDocumentTypeSchema,
@@ -337,6 +338,21 @@ export type GenerateProjectPlanInput = z.infer<typeof GenerateProjectPlanInputSc
 
 
 // generate-proposal.ts
+const AdvancedProposalFieldsSchema = z.object({
+    projectTitle: z.string().optional(),
+    projectObjective: z.string().optional(),
+    expectedOutcomes: z.string().optional(),
+    timeline: z.string().optional(),
+    budget: z.string().optional(),
+    stakeholders: z.string().optional(),
+    projectRationale: z.string().optional(),
+    projectContext: z.string().optional(),
+    methodology: z.string().optional(),
+    risksAndChallenges: z.string().optional(),
+    additionalContext: z.string().optional(),
+});
+export type AdvancedProposalFields = z.infer<typeof AdvancedProposalFieldsSchema>;
+
 export const GenerateProposalInputSchema = z.object({
     projectIdea: z.string().describe('A short description of the project idea.'),
     guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
@@ -344,6 +360,7 @@ export const GenerateProposalInputSchema = z.object({
         fileName: z.string(),
         content: z.string(),
     })).optional().describe("An array of external documents (text or data URIs) provided by the user."),
+    advancedFields: AdvancedProposalFieldsSchema.optional().describe('Optional structured data for a detailed proposal.'),
 });
 export type GenerateProposalInput = z.infer<typeof GenerateProposalInputSchema>;
 

@@ -3,7 +3,8 @@
 // src/app/api/teams/[id]/invitations/route.ts
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
-import { type Team, type TeamMember } from '@/lib/types';
+import { TeamProperties } from '@/lib/models/team';
+import { TeamMember } from '@/lib/models/user';
 import { getUserProfile } from '@/lib/db/queries';
 import { FieldValue } from 'firebase-admin/firestore';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
@@ -18,7 +19,7 @@ async function verifyTeamOwner(requesterId: string, teamId: string) {
     if (!teamDoc.exists) {
         throw { status: 404, message: 'Team not found' };
     }
-    const team = teamDoc.data() as Team;
+    const team = teamDoc.data() as TeamProperties;
 
     if (team.ownerId !== requesterId) {
         throw { status: 403, message: 'Forbidden: Only the team owner can invite members' };

@@ -1,6 +1,5 @@
 
-import { User } from './user';
-import type { TeamWithMembers, TeamMember } from '@/lib/types';
+import { User, type TeamMember } from './user';
 
 // The properties for our class constructor will be the API response type
 export interface TeamProperties {
@@ -10,6 +9,11 @@ export interface TeamProperties {
     createdAt: string;
     members: TeamMember[];
 }
+
+export interface TeamWithMembers extends TeamProperties {
+  members: TeamMember[];
+}
+
 
 export class Team {
     public id: string;

@@ -4,9 +4,9 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { adminAuth, adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
-import type { UserRole } from '@/lib/types';
 import { getUserProfile } from '@/lib/db/queries';
 import { handleApiError, createApiResponse } from '@/lib/api-utils';
+import type { UserRole } from '@/lib/models/user';
 
 const signupSchema = z.object({
   email: z.string().email("Invalid email address"),

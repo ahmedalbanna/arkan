@@ -74,8 +74,8 @@ These stores manage global UI state that is not directly tied to the server.
 
 -   **`useBuilderStore.ts`**: The most important store. It holds a single instance of the `Project` model class, which contains all the data and business logic for the user's current work. It provides the `project` object to the rest of the app and includes a critical helper function:
     -   **`updateProject(updater: (project: Project) => void)`**: This is the **only** way components should modify the project. It takes a function, gives it the current project instance to modify, and then automatically creates a new `Project` instance to trigger React's state updates correctly. This ensures all state changes are centralized and predictable.
--   **`useReportStore.ts`**: Manages UI-specific state for the Report Generator tab, such as the state of UI controls (sliders, dropdowns), guideline selections, and context selections. It does **not** hold the report text itself; that data lives inside the `Project` model.
--   **`usePresentationStore.ts`**: Manages UI state for the Presentation Generator, primarily the ID of the currently active presentation being viewed or edited. The actual presentation data is stored within the `Project` model.
+-   **`useGenerationUIStore.ts`**: Manages UI-specific state for all generation tabs (Proposal, Report, Diagram, etc.). This includes the state of UI controls (sliders, dropdowns), guideline selections, and context selections. It does **not** hold the generated content itself; that data lives inside the `Project` model held by `useBuilderStore`.
+-   **`useChatStore.ts`**: Manages the state for the live chat and notifications system, including the list of conversations and real-time messages.
 
 ---
 
