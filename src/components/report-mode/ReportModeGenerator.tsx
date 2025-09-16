@@ -1,25 +1,71 @@
 
 'use client';
 
-import { useReportModeGenerator } from '@/hooks';
 import { lazy, Suspense } from 'react';
+import { useReportModeGenerator } from '@/hooks';
+import { GenerationTools } from './ReportGenerationTools';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { PanelRightOpen } from 'lucide-react';
+import { Skeleton } from '../ui/skeleton';
 
-function ReportResultsSkeleton() {
+const ReportResults = lazy(() => import('@/components/report-mode/ReportResults'));
+
+function ReportSkeleton() {
     return (
-        <div className="space-y-6">
-            <div className="h-[calc(100vh-180px)] w-full" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start">
+            <div className="lg:col-span-4">
+                <Skeleton className="h-[calc(100vh-200px)]" />
+            </div>
+            <div className="lg:col-span-8">
+                <Skeleton className="h-[calc(100vh-200px)]" />
+            </div>
         </div>
     );
 }
 
-const ReportResults = lazy(() => import('@/components/report-mode/ReportResults').then(mod => ({ default: mod.ReportResults })));
-
 export default function ReportModeGenerator() {
-    const { handleSectionUpdate } = useReportModeGenerator();
+    const {
+        isPanelCollapsed,
+        setIsPanelCollapsed,
+        handleSectionUpdate,
+        handleTranslateAll,
+        isTranslatingAll,
+        t,
+        locale
+    } = useReportModeGenerator();
 
     return (
-        <Suspense fallback={<ReportResultsSkeleton />}>
-            <ReportResults onSectionUpdate={handleSectionUpdate} />
-        </Suspense>
+         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+            {isPanelCollapsed && (
+                <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-24">
+                     <Button
+                        variant="secondary"
+                        className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
+                        onClick={() => setIsPanelCollapsed(false)}
+                    >
+                        <PanelRightOpen className="h-5 w-5 mb-2" />
+                        {t('builder.reportGenerator.toolsTitle')}
+                    </Button>
+                </div>
+            )}
+             <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
+                <GenerationTools
+                    onTranslateAll={handleTranslateAll}
+                    isTranslating={isTranslatingAll}
+                    onCollapseToggle={() => setIsPanelCollapsed(true)}
+                />
+            </div>
+
+            <div className={cn("lg:overflow-y-auto pr-2", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
+                <Suspense fallback={<ReportSkeleton />}>
+                    <ReportResults
+                        onSectionUpdate={handleSectionUpdate}
+                        onTranslateAll={handleTranslateAll}
+                        isTranslatingAll={isTranslatingAll}
+                    />
+                </Suspense>
+            </div>
+        </div>
     );
 }
