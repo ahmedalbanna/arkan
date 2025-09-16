@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { PanelRightOpen } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 
-const ReportResults = lazy(() => import('@/components/report-mode/ReportResults'));
+const ReportResults = lazy(() => import('@/components/report-mode/ReportResults').then(module => ({ default: module.ReportResults })));
 
 function ReportSkeleton() {
     return (
