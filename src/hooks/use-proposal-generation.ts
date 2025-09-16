@@ -7,24 +7,19 @@ import { handleErrorUtility } from '@/lib/errorUtils';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from './use-toast';
 
-import { ExternalContext } from '@/ai/schemas';
+import { ExternalContext, GenerateProposalInput } from '@/ai/schemas';
 import { generateProposalApi } from '@/services';
 import { useBuilderStore } from './useBuilderStore';
-import { AdvancedProposalFields } from './useGenerationUIStore';
+import { userKeys } from '@/lib/query-keys';
+import { useQueryClient } from '@tanstack/react-query';
 
-export interface GenerateProposalBody {
-    projectIdea: string;
-    templateId: string;
-    customGuidelines: string[];
-    externalContext: ExternalContext[];
-    advancedFields?: AdvancedProposalFields;
-}
 
 export function useGenerateProposal() {
     const { firebaseUser, refetchUser } = useAuth();
+    const queryClient = useQueryClient();
     const { updateProject } = useBuilderStore(); // Get the central updater function
 
-    return useMutation<any, Error, GenerateProposalBody>({
+    return useMutation<any, Error, GenerateProposalInput>({
         mutationFn: async (body) => {
             const token = await getAuthenticatedToken(firebaseUser);
             const response = await generateProposalApi({ body, token });
