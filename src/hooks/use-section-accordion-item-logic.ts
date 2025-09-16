@@ -20,15 +20,10 @@ export const useSectionAccordionItemLogic = (sectionKey: SectionNameType | Diagr
     const { project } = useBuilderStore();
     const { contextSelection } = useGenerationUIStore();
 
-    const reportSections = useMemo(() => {
-        if (!sectionConfigs) return {};
-        return sectionConfigs.filter(s => s.type === 'report').reduce((acc, sec) => {
-            acc[sec.id] = sec;
-            return acc;
-        }, {} as Record<string, any>);
-    }, [sectionConfigs]);
-
-    const sectionConfig = reportSections[sectionKey];
+    const sectionConfig = useMemo(() => {
+        if (!sectionConfigs) return null;
+        return sectionConfigs.find(s => s.id === sectionKey) || null;
+    }, [sectionConfigs, sectionKey]);
 
     const title = sectionConfig?.title || '';
     const agentId = sectionConfig?.agentId || '';

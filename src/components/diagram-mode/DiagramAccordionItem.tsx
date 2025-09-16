@@ -36,7 +36,7 @@ export const DiagramAccordionItem = ({
                 <AccordionTrigger className="flex-1 rounded-md px-4 py-2 text-sm font-medium hover:no-underline">
                     <div className="flex items-center gap-2">
                         {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon />}
-                        {t(title)}
+                        {title}
                     </div>
                 </AccordionTrigger>
             </div>
@@ -65,7 +65,7 @@ export const DiagramAccordionItem = ({
                                         className="font-headline w-full"
                                     >
                                         {isGenerating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-                                        {`${t('builder.reportGenerator.generateButton')} ${t(title)}`}
+                                        {`${t('builder.reportGenerator.generateButton')} ${title}`}
                                     </Button>
                                 </div>
                             </TooltipTrigger>
