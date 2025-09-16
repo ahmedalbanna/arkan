@@ -1,0 +1,7 @@
+/.genkit/
+/.next/
+/.vercel/
+/.idx/
+/.vscode/
+/dataconnect/
+/node_modules/
