@@ -67,21 +67,6 @@ export const ReportResults = ({ onSectionUpdate, onTranslateAll, isTranslatingAl
                     </A4Page>
                 )}
             </ScrollArea>
-             {totalPages > 1 && (
-                <div className="flex w-full justify-center items-center p-2 mt-2 border-t bg-background rounded-b-lg max-w-a4 mx-auto">
-                    <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost">
-                        <ChevronLeft className="h-4 w-4 mr-2" />
-                        {t('builder.presentationGenerator.prev')}
-                    </Button>
-                    <span className="text-sm font-medium text-muted-foreground mx-4">
-                        Page {currentPage + 1} of {totalPages}
-                    </span>
-                    <Button onClick={handleNextPage} disabled={currentPage === totalPages - 1} variant="ghost">
-                        {t('builder.presentationGenerator.next')}
-                        <ChevronRight className="h-4 w-4 ml-2" />
-                    </Button>
-                </div>
-            )}
         </div>
     );
   }
@@ -153,6 +138,21 @@ export const ReportResults = ({ onSectionUpdate, onTranslateAll, isTranslatingAl
                 </div>
             )}
         </CardHeader>
+        {totalPages > 1 && (
+            <div className="flex w-full justify-center items-center p-2 border-b bg-background">
+                <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost">
+                    <ChevronLeft className="h-4 w-4 mr-2" />
+                    {t('builder.presentationGenerator.prev')}
+                </Button>
+                <span className="text-sm font-medium text-muted-foreground mx-4">
+                    Page {currentPage + 1} of {totalPages}
+                </span>
+                <Button onClick={handleNextPage} disabled={currentPage === totalPages - 1} variant="ghost">
+                    {t('builder.presentationGenerator.next')}
+                    <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+            </div>
+        )}
         <CardContent className="flex-grow flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50">
             {renderContent()}
         </CardContent>
