@@ -1,18 +1,12 @@
+
 // src/ai/prompts/generate-proposal.ts
 'use server';
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { ProjectProposalSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, GenerateProposalInputSchema } from '@/ai/schemas';
 import { defaultModel } from '@/ai/config/models';
-
-export const PromptInputSchema = z.object({
-  projectIdea: z.string(),
-  guidelines: z.array(z.string()).optional(),
-  textContext: z.array(z.object({ fileName: z.string(), content: z.string() })).optional(),
-  mediaContext: z.array(z.object({ fileName: z.string(), content: z.string() })).optional(),
-});
 
 const jsonSchema = zodToJsonSchema(ProjectProposalSchema, "ProjectProposal");
 const schemaString = JSON.stringify(jsonSchema, null, 2);
@@ -20,7 +14,7 @@ const schemaString = JSON.stringify(jsonSchema, null, 2);
 export const generateProposalPrompt = ai.definePrompt(
   {
     name: 'generateProposalPrompt',
-    input: { schema: PromptInputSchema },
+    input: { schema: GenerateProposalInputSchema }, // Use the updated schema
     output: { schema: ProjectProposalSchema },
     model: defaultModel,
     system: `You are an expert project manager and technical writer. Your task is to generate a comprehensive and professional project proposal based on the provided idea and context.
@@ -32,6 +26,25 @@ The 'description' fields in the JSON schema below are your primary instructions 
 ${schemaString}
 ---`,
     prompt: `
+{{#if advancedFields}}
+--- DETAILED PROJECT REQUIREMENTS ---
+The user has provided the following structured details for the project. Use this as the primary source of information.
+- **Project Title**: \'\'\'{{advancedFields.projectTitle}}\'\'\'
+- **Project Objective**: \'\'\'{{advancedFields.projectObjective}}\'\'\'
+- **Expected Outcomes**: \'\'\'{{advancedFields.expectedOutcomes}}\'\'\'
+- **Methodology**: \'\'\'{{advancedFields.methodology}}\'\'\'
+- **Timeline**: \'\'\'{{advancedFields.timeline}}\'\'\'
+- **Budget**: \'\'\'{{advancedFields.budget}}\'\'\'
+- **Stakeholders**: \'\'\'{{advancedFields.stakeholders}}\'\'\'
+- **Project Rationale**: \'\'\'{{advancedFields.projectRationale}}\'\'\'
+- **Project Context**: \'\'\'{{advancedFields.projectContext}}\'\'\'
+- **Risks & Challenges**: \'\'\'{{advancedFields.risksAndChallenges}}\'\'\'
+- **Additional Context**: \'\'\'{{advancedFields.additionalContext}}\'\'\'
+{{else}}
+--- Main Input: Project Idea ---
+{{{projectIdea}}}
+{{/if}}
+
 {{#if guidelines}}
 --- Guidelines ---
 {{#each guidelines}}
@@ -40,8 +53,8 @@ ${schemaString}
 {{/if}}
 
 {{#if textContext}}
---- IMPORTANT CONTEXT ---
-Use the following text as the primary source of truth and context for generating the proposal.
+--- IMPORTANT TEXT CONTEXT ---
+Use the following text as a source of truth and context.
 {{#each textContext}}
 File: {{this.fileName}}
 {{{this.content}}}
@@ -51,16 +64,13 @@ File: {{this.fileName}}
 
 {{#if mediaContext}}
 --- IMPORTANT MEDIA CONTEXT ---
-Analyze the following files as the primary source of truth and context.
+Analyze the following files as a primary source of truth and context.
 {{#each mediaContext}}
 File: {{this.fileName}}
 {{media url=this.content}}
 ---
 {{/each}}
 {{/if}}
-
---- Main Input: Project Idea ---
-{{{projectIdea}}}
 `,
     config: {
       temperature: 0.7,

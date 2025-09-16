@@ -10,58 +10,17 @@ import { logGeneration } from '@/services/generation-service';
 
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
-import type { ExternalContext } from '@/hooks/use-academic-solver-logic';
-import type { AdvancedProposalFields } from '@/hooks';
+import { GenerateProposalInputSchema, type GenerateProposalInput } from '@/ai/schemas';
 
-
-const generateProposalSchema = z.object({
-  projectIdea: z.string().min(1, { message: 'Project idea is required.' }),
+// The schema for the API route now directly uses the AI flow's input schema.
+const generateProposalApiSchema = GenerateProposalInputSchema.extend({
   templateId: z.string(),
-  customGuidelines: z.array(z.string()).optional(),
-  externalContext: z.array(z.object({
-      fileName: z.string(),
-      content: z.string(),
-      type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
-  })).optional(),
-  advancedFields: z.object({
-    projectTitle: z.string(),
-    projectObjective: z.string(),
-    expectedOutcomes: z.string(),
-    stakeholders: z.string(),
-    projectContext: z.string(),
-    risksAndChallenges: z.string(),
-    projectRationale: z.string(),
-    additionalContext: z.string(),
-    methodology: z.string(),
-    timeline: z.string(),
-    budget: z.string(),
-  }).optional(),
 });
-
-function formatAdvancedPrompt(fields: AdvancedProposalFields): string {
-    return `
-Here are the specific details for the project:
-- **Project Title**: ${'\'\'\''}${fields.projectTitle}'\'\'\''}
-- **Project Objective**: ${'\'\'\''}${fields.projectObjective}'\'\'\''}
-- **Expected Outcomes**: ${'\'\'\''}${fields.expectedOutcomes}'\'\'\''}
-- **Methodology**: ${'\'\'\''}${fields.methodology}'\'\'\''}
-- **Timeline**: ${'\'\'\''}${fields.timeline}'\'\'\''}
-- **Budget**: ${'\'\'\''}${fields.budget}'\'\'\''}
-- **Stakeholders**: ${'\'\'\''}${fields.stakeholders}'\'\'\''}
-- **Project Rationale**: ${'\'\'\''}${fields.projectRationale}'\'\'\''}
-- **Project Context**: ${'\'\'\''}${fields.projectContext}'\'\'\''}
-- **Risks & Challenges**: ${'\'\'\''}${fields.risksAndChallenges}'\'\'\''}
-- **Additional Context**: ${'\'\'\''}${fields.additionalContext}'\'\'\''}
-
-Based on these details, please generate a comprehensive and professional project proposal in a well-structured markdown format.
-`;
-}
-
 
 export const POST = withAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
-    const validation = generateProposalSchema.safeParse(body);
+    const validation = generateProposalApiSchema.safeParse(body);
 
     if (!validation.success) {
       return handleApiError(validation.error);
@@ -69,21 +28,16 @@ export const POST = withAuth(async ({ request, user }) => {
 
     let { projectIdea, templateId, customGuidelines, externalContext, advancedFields } = validation.data;
 
-    if (advancedFields) {
-        projectIdea = formatAdvancedPrompt(advancedFields);
-    }
-
     // If the user selects the "automatic" template, first call the AI to select the best template.
     if (templateId === 'automatic-ai') {
         const selectionResult = await selectProposalTemplate({ projectIdea });
         templateId = selectionResult.templateId;
-        // Log this intermediate step
         await logGeneration({
             agentId: 'select-proposal-template',
             userId: user.id,
             input: { projectIdea },
             output: { selectedTemplateId: templateId },
-            creditCost: 0, // Template selection is a free action
+            creditCost: 0,
         });
     }
 
@@ -95,10 +49,13 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!template) {
       return handleApiError({ message: 'Proposal template data is missing.' }, 404);
     }
-    const agentInput = {
+    
+    // The AI flow now handles the simple vs. advanced logic internally.
+    const agentInput: GenerateProposalInput = {
       projectIdea,
       guidelines: [...(template.guidelines || []), ...(customGuidelines || [])],
-      externalContext: externalContext,
+      externalContext,
+      advancedFields,
     };
 
     let result = await generateProposal(agentInput);
@@ -115,8 +72,9 @@ export const POST = withAuth(async ({ request, user }) => {
             finalTemplateId: templateId,
             customGuidelines,
             externalContextFileCount: externalContext?.length || 0,
+            usedAdvancedMode: !!advancedFields,
         },
-      output: { resultLength: JSON.stringify(result).length },
+        output: { resultLength: JSON.stringify(result).length },
         creditCost: creditCost,
     });
 
