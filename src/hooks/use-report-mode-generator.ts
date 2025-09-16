@@ -51,7 +51,7 @@ export const useReportModeGenerator = () => {
             }
         });
         
-        setProject(new Project({ ...project.toPlainObject(), translatedSections: { ...project.translatedSections, ...translatedMap } }));
+        setProject(new Project({ ...project.toJSON(), translatedSections: { ...project.translatedSections, ...translatedMap } }));
         
         setIsTranslatingAll(false);
         toast({

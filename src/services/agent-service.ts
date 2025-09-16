@@ -4,7 +4,7 @@
 import type { UpdateAgentVariables, CreateAgentVariables } from '@/hooks';
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
 import { GenerateAgentConfigOutput } from '@/ai/schemas';
-import type { Agent, AgentCategory } from '@/lib/types';
+import type { Agent, AgentCategory, AgentCategoryDetails } from '@/lib/types';
 
 
 /**
@@ -13,7 +13,7 @@ import type { Agent, AgentCategory } from '@/lib/types';
  * @param token The admin user's authentication token.
  * @returns A promise that resolves to an array of AgentCategory objects.
  */
-export async function fetchAgentCategoriesApi(token: string): Promise<AgentCategory[]> {
+export async function fetchAgentCategoriesApi(token: string): Promise<AgentCategoryDetails[]> {
     const response = await fetch('/api/admin/agent-categories', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -31,7 +31,7 @@ export async function fetchAgentCategoriesApi(token: string): Promise<AgentCateg
  * @param token The admin user's authentication token.
  * @returns A promise that resolves to the newly created AgentCategory object.
  */
-export async function createAgentCategoryApi(data: { id: string; name: string }, token: string): Promise<AgentCategory> {
+export async function createAgentCategoryApi(data: { id: string; name: string }, token: string): Promise<AgentCategoryDetails> {
     const response = await fetch('/api/admin/agent-categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },

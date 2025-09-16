@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Bot, MessageSquare, Plus, X } from 'lucide-react';
-import { type AgentPrompt, type AgentCategory } from '@/lib/types';
+import { type AgentPrompt, type AgentCategoryDetails as AgentCategory } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useEffect, useState } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';

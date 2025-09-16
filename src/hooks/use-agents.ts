@@ -36,7 +36,7 @@ export type CreateAgentVariables = Omit<import('@/lib/types').Agent, 'isEnabled'
 export function useAgentCategories() {
   const { firebaseUser } = useAuth();
 
-  return useQuery<import('@/lib/types').AgentCategory[]>({
+  return useQuery<import('@/lib/types').AgentCategoryDetails[]>({
     queryKey: categoryKeys.lists(),
     queryFn: async () => {
       const token = await getAuthenticatedToken(firebaseUser);

@@ -1,17 +1,16 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/authUtils';
-import { startGenerationApi } from '@/services/taskade-service';
-import { toast } from './use-toast';
-import { getDatabase, ref, onValue, off } from 'firebase/database';
-import {
-  StartGenerationPayload,
-  TaskadeJobStatus,
-} from "@/@types/taskade";
 import { app } from '@/lib';
+import { getAuthenticatedToken } from '@/lib/authUtils';
+import {
+  StartGenerationPayload
+} from "@/lib/types";
+import { startGenerationApi } from '@/services/taskade-service';
+import { getDatabase, off, onValue, ref } from 'firebase/database';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from './use-toast';
 
 type JobStatus = 'idle' | 'pending' | 'completed' | 'failed';
 
@@ -51,17 +50,17 @@ export function useTaskadeGeneration() {
 
     // Listen for changes to the job status in the Realtime Database
     const unsubscribe = onValue(jobRef, (snapshot) => {
-        const jobData = snapshot.val();
-        if (jobData) {
-            setStatus(jobData.status);
-            if (jobData.status === 'completed') {
-                setResult(jobData.result);
-                toast({ title: 'Success!', description: 'Generation task completed.' });
-            } else if (jobData.status === 'failed') {
-                setError(jobData.error || 'An unknown error occurred.');
-                toast({ title: 'Error', description: 'Generation task failed.', variant: 'destructive' });
-            }
+      const jobData = snapshot.val();
+      if (jobData) {
+        setStatus(jobData.status);
+        if (jobData.status === 'completed') {
+          setResult(jobData.result);
+          toast({ title: 'Success!', description: 'Generation task completed.' });
+        } else if (jobData.status === 'failed') {
+          setError(jobData.error || 'An unknown error occurred.');
+          toast({ title: 'Error', description: 'Generation task failed.', variant: 'destructive' });
         }
+      }
     });
 
     // Cleanup listener on component unmount or when jobId changes

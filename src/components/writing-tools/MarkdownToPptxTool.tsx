@@ -6,17 +6,17 @@ import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { Checkbox } from '@/components/ui/checkbox';
+import { PptxStyleOptionsSchema } from '@/ai/schemas/template-schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { convertMarkdownToPptx, convertMarkdownToPdf } from '@/lib/markdown-to-pptx-converter';
+import { convertMarkdownToPdf, convertMarkdownToPptx } from '@/lib/markdown-to-pptx-converter';
 import { templates } from '@/lib/pptx-styles';
-import { PptxStyleOptionsSchema } from '@/ai/schemas/template-schemas';
 import type { PptxStyleOptions } from '@/lib/types';
 
 const markdownToPptxSchema = z.object({
@@ -264,8 +264,8 @@ This slide demonstrates how a very long paragraph will gracefully break across m
     <Card>
       <CardHeader>
         <CardTitle>Markdown to PowerPoint Converter</CardTitle>
-        <CardDescription>
-          Easily convert your markdown documents into styled .pptx presentations. Use `---`, a top-level heading (`#`), or `<!-- slide-break -->` to separate slides.
+        <CardDescription className="[&>code]:font-mono [&>code]:font-bold [&>code]:bg-gray-200 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded">
+          Easily convert your markdown documents into styled .pptx presentations. Use `---`, a top-level heading (`#`), or <code className="whitespace-nowrap">&lt;!-- slide-break --&gt;</code> to separate slides.
         </CardDescription>
       </CardHeader>
       <CardContent>

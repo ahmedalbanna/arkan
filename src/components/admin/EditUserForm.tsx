@@ -100,7 +100,7 @@ export default function EditUserForm({ user }: { user: User }) {
         email: user.email,
         bio: user.bio ?? '',
         credits: user.credits,
-        role: user.role,
+        role: (user.role === 'admin' || user.role === 'user') ? user.role : 'user',
       }
   });
 

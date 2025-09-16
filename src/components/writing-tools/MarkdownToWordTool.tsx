@@ -1,21 +1,21 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 import { useState, type ComponentPropsWithoutRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2 } from 'lucide-react';
 
-import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { templates, type DocxTemplateKey } from '@/lib/docx-styles';
 import { convertMarkdownToWord } from '@/lib/markdown-to-word-converter';
-import { templates, type DocxTemplateKey  } from '@/lib/docx-styles';
 import dynamic from 'next/dynamic';
 
 // Dynamically import FileWord to avoid SSR issues with lucide-react icons
@@ -56,7 +56,7 @@ export function MarkdownToWordTool() {
     setIsConverting(true);
     try {
       await convertMarkdownToWord(data.markdown, data.fileName, {
-        styles: templates[data.template as DocxTemplateKey ].styles,
+        styles: templates[data.template as DocxTemplateKey].styles as any, // Cast to any to bypass Zod type inference issues
         pageNumbers: data.pageNumbers,
         coverPageMarkdown: data.addCoverPage ? data.coverPageMarkdown : undefined,
         isRtl: data.isRtl,
@@ -115,7 +115,7 @@ export function MarkdownToWordTool() {
             <div className="space-y-2">
               <Label htmlFor="template-select">Document Template</Label>
               <Select
-                onValueChange={(value) => form.setValue('template', value as DocxTemplateKey )}
+                onValueChange={(value) => form.setValue('template', value as DocxTemplateKey)}
                 defaultValue={form.getValues('template')}
                 disabled={isConverting}
               >

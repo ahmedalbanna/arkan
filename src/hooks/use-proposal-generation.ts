@@ -1,17 +1,16 @@
 
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { userKeys } from '@/lib/query-keys';
-import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
+import { handleErrorUtility } from '@/lib/errorUtils';
+import { useMutation } from '@tanstack/react-query';
 import { toast } from './use-toast';
-import type { ExternalContext } from '@/lib/types';
+
+import { ExternalContext } from '@/ai/schemas';
 import { generateProposalApi } from '@/services';
 import { useBuilderStore } from './useBuilderStore';
-import type { AdvancedProposalFields } from './useProposalGenerationStore';
-import { Project } from '@/lib/models/project'; // Import Project
+import { AdvancedProposalFields } from './useGenerationUIStore';
 
 export interface GenerateProposalBody {
     projectIdea: string;

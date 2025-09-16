@@ -3,7 +3,8 @@
 'use client';
 
 import { useState } from 'react';
-import type { Agent, AgentCategory } from '@/lib/types';
+import type { Agent } from '@/lib/models/agent';
+import type { AgentCategoryDetails as AgentCategory } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, Bot, BookOpen, Wrench, MessageSquare, ListChecks, Link as LinkIcon, BotMessageSquare, PencilRuler } from 'lucide-react';

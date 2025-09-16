@@ -1,11 +1,10 @@
 
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useBuilderStore } from '@/hooks';
-import { useDeleteProject } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useBuilderStore, useDeleteProject } from '@/hooks';
 import type { Project } from '@/lib/models/project'; // Import the Project class
+import { useRouter } from 'next/navigation';
 
 export function useProjectCardLogic(project: Project) { // Changed type to Project
     const router = useRouter();
@@ -16,7 +15,7 @@ export function useProjectCardLogic(project: Project) { // Changed type to Proje
 
     const handleLoadProject = () => {
         // The store's loadProject action expects a plain object
-        loadProject(project.toPlainObject()); 
+        loadProject(project.toStateObject());
         router.push('/generate');
     };
 

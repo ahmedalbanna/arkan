@@ -20,7 +20,7 @@ export interface AgentProperties {
   language?: string;
   model?: string;
   isDefault?: boolean;
-  icon?: LucideIcon;
+  icon?: string;
   iconComponent?: LucideIcon;
 }
 
@@ -41,7 +41,7 @@ export class Agent {
   public language?: string;
   public model?: string;
   public isDefault?: boolean;
-  public icon?: LucideIcon;
+  public icon?: string;
   public iconComponent?: LucideIcon;
 
   constructor(props: AgentProperties) {

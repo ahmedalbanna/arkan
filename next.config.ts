@@ -1,11 +1,10 @@
 
-import type {NextConfig} from 'next';
-import fs from 'fs';
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true, // Enable React strict mode for better development experience
   output: 'standalone',
-  
+
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -26,7 +25,7 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/plantuml/**',
       },
-       {
+      {
         protocol: 'https',
         hostname: 'storage.googleapis.com',
         port: '',
@@ -34,7 +33,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  allowedDevOrigins: ["https://9000-firebase-studio-1754388625396.cluster-64pjnskmlbaxowh5lzq6i7v4ra.cloudworkstations.dev", "https://6000-firebase-studio-1754388625396.cluster-64pjnskmlbaxowh5lzq6i7v4ra.cloudworkstations.dev"],
+  allowedDevOrigins: ["http://localhost:9002"],
   async rewrites() {
     return [
       {

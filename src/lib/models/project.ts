@@ -128,7 +128,7 @@ export class Project implements SavedProject {
         };
     }
     
-    public toStateObject(): ProjectState {
+    public toStateObject(): SavedProject {
         return this.toJSON();
     }
 

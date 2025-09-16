@@ -1,11 +1,11 @@
 
 'use client';
 
-import { create } from 'zustand';
-import { type AgentWithComponent } from './useAgentStore';
+import { PROPOSAL_TEMPLATES } from '@/lib/db/seed-data/proposal-templates';
+import { Agent } from '@/lib/models/agent';
 import { type Section } from '@/lib/models/section';
 import type { AgentPrompt } from '@/lib/types';
-import { PROPOSAL_TEMPLATES } from '@/lib/db/seed-data/proposal-templates';
+import { create } from 'zustand';
 
 // State definitions for UI controls and selections, consolidated from old stores.
 
@@ -29,17 +29,17 @@ interface ContextSelectionValue {
 }
 
 export interface AdvancedProposalFields {
-    projectTitle: string;
-    projectObjective: string;
-    expectedOutcomes: string;
-    stakeholders: string;
-    projectContext: string;
-    risksAndChallenges: string;
-    projectRationale: string;
-    additionalContext: string;
-    methodology: string;
-    timeline: string;
-    budget: string;
+  projectTitle: string;
+  projectObjective: string;
+  expectedOutcomes: string;
+  stakeholders: string;
+  projectContext: string;
+  risksAndChallenges: string;
+  projectRationale: string;
+  additionalContext: string;
+  methodology: string;
+  timeline: string;
+  budget: string;
 }
 
 interface GenerationUIState {
@@ -58,7 +58,7 @@ interface GenerationUIState {
 }
 
 interface GenerationUIActions {
-  initializeDependentStates: (agents: AgentWithComponent[], sections: Section[]) => void;
+  initializeDependentStates: (agents: Agent[], sections: Section[]) => void;
   newSession: () => void;
   // Report Store Actions
   handleControlChange: (section: string, control: keyof ControlState, value: any) => void;
@@ -78,15 +78,15 @@ interface GenerationUIActions {
 }
 
 const defaultControlState: ControlState = {
-    formality: 50,
-    tone: 'professional',
-    wordCount: '',
+  formality: 50,
+  tone: 'professional',
+  wordCount: '',
 };
 
 const initialAdvancedFields: AdvancedProposalFields = {
-    projectTitle: '', projectObjective: '', expectedOutcomes: '', stakeholders: '',
-    projectContext: '', risksAndChallenges: '', projectRationale: '', additionalContext: '',
-    methodology: '', timeline: '', budget: '',
+  projectTitle: '', projectObjective: '', expectedOutcomes: '', stakeholders: '',
+  projectContext: '', risksAndChallenges: '', projectRationale: '', additionalContext: '',
+  methodology: '', timeline: '', budget: '',
 };
 
 const initialState: GenerationUIState = {
@@ -131,57 +131,57 @@ export const useGenerationUIStore = create<GenerationUIState & GenerationUIActio
     },
 
     newSession: () => set(initialState),
-    
+
     handleControlChange: (section, control, value) => set(state => ({
-        controlState: { ...state.controlState, [section]: { ...(state.controlState[section] || defaultControlState), [control]: value } },
+      controlState: { ...state.controlState, [section]: { ...(state.controlState[section] || defaultControlState), [control]: value } },
     })),
-    
+
     handleGuidelineToggle: (itemKey, index, checked) => set(state => {
-        const newGuidelines = { ...state.guidelineState };
-        if (newGuidelines[itemKey]) {
-            const newChecked = [...newGuidelines[itemKey].checked];
-            newChecked[index] = checked;
-            newGuidelines[itemKey] = { ...newGuidelines[itemKey], checked: newChecked };
-        }
-        return { guidelineState: newGuidelines };
+      const newGuidelines = { ...state.guidelineState };
+      if (newGuidelines[itemKey]) {
+        const newChecked = [...newGuidelines[itemKey].checked];
+        newChecked[index] = checked;
+        newGuidelines[itemKey] = { ...newGuidelines[itemKey], checked: newChecked };
+      }
+      return { guidelineState: newGuidelines };
     }),
 
     setCustomGuidelineInputForItem: (itemKey, value) => set(state => ({ customGuidelineInput: { ...state.customGuidelineInput, [itemKey]: value } })),
-    
+
     handleAddCustomGuidelineForItem: (itemKey) => {
-        const { guidelineState, customGuidelineInput } = get();
-        const newGuideline = customGuidelineInput[itemKey]?.trim();
-        if (newGuideline) {
-            const newGuidelines = { ...guidelineState };
-            if (!newGuidelines[itemKey]) newGuidelines[itemKey] = { checked: [], custom: [] };
-            newGuidelines[itemKey].custom.push(newGuideline);
-            set({ guidelineState: newGuidelines, customGuidelineInput: { ...customGuidelineInput, [itemKey]: '' } });
-        }
+      const { guidelineState, customGuidelineInput } = get();
+      const newGuideline = customGuidelineInput[itemKey]?.trim();
+      if (newGuideline) {
+        const newGuidelines = { ...guidelineState };
+        if (!newGuidelines[itemKey]) newGuidelines[itemKey] = { checked: [], custom: [] };
+        newGuidelines[itemKey].custom.push(newGuideline);
+        set({ guidelineState: newGuidelines, customGuidelineInput: { ...customGuidelineInput, [itemKey]: '' } });
+      }
     },
 
     handleRemoveCustomGuidelineForItem: (itemKey, index) => set(state => {
-        const newGuidelines = { ...state.guidelineState };
-        if (newGuidelines[itemKey]) newGuidelines[itemKey].custom.splice(index, 1);
-        return { guidelineState: newGuidelines };
+      const newGuidelines = { ...state.guidelineState };
+      if (newGuidelines[itemKey]) newGuidelines[itemKey].custom.splice(index, 1);
+      return { guidelineState: newGuidelines };
     }),
 
     setOneTimeInstruction: (itemKey, value) => set(state => ({ oneTimeInstructions: { ...state.oneTimeInstructions, [itemKey]: value } })),
-    
+
     toggleContextSelection: (itemKey, type, contextKey, isSelected) => set(state => {
-        const newSelection = JSON.parse(JSON.stringify(state.contextSelection[itemKey] || { ...emptySelection, proposal: true, projectPlan: true }));
-        if (type === 'proposal' || type === 'projectPlan') {
-            newSelection[type] = isSelected;
-        } else if (type === 'externalContext' && typeof contextKey === 'number') {
-            if (!Array.isArray(newSelection.externalContext)) newSelection.externalContext = [];
-            newSelection.externalContext[contextKey] = isSelected;
-        } else if (contextKey) {
-            newSelection[type][contextKey as string] = isSelected;
-        }
-        return { contextSelection: { ...state.contextSelection, [itemKey]: newSelection } };
+      const newSelection = JSON.parse(JSON.stringify(state.contextSelection[itemKey] || { ...emptySelection, proposal: true, projectPlan: true }));
+      if (type === 'proposal' || type === 'projectPlan') {
+        newSelection[type] = isSelected;
+      } else if (type === 'externalContext' && typeof contextKey === 'number') {
+        if (!Array.isArray(newSelection.externalContext)) newSelection.externalContext = [];
+        newSelection.externalContext[contextKey] = isSelected;
+      } else if (contextKey) {
+        newSelection[type][contextKey as string] = isSelected;
+      }
+      return { contextSelection: { ...state.contextSelection, [itemKey]: newSelection } };
     }),
 
     setSelectedReportTemplateId: (id) => set({ selectedReportTemplateId: id }),
-    
+
     // From usePresentationStore
     setActivePresentationId: (id) => set({ activePresentationId: id }),
 

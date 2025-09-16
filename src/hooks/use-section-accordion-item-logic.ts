@@ -1,19 +1,18 @@
 
 'use client';
 
-import { useMemo } from 'react';
-import { useLocalization } from '@/context/LocalizationContext';
+import { DiagramType, type SectionName as SectionNameType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
-import { useBuilderStore } from '@/hooks';
-import { useGenerationUIStore } from '@/hooks';
-import { type SectionName as SectionNameType } from '@/ai/schemas';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useBuilderStore, useGenerationUIStore } from '@/hooks';
 import { FileText } from 'lucide-react';
+import { useMemo } from 'react';
 import { useSections } from './use-sections'; // Correct hook for section configs
 import { useAgentStore } from './useAgentStore'; // Correct hook for agent icons
 
 const defaultSelection = { sections: {}, diagrams: {}, externalContext: [], proposal: false, projectPlan: true };
 
-export const useSectionAccordionItemLogic = (sectionKey: SectionNameType) => {
+export const useSectionAccordionItemLogic = (sectionKey: SectionNameType | DiagramType) => {
     const { t } = useLocalization();
     const { data: sectionConfigs } = useSections(); // Use the correct hook
     const getIconComponent = useAgentStore((state) => state.getIconComponent); // Get icon utility from agent store

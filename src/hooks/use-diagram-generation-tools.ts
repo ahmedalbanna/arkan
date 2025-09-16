@@ -1,18 +1,14 @@
 
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { useLocalization } from '@/context/LocalizationContext';
-import { useAgents, useSections } from '@/hooks';
-import { useToast } from '@/hooks';
-import { useAuth } from '@/context/AuthContext';
-import { useBuilderStore } from '@/hooks';
-import { useGenerateDiagram } from '@/hooks';
-import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { type DiagramType, type SectionName } from '@/ai/schemas';
-import { useGenerationUIStore } from './useGenerationUIStore';
+import { useAuth } from '@/context/AuthContext';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useAgents, useBuilderStore, useGenerateDiagram, useSections, useToast } from '@/hooks';
+import { getSelectedGuidelines } from '@/lib/guideline-utils';
+import React, { useEffect, useMemo } from 'react';
 import { useAgentStore } from './useAgentStore';
-import { Project } from '@/lib/models/project';
+import { useGenerationUIStore } from './useGenerationUIStore';
 
 export const useDiagramGenerationTools = () => {
     const { t } = useLocalization();
@@ -44,7 +40,7 @@ export const useDiagramGenerationTools = () => {
     const diagramMutation = useGenerateDiagram();
 
     const isAnythingGenerating = diagramMutation.isPending;
-    const hasCreditsForGeneration = userProfile ? userProfile.credits >= 1 : false;
+    const hasCreditsForGeneration = userProfile ? userProfile.credits ?? 0 >= 1 : false;
 
     const onGenerateDiagram = (diagramType: DiagramType) => {
         if (!project) return;

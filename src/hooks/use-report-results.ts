@@ -77,7 +77,7 @@ export const useReportResults = () => {
           }
       });
       
-      setProject(new Project({ ...project.toPlainObject(), translatedSections: { ...project.translatedSections, ...translatedMap } }));
+      setProject(new Project({ ...project.toJSON(), translatedSections: { ...project.translatedSections, ...translatedMap } }));
       setIsTranslatingAll(false);
       toast({
           title: t('builder.reportGenerator.toasts.translateAllSuccess'),

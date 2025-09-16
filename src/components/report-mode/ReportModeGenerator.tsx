@@ -1,8 +1,8 @@
 
 'use client';
 
-import { lazy, Suspense } from 'react';
 import { useReportModeGenerator } from '@/hooks';
+import { lazy, Suspense } from 'react';
 
 function ReportResultsSkeleton() {
     return (
@@ -12,7 +12,7 @@ function ReportResultsSkeleton() {
     );
 }
 
-const ReportResults = lazy(() => import('./ReportResults'));
+const ReportResults = lazy(() => import('@/components/report-mode/ReportResults').then(mod => ({ default: mod.ReportResults })));
 
 export default function ReportModeGenerator() {
     const { handleSectionUpdate } = useReportModeGenerator();

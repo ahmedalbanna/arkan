@@ -3,20 +3,16 @@
 
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
-import { useToast } from '@/hooks';
-import { useBuilderStore } from '@/hooks';
+import { type DiagramType, EvaluateContextOutput, type SectionName as SectionNameType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
-import { getSelectedGuidelines } from '@/lib/guideline-utils';
-import { useGenerateReportSection, useGenerateFullReport } from '@/hooks';
-import { evaluateContextApi } from '@/services';
+import { useBuilderStore, useGenerateFullReport, useGenerateReportSection, useToast } from '@/hooks';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
+import { getSelectedGuidelines } from '@/lib/guideline-utils';
+import { evaluateContextApi } from '@/services';
+import { useEffect, useMemo, useState } from 'react';
 import { useAgents } from './use-agents';
-import { useReportTemplates } from './use-templates';
-import { AgentPrompt } from '@/lib/types';
 import { useSections } from './use-sections';
-import { useLocalization } from '@/context/LocalizationContext';
+import { useReportTemplates } from './use-templates';
 import { useGenerationUIStore } from './useGenerationUIStore';
 
 // Helper function to generate instruction text from control state
@@ -35,15 +31,14 @@ const generateInstructionText = (controls: any, oneTimeInstruction: string): str
 };
 
 export function useReportGenerationLogic() {
-    const { t } = useLocalization();
     const { toast } = useToast();
     const { userProfile, firebaseUser } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = useState<string | null>(null);
     const [generationPlan, setGenerationPlan] = useState<EvaluateContextOutput | null>(null);
     const [isPlanning, setIsPlanning] = useState(false);
-    
+
     const { project } = useBuilderStore();
-    
+
     const {
         controlState,
         guidelineState,
@@ -53,7 +48,7 @@ export function useReportGenerationLogic() {
         setSelectedReportTemplateId,
         initializeDependentStates,
     } = useGenerationUIStore();
-    
+
     const { data: sectionConfigs, isLoading: sectionsLoading } = useSections();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { data: reportTemplates, isLoading: templatesLoading } = useReportTemplates();
@@ -133,11 +128,11 @@ export function useReportGenerationLogic() {
 
     const canGenerateFullReport = useMemo(() => (
         (!!project?.proposal || !!project?.projectPlan || (project?.externalContext && project.externalContext.length > 0)) &&
-        (userProfile ? userProfile.credits >= fullReportCreditCost : false) &&
+        (userProfile ? userProfile.credits ?? 0 >= fullReportCreditCost : false) &&
         fullReportCreditCost > 1 &&
         !isAnythingGenerating
     ), [project, userProfile, fullReportCreditCost, isAnythingGenerating]);
-    
+
     const getGenerationPlan = async () => {
         if (!selectedTemplate || !project) {
             toast({ title: "No Template or Project Loaded", variant: "destructive" });
@@ -197,9 +192,9 @@ export function useReportGenerationLogic() {
             fullReportMutation.mutate(fullReportBody);
         }
     };
-    
-    const hasCreditsForSingleSection = useMemo(() => (userProfile ? userProfile.credits >= 1 : false), [userProfile]);
-    
+
+    const hasCreditsForSingleSection = useMemo(() => (userProfile ? userProfile.credits ?? 0 >= 1 : false), [userProfile]);
+
     return {
         isAnythingGenerating,
         isPlanning,

@@ -1,25 +1,22 @@
 
 'use client';
 
-import React from 'react';
-import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, FileDown, PenSquare, Volume2, X, Check, ThumbsDown, Languages, ArrowRightLeft, MoreVertical, Brush, GitCommitVertical, UserCheck, ShieldCheck } from 'lucide-react';
-import { markdownComponents } from '@/lib/markdown-styles';
-import { Button } from '@/components/ui/button';
 import type { SectionName } from '@/ai/schemas';
-import { useLocalization } from '@/context/LocalizationContext';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs } from '@/components/ui/tabs';
+import { markdownComponents } from '@/lib/markdown-styles';
+import { BookText, Brush, Check, GitCommitVertical, Loader2, Maximize, SpellCheck, ThumbsDown, UserCheck, Volume2, Wand2, X } from 'lucide-react';
+import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useReportStore } from '@/hooks';
-import { Textarea } from '@/components/ui/textarea';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useSectionLogic } from '@/hooks';
 import { DiffPart } from '@/lib/diff';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { EvaluationTools } from '../evaluation/EvaluationTools';
-import { useSectionLogic } from '@/hooks';
 
 interface SectionProps {
     sectionKey: SectionName;
@@ -86,20 +83,20 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                 </ScrollArea>
 
                 {aiSuggestion && (
-                     <Card className="mt-4 border-accent">
+                    <Card className="mt-4 border-accent">
                         <CardHeader>
                             <CardTitle className="text-lg flex items-center gap-2">
-                            <Wand2 className="h-5 w-5 text-accent" /> {t('builder.Section.aiSuggestion')}
+                                <Wand2 className="h-5 w-5 text-accent" /> {t('builder.Section.aiSuggestion')}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="prose dark:prose-invert max-w-none text-sm p-4 bg-muted/50 rounded-md max-h-60 overflow-y-auto">
-                           {diff ? (
-                               <DiffView diff={diff} />
-                           ) : (
-                               <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+                            {diff ? (
+                                <DiffView diff={diff} />
+                            ) : (
+                                <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
                                     {aiSuggestion}
                                 </ReactMarkdown>
-                           )}
+                            )}
                         </CardContent>
                         <CardFooter className="flex justify-end gap-2 pt-4">
                             <Button variant="ghost" onClick={handleRejectSuggestion}>
@@ -112,7 +109,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                     </Card>
                 )}
 
-                 <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between">
                     <div className="flex items-center text-xs text-muted-foreground">
                         <span>{words} {t('builder.Section.words')}</span>
                         <span className="mx-2">|</span>
@@ -135,7 +132,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                             </Tooltip>
                         </TooltipProvider>
 
-                         <DropdownMenu>
+                        <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="sm" disabled={isProcessingAi}>
                                     {isProcessingAi ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Wand2 className="h-4 w-4 mr-2" />} {t('builder.Section.aiActions.title')}
@@ -150,7 +147,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                                 <DropdownMenuSeparator />
                                 <DropdownMenuSub>
                                     <DropdownMenuSubTrigger><Brush className="me-2 h-4 w-4" />{t('builder.Section.aiActions.rewrite')}</DropdownMenuSubTrigger>
-                                     <DropdownMenuSubContent>
+                                    <DropdownMenuSubContent>
                                         <DropdownMenuItem onClick={() => handleRewriteAction('Formal')}>{t('builder.Section.aiActions.styles.formal')}</DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => handleRewriteAction('Friendly')}>{t('builder.Section.aiActions.styles.friendly')}</DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => handleRewriteAction('Simple')}>{t('builder.Section.aiActions.styles.simple')}</DropdownMenuItem>
@@ -160,7 +157,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                                     </DropdownMenuSubContent>
                                 </DropdownMenuSub>
                             </DropdownMenuContent>
-                         </DropdownMenu>
+                        </DropdownMenu>
                     </div>
                 </div>
             </div>

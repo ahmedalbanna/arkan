@@ -1,45 +1,35 @@
-// code explantion in docs/hooks/use-user.md
 
-"use client";
+'use client';
 
-import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
-import { userKeys } from '@/lib/query-keys';
-import type { UserProfile, PricingPlan } from '@/lib/types';
+import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks";
-import { useRouter } from "next/navigation";
-import { auth, app } from '@/lib/firebase/client-init';
+import { getAuthenticatedToken } from "@/lib/authUtils";
+import { handleErrorUtility } from "@/lib/errorUtils";
+import { auth } from '@/lib/firebase/client-init';
+import { User, type UserProperties } from '@/lib/models/user'; // NEW: Import our User class
+import { userKeys } from '@/lib/query-keys';
+import type { PricingPlan, UserProfile } from '@/lib/types';
 import {
-  signInWithEmailAndPassword,
-  signOut,
-  sendPasswordResetEmail,
-  GoogleAuthProvider,
-  signInWithPopup,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  type ConfirmationResult,
-} from "firebase/auth";
-import type { SignupCredentials } from "@/components/auth/SignupForm";
-import { getFirestore, doc, onSnapshot, setDoc } from "firebase/firestore";
-import {
+  fetchAdminsApi,
+  fetchUserProfileApi,
   fetchUsersApi,
-  subscribeToUserProfile,
-  createUserService,
+  forgotPasswordService,
   loginWithEmail,
   loginWithGoogle,
+  purchaseCreditsApi,
+  sendPasswordResetEmailApi,
   serviceLogoutUser,
   serviceSignupUser,
-  fetchUserProfileApi,
-  sendPasswordResetEmailApi,
-  forgotPasswordService,
-  purchaseCreditsApi,
-  type UserListResponse,
-  fetchAdminsApi,
+  subscribeToUserProfile
 } from "@/services";
-import { useAuth } from "@/context/AuthContext";
-import { useState, useCallback, useEffect } from "react";
-import { handleErrorUtility } from "@/lib/errorUtils";
-import { getAuthenticatedToken } from "@/lib/authUtils";
-import { User, type UserProperties } from '@/lib/models/user'; // NEW: Import our User class
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  type ConfirmationResult
+} from "firebase/auth";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 
 // --- Custom Hooks ---
@@ -50,22 +40,25 @@ const USERS_PER_PAGE = 10;
  * Returns instances of the User CLASS.
  */
 export function useUsers() {
-    const { firebaseUser } = useAuth();
-    return useInfiniteQuery({
-        queryKey: userKeys.lists(),
-        queryFn: async ({ pageParam }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            const result = await fetchUsersApi(USERS_PER_PAGE, pageParam as string | undefined, token);
-            // Transform plain objects to User instances here
-            return {
-              ...result,
-              users: result.users.map(u => new User(u as UserProperties))
-            };
-        },
-        initialPageParam: undefined,
-        getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
-        enabled: !!firebaseUser,
-    });
+  const { firebaseUser } = useAuth();
+  return useInfiniteQuery({
+    queryKey: userKeys.lists(),
+    queryFn: async ({ pageParam }) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return fetchUsersApi(USERS_PER_PAGE, pageParam as string | undefined, token);
+    },
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
+    enabled: !!firebaseUser,
+    // NEW: Transform the data into User instances
+    select: (data) => ({
+      ...data,
+      pages: data.pages.map(page => ({
+        ...page,
+        users: page.users.map(u => new User(u as UserProperties))
+      }))
+    })
+  });
 }
 
 /**
@@ -74,19 +67,20 @@ export function useUsers() {
  */
 export function useAdmins() {
   const { firebaseUser } = useAuth();
-  return useQuery<User[]>({ // Explicitly set the return type to User[]
+  return useQuery({
     queryKey: userKeys.admins(),
     queryFn: async () => {
-        const token = await getAuthenticatedToken(firebaseUser);
-        const data = await fetchAdminsApi(token);
-        // Transform plain objects to User instances
-        if (!data) return [];
-        return data.map(u => new User(u as UserProperties));
+      const token = await getAuthenticatedToken(firebaseUser);
+      return fetchAdminsApi(); // No token needed for public endpoint
     },
     staleTime: 1000 * 60 * 15, // 15 minutes
     meta: {
       onError: (error: Error) => handleErrorUtility(error, "Failed to fetch administrators"),
     },
+    // NEW: Transform the data into User instances
+    select: (data: UserProfile[]): User[] => {
+      return data.map(u => new User(u as UserProperties));
+    }
   });
 }
 
@@ -113,19 +107,21 @@ export function useUserProfile(userId: string) {
 
   // The component will use the data from the cache, which is kept up-to-date
   // by the real-time listener.
-  return useQuery<User | null>({ // Ensure the query hook also expects User | null
+  return useQuery({
     queryKey: userKeys.profile(userId),
     // The queryFn will run on initial load or if the listener fails for some reason
     queryFn: async () => {
-        if (!firebaseUser) return null; // Or handle this case as needed
-        const token = await getAuthenticatedToken(firebaseUser);
-        const data = await fetchUserProfileApi(userId, token);
-        if (!data) return null;
-        // Transform the fetched data into a User instance
-        return new User(data as UserProperties);
+      if (!firebaseUser) return null; // Or handle this case as needed
+      const token = await getAuthenticatedToken(firebaseUser);
+      return fetchUserProfileApi(userId, token);
     },
     staleTime: Infinity, // Data is live, so it's always "fresh"
     enabled: !!userId && !!firebaseUser, // Only run if we have IDs
+    // NEW: Transform the data into a User instance
+    select: (data: UserProfile | null): User | null => {
+      if (!data) return null;
+      return new User(data as UserProperties);
+    }
   });
 }
 
@@ -314,7 +310,6 @@ export function usePhoneSignIn() {
     } catch (e: any) {
       console.error("Error sending OTP:", e);
       handleErrorUtility(e, "Failed to send OTP");
-      setError(e.message || "Failed to send OTP.");
       return null;
     } finally {
       setIsLoading(false);
@@ -343,7 +338,6 @@ export function usePhoneSignIn() {
     } catch (e: any) {
       console.error("Error verifying OTP:", e);
       handleErrorUtility(e, "Failed to verify OTP");
-      setError(e.message || "Failed to verify OTP.");
     } finally {
       setIsLoading(false);
     }

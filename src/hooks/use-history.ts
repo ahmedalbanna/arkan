@@ -2,18 +2,17 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import type { AnyProjectProposal, DiagramType } from "@/ai/schemas";
+import type { AnyProjectProposal } from "@/ai/schemas";
 import type { ProjectState } from '@/lib/types'; // For ProjectState
-import type { DiagramData } from './useDiagramStore'; // For DiagramData
-import type { PresentationHistoryEntry } from './usePresentationStore'; // For PresentationHistoryEntry
+import { useCallback, useEffect, useState } from "react";
+
 
 export interface HistoryEntry {
   id: string;
   createdAt: string;
   type: 'proposal' | 'diagram' | 'section' | 'project' | 'presentation'; // Added 'project' and 'presentation'
   title: string; // e.g., "Project Proposal" or "Use Case Diagram"
-  data: ProjectState | DiagramData | PresentationHistoryEntry | AnyProjectProposal | any; // More specific types
+  data: ProjectState | any; // More specific types
   projectIdea?: string;
   proposal?: AnyProjectProposal | null; // The proposal at the time of generation
 }

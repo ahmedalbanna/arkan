@@ -19,12 +19,12 @@ export const agentPromptSchema = z.object({
 });
 
 export const agentEditorSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  category: z.string(), // Changed to string for dynamic categories
+  name: z.string().min(1, "Name is required").optional(),
+  category: z.string().optional(), // Changed to string for dynamic categories
   prompt: z.union([
     z.string().min(10, "Prompt must be at least 10 characters"),
     agentPromptSchema
-  ]),
+  ]).optional(),
   introduction: z.string().max(500).optional(),
   placeholder: z.string().optional(),
   conversationStarters: z.array(z.object({ value: z.string() })).optional(),

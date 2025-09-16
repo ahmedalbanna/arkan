@@ -1,16 +1,17 @@
-
 'use client';
 
-import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { toast } from '@/hooks';
-import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { getTransactions as getTransactionsApi, verifyPayment as verifyPaymentApi, fetchUserTransactions as fetchUserTransactionsApi } from '@/services';
-import { transactionKeys, userKeys } from '@/lib/query-keys';
-import { TransactionStatus, type TransactionData, VerifyPaymentVariables } from '@/services';
 import { Transaction, type TransactionProperties } from '@/lib/models/transaction';
+import { transactionKeys } from '@/lib/query-keys';
+import { fetchUserTransactions as fetchUserTransactionsApi, getTransactions as getTransactionsApi, TransactionStatus } from '@/services';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
+
+interface TransactionsPage {
+    transactions: Transaction[];
+    hasNextPage: boolean;
+}
 
 const TRANSACTIONS_PER_PAGE = 6;
 
@@ -24,7 +25,7 @@ export function useTransactions(status: TransactionStatus) {
     const { firebaseUser } = useAuth();
     const queryKey = transactionKeys.list(status);
 
-    return useInfiniteQuery({
+    return useInfiniteQuery<TransactionsPage>({
         queryKey: queryKey,
         queryFn: async ({ pageParam }) => {
             if (!firebaseUser) throw new Error("User not authenticated.");
@@ -61,34 +62,5 @@ export function useUserTransactions() {
             return data.map(t => new Transaction(t as TransactionProperties));
         },
         enabled: !!firebaseUser,
-    });
-}
-
-/**
- * Custom mutation hook for an admin to verify or reject a payment transaction.
- * @returns The result of the useMutation hook.
- */
-export function useVerifyPayment() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-
-    return useMutation<any, Error, VerifyPaymentVariables>({
-        mutationFn: async (variables) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return verifyPaymentApi(variables, token);
-        },
-        onSuccess: (data, variables) => {
-            toast({
-                title: "Transaction Updated",
-                description: `Transaction has been marked as ${variables.status}.`,
-            });
-            // Invalidate all transaction lists to ensure UI updates across all tabs
-            queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
-            // Invalidate the specific user's profile to update their credit count
-            queryClient.invalidateQueries({ queryKey: userKeys.profile(variables.userId) });
-        },
-        onError: (error) => {
-            handleErrorUtility(error, "Payment verification failed");
-        }
     });
 }

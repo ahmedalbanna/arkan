@@ -1,6 +1,7 @@
 
 export * from './use-academic-solver';
 export * from './use-academic-solver-logic';
+export * from './use-admin-dashboard';
 export * from './use-agent-editor';
 export * from './use-agents';
 export * from './use-analytics';
@@ -16,23 +17,30 @@ export * from './use-diagram-generator';
 export * from './use-diagram-viewer';
 export * from './use-diagrams';
 export * from './use-docx-styles';
+export * from './use-docx-template-manager';
+export * from './use-evaluation';
 export * from './use-evaluation-result-viewer';
 export * from './use-evaluation-tools';
-export * from './use-evaluation';
 export * from './use-export';
 export * from './use-features';
 export * from './use-guideline-editor'; // Export new hook
 export * from './use-mobile';
+export * from './use-new-chat-dialog';
 export * from './use-notifications';
+export * from './use-payment';
 export * from './use-pptx-styles';
 export * from './use-presentation-generation';
 export * from './use-presentation-generator-logic';
+export * from './use-presentation-template-manager';
+export * from './use-project-plan';
+export * from './use-project-plan-generator';
 export * from './use-projects';
 export * from './use-proposal-generation';
+export * from './use-proposal-generation-tools-logic';
 export * from './use-proposal-mode-generator-logic';
 export * from './use-report-actions';
-export * from './use-report-generation-logic';
 export * from './use-report-generation';
+export * from './use-report-generation-logic';
 export * from './use-report-mode-generator';
 export * from './use-report-results';
 export * from './use-section-accordion-item-logic'; // Export new hook
@@ -46,20 +54,12 @@ export * from './use-templates';
 export * from './use-text-to-speech';
 export * from './use-toast';
 export * from './use-transactions';
-export * from './use-translation-view-logic';
 export * from './use-translation';
-export * from './use-user';
-export * from './use-writing-tools';
-export * from './use-new-chat-dialog';
-export * from './use-docx-template-manager';
-export * from './use-presentation-template-manager';
-export * from './use-user-management-console';
+export * from './use-translation-view-logic';
 export * from './use-upload-project-logic';
-export * from './use-admin-dashboard';
-export * from './use-payment';
-export * from './use-project-plan';
-export * from './use-project-plan-generator';
-export * from './use-proposal-generation-tools-logic';
+export * from './use-user';
+export * from './use-user-management-console';
+export * from './use-writing-tools';
 
 // Store hooks
 export * from './useAgentStore';
@@ -67,3 +67,4 @@ export * from './useBuilderStore';
 export * from './useChatInterface';
 export * from './useChatStore';
 export * from './useGenerationUIStore';
+

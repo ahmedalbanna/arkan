@@ -1,25 +1,24 @@
 
 'use client';
 
-import React, { useMemo } from 'react';
+import { type DiagramType, EvaluateContextOutput, type SectionName as SectionNameType } from '@/ai/schemas';
+import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
 import { Accordion } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
-import { Loader2, Sparkles, Eye } from 'lucide-react';
-import { ReportActions } from './ReportActions';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { markdownComponents } from '@/lib/markdown-styles';
-import ReactMarkdown from 'react-markdown';
-import { useSections } from '@/hooks';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useReportGenerationLogic } from '@/hooks';
+import { useReportGenerationLogic, useSections } from '@/hooks';
+import { markdownComponents } from '@/lib/markdown-styles';
+import { cn } from '@/lib/utils';
+import { Eye, Loader2, Sparkles } from 'lucide-react';
+import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import { ReportActions } from './ReportActions';
 
 interface GenerationToolsProps {
     onTranslateAll: (targetLang: 'en' | 'ar') => void;
@@ -27,8 +26,8 @@ interface GenerationToolsProps {
 }
 
 function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput | null, onOpenChange: (open: boolean) => void }) {
-    const { t } = useLocalization();
     const { data: sectionConfigs } = useSections();
+    const { t } = useLocalization();
     const reportSections = React.useMemo(() => sectionConfigs?.filter(s => s.type === 'report').reduce((acc, sec) => ({ ...acc, [sec.id]: sec }), {}) || {}, [sectionConfigs]);
     const diagramSections = React.useMemo(() => sectionConfigs?.filter(s => s.type === 'diagram').reduce((acc, sec) => ({ ...acc, [sec.id]: sec }), {}) || {}, [sectionConfigs]);
 
@@ -84,7 +83,6 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
 
 export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToolsProps) => {
     const {
-        t,
         isAnythingGenerating,
         isPlanning,
         activeMutationKey,
@@ -103,12 +101,14 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     } = useReportGenerationLogic();
 
     const isDisabled = isAnythingGenerating || isTranslating || isPlanning;
+    const { t } = useLocalization();
+
 
     return (
         <Card className={cn("flex flex-col h-full", (isDisabled || isTranslating) && 'opacity-50 pointer-events-none')}>
             <PlanViewerDialog plan={generationPlan} onOpenChange={() => setGenerationPlan(null)} />
             <CardHeader>
-                 <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center">
                     <div>
                         <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
                         <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
@@ -148,7 +148,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                     <Button variant="outline" size="icon" onClick={handleViewPlan} disabled={isDisabled || fullReportCreditCost <= 1}>
+                                    <Button variant="outline" size="icon" onClick={handleViewPlan} disabled={isDisabled || fullReportCreditCost <= 1}>
                                         {isPlanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
                                     </Button>
                                 </TooltipTrigger>
@@ -159,23 +159,23 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                 </div>
 
                 <Accordion type="multiple" className="w-full space-y-1">
-                  {orderedSections.map((key) => {
-                      const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
-                      return (
-                          <SectionAccordionItem
-                              key={key}
-                              sectionKey={key as SectionNameType}
-                              onGenerate={onGenerateSection}
-                              isGenerating={isGeneratingThis}
-                              isAnythingGenerating={isAnythingGenerating}
-                              hasCredits={hasCreditsForSingleSection}
-                          />
-                      );
-                  })}
+                    {orderedSections.map((key) => {
+                        const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
+                        return (
+                            <SectionAccordionItem
+                                key={key}
+                                sectionKey={key as SectionNameType}
+                                onGenerate={onGenerateSection}
+                                isGenerating={isGeneratingThis}
+                                isAnythingGenerating={isAnythingGenerating}
+                                hasCredits={!!hasCreditsForSingleSection}
+                            />
+                        );
+                    })}
                 </Accordion>
             </CardContent>
             <CardFooter>
-                 <ReportActions onTranslateAll={onTranslateAll} isTranslating={isTranslating} />
+                <ReportActions onTranslateAll={onTranslateAll} isTranslating={isTranslating} />
             </CardFooter>
         </Card>
     );

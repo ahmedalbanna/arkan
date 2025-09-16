@@ -1,24 +1,22 @@
 
 'use client';
 
-import { useQuery, useMutation, useQueryClient, useQueryClient as useTanstackQueryClient } from '@tanstack/react-query';
-import { toast } from '@/hooks';
-import { teamKeys } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
-import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
+import { handleErrorUtility } from '@/lib/errorUtils';
+import { teamKeys } from '@/lib/query-keys';
 import {
     createTeam as createTeamApi,
-    inviteMember as inviteMemberApi,
-    fetchUserTeams as fetchUserTeamsApi,
+    inviteMember as inviteMemberApi
 } from '@/services';
+import { useMutation, useQuery, useQueryClient, useQueryClient as useTanstackQueryClient } from '@tanstack/react-query';
 // Import the plain object type for API responses
-import type { TeamWithMembers, TeamMember } from '@/services'; 
+import type { TeamMember } from '@/lib/types';
 // Import our new class
-import { Team, type TeamProperties } from '@/lib/models/team'; 
-import { useEffect } from 'react';
-import { getFirestore, collection, onSnapshot, query, where, getDocs } from 'firebase/firestore';
 import { app } from '@/lib';
+import { Team, type TeamProperties } from '@/lib/models/team';
+import { collection, getDocs, getFirestore, onSnapshot, query, where } from 'firebase/firestore';
+import { useEffect } from 'react';
 
 /**
  * Fetches the user's teams in real-time.
@@ -48,7 +46,7 @@ export function useTeams() {
                 teamData.members = members;
                 return new Team(teamData);
             });
-            
+
             const teams = await Promise.all(teamPromises);
             teams.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
             queryClient.setQueryData(queryKey, teams);
@@ -91,7 +89,7 @@ export function useCreateTeam() {
             queryClient.invalidateQueries({ queryKey: teamKeys.lists() });
         },
         onError: (error) => {
-             handleErrorUtility(error, "Failed to create team");
+            handleErrorUtility(error, "Failed to create team");
         }
     });
 }
@@ -106,13 +104,13 @@ export function useInviteMember() {
             return inviteMemberApi({ ...variables, token });
         },
         onSuccess: () => {
-             // Invalidation will trigger a refetch, but the real-time listener will also update.
-             queryClient.invalidateQueries({ queryKey: teamKeys.lists() });
+            // Invalidation will trigger a refetch, but the real-time listener will also update.
+            queryClient.invalidateQueries({ queryKey: teamKeys.lists() });
         },
-         onError: (error) => {
-             handleErrorUtility(error, "Failed to invite member");
+        onError: (error) => {
+            handleErrorUtility(error, "Failed to invite member");
         }
     })
 }
 
-    
+
