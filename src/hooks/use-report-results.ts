@@ -60,6 +60,9 @@ export const useReportResults = () => {
   }, [sectionConfigs]);
 
   const getSectionTitle = (key: SectionName): string => {
+    if (!sectionConfigMap[key] || !sectionConfigMap[key].title) {
+        return key; // Fallback to the key if title isn't loaded
+    }
     return t(sectionConfigMap[key]?.title) || key;
   };
 
