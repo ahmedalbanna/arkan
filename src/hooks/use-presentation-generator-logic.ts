@@ -1,25 +1,21 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useGeneratePresentation } from '@/hooks';
+import { toast, useGeneratePresentation } from '@/hooks';
 import { translatePresentationApi } from '@/services';
-import { toast } from '@/hooks';
+import { useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useBuilderStore } from './useBuilderStore';
-import { Project } from '@/lib/models/project';
 import { useGenerationUIStore } from './useGenerationUIStore';
-import type { PresentationHistoryEntry } from '@/ai/schemas';
 
 export function usePresentationGeneratorLogic() {
     const { t, locale } = useLocalization();
     const { firebaseUser } = useAuth();
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
-    
-    const { project, setProject } = useBuilderStore();
-    
+    const { project, updateProject } = useBuilderStore();
+
     const { activePresentationId } = useGenerationUIStore();
 
     const generationMutation = useGeneratePresentation();
@@ -29,21 +25,21 @@ export function usePresentationGeneratorLogic() {
         onSuccess: (data) => {
             if (!project) return;
 
-            const updatedHistory = project.presentation?.history.map(p => 
+            const updatedHistory = project.presentation?.history.map(p =>
                 p.id === data.id ? data : p
             ) || [];
-            
+
             updateProject(p => {
                 p.presentation!.history = updatedHistory;
             });
-            
+
             toast({
                 title: t('builder.presentationGenerator.toasts.translateAllSuccess'),
                 description: t('builder.presentationGenerator.toasts.translateAllSuccessDesc'),
             });
         },
         onError: (error: Error) => {
-             toast({
+            toast({
                 title: t('builder.presentationGenerator.toasts.translateAllFailed'),
                 description: error.message || t('builder.presentationGenerator.toasts.translateAllFailedDesc'),
                 variant: 'destructive'

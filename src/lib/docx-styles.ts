@@ -1,10 +1,10 @@
 
 'use client';
 
-import { AlignmentType, ShadingType } from 'docx';
-import type { IStylesOptions } from 'docx';
-import { DocxTemplateProperties, DocxStyleOptionsSchema } from '@/lib/models/docxTemplate';
+import { DocxTemplateProperties } from '@/lib/models/docxTemplate';
 import { CustomStyles } from '@/lib/word-converter/types';
+import type { IStylesOptions } from 'docx';
+import { AlignmentType, ShadingType } from 'docx';
 
 
 const commonParagraphStyles = [

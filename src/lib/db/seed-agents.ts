@@ -1,7 +1,7 @@
 import 'dotenv/config';
-import { adminDb } from '../firebase/server-init';
-import { AGENTS as defaultAgents } from '../agents-template';
 import { CollectionReference } from 'firebase-admin/firestore';
+import { AGENTS as defaultAgents } from '../agents-template';
+import { adminDb } from '../firebase/server-init';
 
 // The AGENTS constant from your original `lib/agents.ts` file will be moved here.
 // For brevity, it is omitted from this code block but should be pasted in.
@@ -14,15 +14,15 @@ async function seedAgents() {
 
     console.log('Seeding agents...');
     for (const agent of defaultAgents) {
-        const { icon, ...agentData } = agent;
-        if (!icon || !icon.displayName) {
-            console.warn(`Skipping agent "${agent.id}" due to missing icon displayName.`);
+        const { icon, ...agentData } = agent as any;
+        if (!icon) {
+            console.warn(`Skipping agent "${agent.id}" due to missing icon.`);
             continue;
         }
         const docRef = agentsCollection.doc(agent.id);
         batch.set(docRef, {
             ...agentData,
-            icon: icon.displayName, // Store the icon's name as a string
+            icon: icon, // Store the icon's name as a string
             isDefault: true,
         });
         count++;

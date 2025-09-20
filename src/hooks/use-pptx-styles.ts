@@ -1,29 +1,28 @@
 
 'use client';
 
-import * as React from 'react';
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@/hooks";
 import { useAuth } from "@/context/AuthContext";
-import { handleErrorUtility } from "@/lib/errorUtils";
+import { toast } from "@/hooks";
 import { getAuthenticatedToken } from "@/lib/authUtils";
-import {
-  fetchPptxTemplates,
-  updatePptxTemplate,
-  createPptxTemplate,
-  deletePptxTemplate,
-  uploadPptxTemplateFile as uploadPptxTemplateFileApi,
-  type PptxTemplate as PptxTemplateType,
-} from "@/services";
-import { PptxStyleOptions } from '@/lib/types';
+import { handleErrorUtility } from "@/lib/errorUtils";
 import { PptxTemplate, type PptxTemplateProperties } from '@/lib/models/pptxTemplate';
+import { PptxStyleOptions } from '@/lib/types';
+import {
+    createPptxTemplate,
+    deletePptxTemplate,
+    fetchPptxTemplates,
+    updatePptxTemplate,
+    uploadPptxTemplateFile as uploadPptxTemplateFileApi,
+} from "@/services";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import * as React from 'react';
 
 
 export type PptxTemplateKey = 'modern' | 'dark' | 'professional' | string;
 
 export const pptxTemplateKeys = {
-  all: ["pptx-templates"] as const,
-  lists: () => [...pptxTemplateKeys.all, "list"] as const,
+    all: ["pptx-templates"] as const,
+    lists: () => [...pptxTemplateKeys.all, "list"] as const,
 };
 
 export function usePptxStyles() {
@@ -129,10 +128,11 @@ export function usePptxStyles() {
 export function useCreatePptxTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
-    return useMutation<PptxTemplateType, Error, {id: string, name: string, description: string}>({
+    return useMutation<PptxTemplate, Error, { id: string, name: string, description: string }>({
         mutationFn: async (data) => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return createPptxTemplate(data, token);
+            const newTemplateProperties = await createPptxTemplate(data, token);
+            return new PptxTemplate(newTemplateProperties);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: pptxTemplateKeys.lists() });

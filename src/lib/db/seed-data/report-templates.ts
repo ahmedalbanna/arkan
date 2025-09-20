@@ -1,9 +1,9 @@
 
 // src/lib/report-generation-templates.ts
 
-import type { ReportGenerationTemplate } from "../../types";
+import type { ReportTemplate } from "../../types";
 
-export const REPORT_GENERATION_TEMPLATES: ReportGenerationTemplate[] = [
+export const REPORT_GENERATION_TEMPLATES: ReportTemplate[] = [
     {
         id: 'software-report',
         name: 'Software Project Report',
@@ -16,7 +16,8 @@ export const REPORT_GENERATION_TEMPLATES: ReportGenerationTemplate[] = [
             'systemProgramming',
             'systemTesting',
             'conclusion',
-        ]
+        ],
+        isDefault: false
     },
     {
         id: 'training-report',
@@ -32,7 +33,8 @@ export const REPORT_GENERATION_TEMPLATES: ReportGenerationTemplate[] = [
             'recommendations',
             'references',
             'appendices',
-        ]
+        ],
+        isDefault: false
     },
     {
         id: 'scientific-research-report',
@@ -44,6 +46,7 @@ export const REPORT_GENERATION_TEMPLATES: ReportGenerationTemplate[] = [
             'systemAnalysis',
             'systemTesting',
             'conclusion',
-        ]
+        ],
+        isDefault: false
     },
 ];

@@ -1,12 +1,11 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useUsers, toast, useChatStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
-import type { UserProfile } from '@/lib/types';
-import { createConversationApi } from '@/services';
+import { toast, useChatStore, useUsers } from '@/hooks';
 import type { User } from '@/lib/models/user';
+import { createConversationApi } from '@/services';
+import { useState } from 'react';
 
 
 export function useNewChatDialog() {
@@ -23,7 +22,7 @@ export function useNewChatDialog() {
         isFetchingNextPage
     } = useUsers();
 
-    const allUsers = data?.pages.flatMap(page => page.users) ?? [];
+    const allUsers = data?.pages.flatMap(page => (page as any).users) ?? [];
 
     const onSelectUser = async (user: User) => {
         if (!firebaseUser || !adminProfile) return;

@@ -1,11 +1,11 @@
 
 'use server';
 
-import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
 import { imageToText } from '@/ai/flows/image-to-text';
+import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
+import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 const SUPPORTED_MIME_TYPES = [
     'application/pdf',
@@ -28,33 +28,28 @@ export const POST = withAuth(async ({ request, user }) => {
         if (!SUPPORTED_MIME_TYPES.includes(file.type)) {
             return handleApiError({ message: `Invalid file type. Supported types are: ${SUPPORTED_MIME_TYPES.join(', ')}` }, 400);
         }
-        
+
+        // Standard credit deduction for processing
+        await deductCredit(user.id, 2);
+
+        const fileArrayBuffer = await file.arrayBuffer();
+        const base64 = Buffer.from(fileArrayBuffer).toString('base64');
+        const dataUri = `data:${file.type};base64,${base64}`;
+
         let result: { markdown: string } | { text: string };
         let agentId: string;
         let markdownContent: string;
-        let creditCost = 0;
 
         if (file.type === 'application/pdf') {
-            creditCost = 2; // AI processing required
-            await deductCredit(user.id, creditCost);
-            const fileArrayBuffer = await file.arrayBuffer();
-            const base64 = Buffer.from(fileArrayBuffer).toString('base64');
-            const dataUri = `data:${file.type};base64,${base64}`;
             agentId = 'pdf-to-markdown';
             result = await rewriteDocumentToMarkdown({ pdfDataUri: dataUri });
             markdownContent = 'markdown' in result ? result.markdown : '';
         } else if (file.type.startsWith('image/')) {
-            creditCost = 1; // AI processing required
-            await deductCredit(user.id, creditCost);
-            const fileArrayBuffer = await file.arrayBuffer();
-            const base64 = Buffer.from(fileArrayBuffer).toString('base64');
-            const dataUri = `data:${file.type};base64,${base64}`;
             agentId = 'image-to-text';
             result = await imageToText({ imageDataUri: dataUri });
             markdownContent = 'text' in result ? result.text : '';
         } else {
             // For plain text or markdown, we just decode it.
-            // No AI call needed, so no credit deduction for this path.
             agentId = 'text-file-to-markdown';
             markdownContent = Buffer.from(await file.arrayBuffer()).toString('utf-8');
             result = { markdown: markdownContent };
@@ -65,7 +60,7 @@ export const POST = withAuth(async ({ request, user }) => {
             userId: user.id,
             input: { fileName: file.name, fileType: file.type }, // Don't log the full data URI
             output: { markdownLength: markdownContent.length },
-            creditCost: creditCost,
+            creditCost: 1
         });
 
         return createApiResponse({ markdown: markdownContent }, 200);

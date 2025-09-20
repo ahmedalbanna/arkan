@@ -1,16 +1,15 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useLocalization } from '@/context/LocalizationContext';
-import { useUpdateDiagram, useSections, useAgentStore } from '@/hooks';
 import { type DiagramType, DiagramTypeSchema } from '@/ai/schemas';
-import { useBuilderStore } from '@/hooks';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useAgentStore, useBuilderStore, useSections, useUpdateDiagram } from '@/hooks';
+import { useMemo, useState } from 'react';
 
 export const useDiagramGenerator = () => {
     const { t, locale } = useLocalization();
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     const { project, updateProject } = useBuilderStore();
-    const { data: sectionConfigs, isLoaded: sectionsLoaded } = useSections();
+    const { data: sectionConfigs } = useSections();
     const getIconComponent = useAgentStore(state => state.getIconComponent);
 
     const diagrams = project?.diagrams || {};

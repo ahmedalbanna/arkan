@@ -1,19 +1,17 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks';
+import { AcademicDocumentType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore } from '@/hooks';
-import { useAnalyzeAcademicDocument, useSolveAcademicDocument } from '@/hooks';
+import { useAnalyzeAcademicDocument, useBuilderStore, useSolveAcademicDocument, useToast } from '@/hooks';
 import { exportDocumentAsDocx } from '@/lib/academic-exporter';
-import { AcademicDocumentType } from '@/ai/schemas';
+import { useEffect, useState } from 'react';
 
 export interface ExternalContext {
-  fileName: string;
-  content: string;
-  type: 'question' | 'context';
+    fileName: string;
+    content: string;
+    type: 'question' | 'context';
 }
 
 export type ContextFileType = 'question' | 'context';
@@ -48,7 +46,7 @@ export function useAcademicSolverLogic() {
 
         updateProject(p => p.setAcademicSolverStage('analyzing'));
 
-        const combinedQuestionContent = academicSolverState.questionDocuments.map(doc => `--- Content from: ${doc.fileName} ---\n${doc.content}`).join('\n\n');
+        const combinedQuestionContent = academicSolverState.questionDocuments.map((doc: { fileName: string; content: string }) => `--- Content from: ${doc.fileName} ---\n${doc.content}`).join('\n\n');
 
         analyzeMutation.mutate({ markdown: combinedQuestionContent, documentType: academicSolverState.documentType }, {
             onSuccess: (data) => {
@@ -71,7 +69,7 @@ export function useAcademicSolverLogic() {
 
         let contextMarkdown: string | undefined = undefined;
         if (academicSolverState.externalContext && academicSolverState.externalContext.length > 0) {
-            contextMarkdown = academicSolverState.externalContext.map(c => `--- Context from: ${c.fileName} ---\n${c.content}`).join('\n\n');
+            contextMarkdown = academicSolverState.externalContext.map((c: { fileName: string; content: string }) => `--- Content from: ${c.fileName} ---\n${c.content}`).join('\n\n');
         }
 
         solveMutation.mutate({ analyzedDocument: academicSolverState.analyzedDocument, contextMarkdown }, {

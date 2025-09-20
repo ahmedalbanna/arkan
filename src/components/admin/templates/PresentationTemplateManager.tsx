@@ -1,36 +1,34 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { templateKeys, useUpdatePresentationTemplate, useCreatePresentationTemplate, useDeletePresentationTemplate, usePresentationTemplates } from '@/hooks';
-import { type PresentationGenerationTemplate } from '@/services';
-import { useAuth } from '@/context/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCreatePresentationTemplate, useDeletePresentationTemplate, usePresentationTemplates, useUpdatePresentationTemplate } from '@/hooks';
+
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, PlusCircle, Trash2 } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2, PlusCircle, Save, Trash2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-import { Skeleton } from '@/components/ui/skeleton';
-import { useMemo, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { useSections } from '@/hooks';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
-import { toast } from '@/hooks';
+import { toast, useSections } from '@/hooks';
+import { PresentationTemplate } from '@/lib/models/presentationTemplate';
+import { useMemo, useState } from 'react';
 
 
 const presentationTemplateSchema = z.object({
-  id: z.string(),
-  name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "Description is required"),
-  primaryAgentId: z.string().default('generate-presentation'),
-  relevantReportSectionIds: z.array(z.string()).optional(),
+    id: z.string(),
+    name: z.string().min(1, "Name is required"),
+    description: z.string().min(1, "Description is required"),
+    primaryAgentId: z.string().default('generate-presentation'),
+    relevantReportSectionIds: z.array(z.string()).optional(),
 });
 
 type PresentationFormValues = z.infer<typeof presentationTemplateSchema>;
@@ -42,7 +40,7 @@ type CreatePresentationFormValues = z.infer<typeof createPresentationTemplateSch
 
 
 
-function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: PresentationGenerationTemplate, onSave: (data: PresentationFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
+function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: PresentationTemplate, onSave: (data: PresentationFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
     const { t } = useLocalization();
     const { data: sections } = useSections();
     const reportSections = useMemo(() => (sections || []).filter(s => s.type === 'report'), [sections]);
@@ -59,21 +57,21 @@ function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDele
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSave)} className="space-y-4">
-                 <FormField control={form.control} name="name" render={({ field }) => (
+                <FormField control={form.control} name="name" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Template Name</FormLabel>
                         <FormControl><Input {...field} disabled={isSaving || isDeleting} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
-                 <FormField control={form.control} name="description" render={({ field }) => (
+                <FormField control={form.control} name="description" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Description</FormLabel>
                         <FormControl><Textarea {...field} disabled={isSaving || isDeleting} rows={2} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
-                 <FormField
+                <FormField
                     control={form.control}
                     name="relevantReportSectionIds"
                     render={() => (
@@ -119,19 +117,19 @@ function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDele
                     {!isDefaultTemplate && (
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                 <Button variant="destructive" type="button" disabled={isSaving || isDeleting}>
+                                <Button variant="destructive" type="button" disabled={isSaving || isDeleting}>
                                     {isDeleting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Trash2 className="me-2 h-4 w-4" />}
                                     Delete
                                 </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>This action cannot be undone. This will permanently delete the "{template.name}" template.</AlertDialogDescription>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>This action cannot be undone. This will permanently delete the "{template.name}" template.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
@@ -163,7 +161,7 @@ function CreatePresentationTemplateDialog() {
     });
 
 
-     const handleSave = (data: CreatePresentationFormValues) => {
+    const handleSave = (data: CreatePresentationFormValues) => {
         createMutation.mutate(data, {
             onSuccess: () => {
                 toast({ title: 'Success', description: 'New presentation template created.' });
@@ -242,7 +240,7 @@ function CreatePresentationTemplateDialog() {
                                 </FormItem>
                             )}
                         />
-                         <DialogFooter>
+                        <DialogFooter>
                             <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
                             <Button type="submit" disabled={createMutation.isPending}>
                                 {createMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="me-2 h-4 w-4" />}
@@ -281,28 +279,29 @@ export function PresentationTemplateManager() {
                 <div>
                     <CardTitle>Presentation Generation Templates</CardTitle>
                     <CardDescription>
-                    Configure the content structure for different types of presentations.
+                        Configure the content structure for different types of presentations.
                     </CardDescription>
                 </div>
-                 <CreatePresentationTemplateDialog />
+                <CreatePresentationTemplateDialog />
             </CardHeader>
             <CardContent>
                 <Accordion type="single" collapsible className="w-full">
                     {templates?.map(template => {
                         return (
-                        <AccordionItem value={template.id} key={template.id}>
-                            <AccordionTrigger>{template.name}</AccordionTrigger>
-                            <AccordionContent className="p-4 bg-muted/50 rounded-b-md">
-                                <PresentationTemplateForm
-                                    template={template}
-                                    onSave={handleSave}
-                                    isSaving={updateMutation.isPending && updateMutation.variables?.templateId === template.id}
-                                    onDelete={() => handleDelete(template.id)}
-                                    isDeleting={deleteMutation.isPending && deleteMutation.variables === template.id}
-                                />
-                            </AccordionContent>
-                        </AccordionItem>
-                    )})}
+                            <AccordionItem value={template.id} key={template.id}>
+                                <AccordionTrigger>{template.name}</AccordionTrigger>
+                                <AccordionContent className="p-4 bg-muted/50 rounded-b-md">
+                                    <PresentationTemplateForm
+                                        template={template}
+                                        onSave={handleSave}
+                                        isSaving={updateMutation.isPending && updateMutation.variables?.templateId === template.id}
+                                        onDelete={() => handleDelete(template.id)}
+                                        isDeleting={deleteMutation.isPending && deleteMutation.variables === template.id}
+                                    />
+                                </AccordionContent>
+                            </AccordionItem>
+                        )
+                    })}
                 </Accordion>
             </CardContent>
         </Card>

@@ -1,28 +1,28 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { templateKeys, useUpdateProposalTemplate, useCreateProposalTemplate, useDeleteProposalTemplate } from '@/hooks';
-import { fetchProposalTemplates, type ProposalTemplate } from '@/services';
-import { useAuth } from '@/context/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, PlusCircle, Trash2 } from 'lucide-react';
-import { useForm, useFieldArray } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
-import { useState } from 'react';
-import { PROPOSAL_TEMPLATES } from '@/lib/db/seed-data/proposal-templates';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import dynamic from 'next/dynamic';
-import { useTheme } from 'next-themes';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
+import { templateKeys, useCreateProposalTemplate, useDeleteProposalTemplate, useToast, useUpdateProposalTemplate } from '@/hooks';
+import { PROPOSAL_TEMPLATES } from '@/lib/db/seed-data/proposal-templates';
+import { ProposalTemplate } from '@/lib/types';
+import { fetchProposalTemplates } from '@/services';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useQuery } from '@tanstack/react-query';
+import { Loader2, PlusCircle, Save, Trash2 } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import dynamic from 'next/dynamic';
+import { useState } from 'react';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
@@ -66,28 +66,28 @@ function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSave)} className="space-y-4">
-                 <FormField control={form.control} name="name" render={({ field }) => (
+                <FormField control={form.control} name="name" render={({ field }) => (
                     <FormItem>
                         <FormLabel>{t('manageTemplates.proposalDialog.nameLabel')}</FormLabel>
                         <FormControl><Input {...field} disabled={isSaving || isDeleting} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
-                 <FormField control={form.control} name="description" render={({ field }) => (
+                <FormField control={form.control} name="description" render={({ field }) => (
                     <FormItem>
                         <FormLabel>{t('manageTemplates.proposalDialog.descriptionLabel')}</FormLabel>
                         <FormControl><Textarea {...field} disabled={isSaving || isDeleting} rows={2} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
-                 <FormField control={form.control} name="prompt" render={({ field }) => (
+                <FormField control={form.control} name="prompt" render={({ field }) => (
                     <FormItem>
                         <FormLabel>{t('manageTemplates.proposalDialog.promptLabel')}</FormLabel>
                         <FormControl><Textarea {...field} disabled={isSaving || isDeleting} rows={8} className="font-mono text-xs" /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
-                 <div>
+                <div>
                     <FormLabel>{t('manageTemplates.proposalDialog.guidelinesLabel')}</FormLabel>
                     <div className="space-y-2 mt-2">
                         {fields.map((field, index) => (
@@ -101,26 +101,26 @@ function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting
                         <Button type="button" variant="outline" size="sm" onClick={() => append("")} disabled={isSaving || isDeleting}>{t('manageTemplates.proposalDialog.addGuideline')}</Button>
                     </div>
                 </div>
-                 <Accordion type="single" collapsible className="w-full">
+                <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="json-structure">
                         <AccordionTrigger>{t('manageTemplates.proposalDialog.jsonStructureLabel')}</AccordionTrigger>
                         <AccordionContent>
-                             <div className="p-2 border rounded-md bg-background">
-                                 <ReactJson
+                            <div className="p-2 border rounded-md bg-background">
+                                <ReactJson
                                     src={template.jsonStructure || {}}
                                     theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'}
                                     displayDataTypes={false}
                                     name={false}
                                     collapsed={2}
                                 />
-                             </div>
+                            </div>
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
 
 
                 <div className="flex justify-end gap-2">
-                     {!isDefaultTemplate && (
+                    {!isDefaultTemplate && (
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button variant="destructive" type="button" disabled={isSaving || isDeleting}>
@@ -130,12 +130,12 @@ function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
-                                <AlertDialogTitle>{t('manageTemplates.deleteDialog.title')}</AlertDialogTitle>
-                                <AlertDialogDescription>{t('manageTemplates.deleteDialog.description').replace('{templateName}', template.name)}</AlertDialogDescription>
+                                    <AlertDialogTitle>{t('manageTemplates.deleteDialog.title')}</AlertDialogTitle>
+                                    <AlertDialogDescription>{t('manageTemplates.deleteDialog.description').replace('{templateName}', template.name)}</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                <AlertDialogCancel>{t('manageTemplates.cancelButton')}</AlertDialogCancel>
-                                <AlertDialogAction onClick={onDelete}>{t('manageTemplates.deleteDialog.deleteButton')}</AlertDialogAction>
+                                    <AlertDialogCancel>{t('manageTemplates.cancelButton')}</AlertDialogCancel>
+                                    <AlertDialogAction onClick={onDelete}>{t('manageTemplates.deleteDialog.deleteButton')}</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
@@ -167,7 +167,7 @@ function CreateProposalTemplateDialog() {
         }
     });
 
-     const { fields, append, remove } = useFieldArray({
+    const { fields, append, remove } = useFieldArray({
         control: form.control,
         name: "guidelines" as never,
     });
@@ -180,7 +180,7 @@ function CreateProposalTemplateDialog() {
                 form.reset();
             },
             onError: (error: any) => {
-                 if (error.errors) {
+                if (error.errors) {
                     for (const key in error.errors) {
                         form.setError(key as keyof CreateProposalFormValues, { message: error.errors[key][0] });
                     }
@@ -203,7 +203,7 @@ function CreateProposalTemplateDialog() {
                         {t('manageTemplates.proposalDialog.description')}
                     </DialogDescription>
                 </DialogHeader>
-                 <Form {...form}>
+                <Form {...form}>
                     <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
                         <FormField control={form.control} name="id" render={({ field }) => (
                             <FormItem>
@@ -233,7 +233,7 @@ function CreateProposalTemplateDialog() {
                                 <FormMessage />
                             </FormItem>
                         )} />
-                         <div>
+                        <div>
                             <FormLabel>{t('manageTemplates.proposalDialog.guidelinesLabel')}</FormLabel>
                             <div className="space-y-2 mt-2">
                                 {fields.map((field, index) => (
@@ -306,21 +306,22 @@ export function ProposalTemplateManager() {
                 <Accordion type="single" collapsible className="w-full">
                     {templates?.map(template => {
                         return (
-                        <AccordionItem value={template.id} key={template.id}>
-                           <div className="flex items-center justify-between">
-                                <AccordionTrigger className="flex-1">{t(template.name)}</AccordionTrigger>
-                            </div>
-                            <AccordionContent className="p-4 bg-muted/50 rounded-b-md">
-                                <ProposalTemplateForm
-                                    template={template}
-                                    onSave={handleSave}
-                                    isSaving={updateMutation.isPending && updateMutation.variables?.templateId === template.id}
-                                    onDelete={() => handleDelete(template.id)}
-                                    isDeleting={deleteMutation.isPending && deleteMutation.variables === template.id}
-                                />
-                            </AccordionContent>
-                        </AccordionItem>
-                    )})}
+                            <AccordionItem value={template.id} key={template.id}>
+                                <div className="flex items-center justify-between">
+                                    <AccordionTrigger className="flex-1">{t(template.name)}</AccordionTrigger>
+                                </div>
+                                <AccordionContent className="p-4 bg-muted/50 rounded-b-md">
+                                    <ProposalTemplateForm
+                                        template={template as ProposalTemplate & { jsonStructure: any }}
+                                        onSave={handleSave}
+                                        isSaving={updateMutation.isPending && updateMutation.variables?.templateId === template.id}
+                                        onDelete={() => handleDelete(template.id)}
+                                        isDeleting={deleteMutation.isPending && deleteMutation.variables === template.id}
+                                    />
+                                </AccordionContent>
+                            </AccordionItem>
+                        )
+                    })}
                 </Accordion>
             </CardContent>
         </Card>

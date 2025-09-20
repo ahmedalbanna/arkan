@@ -138,7 +138,15 @@ export async function exportReportAsDocx(
 ) {
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[docxTemplateKey]?.styles || templates.modern.styles;
-    const doc = new Document({ styles });
+    const doc = new Document({
+        styles,
+        sections: [
+            {
+                properties: {},
+                children: [],
+            },
+        ],
+    });
     const blob = await Packer.toBlob(doc);
     saveAs(blob, "project-report.docx");
 }

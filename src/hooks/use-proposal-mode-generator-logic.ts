@@ -2,17 +2,14 @@
 
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { toast } from '@/hooks';
-import { useBuilderStore, useDocxStyles, useExport } from '@/hooks';
+import { ProjectProposalSchema, type AnyProjectProposal, type ProjectProposal } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useGenerateProposal } from '@/hooks';
-import { translateProposalApi, summarizeProjectApi } from '@/services';
-import { ProjectProposalSchema, type ProjectProposal, type AnyProjectProposal } from '@/ai/schemas';
-import { Project } from '@/lib/models/project';
+import { toast, useBuilderStore, useDocxStyles, useExport, useGenerateProposal } from '@/hooks';
 import type { DocxTemplateKey } from '@/lib/docx-styles';
+import { summarizeProjectApi, translateProposalApi } from '@/services';
+import { useMutation } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from 'react';
 import { useIsMobile } from './use-mobile';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
@@ -21,7 +18,7 @@ const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 function proposalToMarkdown(proposal: AnyProjectProposal): string {
     let md = `# ${proposal.title}\n\n`;
     md += `**Category:** ${proposal.category}\n\n`;
-    
+
     const renderValue = (value: any, level: number): string => {
         if (value === null || value === undefined) return '';
         if (typeof value !== 'object') return `${value}\n\n`;
@@ -56,8 +53,11 @@ export function useProposalModeGeneratorLogic() {
     const proposal = translatedProposal || project?.proposal as ProjectProposal | null;
 
     const translateMutation = useMutation({
-        mutationFn: translateProposalApi,
-        onSuccess: (data: ProjectProposal) => {
+        mutationFn: async (variables: { proposal: ProjectProposal, targetLang: 'en' | 'ar', token: string }) => {
+            const result = await translateProposalApi(variables);
+            return result as ProjectProposal;
+        },
+        onSuccess: (data) => {
             setTranslatedProposal(data);
             toast({
                 title: t('builder.proposalGenerator.toasts.translateAllSuccess'),

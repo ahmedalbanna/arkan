@@ -1,13 +1,15 @@
-// src/app/api/purchase-request/route.ts
-import { getStorage } from 'firebase-admin/storage';
+
+'use server';
+
+import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { createTransaction } from '@/lib/db/queries';
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { getStorage } from 'firebase-admin/storage';
 
 export const config = {
-    api: {
-        bodyParser: false,
-    },
+  api: {
+    bodyParser: false,
+  },
 };
 
 export const POST = withAuth(async ({ request }) => {
@@ -68,9 +70,9 @@ export const POST = withAuth(async ({ request }) => {
       };
 
       const notificationPromises = adminsSnapshot.docs.map(adminDoc => {
-          const adminId = adminDoc.id;
-          const notificationRef = rtdb.ref(`notifications/${adminId}`).push();
-          return notificationRef.set(notificationPayload);
+        const adminId = adminDoc.id;
+        const notificationRef = rtdb.ref(`notifications/${adminId}`).push();
+        return notificationRef.set(notificationPayload);
       });
       await Promise.all(notificationPromises);
     }

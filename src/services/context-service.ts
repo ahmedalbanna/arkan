@@ -1,8 +1,8 @@
 
 'use client';
 
-import type { ExternalContext } from '@/hooks';
-import type { AnalyzeContextOutput } from '@/ai/schemas';
+
+import type { AnalyzeContextOutput, ExternalContext } from '@/ai/schemas';
 
 interface AnalyzeContextVariables {
   prompt: string;

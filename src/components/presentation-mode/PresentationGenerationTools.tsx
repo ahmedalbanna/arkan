@@ -1,40 +1,32 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { type DiagramType, EvaluateContextOutput, type SectionName as SectionNameType } from '@/ai/schemas';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAgents } from '@/hooks';
-import { cn } from '@/lib/utils';
-import { type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
-import { Loader2, Sparkles, Settings, Eye, PanelLeftClose } from 'lucide-react';
-import { useToast } from '@/hooks';
-import { useBuilderStore } from '@/hooks';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useGenerationUIStore } from '@/hooks';
-import { usePresentationTemplates } from '@/hooks';
-import { formatDistanceToNow } from 'date-fns';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { GuidelineEditor } from '../section/SectionGuidelineEditor';
-import { AcademicUploaders } from '../academicSolver-mode/AcademicUploaders';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useAgents, useBuilderStore, useGenerationUIStore, usePresentationTemplates, useSections, useToast } from '@/hooks';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
-import { ContextSelector } from '../section/SectionContextSelector';
-import { useSections } from '@/hooks';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { useMutation } from '@tanstack/react-query';
-import { getAuthenticatedToken } from '@/lib/authUtils';
-import { evaluateContextApi } from '@/services';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { Project } from '@/lib/models/project';
+import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from 'date-fns';
+import { Loader2, PanelLeftClose, Settings, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { AcademicUploaders } from '../academicSolver-mode/AcademicUploaders';
+import { ContextSelector } from '../section/SectionContextSelector';
+import { GuidelineEditor } from '../section/SectionGuidelineEditor';
 import { PresentationActions } from './PresentationActions';
 
 interface PresentationGenerationToolsProps {
@@ -78,8 +70,8 @@ function ToolsSkeleton() {
 function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput | null, onOpenChange: (open: boolean) => void }) {
     const { t } = useLocalization();
     const { data: sectionConfigs } = useSections();
-    const reportSections = React.useMemo(() => sectionConfigs?.filter(s => s.type === 'report').reduce((acc, sec) => ({ ...acc, [sec.id]: sec }), {}) || {}, [sectionConfigs]);
-    const diagramSections = React.useMemo(() => sectionConfigs?.filter(s => s.type === 'diagram').reduce((acc, sec) => ({ ...acc, [sec.id]: sec }), {}) || {}, [sectionConfigs]);
+    const reportSections = React.useMemo(() => sectionConfigs?.filter(s => s.type === 'report').reduce((acc, sec) => ({ ...acc, [sec.id]: sec }), {} as Record<string, any>) || {}, [sectionConfigs]);
+    const diagramSections = React.useMemo(() => sectionConfigs?.filter(s => s.type === 'diagram').reduce((acc, sec) => ({ ...acc, [sec.id]: sec }), {} as Record<string, any>) || {}, [sectionConfigs]);
 
     if (!plan) return null;
 
@@ -103,7 +95,7 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
                                     <div>
                                         <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.contextItems')}</h4>
                                         <ul className="list-disc pl-5 text-muted-foreground text-xs">
-                                            {config.context.sections?.map(s => <li key={s}>{reportSections[s]?.title || s}</li>)}
+                                            {config.context.sections?.map(s => <li key={s}>{(reportSections as Record<string, any>)[s]?.title || s}</li>)}
                                             {config.context.diagrams?.map(d => <li key={d}>{diagramSections[d as DiagramType]?.title || d}</li>)}
                                             {!config.context.sections?.length && !config.context.diagrams?.length && <li>{t('builder.proposalGenerator.title')}</li>}
                                         </ul>
@@ -141,11 +133,9 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         setActivePresentationId,
         guidelineState,
         contextSelection,
-        selectedPresentationTemplateId,
-        setSelectedPresentationTemplateId,
     } = useGenerationUIStore();
     const { userProfile, firebaseUser } = useAuth();
-    const hasCreditsForGeneration = userProfile ? userProfile.credits >= 1 : false;
+    const hasCreditsForGeneration = (userProfile?.credits ?? 0) >= 1;
 
     const sections = project?.sections || {};
     const diagrams = project?.diagrams || {};
@@ -175,7 +165,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     }
 
     const handleGenerateClick = () => {
-        if (!selectedPresentationTemplateId) {
+        if (!presentationTemplates) {
             toast({ title: t('builder.presentationGenerator.toasts.selectTemplate'), variant: 'destructive' });
             return;
         }
@@ -201,7 +191,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
             }
         }
 
-         for (const key in selectedContext.diagrams) {
+        for (const key in selectedContext.diagrams) {
             if (selectedContext.diagrams[key] && diagrams[key as DiagramType]) {
                 const diagramKey = key as DiagramType;
                 sourceDocuments.push({
@@ -222,7 +212,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
             projectPlan: project?.projectPlan,
             sourceDocuments: sourceDocuments,
             guidelines: getSelectedGuidelines(agent, guidelineState['presentation']),
-            templateId: selectedPresentationTemplateId,
+            templateId: presentationTemplates,
             tone: tone,
             complexity: complexity,
         };
@@ -236,7 +226,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     return (
         <Card className={cn("flex flex-col h-full", isDisabled && 'opacity-50 pointer-events-none')}>
             <CardHeader>
-                 <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center">
                     <div>
                         <CardTitle className="font-headline">{t('builder.presentationGenerator.toolsTitle')}</CardTitle>
                         <CardDescription>{t('builder.presentationGenerator.toolsDesc')}</CardDescription>
@@ -253,11 +243,11 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                         <TabsTrigger value="history">{t('builder.presentationGenerator.historyTab')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="generate" className="pt-6 space-y-4">
-                         <div className="space-y-2">
+                        <div className="space-y-2">
                             <Label htmlFor="presentation-template-select">{t('builder.presentationGenerator.templateLabel')}</Label>
-                            <Select value={selectedPresentationTemplateId} onValueChange={setSelectedPresentationTemplateId}>
-                                <SelectTrigger id="presentation-template-select">
-                                    <SelectValue placeholder="Select a presentation template"/>
+                            <Select value={activePresentationId as string} onValueChange={setActivePresentationId}>
+                                <SelectTrigger id="presentation-template-select" value={activePresentationId || ''}>
+                                    <SelectValue placeholder="Select a presentation template" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {presentationTemplates?.map(template => (
@@ -269,31 +259,30 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                         <Separator />
                         <div>
                             <h4 className="text-sm font-semibold mb-2">{t('builder.presentationGenerator.sourceDocuments')}</h4>
-                             <Accordion type="multiple" className="w-full space-y-1">
+                            <Accordion type="multiple" className="w-full space-y-1">
                                 <AccordionItem value="context-selector">
                                     <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
                                         {t('builder.presentationGenerator.selectExistingContext')}
                                     </AccordionTrigger>
                                     <AccordionContent className="p-4 border">
-                                         <ContextSelector itemKey="presentation" />
+                                        <ContextSelector itemKey="presentation" />
                                     </AccordionContent>
                                 </AccordionItem>
-                                 <AccordionItem value="file-uploader">
+                                <AccordionItem value="file-uploader">
                                     <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
                                         {t('builder.presentationGenerator.uploadNewContext')}
                                     </AccordionTrigger>
-                                     <AccordionContent className="p-4 border">
-                                         <AcademicUploaders
+                                    <AccordionContent className="p-4 border">
+                                        <AcademicUploaders
                                             title=""
                                             onContentAdded={handleAddExternalContext}
                                             onContentRemoved={handleRemoveExternalContext}
                                             isProcessing={isDisabled}
-                                            uploadedContent={externalContext}
-                                            isContext
+                                            uploadedContent={externalContext.filter(item => item.type === 'context')}
                                         />
                                     </AccordionContent>
                                 </AccordionItem>
-                             </Accordion>
+                            </Accordion>
                         </div>
 
                         <Separator />
@@ -301,7 +290,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                         <div>
                             <h4 className="text-sm font-semibold mb-2">{t('builder.presentationGenerator.generationSettings')}</h4>
                             <Accordion type="multiple" className="w-full space-y-1">
-                                 <AccordionItem value="settings">
+                                <AccordionItem value="settings">
                                     <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
                                         <div className="flex items-center gap-2">
                                             <Settings className="h-4 w-4" /> {t('builder.presentationGenerator.advancedSettings')}
@@ -362,7 +351,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                 )}
                                             >
                                                 <div className="flex flex-col">
-                                                    <span>{p.name} ({t('builder.presentationGenerator.historyItem', {slideCount: (p.slides || []).length})})</span>
+                                                    <span>{p.name} ({t('builder.presentationGenerator.historyItem', { slideCount: (p.slides || []).length })})</span>
                                                     {isValidDate && (
                                                         <span className="text-xs text-muted-foreground">
                                                             {formatDistanceToNow(new Date(p.id), { addSuffix: true })}
@@ -404,10 +393,10 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                             <TooltipContent>
                                 <p>{t('builder.presentationGenerator.tooltips.noContent')}</p>
                             </TooltipContent>
-                        ): null}
+                        ) : null}
                     </Tooltip>
                 </TooltipProvider>
-                 <PresentationActions
+                <PresentationActions
                     isGenerating={isGenerating}
                     isTranslating={isTranslating}
                     onTranslateAll={onTranslateAll}

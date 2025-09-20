@@ -1,13 +1,13 @@
 
 'use client';
 
-import { Document, Packer, Paragraph, HeadingLevel } from 'docx';
-import { saveAs } from 'file-saver';
 import { AnalyzedDocument, SolvedDocument } from '@/ai/schemas';
-import { templates, type DocxTemplateKey  } from './docx-styles';
+import { Document, Packer, Paragraph, Table } from 'docx';
+import { saveAs } from 'file-saver';
+import { templates, type DocxTemplateKey } from './docx-styles';
 import { createDocxContent } from './markdown-to-word-converter';
 
-async function getStylesFromServer(): Promise<Record<DocxTemplateKey , { styles: any }>> {
+async function getStylesFromServer(): Promise<Record<DocxTemplateKey, { styles: any }>> {
     try {
         const response = await fetch('/api/admin/templates/docx');
         if (!response.ok) {
@@ -24,21 +24,21 @@ async function getStylesFromServer(): Promise<Record<DocxTemplateKey , { styles:
 export async function exportDocumentAsDocx(
     analyzedDocument: AnalyzedDocument,
     solvedDocument: SolvedDocument,
-    docxTemplateKey : DocxTemplateKey  = 'modern'
+    docxTemplateKey: DocxTemplateKey = 'modern'
 ) {
     const allTemplates = await getStylesFromServer();
-    const styles = allTemplates[docxTemplateKey ]?.styles || templates.modern.styles;
+    const styles = allTemplates[docxTemplateKey]?.styles || templates.modern.styles;
 
     const docxContent = [];
 
     for (const pair of solvedDocument.solutions) {
         const { docxObjects: questionObjects } = await createDocxContent(pair.question);
-        docxContent.push(...questionObjects);
+        docxContent.push(...questionObjects.filter((obj): obj is Paragraph | Table => !('_type' in obj)));
 
-        docxContent.push(new Paragraph({ text: "Solution:", style: "IntenseQuote"}));
-        
+        docxContent.push(new Paragraph({ text: "Solution:", style: "IntenseQuote" }));
+
         const { docxObjects: solutionObjects } = await createDocxContent(pair.solution);
-        docxContent.push(...solutionObjects);
+        docxContent.push(...solutionObjects.filter((obj): obj is Paragraph | Table => !('_type' in obj)));
 
         docxContent.push(new Paragraph({ text: "" })); // Add a spacer
     }

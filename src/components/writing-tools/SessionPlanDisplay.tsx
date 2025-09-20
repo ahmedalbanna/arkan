@@ -1,11 +1,12 @@
 'use client';
 
-import { GenerateSessionPlanOutput } from "@/ai/schemas";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+
+import { GenerateSessionPlanOutput } from "@/ai/schemas/lecture-generator";
+import { MarkdownViewer } from "@/components/shared/MarkdownViewer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Users, BookOpen, List, CheckCircle, Target, FileText, Package, Lightbulb, HelpCircle, MessageSquare, FileSignature } from "lucide-react";
-import { MarkdownViewer } from "@/components/shared/MarkdownViewer";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookOpen, CheckCircle, Clock, FileSignature, FileText, HelpCircle, Lightbulb, List, MessageSquare, Package, Target, Users } from "lucide-react";
 
 interface SessionPlanDisplayProps {
   data: GenerateSessionPlanOutput;

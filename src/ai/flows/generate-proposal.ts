@@ -8,8 +8,8 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { GenerateProposalInputSchema, ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
 import { generateProposalPrompt } from '@/ai/prompts/generate-proposal';
+import { GenerateProposalInputSchema, ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
 
 // We wrap the prompt in a flow to handle input processing and ensure a clean interface.
 export const generateProposal = ai.defineFlow(
@@ -21,15 +21,11 @@ export const generateProposal = ai.defineFlow(
   async (input): Promise<ProjectProposal> => {
     const { projectIdea, guidelines, externalContext, advancedFields } = input;
 
-    // Separate media from text files for the prompt
-    const textContext = externalContext?.filter(f => !f.content.startsWith('data:')) || [];
-    const mediaContext = externalContext?.filter(f => f.content.startsWith('data:')) || [];
 
     const { output } = await generateProposalPrompt({
       projectIdea,
       guidelines,
-      textContext,
-      mediaContext,
+      externalContext,
       advancedFields, // Pass the advanced fields to the prompt
     });
 

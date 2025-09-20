@@ -1,35 +1,33 @@
 
 'use client';
 
-import * as React from 'react';
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@/hooks";
 import { useAuth } from "@/context/AuthContext";
-import { handleErrorUtility } from "@/lib/errorUtils";
+import { toast } from "@/hooks";
 import { getAuthenticatedToken } from "@/lib/authUtils";
-import {
-  fetchDocxTemplates as fetchDocxTemplatesApi,
-  updateDocxTemplate,
-  createDocxTemplate,
-  deleteDocxTemplate,
-  type DocxTemplate as DocxTemplateType,
-} from "@/services";
+import { handleErrorUtility } from "@/lib/errorUtils";
 import { DocxTemplate, type DocxTemplateProperties } from '@/lib/models/docxTemplate';
+import {
+    createDocxTemplate,
+    deleteDocxTemplate,
+    fetchDocxTemplates as fetchDocxTemplatesApi,
+    updateDocxTemplate,
+} from "@/services";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { IStylesOptions } from 'docx';
-import { templates as defaultTemplates } from '@/lib/docx-styles';
+import * as React from 'react';
 
 
-export type DocxTemplateKey  = 'modern' | 'classic' | 'academic' | string;
+export type DocxTemplateKey = 'modern' | 'classic' | 'academic' | string;
 
 export const docxTemplateKeys = {
-  all: ["docx-templates"] as const,
-  lists: () => [...docxTemplateKeys.all, "list"] as const,
+    all: ["docx-templates"] as const,
+    lists: () => [...docxTemplateKeys.all, "list"] as const,
 };
 
 export function useDocxStyles() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
-    const [activeTemplateKey, setActiveTemplateKey] = React.useState<DocxTemplateKey >('modern');
+    const [activeTemplateKey, setActiveTemplateKey] = React.useState<DocxTemplateKey>('modern');
     const [localChanges, setLocalChanges] = React.useState<Record<string, IStylesOptions>>({});
 
 
@@ -119,7 +117,7 @@ export function useCreateDocxTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
     return useMutation({
-        mutationFn: async (data: {id: string, name: string, description: string}) => {
+        mutationFn: async (data: { id: string, name: string, description: string }) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return createDocxTemplate(data, token);
         },

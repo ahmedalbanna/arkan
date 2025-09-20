@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useDocxStyles, useDeleteDocxTemplate } from '@/hooks';
-import type { DocxTemplateKey  } from '@/lib/types';
-import { useMutation } from '@tanstack/react-query';
-import { getAuthenticatedToken } from '@/lib/authUtils';
 import { useAuth } from '@/context/AuthContext';
-import { toast } from './use-toast';
+import { useDeleteDocxTemplate, useDocxStyles } from '@/hooks';
+import { getAuthenticatedToken } from '@/lib/authUtils';
+import type { DocxTemplateKey } from '@/lib/types';
 import { refreshTemplateImage } from '@/services/template-service'; // Assuming this service exists
+import { useMutation } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { toast } from './use-toast';
 
 export function useDocxTemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded, activeTemplateKey, setActiveTemplateKey } = useDocxStyles();
@@ -27,7 +27,7 @@ export function useDocxTemplateManager() {
     },
   });
 
-  const [changeQueue, setChangeQueue] = useState<{ key: DocxTemplateKey , path: string, value: any } | null>(null);
+  const [changeQueue, setChangeQueue] = useState<{ key: DocxTemplateKey, path: string, value: any } | null>(null);
 
   // When a change is queued, set the active template key.
   // This will trigger a re-render.
@@ -45,20 +45,20 @@ export function useDocxTemplateManager() {
     }
   }, [activeTemplateKey, changeQueue, updateStyle]);
 
-  const handleStyleChange = (key: DocxTemplateKey , path: string, value: string | number | boolean) => {
-    setChangeQueue({ key: key , path, value });
+  const handleStyleChange = (key: DocxTemplateKey, path: string, value: string | number | boolean) => {
+    setChangeQueue({ key: key, path, value });
   };
 
-  const handleSave = (key: DocxTemplateKey ) => {
+  const handleSave = (key: DocxTemplateKey) => {
     saveChanges(key);
   };
 
-  const handleDelete = (key: DocxTemplateKey ) => {
+  const handleDelete = (key: DocxTemplateKey) => {
     deleteMutation.mutate(key);
   };
 
   const handleRefreshImage = (templateId: string, prompt: string) => {
-    refreshImageMutation.mutate({ templateId, prompt, templateType: 'docx' });
+    refreshImageMutation.mutate({ templateId, prompt });
   };
 
   return {
@@ -73,5 +73,3 @@ export function useDocxTemplateManager() {
     handleRefreshImage,
   };
 }
-
-

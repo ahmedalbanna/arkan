@@ -1,13 +1,10 @@
 
 'use client';
 
-import { lazy, Suspense } from 'react';
 import { useReportModeGenerator } from '@/hooks';
-import { GenerationTools } from './ReportGenerationTools';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { PanelRightOpen } from 'lucide-react';
+import { lazy, Suspense } from 'react';
 import { Skeleton } from '../ui/skeleton';
+import { GenerationTools } from './ReportGenerationTools';
 
 const ReportResults = lazy(() => import('@/components/report-mode/ReportResults').then(module => ({ default: module.ReportResults })));
 
@@ -26,36 +23,24 @@ function ReportSkeleton() {
 
 export default function ReportModeGenerator() {
     const {
-        isPanelCollapsed,
-        setIsPanelCollapsed,
         handleSectionUpdate,
         handleTranslateAll,
         isTranslatingAll,
-        t,
         locale
     } = useReportModeGenerator();
 
     return (
-         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-            {isPanelCollapsed && (
-                <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-24">
-                     <Button
-                        variant="secondary"
-                        className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
-                        onClick={() => setIsPanelCollapsed(false)}
-                    >
-                        <PanelRightOpen className="h-5 w-5 mb-2" />
-                        {t('builder.reportGenerator.toolsTitle')}
-                    </Button>
-                </div>
-            )}
-             <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+            <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300">
                 <GenerationTools
-                    onCollapseToggle={() => setIsPanelCollapsed(true)}
+                    // The onCollapseToggle prop is no longer needed as the panel is not collapsible.
+                    // It's kept here for now to avoid breaking the component, but can be removed
+                    // from GenerationTools component if it's not used there for other purposes.
+                    onCollapseToggle={() => { }}
                 />
             </div>
 
-            <div className={cn("lg:overflow-y-auto pr-2", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
+            <div className="lg:col-span-8 lg:overflow-y-auto pr-2">
                 <Suspense fallback={<ReportSkeleton />}>
                     <ReportResults
                         onSectionUpdate={handleSectionUpdate}

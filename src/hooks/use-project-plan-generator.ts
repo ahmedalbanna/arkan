@@ -1,21 +1,20 @@
 
-import { useState, useEffect } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { useBuilderStore } from '@/hooks';
+import type { ProjectProposal } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/hooks';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useBuilderStore, useToast } from '@/hooks';
 import { useGenerateProjectPlan } from '@/hooks/use-project-plan';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { summarizeProjectApi } from '@/services';
-import { useLocalization } from '@/context/LocalizationContext';
-import type { AnyProjectProposal } from '@/ai/schemas';
+import { useMutation } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 
 export function useProjectPlanGenerator() {
     const { toast } = useToast();
     const { t } = useLocalization();
     const { firebaseUser, userProfile } = useAuth();
     const { project } = useBuilderStore();
-    const proposal = project?.proposal as AnyProjectProposal | null; // Cast for easier use
+    const proposal = project?.proposal as ProjectProposal | null; // Cast for easier use
     const projectIdea = project?.projectIdea;
 
     const [description, setDescription] = useState('');
@@ -26,7 +25,7 @@ export function useProjectPlanGenerator() {
     useEffect(() => {
         // Pre-fill from proposal if available
         if (proposal) {
-            setDescription(String(proposal.proposedSolution?.overview) || '');
+            setDescription(proposal?.proposedSolution?.overview || '');
             const outcome = proposal.projectPlan?.keyDeliverables;
             setDeliverables(typeof outcome === 'string' ? outcome : '');
         } else if (projectIdea) {

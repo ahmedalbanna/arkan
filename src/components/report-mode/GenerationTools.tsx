@@ -1,23 +1,23 @@
 
 'use client';
 
-import React from 'react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { type DiagramType, EvaluateContextOutput, type SectionName as SectionNameType } from '@/ai/schemas';
+import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
+import { Accordion } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
-import { Loader2, Sparkles, Eye, PanelLeftClose } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useReportGenerationLogic } from '@/hooks';
-import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import ReactMarkdown from 'react-markdown';
+import { useReportGenerationLogic, useSections } from '@/hooks';
 import { markdownComponents } from '@/lib/markdown-styles';
+import { cn } from '@/lib/utils';
+import { Eye, Loader2, PanelLeftClose, Sparkles } from 'lucide-react';
+import React from 'react';
+import ReactMarkdown from 'react-markdown';
 
 interface GenerationToolsProps {
     onTranslateAll: (targetLang: 'en' | 'ar') => void;
@@ -113,7 +113,7 @@ export const GenerationTools = ({ isTranslating, onCollapseToggle }: GenerationT
                         <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
                         <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
                     </div>
-                     <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
+                    <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
                         <PanelLeftClose className="h-5 w-5" />
                     </Button>
                 </div>

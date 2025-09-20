@@ -1,15 +1,14 @@
 
 'use client';
 
-import React from 'react';
-import { Accordion } from '@/components/ui/accordion';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
 import { DiagramTypeSchema } from '@/ai/schemas';
-import { Loader2, PanelLeftClose } from 'lucide-react';
-import { useDiagramGenerationTools } from '@/hooks/use-diagram-generation-tools';
-import { DiagramAccordionItem } from './DiagramAccordionItem';
+import { Accordion } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useDiagramGenerationTools } from '@/hooks/use-diagram-generation-tools';
+import { cn } from '@/lib/utils';
+import { Loader2, PanelLeftClose } from 'lucide-react';
+import { DiagramAccordionItem } from './DiagramAccordionItem';
 
 const orderedDiagrams = DiagramTypeSchema.options;
 
@@ -49,14 +48,14 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
                     {orderedDiagrams.map((key) => {
                         const diagramConfig = diagramSections[key];
                         if (!diagramConfig) return null;
-                        
+
                         return (
                             <DiagramAccordionItem
                                 key={key}
                                 diagramType={key}
                                 onGenerate={onGenerateDiagram}
                                 isGenerating={isAnythingGenerating}
-                                hasCredits={hasCreditsForGeneration}
+                                hasCredits={!!hasCreditsForGeneration}
                             />
                         );
                     })}

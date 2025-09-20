@@ -1,13 +1,10 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useProposalTemplates } from '@/hooks';
-import { useBuilderStore } from '@/hooks';
-import { useGenerationUIStore, type AdvancedProposalFields } from '@/hooks';
-import { useLocalization } from '@/context/LocalizationContext';
-import { useGenerateProposal } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useBuilderStore, useGenerateProposal, useGenerationUIStore, useProposalTemplates, type AdvancedProposalFields } from '@/hooks';
+import { useState } from 'react';
 
 export function useProposalGenerationToolsLogic() {
     const { t } = useLocalization();
@@ -42,17 +39,17 @@ export function useProposalGenerationToolsLogic() {
     };
 
     const handleGenerateClick = () => {
-        const customGuidelines = guidelineState['proposal']?.custom || [];
+        const guidelines = guidelineState['proposal']?.custom || [];
 
         const payload = activeTab === 'simple'
-            ? { projectIdea: projectIdea || '', templateId: selectedProposalTemplateId, customGuidelines, externalContext }
-            : { projectIdea: advancedProposalFields.projectTitle, templateId: selectedProposalTemplateId, customGuidelines, externalContext, advancedFields: advancedProposalFields };
+            ? { projectIdea: projectIdea || '', templateId: selectedProposalTemplateId, guidelines, externalContext }
+            : { projectIdea: advancedProposalFields.projectTitle, templateId: selectedProposalTemplateId, guidelines, externalContext, advancedFields: advancedProposalFields };
 
         generationMutation.mutate(payload as any);
     };
 
     const canGenerate = (activeTab === 'simple' && !!projectIdea) ||
-                      (activeTab === 'advanced' && !!advancedProposalFields.projectTitle && !!advancedProposalFields.projectObjective);
+        (activeTab === 'advanced' && !!advancedProposalFields.projectTitle && !!advancedProposalFields.projectObjective);
 
     return {
         t,

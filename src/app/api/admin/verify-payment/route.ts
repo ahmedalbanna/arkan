@@ -1,9 +1,8 @@
 
-import { z } from 'zod';
+import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
+import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import { FieldValue } from 'firebase-admin/firestore';
-import { adminDb } from '@/lib/firebase/server-init';
-import { getDatabase } from 'firebase-admin/database';
-import { handleApiError, withAuth, createApiResponse } from '@/lib/api-utils';
+import { z } from 'zod';
 
 const verifyPaymentSchema = z.object({
   transactionId: z.string(),
@@ -26,7 +25,7 @@ export const POST = withAuth(async ({ request, user }) => {
     const adminId = user.id;
 
     const transactionRef = adminDb.collection('transactions').doc(transactionId);
-    const rtdb = getDatabase();
+    const rtdb = adminRealtimeDb;
     const notificationRef = rtdb.ref(`notifications/${userId}`).push();
 
     if (status === 'verified') {

@@ -1,6 +1,7 @@
 
 'use client';
 
+import { PricingPlan } from "@/components/price/PricingCard";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks";
 import { getAuthenticatedToken } from "@/lib/authUtils";
@@ -8,7 +9,7 @@ import { handleErrorUtility } from "@/lib/errorUtils";
 import { auth } from '@/lib/firebase/client-init';
 import { User, type UserProperties } from '@/lib/models/user'; // NEW: Import our User class
 import { userKeys } from '@/lib/query-keys';
-import type { PricingPlan, UserProfile } from '@/lib/types';
+import type { UserProfile } from '@/lib/types';
 import {
   fetchAdminsApi,
   fetchUserProfileApi,

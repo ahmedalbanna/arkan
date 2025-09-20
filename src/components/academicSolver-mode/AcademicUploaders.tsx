@@ -1,19 +1,19 @@
 
 'use client';
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { X, Loader2 } from 'lucide-react';
-import { useToast } from '@/hooks';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
+import { ExternalContext } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileUploadZone } from './FileUploadZone';
-import type { ExternalContext } from '@/hooks';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useToast } from '@/hooks';
+import { Loader2, X } from 'lucide-react';
+import { useState } from 'react';
+import { FileUploadZone } from './FileUploadZone';
 
 interface AcademicUploadersProps {
     title: string;

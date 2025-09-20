@@ -1,24 +1,22 @@
 'use client';
 
-import type { UserProfile, PricingPlan } from '@/lib/types';
-import { auth, app } from '@/lib/firebase/client-init';
-import {
-  signInWithEmailAndPassword,
-  signOut,
-  sendPasswordResetEmail,
-  GoogleAuthProvider,
-  signInWithPopup,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  type ConfirmationResult,
-} from "firebase/auth";
 import type { SignupCredentials } from "@/components/auth/SignupForm";
-import { getFirestore, doc, onSnapshot, setDoc } from "firebase/firestore";
+import { PricingPlan } from '@/components/price/PricingCard';
+import { app, auth } from '@/lib/firebase/client-init';
+import type { UserProfile } from '@/lib/types';
+import {
+  GoogleAuthProvider,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut
+} from "firebase/auth";
+import { doc, getFirestore, onSnapshot, setDoc } from "firebase/firestore";
 
 export interface UserListResponse {
-    users: UserProfile[];
-    hasNextPage: boolean;
-    lastVisibleId: string | null;
+  users: UserProfile[];
+  hasNextPage: boolean;
+  lastVisibleId: string | null;
 }
 
 /**
@@ -27,11 +25,11 @@ export interface UserListResponse {
  * @returns A promise that resolves to an array of admin UserProfile objects.
  */
 export async function fetchAdminsApi(): Promise<UserProfile[]> {
-    const response = await fetch('/api/admins');
-    if (!response.ok) {
-        throw new Error('Failed to fetch admins');
-    }
-    return response.json();
+  const response = await fetch('/api/admins');
+  if (!response.ok) {
+    throw new Error('Failed to fetch admins');
+  }
+  return response.json();
 }
 
 /**
@@ -41,18 +39,18 @@ export async function fetchAdminsApi(): Promise<UserProfile[]> {
  * @returns A promise that resolves to an array of UserProfile objects.
  */
 export async function fetchUsersApi(limit: number, lastVisibleId: string | undefined, token: string): Promise<UserListResponse> {
-    const params = new URLSearchParams({ limit: String(limit) });
-    if (lastVisibleId) {
-        params.append('lastVisibleId', lastVisibleId);
-    }
-    const response = await fetch(`/api/admin/users?${params.toString()}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch users');
-    }
-    return await response.json();
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (lastVisibleId) {
+    params.append('lastVisibleId', lastVisibleId);
+  }
+  const response = await fetch(`/api/admin/users?${params.toString()}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to fetch users');
+  }
+  return await response.json();
 }
 
 /**
@@ -63,21 +61,21 @@ export async function fetchUsersApi(limit: number, lastVisibleId: string | undef
  * @returns An unsubscribe function to stop listening for updates.
  */
 export function subscribeToUserProfile(userId: string, callback: (user: UserProfile | null) => void) {
-    const db = getFirestore(app);
-    const userDocRef = doc(db, "users", userId);
+  const db = getFirestore(app);
+  const userDocRef = doc(db, "users", userId);
 
-    const unsubscribe = onSnapshot(userDocRef, (doc) => {
-        if (doc.exists()) {
-            callback({ id: doc.id, ...doc.data() } as UserProfile);
-        } else {
-            callback(null);
-        }
-    }, (error) => {
-        console.error("Error listening to user profile:", error);
-        callback(null);
-    });
+  const unsubscribe = onSnapshot(userDocRef, (doc) => {
+    if (doc.exists()) {
+      callback({ id: doc.id, ...doc.data() } as UserProfile);
+    } else {
+      callback(null);
+    }
+  }, (error) => {
+    console.error("Error listening to user profile:", error);
+    callback(null);
+  });
 
-    return unsubscribe;
+  return unsubscribe;
 }
 
 /**
@@ -88,20 +86,20 @@ export function subscribeToUserProfile(userId: string, callback: (user: UserProf
  * @returns A promise that resolves to the UserProfile object or null if not found.
  */
 export async function fetchUserProfileApi(userId: string, token: string): Promise<UserProfile | null> {
-    if (!userId) return null;
-    const response = await fetch(`/api/users/${userId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!response.ok) {
-        if(response.status === 404) return null;
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch user profile');
-    }
-    return await response.json();
+  if (!userId) return null;
+  const response = await fetch(`/api/users/${userId}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!response.ok) {
+    if (response.status === 404) return null;
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to fetch user profile');
+  }
+  return await response.json();
 }
 
 
-export async function loginWithEmail(credentials: {email: string, password: string}) {
+export async function loginWithEmail(credentials: { email: string, password: string }) {
   try {
     const userCredential = await signInWithEmailAndPassword(
       auth,
@@ -157,27 +155,27 @@ export async function serviceSignupUser(credentials: SignupCredentials) {
 }
 
 export async function createUserService(data: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt' | 'hasCompletedOnboarding'> & { password?: string }, token: string) {
-    const response = await fetch('/api/admin/users', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to create user.');
-    }
-    return response.json();
+  const response = await fetch('/api/admin/users', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to create user.');
+  }
+  return response.json();
 }
 
 
 export async function saveDeviceToken(userId: string, token: string) {
-    if (!userId || !token) return;
-    const db = getFirestore(app);
-    const tokenRef = doc(db, 'deviceTokens', userId);
-    await setDoc(tokenRef, { token, updatedAt: new Date().toISOString() }, { merge: true });
+  if (!userId || !token) return;
+  const db = getFirestore(app);
+  const tokenRef = doc(db, 'deviceTokens', userId);
+  await setDoc(tokenRef, { token, updatedAt: new Date().toISOString() }, { merge: true });
 }
 
 

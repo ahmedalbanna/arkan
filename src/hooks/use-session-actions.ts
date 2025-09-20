@@ -1,12 +1,12 @@
 
 'use client';
 
-import { useRef, useState } from 'react';
-import { useBuilderStore, useSaveProject, useUpdateProject, useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
-import { saveAs } from 'file-saver';
+import { useBuilderStore, useSaveProject, useToast, useUpdateProject } from '@/hooks';
+import { Project } from '@/lib/models/project';
 import type { SavedProject } from '@/lib/types';
-import { Project, type ProjectProperties } from '@/lib/models/project';
+import { saveAs } from 'file-saver';
+import { useRef, useState } from 'react';
 
 function hasAnyContent(project: Project | null): boolean {
     if (!project) return false;
@@ -99,11 +99,11 @@ export function useSessionActions() {
 
     const handleSave = () => {
         if (!project) return;
-        
+
         if (project.id && !project.id.startsWith('temp-')) {
             performSave();
         } else if (hasAnyContent(project)) {
-            
+
             setProjectName(project.name || '');
             setIsSavePromptOpen(true);
         } else {
@@ -125,14 +125,14 @@ export function useSessionActions() {
         if (!project) return;
         const projectData = project.toJSON();
         const finalSaveAsName = saveAsName.trim() || project.name || (project.proposal as any)?.title || 'Untitled Project';
-        
+
         const saveData = { ...projectData, name: String(finalSaveAsName), id: '' };
-        
+
         saveProjectMutation.mutate(saveData, {
             onSuccess: (newProjectData) => {
-                 toast({
+                toast({
                     title: t("projects.projectSavedAsToastTitle"),
-                    description: t("projects.projectSavedAsToastDesc").replace('{name}', newProjectData.name),
+                    description: t("projects.projectSavedAsToastDesc", { name: newProjectData.name }),
                 });
                 setIsSaveAsOpen(false);
                 setSaveAsName('');
@@ -141,10 +141,10 @@ export function useSessionActions() {
     }
 
     const handleDownloadAs = () => {
-         const finalSaveAsName = saveAsName.trim() || project?.name || (project?.proposal as any)?.title || 'Untitled Project';
-         handleSaveProjectFile(finalSaveAsName);
-         setIsSaveAsOpen(false);
-         setSaveAsName('');
+        const finalSaveAsName = saveAsName.trim() || project?.name || (project?.proposal as any)?.title || 'Untitled Project';
+        handleSaveProjectFile(finalSaveAsName);
+        setIsSaveAsOpen(false);
+        setSaveAsName('');
     }
 
     return {

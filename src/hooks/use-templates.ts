@@ -22,9 +22,6 @@ import {
   updatePresentationTemplate,
   updateProposalTemplate,
   updateReportTemplate,
-  type PresentationGenerationTemplate as PresentationTemplateType,
-  type ProposalTemplate as ProposalTemplateType,
-  type ReportGenerationTemplate as ReportTemplateType,
 } from "@/services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { docxTemplateKeys } from "./use-docx-styles";
@@ -93,10 +90,11 @@ export function usePresentationTemplates() {
 export function useCreateProposalTemplate() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
-  return useMutation<ProposalTemplateType, Error, Omit<ProposalTemplateType, 'id' | 'createdAt'> & { id: string }>({
+  return useMutation<ProposalTemplate, Error, Omit<ProposalTemplateProperties, 'createdAt'> & { id: string }>({
     mutationFn: async (data) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return createProposalTemplate(data, token);
+      const newTemplateProperties = await createProposalTemplate(data, token);
+      return new ProposalTemplate(newTemplateProperties);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: templateKeys.proposals() });
@@ -111,10 +109,11 @@ export function useCreateProposalTemplate() {
 export function useCreateReportTemplate() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
-  return useMutation<ReportTemplateType, Error, Omit<ReportTemplateType, 'isDefault' | 'createdAt'> & { id: string }>({
+  return useMutation<ReportTemplate, Error, Omit<ReportTemplateProperties, 'isDefault' | 'createdAt'> & { id: string }>({
     mutationFn: async (data) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return createReportTemplate(data, token);
+      const newTemplateProperties = await createReportTemplate(data, token);
+      return new ReportTemplate(newTemplateProperties);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: templateKeys.reports() });
@@ -128,10 +127,11 @@ export function useCreateReportTemplate() {
 export function useCreatePresentationTemplate() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
-  return useMutation<PresentationTemplateType, Error, Omit<PresentationTemplateType, 'isDefault' | 'createdAt'> & { id: string }>({
+  return useMutation<PresentationTemplate, Error, Omit<PresentationTemplateProperties, 'createdAt'> & { id: string }>({
     mutationFn: async (data) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return createPresentationTemplate(data, token);
+      const newTemplateProperties = await createPresentationTemplate(data, token);
+      return new PresentationTemplate(newTemplateProperties);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: templateKeys.presentations() });
@@ -147,7 +147,7 @@ export function useUpdateProposalTemplate() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
   return useMutation({
-    mutationFn: async (variables: UpdateTemplateVariables<ProposalTemplateType>) => {
+    mutationFn: async (variables: UpdateTemplateVariables<ProposalTemplate>) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return updateProposalTemplate(variables.templateId, variables.data, token);
     },
@@ -163,7 +163,7 @@ export function useUpdateReportTemplate() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
   return useMutation({
-    mutationFn: async (variables: UpdateTemplateVariables<ReportTemplateType>) => {
+    mutationFn: async (variables: UpdateTemplateVariables<ReportTemplate>) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return updateReportTemplate(variables.templateId, variables.data, token);
     },
@@ -179,7 +179,7 @@ export function useUpdatePresentationTemplate() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
   return useMutation({
-    mutationFn: async (variables: UpdateTemplateVariables<PresentationTemplateType>) => {
+    mutationFn: async (variables: UpdateTemplateVariables<PresentationTemplate>) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return updatePresentationTemplate(variables.templateId, variables.data, token);
     },

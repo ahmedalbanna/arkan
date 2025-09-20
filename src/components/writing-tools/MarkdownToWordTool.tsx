@@ -115,7 +115,7 @@ export function MarkdownToWordTool() {
             <div className="space-y-2">
               <Label htmlFor="template-select">Document Template</Label>
               <Select
-                onValueChange={(value) => form.setValue('template', value as DocxTemplateKey)}
+                onValueChange={(value: DocxTemplateKey) => form.setValue('template', value as any)}
                 defaultValue={form.getValues('template')}
                 disabled={isConverting}
               >

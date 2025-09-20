@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useUsers } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
+import { useUsers } from '@/hooks';
 import { User } from '@/lib/models/user';
 
 export function useUserManagementConsole() {
@@ -18,9 +18,9 @@ export function useUserManagementConsole() {
     status
   } = useUsers();
 
-  const allUsers: User[] = data?.pages.flatMap(page => page.users) ?? [];
+  const allUsers: User[] = data?.pages.flatMap(page => (page as any).users) ?? [];
 
-  const isLoading = status === 'pending' || authIsLoading;
+  const isLoading = isFetching || authIsLoading;
   const isError = status === 'error';
 
   return {

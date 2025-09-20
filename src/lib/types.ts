@@ -2,19 +2,20 @@
 // It helps to have a single point of import for many parts of the app,
 // but the source of truth for each type is now its respective model file.
 
-export type { UserRole, UserProfile, TeamMember, UserProperties } from '@/lib/models/user';
-export type { Team, TeamWithMembers, TeamProperties } from '@/lib/models/team';
-export type { ProjectState, SavedProject, FullReportModeConfig, ReportSectionConfig, PostProcessingStep, LinkedAsset, GeneratedProposalSection, PostProcessingStepResult, ProposalVersionHistory, SavedProposalState, ContextFileType, ProjectProperties } from '@/lib/models/project';
-export type { Agent, AgentPrompt, AgentCategory, AgentCategoryDetails, AgentGuideline, AgentKnowledgeSource, AgentProperties } from '@/lib/models/agent';
-export type { TransactionProperties } from '@/lib/models/transaction';
-export type { DocxTemplate, DocxTemplateProperties } from '@/lib/models/docxTemplate';
-export type { PptxTemplate, PptxTemplateProperties } from '@/lib/models/pptxTemplate';
-export type { ProposalTemplate, ProposalTemplateProperties } from '@/lib/models/proposalTemplate';
-export type { ReportGenerationTemplate, ReportTemplateProperties } from '@/lib/models/reportTemplate';
-export type { PresentationGenerationTemplate, PresentationTemplateProperties } from '@/lib/models/presentationTemplate';
+export { AgentCategory } from '@/lib/models/agent';
+export type { Agent, AgentCategoryDetails, AgentGuideline, AgentKnowledgeSource, AgentPrompt, AgentProperties } from '@/lib/models/agent';
 export type { DiagramProperties } from '@/lib/models/diagram';
-export type { GenerationStatus, GeneratableDocumentProperties } from '@/lib/models/generatableDocument';
-export type { Section, SectionType, SectionProperties } from '@/lib/models/section';
+export type { DocxTemplate, DocxTemplateProperties } from '@/lib/models/docxTemplate';
+export type { GeneratableDocumentProperties, GenerationStatus } from '@/lib/models/generatableDocument';
+export type { PptxTemplate, PptxTemplateProperties } from '@/lib/models/pptxTemplate';
+export type { PresentationTemplate, PresentationTemplateProperties } from '@/lib/models/presentationTemplate';
+export type { ContextFileType, FullReportModeConfig, GeneratedProposalSection, LinkedAsset, PostProcessingStep, PostProcessingStepResult, ProjectProperties, ProjectState, ProposalVersionHistory, ReportSectionConfig, SavedProject, SavedProposalState } from '@/lib/models/project';
+export type { ProposalTemplate, ProposalTemplateProperties } from '@/lib/models/proposalTemplate';
+export type { ReportTemplate, ReportTemplateProperties } from '@/lib/models/reportTemplate';
+export type { Section, SectionProperties, SectionType } from '@/lib/models/section';
+export type { Team, TeamProperties, TeamWithMembers } from '@/lib/models/team';
+export type { TransactionProperties } from '@/lib/models/transaction';
+export type { TeamMember, UserProfile, UserProperties, UserRole } from '@/lib/models/user';
 
 // AI Schema re-exports - still useful to have a central point for these
 export type {
@@ -23,7 +24,7 @@ export type {
 } from '@/ai/schemas';
 
 // Re-export from template-schemas
-export type { DocxStyleOptions, PptxStyleOptions } from '@/ai/schemas/template-schemas';
+// Re-export from template-schemas
 
 // Specific, non-model types can still live here
 export type FontOptions = {
@@ -64,13 +65,19 @@ export interface ConversionOptions {
   includeToc?: boolean;
 }
 
+export interface PptxStyleOptions {
+  [key: string]: any; // Placeholder for now, will refine if needed
+}
+
+export interface DocxStyleOptions {
+  [key: string]: any; // Placeholder for now, will refine if needed
+}
+
 // Misc types from various hooks/services
-export type { CreateAgentVariables, UpdateAgentVariables } from '@/hooks';
-export type { HistoryEntry } from '@/hooks/use-history';
-export type { Codebase } from '@/ai/schemas';
-export type { GenerateAgentConfigOutput, RewriteTextOutput, TranslateTextOutput, TranslateVariables } from '@/ai/schemas';
+export type { Codebase, GenerateAgentConfigOutput, RewriteTextOutput, TranslateTextOutput, TranslateVariables } from '@/ai/schemas';
 export type { SignupCredentials } from '@/components/auth/SignupForm';
-export type { Feature, UpdateFeatureVariables } from '@/hooks';
+export type { CreateAgentVariables, Feature, UpdateAgentVariables, UpdateFeatureVariables } from '@/hooks';
+export type { HistoryEntry } from '@/hooks/use-history';
 export type { Notification } from '@/hooks/use-notifications';
 export type { DiffPart } from '@/lib/diff';
 export interface LoginCredentials {
@@ -103,11 +110,11 @@ export interface AppSettings {
 }
 
 export interface VerifyPaymentVariables {
-    transactionId: string;
-    userId: string;
-    creditsToGrant: number;
-    status: 'verified' | 'rejected';
-    adminNotes?: string;
+  transactionId: string;
+  userId: string;
+  creditsToGrant: number;
+  status: 'verified' | 'rejected';
+  adminNotes?: string;
 }
 
 export type TransactionStatus = 'pending' | 'verified' | 'rejected';

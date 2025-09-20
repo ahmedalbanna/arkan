@@ -1,60 +1,33 @@
-// src/app/api/agents/route.ts
-import { z } from 'zod';
+'use server';
+
+import { AgentPromptSchema } from '@/ai/schemas';
+import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
-
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-import { AgentPromptSchema } from '@/lib/models/agent';
-
-// GET /api/agents
-export const GET = withAuth(async () => {
-    try {
-        const agentsCollection = adminDb.collection('agents');
-        let agents = await agentsCollection.get();
+import { z } from 'zod';
 
 
-
-
-        return createApiResponse(agents, 200);
-    } catch (error) {
-        return handleApiError(error);
-    }
-}, { requireAdmin: true });
-
-
-const agentKnowledgeSourceSchema = z.object({
-    name: z.string(),
-    type: z.enum(['file', 'text', 'web']),
-    content: z.string(),
+// Schema for creating a new agent
+const CreateAgentSchema = z.object({
+    id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID must be lowercase and contain only letters, numbers, and hyphens."),
+    name: z.string().min(1, "Name is required"),
+    description: z.string().min(1, "Description is required"),
+    category: z.string().min(1, "Category is required."),
+    pageUrl: z.string().min(1, "Page URL is required").startsWith('/', "URL must start with /"),
+    prompt: z.union([z.string(), AgentPromptSchema]),
+    icon: z.string().optional(),
 });
 
-
-const createAgentSchema = z.object({
-  id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID must be lowercase and contain only letters, numbers, and hyphens."),
-  name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "Description is required"),
-  category: z.string().min(1, "Category is required."),
-  pageUrl: z.string().min(1, "Page URL is required"),
-  prompt: z.union([z.string().min(10), AgentPromptSchema]),
-  knowledge: z.array(agentKnowledgeSourceSchema).optional(),
-  introduction: z.string().max(500).optional(),
-  placeholder: z.string().optional(),
-  conversationStarters: z.array(z.object({ value: z.string() })).optional(),
-  tone: z.string().optional(),
-  language: z.string().optional(),
-  model: z.string().optional(),
-});
-
-
-// POST /api/agents
 export const POST = withAuth(async ({ request }) => {
     try {
         const body = await request.json();
-        const validation = createAgentSchema.safeParse(body);
+        const validation = CreateAgentSchema.safeParse(body);
+
         if (!validation.success) {
             return handleApiError(validation.error);
         }
 
-        const { id, ...agentData } = validation.data;
+        const { id, ...data } = validation.data;
+
         const agentRef = adminDb.collection('agents').doc(id);
         const doc = await agentRef.get();
 
@@ -62,14 +35,10 @@ export const POST = withAuth(async ({ request }) => {
             return handleApiError({ message: 'An agent with this ID already exists.' }, 409);
         }
 
-        const newAgent = {
-            ...agentData,
-            isEnabled: true, // New agents are enabled by default
-        };
+        await agentRef.set({ ...data, isEnabled: true, createdAt: new Date().toISOString() });
 
-        await agentRef.set(newAgent);
-
-        return createApiResponse({ id: agentRef.id, ...newAgent }, 201);
+        const newAgent = await agentRef.get();
+        return createApiResponse({ id: newAgent.id, ...newAgent.data() }, 201);
     } catch (error) {
         return handleApiError(error);
     }

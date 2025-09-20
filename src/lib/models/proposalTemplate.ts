@@ -10,13 +10,13 @@ export interface ProposalTemplateProperties extends BaseTemplateProperties {
 
 export class ProposalTemplate extends Template {
   public prompt: string;
-  public guidelines: string[];
+  public guidelines?: string[];
   public jsonStructure: any;
 
   constructor(props: ProposalTemplateProperties) {
     super(props);
     this.prompt = props.prompt;
     this.guidelines = props.guidelines || [];
-    this.jsonStructure = props.jsonStructure;
+    this.jsonStructure = props.jsonStructure ?? {};
   }
 }

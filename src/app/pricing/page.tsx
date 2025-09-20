@@ -1,10 +1,9 @@
 
 'use client';
 
-import { PricingCard } from '@/components/price/PricingCard';
-import type { PricingPlan } from '@/lib/types';
-import { Gem } from 'lucide-react';
+import { PricingCard, PricingPlan } from '@/components/price/PricingCard';
 import { useLocalization } from '@/context/LocalizationContext';
+import { Gem } from 'lucide-react';
 
 const plans: PricingPlan[] = [
   {
