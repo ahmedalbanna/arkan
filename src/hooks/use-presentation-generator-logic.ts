@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
@@ -13,7 +14,6 @@ import { useGenerationUIStore } from './useGenerationUIStore';
 export function usePresentationGeneratorLogic() {
     const { t, locale } = useLocalization();
     const { firebaseUser } = useAuth();
-    const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     const { project, updateProject } = useBuilderStore();
 
     const { activePresentationId } = useGenerationUIStore();
@@ -74,8 +74,6 @@ export function usePresentationGeneratorLogic() {
     return {
         t,
         locale,
-        isPanelCollapsed,
-        setIsPanelCollapsed,
         generationMutation,
         translateMutation,
         onGenerate,
@@ -83,5 +81,3 @@ export function usePresentationGeneratorLogic() {
         activePresentation,
     };
 }
-
-    

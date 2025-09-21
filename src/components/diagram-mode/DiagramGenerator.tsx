@@ -4,13 +4,11 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import DiagramViewer from './DiagramViewer';
-import { GitGraph, PanelRightOpen, PanelLeftClose } from 'lucide-react';
+import { GitGraph } from 'lucide-react';
 import { DiagramGenerationTools } from './DiagramGenerationTools';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion } from '@/components/ui/accordion';
 import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { useDiagramGenerator } from '@/hooks';
 
 
@@ -28,8 +26,6 @@ export default function DiagramGenerator() {
     const {
         t,
         locale,
-        isPanelCollapsed,
-        setIsPanelCollapsed,
         diagramSections,
         getIconComponent,
         diagrams,
@@ -41,28 +37,15 @@ export default function DiagramGenerator() {
     } = useDiagramGenerator();
 
     return (
-        <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-
-            {isPanelCollapsed && (
-                <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-24">
-                     <Button
-                        variant="secondary"
-                        className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
-                        onClick={() => setIsPanelCollapsed(false)}
-                    >
-                        <PanelRightOpen className="h-5 w-5 mb-2" />
-                        {t('builder.diagramGenerator.toolsTitle')}
-                    </Button>
-                </div>
-            )}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
 
             {/* Left Column */}
-            <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
-                <DiagramGenerationTools onCollapseToggle={() => setIsPanelCollapsed(true)} />
+            <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
+                <DiagramGenerationTools />
             </div>
 
             {/* Center Column */}
-            <div className={cn("lg:overflow-y-auto lg:pr-2", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
+            <div className="lg:col-span-8 lg:overflow-y-auto pr-2">
                  <Card className="h-full">
                     <CardHeader>
                         <CardTitle className="font-headline">{t('builder.diagramGenerator.title')}</CardTitle>

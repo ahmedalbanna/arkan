@@ -1,3 +1,4 @@
+
 'use client';
 
 import { type DiagramType, DiagramTypeSchema } from '@/ai/schemas';
@@ -7,7 +8,6 @@ import { useMemo, useState } from 'react';
 
 export const useDiagramGenerator = () => {
     const { t, locale } = useLocalization();
-    const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     const { project, updateProject } = useBuilderStore();
     const { data: sectionConfigs } = useSections();
     const getIconComponent = useAgentStore(state => state.getIconComponent);
@@ -54,8 +54,6 @@ export const useDiagramGenerator = () => {
     return {
         t,
         locale,
-        isPanelCollapsed,
-        setIsPanelCollapsed,
         diagramSections, // This is now safely memoized
         getIconComponent,
         diagrams,

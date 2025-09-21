@@ -1,10 +1,11 @@
 
+
 'use client';
 
 import { useReportModeGenerator } from '@/hooks';
 import { lazy, Suspense } from 'react';
 import { Skeleton } from '../ui/skeleton';
-import { GenerationTools } from './ReportGenerationTools';
+import { GenerationTools } from './GenerationTools';
 
 const ReportResults = lazy(() => import('@/components/report-mode/ReportResults').then(module => ({ default: module.ReportResults })));
 
@@ -31,7 +32,7 @@ export default function ReportModeGenerator() {
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-            <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300">
+            <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
                 <GenerationTools />
             </div>
 
