@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTranslate } from '@/hooks';
 import { toast } from '@/hooks';
