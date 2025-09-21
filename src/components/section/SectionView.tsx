@@ -15,6 +15,7 @@ import remarkGfm from 'remark-gfm';
 import { useSectionLogic } from '@/hooks';
 import { DiffPart } from '@/lib/diff';
 import { cn } from '@/lib/utils';
+import { SectionToolbar } from './SectionToolbar';
 
 interface SectionProps {
     sectionKey: SectionName;
@@ -47,11 +48,34 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         handleAcceptSuggestion,
         handleRejectSuggestion,
         processedContent,
+        handleAiAction,
+        handleReadAloud,
+        isProcessingAi,
+        ttsMutation,
+        words,
+        chars
     } = useSectionLogic(sectionKey, content, onUpdate);
 
     return (
         <Tabs defaultValue="view">
-            <div className="group relative space-y-4">
+            <div className="flex items-center justify-between mb-4">
+                 <h2 className="font-semibold text-lg md:text-xl text-primary/90 font-headline flex items-center gap-2">
+                    <Icon className="w-5 h-5"/>
+                    {title}
+                </h2>
+                 <SectionToolbar
+                    isProcessingAi={isProcessingAi}
+                    onAiAction={handleAiAction}
+                    onReadAloud={handleReadAloud}
+                    isReadingAloud={ttsMutation.isPending}
+                />
+            </div>
+            <div className="space-y-1 text-xs text-muted-foreground">
+                <span>{words} {t('builder.Section.words')}</span>
+                <span className="mx-2">|</span>
+                <span>{chars} {t('builder.Section.characters')}</span>
+            </div>
+            <div className="group relative space-y-4 mt-4">
                 <ScrollArea className="h-full">
                     <div className="prose dark:prose-invert max-w-none">
                         <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{processedContent}</ReactMarkdown>

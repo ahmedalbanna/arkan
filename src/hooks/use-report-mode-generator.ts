@@ -2,9 +2,9 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useTranslate, useTextToSpeech } from '@/hooks';
+import { useTranslate } from '@/hooks';
 import { toast } from '@/hooks';
 import type { SectionName } from '@/ai/schemas';
 import { useBuilderStore } from '@/hooks';
@@ -12,16 +12,14 @@ import { Project } from '@/lib/models/project';
 import { useSections } from './use-sections';
 import { useAgentStore } from './useAgentStore';
 import { FileText } from 'lucide-react';
-import { useSectionLogic } from './use-section-logic';
 import { useExport } from './use-export';
-import { useWritingTool } from './use-writing-tools';
 
 export const useReportModeGenerator = () => {
     const { t, locale } = useLocalization();
     const { project, setProject } = useBuilderStore();
     const translateMutation = useTranslate();
     const [isTranslatingAll, setIsTranslatingAll] = useState(false);
-    const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
+    
     const { data: sectionConfigs } = useSections();
     const getIconComponent = useAgentStore(state => state.getIconComponent);
     const { exportReportDocx, isExporting } = useExport();
@@ -38,21 +36,21 @@ export const useReportModeGenerator = () => {
 
     const totalPages = generatedSections.length;
 
-    useState(() => {
+    const handlePageChange = useCallback((newPage: number) => {
+        if (newPage >= 0 && newPage < totalPages) {
+            setCurrentPage(newPage);
+        }
+    }, [totalPages]);
+
+    useEffect(() => {
+        // Reset to first page if the number of pages changes (e.g., a section is added/removed)
         setCurrentPage(0);
-    });
+    }, [totalPages]);
 
-    const handleNextPage = () => {
-        if (currentPage < totalPages - 1) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
 
-    const handlePrevPage = () => {
-        if (currentPage > 0) {
-            setCurrentPage(currentPage - 1);
-        }
-    };
+    const handleNextPage = () => handlePageChange(currentPage + 1);
+    const handlePrevPage = () => handlePageChange(currentPage - 1);
+
 
     const hasContent = generatedSections.length > 0;
     const currentSectionKey = hasContent ? generatedSections[currentPage] : undefined;
@@ -122,6 +120,14 @@ export const useReportModeGenerator = () => {
         });
     };
 
+    const reportSections = useMemo(() => {
+        if (!sectionConfigs) return {};
+        return sectionConfigs.filter(s => s.type === 'report').reduce((acc, sec) => {
+            acc[sec.id] = sec;
+            return acc;
+        }, {} as Record<string, any>);
+    }, [sectionConfigs]);
+
     const handleExportReportDOCX = async (sectionsToInclude: SectionName[]) => {
         if (!project || !hasContent) return;
 
@@ -132,33 +138,10 @@ export const useReportModeGenerator = () => {
 
         await exportReportDocx(project, "modern", translatedTitles, sectionsToInclude);
     };
-
-    const {
-        isProcessingAi,
-        handleAiAction,
-        handleReadAloud,
-        ttsMutation,
-        words,
-        chars
-    } = useSectionLogic(
-        currentSectionKey!,
-        currentSectionKey ? sections[currentSectionKey]! : '',
-        handleSectionUpdate
-    );
-
-    const reportSections = useMemo(() => {
-        if (!sectionConfigs) return {};
-        return sectionConfigs.filter(s => s.type === 'report').reduce((acc, sec) => {
-            acc[sec.id] = sec;
-            return acc;
-        }, {} as Record<string, any>);
-    }, [sectionConfigs]);
-
+    
     return {
         t,
         locale,
-        isPanelCollapsed,
-        setIsPanelCollapsed,
         handleSectionUpdate,
         handleTranslateAll,
         isTranslatingAll,
@@ -171,12 +154,6 @@ export const useReportModeGenerator = () => {
         currentSectionKey,
         getSectionTitle,
         getSectionIcon,
-        isProcessingAi,
-        handleAiAction,
-        handleReadAloud,
-        ttsMutation,
-        words,
-        chars,
         isExporting,
         handleExportReportDOCX,
         reportSections
