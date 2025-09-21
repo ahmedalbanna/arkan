@@ -361,6 +361,7 @@ export const GenerateProposalInputSchema = z.object({
         content: z.string(),
     })).optional().describe("An array of external documents (text or data URIs) provided by the user."),
     advancedFields: AdvancedProposalFieldsSchema.optional().describe('Optional structured data for a detailed proposal.'),
+    jsonStructure: z.string().optional().describe("An optional JSON schema string to guide the proposal structure."),
 });
 export type GenerateProposalInput = z.infer<typeof GenerateProposalInputSchema>;
 

@@ -1,14 +1,14 @@
 
 'use client';
 
-import React, { useMemo } from 'react';
-import { type ProjectProposal, ProjectProposalSchema } from '@/ai/schemas';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-styles';
-import { cn } from '@/lib/utils';
-import remarkGfm from 'remark-gfm';
-import { hasContent, formatKeyToTitle } from '@/lib/proposal-utils';
+import { type ProjectProposal } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
+import { markdownComponents } from '@/lib/markdown-styles';
+import { formatKeyToTitle, hasContent } from '@/lib/proposal-utils';
+import { cn } from '@/lib/utils';
+import React, { useMemo } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 /**
  * This file contains a set of components designed to render a structured
@@ -55,22 +55,24 @@ ObjectRenderer.displayName = 'ObjectRenderer';
 
 
 const ArrayRenderer = React.memo(({ items }: { items: any[] }) => {
-    if (items.every(item => typeof item === 'string')) {
+    // If it's a list of objects (or potentially stringified objects), render them as blocks.
+    if (items.some(item => typeof item === 'object' || (typeof item === 'string' && item.trim().startsWith('{')))) {
         return (
-            <ul className="list-disc pl-5 space-y-1">
-                {items.map((item, index) => <li key={index}>{item}</li>)}
-            </ul>
+            <div className="space-y-4">
+                {items.map((item, index) => (
+                    <div key={index} className="p-3 my-2 border-l-4 border-muted-foreground/20 rounded-r-md bg-muted/20">
+                        <ValueRenderer value={item} />
+                    </div>
+                ))}
+            </div>
         );
     }
 
+    // Otherwise, it's likely a simple list of strings. Render as a standard bulleted list.
     return (
-        <div className="space-y-4">
-            {items.map((item, index) => (
-                <div key={index} className="p-3 my-2 border-l-4 border-muted-foreground/20 rounded-r-md bg-muted/20">
-                    <ValueRenderer value={item} />
-                </div>
-            ))}
-        </div>
+        <ul className="list-disc pl-5 space-y-1">
+            {items.map((item, index) => <li key={index}><ValueRenderer value={item} /></li>)}
+        </ul>
     );
 });
 ArrayRenderer.displayName = 'ArrayRenderer';
@@ -80,7 +82,22 @@ const ValueRenderer = React.memo(({ value }: { value: any }) => {
     if (!hasContent(value)) return null;
     if (Array.isArray(value)) return <ArrayRenderer items={value} />;
     if (typeof value === 'object' && value !== null) return <ObjectRenderer data={value} />;
-    if (typeof value === 'string') return <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown>;
+
+    if (typeof value === 'string') {
+        try {
+            // Try to parse the string as JSON. If it's a valid JSON object or array,
+            // recursively render it. This handles cases where the AI returns stringified JSON.
+            const parsed = JSON.parse(value);
+            if (typeof parsed === 'object' && parsed !== null) {
+                return <ValueRenderer value={parsed} />;
+            }
+        } catch (e) {
+            // Not a JSON string, fall through to render as Markdown.
+        }
+        // It's a regular string, render as Markdown.
+        return <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown>;
+    }
+
     return <>{String(value)}</>;
 });
 ValueRenderer.displayName = 'ValueRenderer';
@@ -89,8 +106,8 @@ export default function FormattedProposalView({ proposal, currentPage }: Formatt
     const { locale } = useLocalization();
 
     const orderedKeys = useMemo(() =>
-        Object.keys(ProjectProposalSchema.shape).filter(key => key !== 'title' && key !== 'category'),
-        []
+        Object.keys(proposal).filter(key => key !== 'title' && key !== 'category'),
+        [proposal]
     );
 
     if (currentPage === 0) {
@@ -99,7 +116,7 @@ export default function FormattedProposalView({ proposal, currentPage }: Formatt
                 <div className="flex flex-col items-center justify-center h-full text-center min-h-[297mm]">
                     <h1 className="text-3xl md:text-4xl font-bold font-headline text-primary mb-4">{proposal.title}</h1>
                     <p className="text-lg md:text-xl text-muted-foreground">{proposal.category}</p>
-                 </div>
+                </div>
             </A4Page>
         )
     }

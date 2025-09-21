@@ -2,11 +2,11 @@
 // src/ai/prompts/generate-proposal.ts
 'use server';
 
+import { defaultModel } from '@/ai/config/models';
 import { ai } from '@/ai/genkit';
+import { GenerateProposalInputSchema, ProjectProposalSchema } from '@/ai/schemas';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { ProjectProposalSchema, GenerateProposalInputSchema } from '@/ai/schemas';
-import { defaultModel } from '@/ai/config/models';
 
 const jsonSchema = zodToJsonSchema(ProjectProposalSchema, "ProjectProposal");
 const schemaString = JSON.stringify(jsonSchema, null, 2);
@@ -15,7 +15,7 @@ export const generateProposalPrompt = ai.definePrompt(
   {
     name: 'generateProposalPrompt',
     input: { schema: GenerateProposalInputSchema }, // Use the updated schema
-    output: { schema: ProjectProposalSchema },
+    output: { schema: z.any() },
     model: defaultModel,
     system: `You are an expert project manager and technical writer. Your task is to generate a comprehensive and professional project proposal based on the provided idea and context.
 Your entire response must be a valid JSON object that adheres to the provided output schema.

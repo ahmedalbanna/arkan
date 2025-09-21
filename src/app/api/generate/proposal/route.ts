@@ -3,7 +3,6 @@
 'use server';
 
 import { generateProposal } from '@/ai/flows/generate-proposal';
-import { selectProposalTemplate } from '@/ai/flows/select-proposal-template';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { z } from 'zod';
@@ -30,18 +29,7 @@ export const POST = withAuth(async ({ request, user }) => {
 
     let { projectIdea, templateId, customGuidelines, externalContext, advancedFields } = validation.data;
 
-    // If the user selects the "automatic" template, first call the AI to select the best template.
-    if (templateId === 'automatic-ai') {
-      const selectionResult = await selectProposalTemplate({ projectIdea });
-      templateId = selectionResult.templateId;
-      await logGeneration({
-        agentId: 'select-proposal-template',
-        userId: user.id,
-        input: { projectIdea },
-        output: { selectedTemplateId: templateId },
-        creditCost: 0,
-      });
-    }
+
 
     const templateDoc = await adminDb.collection('templates').doc('proposal').collection('items').doc(templateId).get();
     if (!templateDoc.exists) {
@@ -58,6 +46,7 @@ export const POST = withAuth(async ({ request, user }) => {
       guidelines: [...(template.guidelines || []), ...(customGuidelines || [])],
       externalContext,
       advancedFields,
+      jsonStructure: template.jsonStructure ? JSON.stringify(template.jsonStructure, null, 2) : undefined,
     };
 
     let result = await generateProposal(agentInput);

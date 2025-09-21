@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useBuilderStore, useDocxStyles, useExport, useGenerateProposal } from '@/hooks';
 import type { DocxTemplateKey } from '@/lib/docx-styles';
+import { formatKeyToTitle } from '@/lib/proposal-utils';
 import { summarizeProjectApi, translateProposalApi } from '@/services';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
@@ -16,29 +17,67 @@ const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 
 // Helper function to convert a proposal object to a markdown string
 function proposalToMarkdown(proposal: AnyProjectProposal): string {
-    let md = `# ${proposal.title}\n\n`;
-    md += `**Category:** ${proposal.category}\n\n`;
-
-    const renderValue = (value: any, level: number): string => {
-        if (value === null || value === undefined) return '';
-        if (typeof value !== 'object') return `${value}\n\n`;
-        if (Array.isArray(value)) {
-            return value.map(item => `- ${renderValue(item, level + 1)}`).join('');
+    // Helper to recursively render any value to a markdown string
+    const renderValue = (value: any): string => {
+        if (value === null || value === undefined) {
+            return "";
         }
-        return Object.entries(value).map(([k, v]) => {
-            const keyTitle = k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
-            return `${'#'.repeat(level)} ${keyTitle}\n\n${renderValue(v, level + 1)}`;
-        }).join('');
+
+        // If value is a string, try to parse it as JSON first.
+        if (typeof value === 'string') {
+            try {
+                const parsed = JSON.parse(value);
+                // If parsing is successful and it's an object, recurse.
+                if (typeof parsed === 'object' && parsed !== null) {
+                    return renderValue(parsed);
+                }
+            } catch (e) {
+                // Not a JSON string, treat as regular text.
+            }
+            return value; // Return the plain string
+        }
+
+        if (Array.isArray(value)) {
+            // For each item in the array, render it as a list item.
+            return value
+                .map(item => `- ${renderValue(item)}`)
+                .join('\n');
+        }
+
+        if (typeof value === 'object') {
+            // For each key-value pair in the object, render it as a sub-section.
+            return Object.entries(value)
+                .map(([k, v]) => {
+                    const keyTitle = formatKeyToTitle(k);
+                    const nestedValue = renderValue(v);
+                    // Render simple key-value pairs on one line, complex ones on multiple.
+                    if (typeof v === 'object' || (typeof v === 'string' && v.includes('\n')) ){
+                         return `**${keyTitle}:**\n${nestedValue}`;
+                    }
+                    return `**${keyTitle}:** ${nestedValue}`;
+                })
+                .join('\n'); // Use single newline for object properties for a denser look
+        }
+
+        return String(value);
     };
 
-    for (const [key, value] of Object.entries(proposal)) {
-        if (key !== 'title' && key !== 'category') {
-            const keyTitle = key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
-            md += `## ${keyTitle}\n\n`;
-            md += renderValue(value, 3);
-        }
+    let md = `# ${proposal.title || 'Untitled Proposal'}\n\n`;
+    if (proposal.category && proposal.category !== 'undefined') {
+        md += `**Category:** ${proposal.category}\n\n`;
     }
-    return md;
+
+    // Get all other keys and render them as top-level sections
+    Object.entries(proposal)
+        .filter(([key]) => key !== 'title' && key !== 'category')
+        .forEach(([key, value]) => {
+            const keyTitle = formatKeyToTitle(key);
+            md += `## ${keyTitle}\n\n`;
+            md += renderValue(value);
+            md += '\n\n'; // Add space between sections
+        });
+
+    return md.trim();
 }
 
 
@@ -87,7 +126,7 @@ export function useProposalModeGeneratorLogic() {
 
     const totalPages = useMemo(() => {
         if (!proposal) return 0;
-        return Object.keys(ProjectProposalSchema.shape).filter(k => k !== 'title' && k !== 'category').length + 1;
+        return Object.keys(proposal).filter(k => k !== 'title' && k !== 'category').length + 1;
     }, [proposal]);
 
     const markdownContent = useMemo(() => {

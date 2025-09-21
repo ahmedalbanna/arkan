@@ -9,17 +9,17 @@
 
 import { ai } from '@/ai/genkit';
 import { generateProposalPrompt } from '@/ai/prompts/generate-proposal';
-import { GenerateProposalInputSchema, ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
-
+import { GenerateProposalInputSchema, type AnyProjectProposal } from '@/ai/schemas';
+import { z } from '@genkit-ai/core';
 // We wrap the prompt in a flow to handle input processing and ensure a clean interface.
 export const generateProposal = ai.defineFlow(
   {
     name: 'generateProposalFlow',
     inputSchema: GenerateProposalInputSchema,
-    outputSchema: ProjectProposalSchema,
+    outputSchema: z.any(),
   },
-  async (input): Promise<ProjectProposal> => {
-    const { projectIdea, guidelines, externalContext, advancedFields } = input;
+  async (input): Promise<AnyProjectProposal> => {
+    const { projectIdea, guidelines, externalContext, advancedFields, jsonStructure } = input;
 
 
     const { output } = await generateProposalPrompt({
@@ -27,6 +27,7 @@ export const generateProposal = ai.defineFlow(
       guidelines,
       externalContext,
       advancedFields, // Pass the advanced fields to the prompt
+      jsonStructure,
     });
 
     if (!output) {

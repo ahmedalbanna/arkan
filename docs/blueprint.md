@@ -2,13 +2,13 @@
 
 ## Core Features:
 
-- AI Proposal Generation: Generate project proposals based on user input and external PDF context using a tool that uses reasoning to incorporate details from PDFs in its output when needed.
+- AI Proposal Generation: Generate project proposals based on user input and context.
 
-- AI Report Section Generation: Create report sections such as Introductions and System Analysis, using a tool that intelligently uses external PDFs when generating output.
+- AI Report Section Generation: Create report sections such as Introductions and System Analysis.
 
-- Diagram Generation: Generate UML and ER diagrams (saved as JSON) based on user descriptions.
+- Diagram Generation: Generate UML diagrams.
 
-- PDF Context Input: Allow users to upload PDF documents to use as context for AI generation.
+- Context Input: Allow users to upload documents to use as context for AI generation.
 
 - AI Code Generation: Generate HTML, CSS, and JavaScript code snippets from natural language descriptions.
 
