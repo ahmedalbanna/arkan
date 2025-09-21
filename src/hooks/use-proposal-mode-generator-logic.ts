@@ -1,19 +1,15 @@
 
-
 'use client';
 
 import { ProjectProposalSchema, type AnyProjectProposal, type ProjectProposal } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { toast, useBuilderStore, useDocxStyles, useExport, useGenerateProposal } from '@/hooks';
-import type { DocxTemplateKey } from '@/lib/docx-styles';
+import { toast, useBuilderStore, useExport, useGenerateProposal } from '@/hooks';
 import { formatKeyToTitle } from '@/lib/proposal-utils';
 import { summarizeProjectApi, translateProposalApi } from '@/services';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useIsMobile } from './use-mobile';
-
-const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 
 // Helper function to convert a proposal object to a markdown string
 function proposalToMarkdown(proposal: AnyProjectProposal): string {
@@ -157,8 +153,6 @@ export function useProposalModeGeneratorLogic() {
     };
 
     // --- Logic from use-proposal-actions-logic ---
-    const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
-    const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<DocxTemplateKey>('modern');
     const { exportProposal, isExporting } = useExport();
 
     const summarizeMutation = useMutation({
@@ -169,21 +163,11 @@ export function useProposalModeGeneratorLogic() {
         }
     });
 
-    useEffect(() => {
-        const savedDocxTemplate = localStorage.getItem(DOCX_TEMPLATE_KEY) as DocxTemplateKey | null;
-        if (savedDocxTemplate && docxTemplates && docxTemplates[savedDocxTemplate]) {
-            setSelectedDocxTemplate(savedDocxTemplate);
-        }
-    }, [docxTemplates]);
-
-    const handleDocxTemplateChange = (key: DocxTemplateKey) => {
-        setSelectedDocxTemplate(key);
-        localStorage.setItem(DOCX_TEMPLATE_KEY, key);
-    }
-
     const handleExport = (format: 'docx' | 'pdf') => {
         if (project && project.proposal) {
-            exportProposal(format, project, selectedDocxTemplate);
+            // Since we removed template selection, we pass a default or no template key.
+            // The export utility has been updated to use a hardcoded default.
+            exportProposal(format, project);
         }
     }
 
@@ -213,12 +197,8 @@ export function useProposalModeGeneratorLogic() {
         handlePrevPage,
         markdownContent,
         // from useProposalActionsLogic
-        docxTemplates,
-        docxLoaded,
-        selectedDocxTemplate,
         isExporting,
         summarizeMutation,
-        handleDocxTemplateChange,
         handleExport,
         handleSummarizeProject,
     };
