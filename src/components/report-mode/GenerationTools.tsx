@@ -11,6 +11,46 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useReportGenerationLogic } from '@/hooks';
 import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
 import { Button } from '../ui/button';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+interface SortableSectionItemProps {
+    id: SectionNameType;
+    isGenerating: boolean;
+    isAnythingGenerating: boolean;
+    hasCredits: boolean;
+    onGenerate: (section: SectionNameType) => void;
+}
+
+function SortableSectionItem({ id, ...props }: SortableSectionItemProps) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+    } = useSortable({id: id});
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
+
+    return (
+        <div ref={setNodeRef} style={style} {...attributes}>
+             <SectionAccordionItem
+                sectionKey={id}
+                onGenerate={props.onGenerate}
+                isGenerating={props.isGenerating}
+                isAnythingGenerating={props.isAnythingGenerating}
+                hasCredits={props.hasCredits}
+                handleProps={listeners}
+            />
+        </div>
+    );
+}
 
 interface GenerationToolsProps {
     onCollapseToggle: () => void;
@@ -23,7 +63,25 @@ export const GenerationTools = ({ onCollapseToggle }: GenerationToolsProps) => {
         onGenerateSection,
         hasCreditsForSingleSection,
         orderedSections,
+        setOrderedSections,
     } = useReportGenerationLogic();
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+          coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragEnd = (event: any) => {
+        const {active, over} = event;
+        if (active.id !== over.id) {
+          const oldIndex = orderedSections.indexOf(active.id);
+          const newIndex = orderedSections.indexOf(over.id);
+          setOrderedSections(arrayMove(orderedSections, oldIndex, newIndex));
+        }
+    };
+
 
     const isDisabled = isAnythingGenerating;
     const { t } = useLocalization();
@@ -43,21 +101,25 @@ export const GenerationTools = ({ onCollapseToggle }: GenerationToolsProps) => {
                 </div>
             </CardHeader>
             <CardContent className="flex-grow overflow-y-auto pr-2">
-                <Accordion type="multiple" className="w-full space-y-1">
-                    {orderedSections.map((key) => {
-                        const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
-                        return (
-                            <SectionAccordionItem
-                                key={key}
-                                sectionKey={key as SectionNameType}
-                                onGenerate={onGenerateSection}
-                                isGenerating={isGeneratingThis}
-                                isAnythingGenerating={isAnythingGenerating}
-                                hasCredits={!!hasCreditsForSingleSection}
-                            />
-                        );
-                    })}
-                </Accordion>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <SortableContext items={orderedSections} strategy={verticalListSortingStrategy}>
+                        <Accordion type="multiple" className="w-full space-y-1">
+                            {orderedSections.map((key) => {
+                                const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
+                                return (
+                                    <SortableSectionItem
+                                        key={key}
+                                        id={key}
+                                        onGenerate={onGenerateSection}
+                                        isGenerating={isGeneratingThis}
+                                        isAnythingGenerating={isAnythingGenerating}
+                                        hasCredits={!!hasCreditsForSingleSection}
+                                    />
+                                );
+                            })}
+                        </Accordion>
+                    </SortableContext>
+                </DndContext>
             </CardContent>
         </Card>
     );

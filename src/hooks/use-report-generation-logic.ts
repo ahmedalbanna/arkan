@@ -1,12 +1,10 @@
 
-
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { type SectionName as SectionNameType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore, useGenerateReportSection, useSections, useGenerationUIStore } from '@/hooks';
-import { useMemo, useState } from 'react';
 import { useAgents } from './use-agents';
 
 export function useReportGenerationLogic() {
@@ -21,14 +19,8 @@ export function useReportGenerationLogic() {
 
     const reportGenerationMutation = useGenerateReportSection();
 
-    // Initialize dependent states once data is loaded
-    useState(() => {
-        if (agentsLoaded && !sectionsLoading && sectionConfigs && agents.length > 0) {
-            initializeDependentStates(agents, sectionConfigs);
-        }
-    });
-
-    const isAnythingGenerating = reportGenerationMutation.isPending;
+    // NEW: State to manage the order of sections
+    const [orderedSections, setOrderedSections] = useState<SectionNameType[]>([]);
 
     const reportSections = useMemo(() => {
         if (!sectionConfigs) return {};
@@ -38,18 +30,28 @@ export function useReportGenerationLogic() {
         }, {} as Record<string, any>);
     }, [sectionConfigs]);
 
-    const orderedSections = useMemo(() => {
-        if (!reportSections || Object.keys(reportSections).length === 0) return [];
-        return Object.keys(reportSections).sort((a, b) =>
-            reportSections[a].title.localeCompare(reportSections[b].title)
-        ) as SectionNameType[];
-    }, [reportSections]);
+    // Initialize the order when sections are loaded
+    useEffect(() => {
+        if (sectionConfigs && orderedSections.length === 0) {
+            const initialOrder = Object.keys(reportSections).sort((a, b) =>
+                reportSections[a].title.localeCompare(reportSections[b].title)
+            ) as SectionNameType[];
+            setOrderedSections(initialOrder);
+        }
+    }, [sectionConfigs, reportSections, orderedSections.length]);
+
+    useEffect(() => {
+        if (agentsLoaded && !sectionsLoading && sectionConfigs && agents.length > 0) {
+            initializeDependentStates(agents, sectionConfigs);
+        }
+    }, [agentsLoaded, sectionsLoading, agents, sectionConfigs, initializeDependentStates]);
+
+
+    const isAnythingGenerating = reportGenerationMutation.isPending;
 
     const onGenerateSection = async (section: SectionNameType) => {
         if (!project) return;
         
-        // With automatic context, we pass all available project data to the backend.
-        // The AI will be responsible for selecting what's relevant.
         const body = {
             proposal: project.proposal,
             projectPlan: project.projectPlan,
@@ -74,6 +76,7 @@ export function useReportGenerationLogic() {
         agentsLoaded,
         sectionsLoading,
         orderedSections,
+        setOrderedSections, // Expose setter for DnD
         project,
     };
 }
