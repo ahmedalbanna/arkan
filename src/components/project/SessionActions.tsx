@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Download, Trash2, Save, FileJson, Upload, Cloud, Export } from 'lucide-react';
+import { Download, Trash2, Save, FileJson, Upload, Cloud } from 'lucide-react';
 import React from 'react';
 import {
   Tooltip,
@@ -169,7 +169,7 @@ export const SessionActions = () => {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="icon" className="h-8 w-8 md:w-auto md:px-3" disabled={isBusy || !hasContent}>
-                            <Export className="h-4 w-4" />
+                            <Download className="h-4 w-4" />
                             <span className="hidden md:inline ms-2">Export</span>
                         </Button>
                     </DropdownMenuTrigger>
