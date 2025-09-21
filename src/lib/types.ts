@@ -1,16 +1,15 @@
+
 // This file is now primarily for re-exporting types from the model files.
 // It helps to have a single point of import for many parts of the app,
 // but the source of truth for each type is now its respective model file.
 
-export { AgentCategory } from '@/lib/models/agent';
-export type { Agent, AgentCategoryDetails, AgentGuideline, AgentKnowledgeSource, AgentPrompt, AgentProperties } from '@/lib/models/agent';
+export type { AgentCategory, AgentCategoryDetails, AgentGuideline, AgentKnowledgeSource, AgentPrompt, AgentProperties } from '@/lib/models/agent';
 export type { DiagramProperties } from '@/lib/models/diagram';
 export type { DocxTemplate, DocxTemplateProperties } from '@/lib/models/docxTemplate';
 export type { GeneratableDocumentProperties, GenerationStatus } from '@/lib/models/generatableDocument';
 export type { PptxTemplate, PptxTemplateProperties } from '@/lib/models/pptxTemplate';
-export type { PresentationTemplate, PresentationTemplateProperties } from '@/lib/models/presentationTemplate';
 export type { ContextFileType, FullReportModeConfig, GeneratedProposalSection, LinkedAsset, PostProcessingStep, PostProcessingStepResult, ProjectProperties, ProjectState, ProposalVersionHistory, ReportSectionConfig, SavedProject, SavedProposalState, AcademicSolverState, AcademicSolverStage } from '@/lib/models/project';
-export type { ReportTemplate, ReportTemplateProperties } from '@/lib/models/reportTemplate';
+export type { ReportTemplateProperties } from '@/lib/models/reportTemplate';
 export type { Section, SectionProperties, SectionType } from '@/lib/models/section';
 export type { Team, TeamProperties, TeamWithMembers } from '@/lib/models/team';
 export type { TransactionProperties } from '@/lib/models/transaction';
@@ -118,19 +117,4 @@ export interface VerifyPaymentVariables {
 
 export type TransactionStatus = 'pending' | 'verified' | 'rejected';
 
-export interface TransactionData {
-  id: string; // Firestore document ID
-  userId: string;
-  planId: string;
-  planName: string;
-  credits: number;
-  price: number;
-  userName: string;
-  userEmail: string;
-  status: TransactionStatus;
-  proofUrl: string;
-  createdAt: string; // ISO string
-  adminNotes?: string;
-  verifiedAt?: string; // ISO string
-  verifiedBy?: string; // Admin user ID
-}
+    

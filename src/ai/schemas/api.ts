@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 import { AcademicDocumentTypeSchema } from './enums';
 import { AnalyzedDocumentSchema, PresentationHistoryEntrySchema } from './flows';
@@ -45,7 +46,8 @@ export const ApiGeneratePresentationSchema = z.object({
         fileName: z.string(),
         content: z.string(),
     })).min(1, "At least one source document is required."),
-    templateId: z.string(),
     tone: z.string().optional(),
     complexity: z.string().optional(),
 });
+
+    

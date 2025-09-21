@@ -53,7 +53,7 @@ export function usePresentationGeneratorLogic() {
             return;
         }
         const token = await firebaseUser.getIdToken();
-        generationMutation.mutate({ body, token });
+        generationMutation.mutate({ body: { ...body, templateId: 'default' }, token });
     };
 
     const handleTranslateAll = async (targetLang: 'en' | 'ar') => {
@@ -83,3 +83,5 @@ export function usePresentationGeneratorLogic() {
         activePresentation,
     };
 }
+
+    

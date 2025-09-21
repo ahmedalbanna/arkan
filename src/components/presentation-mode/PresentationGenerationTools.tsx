@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAgents, useBuilderStore, useGenerationUIStore, usePresentationTemplates, useSections, useToast } from '@/hooks';
+import { useAgents, useBuilderStore, useGenerationUIStore, useSections, useToast } from '@/hooks';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { Project } from '@/lib/models/project';
@@ -142,7 +142,6 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     const externalContext = project?.externalContext || [];
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
-    const { data: presentationTemplates, isLoading: presentationTemplatesLoading } = usePresentationTemplates();
 
     const [tone, setTone] = useState('');
     const [complexity, setComplexity] = useState('');
@@ -165,11 +164,6 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     }
 
     const handleGenerateClick = () => {
-        if (!presentationTemplates) {
-            toast({ title: t('builder.presentationGenerator.toasts.selectTemplate'), variant: 'destructive' });
-            return;
-        }
-
         const selectedContext = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
 
         const sourceDocuments = [];
@@ -212,14 +206,13 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
             projectPlan: project?.projectPlan,
             sourceDocuments: sourceDocuments,
             guidelines: getSelectedGuidelines(agent, guidelineState['presentation']),
-            templateId: presentationTemplates,
             tone: tone,
             complexity: complexity,
         };
         onGenerate(body);
     }
 
-    if (!agentsLoaded || presentationTemplatesLoading || !agent) {
+    if (!agentsLoaded || !agent) {
         return <ToolsSkeleton />;
     }
 
@@ -243,19 +236,6 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                         <TabsTrigger value="history">{t('builder.presentationGenerator.historyTab')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="generate" className="pt-6 space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="presentation-template-select">{t('builder.presentationGenerator.templateLabel')}</Label>
-                            <Select value={activePresentationId as string} onValueChange={setActivePresentationId}>
-                                <SelectTrigger id="presentation-template-select" value={activePresentationId || ''}>
-                                    <SelectValue placeholder="Select a presentation template" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {presentationTemplates?.map(template => (
-                                        <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
                         <Separator />
                         <div>
                             <h4 className="text-sm font-semibold mb-2">{t('builder.presentationGenerator.sourceDocuments')}</h4>
@@ -405,3 +385,5 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         </Card>
     );
 };
+
+    

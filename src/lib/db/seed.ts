@@ -7,9 +7,7 @@ import { defaultFeatures } from '@/lib/features';
 import { defaultAgentCategories } from '@/lib/agent-categories';
 import { templates as defaultDocxTemplates, type DocxTemplateKey  } from '@/lib/docx-styles';
 import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
-import { PROPOSAL_TEMPLATES as defaultProposalTemplates } from '@/lib/db/seed-data/proposal-templates';
 import { REPORT_GENERATION_TEMPLATES as defaultReportTemplates } from '@/lib/db/seed-data/report-templates';
-import { PRESENTATION_GENERATION_TEMPLATES as defaultPresentationTemplates } from '@/lib/db/seed-data/presentation-templates';
 import { defaultBankAccounts } from '@/lib/bank-accounts';
 
 async function seed() {
@@ -74,15 +72,6 @@ async function seed() {
         });
         console.log(`${Object.keys(defaultPptxTemplates).length} PPTX templates added to batch.`);
 
-        // --- Proposal Templates ---
-        console.log("Preparing to seed Proposal templates...");
-        const proposalCollection = adminDb.collection('templates').doc('proposal').collection('items');
-        defaultProposalTemplates.forEach(template => {
-            const docRef = proposalCollection.doc(template.id);
-            batch.set(docRef, template);
-        });
-        console.log(`${defaultProposalTemplates.length} Proposal templates added to batch.`);
-
         // --- Report Templates ---
         console.log("Preparing to seed Report templates...");
         const reportCollection = adminDb.collection('templates').doc('report').collection('items');
@@ -91,15 +80,6 @@ async function seed() {
             batch.set(docRef, { ...template, isDefault: true });
         });
         console.log(`${defaultReportTemplates.length} Report templates added to batch.`);
-
-        // --- Presentation Templates ---
-        console.log("Preparing to seed Presentation templates...");
-        const presentationCollection = adminDb.collection('templates').doc('presentation').collection('items');
-        defaultPresentationTemplates.forEach(template => {
-            const docRef = presentationCollection.doc(template.id);
-            batch.set(docRef, { ...template, isDefault: true });
-        });
-        console.log(`${defaultPresentationTemplates.length} Presentation templates added to batch.`);
 
         // Commit all changes at once
         await batch.commit();
@@ -115,3 +95,5 @@ seed().then(() => {
     console.log("Seeding complete. Exiting.");
     process.exit(0);
 });
+
+    

@@ -1,10 +1,8 @@
 
 'use client';
 
-import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
 import { DocxTemplateProperties } from '@/lib/models/docxTemplate';
 import { PptxTemplateProperties } from '@/lib/models/pptxTemplate';
-import { PresentationTemplateProperties } from '@/lib/models/presentationTemplate';
 import { ReportTemplateProperties } from '@/lib/models/reportTemplate';
 
 
@@ -61,58 +59,6 @@ export async function deleteReportTemplate(id: string, token: string): Promise<{
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to delete report template');
-    }
-    return await response.json();
-}
-
-// --- Presentation Templates ---
-export async function fetchPresentationTemplates(token: string): Promise<PresentationTemplateProperties[]> {
-    const response = await fetch('/api/admin/templates/presentation', {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!response.ok) {
-        throw new Error('Failed to fetch presentation templates');
-    }
-    return await response.json();
-}
-
-export async function createPresentationTemplate(data: Omit<PresentationTemplateProperties, 'createdAt'> & {id: string}, token: string): Promise<PresentationTemplateProperties> {
-     const response = await fetch('/api/admin/templates/presentation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw error;
-    }
-    return await response.json();
-}
-
-export async function updatePresentationTemplate(id: string, data: Partial<PresentationTemplateProperties>, token: string): Promise<PresentationTemplateProperties> {
-    const response = await fetch(`/api/admin/templates/presentation/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update presentation template');
-    }
-    return await response.json();
-}
-
-export async function deletePresentationTemplate(id: string, token: string): Promise<{ message: string }> {
-    const response = await fetch(`/api/admin/templates/presentation/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to delete presentation template');
     }
     return await response.json();
 }
@@ -264,3 +210,5 @@ export async function uploadPptxTemplateFile(variables: { templateId: string; fi
     }
     return response.json();
 }
+
+    

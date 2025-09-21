@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -15,17 +14,15 @@ import {
   GeneratePresentationOutputSchema,
   type GeneratePresentationOutput,
 } from '@/ai/schemas';
-import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/db/seed-data/presentation-templates';
 
-
-export async function generatePresentation(input: GeneratePresentationInput): Promise<GeneratePresentationOutput> {
+export async function generatePresentation(input: Omit<GeneratePresentationInput, 'templateId'>): Promise<GeneratePresentationOutput> {
   return generatePresentationFlow(input);
 }
 
 const generatePresentationFlow = ai.defineFlow(
   {
     name: 'generatePresentationFlow',
-    inputSchema: GeneratePresentationInputSchema,
+    inputSchema: GeneratePresentationInputSchema.omit({ templateId: true }),
     outputSchema: GeneratePresentationOutputSchema,
   },
   async (input) => {
@@ -33,10 +30,7 @@ const generatePresentationFlow = ai.defineFlow(
     // Separate media from text files for the prompt
     const textContext = input.sourceDocuments?.filter(f => !f.content.startsWith('data:')) || [];
     const mediaContext = input.sourceDocuments?.filter(f => f.content.startsWith('data:')) || [];
-
-    const template = PRESENTATION_GENERATION_TEMPLATES.find(t => t.id === input.templateId);
-    const relevantSections = template?.relevantReportSectionIds || [];
-
+    
     const prompt = ai.definePrompt({
       name: 'generatePresentationPrompt',
       input: { schema: z.any() }, // Using any() since we are manually constructing the payload
@@ -56,15 +50,6 @@ const generatePresentationFlow = ai.defineFlow(
 **CRITICAL INSTRUCTIONS:**
 -   Your primary source of information is the 'Source Documents' and 'Project Plan' provided below. Synthesize information from ALL of them to create a coherent narrative.
 -   Adhere to all provided guidelines, including tone and complexity.
-
-{{#if relevantSections.length}}
---- PRIORITIZATION ---
-This is a '{{template.name}}' presentation. You MUST prioritize and focus heavily on the content from the following source documents when creating the presentation. These sections are the most important for this presentation type:
-{{#each relevantSections}}
--   {{this}}
-{{/each}}
---------------------
-{{/if}}
 
 --- GUIDELINES ---
 {{#if guidelines}}
@@ -108,7 +93,9 @@ ${JSON.stringify(input.projectPlan, null, 2)}
       }
     });
 
-    const { output } = await prompt({ ...input, textContext, mediaContext, relevantSections, template });
+    const { output } = await prompt({ ...input, textContext, mediaContext });
     return output!;
   }
 );
+
+    

@@ -8,10 +8,13 @@ import { logGeneration } from '@/services/generation-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { ApiGeneratePresentationSchema } from '@/ai/schemas';
 
+const generatePresentationApiSchema = ApiGeneratePresentationSchema.omit({ templateId: true });
+
+
 export const POST = withAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
-    const validation = ApiGeneratePresentationSchema.safeParse(body);
+    const validation = generatePresentationApiSchema.safeParse(body);
 
     if (!validation.success) {
       return handleApiError(validation.error);
@@ -29,7 +32,6 @@ export const POST = withAuth(async ({ request, user }) => {
         input: {
             guidelineCount: agentInput.guidelines?.length || 0,
             sourceDocumentCount: agentInput.sourceDocuments.length,
-            templateId: agentInput.templateId
         },
         output: {
             slideCount: result.slides.length
@@ -42,3 +44,5 @@ export const POST = withAuth(async ({ request, user }) => {
     return handleApiError(error);
   }
 });
+
+    

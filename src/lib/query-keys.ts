@@ -1,4 +1,5 @@
 
+
 /**
  * Query Key Factories for React Query
  *
@@ -70,7 +71,6 @@ export const templateKeys = {
     all: ['templates'] as const,
     proposals: () => [...templateKeys.all, 'proposal'] as const,
     reports: () => [...templateKeys.all, 'report'] as const,
-    presentations: () => [...templateKeys.all, 'presentation'] as const,
 }
 
 export const projectKeys = {
@@ -95,3 +95,5 @@ export const sectionKeys = {
   lists: () => [...sectionKeys.all, 'list'] as const,
   detail: (id: string) => [...sectionKeys.all, 'detail', id] as const,
 };
+
+    

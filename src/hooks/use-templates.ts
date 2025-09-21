@@ -4,18 +4,13 @@
 import { useAuth } from "@/context/AuthContext";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import { handleErrorUtility } from "@/lib/errorUtils";
-import { PresentationTemplate, type PresentationTemplateProperties } from "@/lib/models/presentationTemplate";
 import { ReportTemplate, type ReportTemplateProperties } from "@/lib/models/reportTemplate";
 import { templateKeys } from "@/lib/query-keys";
 import {
-  createPresentationTemplate,
   createReportTemplate,
-  deletePresentationTemplate,
   deleteReportTemplate,
-  fetchPresentationTemplates,
   fetchReportTemplates,
   refreshTemplateImage,
-  updatePresentationTemplate,
   updateReportTemplate,
 } from "@/services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -48,23 +43,6 @@ export function useReportTemplates() {
   });
 }
 
-export function usePresentationTemplates() {
-  const { firebaseUser } = useAuth();
-  return useQuery({
-    queryKey: templateKeys.presentations(),
-    queryFn: async () => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      const data = await fetchPresentationTemplates(token);
-      return data.map(t => new PresentationTemplate(t as PresentationTemplateProperties));
-    },
-    enabled: !!firebaseUser,
-    staleTime: 1000 * 60 * 5,
-    meta: {
-      onError: (error: Error) => handleErrorUtility(error, "Failed to fetch presentation templates"),
-    },
-  });
-}
-
 
 export function useCreateReportTemplate() {
   const queryClient = useQueryClient();
@@ -84,25 +62,6 @@ export function useCreateReportTemplate() {
   });
 }
 
-export function useCreatePresentationTemplate() {
-  const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
-  return useMutation<PresentationTemplate, Error, Omit<PresentationTemplateProperties, 'createdAt'> & { id: string }>({
-    mutationFn: async (data) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      const newTemplateProperties = await createPresentationTemplate(data, token);
-      return new PresentationTemplate(newTemplateProperties);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: templateKeys.presentations() });
-    },
-    onError: (error: any) => {
-      throw error;
-    }
-  });
-}
-
-
 export function useUpdateReportTemplate() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
@@ -118,23 +77,6 @@ export function useUpdateReportTemplate() {
     onError: (error: Error) => handleErrorUtility(error, "Failed to update template"),
   });
 }
-
-export function useUpdatePresentationTemplate() {
-  const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
-  return useMutation({
-    mutationFn: async (variables: UpdateTemplateVariables<PresentationTemplate>) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return updatePresentationTemplate(variables.templateId, variables.data, token);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: templateKeys.presentations() });
-      toast({ title: 'Success', description: 'Presentation template updated.' });
-    },
-    onError: (error: Error) => handleErrorUtility(error, "Failed to update template"),
-  });
-}
-
 
 
 export function useDeleteReportTemplate() {
@@ -152,23 +94,6 @@ export function useDeleteReportTemplate() {
     onError: (error: Error) => handleErrorUtility(error, "Failed to delete template"),
   });
 }
-
-export function useDeletePresentationTemplate() {
-  const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
-  return useMutation({
-    mutationFn: async (templateId: string) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return deletePresentationTemplate(templateId, token);
-    },
-    onSuccess: (data, templateId) => {
-      queryClient.invalidateQueries({ queryKey: templateKeys.presentations() });
-      toast({ title: "Template Deleted", description: `Template "${templateId}" has been deleted.` });
-    },
-    onError: (error: Error) => handleErrorUtility(error, "Failed to delete template"),
-  });
-}
-
 
 
 export function useRefreshTemplateImage(templateType: 'docx' | 'pptx') {
@@ -193,3 +118,5 @@ export function useRefreshTemplateImage(templateType: 'docx' | 'pptx') {
     }
   })
 }
+
+    
