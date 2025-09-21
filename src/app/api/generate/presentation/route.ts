@@ -8,7 +8,7 @@ import { logGeneration } from '@/services/generation-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { ApiGeneratePresentationSchema } from '@/ai/schemas';
 
-const generatePresentationApiSchema = ApiGeneratePresentationSchema.omit({ templateId: true });
+const generatePresentationApiSchema = ApiGeneratePresentationSchema;
 
 
 export const POST = withAuth(async ({ request, user }) => {
@@ -45,4 +45,5 @@ export const POST = withAuth(async ({ request, user }) => {
   }
 });
 
+    
     

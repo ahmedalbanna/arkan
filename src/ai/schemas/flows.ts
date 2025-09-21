@@ -1,4 +1,5 @@
 
+
 import { z } from 'zod';
 import {
     AcademicDocumentTypeSchema,
@@ -316,7 +317,6 @@ export const GeneratePresentationInputSchema = z.object({
         fileName: z.string(),
         content: z.string(),
     })).min(1, "At least one source document is required.").describe("An array of source documents (text or data URIs) to be synthesized into a presentation."),
-    templateId: z.string(), // The ID of the template which contains the primary agent and other config
     tone: z.string().optional().describe("The desired tone for the presentation (e.g., 'Professional', 'Casual')."),
     complexity: z.string().optional().describe("The desired complexity (e.g., 'High-level Summary', 'Detailed').")
 });
@@ -800,3 +800,5 @@ export const EvaluateReportOutputSchema = z.object({
     aiContentAnalysis: z.array(AIContentAnalysisSchema).optional().describe("An analysis of each section for AI-generated content probability."),
 });
 export type EvaluateReportOutput = z.infer<typeof EvaluateReportOutputSchema>;
+
+    

@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -15,14 +16,14 @@ import {
   type GeneratePresentationOutput,
 } from '@/ai/schemas';
 
-export async function generatePresentation(input: Omit<GeneratePresentationInput, 'templateId'>): Promise<GeneratePresentationOutput> {
+export async function generatePresentation(input: GeneratePresentationInput): Promise<GeneratePresentationOutput> {
   return generatePresentationFlow(input);
 }
 
 const generatePresentationFlow = ai.defineFlow(
   {
     name: 'generatePresentationFlow',
-    inputSchema: GeneratePresentationInputSchema.omit({ templateId: true }),
+    inputSchema: GeneratePresentationInputSchema,
     outputSchema: GeneratePresentationOutputSchema,
   },
   async (input) => {
@@ -97,3 +98,5 @@ ${JSON.stringify(input.projectPlan, null, 2)}
     return output!;
   }
 );
+
+    

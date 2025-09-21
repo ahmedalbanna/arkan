@@ -64,7 +64,6 @@ const navConfig: NavLink[] = [
         labelKey: 'header.templates',
         icon: Palette,
         children: [
-            { href: '/admin/manage-generation-templates', labelKey: 'header.generationTemplates', icon: PencilRuler },
             { href: '/admin/manage-prompt-templates', labelKey: 'header.promptTemplates', icon: Library },
             { href: '/admin/manage-templates', labelKey: 'header.exportTemplates', icon: Palette },
             { href: '/admin/manage-pptx-templates', labelKey: 'header.pptxTemplates', icon: FileImage },
@@ -232,3 +231,5 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
 export default function AdminLayout({ children }: { children: ReactNode }) {
     return <AdminLayoutContent>{children}</AdminLayoutContent>;
 }
+
+    

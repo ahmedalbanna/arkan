@@ -1,4 +1,5 @@
 
+
 // src/lib/db/seed-templates.ts
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultDocxTemplates, type DocxTemplateKey  } from '@/lib/docx-styles';
@@ -44,4 +45,5 @@ seed().then(() => {
   process.exit(0);
 });
 
+    
     
