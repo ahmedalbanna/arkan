@@ -7,7 +7,6 @@ import { defaultFeatures } from '@/lib/features';
 import { defaultAgentCategories } from '@/lib/agent-categories';
 import { templates as defaultDocxTemplates, type DocxTemplateKey  } from '@/lib/docx-styles';
 import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
-import { REPORT_GENERATION_TEMPLATES as defaultReportTemplates } from '@/lib/db/seed-data/report-templates';
 import { defaultBankAccounts } from '@/lib/bank-accounts';
 
 async function seed() {
@@ -71,15 +70,6 @@ async function seed() {
             batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
         });
         console.log(`${Object.keys(defaultPptxTemplates).length} PPTX templates added to batch.`);
-
-        // --- Report Templates ---
-        console.log("Preparing to seed Report templates...");
-        const reportCollection = adminDb.collection('templates').doc('report').collection('items');
-        defaultReportTemplates.forEach(template => {
-            const docRef = reportCollection.doc(template.id);
-            batch.set(docRef, { ...template, isDefault: true });
-        });
-        console.log(`${defaultReportTemplates.length} Report templates added to batch.`);
 
         // Commit all changes at once
         await batch.commit();

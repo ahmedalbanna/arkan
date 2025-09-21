@@ -3,65 +3,10 @@
 
 import { DocxTemplateProperties } from '@/lib/models/docxTemplate';
 import { PptxTemplateProperties } from '@/lib/models/pptxTemplate';
-import { ReportTemplateProperties } from '@/lib/models/reportTemplate';
 
 
 export type DocxTemplatesRecord = Record<string, DocxTemplateProperties>;
 export type PptxTemplatesRecord = Record<string, PptxTemplateProperties>;
-
-
-// --- Report Templates ---
-export async function fetchReportTemplates(token: string): Promise<ReportTemplateProperties[]> {
-    const response = await fetch('/api/admin/templates/report', {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!response.ok) {
-        throw new Error('Failed to fetch report templates');
-    }
-    return await response.json();
-}
-
-export async function createReportTemplate(data: Omit<ReportTemplateProperties, 'isDefault' | 'createdAt'> & {id: string}, token: string): Promise<ReportTemplateProperties> {
-     const response = await fetch('/api/admin/templates/report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw error;
-    }
-    return await response.json();
-}
-
-
-export async function updateReportTemplate(id: string, data: Partial<ReportTemplateProperties>, token: string): Promise<ReportTemplateProperties> {
-    const response = await fetch(`/api/admin/templates/report/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update report template');
-    }
-    return await response.json();
-}
-
-export async function deleteReportTemplate(id: string, token: string): Promise<{ message: string }> {
-    const response = await fetch(`/api/admin/templates/report/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to delete report template');
-    }
-    return await response.json();
-}
 
 
 // --- DOCX Templates ---
@@ -86,6 +31,7 @@ export async function createDocxTemplate(data: {id: string, name: string, descri
     }
     return await response.json();
 }
+
 
 export async function updateDocxTemplate(
   variables: {key: string, styles: any},

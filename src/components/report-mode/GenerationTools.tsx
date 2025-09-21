@@ -1,27 +1,26 @@
 
 'use client';
 
-import { type DiagramType, EvaluateContextOutput, type SectionName as SectionNameType } from '@/ai/schemas';
-import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
-import { Accordion } from '@/components/ui/accordion';
+import React from 'react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+import { type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
+import { Loader2, Sparkles, Eye, PanelLeftClose } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useReportGenerationLogic, useSections } from '@/hooks';
-import { markdownComponents } from '@/lib/markdown-styles';
-import { cn } from '@/lib/utils';
-import { Eye, Loader2, PanelLeftClose, Sparkles } from 'lucide-react';
-import React from 'react';
+import { useReportGenerationLogic } from '@/hooks';
+import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
+import { markdownComponents } from '@/lib/markdown-styles';
+import { useSections } from '@/hooks';
 
 interface GenerationToolsProps {
-    onTranslateAll: (targetLang: 'en' | 'ar') => void;
-    isTranslating: boolean;
     onCollapseToggle: () => void;
 }
 
@@ -81,7 +80,7 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
     )
 }
 
-export const GenerationTools = ({ isTranslating, onCollapseToggle }: GenerationToolsProps) => {
+export const GenerationTools = ({ onCollapseToggle }: GenerationToolsProps) => {
     const {
         isAnythingGenerating,
         isPlanning,
@@ -93,19 +92,16 @@ export const GenerationTools = ({ isTranslating, onCollapseToggle }: GenerationT
         handleViewPlan,
         canGenerateFullReport,
         hasCreditsForSingleSection,
-        reportTemplates,
-        selectedReportTemplateId,
-        setSelectedReportTemplateId,
         fullReportCreditCost,
         orderedSections,
     } = useReportGenerationLogic();
 
-    const isDisabled = isAnythingGenerating || isTranslating || isPlanning;
+    const isDisabled = isAnythingGenerating || isPlanning;
     const { t } = useLocalization();
 
 
     return (
-        <Card className={cn("flex flex-col h-full", (isDisabled || isTranslating) && 'opacity-50 pointer-events-none')}>
+        <Card className={cn("flex flex-col h-full", (isDisabled) && 'opacity-50 pointer-events-none')}>
             <PlanViewerDialog plan={generationPlan} onOpenChange={() => setGenerationPlan(null)} />
             <CardHeader>
                 <div className="flex justify-between items-center">
@@ -113,31 +109,12 @@ export const GenerationTools = ({ isTranslating, onCollapseToggle }: GenerationT
                         <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
                         <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
                     </div>
-                    <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
+                     <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
                         <PanelLeftClose className="h-5 w-5" />
                     </Button>
                 </div>
             </CardHeader>
             <CardContent className="flex-grow overflow-y-auto pr-2">
-                <div className="space-y-2 mb-4">
-                    <Label htmlFor="report-template-select">{t('builder.reportGenerator.report_template')}</Label>
-                    <Select value={selectedReportTemplateId || ''} onValueChange={(value) => setSelectedReportTemplateId(value as string)}>
-                        <SelectTrigger id="report-template-select">
-                            <SelectValue placeholder="Select a report template" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {reportTemplates?.map((template) => (
-                                <TooltipProvider key={template.id}>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <SelectItem value={template.id}>{template.name}</SelectItem>
-                                        </TooltipTrigger>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
                 <div className="pt-2">
                     <div className="flex gap-2">
                         <Button

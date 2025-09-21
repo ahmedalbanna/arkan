@@ -1,48 +1,14 @@
 
 // src/app/api/templates/report/[id]/route.ts
-import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-import { UpdateReportTemplateSchema } from '@/ai/schemas/template-schemas';
+// This entire API route is no longer needed as report templates have been removed.
+// It can be safely deleted.
 
-export const PUT = withAuth(async ({ request, params }) => {
-    try {
-        const id = params.id;
-        const templateRef = adminDb.collection('templates').doc('report').collection('items').doc(id);
-        const body = await request.json();
-        const validation = UpdateReportTemplateSchema.safeParse(body);
+import { createApiResponse } from '@/lib/api-utils';
 
-        if (!validation.success) {
-            return handleApiError(validation.error);
-        }
+export async function PUT() {
+    return createApiResponse({ message: "This feature has been deprecated." }, 410);
+}
 
-        await templateRef.update({ ...validation.data, updatedAt: new Date().toISOString() });
-        const updatedDoc = await templateRef.get();
-
-        return createApiResponse({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
-    } catch (error) {
-        return handleApiError(error);
-    }
-}, { requireAdmin: true });
-
-
-export const DELETE = withAuth(async ({ params }) => {
-    try {
-        const id = params.id;
-        const templateRef = adminDb.collection('templates').doc('report').collection('items').doc(id);
-        const doc = await templateRef.get();
-        if (!doc.exists) {
-            return handleApiError({ message: 'Template not found.' }, 404);
-        }
-
-        if (doc.data()?.isDefault) {
-            return handleApiError({ message: 'Default templates cannot be deleted.' }, 403);
-        }
-
-        await templateRef.delete();
-
-        return createApiResponse({ message: `Template "${id}" deleted successfully.` }, 200);
-    } catch (error) {
-        return handleApiError(error);
-    }
-}, { requireAdmin: true });
+export async function DELETE() {
+    return createApiResponse({ message: "This feature has been deprecated." }, 410);
+}

@@ -12,7 +12,6 @@ import { evaluateContextApi } from '@/services';
 import { useEffect, useMemo, useState } from 'react';
 import { useAgents } from './use-agents';
 import { useSections } from './use-sections';
-import { useReportTemplates } from './use-templates';
 import { useGenerationUIStore } from './useGenerationUIStore';
 
 // Helper function to generate instruction text from control state
@@ -44,14 +43,11 @@ export function useReportGenerationLogic() {
         guidelineState,
         contextSelection,
         oneTimeInstructions,
-        selectedReportTemplateId,
-        setSelectedReportTemplateId,
         initializeDependentStates,
     } = useGenerationUIStore();
 
     const { data: sectionConfigs, isLoading: sectionsLoading } = useSections();
     const { agents, isLoaded: agentsLoaded } = useAgents();
-    const { data: reportTemplates, isLoading: templatesLoading } = useReportTemplates();
 
     const reportGenerationMutation = useGenerateReportSection();
     const fullReportMutation = useGenerateFullReport();
@@ -74,22 +70,13 @@ export function useReportGenerationLogic() {
         }, {} as Record<string, any>);
     }, [sectionConfigs]);
 
-    useEffect(() => {
-        if (setSelectedReportTemplateId && !selectedReportTemplateId && reportTemplates && reportTemplates.length > 0) {
-            const defaultTemplate = reportTemplates.find(t => t.isDefault) || reportTemplates[0];
-            setSelectedReportTemplateId(defaultTemplate.id);
-        }
-    }, [reportTemplates, selectedReportTemplateId, setSelectedReportTemplateId]);
-
-    const selectedTemplate = useMemo(() => {
-        if (!reportTemplates || !selectedReportTemplateId) return null;
-        return reportTemplates.find(t => t.id === selectedReportTemplateId) || null;
-    }, [reportTemplates, selectedReportTemplateId]);
-
     const orderedSections = useMemo(() => {
-        if (!selectedTemplate || !reportSections || Object.keys(reportSections).length === 0) return [];
-        return selectedTemplate.sectionIds.filter(key => reportSections[key as SectionNameType]) as SectionNameType[];
-    }, [selectedTemplate, reportSections]);
+        if (!reportSections || Object.keys(reportSections).length === 0) return [];
+        // Sort sections alphabetically by title for a consistent order
+        return Object.keys(reportSections).sort((a, b) =>
+            reportSections[a].title.localeCompare(reportSections[b].title)
+        ) as SectionNameType[];
+    }, [reportSections]);
 
 
     const onGenerateSection = async (section: SectionNameType) => {
@@ -117,12 +104,12 @@ export function useReportGenerationLogic() {
     };
 
     const sectionsToGenerateCount = useMemo(() => {
-        if (!project || !selectedTemplate || !reportSections) return 0;
-        return selectedTemplate.sectionIds.filter(sectionId => {
-            if (!project.sections) return true; // if sections object doesn't exist, all are to be generated
-            return !!reportSections[sectionId] && !project.sections[sectionId as SectionNameType];
+        if (!project || !orderedSections) return 0;
+        return orderedSections.filter(sectionId => {
+            if (!project.sections) return true;
+            return !project.sections[sectionId as SectionNameType];
         }).length;
-    }, [selectedTemplate, reportSections, project]);
+    }, [orderedSections, project]);
 
     const fullReportCreditCost = sectionsToGenerateCount > 0 ? sectionsToGenerateCount + 1 : 0;
 
@@ -134,13 +121,12 @@ export function useReportGenerationLogic() {
     ), [project, userProfile, fullReportCreditCost, isAnythingGenerating]);
 
     const getGenerationPlan = async () => {
-        if (!selectedTemplate || !project) {
-            toast({ title: "No Template or Project Loaded", variant: "destructive" });
+        if (!project) {
+            toast({ title: "No Project Loaded", variant: "destructive" });
             return null;
         }
 
-        const sectionsToGenerate = selectedTemplate.sectionIds
-            .filter((sectionId): sectionId is SectionNameType => !!reportSections[sectionId] && !project.sections?.[sectionId as SectionNameType]);
+        const sectionsToGenerate = orderedSections.filter((sectionId): sectionId is SectionNameType => !project.sections?.[sectionId as SectionNameType]);
 
         if (sectionsToGenerate.length === 0) {
             toast({ title: "Report Complete", description: "All sections for this template have already been generated." });
@@ -208,10 +194,6 @@ export function useReportGenerationLogic() {
         hasCreditsForSingleSection,
         agentsLoaded,
         sectionsLoading,
-        templatesLoading,
-        reportTemplates,
-        selectedReportTemplateId: selectedReportTemplateId || '',
-        setSelectedReportTemplateId,
         fullReportCreditCost,
         orderedSections,
         project,
