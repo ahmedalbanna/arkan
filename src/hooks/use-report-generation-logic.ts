@@ -2,14 +2,13 @@
 
 'use client';
 
+import React from 'react';
 import { type SectionName as SectionNameType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
-import { useBuilderStore, useGenerateReportSection, useToast } from '@/hooks';
+import { useBuilderStore, useGenerateReportSection, useSections, useGenerationUIStore } from '@/hooks';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { useMemo, useState } from 'react';
 import { useAgents } from './use-agents';
-import { useSections } from './use-sections';
-import { useGenerationUIStore } from './useGenerationUIStore';
 
 // Helper function to generate instruction text from control state
 const generateInstructionText = (controls: any, oneTimeInstruction: string): string => {

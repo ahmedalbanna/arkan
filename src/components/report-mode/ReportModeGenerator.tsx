@@ -32,12 +32,7 @@ export default function ReportModeGenerator() {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
             <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300">
-                <GenerationTools
-                    // The onCollapseToggle prop is no longer needed as the panel is not collapsible.
-                    // It's kept here for now to avoid breaking the component, but can be removed
-                    // from GenerationTools component if it's not used there for other purposes.
-                    onCollapseToggle={() => { }}
-                />
+                <GenerationTools />
             </div>
 
             <div className="lg:col-span-8 lg:overflow-y-auto pr-2">

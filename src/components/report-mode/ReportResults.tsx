@@ -5,13 +5,12 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Section } from '../section/SectionView';
 import type { SectionName } from '@/ai/schemas';
-import { FileText, ChevronLeft, ChevronRight, Wand2, Volume2, Loader2, BookText, Maximize, SpellCheck, UserCheck, GitCommitVertical, Brush } from 'lucide-react';
+import { FileText, ChevronLeft, ChevronRight, Wand2, Volume2, Loader2, BookText, Maximize, SpellCheck, UserCheck, GitCommitVertical, Brush, Languages, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useReportResults } from '@/hooks';
 import A4Page from '@/components/shared/A4Page';
-import { ReportActions } from './ReportActions';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 interface ReportResultsProps {
@@ -37,7 +36,9 @@ export const ReportResults = ({ onSectionUpdate, onTranslateAll, isTranslatingAl
     handleReadAloud,
     ttsMutation,
     words,
-    chars
+    chars,
+    isExporting,
+    handleExportReportDOCX,
   } = useReportResults();
 
   const renderContent = () => {
@@ -71,6 +72,8 @@ export const ReportResults = ({ onSectionUpdate, onTranslateAll, isTranslatingAl
     );
   }
 
+  const isBusy = isTranslatingAll || isExporting;
+
   return (
     <Card className="h-full flex flex-col overflow-hidden">
         <CardHeader>
@@ -79,10 +82,16 @@ export const ReportResults = ({ onSectionUpdate, onTranslateAll, isTranslatingAl
                     <CardTitle className="font-headline">{t('builder.reportGenerator.resultsTitle')}</CardTitle>
                     <CardDescription>{t('builder.reportGenerator.resultsDesc')}</CardDescription>
                 </div>
-                <ReportActions
-                    onTranslateAll={onTranslateAll}
-                    isTranslating={isTranslatingAll}
-                />
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => onTranslateAll('ar')} disabled={isBusy || !hasContent}>
+                        {isTranslatingAll ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Languages className="me-2 h-4 w-4" />}
+                        <span>Translate All</span>
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleExportReportDOCX} disabled={isBusy || !hasContent}>
+                        {isExporting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Download className="me-2 h-4 w-4" />}
+                        <span>Export</span>
+                    </Button>
+                </div>
             </div>
              {hasContent && (
                 <div className="flex items-center justify-between pt-4 border-t mt-4">

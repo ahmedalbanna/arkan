@@ -12,6 +12,7 @@ import { useTranslate } from './use-translation';
 import { toast } from './use-toast';
 import { Project } from '@/lib/models/project';
 import { useSectionLogic } from './use-section-logic';
+import { useExport } from './use-export';
 
 
 export const useReportResults = () => {
@@ -19,6 +20,7 @@ export const useReportResults = () => {
   const { t } = useLocalization();
   const { data: sectionConfigs } = useSections();
   const getIconComponent = useAgentStore(state => state.getIconComponent);
+  const { exportReportDocx, isExporting } = useExport();
 
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -90,6 +92,17 @@ export const useReportResults = () => {
       }
   );
 
+  const handleExportReportDOCX = async () => {
+    if (!project || !hasContent) return;
+
+    const translatedTitles = Object.keys(reportSections).reduce((acc, key) => {
+      acc[key as SectionName] = t(reportSections[key as SectionName]?.title || key);
+      return acc;
+    }, {} as { [key in SectionName]?: string });
+
+    await exportReportDocx(project, "modern", translatedTitles, Object.keys(sections));
+  };
+
 
   return {
     t,
@@ -107,6 +120,9 @@ export const useReportResults = () => {
     handleReadAloud,
     ttsMutation,
     words,
-    chars
+    chars,
+    isExporting,
+    handleExportReportDOCX,
+    reportSections: sectionConfigMap
   };
 };
