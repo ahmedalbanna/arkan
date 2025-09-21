@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useReportModeGenerator } from '@/hooks';
 import A4Page from '@/components/shared/A4Page';
-import { ReportActions } from './ReportActions';
 
 export const ReportResults = () => {
   const {
@@ -69,10 +68,6 @@ export const ReportResults = () => {
                     <CardTitle className="font-headline">{t('builder.reportGenerator.resultsTitle')}</CardTitle>
                     <CardDescription>{t('builder.reportGenerator.resultsDesc')}</CardDescription>
                 </div>
-                <ReportActions
-                    onTranslateAll={handleTranslateAll}
-                    isTranslating={isTranslatingAll}
-                />
             </div>
         </CardHeader>
         {totalPages > 1 && (
