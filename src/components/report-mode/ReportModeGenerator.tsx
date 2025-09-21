@@ -24,10 +24,9 @@ function ReportSkeleton() {
 
 export default function ReportModeGenerator() {
     const {
-        handleSectionUpdate,
-        handleTranslateAll,
-        isTranslatingAll,
-        locale
+        locale,
+        isPanelCollapsed,
+        setIsPanelCollapsed,
     } = useReportModeGenerator();
 
     return (
@@ -38,11 +37,7 @@ export default function ReportModeGenerator() {
 
             <div className="lg:col-span-8 lg:overflow-y-auto pr-2">
                 <Suspense fallback={<ReportSkeleton />}>
-                    <ReportResults
-                        onSectionUpdate={handleSectionUpdate}
-                        onTranslateAll={handleTranslateAll}
-                        isTranslatingAll={isTranslatingAll}
-                    />
+                    <ReportResults />
                 </Suspense>
             </div>
         </div>

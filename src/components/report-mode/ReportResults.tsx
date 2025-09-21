@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React from 'react';
@@ -8,18 +9,12 @@ import type { SectionName } from '@/ai/schemas';
 import { FileText, ChevronLeft, ChevronRight, Wand2, Volume2, Loader2, BookText, Maximize, SpellCheck, UserCheck, GitCommitVertical, Brush, Languages, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useReportResults } from '@/hooks';
+import { useReportModeGenerator } from '@/hooks';
 import A4Page from '@/components/shared/A4Page';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
-interface ReportResultsProps {
-  onSectionUpdate: (key: SectionName, value: string) => void;
-  onTranslateAll: (targetLang: 'en' | 'ar') => void;
-  isTranslatingAll: boolean;
-}
-
-export const ReportResults = ({ onSectionUpdate, onTranslateAll, isTranslatingAll }: ReportResultsProps) => {
+export const ReportResults = () => {
   const {
     t,
     sections,
@@ -39,7 +34,11 @@ export const ReportResults = ({ onSectionUpdate, onTranslateAll, isTranslatingAl
     chars,
     isExporting,
     handleExportReportDOCX,
-  } = useReportResults();
+    handleSectionUpdate,
+    handleTranslateAll,
+    isTranslatingAll,
+    reportSections
+  } = useReportModeGenerator();
 
   const renderContent = () => {
     if (!hasContent) {
@@ -63,7 +62,7 @@ export const ReportResults = ({ onSectionUpdate, onTranslateAll, isTranslatingAl
                             title={getSectionTitle(currentSectionKey)}
                             icon={getSectionIcon(currentSectionKey)}
                             content={sections[currentSectionKey]!}
-                            onUpdate={onSectionUpdate}
+                            onUpdate={handleSectionUpdate}
                         />
                     </A4Page>
                 )}
@@ -83,11 +82,11 @@ export const ReportResults = ({ onSectionUpdate, onTranslateAll, isTranslatingAl
                     <CardDescription>{t('builder.reportGenerator.resultsDesc')}</CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => onTranslateAll('ar')} disabled={isBusy || !hasContent}>
+                    <Button variant="outline" size="sm" onClick={() => handleTranslateAll('ar')} disabled={isBusy || !hasContent}>
                         {isTranslatingAll ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Languages className="me-2 h-4 w-4" />}
                         <span>Translate All</span>
                     </Button>
-                    <Button variant="outline" size="sm" onClick={handleExportReportDOCX} disabled={isBusy || !hasContent}>
+                    <Button variant="outline" size="sm" onClick={() => handleExportReportDOCX(Object.keys(sections) as SectionName[])} disabled={isBusy || !hasContent}>
                         {isExporting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Download className="me-2 h-4 w-4" />}
                         <span>Export</span>
                     </Button>

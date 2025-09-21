@@ -2,19 +2,79 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTranslate } from '@/hooks';
 import { toast } from '@/hooks';
 import type { SectionName } from '@/ai/schemas';
 import { useBuilderStore } from '@/hooks';
 import { Project } from '@/lib/models/project';
+import { useSections } from './use-sections';
+import { useAgentStore } from './useAgentStore';
+import { FileText } from 'lucide-react';
+import { useSectionLogic } from './use-section-logic';
+import { useExport } from './use-export';
 
 export const useReportModeGenerator = () => {
     const { t, locale } = useLocalization();
     const { project, setProject } = useBuilderStore();
     const translateMutation = useTranslate();
     const [isTranslatingAll, setIsTranslatingAll] = useState(false);
+    const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
+    const { data: sectionConfigs } = useSections();
+    const getIconComponent = useAgentStore(state => state.getIconComponent);
+    const { exportReportDocx, isExporting } = useExport();
+
+    const [currentPage, setCurrentPage] = useState(0);
+
+    const sections = project?.sections || {};
+    const translatedSections = project?.translatedSections || {};
+
+    const generatedSections = useMemo(
+        () => (Object.keys(sections) as SectionName[]).filter(key => sections[key]),
+        [sections]
+    );
+
+    const totalPages = generatedSections.length;
+
+    useState(() => {
+        setCurrentPage(0);
+    });
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages - 1) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 0) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const hasContent = generatedSections.length > 0;
+    const currentSectionKey = hasContent ? generatedSections[currentPage] : undefined;
+
+    const sectionConfigMap = useMemo(() => {
+        if (!sectionConfigs) return {};
+        return sectionConfigs.reduce((acc, sec) => {
+            acc[sec.id] = sec;
+            return acc;
+        }, {} as Record<string, any>);
+    }, [sectionConfigs]);
+
+    const getSectionTitle = (key: SectionName): string => {
+        if (!sectionConfigMap[key] || !sectionConfigMap[key].title) {
+            return key; // Fallback to the key if title isn't loaded
+        }
+        return t(sectionConfigMap[key]?.title) || key;
+    };
+
+    const getSectionIcon = (key: SectionName) => {
+        const iconName = sectionConfigMap[key]?.icon;
+        return getIconComponent(iconName) || FileText;
+    };
 
     const handleSectionUpdate = (key: SectionName, value: string) => {
         if (!project) return;
@@ -51,9 +111,9 @@ export const useReportModeGenerator = () => {
                 console.error(`Failed to translate section ${result.key}:`, result.error);
             }
         });
-        
+
         setProject(new Project({ ...project.toJSON(), translatedSections: { ...project.translatedSections, ...translatedMap } }));
-        
+
         setIsTranslatingAll(false);
         toast({
             title: t('builder.reportGenerator.toasts.translateAllSuccess'),
@@ -61,11 +121,63 @@ export const useReportModeGenerator = () => {
         });
     };
 
+    const handleExportReportDOCX = async (sectionsToInclude: SectionName[]) => {
+        if (!project || !hasContent) return;
+
+        const translatedTitles = Object.keys(reportSections).reduce((acc, key) => {
+            acc[key as SectionName] = t(reportSections[key as SectionName]?.title || key);
+            return acc;
+        }, {} as { [key in SectionName]?: string });
+
+        await exportReportDocx(project, "modern", translatedTitles, sectionsToInclude);
+    };
+
+    const {
+        isProcessingAi,
+        handleAiAction,
+        handleReadAloud,
+        ttsMutation,
+        words,
+        chars
+    } = useSectionLogic(
+        currentSectionKey!,
+        currentSectionKey ? sections[currentSectionKey]! : '',
+        handleSectionUpdate
+    );
+
+    const reportSections = useMemo(() => {
+        if (!sectionConfigs) return {};
+        return sectionConfigs.filter(s => s.type === 'report').reduce((acc, sec) => {
+            acc[sec.id] = sec;
+            return acc;
+        }, {} as Record<string, any>);
+    }, [sectionConfigs]);
+
     return {
         t,
         locale,
+        isPanelCollapsed,
+        setIsPanelCollapsed,
         handleSectionUpdate,
         handleTranslateAll,
         isTranslatingAll,
+        sections,
+        currentPage,
+        totalPages,
+        handleNextPage,
+        handlePrevPage,
+        hasContent,
+        currentSectionKey,
+        getSectionTitle,
+        getSectionIcon,
+        isProcessingAi,
+        handleAiAction,
+        handleReadAloud,
+        ttsMutation,
+        words,
+        chars,
+        isExporting,
+        handleExportReportDOCX,
+        reportSections
     };
 };
