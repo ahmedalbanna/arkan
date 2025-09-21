@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Download, Trash2, Save, FileJson, Upload, Cloud } from 'lucide-react';
+import { Download, Trash2, Save, FileJson, Upload, Cloud, Export } from 'lucide-react';
 import React from 'react';
 import {
   Tooltip,
@@ -25,6 +25,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useSessionActions } from '@/hooks';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DocxTemplateKey, PptxTemplateKey } from '@/lib/types';
+import { ReportExportDialog } from './ExportDialogs';
+
 
 export const SessionActions = () => {
     const {
@@ -46,8 +51,22 @@ export const SessionActions = () => {
         handleSaveAsCloud,
         handleDownloadAs,
         hasContent,
-        t
+        t,
+        // Export related items
+        isExporting,
+        docxTemplates,
+        pptxTemplates,
+        docxLoaded,
+        pptxLoaded,
+        selectedDocxTemplate,
+        selectedPptxTemplate,
+        handleDocxTemplateChange,
+        handlePptxTemplateChange,
+        handleExportReport,
+        handleExportPresentation
     } = useSessionActions();
+
+    const isBusy = isSaving || isExporting;
 
     return (
         <TooltipProvider>
@@ -81,7 +100,7 @@ export const SessionActions = () => {
                     variant="default"
                     size="icon"
                     onClick={handleSave}
-                    disabled={!project?.hasUnsavedChanges || isSaving}
+                    disabled={!project?.hasUnsavedChanges || isBusy}
                     className="h-8 w-8 md:w-auto md:px-3"
                 >
                     {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
@@ -147,6 +166,32 @@ export const SessionActions = () => {
                     </DialogContent>
                 </Dialog>
 
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="icon" className="h-8 w-8 md:w-auto md:px-3" disabled={isBusy || !hasContent}>
+                            <Export className="h-4 w-4" />
+                            <span className="hidden md:inline ms-2">Export</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-64">
+                         <DropdownMenuLabel>Export Options</DropdownMenuLabel>
+                         <DropdownMenuSeparator />
+                        <ReportExportDialog
+                            isExporting={isExporting}
+                            onExport={handleExportReport}
+                            disabled={isBusy || !project?.sections || Object.keys(project.sections).length === 0}
+                        />
+                         <DropdownMenuItem
+                            onSelect={() => handleExportPresentation()}
+                            disabled={isBusy || !project?.presentation?.history.length}
+                         >
+                            <div className="flex flex-col w-full">
+                                <span>Export Presentation as PPTX</span>
+                                <span className="text-xs text-muted-foreground">Requires generated presentation slides</span>
+                            </div>
+                         </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
 
                  <Tooltip>
                     <TooltipTrigger asChild>
