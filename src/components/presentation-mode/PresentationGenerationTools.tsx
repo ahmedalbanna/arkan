@@ -4,7 +4,7 @@
 import type { DiagramType, SectionName as SectionNameType } from '@/ai/schemas';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAgents, useBuilderStore, useGenerationUIStore, useSections, useToast } from '@/hooks';
