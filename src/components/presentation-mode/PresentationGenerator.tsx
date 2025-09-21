@@ -44,8 +44,6 @@ export default function PresentationGenerator() {
                     isDisabled={generationMutation.isPending || translateMutation.isPending}
                     isGenerating={generationMutation.isPending}
                     onGenerate={onGenerate}
-                    onTranslateAll={handleTranslateAll}
-                    isTranslating={translateMutation.isPending}
                 />
             </div>
 
@@ -55,6 +53,9 @@ export default function PresentationGenerator() {
                         <DynamicPresentationViewer
                             key={activePresentation.id}
                             activePresentation={activePresentation}
+                            isGenerating={generationMutation.isPending}
+                            isTranslating={translateMutation.isPending}
+                            onTranslateAll={handleTranslateAll}
                         />
                     ) : (
                         <Card className="flex items-center justify-center h-full min-h-[300px]">

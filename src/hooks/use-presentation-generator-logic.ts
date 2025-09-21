@@ -7,9 +7,9 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useGeneratePresentation } from '@/hooks';
 import { translatePresentationApi } from '@/services';
 import { useMutation } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useBuilderStore } from './useBuilderStore';
 import { useGenerationUIStore } from './useGenerationUIStore';
+import { Project } from '@/lib/models/project';
 
 export function usePresentationGeneratorLogic() {
     const { t, locale } = useLocalization();
@@ -24,14 +24,13 @@ export function usePresentationGeneratorLogic() {
         mutationFn: translatePresentationApi,
         onSuccess: (data) => {
             if (!project) return;
-
-            const updatedHistory = project.presentation?.history.map(p =>
+            // Create a new Project instance with the updated history
+            const newHistory = (project.presentation?.history || []).map(p =>
                 p.id === data.id ? data : p
-            ) || [];
+            );
+            const newState = { ...project.toJSON(), presentation: { history: newHistory } };
+            updateProject(p => Object.assign(p, newState));
 
-            updateProject(p => {
-                p.presentation!.history = updatedHistory;
-            });
 
             toast({
                 title: t('builder.presentationGenerator.toasts.translateAllSuccess'),
@@ -53,7 +52,7 @@ export function usePresentationGeneratorLogic() {
             return;
         }
         const token = await firebaseUser.getIdToken();
-        generationMutation.mutate({ body: { ...body, templateId: 'default' }, token });
+        generationMutation.mutate({ body, token });
     };
 
     const handleTranslateAll = async (targetLang: 'en' | 'ar') => {

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -10,12 +11,16 @@ import { markdownComponents } from '@/lib/markdown-styles';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { PresentationActions } from './PresentationActions';
 
 interface PresentationViewerProps {
   activePresentation: PresentationHistoryEntry;
+  isGenerating: boolean;
+  isTranslating: boolean;
+  onTranslateAll: (targetLang: 'en' | 'ar') => void;
 }
 
-export default function PresentationViewer({ activePresentation }: PresentationViewerProps) {
+export default function PresentationViewer({ activePresentation, isGenerating, isTranslating, onTranslateAll }: PresentationViewerProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { t } = useLocalization();
 
@@ -66,6 +71,11 @@ export default function PresentationViewer({ activePresentation }: PresentationV
         <CardHeader className="pb-4">
             <div className="flex justify-between items-center flex-wrap gap-2">
                 <h2 className="font-headline text-2xl text-primary">{activePresentation.name}</h2>
+                <PresentationActions
+                  isGenerating={isGenerating}
+                  isTranslating={isTranslating}
+                  onTranslateAll={onTranslateAll}
+                />
             </div>
             <CardDescription>
             {t('builder.presentationGenerator.slideLabel', {current: currentSlide + 1, total: slides.length})}

@@ -1,12 +1,11 @@
 
 'use client';
 
-import { type DiagramType, EvaluateContextOutput, type SectionName as SectionNameType } from '@/ai/schemas';
+import { type DiagramType, type SectionName as SectionNameType } from '@/ai/schemas';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -18,19 +17,16 @@ import { Loader2, PanelLeftClose, Settings, Sparkles } from 'lucide-react';
 import React, { useState } from 'react';
 import { AcademicUploaders } from '../academicSolver-mode/AcademicUploaders';
 import { GuidelineEditor } from '../section/SectionGuidelineEditor';
-import { PresentationActions } from './PresentationActions';
-import { Skeleton } from '../ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { ScrollArea } from '../ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
+import { Skeleton } from '../ui/skeleton';
 
 interface PresentationGenerationToolsProps {
     isDisabled: boolean;
     isGenerating: boolean;
     onGenerate: (variables: any) => void;
-    onCollapseToggle: () => void;
-    onTranslateAll: (targetLang: 'en' | 'ar') => void;
-    isTranslating: boolean;
 }
 
 function ToolsSkeleton() {
@@ -65,7 +61,7 @@ function ToolsSkeleton() {
 
 export const PresentationGenerationTools = (props: PresentationGenerationToolsProps) => {
     const { t } = useLocalization();
-    const { isDisabled, isGenerating, onGenerate, onCollapseToggle, onTranslateAll, isTranslating } = props;
+    const { isDisabled, isGenerating, onGenerate } = props;
     const { toast } = useToast();
 
     const { project, setProject } = useBuilderStore();
@@ -157,9 +153,6 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                         <CardTitle className="font-headline">{t('builder.presentationGenerator.toolsTitle')}</CardTitle>
                         <CardDescription>{t('builder.presentationGenerator.toolsDesc')}</CardDescription>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={onCollapseToggle}>
-                        <PanelLeftClose className="h-5 w-5" />
-                    </Button>
                 </div>
             </CardHeader>
             <CardContent className="flex-grow overflow-y-auto pr-2">
@@ -300,11 +293,6 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                         ) : null}
                     </Tooltip>
                 </TooltipProvider>
-                <PresentationActions
-                    isGenerating={isGenerating}
-                    isTranslating={isTranslating}
-                    onTranslateAll={onTranslateAll}
-                />
             </CardFooter>
         </Card>
     );
