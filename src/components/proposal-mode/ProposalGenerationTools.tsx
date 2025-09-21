@@ -8,18 +8,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal, Wand2, Scale } from 'lucide-react';
-import type { AdvancedProposalFields } from '@/hooks';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal } from 'lucide-react';
+import type { AdvancedProposalFields } from '@/lib/models/project';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useProposalGenerationToolsLogic } from '@/hooks/use-proposal-generation-tools-logic';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-styles';
-import { EvaluationTools } from '../evaluation/EvaluationTools';
-
 
 interface GenerateButtonProps {
     isGenerating: boolean;
@@ -113,7 +108,7 @@ const AdvancedFieldsForm = () => {
             </div>
              <div className="space-y-1">
                 <Label htmlFor="additionalContext">Additional Context</Label>
-                <Textarea id="additionalContext" name="additionalContext" value={advancedFields.additionalContext} onChange={handleFieldChange} rows={3} placeholder="Any additional information that might be relevant..."/>
+                <Textarea id="additionalContext" name="additionalContext" value={advancedFields.additionalContext} onChange={handleFieldChange} rows={3} placeholder="Any other relevant information that might be relevant..."/>
                  <p className="text-xs text-muted-foreground">Any other relevant information that could help in the analysis.</p>
             </div>
         </div>
@@ -153,14 +148,10 @@ export const ProposalGenerationTools = ({
 
     const {
         t,
-        templates,
-        templatesLoading,
         activeTab,
         setActiveTab,
         projectIdea,
         setProjectIdea,
-        selectedTemplateId,
-        setSelectedTemplateId,
         customGuidelines,
         addCustomGuideline,
         removeCustomGuideline,
@@ -169,12 +160,6 @@ export const ProposalGenerationTools = ({
         handleAddGuideline,
         generationMutation,
     } = useProposalGenerationToolsLogic();
-
-    const selectedTemplate = templates?.find(t => t.id === selectedTemplateId);
-
-    if (templatesLoading) {
-        return <ToolsSkeleton />;
-    }
 
     return (
         <Card className={cn("flex flex-col h-full", isDisabled && 'opacity-50 pointer-events-none')}>
@@ -213,40 +198,6 @@ export const ProposalGenerationTools = ({
                     <AccordionItem value="item-1">
                         <AccordionTrigger className="font-semibold text-base"><SlidersHorizontal className="me-2 h-4 w-4"/>{t('builder.proposalGenerator.generationSettings')}</AccordionTrigger>
                         <AccordionContent className="pt-4 space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="proposal-template">{t('builder.proposalGenerator.templateLabel')}</Label>
-                                <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId} disabled={generationMutation.isPending}>
-                                    <SelectTrigger id="proposal-template">
-                                        <SelectValue placeholder="Select a template" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {templates?.map(template => (
-                                            <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            
-                            {selectedTemplate && (
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label className="text-xs font-semibold text-muted-foreground">Base Prompt</Label>
-                                        <div className="p-3 rounded-md border bg-muted text-xs">
-                                            <ReactMarkdown components={markdownComponents}>{selectedTemplate.prompt}</ReactMarkdown>
-                                        </div>
-                                    </div>
-
-                                    {selectedTemplate.guidelines && selectedTemplate.guidelines.length > 0 && (
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-semibold text-muted-foreground">Default Guidelines</Label>
-                                            <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
-                                                {selectedTemplate.guidelines.map((g, i) => <li key={i}>{g}</li>)}
-                                            </ul>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
                             <div className="space-y-2">
                                 <Label className="text-xs font-semibold text-muted-foreground">{t('builder.proposalGenerator.customGuidelinesLabel')}</Label>
                                 {customGuidelines.map((custom, index) => (

@@ -7,7 +7,6 @@ config();
 
 import '@/ai/flows/summarize-project.ts';
 import '@/ai/flows/generate-proposal.ts';
-import '@/ai/flows/select-proposal-template.ts'; // Add new flow
 import '@/ai/flows/generate-report-section.ts'; // Replaces all individual section flows
 import '@/ai/flows/generate-diagrams.ts';
 import '@/ai/flows/manipulate-text.ts';

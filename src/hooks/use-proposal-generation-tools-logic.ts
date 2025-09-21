@@ -3,12 +3,12 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useGenerateProposal, useGenerationUIStore, useProposalTemplates, type AdvancedProposalFields } from '@/hooks';
+import { useBuilderStore, useGenerateProposal, useGenerationUIStore } from '@/hooks';
+import type { AdvancedProposalFields } from '@/lib/models/project';
 import { useState } from 'react';
 
 export function useProposalGenerationToolsLogic() {
     const { t } = useLocalization();
-    const { data: templates, isLoading: templatesLoading } = useProposalTemplates();
     const [activeTab, setActiveTab] = useState<'simple' | 'advanced'>('simple');
 
     const { project, updateProject } = useBuilderStore();
@@ -16,15 +16,13 @@ export function useProposalGenerationToolsLogic() {
     const setProjectIdea = (idea: string) => updateProject(p => { p.projectIdea = idea; });
 
     const {
-        selectedProposalTemplateId,
-        setSelectedProposalTemplateId,
-        advancedProposalFields,
-        setAdvancedField,
         guidelineState,
         customGuidelineInput,
         setCustomGuidelineInputForItem,
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
+        advancedProposalFields,
+        setAdvancedField,
     } = useGenerationUIStore();
 
     const { externalContext } = project ?? {};
@@ -42,8 +40,8 @@ export function useProposalGenerationToolsLogic() {
         const guidelines = guidelineState['proposal']?.custom || [];
 
         const payload = activeTab === 'simple'
-            ? { projectIdea: projectIdea || '', templateId: selectedProposalTemplateId, guidelines, externalContext }
-            : { projectIdea: advancedProposalFields.projectTitle, templateId: selectedProposalTemplateId, guidelines, externalContext, advancedFields: advancedProposalFields };
+            ? { projectIdea: projectIdea || '', guidelines, externalContext }
+            : { projectIdea: advancedProposalFields.projectTitle, guidelines, externalContext, advancedFields: advancedProposalFields };
 
         generationMutation.mutate(payload as any);
     };
@@ -53,20 +51,16 @@ export function useProposalGenerationToolsLogic() {
 
     return {
         t,
-        templates,
-        templatesLoading,
         activeTab,
         setActiveTab,
         projectIdea,
         setProjectIdea,
-        selectedTemplateId: selectedProposalTemplateId,
-        setSelectedTemplateId: setSelectedProposalTemplateId,
         customGuidelines: guidelineState['proposal']?.custom || [],
         addCustomGuideline: () => handleAddCustomGuidelineForItem('proposal'),
         removeCustomGuideline: (index: number) => handleRemoveCustomGuidelineForItem('proposal', index),
         customGuidelineInput: customGuidelineInput['proposal'] || '',
         setCustomGuidelineInput: (value: string) => setCustomGuidelineInputForItem('proposal', value),
-        handleAddGuideline: handleAddGuideline,
+        handleAddGuideline,
         advancedFields: advancedProposalFields,
         handleFieldChange,
         generationMutation,

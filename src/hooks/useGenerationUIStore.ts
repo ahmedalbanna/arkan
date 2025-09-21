@@ -1,7 +1,6 @@
 
 'use client';
 
-import { PROPOSAL_TEMPLATES } from '@/lib/db/seed-data/proposal-templates';
 import { Agent } from '@/lib/models/agent';
 import { type Section } from '@/lib/models/section';
 import type { AgentPrompt } from '@/lib/types';
@@ -53,7 +52,6 @@ interface GenerationUIState {
   // From usePresentationStore
   activePresentationId: string | null;
   // From useProposalGenerationStore
-  selectedProposalTemplateId: string;
   advancedProposalFields: AdvancedProposalFields;
 }
 
@@ -72,7 +70,6 @@ interface GenerationUIActions {
   // Presentation Store Actions
   setActivePresentationId: (id: string | null) => void;
   // Proposal Store Actions
-  setSelectedProposalTemplateId: (id: string) => void;
   setAdvancedField: (field: keyof AdvancedProposalFields, value: string) => void;
   resetAdvancedFields: () => void;
 }
@@ -97,7 +94,6 @@ const initialState: GenerationUIState = {
   contextSelection: {},
   selectedReportTemplateId: '',
   activePresentationId: null,
-  selectedProposalTemplateId: PROPOSAL_TEMPLATES[0].id,
   advancedProposalFields: initialAdvancedFields,
 };
 
@@ -186,7 +182,6 @@ export const useGenerationUIStore = create<GenerationUIState & GenerationUIActio
     setActivePresentationId: (id) => set({ activePresentationId: id }),
 
     // From useProposalGenerationStore
-    setSelectedProposalTemplateId: (id) => set({ selectedProposalTemplateId: id }),
     setAdvancedField: (field, value) => set(state => ({ advancedProposalFields: { ...state.advancedProposalFields, [field]: value } })),
     resetAdvancedFields: () => set({ advancedProposalFields: initialAdvancedFields }),
   })

@@ -5,64 +5,12 @@ import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgent
 import { DocxTemplateProperties } from '@/lib/models/docxTemplate';
 import { PptxTemplateProperties } from '@/lib/models/pptxTemplate';
 import { PresentationTemplateProperties } from '@/lib/models/presentationTemplate';
-import { ProposalTemplateProperties } from '@/lib/models/proposalTemplate';
 import { ReportTemplateProperties } from '@/lib/models/reportTemplate';
 
 
 export type DocxTemplatesRecord = Record<string, DocxTemplateProperties>;
 export type PptxTemplatesRecord = Record<string, PptxTemplateProperties>;
 
-// --- Proposal Templates ---
-export async function fetchProposalTemplates(token: string): Promise<ProposalTemplateProperties[]> {
-    const response = await fetch('/api/admin/templates/proposal', {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!response.ok) {
-        throw new Error('Failed to fetch proposal templates');
-    }
-    return await response.json();
-}
-
-export async function createProposalTemplate(data: Omit<ProposalTemplateProperties, 'id' | 'createdAt'> & {id: string}, token: string): Promise<ProposalTemplateProperties> {
-    const response = await fetch('/api/admin/templates/proposal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw error; // Throw the structured error from the API
-    }
-    return await response.json();
-}
-
-export async function updateProposalTemplate(id: string, data: Partial<ProposalTemplateProperties>, token: string): Promise<ProposalTemplateProperties> {
-    const response = await fetch(`/api/admin/templates/proposal/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update proposal template');
-    }
-    return await response.json();
-}
-
-export async function deleteProposalTemplate(id: string, token: string): Promise<{ message: string }> {
-    const response = await fetch(`/api/admin/templates/proposal/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to delete proposal template');
-    }
-    return await response.json();
-}
 
 // --- Report Templates ---
 export async function fetchReportTemplates(token: string): Promise<ReportTemplateProperties[]> {

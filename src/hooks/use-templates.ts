@@ -5,22 +5,17 @@ import { useAuth } from "@/context/AuthContext";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { PresentationTemplate, type PresentationTemplateProperties } from "@/lib/models/presentationTemplate";
-import { ProposalTemplate, type ProposalTemplateProperties } from "@/lib/models/proposalTemplate";
 import { ReportTemplate, type ReportTemplateProperties } from "@/lib/models/reportTemplate";
 import { templateKeys } from "@/lib/query-keys";
 import {
   createPresentationTemplate,
-  createProposalTemplate,
   createReportTemplate,
   deletePresentationTemplate,
-  deleteProposalTemplate,
   deleteReportTemplate,
   fetchPresentationTemplates,
-  fetchProposalTemplates,
   fetchReportTemplates,
   refreshTemplateImage,
   updatePresentationTemplate,
-  updateProposalTemplate,
   updateReportTemplate,
 } from "@/services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -35,23 +30,6 @@ interface UpdateTemplateVariables<T> {
   data: Partial<T>;
 }
 
-export function useProposalTemplates() {
-  const { firebaseUser } = useAuth();
-  return useQuery<ProposalTemplate[], Error>({
-    queryKey: templateKeys.proposals(),
-    queryFn: async () => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      const data = await fetchProposalTemplates(token);
-      // Transform plain objects into class instances
-      return data.map(t => new ProposalTemplate(t as ProposalTemplateProperties));
-    },
-    enabled: !!firebaseUser,
-    staleTime: 1000 * 60 * 5,
-    meta: {
-      onError: (error: Error) => handleErrorUtility(error, "Failed to fetch proposal templates"),
-    },
-  });
-}
 
 export function useReportTemplates() {
   const { firebaseUser } = useAuth();
@@ -87,24 +65,6 @@ export function usePresentationTemplates() {
   });
 }
 
-export function useCreateProposalTemplate() {
-  const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
-  return useMutation<ProposalTemplate, Error, Omit<ProposalTemplateProperties, 'createdAt'> & { id: string }>({
-    mutationFn: async (data) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      const newTemplateProperties = await createProposalTemplate(data, token);
-      return new ProposalTemplate(newTemplateProperties);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: templateKeys.proposals() });
-    },
-    onError: (error: any) => {
-      // Re-throw for form handling
-      throw error;
-    }
-  });
-}
 
 export function useCreateReportTemplate() {
   const queryClient = useQueryClient();
@@ -143,22 +103,6 @@ export function useCreatePresentationTemplate() {
 }
 
 
-export function useUpdateProposalTemplate() {
-  const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
-  return useMutation({
-    mutationFn: async (variables: UpdateTemplateVariables<ProposalTemplate>) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return updateProposalTemplate(variables.templateId, variables.data, token);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: templateKeys.proposals() });
-      toast({ title: 'Success', description: 'Proposal template updated.' });
-    },
-    onError: (error: Error) => handleErrorUtility(error, "Failed to update template"),
-  });
-}
-
 export function useUpdateReportTemplate() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
@@ -192,21 +136,6 @@ export function useUpdatePresentationTemplate() {
 }
 
 
-export function useDeleteProposalTemplate() {
-  const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
-  return useMutation({
-    mutationFn: async (templateId: string) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return deleteProposalTemplate(templateId, token);
-    },
-    onSuccess: (data, templateId) => {
-      queryClient.invalidateQueries({ queryKey: templateKeys.proposals() });
-      toast({ title: "Template Deleted", description: `Template "${templateId}" has been deleted.` });
-    },
-    onError: (error: Error) => handleErrorUtility(error, "Failed to delete template"),
-  });
-}
 
 export function useDeleteReportTemplate() {
   const queryClient = useQueryClient();

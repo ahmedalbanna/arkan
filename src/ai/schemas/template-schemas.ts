@@ -204,17 +204,6 @@ export const PptxTemplateSchema = BaseTemplateSchema.extend({
   dataAiHint: z.string(),
 });
 
-// Proposal Template
-export const ProposalTemplateSchema = BaseTemplateSchema.extend({
-  prompt: z.string(),
-  guidelines: z.array(z.string()).optional(),
-  jsonStructure: z.any().optional(),
-});
-export const CreateProposalTemplateSchema = ProposalTemplateSchema.omit({ id: true }).extend({
-  id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID can only contain lowercase letters, numbers, and hyphens."),
-});
-export const UpdateProposalTemplateSchema = ProposalTemplateSchema.omit({ id: true }).partial();
-
 // Report Generation Template
 export const ReportGenerationTemplateSchema = BaseTemplateSchema.extend({
   sectionIds: z.array(z.string()).min(1, 'At least one agent must be selected.'),
