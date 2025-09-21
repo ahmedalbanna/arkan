@@ -2,9 +2,9 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useSaveProject, useToast, useUpdateProject, useExport, useDocxStyles, usePptxStyles } from '@/hooks';
+import { useBuilderStore, useSaveProject, useToast, useUpdateProject, useExport } from '@/hooks';
 import { Project } from '@/lib/models/project';
-import type { SavedProject, DocxTemplateKey, PptxTemplateKey } from '@/lib/types';
+import type { SavedProject } from '@/lib/types';
 import { saveAs } from 'file-saver';
 import { useRef, useState, useEffect } from 'react';
 
@@ -22,9 +22,6 @@ function hasAnyContent(project: Project | null): boolean {
     return false;
 }
 
-const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
-const PPTX_TEMPLATE_KEY = 'arkan-pptx-template';
-
 export function useSessionActions() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
@@ -40,48 +37,22 @@ export function useSessionActions() {
 
     // --- Start of Export Logic Integration ---
     const { exportProposal, exportReportDocx, exportPresentationPptx, isExporting } = useExport();
-    const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
-    const { templates: pptxTemplates, isLoaded: pptxLoaded } = usePptxStyles();
-
-    const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<DocxTemplateKey>('modern');
-    const [selectedPptxTemplate, setSelectedPptxTemplate] = useState<PptxTemplateKey>('modern');
-
-    useEffect(() => {
-        const savedDocx = localStorage.getItem(DOCX_TEMPLATE_KEY) as DocxTemplateKey | null;
-        if (savedDocx && docxTemplates && docxTemplates[savedDocx]) {
-            setSelectedDocxTemplate(savedDocx);
-        }
-        const savedPptx = localStorage.getItem(PPTX_TEMPLATE_KEY) as PptxTemplateKey | null;
-        if (savedPptx && pptxTemplates && pptxTemplates[savedPptx]) {
-            setSelectedPptxTemplate(savedPptx);
-        }
-    }, [docxTemplates, pptxTemplates]);
-
-    const handleDocxTemplateChange = (key: DocxTemplateKey) => {
-        setSelectedDocxTemplate(key);
-        localStorage.setItem(DOCX_TEMPLATE_KEY, key);
-    };
-
-    const handlePptxTemplateChange = (key: PptxTemplateKey) => {
-        setSelectedPptxTemplate(key);
-        localStorage.setItem(PPTX_TEMPLATE_KEY, key);
-    };
 
     const handleExportProposal = async (format: 'docx' | 'pdf') => {
         if (project && project.proposal) {
-            await exportProposal(format, project, selectedDocxTemplate);
+            await exportProposal(format, project);
         }
     }
 
     const handleExportReport = async (sectionsToInclude: string[]) => {
-        if (!project || !hasContent(project)) return;
-         await exportReportDocx(project, selectedDocxTemplate, {}, sectionsToInclude);
+        if (!project || !hasAnyContent(project)) return;
+         await exportReportDocx(project, {}, sectionsToInclude);
     };
 
     const handleExportPresentation = async () => {
         if (!project || !project.presentation?.history.length) return;
         const latestPresentation = project.presentation.history[0];
-        await exportPresentationPptx(project, latestPresentation.id, selectedPptxTemplate);
+        await exportPresentationPptx(project, latestPresentation.id);
     }
     // --- End of Export Logic Integration ---
 
@@ -102,6 +73,8 @@ export function useSessionActions() {
                 const content = e.target?.result as string;
                 const decodedJson = decodeURIComponent(escape(atob(content)));
                 const parsedState = JSON.parse(decodedJson);
+                // Here, you would ideally validate the parsedState against a Zod schema
+                // before loading it into the store to ensure data integrity.
                 loadProject(parsedState as SavedProject);
             } catch (error) {
                 console.error('Failed to load project file:', error);
@@ -219,18 +192,8 @@ export function useSessionActions() {
         t,
         // New exports for export functionality
         isExporting,
-        docxTemplates,
-        pptxTemplates,
-        docxLoaded,
-        pptxLoaded,
-        selectedDocxTemplate,
-        selectedPptxTemplate,
-        handleDocxTemplateChange,
-        handlePptxTemplateChange,
         handleExportProposal,
         handleExportReport,
         handleExportPresentation,
     };
 }
-
-    

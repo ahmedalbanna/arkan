@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Download, Trash2, Save, FileJson, Upload, Cloud } from 'lucide-react';
+import { Download, Trash2, Save, FileJson, Upload, Cloud, Share2 } from 'lucide-react';
 import React from 'react';
 import {
   Tooltip,
@@ -212,5 +212,3 @@ export const SessionActions = () => {
         </TooltipProvider>
     );
 };
-
-    

@@ -8,13 +8,11 @@ import { toast } from './use-toast';
 
 import type { ProjectProposal } from '@/ai/schemas';
 import { Project } from '@/lib/models/project';
-import type { DocxTemplateKey, PptxTemplateKey } from '@/lib/types';
-
 
 export function useExport() {
     const [isExporting, setIsExporting] = useState(false);
 
-    const exportProposal = async (format: 'docx' | 'pdf', project: Project, docxTemplateKey: DocxTemplateKey) => {
+    const exportProposal = async (format: 'docx' | 'pdf', project: Project) => {
         setIsExporting(true);
         try {
             if (!project.proposal) {
@@ -22,9 +20,9 @@ export function useExport() {
                 return;
             }
             if (format === 'docx') {
-                await exportProposalUtil(project.proposal as ProjectProposal, docxTemplateKey);
+                await exportProposalUtil(project.proposal as ProjectProposal);
             } else {
-                await exportProposalPdfUtil(project.proposal as ProjectProposal, docxTemplateKey);
+                await exportProposalPdfUtil(project.proposal as ProjectProposal);
             }
             toast({ title: 'Export Successful', description: `Proposal exported as ${format.toUpperCase()}.` });
         } catch (error) {
@@ -35,7 +33,7 @@ export function useExport() {
         }
     };
 
-    const exportReportDocx = async (project: Project, docxTemplateKey: DocxTemplateKey, translatedTitles: { [key in string]?: string; }, sectionsToInclude?: string[]) => {
+    const exportReportDocx = async (project: Project, translatedTitles: { [key in string]?: string; }, sectionsToInclude?: string[]) => {
         setIsExporting(true);
         try {
             const sectionsToExport = sectionsToInclude?.reduce((acc, key) => {
@@ -46,7 +44,7 @@ export function useExport() {
                 return acc;
             }, {} as { [key in string]?: string }) || project.sections;
 
-            await exportReportUtil(sectionsToExport || {}, project.diagrams || {}, project.name || 'Untitled Report', docxTemplateKey, translatedTitles, sectionsToInclude);
+            await exportReportUtil(sectionsToExport || {}, project.diagrams || {}, project.name || 'Untitled Report', translatedTitles, sectionsToInclude);
             toast({ title: 'Export Successful', description: 'Report exported as DOCX.' });
         } catch (error) {
             console.error(error);
@@ -56,7 +54,7 @@ export function useExport() {
         }
     };
 
-    const exportPresentationPptx = async (project: Project, activePresentationId: string | null, pptxTemplateKey: PptxTemplateKey) => {
+    const exportPresentationPptx = async (project: Project, activePresentationId: string | null) => {
         setIsExporting(true);
         try {
             const activePresentation = project.presentation?.history.find(p => p.id === activePresentationId);
@@ -64,7 +62,7 @@ export function useExport() {
                 toast({ title: 'Export Failed', description: 'No presentation slides found to export.', variant: 'destructive' });
                 return;
             }
-            await exportPptxUtil(activePresentation.slides, pptxTemplateKey);
+            await exportPptxUtil(activePresentation.slides);
             toast({ title: 'Export Successful', description: 'Presentation exported as PPTX.' });
         } catch (error) {
             console.error(error);

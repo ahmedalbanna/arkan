@@ -59,16 +59,6 @@ const navConfig: NavLink[] = [
     { href: '/admin/manage-features', labelKey: 'header.manageFeatures', icon: SlidersHorizontal },
     { href: '/admin/manage-generations', labelKey: 'header.activityHistory', icon: History },
     { href: '/admin/automations/builder', labelKey: 'header.automations', icon: Workflow },
-    {
-        href: '#', // Parent link doesn't navigate
-        labelKey: 'header.templates',
-        icon: Palette,
-        children: [
-            { href: '/admin/manage-prompt-templates', labelKey: 'header.promptTemplates', icon: Library },
-            { href: '/admin/manage-templates', labelKey: 'header.exportTemplates', icon: Palette },
-            { href: '/admin/manage-pptx-templates', labelKey: 'header.pptxTemplates', icon: FileImage },
-        ]
-    },
     { href: '/admin/settings', labelKey: 'header.adminSettings', icon: Settings },
 ];
 
@@ -231,5 +221,3 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
 export default function AdminLayout({ children }: { children: ReactNode }) {
     return <AdminLayoutContent>{children}</AdminLayoutContent>;
 }
-
-    

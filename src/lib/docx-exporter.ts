@@ -9,19 +9,7 @@ import { createDocxContent } from './markdown-to-word-converter';
 import { formatKeyToTitle, hasContent } from './proposal-utils';
 import { exportComponentAsPDF } from './pdf-exporter';
 
-async function getStylesFromServer(): Promise<Record<DocxTemplateKey, { styles: any }>> {
-    try {
-        const response = await fetch('/api/admin/templates/docx');
-        if (!response.ok) {
-            console.error('Failed to fetch DOCX templates from server, falling back to defaults.');
-            return templates;
-        }
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching DOCX templates, falling back to defaults:', error);
-        return templates;
-    }
-}
+const defaultStyles = templates.modern.styles;
 
 /**
  * Recursively traverses a proposal data structure and converts it into an array of docx objects.
@@ -72,10 +60,7 @@ async function renderDocxValue(data: any, level: number = 1): Promise<(Paragraph
 }
 
 
-export async function exportProposalAsPdf(proposal: ProjectProposal, docxTemplateKey: DocxTemplateKey) {
-    const allTemplates = await getStylesFromServer();
-    const styles = allTemplates[docxTemplateKey]?.styles || templates.modern.styles;
-
+export async function exportProposalAsPdf(proposal: ProjectProposal) {
     const container = document.createElement('div');
     document.body.appendChild(container);
     await exportComponentAsPDF(container, `${proposal.title.replace(/\s+/g, '_')}_proposal.pdf`);
@@ -83,9 +68,8 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, docxTemplat
 }
 
 
-export async function exportProposalAsDocx(proposal: ProjectProposal, docxTemplateKey: DocxTemplateKey) {
-    const allTemplates = await getStylesFromServer();
-    const styles = allTemplates[docxTemplateKey]?.styles || templates.modern.styles;
+export async function exportProposalAsDocx(proposal: ProjectProposal) {
+    const styles = defaultStyles;
 
     const { title, category, ...restOfProposal } = proposal;
 
@@ -99,7 +83,7 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, docxTempla
                 children: [
                     new Paragraph({ text: "", spacing: { after: 2000 } }),
                     new Paragraph({ text: title, style: 'Title' }),
-                    new Paragraph({ text: category, style: 'SubTitle', spacing: { after: 400 } }),
+                    new Paragraph({ text: category, style: 'SubTitle', spacing: { after: 800 } }),
                 ]
             },
             {
@@ -132,12 +116,10 @@ export async function exportReportAsDocx(
     sections: { [key in string]?: string; },
     diagrams: { [key in string]?: { plantUmlCode: string; imageUrl: string; } },
     proposalTitle: string,
-    docxTemplateKey: DocxTemplateKey,
     translatedTitles: { [key in string]?: string; },
     sectionsToInclude?: string[]
 ) {
-    const allTemplates = await getStylesFromServer();
-    const styles = allTemplates[docxTemplateKey]?.styles || templates.modern.styles;
+    const styles = defaultStyles;
     const doc = new Document({
         styles,
         sections: [
