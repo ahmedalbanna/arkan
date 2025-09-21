@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -26,6 +25,7 @@ import {
 } from '../ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
+import { Separator } from '../ui/separator';
 
 interface SectionToolbarProps {
   isProcessingAi: boolean;
