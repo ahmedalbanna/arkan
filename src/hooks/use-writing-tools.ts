@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -9,7 +10,7 @@ import { handleErrorUtility } from '@/lib/errorUtils';
 
 /**
  * Generic custom mutation hook for all writing tools.
- * @param endpoint The specific API endpoint for the tool (e.g., '/api/writing-tools/summarize').
+ * @param tool The specific API endpoint for the tool (e.g., 'summarize', 'paraphrase').
  * @param options Optional callbacks for onSuccess and onError.
  * @returns The result of the useMutation hook.
  */
@@ -29,7 +30,9 @@ export function useWritingTool<TData = any, TVariables = any>(
     },
     onSuccess: (data, variables) => {
         refetchUser(); // Invalidate user to update credits
-        options?.onSuccess?.(data, variables);
+        if (options?.onSuccess) {
+            options.onSuccess(data, variables);
+        }
     },
     onError: (error, variables) => {
         if (options?.onError) {

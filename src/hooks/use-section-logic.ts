@@ -1,4 +1,4 @@
-// code explantion in docs/hooks/use-section-logic.md
+
 
 'use client';
 

@@ -4,7 +4,7 @@
 
 import { useState, useMemo } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useTranslate } from '@/hooks';
+import { useTranslate, useTextToSpeech } from '@/hooks';
 import { toast } from '@/hooks';
 import type { SectionName } from '@/ai/schemas';
 import { useBuilderStore } from '@/hooks';
@@ -14,6 +14,7 @@ import { useAgentStore } from './useAgentStore';
 import { FileText } from 'lucide-react';
 import { useSectionLogic } from './use-section-logic';
 import { useExport } from './use-export';
+import { useWritingTool } from './use-writing-tools';
 
 export const useReportModeGenerator = () => {
     const { t, locale } = useLocalization();
