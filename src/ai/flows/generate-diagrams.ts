@@ -33,7 +33,7 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
         input: { schema: z.any() }, // Using any() since we are manually constructing the payload
         output: { schema: GenerateDiagramOutputSchema },
         system: `${basePrompt}
-You will also provide a detailed explanation of the generated diagram.
+You are also an expert analyst. Before you generate the diagram, you must first review all the provided context sections (proposal, other report sections, other diagrams). From this context, intelligently identify and synthesize only the most relevant information needed to create the requested diagram.
 Your final output MUST be a JSON object containing two keys: 'plantUmlCode' and 'explanation'.`,
         prompt: `
 {{#if guidelines}}
@@ -48,42 +48,8 @@ Your final output MUST be a JSON object containing two keys: 'plantUmlCode' and 
 {{{instructionText}}}
 {{/if}}
 
---- Context from Project ---
-{{#if textContext}}
---- ADDITIONAL TEXTUAL CONTEXT ---
-{{#each textContext}}
-File: {{this.fileName}}
-{{{this.content}}}
----
-{{/each}}
-{{/if}}
-
-{{#if mediaContext}}
---- ADDITIONAL MEDIA CONTEXT ---
-{{#each mediaContext}}
-File: {{this.fileName}}
-{{media url=this.content}}
----
-{{/each}}
-{{/if}}
-
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
+--- AVAILABLE CONTEXT FROM PROJECT ---
+You have access to the following documents. Review them and use the most relevant information to generate the diagram.
 
 {{#if proposal}}
 --- Main Input: Project Proposal ---
@@ -97,6 +63,42 @@ ${stringifiedProposal}
 \`\`\`json
 ${stringifiedPlan}
 \`\`\`
+{{/if}}
+
+{{#if otherSections}}
+--- Other Report Sections ---
+{{#each otherSections}}
+--- Section: {{@key}} ---
+{{{this}}}
+---
+{{/each}}
+{{/if}}
+
+{{#if otherDiagrams}}
+--- Other Generated Diagrams (PlantUML) ---
+{{#each otherDiagrams}}
+--- Diagram: {{@key}} ---
+{{{this}}}
+---
+{{/each}}
+{{/if}}
+
+{{#if textContext}}
+--- Additional Textual Context ---
+{{#each textContext}}
+File: {{this.fileName}}
+{{{this.content}}}
+---
+{{/each}}
+{{/if}}
+
+{{#if mediaContext}}
+--- Additional Media Context ---
+{{#each mediaContext}}
+File: {{this.fileName}}
+{{media url=this.content}}
+---
+{{/each}}
 {{/if}}
 `,
     config: {

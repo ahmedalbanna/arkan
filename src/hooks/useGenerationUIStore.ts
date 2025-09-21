@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Agent } from '@/lib/models/agent';
@@ -47,7 +48,6 @@ interface GenerationUIState {
   controlState: Record<string, ControlState>;
   customGuidelineInput: Record<string, string>;
   oneTimeInstructions: Record<string, string>;
-  contextSelection: Record<string, ContextSelectionValue>;
   selectedReportTemplateId: string;
   // From usePresentationStore
   activePresentationId: string | null;
@@ -65,7 +65,6 @@ interface GenerationUIActions {
   handleAddCustomGuidelineForItem: (itemKey: string) => void;
   handleRemoveCustomGuidelineForItem: (itemKey: string, index: number) => void;
   setOneTimeInstruction: (itemKey: string, value: string) => void;
-  toggleContextSelection: (itemKey: string, type: 'sections' | 'diagrams' | 'externalContext' | 'proposal' | 'projectPlan', contextKey: string | number | null, isSelected: boolean) => void;
   setSelectedReportTemplateId: (id: string) => void;
   // Presentation Store Actions
   setActivePresentationId: (id: string | null) => void;
@@ -91,13 +90,11 @@ const initialState: GenerationUIState = {
   controlState: {},
   customGuidelineInput: {},
   oneTimeInstructions: {},
-  contextSelection: {},
   selectedReportTemplateId: '',
   activePresentationId: null,
   advancedProposalFields: initialAdvancedFields,
 };
 
-const emptySelection: ContextSelectionValue = { sections: {}, diagrams: {}, externalContext: [], proposal: false, projectPlan: false };
 
 export const useGenerationUIStore = create<GenerationUIState & GenerationUIActions>()(
   (set, get) => ({
@@ -162,19 +159,6 @@ export const useGenerationUIStore = create<GenerationUIState & GenerationUIActio
     }),
 
     setOneTimeInstruction: (itemKey, value) => set(state => ({ oneTimeInstructions: { ...state.oneTimeInstructions, [itemKey]: value } })),
-
-    toggleContextSelection: (itemKey, type, contextKey, isSelected) => set(state => {
-      const newSelection = JSON.parse(JSON.stringify(state.contextSelection[itemKey] || { ...emptySelection, proposal: true, projectPlan: true }));
-      if (type === 'proposal' || type === 'projectPlan') {
-        newSelection[type] = isSelected;
-      } else if (type === 'externalContext' && typeof contextKey === 'number') {
-        if (!Array.isArray(newSelection.externalContext)) newSelection.externalContext = [];
-        newSelection.externalContext[contextKey] = isSelected;
-      } else if (contextKey) {
-        newSelection[type][contextKey as string] = isSelected;
-      }
-      return { contextSelection: { ...state.contextSelection, [itemKey]: newSelection } };
-    }),
 
     setSelectedReportTemplateId: (id) => set({ selectedReportTemplateId: id }),
 

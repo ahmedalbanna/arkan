@@ -1,16 +1,13 @@
 
+
 'use client';
 
 import React from 'react';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { type SectionName as SectionNameType } from '@/ai/schemas';
-import { Loader2, Sparkles, FileText, GripVertical } from 'lucide-react';
+import { Loader2, Sparkles, GripVertical } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { GuidelineEditor } from './SectionGuidelineEditor';
-import { ContextSelector } from './SectionContextSelector';
-import { SectionGenerationControls } from './SectionGenerationControls';
 import { useSectionAccordionItemLogic } from '@/hooks';
 
 export const SectionAccordionItem = ({
@@ -31,17 +28,16 @@ export const SectionAccordionItem = ({
     const {
         t,
         title,
-        agentId,
         Icon,
-        userProfile,
-        hasSelectedContext,
         disabledReason,
     } = useSectionAccordionItemLogic(sectionKey);
 
+    // Context is now auto-selected by the AI, so we only disable based on credits/processing state.
+    const canGenerate = hasCredits && !isAnythingGenerating;
 
     return (
-        <AccordionItem value={sectionKey} key={sectionKey}>
-            <div className="flex items-center rounded-md hover:bg-muted" >
+        <AccordionItem value={sectionKey} key={sectionKey} className="bg-background border rounded-lg">
+            <div className="flex items-center" >
                 {handleProps && (
                     <div {...handleProps} className="p-2 cursor-grab touch-none">
                         <GripVertical className="h-5 w-5 text-muted-foreground" />
@@ -53,37 +49,20 @@ export const SectionAccordionItem = ({
                         {t(title)}
                     </div>
                 </AccordionTrigger>
-            </div>
-            <AccordionContent className="space-y-4 p-4">
-                <Tabs defaultValue="prompt" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="prompt">{t('builder.reportGenerator.tool_tab_prompt')}</TabsTrigger>
-                        <TabsTrigger value="controls">{t('builder.reportGenerator.tool_tab_controls')}</TabsTrigger>
-                        <TabsTrigger value="context">{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="prompt" className="pt-4 space-y-4">
-                        <GuidelineEditor itemKey={sectionKey} agentId={agentId} isAdmin={userProfile?.role === 'admin'} />
-                    </TabsContent>
-                    <TabsContent value="controls" className="pt-4">
-                        <SectionGenerationControls sectionKey={sectionKey} />
-                    </TabsContent>
-                    <TabsContent value="context" className="pt-4">
-                        <ContextSelector itemKey={sectionKey} />
-                    </TabsContent>
-                </Tabs>
-                <div className="pt-2">
+                <div className="p-2">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <div className="w-full">
                                     <Button
                                         type="button"
+                                        size="sm"
                                         onClick={() => onGenerate(sectionKey)}
-                                        disabled={isAnythingGenerating || !hasSelectedContext || !hasCredits}
-                                        className="font-headline w-full"
+                                        disabled={!canGenerate}
+                                        className="font-headline"
                                     >
                                         {isGenerating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-                                        {`${t('builder.reportGenerator.generateButton')} ${t(title)}`}
+                                        {t('builder.reportGenerator.generateButton')}
                                     </Button>
                                 </div>
                             </TooltipTrigger>
@@ -95,6 +74,9 @@ export const SectionAccordionItem = ({
                         </Tooltip>
                     </TooltipProvider>
                 </div>
+            </div>
+            <AccordionContent className="p-4 border-t text-xs text-muted-foreground">
+                {t('builder.reportGenerator.autoContextNote')}
             </AccordionContent>
         </AccordionItem>
     );

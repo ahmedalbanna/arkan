@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React from 'react';
@@ -6,14 +7,17 @@ import { Accordion } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { type SectionName as SectionNameType } from '@/ai/schemas';
-import { Loader2 } from 'lucide-react';
+import { PanelLeftClose } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useReportGenerationLogic } from '@/hooks';
 import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
+import { Button } from '../ui/button';
 
-interface GenerationToolsProps {}
+interface GenerationToolsProps {
+    onCollapseToggle: () => void;
+}
 
-export const GenerationTools = (props: GenerationToolsProps) => {
+export const GenerationTools = ({ onCollapseToggle }: GenerationToolsProps) => {
     const {
         isAnythingGenerating,
         activeMutationKey,
@@ -34,6 +38,9 @@ export const GenerationTools = (props: GenerationToolsProps) => {
                         <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
                         <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
                     </div>
+                     <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
+                        <PanelLeftClose className="h-5 w-5" />
+                    </Button>
                 </div>
             </CardHeader>
             <CardContent className="flex-grow overflow-y-auto pr-2">

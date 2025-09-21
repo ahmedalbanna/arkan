@@ -1125,7 +1125,7 @@
       "generationFailed": "Generation Failed",
       "generationSuccess": "Generation Successful",
       "generationSuccessDesc": "{item} has been successfully generated.",
-      "insufficientCredits": "Insufficient credits. Please purchase more credits to continue."
+      "insufficientCredits": "Insufficient credits. Please purchase more to continue."
     },
     "projectPlan": {
       "title": "Project Planning",
@@ -1286,7 +1286,8 @@
         "translateAllStartedDesc": "Translating all sections. This may take a moment...",
         "translateAllSuccess": "Translation Complete",
         "translateAllSuccessDesc": "All sections have been successfully translated."
-      }
+      },
+      "autoContextNote": "The AI will automatically review all available project data (proposal, sections, diagrams) and use the most relevant information to generate this section."
     },
     "diagramGenerator": {
       "noProposal": "No Proposal Loaded",
@@ -1338,7 +1339,8 @@
         "explanationFailed": "Explanation Failed",
         "explaining": "The AI is analyzing the diagram...",
         "explanationPlaceholder": "Click the \"Explain\" button again to generate an explanation."
-      }
+      },
+      "autoContextNote": "The AI will automatically review all available project data and use the most relevant information to generate this diagram."
     },
     "codeGenerator": {
       "tabs": {

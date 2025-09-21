@@ -28,7 +28,9 @@ const reportSectionPrompt = ai.definePrompt({
   input: { schema: ReportSectionPromptInputSchema },
   output: { schema: GenerateSectionOutputSchema },
   model: 'googleai/gemini-1.5-flash', // Default model, will be overridden by agent config.
-  system: '{{systemPrompt}}', // System prompt will be passed in
+  system: `{{systemPrompt}}
+
+You are also an expert analyst. Before you begin writing, you must first review all the provided context sections (proposal, project plan, other report sections, diagrams, etc.). From this context, intelligently identify and synthesize only the most relevant information needed to create the requested report section. Do not simply list information; integrate it into a well-written, coherent narrative.`,
   prompt: `
 CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
 
@@ -44,7 +46,43 @@ CRITICAL: Your final output must be a JSON object where the 'sectionName' field 
 {{{instructionText}}}
 {{/if}}
 
---- Context from Project ---
+--- AVAILABLE CONTEXT FROM PROJECT ---
+You have access to the following documents. Review them and use the most relevant information to generate the requested section.
+
+{{#if proposal}}
+--- Main Input: Project Proposal ---
+\`\`\`json
+{{{stringifiedProposal}}}
+\`\`\`
+{{else}}
+(No project proposal is being used for this generation. Rely on other provided context.)
+{{/if}}
+
+{{#if projectPlan}}
+--- Main Input: Project Plan ---
+\`\`\`json
+{{{stringifiedPlan}}}
+\`\`\`
+{{/if}}
+
+{{#if otherSections}}
+--- Other Report Sections ---
+{{#each otherSections}}
+--- Section: {{@key}} ---
+{{{this}}}
+---
+{{/each}}
+{{/if}}
+
+{{#if otherDiagrams}}
+--- Other Generated Diagrams (PlantUML) ---
+{{#each otherDiagrams}}
+--- Diagram: {{@key}} ---
+{{{this}}}
+---
+{{/each}}
+{{/if}}
+
 {{#if exampleFiles}}
 --- IMPORTANT EXAMPLES (STYLE REFERENCE) ---
 You MUST heavily reference the following content for style, tone, and structure.
@@ -64,88 +102,10 @@ File: {{this.fileName}}
 ---
 {{/each}}
 {{/if}}
-
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-
-{{#if proposal}}
---- Main Input: Project Proposal ---
-\`\`\`json
-{{{stringifiedProposal}}}
-\`\`\`
-{{else}}
-(No project proposal is being used for this generation. Rely on other provided context.)
-{{/if}}
-
-{{#if projectPlan}}
---- Main Input: Project Plan ---
-\`\`\`json
-{{{stringifiedPlan}}}
-\`\`\`
-{{/if}}
 `,
   config: {
-    temperature: 0.3, // Controls the degree of randomness in token selection. A lower value is good for a more predictable response. A higher value leads to more diverse or unexpected results. The default value is 1.0.
-    maxOutputTokens: 8192, // The maximum number of tokens to include in the response.
-    googleSearchRetrieval: true, // Retrieve public web data for grounding, powered by Google Search.
-    topK: 14, //The maximum number of tokens to consider when sampling.
-    topP: 0.95, // Decides how many possible words to consider. A higher value means that the model looks at more possible words, even the less likely ones, which makes the generated text more diverse. The default value is 0.95.
-    safetySettings: [ // Adjust how likely you are to see responses that could be harmful. Content is blocked based on the probability that it is harmful.
-      {
-        category: 'HARM_CATEGORY_HATE_SPEECH',
-        threshold: 'BLOCK_LOW_AND_ABOVE',
-      },
-      {
-        category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-        threshold: 'BLOCK_LOW_AND_ABOVE',
-      }
-      , {
-        category: 'HARM_CATEGORY_HARASSMENT',
-        threshold: 'BLOCK_LOW_AND_ABOVE',
-      }
-      , {
-        category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-        threshold: 'BLOCK_LOW_AND_ABOVE',
-      }
-      , {
-        category: 'HARM_CATEGORY_CIVIC_INTEGRITY',
-        threshold: 'BLOCK_LOW_AND_ABOVE',
-      }
-    ],
-    // codeExecution: true,
-    //contextCache: true, // Context caching allows you to save and reuse precomputed input tokens that you wish to use repeatedly.
-    //thinkingConfig: {
-    //   includeThoughts: true, // Indicates whether to include thoughts in the response.If true, thoughts are returned only when available.
-    //   thinkingBudget: 2287 // The thinking budget parameter gives the model guidance on the number of thinking tokens it can use when generating a response. A greater number of tokens is typically associated with more detailed thinking, which is needed for solving more complex tasks. Setting the thinking budget to 0 disables thinking.
-    // },
-    // functionCallingConfig: { // Controls how the model uses the provided tools (function declarations). With AUTO (Default) mode, the model decides whether to generate a natural language response or suggest a function call based on the prompt and context. With ANY, the model is constrained to always predict a function call and guarantee function schema adherence. With NONE, the model is prohibited from making function calls.
-    //   mode: 'AUTO'
-    // }
-
+    temperature: 0.3, 
   },
-  tools: [],
-  docs: [],
-  context: {
-
-  },
-  description: `Generates a specific section of a project report based on the provided project context and guidelines.`,
-  maxTurns: 1,
-  messages: [],
-  use: [],
 });
 
 
@@ -159,8 +119,6 @@ export async function generateReportSection(input: GenerateSectionInput): Promis
     throw new Error(`Configuration for the report section '${sectionToGenerate}' is missing or invalid.`);
   }
 
-  // It's safer to validate the prompt structure, but we trust the data from `getAgent` for now.
-  // A more robust implementation might use a Zod schema to parse `agent.prompt`.
   const agentPrompt = agent.prompt as AgentPrompt;
   const systemPrompt = agentPrompt.base;
 

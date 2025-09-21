@@ -1,11 +1,11 @@
 
+
 'use client';
 
 import { type DiagramType, type SectionName } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAgents, useBuilderStore, useGenerateDiagram, useSections, useToast } from '@/hooks';
-import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import React, { useEffect, useMemo } from 'react';
 import { useAgentStore } from './useAgentStore';
 import { useGenerationUIStore } from './useGenerationUIStore';
@@ -13,11 +13,10 @@ import { useGenerationUIStore } from './useGenerationUIStore';
 export const useDiagramGenerationTools = () => {
     const { t } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
-    const { toast } = useToast();
     const { userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
-    const { project, setProject } = useBuilderStore();
-    const { contextSelection, guidelineState, initializeDependentStates } = useGenerationUIStore();
+    const { project } = useBuilderStore();
+    const { initializeDependentStates } = useGenerationUIStore();
     const { data: sectionConfigs, isLoading: sectionsLoading } = useSections();
 
     const diagramSections = useMemo(() => {
@@ -34,29 +33,22 @@ export const useDiagramGenerationTools = () => {
         }
     }, [agentsLoaded, sectionsLoading, agents, sectionConfigs, initializeDependentStates]);
 
-
-    const getIconComponent = useAgentStore(state => state.getIconComponent);
-
     const diagramMutation = useGenerateDiagram();
-
     const isAnythingGenerating = diagramMutation.isPending;
     const hasCreditsForGeneration = userProfile ? userProfile.credits ?? 0 >= 1 : false;
 
     const onGenerateDiagram = (diagramType: DiagramType) => {
         if (!project) return;
-
-        const selectedContext = contextSelection[diagramType] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-        const agent = agents?.find(a => a.id === `generate-${diagramType}-diagram`);
-        const selectedExternalContext = project.externalContext?.filter((c: any, i: number) => selectedContext.externalContext[i]);
-
+        
+        // The AI now handles context automatically. We pass all available context.
         const body = {
-            proposal: selectedContext.proposal ? project.proposal : undefined,
-            projectPlan: selectedContext.projectPlan ? project.projectPlan : undefined,
+            proposal: project.proposal,
+            projectPlan: project.projectPlan,
             diagramToGenerate: diagramType,
-            otherSections: Object.keys(selectedContext.sections).filter(k => selectedContext.sections[k]).reduce((acc, k) => ({ ...acc, [k]: project.sections?.[k as SectionName] }), {}),
-            otherDiagrams: Object.keys(selectedContext.diagrams).filter(k => selectedContext.diagrams[k]).reduce((acc, k) => ({ ...acc, [k]: project.diagrams?.[k as DiagramType]?.plantUmlCode }), {}),
-            guidelines: getSelectedGuidelines(agent, guidelineState[diagramType]),
-            externalContext: selectedExternalContext,
+            otherSections: project.sections,
+            otherDiagrams: Object.fromEntries(Object.entries(project.diagrams || {}).map(([key, value]) => [key, value?.plantUmlCode])),
+            externalContext: project.externalContext,
+            // Guidelines and instructions can still be passed if needed in the future
         };
         setActiveMutationKey(diagramType);
         diagramMutation.mutate(body);
@@ -68,7 +60,6 @@ export const useDiagramGenerationTools = () => {
         isAnythingGenerating,
         onGenerateDiagram,
         diagramSections,
-        getIconComponent,
         hasCreditsForGeneration,
     };
 };

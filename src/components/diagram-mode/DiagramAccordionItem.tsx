@@ -1,14 +1,13 @@
 
+
 'use client';
 
 import React from 'react';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, FileText, GripVertical } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { ContextSelector } from '../section/SectionContextSelector';
 import { useSectionAccordionItemLogic } from '@/hooks';
 
 export const DiagramAccordionItem = ({
@@ -26,9 +25,11 @@ export const DiagramAccordionItem = ({
         t,
         title,
         Icon,
-        hasSelectedContext,
         disabledReason,
     } = useSectionAccordionItemLogic(diagramType);
+
+    // Context is now handled automatically by the AI, so we always enable generation if credits are available.
+    const canGenerate = hasCredits;
 
     return (
         <AccordionItem value={diagramType} key={diagramType}>
@@ -39,33 +40,20 @@ export const DiagramAccordionItem = ({
                         {title}
                     </div>
                 </AccordionTrigger>
-            </div>
-            <AccordionContent className="space-y-4 p-4">
-                <Tabs defaultValue="context" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="controls">{t('builder.reportGenerator.tool_tab_controls')}</TabsTrigger>
-                        <TabsTrigger value="context">{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="controls" className="pt-4">
-                        <p className="text-xs text-muted-foreground">Controls for this diagram type can be added here in the future.</p>
-                    </TabsContent>
-                    <TabsContent value="context" className="pt-4">
-                        <ContextSelector itemKey={diagramType} />
-                    </TabsContent>
-                </Tabs>
-                <div className="pt-2">
+                 <div className="p-2">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <div className="w-full">
                                     <Button
                                         type="button"
+                                        size="sm"
                                         onClick={() => onGenerate(diagramType)}
-                                        disabled={isGenerating || !hasSelectedContext || !hasCredits}
-                                        className="font-headline w-full"
+                                        disabled={isGenerating || !canGenerate}
+                                        className="font-headline"
                                     >
                                         {isGenerating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-                                        {`${t('builder.reportGenerator.generateButton')} ${title}`}
+                                        {t('builder.reportGenerator.generateButton')}
                                     </Button>
                                 </div>
                             </TooltipTrigger>
@@ -77,6 +65,9 @@ export const DiagramAccordionItem = ({
                         </Tooltip>
                     </TooltipProvider>
                 </div>
+            </div>
+            <AccordionContent className="space-y-4 p-4 text-xs text-muted-foreground">
+              {t('builder.diagramGenerator.autoContextNote')}
             </AccordionContent>
         </AccordionItem>
     );
