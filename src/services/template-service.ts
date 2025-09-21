@@ -1,4 +1,3 @@
-
 'use client';
 
 import { DocxTemplateProperties } from '@/lib/models/docxTemplate';
@@ -156,5 +155,3 @@ export async function uploadPptxTemplateFile(variables: { templateId: string; fi
     }
     return response.json();
 }
-
-    

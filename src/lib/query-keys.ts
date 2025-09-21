@@ -67,12 +67,6 @@ export const analyticsKeys = {
     userStats: (userId: string) => [...analyticsKeys.all, 'user-stats', userId] as const,
 }
 
-export const templateKeys = {
-    all: ['templates'] as const,
-    proposals: () => [...templateKeys.all, 'proposal'] as const,
-    reports: () => [...templateKeys.all, 'report'] as const,
-}
-
 export const projectKeys = {
     all: ['projects'] as const,
     lists: () => [...projectKeys.all, 'list'] as const,
@@ -95,5 +89,3 @@ export const sectionKeys = {
   lists: () => [...sectionKeys.all, 'list'] as const,
   detail: (id: string) => [...sectionKeys.all, 'detail', id] as const,
 };
-
-    

@@ -5,23 +5,16 @@
 import { useAuth } from "@/context/AuthContext";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import { handleErrorUtility } from "@/lib/errorUtils";
-import { ReportTemplate, type ReportTemplateProperties } from "@/lib/models/reportTemplate";
 import { templateKeys } from "@/lib/query-keys";
 import {
   refreshTemplateImage,
 } from "@/services";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { docxTemplateKeys } from "./use-docx-styles";
 import { pptxTemplateKeys } from "./use-pptx-styles";
 import { toast } from "./use-toast";
 
 export { templateKeys };
-
-interface UpdateTemplateVariables<T> {
-  templateId: string;
-  data: Partial<T>;
-}
-
 
 export function useRefreshTemplateImage(templateType: 'docx' | 'pptx') {
   const queryClient = useQueryClient();
@@ -45,6 +38,3 @@ export function useRefreshTemplateImage(templateType: 'docx' | 'pptx') {
     }
   })
 }
-
-    
-    

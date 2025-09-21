@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -19,26 +18,26 @@ export function useReportGenerationLogic() {
 
     const reportGenerationMutation = useGenerateReportSection();
 
-    // NEW: State to manage the order of sections
     const [orderedSections, setOrderedSections] = useState<SectionNameType[]>([]);
 
     const reportSections = useMemo(() => {
         if (!sectionConfigs) return {};
+        // Filter for sections of type 'report'
         return sectionConfigs.filter(s => s.type === 'report').reduce((acc, sec) => {
             acc[sec.id] = sec;
             return acc;
         }, {} as Record<string, any>);
     }, [sectionConfigs]);
 
-    // Initialize the order when sections are loaded
+    // Initialize the order based on all available report sections
     useEffect(() => {
-        if (sectionConfigs && orderedSections.length === 0) {
+        if (sectionConfigs) {
             const initialOrder = Object.keys(reportSections).sort((a, b) =>
                 reportSections[a].title.localeCompare(reportSections[b].title)
             ) as SectionNameType[];
             setOrderedSections(initialOrder);
         }
-    }, [sectionConfigs, reportSections, orderedSections.length]);
+    }, [sectionConfigs, reportSections]);
 
     useEffect(() => {
         if (agentsLoaded && !sectionsLoading && sectionConfigs && agents.length > 0) {
@@ -76,7 +75,7 @@ export function useReportGenerationLogic() {
         agentsLoaded,
         sectionsLoading,
         orderedSections,
-        setOrderedSections, // Expose setter for DnD
+        setOrderedSections,
         project,
     };
 }
