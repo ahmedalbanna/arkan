@@ -1,14 +1,14 @@
 
+
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { generateReportSectionApi, generateFullReportApi } from '@/services';
+import { useMutation } from '@tanstack/react-query';
+import { generateReportSectionApi } from '@/services';
 import { toast } from './use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { SectionName } from '@/ai/schemas';
 import { useBuilderStore } from './useBuilderStore';
-import { userKeys } from '@/lib/query-keys';
 import { Project } from '@/lib/models/project';
 
 export function useGenerateReportSection() {
@@ -36,30 +36,4 @@ export function useGenerateReportSection() {
       toast({ title: `Failed to generate "${item}"`, description: error.message, variant: "destructive" });
     },
   });
-}
-
-export function useGenerateFullReport() {
-    const { firebaseUser, refetchUser } = useAuth();
-    const { updateProject } = useBuilderStore(); // Use updateProject
-    
-    return useMutation({
-        mutationFn: async (body: any) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return generateFullReportApi(body, token);
-        },
-        onSuccess: (data) => {
-             // Use the new updater function
-             updateProject(p => {
-                Object.keys(data).forEach(key => {
-                    p.updateSectionContent(key as SectionName, data[key]);
-                });
-             });
-             
-             refetchUser();
-             toast({ title: "Full Report Generated", description: "All selected sections have been created." });
-        },
-        onError: (error: Error) => {
-             toast({ title: "Full Report Generation Failed", description: error.message, variant: "destructive" });
-        }
-    });
 }

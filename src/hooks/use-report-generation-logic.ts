@@ -1,15 +1,12 @@
 
-// code explantion in docs/hooks/use-report-generation-logic.md
 
 'use client';
 
-import { type DiagramType, EvaluateContextOutput, type SectionName as SectionNameType } from '@/ai/schemas';
+import { type SectionName as SectionNameType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
-import { useBuilderStore, useGenerateFullReport, useGenerateReportSection, useToast } from '@/hooks';
-import { getAuthenticatedToken } from '@/lib/authUtils';
+import { useBuilderStore, useGenerateReportSection, useToast } from '@/hooks';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
-import { evaluateContextApi } from '@/services';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useAgents } from './use-agents';
 import { useSections } from './use-sections';
 import { useGenerationUIStore } from './useGenerationUIStore';
@@ -30,11 +27,8 @@ const generateInstructionText = (controls: any, oneTimeInstruction: string): str
 };
 
 export function useReportGenerationLogic() {
-    const { toast } = useToast();
-    const { userProfile, firebaseUser } = useAuth();
+    const { userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = useState<string | null>(null);
-    const [generationPlan, setGenerationPlan] = useState<EvaluateContextOutput | null>(null);
-    const [isPlanning, setIsPlanning] = useState(false);
 
     const { project } = useBuilderStore();
 
@@ -50,17 +44,16 @@ export function useReportGenerationLogic() {
     const { agents, isLoaded: agentsLoaded } = useAgents();
 
     const reportGenerationMutation = useGenerateReportSection();
-    const fullReportMutation = useGenerateFullReport();
 
-    // NEW: Initialize dependent states once data is loaded
-    useEffect(() => {
+    // Initialize dependent states once data is loaded
+    useState(() => {
         if (agentsLoaded && !sectionsLoading && sectionConfigs && agents.length > 0) {
             initializeDependentStates(agents, sectionConfigs);
         }
-    }, [agentsLoaded, sectionsLoading, agents, sectionConfigs, initializeDependentStates]);
+    });
 
 
-    const isAnythingGenerating = reportGenerationMutation.isPending || fullReportMutation.isPending;
+    const isAnythingGenerating = reportGenerationMutation.isPending;
 
     const reportSections = useMemo(() => {
         if (!sectionConfigs) return {};
@@ -92,7 +85,7 @@ export function useReportGenerationLogic() {
             projectPlan: currentSelection.projectPlan ? project.projectPlan : undefined,
             sectionToGenerate: section,
             otherSections: Object.keys(currentSelection.sections).filter(k => currentSelection.sections[k]).reduce((acc, k) => ({ ...acc, [k]: project.sections?.[k as SectionNameType] }), {}),
-            otherDiagrams: Object.keys(currentSelection.diagrams).filter(k => currentSelection.diagrams[k]).reduce((acc, k) => ({ ...acc, [k]: project.diagrams?.[k as DiagramType]?.plantUmlCode }), {}),
+            otherDiagrams: Object.keys(currentSelection.diagrams).filter(k => currentSelection.diagrams[k]).reduce((acc, k) => ({ ...acc, [k]: project.diagrams?.[k as keyof typeof project.diagrams]?.plantUmlCode }), {}),
             guidelines: getSelectedGuidelines(agent, guidelineState[section]),
             instructionText: generateInstructionText(controlState[section], oneTimeInstruction),
             exampleFiles,
@@ -103,98 +96,15 @@ export function useReportGenerationLogic() {
         reportGenerationMutation.mutate({ body });
     };
 
-    const sectionsToGenerateCount = useMemo(() => {
-        if (!project || !orderedSections) return 0;
-        return orderedSections.filter(sectionId => {
-            if (!project.sections) return true;
-            return !project.sections[sectionId as SectionNameType];
-        }).length;
-    }, [orderedSections, project]);
-
-    const fullReportCreditCost = sectionsToGenerateCount > 0 ? sectionsToGenerateCount + 1 : 0;
-
-    const canGenerateFullReport = useMemo(() => (
-        (!!project?.proposal || !!project?.projectPlan || (project?.externalContext && project.externalContext.length > 0)) &&
-        (userProfile ? userProfile.credits ?? 0 >= fullReportCreditCost : false) &&
-        fullReportCreditCost > 1 &&
-        !isAnythingGenerating
-    ), [project, userProfile, fullReportCreditCost, isAnythingGenerating]);
-
-    const getGenerationPlan = async () => {
-        if (!project) {
-            toast({ title: "No Project Loaded", variant: "destructive" });
-            return null;
-        }
-
-        const sectionsToGenerate = orderedSections.filter((sectionId): sectionId is SectionNameType => !project.sections?.[sectionId as SectionNameType]);
-
-        if (sectionsToGenerate.length === 0) {
-            toast({ title: "Report Complete", description: "All sections for this template have already been generated." });
-            return null;
-        }
-
-        try {
-            const token = await getAuthenticatedToken(firebaseUser);
-            const evaluationBody = {
-                proposal: project.proposal,
-                projectPlan: project.projectPlan,
-                existingSections: project.sections,
-                existingDiagrams: Object.fromEntries(Object.entries(project.diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
-                sectionsToGenerate,
-                externalContext: project.externalContext, // Correctly pass the external context
-            };
-            return await evaluateContextApi(evaluationBody, token);
-        } catch (error: any) {
-            toast({ title: "Error Creating Plan", description: error.message, variant: "destructive" });
-            return null;
-        }
-    }
-
-    const handleViewPlan = async () => {
-        setIsPlanning(true);
-        const plan = await getGenerationPlan();
-        if (plan) {
-            setGenerationPlan(plan);
-        }
-        setIsPlanning(false);
-    };
-
-    const onGenerateFullReport = async () => {
-        if (!project) return;
-        setIsPlanning(true);
-        const plan = await getGenerationPlan();
-        setIsPlanning(false);
-
-        if (plan) {
-            setActiveMutationKey('full-report');
-            const fullReportBody = {
-                proposal: project.proposal,
-                projectPlan: project.projectPlan,
-                existingSections: project.sections,
-                existingDiagrams: Object.fromEntries(Object.entries(project.diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
-                externalContext: project.externalContext,
-                generationPlan: plan.configs,
-            };
-            fullReportMutation.mutate(fullReportBody);
-        }
-    };
-
     const hasCreditsForSingleSection = useMemo(() => (userProfile ? userProfile.credits ?? 0 >= 1 : false), [userProfile]);
 
     return {
         isAnythingGenerating,
-        isPlanning,
         activeMutationKey,
-        generationPlan,
-        setGenerationPlan,
         onGenerateSection,
-        onGenerateFullReport,
-        handleViewPlan,
-        canGenerateFullReport,
         hasCreditsForSingleSection,
         agentsLoaded,
         sectionsLoading,
-        fullReportCreditCost,
         orderedSections,
         project,
     };
