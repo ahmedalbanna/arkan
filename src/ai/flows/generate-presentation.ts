@@ -97,5 +97,3 @@ ${JSON.stringify(input.projectPlan, null, 2)}
     return output!;
   }
 );
-
-    

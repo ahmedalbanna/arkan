@@ -5,29 +5,24 @@ import { type DiagramType, EvaluateContextOutput, type SectionName as SectionNam
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAgents, useBuilderStore, useGenerationUIStore, useSections, useToast } from '@/hooks';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
-import { markdownComponents } from '@/lib/markdown-styles';
 import { Project } from '@/lib/models/project';
 import { cn } from '@/lib/utils';
-import { formatDistanceToNow } from 'date-fns';
 import { Loader2, PanelLeftClose, Settings, Sparkles } from 'lucide-react';
 import React, { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
 import { AcademicUploaders } from '../academicSolver-mode/AcademicUploaders';
-import { ContextSelector } from '../section/SectionContextSelector';
 import { GuidelineEditor } from '../section/SectionGuidelineEditor';
 import { PresentationActions } from './PresentationActions';
+import { Skeleton } from '../ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { formatDistanceToNow } from 'date-fns';
 
 interface PresentationGenerationToolsProps {
     isDisabled: boolean;
@@ -67,60 +62,6 @@ function ToolsSkeleton() {
     )
 }
 
-function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput | null, onOpenChange: (open: boolean) => void }) {
-    const { t } = useLocalization();
-    const { data: sectionConfigs } = useSections();
-    const reportSections = React.useMemo(() => sectionConfigs?.filter(s => s.type === 'report').reduce((acc, sec) => ({ ...acc, [sec.id]: sec }), {} as Record<string, any>) || {}, [sectionConfigs]);
-    const diagramSections = React.useMemo(() => sectionConfigs?.filter(s => s.type === 'diagram').reduce((acc, sec) => ({ ...acc, [sec.id]: sec }), {} as Record<string, any>) || {}, [sectionConfigs]);
-
-    if (!plan) return null;
-
-    return (
-        <Dialog open={!!plan} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl h-[90vh]">
-                <DialogHeader>
-                    <DialogTitle>{t('builder.presentationGenerator.planViewer.title')}</DialogTitle>
-                    <DialogDescription>
-                        {t('builder.presentationGenerator.planViewer.description')}
-                    </DialogDescription>
-                </DialogHeader>
-                <ScrollArea className="h-full">
-                    <div className="space-y-4 pr-6">
-                        {plan.configs.map(config => (
-                            <Card key={config.section} className="bg-muted/50">
-                                <CardHeader>
-                                    <CardTitle className="text-lg font-headline">{reportSections[config.section]?.title || config.section}</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-3 text-sm">
-                                    <div>
-                                        <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.contextItems')}</h4>
-                                        <ul className="list-disc pl-5 text-muted-foreground text-xs">
-                                            {config.context.sections?.map(s => <li key={s}>{(reportSections as Record<string, any>)[s]?.title || s}</li>)}
-                                            {config.context.diagrams?.map(d => <li key={d}>{diagramSections[d as DiagramType]?.title || d}</li>)}
-                                            {!config.context.sections?.length && !config.context.diagrams?.length && <li>{t('builder.proposalGenerator.title')}</li>}
-                                        </ul>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.instructions')}</h4>
-                                        <div className="text-xs text-muted-foreground prose dark:prose-invert max-w-none">
-                                            <ReactMarkdown components={markdownComponents}>{`- Tone: ${config.instructions.tone}\n- Formality: ${config.instructions.formality}`}</ReactMarkdown>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.guidelines')}</h4>
-                                        <ul className="list-disc pl-5 text-muted-foreground text-xs">
-                                            {config.guidelines.map((g, i) => <li key={i}>{g}</li>)}
-                                        </ul>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                </ScrollArea>
-            </DialogContent>
-        </Dialog>
-    )
-}
 
 export const PresentationGenerationTools = (props: PresentationGenerationToolsProps) => {
     const { t } = useLocalization();
@@ -132,14 +73,9 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         activePresentationId,
         setActivePresentationId,
         guidelineState,
-        contextSelection,
     } = useGenerationUIStore();
-    const { userProfile, firebaseUser } = useAuth();
+    const { userProfile } = useAuth();
     const hasCreditsForGeneration = (userProfile?.credits ?? 0) >= 1;
-
-    const sections = project?.sections || {};
-    const diagrams = project?.diagrams || {};
-    const externalContext = project?.externalContext || [];
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
 
@@ -148,8 +84,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
     const agent = agents.find(a => a.id === 'generate-presentation');
     const presentations = project?.presentation?.history || [];
-    const currentSelection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-    const hasContent = externalContext.length > 0 || currentSelection.proposal || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v);
+    const hasContent = !!project?.proposal || !!project?.projectPlan || Object.keys(project?.sections || {}).length > 0 || (project?.externalContext?.length || 0) > 0;
 
     const handleAddExternalContext = (fileName: string, content: string) => {
         if (!project) return;
@@ -164,42 +99,40 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     }
 
     const handleGenerateClick = () => {
-        const selectedContext = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
 
         const sourceDocuments = [];
 
-        if (selectedContext.proposal && project?.proposal) {
+        if (project?.proposal) {
             sourceDocuments.push({
                 fileName: "Project Proposal",
                 content: JSON.stringify(project.proposal, null, 2)
             });
         }
-
-        for (const key in selectedContext.sections) {
-            if (selectedContext.sections[key] && sections[key as SectionNameType]) {
-                const sectionKey = key as SectionNameType;
+        
+        if(project?.sections) {
+            for (const key in project.sections) {
                 sourceDocuments.push({
-                    fileName: "Report Section: " + sectionKey,
-                    content: sections[sectionKey]!
+                    fileName: "Report Section: " + key,
+                    content: project.sections[key as SectionNameType]!
+                });
+            }
+        }
+        
+        if(project?.diagrams) {
+            for (const key in project.diagrams) {
+                 sourceDocuments.push({
+                    fileName: `Diagram: ${key}`,
+                    content: project.diagrams[key as DiagramType]!.plantUmlCode
                 });
             }
         }
 
-        for (const key in selectedContext.diagrams) {
-            if (selectedContext.diagrams[key] && diagrams[key as DiagramType]) {
-                const diagramKey = key as DiagramType;
-                sourceDocuments.push({
-                    fileName: `Diagram: ${diagramKey}`,
-                    content: diagrams[diagramKey]!.plantUmlCode
-                });
-            }
-        }
-
-        externalContext.forEach((file, index) => {
-            if (selectedContext.externalContext[index]) {
+        if(project?.externalContext) {
+            project.externalContext.forEach((file) => {
                 sourceDocuments.push(file);
-            }
-        });
+            });
+        }
+
 
         const body = {
             proposal: project?.proposal,
@@ -236,18 +169,11 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                         <TabsTrigger value="history">{t('builder.presentationGenerator.historyTab')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="generate" className="pt-6 space-y-4">
-                        <Separator />
+                        
                         <div>
                             <h4 className="text-sm font-semibold mb-2">{t('builder.presentationGenerator.sourceDocuments')}</h4>
-                            <Accordion type="multiple" className="w-full space-y-1">
-                                <AccordionItem value="context-selector">
-                                    <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
-                                        {t('builder.presentationGenerator.selectExistingContext')}
-                                    </AccordionTrigger>
-                                    <AccordionContent className="p-4 border">
-                                        <ContextSelector itemKey="presentation" />
-                                    </AccordionContent>
-                                </AccordionItem>
+                            <p className="text-xs text-muted-foreground mb-2">The AI will automatically review all available project data. You can also upload additional files below.</p>
+                            <Accordion type="single" collapsible className="w-full space-y-1">
                                 <AccordionItem value="file-uploader">
                                     <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
                                         {t('builder.presentationGenerator.uploadNewContext')}
@@ -258,14 +184,12 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                             onContentAdded={handleAddExternalContext}
                                             onContentRemoved={handleRemoveExternalContext}
                                             isProcessing={isDisabled}
-                                            uploadedContent={externalContext.filter(item => item.type === 'context')}
+                                            uploadedContent={project?.externalContext?.filter(item => item.type === 'context') || []}
                                         />
                                     </AccordionContent>
                                 </AccordionItem>
                             </Accordion>
                         </div>
-
-                        <Separator />
 
                         <div>
                             <h4 className="text-sm font-semibold mb-2">{t('builder.presentationGenerator.generationSettings')}</h4>
@@ -385,5 +309,3 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         </Card>
     );
 };
-
-    
