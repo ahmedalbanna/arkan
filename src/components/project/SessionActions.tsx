@@ -26,8 +26,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useSessionActions } from '@/hooks';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DocxTemplateKey, PptxTemplateKey } from '@/lib/types';
 import { ReportExportDialog } from './ExportDialogs';
 
 
@@ -54,16 +52,9 @@ export const SessionActions = () => {
         t,
         // Export related items
         isExporting,
-        docxTemplates,
-        pptxTemplates,
-        docxLoaded,
-        pptxLoaded,
-        selectedDocxTemplate,
-        selectedPptxTemplate,
-        handleDocxTemplateChange,
-        handlePptxTemplateChange,
         handleExportReport,
-        handleExportPresentation
+        handleExportPresentation,
+        handleExportProposal, // New handler
     } = useSessionActions();
 
     const isBusy = isSaving || isExporting;
@@ -176,6 +167,14 @@ export const SessionActions = () => {
                     <DropdownMenuContent align="end" className="w-64">
                          <DropdownMenuLabel>Export Options</DropdownMenuLabel>
                          <DropdownMenuSeparator />
+                         <DropdownMenuSub>
+                            <DropdownMenuSubTrigger disabled={isBusy || !project?.proposal}>Proposal</DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent>
+                                <DropdownMenuItem onSelect={() => handleExportProposal('docx')}>as DOCX</DropdownMenuItem>
+                                <DropdownMenuItem onSelect={() => handleExportProposal('pdf')}>as PDF</DropdownMenuItem>
+                            </DropdownMenuSubContent>
+                         </DropdownMenuSub>
+                         <DropdownMenuSeparator />
                         <ReportExportDialog
                             isExporting={isExporting}
                             onExport={handleExportReport}
@@ -213,3 +212,5 @@ export const SessionActions = () => {
         </TooltipProvider>
     );
 };
+
+    

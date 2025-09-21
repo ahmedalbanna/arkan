@@ -39,7 +39,7 @@ export function useSessionActions() {
     const updateProjectMutation = useUpdateProject();
 
     // --- Start of Export Logic Integration ---
-    const { exportReportDocx, exportPresentationPptx, isExporting } = useExport();
+    const { exportProposal, exportReportDocx, exportPresentationPptx, isExporting } = useExport();
     const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
     const { templates: pptxTemplates, isLoaded: pptxLoaded } = usePptxStyles();
 
@@ -66,6 +66,12 @@ export function useSessionActions() {
         setSelectedPptxTemplate(key);
         localStorage.setItem(PPTX_TEMPLATE_KEY, key);
     };
+
+    const handleExportProposal = async (format: 'docx' | 'pdf') => {
+        if (project && project.proposal) {
+            await exportProposal(format, project, selectedDocxTemplate);
+        }
+    }
 
     const handleExportReport = async (sectionsToInclude: string[]) => {
         if (!project || !hasContent(project)) return;
@@ -221,7 +227,10 @@ export function useSessionActions() {
         selectedPptxTemplate,
         handleDocxTemplateChange,
         handlePptxTemplateChange,
+        handleExportProposal,
         handleExportReport,
         handleExportPresentation,
     };
 }
+
+    
