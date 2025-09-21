@@ -42,14 +42,8 @@ export const ApiTranslateTextSchema = z.object({
 export const ApiGeneratePresentationSchema = z.object({
     proposal: z.lazy(() => ProjectProposalSchema).nullable().optional(),
     projectPlan: z.lazy(() => ProjectPlanSchema).nullable().optional(),
-    guidelines: z.array(z.string()).optional(),
     sourceDocuments: z.array(z.object({
         fileName: z.string(),
         content: z.string(),
     })).min(1, "At least one source document is required."),
-    tone: z.string().optional(),
-    complexity: z.string().optional(),
 });
-
-    
-    

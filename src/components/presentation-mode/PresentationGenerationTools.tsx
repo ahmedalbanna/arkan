@@ -1,22 +1,19 @@
 
 'use client';
 
-import { type DiagramType, type SectionName as SectionNameType } from '@/ai/schemas';
+import type { DiagramType, SectionName as SectionNameType } from '@/ai/schemas';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAgents, useBuilderStore, useGenerationUIStore, useSections, useToast } from '@/hooks';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { Project } from '@/lib/models/project';
 import { cn } from '@/lib/utils';
-import { Loader2, PanelLeftClose, Settings, Sparkles, History } from 'lucide-react';
+import { Loader2, PanelLeftClose, Sparkles, History } from 'lucide-react';
 import React, { useState } from 'react';
 import { AcademicUploaders } from '../academicSolver-mode/AcademicUploaders';
-import { GuidelineEditor } from '../section/SectionGuidelineEditor';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { ScrollArea } from '../ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
@@ -62,15 +59,11 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     const {
         activePresentationId,
         setActivePresentationId,
-        guidelineState,
     } = useGenerationUIStore();
     const { userProfile } = useAuth();
     const hasCreditsForGeneration = (userProfile?.credits ?? 0) >= 1;
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
-
-    const [tone, setTone] = useState('');
-    const [complexity, setComplexity] = useState('');
 
     const agent = agents.find(a => a.id === 'generate-presentation');
     const presentations = project?.presentation?.history || [];
@@ -129,9 +122,6 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
             proposal: project.proposal,
             projectPlan: project.projectPlan,
             sourceDocuments: sourceDocuments,
-            guidelines: getSelectedGuidelines(agent, guidelineState['presentation']),
-            tone: tone,
-            complexity: complexity,
         };
         onGenerate(body);
     }
@@ -169,52 +159,6 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                         </Accordion>
                     </div>
 
-                    <div>
-                        <h4 className="text-sm font-semibold mb-2">{t('builder.presentationGenerator.generationSettings')}</h4>
-                        <Accordion type="multiple" className="w-full space-y-1">
-                            <AccordionItem value="settings">
-                                <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
-                                    <div className="flex items-center gap-2">
-                                        <Settings className="h-4 w-4" /> {t('builder.presentationGenerator.advancedSettings')}
-                                    </div>
-                                </AccordionTrigger>
-                                <AccordionContent className="space-y-4 p-4 border">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="tone-select">{t('builder.reportGenerator.tool_tone_label')}</Label>
-                                            <Select value={tone} onValueChange={setTone}>
-                                                <SelectTrigger id="tone-select"><SelectValue placeholder={t('builder.reportGenerator.tool_tone_professional')} /></SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="professional">{t('builder.reportGenerator.tool_tone_professional')}</SelectItem>
-                                                    <SelectItem value="casual">{t('builder.reportGenerator.tool_tone_casual')}</SelectItem>
-                                                    <SelectItem value="enthusiastic">{t('builder.presentationGenerator.toneEnthusiastic')}</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="complexity-select">{t('builder.presentationGenerator.complexity')}</Label>
-                                            <Select value={complexity} onValueChange={setComplexity}>
-                                                <SelectTrigger id="complexity-select"><SelectValue placeholder={t('builder.presentationGenerator.complexityDefault')} /></SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="summary">{t('builder.presentationGenerator.complexitySummary')}</SelectItem>
-                                                    <SelectItem value="detailed">{t('builder.presentationGenerator.complexityDetailed')}</SelectItem>
-                                                    <SelectItem value="technical">{t('builder.presentationGenerator.complexityTechnical')}</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="guidelines">
-                                <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
-                                    {t('builder.presentationGenerator.promptAndGuidelines')}
-                                </AccordionTrigger>
-                                <AccordionContent className="space-y-4 p-4 border">
-                                    <GuidelineEditor itemKey="presentation" agentId="generate-presentation" isAdmin={userProfile?.role === 'admin'} />
-                                </AccordionContent>
-                            </AccordionItem>
-                        </Accordion>
-                    </div>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-2">
                     <TooltipProvider>

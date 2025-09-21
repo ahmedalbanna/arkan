@@ -40,7 +40,7 @@ const generatePresentationFlow = ai.defineFlow(
       prompt: `You are an expert presentation creator. Your task is to analyze the provided source documents and create a compelling presentation slide deck.
 
 **Your Process:**
-1.  **Synthesize Content:** Read through all the provided source documents to understand the key topics, arguments, and data. The documents are varied and may include project proposals, report sections, diagrams (as PlantUML code), a project plan, or other text.
+1.  **Synthesize Content:** Read through all the provided source documents to understand the key topics, arguments, and data.
 2.  **Structure the Narrative:** Create a logical flow for the presentation. If a project plan is available, structure the presentation around its phases. Otherwise, start with an introduction, develop the main points, and end with a conclusion.
 3.  **Draft Slides:** For each slide:
     *   Write a clear, concise title.
@@ -50,21 +50,8 @@ const generatePresentationFlow = ai.defineFlow(
 
 **CRITICAL INSTRUCTIONS:**
 -   Your primary source of information is the 'Source Documents' and 'Project Plan' provided below. Synthesize information from ALL of them to create a coherent narrative.
--   Adhere to all provided guidelines, including tone and complexity.
-
---- GUIDELINES ---
-{{#if guidelines}}
-{{#each guidelines}}
-- {{{this}}}
-{{/each}}
-{{else}}
-- The total number of slides should be between 7 and 12.
-- Each slide must have a clear title.
-- Slide content should be a list of 2-5 concise bullet points.
-- Speaker notes must be detailed, providing elaboration for each bullet point.
-- The tone should be {{#if tone}}{{tone}}{{else}}professional{{/if}}.
-- The complexity should be {{#if complexity}}{{complexity}}{{else}}a standard summary{{/if}}.
-{{/if}}
+-   The total number of slides should be between 7 and 12.
+-   The tone should be professional and engaging.
 
 --- PROJECT PLAN ---
 {{#if projectPlan}}
@@ -98,5 +85,3 @@ ${JSON.stringify(input.projectPlan, null, 2)}
     return output!;
   }
 );
-
-    
