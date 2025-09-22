@@ -34,12 +34,7 @@ The user has provided the following structured details for the project. Use this
 - **Expected Outcomes**: '''{{advancedFields.expectedOutcomes}}'''
 - **Methodology**: '''{{advancedFields.methodology}}'''
 - **Timeline**: '''{{advancedFields.timeline}}'''
-- **Budget**: '''{{advancedFields.budget}}'''
-- **Stakeholders**: '''{{advancedFields.stakeholders}}'''
-- **Project Rationale**: '''{{advancedFields.projectRationale}}'''
-- **Project Context**: '''{{advancedFields.projectContext}}'''
-- **Risks & Challenges**: '''{{advancedFields.risksAndChallenges}}'''
-- **Additional Context**: '''{{advancedFields.additionalContext}}'''
+- **Knowledge & Context**: '''{{advancedFields.knowledge}}'''
 {{else}}
 --- Main Input: Project Idea ---
 {{{projectIdea}}}
@@ -70,4 +65,5 @@ Analyze the following files as a primary source of truth and context.
     },
   },
 );
+
 

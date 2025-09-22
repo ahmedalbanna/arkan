@@ -74,43 +74,18 @@ const AdvancedFieldsForm = () => {
             </div>
             <div className="space-y-1">
                 <Label htmlFor="methodology">Methodology</Label>
-                <Textarea id="methodology" name="methodology" value={advancedFields.methodology} onChange={handleFieldChange} rows={3} placeholder="Describe the methodology (e.g., Agile, Waterfall)..."/>
+                <Input id="methodology" name="methodology" value={advancedFields.methodology} onChange={handleFieldChange} placeholder="e.g., Agile, Waterfall, Scrum"/>
                 <p className="text-xs text-muted-foreground">What approach or process will be followed for this project?</p>
             </div>
-            <div className="space-y-1">
+             <div className="space-y-1">
                 <Label htmlFor="timeline">Timeline</Label>
-                <Textarea id="timeline" name="timeline" value={advancedFields.timeline} onChange={handleFieldChange} rows={3} placeholder="Outline the project timeline, phases, and key milestones..."/>
-                <p className="text-xs text-muted-foreground">What is the estimated duration and what are the key phases?</p>
-            </div>
-            <div className="space-y-1">
-                <Label htmlFor="budget">Budget</Label>
-                <Textarea id="budget" name="budget" value={advancedFields.budget} onChange={handleFieldChange} rows={3} placeholder="Provide a budget estimate and breakdown..."/>
-                <p className="text-xs text-muted-foreground">What are the estimated costs for the project?</p>
-            </div>
-             <div className="space-y-1">
-                <Label htmlFor="stakeholders">Stakeholders</Label>
-                <Input id="stakeholders" name="stakeholders" value={advancedFields.stakeholders} onChange={handleFieldChange} placeholder="Identify key stakeholders and their roles..."/>
-                 <p className="text-xs text-muted-foreground">Who are the key people or groups involved in or affected by this project?</p>
-            </div>
-             <div className="space-y-1">
-                <Label htmlFor="projectContext">Project Context</Label>
-                <Textarea id="projectContext" name="projectContext" value={advancedFields.projectContext} onChange={handleFieldChange} rows={4} placeholder="Provide background information and context..."/>
-                 <p className="text-xs text-muted-foreground">What is the background and environment in which this project exists?</p>
+                <Input id="timeline" name="timeline" value={advancedFields.timeline} onChange={handleFieldChange} placeholder="e.g., 6 months, Q4 2024"/>
+                <p className="text-xs text-muted-foreground">What is the estimated duration of the project?</p>
             </div>
               <div className="space-y-1">
-                <Label htmlFor="risksAndChallenges">Risks & Challenges</Label>
-                <Textarea id="risksAndChallenges" name="risksAndChallenges" value={advancedFields.risksAndChallenges} onChange={handleFieldChange} rows={3} placeholder="Identify potential risks and challenges..."/>
-                 <p className="text-xs text-muted-foreground">What potential risks, challenges, or obstacles might this project face?</p>
-            </div>
-              <div className="space-y-1">
-                <Label htmlFor="projectRationale">Project Rationale</Label>
-                <Textarea id="projectRationale" name="projectRationale" value={advancedFields.projectRationale} onChange={handleFieldChange} rows={3} placeholder="Explain why this project is necessary..."/>
-                 <p className="text-xs text-muted-foreground">Why is this project important? What problems does it solve?</p>
-            </div>
-             <div className="space-y-1">
-                <Label htmlFor="additionalContext">Additional Context</Label>
-                <Textarea id="additionalContext" name="additionalContext" value={advancedFields.additionalContext} onChange={handleFieldChange} rows={3} placeholder="Any other relevant information that might be relevant..."/>
-                 <p className="text-xs text-muted-foreground">Any other relevant information that could help in the analysis.</p>
+                <Label htmlFor="knowledge">Knowledge & Context</Label>
+                <Textarea id="knowledge" name="knowledge" value={advancedFields.knowledge} onChange={handleFieldChange} rows={5} placeholder="Provide background information, rationale, potential risks, and any other context..."/>
+                 <p className="text-xs text-muted-foreground">Provide any background info, rationale, risks, or other context to guide the AI.</p>
             </div>
         </div>
     )
@@ -157,8 +132,9 @@ export const ProposalGenerationTools = ({
         addCustomGuideline,
         removeCustomGuideline,
         customGuidelineInput,
-        setCustomGuidelineInput,
-        handleAddGuideline,
+        setCustomGuidelineInputForItem,
+        handleAddCustomGuidelineForItem,
+        handleRemoveCustomGuidelineForItem,
         generationMutation,
         suggestIdeaMutation,
         handleSuggestIdea,
@@ -220,8 +196,8 @@ export const ProposalGenerationTools = ({
                                 <div className="flex gap-2">
                                     <Input
                                         placeholder={t('builder.proposalGenerator.addGuidelinePlaceholder')}
-                                        value={customGuidelineInput}
-                                        onChange={(e) => setCustomGuidelineInput(e.target.value)}
+                                        value={customGuidelineInput['proposal'] || ''}
+                                        onChange={(e) => setCustomGuidelineInputForItem('proposal', e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddGuideline())}
                                         disabled={generationMutation.isPending}
                                     />

@@ -339,14 +339,9 @@ const AdvancedProposalFieldsSchema = z.object({
     projectTitle: z.string().optional(),
     projectObjective: z.string().optional(),
     expectedOutcomes: z.string().optional(),
-    timeline: z.string().optional(),
-    budget: z.string().optional(),
-    stakeholders: z.string().optional(),
-    projectRationale: z.string().optional(),
-    projectContext: z.string().optional(),
     methodology: z.string().optional(),
-    risksAndChallenges: z.string().optional(),
-    additionalContext: z.string().optional(),
+    timeline: z.string().optional(),
+    knowledge: z.string().optional(),
 });
 export type AdvancedProposalFields = z.infer<typeof AdvancedProposalFieldsSchema>;
 
