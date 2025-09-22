@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
@@ -15,13 +14,13 @@ import { FileText } from 'lucide-react';
 import { useExport } from './use-export';
 import { reportSections as staticReportSections } from '@/lib/db/seed-data/sections-templates';
 
-export const useReportModeGenerator = (orderedSections: SectionName[]) => {
+export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: { orderedSections: SectionName[], setOrderedSections: (sections: SectionName[]) => void; }) => {
     const { t, locale } = useLocalization();
     const { project, setProject } = useBuilderStore();
     const translateMutation = useTranslate();
     const [isTranslatingAll, setIsTranslatingAll] = useState(false);
+    const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     
-    // Removed useSections and useAgentStore hooks as we're using static data now.
     const { exportReportDocx, isExporting } = useExport();
 
     const [currentPage, setCurrentPage] = useState(0);
@@ -30,7 +29,7 @@ export const useReportModeGenerator = (orderedSections: SectionName[]) => {
     const translatedSections = project?.translatedSections || {};
 
     const generatedSections = useMemo(
-        () => orderedSections.filter(key => sections[key]),
+        () => (orderedSections || []).filter(key => sections[key]),
         [sections, orderedSections]
     );
 
@@ -137,6 +136,8 @@ export const useReportModeGenerator = (orderedSections: SectionName[]) => {
     return {
         t,
         locale,
+        isPanelCollapsed,
+        setIsPanelCollapsed,
         handleSectionUpdate,
         handleTranslateAll,
         isTranslatingAll,
@@ -151,6 +152,8 @@ export const useReportModeGenerator = (orderedSections: SectionName[]) => {
         getSectionIcon,
         isExporting,
         handleExportReportDOCX,
-        reportSections: reportSectionsMap
+        reportSections: reportSectionsMap,
+        orderedSections,
+        setOrderedSections,
     };
 };

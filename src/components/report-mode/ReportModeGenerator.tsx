@@ -1,11 +1,11 @@
 
-
 'use client';
 
 import { useReportModeGenerator } from '@/hooks';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState } from 'react'; // Import useState
 import { Skeleton } from '../ui/skeleton';
 import { GenerationTools } from './GenerationTools';
+import type { SectionName } from '@/ai/schemas';
 
 const ReportResults = lazy(() => import('@/components/report-mode/ReportResults').then(module => ({ default: module.ReportResults })));
 
@@ -23,13 +23,15 @@ function ReportSkeleton() {
 }
 
 export default function ReportModeGenerator() {
+    // Manage the state for section order here
+    const [orderedSections, setOrderedSections] = useState<SectionName[]>([]);
+    
+    // Pass the state and its setter to the hook
     const {
         locale,
         isPanelCollapsed,
         setIsPanelCollapsed,
-        orderedSections,
-        setOrderedSections,
-    } = useReportModeGenerator();
+    } = useReportModeGenerator({ orderedSections, setOrderedSections });
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
@@ -47,4 +49,3 @@ export default function ReportModeGenerator() {
             </div>
         </div>
     );
-}
