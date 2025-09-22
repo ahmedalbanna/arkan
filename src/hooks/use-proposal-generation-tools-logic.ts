@@ -31,7 +31,7 @@ export function useProposalGenerationToolsLogic() {
     const { externalContext } = project ?? {};
     const generationMutation = useGenerateProposal();
 
-    const suggestIdeaMutation = useWritingTool('generate-text', {
+    const suggestIdeaMutation = useWritingTool('/api/writing-tools/generate-text', {
         onSuccess: (data: any) => {
             setProjectIdea(data.generatedText);
             toast({ title: "Idea Suggested", description: "A new project idea has been generated for you." });
@@ -55,7 +55,7 @@ export function useProposalGenerationToolsLogic() {
 
         const payload = activeTab === 'simple'
             ? { projectIdea: projectIdea || '', guidelines, externalContext }
-            : { projectIdea: advancedProposalFields.projectTitle, guidelines, externalContext, advancedFields: advancedProposalFields };
+            : { projectIdea: '', guidelines, externalContext, advancedFields: advancedProposalFields };
 
         generationMutation.mutate(payload as any);
     };

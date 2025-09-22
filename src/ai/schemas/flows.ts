@@ -351,14 +351,14 @@ const AdvancedProposalFieldsSchema = z.object({
 export type AdvancedProposalFields = z.infer<typeof AdvancedProposalFieldsSchema>;
 
 export const GenerateProposalInputSchema = z.object({
-    projectIdea: z.string().describe('A short description of the project idea.'),
+    projectIdea: z.string(),
     guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
     externalContext: z.array(z.object({
         fileName: z.string(),
         content: z.string(),
+        type: ExternalContextTypeSchema,
     })).optional().describe("An array of external documents (text or data URIs) provided by the user."),
     advancedFields: AdvancedProposalFieldsSchema.optional().describe('Optional structured data for a detailed proposal.'),
-    jsonStructure: z.string().optional().describe("An optional JSON schema string to guide the proposal structure."),
 });
 export type GenerateProposalInput = z.infer<typeof GenerateProposalInputSchema>;
 

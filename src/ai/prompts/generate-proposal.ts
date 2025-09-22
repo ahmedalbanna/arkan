@@ -28,7 +28,7 @@ ${schemaString}
     prompt: `
 {{#if advancedFields}}
 --- DETAILED PROJECT REQUIREMENTS ---
-The user has provided the following structured details for the project. Use this as the primary source of information.
+The user has provided the following structured details for the project. Use this as the primary source of information to construct the full proposal object.
 - **Project Title**: '''{{advancedFields.projectTitle}}'''
 - **Project Objective**: '''{{advancedFields.projectObjective}}'''
 - **Expected Outcomes**: '''{{advancedFields.expectedOutcomes}}'''
@@ -52,22 +52,14 @@ The user has provided the following structured details for the project. Use this
 {{/each}}
 {{/if}}
 
-{{#if textContext}}
---- IMPORTANT TEXT CONTEXT ---
-Use the following text as a source of truth and context.
-{{#each textContext}}
-File: {{this.fileName}}
-{{{this.content}}}
----
-{{/each}}
-{{/if}}
-
-{{#if mediaContext}}
---- IMPORTANT MEDIA CONTEXT ---
+{{#if externalContext}}
+--- IMPORTANT EXTERNAL CONTEXT ---
 Analyze the following files as a primary source of truth and context.
-{{#each mediaContext}}
-File: {{this.fileName}}
+{{#each externalContext}}
+--- File: {{this.fileName}} (Type: {{this.type}}) ---
+{{#if this.content}}
 {{media url=this.content}}
+{{/if}}
 ---
 {{/each}}
 {{/if}}
@@ -78,3 +70,4 @@ File: {{this.fileName}}
     },
   },
 );
+
