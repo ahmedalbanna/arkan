@@ -6,6 +6,8 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useGenerateProposal, useGenerationUIStore } from '@/hooks';
 import type { AdvancedProposalFields } from '@/lib/models/project';
 import { useState } from 'react';
+import { useWritingTool } from './use-writing-tools';
+import { toast } from './use-toast';
 
 export function useProposalGenerationToolsLogic() {
     const { t } = useLocalization();
@@ -27,6 +29,17 @@ export function useProposalGenerationToolsLogic() {
 
     const { externalContext } = project ?? {};
     const generationMutation = useGenerateProposal();
+
+    const suggestIdeaMutation = useWritingTool('generate-text', {
+        onSuccess: (data: any) => {
+            setProjectIdea(data.generatedText);
+            toast({ title: "Idea Suggested", description: "A new project idea has been generated for you." });
+        },
+        onError: (error) => {
+            toast({ title: "Failed to Suggest Idea", description: error.message, variant: 'destructive' });
+        }
+    });
+
     const { userProfile } = useAuth();
     const hasCredits = (userProfile?.credits ?? 0) >= 1;
 
@@ -44,6 +57,10 @@ export function useProposalGenerationToolsLogic() {
             : { projectIdea: advancedProposalFields.projectTitle, guidelines, externalContext, advancedFields: advancedProposalFields };
 
         generationMutation.mutate(payload as any);
+    };
+
+    const handleSuggestIdea = () => {
+        suggestIdeaMutation.mutate({ prompt: 'Suggest a random, interesting software project idea in one sentence.' });
     };
 
     const canGenerate = (activeTab === 'simple' && !!projectIdea) ||
@@ -67,5 +84,7 @@ export function useProposalGenerationToolsLogic() {
         handleGenerateClick,
         canGenerate,
         hasCredits,
+        suggestIdeaMutation,
+        handleSuggestIdea
     };
 }

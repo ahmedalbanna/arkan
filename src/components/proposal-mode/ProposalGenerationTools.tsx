@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal, Lightbulb } from 'lucide-react';
 import type { AdvancedProposalFields } from '@/lib/models/project';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -159,6 +159,8 @@ export const ProposalGenerationTools = ({
         setCustomGuidelineInput,
         handleAddGuideline,
         generationMutation,
+        suggestIdeaMutation,
+        handleSuggestIdea,
     } = useProposalGenerationToolsLogic();
 
     return (
@@ -175,7 +177,13 @@ export const ProposalGenerationTools = ({
                     </TabsList>
                     <TabsContent value="simple" className="pt-4">
                         <div>
-                            <Label htmlFor="project-idea">{t('builder.proposalGenerator.mainSubjectLabel')}</Label>
+                            <div className="flex justify-between items-center mb-1">
+                                <Label htmlFor="project-idea">{t('builder.proposalGenerator.mainSubjectLabel')}</Label>
+                                <Button variant="ghost" size="sm" onClick={handleSuggestIdea} disabled={suggestIdeaMutation.isPending}>
+                                    {suggestIdeaMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Lightbulb className="me-2 h-4 w-4" />}
+                                    Suggest Idea
+                                </Button>
+                            </div>
                             <Textarea
                                 id="project-idea"
                                 name="projectIdea"
