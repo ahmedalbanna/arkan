@@ -312,13 +312,10 @@ export type PresentationSlide = z.infer<typeof PresentationSlideSchema>;
 export const GeneratePresentationInputSchema = z.object({
     proposal: ProjectProposalSchema.nullable().optional().describe("An optional project proposal for high-level context."),
     projectPlan: ProjectPlanSchema.nullable().optional().describe("The project plan with phases and tasks."),
-    guidelines: z.array(z.string()).optional(),
     sourceDocuments: z.array(z.object({
         fileName: z.string(),
         content: z.string(),
     })).min(1, "At least one source document is required.").describe("An array of source documents (text or data URIs) to be synthesized into a presentation."),
-    tone: z.string().optional().describe("The desired tone for the presentation (e.g., 'Professional', 'Casual')."),
-    complexity: z.string().optional().describe("The desired complexity (e.g., 'High-level Summary', 'Detailed').")
 });
 export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
 
