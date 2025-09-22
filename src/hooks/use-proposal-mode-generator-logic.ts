@@ -6,10 +6,12 @@ import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useBuilderStore, useExport, useGenerateProposal } from '@/hooks';
 import { formatKeyToTitle } from '@/lib/proposal-utils';
-import { summarizeProjectApi, translateProposalApi } from '@/services';
+import { summarizeProjectApi, translateProposalApi, writingToolApi } from '@/services';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useIsMobile } from './use-mobile';
+import { useWritingTool } from './use-writing-tools';
+import { set } from 'date-fns';
 
 // Helper function to convert a proposal object to a markdown string
 function proposalToMarkdown(proposal: AnyProjectProposal): string {
@@ -80,7 +82,7 @@ function proposalToMarkdown(proposal: AnyProjectProposal): string {
 export function useProposalModeGeneratorLogic() {
     const { t, locale } = useLocalization();
     const { firebaseUser, refetchUser } = useAuth();
-    const { project, setProject } = useBuilderStore();
+    const { project, updateProject } = useBuilderStore();
     const generationMutation = useGenerateProposal();
 
     const [translatedProposal, setTranslatedProposal] = useState<ProjectProposal | null>(null);
@@ -152,11 +154,22 @@ export function useProposalModeGeneratorLogic() {
         }
     };
 
+    const handleProposalUpdate = (key: string, value: string) => {
+        updateProject(p => {
+            if (p.proposal) {
+                p.proposal[key as keyof typeof p.proposal] = value;
+            }
+        });
+    }
+
     // --- Logic from use-proposal-actions-logic ---
     const { exportProposal, isExporting } = useExport();
 
     const summarizeMutation = useMutation({
-        mutationFn: summarizeProjectApi,
+        mutationFn: async (variables: { body: any, token: string }) => {
+            const response = await summarizeProjectApi(variables);
+            return response;
+        },
         onSuccess: () => refetchUser(),
         onError: (error: Error) => {
             toast({ title: "Summarization Failed", description: error.message, variant: "destructive" });
@@ -165,8 +178,6 @@ export function useProposalModeGeneratorLogic() {
 
     const handleExport = (format: 'docx' | 'pdf') => {
         if (project && project.proposal) {
-            // Since we removed template selection, we pass a default or no template key.
-            // The export utility has been updated to use a hardcoded default.
             exportProposal(format, project);
         }
     }
@@ -196,6 +207,7 @@ export function useProposalModeGeneratorLogic() {
         handleNextPage,
         handlePrevPage,
         markdownContent,
+        handleProposalUpdate,
         // from useProposalActionsLogic
         isExporting,
         summarizeMutation,

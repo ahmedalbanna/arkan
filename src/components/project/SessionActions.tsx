@@ -160,7 +160,7 @@ export const SessionActions = () => {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="icon" className="h-8 w-8 md:w-auto md:px-3" disabled={isBusy || !hasContent}>
-                            <Download className="h-4 w-4" />
+                            <Share2 className="h-4 w-4" />
                             <span className="hidden md:inline ms-2">Export</span>
                         </Button>
                     </DropdownMenuTrigger>
