@@ -13,26 +13,39 @@ import { useReportModeGenerator } from '@/hooks';
 import A4Page from '@/components/shared/A4Page';
 
 interface ReportResultsProps {
-  orderedSections: SectionName[];
+  // NEW: Receive the list of generated sections directly as a prop
+  generatedSections: SectionName[];
 }
 
-export const ReportResults = ({ orderedSections }: ReportResultsProps) => {
+export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
+  // The hook is now only used for getting data and handlers, not for deriving `generatedSections`
   const {
     t,
     sections,
-    currentPage,
-    totalPages,
-    handleNextPage,
-    handlePrevPage,
-    hasContent,
     getSectionTitle,
     getSectionIcon,
     handleSectionUpdate,
-    isTranslatingAll,
-    generatedSections, // Use generatedSections from the hook
-  } = useReportModeGenerator(orderedSections); // Pass orderedSections to the hook
+  } = useReportModeGenerator({ orderedSections: generatedSections, setOrderedSections: () => {} });
 
+  const [currentPage, setCurrentPage] = React.useState(0);
+  const totalPages = generatedSections.length;
+  const hasContent = totalPages > 0;
   const currentSectionKey = hasContent ? generatedSections[currentPage] : undefined;
+
+  React.useEffect(() => {
+    if (currentPage >= totalPages && totalPages > 0) {
+      setCurrentPage(totalPages - 1);
+    } else if (totalPages === 0) {
+      setCurrentPage(0);
+    }
+  }, [totalPages, currentPage]);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages - 1) setCurrentPage(currentPage + 1);
+  };
+  const handlePrevPage = () => {
+    if (currentPage > 0) setCurrentPage(currentPage - 1);
+  };
 
   const renderContent = () => {
     if (!hasContent) {

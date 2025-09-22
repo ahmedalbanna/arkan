@@ -142,6 +142,7 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         handleTranslateAll,
         isTranslatingAll,
         sections,
+        generatedSections, // Return the calculated list
         currentPage,
         totalPages,
         handleNextPage,
