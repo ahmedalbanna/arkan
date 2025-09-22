@@ -14,6 +14,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../ui/card
 import { Wand2, ThumbsDown, Check } from 'lucide-react';
 import { DiffPart } from '@/lib/diff';
 import { cn } from '@/lib/utils';
+import RichTextEditor from '../ui/RichTextEditor';
 
 // This is a simplified view for the diff, as the one in SectionView is not exported.
 const DiffView = ({ diff }: { diff: DiffPart[] }) => {
@@ -75,9 +76,10 @@ export const ProposalSection = ({ sectionKey, title, content, onUpdate }: Propos
                 <span>{chars} {t('builder.Section.characters')}</span>
             </div>
 
-            <div className="prose dark:prose-invert max-w-none text-sm md:text-base">
-                <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{processedContent}</ReactMarkdown>
-            </div>
+            <RichTextEditor
+                content={processedContent}
+                onChange={(newMarkdown) => onUpdate(sectionKey, newMarkdown)}
+            />
 
             {aiSuggestion && (
                 <Card className="mt-4 border-accent">

@@ -16,6 +16,7 @@ import { useSectionLogic } from '@/hooks';
 import { DiffPart } from '@/lib/diff';
 import { cn } from '@/lib/utils';
 import { SectionToolbar } from './SectionToolbar';
+import RichTextEditor from '../ui/RichTextEditor';
 
 interface SectionProps {
     sectionKey: SectionName;
@@ -76,11 +77,10 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                 <span>{chars} {t('builder.Section.characters')}</span>
             </div>
             <div className="group relative space-y-4 mt-4">
-                <ScrollArea className="h-full">
-                    <div className="prose dark:prose-invert max-w-none">
-                        <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{processedContent}</ReactMarkdown>
-                    </div>
-                </ScrollArea>
+                <RichTextEditor
+                    content={processedContent}
+                    onChange={(newMarkdown) => onUpdate(sectionKey, newMarkdown)}
+                />
 
                 {aiSuggestion && (
                     <Card className="mt-4 border-accent">

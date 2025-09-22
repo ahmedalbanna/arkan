@@ -6,6 +6,7 @@ import { BubbleMenu, Editor, EditorContent, Range, useEditor } from '@tiptap/rea
 import StarterKit from '@tiptap/starter-kit';
 import { marked } from 'marked';
 import React, { useCallback, useEffect, useState } from 'react';
+import { turndown } from '@/lib/turndown';
 
 // ... (MenuBar component remains the same)
 interface MenuBarProps {
@@ -37,6 +38,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
 
 interface RichTextEditorProps {
   content: string; // Expecting Markdown content
+  onChange: (markdownContent: string) => void;
 }
 
 // Define types for AI state
@@ -46,7 +48,7 @@ interface AIState {
   error: string | null;
 }
 
-const RichTextEditor: React.FC<RichTextEditorProps> = ({ content }) => {
+const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange }) => {
   const [direction, setDirection] = useState<'ltr' | 'rtl'>('rtl');
   const [aiState, setAIState] = useState<AIState>({ isLoading: false, data: null, error: null });
   const [selectionRange, setSelectionRange] = useState<Range | null>(null);
@@ -62,15 +64,20 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content }) => {
         class: 'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl m-5 focus:outline-none',
       },
     },
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      const markdown = turndown.turndown(html);
+      onChange(markdown);
+    }
   });
 
   useEffect(() => {
-    if (editor && content) {
+    if (editor && content && !editor.isFocused) {
       const html = marked.parse(content) as string;
-      editor.commands.setContent(html);
+      editor.commands.setContent(html, false);
       editor.chain().focus().setTextAlign(direction).run();
     }
-  }, [editor, content]);
+  }, [editor, content, direction]);
 
   const resetAIState = useCallback(() => {
     setAIState({ isLoading: false, data: null, error: null });
