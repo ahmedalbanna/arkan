@@ -8,41 +8,35 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { CheckSquare, ListTodo, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
+import { MarkdownViewer } from '../shared/MarkdownViewer';
+import A4Page from '../shared/A4Page';
+
 
 function TaskCard({ task }: { task: ProjectTask }) {
   const { t } = useLocalization();
   return (
-    <Card className="bg-background/50 h-full rounded-lg shadow-lg hover:shadow-xl">
+    <Card className="bg-background/50 h-full flex flex-col rounded-lg shadow-lg hover:shadow-xl">
       <CardHeader className="p-4">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
           <ListTodo className="h-4 w-4 text-primary" />
           {task.title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-4 pt-0 space-y-4">
-        <p className="text-sm text-muted-foreground">{task.description}</p>
+      <CardContent className="p-4 pt-0 space-y-4 flex-grow">
+        <MarkdownViewer content={task.description} className="text-sm text-muted-foreground" />
         <div>
           <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
             <CheckSquare className="h-4 w-4" />
             {t('builder.projectPlan.acceptanceCriteria')}
           </h4>
-          <ul className="list-disc pl-5 space-y-1 text-xs text-muted-foreground">
-            {task.acceptanceCriteria.map((criterion, index) => (
-              <li key={index}>{criterion}</li>
-            ))}
-          </ul>
+           <div className="text-xs text-muted-foreground">
+             <MarkdownViewer content={task.acceptanceCriteria.map(ac => `- ${ac}`).join('\n')} />
+           </div>
         </div>
       </CardContent>
     </Card>
   );
 }
-
-const A4Page = ({ children, title }: { children: React.ReactNode, title: string }) => (
-    <div className="bg-background shadow-lg p-8 md:p-12 mx-auto" style={{ maxWidth: '210mm', minHeight: '297mm' }}>
-        <h2 className="text-2xl font-bold font-headline text-primary border-b pb-2 mb-6">{title}</h2>
-        {children}
-    </div>
-);
 
 
 export default function ProjectPlanViewer({ projectPlan }: { projectPlan: ProjectPlan }) {
