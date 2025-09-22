@@ -72,15 +72,15 @@ const AdvancedFieldsForm = () => {
                 <Textarea id="expectedOutcomes" name="expectedOutcomes" value={advancedFields.expectedOutcomes} onChange={handleFieldChange} rows={3} placeholder="List the expected outcomes and deliverables..."/>
                  <p className="text-xs text-muted-foreground">What specific results and deliverables do you expect from this project?</p>
             </div>
-            <div className="space-y-1">
-                <Label htmlFor="methodology">Methodology</Label>
-                <Input id="methodology" name="methodology" value={advancedFields.methodology} onChange={handleFieldChange} placeholder="e.g., Agile, Waterfall, Scrum"/>
-                <p className="text-xs text-muted-foreground">What approach or process will be followed for this project?</p>
-            </div>
              <div className="space-y-1">
                 <Label htmlFor="timeline">Timeline</Label>
                 <Input id="timeline" name="timeline" value={advancedFields.timeline} onChange={handleFieldChange} placeholder="e.g., 6 months, Q4 2024"/>
                 <p className="text-xs text-muted-foreground">What is the estimated duration of the project?</p>
+            </div>
+            <div className="space-y-1">
+                <Label htmlFor="methodology">Methodology</Label>
+                <Input id="methodology" name="methodology" value={advancedFields.methodology} onChange={handleFieldChange} placeholder="e.g., Agile, Waterfall, Scrum"/>
+                <p className="text-xs text-muted-foreground">What approach or process will be followed for this project?</p>
             </div>
               <div className="space-y-1">
                 <Label htmlFor="knowledge">Knowledge & Context</Label>
@@ -129,12 +129,10 @@ export const ProposalGenerationTools = ({
         projectIdea,
         setProjectIdea,
         customGuidelines,
-        addCustomGuideline,
         removeCustomGuideline,
         customGuidelineInput,
-        setCustomGuidelineInputForItem,
-        handleAddCustomGuidelineForItem,
-        handleRemoveCustomGuidelineForItem,
+        setCustomGuidelineInput,
+        handleAddGuideline,
         generationMutation,
         suggestIdeaMutation,
         handleSuggestIdea,
@@ -196,8 +194,8 @@ export const ProposalGenerationTools = ({
                                 <div className="flex gap-2">
                                     <Input
                                         placeholder={t('builder.proposalGenerator.addGuidelinePlaceholder')}
-                                        value={customGuidelineInput['proposal'] || ''}
-                                        onChange={(e) => setCustomGuidelineInputForItem('proposal', e.target.value)}
+                                        value={customGuidelineInput}
+                                        onChange={(e) => setCustomGuidelineInput(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddGuideline())}
                                         disabled={generationMutation.isPending}
                                     />
