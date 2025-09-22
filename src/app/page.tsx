@@ -1,26 +1,24 @@
 'use client';
 
-import RichTextEditor from '@/components/ui/RichTextEditor';
+import HomePageContent from '@/components/HomePageContent';
+import { adminDb } from '@/lib/firebase/server-init';
+
+// This is a server-side function that could be used to fetch data
+// In this case, we're not fetching any projects, so we pass an empty array.
+// This structure is kept for potential future use.
+async function getFeaturedProjects() {
+    // Example of how you might fetch data in a real scenario:
+    // const projectsSnapshot = await adminDb.collection('projects').where('isFeatured', '==', true).limit(3).get();
+    // const projects = projectsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // return projects;
+    return [];
+}
 
 export default function Home() {
-  const markdownContent = `
-# مرحبًا من الماركدون!
+    // Although we're not fetching projects, we keep the prop for structural consistency
+    const featuredProjects = [];
 
-هذا النص تم تحويله من **ماركدون** إلى HTML وعرضه بواسطة TipTap.
-
-- قائمة أولى
-- قائمة ثانية
-
-javascript
-  // وهذا مثال على كود
-  console.log("Hello, Markdown!");
-
-  `;
-
-  return (
-    <main className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-4 text-center">محرر النصوص الغني - TipTap</h1>
-      <RichTextEditor content={markdownContent} />
-    </main>
-  );
+    return (
+        <HomePageContent featuredProjects={featuredProjects} />
+    );
 }

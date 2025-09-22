@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Link from 'next/link';
@@ -101,7 +102,7 @@ export function Header() {
       { href: '/writing-tools', label: 'Writing Tools', icon: PenSquare },
       { href: '/handwriting', label: 'Text to Handwriting', icon: PencilLine },
       { href: '/pdf-to-markdown', label: 'PDF to Markdown', icon: FileText },
-      { href: '/markdown-display', label: 'Markdown Editor', icon: PencilRuler },
+      { href: '/writing-tools/markdown-editor', label: 'Markdown Editor', icon: PencilRuler },
   ];
 
   const adminLinks = [

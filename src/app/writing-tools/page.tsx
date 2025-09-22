@@ -33,6 +33,7 @@ export default function WritingToolsPage() {
     { name: 'PlantUML Diagram Generator', icon: GitGraph, href: '/writing-tools/generate-plantuml' },
     { name: 'Session Plan Generator', icon: BrainCircuit, href: '/writing-tools/session-plan' },
     { name: 'Lecture Generator', icon: BrainCircuit, href: '/writing-tools/lecture-generator' },
+    { name: 'Markdown Editor', icon: PencilRuler, href: '/writing-tools/markdown-editor' },
   ];
 
   return (
