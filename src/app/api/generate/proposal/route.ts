@@ -6,14 +6,11 @@ import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { z } from 'zod';
 
-import { GenerateProposalInputSchema, type AdvancedProposalFields, type GenerateProposalInput } from '@/ai/schemas';
+import { GenerateProposalInputSchema, type GenerateProposalInput } from '@/ai/schemas';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 
 // The schema for the API route now directly uses the AI flow's input schema.
-const generateProposalApiSchema = GenerateProposalInputSchema.extend({
-  customGuidelines: z.array(z.string()).optional(),
-  advancedFields: z.custom<AdvancedProposalFields>().optional(),
-});
+const generateProposalApiSchema = GenerateProposalInputSchema;
 
 export const POST = withAuth(async ({ request, user }) => {
   try {
@@ -24,12 +21,11 @@ export const POST = withAuth(async ({ request, user }) => {
       return handleApiError(validation.error);
     }
 
-    let { projectIdea, customGuidelines, externalContext, advancedFields } = validation.data;
+    const { projectIdea, guidelines, externalContext, advancedFields } = validation.data;
 
-    // The AI flow now handles the simple vs. advanced logic internally.
     const agentInput: GenerateProposalInput = {
       projectIdea,
-      guidelines: customGuidelines || [],
+      guidelines,
       externalContext,
       advancedFields,
     };
@@ -44,7 +40,7 @@ export const POST = withAuth(async ({ request, user }) => {
       userId: user.id,
       input: {
         projectIdea,
-        customGuidelines,
+        guidelines,
         externalContextFileCount: externalContext?.length || 0,
         usedAdvancedMode: !!advancedFields,
       },
