@@ -40,7 +40,7 @@ Please analyze the following project description and provide the output in the r
 Description: {{{projectDescription}}}`,
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-ui',
@@ -60,7 +60,7 @@ User Prompt: {{{prompt}}}
 `,
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-proposal',
@@ -84,7 +84,7 @@ Project Idea: {{{projectIdea}}}`,
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-ad-copy',
@@ -101,7 +101,7 @@ Product Description: {{{productDescription}}}
 Target Audience: {{{targetAudience}}}`,
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-nda',
@@ -119,7 +119,7 @@ Effective Date: {{{effectiveDate}}}
 Generate the NDA text. IMPORTANT: Include a disclaimer that this is not legal advice and a qualified lawyer should be consulted.`,
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   // Report Section Agents
   {
@@ -142,7 +142,7 @@ Generate the NDA text. IMPORTANT: Include a disclaimer that this is not legal ad
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-acknowledgment-section',
@@ -163,7 +163,7 @@ Generate the NDA text. IMPORTANT: Include a disclaimer that this is not legal ad
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-introduction-section',
@@ -174,27 +174,23 @@ Generate the NDA text. IMPORTANT: Include a disclaimer that this is not legal ad
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are an expert technical writer specializing in project proposals. Based on the provided project proposal and any additional context, write a complete and professional introduction section for the formal report.
-Synthesize the information from the entire proposal and the provided context to create this introduction. Infer the problem from the objective and risks. Infer the limitations of existing systems from the project's goals.
-Generate the entire introduction as a single, coherent text. Use markdown newlines for paragraph breaks.
-
-The introduction should be well-structured, engaging, and must heading include:`,
+      base: `You are an expert technical writer. Your primary goal is to craft a comprehensive and professional **Introduction** section for a formal report.
+You must synthesize information from the provided project proposal and any other available context (like other report sections) to create a coherent narrative.
+Do not simply list information; analyze and integrate it to build a strong opening for the report. For example, infer the 'Problem' from the project's 'Objective' and 'Risks'. Infer the 'Limitations of Existing Systems' from the project's 'Rationale' and 'Expected Outcomes'.
+Your entire response must be a single, cohesive text formatted in markdown.`,
       guidelines: [
-        { text: "**Purpose of the Project**: Provide a clear statement of why the project is being undertaken. Include the main reasons for its inception and what it aims to achieve.", isDefault: true },
-        { text: "**Problem Definition**: Identify and explain the problem the project addresses. Provide a comprehensive description and the context in which this problem exists.", isDefault: true },
-        { text: "**Overview of the Document**: Create an outline of the report structure, highlighting the main sections and what each section will cover in relation to the project.", isDefault: true },
-        { text: "**Limitations of Existing Systems**: Describe the current solutions or technologies addressing the problem and their limitations, justifying the need for this new project.", isDefault: true },
-        { text: "**Goals and Objectives**: Define the project's goals and objectives, including how they will be achieved and the expected contributions of the project..", isDefault: true },
-        { text: "**Solution Overview**: Give a brief overview of how the project will solve the stated problem, outlining the solution's main components.", isDefault: true },
-        { text: "**Research Scope**: Specify the project boundaries, detailing what is included and what is not within the scope of the research.", isDefault: true },
-
-
+        { text: "Structure the introduction with clear subheadings for each required part (e.g., `## Purpose of the Project`).", isDefault: true },
+        { text: "**Problem Definition**: Clearly articulate the core problem or opportunity the project addresses. Provide context for why this problem is significant.", isDefault: true },
+        { text: "**Goals and Objectives**: State the primary goals of the project and list the specific, measurable objectives that will achieve those goals.", isDefault: true },
+        { text: "**Solution Overview**: Briefly describe the proposed solution and its key features or components. Explain how it solves the defined problem.", isDefault: true },
+        { text: "**Scope and Limitations**: Clearly define the boundaries of the project. Specify what is included in the scope and, just as importantly, what is excluded.", isDefault: true },
+        { text: "**Document Overview**: Conclude with a brief roadmap of the report, outlining what the reader can expect in the subsequent sections.", isDefault: true },
       ],
       defaultContext: ['proposal']
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-trainingProgram-section',
@@ -216,7 +212,7 @@ The introduction should be well-structured, engaging, and must heading include:`
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-technicalExperience-section',
@@ -238,7 +234,7 @@ The introduction should be well-structured, engaging, and must heading include:`
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-recommendations-section',
@@ -259,7 +255,7 @@ The introduction should be well-structured, engaging, and must heading include:`
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-references-section',
@@ -280,7 +276,7 @@ The introduction should be well-structured, engaging, and must heading include:`
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-appendices-section',
@@ -301,7 +297,7 @@ The introduction should be well-structured, engaging, and must heading include:`
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-literatureReview-section',
@@ -331,7 +327,7 @@ The literature review should be well-structured, engaging, and must heading incl
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-systemAnalysis-section',
@@ -342,28 +338,20 @@ The literature review should be well-structured, engaging, and must heading incl
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are an expert systems analyst. Based on the provided project proposal and any additional context, write a thorough 'System Analysis' section.
-Synthesize information from the entire proposal and the provided context to create a comprehensive analysis. Use markdown for formatting, including bullet points for requirements.
-
-The analysis should be well-structured, engaging, and must heading include:`,
+      base: `You are an expert systems analyst. Your goal is to write a thorough **System Analysis** section for a formal report.
+You must analyze the provided project proposal and any other available context to define the system's requirements in detail.
+Do not simply list features. You must categorize them logically as functional and non-functional requirements. Use markdown formatting, including bullet points for lists.`,
       guidelines: [
-        { text: "**Functional Requirements**: Detail the specific functions the system must perform. Infer these from the project objective, expected outcomes, and stakeholders' interests.", isDefault: true },
-        { text: "**Data Requirements**: Describe the data entities, their attributes, and relationships.", isDefault: true },
-        { text: "**Non-Functional Requirements**: Describe the system's quality attributes, such as performance, security, usability, and scalability. Infer these from the project's context and risks.", isDefault: true },
-        { text: "**Stakeholder Analysis**: Elaborate on the needs and expectations of each stakeholder group identified in the proposal.", isDefault: true },
-        { text: "**Problem Analysis**: Expand on the limitations of current systems (as suggested by the project's rationale) and clearly define the scope of the problem being solved.", isDefault: true },
-        { text: "**Clients, Customers, and Users**: Identify and describe the different types of clients, customers, and end-users of the system.", isDefault: true },
-        { text: "**Look and Feel Requirementss**: Describe the aesthetic and design requirements for the user interface.", isDefault: true },
-        { text: "**Usability Requirements**: Define how easy the system should be to learn and use.", isDefault: true },
-        { text: "**Security Requirements**: Outline the necessary security measures to protect the system and its data.", isDefault: true },
-        { text: "**Performance Requirements**: Specify the system's expected response times, throughput, and resource utilization.", isDefault: true },
-        { text: "**Portability Requirements**: Describe the system's ability to run on different platforms or environments.", isDefault: true },
+        { text: "**Functional Requirements**: Detail the specific functions the system must perform. Infer these from the project objective, expected outcomes, and stakeholders' interests. Be specific (e.g., 'The system must allow users to register with an email and password.').", isDefault: true },
+        { text: "**Data Requirements**: Describe the data entities, their attributes, and relationships. Think about what information the system needs to store and manage.", isDefault: true },
+        { text: "**Non-Functional Requirements**: Detail the system's quality attributes. This includes Performance (e.g., 'Page load times must be under 2 seconds'), Security (e.g., 'All user data must be encrypted at rest'), Usability, and Scalability.", isDefault: true },
+        { text: "**Stakeholder Analysis**: Elaborate on the needs and expectations of each stakeholder group identified in the proposal. What does each group need from the system?", isDefault: true },
       ],
       defaultContext: ['proposal']
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-designStrategy-section',
@@ -374,26 +362,21 @@ The analysis should be well-structured, engaging, and must heading include:`,
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are a senior design strategist and UI/UX expert. Based on the provided project proposal and any additional context, write a detailed 'Design Strategy' section.
-Synthesize information from the entire proposal and the provided context to create a coherent design strategy. Use markdown for formatting.
-
-The strategist should be well-structured, engaging, and must heading include:`,
+      base: `You are a senior design strategist and UI/UX expert. Your task is to write a detailed **Design Strategy** section for a project report.
+You must analyze the provided context (especially the system analysis and proposal) to formulate a comprehensive design approach.
+Explain your reasoning clearly. The goal is to outline a plan that will lead to a successful and user-friendly product.`,
       guidelines: [
-        { text: "**Design Methodology**: Explain the selected design approach, such as User-Centered Design or Double Diamond, and provide reasons for its choice based on the project's methodology and objectives. Your explanation should align with the project's goals and help guide the design process effectively.", isDefault: true },
-        { text: "**Core Design Principles**: Identify and describe 3 to 5 core design principles that will guide the design process, such as 'Clarity and Simplicity', 'Efficiency', or 'Consistency'. Explain how these principles will be applied to achieve project objectives and improve user experience.", isDefault: true },
-        { text: "**Proposed Solution**: Outline the primary solution proposed to address the identified problems and requirements in the project. Include relevant details that illustrate how this solution meets the project's objectives and overcomes the identified challenges.", isDefault: true },
-        { text: "**Alternative Solutions**: Discuss other potential solutions that were considered during the design process and explain why the proposed solution was chosen over these alternatives. Provide a thorough comparison that highlights the key differentiators.", isDefault: true },
-        { text: "**Design Constraints**: Outline the project's hardware and software needs and describe the characteristics of the target end-users. Explain how these constraints might impact the design process and the final solution.", isDefault: true },
-        { text: "**Architectural Strategies**: Specify the architectural strategies including utilized algorithms, reuse of existing software components, management strategies, task descriptions, resources and risks, development method, future enhancement plans, and system architecture diagram. Provide a comprehensive overview that will guide development.", isDefault: true },
-        { text: "**Costs and Benefits**: Conduct a cost analysis and benefit analysis for the project, including a detailed cost-benefit comparison. Explain how these analyses support the project's viability and decision-making process.", isDefault: true },
-        { text: "**User Experience (UX) Goals**: Describe the intended user experience goals, focusing on how the design will address stakeholder needs and solve the core problem. Highlight strategies for achieving a positive and effective user experience.", isDefault: true },
-        { text: "**User Interface (UI) Direction**: Outline the visual direction for the user interface, including layout, color palette, and typography choices. Ensure these align with the project's category and goals, enhancing the overall design strategy.", isDefault: true },
+        { text: "**Design Methodology**: Explain the selected design approach (e.g., User-Centered Design, Double Diamond) and justify its choice based on project goals.", isDefault: true },
+        { text: "**Core Design Principles**: Identify 3-5 core principles that will guide the design (e.g., 'Clarity over cleverness', 'Efficiency in every click'). Explain how each principle supports the project's objectives.", isDefault: true },
+        { text: "**User Experience (UX) Goals**: Describe the intended user experience. How should users feel when using the product? What are the key interaction flows? (e.g., 'A seamless onboarding process that takes less than 2 minutes').", isDefault: true },
+        { text: "**User Interface (UI) Direction**: Outline the visual direction. Describe the intended layout, color palette, and typography. Justify these choices based on the target audience and brand identity.", isDefault: true },
+        { text: "**Accessibility Plan**: Briefly describe the plan to ensure the design is accessible to users with disabilities, referencing standards like WCAG.", isDefault: true },
       ],
       defaultContext: ['proposal']
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-systemDesign-section',
@@ -404,23 +387,20 @@ The strategist should be well-structured, engaging, and must heading include:`,
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are a principal software architect. From the provided project proposal and any additional context, create a comprehensive 'System Design' section.
-Synthesize information from the entire proposal and the provided context to produce a logical and robust system design. Use markdown for formatting.
-
-The architect should be well-structured, engaging, and must heading include:`,
+      base: `You are a principal software architect. Your objective is to create a comprehensive **System Design** section based on the project proposal and system analysis.
+You must translate the requirements into a technical blueprint for the development team. Be specific and justify your architectural decisions. Use markdown for all formatting.`,
       guidelines: [
-        { text: "**High-Level Architecture**: Provide a detailed description and justification for selecting a particular architectural pattern such as Monolithic, Microservices, or Serverless. Consider the project's scale, objectives, and potential risks when making your recommendation. Explain why this architecture is the most suitable choice for the project.", isDefault: true },
-        { text: "**Data Model / Schema**: Outline the key data entities that will be used in the project, including their attributes and relationships. This should include primary objects like users and any configurations necessary for the system. Provide a detailed explanation of how these entities will interact.", isDefault: true },
-        { text: "**Component Breakdown**: Detail the major components of the system, such as the Authentication Service, API Gateway, Frontend Application, and Database. Explain the specific responsibilities and functionalities of each component within the system architecture.", isDefault: true },
-        { text: "**Technology Stack**: Propose and justify a technology stack for the project's backend, frontend, database, and deployment. Ensure the proposed technologies align with the project's specific requirements and justify why each technology is the best fit for its purpose.", isDefault: true },
-        { text: "**Assess Project Scale and Objectives**: Evaluate the scale and objectives of the project to ensure the chosen architectural pattern aligns with them. Provide insights into how the objectives and scale of the project impact architectural decisions.", isDefault: true },
-
+        { text: "**High-Level Architecture**: Describe and justify the chosen architectural pattern (e.g., Monolithic, Microservices, Serverless). Explain why this pattern is the best fit for the project's scale, budget, and timeline.", isDefault: true },
+        { text: "**Data Model / Schema**: Outline the primary database tables or document collections. For each, list the key fields and data types. Explain the relationships between them (e.g., one-to-many, many-to-many).", isDefault: true },
+        { text: "**Component Breakdown**: Detail the major components of the system (e.g., 'Authentication Service', 'API Gateway', 'Frontend Application'). For each component, describe its main responsibilities and how it interacts with other components.", isDefault: true },
+        { text: "**Technology Stack**: Propose and justify a specific technology stack (e.g., 'Backend: Node.js with Express; Frontend: React with Next.js; Database: PostgreSQL'). Explain why each choice is suitable for the project.", isDefault: true },
+        { text: "**Scalability and Performance**: Briefly outline how the design will handle future growth and maintain performance under load.", isDefault: false },
       ],
       defaultContext: ['proposal', 'systemAnalysis', 'designStrategy']
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-systemProgramming-section',
@@ -439,14 +419,14 @@ Synthesize information from the entire proposal and the provided context to crea
         { text: "Identify Key Libraries & Frameworks  List and justify the selection of essential libraries and frameworks that will be utilized in the implementation phase, based on the project type, ensuring they align with project needs.", isDefault: true },
         { text: "Describe Environment Setup  Provide a detailed description of the development, staging, and production environments. Include necessary configurations and software requirements for each environment.", isDefault: true },
         { text: "Outline System Architecture  Create a Deployment diagram illustrating nodes and their connections, along with a Program Flow Diagram to show object interactions and life cycles within the system.", isDefault: true },
-        { text: "Detail System Design  Include a Detailed Component Description using a component diagram, along with Data Flow Diagrams using an activity diagram to explain the flow of data within the system.", isDefault: true },
+        { text: "Detail System Design  Include a Detailed Component Description using a component diagram, along with a Data Flow Diagrams using an activity diagram to explain the flow of data within the system.", isDefault: true },
         { text: "Specify Version Control  Provide details on the version control system and hosting platform to be used, such as Git and GitHub, to ensure proper code management and collaboration.", isDefault: true },
       ],
       defaultContext: ['proposal']
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-systemTesting-section',
@@ -476,7 +456,7 @@ The system testing should be well-structured, engaging, and must heading include
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-conclusion-section',
@@ -487,21 +467,20 @@ The system testing should be well-structured, engaging, and must heading include
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are an expert technical writer. Based on the provided project proposal and any additional context, write a concise and impactful 'Conclusion' section for the final report.
-Synthesize information from the entire proposal and the provided context to create a powerful conclusion. Use markdown for formatting.
-
-The conclusion should:`,
+      base: `You are an expert technical writer. Your task is to write a concise and impactful **Conclusion** section for a formal report.
+You must synthesize the key information from the entire project context (proposal, other sections) to provide a powerful summary and forward-looking statement.
+Do not introduce new information. Your goal is to wrap up the report effectively.`,
       guidelines: [
-        { text: "Summarize Key Points  Summarize the key points of a project by briefly reiterating the problem, the proposed solution, and the main objective of the project. Ensure the summary is concise yet comprehensive, capturing the essence of the project in at least 30 words.", isDefault: true },
-        { text: "Reiterate Expected Outcomes  Reiterate the expected outcomes of a project by restating the most important results and the value that the project is expected to deliver upon its completion. Provide insight into the benefits and impact.", isDefault: true },
-        { text: "Provide Future Outlook  Provide a future outlook for a project by offering a forward-looking statement. Discuss potential long-term impacts or next steps that might occur after the project's completion. Make it at least 30 words.", isDefault: true },
-        { text: "Make Final Statement  Craft a final statement that concludes a project discussion. Ensure the statement is strong and conclusive, reinforcing the project's importance and viability. The statement should be compelling and persuasive.", isDefault: true },
+        { text: "**Summarize Key Points**: Briefly reiterate the problem statement, the proposed solution, and the main objective of the project. This should be a high-level recap.", isDefault: true },
+        { text: "**Reiterate Expected Outcomes**: Restate the most important results and the value that the project is expected to deliver upon completion.", isDefault: true },
+        { text: "**Provide Future Outlook**: Offer a forward-looking statement. Discuss potential long-term impacts, future enhancements, or next steps that could be taken after the project is complete.", isDefault: true },
+        { text: "**Final Statement**: End with a strong, conclusive final sentence that reinforces the project's importance and viability.", isDefault: true },
       ],
       defaultContext: ['proposal']
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   // End Report Section Agents
   {
@@ -529,7 +508,7 @@ You will be provided with the full project proposal in JSON format, and may also
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   // Diagram Agents
   {
@@ -552,7 +531,7 @@ You will be provided with the full project proposal in JSON format, and may also
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-class-diagram',
@@ -574,7 +553,7 @@ You will be provided with the full project proposal in JSON format, and may also
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-sequence-diagram',
@@ -597,7 +576,7 @@ You will be provided with the full project proposal in JSON format, and may also
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-activity-diagram',
@@ -620,7 +599,7 @@ You will be provided with the full project proposal in JSON format, and may also
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-component-diagram',
@@ -642,7 +621,7 @@ You will be provided with the full project proposal in JSON format, and may also
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-archimate-diagram',
@@ -665,7 +644,7 @@ You will be provided with the full project proposal in JSON format, and may also
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'generate-er-diagram',
@@ -687,7 +666,7 @@ You will be provided with the full project proposal in JSON format, and may also
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
   {
     id: 'activity-history',
@@ -700,6 +679,6 @@ You will be provided with the full project proposal in JSON format, and may also
     prompt: '',
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
   },
 ];
