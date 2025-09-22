@@ -10,10 +10,26 @@ import { CheckSquare, ListTodo, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { MarkdownViewer } from '../shared/MarkdownViewer';
 import A4Page from '../shared/A4Page';
+import { useTaskCardLogic } from '@/hooks/use-task-card-logic'; // New hook
+import { SectionToolbar } from '../section/SectionToolbar'; // Re-use toolbar
 
-
-function TaskCard({ task }: { task: ProjectTask }) {
+function TaskCard({ task, phaseIndex, taskIndex }: { task: ProjectTask, phaseIndex: number, taskIndex: number }) {
   const { t } = useLocalization();
+
+  // Use the new hook for description
+  const descriptionLogic = useTaskCardLogic({
+    phaseIndex,
+    taskIndex,
+    fieldName: 'description',
+  });
+
+  // Use the new hook for acceptance criteria
+  const acceptanceCriteriaLogic = useTaskCardLogic({
+    phaseIndex,
+    taskIndex,
+    fieldName: 'acceptanceCriteria',
+  });
+
   return (
     <Card className="bg-background/50 h-full flex flex-col rounded-lg shadow-lg hover:shadow-xl">
       <CardHeader className="p-4">
@@ -23,15 +39,40 @@ function TaskCard({ task }: { task: ProjectTask }) {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-0 space-y-4 flex-grow">
-        <MarkdownViewer content={task.description} className="text-sm text-muted-foreground" />
         <div>
-          <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-            <CheckSquare className="h-4 w-4" />
-            {t('builder.projectPlan.acceptanceCriteria')}
-          </h4>
+           <div className="flex justify-between items-center mb-2">
+                <h4 className="text-sm font-semibold">Description</h4>
+                <SectionToolbar
+                    isProcessingAi={descriptionLogic.isProcessingAi}
+                    isReadingAloud={descriptionLogic.ttsMutation.isPending}
+                    onAiAction={descriptionLogic.handleAiAction}
+                    onReadAloud={descriptionLogic.handleReadAloud}
+                />
+            </div>
+            <MarkdownViewer content={task.description} className="text-sm text-muted-foreground" />
+             {descriptionLogic.aiSuggestion && (
+                 <div className="mt-2 text-xs">AI Suggestion: {descriptionLogic.aiSuggestion}</div>
+            )}
+        </div>
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <h4 className="text-sm font-semibold flex items-center gap-2">
+                <CheckSquare className="h-4 w-4" />
+                {t('builder.projectPlan.acceptanceCriteria')}
+            </h4>
+            <SectionToolbar
+                isProcessingAi={acceptanceCriteriaLogic.isProcessingAi}
+                isReadingAloud={acceptanceCriteriaLogic.ttsMutation.isPending}
+                onAiAction={acceptanceCriteriaLogic.handleAiAction}
+                onReadAloud={acceptanceCriteriaLogic.handleReadAloud}
+            />
+          </div>
            <div className="text-xs text-muted-foreground">
              <MarkdownViewer content={task.acceptanceCriteria.map(ac => `- ${ac}`).join('\n')} />
            </div>
+            {acceptanceCriteriaLogic.aiSuggestion && (
+                 <div className="mt-2 text-xs">AI Suggestion: {acceptanceCriteriaLogic.aiSuggestion}</div>
+            )}
         </div>
       </CardContent>
     </Card>
@@ -81,7 +122,7 @@ export default function ProjectPlanViewer({ projectPlan }: { projectPlan: Projec
                  <A4Page key={currentPhase.phaseName} title={currentPhase.phaseName}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {currentPhase.tasks.map((task, index) => (
-                            <TaskCard key={index} task={task} />
+                            <TaskCard key={index} task={task} phaseIndex={currentPage} taskIndex={index} />
                         ))}
                     </div>
                 </A4Page>
