@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -8,7 +9,7 @@ import { useBuilderStore, useGenerateReportSection, useGenerationUIStore } from 
 import { useAgents } from './use-agents';
 import { reportSections } from '@/lib/db/seed-data/sections-templates'; // Import static data
 
-export function useReportGenerationLogic() {
+export function useReportGenerationLogic({ orderedSections, setOrderedSections }: { orderedSections: SectionNameType[], setOrderedSections: (sections: SectionNameType[]) => void }) {
     const { userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = useState<string | null>(null);
 
@@ -20,18 +21,16 @@ export function useReportGenerationLogic() {
 
     const reportGenerationMutation = useGenerateReportSection();
 
-    const [orderedSections, setOrderedSections] = useState<SectionNameType[]>([]);
-
-    // Initialize the order based on the static data
+    // State for section order is now managed by the parent hook
     useEffect(() => {
-        const initialOrder = Object.keys(reportSections).sort((a, b) =>
-            reportSections[a as SectionNameType].title.localeCompare(reportSections[b as SectionNameType].title)
-        ) as SectionNameType[];
-        setOrderedSections(initialOrder);
-    }, []);
+        if (orderedSections.length === 0) {
+            const initialOrder = Object.keys(reportSections).sort((a, b) =>
+                reportSections[a as SectionNameType].title.localeCompare(reportSections[b as SectionNameType].title)
+            ) as SectionNameType[];
+            setOrderedSections(initialOrder);
+        }
+    }, [orderedSections, setOrderedSections]);
 
-    // NOTE: The sections are now static, so the initializeDependentStates might need adjustment
-    // if it relies on dynamically fetched sections. For now, we assume it can work with static agent data.
     useEffect(() => {
         if (agentsLoaded && agents.length > 0) {
             // This might need a refactor if sections were also expected.
@@ -69,8 +68,6 @@ export function useReportGenerationLogic() {
         hasCreditsForSingleSection,
         agentsLoaded,
         sectionsLoading: false, // Since it's static now
-        orderedSections,
-        setOrderedSections,
         project,
     };
 }

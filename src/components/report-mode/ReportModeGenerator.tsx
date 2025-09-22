@@ -27,17 +27,22 @@ export default function ReportModeGenerator() {
         locale,
         isPanelCollapsed,
         setIsPanelCollapsed,
+        orderedSections,
+        setOrderedSections,
     } = useReportModeGenerator();
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
             <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
-                <GenerationTools />
+                <GenerationTools 
+                    orderedSections={orderedSections}
+                    setOrderedSections={setOrderedSections}
+                />
             </div>
 
             <div className="lg:col-span-8 lg:overflow-y-auto pr-2">
                 <Suspense fallback={<ReportSkeleton />}>
-                    <ReportResults />
+                    <ReportResults orderedSections={orderedSections} />
                 </Suspense>
             </div>
         </div>

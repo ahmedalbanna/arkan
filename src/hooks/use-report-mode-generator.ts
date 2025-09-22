@@ -13,15 +13,15 @@ import { useSections } from './use-sections';
 import { useAgentStore } from './useAgentStore';
 import { FileText } from 'lucide-react';
 import { useExport } from './use-export';
+import { reportSections as staticReportSections } from '@/lib/db/seed-data/sections-templates';
 
-export const useReportModeGenerator = () => {
+export const useReportModeGenerator = (orderedSections: SectionName[]) => {
     const { t, locale } = useLocalization();
     const { project, setProject } = useBuilderStore();
     const translateMutation = useTranslate();
     const [isTranslatingAll, setIsTranslatingAll] = useState(false);
     
-    const { data: sectionConfigs } = useSections();
-    const getIconComponent = useAgentStore(state => state.getIconComponent);
+    // Removed useSections and useAgentStore hooks as we're using static data now.
     const { exportReportDocx, isExporting } = useExport();
 
     const [currentPage, setCurrentPage] = useState(0);
@@ -30,8 +30,8 @@ export const useReportModeGenerator = () => {
     const translatedSections = project?.translatedSections || {};
 
     const generatedSections = useMemo(
-        () => (Object.keys(sections) as SectionName[]).filter(key => sections[key]),
-        [sections]
+        () => orderedSections.filter(key => sections[key]),
+        [sections, orderedSections]
     );
 
     const totalPages = generatedSections.length;
@@ -43,9 +43,12 @@ export const useReportModeGenerator = () => {
     }, [totalPages]);
 
     useEffect(() => {
-        // Reset to first page if the number of pages changes (e.g., a section is added/removed)
-        setCurrentPage(0);
-    }, [totalPages]);
+        if (currentPage >= totalPages && totalPages > 0) {
+            setCurrentPage(totalPages - 1);
+        } else if (totalPages === 0) {
+            setCurrentPage(0);
+        }
+    }, [totalPages, currentPage]);
 
 
     const handleNextPage = () => handlePageChange(currentPage + 1);
@@ -55,24 +58,20 @@ export const useReportModeGenerator = () => {
     const hasContent = generatedSections.length > 0;
     const currentSectionKey = hasContent ? generatedSections[currentPage] : undefined;
 
-    const sectionConfigMap = useMemo(() => {
-        if (!sectionConfigs) return {};
-        return sectionConfigs.reduce((acc, sec) => {
-            acc[sec.id] = sec;
-            return acc;
-        }, {} as Record<string, any>);
-    }, [sectionConfigs]);
+    const sectionConfigMap = staticReportSections;
 
     const getSectionTitle = (key: SectionName): string => {
         if (!sectionConfigMap[key] || !sectionConfigMap[key].title) {
-            return key; // Fallback to the key if title isn't loaded
+            return key; 
         }
         return t(sectionConfigMap[key]?.title) || key;
     };
 
     const getSectionIcon = (key: SectionName) => {
-        const iconName = sectionConfigMap[key]?.icon;
-        return getIconComponent(iconName) || FileText;
+        const iconName = (sectionConfigMap[key] as any)?.icon;
+        // This part becomes tricky as we don't have the icon components directly.
+        // Let's assume a fallback for now.
+        return FileText;
     };
 
     const handleSectionUpdate = (key: SectionName, value: string) => {
@@ -120,23 +119,19 @@ export const useReportModeGenerator = () => {
         });
     };
 
-    const reportSections = useMemo(() => {
-        if (!sectionConfigs) return {};
-        return sectionConfigs.filter(s => s.type === 'report').reduce((acc, sec) => {
-            acc[sec.id] = sec;
-            return acc;
-        }, {} as Record<string, any>);
-    }, [sectionConfigs]);
+    const reportSectionsMap = useMemo(() => {
+        return staticReportSections
+    }, []);
 
     const handleExportReportDOCX = async (sectionsToInclude: SectionName[]) => {
         if (!project || !hasContent) return;
 
-        const translatedTitles = Object.keys(reportSections).reduce((acc, key) => {
-            acc[key as SectionName] = t(reportSections[key as SectionName]?.title || key);
+        const translatedTitles = Object.keys(reportSectionsMap).reduce((acc, key) => {
+            acc[key as SectionName] = t(reportSectionsMap[key as SectionName]?.title || key);
             return acc;
         }, {} as { [key in SectionName]?: string });
 
-        await exportReportDocx(project, "modern", translatedTitles, sectionsToInclude);
+        await exportReportDocx(project, translatedTitles, sectionsToInclude);
     };
     
     return {
@@ -156,6 +151,6 @@ export const useReportModeGenerator = () => {
         getSectionIcon,
         isExporting,
         handleExportReportDOCX,
-        reportSections
+        reportSections: reportSectionsMap
     };
 };

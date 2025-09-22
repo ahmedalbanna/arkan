@@ -7,7 +7,7 @@ import { Accordion } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { type SectionName as SectionNameType } from '@/ai/schemas';
-import { Loader2, PanelLeftClose } from 'lucide-react';
+import { PanelLeftClose } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useReportGenerationLogic } from '@/hooks';
 import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
@@ -55,17 +55,17 @@ function SortableSectionItem({ id, ...props }: SortableSectionItemProps) {
 
 interface GenerationToolsProps {
     onCollapseToggle: () => void;
+    orderedSections: SectionNameType[];
+    setOrderedSections: (sections: SectionNameType[]) => void;
 }
 
-export const GenerationTools = ({ onCollapseToggle }: GenerationToolsProps) => {
+export const GenerationTools = ({ onCollapseToggle, orderedSections, setOrderedSections }: GenerationToolsProps) => {
     const {
         isAnythingGenerating,
         activeMutationKey,
         onGenerateSection,
         hasCreditsForSingleSection,
-        orderedSections,
-        setOrderedSections,
-    } = useReportGenerationLogic();
+    } = useReportGenerationLogic({ orderedSections, setOrderedSections });
 
     const sensors = useSensors(
         useSensor(PointerSensor),

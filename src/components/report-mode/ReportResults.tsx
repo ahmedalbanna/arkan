@@ -12,7 +12,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useReportModeGenerator } from '@/hooks';
 import A4Page from '@/components/shared/A4Page';
 
-export const ReportResults = () => {
+interface ReportResultsProps {
+  orderedSections: SectionName[];
+}
+
+export const ReportResults = ({ orderedSections }: ReportResultsProps) => {
   const {
     t,
     sections,
@@ -21,13 +25,14 @@ export const ReportResults = () => {
     handleNextPage,
     handlePrevPage,
     hasContent,
-    currentSectionKey,
     getSectionTitle,
     getSectionIcon,
     handleSectionUpdate,
-    handleTranslateAll,
     isTranslatingAll,
-  } = useReportModeGenerator();
+    generatedSections, // Use generatedSections from the hook
+  } = useReportModeGenerator(orderedSections); // Pass orderedSections to the hook
+
+  const currentSectionKey = hasContent ? generatedSections[currentPage] : undefined;
 
   const renderContent = () => {
     if (!hasContent) {
