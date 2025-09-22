@@ -9,6 +9,7 @@ import { useSectionLogic } from '@/hooks';
 import { SectionName } from '@/ai/schemas';
 import { SectionToolbar } from '../section/SectionToolbar';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../ui/card';
 import { Wand2, ThumbsDown, Check } from 'lucide-react';
 import { DiffPart } from '@/lib/diff';
@@ -89,7 +90,7 @@ export const ProposalSection = ({ sectionKey, title, content, onUpdate }: Propos
                         {diff ? (
                             <DiffView diff={diff} />
                         ) : (
-                            <ReactMarkdown components={markdownComponents}>
+                            <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
                                 {aiSuggestion}
                             </ReactMarkdown>
                         )}
