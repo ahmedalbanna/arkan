@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -121,32 +122,34 @@ export function ProposalModeGenerator() {
                     </CardHeader>
                     <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'formatted' | 'markdown')} className="flex flex-col flex-grow">
                         <div className="flex justify-between items-center px-4 py-2 border-y bg-background">
-                            <TabsList>
-                                <TabsTrigger value="formatted"><File className="me-2 h-4 w-4" /> Formatted</TabsTrigger>
-                                <TabsTrigger value="markdown"><Code className="me-2 h-4 w-4" /> Markdown</TabsTrigger>
-                            </TabsList>
+                             <div className="flex-1">
+                                <TabsList>
+                                    <TabsTrigger value="formatted"><File className="me-2 h-4 w-4" /> Formatted</TabsTrigger>
+                                    <TabsTrigger value="markdown"><Code className="me-2 h-4 w-4" /> Markdown</TabsTrigger>
+                                </TabsList>
+                            </div>
                             {viewMode === 'formatted' && totalPages > 1 && (
-                                <div className="flex items-center" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-                                    <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost">
-                                        <ChevronLeft className="h-4 w-4 mr-2" />
-                                        {t('builder.presentationGenerator.prev')}
+                                <div className="flex items-center justify-center flex-1" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+                                    <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost" size="sm">
+                                        <ChevronLeft className="h-4 w-4" />
                                     </Button>
                                     <span className="text-sm font-medium text-muted-foreground mx-4">
                                         Page {currentPage + 1} of {totalPages}
                                     </span>
-                                    <Button onClick={handleNextPage} disabled={currentPage === totalPages - 1} variant="ghost">
-                                        {t('builder.presentationGenerator.next')}
-                                        <ChevronRight className="h-4 w-4 ml-2" />
+                                    <Button onClick={handleNextPage} disabled={currentPage === totalPages - 1} variant="ghost" size="sm">
+                                        <ChevronRight className="h-4 w-4" />
                                     </Button>
                                 </div>
                             )}
-                            {viewMode === 'formatted' && (
-                                <div className="flex items-center gap-1">
-                                    <Button variant="ghost" size="icon" onClick={() => setZoom(z => Math.max(0.5, z - 0.1))}><ZoomOut className="h-4 w-4" /></Button>
-                                    <span className="text-sm font-semibold w-12 text-center">{Math.round(zoom * 100)}%</span>
-                                    <Button variant="ghost" size="icon" onClick={() => setZoom(z => Math.min(1.5, z + 0.1))}><ZoomIn className="h-4 w-4" /></Button>
-                                </div>
-                            )}
+                             <div className="flex-1 flex justify-end">
+                                {viewMode === 'formatted' && (
+                                    <div className="flex items-center gap-1">
+                                        <Button variant="ghost" size="icon" onClick={() => setZoom(z => Math.max(0.5, z - 0.1))}><ZoomOut className="h-4 w-4" /></Button>
+                                        <span className="text-sm font-semibold w-12 text-center">{Math.round(zoom * 100)}%</span>
+                                        <Button variant="ghost" size="icon" onClick={() => setZoom(z => Math.min(1.5, z + 0.1))}><ZoomIn className="h-4 w-4" /></Button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <CardContent className="flex-1 p-0 bg-slate-200 dark:bg-slate-900/50">
                             <ScrollArea className="h-full p-4">
