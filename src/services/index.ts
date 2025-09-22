@@ -1,5 +1,6 @@
 
 
+
 export * from './academic-solver-service';
 export * from './ai-detector-service';
 export * from './agent-service';
@@ -25,7 +26,7 @@ export * from './section-service';
 export * from './settings-service';
 export * from './taskade-service';
 export * from './team-service';
-export * from './template-service';
+
 export * from './text-to-speech-service';
 export * from './topic-explainer-service';
 export * from './transaction-service';

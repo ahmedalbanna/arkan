@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { adminDb } from '@/lib/firebase/server-init';
@@ -64,6 +65,22 @@ export async function generateCodebaseApi(variables: { proposal: any; token: str
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to generate codebase');
+    }
+    return await response.json();
+}
+
+export async function generateTextApi(variables: { prompt: string; token: string }) {
+    const response = await fetch('/api/generate/text', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${variables.token}`,
+        },
+        body: JSON.stringify({ prompt: variables.prompt }),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate text');
     }
     return await response.json();
 }
