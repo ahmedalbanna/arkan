@@ -9,26 +9,21 @@ import { FileText } from 'lucide-react';
 import { useMemo } from 'react';
 import { useAgentStore } from './useAgentStore';
 import { useGenerationUIStore } from './useGenerationUIStore';
-
+import { reportSections } from '@/lib/db/seed-data/sections-templates'; // Import static data
 
 export const useSectionAccordionItemLogic = (sectionKey: SectionNameType | DiagramType) => {
     const { t } = useLocalization();
-    const { data: sectionConfigs } = useSections();
     const getIconComponent = useAgentStore((state) => state.getIconComponent);
     const { userProfile } = useAuth();
     const { project } = useBuilderStore();
 
-    const sectionConfig = useMemo(() => {
-        if (!sectionConfigs) return null;
-        return sectionConfigs.find(s => s.id === sectionKey) || null;
-    }, [sectionConfigs, sectionKey]);
+    // Use static data instead of the hook
+    const sectionConfig = reportSections[sectionKey as SectionNameType];
 
     const title = sectionConfig?.title || '';
     const agentId = sectionConfig?.agentId || '';
-    const Icon = sectionConfig ? getIconComponent(sectionConfig.icon) || FileText : FileText;
+    const Icon = sectionConfig ? getIconComponent((sectionConfig.icon as any)?.displayName || 'FileText') || FileText : FileText;
     
-    // Auto-context means we no longer need to check for selected context.
-    // The main check is just if there's *any* project content to work with.
     const hasProjectContext = !!project?.proposal || (project?.projectIdea && project.projectIdea.length > 0);
 
     const hasCredits = (userProfile?.credits ?? 0) >= 1;
