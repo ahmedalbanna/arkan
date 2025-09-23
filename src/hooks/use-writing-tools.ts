@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -10,15 +11,15 @@ import { handleErrorUtility } from '@/lib/errorUtils';
 
 /**
  * Generic custom mutation hook for all writing tools.
- * @param tool The specific API endpoint for the tool (e.g., 'summarize', 'paraphrase').
+ * @param endpoint The specific API endpoint for the tool (e.g., '/api/writing-tools/summarize').
  * @param options Optional callbacks for onSuccess and onError.
  * @returns The result of the useMutation hook.
  */
 export function useWritingTool<TData = any, TVariables = any>(
-  tool: string,
+  endpoint: string,
   options?: {
-    onSuccess?: (data: TData, variables: TVariables) => void;
-    onError?: (error: Error, variables: TVariables) => void;
+    onSuccess?: (data: TData, variables: TVariables, context: unknown) => void;
+    onError?: (error: Error, variables: TVariables, context: unknown) => void;
   }
 ) {
   const { firebaseUser, refetchUser } = useAuth();
@@ -26,17 +27,17 @@ export function useWritingTool<TData = any, TVariables = any>(
   return useMutation<TData, Error, TVariables>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return writingToolApi(tool, { data: variables, token });
+      return writingToolApi(endpoint, { data: variables, token });
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (data, variables, context) => {
         refetchUser(); // Invalidate user to update credits
         if (options?.onSuccess) {
-            options.onSuccess(data, variables);
+            options.onSuccess(data, variables, context);
         }
     },
-    onError: (error, variables) => {
+    onError: (error, variables, context) => {
         if (options?.onError) {
-            options.onError(error, variables);
+            options.onError(error, variables, context);
         } else {
             handleErrorUtility(error, "AI Tool Failed");
         }

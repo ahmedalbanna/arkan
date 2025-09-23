@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -38,6 +39,8 @@ import { generatePlantUML } from '@/ai/flows/generate-plantuml';
 import { GeneratePlantUMLInputSchema } from '@/ai/schemas';
 import { rewriteText, summarizeTextWithRatio } from '@/ai/flows/text-stylist';
 import { RewriteTextInputSchema, SummarizeTextWithRatioInputSchema } from '@/ai/schemas';
+import { manipulateText } from '@/ai/flows/manipulate-text';
+import { ManipulateTextInputSchema } from '@/ai/schemas';
 
 // Define a map for tool configurations
 const toolConfig = {
@@ -58,6 +61,7 @@ const toolConfig = {
   'generate-plantuml': { flow: generatePlantUML, schema: GeneratePlantUMLInputSchema, creditCost: 1 },
   'rewrite-text': { flow: rewriteText, schema: RewriteTextInputSchema, creditCost: 1 },
   'summarize-with-ratio': { flow: summarizeTextWithRatio, schema: SummarizeTextWithRatioInputSchema, creditCost: 1 },
+  'manipulate-text': { flow: manipulateText, schema: ManipulateTextInputSchema, creditCost: 1 },
 };
 
 type ToolName = keyof typeof toolConfig;
