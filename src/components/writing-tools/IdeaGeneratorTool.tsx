@@ -1,50 +1,25 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useWritingTool } from '@/hooks';
+import { Controller } from 'react-hook-form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles } from 'lucide-react';
-import { toast } from '@/hooks';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { IdeaGenerationInputSchema, type IdeaGenerationInput, type IdeaGenerationOutput } from '@/ai/schemas';
 import { Textarea } from '@/components/ui/textarea';
-import { useLocalization } from '@/context/LocalizationContext';
-
-const formSchema = IdeaGenerationInputSchema;
-type FormValues = IdeaGenerationInput;
+import { useIdeaGeneratorLogic } from '@/hooks';
 
 export function IdeaGeneratorTool() {
-  const { t } = useLocalization();
-  const mutation = useWritingTool('/api/writing-tools/generate-ideas', {
-    onError: (error) => {
-        toast({ title: "Idea Generation Failed", description: error.message, variant: 'destructive' });
-    }
-  });
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      specialization: '',
-      domain: '',
-      region: '',
-      circumstances: '',
-      additionalContext: ''
-    },
-  });
-
-  const onSubmit = (data: FormValues) => {
-    mutation.mutate(data);
-  };
-
-  const results = mutation.data as IdeaGenerationOutput | undefined;
+  const {
+    t,
+    form,
+    mutation,
+    onSubmit,
+    results,
+  } = useIdeaGeneratorLogic();
 
   return (
     <Card>

@@ -1,90 +1,30 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Loader2, Sparkles, CheckCircle, HelpCircle, XCircle, ExternalLink, UploadCloud, ShieldCheck } from 'lucide-react';
+import { Loader2, ShieldCheck, ExternalLink, UploadCloud } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { useWritingTool } from '@/hooks';
-import { toast } from '@/hooks';
-import type { ClaimStatus, FactCheckOutput } from '@/ai/schemas';
+import type { PlagiarismCheckOutput } from '@/ai/schemas';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { useDropzone } from 'react-dropzone';
-import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services';
-import { PlagiarismCheckOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
-
-const plagiarismSchema = z.object({
-  text: z.string().min(100, 'Please enter at least 100 characters for a plagiarism check.'),
-});
-
-type PlagiarismFormValues = z.infer<typeof plagiarismSchema>;
-
+import { usePlagiarismCheckerLogic } from '@/hooks';
 
 export function PlagiarismCheckerTool() {
   const { t } = useLocalization();
-  const mutation = useWritingTool('/api/writing-tools/plagiarism-checker');
-  const { firebaseUser, refetchUser } = useAuth();
-  const [isUploading, setIsUploading] = useState(false);
-
-  const form = useForm<PlagiarismFormValues>({
-    resolver: zodResolver(plagiarismSchema),
-    defaultValues: { text: '' },
-  });
-
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
-
-    if (!firebaseUser) {
-        toast({ title: t('writingTools.plagiarismChecker.authErrorTitle'), description: t('writingTools.plagiarismChecker.authErrorDesc'), variant: "destructive" });
-        return;
-    }
-
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-        const token = await firebaseUser.getIdToken();
-        const result = await processFileApi(formData, token);
-        form.setValue('text', result.markdown, { shouldValidate: true });
-        toast({ title: t('writingTools.plagiarismChecker.fileProcessedTitle'), description: t('writingTools.plagiarismChecker.fileProcessedDesc').replace('{fileName}', file.name) });
-        refetchUser();
-    } catch (error: any) {
-        toast({ title: t('writingTools.plagiarismChecker.fileProcessingFailedTitle'), description: error.message, variant: "destructive" });
-    } finally {
-        setIsUploading(false);
-    }
-  }, [firebaseUser, form, refetchUser, toast, t]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    multiple: false,
-    accept: {
-      'application/pdf': ['.pdf'],
-      'text/plain': ['.txt'],
-      'text/markdown': ['.md'],
-    },
-  });
-
-  const onSubmit = async (data: PlagiarismFormValues) => {
-    mutation.mutate({ text: data.text }, {
-      onError: (error) => {
-        toast({ title: t('writingTools.plagiarismChecker.checkFailedTitle'), description: error.message, variant: 'destructive' });
-      }
-    });
-  };
-
-  const results = mutation.data as PlagiarismCheckOutput | undefined;
+  const {
+    form,
+    mutation,
+    isUploading,
+    getRootProps,
+    getInputProps,
+    isDragActive,
+    onSubmit,
+    getScoreColor,
+    results,
+  } = usePlagiarismCheckerLogic();
 
   return (
     <Card>
@@ -185,10 +125,4 @@ export function PlagiarismCheckerTool() {
       </CardContent>
     </Card>
   );
-}
-
-function getScoreColor(score: number) {
-    if (score < 25) return 'text-destructive';
-    if (score < 80) return 'text-yellow-500';
-    return 'text-green-500';
 }

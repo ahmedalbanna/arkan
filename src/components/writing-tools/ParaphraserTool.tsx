@@ -1,11 +1,7 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useWritingTool } from '@/hooks';
+import { Controller } from 'react-hook-form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,94 +9,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check, UploadCloud } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { toast } from '@/hooks';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { useDropzone } from 'react-dropzone';
-import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services';
-import { useLocalization } from '@/context/LocalizationContext';
-
-const paraphraserSchema = z.object({
-  text: z.string().min(10, 'Please enter at least 10 characters to paraphrase.'),
-  mode: z.enum(['standard', 'fluent', 'formal', 'creative', 'simplify']),
-});
-
-type ParaphraserFormValues = z.infer<typeof paraphraserSchema>;
+import { useParaphraserLogic } from '@/hooks';
 
 export function ParaphraserTool() {
-  const { t } = useLocalization();
-  const [originalText, setOriginalText] = useState('');
-  const [paraphrasedText, setParaphrasedText] = useState('');
-  const [isCopied, setIsCopied] = useState(false);
-  const { firebaseUser, refetchUser } = useAuth();
-  const [isUploading, setIsUploading] = useState(false);
-
-  const paraphraseMutation = useWritingTool('/api/writing-tools/paraphrase', {
-    onSuccess: (data: any) => {
-        setParaphrasedText(data.paraphrasedText);
-        toast({ title: t('writingTools.paraphraser.toastSuccess') });
-    },
-    onError: (error) => {
-        toast({ title: t('writingTools.paraphraser.toastError'), description: error.message, variant: 'destructive' });
-    }
-  });
-
-  const form = useForm<ParaphraserFormValues>({
-    resolver: zodResolver(paraphraserSchema),
-    defaultValues: { text: '', mode: 'standard' },
-  });
-
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
-
-    if (!firebaseUser) {
-        toast({ title: t('writingTools.paraphraser.toastAuthError'), description: t('writingTools.paraphraser.toastAuthErrorDesc'), variant: "destructive" });
-        return;
-    }
-
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-        const token = await firebaseUser.getIdToken();
-        const result = await processFileApi(formData, token);
-        form.setValue('text', result.markdown, { shouldValidate: true });
-        toast({ title: t('writingTools.paraphraser.toastFileProcessed'), description: t('writingTools.paraphraser.toastFileProcessedDesc').replace('{fileName}', file.name) });
-        refetchUser();
-    } catch (error: any) {
-        toast({ title: t('writingTools.paraphraser.toastFileFailed'), description: error.message, variant: "destructive" });
-    } finally {
-        setIsUploading(false);
-    }
-  }, [firebaseUser, form, refetchUser, toast, t]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    multiple: false,
-    accept: {
-      'application/pdf': ['.pdf'],
-      'text/plain': ['.txt'],
-      'text/markdown': ['.md'],
-    },
-  });
-
-  const onSubmit = (data: ParaphraserFormValues) => {
-    setOriginalText(data.text);
-    paraphraseMutation.mutate(data);
-  };
-
-  const handleCopy = () => {
-    if (!paraphrasedText) return;
-    navigator.clipboard.writeText(paraphrasedText).then(() => {
-        setIsCopied(true);
-        toast({ title: 'Copied to clipboard!' });
-        setTimeout(() => setIsCopied(false), 2000);
-    });
-  };
+  const {
+    t,
+    form,
+    paraphraseMutation,
+    isUploading,
+    getRootProps,
+    getInputProps,
+    isDragActive,
+    onSubmit,
+    originalText,
+    paraphrasedText,
+    isCopied,
+    handleCopy,
+  } = useParaphraserLogic();
 
   return (
     <Card>
