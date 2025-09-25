@@ -1,8 +1,5 @@
 'use client';
 
-import type { AnyProjectProposal } from '@/ai/schemas';
-import { Button } from '@/components/ui/button';
-import { SectionToolbar } from '../section/SectionToolbar';
 import RichTextEditor from '../ui/RichTextEditor';
 import { Card, CardFooter, CardHeader, CardTitle, CardContent } from '../ui/card';
 import { useSectionLogic } from '@/hooks';
@@ -12,6 +9,8 @@ import remarkGfm from 'remark-gfm';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { DiffView } from '../shared/DiffView';
 import { Wand2, ThumbsDown, Check } from 'lucide-react';
+import { Button } from '../ui/button';
+
 
 interface ProposalSectionProps {
     sectionKey: string; // Use string for general keys
@@ -41,12 +40,7 @@ export const ProposalSection = ({ sectionKey, title, content, onUpdate }: Propos
                 <h2 className="font-semibold text-lg md:text-xl text-primary/90 font-headline">
                     {title}
                 </h2>
-                <SectionToolbar
-                    isProcessingAi={isProcessingAi}
-                    onAiAction={handleAiAction}
-                    onReadAloud={handleReadAloud}
-                    isReadingAloud={ttsMutation.isPending}
-                />
+                {/* The toolbar is now part of the RichTextEditor's bubble menu */}
             </div>
             <div className="space-y-1 text-xs text-muted-foreground">
                 <span>{words} {t('builder.Section.words')}</span>
@@ -57,6 +51,10 @@ export const ProposalSection = ({ sectionKey, title, content, onUpdate }: Propos
             <RichTextEditor
                 content={content} // Pass the original content
                 onChange={(newMarkdown) => onUpdate(sectionKey, newMarkdown)}
+                onAiAction={handleAiAction}
+                onReadAloud={handleReadAloud}
+                isProcessingAi={isProcessingAi}
+                isReadingAloud={ttsMutation.isPending}
             />
 
             {aiSuggestion && (

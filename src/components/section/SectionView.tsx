@@ -1,17 +1,17 @@
 'use client';
 
 import type { SectionName } from '@/ai/schemas';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSectionLogic } from '@/hooks';
-import { Check, ThumbsDown, Wand2 } from 'lucide-react';
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import RichTextEditor from '../ui/RichTextEditor';
-import { markdownComponents } from '@/lib/markdown-styles';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { Wand2, ThumbsDown, Check } from 'lucide-react';
 import { DiffView } from '../shared/DiffView';
-import { SectionToolbar } from './SectionToolbar';
+import ReactMarkdown from 'react-markdown';
+import { markdownComponents } from '@/lib/markdown-styles';
+import { remark } from 'remark';
+import remarkGfm from 'remark-gfm';
 
 interface SectionProps {
     sectionKey: SectionName;
@@ -43,12 +43,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                     <Icon className="w-5 h-5"/>
                     {title}
                 </h2>
-                 <SectionToolbar
-                    isProcessingAi={isProcessingAi}
-                    onAiAction={handleAiAction}
-                    onReadAloud={handleReadAloud}
-                    isReadingAloud={ttsMutation.isPending}
-                />
+                {/* The main toolbar is now handled by the BubbleMenu in the editor */}
             </div>
             <div className="space-y-1 text-xs text-muted-foreground">
                 <span>{words} {t('builder.Section.words')}</span>
@@ -57,8 +52,12 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
             </div>
             <div className="group relative space-y-4 mt-4">
                 <RichTextEditor
-                    content={content} // Pass the original content
+                    content={content}
                     onChange={(newMarkdown) => onUpdate(sectionKey, newMarkdown)}
+                    onAiAction={handleAiAction}
+                    onReadAloud={handleReadAloud}
+                    isProcessingAi={isProcessingAi}
+                    isReadingAloud={ttsMutation.isPending}
                 />
 
                 {aiSuggestion && (

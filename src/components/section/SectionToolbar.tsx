@@ -53,7 +53,7 @@ export function SectionToolbar({
     ];
 
     return (
-        <div className="flex items-center gap-1 rounded-full border bg-background p-1 shadow-sm">
+        <div className="flex items-center gap-1 rounded-full border bg-background p-1 shadow-lg">
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild>

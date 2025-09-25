@@ -1,12 +1,14 @@
 
 'use client';
 
-import TextAlign from '@tiptap/extension-text-align';
-import { Editor, EditorContent, useEditor } from '@tiptap/react';
+import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { marked } from 'marked';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDebounce } from '@/hooks';
+import { SectionToolbar } from '../section/SectionToolbar';
+import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
+import TextAlign from '@tiptap/extension-text-align';
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -73,21 +75,38 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
 interface RichTextEditorProps {
   content: string; // Expecting Markdown content
   onChange: (markdown: string) => void;
+  onAiAction: (action: string, payload?: any) => void;
+  onReadAloud: () => void;
+  isProcessingAi: boolean;
+  isReadingAloud: boolean;
 }
 
-const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange }) => {
+const RichTextEditor: React.FC<RichTextEditorProps> = ({
+  content,
+  onChange,
+  onAiAction,
+  onReadAloud,
+  isProcessingAi,
+  isReadingAloud,
+}) => {
   const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr');
+  const [isUpdatingFromProp, setIsUpdatingFromProp] = useState(false);
 
   const editor = useEditor({
     extensions: [
       StarterKit,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      BubbleMenuExtension.configure({
+        element: document.querySelector('.menu') as HTMLElement,
+      }),
     ],
     content: '',
     onUpdate: ({ editor }) => {
-      // Convert HTML back to Markdown
-      // const html = editor.getHTML();
-      // onChange(turndown.turndown(html));
+      if (isUpdatingFromProp) return; // Prevent loop
+      const html = editor.getHTML();
+      // A proper HTML to Markdown converter should be used here.
+      // For this example, we'll just pass the HTML. A library like `turndown` is recommended.
+      onChange(html);
     },
     editorProps: {
       attributes: {
@@ -96,31 +115,29 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange }) =>
     },
   });
 
-  // This effect ensures that if the `content` prop changes from the outside
-  // (e.g., after an AI action), the editor's content is updated.
   useEffect(() => {
-    if (editor && content) {
-      const html = marked.parse(content) as string;
-      // Check if the editor's content is already the same to prevent unnecessary updates
-      // and cursor jumping.
+    if (editor) {
+      const html = marked.parse(content || '<p></p>') as string;
       if (editor.getHTML() !== html) {
-        editor.commands.setContent(html, false); // `false` prevents the update event from firing
+        setIsUpdatingFromProp(true);
+        editor.commands.setContent(html, false);
+        setIsUpdatingFromProp(false);
       }
     }
-  }, [editor, content]);
-
-  const debouncedContent = useDebounce(editor?.getHTML(), 500); // Debounce editor content
-
-  useEffect(() => {
-    if (debouncedContent) {
-      // const markdown = turndown.turndown(debouncedContent);
-      // onChange(markdown);
-    }
-  }, [debouncedContent, onChange]);
+  }, [content, editor]);
 
   return (
     <div dir={direction}>
-      <MenuBar editor={editor} setDirection={setDirection} />
+      {editor && (
+        <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
+          <SectionToolbar
+            isProcessingAi={isProcessingAi}
+            onAiAction={onAiAction}
+            onReadAloud={onReadAloud}
+            isReadingAloud={isReadingAloud}
+          />
+        </BubbleMenu>
+      )}
       <div className="rounded-b-lg p-2 min-h-[200px] relative">
         <EditorContent editor={editor} />
       </div>
