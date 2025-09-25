@@ -5,7 +5,8 @@
 import {
   CopyCheck, UserCheck, Fingerprint, Repeat, BookOpenText,
   SpellCheck, FileQuestion, CheckCircle, Quote, BrainCircuit, PenSquare, Search, Lightbulb, PencilLine, FileEdit, Presentation, Brain,
-  GitGraph
+  GitGraph,
+  PencilRuler
 } from 'lucide-react';
 import { AIToolCard } from '@/components/writing-tools/AIToolCard';
 import { useLocalization } from '@/context/LocalizationContext';
