@@ -28,7 +28,7 @@ export function useWritingTool<TData = any, TVariables = any>(
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
       // The endpoint is now the tool name itself.
-      return writingToolApi(endpoint.replace('/api/writing-tools/', ''), { data: variables, token });
+      return writingToolApi(endpoint, { data: variables, token });
     },
     onSuccess: (data, variables, context) => {
         refetchUser(); // Invalidate user to update credits

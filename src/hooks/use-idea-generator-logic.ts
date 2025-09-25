@@ -14,7 +14,7 @@ export function useIdeaGeneratorLogic() {
   const { t } = useLocalization();
   const { toast } = useToast();
 
-  const mutation = useWritingTool('/api/writing-tools/generate-ideas', {
+  const mutation = useWritingTool('generate-ideas', {
     onError: (error) => {
         toast({ title: "Idea Generation Failed", description: error.message, variant: 'destructive' });
     }
