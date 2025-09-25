@@ -47,10 +47,7 @@ export async function rewriteText(input: RewriteTextInput): Promise<RewriteTextO
 
   const instruction = styleInstructions[input.style] || "Rewrite the text as requested.";
 
-  const prompt = ai.definePrompt({
-    name: 'rewriteTextPrompt',
-    input: { schema: RewriteTextInputSchema },
-    output: { schema: RewriteTextOutputSchema },
+  const llmResponse = await ai.generate({
     model: 'googleai/gemini-1.5-flash',
     prompt: `You are an expert editor. Your task is to rewrite the following text based on the provided style instruction, preserving the core meaning and markdown formatting.
 Return only the rewritten text.
@@ -59,7 +56,7 @@ Return only the rewritten text.
 
 **Original Text:**
 ---
-{{{text}}}
+${input.text}
 ---
 `,
     config: {
@@ -67,12 +64,13 @@ Return only the rewritten text.
     }
   });
 
-  const { output } = await prompt({ text: input.text, style: input.style });
-  if (!output) {
+  const rewrittenText = llmResponse.text.replace(/---/g, '').trim();
+
+  if (!rewrittenText) {
       throw new Error("Failed to rewrite text.");
   }
-  output.rewrittenText = output.rewrittenText.replace(/---/g, '').trim();
-  return output;
+  
+  return { rewrittenText };
 }
 
 
