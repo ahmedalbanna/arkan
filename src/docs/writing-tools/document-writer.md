@@ -16,6 +16,6 @@ The Document Writer is a powerful tool designed to generate complete, long-form 
 1.  A user navigates to the "AI Document Writer" page.
 2.  They provide a `topic` and select a `documentType` (e.g., "Blog Post", "Essay").
 3.  Optionally, they can add specific `knowledge` or a `tableOfContents` to guide the AI.
-4.  The client calls the `/api/ai/writing-tools/write-document` endpoint.
+4.  The client calls the `/api/writing-tools/write-document` endpoint.
 5.  The API route invokes the `writeDocument` flow.
 6.  The complete document, formatted in Markdown, is returned to be displayed and downloaded.

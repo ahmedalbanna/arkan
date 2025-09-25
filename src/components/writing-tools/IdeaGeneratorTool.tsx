@@ -23,7 +23,7 @@ type FormValues = IdeaGenerationInput;
 
 export function IdeaGeneratorTool() {
   const { t } = useLocalization();
-  const mutation = useWritingTool('/api/ai/writing-tools/generate-ideas', {
+  const mutation = useWritingTool('/api/writing-tools/generate-ideas', {
     onError: (error) => {
         toast({ title: "Idea Generation Failed", description: error.message, variant: 'destructive' });
     }

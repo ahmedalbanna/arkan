@@ -31,7 +31,7 @@ type PlagiarismFormValues = z.infer<typeof plagiarismSchema>;
 
 export function PlagiarismCheckerTool() {
   const { t } = useLocalization();
-  const mutation = useWritingTool('/api/ai/writing-tools/plagiarism-checker');
+  const mutation = useWritingTool('/api/writing-tools/plagiarism-checker');
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 

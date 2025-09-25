@@ -37,7 +37,7 @@ export function ParaphraserTool() {
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 
-  const paraphraseMutation = useWritingTool('/api/ai/writing-tools/paraphrase', {
+  const paraphraseMutation = useWritingTool('/api/writing-tools/paraphrase', {
     onSuccess: (data: any) => {
         setParaphrasedText(data.paraphrasedText);
         toast({ title: t('writingTools.paraphraser.toastSuccess') });

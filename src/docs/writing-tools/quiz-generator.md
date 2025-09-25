@@ -15,6 +15,6 @@ The Quiz Generator allows users to automatically create a multiple-choice quiz f
 1.  A user navigates to the "AI Quiz Generator" page.
 2.  They paste the source text into the text area.
 3.  They use a slider to select the desired number of questions.
-4.  The client calls the `/api/ai/writing-tools/generate-quiz` endpoint.
+4.  The client calls the `/api/writing-tools/generate-quiz` endpoint.
 5.  The API route invokes the `generateQuiz` flow.
 6.  The structured quiz data is returned to the client and displayed in an interactive format where answers can be shown or hidden.

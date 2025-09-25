@@ -16,6 +16,6 @@ The AI Fact Checker is designed to analyze a piece of text, identify verifiable 
 
 1.  A user navigates to the "Fact Checker" page.
 2.  They paste the text they wish to check.
-3.  The client calls the `/api/ai/writing-tools/fact-checker` endpoint.
+3.  The client calls the `/api/writing-tools/fact-checker` endpoint.
 4.  The API route invokes the `factCheckText` flow.
 5.  The structured report, including each claim's status, explanation, and source, is returned to the client and displayed in the UI.

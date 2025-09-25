@@ -13,7 +13,7 @@ The primary goal of this hook is to abstract away the boilerplate code involved 
 
 ## Parameters
 
--   `endpoint: string`: The specific API route for the tool (e.g., `/api/ai/writing-tools/rewrite-text`).
+-   `endpoint: string`: The specific API route for the tool (e.g., `/api/writing-tools/rewrite-text`).
 -   `options?: { onSuccess?: (data, variables) => void; onError?: (error, variables) => void; }`: An optional object containing `onSuccess` and `onError` callback functions. This allows the calling component to define custom logic for handling the results of the API call.
 
 ## How It Works

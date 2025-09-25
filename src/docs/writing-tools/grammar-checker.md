@@ -14,6 +14,6 @@ The Grammar Checker analyzes a piece of text for grammatical errors, spelling mi
 
 1.  A user navigates to the "Grammar Checker" page.
 2.  They paste their text into the text area.
-3.  The client calls the `/api/ai/writing-tools/grammar-checker` endpoint.
+3.  The client calls the `/api/writing-tools/grammar-checker` endpoint.
 4.  The API route invokes the `grammarCheck` flow.
 5.  The result, containing both the `correctedText` and the `corrections` array, is returned to the client and displayed in a side-by-side view.

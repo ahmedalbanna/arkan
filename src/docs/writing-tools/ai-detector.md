@@ -14,6 +14,6 @@ The AI Content Detector is designed to analyze a piece of text and estimate the 
 
 1.  A user navigates to the "AI Detector" page.
 2.  They paste their text into the text area.
-3.  Upon clicking "Analyze Text," the frontend calls the `/api/ai/writing-tools/ai-detector` endpoint.
+3.  Upon clicking "Analyze Text," the frontend calls the `/api/writing-tools/ai-detector` endpoint.
 4.  The API route invokes the `detectAiContent` flow, which prompts the AI model to perform the analysis.
 5.  The structured result, containing the `score` and `analysis`, is returned to the client and displayed in the UI.

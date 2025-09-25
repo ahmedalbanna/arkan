@@ -15,7 +15,7 @@ interface FactCheckApiVariables extends FactCheckVariables {
  */
 export async function factCheckApi(variables: FactCheckApiVariables): Promise<FactCheckOutput> {
     const { token, ...body } = variables;
-    const response = await fetch('/api/ai/writing-tools/fact-checker', {
+    const response = await fetch('/api/writing-tools/fact-checker', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

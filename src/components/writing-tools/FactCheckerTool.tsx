@@ -31,7 +31,7 @@ type FactCheckerFormValues = z.infer<typeof factCheckerSchema>;
 
 export function FactCheckerTool() {
   const { t } = useLocalization();
-  const mutation = useWritingTool('/api/ai/writing-tools/fact-checker');
+  const mutation = useWritingTool('/api/writing-tools/fact-checker');
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 

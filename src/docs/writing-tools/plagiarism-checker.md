@@ -16,6 +16,6 @@ The Plagiarism Checker analyzes a block of text for originality by comparing it 
 
 1.  A user navigates to the "Plagiarism Checker" page.
 2.  They paste their text into the input field.
-3.  The client calls the `/api/ai/writing-tools/plagiarism-checker` endpoint.
+3.  The client calls the `/api/writing-tools/plagiarism-checker` endpoint.
 4.  The API route invokes the `plagiarismCheck` flow.
 5.  The structured report, including the originality score and detailed matches, is returned to the client.

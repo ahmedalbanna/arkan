@@ -31,7 +31,7 @@ export function QuizGeneratorTool() {
   const { t } = useLocalization();
   const [generatedQuiz, setGeneratedQuiz] = useState<any[]>([]);
   const [showAnswers, setShowAnswers] = useState(false);
-  const quizMutation = useWritingTool('/api/ai/writing-tools/generate-quiz');
+  const quizMutation = useWritingTool('/api/writing-tools/generate-quiz');
 
   const form = useForm<QuizFormValues>({
     resolver: zodResolver(quizGeneratorSchema),

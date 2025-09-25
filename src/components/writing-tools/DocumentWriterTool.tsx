@@ -33,7 +33,7 @@ export function DocumentWriterTool() {
   const [isCopied, setIsCopied] = useState(false);
   const [generatedContent, setGeneratedContent] = useState('');
 
-  const mutation = useWritingTool('/api/ai/writing-tools/write-document', {
+  const mutation = useWritingTool('/api/writing-tools/write-document', {
     onSuccess: (data: any) => {
         setGeneratedContent(data.documentContent);
         toast({ title: 'Document generated successfully!' });

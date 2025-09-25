@@ -14,6 +14,6 @@ The Topic Explainer is an educational tool that takes a complex topic or term fr
 
 1.  A user navigates to the "Topic Explainer" page.
 2.  They enter the topic they want to understand (e.g., "Quantum Entanglement", "Blockchain").
-3.  The client calls the `/api/ai/writing-tools/topic-explainer` endpoint.
+3.  The client calls the `/api/writing-tools/topic-explainer` endpoint.
 4.  The API route invokes the `topicExplainer` flow.
 5.  The generated Markdown explanation is returned and displayed in a formatted view.

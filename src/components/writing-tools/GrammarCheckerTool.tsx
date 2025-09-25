@@ -31,7 +31,7 @@ type GrammarFormValues = z.infer<typeof grammarSchema>;
 export function GrammarCheckerTool() {
   const { t } = useLocalization();
   const [isCopied, setIsCopied] = useState(false);
-  const mutation = useWritingTool('/api/ai/writing-tools/grammar-checker');
+  const mutation = useWritingTool('/api/writing-tools/grammar-checker');
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 

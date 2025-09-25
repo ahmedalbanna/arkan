@@ -1,5 +1,4 @@
 
-
 export * from './use-academic-solver';
 export * from './use-academic-solver-logic';
 export * from './use-admin-dashboard';
@@ -55,6 +54,26 @@ export * from './use-upload-project-logic';
 export * from './use-user';
 export * from './use-user-management-console';
 export * from './use-writing-tools';
+
+// Logic Hooks for Writing Tools
+export * from './use-ai-detector-logic';
+export * from './use-ai-researcher-logic';
+export * from './use-citation-generator-logic';
+export * from './use-document-writer-logic';
+export * from './use-fact-checker-logic';
+export * from './use-grammar-checker-logic';
+export * from './use-humanizer-logic';
+export * from './use-idea-generator-logic';
+export * from './use-paraphraser-logic';
+export * from './use-plagiarism-checker-logic';
+export * from './use-presentation-outline-logic';
+export * from './use-quiz-generator-logic';
+export * from './use-summarizer-logic';
+export * from './use-text-stylist-logic';
+export * from './use-topic-explainer-logic';
+export * from './use-plant-uml-generator-logic';
+export * from './use-session-plan-generator-logic';
+
 
 // Store hooks
 export * from './useAgentStore';

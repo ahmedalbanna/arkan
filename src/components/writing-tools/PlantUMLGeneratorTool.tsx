@@ -61,7 +61,7 @@ export function PlantUMLGeneratorTool() {
   const [generatedCode, setGeneratedCode] = useState('');
   const [isCopied, setIsCopied] = useState(false);
 
-  const mutation = useWritingTool('/api/ai/writing-tools/generate-plantuml', {
+  const mutation = useWritingTool('/api/writing-tools/generate-plantuml', {
     onSuccess: (data: any) => {
         setGeneratedCode(data.plantUmlCode);
         toast({ title: 'Diagram generated successfully!' });

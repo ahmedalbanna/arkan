@@ -13,7 +13,7 @@ interface TopicExplainerApiVariables extends TopicExplainerVariables {
  */
 export async function topicExplainerApi(variables: TopicExplainerApiVariables): Promise<TopicExplainerOutput> {
     const { token, ...body } = variables;
-    const response = await fetch('/api/ai/writing-tools/topic-explainer', {
+    const response = await fetch('/api/writing-tools/topic-explainer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(body),
