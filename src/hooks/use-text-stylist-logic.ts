@@ -27,8 +27,8 @@ export function useTextStylistLogic() {
   const [activeView, setActiveView] = useState<'side-by-side' | 'diff'>('side-by-side');
   const { toast } = useToast();
 
-  const rewriteMutation = useWritingTool('/api/writing-tools/rewrite-text');
-  const summarizeMutation = useWritingTool('/api/writing-tools/summarize-with-ratio');
+  const rewriteMutation = useWritingTool('rewrite-text');
+  const summarizeMutation = useWritingTool('summarize-with-ratio');
   const isProcessing = rewriteMutation.isPending || summarizeMutation.isPending;
 
   const form = useForm<FormValues>({

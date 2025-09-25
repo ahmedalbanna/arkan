@@ -74,23 +74,23 @@ export interface GeneratePlantUMLVariables {
 }
 
 export interface ManipulateTextVariables {
-    text: string;
+    textToManipulate: string;
     command: string;
 }
 
 
 /**
  * A generic API handler for all writing tools.
- * @param tool The specific tool name (e.g., 'summarize', 'paraphrase').
+ * @param endpoint The specific API endpoint for the tool (e.g., '/api/writing-tools/summarize').
  * @param variables An object containing the request body and the auth token.
  * @returns A promise that resolves to the API response.
  */
 export async function writingToolApi<TRequest, TResponse>(
-  tool: string,
+  endpoint: string,
   variables: { data: TRequest; token: string }
 ): Promise<TResponse> {
   const { token, data } = variables;
-  const response = await fetch(`/api/writing-tools/${tool}`, {
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -101,7 +101,7 @@ export async function writingToolApi<TRequest, TResponse>(
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || `API call to ${tool} failed.`);
+    throw new Error(error.message || `API call to ${endpoint} failed.`);
   }
 
   return response.json();
