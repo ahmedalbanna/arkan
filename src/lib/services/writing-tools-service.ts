@@ -81,7 +81,7 @@ export interface ManipulateTextVariables {
 
 /**
  * A generic API handler for all writing tools.
- * @param endpoint The specific API endpoint for the tool (e.g., '/api/writing-tools/summarize').
+ * @param endpoint The specific API endpoint for the tool (e.g., '/api/ai/writing-tools/summarize').
  * @param variables An object containing the request body and the auth token.
  * @returns A promise that resolves to the API response.
  */

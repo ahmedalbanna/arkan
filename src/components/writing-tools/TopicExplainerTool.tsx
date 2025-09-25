@@ -24,7 +24,7 @@ const explainerSchema = z.object({
 type ExplainerFormValues = z.infer<typeof explainerSchema>;
 
 export function TopicExplainerTool() {
-  const mutation = useWritingTool('/api/writing-tools/topic-explainer');
+  const mutation = useWritingTool('/api/ai/writing-tools/topic-explainer');
   const { t } = useLocalization();
 
   const form = useForm<ExplainerFormValues>({

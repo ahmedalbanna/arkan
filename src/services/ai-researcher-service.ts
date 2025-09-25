@@ -13,7 +13,7 @@ interface AIResearcherApiVariables extends AIResearcherVariables {
  */
 export async function aiResearcherApi(variables: AIResearcherApiVariables): Promise<AIResearcherOutput> {
     const { token, ...body } = variables;
-    const response = await fetch('/api/writing-tools/ai-researcher', {
+    const response = await fetch('/api/ai/writing-tools/ai-researcher', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(body),

@@ -78,7 +78,7 @@ function jsonToMarkdown(json: any, level = 1): string {
 
 export default function AnalystAgent() {
     const { t } = useLocalization();
-    const { project, addExternalContext } = useBuilderStore();
+    const { project, updateProject } = useBuilderStore();
     const externalContext = project?.externalContext || [];
     const { firebaseUser, refetchUser, userProfile } = useAuth();
     const { resolvedTheme } = useTheme();
@@ -119,7 +119,7 @@ export default function AnalystAgent() {
 
         const fileName = form.getValues('prompt').toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').slice(0, 50) + '.md';
 
-        addExternalContext(fileName, markdownResult, 'context');
+        updateProject(p => p.addExternalContext(fileName, markdownResult, 'context'));
         toast({ title: t('builder.files.toasts.analysisSaved'), description: t('builder.files.toasts.analysisSavedDesc').replace('{fileName}', fileName) });
     };
 

@@ -31,7 +31,7 @@ export function HumanizerTool() {
   const [processedText, setProcessedText] = useState('');
   const [isCopied, setIsCopied] = useState(false);
 
-  const mutation = useWritingTool('/api/writing-tools/humanize');
+  const mutation = useWritingTool('/api/ai/writing-tools/humanize');
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),

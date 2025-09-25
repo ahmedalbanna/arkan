@@ -64,8 +64,8 @@ export function AITextTune() {
   const [compressionRatio, setCompressionRatio] = useState(50);
   const [activeView, setActiveView] = useState<'side-by-side' | 'diff'>('side-by-side');
 
-  const rewriteMutation = useWritingTool('/api/writing-tools/rewrite-text');
-  const summarizeMutation = useWritingTool('/api/writing-tools/summarize-with-ratio');
+  const rewriteMutation = useWritingTool('/api/ai/writing-tools/rewrite-text');
+  const summarizeMutation = useWritingTool('/api/ai/writing-tools/summarize-with-ratio');
   const isProcessing = rewriteMutation.isPending || summarizeMutation.isPending;
 
   const form = useForm<FormValues>({

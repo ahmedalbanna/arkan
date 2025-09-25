@@ -14,6 +14,6 @@ The AI Humanizer is designed to take text that sounds robotic or overly formal (
 
 1.  A user navigates to the "AI Humanizer" page.
 2.  They paste the text they want to improve.
-3.  The client calls the `/api/writing-tools/humanize` endpoint.
+3.  The client calls the `/api/ai/writing-tools/humanize` endpoint.
 4.  The API route invokes the `humanizeText` flow.
 5.  The rewritten, more natural-sounding text is returned to the client.

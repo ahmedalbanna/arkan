@@ -15,6 +15,6 @@ The Citation Generator helps users create properly formatted academic citations 
 1.  A user navigates to the "Citation Generator" page.
 2.  They paste their source material (e.g., a URL) into the text area.
 3.  They select the desired citation style from a dropdown menu.
-4.  The client calls the `/api/writing-tools/citation-generator` endpoint.
+4.  The client calls the `/api/ai/writing-tools/citation-generator` endpoint.
 5.  The API route invokes the `generateCitation` flow.
 6.  The single, correctly formatted citation string is returned and displayed to the user for copying.

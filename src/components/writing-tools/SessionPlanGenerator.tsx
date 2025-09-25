@@ -27,7 +27,7 @@ type SessionPlanFormValues = z.infer<typeof formSchema>;
 
 export const SessionPlanGenerator = () => {
   const [result, setResult] = useState<GenerateSessionPlanOutput | null>(null);
-  const mutation = useWritingTool<GenerateSessionPlanOutput, SessionPlanFormValues>('/api/writing-tools/generate-session-plan', {
+  const mutation = useWritingTool<GenerateSessionPlanOutput, SessionPlanFormValues>('/api/ai/writing-tools/generate-session-plan', {
     onSuccess: (data) => {
       setResult(data);
     },

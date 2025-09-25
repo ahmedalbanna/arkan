@@ -15,7 +15,7 @@ interface DetectAIApiVariables extends DetectAIVariables {
  */
 export async function detectAiContentApi(variables: DetectAIApiVariables): Promise<DetectAIOutput> {
     const { token, ...body } = variables;
-    const response = await fetch('/api/writing-tools/ai-detector', {
+    const response = await fetch('/api/ai/writing-tools/ai-detector', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

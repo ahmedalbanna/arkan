@@ -36,7 +36,7 @@ export function SummarizerTool() {
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 
-  const summarizeMutation = useWritingTool('/api/writing-tools/summarize', {
+  const summarizeMutation = useWritingTool('/api/ai/writing-tools/summarize', {
     onSuccess: (data: any) => {
         setSummarizedText(data.summary);
         toast({ title: t('writingTools.summarizer.successToast') });

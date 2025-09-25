@@ -31,7 +31,7 @@ export function useProposalGenerationToolsLogic() {
     const { externalContext } = project ?? {};
     const generationMutation = useGenerateProposal();
 
-    const suggestIdeaMutation = useWritingTool('/api/writing-tools/generate-text', {
+    const suggestIdeaMutation = useWritingTool('/api/ai/writing-tools/generate-text', {
         onSuccess: (data: any) => {
             setProjectIdea(data.generatedText);
             toast({ title: "Idea Suggested", description: "A new project idea has been generated for you." });

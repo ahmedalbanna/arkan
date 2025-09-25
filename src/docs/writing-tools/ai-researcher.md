@@ -17,6 +17,6 @@ The AI Researcher acts as an automated research assistant. It takes a topic from
 
 1.  A user navigates to the "AI Researcher" page.
 2.  They enter a research topic into the input field.
-3.  The client calls the `/api/writing-tools/ai-researcher` endpoint.
+3.  The client calls the `/api/ai/writing-tools/ai-researcher` endpoint.
 4.  The API route invokes the `aiResearcher` flow.
 5.  The structured research report is returned to the client and displayed in a formatted view.

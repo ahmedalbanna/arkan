@@ -63,7 +63,7 @@ function ViewContextDialog({ item }: { item: { fileName: string, content: string
 function FileDropzone() {
     const { t } = useLocalization();
     const { toast } = useToast();
-    const { firebaseUser } = useAuth();
+    const { firebaseUser, refetchUser } = useAuth();
     const { updateProject } = useBuilderStore();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -75,25 +75,27 @@ function FileDropzone() {
 
         setIsLoading(true);
         for (const file of acceptedFiles) {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onloadend = () => {
-                const content = reader.result as string;
-                updateProject(p => p.addExternalContext(file.name, content, 'context'));
+            try {
+                const token = await firebaseUser.getIdToken();
+                const formData = new FormData();
+                formData.append('file', file);
+                const result = await processFileApi(formData, token);
+                updateProject(p => p.addExternalContext(file.name.replace(/\.[^/.]+$/, ".md"), result.markdown, 'context'));
                 toast({ title: t('builder.files.toasts.fileAdded'), description: t('builder.files.toasts.fileAddedDesc').replace('{fileName}', file.name) });
-            };
-            reader.onerror = () => {
-                toast({ title: t('builder.files.toasts.fileReadError'), description: t('builder.files.toasts.fileReadErrorDesc'), variant: "destructive" });
+                refetchUser();
+            } catch (error: any) {
+                 toast({ title: t('builder.files.toasts.uploadFailed'), description: error.message, variant: "destructive" });
             }
         }
         setIsLoading(false);
-    }, [firebaseUser, updateProject, toast, t]);
+    }, [firebaseUser, updateProject, toast, refetchUser, t]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
         multiple: true,
         accept: {
             'application/pdf': ['.pdf'],
+            'application/msword': ['.doc'],
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
             'text/plain': ['.txt'],
             'text/markdown': ['.md'],
@@ -133,10 +135,7 @@ function FileDropzone() {
 export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
     const { t } = useLocalization();
     const { project, updateProject } = useBuilderStore();
-    const [processingFileIndex, setProcessingFileIndex] = useState<number | null>(null);
-    const { firebaseUser, refetchUser } = useAuth();
-    const { toast } = useToast();
-
+    
     const externalContext = project?.externalContext || [];
 
     const removeExternalContext = (index: number) => {
@@ -146,38 +145,6 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
     const updateExternalContextType = (index: number, type: ContextFileType) => {
         updateProject(p => { p.updateExternalContextType(index, type); });
     };
-
-    const handleProcessFile = async (index: number) => {
-        if (!project) return;
-        const fileToProcess = project.externalContext[index];
-        if (!fileToProcess || !fileToProcess.content.startsWith('data:') || !firebaseUser) return;
-
-        setProcessingFileIndex(index);
-        try {
-            const token = await firebaseUser.getIdToken();
-            const blob = await fetch(fileToProcess.content).then(res => res.blob());
-            const file = new File([blob], fileToProcess.fileName, { type: blob.type });
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            const result = await processFileApi(formData, token);
-            updateProject(p => p.replaceExternalContext(index, {
-                fileName: fileToProcess.fileName.replace(/\.[^/.]+$/, "") + ".md",
-                content: result.markdown,
-                type: 'context',
-            }));
-
-            refetchUser();
-            toast({ title: "File Processed", description: `"${fileToProcess.fileName}" has been converted to Markdown.` });
-
-        } catch (error: any) {
-            toast({ title: "Processing Failed", description: error.message, variant: "destructive" });
-        } finally {
-            setProcessingFileIndex(null);
-        }
-    };
-
 
     const fileTypes: ContextFileType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
 
@@ -214,11 +181,6 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
                         <ScrollArea className="flex-grow border rounded-lg">
                             <ul className="space-y-1 list-none p-2">
                                 {externalContext.map((item, index) => {
-                                    const isDataUri = item.content.startsWith('data:');
-                                    const isImage = isDataUri && item.content.startsWith('data:image');
-                                    const isPdf = isDataUri && item.content.startsWith('data:application/pdf');
-                                    const isProcessable = isPdf || isImage;
-
                                     return (
                                         <li key={index} className="flex items-center justify-between p-2 rounded-md hover:bg-muted">
                                             <div className="flex items-center gap-2 truncate ">
@@ -226,11 +188,6 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
                                                 <span className="truncate font-medium text-sm" style={{ maxWidth: '200px' }}>{item.fileName}</span>
                                             </div>
                                             <div className="flex items-center gap-1">
-                                                {isProcessable && (
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleProcessFile(index)} disabled={processingFileIndex === index}>
-                                                        {processingFileIndex === index ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-                                                    </Button>
-                                                )}
                                                 <Select value={item.type} onValueChange={(value: ContextFileType) => updateExternalContextType(index, value)}>
                                                     <SelectTrigger className={cn("text-xs h-7 w-auto p-0 border-0 bg-transparent focus:ring-0", {
                                                         'text-blue-800 dark:text-blue-200': item.type === 'context',

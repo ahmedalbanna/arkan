@@ -15,7 +15,7 @@ interface PlagiarismCheckApiVariables extends PlagiarismCheckVariables {
  */
 export async function plagiarismCheckApi(variables: PlagiarismCheckApiVariables): Promise<PlagiarismCheckOutput> {
     const { token, ...body } = variables;
-    const response = await fetch('/api/writing-tools/plagiarism-checker', {
+    const response = await fetch('/api/ai/writing-tools/plagiarism-checker', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

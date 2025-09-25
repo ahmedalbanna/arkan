@@ -90,7 +90,7 @@ export async function writingToolApi<TRequest, TResponse>(
   variables: { data: TRequest; token: string }
 ): Promise<TResponse> {
   const { token, data } = variables;
-  const response = await fetch(`/api/writing-tools/${tool}`, {
+  const response = await fetch(`/api/ai/writing-tools/${tool}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -11,7 +11,7 @@ import { handleErrorUtility } from '@/lib/errorUtils';
 
 /**
  * Generic custom mutation hook for all writing tools.
- * @param endpoint The specific API endpoint for the tool (e.g., '/api/writing-tools/summarize').
+ * @param endpoint The specific API endpoint for the tool (e.g., '/api/ai/writing-tools/summarize').
  * @param options Optional callbacks for onSuccess and onError.
  * @returns The result of the useMutation hook.
  */
@@ -28,7 +28,7 @@ export function useWritingTool<TData = any, TVariables = any>(
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
       // The endpoint is now the tool name itself.
-      return writingToolApi(endpoint.replace('/api/writing-tools/', ''), { data: variables, token });
+      return writingToolApi(endpoint.replace('/api/ai/writing-tools/', ''), { data: variables, token });
     },
     onSuccess: (data, variables, context) => {
         refetchUser(); // Invalidate user to update credits

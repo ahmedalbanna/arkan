@@ -32,7 +32,7 @@ interface AIAnalysisResult {
 
 export function AIDetectorTool() {
   const { t } = useLocalization();
-  const mutation = useWritingTool('/api/writing-tools/ai-detector');
+  const mutation = useWritingTool('/api/ai/writing-tools/ai-detector');
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 

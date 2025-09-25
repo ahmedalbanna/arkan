@@ -1,11 +1,11 @@
 
 'use server';
 
-import { imageToText } from '@/ai/flows/image-to-text';
-import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
+import { imageToText } from '@/ai/flows/image-to-text';
+import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
 
 const SUPPORTED_MIME_TYPES = [
     'application/pdf',
@@ -30,7 +30,7 @@ export const POST = withAuth(async ({ request, user }) => {
         }
 
         // Standard credit deduction for processing
-        await deductCredit(user.id, 2);
+        await deductCredit(user.id, 1);
 
         const fileArrayBuffer = await file.arrayBuffer();
         const base64 = Buffer.from(fileArrayBuffer).toString('base64');

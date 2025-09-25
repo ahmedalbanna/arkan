@@ -17,6 +17,6 @@ TextStylist.ai is a multi-functional tool that allows users to refine a piece of
 
 1.  A user navigates to the "TextStylist.ai" page.
 2.  They enter their text.
-3.  **For Rewriting**: They select a style and click "Rewrite." This calls the `/api/writing-tools/rewrite-text` endpoint.
-4.  **For Summarizing**: They adjust the compression ratio slider and click "Summarize." This calls the `/api/writing-tools/summarize-with-ratio` endpoint.
+3.  **For Rewriting**: They select a style and click "Rewrite." This calls the `/api/ai/writing-tools/rewrite-text` endpoint.
+4.  **For Summarizing**: They adjust the compression ratio slider and click "Summarize." This calls the `/api/ai/writing-tools/summarize-with-ratio` endpoint.
 5.  The processed text is returned and displayed side-by-side with the original for easy comparison.

@@ -121,7 +121,7 @@ function AddToProjectDialog({ researchMarkdown, researchTitle, onOpenChange }: {
 
 export function AIResearcherTool() {
   const { t } = useLocalization();
-  const mutation = useWritingTool('/api/writing-tools/ai-researcher');
+  const mutation = useWritingTool('/api/ai/writing-tools/ai-researcher');
   const reportRef = useRef<HTMLDivElement>(null);
   const [isCopied, setIsCopied] = useState(false);
   const [isAddToProjectOpen, setIsAddToProjectOpen] = useState(false);

@@ -6,15 +6,22 @@ import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { analyzeContext } from '@/ai/flows/analyze-context';
+import { imageToText } from '@/ai/flows/image-to-text';
+import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
 
+// Define the schema for a single file in the request
+const FileContextSchema = z.object({
+  fileName: z.string(),
+  content: z.string(), // This will now always be markdown or plain text
+  type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
+});
+
+// Define the main schema for the API request
 const analyzeContextSchema = z.object({
   prompt: z.string().min(10, 'Prompt must be at least 10 characters long.'),
-  contextFiles: z.array(z.object({
-    fileName: z.string(),
-    content: z.string(),
-    type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
-  })),
+  contextFiles: z.array(FileContextSchema),
 });
+
 
 export const POST = withAuth(async ({ request, user }) => {
   try {
@@ -51,3 +58,4 @@ export const POST = withAuth(async ({ request, user }) => {
     return handleApiError(error);
   }
 });
+
