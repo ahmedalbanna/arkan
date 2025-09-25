@@ -1,69 +1,29 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useWritingTool } from '@/hooks';
+import { Controller } from 'react-hook-form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check } from 'lucide-react';
-import { toast } from '@/hooks';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useLocalization } from '@/context/LocalizationContext';
-
-const formSchema = z.object({
-  topic: z.string().min(5, 'Please enter a topic with at least 5 characters.'),
-  documentType: z.string().min(1, 'Please select a document type.'),
-  knowledge: z.string().optional(),
-  tableOfContents: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { useDocumentWriterLogic } from '@/hooks';
 
 export function DocumentWriterTool() {
-  const { t } = useLocalization();
-  const [isCopied, setIsCopied] = useState(false);
-  const [generatedContent, setGeneratedContent] = useState('');
-
-  const mutation = useWritingTool('/api/writing-tools/write-document', {
-    onSuccess: (data: any) => {
-        setGeneratedContent(data.documentContent);
-        toast({ title: 'Document generated successfully!' });
-    },
-    onError: (error) => {
-        toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    }
-  });
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { topic: '', documentType: 'essay', knowledge: '', tableOfContents: '' },
-  });
-
-  const onSubmit = (data: FormValues) => {
-    const submissionData = {
-        ...data,
-        tableOfContents: data.tableOfContents ? data.tableOfContents.split('\n').filter(line => line.trim() !== '') : undefined,
-    };
-    mutation.mutate(submissionData);
-  };
-
-  const handleCopy = () => {
-    if (!generatedContent) return;
-    navigator.clipboard.writeText(generatedContent).then(() => {
-      setIsCopied(true);
-      toast({ title: 'Copied to clipboard!' });
-      setTimeout(() => setIsCopied(false), 2000);
-    });
-  };
+  const {
+    t,
+    form,
+    mutation,
+    onSubmit,
+    generatedContent,
+    isCopied,
+    handleCopy,
+  } = useDocumentWriterLogic();
 
   const docTypes = [
     { value: 'essay', label: t('writingTools.documentWriter.docTypeEssay') },

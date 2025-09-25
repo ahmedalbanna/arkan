@@ -1,101 +1,46 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, CheckCircle, HelpCircle, XCircle, ExternalLink, UploadCloud, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { useWritingTool } from '@/hooks';
-import { toast } from '@/hooks';
 import type { ClaimStatus, FactCheckOutput } from '@/ai/schemas';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { useDropzone } from 'react-dropzone';
-import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services';
-import { PlagiarismCheckOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useFactCheckerLogic } from '@/hooks';
 
-const factCheckerSchema = z.object({
-  text: z.string().min(50, 'Please enter at least 50 characters for a thorough fact-check.'),
-});
+function getStatusInfo(status: ClaimStatus) {
+  switch (status) {
+    case 'Verified':
+      return { icon: CheckCircle, color: 'text-green-500', badgeVariant: 'default' as const };
+    case 'Inconclusive':
+      return { icon: HelpCircle, color: 'text-yellow-500', badgeVariant: 'secondary' as const };
+    case 'False':
+      return { icon: XCircle, color: 'text-destructive', badgeVariant: 'destructive' as const };
+  }
+};
 
-type FactCheckerFormValues = z.infer<typeof factCheckerSchema>;
-
+function getScoreColor(score: number) {
+    if (score < 50) return 'text-destructive';
+    if (score < 80) return 'text-yellow-500';
+    return 'text-green-500';
+}
 
 export function FactCheckerTool() {
   const { t } = useLocalization();
-  const mutation = useWritingTool('/api/writing-tools/fact-checker');
-  const { firebaseUser, refetchUser } = useAuth();
-  const [isUploading, setIsUploading] = useState(false);
-
-  const form = useForm<FactCheckerFormValues>({
-    resolver: zodResolver(factCheckerSchema),
-    defaultValues: { text: '' },
-  });
-
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
-
-    if (!firebaseUser) {
-        toast({ title: "Authentication Error", description: "You must be logged in to process files.", variant: "destructive" });
-        return;
-    }
-
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-        const token = await firebaseUser.getIdToken();
-        const result = await processFileApi(formData, token);
-        form.setValue('text', result.markdown, { shouldValidate: true });
-        toast({ title: "File Processed", description: `Text extracted from ${file.name}. You can now start the analysis.` });
-        refetchUser();
-    } catch (error: any) {
-        toast({ title: "File Processing Failed", description: error.message, variant: "destructive" });
-    } finally {
-        setIsUploading(false);
-    }
-  }, [firebaseUser, form, refetchUser, toast]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    multiple: false,
-    accept: {
-      'application/pdf': ['.pdf'],
-      'text/plain': ['.txt'],
-      'text/markdown': ['.md'],
-    },
-  });
-
-  const onSubmit = async (data: FactCheckerFormValues) => {
-    mutation.mutate({ text: data.text }, {
-      onError: (error) => {
-        toast({ title: t('writingTools.factChecker.checkFailedTitle'), description: error.message, variant: 'destructive' });
-      }
-    });
-  };
-
-  const getStatusInfo = (status: ClaimStatus) => {
-    switch (status) {
-      case 'Verified':
-        return { icon: CheckCircle, color: 'text-green-500', badgeVariant: 'default' as const };
-      case 'Inconclusive':
-        return { icon: HelpCircle, color: 'text-yellow-500', badgeVariant: 'secondary' as const };
-      case 'False':
-        return { icon: XCircle, color: 'text-destructive', badgeVariant: 'destructive' as const };
-    }
-  };
-
-  const results = mutation.data as FactCheckOutput | undefined;
+  const {
+    form,
+    mutation,
+    isUploading,
+    getRootProps,
+    getInputProps,
+    isDragActive,
+    onSubmit,
+    results,
+  } = useFactCheckerLogic();
 
   return (
     <Card>
@@ -202,10 +147,4 @@ export function FactCheckerTool() {
       </CardContent>
     </Card>
   );
-}
-
-function getScoreColor(score: number) {
-    if (score < 50) return 'text-destructive';
-    if (score < 80) return 'text-yellow-500';
-    return 'text-green-500';
 }

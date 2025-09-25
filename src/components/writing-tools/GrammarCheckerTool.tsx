@@ -1,102 +1,31 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check, ArrowRight, UploadCloud } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { toast } from '@/hooks';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { useWritingTool } from '@/hooks';
 import { Tabs, TabsTrigger, TabsList, TabsContent } from '@/components/ui/tabs';
-import { useDropzone } from 'react-dropzone';
-import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services';
-import { GrammarCheckOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
-
-const grammarSchema = z.object({
-  text: z.string().min(5, 'Text must be at least 5 characters to check.'),
-});
-
-type GrammarFormValues = z.infer<typeof grammarSchema>;
+import { useGrammarCheckerLogic } from '@/hooks';
 
 export function GrammarCheckerTool() {
   const { t } = useLocalization();
-  const [isCopied, setIsCopied] = useState(false);
-  const mutation = useWritingTool('/api/writing-tools/grammar-checker');
-  const { firebaseUser, refetchUser } = useAuth();
-  const [isUploading, setIsUploading] = useState(false);
-
-  const form = useForm<GrammarFormValues>({
-    resolver: zodResolver(grammarSchema),
-    defaultValues: { text: '' },
-  });
-
-   const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
-
-    if (!firebaseUser) {
-        toast({ title: "Authentication Error", description: "You must be logged in to process files.", variant: "destructive" });
-        return;
-    }
-
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-        const token = await firebaseUser.getIdToken();
-        const result = await processFileApi(formData, token);
-        form.setValue('text', result.markdown, { shouldValidate: true });
-        toast({ title: "File Processed", description: `Text extracted from ${file.name}. You can now start the analysis.` });
-        refetchUser();
-    } catch (error: any) {
-        toast({ title: "File Processing Failed", description: error.message, variant: "destructive" });
-    } finally {
-        setIsUploading(false);
-    }
-  }, [firebaseUser, form, refetchUser, toast]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    multiple: false,
-    accept: {
-      'application/pdf': ['.pdf'],
-      'text/plain': ['.txt'],
-      'text/markdown': ['.md'],
-    },
-  });
-
-  const onSubmit = async (data: GrammarFormValues) => {
-    mutation.mutate({ text: data.text }, {
-      onSuccess: () => {
-        toast({ title: 'Grammar check successful!' });
-      },
-      onError: (error) => {
-        toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      },
-    });
-  };
-
-  const results = mutation.data as GrammarCheckOutput | undefined;
-
-  const handleCopy = () => {
-    if (!results?.correctedText) return;
-    navigator.clipboard.writeText(results.correctedText).then(() => {
-      setIsCopied(true);
-      toast({ title: 'Copied to clipboard!' });
-      setTimeout(() => setIsCopied(false), 2000);
-    });
-  };
+  const {
+    form,
+    mutation,
+    isUploading,
+    getRootProps,
+    getInputProps,
+    isDragActive,
+    onSubmit,
+    results,
+    isCopied,
+    handleCopy,
+  } = useGrammarCheckerLogic();
 
   return (
     <Card>
@@ -117,6 +46,7 @@ export function GrammarCheckerTool() {
                         rows={12}
                         placeholder={t('writingTools.grammarChecker.placeholder')}
                         className="resize-none"
+                        disabled={mutation.isPending || isUploading}
                         />
                 </TabsContent>
                 <TabsContent value="upload" className="pt-4">
