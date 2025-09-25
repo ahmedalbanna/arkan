@@ -1,46 +1,24 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles } from 'lucide-react';
-import { toast } from '@/hooks';
-import { useWritingTool } from '@/hooks';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { useLocalization } from '@/context/LocalizationContext';
-
-const explainerSchema = z.object({
-  topic: z.string().min(3, 'Please enter a topic to explain.'),
-});
-
-type ExplainerFormValues = z.infer<typeof explainerSchema>;
+import { useTopicExplainerLogic } from '@/hooks';
 
 export function TopicExplainerTool() {
-  const mutation = useWritingTool('/api/writing-tools/topic-explainer');
-  const { t } = useLocalization();
-
-  const form = useForm<ExplainerFormValues>({
-    resolver: zodResolver(explainerSchema),
-    defaultValues: { topic: '' },
-  });
-
-  const onSubmit = async (data: ExplainerFormValues) => {
-    mutation.mutate(data, {
-        onError: (error) => {
-            toast({ title: "Explanation Failed", description: error.message, variant: 'destructive' });
-        }
-    });
-  };
-
-  const results = mutation.data as { explanation: string } | undefined;
+  const {
+    t,
+    form,
+    mutation,
+    onSubmit,
+    results,
+  } = useTopicExplainerLogic();
 
   return (
     <Card>
@@ -67,22 +45,20 @@ export function TopicExplainerTool() {
           </Button>
         </form>
 
-        {mutation.isPending && (
-            <div className="pt-6 border-t">
-                <div className="flex justify-center items-center text-sm text-muted-foreground">
-                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                    {t('writingTools.topicExplainer.analyzing')}
-                </div>
-            </div>
-        )}
-
-        {results && (
+        {(mutation.isPending || results) && (
           <div className="space-y-4 pt-6 border-t">
             <h3 className="font-semibold text-lg">{t('writingTools.topicExplainer.resultTitle')}</h3>
             <ScrollArea className="h-[60vh] rounded-md border p-4 bg-muted/30">
-                <div className="prose dark:prose-invert max-w-none">
-                    <ReactMarkdown components={markdownComponents}>{results.explanation}</ReactMarkdown>
-                </div>
+                {mutation.isPending ? (
+                     <div className="flex justify-center items-center h-full text-muted-foreground">
+                        <Loader2 className="me-2 h-6 w-6 animate-spin" />
+                        {t('writingTools.topicExplainer.analyzing')}
+                    </div>
+                ) : results?.explanation ? (
+                    <div className="prose dark:prose-invert max-w-none">
+                        <ReactMarkdown components={markdownComponents}>{results.explanation}</ReactMarkdown>
+                    </div>
+                ) : null}
             </ScrollArea>
           </div>
         )}

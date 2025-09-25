@@ -1,11 +1,7 @@
 
-
 'use client';
 
-import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { Controller } from 'react-hook-form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,26 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check, Wand2, BookOpenText } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { toast } from '@/hooks';
-import { useWritingTool } from '@/hooks';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
-import type { DiffPart } from '@/lib/diff';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { computeDiff } from '@/lib/diff';
-import { useLocalization } from '@/context/LocalizationContext';
-
-
-const formSchema = z.object({
-  text: z.string().min(10, 'Please enter at least 10 characters.'),
-  style: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { useTextStylistLogic } from '@/hooks';
+import { DiffView } from '../shared/DiffView';
 
 const styles = [
   "Informal", "Friendly", "Simple", "Formal", "Professional", "Narrative",
@@ -40,75 +23,25 @@ const styles = [
   "Technical", "Academic", "Journalistic", "Poetic", "Satirical", "Humorous"
 ];
 
-const DiffView = ({ diff }: { diff: DiffPart[] }) => {
-    return (
-        <p>
-            {diff.map((part, index) => (
-                <span key={index} className={cn({
-                    'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300': part.type === 'added',
-                    'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 line-through': part.type === 'removed',
-                })}>
-                    {part.value}
-                </span>
-            ))}
-        </p>
-    )
-}
-
 export function AITextTune() {
-  const { t } = useLocalization();
-  const [originalText, setOriginalText] = useState('');
-  const [processedText, setProcessedText] = useState('');
-  const [diff, setDiff] = useState<DiffPart[] | null>(null);
-  const [isCopied, setIsCopied] = useState(false);
-  const [compressionRatio, setCompressionRatio] = useState(50);
-  const [activeView, setActiveView] = useState<'side-by-side' | 'diff'>('side-by-side');
-
-  const rewriteMutation = useWritingTool('/api/writing-tools/rewrite-text');
-  const summarizeMutation = useWritingTool('/api/writing-tools/summarize-with-ratio');
-  const isProcessing = rewriteMutation.isPending || summarizeMutation.isPending;
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { text: '', style: 'None' },
-  });
-
-  const onSubmitRewrite = (data: FormValues) => {
-    if (!data.style || data.style === 'None') {
-      toast({ title: t('writingTools.textStylist.toastStyleRequired'), description: t('writingTools.textStylist.toastStyleRequiredDesc'), variant: 'destructive' });
-      return;
-    }
-    setOriginalText(data.text);
-    setProcessedText('');
-    setDiff(null);
-    setActiveView('side-by-side');
-    rewriteMutation.mutate({ text: data.text, style: data.style }, {
-      onSuccess: (result: any) => {
-          setProcessedText(result.rewrittenText);
-          setDiff(computeDiff(data.text, result.rewrittenText));
-      },
-      onError: (error) => toast({ title: t('writingTools.textStylist.toastStyleRequired'), description: error.message, variant: 'destructive'})
-    });
-  };
-
-  const onSubmitSummarize = (data: FormValues) => {
-    setOriginalText(data.text);
-    setProcessedText('');
-    setDiff(null);
-    setActiveView('side-by-side');
-    summarizeMutation.mutate({ text: data.text, ratio: compressionRatio }, {
-        onSuccess: (result: any) => setProcessedText(result.summarizedText)
-    });
-  };
-
-  const handleCopy = () => {
-    if (!processedText) return;
-    navigator.clipboard.writeText(processedText).then(() => {
-      setIsCopied(true);
-      toast({ title: 'Copied to clipboard!' });
-      setTimeout(() => setIsCopied(false), 2000);
-    });
-  };
+  const {
+    t,
+    form,
+    rewriteMutation,
+    summarizeMutation,
+    isProcessing,
+    originalText,
+    processedText,
+    diff,
+    isCopied,
+    compressionRatio,
+    setCompressionRatio,
+    activeView,
+    setActiveView,
+    onSubmitRewrite,
+    onSubmitSummarize,
+    handleCopy,
+  } = useTextStylistLogic();
 
   return (
     <div className="space-y-6">
