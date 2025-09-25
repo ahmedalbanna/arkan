@@ -5,5 +5,16 @@
     "default_project_name": "docudec",
     "default_project_path": "c:\\Users\\ahmed\\source\\repos\\arkan",
     "github_username": "ahmedalbanna",
-    "github_repository": "arkan"
+    "github_repository": "arkan",
+    "mcpServers": {
+        "genkit": {
+            "command": "genkit",
+            "args": [
+                "mcp"
+            ],
+            "cwd": "",
+            "timeout": 30000,
+            "trust": false
+        }
+    }
 }

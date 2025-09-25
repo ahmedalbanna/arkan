@@ -82,7 +82,7 @@ interface AIState {
 type AIAction = 'summarize' | 'rewrite' | 'humanize' | 'grammar';
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({ content }) => {
-  const [direction, setDirection] = useState<'ltr' | 'rtl'>('rtl');
+  const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr');
   const [aiState, setAIState] = useState<AIState>({ isLoading: false, data: null, error: null });
   const [selectionRange, setSelectionRange] = useState<Range | null>(null);
 
@@ -94,7 +94,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content }) => {
     content: '',
     editorProps: {
       attributes: {
-        class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif prose-p:text-[12px] prose-headings:text-[16px] prose-h1:text-[16px] prose-h2:text-[16px] prose-h3:text-[16px] prose-h4:text-[16px] prose-h5:text-[16px] prose-h6:text-[16px]',
+        class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif prose-p:text-[12px] prose-headings:text-[16px] prose-h1:text-[16px] prose-h2:text-[16px] prose-h3:text-[16px] prose-h4:text-[16px] prose-h5:text-[16px] prose-h6:text-[16px] prose-a:text-primary hover:prose-a:text-primary/90',
       },
     },
   });
@@ -198,7 +198,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content }) => {
       )}
 
       <MenuBar editor={editor} setDirection={setDirection} />
-      <div className="border border-gray-300 rounded-b-lg p-2 min-h-[200px] relative">
+      <div className="rounded-b-lg p-2 min-h-[200px] relative">
         <EditorContent editor={editor} />
       </div>
     </div>
