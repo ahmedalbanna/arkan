@@ -25,38 +25,47 @@ const calculateCounts = (text: string) => {
 
 export const useSectionLogic = (sectionKey: SectionName, content: string, onUpdate: (key: SectionName, value: string) => void) => {
     const audioRef = useRef<HTMLAudioElement>(null);
-    const [localContent, setLocalContent] = useState(content);
     const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const [diff, setDiff] = useState<DiffPart[] | null>(null);
     const [showAudioPlayer, setShowAudioPlayer] = useState(false);
     const [audioSrc, setAudioSrc] = useState<string | null>(null);
     const { toast } = useToast();
-    const { firebaseUser, refetchUser } = useAuth();
     const { t } = useLocalization();
     const ttsMutation = useTextToSpeech();
 
-    const aiActionMutation = useWritingTool('rewrite-text', {
-        onSuccess: (data: any) => {
-            const resultText = data.rewrittenText;
+    const handleSuccess = (data: any) => {
+        const resultText = data.rewrittenText || data.summarizedText || data.humanizedText || data.correctedText;
+        if (resultText) {
             setAiSuggestion(resultText);
             setDiff(computeDiff(content, resultText));
             toast({ title: t('builder.Section.toasts.suggestionReadyTitle'), description: t('builder.Section.toasts.suggestionReadyDesc') });
-        },
-        onError: (error: any) => {
-             const isCreditError = error.message.toLowerCase().includes('credit');
-            toast({
-                title: isCreditError ? t('builder.toasts.insufficientCredits') : t('builder.toasts.generationFailed'),
-                description: error.message,
-                variant: "destructive"
-            });
+        } else {
+             toast({ title: t('builder.Section.toasts.suggestionErrorTitle'), description: t('builder.Section.toasts.suggestionErrorDesc'), variant: "destructive" });
         }
-    });
+    };
+    
+    const handleError = (error: any) => {
+        const isCreditError = error.message.toLowerCase().includes('credit');
+        toast({
+            title: isCreditError ? t('builder.toasts.insufficientCredits') : t('builder.toasts.generationFailed'),
+            description: error.message,
+            variant: "destructive"
+        });
+    }
+
+    const summarizeMutation = useWritingTool('summarize-with-ratio', { onSuccess: handleSuccess, onError: handleError });
+    const expandMutation = useWritingTool('manipulate-text', { onSuccess: handleSuccess, onError: handleError });
+    const grammarMutation = useWritingTool('grammar-checker', { onSuccess: handleSuccess, onError: handleError });
+    const humanizeMutation = useWritingTool('humanize-text', { onSuccess: handleSuccess, onError: handleError });
+    const rewriteMutation = useWritingTool('rewrite-text', { onSuccess: handleSuccess, onError: handleError });
+
+    const isProcessingAi = summarizeMutation.isPending || expandMutation.isPending || grammarMutation.isPending || humanizeMutation.isPending || rewriteMutation.isPending || ttsMutation.isPending;
 
     useEffect(() => {
-        setLocalContent(content);
+        // When content is updated from outside (e.g. accepting a suggestion), clear old suggestions
+        setAiSuggestion(null);
+        setDiff(null);
     }, [content]);
-
-    const isProcessingAi = aiActionMutation.isPending || ttsMutation.isPending;
 
     // Effect to play audio when src changes
     useEffect(() => {
@@ -66,19 +75,31 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
     }, [audioSrc, showAudioPlayer]);
 
 
-    const handleAiAction = (styleOrCommand: string, isCommand: boolean = true) => {
-        if (!firebaseUser) {
-            toast({ title: t('builder.toasts.authError'), variant: "destructive" });
-            return;
-        }
+    const handleAiAction = (action: string, payload?: any) => {
         setAiSuggestion(null);
         setDiff(null);
 
-        const variables = isCommand
-            ? { text: content, style: `command: ${styleOrCommand}` }
-            : { text: content, style: styleOrCommand };
-
-        aiActionMutation.mutate(variables);
+        switch (action) {
+            case 'summarize':
+                summarizeMutation.mutate({ text: content, ratio: 50 }); // Default to 50%
+                break;
+            case 'expand':
+                expandMutation.mutate({ textToManipulate: content, command: "Expand on this topic, adding more detail and explanation." });
+                break;
+            case 'grammar':
+                grammarMutation.mutate({ text: content });
+                break;
+            case 'humanize':
+                humanizeMutation.mutate({ text: content });
+                break;
+            case 'rewrite':
+                if(payload?.style) {
+                    rewriteMutation.mutate({ text: content, style: payload.style });
+                }
+                break;
+            default:
+                break;
+        }
     };
 
     const handleReadAloud = () => {
@@ -92,6 +113,9 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
                 setShowAudioPlayer(true);
                 toast({ title: t('builder.Section.toasts.ttsSuccessTitle'), description: t('builder.Section.toasts.ttsSuccessDesc')});
             },
+             onError: (error) => {
+                toast({ title: 'Text-to-Speech Failed', description: error.message, variant: 'destructive' });
+            }
         });
     };
 
@@ -113,8 +137,6 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
 
     return {
         audioRef,
-        localContent,
-        setLocalContent,
         aiSuggestion,
         diff,
         showAudioPlayer,

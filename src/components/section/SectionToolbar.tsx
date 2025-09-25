@@ -30,7 +30,7 @@ import { Separator } from '../ui/separator';
 interface SectionToolbarProps {
   isProcessingAi: boolean;
   isReadingAloud: boolean;
-  onAiAction: (styleOrCommand: string, isCommand?: boolean) => void;
+  onAiAction: (action: string, payload?: any) => void;
   onReadAloud: () => void;
 }
 
@@ -44,12 +44,12 @@ export function SectionToolbar({
     const isBusy = isProcessingAi || isReadingAloud;
 
     const rewriteStyles = [
-        { label: t('builder.Section.aiActions.styles.formal'), style: 'Formal' },
-        { label: t('builder.Section.aiActions.styles.friendly'), style: 'Friendly' },
-        { label: t('builder.Section.aiActions.styles.simple'), style: 'Simple' },
-        { label: t('builder.Section.aiActions.styles.creative'), style: 'Creative' },
-        { label: t('builder.Section.aiActions.styles.professional'), style: 'Professional' },
-        { label: t('builder.Section.aiActions.styles.academic'), style: 'Academic' },
+        { label: t('writingTools.textStylist.styles.formal'), style: 'Formal' },
+        { label: t('writingTools.textStylist.styles.friendly'), style: 'Friendly' },
+        { label: t('writingTools.textStylist.styles.simple'), style: 'Simple' },
+        { label: t('writingTools.textStylist.styles.creative'), style: 'Creative' },
+        { label: t('writingTools.textStylist.styles.professional'), style: 'Professional' },
+        { label: t('writingTools.textStylist.styles.academic'), style: 'Academic' },
     ];
 
     return (
@@ -57,7 +57,7 @@ export function SectionToolbar({
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction(t('builder.Section.aiActions.summarizePrompt'))} disabled={isBusy} >
+                         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('summarize')} disabled={isBusy} >
                             <BookText className="h-4 w-4" />
                         </Button>
                     </TooltipTrigger>
@@ -66,7 +66,7 @@ export function SectionToolbar({
 
                 <Tooltip>
                     <TooltipTrigger asChild>
-                         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction(t('builder.Section.aiActions.expandPrompt'))} disabled={isBusy} >
+                         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('expand')} disabled={isBusy} >
                             <Maximize className="h-4 w-4" />
                         </Button>
                     </TooltipTrigger>
@@ -75,7 +75,7 @@ export function SectionToolbar({
 
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction(t('builder.Section.aiActions.checkGrammarPrompt'))} disabled={isBusy}>
+                        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('grammar')} disabled={isBusy}>
                             <SpellCheck className="h-4 w-4" />
                         </Button>
                     </TooltipTrigger>
@@ -84,7 +84,7 @@ export function SectionToolbar({
 
                 <Tooltip>
                     <TooltipTrigger asChild>
-                         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('Humanize', false)} disabled={isBusy}>
+                         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('humanize')} disabled={isBusy}>
                             <UserCheck className="h-4 w-4" />
                         </Button>
                     </TooltipTrigger>
@@ -104,7 +104,7 @@ export function SectionToolbar({
                     </Tooltip>
                     <DropdownMenuContent>
                          {rewriteStyles.map(({ label, style }) => (
-                            <DropdownMenuItem key={style} onClick={() => onAiAction(style, false)}>
+                            <DropdownMenuItem key={style} onClick={() => onAiAction('rewrite', { style })}>
                                 {label}
                             </DropdownMenuItem>
                         ))}
