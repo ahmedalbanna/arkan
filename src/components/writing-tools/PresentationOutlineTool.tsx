@@ -1,28 +1,16 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useWritingTool } from '@/hooks';
+import { usePresentationOutlineLogic } from '@/hooks';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check, ChevronDown, ChevronRight } from 'lucide-react';
-import { toast } from '@/hooks';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { GeneratePresentationOutlineOutput } from '@/ai/schemas';
 import { Textarea } from '@/components/ui/textarea';
-import { useLocalization } from '@/context/LocalizationContext';
-
-const formSchema = z.object({
-  prompt: z.string().min(5, 'Please enter a topic with at least 5 characters.'),
-  documentation: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { useState } from 'react';
+import { GeneratePresentationOutlineOutput } from '@/ai/schemas';
 
 const OutlineItem = ({ item, level = 0 }: { item: GeneratePresentationOutlineOutput['outline'][0], level?: number }) => {
     const [isOpen, setIsOpen] = useState(true);
@@ -49,38 +37,15 @@ const OutlineItem = ({ item, level = 0 }: { item: GeneratePresentationOutlineOut
 }
 
 export function PresentationOutlineTool() {
-  const { t } = useLocalization();
-  const [isCopied, setIsCopied] = useState(false);
-  const [generatedOutline, setGeneratedOutline] = useState<GeneratePresentationOutlineOutput | null>(null);
-
-  const mutation = useWritingTool('/api/generate/presentation-outline', {
-    onSuccess: (data: any) => {
-        setGeneratedOutline(data);
-        toast({ title: "Outline Generated!", description: "Review the outline and choose a template to proceed."});
-    },
-    onError: (error) => {
-        toast({ title: "Outline Generation Failed", description: error.message, variant: "destructive" });
-    }
-  });
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { prompt: '' },
-  });
-
-  const onSubmit = (data: FormValues) => {
-    mutation.mutate(data);
-  };
-
-  const handleCopy = () => {
-    if (!generatedOutline) return;
-    const textToCopy = `${generatedOutline.cover.title}\n\n` + generatedOutline.outline.map(item => `${item.title}\n${item.content}`).join('\n\n');
-    navigator.clipboard.writeText(textToCopy).then(() => {
-      setIsCopied(true);
-      toast({ title: 'Copied to clipboard!' });
-      setTimeout(() => setIsCopied(false), 2000);
-    });
-  };
+  const {
+    t,
+    form,
+    mutation,
+    onSubmit,
+    results,
+    isCopied,
+    handleCopy,
+  } = usePresentationOutlineLogic();
 
   return (
     <Card>
@@ -118,11 +83,11 @@ export function PresentationOutlineTool() {
           </Button>
         </form>
 
-        {(mutation.isPending || generatedOutline) && (
+        {(mutation.isPending || results) && (
           <div className="space-y-2 pt-6 border-t">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold text-muted-foreground">{t('writingTools.presentationOutline.generatedOutline')}</h3>
-              {generatedOutline && (
+              {results && (
                 <Button variant="ghost" size="icon" onClick={handleCopy}>
                   {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                 </Button>
@@ -133,11 +98,11 @@ export function PresentationOutlineTool() {
                 <div className="flex items-center justify-center h-full">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
-              ) : generatedOutline && (
+              ) : results && (
                 <div className="space-y-4">
-                    <h3 className="text-lg font-bold">{generatedOutline.cover.title}</h3>
+                    <h3 className="text-lg font-bold">{results.cover.title}</h3>
                     <div className="space-y-2">
-                        {generatedOutline.outline.map((item, index) => <OutlineItem key={index} item={item} />)}
+                        {results.outline.map((item, index) => <OutlineItem key={index} item={item} />)}
                     </div>
                 </div>
               )}

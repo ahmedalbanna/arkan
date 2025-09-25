@@ -17,41 +17,18 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-
-const quizGeneratorSchema = z.object({
-  text: z.string().min(50, 'Please enter at least 50 characters to generate a meaningful quiz.'),
-  numQuestions: z.number().int().min(1).max(20),
-  questionType: z.enum(['multiple-choice', 'true-false', 'direct-question']),
-
-});
-
-type QuizFormValues = z.infer<typeof quizGeneratorSchema>;
+import { useQuizGeneratorLogic } from '@/hooks';
 
 export function QuizGeneratorTool() {
   const { t } = useLocalization();
-  const [generatedQuiz, setGeneratedQuiz] = useState<any[]>([]);
-  const [showAnswers, setShowAnswers] = useState(false);
-  const quizMutation = useWritingTool('/api/writing-tools/generate-quiz');
-
-  const form = useForm<QuizFormValues>({
-    resolver: zodResolver(quizGeneratorSchema),
-    defaultValues: { text: '', numQuestions: 5, questionType: 'multiple-choice' },
-
-  });
-
-  const onSubmit = (data: QuizFormValues) => {
-    setGeneratedQuiz([]);
-    setShowAnswers(false);
-    quizMutation.mutate(data, {
-      onSuccess: (result: any) => {
-        setGeneratedQuiz(result.questions);
-        toast({ title: 'Quiz generated successfully!' });
-      },
-      onError: (error) => {
-        toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      },
-    });
-  };
+  const {
+    form,
+    mutation,
+    onSubmit,
+    generatedQuiz,
+    showAnswers,
+    setShowAnswers,
+  } = useQuizGeneratorLogic();
 
   return (
     <Card>
@@ -68,7 +45,7 @@ export function QuizGeneratorTool() {
               render={({ field }) => (
                 <div className="space-y-2">
                   <Label>Question Type</Label>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={quizMutation.isPending}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={mutation.isPending}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select question type" />
                     </SelectTrigger>
@@ -110,19 +87,19 @@ export function QuizGeneratorTool() {
                         min={1}
                         max={20}
                         step={1}
-                        disabled={quizMutation.isPending}
+                        disabled={mutation.isPending}
                     />
                 </div>
             )}
            />
 
-          <Button type="submit" disabled={quizMutation.isPending} className="w-full">
-            {quizMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
+          <Button type="submit" disabled={mutation.isPending} className="w-full">
+            {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
             {t('writingTools.aiQuizGenerator.generateButton')}
           </Button>
         </form>
 
-        {(quizMutation.isPending || generatedQuiz.length > 0) && (
+        {(mutation.isPending || generatedQuiz.length > 0) && (
           <div className="space-y-4 pt-6 border-t">
             <div className="flex justify-between items-center">
                  <h3 className="font-semibold text-muted-foreground flex items-center gap-2">
@@ -137,7 +114,7 @@ export function QuizGeneratorTool() {
             </div>
 
             <ScrollArea className="h-[60vh] rounded-md border p-4 bg-muted/30">
-              {quizMutation.isPending ? (
+              {mutation.isPending ? (
                 <div className="flex items-center justify-center h-full">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
@@ -146,7 +123,7 @@ export function QuizGeneratorTool() {
                     {generatedQuiz.map((q, index) => (
                         <div key={index} className="space-y-3">
                             <p className="font-semibold">{index + 1}. {q.question}</p>
-                        {(q.type === 'multiple-choice' || q.type === 'true-false') && (
+                        {(q.type === 'multiple-choice' || q.type === 'true-false') && Array.isArray(q.options) && (
                           <ul className="space-y-2 pl-4">
                             {q.options.map((option: string, i: number) => (
                               <li key={i} className="flex items-center gap-2 text-sm">

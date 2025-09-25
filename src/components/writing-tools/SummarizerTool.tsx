@@ -1,11 +1,7 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useWritingTool } from '@/hooks';
+import { Controller } from 'react-hook-form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,92 +9,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check, UploadCloud } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { toast } from '@/hooks';
-import ReactMarkdown from 'react-markdown';
+import { useLocalization } from '@/context/LocalizationContext';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { useDropzone } from 'react-dropzone';
-import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services';
-import { useLocalization } from '@/context/LocalizationContext';
-
-const summarizerSchema = z.object({
-  text: z.string().min(20, 'Please enter at least 20 characters to summarize.'),
-  length: z.enum(['short', 'medium', 'long']),
-});
-
-type SummarizerFormValues = z.infer<typeof summarizerSchema>;
+import ReactMarkdown from 'react-markdown';
+import { useSummarizerLogic } from '@/hooks';
 
 export function SummarizerTool() {
   const { t } = useLocalization();
-  const [summarizedText, setSummarizedText] = useState('');
-  const [isCopied, setIsCopied] = useState(false);
-  const { firebaseUser, refetchUser } = useAuth();
-  const [isUploading, setIsUploading] = useState(false);
-
-  const summarizeMutation = useWritingTool('/api/writing-tools/summarize', {
-    onSuccess: (data: any) => {
-        setSummarizedText(data.summary);
-        toast({ title: t('writingTools.summarizer.successToast') });
-    },
-    onError: (error) => {
-         toast({ title: t('writingTools.summarizer.errorToast'), description: error.message, variant: 'destructive' });
-    }
-  });
-
-  const form = useForm<SummarizerFormValues>({
-    resolver: zodResolver(summarizerSchema),
-    defaultValues: { text: '', length: 'medium' },
-  });
-
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
-
-    if (!firebaseUser) {
-        toast({ title: "Authentication Error", description: "You must be logged in to process files.", variant: "destructive" });
-        return;
-    }
-
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-        const token = await firebaseUser.getIdToken();
-        const result = await processFileApi(formData, token);
-        form.setValue('text', result.markdown, { shouldValidate: true });
-        toast({ title: t('writingTools.summarizer.processingFile'), description: `Text extracted from ${file.name}.` });
-        refetchUser();
-    } catch (error: any) {
-        toast({ title: "File Processing Failed", description: error.message, variant: "destructive" });
-    } finally {
-        setIsUploading(false);
-    }
-  }, [firebaseUser, form, refetchUser, toast, t]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    multiple: false,
-    accept: {
-      'application/pdf': ['.pdf'],
-      'text/plain': ['.txt'],
-      'text/markdown': ['.md'],
-    },
-  });
-
-  const onSubmit = (data: SummarizerFormValues) => {
-    summarizeMutation.mutate(data);
-  };
-
-  const handleCopy = () => {
-    if (!summarizedText) return;
-    navigator.clipboard.writeText(summarizedText).then(() => {
-        setIsCopied(true);
-        toast({ title: 'Copied to clipboard!' });
-        setTimeout(() => setIsCopied(false), 2000);
-    });
-  };
+  const {
+    form,
+    summarizeMutation,
+    isUploading,
+    getRootProps,
+    getInputProps,
+    isDragActive,
+    onSubmit,
+    summarizedText,
+    isCopied,
+    handleCopy,
+  } = useSummarizerLogic();
 
   return (
     <Card>
