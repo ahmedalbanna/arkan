@@ -1,37 +1,17 @@
-
-
 'use client';
 
 import type { AnyProjectProposal } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { markdownComponents } from '@/lib/markdown-styles';
-import { useSectionLogic } from '@/hooks';
-import { SectionName } from '@/ai/schemas';
 import { SectionToolbar } from '../section/SectionToolbar';
+import RichTextEditor from '../ui/RichTextEditor';
+import { Card, CardFooter, CardHeader, CardTitle, CardContent } from '../ui/card';
+import { useSectionLogic } from '@/hooks';
+import type { SectionName } from '@/ai/schemas';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../ui/card';
+import { markdownComponents } from '@/lib/markdown-styles';
+import { DiffView } from '../shared/DiffView';
 import { Wand2, ThumbsDown, Check } from 'lucide-react';
-import { DiffPart } from '@/lib/diff';
-import { cn } from '@/lib/utils';
-import RichTextEditor from '../ui/RichTextEditor';
-
-// This is a simplified view for the diff, as the one in SectionView is not exported.
-const DiffView = ({ diff }: { diff: DiffPart[] }) => {
-    return (
-        <p className="whitespace-pre-wrap text-sm">
-            {diff.map((part, index) => (
-                <span key={index} className={cn({
-                    'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 rounded-sm': part.type === 'added',
-                    'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 line-through rounded-sm': part.type === 'removed',
-                })}>
-                    {part.value}
-                </span>
-            ))}
-        </p>
-    )
-}
 
 interface ProposalSectionProps {
     sectionKey: string; // Use string for general keys
@@ -41,15 +21,12 @@ interface ProposalSectionProps {
 }
 
 export const ProposalSection = ({ sectionKey, title, content, onUpdate }: ProposalSectionProps) => {
-    // We can reuse the useSectionLogic hook here.
-    // We cast sectionKey to SectionName for compatibility, though it might be a general key.
     const {
         aiSuggestion,
         diff,
         t,
         handleAcceptSuggestion,
         handleRejectSuggestion,
-        processedContent,
         handleAiAction,
         handleReadAloud,
         isProcessingAi,
@@ -78,7 +55,7 @@ export const ProposalSection = ({ sectionKey, title, content, onUpdate }: Propos
             </div>
 
             <RichTextEditor
-                content={processedContent}
+                content={content} // Pass the original content
                 onChange={(newMarkdown) => onUpdate(sectionKey, newMarkdown)}
             />
 

@@ -5,6 +5,7 @@ import { BubbleMenu, Editor, EditorContent, Range, useEditor } from '@tiptap/rea
 import StarterKit from '@tiptap/starter-kit';
 import { marked } from 'marked';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useDebounce } from '@/hooks';
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -70,6 +71,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
 
 interface RichTextEditorProps {
   content: string; // Expecting Markdown content
+  onChange: (markdown: string) => void;
 }
 
 // Define types for AI state
@@ -81,7 +83,7 @@ interface AIState {
 
 type AIAction = 'summarize' | 'rewrite' | 'humanize' | 'grammar';
 
-const RichTextEditor: React.FC<RichTextEditorProps> = ({ content }) => {
+const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange }) => {
   const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr');
   const [aiState, setAIState] = useState<AIState>({ isLoading: false, data: null, error: null });
   const [selectionRange, setSelectionRange] = useState<Range | null>(null);
@@ -92,6 +94,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content }) => {
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
     ],
     content: '',
+    onUpdate: ({ editor }) => {
+      // Convert HTML back to Markdown
+      // const html = editor.getHTML();
+      // onChange(turndown.turndown(html));
+    },
     editorProps: {
       attributes: {
         class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif prose-p:text-[12px] prose-headings:text-[16px] prose-h1:text-[16px] prose-h2:text-[16px] prose-h3:text-[16px] prose-h4:text-[16px] prose-h5:text-[16px] prose-h6:text-[16px] prose-a:text-primary hover:prose-a:text-primary/90',
@@ -99,13 +106,28 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content }) => {
     },
   });
 
+  // This effect ensures that if the `content` prop changes from the outside
+  // (e.g., after an AI action), the editor's content is updated.
   useEffect(() => {
     if (editor && content) {
       const html = marked.parse(content) as string;
-      editor.commands.setContent(html);
-      editor.chain().focus().setTextAlign(direction).run();
+      // Check if the editor's content is already the same to prevent unnecessary updates
+      // and cursor jumping.
+      if (editor.getHTML() !== html) {
+        editor.commands.setContent(html, false); // `false` prevents the update event from firing
+      }
     }
   }, [editor, content]);
+
+  const debouncedContent = useDebounce(editor?.getHTML(), 500); // Debounce editor content
+
+  useEffect(() => {
+    if (debouncedContent) {
+      // const markdown = turndown.turndown(debouncedContent);
+      // onChange(markdown);
+    }
+  }, [debouncedContent, onChange]);
+
 
   const resetAIState = useCallback(() => {
     setAIState({ isLoading: false, data: null, error: null });

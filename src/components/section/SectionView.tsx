@@ -1,22 +1,17 @@
-
-
 'use client';
 
 import type { SectionName } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs } from '@/components/ui/tabs';
-import { markdownComponents } from '@/lib/markdown-styles';
-import { BookText, Brush, Check, GitCommitVertical, Maximize, SpellCheck, ThumbsDown, UserCheck, Wand2, X } from 'lucide-react';
+import { useSectionLogic } from '@/hooks';
+import { Check, ThumbsDown, Wand2 } from 'lucide-react';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useSectionLogic } from '@/hooks';
-import { DiffPart } from '@/lib/diff';
-import { cn } from '@/lib/utils';
-import { SectionToolbar } from './SectionToolbar';
 import RichTextEditor from '../ui/RichTextEditor';
+import { markdownComponents } from '@/lib/markdown-styles';
+import { DiffView } from '../shared/DiffView';
+import { SectionToolbar } from './SectionToolbar';
 
 interface SectionProps {
     sectionKey: SectionName;
@@ -26,21 +21,6 @@ interface SectionProps {
     onUpdate: (key: SectionName, value: string) => void;
 }
 
-const DiffView = ({ diff }: { diff: DiffPart[] }) => {
-    return (
-        <p className="whitespace-pre-wrap text-sm">
-            {diff.map((part, index) => (
-                <span key={index} className={cn({
-                    'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 rounded-sm': part.type === 'added',
-                    'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 line-through rounded-sm': part.type === 'removed',
-                })}>
-                    {part.value}
-                </span>
-            ))}
-        </p>
-    )
-}
-
 export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: SectionProps) => {
     const {
         aiSuggestion,
@@ -48,7 +28,6 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         t,
         handleAcceptSuggestion,
         handleRejectSuggestion,
-        processedContent,
         handleAiAction,
         handleReadAloud,
         isProcessingAi,
@@ -58,8 +37,8 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
     } = useSectionLogic(sectionKey, content, onUpdate);
 
     return (
-        <Tabs defaultValue="view">
-            <div className="flex items-center justify-between mb-4">
+        <div className="space-y-4">
+            <div className="flex items-center justify-between">
                  <h2 className="font-semibold text-lg md:text-xl text-primary/90 font-headline flex items-center gap-2">
                     <Icon className="w-5 h-5"/>
                     {title}
@@ -78,7 +57,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
             </div>
             <div className="group relative space-y-4 mt-4">
                 <RichTextEditor
-                    content={processedContent}
+                    content={content} // Pass the original content
                     onChange={(newMarkdown) => onUpdate(sectionKey, newMarkdown)}
                 />
 
@@ -109,6 +88,6 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                     </Card>
                 )}
             </div>
-        </Tabs>
+        </div>
     );
 };
