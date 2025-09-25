@@ -76,17 +76,14 @@ ${input.text}
 
 // --- Summarize Text with Ratio Flow ---
 export async function summarizeTextWithRatio(input: SummarizeTextWithRatioInput): Promise<SummarizeTextWithRatioOutput> {
-  const prompt = ai.definePrompt({
-    name: 'summarizeTextWithRatioPrompt',
-    input: { schema: SummarizeTextWithRatioInputSchema },
-    output: { schema: SummarizeTextWithRatioOutputSchema },
+  const llmResponse = await ai.generate({
     model: 'googleai/gemini-1.5-flash',
     prompt: `You are an expert summarizer. Your task is to read the provided text and generate a summary.
-The summary should be approximately {{{ratio}}}% of the original text's length.
+The summary should be approximately ${input.ratio}% of the original text's length. Return only the summarized text.
 
 **Original Text:**
 ---
-{{{text}}}
+${input.text}
 ---
 `,
     config: {
@@ -94,10 +91,11 @@ The summary should be approximately {{{ratio}}}% of the original text's length.
     }
   });
 
-  const { output } = await prompt(input);
-  if (!output) {
+  const summarizedText = llmResponse.text.replace(/---/g, '').trim();
+
+  if (!summarizedText) {
       throw new Error("Failed to summarize text.");
   }
-  output.summarizedText = output.summarizedText.replace(/---/g, '').trim();
-  return output;
+  
+  return { summarizedText };
 }
