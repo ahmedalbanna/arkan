@@ -157,6 +157,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           />
         </BubbleMenu>
       )}
+      <MenuBar editor={editor} setDirection={setDirection} />
       <div className="rounded-b-lg p-2 min-h-[200px] relative">
         <EditorContent editor={editor} />
       </div>
