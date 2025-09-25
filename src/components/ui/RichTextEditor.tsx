@@ -76,7 +76,7 @@ interface RichTextEditorProps {
   content: string; // Expecting Markdown content
   onChange: (markdown: string) => void;
   onAiAction: (action: string, payload?: any) => void;
-  onReadAloud: () => void;
+  onReadAloud: (text: string) => void;
   isProcessingAi: boolean;
   isReadingAloud: boolean;
 }
@@ -91,6 +91,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr');
   const [isUpdatingFromProp, setIsUpdatingFromProp] = useState(false);
+  const debouncedContent = useDebounce(content, 1000); // Debounce content prop
 
   const editor = useEditor({
     extensions: [
@@ -115,16 +116,34 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     },
   });
 
+  const handleAiActionWrapper = (action: string, payload?: any) => {
+    if (!editor) return;
+    const { from, to } = editor.state.selection;
+    const selectedText = editor.state.doc.textBetween(from, to);
+    onAiAction(action, { ...payload, selectedText: selectedText || content });
+  };
+  
+  const handleReadAloudWrapper = () => {
+    if (!editor) return;
+    const { from, to } = editor.state.selection;
+    const selectedText = editor.state.doc.textBetween(from, to);
+    onReadAloud(selectedText || content);
+  }
+
+  // Effect to update editor content when debounced prop changes
   useEffect(() => {
-    if (editor) {
-      const html = marked.parse(content || '<p></p>') as string;
-      if (editor.getHTML() !== html) {
+    if (editor && debouncedContent !== undefined) {
+      const currentHtml = editor.getHTML();
+      const newHtml = marked.parse(debouncedContent) as string;
+
+      if (currentHtml !== newHtml) {
         setIsUpdatingFromProp(true);
-        editor.commands.setContent(html, false);
-        setIsUpdatingFromProp(false);
+        editor.commands.setContent(newHtml, false); // `false` means don't trigger update event
+        setTimeout(() => setIsUpdatingFromProp(false), 100); // Release the lock shortly after
       }
     }
-  }, [content, editor]);
+  }, [debouncedContent, editor]);
+  
 
   return (
     <div dir={direction}>
@@ -132,8 +151,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
           <SectionToolbar
             isProcessingAi={isProcessingAi}
-            onAiAction={onAiAction}
-            onReadAloud={onReadAloud}
+            onAiAction={handleAiActionWrapper}
+            onReadAloud={handleReadAloudWrapper}
             isReadingAloud={isReadingAloud}
           />
         </BubbleMenu>

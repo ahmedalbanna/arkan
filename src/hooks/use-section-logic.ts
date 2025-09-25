@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -32,16 +31,23 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
     const { toast } = useToast();
     const { t } = useLocalization();
     const ttsMutation = useTextToSpeech();
+    const [selection, setSelection] = useState<{ text: string, from: number, to: number } | null>(null);
 
     const handleSuccess = (data: any) => {
         const resultText = data.rewrittenText || data.summarizedText || data.humanizedText || data.correctedText;
-        if (resultText) {
+        if (resultText && selection) {
+            const originalContent = content;
+            const newContent = originalContent.slice(0, selection.from) + resultText + originalContent.slice(selection.to);
+            onUpdate(sectionKey, newContent);
+            setAiSuggestion(null);
+            setDiff(null);
+        } else if (resultText) {
             setAiSuggestion(resultText);
             setDiff(computeDiff(content, resultText));
-            toast({ title: t('builder.Section.toasts.suggestionReadyTitle'), description: t('builder.Section.toasts.suggestionReadyDesc') });
         } else {
              toast({ title: t('builder.Section.toasts.suggestionErrorTitle'), description: t('builder.Section.toasts.suggestionErrorDesc'), variant: "destructive" });
         }
+        setSelection(null);
     };
     
     const handleError = (error: any) => {
@@ -51,6 +57,7 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
             description: error.message,
             variant: "destructive"
         });
+        setSelection(null);
     }
 
     const summarizeMutation = useWritingTool('summarize-with-ratio', { onSuccess: handleSuccess, onError: handleError });
@@ -76,25 +83,38 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
 
 
     const handleAiAction = (action: string, payload?: any) => {
+        const textToProcess = payload?.selectedText || content;
+        if (!textToProcess) return;
+
+        // If a selection was made, store its range to replace it later
+        if (payload?.selectedText) {
+             const from = content.indexOf(payload.selectedText);
+             if (from !== -1) {
+                setSelection({ text: payload.selectedText, from, to: from + payload.selectedText.length });
+             }
+        } else {
+            setSelection(null);
+        }
+        
         setAiSuggestion(null);
         setDiff(null);
 
         switch (action) {
             case 'summarize':
-                summarizeMutation.mutate({ text: content, ratio: 50 }); // Default to 50%
+                summarizeMutation.mutate({ text: textToProcess, ratio: 50 }); // Default to 50%
                 break;
             case 'expand':
-                expandMutation.mutate({ textToManipulate: content, command: "Expand on this topic, adding more detail and explanation." });
+                expandMutation.mutate({ textToManipulate: textToProcess, command: "Expand on this topic, adding more detail and explanation." });
                 break;
             case 'grammar':
-                grammarMutation.mutate({ text: content });
+                grammarMutation.mutate({ text: textToProcess });
                 break;
             case 'humanize':
-                humanizeMutation.mutate({ text: content });
+                humanizeMutation.mutate({ text: textToProcess });
                 break;
             case 'rewrite':
                 if(payload?.style) {
-                    rewriteMutation.mutate({ text: content, style: payload.style });
+                    rewriteMutation.mutate({ text: textToProcess, style: payload.style });
                 }
                 break;
             default:
@@ -102,12 +122,13 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
         }
     };
 
-    const handleReadAloud = () => {
+    const handleReadAloud = (textToRead?: string) => {
+        const text = textToRead || content;
         if (audioSrc) {
             setShowAudioPlayer(true);
             return;
         }
-        ttsMutation.mutate({ text: content }, {
+        ttsMutation.mutate({ text }, {
             onSuccess: (data) => {
                 setAudioSrc(data.audioDataUri);
                 setShowAudioPlayer(true);
