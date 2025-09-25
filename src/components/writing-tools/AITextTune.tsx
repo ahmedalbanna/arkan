@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -20,7 +21,7 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import type { RewriteTextOutput, DiffPart } from '@/lib/types';
+import type { DiffPart } from '@/lib/diff';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { computeDiff } from '@/lib/diff';
 import { useLocalization } from '@/context/LocalizationContext';

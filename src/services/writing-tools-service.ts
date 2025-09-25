@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { ParaphraseMode, SummarizeLength, CitationStyle } from "@/ai/schemas";
@@ -73,7 +74,7 @@ export interface GeneratePlantUMLVariables {
 }
 
 export interface ManipulateTextVariables {
-    textToManipulate: string;
+    text: string;
     command: string;
 }
 

@@ -504,7 +504,7 @@ export type ImproveMarkdownOutput = z.infer<typeof ImproveMarkdownOutputSchema>;
 
 // manipulate-text.ts
 export const ManipulateTextInputSchema = z.object({
-    textToManipulate: z.string().describe('The original text to be modified.'),
+    text: z.string().describe('The original text to be modified.'),
     command: z.string().describe('The instruction for how to modify the text (e.g., "summarize", "expand on this topic", "rewrite this to be more formal").'),
 });
 export type ManipulateTextInput = z.infer<typeof ManipulateTextInputSchema>;
