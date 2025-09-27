@@ -11,6 +11,7 @@ import { Project } from '@/lib/models/project';
 import { useExport } from './use-export';
 import { useAgents } from './use-agents';
 import { AgentCategory } from '@/lib/models/agent';
+import { Section } from '@/lib/models/section';
 
 export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: { orderedSections: import('@/lib/models/section').Section[], setOrderedSections: (sections: import('@/lib/models/section').Section[]) => void; }) => {
     const { t, locale } = useLocalization();
