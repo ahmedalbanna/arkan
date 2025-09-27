@@ -19,7 +19,9 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
         throw new Error(`Agent configuration for diagram type '${input.diagramToGenerate}' not found.`);
     }
     const agentPrompt = agent.prompt as AgentPrompt;
-    const basePrompt = agentPrompt.base;
+    const systemPrompt = `${agentPrompt.base}
+You are also an expert analyst. Before you generate the diagram, you must first review all the provided context sections (proposal, other report sections, other diagrams). From this context, intelligently identify and synthesize only the most relevant information needed to create the requested diagram.
+Your final output MUST be a JSON object containing two keys: 'plantUmlCode' and 'explanation'.`;
 
     const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
     const stringifiedPlan = input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '';
@@ -32,9 +34,7 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
         name: `generate-${input.diagramToGenerate}-diagram-prompt`,
         input: { schema: z.any() }, // Using any() since we are manually constructing the payload
         output: { schema: GenerateDiagramOutputSchema },
-        system: `${basePrompt}
-You are also an expert analyst. Before you generate the diagram, you must first review all the provided context sections (proposal, other report sections, other diagrams). From this context, intelligently identify and synthesize only the most relevant information needed to create the requested diagram.
-Your final output MUST be a JSON object containing two keys: 'plantUmlCode' and 'explanation'.`,
+        system: systemPrompt,
         prompt: `
 {{#if guidelines}}
 --- Guidelines ---

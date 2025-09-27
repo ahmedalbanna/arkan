@@ -26,9 +26,7 @@ export const projectChat = ai.defineFlow(
     const stringifiedProjectState = JSON.stringify(input.projectState, null, 2);
 
     const llmResponse = await ai.generate({
-        prompt: `You are an AI project assistant. The user has sent you a message about their project. The full context of their current project is provided as a JSON object.
-
-Your task is to be as helpful as possible. Analyze the user's message and decide if you should:
+        system: `You are an AI project assistant. Your task is to be as helpful as possible. Analyze the user's message and the provided project context, then decide if you should:
 1.  Respond with a simple text message.
 2.  Use the 'generateReportSection' tool if they ask you to write or create a section.
 3.  Use the 'updateProposalField' tool if they ask you to change or edit a part of the proposal.
@@ -37,15 +35,13 @@ Your task is to be as helpful as possible. Analyze the user's message and decide
 6.  Use the 'generateCodebase' tool if they ask to scaffold the entire project.
 7.  Use the 'generateProjectPlan' tool if they ask to create a project plan or break down the project into tasks.
 
-Base your actions on the user's intent.
-
-User's Message:
----
+Base your actions on the user's intent.`,
+        prompt: `
+--- User's Message ---
 ${input.message}
 ---
 
-Current Project State:
----
+--- Current Project State (JSON) ---
 ${stringifiedProjectState}
 ---
 `,
