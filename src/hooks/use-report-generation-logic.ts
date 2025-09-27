@@ -8,6 +8,7 @@ import { useBuilderStore, useGenerateReportSection, useGenerationUIStore } from 
 import { useAgents } from './use-agents';
 import type { Section } from '@/lib/models/section';
 import { AgentCategory } from '@/lib/models/agent';
+import { Section as SectionModel } from '@/lib/models/section';
 
 export function useReportGenerationLogic({ orderedSections, setOrderedSections }: { orderedSections: Section[], setOrderedSections: (sections: Section[]) => void }) {
     const { userProfile } = useAuth();
@@ -23,7 +24,7 @@ export function useReportGenerationLogic({ orderedSections, setOrderedSections }
     useEffect(() => {
         if (!orderedSections.length && agentsLoaded && agents.length > 0) {
             const reportAgents = agents.filter(a => a.category === AgentCategory.ReportGeneration);
-            const initialOrder = reportAgents.map(a => new Section({
+            const initialOrder = reportAgents.map(a => new SectionModel({
                 id: a.id.replace('generate-', '').replace('-section', ''),
                 title: a.name,
                 agentId: a.id,
