@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
@@ -23,8 +24,6 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     
     const { exportReportDocx, isExporting } = useExport();
 
-    const [currentPage, setCurrentPage] = useState(0);
-
     const sections = project?.sections || {};
     const translatedSections = project?.translatedSections || {};
 
@@ -32,46 +31,6 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         () => (orderedSections || []).filter(key => sections[key]),
         [sections, orderedSections]
     );
-
-    const totalPages = generatedSections.length;
-
-    const handlePageChange = useCallback((newPage: number) => {
-        if (newPage >= 0 && newPage < totalPages) {
-            setCurrentPage(newPage);
-        }
-    }, [totalPages]);
-
-    useEffect(() => {
-        if (currentPage >= totalPages && totalPages > 0) {
-            setCurrentPage(totalPages - 1);
-        } else if (totalPages === 0) {
-            setCurrentPage(0);
-        }
-    }, [totalPages, currentPage]);
-
-
-    const handleNextPage = () => handlePageChange(currentPage + 1);
-    const handlePrevPage = () => handlePageChange(currentPage - 1);
-
-
-    const hasContent = generatedSections.length > 0;
-    const currentSectionKey = hasContent ? generatedSections[currentPage] : undefined;
-
-    const sectionConfigMap = staticReportSections;
-
-    const getSectionTitle = (key: SectionName): string => {
-        if (!sectionConfigMap[key] || !sectionConfigMap[key].title) {
-            return key; 
-        }
-        return t(sectionConfigMap[key]?.title) || key;
-    };
-
-    const getSectionIcon = (key: SectionName) => {
-        const iconName = (sectionConfigMap[key] as any)?.icon;
-        // This part becomes tricky as we don't have the icon components directly.
-        // Let's assume a fallback for now.
-        return FileText;
-    };
 
     const handleSectionUpdate = (key: SectionName, value: string) => {
         if (!project) return;
@@ -123,7 +82,7 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     }, []);
 
     const handleExportReportDOCX = async (sectionsToInclude: SectionName[]) => {
-        if (!project || !hasContent) return;
+        if (!project || generatedSections.length === 0) return;
 
         const translatedTitles = Object.keys(reportSectionsMap).reduce((acc, key) => {
             acc[key as SectionName] = t(reportSectionsMap[key as SectionName]?.title || key);
@@ -141,20 +100,8 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         handleSectionUpdate,
         handleTranslateAll,
         isTranslatingAll,
-        sections,
         generatedSections, // Return the calculated list
-        currentPage,
-        totalPages,
-        handleNextPage,
-        handlePrevPage,
-        hasContent,
-        currentSectionKey,
-        getSectionTitle,
-        getSectionIcon,
         isExporting,
         handleExportReportDOCX,
-        reportSections: reportSectionsMap,
-        orderedSections,
-        setOrderedSections,
     };
 };
