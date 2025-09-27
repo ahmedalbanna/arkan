@@ -1,26 +1,21 @@
 
 'use client';
 
-import { DiagramType, type SectionName as SectionNameType } from '@/ai/schemas';
+import { type SectionName as SectionNameType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useSections } from '@/hooks';
-import { FileText } from 'lucide-react';
-import { useMemo } from 'react';
-import { useGenerationUIStore } from './useGenerationUIStore';
-import { reportSections } from '@/lib/db/seed-data/sections-templates'; // Import static data
+import { useBuilderStore } from '@/hooks';
+import { reportSections as staticReportSections } from '@/lib/db/seed-data/sections-templates'; 
 
-export const useSectionAccordionItemLogic = (sectionKey: SectionNameType | DiagramType) => {
+export const useSectionAccordionItemLogic = (sectionKey: SectionNameType) => {
     const { t } = useLocalization();
     const { userProfile } = useAuth();
     const { project } = useBuilderStore();
 
-    // Use static data instead of the hook
-    const sectionConfig = reportSections[sectionKey as SectionNameType];
+    const sectionConfig = staticReportSections[sectionKey];
 
     const title = sectionConfig?.title || '';
     const agentId = sectionConfig?.agentId || '';
-    const Icon = FileText; // Default icon
     
     const hasProjectContext = !!project?.proposal || (project?.projectIdea && project.projectIdea.length > 0);
 
@@ -35,7 +30,6 @@ export const useSectionAccordionItemLogic = (sectionKey: SectionNameType | Diagr
         sectionConfig,
         title,
         agentId,
-        Icon,
         userProfile,
         disabledReason,
     };

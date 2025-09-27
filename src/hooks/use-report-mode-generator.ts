@@ -8,8 +8,6 @@ import { toast } from '@/hooks';
 import type { SectionName } from '@/ai/schemas';
 import { useBuilderStore } from '@/hooks';
 import { Project } from '@/lib/models/project';
-import { useSections } from './use-sections';
-import { FileText, Bot } from 'lucide-react';
 import { useExport } from './use-export';
 import { reportSections as staticReportSections } from '@/lib/db/seed-data/sections-templates';
 
@@ -94,10 +92,6 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         return reportSectionsMap[sectionKey]?.title || sectionKey;
     }, [reportSectionsMap]);
 
-    const getSectionIcon = useCallback((sectionKey: SectionName) => {
-        return Bot; // Return a default icon
-    }, []);
-    
     return {
         t,
         locale,
@@ -111,6 +105,5 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         handleExportReportDOCX,
         sections, // Pass sections state
         getSectionTitle, // Pass helper function
-        getSectionIcon, // Pass helper function
     };
 };

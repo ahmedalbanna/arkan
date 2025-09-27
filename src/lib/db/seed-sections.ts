@@ -2,12 +2,10 @@ import 'dotenv/config'; // Make sure to install dotenv: npm install dotenv
 import { adminDb } from '../firebase/server-init';
 import { reportSections, diagramSections, presentationSections } from './seed-data/sections-templates';
 import { CollectionReference } from 'firebase-admin/firestore';
-import { LucideIcon } from 'lucide-react';
 
 // A helper type to make sure our section objects are what we expect
 interface StaticSection {
     title: string;
-    icon: LucideIcon;
     agentId: string;
 }
 
@@ -19,15 +17,10 @@ async function seedSections() {
     console.log('Seeding report sections...');
     for (const [id, section] of Object.entries(reportSections)) {
         const staticSection = section as StaticSection;
-        if (!staticSection.icon || !(staticSection.icon as any).displayName) {
-            console.warn(`Skipping section "${id}" due to missing icon displayName.`);
-            continue;
-        }
         const docRef = sectionsCollection.doc(id);
         batch.set(docRef, {
             title: staticSection.title,
             agentId: staticSection.agentId,
-            icon: (staticSection.icon as any).displayName, // Get the string name of the icon component
             type: 'report'
         });
         count++;
@@ -36,15 +29,10 @@ async function seedSections() {
     console.log('Seeding diagram sections...');
     for (const [id, section] of Object.entries(diagramSections)) {
         const staticSection = section as StaticSection;
-        if (!staticSection.icon || !(staticSection.icon as any).displayName) {
-            console.warn(`Skipping diagram "${id}" due to missing icon displayName.`);
-            continue;
-        }
         const docRef = sectionsCollection.doc(id);
         batch.set(docRef, {
             title: staticSection.title,
             agentId: staticSection.agentId,
-            icon: (staticSection.icon as any).displayName,
             type: 'diagram'
         });
         count++;
@@ -52,16 +40,14 @@ async function seedSections() {
 
     console.log('Seeding presentation section...');
     const staticPresentationSection = presentationSections as StaticSection;
-    if (staticPresentationSection.icon.displayName) {
-        const docRef = sectionsCollection.doc('presentation');
-        batch.set(docRef, {
-            title: staticPresentationSection.title,
-            agentId: staticPresentationSection.agentId,
-            icon: (staticPresentationSection.icon as any).displayName,
-            type: 'presentation'
-        });
-        count++;
-    }
+    const docRef = sectionsCollection.doc('presentation');
+    batch.set(docRef, {
+        title: staticPresentationSection.title,
+        agentId: staticPresentationSection.agentId,
+        type: 'presentation'
+    });
+    count++;
+
 
     await batch.commit();
     console.log(`✅ Successfully seeded ${count} documents into the 'sections' collection.`);

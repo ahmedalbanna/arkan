@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React from 'react';
@@ -28,7 +27,6 @@ export const SectionAccordionItem = ({
     const {
         t,
         title,
-        Icon,
         disabledReason,
     } = useSectionAccordionItemLogic(sectionKey);
 
@@ -45,7 +43,7 @@ export const SectionAccordionItem = ({
                 )}
                 <AccordionTrigger className="flex-1 rounded-md px-4 py-2 text-sm font-medium hover:no-underline">
                     <div className="flex items-center gap-2">
-                        {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon />}
+                        {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}
                         {t(title)}
                     </div>
                 </AccordionTrigger>

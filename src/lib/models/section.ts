@@ -4,7 +4,6 @@ export type SectionType = 'report' | 'diagram' | 'presentation';
 export interface SectionProperties {
     id: string;
     title: string;
-    icon: string;
     agentId: string;
     type: SectionType;
 }
@@ -12,14 +11,12 @@ export interface SectionProperties {
 export class Section {
     public id: string;
     public title: string;
-    public icon: string;
     public agentId: string;
     public type: SectionType;
 
     constructor(props: SectionProperties) {
         this.id = props.id;
         this.title = props.title;
-        this.icon = props.icon;
         this.agentId = props.agentId;
         this.type = props.type;
     }

@@ -4,17 +4,10 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
 import { SectionActions } from './SectionActions';
-import { GitGraph, Bot } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import { Section } from '@/lib/models/section';
 
 export const columns: ColumnDef<Section>[] = [
-  {
-    accessorKey: 'icon',
-    header: 'Icon',
-    cell: ({ row }) => {
-      return <Bot className="h-5 w-5" />; // Use a default icon
-    },
-  },
   {
     accessorKey: 'title',
     header: 'Title',

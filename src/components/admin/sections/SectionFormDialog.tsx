@@ -25,8 +25,7 @@ import { Section, type SectionProperties } from '@/lib/models/section';
 
 const SectionSchema = z.object({
   id: z.string().min(3, 'ID must be at least 3 characters').regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'ID must be lowercase and kebab-case.'),
-  title: z.string().min(3, 'Title is required'),
-  icon: z.string().min(1, 'Icon is required'),
+  title: z.string().min(1, 'Title is required'),
   agentId: z.string().min(1, 'Agent is required'),
   type: z.enum(['report', 'diagram', 'presentation']),
 });
@@ -46,10 +45,14 @@ export function SectionFormDialog({ sectionToEdit, children }: SectionFormDialog
 
   const form = useForm<SectionFormData>({
     resolver: zodResolver(SectionSchema),
-    defaultValues: sectionToEdit || {
+    defaultValues: sectionToEdit ? {
+        id: sectionToEdit.id,
+        title: sectionToEdit.title,
+        agentId: sectionToEdit.agentId,
+        type: sectionToEdit.type,
+    } : {
       id: '',
       title: '',
-      icon: '',
       agentId: '',
       type: 'report',
     },
@@ -88,11 +91,6 @@ export function SectionFormDialog({ sectionToEdit, children }: SectionFormDialog
             <Label htmlFor="title" className="text-right">Title</Label>
             <Input id="title" {...form.register('title')} className="col-span-3" />
             {form.formState.errors.title && <p className="col-span-4 text-sm text-destructive text-right">{form.formState.errors.title.message}</p>}
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="icon" className="text-right">Icon</Label>
-            <Input id="icon" {...form.register('icon')} className="col-span-3" placeholder="e.g., FileText" />
-            {form.formState.errors.icon && <p className="col-span-4 text-sm text-destructive text-right">{form.formState.errors.icon.message}</p>}
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="agentId" className="text-right">Agent</Label>

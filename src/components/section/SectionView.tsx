@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { SectionName } from '@/ai/schemas';
@@ -16,12 +17,11 @@ import remarkGfm from 'remark-gfm';
 interface SectionProps {
     sectionKey: SectionName;
     title: string;
-    icon: React.ElementType; // Icon component for the section
     content: string; // The markdown content of the section
     onUpdate: (key: SectionName, value: string) => void;
 }
 
-export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: SectionProps) => {
+export const Section = ({ sectionKey, title, content, onUpdate }: SectionProps) => {
     const {
         aiSuggestion,
         diff,
@@ -40,7 +40,6 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                  <h2 className="font-semibold text-lg md:text-xl text-primary/90 font-headline flex items-center gap-2">
-                    <Icon className="w-5 h-5"/>
                     {title}
                 </h2>
                 {/* The main toolbar is now handled by the BubbleMenu in the editor */}
