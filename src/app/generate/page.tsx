@@ -3,7 +3,6 @@
 'use client';
 
 import OnboardingGuide from '@/components/auth/OnboardingGuide';
-import ProjectChat from '@/components/chat/ProjectChat';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from '@/context/AuthContext';
@@ -256,7 +255,6 @@ function GeneratePageContent() {
           )}
         </div>
       </div>
-      <ProjectChat />
     </div>
   );
 }

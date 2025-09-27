@@ -1,6 +1,5 @@
 
 
-
 'use server';
 
 import { config } from 'dotenv';
@@ -25,7 +24,6 @@ import '@/ai/flows/generate-project-plan.ts';
 import '@/ai/flows/generate-codebase.ts';
 import '@/ai/flows/academic-solver.ts';
 import '@/ai/flows/text-to-speech.ts';
-import '@/ai/flows/project-chat.ts'; // Add new flow
 import '@/ai/flows/analyze-context.ts'; // Add new flow
 import '@/ai/flows/analyzeAndReport.ts';
 import '@/ai/flows/generate-agent-config.ts';
