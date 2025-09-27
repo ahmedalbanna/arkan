@@ -9,11 +9,28 @@ import { useDiagramGenerationTools } from '@/hooks/use-diagram-generation-tools'
 import { cn } from '@/lib/utils';
 import { Loader2, PanelLeftClose } from 'lucide-react';
 import { DiagramAccordionItem } from './DiagramAccordionItem';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const orderedDiagrams = DiagramTypeSchema.options;
 
 interface DiagramGenerationToolsProps {
     onCollapseToggle: () => void;
+}
+
+function ToolsSkeleton() {
+    return (
+        <Card className="flex flex-col h-full">
+            <CardHeader>
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-full mt-2" />
+            </CardHeader>
+            <CardContent className="flex-grow space-y-2 pt-6">
+                {Array.from({ length: 7 }).map((_, i) => (
+                    <Skeleton key={i} className="h-12 w-full" />
+                ))}
+            </CardContent>
+        </Card>
+    );
 }
 
 export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationToolsProps) => {
@@ -27,7 +44,7 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
     } = useDiagramGenerationTools();
 
     if (!agentsLoaded || Object.keys(diagramSections).length === 0) {
-        return <Card><CardHeader><CardTitle>{t('builder.diagramGenerator.toolsLoading')}</CardTitle><CardContent><Loader2 className="animate-spin" /></CardContent></CardHeader></Card>;
+        return <ToolsSkeleton />;
     }
 
     return (
