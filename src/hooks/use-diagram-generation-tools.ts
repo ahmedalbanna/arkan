@@ -60,6 +60,7 @@ export const useDiagramGenerationTools = () => {
         t,
         agentsLoaded,
         isAnythingGenerating,
+        activeMutationKey,
         onGenerateDiagram,
         diagramSections, // This now holds Agent objects
         hasCreditsForGeneration,
