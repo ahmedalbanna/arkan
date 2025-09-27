@@ -9,12 +9,11 @@ import { Loader2, Sparkles, Copy, Check } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { useLocalization } from '@/context/LocalizationContext';
 import { useHumanizerLogic } from '@/hooks';
 
 export function HumanizerTool() {
-  const { t } = useLocalization();
   const {
+    t,
     form,
     mutation,
     onSubmit,
