@@ -1,18 +1,16 @@
 
-
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useTranslate } from '@/hooks';
+import { useTranslate, useSections } from '@/hooks';
 import { toast } from '@/hooks';
 import type { SectionName } from '@/ai/schemas';
 import { useBuilderStore } from '@/hooks';
 import { Project } from '@/lib/models/project';
 import { useExport } from './use-export';
-import { reportSections as staticReportSections } from '@/lib/db/seed-data/sections-templates';
 
-export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: { orderedSections: SectionName[], setOrderedSections: (sections: SectionName[]) => void; }) => {
+export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: { orderedSections: import('@/lib/models/section').Section[], setOrderedSections: (sections: import('@/lib/models/section').Section[]) => void; }) => {
     const { t, locale } = useLocalization();
     const { project, setProject } = useBuilderStore();
     const translateMutation = useTranslate();
@@ -21,11 +19,12 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     
     const { exportReportDocx, isExporting } = useExport();
 
+    const { data: sectionConfigs } = useSections();
+
     const sections = project?.sections || {};
-    const translatedSections = project?.translatedSections || {};
 
     const generatedSections = useMemo(
-        () => (orderedSections || []).filter(key => sections[key]),
+        () => (orderedSections || []).filter(section => sections[section.id as SectionName]),
         [sections, orderedSections]
     );
 
@@ -74,24 +73,28 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         });
     };
 
-    const reportSectionsMap = useMemo(() => {
-        return staticReportSections
-    }, []);
-
     const handleExportReportDOCX = async (sectionsToInclude: SectionName[]) => {
         if (!project || generatedSections.length === 0) return;
 
-        const translatedTitles = Object.keys(reportSectionsMap).reduce((acc, key) => {
-            acc[key as SectionName] = t(reportSectionsMap[key as SectionName]?.title || key);
+        const translatedTitles = sectionConfigs?.reduce((acc, sec) => {
+            acc[sec.id as SectionName] = sec.title; // No need for t() here, we use the direct title
             return acc;
-        }, {} as { [key in SectionName]?: string });
+        }, {} as { [key in SectionName]?: string }) || {};
 
         await exportReportDocx(project, translatedTitles, sectionsToInclude);
     };
-
+    
     const getSectionTitle = useCallback((sectionKey: SectionName) => {
-        return reportSectionsMap[sectionKey]?.title || sectionKey;
-    }, [reportSectionsMap]);
+        return sectionConfigs?.find(s => s.id === sectionKey)?.title || sectionKey;
+    }, [sectionConfigs]);
+
+    useEffect(() => {
+        if (!orderedSections.length && sectionConfigs) {
+            const reportSectionConfigs = sectionConfigs.filter(s => s.type === 'report').sort((a, b) => a.title.localeCompare(b.title));
+            setOrderedSections(reportSectionConfigs);
+        }
+    }, [orderedSections, setOrderedSections, sectionConfigs]);
+
 
     return {
         t,

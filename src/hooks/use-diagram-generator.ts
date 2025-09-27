@@ -3,14 +3,15 @@
 
 import { type DiagramType, DiagramTypeSchema } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAgentStore, useBuilderStore, useSections, useUpdateDiagram } from '@/hooks';
-import { useMemo, useState } from 'react';
+import { useAgentStore, useBuilderStore, useAgents, useUpdateDiagram } from '@/hooks';
+import { useMemo } from 'react';
+import { Agent, AgentCategory } from '@/lib/models/agent';
+import { GitGraph } from 'lucide-react';
 
 export const useDiagramGenerator = () => {
     const { t, locale } = useLocalization();
     const { project, updateProject } = useBuilderStore();
-    const { data: sectionConfigs } = useSections();
-    const getIconComponent = useAgentStore(state => state.getIconComponent);
+    const { agents } = useAgents();
 
     const diagrams = project?.diagrams || {};
 
@@ -25,12 +26,15 @@ export const useDiagramGenerator = () => {
     });
 
     const diagramSections = useMemo(() => {
-        if (!sectionConfigs) return {};
-        return sectionConfigs.filter(s => s.type === 'diagram').reduce((acc, sec) => {
-            acc[sec.id] = sec;
-            return acc;
-        }, {} as Record<string, any>);
-    }, [sectionConfigs]);
+        if (!agents) return {};
+        return agents
+            .filter(a => a.category === AgentCategory.DiagramGeneration)
+            .reduce((acc, agent) => {
+                const sectionId = agent.id.replace('generate-', '').replace('-diagram', '');
+                acc[sectionId] = agent;
+                return acc;
+            }, {} as Record<string, Agent>);
+    }, [agents]);
 
     const handleUpdateDiagram = (plantUmlCode: string) => {
         mutation.mutate(plantUmlCode);
@@ -54,8 +58,7 @@ export const useDiagramGenerator = () => {
     return {
         t,
         locale,
-        diagramSections, // This is now safely memoized
-        getIconComponent,
+        diagramSections,
         diagrams,
         handleDiagramCodeUpdate,
         setDiagramExplanation,

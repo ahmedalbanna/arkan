@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useDiagramGenerationTools } from '@/hooks/use-diagram-generation-tools';
 import { cn } from '@/lib/utils';
 import { Loader2, PanelLeftClose } from 'lucide-react';
-import { DiagramAccordionItem } from './DiagramAccordionItem';
+import { SectionAccordionItem } from '../section/SectionAccordionItem';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const orderedDiagrams = DiagramTypeSchema.options;
@@ -39,7 +39,7 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
         agentsLoaded,
         isAnythingGenerating,
         onGenerateDiagram,
-        diagramSections,
+        diagramSections, // This is now a Record<string, Agent>
         hasCreditsForGeneration,
     } = useDiagramGenerationTools();
 
@@ -63,15 +63,17 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
             <CardContent className="flex-grow overflow-y-auto pr-2">
                 <Accordion type="multiple" className="w-full space-y-1">
                     {orderedDiagrams.map((key) => {
-                        const diagramConfig = diagramSections[key];
-                        if (!diagramConfig) return null;
+                        const agent = diagramSections[key];
+                        if (!agent) return null;
 
                         return (
-                            <DiagramAccordionItem
+                            <SectionAccordionItem
                                 key={key}
-                                diagramType={key}
-                                onGenerate={onGenerateDiagram}
-                                isGenerating={isAnythingGenerating}
+                                itemKey={key}
+                                agent={agent} // Pass the full agent object
+                                onGenerate={() => onGenerateDiagram(key)}
+                                isGenerating={isAnythingGenerating && activeMutationKey === key} // Assuming activeMutationKey is managed in the hook
+                                isAnythingGenerating={isAnythingGenerating}
                                 hasCredits={!!hasCreditsForGeneration}
                             />
                         );

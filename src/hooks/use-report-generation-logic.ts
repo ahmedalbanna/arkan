@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -7,37 +6,35 @@ import { type SectionName as SectionNameType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore, useGenerateReportSection, useGenerationUIStore } from '@/hooks';
 import { useAgents } from './use-agents';
-import { reportSections } from '@/lib/db/seed-data/sections-templates'; // Import static data
+import type { Section } from '@/lib/models/section';
 
-export function useReportGenerationLogic({ orderedSections, setOrderedSections }: { orderedSections: SectionNameType[], setOrderedSections: (sections: SectionNameType[]) => void }) {
+export function useReportGenerationLogic({ orderedSections, setOrderedSections }: { orderedSections: SectionName[], setOrderedSections: (sections: Section[]) => void }) {
     const { userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = useState<string | null>(null);
 
     const { project } = useBuilderStore();
     const { initializeDependentStates } = useGenerationUIStore();
 
-    // Remove useSections hook
+    const { data: sections, isLoading: sectionsLoading } = useSections();
     const { agents, isLoaded: agentsLoaded } = useAgents();
 
     const reportGenerationMutation = useGenerateReportSection();
 
-    // State for section order is now managed by the parent hook
     useEffect(() => {
-        if (orderedSections.length === 0) {
-            const initialOrder = Object.keys(reportSections).sort((a, b) =>
-                reportSections[a as SectionNameType].title.localeCompare(reportSections[b as SectionNameType].title)
-            ) as SectionNameType[];
+        if (!orderedSections.length && sections) {
+            const initialOrder = sections
+                .filter(s => s.type === 'report')
+                .sort((a, b) => a.title.localeCompare(b.title));
             setOrderedSections(initialOrder);
         }
-    }, [orderedSections, setOrderedSections]);
+    }, [orderedSections, setOrderedSections, sections]);
+
 
     useEffect(() => {
-        if (agentsLoaded && agents.length > 0) {
-            // This might need a refactor if sections were also expected.
-            // For now, we assume it's primarily for agent-based guideline initialization.
-            // initializeDependentStates(agents, []); // Pass empty sections array
+        if (agentsLoaded && !sectionsLoading && sections && agents.length > 0) {
+            initializeDependentStates(agents, sections);
         }
-    }, [agentsLoaded, agents, initializeDependentStates]);
+    }, [agentsLoaded, sectionsLoading, agents, sections, initializeDependentStates]);
 
 
     const isAnythingGenerating = reportGenerationMutation.isPending;
@@ -67,7 +64,7 @@ export function useReportGenerationLogic({ orderedSections, setOrderedSections }
         onGenerateSection,
         hasCreditsForSingleSection,
         agentsLoaded,
-        sectionsLoading: false, // Since it's static now
+        sectionsLoading,
         project,
     };
 }

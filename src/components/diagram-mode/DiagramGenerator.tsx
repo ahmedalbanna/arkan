@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,8 +9,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion } from '@/components/ui/accordion';
 import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { useDiagramGenerator } from '@/hooks';
-
-
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import { Button } from '../ui/button';
+import { PanelRightOpen } from 'lucide-react';
 
 function DiagramSkeleton() {
   return (
@@ -27,7 +28,6 @@ export default function DiagramGenerator() {
         t,
         locale,
         diagramSections,
-        getIconComponent,
         diagrams,
         handleDiagramCodeUpdate,
         setDiagramExplanation,
@@ -35,17 +35,29 @@ export default function DiagramGenerator() {
         handleUpdateDiagram,
         generatedDiagrams,
     } = useDiagramGenerator();
+    const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-
+             {isPanelCollapsed && (
+                <div className="hidden lg:block lg:col-span-1 sticky top-24">
+                     <Button
+                        variant="secondary"
+                        className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
+                        onClick={() => setIsPanelCollapsed(false)}
+                    >
+                        <PanelRightOpen className="h-5 w-5 mb-2" />
+                        {t('builder.diagramGenerator.toolsTitle')}
+                    </Button>
+                </div>
+            )}
             {/* Left Column */}
-            <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
-                <DiagramGenerationTools />
+            <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
+                <DiagramGenerationTools onCollapseToggle={() => setIsPanelCollapsed(true)} />
             </div>
 
             {/* Center Column */}
-            <div className="lg:col-span-8 lg:overflow-y-auto pr-2">
+            <div className={cn("lg:overflow-y-auto pr-2", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
                  <Card className="h-full">
                     <CardHeader>
                         <CardTitle className="font-headline">{t('builder.diagramGenerator.title')}</CardTitle>
@@ -58,15 +70,14 @@ export default function DiagramGenerator() {
                             <Accordion type="multiple" className="w-full space-y-4">
                               {generatedDiagrams.map(key => {
                                 const diagramData = diagrams![key];
-                                const diagramConfig = diagramSections[key];
-                                if (!diagramData || !diagramConfig) return null;
-                                const Icon = getIconComponent(diagramConfig.icon) || GitGraph;
+                                const agent = diagramSections[key];
+                                if (!diagramData || !agent) return null;
                                 return (
                                    <AccordionItem value={key} key={key} className="bg-background rounded-lg border">
                                       <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline">
-                                         <div className="flex items-center">
-                                              <Icon />
-                                              {t(diagramConfig.title)}
+                                         <div className="flex items-center gap-2">
+                                              <GitGraph />
+                                              {agent.name}
                                          </div>
                                       </AccordionTrigger>
                                       <AccordionContent className="p-4 border-t">

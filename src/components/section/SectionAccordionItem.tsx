@@ -2,23 +2,26 @@
 'use client';
 
 import React from 'react';
-import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { type SectionName as SectionNameType } from '@/ai/schemas';
+import { type SectionName as SectionNameType, type DiagramType } from '@/ai/schemas';
 import { Loader2, Sparkles, GripVertical } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSectionAccordionItemLogic } from '@/hooks';
+import type { Agent } from '@/lib/models/agent';
 
 export const SectionAccordionItem = ({
-    sectionKey,
+    itemKey,
+    agent,
     onGenerate,
     isGenerating,
     isAnythingGenerating,
     hasCredits,
     handleProps,
 }: {
-    sectionKey: SectionNameType,
-    onGenerate: (section: SectionNameType) => void,
+    itemKey: SectionNameType | DiagramType,
+    agent: Agent,
+    onGenerate: () => void,
     isGenerating: boolean,
     isAnythingGenerating: boolean,
     hasCredits: boolean,
@@ -28,13 +31,12 @@ export const SectionAccordionItem = ({
         t,
         title,
         disabledReason,
-    } = useSectionAccordionItemLogic(sectionKey);
+    } = useSectionAccordionItemLogic(agent); // Pass the full agent object
 
-    // Context is now auto-selected by the AI, so we only disable based on credits/processing state.
     const canGenerate = hasCredits && !isAnythingGenerating;
 
     return (
-        <AccordionItem value={sectionKey} key={sectionKey} className="bg-background border rounded-lg">
+        <AccordionItem value={itemKey} key={itemKey} className="bg-background border rounded-lg">
             <div className="flex items-center" >
                 {handleProps && (
                     <div {...handleProps} className="p-2 cursor-grab touch-none">
@@ -44,7 +46,7 @@ export const SectionAccordionItem = ({
                 <AccordionTrigger className="flex-1 rounded-md px-4 py-2 text-sm font-medium hover:no-underline">
                     <div className="flex items-center gap-2">
                         {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}
-                        {t(title)}
+                        {title}
                     </div>
                 </AccordionTrigger>
                 <div className="p-2">
@@ -55,7 +57,7 @@ export const SectionAccordionItem = ({
                                     <Button
                                         type="button"
                                         size="sm"
-                                        onClick={() => onGenerate(sectionKey)}
+                                        onClick={onGenerate}
                                         disabled={!canGenerate}
                                         className="font-headline"
                                     >

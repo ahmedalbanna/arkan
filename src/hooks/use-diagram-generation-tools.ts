@@ -1,14 +1,14 @@
 
-
 'use client';
 
 import { type DiagramType, type SectionName } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAgents, useBuilderStore, useGenerateDiagram, useSections, useToast } from '@/hooks';
+import { useAgents, useBuilderStore, useGenerateDiagram, useToast } from '@/hooks';
 import React, { useEffect, useMemo } from 'react';
 import { useAgentStore } from './useAgentStore';
 import { useGenerationUIStore } from './useGenerationUIStore';
+import { Agent, AgentCategory } from '@/lib/models/agent';
 
 export const useDiagramGenerationTools = () => {
     const { t } = useLocalization();
@@ -17,21 +17,23 @@ export const useDiagramGenerationTools = () => {
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
     const { project } = useBuilderStore();
     const { initializeDependentStates } = useGenerationUIStore();
-    const { data: sectionConfigs, isLoading: sectionsLoading } = useSections();
+
+
+    const diagramAgents = useMemo(() => {
+        if (!agents) return [];
+        return agents.filter(a => a.category === AgentCategory.DiagramGeneration);
+    }, [agents]);
 
     const diagramSections = useMemo(() => {
-        if (!sectionConfigs) return {};
-        return sectionConfigs.filter(s => s.type === 'diagram').reduce((acc, sec) => {
-            acc[sec.id] = sec;
+        if (!diagramAgents) return {};
+        return diagramAgents.reduce((acc, agent) => {
+            // The ID of the diagram section is derived from the agent ID
+            const sectionId = agent.id.replace('generate-', '').replace('-diagram', '');
+            acc[sectionId] = agent; // Store the full agent object
             return acc;
-        }, {} as Record<string, any>);
-    }, [sectionConfigs]);
+        }, {} as Record<string, Agent>);
+    }, [diagramAgents]);
 
-    useEffect(() => {
-        if (agentsLoaded && !sectionsLoading && sectionConfigs && agents.length > 0) {
-            initializeDependentStates(agents, sectionConfigs);
-        }
-    }, [agentsLoaded, sectionsLoading, agents, sectionConfigs, initializeDependentStates]);
 
     const diagramMutation = useGenerateDiagram();
     const isAnythingGenerating = diagramMutation.isPending;
@@ -59,7 +61,7 @@ export const useDiagramGenerationTools = () => {
         agentsLoaded,
         isAnythingGenerating,
         onGenerateDiagram,
-        diagramSections,
+        diagramSections, // This now holds Agent objects
         hasCreditsForGeneration,
     };
 };

@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useReportModeGenerator } from '@/hooks';
@@ -11,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { PanelLeftClose, PanelRightOpen } from 'lucide-react';
 import { ReportResults } from './ReportResults';
+import type { Section } from '@/lib/models/section';
 
 function ReportSkeleton() {
     return (
@@ -26,7 +26,7 @@ function ReportSkeleton() {
 }
 
 export default function ReportModeGenerator() {
-    const [orderedSections, setOrderedSections] = useState<SectionName[]>([]);
+    const [orderedSections, setOrderedSections] = useState<Section[]>([]);
     
     const {
         locale,
@@ -60,7 +60,7 @@ export default function ReportModeGenerator() {
             <div className={cn("lg:overflow-y-auto pr-2", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
                 <Suspense fallback={<ReportSkeleton />}>
                     {/* Pass the generatedSections array directly as a prop */}
-                    <ReportResults generatedSections={generatedSections} />
+                    <ReportResults generatedSections={generatedSections.map(s => s.id as SectionName)} />
                 </Suspense>
             </div>
         </div>

@@ -1,12 +1,10 @@
 
-
 'use client';
 
 import React from 'react';
 import { Accordion } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { type SectionName as SectionNameType } from '@/ai/schemas';
 import { PanelLeftClose } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useReportGenerationLogic } from '@/hooks';
@@ -16,16 +14,19 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Section } from '@/lib/models/section';
 
 interface SortableSectionItemProps {
-    id: SectionNameType;
+    id: string; // The ID of the section, which is a string.
+    agent: import('@/lib/models/agent').Agent;
     isGenerating: boolean;
     isAnythingGenerating: boolean;
     hasCredits: boolean;
-    onGenerate: (section: SectionNameType) => void;
+    onGenerate: () => void; // Changed from onGenerate: (section: SectionNameType) => void;
 }
 
-function SortableSectionItem({ id, ...props }: SortableSectionItemProps) {
+
+function SortableSectionItem({ id, agent, ...props }: SortableSectionItemProps) {
     const {
         attributes,
         listeners,
@@ -42,7 +43,8 @@ function SortableSectionItem({ id, ...props }: SortableSectionItemProps) {
     return (
         <div ref={setNodeRef} style={style} {...attributes}>
              <SectionAccordionItem
-                sectionKey={id}
+                itemKey={id}
+                agent={agent}
                 onGenerate={props.onGenerate}
                 isGenerating={props.isGenerating}
                 isAnythingGenerating={props.isAnythingGenerating}
@@ -55,8 +57,8 @@ function SortableSectionItem({ id, ...props }: SortableSectionItemProps) {
 
 interface GenerationToolsProps {
     onCollapseToggle: () => void;
-    orderedSections: SectionNameType[];
-    setOrderedSections: (sections: SectionNameType[]) => void;
+    orderedSections: Section[];
+    setOrderedSections: (sections: Section[]) => void;
 }
 
 export const GenerationTools = ({ onCollapseToggle, orderedSections, setOrderedSections }: GenerationToolsProps) => {
@@ -65,7 +67,10 @@ export const GenerationTools = ({ onCollapseToggle, orderedSections, setOrderedS
         activeMutationKey,
         onGenerateSection,
         hasCreditsForSingleSection,
+        agents, // Assuming useReportGenerationLogic provides this
     } = useReportGenerationLogic({ orderedSections, setOrderedSections });
+    
+    const { t } = useLocalization();
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -77,15 +82,14 @@ export const GenerationTools = ({ onCollapseToggle, orderedSections, setOrderedS
     const handleDragEnd = (event: any) => {
         const {active, over} = event;
         if (active.id !== over.id) {
-          const oldIndex = orderedSections.indexOf(active.id);
-          const newIndex = orderedSections.indexOf(over.id);
+          const oldIndex = orderedSections.findIndex(s => s.id === active.id);
+          const newIndex = orderedSections.findIndex(s => s.id === over.id);
           setOrderedSections(arrayMove(orderedSections, oldIndex, newIndex));
         }
     };
 
 
     const isDisabled = isAnythingGenerating;
-    const { t } = useLocalization();
 
 
     return (
@@ -103,15 +107,19 @@ export const GenerationTools = ({ onCollapseToggle, orderedSections, setOrderedS
             </CardHeader>
             <CardContent className="flex-grow overflow-y-auto pr-2">
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                    <SortableContext items={orderedSections} strategy={verticalListSortingStrategy}>
+                    <SortableContext items={orderedSections.map(s => s.id)} strategy={verticalListSortingStrategy}>
                         <Accordion type="multiple" className="w-full space-y-1">
-                            {orderedSections.map((key) => {
-                                const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
+                            {orderedSections.map((section) => {
+                                const agent = agents?.find(a => a.id === section.agentId);
+                                if (!agent) return null; // Should not happen if data is consistent
+
+                                const isGeneratingThis = isAnythingGenerating && activeMutationKey === section.id;
                                 return (
                                     <SortableSectionItem
-                                        key={key}
-                                        id={key}
-                                        onGenerate={onGenerateSection}
+                                        key={section.id}
+                                        id={section.id}
+                                        agent={agent}
+                                        onGenerate={() => onGenerateSection(section.id as any)}
                                         isGenerating={isGeneratingThis}
                                         isAnythingGenerating={isAnythingGenerating}
                                         hasCredits={!!hasCreditsForSingleSection}
