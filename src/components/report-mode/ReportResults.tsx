@@ -23,7 +23,6 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     t,
     sections,
     getSectionTitle,
-    getSectionIcon,
     handleSectionUpdate,
   } = useReportModeGenerator({ orderedSections: generatedSections, setOrderedSections: () => {} });
 
@@ -67,7 +66,6 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
                         <Section
                             sectionKey={currentSectionKey}
                             title={getSectionTitle(currentSectionKey)}
-                            icon={getSectionIcon(currentSectionKey)}
                             content={sections[currentSectionKey]!}
                             onUpdate={handleSectionUpdate}
                         />
