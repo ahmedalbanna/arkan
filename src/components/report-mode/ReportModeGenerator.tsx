@@ -32,7 +32,7 @@ export default function ReportModeGenerator() {
         locale,
         isPanelCollapsed,
         setIsPanelCollapsed,
-        generatedSections, // Get the correctly calculated generated sections
+        generatedSections,
     } = useReportModeGenerator({ orderedSections, setOrderedSections });
 
     return (
@@ -59,7 +59,6 @@ export default function ReportModeGenerator() {
 
             <div className={cn("lg:overflow-y-auto pr-2", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
                 <Suspense fallback={<ReportSkeleton />}>
-                    {/* Pass the generatedSections array directly as a prop */}
                     <ReportResults generatedSections={generatedSections.map(s => s.id as SectionName)} />
                 </Suspense>
             </div>

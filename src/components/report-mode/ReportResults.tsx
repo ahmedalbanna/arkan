@@ -24,7 +24,9 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     sections,
     getSectionTitle,
     handleSectionUpdate,
-  } = useReportModeGenerator({ orderedSections: generatedSections, setOrderedSections: () => {} });
+    orderedSections,
+    setOrderedSections,
+  } = useReportModeGenerator({ orderedSections: [], setOrderedSections: () => {} });
 
   const [currentPage, setCurrentPage] = React.useState(0);
   const totalPages = generatedSections.length;

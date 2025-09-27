@@ -9,6 +9,8 @@ import type { SectionName } from '@/ai/schemas';
 import { useBuilderStore } from '@/hooks';
 import { Project } from '@/lib/models/project';
 import { useExport } from './use-export';
+import { useAgents } from './use-agents';
+import { AgentCategory } from '@/lib/models/agent';
 
 export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: { orderedSections: import('@/lib/models/section').Section[], setOrderedSections: (sections: import('@/lib/models/section').Section[]) => void; }) => {
     const { t, locale } = useLocalization();
@@ -18,8 +20,13 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     
     const { exportReportDocx, isExporting } = useExport();
-
     const { data: sectionConfigs } = useSections();
+    const { agents } = useAgents();
+
+    const reportAgents = useMemo(() => {
+        if (!agents) return [];
+        return agents.filter(a => a.category === AgentCategory.ReportGeneration);
+    }, [agents]);
 
     const sections = project?.sections || {};
 
@@ -76,8 +83,8 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     const handleExportReportDOCX = async (sectionsToInclude: SectionName[]) => {
         if (!project || generatedSections.length === 0) return;
 
-        const translatedTitles = sectionConfigs?.reduce((acc, sec) => {
-            acc[sec.id as SectionName] = sec.title; // No need for t() here, we use the direct title
+        const translatedTitles = reportAgents?.reduce((acc, agent) => {
+            acc[agent.id as SectionName] = agent.name; // Use agent name directly
             return acc;
         }, {} as { [key in SectionName]?: string }) || {};
 
@@ -85,15 +92,20 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     };
     
     const getSectionTitle = useCallback((sectionKey: SectionName) => {
-        return sectionConfigs?.find(s => s.id === sectionKey)?.title || sectionKey;
-    }, [sectionConfigs]);
+        return reportAgents?.find(a => a.id.includes(sectionKey))?.name || sectionKey;
+    }, [reportAgents]);
 
     useEffect(() => {
-        if (!orderedSections.length && sectionConfigs) {
-            const reportSectionConfigs = sectionConfigs.filter(s => s.type === 'report').sort((a, b) => a.title.localeCompare(b.title));
-            setOrderedSections(reportSectionConfigs);
+        if (!orderedSections.length && reportAgents.length > 0) {
+            const initialOrder = reportAgents.map(a => new Section({
+                id: a.id.replace('generate-', '').replace('-section', ''),
+                title: a.name,
+                agentId: a.id,
+                type: 'report',
+            })).sort((a, b) => a.title.localeCompare(b.title));
+            setOrderedSections(initialOrder);
         }
-    }, [orderedSections, setOrderedSections, sectionConfigs]);
+    }, [orderedSections.length, setOrderedSections, reportAgents]);
 
 
     return {
@@ -109,5 +121,7 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         handleExportReportDOCX,
         sections, // Pass sections state
         getSectionTitle, // Pass helper function
+        orderedSections,
+        setOrderedSections,
     };
 };
