@@ -91,6 +91,17 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
 
         await exportReportDocx(project, translatedTitles, sectionsToInclude);
     };
+
+    const getIconComponent = useAgentStore(state => state.getIconComponent);
+
+    const getSectionTitle = useCallback((sectionKey: SectionName) => {
+        return reportSectionsMap[sectionKey]?.title || sectionKey;
+    }, [reportSectionsMap]);
+
+    const getSectionIcon = useCallback((sectionKey: SectionName) => {
+        const iconName = reportSectionsMap[sectionKey]?.icon as any;
+        return getIconComponent(iconName?.displayName || 'FileText') || FileText;
+    }, [reportSectionsMap, getIconComponent]);
     
     return {
         t,
@@ -100,8 +111,11 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         handleSectionUpdate,
         handleTranslateAll,
         isTranslatingAll,
-        generatedSections, // Return the calculated list
+        generatedSections,
         isExporting,
         handleExportReportDOCX,
+        sections, // Pass sections state
+        getSectionTitle, // Pass helper function
+        getSectionIcon, // Pass helper function
     };
 };
