@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
@@ -10,8 +9,7 @@ import type { SectionName } from '@/ai/schemas';
 import { useBuilderStore } from '@/hooks';
 import { Project } from '@/lib/models/project';
 import { useSections } from './use-sections';
-import { useAgentStore } from './useAgentStore';
-import { FileText } from 'lucide-react';
+import { FileText, Bot } from 'lucide-react';
 import { useExport } from './use-export';
 import { reportSections as staticReportSections } from '@/lib/db/seed-data/sections-templates';
 
@@ -92,16 +90,13 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         await exportReportDocx(project, translatedTitles, sectionsToInclude);
     };
 
-    const getIconComponent = useAgentStore(state => state.getIconComponent);
-
     const getSectionTitle = useCallback((sectionKey: SectionName) => {
         return reportSectionsMap[sectionKey]?.title || sectionKey;
     }, [reportSectionsMap]);
 
     const getSectionIcon = useCallback((sectionKey: SectionName) => {
-        const iconName = reportSectionsMap[sectionKey]?.icon as any;
-        return getIconComponent(iconName?.displayName || 'FileText') || FileText;
-    }, [reportSectionsMap, getIconComponent]);
+        return Bot; // Return a default icon
+    }, []);
     
     return {
         t,

@@ -2,22 +2,10 @@
 import { create } from 'zustand';
 import { db } from '@/lib/firebase/client-init';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
-import {
-  LucideIcon, FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText as BookTextIcon, Presentation, DatabaseZap, History, FileHeart, Hand, DraftingCompass, Files, LayoutGrid, Scale, Megaphone, PencilRuler, Users
-} from 'lucide-react';
-import type { Agent, AgentPrompt } from '@/lib/types';
+import type { AgentProperties } from '@/lib/models/agent';
 
-const iconMap: Record<string, LucideIcon> = {
-  FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText: BookTextIcon, Presentation, DatabaseZap, History, FileHeart, Hand, DraftingCompass, Files, LayoutGrid, Scale, Megaphone, PencilRuler, Users
-};
-
-export interface DynamicAgent extends Omit<Agent, 'icon'> {
+export interface AgentWithComponent extends AgentProperties {
   id: string;
-  icon: string;
-}
-
-export interface AgentWithComponent extends DynamicAgent {
-    iconComponent: LucideIcon;
 }
 
 interface AgentState {
@@ -26,7 +14,6 @@ interface AgentState {
   isLoading: boolean;
   error: string | null;
   fetchAgents: () => void;
-  getIconComponent: (iconName: string) => LucideIcon | undefined;
 }
 
 let unsubscribe: (() => void) | null = null;
@@ -56,11 +43,10 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       unsubscribe = onSnapshot(q, (querySnapshot) => {
         const fetchedAgents: Record<string, AgentWithComponent> = {};
         querySnapshot.forEach((doc) => {
-          const data = doc.data() as Omit<DynamicAgent, 'id'>;
+          const data = doc.data() as Omit<AgentWithComponent, 'id'>;
           const agent: AgentWithComponent = {
             id: doc.id,
             ...data,
-            iconComponent: iconMap[data.icon] || FileText,
           };
           fetchedAgents[doc.id] = agent;
         });
@@ -73,9 +59,6 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       console.error("Error setting up agent listener:", e);
       set({ isLoaded: false, isLoading: false, error: e.message });
     }
-  },
-  getIconComponent: (iconName: string) => {
-      return iconMap[iconName];
   },
 }));
 

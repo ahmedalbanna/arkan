@@ -62,8 +62,6 @@ export interface AgentProperties {
   language?: string;
   model?: string;
   isDefault?: boolean;
-  icon?: string;
-  iconComponent?: LucideIcon;
 }
 
 export class Agent {
@@ -83,8 +81,6 @@ export class Agent {
   public language?: string;
   public model?: string;
   public isDefault?: boolean;
-  public icon?: string;
-  public iconComponent?: LucideIcon;
 
   constructor(props: AgentProperties) {
     this.id = props.id;
@@ -103,8 +99,6 @@ export class Agent {
     this.language = props.language;
     this.model = props.model;
     this.isDefault = props.isDefault;
-    this.icon = props.icon;
-    this.iconComponent = props.iconComponent;
   }
 
   /**

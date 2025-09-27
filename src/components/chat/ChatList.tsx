@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -120,7 +121,6 @@ function LiveChatListItem({ chat, isSelected, onSelect }: { chat: Chat, isSelect
 }
 
 function AgentListItem({ agent, isSelected, onSelect }: { agent: Agent, isSelected: boolean, onSelect: () => void }) {
-    const Icon = agent.iconComponent || Bot;
     return (
         <button
             onClick={onSelect}
@@ -129,7 +129,7 @@ function AgentListItem({ agent, isSelected, onSelect }: { agent: Agent, isSelect
                 isSelected && 'bg-accent'
             )}
         >
-            <Icon className="h-5 w-5" />
+            <Bot className="h-5 w-5" />
             <div className="font-semibold">{agent.name}</div>
         </button>
     )

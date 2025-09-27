@@ -7,13 +7,11 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useSections } from '@/hooks';
 import { FileText } from 'lucide-react';
 import { useMemo } from 'react';
-import { useAgentStore } from './useAgentStore';
 import { useGenerationUIStore } from './useGenerationUIStore';
 import { reportSections } from '@/lib/db/seed-data/sections-templates'; // Import static data
 
 export const useSectionAccordionItemLogic = (sectionKey: SectionNameType | DiagramType) => {
     const { t } = useLocalization();
-    const getIconComponent = useAgentStore((state) => state.getIconComponent);
     const { userProfile } = useAuth();
     const { project } = useBuilderStore();
 
@@ -22,7 +20,7 @@ export const useSectionAccordionItemLogic = (sectionKey: SectionNameType | Diagr
 
     const title = sectionConfig?.title || '';
     const agentId = sectionConfig?.agentId || '';
-    const Icon = sectionConfig ? getIconComponent((sectionConfig.icon as any)?.displayName || 'FileText') || FileText : FileText;
+    const Icon = FileText; // Default icon
     
     const hasProjectContext = !!project?.proposal || (project?.projectIdea && project.projectIdea.length > 0);
 

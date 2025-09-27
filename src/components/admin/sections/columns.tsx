@@ -2,10 +2,9 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { useAgentStore } from '@/hooks'; // Import from hooks
 import { Badge } from '@/components/ui/badge';
 import { SectionActions } from './SectionActions';
-import { GitGraph } from 'lucide-react';
+import { GitGraph, Bot } from 'lucide-react';
 import { Section } from '@/lib/models/section';
 
 export const columns: ColumnDef<Section>[] = [
@@ -13,9 +12,7 @@ export const columns: ColumnDef<Section>[] = [
     accessorKey: 'icon',
     header: 'Icon',
     cell: ({ row }) => {
-      const getIconComponent = useAgentStore.getState().getIconComponent;
-      const Icon = getIconComponent(row.original.icon) || GitGraph;
-      return <Icon className="h-5 w-5" />;
+      return <Bot className="h-5 w-5" />; // Use a default icon
     },
   },
   {
