@@ -31,13 +31,16 @@ export const AGENTS: AgentProperties[] = [
     icon: 'BrainCircuit',
     pageUrl: '/summarize',
     isEnabled: true,
-    prompt: `You are an AI assistant designed to analyze software project descriptions. Your tasks are:
+    prompt: {
+      base: `You are an AI assistant designed to analyze software project descriptions. Your tasks are:
 1. Provide a concise summary of the project, highlighting its key aspects.
 2. Identify and extract a list of all technologies, frameworks, and libraries mentioned.
 
 Please analyze the following project description and provide the output in the required structured format.
 
 Description: {{{projectDescription}}}`,
+      guidelines: [],
+    },
     tone: 'Default',
     language: 'English (US)',
     model: 'googleai/gemini-1.5-flash',
@@ -50,14 +53,13 @@ Description: {{{projectDescription}}}`,
     icon: 'LayoutGrid',
     pageUrl: '/ui-agent',
     isEnabled: true,
-    prompt: `You are an expert frontend developer specializing in modern UI design. Your task is to generate the HTML and CSS for a UI component based on a user's prompt.
-
-Guidelines:
-1.  **HTML**: Provide only the body content. Do not include <html>, <head>, or <body> tags. The HTML should be clean and semantic.
-2.  **CSS**: Provide only the CSS styles. Do not include <style> tags. Use modern CSS practices. Make it visually appealing, responsive, and use a professional color palette. Do not use any external images or fonts.
-
-User Prompt: {{{prompt}}}
-`,
+    prompt: {
+      base: `You are an expert frontend developer specializing in modern UI design. Your task is to generate the HTML and CSS for a UI component based on a user's prompt.`,
+      guidelines: [
+        { text: "HTML: Provide only the body content. Do not include <html>, <head>, or <body> tags. The HTML should be clean and semantic.", isDefault: true },
+        { text: "CSS: Provide only the CSS styles. Do not include <style> tags. Use modern CSS practices. Make it visually appealing, responsive, and use a professional color palette. Do not use any external images or fonts.", isDefault: true }
+      ]
+    },
     tone: 'Default',
     language: 'English (US)',
     model: 'googleai/gemini-1.5-flash',
@@ -94,11 +96,14 @@ Project Idea: {{{projectIdea}}}`,
     icon: 'Megaphone',
     pageUrl: '/generate', // This could be a new page later
     isEnabled: true,
-    prompt: `You are a professional copywriter specializing in high-converting ad copy. A user will provide a product name and description. Your task is to generate 3 distinct ad copy variations (Headline and Body) for a social media campaign.
-
-Product Name: {{{productName}}}
-Product Description: {{{productDescription}}}
-Target Audience: {{{targetAudience}}}`,
+    prompt: {
+      base: `You are a professional copywriter specializing in high-converting ad copy. A user will provide a product name and description. Your task is to generate 3 distinct ad copy variations (Headline and Body) for a social media campaign.`,
+      guidelines: [
+        { text: "Product Name: {{{productName}}}", isDefault: true },
+        { text: "Product Description: {{{productDescription}}}", isDefault: true },
+        { text: "Target Audience: {{{targetAudience}}}", isDefault: true }
+      ]
+    },
     tone: 'Default',
     language: 'English (US)',
     model: 'googleai/gemini-1.5-flash',
@@ -111,12 +116,15 @@ Target Audience: {{{targetAudience}}}`,
     icon: 'Scale',
     pageUrl: '/generate', // This could be a new page later
     isEnabled: true,
-    prompt: `You are a legal assistant AI. Based on the user's input, generate a standard, basic Non-Disclosure Agreement (NDA).
-Disclosing Party: {{{disclosingParty}}}
-Receiving Party: {{{receivingParty}}}
-Effective Date: {{{effectiveDate}}}
-
-Generate the NDA text. IMPORTANT: Include a disclaimer that this is not legal advice and a qualified lawyer should be consulted.`,
+    prompt: {
+      base: `You are a legal assistant AI. Based on the user's input, generate a standard, basic Non-Disclosure Agreement (NDA).`,
+      guidelines: [
+        { text: "Disclosing Party: {{{disclosingParty}}}", isDefault: true },
+        { text: "Receiving Party: {{{receivingParty}}}", isDefault: true },
+        { text: "Effective Date: {{{effectiveDate}}}", isDefault: true },
+        { text: "Generate the NDA text. IMPORTANT: Include a disclaimer that this is not legal advice and a qualified lawyer should be consulted.", isDefault: true }
+      ]
+    },
     tone: 'Default',
     language: 'English (US)',
     model: 'googleai/gemini-1.5-flash',
