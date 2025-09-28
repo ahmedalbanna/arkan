@@ -60,6 +60,12 @@ export * from './hooks/specialized-tools/use-specialized-factory';
 // Hooks UI/UX
 export * from './ui/use-ui-factory';
 
+// نظام التصدير الشامل
+export * from './export';
+
+// نظام إدارة القوالب الشامل
+export * from './templates';
+
 // تصدير الأنواع
 export type { AcademicSolverToolConfig } from './hooks/academic-solver-tools/use-academic-solver-factory';
 export type { CopyToastOptions, CopyToastResult } from './hooks/base/use-copy-toast';

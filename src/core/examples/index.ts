@@ -10,3 +10,6 @@ export * from './use-project-plan-refactored';
 // أمثلة الحل الأكاديمي
 export * from './use-academic-solver-refactored';
 
+// أمثلة نظام التصدير والقوالب
+export * from './use-export-example';
+
