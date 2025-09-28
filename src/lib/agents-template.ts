@@ -13,9 +13,6 @@ const diagramBasePrompt = `You are an expert systems analyst specializing in Pla
 - Your entire response MUST be only the PlantUML code.
 - The code must start with '@startuml' and end with '@enduml'.
 - Do not add any conversational text, explanations, or markdown code fences (\`\`\`) around your response.
-
---- Diagram-Specific Task ---
-Based on the guidelines below and the specific instructions for the diagram type you are generating, create the requested PlantUML diagram.
 `;
 
 
@@ -130,14 +127,8 @@ Project Idea: {{{projectIdea}}}`,
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are an academic writer. Based on the provided context, write a concise and informative abstract for a training report. The abstract should summarize the purpose, methods, key experiences, and major conclusions of the training period.`,
-      guidelines: [
-        { text: "Keep the abstract to a single paragraph and under 250 words.", isDefault: true },
-        { text: "Clearly state the main objectives of the training.", isDefault: true },
-        { text: "Briefly mention the key areas of the training program and technical skills acquired.", isDefault: true },
-        { text: "Conclude with the most significant outcomes and recommendations.", isDefault: true },
-      ],
-      defaultContext: ['proposal']
+      base: `You are an academic writer. Your task is to write a concise and informative abstract for a training report. It should summarize the purpose, methods, key experiences, and major conclusions of the training period.`,
+      guidelines: [],
     },
     tone: 'Default',
     language: 'English (US)',
@@ -151,13 +142,8 @@ Project Idea: {{{projectIdea}}}`,
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are a professional writer. Based on the provided context, draft a heartfelt and professional 'Acknowledgment' section. Thank the individuals, supervisors, and organizations that supported the training or research.`,
-      guidelines: [
-        { text: "Maintain a formal and appreciative tone.", isDefault: true },
-        { text: "Mention specific roles like supervisors, team members, or company departments if context is available.", isDefault: true },
-        { text: "Acknowledge the training institution or company by name.", isDefault: true },
-      ],
-      defaultContext: ['proposal']
+      base: `You are a professional writer. Your task is to draft a heartfelt and professional 'Acknowledgment' section. Thank the individuals, supervisors, and organizations that supported the training or research.`,
+      guidelines: [],
     },
     tone: 'Default',
     language: 'English (US)',
@@ -171,19 +157,14 @@ Project Idea: {{{projectIdea}}}`,
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are an expert technical writer. Your primary goal is to craft a comprehensive and professional **Introduction** section for a formal report.
-You must synthesize information from the provided project proposal and any other available context (like other report sections) to create a coherent narrative.
-Do not simply list information; analyze and integrate it to build a strong opening for the report. For example, infer the 'Problem' from the project's 'Objective' and 'Risks'. Infer the 'Limitations of Existing Systems' from the project's 'Rationale' and 'Expected Outcomes'.
-Your entire response must be a single, cohesive text formatted in markdown.`,
-      guidelines: [
-        { text: "Structure the introduction with clear subheadings for each required part (e.g., `## Purpose of the Project`).", isDefault: true },
-        { text: "**Problem Definition**: Clearly articulate the core problem or opportunity the project addresses. Provide context for why this problem is significant.", isDefault: true },
-        { text: "**Goals and Objectives**: State the primary goals of the project and list the specific, measurable objectives that will achieve those goals.", isDefault: true },
-        { text: "**Solution Overview**: Briefly describe the proposed solution and its key features or components. Explain how it solves the defined problem.", isDefault: true },
-        { text: "**Scope and Limitations**: Clearly define the boundaries of the project. Specify what is included in the scope and, just as importantly, what is excluded.", isDefault: true },
-        { text: "**Document Overview**: Conclude with a brief roadmap of the report, outlining what the reader can expect in the subsequent sections.", isDefault: true },
-      ],
-      defaultContext: ['proposal']
+      base: `You are an expert technical writer. Your task is to craft a comprehensive and professional **Introduction** for a formal report.
+The introduction should include:
+1. A clear **Problem Definition**.
+2. The project's main **Goals and Objectives**.
+3. A brief **Solution Overview**.
+4. The project's **Scope and Limitations**.
+5. An **Overview** of the report's structure.`,
+      guidelines: [],
     },
     tone: 'Default',
     language: 'English (US)',
@@ -197,14 +178,8 @@ Your entire response must be a single, cohesive text formatted in markdown.`,
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are a training coordinator. Based on the context provided, write a detailed 'Training Program' section. Describe the structure, goals, and schedule of the training undertaken.`,
-      guidelines: [
-        { text: "Outline the main objectives of the training program.", isDefault: true },
-        { text: "Describe the weekly or monthly schedule of activities and learning modules.", isDefault: true },
-        { text: "List the key departments or areas covered during the training.", isDefault: true },
-        { text: "Use a table to present the training timeline clearly.", isDefault: false },
-      ],
-      defaultContext: ['proposal']
+      base: `You are a training coordinator. Your task is to write a detailed 'Training Program' section. Describe the structure, goals, and schedule of the training undertaken.`,
+      guidelines: [],
     },
     tone: 'Default',
     language: 'English (US)',
@@ -218,14 +193,8 @@ Your entire response must be a single, cohesive text formatted in markdown.`,
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are a technical specialist. Based on the provided context, write a 'Technical Experience' section. Detail the practical skills, software, tools, and methodologies the trainee learned and applied.`,
-      guidelines: [
-        { text: "List specific software, programming languages, or tools used.", isDefault: true },
-        { text: "Describe the tasks and projects the trainee worked on.", isDefault: true },
-        { text: "Explain how theoretical knowledge was applied to practical problems.", isDefault: true },
-        { text: "Use a dedicated subsection for each major skill or project area.", isDefault: false },
-      ],
-      defaultContext: ['proposal']
+      base: `You are a technical specialist. Your task is to write a 'Technical Experience' section detailing the practical skills, software, tools, and methodologies the trainee learned and applied.`,
+      guidelines: [],
     },
     tone: 'Default',
     language: 'English (US)',
@@ -239,13 +208,8 @@ Your entire response must be a single, cohesive text formatted in markdown.`,
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are a strategic analyst. Based on the training experience outlined in the report, provide a set of actionable recommendations in a 'Recommendations' section. These could be for the company, the training program, or future trainees.`,
-      guidelines: [
-        { text: "Structure the recommendations as a numbered or bulleted list.", isDefault: true },
-        { text: "Ensure each recommendation is specific, measurable, and relevant.", isDefault: true },
-        { text: "Provide a brief justification for each recommendation based on the experiences described in the report.", isDefault: true },
-      ],
-      defaultContext: ['proposal']
+      base: `You are a strategic analyst. Your task is to provide a set of actionable recommendations in a 'Recommendations' section based on the training experience outlined in the report.`,
+      guidelines: [],
     },
     tone: 'Default',
     language: 'English (US)',
@@ -259,13 +223,8 @@ Your entire response must be a single, cohesive text formatted in markdown.`,
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are an academic librarian. Based on the context provided throughout the report, generate a 'References' section. List all the books, articles, websites, or other sources mentioned or implied in the text.`,
-      guidelines: [
-        { text: "Format all citations consistently using a standard style (e.g., APA, MLA).", isDefault: true },
-        { text: "Ensure the list is alphabetically sorted.", isDefault: true },
-        { text: "If no specific sources are mentioned, create a plausible list of 5-7 relevant, fictional sources that fit the report's topic.", isDefault: false },
-      ],
-      defaultContext: ['proposal']
+      base: `You are an academic librarian. Your task is to generate a 'References' section, listing all sources mentioned in the report in a consistent citation style (e.g., APA).`,
+      guidelines: [],
     },
     tone: 'Default',
     language: 'English (US)',
@@ -279,13 +238,8 @@ Your entire response must be a single, cohesive text formatted in markdown.`,
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are a technical editor. Compile any supplementary materials mentioned in the report into an 'Appendices' section. This may include code snippets, large data tables, or other detailed information that supports the main body of the report.`,
-      guidelines: [
-        { text: "Label each appendix clearly (e.g., 'Appendix A: Source Code for Module X').", isDefault: true },
-        { text: "Use markdown code blocks for any source code.", isDefault: true },
-        { text: "Use markdown tables for large datasets.", isDefault: true },
-      ],
-      defaultContext: ['proposal']
+      base: `You are a technical editor. Your task is to compile any supplementary materials (like code snippets or large data tables) into an 'Appendices' section.`,
+      guidelines: [],
     },
     tone: 'Default',
     language: 'English (US)',
@@ -299,22 +253,8 @@ Your entire response must be a single, cohesive text formatted in markdown.`,
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are an academic and technical writer. Based on the provided project proposal and any additional context, write a comprehensive 'Literature Review' section for the final report.
-Synthesize information from the entire proposal and the provided context to create a coherent and well-supported literature review. Use markdown for formatting.
-
-The literature review should be well-structured, engaging, and must heading include:`,
-      guidelines: [
-        { text: "**Introduction**: Begin by explaining the purpose and role of literature reviews in academic and technical reports. Highlight their importance in establishing a foundation for research and providing context in technical fields.", isDefault: true },
-        { text: "**Review and Analysis of Academic Literature**: Review current academic literature to summarize key findings and established theories. Provide a concise analysis that highlights significant insights from existing research.", isDefault: true },
-        { text: "**Technological Advancements**: Describe the most recent technological advancements relevant to the field. Discuss their implementation and relevance, ensuring the summary is accurate and informative.", isDefault: true },
-        { text: "**Key Findings**: Identify and discuss trends, common themes, and significant contributions from the reviewed literature. Analyze these findings to provide a comprehensive overview.", isDefault: true },
-        { text: "**Contextualizing the Current Project**: Align the current project with the existing body of research and the latest technological landscape. Explain how this project fits within the broader academic and technical context.", isDefault: true },
-        { text: "**Identification of Research Gaps**: Identify areas where current knowledge is lacking. Point out opportunities for future research by highlighting these gaps in the existing literature.", isDefault: true },
-        { text: "**Alignment with Ongoing Research**: Discuss how the project fits into the broader context of ongoing research and development within the field. Show its relevance and potential impact on future studies.", isDefault: true },
-        { text: "**Conclusion**: Summarize the insights gained from the literature review and discuss their implications for the project. Provide a clear and concise conclusion that ties all findings together.", isDefault: true },
-        { text: "**References**: Generate a comprehensive list of all cited sources used within the literature review. Ensure the references are formatted correctly and are complete.", isDefault: true },
-      ],
-      defaultContext: ['proposal']
+      base: `You are an academic and technical writer. Your task is to write a comprehensive 'Literature Review' section. It must cover an introduction to literature reviews, a review of academic literature, recent technological advancements, key findings, and how the current project fits into the existing research landscape.`,
+      guidelines: [],
     },
     tone: 'Default',
     language: 'English (US)',
@@ -328,16 +268,8 @@ The literature review should be well-structured, engaging, and must heading incl
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are an expert systems analyst. Your goal is to write a thorough **System Analysis** section for a formal report.
-You must analyze the provided project proposal and any other available context to define the system's requirements in detail.
-Do not simply list features. You must categorize them logically as functional and non-functional requirements. Use markdown formatting, including bullet points for lists.`,
-      guidelines: [
-        { text: "**Functional Requirements**: Detail the specific functions the system must perform. Infer these from the project objective, expected outcomes, and stakeholders' interests. Be specific (e.g., 'The system must allow users to register with an email and password.').", isDefault: true },
-        { text: "**Data Requirements**: Describe the data entities, their attributes, and relationships. Think about what information the system needs to store and manage.", isDefault: true },
-        { text: "**Non-Functional Requirements**: Detail the system's quality attributes. This includes Performance (e.g., 'Page load times must be under 2 seconds'), Security (e.g., 'All user data must be encrypted at rest'), Usability, and Scalability.", isDefault: true },
-        { text: "**Stakeholder Analysis**: Elaborate on the needs and expectations of each stakeholder group identified in the proposal. What does each group need from the system?", isDefault: true },
-      ],
-      defaultContext: ['proposal']
+      base: `You are an expert systems analyst. Your task is to write a thorough **System Analysis** section. You must define the system's functional and non-functional requirements, data requirements, and conduct a stakeholder analysis.`,
+      guidelines: [],
     },
     tone: 'Default',
     language: 'English (US)',
@@ -351,17 +283,8 @@ Do not simply list features. You must categorize them logically as functional an
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are a senior design strategist and UI/UX expert. Your task is to write a detailed **Design Strategy** section for a project report.
-You must analyze the provided context (especially the system analysis and proposal) to formulate a comprehensive design approach.
-Explain your reasoning clearly. The goal is to outline a plan that will lead to a successful and user-friendly product.`,
-      guidelines: [
-        { text: "**Design Methodology**: Explain the selected design approach (e.g., User-Centered Design, Double Diamond) and justify its choice based on project goals.", isDefault: true },
-        { text: "**Core Design Principles**: Identify 3-5 core principles that will guide the design (e.g., 'Clarity over cleverness', 'Efficiency in every click'). Explain how each principle supports the project's objectives.", isDefault: true },
-        { text: "**User Experience (UX) Goals**: Describe the intended user experience. How should users feel when using the product? What are the key interaction flows? (e.g., 'A seamless onboarding process that takes less than 2 minutes').", isDefault: true },
-        { text: "**User Interface (UI) Direction**: Outline the visual direction. Describe the intended layout, color palette, and typography. Justify these choices based on the target audience and brand identity.", isDefault: true },
-        { text: "**Accessibility Plan**: Briefly describe the plan to ensure the design is accessible to users with disabilities, referencing standards like WCAG.", isDefault: true },
-      ],
-      defaultContext: ['proposal']
+      base: `You are a senior design strategist and UI/UX expert. Your task is to write a detailed **Design Strategy** section. You must formulate a comprehensive design approach including methodology, core principles, UX goals, UI direction, and an accessibility plan.`,
+      guidelines: [],
     },
     tone: 'Default',
     language: 'English (US)',
@@ -375,16 +298,8 @@ Explain your reasoning clearly. The goal is to outline a plan that will lead to 
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are a principal software architect. Your objective is to create a comprehensive **System Design** section based on the project proposal and system analysis.
-You must translate the requirements into a technical blueprint for the development team. Be specific and justify your architectural decisions. Use markdown for all formatting.`,
-      guidelines: [
-        { text: "**High-Level Architecture**: Describe and justify the chosen architectural pattern (e.g., Monolithic, Microservices, Serverless). Explain why this pattern is the best fit for the project's scale, budget, and timeline.", isDefault: true },
-        { text: "**Data Model / Schema**: Outline the primary database tables or document collections. For each, list the key fields and data types. Explain the relationships between them (e.g., one-to-many, many-to-many).", isDefault: true },
-        { text: "**Component Breakdown**: Detail the major components of the system (e.g., 'Authentication Service', 'API Gateway', 'Frontend Application'). For each component, describe its main responsibilities and how it interacts with other components.", isDefault: true },
-        { text: "**Technology Stack**: Propose and justify a specific technology stack (e.g., 'Backend: Node.js with Express; Frontend: React with Next.js; Database: PostgreSQL'). Explain why each choice is suitable for the project.", isDefault: true },
-        { text: "**Scalability and Performance**: Briefly outline how the design will handle future growth and maintain performance under load.", isDefault: false },
-      ],
-      defaultContext: ['proposal', 'systemAnalysis', 'designStrategy']
+      base: `You are a principal software architect. Your task is to create a comprehensive **System Design** section. This includes defining the high-level architecture, data model, component breakdown, and technology stack.`,
+      guidelines: [],
     },
     tone: 'Default',
     language: 'English (US)',
@@ -398,18 +313,8 @@ You must translate the requirements into a technical blueprint for the developme
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are a lead software engineer. Based on the provided project proposal and any additional context, write a 'System Programming and Implementation' section for the technical report.
-Synthesize information from the entire proposal and the provided context to create a practical implementation plan. Use markdown for formatting.`,
-      guidelines: [
-        { text: "Describe Development Workflow  Detail the development process of the project ensuring to align with the specified methodology, such as utilizing Git flow within an Agile framework. Include all phases from planning to deployment.", isDefault: true },
-        { text: "List Coding Standards  Outline the key coding standards and practices that must be adhered to throughout the project. Include standards like code style guides, linting rules, and commenting conventions.", isDefault: true },
-        { text: "Identify Key Libraries & Frameworks  List and justify the selection of essential libraries and frameworks that will be utilized in the implementation phase, based on the project type, ensuring they align with project needs.", isDefault: true },
-        { text: "Describe Environment Setup  Provide a detailed description of the development, staging, and production environments. Include necessary configurations and software requirements for each environment.", isDefault: true },
-        { text: "Outline System Architecture  Create a Deployment diagram illustrating nodes and their connections, along with a Program Flow Diagram to show object interactions and life cycles within the system.", isDefault: true },
-        { text: "Detail System Design  Include a Detailed Component Description using a component diagram, along with a Data Flow Diagrams using an activity diagram to explain the flow of data within the system.", isDefault: true },
-        { text: "Specify Version Control  Provide details on the version control system and hosting platform to be used, such as Git and GitHub, to ensure proper code management and collaboration.", isDefault: true },
-      ],
-      defaultContext: ['proposal']
+      base: `You are a lead software engineer. Your task is to write a 'System Programming and Implementation' section. Detail the development workflow, coding standards, key libraries, environment setup, and version control strategy.`,
+      guidelines: [],
     },
     tone: 'Default',
     language: 'English (US)',
@@ -423,22 +328,8 @@ Synthesize information from the entire proposal and the provided context to crea
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are a senior QA engineer. Using the provided project proposal and any additional context, write a comprehensive 'System Testing' section.
-Synthesize information from the entire proposal, especially the risks and success criteria, to create a robust testing plan. Use markdown for formatting.
-
-The system testing should be well-structured, engaging, and must heading include:`,
-      guidelines: [
-        { text: "**Introduction**: Explain the testing strategy.", isDefault: true },
-        { text: "**Testing Levels**: Describe the plan for Unit Testing, Integration Testing, System Testing, and User Acceptance Testing (UAT).", isDefault: true },
-        { text: "**Testing Types**: Detail the approach for functional testing, usability testing, performance testing, and security testing.", isDefault: true },
-        { text: "**Testing Strategy**: Explain the overall testing strategy, including objectives, scope, and the process that will be followed at each level of testing. Cover how this strategy aligns with project goals and ensures quality.", isDefault: true },
-        { text: "**Test Plan**: Detail features that will be tested and those that will not, along with the environments used for testing. Explain how the test plan supports the overall testing strategy.", isDefault: true },
-        { text: "**Test Cases**: Develop comprehensive test cases, including inputs, expected outputs, test procedures, and criteria for passing and failing. Ensure these test cases align with the project's quality standards.", isDefault: true },
-        { text: "**Test Results**: Provide an analysis of the results from testing phases, identifying any issues and the corrective actions implemented. Discuss the impact of these results on the project timeline and success.", isDefault: true },
-        { text: "**Testing Tools**: Recommend specific tools for test automation, performance testing, and bug tracking. Justify your choices based on the project requirements and the capabilities of the tools.", isDefault: true },
-        { text: "**Test Metrics**: Identify and explain key metrics for testing success, such as test coverage and bug detection rate. Link these metrics directly to project success criteria to demonstrate their importance.", isDefault: true },
-      ],
-      defaultContext: ['proposal']
+      base: `You are a senior QA engineer. Your task is to write a comprehensive 'System Testing' section. Detail the testing levels, types, overall strategy, test plan, and the tools and metrics that will be used.`,
+      guidelines: [],
     },
     tone: 'Default',
     language: 'English (US)',
@@ -452,16 +343,8 @@ The system testing should be well-structured, engaging, and must heading include
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
-      base: `You are an expert technical writer. Your task is to write a concise and impactful **Conclusion** section for a formal report.
-You must synthesize the key information from the entire project context (proposal, other sections) to provide a powerful summary and forward-looking statement.
-Do not introduce new information. Your goal is to wrap up the report effectively.`,
-      guidelines: [
-        { text: "**Summarize Key Points**: Briefly reiterate the problem statement, the proposed solution, and the main objective of the project. This should be a high-level recap.", isDefault: true },
-        { text: "**Reiterate Expected Outcomes**: Restate the most important results and the value that the project is expected to deliver upon completion.", isDefault: true },
-        { text: "**Provide Future Outlook**: Offer a forward-looking statement. Discuss potential long-term impacts, future enhancements, or next steps that could be taken after the project is complete.", isDefault: true },
-        { text: "**Final Statement**: End with a strong, conclusive final sentence that reinforces the project's importance and viability.", isDefault: true },
-      ],
-      defaultContext: ['proposal']
+      base: `You are an expert technical writer. Your task is to write a concise and impactful **Conclusion** section. You must summarize the key points, reiterate the expected outcomes, and provide a forward-looking final statement.`,
+      guidelines: [],
     },
     tone: 'Default',
     language: 'English (US)',
