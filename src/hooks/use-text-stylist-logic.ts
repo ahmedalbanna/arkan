@@ -1,14 +1,14 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useWritingTool, useToast } from '@/hooks';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useToast, useWritingTool } from '@/hooks';
 import type { DiffPart } from '@/lib/diff';
 import { computeDiff } from '@/lib/diff';
-import { useLocalization } from '@/context/LocalizationContext';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const formSchema = z.object({
   text: z.string().min(10, 'Please enter at least 10 characters.'),
@@ -17,6 +17,10 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+/**
+ * Hook محسن لمعالج تنسيق النصوص
+ * يحتوي على وظيفتين: إعادة الكتابة والتلخيص
+ */
 export function useTextStylistLogic() {
   const { t } = useLocalization();
   const [originalText, setOriginalText] = useState('');
@@ -27,43 +31,63 @@ export function useTextStylistLogic() {
   const [activeView, setActiveView] = useState<'side-by-side' | 'diff'>('side-by-side');
   const { toast } = useToast();
 
+  // الطفرات
   const rewriteMutation = useWritingTool('rewrite-text');
   const summarizeMutation = useWritingTool('summarize-with-ratio');
   const isProcessing = rewriteMutation.isPending || summarizeMutation.isPending;
 
+  // النموذج
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { text: '', style: 'None' },
   });
 
+  // معالج إعادة الكتابة
   const onSubmitRewrite = (data: FormValues) => {
     if (!data.style || data.style === 'None') {
-      toast({ title: t('writingTools.textStylist.toastStyleRequired'), description: t('writingTools.textStylist.toastStyleRequiredDesc'), variant: 'destructive' });
+      toast({
+        title: t('writingTools.textStylist.toastStyleRequired'),
+        description: t('writingTools.textStylist.toastStyleRequiredDesc'),
+        variant: 'destructive'
+      });
       return;
     }
+
     setOriginalText(data.text);
     setProcessedText('');
     setDiff(null);
     setActiveView('side-by-side');
+
     rewriteMutation.mutate({ text: data.text, style: data.style }, {
       onSuccess: (result: any) => {
         setProcessedText(result.rewrittenText);
         setDiff(computeDiff(data.text, result.rewrittenText));
       },
-      onError: (error) => toast({ title: t('writingTools.textStylist.toastStyleRequired'), description: error.message, variant: 'destructive' })
+      onError: (error) => {
+        toast({
+          title: t('writingTools.textStylist.toastStyleRequired'),
+          description: error.message,
+          variant: 'destructive'
+        });
+      }
     });
   };
 
+  // معالج التلخيص
   const onSubmitSummarize = (data: FormValues) => {
     setOriginalText(data.text);
     setProcessedText('');
     setDiff(null);
     setActiveView('side-by-side');
+
     summarizeMutation.mutate({ text: data.text, ratio: compressionRatio }, {
-        onSuccess: (result: any) => setProcessedText(result.summarizedText)
+      onSuccess: (result: any) => {
+        setProcessedText(result.summarizedText);
+      }
     });
   };
 
+  // معالج النسخ
   const handleCopy = () => {
     if (!processedText) return;
     navigator.clipboard.writeText(processedText).then(() => {
@@ -74,21 +98,36 @@ export function useTextStylistLogic() {
   };
 
   return {
+    // الترجمة
     t,
+
+    // النموذج والحالة
     form,
-    rewriteMutation,
-    summarizeMutation,
     isProcessing,
+
+    // النصوص والنتائج
     originalText,
     processedText,
     diff,
+
+    // النسخ
     isCopied,
+    handleCopy,
+
+    // إعدادات التلخيص
     compressionRatio,
     setCompressionRatio,
+
+    // إعدادات العرض
     activeView,
     setActiveView,
+
+    // المعالجات
     onSubmitRewrite,
     onSubmitSummarize,
-    handleCopy,
+
+    // الطفرات (للتوافق مع الكود الموجود)
+    rewriteMutation,
+    summarizeMutation,
   };
 }

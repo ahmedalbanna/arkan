@@ -138,6 +138,7 @@
     "tailwindcss": "^3.4.17",
     "ts-jest": "^29.4.1",
     "tsx": "^4.16.2",
+    "typedoc": "^0.28.13",
     "typescript": "^5"
   }
 }

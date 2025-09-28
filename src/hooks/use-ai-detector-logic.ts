@@ -1,79 +1,42 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useDropzone } from 'react-dropzone';
-import { useWritingTool, useToast } from '@/hooks';
-import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services';
 import { useLocalization } from '@/context/LocalizationContext';
-import type { AIAnalysisResult } from '@/components/writing-tools/AIDetectorTool';
+import { useTextProcessor } from '@/core';
+import { z } from 'zod';
 
+// مخطط التحقق من البيانات
 const aiDetectorSchema = z.object({
   text: z.string().min(100, 'Please enter at least 100 characters for an accurate analysis.'),
 });
 
-type AIDetectorFormValues = z.infer<typeof aiDetectorSchema>;
+// القيم الافتراضية
+const defaultValues = {
+  text: '',
+};
 
+/**
+ * Hook محسن لمعالج كشف الذكاء الاصطناعي
+ * يستخدم النظام الجديد لتقليل التكرار وتحسين الأداء
+ */
 export function useAIDetectorLogic() {
   const { t } = useLocalization();
-  const mutation = useWritingTool('/api/writing-tools/ai-detector');
-  const { firebaseUser, refetchUser } = useAuth();
-  const [isUploading, setIsUploading] = useState(false);
-  const { toast } = useToast();
 
-  const form = useForm<AIDetectorFormValues>({
-    resolver: zodResolver(aiDetectorSchema),
-    defaultValues: { text: '' },
+  const textProcessor = useTextProcessor({
+    toolName: 'ai-detector',
+    apiEndpoint: '/api/writing-tools/ai-detector',
+    schema: aiDetectorSchema,
+    defaultValues,
+    successMessage: t('writingTools.aiDetector.toastAnalysisSuccess') || 'Analysis completed successfully!',
+    errorMessage: t('writingTools.aiDetector.toastAnalysisFailed') || 'Analysis failed',
+    enableFileUpload: true,
+    acceptedFileTypes: ['application/pdf', 'text/plain', 'text/markdown'],
   });
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
+  // الحصول على النتائج من الطفرة
+  const results = textProcessor.mutation.data as AIAnalysisResult | undefined;
 
-    if (!firebaseUser) {
-        toast({ title: "Authentication Error", description: "You must be logged in to process files.", variant: "destructive" });
-        return;
-    }
-
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-        const token = await firebaseUser.getIdToken();
-        const result = await processFileApi(formData, token);
-        form.setValue('text', result.markdown, { shouldValidate: true });
-        toast({ title: t('writingTools.aiDetector.toastFileProcessed'), description: t('writingTools.aiDetector.toastFileExtracted').replace('{fileName}', file.name) });
-        refetchUser();
-    } catch (error: any) {
-        toast({ title: t('writingTools.aiDetector.toastFileFailed'), description: error.message, variant: "destructive" });
-    } finally {
-        setIsUploading(false);
-    }
-  }, [firebaseUser, form, refetchUser, toast, t]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    multiple: false,
-    accept: {
-      'application/pdf': ['.pdf'],
-      'text/plain': ['.txt'],
-      'text/markdown': ['.md'],
-    },
-  });
-
-  const onSubmit = async (data: AIDetectorFormValues) => {
-    mutation.mutate({ text: data.text }, {
-        onError: (error) => {
-            toast({ title: t('writingTools.aiDetector.toastAnalysisFailed'), description: error.message, variant: 'destructive' });
-        }
-    });
-  };
-
+  // دالة لتحديد لون النتيجة
   const getScoreColor = (score: number) => {
     if (score > 75) return 'text-destructive';
     if (score > 40) return 'text-yellow-500';
@@ -81,20 +44,34 @@ export function useAIDetectorLogic() {
   };
 
   return {
-    form,
-    mutation,
-    isUploading,
-    getRootProps,
-    getInputProps,
-    isDragActive,
-    onSubmit,
+    // النموذج والحالة
+    form: textProcessor.form,
+    isProcessing: textProcessor.isProcessing,
+
+    // النصوص
+    originalText: textProcessor.originalText,
+    processedText: textProcessor.processedText,
+
+    // رفع الملفات
+    isUploading: textProcessor.isUploading,
+    getRootProps: textProcessor.getRootProps,
+    getInputProps: textProcessor.getInputProps,
+    isDragActive: textProcessor.isDragActive,
+
+    // المعالجة
+    onSubmit: textProcessor.handleSubmit,
+
+    // النتائج والوظائف المساعدة
+    results,
     getScoreColor,
-    results: mutation.data as AIAnalysisResult | undefined,
+
+    // الطفرة (للتوافق مع الكود الموجود)
+    mutation: textProcessor.mutation,
   };
 }
 
-// You might need to define this type or import it if it's defined elsewhere
+// نوع النتيجة
 export interface AIAnalysisResult {
-    score: number;
-    analysis: string;
+  score: number;
+  analysis: string;
 }

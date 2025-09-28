@@ -1,42 +1,94 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useWritingTool, useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
+import { createContentGeneratorHook } from '@/core';
+import { z } from 'zod';
 
-const explainerSchema = z.object({
+// مخطط التحقق من البيانات
+const topicExplainerSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic to explain.'),
 });
 
-type ExplainerFormValues = z.infer<typeof explainerSchema>;
+// القيم الافتراضية
+const defaultValues = {
+  topic: '',
+};
 
+/**
+ * Hook محسن لشرح المواضيع
+ * يستخدم النظام الجديد لتقليل التكرار وتحسين الأداء
+ */
 export function useTopicExplainerLogic() {
-  const mutation = useWritingTool('/api/writing-tools/topic-explainer');
   const { t } = useLocalization();
-  const { toast } = useToast();
 
-  const form = useForm<ExplainerFormValues>({
-    resolver: zodResolver(explainerSchema),
-    defaultValues: { topic: '' },
-  });
-
-  const onSubmit = async (data: ExplainerFormValues) => {
-    mutation.mutate(data, {
-      onError: (error) => {
-        toast({ title: "Explanation Failed", description: error.message, variant: 'destructive' });
+  const contentGenerator = createContentGeneratorHook({
+    toolName: 'topic-explainer',
+    apiEndpoint: '/api/writing-tools/topic-explainer',
+    schema: topicExplainerSchema,
+    defaultValues,
+    successMessage: t('writingTools.topicExplainer.successToast') || 'Topic explained successfully!',
+    errorMessage: t('writingTools.topicExplainer.errorToast') || 'Failed to explain topic',
+    enableFileUpload: false, // هذا الأداة لا تدعم رفع الملفات
+    outputFormat: 'text',
+    customFeatures: {
+      formatOutput: (data: any) => {
+        if (data.explanation) {
+          return {
+            explanation: data.explanation,
+            metadata: {
+              topic: data.topic,
+              wordCount: data.explanation.length,
+              complexity: data.complexity || 'medium',
+              language: data.language || 'en',
+            }
+          };
+        }
+        return data;
       },
-    });
-  };
+      validateInput: (data: any) => {
+        return data.topic?.length >= 3;
+      },
+      getProgressSteps: () => [
+        'Analyzing topic',
+        'Researching information',
+        'Structuring explanation',
+        'Generating content',
+        'Finalizing explanation'
+      ]
+    }
+  })();
 
-  const results = mutation.data as { explanation: string } | undefined;
+  // الحصول على النتائج من الطفرة
+  const results = contentGenerator.mutation.data as { explanation: string } | undefined;
 
   return {
+    // الترجمة
     t,
-    form,
-    mutation,
-    onSubmit,
+
+    // النموذج والحالة
+    form: contentGenerator.form,
+    isProcessing: contentGenerator.isProcessing,
+
+    // النصوص والمحتوى
+    originalText: contentGenerator.originalText,
+    processedText: contentGenerator.processedText,
+    generatedContent: contentGenerator.generatedContent,
+
+    // النسخ
+    isCopied: contentGenerator.isCopied,
+    handleCopy: () => contentGenerator.copyToClipboard(contentGenerator.generatedContent || contentGenerator.processedText),
+
+    // المعالجة
+    onSubmit: contentGenerator.handleSubmit,
+    reset: contentGenerator.reset,
+
+    // النتائج والوظائف المساعدة
     results,
+    formatOutput: contentGenerator.formatOutput,
+    validateInput: contentGenerator.validateInput,
+    getProgressSteps: contentGenerator.getProgressSteps,
+
+    // الطفرة (للتوافق مع الكود الموجود)
+    mutation: contentGenerator.mutation,
   };
 }

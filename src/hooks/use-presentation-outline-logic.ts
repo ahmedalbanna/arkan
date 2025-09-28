@@ -1,63 +1,106 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useWritingTool, useToast } from '@/hooks';
 import { GeneratePresentationOutlineOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
+import { createContentGeneratorHook } from '@/core';
+import { z } from 'zod';
 
-const formSchema = z.object({
+// مخطط التحقق من البيانات
+const presentationOutlineSchema = z.object({
   prompt: z.string().min(5, 'Please enter a topic with at least 5 characters.'),
   documentation: z.string().optional(),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+// القيم الافتراضية
+const defaultValues = {
+  prompt: '',
+  documentation: '',
+};
 
+/**
+ * Hook محسن لمولد خطط العروض التقديمية
+ * يستخدم النظام الجديد لتقليل التكرار وتحسين الأداء
+ */
 export function usePresentationOutlineLogic() {
   const { t } = useLocalization();
-  const [isCopied, setIsCopied] = useState(false);
-  const { toast } = useToast();
 
-  const mutation = useWritingTool('/api/writing-tools/presentation-outline');
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { prompt: '', documentation: '' },
-  });
-
-  const onSubmit = (data: FormValues) => {
-    mutation.mutate(data, {
-      onSuccess: () => {
-        toast({ title: "Outline Generated!", description: "Review the outline and choose a template to proceed." });
+  const contentGenerator = createContentGeneratorHook({
+    toolName: 'presentation-outline',
+    apiEndpoint: '/api/writing-tools/presentation-outline',
+    schema: presentationOutlineSchema,
+    defaultValues,
+    successMessage: t('writingTools.presentationOutline.successToast') || 'Outline generated successfully!',
+    errorMessage: t('writingTools.presentationOutline.errorToast') || 'Failed to generate outline',
+    enableFileUpload: false, // هذا الأداة لا تدعم رفع الملفات
+    outputFormat: 'json',
+    customFeatures: {
+      formatOutput: (data: any) => {
+        if (data.outline) {
+          return {
+            outline: data.outline,
+            cover: data.cover,
+            metadata: {
+              slideCount: data.outline.length,
+              estimatedDuration: data.outline.length * 2, // تقدير دقيقتين لكل شريحة
+              difficulty: data.difficulty || 'medium',
+              targetAudience: data.targetAudience || 'General',
+            }
+          };
+        }
+        return data;
       },
-      onError: (error) => {
-        toast({ title: "Outline Generation Failed", description: error.message, variant: "destructive" });
-      }
-    });
-  };
+      validateInput: (data: any) => {
+        return data.prompt?.length >= 5;
+      },
+      getProgressSteps: () => [
+        'Analyzing topic',
+        'Researching content',
+        'Creating structure',
+        'Generating slides',
+        'Finalizing outline'
+      ]
+    }
+  })();
 
-  const results = mutation.data as GeneratePresentationOutlineOutput | undefined;
+  // الحصول على النتائج من الطفرة
+  const results = contentGenerator.mutation.data as GeneratePresentationOutlineOutput | undefined;
 
+  // معالج النسخ المخصص للعروض التقديمية
   const handleCopy = () => {
     if (!results) return;
     const textToCopy = `${results.cover.title}\n\n` + results.outline.map(item => `${item.title}\n${item.content}`).join('\n\n');
-    navigator.clipboard.writeText(textToCopy).then(() => {
-      setIsCopied(true);
-      toast({ title: 'Copied to clipboard!' });
-      setTimeout(() => setIsCopied(false), 2000);
-    });
+    contentGenerator.copyToClipboard(textToCopy);
   };
 
   return {
+    // الترجمة
     t,
-    form,
-    mutation,
-    onSubmit,
-    results,
-    isCopied,
+
+    // النموذج والحالة
+    form: contentGenerator.form,
+    isProcessing: contentGenerator.isProcessing,
+
+    // النصوص والمحتوى
+    originalText: contentGenerator.originalText,
+    processedText: contentGenerator.processedText,
+    generatedContent: contentGenerator.generatedContent,
+
+    // النسخ
+    isCopied: contentGenerator.isCopied,
     handleCopy,
+
+    // المعالجة
+    onSubmit: contentGenerator.handleSubmit,
+    reset: contentGenerator.reset,
+
+    // النتائج والوظائف المساعدة
+    results,
+    formatOutput: contentGenerator.formatOutput,
+    validateInput: contentGenerator.validateInput,
+    getProgressSteps: contentGenerator.getProgressSteps,
+
+    // الطفرة (للتوافق مع الكود الموجود)
+    mutation: contentGenerator.mutation,
   };
 }
