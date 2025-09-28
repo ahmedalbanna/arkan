@@ -123,7 +123,11 @@ export class AuthService {
 
         } catch (error) {
             const authError = error as AuthError;
-            return handleClientError(authError, 'Login');
+            const errorResult = handleClientError(authError, { context: 'Login' });
+            return {
+                success: false,
+                error: errorResult.message,
+            };
         }
     }
 
@@ -176,7 +180,11 @@ export class AuthService {
 
         } catch (error) {
             const authError = error as AuthError;
-            return handleClientError(authError, 'Registration');
+            const errorResult = handleClientError(authError, { context: 'Registration' });
+            return {
+                success: false,
+                error: errorResult.message,
+            };
         }
     }
 
@@ -194,7 +202,11 @@ export class AuthService {
 
         } catch (error) {
             const authError = error as AuthError;
-            return handleClientError(authError, 'Logout');
+            const errorResult = handleClientError(authError, { context: 'Logout' });
+            return {
+                success: false,
+                error: errorResult.message,
+            };
         }
     }
 
@@ -246,7 +258,11 @@ export class AuthService {
 
         } catch (error) {
             const authError = error as AuthError;
-            return handleClientError(authError, 'Change Password');
+            const errorResult = handleClientError(authError, { context: 'Change Password' });
+            return {
+                success: false,
+                error: errorResult.message,
+            };
         }
     }
 
@@ -275,7 +291,11 @@ export class AuthService {
 
         } catch (error) {
             const authError = error as AuthError;
-            return handleClientError(authError, 'Reset Password');
+            const errorResult = handleClientError(authError, { context: 'Reset Password' });
+            return {
+                success: false,
+                error: errorResult.message,
+            };
         }
     }
 
@@ -318,7 +338,11 @@ export class AuthService {
 
         } catch (error) {
             const authError = error as AuthError;
-            return handleClientError(authError, 'Confirm Reset Password');
+            const errorResult = handleClientError(authError, { context: 'Confirm Reset Password' });
+            return {
+                success: false,
+                error: errorResult.message,
+            };
         }
     }
 
@@ -357,7 +381,11 @@ export class AuthService {
 
         } catch (error) {
             const authError = error as AuthError;
-            return handleClientError(authError, 'Update Profile');
+            const errorResult = handleClientError(authError, { context: 'Update Profile' });
+            return {
+                success: false,
+                error: errorResult.message,
+            };
         }
     }
 

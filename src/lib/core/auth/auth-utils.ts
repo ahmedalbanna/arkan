@@ -310,7 +310,8 @@ export class AuthUtils {
         try {
             return atob(encryptedData); // Base64 decoding مؤقت
         } catch (error) {
-            handleClientError(error, 'Decrypt Sensitive Data');
+            const errorResult = handleClientError(error, { context: 'Decrypt Sensitive Data' });
+            console.error('Decrypt Sensitive Data Error:', errorResult.message);
             return '';
         }
     }

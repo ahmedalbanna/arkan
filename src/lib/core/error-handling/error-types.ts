@@ -284,43 +284,43 @@ export interface ErrorStats {
 /**
  * مساعد للتحقق من نوع الخطأ
  */
-export const isValidationError = (error: AppError): error is ValidationError => {
+export const isValidationErrorType = (error: AppError): error is ValidationError => {
     return error.type === 'VALIDATION_ERROR';
 };
 
-export const isAuthenticationError = (error: AppError): error is AuthenticationError => {
+export const isAuthenticationErrorType = (error: AppError): error is AuthenticationError => {
     return error.type === 'AUTHENTICATION_ERROR';
 };
 
-export const isAuthorizationError = (error: AppError): error is AuthorizationError => {
+export const isAuthorizationErrorType = (error: AppError): error is AuthorizationError => {
     return error.type === 'AUTHORIZATION_ERROR';
 };
 
-export const isNetworkError = (error: AppError): error is NetworkError => {
+export const isNetworkErrorType = (error: AppError): error is NetworkError => {
     return error.type === 'NETWORK_ERROR';
 };
 
-export const isServerError = (error: AppError): error is ServerError => {
+export const isServerErrorType = (error: AppError): error is ServerError => {
     return error.type === 'SERVER_ERROR';
 };
 
-export const isClientError = (error: AppError): error is ClientError => {
+export const isClientErrorType = (error: AppError): error is ClientError => {
     return error.type === 'CLIENT_ERROR';
 };
 
-export const isFileError = (error: AppError): error is FileError => {
+export const isFileErrorType = (error: AppError): error is FileError => {
     return error.type === 'FILE_ERROR';
 };
 
-export const isDatabaseError = (error: AppError): error is DatabaseError => {
+export const isDatabaseErrorType = (error: AppError): error is DatabaseError => {
     return error.type === 'DATABASE_ERROR';
 };
 
-export const isAPIError = (error: AppError): error is APIError => {
+export const isAPIErrorType = (error: AppError): error is APIError => {
     return error.type === 'API_ERROR';
 };
 
-export const isUnknownError = (error: AppError): error is UnknownError => {
+export const isUnknownErrorType = (error: AppError): error is UnknownError => {
     return error.type === 'UNKNOWN_ERROR';
 };
 

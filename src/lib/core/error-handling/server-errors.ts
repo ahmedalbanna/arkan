@@ -28,7 +28,7 @@ export function createServerError(options: CreateErrorOptions): AppError {
         ...specificOptions
     } = options;
 
-    const baseError: AppError = {
+    const baseError = {
         type,
         code,
         message,
@@ -118,11 +118,11 @@ export function createServerError(options: CreateErrorOptions): AppError {
         case 'UNKNOWN_ERROR':
             return {
                 ...baseError,
-                originalError: specificOptions.originalError,
+                originalError: originalError,
             } as AppError;
 
         default:
-            return baseError;
+            return baseError as AppError;
     }
 }
 
@@ -557,9 +557,9 @@ export function handleNetworkError(
 }
 
 /**
- * معالجة خطأ الخادم
+ * معالجة خطأ الخادم المحدد
  */
-export function handleServerError(
+export function handleSpecificServerError(
     message: string,
     endpoint?: string,
     statusCode?: number

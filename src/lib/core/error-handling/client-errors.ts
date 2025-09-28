@@ -32,7 +32,7 @@ export function createError(options: CreateErrorOptions): AppError {
         ...specificOptions
     } = options;
 
-    const baseError: AppError = {
+    const baseError = {
         type,
         code,
         message,
@@ -122,11 +122,11 @@ export function createError(options: CreateErrorOptions): AppError {
         case 'UNKNOWN_ERROR':
             return {
                 ...baseError,
-                originalError: specificOptions.originalError,
+                originalError: originalError,
             } as AppError;
 
         default:
-            return baseError;
+            return baseError as AppError;
     }
 }
 

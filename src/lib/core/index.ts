@@ -27,7 +27,13 @@ export * from './auth';
 export * from './integration';
 
 // Firebase
-export * from './firebase/client-init';
+export * from './firebase';
+
+// Cache
+export * from './cache';
+
+// Query Keys
+export * from './query-keys';
 
 // Re-export commonly used types
 export type {
