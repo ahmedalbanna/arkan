@@ -57,7 +57,7 @@ export function useSessionActions() {
     const [isSavePromptOpen, setIsSavePromptOpen] = useState(false);
     const [projectName, setProjectName] = useState('');
 
-    const { project, loadProject, newSession, updateProject } = useBuilderStore();
+    const { project, loadProject, newSession, updateProject, setHasUnsavedChanges } = useBuilderStore();
     const saveProjectMutation = useSaveProject();
     const updateProjectMutation = useUpdateProject();
 
@@ -133,6 +133,7 @@ export function useSessionActions() {
             updateProject(p => { p.name = name; });
         }
 
+        // It's crucial to get the latest state right before mutation
         const projectToSave = useBuilderStore.getState().project!;
         const projectData = projectToSave.toStateObject();
         const finalName = projectToSave.name || 'Untitled Project';
@@ -152,7 +153,6 @@ export function useSessionActions() {
         if (project.id && !project.id.startsWith('temp-')) {
             performSave();
         } else if (hasAnyContent(project)) {
-
             setProjectName(project.name || '');
             setIsSavePromptOpen(true);
         } else {

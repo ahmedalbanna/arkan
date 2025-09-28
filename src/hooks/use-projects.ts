@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/use-projects.md
 
 "use client";
@@ -91,7 +92,7 @@ export function useProject(projectId: string) {
 export function useSaveProject() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
-  const { setProject } = useBuilderStore(); // Use setProject from the store
+  const { setProject, setHasUnsavedChanges } = useBuilderStore(); // Use setProject from the store
 
   return useMutation<SavedProject, Error, SaveProjectVariables>({
     mutationFn: async (data) => {
@@ -104,6 +105,7 @@ export function useSaveProject() {
       queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
       // Set the newly created project as the active one in the builder store
       setProject(newProject);
+      setHasUnsavedChanges(false);
       toast({
         title: "Project Saved",
         description: `"${newProject.name}" has been successfully saved.`,
@@ -118,7 +120,7 @@ export function useSaveProject() {
 export function useUpdateProject() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
-  const { setProject } = useBuilderStore();
+  const { setProject, setHasUnsavedChanges } = useBuilderStore();
 
   return useMutation<SavedProject, Error, UpdateProjectVariables>({
     mutationFn: async (variables) => {
@@ -136,6 +138,7 @@ export function useUpdateProject() {
       
       // Update the active project in the builder store
       setProject(updatedProject);
+      setHasUnsavedChanges(false);
 
       toast({
         title: "Project Updated",
