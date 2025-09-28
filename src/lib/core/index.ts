@@ -35,6 +35,9 @@ export * from './cache';
 // Query Keys
 export * from './query-keys';
 
+// Performance
+export * from './performance';
+
 // Re-export commonly used types
 export type {
     ErrorState, LoadingState, ProcessResult
@@ -59,3 +62,29 @@ export type {
     ExtendedUser,
     PermissionCheckResult, UserPermission, UserRole
 } from './auth/auth-utils';
+
+export type {
+    BundleStats
+} from './performance/bundle-analyzer';
+
+export type {
+    PerformanceEvent, PerformanceMetrics
+} from './performance/performance-monitor';
+
+export type {
+    AdvancedCacheOptions,
+    CacheStats
+} from './performance/cache-optimizer';
+
+export type {
+    ApiBatch, ApiOptimizationOptions,
+    ApiRequest
+} from './performance/api-optimizer';
+
+export type {
+    AnalyticsEvent, AnalyticsEventType, AppMetrics, UserMetrics
+} from './performance/analytics';
+
+export type {
+    IntegrationConfig
+} from './performance/integration';
