@@ -310,12 +310,14 @@ export const PresentationSlideSchema = z.object({
 export type PresentationSlide = z.infer<typeof PresentationSlideSchema>;
 
 export const GeneratePresentationInputSchema = z.object({
-    proposal: ProjectProposalSchema.nullable().optional().describe("An optional project proposal for high-level context."),
-    projectPlan: ProjectPlanSchema.nullable().optional().describe("The project plan with phases and tasks."),
-    sourceDocuments: z.array(z.object({
+    proposal: ProjectProposalSchema.optional().nullable(),
+    projectPlan: ProjectPlanSchema.optional().nullable(),
+    otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context."),
+    otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context."),
+    externalContext: z.array(z.object({
         fileName: z.string(),
         content: z.string(),
-    })).min(1, "At least one source document is required.").describe("An array of source documents (text or data URIs) to be synthesized into a presentation."),
+    })).optional().describe("An array of external documents (text or data URIs) provided by the user."),
 });
 export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
 
@@ -504,7 +506,7 @@ export type ImproveMarkdownOutput = z.infer<typeof ImproveMarkdownOutputSchema>;
 
 // manipulate-text.ts
 export const ManipulateTextInputSchema = z.object({
-    text: z.string().describe('The original text to be modified.'),
+    textToManipulate: z.string().describe('The original text to be modified.'),
     command: z.string().describe('The instruction for how to modify the text (e.g., "summarize", "expand on this topic", "rewrite this to be more formal").'),
 });
 export type ManipulateTextInput = z.infer<typeof ManipulateTextInputSchema>;

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { DiagramType, SectionName as SectionNameType } from '@/ai/schemas';
@@ -84,45 +85,15 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     const handleGenerateClick = () => {
         if (!project) return;
 
-        const sourceDocuments = [];
-
-        if (project.proposal) {
-            sourceDocuments.push({
-                fileName: "Project Proposal",
-                content: JSON.stringify(project.proposal, null, 2)
-            });
-        }
-        
-        if(project.sections) {
-            for (const key in project.sections) {
-                sourceDocuments.push({
-                    fileName: "Report Section: " + key,
-                    content: project.sections[key as SectionNameType]!
-                });
-            }
-        }
-        
-        if(project.diagrams) {
-            for (const key in project.diagrams) {
-                 sourceDocuments.push({
-                    fileName: `Diagram: ${key}`,
-                    content: project.diagrams[key as DiagramType]!.plantUmlCode
-                });
-            }
-        }
-
-        if(project.externalContext) {
-            project.externalContext.forEach((file) => {
-                sourceDocuments.push(file);
-            });
-        }
-
-
+        // The AI now handles context selection automatically. Pass everything.
         const body = {
             proposal: project.proposal,
             projectPlan: project.projectPlan,
-            sourceDocuments: sourceDocuments,
+            otherSections: project.sections,
+            otherDiagrams: Object.fromEntries(Object.entries(project.diagrams || {}).map(([key, value]) => [key, value?.plantUmlCode])),
+            externalContext: project.externalContext,
         };
+
         onGenerate(body);
     }
 

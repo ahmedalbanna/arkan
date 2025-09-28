@@ -28,19 +28,18 @@ const generatePresentationFlow = ai.defineFlow(
   },
   async (input) => {
 
-    // Separate media from text files for the prompt
-    const textContext = input.sourceDocuments?.filter(f => !f.content.startsWith('data:')) || [];
-    const mediaContext = input.sourceDocuments?.filter(f => f.content.startsWith('data:')) || [];
+    const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
+    const stringifiedPlan = input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '';
     
     const prompt = ai.definePrompt({
       name: 'generatePresentationPrompt',
-      input: { schema: z.any() }, // Using any() since we are manually constructing the payload
+      input: { schema: GeneratePresentationInputSchema },
       output: { schema: GeneratePresentationOutputSchema },
       model: 'googleai/gemini-1.5-flash',
-      prompt: `You are an expert presentation creator. Your task is to analyze the provided source documents and create a compelling presentation slide deck.
+      prompt: `You are an expert presentation creator. Your task is to analyze the provided project context and create a compelling presentation slide deck.
 
 **Your Process:**
-1.  **Synthesize Content:** Read through all the provided source documents to understand the key topics, arguments, and data.
+1.  **Synthesize Context:** Read through all the provided documents (proposal, report sections, diagrams, etc.) to understand the key topics, arguments, and data.
 2.  **Structure the Narrative:** Create a logical flow for the presentation. If a project plan is available, structure the presentation around its phases. Otherwise, start with an introduction, develop the main points, and end with a conclusion.
 3.  **Draft Slides:** For each slide:
     *   Write a clear, concise title.
@@ -49,31 +48,52 @@ const generatePresentationFlow = ai.defineFlow(
     *   Write detailed speaker notes that elaborate on each bullet point, providing context and deeper explanations. **Crucially, include prompts for the presenter**, such as "Ask the audience if they have experience with..." or "Emphasize the cost savings here."
 
 **CRITICAL INSTRUCTIONS:**
--   Your primary source of information is the 'Source Documents' and 'Project Plan' provided below. Synthesize information from ALL of them to create a coherent narrative.
+-   Your primary source of information is the project context provided below. Synthesize information from ALL of it to create a coherent narrative.
 -   The total number of slides should be between 7 and 12.
 -   The tone should be professional and engaging.
 
---- PROJECT PLAN ---
-{{#if projectPlan}}
+--- AVAILABLE CONTEXT FROM PROJECT ---
+
+{{#if proposal}}
+--- Project Proposal ---
 \`\`\`json
-${JSON.stringify(input.projectPlan, null, 2)}
+${stringifiedProposal}
 \`\`\`
-{{else}}
-(No project plan provided)
 {{/if}}
 
---- SOURCE DOCUMENTS ---
-{{#each textContext}}
---- Document: {{this.fileName}} ---
+{{#if projectPlan}}
+--- Project Plan ---
+\`\`\`json
+${stringifiedPlan}
+\`\`\`
+{{/if}}
+
+{{#if otherSections}}
+--- Other Report Sections ---
+{{#each otherSections}}
+--- Section: {{@key}} ---
+{{{this}}}
+---
+{{/each}}
+{{/if}}
+
+{{#if otherDiagrams}}
+--- Other Generated Diagrams (PlantUML) ---
+{{#each otherDiagrams}}
+--- Diagram: {{@key}} ---
+{{{this}}}
+---
+{{/each}}
+{{/if}}
+
+{{#if externalContext}}
+--- Additional Context Files ---
+{{#each externalContext}}
+File: {{this.fileName}}
 {{{this.content}}}
 ---
 {{/each}}
-
-{{#each mediaContext}}
---- Document (Media): {{this.fileName}} ---
-{{media url=this.content}}
----
-{{/each}}
+{{/if}}
 `,
       config: {
           temperature: 0.7,
@@ -81,7 +101,7 @@ ${JSON.stringify(input.projectPlan, null, 2)}
       }
     });
 
-    const { output } = await prompt({ ...input, textContext, mediaContext });
+    const { output } = await prompt(input);
     return output!;
   }
 );
