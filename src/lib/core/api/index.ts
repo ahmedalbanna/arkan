@@ -14,6 +14,17 @@ export * from './middleware';
 // Handlers
 export * from './handlers';
 
+// Legacy API Utils (for backward compatibility)
+export {
+    createApiResponseEnhanced, createApiResponse as createApiResponseLegacy,
+    handleApiErrorEnhanced, handleApiError as handleApiErrorLegacy, withAuth as withAuthLegacy
+} from './legacy-api-utils';
+
+// Enhanced API Utils (new system)
+export {
+    createApiResponseEnhanced as createApiResponseEnhancedNew, handleApiErrorEnhanced as handleApiErrorEnhancedNew, withEnhancedAuth
+} from './enhanced-api-utils';
+
 // Types
 export type { ApiClientConfig, HttpError, HttpHeaders, HttpMethod, HttpRequestOptions, HttpResponse } from '../types/api';
 export type { ApiHandler, ApiHandlerOptions } from './handlers/base-handler';
