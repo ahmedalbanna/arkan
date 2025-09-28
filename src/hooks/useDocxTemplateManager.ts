@@ -1,31 +1,22 @@
+
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { useDeleteDocxTemplate, useDocxStyles } from '@/hooks';
+import { useDeleteDocxTemplate, useDocxStyles } from '@/hooks/use-docx-styles';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import type { DocxTemplateKey } from '@/lib/types';
 import { refreshTemplateImage } from '@/services/template-service'; // Assuming this service exists
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { toast } from './use-toast';
+import { useRefreshTemplateImage } from './use-templates';
 
 export function useDocxTemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded, activeTemplateKey, setActiveTemplateKey } = useDocxStyles();
   const deleteMutation = useDeleteDocxTemplate();
   const { firebaseUser } = useAuth();
 
-  const refreshImageMutation = useMutation({
-    mutationFn: async ({ templateId, prompt }: { templateId: string, prompt: string }) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return refreshTemplateImage({ templateType: 'docx', templateId, prompt }, token);
-    },
-    onSuccess: () => {
-      toast({ title: 'Image Refreshed', description: 'Template image has been successfully refreshed.' });
-    },
-    onError: (error: any) => {
-      toast({ title: 'Error', description: `Failed to refresh image: ${error.message}` });
-    },
-  });
+  const refreshImageMutation = useRefreshTemplateImage('docx');
 
   const [changeQueue, setChangeQueue] = useState<{ key: DocxTemplateKey, path: string, value: any } | null>(null);
 

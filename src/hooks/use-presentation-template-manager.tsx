@@ -3,7 +3,7 @@
 
 import { usePptxStyles, useDeletePptxTemplate } from '@/hooks/use-pptx-styles';
 import type { PptxTemplateKey } from '@/lib/pptx-styles';
-import { useRefreshTemplateImage } from './use-templates';
+import { useRefreshTemplateImage } from '@/hooks/use-templates';
 
 export function usePresentationTemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded, uploadTemplateFile } = usePptxStyles();
