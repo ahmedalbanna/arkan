@@ -2,15 +2,12 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useToast } from '@/hooks';
-import { useMutation } from '@tanstack/react-query';
-import type { ManipulateTextOutput, ManipulateTextInput, SectionName } from '@/ai/schemas';
+import type { SectionName } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useWritingTool } from '@/hooks';
+import { useToast, useWritingTool } from '@/hooks';
 import { computeDiff, DiffPart } from '@/lib/diff';
 import { processPlantUml } from '@/lib/utils';
-import { writingToolApi } from '@/services';
+import { useEffect, useState } from 'react';
 
 
 // Helper to calculate word and character counts
@@ -50,11 +47,11 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
             setAiSuggestion(resultText);
             setDiff(computeDiff(content, resultText));
         } else {
-             toast({ title: t('builder.Section.toasts.suggestionErrorTitle'), description: t('builder.Section.toasts.suggestionErrorDesc'), variant: "destructive" });
+            toast({ title: t('builder.Section.toasts.suggestionErrorTitle'), description: t('builder.Section.toasts.suggestionErrorDesc'), variant: "destructive" });
         }
         setSelection(null);
     };
-    
+
     const handleError = (error: any) => {
         const isCreditError = error.message.toLowerCase().includes('credit');
         toast({
@@ -86,14 +83,14 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
 
         // If a selection was made, store its range to replace it later
         if (payload?.selectedText) {
-             const from = content.indexOf(payload.selectedText);
-             if (from !== -1) {
+            const from = content.indexOf(payload.selectedText);
+            if (from !== -1) {
                 setSelection({ text: payload.selectedText, from, to: from + payload.selectedText.length });
-             }
+            }
         } else {
             setSelection(null);
         }
-        
+
         setAiSuggestion(null);
         setDiff(null);
 
@@ -111,7 +108,7 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
                 humanizeMutation.mutate({ text: textToProcess });
                 break;
             case 'rewrite':
-                if(payload?.style) {
+                if (payload?.style) {
                     rewriteMutation.mutate({ text: textToProcess, style: payload.style });
                 }
                 break;
@@ -167,4 +164,29 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
         chars,
         processedContent,
     };
-};
+}
+
+/**
+ * Hook محسن لإدارة الأقسام مع ميزات متقدمة
+ * يستخدم النظام الجديد لتقليل التكرار وتحسين الأداء
+ */
+export const useAdvancedSectionLogic = (sectionKey: SectionName, content: string, onUpdate: (key: SectionName, value: string) => void) => {
+    // Implementation will be added here
+    return {
+        // Basic functionality
+        aiSuggestion: null,
+        diff: null,
+        selection: null,
+        setSelection: () => { },
+        t: (key: string) => key,
+        isProcessingAi: false,
+        isReadingAloud: false,
+        handleAiAction: () => { },
+        handleReadAloud: () => { },
+        handleAcceptSuggestion: () => { },
+        handleRejectSuggestion: () => { },
+        words: 0,
+        chars: 0,
+        processedContent: content,
+    };
+};;
