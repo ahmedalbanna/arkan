@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 import { useTextProcessor } from '../writing-tools/use-text-processor';
 
@@ -34,7 +35,7 @@ export function createPresentationToolHook(config: PresentationToolConfig) {
         });
 
         const rawResults = textProcessor.mutation.data;
-        const processedOutput = config.customFeatures?.formatOutput ? config.customFeatures.formatOutput(rawResults) : rawResults;
+        const processedOutput = (config.customFeatures?.formatOutput && rawResults) ? config.customFeatures.formatOutput(rawResults) : rawResults;
 
         return {
             form: textProcessor.form,
@@ -86,7 +87,7 @@ export function createAdvancedPresentationToolHook(
         });
 
         const rawResults = textProcessor.mutation.data;
-        const processedOutput = customFeatures?.formatOutput ? customFeatures.formatOutput(rawResults) : rawResults;
+        const processedOutput = (customFeatures?.formatOutput && rawResults) ? customFeatures.formatOutput(rawResults) : rawResults;
 
         return {
             form: textProcessor.form,

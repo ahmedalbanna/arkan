@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 import { createAcademicSolverToolHook } from '../hooks/academic-solver-tools/use-academic-solver-factory';
 
@@ -35,6 +36,7 @@ export const useAcademicSolverLogic = createAcademicSolverToolHook({
     solverType: 'general',
     customFeatures: {
         formatOutput: (data: any) => {
+            if (!data) return null;
             if (data.solution) {
                 return {
                     solution: data.solution,

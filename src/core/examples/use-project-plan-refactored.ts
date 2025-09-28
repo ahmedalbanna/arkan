@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 import { createProjectPlanToolHook } from '../hooks/project-plan-tools/use-project-plan-factory';
 
@@ -37,6 +38,7 @@ export const useProjectPlanLogic = createProjectPlanToolHook({
     planType: 'business',
     customFeatures: {
         formatOutput: (data: any) => {
+            if (!data) return null;
             if (data.projectPlan) {
                 return {
                     projectPlan: data.projectPlan,

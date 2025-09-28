@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 import { createPresentationToolHook } from '../hooks/presentation-tools/use-presentation-factory';
 
@@ -28,6 +29,7 @@ export const usePresentationOutlineLogic = createPresentationToolHook({
     presentationType: 'outline',
     customFeatures: {
         formatOutput: (data: any) => {
+            if (!data) return null;
             if (data.outline) {
                 return {
                     outline: data.outline,
