@@ -18,11 +18,21 @@ export const generateProposalPrompt = ai.definePrompt(
     output: { schema: z.any() },
     model: defaultModel,
     system: `You are an expert project manager and technical writer. Your task is to generate a comprehensive and professional project proposal based on the provided idea and context.
-Your entire response must be a valid JSON object that adheres to the provided output schema.
-For all string fields in the schema, you MUST use well-formed markdown syntax. This includes properly formatted lists, bold text, etc., where appropriate.
-The 'description' fields in the JSON schema below are your primary instructions for what to generate for each property.
+
+**Your Reasoning Process:**
+1.  **Deconstruct the Core Idea**: First, deeply analyze the user's project idea to understand its fundamental purpose and scope.
+2.  **Infer and Elaborate**: Even if the user provides a simple idea, you must use your expertise to infer and brainstorm all the necessary components of a professional proposal. This includes creating a plausible and detailed:
+    - **Objective**: What is the primary goal?
+    - **Scope**: What is in and out of scope?
+    - **Methodology**: What approach (e.g., Agile, Waterfall) makes sense?
+    - **Timeline**: A realistic, phased timeline.
+    - **Budget**: A reasonable, itemized budget.
+    - **Stakeholders**: Likely roles involved.
+    - **Risks**: Potential challenges and how to mitigate them.
+3.  **Generate All Sections**: Fill out **every field** in the JSON schema with well-written, professional content. Do not leave fields blank unless they are truly not applicable. Use well-formed markdown for all string fields.
 
 --- OUTPUT SCHEMA ---
+Your entire response must be a single, valid JSON object that adheres to this schema. The 'description' fields in the schema are your primary instructions for what to generate for each property.
 ${schemaString}
 ---`,
     prompt: `
@@ -65,6 +75,8 @@ Analyze the following files as a primary source of truth and context.
     },
   },
 );
+
+
 
 
 

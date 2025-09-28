@@ -1,11 +1,11 @@
 // src/ai/config/models.ts
-import { gemini15Flash, gemini15Pro } from '@genkit-ai/googleai';
+import { gemini20Flash, gemini15Pro } from '@genkit-ai/googleai';
 
 /**
  * The default model for most general-purpose tasks.
  * It's fast and cost-effective.
  */
-export const defaultModel = gemini15Flash;
+export const defaultModel = gemini20Flash;
 
 /**
  * A more powerful model for complex reasoning, analysis, and creative tasks.

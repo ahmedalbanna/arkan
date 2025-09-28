@@ -11,6 +11,7 @@ import { ai } from '@/ai/genkit';
 import { generateProposalPrompt } from '@/ai/prompts/generate-proposal';
 import { GenerateProposalInputSchema, type AnyProjectProposal } from '@/ai/schemas';
 import { z } from '@genkit-ai/core';
+
 // We wrap the prompt in a flow to handle input processing and ensure a clean interface.
 export const generateProposal = ai.defineFlow(
   {

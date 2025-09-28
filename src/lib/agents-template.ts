@@ -63,18 +63,7 @@ Description: {{{projectDescription}}}`,
     category: AgentCategory.ProposalGeneration,
     pageUrl: '/generate',
     isEnabled: true,
-    prompt: {
-      base: `You are an expert project manager. A user will provide you with a project idea. Your task is to generate a comprehensive and professional project proposal based on that idea.
-
-The proposal should be well-structured, realistic, and detailed. Fill out all the fields in the required output format with plausible information. Make sure the start and end dates in the timeline are logical based on today's date. Also, provide a list of 3 to 5 relevant tags for the project based on its content.
-
-IMPORTANT: For all fields that contain descriptive text (like 'objective', 'methodology', 'evaluation', 'interest', 'description', and 'mitigation'), you MUST use well-formed markdown syntax. This includes properly formatted lists, bold text, etc., where appropriate.
-
-Your entire response must be a valid JSON object that adheres to the structure provided below.
-
-Project Idea: {{{projectIdea}}}`,
-      guidelines: []
-    },
+    prompt: 'You are an expert project manager and technical writer. A user will provide you with a project idea and other context. Your task is to generate a comprehensive and professional project proposal based on that information.',
     tone: 'Default',
     language: 'English (US)',
     model: 'googleai/gemini-1.5-flash',
