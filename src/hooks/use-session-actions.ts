@@ -2,36 +2,12 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useSaveProject, useToast, useUpdateProject, useExport } from '@/hooks';
+import { useBuilderStore, useSaveProject, useToast, useUpdateProject } from '@/hooks';
 import { Project } from '@/lib/models/project';
 import type { SavedProject } from '@/lib/types';
 import { saveAs } from 'file-saver';
-import { useRef, useState, useEffect } from 'react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Download, Trash2, Save, FileJson, Upload, Cloud, Share2 } from 'lucide-react';
-import React from 'react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Loader2 } from 'lucide-react';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
-import { ReportExportDialog } from '../project/ExportDialogs';
+import React, { useRef, useState } from 'react';
+import { useExportEnhanced } from './use-export-enhanced';
 
 
 function hasAnyContent(project: Project | null): boolean {
@@ -61,30 +37,123 @@ export function useSessionActions() {
     const project = useBuilderStore(state => state.project);
     const hasUnsavedChanges = useBuilderStore(state => state.hasUnsavedChanges);
     const { loadProject, newSession, updateProject } = useBuilderStore();
-    
+
     const saveProjectMutation = useSaveProject();
     const updateProjectMutation = useUpdateProject();
 
-    // --- Start of Export Logic Integration ---
-    const { exportProposal, exportReportDocx, exportPresentationPptx, isExporting } = useExport();
+    // --- Start of Export Logic Integration (Enhanced) ---
+    const {
+        exportProposal,
+        exportReport,
+        exportPresentation,
+        exportAcademicSolution,
+        isExporting,
+        isProposalExporting,
+        isReportExporting,
+        isPresentationExporting,
+        isAcademicExporting
+    } = useExportEnhanced();
 
-    const handleExportProposal = async (format: 'docx' | 'pdf') => {
+    const handleExportProposal = async (format: 'docx' | 'pdf' | 'html') => {
         if (project && project.proposal) {
-            await exportProposal(format, project);
+            const result = await exportProposal(project.proposal, format, {
+                includeImages: true,
+                templateId: 'modern-proposal-template',
+                customStyles: {
+                    title: { fontSize: 24, fontWeight: 'bold' },
+                    body: { fontSize: 12, lineHeight: 1.5 }
+                }
+            });
+
+            if (result.success) {
+                toast({
+                    title: t('export.success') || 'Export Successful',
+                    description: `${format.toUpperCase()} file exported successfully`,
+                });
+            }
         }
     }
 
     const handleExportReport = async (sectionsToInclude: string[]) => {
         if (!project || !hasAnyContent(project)) return;
-         await exportReportDocx(project, {}, sectionsToInclude);
+
+        const reportData = {
+            sections: project.sections || {},
+            diagrams: project.diagrams || {},
+            title: project.name || 'Untitled Report',
+            translatedTitles: {},
+            sectionsToInclude
+        };
+
+        const result = await exportReport(reportData, 'docx', {
+            includeImages: true,
+            includeDiagrams: true,
+            templateId: 'professional-report-template',
+            customStyles: {
+                title: { fontSize: 20, fontWeight: 'bold' },
+                body: { fontSize: 12, lineHeight: 1.4 }
+            }
+        });
+
+        if (result.success) {
+            toast({
+                title: t('export.success') || 'Export Successful',
+                description: 'Report exported successfully',
+            });
+        }
     };
 
     const handleExportPresentation = async () => {
         if (!project || !project.presentation?.history.length) return;
         const latestPresentation = project.presentation.history[0];
-        await exportPresentationPptx(project, latestPresentation.id);
+
+        const result = await exportPresentation(
+            latestPresentation.slides || [],
+            latestPresentation.title || 'Untitled Presentation',
+            'pptx',
+            {
+                includeImages: true,
+                templateId: 'corporate-presentation-template',
+                customStyles: {
+                    titleSlide: { backgroundColor: '#f7fafc' },
+                    contentSlide: { backgroundColor: '#ffffff' }
+                }
+            }
+        );
+
+        if (result.success) {
+            toast({
+                title: t('export.success') || 'Export Successful',
+                description: 'Presentation exported successfully',
+            });
+        }
     }
-    // --- End of Export Logic Integration ---
+
+    const handleExportAcademicSolution = async () => {
+        if (!project || !project.academicSolver?.analyzedDocument || !project.academicSolver?.solvedDocument) return;
+
+        const result = await exportAcademicSolution(
+            project.academicSolver.analyzedDocument,
+            project.academicSolver.solvedDocument,
+            'docx',
+            {
+                includeImages: true,
+                templateId: 'academic-solution-template',
+                customStyles: {
+                    title: { fontSize: 22, fontWeight: 'bold' },
+                    body: { fontSize: 12, lineHeight: 1.6 }
+                }
+            }
+        );
+
+        if (result.success) {
+            toast({
+                title: t('export.success') || 'Export Successful',
+                description: 'Academic solution exported successfully',
+            });
+        }
+    }
+    // --- End of Export Logic Integration (Enhanced) ---
 
     const isSaving = saveProjectMutation.isPending || updateProjectMutation.isPending;
 

@@ -4,6 +4,15 @@
 // ===== النظام الأساسي - Core System =====
 export * from '../core';
 
+// ===== Enhanced Hooks - النظام المحسن =====
+export * from './use-diagram-tools-enhanced';
+export * from './use-export-enhanced';
+export * from './use-presentation-tools-enhanced';
+export * from './use-proposal-tools-enhanced';
+export * from './use-report-tools-enhanced';
+export * from './use-templates-enhanced';
+export * from './use-writing-tools-enhanced';
+
 // ===== UI/UX Hooks =====
 export * from '../core/ui/use-ui-factory';
 
@@ -13,9 +22,12 @@ export * from './useAutosave';
 export * from './useBuilderStore';
 export * from './useChatStore';
 export * from './useGenerationUIStore';
-export * from './usePresentationStore';
-export * from './useProposalGenerationStore';
-export * from './useReportStore';
+// Note: These stores are not modules, so they're commented out
+// // Note: This store is not a module, so it's commented out
+// export * from './usePresentationStore';
+// export * from './useProposalGenerationStore';
+// // Note: This store is not a module, so it's commented out
+// export * from './useReportStore';
 
 // ===== React Query Hooks =====
 export * from './use-academic-solver';
@@ -37,7 +49,8 @@ export * from './use-features';
 export * from './use-history';
 export * from './use-notifications';
 export * from './use-payment';
-export * from './use-presentation-template-manager';
+// Note: This is already exported from core, so it's commented out to avoid duplication
+// export * from './use-presentation-template-manager';
 export * from './use-project-plan';
 export * from './use-projects';
 export * from './use-teams';
@@ -55,7 +68,8 @@ export * from './use-fact-checker-logic';
 export * from './use-grammar-checker-logic';
 export * from './use-humanizer-logic';
 export * from './use-idea-generator-logic';
-export * from './use-paraphraser-logic';
+// Note: This is already exported from core, so it's commented out to avoid duplication
+// export * from './use-paraphraser-logic';
 export * from './use-plagiarism-checker-logic';
 export * from './use-plant-uml-generator-logic';
 export * from './use-presentation-outline-logic';
@@ -76,7 +90,8 @@ export * from './use-proposal-mode-generator-logic';
 // ===== Report Tools Logic Hooks =====
 export * from './use-report-generation';
 export * from './use-report-generation-logic';
-export * from './use-report-mode-generator';
+// Note: This is already exported from core, so it's commented out to avoid duplication
+// export * from './use-report-mode-generator';
 export * from './use-report-results';
 
 // ===== Diagram Tools Logic Hooks =====
@@ -96,7 +111,8 @@ export * from './use-translation-view-logic';
 export * from './use-agent-editor';
 export * from './use-context-selector';
 export * from './use-debounce';
-export * from './use-export';
+// Note: This is replaced by use-export-enhanced, so it's commented out to avoid duplication
+// export * from './use-export';
 export * from './use-mobile';
 export * from './use-new-chat-dialog';
 export * from './use-section-accordion-item-logic';
@@ -132,7 +148,8 @@ export * from './use-guideline-editor';
 export * from './use-notifications';
 export * from './use-payment';
 export * from './use-presentation-generation';
-export * from './use-presentation-template-manager';
+// Note: This is already exported from core, so it's commented out to avoid duplication
+// export * from './use-presentation-template-manager';
 export * from './use-project-plan';
 export * from './use-proposal-actions-logic';
 export * from './use-proposal-generation';
@@ -145,8 +162,10 @@ export * from './use-upload-project-logic';
 export * from './useAutosave';
 export * from './useBuilderStore';
 export * from './useChatInterface';
-export * from './usePresentationStore';
+// Note: This store is not a module, so it's commented out
+// export * from './usePresentationStore';
 export * from './usePresentationTemplateManager';
 export * from './useReportModeGenerator';
-export * from './useReportStore';
+// Note: This store is not a module, so it's commented out
+// export * from './useReportStore';
 
