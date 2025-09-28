@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -122,8 +123,8 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
         }
     };
 
-    const handleReadAloud = (textToRead?: string) => {
-        const text = textToRead || content;
+    const handleReadAloud = () => {
+        const text = content;
         if (audioSrc) {
             setShowAudioPlayer(true);
             return;

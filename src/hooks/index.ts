@@ -36,7 +36,6 @@ export * from './use-proposal-mode-generator-logic';
 export * from './use-task-card-logic';
 
 export * from './use-report-generation';
-export * from './use-report-generation-logic';
 export * from './use-report-mode-generator';
 export * from './use-section-accordion-item-logic'; // Export new hook
 export * from './use-section-logic';
