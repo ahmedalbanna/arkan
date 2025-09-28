@@ -1,482 +1,436 @@
-# Core Module - دليل الاستخدام
+# النظام الأساسي الموحد
 
 ## نظرة عامة
 
-مجلد `core` في `src/lib` يحتوي على جميع العناصر الأساسية القابلة لإعادة الاستخدام في التطبيق. تم تصميمه لتقليل التكرار وتحسين قابلية الصيانة والتطوير.
+النظام الأساسي الموحد هو نظام شامل ومتطور يوفر جميع المكونات الأساسية اللازمة لتطوير تطبيقات ويب حديثة وقابلة للصيانة. تم تصميمه ليكون مرناً وقابلاً للتوسع مع دعم كامل للغة العربية.
 
-## الهيكل
+## الميزات الرئيسية
+
+### 🔧 المكونات الأساسية
+- **الثوابت**: قيم ثابتة موحدة لجميع أنحاء التطبيق
+- **الأنواع**: تعريفات TypeScript شاملة ومفصلة
+- **الأدوات**: وظائف مساعدة موحدة ومحسنة
+- **معالجة الأخطاء**: نظام شامل لمعالجة الأخطاء
+
+### 🌐 نظام API موحد
+- **عميل API**: عميل HTTP موحد مع إعادة المحاولة ومعالجة الأخطاء
+- **Middleware**: نظام middleware شامل للتحقق والمصادقة والحد من المعدل
+- **المعالجات**: معالجات API موحدة لجميع العمليات
+
+### 🔐 نظام المصادقة المتقدم
+- **خدمة المصادقة**: خدمة شاملة للمصادقة باستخدام Firebase
+- **Hooks**: React hooks للمصادقة وإدارة الحالة
+- **الأدوات**: أدوات مساعدة للتحقق من الصلاحيات والأدوار
+
+### 🔄 نظام التكامل
+- **محولات النظام القديم**: محولات للربط مع النظام القديم
+- **دليل الهجرة**: دليل شامل للهجرة من النظام القديم
+
+## البنية
 
 ```
 src/lib/core/
-├── constants/                 # الثوابت المشتركة
-│   ├── api-endpoints.ts      # نقاط نهاية API
-│   ├── file-types.ts         # أنواع الملفات
-│   ├── validation-rules.ts   # قواعد التحقق
+├── constants/           # الثوابت
+│   ├── api-endpoints.ts
+│   ├── file-types.ts
+│   ├── validation-rules.ts
 │   └── index.ts
-├── types/                     # الأنواع المشتركة
-│   ├── common.ts             # أنواع أساسية
-│   ├── api.ts                # أنواع API
-│   ├── export.ts             # أنواع التصدير
+├── types/              # الأنواع
+│   ├── common.ts
+│   ├── api.ts
+│   ├── export.ts
 │   └── index.ts
-├── utils/                     # الأدوات المساعدة
-│   ├── string-utils.ts       # معالجة النصوص
-│   ├── file-utils.ts         # معالجة الملفات
-│   ├── validation-utils.ts   # أدوات التحقق
-│   ├── crypto-utils.ts       # التشفير والهاش
+├── utils/              # الأدوات
+│   ├── string-utils.ts
+│   ├── file-utils.ts
+│   ├── validation-utils.ts
+│   ├── crypto-utils.ts
 │   └── index.ts
-├── error-handling/           # معالجة الأخطاء
-│   ├── error-types.ts        # أنواع الأخطاء
-│   ├── client-errors.ts      # أخطاء العميل
-│   ├── server-errors.ts      # أخطاء الخادم
+├── error-handling/     # معالجة الأخطاء
+│   ├── error-types.ts
+│   ├── client-errors.ts
+│   ├── server-errors.ts
 │   └── index.ts
-└── index.ts                  # نقطة الدخول الرئيسية
+├── api/                # نظام API
+│   ├── client/
+│   │   ├── base-client.ts
+│   │   ├── api-client.ts
+│   │   └── index.ts
+│   ├── middleware/
+│   │   ├── auth-middleware.ts
+│   │   ├── validation-middleware.ts
+│   │   ├── rate-limit-middleware.ts
+│   │   ├── cors-middleware.ts
+│   │   ├── logging-middleware.ts
+│   │   └── index.ts
+│   ├── handlers/
+│   │   ├── base-handler.ts
+│   │   ├── auth-handlers.ts
+│   │   ├── writing-handlers.ts
+│   │   ├── export-handlers.ts
+│   │   └── index.ts
+│   └── index.ts
+├── auth/               # نظام المصادقة
+│   ├── auth-service.ts
+│   ├── auth-hooks.ts
+│   ├── auth-utils.ts
+│   └── index.ts
+├── integration/        # نظام التكامل
+│   ├── legacy-adapter.ts
+│   ├── migration-guide.ts
+│   └── index.ts
+├── __tests__/          # الاختبارات
+│   ├── integration.test.ts
+│   ├── api.test.ts
+│   ├── auth.test.ts
+│   └── index.ts
+├── index.ts
+└── README.md
 ```
 
-## الثوابت
+## الاستخدام
 
-### نقاط نهاية API
-
-```typescript
-import { API_ENDPOINTS } from '@/lib/core';
-
-// استخدام نقاط النهاية
-const response = await fetch(API_ENDPOINTS.WRITING_TOOLS.PARAPHRASE, {
-  method: 'POST',
-  body: JSON.stringify(data),
-});
-```
-
-### أنواع الملفات
+### استيراد المكونات
 
 ```typescript
-import { SUPPORTED_FILE_TYPES, UPLOAD_ACCEPTED_TYPES } from '@/lib/core';
-
-// التحقق من نوع الملف
-const fileType = SUPPORTED_FILE_TYPES.PDF;
-console.log(fileType.maxSize); // 10485760
-
-// أنواع الملفات المقبولة
-const acceptedTypes = UPLOAD_ACCEPTED_TYPES.documents;
-```
-
-### قواعد التحقق
-
-```typescript
-import { TEXT_VALIDATION_RULES, VALIDATION_MESSAGES } from '@/lib/core';
-
-const schema = z.object({
-  text: z.string()
-    .min(TEXT_VALIDATION_RULES.MIN_LENGTH, VALIDATION_MESSAGES.MIN_LENGTH(5))
-    .max(TEXT_VALIDATION_RULES.MAX_LENGTH, VALIDATION_MESSAGES.MAX_LENGTH(10000)),
-});
-```
-
-## الأنواع
-
-### الأنواع الأساسية
-
-```typescript
-import { ProcessResult, LoadingState, ErrorState } from '@/lib/core';
-
-// نتيجة العملية
-const result: ProcessResult<string> = {
-  success: true,
-  data: 'تمت العملية بنجاح',
-  message: 'تم الحفظ',
-};
-
-// حالة التحميل
-const loading: LoadingState = {
-  isLoading: true,
-  progress: 50,
-  message: 'جاري المعالجة...',
-};
-
-// حالة الخطأ
-const error: ErrorState = {
-  hasError: true,
-  error: 'حدث خطأ',
-  code: 'VALIDATION_ERROR',
-};
-```
-
-### أنواع API
-
-```typescript
-import { HttpRequestOptions, HttpResponse, AuthContext } from '@/lib/core';
-
-// خيارات طلب HTTP
-const options: HttpRequestOptions = {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(data),
-  timeout: 5000,
-};
-
-// سياق المصادقة
-const auth: AuthContext = {
-  user: { id: '1', email: 'user@example.com', role: 'user', permissions: [] },
-  token: 'jwt-token',
-  expiresAt: new Date(),
-};
-```
-
-### أنواع التصدير
-
-```typescript
-import { ExportOptions, PDFExportOptions, ExportResult } from '@/lib/core';
-
-// خيارات تصدير PDF
-const pdfOptions: PDFExportOptions = {
-  format: 'pdf',
-  pageOptions: {
-    size: 'A4',
-    orientation: 'portrait',
-    margins: { top: 20, right: 20, bottom: 20, left: 20 },
-  },
-  fontOptions: {
-    family: 'Arial',
-    size: 12,
-    color: 'black',
-  },
-};
-
-// نتيجة التصدير
-const result: ExportResult = {
-  success: true,
-  filename: 'document.pdf',
-  size: 1024000,
-  format: 'pdf',
-  downloadUrl: '/download/document.pdf',
-};
-```
-
-## الأدوات المساعدة
-
-### معالجة النصوص
-
-```typescript
+// استيراد جميع المكونات
 import {
+  // الثوابت
+  API_ENDPOINTS,
+  FILE_TYPES,
+  VALIDATION_RULES,
+
+  // الأنواع
+  ProcessResult,
+  LoadingState,
+  ErrorState,
+  HttpMethod,
+  HttpHeaders,
+  HttpRequestOptions,
+  HttpResponse,
+  HttpError,
+
+  // الأدوات
   cn,
   generateRandomPassword,
-  sanitizeText,
-  truncateText,
-  slugify,
-  toTitleCase,
-  countWords,
-  estimateReadingTime
-} from '@/lib/core';
-
-// دمج فئات CSS
-const className = cn('text-lg', 'font-bold', 'text-blue-500');
-
-// إنشاء كلمة مرور
-const password = generateRandomPassword(12);
-
-// تنظيف النص
-const cleanText = sanitizeText('<script>alert("xss")</script>');
-
-// تقصير النص
-const shortText = truncateText('هذا نص طويل جداً', 50);
-
-// تحويل إلى slug
-const slug = slugify('هذا عنوان المقال');
-
-// تحويل إلى عنوان
-const title = toTitleCase('hello world');
-
-// حساب عدد الكلمات
-const wordCount = countWords('هذا نص للاختبار');
-
-// حساب وقت القراءة
-const readingTime = estimateReadingTime('هذا نص طويل...');
-```
-
-### معالجة الملفات
-
-```typescript
-import {
-  fileToBase64,
-  base64ToFile,
-  validateFile,
-  formatFileSize,
-  createImagePreview,
-  downloadFileFromBase64
-} from '@/lib/core';
-
-// تحويل الملف إلى base64
-const base64 = await fileToBase64(file);
-
-// تحويل base64 إلى ملف
-const file = base64ToFile(base64, 'document.pdf', 'application/pdf');
-
-// التحقق من صحة الملف
-const validation = validateFile(file, {
-  maxSize: 10 * 1024 * 1024, // 10MB
-  acceptedTypes: ['application/pdf', 'image/jpeg'],
-});
-
-// تنسيق حجم الملف
-const size = formatFileSize(1024000); // "1 MB"
-
-// إنشاء معاينة للصورة
-const preview = await createImagePreview(file, 200);
-
-// تحميل الملف
-downloadFileFromBase64(base64, 'document.pdf', 'application/pdf');
-```
-
-### أدوات التحقق
-
-```typescript
-import {
+  arrayBufferToBase64,
   validateEmail,
-  validatePhone,
   validatePassword,
-  validateText,
-  validateNumber,
-  validateUrl
-} from '@/lib/core';
-
-// التحقق من البريد الإلكتروني
-const emailResult = validateEmail('user@example.com');
-
-// التحقق من رقم الهاتف
-const phoneResult = validatePhone('+966501234567');
-
-// التحقق من كلمة المرور
-const passwordResult = validatePassword('MyPassword123!');
-
-// التحقق من النص
-const textResult = validateText('Hello World', 5, 100);
-
-// التحقق من الرقم
-const numberResult = validateNumber(50, 0, 100);
-
-// التحقق من URL
-const urlResult = validateUrl('https://example.com');
-```
-
-### أدوات التشفير
-
-```typescript
-import {
+  validateUrl,
   createHash,
-  createFileHash,
   generateUUID,
-  generateSalt,
-  encryptText,
-  decryptText
+
+  // معالجة الأخطاء
+  handleClientError,
+  handleServerError,
+  createError,
+  createServerError,
+
+  // نظام API
+  apiClient,
+  createApiHandler,
+  createAuthApiHandler,
+  createValidatedApiHandler,
+  withAuth,
+  withValidation,
+  withRateLimit,
+  withCors,
+  withLogging,
+
+  // نظام المصادقة
+  AuthService,
+  useAuth,
+  useAuthState,
+  useAuthPermissions,
+  useCurrentUser,
+  AuthUtils,
+  UserRole,
+  UserPermission,
+
+  // نظام التكامل
+  LegacyApiUtilsAdapter,
+  LegacyErrorUtilsAdapter,
+  LegacyCacheAdapter,
+  LegacyQueryKeysAdapter,
+  LegacyServicesAdapter,
+  LegacyContextAdapter,
+  LegacyUtilsAdapter,
 } from '@/lib/core';
-
-// إنشاء hash
-const hash = await createHash('Hello World');
-
-// إنشاء hash للملف
-const fileHash = await createFileHash(file);
-
-// إنشاء UUID
-const uuid = generateUUID();
-
-// إنشاء salt
-const salt = generateSalt(16);
-
-// تشفير النص
-const encrypted = await encryptText('Secret Text', 'password');
-
-// فك تشفير النص
-const decrypted = await decryptText(encrypted, 'password');
 ```
 
-## معالجة الأخطاء
-
-### أخطاء العميل
+### استخدام نظام API
 
 ```typescript
-import {
-  handleClientError,
-  handleAPIError,
-  handleValidationError,
-  createError
-} from '@/lib/core';
+// إنشاء معالج API بسيط
+import { createApiHandler } from '@/lib/core';
 
-// معالجة خطأ عام
-try {
-  await riskyOperation();
-} catch (error) {
-  const result = handleClientError(error, {
-    showToast: true,
-    logError: true,
-    context: 'User Operation',
-  });
-}
+export const GET = createApiHandler(async (request, context) => {
+  return { success: true, message: 'Hello World' };
+}, {
+  requireAuth: false,
+  logging: {
+    logRequests: true,
+    logResponses: true,
+    logErrors: true,
+    logPerformance: true,
+  },
+});
 
-// معالجة خطأ API
-try {
-  const response = await fetch('/api/data');
-} catch (error) {
-  const result = handleAPIError(error, 'API Call');
-}
-
-// معالجة خطأ التحقق
-const result = handleValidationError('email', 'invalid-email', 'البريد الإلكتروني غير صحيح');
-
-// إنشاء خطأ مخصص
-const customError = createError({
-  type: 'VALIDATION_ERROR',
-  code: 'INVALID_EMAIL',
-  message: 'البريد الإلكتروني غير صحيح',
-  level: 'low',
-  source: 'validation',
-  field: 'email',
-  value: 'invalid-email',
+// إنشاء معالج API مع مصادقة
+export const POST = createApiHandler(async (request, context) => {
+  const data = await request.json();
+  return { success: true, data };
+}, {
+  requireAuth: true,
+  authOptions: {
+    requireAdmin: false,
+    requireSelf: true,
+  },
+  rateLimit: {
+    maxRequests: 10,
+    windowMs: 60000,
+    errorMessage: 'Too many requests',
+  },
+  logging: {
+    logRequests: true,
+    logResponses: true,
+    logErrors: true,
+    logPerformance: true,
+  },
 });
 ```
 
-### أخطاء الخادم
+### استخدام نظام المصادقة
 
 ```typescript
-import {
-  handleServerError,
-  handleZodError,
-  handleAuthenticationError,
-  createSuccessResponse
-} from '@/lib/core';
+// استخدام خدمة المصادقة
+import { AuthService } from '@/lib/core';
 
-// معالجة خطأ عام
-export async function GET() {
-  try {
-    const data = await fetchData();
-    return createSuccessResponse(data);
-  } catch (error) {
-    return handleServerError(error, 'Data Fetching');
-  }
+// تسجيل الدخول
+const loginResult = await AuthService.login({
+  email: 'user@example.com',
+  password: 'password123',
+  rememberMe: true,
+});
+
+if (loginResult.success) {
+  console.log('Login successful:', loginResult.user);
+} else {
+  console.error('Login failed:', loginResult.error);
 }
 
-// معالجة خطأ Zod
-export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const validatedData = schema.parse(body);
-    return createSuccessResponse(validatedData);
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return handleZodError(error, 'Data Validation');
+// التسجيل
+const registerResult = await AuthService.register({
+  email: 'user@example.com',
+  password: 'password123',
+  confirmPassword: 'password123',
+  firstName: 'John',
+  lastName: 'Doe',
+  role: 'user',
+});
+
+if (registerResult.success) {
+  console.log('Registration successful:', registerResult.user);
+} else {
+  console.error('Registration failed:', registerResult.error);
+}
+```
+
+### استخدام React Hooks
+
+```typescript
+// استخدام hooks المصادقة
+import { useAuth, useAuthState, useAuthPermissions } from '@/lib/core';
+
+function MyComponent() {
+  const { user, login, logout, loading, error } = useAuth();
+  const { isLoggedIn } = useAuthState();
+  const { isAdmin, canEdit, canDelete } = useAuthPermissions();
+
+  const handleLogin = async () => {
+    const result = await login({
+      email: 'user@example.com',
+      password: 'password123',
+    });
+
+    if (result.success) {
+      console.log('Login successful');
+    } else {
+      console.error('Login failed:', result.error);
     }
-    return handleServerError(error, 'Data Processing');
-  }
-}
+  };
 
-// معالجة خطأ المصادقة
-export async function PUT(request: Request) {
-  try {
-    const user = await authenticateUser(request);
-    if (!user) {
-      return handleAuthenticationError('المستخدم غير مسجل', 'AUTHENTICATION_FAILED');
+  const handleLogout = async () => {
+    const result = await logout();
+    if (result.success) {
+      console.log('Logout successful');
     }
-    // ... باقي المنطق
+  };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  return (
+    <div>
+      {isLoggedIn ? (
+        <div>
+          <p>Welcome, {user?.email}</p>
+          {isAdmin && <p>You are an admin</p>}
+          {canEdit && <button>Edit</button>}
+          {canDelete && <button>Delete</button>}
+          <button onClick={handleLogout}>Logout</button>
+        </div>
+      ) : (
+        <button onClick={handleLogin}>Login</button>
+      )}
+    </div>
+  );
+}
+```
+
+### استخدام الأدوات
+
+```typescript
+// استخدام أدوات النصوص
+import { cn, sanitizeText, truncateText } from '@/lib/core';
+
+const className = cn('base-class', condition && 'conditional-class');
+const sanitized = sanitizeText('<script>alert("xss")</script>');
+const truncated = truncateText('This is a long text', 50);
+
+// استخدام أدوات الملفات
+import { arrayBufferToBase64, fileToBase64, formatFileSize, validateFile } from '@/lib/core';
+
+const base64 = arrayBufferToBase64(buffer);
+const fileBase64 = await fileToBase64(file);
+const size = formatFileSize(1024 * 1024); // "1.00 MB"
+const isValid = validateFile(file, ['image/jpeg', 'image/png']);
+
+// استخدام أدوات التشفير
+import { createHash, generateUUID } from '@/lib/core';
+
+const hash = await createHash('Hello World', 'SHA-256');
+const uuid = generateUUID();
+```
+
+### استخدام معالجة الأخطاء
+
+```typescript
+// معالجة الأخطاء على العميل
+import { handleClientError } from '@/lib/core';
+
+try {
+  // منطق قد يسبب خطأ
+  const result = await someAsyncOperation();
+} catch (error) {
+  const errorResult = handleClientError(error, 'MyComponent');
+  console.error('Error:', errorResult.error);
+}
+
+// معالجة الأخطاء على الخادم
+import { handleServerError } from '@/lib/core';
+
+try {
+  // منطق API
+  const result = await processRequest();
+  return NextResponse.json(result);
+} catch (error) {
+  return handleServerError(error, 'API Handler', 500);
+}
+```
+
+## الاختبار
+
+### تشغيل الاختبارات
+
+```bash
+# تشغيل جميع الاختبارات
+npm test
+
+# تشغيل اختبارات محددة
+npm test -- --grep "Auth Service"
+
+# تشغيل الاختبارات مع التغطية
+npm test -- --coverage
+```
+
+### أنواع الاختبارات
+
+1. **اختبارات التكامل**: اختبار تفاعل المكونات مع بعضها
+2. **اختبارات API**: اختبار معالجات API والـ middleware
+3. **اختبارات المصادقة**: اختبار نظام المصادقة والصلاحيات
+
+## الهجرة من النظام القديم
+
+### دليل الهجرة
+
+```typescript
+// النظام القديم
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+
+// النظام الجديد
+import { createApiHandler, handleServerError } from '@/lib/core';
+
+// النظام القديم
+export const GET = withAuth(async (request, context) => {
+  try {
+    // منطق API
+    return createApiResponse({ success: true, data }, 200);
   } catch (error) {
-    return handleServerError(error, 'Authentication');
+    return handleApiError(error, 400);
   }
-}
+});
+
+// النظام الجديد
+export const GET = createApiHandler(async (request, context) => {
+  // منطق API
+  return { success: true, data };
+}, {
+  requireAuth: true,
+  logging: {
+    logRequests: true,
+    logResponses: true,
+    logErrors: true,
+    logPerformance: true,
+  },
+});
 ```
 
-## الفوائد
+### محولات النظام القديم
 
-### 1. تقليل التكرار
-- **قبل**: كود مكرر في كل ملف
-- **بعد**: أدوات موحدة قابلة لإعادة الاستخدام
-- **تحسين**: 60% تقليل في الكود المكرر
-
-### 2. تحسين قابلية القراءة
-- منطق واضح ومنظم
-- فصل الاهتمامات
-- أسماء وصفية
-
-### 3. سهولة الصيانة
-- تغيير واحد يؤثر على جميع الاستخدامات
-- اختبار أسهل
-- توثيق شامل
-
-### 4. تحسين الأداء
-- إعادة استخدام الكود
-- تحسين إدارة الذاكرة
-- تحسين تجربة المستخدم
-
-## أفضل الممارسات
-
-### 1. استخدام الثوابت
 ```typescript
-// ✅ جيد
-import { API_ENDPOINTS } from '@/lib/core';
-const response = await fetch(API_ENDPOINTS.WRITING_TOOLS.PARAPHRASE);
+// استخدام المحولات للتوافق العكسي
+import { LegacyApiUtilsAdapter } from '@/lib/core';
 
-// ❌ سيء
-const response = await fetch('/api/writing-tools/paraphrase');
+// يمكن استخدام المحولات مؤقتاً أثناء الهجرة
+const withAuth = LegacyApiUtilsAdapter.withAuth;
+const handleApiError = LegacyApiUtilsAdapter.handleApiError;
+const createApiResponse = LegacyApiUtilsAdapter.createApiResponse;
 ```
 
-### 2. معالجة الأخطاء
-```typescript
-// ✅ جيد
-try {
-  await operation();
-} catch (error) {
-  handleClientError(error, { context: 'Operation' });
-}
+## المساهمة
 
-// ❌ سيء
-try {
-  await operation();
-} catch (error) {
-  console.error(error);
-}
-```
+### إضافة مكونات جديدة
 
-### 3. استخدام الأنواع
-```typescript
-// ✅ جيد
-import { ProcessResult } from '@/lib/core';
-const result: ProcessResult<string> = await processData();
+1. إنشاء الملف في المجلد المناسب
+2. إضافة التصدير في `index.ts`
+3. كتابة الاختبارات
+4. تحديث الوثائق
 
-// ❌ سيء
-const result: any = await processData();
-```
+### إضافة اختبارات جديدة
 
-### 4. استخدام الأدوات
-```typescript
-// ✅ جيد
-import { validateEmail, formatFileSize } from '@/lib/core';
-const isValid = validateEmail(email);
-const size = formatFileSize(file.size);
+1. إنشاء ملف اختبار في `__tests__/`
+2. كتابة الاختبارات الشاملة
+3. التأكد من تغطية جميع الحالات
 
-// ❌ سيء
-const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-const size = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
-```
+## الترخيص
 
-## التطوير المستقبلي
+هذا المشروع مرخص تحت رخصة MIT. راجع ملف LICENSE للتفاصيل.
 
-### الميزات المخططة
-1. **أدوات إضافية**: للمكونات المعقدة
-2. **أدوات تطوير**: لتحسين تجربة التطوير
-3. **اختبارات شاملة**: لضمان الجودة
-4. **توثيق تفاعلي**: مع أمثلة حية
+## الدعم
 
-### كيفية المساهمة
-1. اتبع المعايير الموجودة
-2. أضف اختبارات للكود الجديد
-3. حدث التوثيق
-4. تأكد من التوافق مع الكود الموجود
-
-## الدعم والمساعدة
-
-إذا واجهت أي مشاكل أو لديك أسئلة حول استخدام Core Module، يرجى:
-
-1. مراجعة هذا الدليل
-2. فحص الأمثلة المتوفرة
-3. التواصل مع فريق التطوير
-4. إنشاء issue في المشروع
+للحصول على الدعم أو الإبلاغ عن مشاكل، يرجى فتح issue في المستودع أو التواصل مع فريق التطوير.
 
 ---
 
-**ملاحظة**: هذا الدليل يتم تحديثه باستمرار مع إضافة ميزات جديدة وتحسينات.
+**ملاحظة**: هذا النظام مصمم ليكون مرناً وقابلاً للتوسع. يمكن تخصيصه وتطويره حسب احتياجات المشروع.

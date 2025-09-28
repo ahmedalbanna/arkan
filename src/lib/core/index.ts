@@ -1,19 +1,55 @@
 /**
- * تصدير موحد لجميع عناصر Core
+ * النظام الأساسي الموحد
  *
- * هذا الملف يحتوي على تصدير جميع العناصر الأساسية
- * لسهولة الاستيراد والاستخدام
+ * هذا الملف يحتوي على جميع مكونات النظام الأساسي الموحد
+ * بما في ذلك الثوابت والأنواع والأدوات ومعالجة الأخطاء
  */
 
-// الثوابت
+// Constants
 export * from './constants';
 
-// الأنواع
+// Types
 export * from './types';
 
-// الأدوات
+// Utils
 export * from './utils';
 
-// معالجة الأخطاء
+// Error Handling
 export * from './error-handling';
 
+// API
+export * from './api';
+
+// Auth
+export * from './auth';
+
+// Integration
+export * from './integration';
+
+// Firebase
+export * from './firebase/client-init';
+
+// Re-export commonly used types
+export type {
+    ErrorState, LoadingState, ProcessResult
+} from './types/common';
+
+export type {
+    HttpError, HttpHeaders, HttpMethod, HttpRequestOptions,
+    HttpResponse
+} from './types/api';
+
+export type {
+    AuthResult,
+    LoginCredentials,
+    RegisterCredentials
+} from './auth/auth-service';
+
+export type {
+    AuthState
+} from './auth/auth-hooks';
+
+export type {
+    ExtendedUser,
+    PermissionCheckResult, UserPermission, UserRole
+} from './auth/auth-utils';
