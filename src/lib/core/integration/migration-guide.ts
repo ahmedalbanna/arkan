@@ -15,7 +15,7 @@ export const ApiUtilsMigrationGuide = {
     withAuth: {
         old: `
 // النظام القديم
-import { withAuth } from '@/lib/api-utils';
+import { withAuth } from '@/lib/core/api';
 
 export const GET = withAuth(async (request, context) => {
   // منطق API
@@ -48,7 +48,7 @@ export const GET = createApiHandler(async (request, context) => {
     handleApiError: {
         old: `
 // النظام القديم
-import { handleApiError } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/core/api';
 
 try {
   // منطق API
@@ -74,7 +74,7 @@ try {
     createApiResponse: {
         old: `
 // النظام القديم
-import { createApiResponse } from '@/lib/api-utils';
+import { createApiResponse } from '@/lib/core/api';
 
 return createApiResponse({ success: true, data }, 200);
     `,

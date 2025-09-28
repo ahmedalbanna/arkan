@@ -16,7 +16,13 @@
     "seed:templates": "tsx src/lib/db/seed-templates.ts",
     "seed:categories": "tsx src/lib/db/seed-agent-categories.ts",
     "seed:sections": "tsx src/lib/db/seed-sections.ts",
-    "seed:agents": "tsx scripts/seed-agents.ts"
+    "seed:agents": "tsx scripts/seed-agents.ts",
+    "migration:apply": "node scripts/apply-migration.js apply",
+    "migration:restore": "node scripts/apply-migration.js restore",
+    "migration:test": "node scripts/apply-migration.js test",
+    "migration:check": "npm run lint && npm run typecheck",
+    "migration:full": "npm run migration:check && npm run migration:apply && npm run test",
+    "migration:rollback": "npm run migration:restore && npm run test"
   },
   "dependencies": {
     "@dataconnect/generated": "file:dataconnect-generated/js/example-connector",

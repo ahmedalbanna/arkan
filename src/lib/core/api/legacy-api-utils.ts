@@ -12,7 +12,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { ZodError } from 'zod';
 
 // Import new error handling
-import { createServerError, handleServerError } from './error-handling/server-errors';
+import { createServerError, handleServerError } from '../error-handling/server-errors';
 
 interface ApiHandlerOptions {
     requireAdmin?: boolean;

@@ -1,0 +1,13 @@
+{
+    "scripts": {
+        "migration:apply": "node scripts/apply-migration.js apply",
+        "migration:restore": "node scripts/apply-migration.js restore",
+        "migration:test": "node scripts/apply-migration.js test",
+        "migration:check": "npm run lint && npm run type-check",
+        "migration:full": "npm run migration:check && npm run migration:apply && npm run test",
+        "migration:rollback": "npm run migration:restore && npm run test"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0"
+    }
+}
