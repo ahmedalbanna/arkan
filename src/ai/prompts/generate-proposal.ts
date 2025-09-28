@@ -16,7 +16,7 @@ export const generateProposalPrompt = ai.definePrompt(
     name: 'generateProposalPrompt',
     input: { schema: GenerateProposalInputSchema }, // Use the updated schema
     output: { schema: z.any() },
-    model: defaultModel,
+    model: defaultModel || 'googleai/gemini-2.0-flash',
     system: `You are an expert project manager and technical writer. Your task is to generate a comprehensive and professional project proposal based on the provided idea and context.
 
 **Your Reasoning Process:**

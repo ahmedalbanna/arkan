@@ -13,14 +13,12 @@ import { ProposalSection } from './ProposalSection'; // Import the new component
  * ProjectProposal object into a paginated, A4-style view.
  *
  * - FormattedProposalView: The main component that handles pagination.
- * - ValueRenderer: A recursive component that dispatches rendering to the appropriate sub-component based on data type.
- * - ObjectRenderer & ArrayRenderer: Specialized components for rendering complex data structures.
  */
 
 interface FormattedProposalViewProps {
     proposal: ProjectProposal;
     currentPage: number;
-    onUpdate: (key: string, value: string) => void;
+    onUpdate: (key: string, value: any) => void;
 }
 
 // A styled container for each "page"
@@ -37,8 +35,8 @@ export default function FormattedProposalView({ proposal, currentPage, onUpdate 
     const { locale } = useLocalization();
 
     const orderedKeys = useMemo(() =>
-        Object.keys(proposal).filter(key => key !== 'title' && key !== 'category'),
-        [proposal]
+        Object.keys(proposal).filter(key => key !== 'title' && key !== 'category' && hasContent(proposal[key as keyof typeof proposal])),
+    [proposal]
     );
 
     if (currentPage === 0) {
@@ -57,18 +55,13 @@ export default function FormattedProposalView({ proposal, currentPage, onUpdate 
 
     const currentPageValue = proposal[currentPageKey as keyof typeof proposal];
 
-    // Convert the value to a string if it's an object or array, for consistent handling
-    const contentAsString = typeof currentPageValue === 'object' && currentPageValue !== null
-        ? JSON.stringify(currentPageValue, null, 2)
-        : String(currentPageValue);
-
     return (
         <div className="relative" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
             <A4Page key={currentPageKey}>
                 <ProposalSection
                     sectionKey={currentPageKey}
                     title={formatKeyToTitle(currentPageKey)}
-                    content={contentAsString}
+                    content={currentPageValue} // Pass the raw value, not a string
                     onUpdate={onUpdate}
                 />
             </A4Page>
