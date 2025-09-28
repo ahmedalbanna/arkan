@@ -1,46 +1,29 @@
 
 'use server';
 
-import { z } from 'zod';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 
 // Import all flows and schemas
-import { paraphraseText } from '@/ai/flows/paraphrase-text';
-import { ParaphraseInputSchema } from '@/ai/schemas';
-import { summarizeText } from '@/ai/flows/summarize-text';
-import { SummarizeInputSchema } from '@/ai/schemas';
-import { humanizeText } from '@/ai/flows/humanize-text';
-import { HumanizeTextInputSchema } from '@/ai/schemas';
-import { detectAiContent } from '@/ai/flows/detect-ai-content';
-import { DetectAIInputSchema } from '@/ai/schemas';
-import { grammarCheck } from '@/ai/flows/grammar-checker';
-import { GrammarCheckInputSchema } from '@/ai/schemas';
-import { generateQuiz } from '@/ai/flows/generate-quiz';
-import { GenerateQuizInputSchema } from '@/ai/schemas';
-import { factCheckText } from '@/ai/flows/fact-checker';
-import { FactCheckInputSchema } from '@/ai/schemas';
-import { plagiarismCheck } from '@/ai/flows/plagiarism-checker';
-import { PlagiarismCheckInputSchema } from '@/ai/schemas';
-import { generateCitation } from '@/ai/flows/generate-citation';
-import { GenerateCitationInputSchema } from '@/ai/schemas';
 import { aiResearcher } from '@/ai/flows/ai-researcher';
-import { AIResearcherInputSchema } from '@/ai/schemas';
-import { topicExplainer } from '@/ai/flows/topic-explainer';
-import { TopicExplainerInputSchema } from '@/ai/schemas';
+import { detectAiContent } from '@/ai/flows/detect-ai-content';
+import { factCheckText } from '@/ai/flows/fact-checker';
+import { generateCitation } from '@/ai/flows/generate-citation';
 import { generateIdeas } from '@/ai/flows/generate-ideas';
-import { IdeaGenerationInputSchema } from '@/ai/schemas';
-import { writeDocument } from '@/ai/flows/write-document';
-import { WriteDocumentInputSchema } from '@/ai/schemas';
-import { generatePresentationOutline } from '@/ai/flows/generate-presentation-outline';
-import { GeneratePresentationOutlineInputSchema } from '@/ai/schemas';
 import { generatePlantUML } from '@/ai/flows/generate-plantuml';
-import { GeneratePlantUMLInputSchema } from '@/ai/schemas';
-import { rewriteText, summarizeTextWithRatio } from '@/ai/flows/text-stylist';
-import { RewriteTextInputSchema, SummarizeTextWithRatioInputSchema } from '@/ai/schemas';
+import { generatePresentationOutline } from '@/ai/flows/generate-presentation-outline';
+import { generateQuiz } from '@/ai/flows/generate-quiz';
+import { grammarCheck } from '@/ai/flows/grammar-checker';
+import { humanizeText } from '@/ai/flows/humanize-text';
 import { manipulateText } from '@/ai/flows/manipulate-text';
-import { ManipulateTextInputSchema } from '@/ai/schemas';
+import { paraphraseText } from '@/ai/flows/paraphrase-text';
+import { plagiarismCheck } from '@/ai/flows/plagiarism-checker';
+import { summarizeText } from '@/ai/flows/summarize-text';
+import { rewriteText, summarizeTextWithRatio } from '@/ai/flows/text-stylist';
+import { topicExplainer } from '@/ai/flows/topic-explainer';
+import { writeDocument } from '@/ai/flows/write-document';
+import { AIResearcherInputSchema, DetectAIInputSchema, FactCheckInputSchema, GenerateCitationInputSchema, GeneratePlantUMLInputSchema, GeneratePresentationOutlineInputSchema, GenerateQuizInputSchema, GrammarCheckInputSchema, HumanizeTextInputSchema, IdeaGenerationInputSchema, ManipulateTextInputSchema, ParaphraseInputSchema, PlagiarismCheckInputSchema, RewriteTextInputSchema, SummarizeInputSchema, SummarizeTextWithRatioInputSchema, TopicExplainerInputSchema, WriteDocumentInputSchema } from '@/ai/schemas';
 
 // Define a map for tool configurations
 const toolConfig = {
