@@ -120,14 +120,14 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
         }
     };
 
-    const handleReadAloud = () => {
+    const handleReadAloud = (textToRead: string) => {
         if (isReading || window.speechSynthesis.speaking) {
             window.speechSynthesis.cancel();
             setIsReading(false);
             return;
         }
 
-        const utterance = new SpeechSynthesisUtterance(content);
+        const utterance = new SpeechSynthesisUtterance(textToRead);
         utterance.onstart = () => setIsReading(true);
         utterance.onend = () => setIsReading(false);
         utterance.onerror = () => {
