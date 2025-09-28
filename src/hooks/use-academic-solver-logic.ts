@@ -4,9 +4,11 @@
 import { AcademicDocumentType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
+import { createAcademicSolverToolHook } from '@/core';
 import { useAnalyzeAcademicDocument, useBuilderStore, useSolveAcademicDocument, useToast } from '@/hooks';
 import { exportDocumentAsDocx } from '@/lib/academic-exporter';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
 
 export interface ExternalContext {
     fileName: string;
@@ -30,6 +32,46 @@ export function useAcademicSolverLogic() {
 
     const analyzeMutation = useAnalyzeAcademicDocument();
     const solveMutation = useSolveAcademicDocument();
+
+    // استخدام النظام الجديد من src/core
+    const academicSolverTool = createAcademicSolverToolHook({
+        toolName: 'academic-solver',
+        apiEndpoint: '/api/academic-solver/solve',
+        schema: z.object({
+            question: z.string().min(10),
+            subject: z.string().min(2),
+            difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
+            context: z.string().optional()
+        }),
+        defaultValues: { question: '', subject: '', difficulty: 'medium', context: '' },
+        solverType: 'general',
+        successMessage: t('academicSolver.success') || 'Academic problem solved successfully!',
+        errorMessage: t('academicSolver.error') || 'Failed to solve academic problem',
+        customFeatures: {
+            formatOutput: (data: any) => {
+                return {
+                    question: data.question || '',
+                    answer: data.answer || '',
+                    solution: data.solution || '',
+                    steps: data.steps || [],
+                    explanation: data.explanation || '',
+                    metadata: {
+                        subject: data.subject || 'General',
+                        difficulty: data.difficulty || 'medium',
+                        timeEstimate: data.timeEstimate || 30,
+                        concepts: data.concepts || []
+                    }
+                };
+            },
+            validateInput: (data: any) => {
+                return data.question && data.question.length >= 10 && data.subject && data.subject.length >= 2;
+            },
+            getSolutionSteps: (data: any) => data.steps || [],
+            getAnswer: (data: any) => data.answer || '',
+            getExplanation: (data: any) => data.explanation || '',
+            getRelatedProblems: (data: any) => data.relatedProblems || []
+        }
+    })();
 
     useEffect(() => {
         setCurrentPage(0);
@@ -137,5 +179,19 @@ export function useAcademicSolverLogic() {
         totalPages,
         handleNextPage,
         handlePrevPage,
+
+        // النظام الجديد من src/core
+        academicSolverTool,
+        isProcessing: academicSolverTool.isProcessing || isProcessing,
+        processedText: academicSolverTool.processedText,
+        solution: academicSolverTool.solution,
+        isCopied: academicSolverTool.isCopied,
+        handleCopy: academicSolverTool.copyToClipboard,
+        onSubmit: academicSolverTool.onSubmit,
+        reset: academicSolverTool.reset,
+        getSolutionSteps: academicSolverTool.getSolutionSteps,
+        getAnswer: academicSolverTool.getAnswer,
+        getExplanation: academicSolverTool.getExplanation,
+        getRelatedProblems: academicSolverTool.getRelatedProblems,
     };
 }
