@@ -5,15 +5,14 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { FactCheckInputSchema, type FactCheckInput, FactCheckOutputSchema, type FactCheckOutput } from '@/ai/schemas';
+import { FactCheckInputSchema, FactCheckOutputSchema, type FactCheckInput, type FactCheckOutput } from '@/ai/schemas';
 
 const factCheckPrompt = ai.definePrompt({
-    name: 'factCheckPrompt',
-    input: { schema: FactCheckInputSchema },
-    output: { schema: FactCheckOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
-    prompt: `You are an expert fact-checker and research analyst. Your task is to analyze the following text, identify all verifiable claims, and determine their factual accuracy.
+  name: 'factCheckPrompt',
+  input: { schema: FactCheckInputSchema },
+  output: { schema: FactCheckOutputSchema },
+  model: 'googleai/gemini-2.0-flash',
+  prompt: `You are an expert fact-checker and research analyst. Your task is to analyze the following text, identify all verifiable claims, and determine their factual accuracy.
 
 **Your Process:**
 1.  **Identify Claims:** Carefully read the text and extract all specific, factual statements that can be verified (e.g., statistics, historical events, scientific statements).
@@ -30,15 +29,15 @@ const factCheckPrompt = ai.definePrompt({
 });
 
 const factCheckFlow = ai.defineFlow({
-    name: 'factCheckFlow',
-    inputSchema: FactCheckInputSchema,
-    outputSchema: FactCheckOutputSchema,
+  name: 'factCheckFlow',
+  inputSchema: FactCheckInputSchema,
+  outputSchema: FactCheckOutputSchema,
 }, async (input) => {
-    const { output } = await factCheckPrompt(input);
-    if (!output) {
-      throw new Error("Fact-checking failed to produce an output.");
-    }
-    return output;
+  const { output } = await factCheckPrompt(input);
+  if (!output) {
+    throw new Error("Fact-checking failed to produce an output.");
+  }
+  return output;
 });
 
 export async function factCheckText(input: FactCheckInput): Promise<FactCheckOutput> {

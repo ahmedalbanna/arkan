@@ -15,11 +15,11 @@ import {
 import { withRetry } from '@/lib/ai-utils';
 
 const generateSessionPlanPrompt = ai.definePrompt({
-    name: 'generateSessionPlanPrompt',
-    input: { schema: GenerateSessionPlanInputSchema },
-    output: { schema: GenerateSessionPlanOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
-    prompt: `You are an expert instructional designer specializing in **transforming theoretical lecture material into engaging, practical training sessions.** Your primary goal is to bridge the gap between knowing and doing. You will create a hands-on session plan that allows participants to apply the concepts from the provided theoretical lecture.
+  name: 'generateSessionPlanPrompt',
+  input: { schema: GenerateSessionPlanInputSchema },
+  output: { schema: GenerateSessionPlanOutputSchema },
+  model: 'googleai/gemini-2.0-flash',
+  prompt: `You are an expert instructional designer specializing in **transforming theoretical lecture material into engaging, practical training sessions.** Your primary goal is to bridge the gap between knowing and doing. You will create a hands-on session plan that allows participants to apply the concepts from the provided theoretical lecture.
 
 **Your Process:**
 1.  **Deconstruct the Lecture:** Read the provided theoretical lecture content to identify the core theories, models, concepts, and key terminology.
@@ -51,9 +51,9 @@ const generateSessionPlanPrompt = ai.definePrompt({
 - **Target Audience:** {{#if targetAudience}}{{{targetAudience}}}{{else}}General learners with an interest in the topic.{{/if}}
 - **Desired Number of Activities:** {{{numActivities}}}
 `,
-    config: {
-        temperature: 0.7,
-    }
+  config: {
+    temperature: 0.7,
+  }
 });
 
 const generateSessionPlanFlow = ai.defineFlow(
@@ -61,7 +61,7 @@ const generateSessionPlanFlow = ai.defineFlow(
     name: 'generateSessionPlanFlow',
     inputSchema: GenerateSessionPlanInputSchema,
     outputSchema: GenerateSessionPlanOutputSchema
-}, async (input) => {
+  }, async (input) => {
     const { output } = await withRetry(() => generateSessionPlanPrompt(input));
     if (!output) {
       throw new Error("Session plan generation failed.");

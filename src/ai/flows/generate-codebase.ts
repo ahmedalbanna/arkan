@@ -7,15 +7,15 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { CodebaseSchema, GenerateCodebaseInputSchema, type Codebase } from '@/ai/schemas';
 import { z } from 'zod';
-import { ProjectProposalSchema, CodebaseSchema, type Codebase, GenerateCodebaseInputSchema } from '@/ai/schemas';
 
 
 const codebasePrompt = ai.definePrompt({
     name: 'generateCodebasePrompt',
     input: { schema: GenerateCodebaseInputSchema },
     output: { schema: CodebaseSchema },
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
     prompt: async (input) => {
         const jsonStringifiedProposal = JSON.stringify(input.proposal, null, 2);
         return `You are an expert Next.js developer and software architect. Your task is to generate a complete boilerplate codebase for a new project based on the provided project proposal.
@@ -67,9 +67,9 @@ const generateCodebaseFlow = ai.defineFlow({
 
 
 export async function generateCodebase(input: z.infer<typeof GenerateCodebaseInputSchema>): Promise<Codebase> {
-  const validation = GenerateCodebaseInputSchema.safeParse(input);
-  if(!validation.success) {
-      throw new Error(`Invalid input for generateCodebase: ${validation.error.message}`);
-  }
-  return generateCodebaseFlow(validation.data);
+    const validation = GenerateCodebaseInputSchema.safeParse(input);
+    if (!validation.success) {
+        throw new Error(`Invalid input for generateCodebase: ${validation.error.message}`);
+    }
+    return generateCodebaseFlow(validation.data);
 }

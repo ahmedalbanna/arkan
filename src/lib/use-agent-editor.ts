@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateAgent } from '@/hooks';
-import type { Agent } from '@/lib/types';
 import { agentEditorSchema, type AgentEditorFormValues } from '@/lib/agent-editor-schema';
+import type { Agent } from '@/lib/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 
 interface UseAgentEditorProps {
   agentId: string;
@@ -31,7 +31,7 @@ export function useAgentEditor({ agentId, initialData }: UseAgentEditorProps) {
       conversationStarters: initialData.conversationStarters || [],
       tone: initialData.tone || 'Default',
       language: initialData.language || 'English (US)',
-      model: initialData.model || 'googleai/gemini-1.5-flash',
+      model: initialData.model || 'googleai/gemini-2.0-flash',
     },
   });
 

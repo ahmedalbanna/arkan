@@ -1,11 +1,11 @@
 'use server';
 
-import { z } from 'zod';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { ai } from '@/ai/genkit';
 import { ImageToTextInputSchema, ImageToTextOutputSchema } from '@/ai/schemas';
+import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
+import { deductCredit } from '@/services/credit-service';
+import { logGeneration } from '@/services/generation-service';
+import { z } from 'zod';
 
 const explainDiagramSchema = ImageToTextInputSchema.extend({
     prompt: z.string().min(10, 'A prompt is required to explain the diagram.'),
@@ -15,7 +15,7 @@ const explainDiagramPrompt = ai.definePrompt({
     name: 'explainDiagramPrompt',
     input: { schema: explainDiagramSchema },
     output: { schema: ImageToTextOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
     prompt: `You are an expert systems analyst. A user has provided a system diagram and a prompt asking for an explanation. Your task is to analyze the image and provide a clear, detailed explanation formatted in markdown.
 
 ---

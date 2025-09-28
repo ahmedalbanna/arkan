@@ -5,8 +5,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { SummarizeInputSchema, type SummarizeInput, SummarizeLength, SummarizeOutputSchema, type SummarizeOutput } from '@/ai/schemas';
+import { SummarizeInputSchema, SummarizeLength, SummarizeOutputSchema, type SummarizeInput, type SummarizeOutput } from '@/ai/schemas';
 
 const lengthDescriptions: Record<SummarizeLength, string> = {
     short: "a single, concise paragraph.",
@@ -20,12 +19,12 @@ const summarizeTextFlow = ai.defineFlow({
     outputSchema: SummarizeOutputSchema
 }, async (input) => {
     const { text, length } = input;
-    
+
     const summarizePrompt = ai.definePrompt({
         name: 'summarizeTextPrompt',
         input: { schema: SummarizeInputSchema },
         output: { schema: SummarizeOutputSchema },
-        model: 'googleai/gemini-1.5-flash',
+        model: 'googleai/gemini-2.0-flash',
         prompt: `You are an expert summarizer. Your task is to read the provided text and generate a summary of the specified length.
 
 **Desired Length**: The summary should be ${lengthDescriptions[length]}
@@ -51,9 +50,9 @@ const summarizeTextFlow = ai.defineFlow({
 
 
 export async function summarizeText(input: SummarizeInput): Promise<SummarizeOutput> {
-  const validation = SummarizeInputSchema.safeParse(input);
-  if (!validation.success) {
-    throw new Error(`Invalid input for summarizeText: ${validation.error.message}`);
-  }
-  return summarizeTextFlow(validation.data);
+    const validation = SummarizeInputSchema.safeParse(input);
+    if (!validation.success) {
+        throw new Error(`Invalid input for summarizeText: ${validation.error.message}`);
+    }
+    return summarizeTextFlow(validation.data);
 }

@@ -8,15 +8,14 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { RewriteDocumentInputSchema, type RewriteDocumentInput, RewriteDocumentOutputSchema, type RewriteDocumentOutput } from '@/ai/schemas';
+import { RewriteDocumentInputSchema, RewriteDocumentOutputSchema, type RewriteDocumentInput, type RewriteDocumentOutput } from '@/ai/schemas';
 
 // Define the prompt outside the flow definition
 const generateMarkdownPrompt = ai.definePrompt({
   name: 'generateMarkdownFromDocumentPrompt',
   input: { schema: RewriteDocumentInputSchema },
   output: { schema: RewriteDocumentOutputSchema },
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-2.0-flash',
   prompt: `You are an expert document editor. Your task is to take the content of the provided PDF document and rewrite it into clean, well-structured markdown.
 
 Follow these guidelines:
@@ -30,22 +29,22 @@ PDF Document:
 {{media url=pdfDataUri}}
 ---
 `,
-    });
+});
 
-    export async function rewriteDocumentToMarkdown(input: RewriteDocumentInput): Promise<RewriteDocumentOutput> {
-      return rewriteDocumentFlow(input);
+export async function rewriteDocumentToMarkdown(input: RewriteDocumentInput): Promise<RewriteDocumentOutput> {
+  return rewriteDocumentFlow(input);
+}
+const rewriteDocumentFlow = ai.defineFlow(
+  {
+    name: 'rewriteDocumentToMarkdownFlow',
+    inputSchema: RewriteDocumentInputSchema,
+    outputSchema: RewriteDocumentOutputSchema,
+  },
+  async (input) => {
+    const { output } = await generateMarkdownPrompt(input);
+    if (!output) {
+      throw new Error('Failed to rewrite document to markdown.');
     }
-    const rewriteDocumentFlow = ai.defineFlow(
-      {
-        name: 'rewriteDocumentToMarkdownFlow',
-        inputSchema: RewriteDocumentInputSchema,
-        outputSchema: RewriteDocumentOutputSchema,
-      },
-      async (input) => {
-        const { output } = await generateMarkdownPrompt(input);
-        if (!output) {
-          throw new Error('Failed to rewrite document to markdown.');
-        }
-        output.markdown = output.markdown.replace(/---/g, '').trim();
-        return output;
-      });
+    output.markdown = output.markdown.replace(/---/g, '').trim();
+    return output;
+  });

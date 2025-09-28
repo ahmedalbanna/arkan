@@ -6,15 +6,14 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { WriteDocumentInputSchema, type WriteDocumentInput, WriteDocumentOutputSchema, type WriteDocumentOutput } from '@/ai/schemas';
+import { WriteDocumentInputSchema, WriteDocumentOutputSchema, type WriteDocumentInput, type WriteDocumentOutput } from '@/ai/schemas';
 
 const universitySubjectMaterialPrompt = ai.definePrompt({
-    name: 'universitySubjectMaterialPrompt',
-    input: { schema: WriteDocumentInputSchema },
-    output: { schema: WriteDocumentOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
-    prompt: `You are an expert university lecturer with a talent for making complex topics simple and engaging for students. Your task is to create educational material for the given university-level subject.
+  name: 'universitySubjectMaterialPrompt',
+  input: { schema: WriteDocumentInputSchema },
+  output: { schema: WriteDocumentOutputSchema },
+  model: 'googleai/gemini-2.0-flash',
+  prompt: `You are an expert university lecturer with a talent for making complex topics simple and engaging for students. Your task is to create educational material for the given university-level subject.
 
 **Your Process:**
 1.  **Deconstruct the Request:** Fully understand the topic and any specific instructions.
@@ -45,11 +44,11 @@ You MUST structure your document according to the following headings. Ensure eac
 });
 
 const defaultWriteDocumentPrompt = ai.definePrompt({
-    name: 'defaultWriteDocumentPrompt',
-    input: { schema: WriteDocumentInputSchema },
-    output: { schema: WriteDocumentOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
-    prompt: `You are an expert writer and researcher. Your task is to generate a complete, well-structured, and comprehensive document based on the user's request.
+  name: 'defaultWriteDocumentPrompt',
+  input: { schema: WriteDocumentInputSchema },
+  output: { schema: WriteDocumentOutputSchema },
+  model: 'googleai/gemini-2.0-flash',
+  prompt: `You are an expert writer and researcher. Your task is to generate a complete, well-structured, and comprehensive document based on the user's request.
 
 **Topic:** {{{topic}}}
 **Document Type:** {{{documentType}}}
@@ -80,22 +79,22 @@ You MUST structure your document according to the following headings. Ensure eac
 });
 
 const writeDocumentFlow = ai.defineFlow({
-    name: 'writeDocumentFlow',
-    inputSchema: WriteDocumentInputSchema,
-    outputSchema: WriteDocumentOutputSchema
+  name: 'writeDocumentFlow',
+  inputSchema: WriteDocumentInputSchema,
+  outputSchema: WriteDocumentOutputSchema
 }, async (input) => {
-    let promptToUse;
-    if (input.documentType === 'university subject material') {
-        promptToUse = universitySubjectMaterialPrompt;
-    } else {
-        promptToUse = defaultWriteDocumentPrompt;
-    }
-    const { output } = await promptToUse(input);
-    if (!output) {
-      throw new Error("Document generation failed.");
-    }
-    output.documentContent = output.documentContent.replace(/---/g, '').trim();
-    return output;
+  let promptToUse;
+  if (input.documentType === 'university subject material') {
+    promptToUse = universitySubjectMaterialPrompt;
+  } else {
+    promptToUse = defaultWriteDocumentPrompt;
+  }
+  const { output } = await promptToUse(input);
+  if (!output) {
+    throw new Error("Document generation failed.");
+  }
+  output.documentContent = output.documentContent.replace(/---/g, '').trim();
+  return output;
 });
 
 export async function writeDocument(input: WriteDocumentInput): Promise<WriteDocumentOutput> {

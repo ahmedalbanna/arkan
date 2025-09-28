@@ -5,8 +5,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { ParaphraseInputSchema, type ParaphraseInput, ParaphraseOutputSchema, type ParaphraseOutput, ParaphraseModeSchema, type ParaphraseMode } from '@/ai/schemas';
+import { ParaphraseInputSchema, ParaphraseOutputSchema, type ParaphraseInput, type ParaphraseMode, type ParaphraseOutput } from '@/ai/schemas';
 
 const styleDescriptions: Record<ParaphraseMode, string> = {
     standard: "Provide a balanced rewrite that improves clarity while retaining the original meaning.",
@@ -23,12 +22,12 @@ const paraphraseTextFlow = ai.defineFlow({
     outputSchema: ParaphraseOutputSchema,
 }, async (input) => {
     const { text, mode } = input;
-    
+
     const paraphrasePrompt = ai.definePrompt({
         name: 'paraphraseTextPrompt',
         input: { schema: ParaphraseInputSchema },
         output: { schema: ParaphraseOutputSchema },
-        model: 'googleai/gemini-1.5-flash',
+        model: 'googleai/gemini-2.0-flash',
         prompt: `You are an expert editor. Your task is to paraphrase the given text based on the selected mode. You must perfectly preserve all markdown formatting.
 
 **Mode**: {{{mode}}}
@@ -53,7 +52,7 @@ const paraphraseTextFlow = ai.defineFlow({
 export async function paraphraseText(input: ParaphraseInput): Promise<ParaphraseOutput> {
     const validation = ParaphraseInputSchema.safeParse(input);
     if (!validation.success) {
-      throw new Error(`Invalid input for paraphraseText: ${validation.error.message}`);
+        throw new Error(`Invalid input for paraphraseText: ${validation.error.message}`);
     }
     return paraphraseTextFlow(validation.data);
 }

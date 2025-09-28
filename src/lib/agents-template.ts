@@ -1,9 +1,6 @@
 
 
-import { AgentCategory } from '@/lib/models/agent';
-import { Agent, AgentProperties } from '@/lib/models/agent';
-import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, Hand, DraftingCompass, Files, Presentation, DatabaseZap, History, FileHeart, LayoutGrid, Scale, Megaphone, Users } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { AgentCategory, AgentProperties } from '@/lib/models/agent';
 
 const diagramBasePrompt = `You are an expert systems analyst specializing in PlantUML. Your task is to generate a complete and valid PlantUML diagram based on the provided project proposal and other context.
 
@@ -36,7 +33,7 @@ Description: {{{projectDescription}}}`,
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-ui',
@@ -54,7 +51,7 @@ Description: {{{projectDescription}}}`,
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-proposal',
@@ -66,7 +63,7 @@ Description: {{{projectDescription}}}`,
     prompt: 'You are an expert project manager and technical writer. A user will provide you with a project idea and other context. Your task is to generate a comprehensive and professional project proposal based on that information.',
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-ad-copy',
@@ -85,7 +82,7 @@ Description: {{{projectDescription}}}`,
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-nda',
@@ -105,7 +102,7 @@ Description: {{{projectDescription}}}`,
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   // Report Section Agents
   {
@@ -121,7 +118,7 @@ Description: {{{projectDescription}}}`,
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-acknowledgment-section',
@@ -136,7 +133,7 @@ Description: {{{projectDescription}}}`,
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-introduction-section',
@@ -157,7 +154,7 @@ The introduction should include:
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-trainingProgram-section',
@@ -172,7 +169,7 @@ The introduction should include:
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-technicalExperience-section',
@@ -187,7 +184,7 @@ The introduction should include:
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-recommendations-section',
@@ -202,7 +199,7 @@ The introduction should include:
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-references-section',
@@ -217,7 +214,7 @@ The introduction should include:
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-appendices-section',
@@ -232,7 +229,7 @@ The introduction should include:
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-literatureReview-section',
@@ -247,7 +244,7 @@ The introduction should include:
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-systemAnalysis-section',
@@ -262,7 +259,7 @@ The introduction should include:
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-designStrategy-section',
@@ -277,7 +274,7 @@ The introduction should include:
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-systemDesign-section',
@@ -292,7 +289,7 @@ The introduction should include:
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-systemProgramming-section',
@@ -307,7 +304,7 @@ The introduction should include:
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-systemTesting-section',
@@ -322,7 +319,7 @@ The introduction should include:
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-conclusion-section',
@@ -337,7 +334,7 @@ The introduction should include:
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   // End Report Section Agents
   {
@@ -364,7 +361,7 @@ You will be provided with the full project proposal in JSON format, and may also
     },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   // Diagram Agents
   {
@@ -377,7 +374,7 @@ You will be provided with the full project proposal in JSON format, and may also
     prompt: { base: diagramBasePrompt },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-class-diagram',
@@ -389,7 +386,7 @@ You will be provided with the full project proposal in JSON format, and may also
     prompt: { base: diagramBasePrompt },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-sequence-diagram',
@@ -401,7 +398,7 @@ You will be provided with the full project proposal in JSON format, and may also
     prompt: { base: diagramBasePrompt },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-activity-diagram',
@@ -413,7 +410,7 @@ You will be provided with the full project proposal in JSON format, and may also
     prompt: { base: diagramBasePrompt },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-component-diagram',
@@ -425,7 +422,7 @@ You will be provided with the full project proposal in JSON format, and may also
     prompt: { base: diagramBasePrompt },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-archimate-diagram',
@@ -437,7 +434,7 @@ You will be provided with the full project proposal in JSON format, and may also
     prompt: { base: diagramBasePrompt },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-er-diagram',
@@ -449,7 +446,7 @@ You will be provided with the full project proposal in JSON format, and may also
     prompt: { base: diagramBasePrompt },
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'activity-history',
@@ -461,6 +458,6 @@ You will be provided with the full project proposal in JSON format, and may also
     prompt: '',
     tone: 'Default',
     language: 'English (US)',
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
   },
 ];

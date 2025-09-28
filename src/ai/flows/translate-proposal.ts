@@ -8,8 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { ProjectProposalSchema, ProjectProposal, TranslateProposalInputSchema, type TranslateProposalInput } from '@/ai/schemas';
+import { ProjectProposal, ProjectProposalSchema, TranslateProposalInputSchema, type TranslateProposalInput } from '@/ai/schemas';
 
 export async function translateProposal(
   input: TranslateProposalInput
@@ -24,14 +23,14 @@ const translateProposalFlow = ai.defineFlow(
     outputSchema: ProjectProposalSchema,
   },
   async ({ proposal, targetLang }) => {
-    
+
     const stringifiedProposal = JSON.stringify(proposal, null, 2);
 
     const prompt = ai.definePrompt({
       name: 'translateProposalPrompt',
       input: { schema: TranslateProposalInputSchema },
       output: { schema: ProjectProposalSchema },
-      model: 'googleai/gemini-1.5-flash',
+      model: 'googleai/gemini-2.0-flash',
       prompt: `You are an expert translator. A user has provided a JSON object representing a project proposal. Your task is to translate all user-facing text values within this object to the specified target language.
 
 Follow these rules:
@@ -49,7 +48,7 @@ ${stringifiedProposal}
 Translated JSON Object:
 `,
       config: {
-          temperature: 0.2,
+        temperature: 0.2,
       }
     });
 

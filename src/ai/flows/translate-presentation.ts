@@ -8,8 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { PresentationHistoryEntrySchema, type PresentationHistoryEntry, TranslatePresentationInputSchema, type TranslatePresentationInput } from '@/ai/schemas';
+import { PresentationHistoryEntrySchema, TranslatePresentationInputSchema, type PresentationHistoryEntry, type TranslatePresentationInput } from '@/ai/schemas';
 
 export async function translatePresentation(
   input: TranslatePresentationInput
@@ -24,14 +23,14 @@ const translatePresentationFlow = ai.defineFlow(
     outputSchema: PresentationHistoryEntrySchema,
   },
   async ({ presentation, targetLang }) => {
-    
+
     const stringifiedPresentation = JSON.stringify(presentation, null, 2);
 
     const prompt = ai.definePrompt({
       name: 'translatePresentationPrompt',
       input: { schema: TranslatePresentationInputSchema },
       output: { schema: PresentationHistoryEntrySchema },
-      model: 'googleai/gemini-1.5-flash',
+      model: 'googleai/gemini-2.0-flash',
       prompt: `You are an expert translator. A user has provided a JSON object representing a presentation. Your task is to translate all user-facing text values within this object to the specified target language.
 
 **CRITICAL INSTRUCTIONS:**
@@ -50,7 +49,7 @@ ${stringifiedPresentation}
 \`\`\`
 `,
       config: {
-          temperature: 0.2,
+        temperature: 0.2,
       }
     });
 

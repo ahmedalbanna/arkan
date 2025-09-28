@@ -6,15 +6,14 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { ImageToTextInputSchema, type ImageToTextInput, ImageToTextOutputSchema, type ImageToTextOutput } from '@/ai/schemas';
+import { ImageToTextInputSchema, ImageToTextOutputSchema, type ImageToTextInput, type ImageToTextOutput } from '@/ai/schemas';
 
 const extractTextPrompt = ai.definePrompt({
-    name: 'extractTextFromImagePrompt',
-    input: { schema: ImageToTextInputSchema },
-    output: { schema: ImageToTextOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
-    prompt: `You are an expert OCR (Optical Character Recognition) tool. Your task is to take the provided image and extract all text content from it.
+  name: 'extractTextFromImagePrompt',
+  input: { schema: ImageToTextInputSchema },
+  output: { schema: ImageToTextOutputSchema },
+  model: 'googleai/gemini-2.0-flash',
+  prompt: `You are an expert OCR (Optical Character Recognition) tool. Your task is to take the provided image and extract all text content from it.
 
 Follow these guidelines:
 1.  **Structure**: Analyze the image to understand the layout. Preserve the original structure as much as possible, including headings, lists, and paragraphs.

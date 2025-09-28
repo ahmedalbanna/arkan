@@ -8,8 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { GenerateCodeInputSchema, type GenerateCodeInput, GenerateCodeOutputSchema, type GenerateCodeOutput } from '@/ai/schemas';
+import { GenerateCodeInputSchema, GenerateCodeOutputSchema, type GenerateCodeInput, type GenerateCodeOutput } from '@/ai/schemas';
 
 export async function generateCode(input: GenerateCodeInput): Promise<GenerateCodeOutput> {
   return generateCodeFlow(input);
@@ -26,7 +25,7 @@ const generateCodeFlow = ai.defineFlow(
       name: 'generateCodePrompt',
       input: { schema: GenerateCodeInputSchema },
       output: { schema: GenerateCodeOutputSchema },
-      model: 'googleai/gemini-1.5-flash',
+      model: 'googleai/gemini-2.0-flash',
       prompt: `You are an expert frontend developer. Your task is to generate the HTML, CSS, and JavaScript for a UI component based on a user's prompt.
 
 Guidelines:
@@ -36,11 +35,11 @@ Guidelines:
 
 User Prompt: {{{prompt}}}
 `,
-    config: {
+      config: {
         temperature: 0.4,
-    }
+      }
     });
-    
+
     const { output } = await prompt(input);
     return output!;
   }

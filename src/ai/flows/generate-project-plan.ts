@@ -7,16 +7,16 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { GenerateProjectPlanInputSchema, ProjectPlanSchema, type GenerateProjectPlanInput } from '@/ai/schemas';
 import { z } from 'zod';
-import { ProjectPlanSchema, GenerateProjectPlanInputSchema, type GenerateProjectPlanInput } from '@/ai/schemas';
 
 
 const planPrompt = ai.definePrompt({
-    name: 'generateProjectPlanPrompt',
-    input: { schema: GenerateProjectPlanInputSchema.extend({ phaseRangeText: z.string() }) },
-    output: { schema: ProjectPlanSchema },
-    model: 'googleai/gemini-1.5-flash',
-    prompt: `You are an expert project manager and scrum master. Your task is to take a project description and list of deliverables and break them down into a detailed, actionable project plan.
+  name: 'generateProjectPlanPrompt',
+  input: { schema: GenerateProjectPlanInputSchema.extend({ phaseRangeText: z.string() }) },
+  output: { schema: ProjectPlanSchema },
+  model: 'googleai/gemini-2.0-flash',
+  prompt: `You are an expert project manager and scrum master. Your task is to take a project description and list of deliverables and break them down into a detailed, actionable project plan.
 
 **Analyze the Input:**
 - You have been provided with a project description and a list of key deliverables. Use this as the primary source of truth.
@@ -44,27 +44,27 @@ Based on the analysis, create a structured project plan consisting of logical ph
 
 ---
 `,
-    config: {
-        temperature: 0.6,
-        maxOutputTokens: 8192,
-    }
-  });
+  config: {
+    temperature: 0.6,
+    maxOutputTokens: 8192,
+  }
+});
 
 
 const generateProjectPlanFlow = ai.defineFlow({
-    name: 'generateProjectPlanFlow',
-    inputSchema: GenerateProjectPlanInputSchema,
-    outputSchema: ProjectPlanSchema,
+  name: 'generateProjectPlanFlow',
+  inputSchema: GenerateProjectPlanInputSchema,
+  outputSchema: ProjectPlanSchema,
 }, async (input) => {
-    const minPhases = input.numPhases || 4;
-    const maxPhases = input.numPhases ? input.numPhases + 2 : 6;
-    const phaseRangeText = `between ${minPhases} and ${maxPhases}`;
-    
-    const { output } = await planPrompt({ ...input, phaseRangeText });
-    if (!output) {
-        throw new Error("Project plan generation failed.");
-    }
-    return output;
+  const minPhases = input.numPhases || 4;
+  const maxPhases = input.numPhases ? input.numPhases + 2 : 6;
+  const phaseRangeText = `between ${minPhases} and ${maxPhases}`;
+
+  const { output } = await planPrompt({ ...input, phaseRangeText });
+  if (!output) {
+    throw new Error("Project plan generation failed.");
+  }
+  return output;
 });
 
 

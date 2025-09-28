@@ -40,7 +40,7 @@ You are also an expert analyst. Before you begin writing, you must first review 
     name: 'generateReportSectionPrompt', // Static name
     input: { schema: ReportSectionPromptInputSchema },
     output: { schema: GenerateSectionOutputSchema },
-    model: agent.model || 'googleai/gemini-1.5-flash',
+    model: agent.model || 'googleai/gemini-2.0-flash',
     system: systemPrompt,
     prompt: `
 CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.

@@ -8,11 +8,10 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
 import {
   GeneratePresentationInputSchema,
-  type GeneratePresentationInput,
   GeneratePresentationOutputSchema,
+  type GeneratePresentationInput,
   type GeneratePresentationOutput,
 } from '@/ai/schemas';
 
@@ -30,12 +29,12 @@ const generatePresentationFlow = ai.defineFlow(
 
     const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
     const stringifiedPlan = input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '';
-    
+
     const prompt = ai.definePrompt({
       name: 'generatePresentationPrompt',
       input: { schema: GeneratePresentationInputSchema },
       output: { schema: GeneratePresentationOutputSchema },
-      model: 'googleai/gemini-1.5-flash',
+      model: 'googleai/gemini-2.0-flash',
       prompt: `You are an expert presentation creator. Your task is to analyze the provided project context and create a compelling presentation slide deck.
 
 **Your Process:**
@@ -96,8 +95,8 @@ File: {{this.fileName}}
 {{/if}}
 `,
       config: {
-          temperature: 0.7,
-          maxOutputTokens: 8192,
+        temperature: 0.7,
+        maxOutputTokens: 8192,
       }
     });
 

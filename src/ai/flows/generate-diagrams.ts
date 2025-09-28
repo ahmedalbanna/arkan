@@ -6,14 +6,14 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { type GenerateDiagramInput, type GenerateDiagramOutput, DiagramTypeSchema, GenerateDiagramOutputSchema } from '@/ai/schemas';
 import { getAgent } from '@/lib/db/queries';
 import type { AgentPrompt } from '@/lib/types';
-import { type GenerateDiagramInput, GenerateDiagramOutputSchema, type GenerateDiagramOutput, DiagramTypeSchema } from '@/ai/schemas';
+import { z } from 'genkit';
 
 
 const diagramSpecificInstructions: Record<z.infer<typeof DiagramTypeSchema>, string> = {
-    useCase: `
+  useCase: `
 ### Use Case Diagram Instructions
 - **Actors**: Define actors using \`actor ActorName\` or \`:"Actor Name": as ActorAlias\`.
 - **Use Cases**: Define use cases inside a system boundary using \`rectangle "System Name" { ... }\`. Use cases are defined with parentheses, e.g., \`(Manage Account)\`.
@@ -34,7 +34,7 @@ const diagramSpecificInstructions: Record<z.infer<typeof DiagramTypeSchema>, str
   @enduml
   \`\`\`
 `,
-    class: `
+  class: `
 ### Class Diagram Instructions
 - **Classes**: Define classes using \`class ClassName\`. You can add attributes and methods inside curly braces \`{...}\`. Use \`+ \` for public, \`- \` for private, \`# \` for protected.
 - **Relationships**:
@@ -60,7 +60,7 @@ const diagramSpecificInstructions: Record<z.infer<typeof DiagramTypeSchema>, str
   @enduml
   \`\`\`
 `,
-    sequence: `
+  sequence: `
 ### Sequence Diagram Instructions
 - **Participants**: Define participants using \`actor\`, \`participant\`, \`boundary\`, \`control\`, \`entity\`, or \`database\`.
 - **Messages**: Use arrows for messages: \`->\` for synchronous, \`->>\` for asynchronous, \`-->\` for return messages.
@@ -84,7 +84,7 @@ const diagramSpecificInstructions: Record<z.infer<typeof DiagramTypeSchema>, str
   @enduml
   \`\`\`
 `,
-    activity: `
+  activity: `
 ### Activity Diagram Instructions
 - **Start/End**: Use \`start\` and \`stop\` or \`end\`.
 - **Activities**: Describe activities using \`:[Action Description];\`.
@@ -110,7 +110,7 @@ const diagramSpecificInstructions: Record<z.infer<typeof DiagramTypeSchema>, str
   @enduml
   \`\`\`
 `,
-    component: `
+  component: `
 ### Component Diagram Instructions
 - **Components**: Define components using \`[ComponentName]\`.
 - **Interfaces**: Define interfaces using \`() "InterfaceName"\`.
@@ -130,7 +130,7 @@ const diagramSpecificInstructions: Record<z.infer<typeof DiagramTypeSchema>, str
   @enduml
   \`\`\`
 `,
-    archimate: `
+  archimate: `
 ### ArchiMate Diagram Instructions
 - **Elements**: Use the format \`archimate "Element Name" as Alias <<ElementType>>\`.
 - **Layers**: Group elements by layer (Business, Application, Technology).
@@ -144,7 +144,7 @@ const diagramSpecificInstructions: Record<z.infer<typeof DiagramTypeSchema>, str
   @enduml
   \`\`\`
 `,
-    er: `
+  er: `
 ### ER Diagram Instructions
 - **Entities**: Define entities using \`entity "EntityName" { ... }\`.
 - **Attributes**: Inside the entity, define attributes. Mark primary keys with \`* \` or \`PK \`.
@@ -174,34 +174,34 @@ const diagramSpecificInstructions: Record<z.infer<typeof DiagramTypeSchema>, str
 
 
 export async function generateDiagram(input: GenerateDiagramInput): Promise<GenerateDiagramOutput> {
-    const agentId = `generate-${input.diagramToGenerate}-diagram`;
-    const agent = await getAgent(agentId);
-    if (!agent) {
-        throw new Error(`Agent configuration for diagram type '${input.diagramToGenerate}' not found.`);
-    }
+  const agentId = `generate-${input.diagramToGenerate}-diagram`;
+  const agent = await getAgent(agentId);
+  if (!agent) {
+    throw new Error(`Agent configuration for diagram type '${input.diagramToGenerate}' not found.`);
+  }
 
-    const agentPrompt = agent.prompt as AgentPrompt;
-    
-    // Combine base prompt with diagram-specific instructions into the system prompt
-    const systemPrompt = `${agentPrompt.base}
+  const agentPrompt = agent.prompt as AgentPrompt;
+
+  // Combine base prompt with diagram-specific instructions into the system prompt
+  const systemPrompt = `${agentPrompt.base}
 ${diagramSpecificInstructions[input.diagramToGenerate]}
 
 --- AVAILABLE CONTEXT FROM PROJECT ---
 You have access to the following documents. Review them and use the most relevant information to generate the diagram code that fulfills the user's request. Your output MUST be a JSON object containing two keys: 'plantUmlCode' and 'explanation'.`;
 
-    const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
-    const stringifiedPlan = input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '';
+  const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
+  const stringifiedPlan = input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '';
 
-    // Separate media from text files for the prompt
-    const textContext = input.externalContext?.filter(f => !f.content.startsWith('data:')) || [];
-    const mediaContext = input.externalContext?.filter(f => f.content.startsWith('data:')) || [];
+  // Separate media from text files for the prompt
+  const textContext = input.externalContext?.filter(f => !f.content.startsWith('data:')) || [];
+  const mediaContext = input.externalContext?.filter(f => f.content.startsWith('data:')) || [];
 
-    const diagramPrompt = ai.definePrompt({
-        name: `generate-${input.diagramToGenerate}-diagram-prompt`,
-        input: { schema: z.any() }, 
-        output: { schema: GenerateDiagramOutputSchema },
-        system: systemPrompt,
-        prompt: `
+  const diagramPrompt = ai.definePrompt({
+    name: `generate-${input.diagramToGenerate}-diagram-prompt`,
+    input: { schema: z.any() },
+    output: { schema: GenerateDiagramOutputSchema },
+    system: systemPrompt,
+    prompt: `
 {{#if instructionText}}
 --- USER INSTRUCTIONS ---
 {{{instructionText}}}
@@ -261,24 +261,24 @@ File: {{this.fileName}}
 Now, generate the PlantUML code and a brief explanation based on all the provided context and the user's instructions.
 `,
     config: {
-        temperature: 0.1, // Very low temp for precise PlantUML syntax
-        maxOutputTokens: 8192,
+      temperature: 0.1, // Very low temp for precise PlantUML syntax
+      maxOutputTokens: 8192,
     }
-    });
+  });
 
-    const { output } = await diagramPrompt({ ...input, textContext, mediaContext }, { model: agent.model || 'googleai/gemini-1.5-flash' });
-    
-    if (!output) {
-      throw new Error("Diagram generation failed to produce an output.");
-    }
-    
-    // Clean the output to ensure it starts correctly
-    if (output.plantUmlCode && !output.plantUmlCode.trim().startsWith('@startuml')) {
-        output.plantUmlCode = '@startuml\n' + output.plantUmlCode;
-    }
-    if (output.plantUmlCode && !output.plantUmlCode.trim().endsWith('@enduml')) {
-        output.plantUmlCode = output.plantUmlCode + '\n@enduml';
-    }
+  const { output } = await diagramPrompt({ ...input, textContext, mediaContext }, { model: agent.model || 'googleai/gemini-2.0-flash' });
 
-    return output;
+  if (!output) {
+    throw new Error("Diagram generation failed to produce an output.");
+  }
+
+  // Clean the output to ensure it starts correctly
+  if (output.plantUmlCode && !output.plantUmlCode.trim().startsWith('@startuml')) {
+    output.plantUmlCode = '@startuml\n' + output.plantUmlCode;
+  }
+  if (output.plantUmlCode && !output.plantUmlCode.trim().endsWith('@enduml')) {
+    output.plantUmlCode = output.plantUmlCode + '\n@enduml';
+  }
+
+  return output;
 }

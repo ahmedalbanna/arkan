@@ -5,9 +5,9 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { AgentChatInputSchema, AgentChatOutputSchema, type AgentChatInput, type AgentChatOutput } from '@/ai/schemas';
 import { getAgent } from '@/lib/db/queries';
 import { AgentPrompt } from '@/lib/types';
-import { AgentChatInputSchema, type AgentChatInput, AgentChatOutputSchema, type AgentChatOutput } from '@/ai/schemas';
 
 const agentChatFlow = ai.defineFlow({
   name: 'agentChatFlow',
@@ -29,7 +29,7 @@ const agentChatFlow = ai.defineFlow({
   const finalPrompt = `${basePrompt}\n\n${guidelines}\n\n--- USER MESSAGE ---\n${input.message}`;
 
   const llmResponse = await ai.generate({
-    model: agentConfig.model || 'googleai/gemini-1.5-flash',
+    model: agentConfig.model || 'googleai/gemini-2.0-flash',
     prompt: finalPrompt,
     config: {
       temperature: 0.7, // Good for conversational, natural responses

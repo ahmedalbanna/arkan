@@ -6,15 +6,14 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { GenerateCitationInputSchema, type GenerateCitationInput, GenerateCitationOutputSchema, type GenerateCitationOutput } from '@/ai/schemas';
+import { GenerateCitationInputSchema, GenerateCitationOutputSchema, type GenerateCitationInput, type GenerateCitationOutput } from '@/ai/schemas';
 
 const generateCitationPrompt = ai.definePrompt({
-    name: 'generateCitationPrompt',
-    input: { schema: GenerateCitationInputSchema },
-    output: { schema: GenerateCitationOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
-     prompt: `You are an expert academic librarian specializing in generating accurate citations. Your task is to analyze the provided source material and generate one or more correctly formatted citations in the specified style.
+  name: 'generateCitationPrompt',
+  input: { schema: GenerateCitationInputSchema },
+  output: { schema: GenerateCitationOutputSchema },
+  model: 'googleai/gemini-2.0-flash',
+  prompt: `You are an expert academic librarian specializing in generating accurate citations. Your task is to analyze the provided source material and generate one or more correctly formatted citations in the specified style.
 
 If the source material contains multiple distinct sources, generate a citation for each one.
 
@@ -31,18 +30,18 @@ If the source material contains multiple distinct sources, generate a citation f
 {{{sourceText}}}
 ---
 `,
-  });
+});
 
 const generateCitationFlow = ai.defineFlow({
-    name: 'generateCitationFlow',
-    inputSchema: GenerateCitationInputSchema,
-    outputSchema: GenerateCitationOutputSchema,
+  name: 'generateCitationFlow',
+  inputSchema: GenerateCitationInputSchema,
+  outputSchema: GenerateCitationOutputSchema,
 }, async (input) => {
-    const { output } = await generateCitationPrompt(input);
-    if (!output) {
-      throw new Error("Citation generation failed.");
-    }
-    return output;
+  const { output } = await generateCitationPrompt(input);
+  if (!output) {
+    throw new Error("Citation generation failed.");
+  }
+  return output;
 });
 
 export async function generateCitation(input: GenerateCitationInput): Promise<GenerateCitationOutput> {
