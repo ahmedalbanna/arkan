@@ -11,6 +11,9 @@ src/core/
 ├── hooks/                    # Hooks قابلة لإعادة الاستخدام
 │   ├── base/                # Hooks أساسية
 │   ├── writing-tools/       # Hooks خاصة بأدوات الكتابة
+│   ├── presentation-tools/  # Hooks خاصة بالعروض التقديمية
+│   ├── project-plan-tools/  # Hooks خاصة بتخطيط المشاريع
+│   ├── academic-solver-tools/ # Hooks خاصة بالحل الأكاديمي
 │   └── index.ts             # تصدير موحد
 ├── types/                   # الأنواع المشتركة
 │   ├── common.ts            # أنواع أساسية
@@ -331,6 +334,75 @@ const maxSize = FILE_VALIDATION_RULES.MAX_SIZE_PDF;
 
 // ❌ سيء
 const maxSize = 10 * 1024 * 1024;
+```
+
+## الأدوات المتخصصة الجديدة
+
+### 1. أدوات العروض التقديمية (Presentation Tools)
+
+```typescript
+import { createPresentationToolHook } from '@/core';
+
+const useMyPresentation = createPresentationToolHook({
+  toolName: 'my-presentation',
+  apiEndpoint: '/api/presentation/my-tool',
+  schema: z.object({
+    topic: z.string().min(5),
+    slides: z.number().min(1).max(50),
+  }),
+  defaultValues: { topic: '', slides: 10 },
+  presentationType: 'slides',
+  customFeatures: {
+    formatOutput: (data) => ({ slides: data.slides }),
+    getSlideCount: (data) => data.slides?.length || 0,
+    getEstimatedDuration: (data) => (data.slides?.length || 0) * 2,
+  }
+});
+```
+
+### 2. أدوات تخطيط المشاريع (Project Plan Tools)
+
+```typescript
+import { createProjectPlanToolHook } from '@/core';
+
+const useMyProjectPlan = createProjectPlanToolHook({
+  toolName: 'my-project-plan',
+  apiEndpoint: '/api/project-plan/my-tool',
+  schema: z.object({
+    title: z.string().min(5),
+    description: z.string().min(20),
+    duration: z.number().min(1).max(365),
+  }),
+  defaultValues: { title: '', description: '', duration: 30 },
+  planType: 'business',
+  customFeatures: {
+    formatOutput: (data) => ({ plan: data.plan }),
+    getTimeline: (data) => data.timeline || [],
+    getMilestones: (data) => data.milestones || [],
+  }
+});
+```
+
+### 3. أدوات الحل الأكاديمي (Academic Solver Tools)
+
+```typescript
+import { createAcademicSolverToolHook } from '@/core';
+
+const useMyAcademicSolver = createAcademicSolverToolHook({
+  toolName: 'my-academic-solver',
+  apiEndpoint: '/api/academic-solver/my-tool',
+  schema: z.object({
+    problem: z.string().min(10),
+    subject: z.enum(['math', 'physics', 'chemistry']),
+  }),
+  defaultValues: { problem: '', subject: 'math' },
+  solverType: 'math',
+  customFeatures: {
+    formatOutput: (data) => ({ solution: data.solution }),
+    getSolutionSteps: (data) => data.steps || [],
+    getAnswer: (data) => data.answer,
+  }
+});
 ```
 
 ## التطوير المستقبلي
