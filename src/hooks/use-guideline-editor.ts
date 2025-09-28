@@ -1,9 +1,9 @@
 
 'use client';
 
-import { useGenerationUIStore } from '@/hooks';
-import { useAgents } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
+import { createUIHook } from '@/core';
+import { useAgents, useGenerationUIStore } from '@/hooks';
 import type { AgentPrompt } from '@/lib/types';
 
 /**
@@ -51,5 +51,184 @@ export const useGuidelineEditor = (itemKey: string, agentId: string) => {
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
         setOneTimeInstruction,
+    };
+};
+
+/**
+ * Hook محسن لمحرر الإرشادات مع ميزات متقدمة
+ * يستخدم النظام الجديد لتقليل التكرار وتحسين الأداء
+ */
+export const useAdvancedGuidelineEditor = (itemKey: string, agentId: string) => {
+    const { t } = useLocalization();
+    const { agents, isLoaded: agentsLoaded } = useAgents();
+
+    const {
+        guidelineState,
+        customGuidelineInput,
+        oneTimeInstructions,
+        handleGuidelineToggle,
+        setCustomGuidelineInputForItem,
+        handleAddCustomGuidelineForItem,
+        handleRemoveCustomGuidelineForItem,
+        setOneTimeInstruction,
+    } = useGenerationUIStore();
+
+    const uiHook = createUIHook({
+        hookName: 'advanced-guideline-editor',
+        initialState: {
+            itemKey,
+            agentId,
+            isEditing: false,
+            isExpanded: false,
+            hasChanges: false,
+            validationErrors: [],
+            searchQuery: '',
+            selectedGuidelines: [],
+        },
+        customLogic: (state, setState, toast) => {
+            const handleToggleEdit = () => {
+                setState(prev => ({ ...prev, isEditing: !prev.isEditing }));
+            };
+
+            const handleToggleExpanded = () => {
+                setState(prev => ({ ...prev, isExpanded: !prev.isExpanded }));
+            };
+
+            const handleSaveChanges = () => {
+                setState(prev => ({ ...prev, isEditing: false, hasChanges: false }));
+                toast({ title: 'Guidelines saved successfully!' });
+            };
+
+            const handleCancelEdit = () => {
+                setState(prev => ({ ...prev, isEditing: false, hasChanges: false }));
+            };
+
+            const handleSearch = (query: string) => {
+                setState(prev => ({ ...prev, searchQuery: query }));
+            };
+
+            const handleSelectGuideline = (guidelineId: string) => {
+                setState(prev => ({
+                    ...prev,
+                    selectedGuidelines: prev.selectedGuidelines.includes(guidelineId)
+                        ? prev.selectedGuidelines.filter(id => id !== guidelineId)
+                        : [...prev.selectedGuidelines, guidelineId]
+                }));
+            };
+
+            const handleSelectAll = () => {
+                const agent = agents.find(a => a.id === agentId);
+                const promptConfig = agent?.prompt as AgentPrompt | undefined;
+                const allGuidelineIds = promptConfig?.guidelines?.map(g => g.id) || [];
+
+                setState(prev => ({
+                    ...prev,
+                    selectedGuidelines: prev.selectedGuidelines.length === allGuidelineIds.length
+                        ? []
+                        : allGuidelineIds
+                }));
+            };
+
+            const handleBulkToggle = () => {
+                const agent = agents.find(a => a.id === agentId);
+                const promptConfig = agent?.prompt as AgentPrompt | undefined;
+                const hasGuidelines = !!promptConfig?.guidelines && promptConfig.guidelines.length > 0;
+
+                if (hasGuidelines) {
+                    handleGuidelineToggle(itemKey);
+                    toast({ title: 'Guidelines toggled successfully!' });
+                }
+            };
+
+            const handleValidateGuidelines = () => {
+                const errors: string[] = [];
+
+                if (!itemKey) errors.push('Item key is required');
+                if (!agentId) errors.push('Agent ID is required');
+                if (!agents.find(a => a.id === agentId)) errors.push('Agent not found');
+
+                setState(prev => ({ ...prev, validationErrors: errors }));
+                return errors.length === 0;
+            };
+
+            const handleExportGuidelines = () => {
+                const agent = agents.find(a => a.id === agentId);
+                const promptConfig = agent?.prompt as AgentPrompt | undefined;
+                const guidelines = promptConfig?.guidelines || [];
+
+                const exportData = {
+                    agentId,
+                    agentName: agent?.name,
+                    itemKey,
+                    guidelines: guidelines.map(g => ({
+                        id: g.id,
+                        title: g.title,
+                        content: g.content,
+                        enabled: guidelineState[itemKey]?.includes(g.id) || false
+                    })),
+                    customGuidelines: customGuidelineInput[itemKey] || [],
+                    oneTimeInstruction: oneTimeInstructions[itemKey] || ''
+                };
+
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `guidelines-${agentId}-${itemKey}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                toast({ title: 'Guidelines exported successfully!' });
+            };
+
+            return {
+                handleToggleEdit,
+                handleToggleExpanded,
+                handleSaveChanges,
+                handleCancelEdit,
+                handleSearch,
+                handleSelectGuideline,
+                handleSelectAll,
+                handleBulkToggle,
+                handleValidateGuidelines,
+                handleExportGuidelines,
+                isEditing: state.isEditing,
+                isExpanded: state.isExpanded,
+                hasChanges: state.hasChanges,
+                validationErrors: state.validationErrors,
+                searchQuery: state.searchQuery,
+                selectedGuidelines: state.selectedGuidelines,
+            };
+        }
+    })();
+
+    // agent is now an instance of our Agent class
+    const agent = agents.find(a => a.id === agentId);
+    // Access prompt directly from the Agent instance
+    const promptConfig = agent?.prompt as AgentPrompt | undefined;
+    const hasGuidelines = !!promptConfig?.guidelines && promptConfig.guidelines.length > 0;
+    const currentGuidelineState = guidelineState[itemKey];
+    const oneTimeInstruction = oneTimeInstructions[itemKey];
+
+    return {
+        // الوظائف الأساسية
+        t,
+        agentsLoaded,
+        agent,
+        promptConfig,
+        hasGuidelines,
+        currentGuidelineState,
+        customGuidelineInput,
+        oneTimeInstruction,
+        handleGuidelineToggle,
+        setCustomGuidelineInputForItem,
+        handleAddCustomGuidelineForItem,
+        handleRemoveCustomGuidelineForItem,
+        setOneTimeInstruction,
+
+        // الوظائف الجديدة من UI Hook
+        ...uiHook,
     };
 };
