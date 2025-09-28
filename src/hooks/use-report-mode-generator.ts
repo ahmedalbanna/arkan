@@ -1,18 +1,17 @@
 
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
-import { useLocalization } from '@/context/LocalizationContext';
-import { useTranslate, useGenerateReportSection } from '@/hooks';
-import { toast } from '@/hooks';
 import type { SectionName } from '@/ai/schemas';
-import { useBuilderStore } from '@/hooks';
-import { Project } from '@/lib/models/project';
-import { useExport } from './use-export';
-import { useAgents } from './use-agents';
-import { AgentCategory } from '@/lib/models/agent';
-import { Section } from '@/lib/models/section';
 import { useAuth } from '@/context/AuthContext';
+import { useLocalization } from '@/context/LocalizationContext';
+import { createReportToolHook } from '@/core';
+import { toast, useBuilderStore, useGenerateReportSection, useTranslate } from '@/hooks';
+import { AgentCategory } from '@/lib/models/agent';
+import { Project } from '@/lib/models/project';
+import { Section } from '@/lib/models/section';
+import { useEffect, useMemo, useState } from 'react';
+import { useAgents } from './use-agents';
+import { useExport } from './use-export';
 import { useGenerationUIStore } from './useGenerationUIStore';
 
 
@@ -22,9 +21,43 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     const translateMutation = useTranslate();
     const [isTranslatingAll, setIsTranslatingAll] = useState(false);
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
-    
+
     const { exportReportDocx, isExporting } = useExport();
     const { agents, isLoaded: agentsLoaded } = useAgents();
+
+    // استخدام النظام الجديد من src/core
+    const reportTool = createReportToolHook({
+        toolName: 'report-generator',
+        apiEndpoint: '/api/reports/generate',
+        schema: require('zod').z.object({
+            title: require('zod').z.string().min(5),
+            sections: require('zod').z.array(require('zod').z.string()),
+            data: require('zod').z.string().min(20)
+        }),
+        defaultValues: { title: '', sections: [], data: '' },
+        reportType: 'analytical',
+        successMessage: t('reportGenerator.success') || 'Report generated successfully!',
+        errorMessage: t('reportGenerator.error') || 'Failed to generate report',
+        customFeatures: {
+            getReportSections: () => ['introduction', 'analysis', 'conclusion', 'recommendations'],
+            validateReportStructure: (data: any) => {
+                return data && data.sections && data.sections.length > 0 && data.content && data.content.length > 100;
+            },
+            formatReportOutput: (data: any) => {
+                return {
+                    title: data.title || 'Untitled Report',
+                    sections: data.sections || [],
+                    content: data.content || '',
+                    metadata: {
+                        type: 'analytical',
+                        createdAt: new Date().toISOString(),
+                        wordCount: data.content?.length || 0,
+                        pageCount: Math.ceil((data.content?.length || 0) / 500)
+                    }
+                };
+            }
+        }
+    })();
 
     const reportAgents = useMemo(() => {
         if (!agents) return [];
@@ -98,11 +131,11 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     const { initializeDependentStates } = useGenerationUIStore();
 
     const reportGenerationMutation = useGenerateReportSection();
-    const isAnythingGenerating = reportGenerationMutation.isPending;
+    const isAnythingGenerating = reportGenerationMutation.mutation.isPending;
 
     const onGenerateSection = async (section: SectionName) => {
         if (!project) return;
-        
+
         const body = {
             proposal: project.proposal,
             projectPlan: project.projectPlan,
@@ -114,7 +147,7 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         };
 
         setActiveMutationKey(section);
-        reportGenerationMutation.mutate({ body });
+        reportGenerationMutation.mutation.mutate({ body });
     };
 
     const hasCreditsForSingleSection = useMemo(() => (userProfile ? userProfile.credits ?? 0 >= 1 : false), [userProfile]);
@@ -160,5 +193,18 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         agents: reportAgents,
         agentsLoaded,
         project,
+
+        // النظام الجديد من src/core
+        reportTool,
+        isProcessing: reportTool.isProcessing,
+        processedText: reportTool.processedText,
+        reportContent: reportTool.reportContent,
+        isCopied: reportTool.isCopied,
+        handleCopy: reportTool.handleCopy,
+        onSubmit: reportTool.onSubmit,
+        reset: reportTool.reset,
+        getReportSections: reportTool.getReportSections,
+        validateReportStructure: reportTool.validateReportStructure,
+        formatReportOutput: reportTool.formatReportOutput,
     };
 };

@@ -3,10 +3,10 @@
 
 import { type DiagramType, DiagramTypeSchema } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAgentStore, useBuilderStore, useAgents, useUpdateDiagram } from '@/hooks';
-import { useMemo } from 'react';
+import { createDiagramToolHook } from '@/core';
+import { useAgents, useBuilderStore, useUpdateDiagram } from '@/hooks';
 import { Agent, AgentCategory } from '@/lib/models/agent';
-import { GitGraph } from 'lucide-react';
+import { useMemo } from 'react';
 
 export const useDiagramGenerator = () => {
     const { t, locale } = useLocalization();
@@ -14,6 +14,36 @@ export const useDiagramGenerator = () => {
     const { agents } = useAgents();
 
     const diagrams = project?.diagrams || {};
+
+    // استخدام النظام الجديد من src/core
+    const diagramTool = createDiagramToolHook({
+        toolName: 'diagram-generator',
+        apiEndpoint: '/api/diagrams/generate',
+        schema: DiagramTypeSchema,
+        defaultValues: { type: 'flowchart' },
+        diagramType: 'flowchart',
+        successMessage: t('diagramGenerator.success') || 'Diagram generated successfully!',
+        errorMessage: t('diagramGenerator.error') || 'Failed to generate diagram',
+        customFeatures: {
+            getDiagramTypes: () => DiagramTypeSchema.options,
+            validateDiagramStructure: (data: any) => {
+                return data && data.plantUmlCode && data.plantUmlCode.length > 0;
+            },
+            formatDiagramOutput: (data: any) => {
+                return {
+                    title: data.title || 'Untitled Diagram',
+                    type: data.type || 'flowchart',
+                    plantUmlCode: data.plantUmlCode || '',
+                    explanation: data.explanation || '',
+                    metadata: {
+                        createdAt: new Date().toISOString(),
+                        nodeCount: data.nodeCount || 0,
+                        complexity: data.complexity || 'medium'
+                    }
+                };
+            }
+        }
+    })();
 
     const mutation = useUpdateDiagram((data, plantUmlCode) => {
         if (!project) return;
@@ -65,5 +95,18 @@ export const useDiagramGenerator = () => {
         mutation,
         handleUpdateDiagram,
         generatedDiagrams,
+
+        // النظام الجديد من src/core
+        diagramTool,
+        isProcessing: diagramTool.isProcessing,
+        processedText: diagramTool.processedText,
+        diagramContent: diagramTool.diagramContent,
+        isCopied: diagramTool.isCopied,
+        handleCopy: diagramTool.handleCopy,
+        onSubmit: diagramTool.onSubmit,
+        reset: diagramTool.reset,
+        getDiagramTypes: diagramTool.getDiagramTypes,
+        validateDiagramStructure: diagramTool.validateDiagramStructure,
+        formatDiagramOutput: diagramTool.formatDiagramOutput,
     };
 };

@@ -4,14 +4,13 @@
 import { ProjectProposalSchema, type AnyProjectProposal, type ProjectProposal } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
+import { createProposalToolHook } from '@/core';
 import { toast, useBuilderStore, useExport, useGenerateProposal } from '@/hooks';
 import { formatKeyToTitle } from '@/lib/proposal-utils';
-import { summarizeProjectApi, translateProposalApi, writingToolApi } from '@/services';
+import { summarizeProjectApi, translateProposalApi } from '@/services';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useIsMobile } from './use-mobile';
-import { useWritingTool } from './use-writing-tools';
-import { set } from 'date-fns';
 
 // Helper function to convert a proposal object to a markdown string
 function proposalToMarkdown(proposal: AnyProjectProposal): string {
@@ -49,8 +48,8 @@ function proposalToMarkdown(proposal: AnyProjectProposal): string {
                     const keyTitle = formatKeyToTitle(k);
                     const nestedValue = renderValue(v);
                     // Render simple key-value pairs on one line, complex ones on multiple.
-                    if (typeof v === 'object' || (typeof v === 'string' && v.includes('\n')) ){
-                         return `**${keyTitle}:**\n${nestedValue}`;
+                    if (typeof v === 'object' || (typeof v === 'string' && v.includes('\n'))) {
+                        return `**${keyTitle}:**\n${nestedValue}`;
                     }
                     return `**${keyTitle}:** ${nestedValue}`;
                 })
@@ -88,6 +87,35 @@ export function useProposalModeGeneratorLogic() {
     const [translatedProposal, setTranslatedProposal] = useState<ProjectProposal | null>(null);
 
     const proposal = translatedProposal || project?.proposal as ProjectProposal | null;
+
+    // استخدام النظام الجديد من src/core
+    const proposalTool = createProposalToolHook({
+        toolName: 'proposal-generator',
+        apiEndpoint: '/api/proposals/generate',
+        schema: ProjectProposalSchema,
+        defaultValues: { title: '', category: 'business' },
+        proposalType: 'business',
+        successMessage: t('proposalGenerator.success') || 'Proposal generated successfully!',
+        errorMessage: t('proposalGenerator.error') || 'Failed to generate proposal',
+        customFeatures: {
+            getProposalSections: () => ['introduction', 'objectives', 'methodology', 'budget', 'timeline', 'conclusion'],
+            validateProposalStructure: (data: any) => {
+                return data && data.title && data.title.length > 0 && Object.keys(data).length > 2;
+            },
+            formatProposalOutput: (data: any) => {
+                return {
+                    title: data.title || 'Untitled Proposal',
+                    sections: Object.keys(data).filter(key => key !== 'title' && key !== 'category'),
+                    content: data,
+                    metadata: {
+                        type: data.category || 'business',
+                        createdAt: new Date().toISOString(),
+                        wordCount: JSON.stringify(data).length
+                    }
+                };
+            }
+        }
+    })();
 
     const translateMutation = useMutation({
         mutationFn: async (variables: { proposal: ProjectProposal, targetLang: 'en' | 'ar', token: string }) => {
@@ -213,5 +241,18 @@ export function useProposalModeGeneratorLogic() {
         summarizeMutation,
         handleExport,
         handleSummarizeProject,
+
+        // النظام الجديد من src/core
+        proposalTool,
+        isProcessing: proposalTool.isProcessing,
+        processedText: proposalTool.processedText,
+        proposalContent: proposalTool.proposalContent,
+        isCopied: proposalTool.isCopied,
+        handleCopy: proposalTool.handleCopy,
+        onSubmit: proposalTool.onSubmit,
+        reset: proposalTool.reset,
+        getProposalSections: proposalTool.getProposalSections,
+        validateProposalStructure: proposalTool.validateProposalStructure,
+        formatProposalOutput: proposalTool.formatProposalOutput,
     };
 }
