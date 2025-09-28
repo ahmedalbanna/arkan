@@ -12,7 +12,7 @@ export * from './error-types';
 export * from './client-errors';
 
 // معالجة أخطاء الخادم
-export * from './server-errors';
+// export * from './server-errors';
 
 // Re-export error types with corrected names
 export {

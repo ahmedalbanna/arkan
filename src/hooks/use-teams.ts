@@ -11,11 +11,11 @@ import {
 } from '@/services';
 import { useMutation, useQuery, useQueryClient, useQueryClient as useTanstackQueryClient } from '@tanstack/react-query';
 // Import our new class
-import { app } from '@/lib';
+import app from '@/lib/core/firebase/client-init';
 import { Team, type TeamProperties, TeamWithMembers } from '@/lib/models/team';
+import type { TeamMember } from '@/lib/models/user';
 import { collection, getDocs, getFirestore, onSnapshot, query, where } from 'firebase/firestore';
 import { useEffect } from 'react';
-import type { TeamMember } from '@/lib/models/user';
 
 export { type TeamWithMembers };
 

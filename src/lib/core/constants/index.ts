@@ -12,5 +12,5 @@ export * from './api-endpoints';
 export * from './file-types';
 
 // قواعد التحقق
-export * from './validation-rules';
+// export * from './validation-rules';
 

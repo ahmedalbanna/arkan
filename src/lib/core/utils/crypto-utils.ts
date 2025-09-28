@@ -8,7 +8,7 @@
 /**
  * إنشاء hash من النص باستخدام SHA-256
  */
-export async function createHash(text: string): Promise<string> {
+export async function createHash(text: string, p0?: string): Promise<string> {
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);

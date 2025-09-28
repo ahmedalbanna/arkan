@@ -12,7 +12,7 @@ export * from './string-utils';
 export * from './file-utils';
 
 // أدوات التحقق
-export * from './validation-utils';
+// export * from './validation-utils';
 
 // أدوات التشفير
 export * from './crypto-utils';

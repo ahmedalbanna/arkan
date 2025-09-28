@@ -1,8 +1,13 @@
 // Core Module - العناصر الأساسية الموحدة
+// للاستخدام العام (يشمل العميل والخادم)
 export * from './core';
 
+// // للاستخدام المحدد
+// export * from './core/client'; // للعميل فقط
+// export * from './core/server'; // للخادم فقط
+
 // Firebase client-side initialization
-export * from './firebase/client-init';
+// export * from './firebase/client-init';
 
 // NOTE: Server-side modules like 'db/queries' and 'firebase/server-init'
 // have been removed from this barrel file. They should be imported directly

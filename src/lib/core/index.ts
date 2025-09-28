@@ -1,9 +1,13 @@
-/**
- * النظام الأساسي الموحد
- *
- * هذا الملف يحتوي على جميع مكونات النظام الأساسي الموحد
- * بما في ذلك الثوابت والأنواع والأدوات ومعالجة الأخطاء
- */
+// /**
+//  * النظام الأساسي الموحد
+//  *
+//  * هذا الملف يحتوي على جميع مكونات النظام الأساسي الموحد
+//  * بما في ذلك الثوابت والأنواع والأدوات ومعالجة الأخطاء
+//  *
+//  * ملاحظة: هذا الملف للاستخدام العام. للاستخدام المحدد:
+//  * - استخدم './client' للعميل
+//  * - استخدم './server' للخادم
+//  */
 
 // Constants
 export * from './constants';
@@ -12,31 +16,16 @@ export * from './constants';
 export * from './types';
 
 // Utils
-export * from './utils';
+// export * from './utils';
 
 // Error Handling
 export * from './error-handling';
 
-// API
-export * from './api';
+// Client-side components (safe for browser)
+// export * from './client';
 
-// Auth
-export * from './auth';
-
-// Integration
-export * from './integration';
-
-// Firebase
-export * from './firebase';
-
-// Cache
-export * from './cache';
-
-// Query Keys
-export * from './query-keys';
-
-// Performance
-export * from './performance';
+// Server-side components (Node.js only)
+// export * from './server';
 
 // Re-export commonly used types
 export type {

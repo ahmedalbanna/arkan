@@ -15,7 +15,7 @@ export * from './middleware';
 export * from './handlers';
 
 // Types
-export type { ApiClientConfig, HttpError, HttpHeaders, HttpMethod, HttpRequestOptions, HttpResponse } from './client/base-client';
+export type { ApiClientConfig, HttpError, HttpHeaders, HttpMethod, HttpRequestOptions, HttpResponse } from '../types/api';
 export type { ApiHandler, ApiHandlerOptions } from './handlers/base-handler';
 export type { AuthContext, AuthMiddlewareOptions } from './middleware/auth-middleware';
 export type { CorsOptions } from './middleware/cors-middleware';
