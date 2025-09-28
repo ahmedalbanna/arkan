@@ -8,7 +8,7 @@ import React from 'react';
 import RichTextEditor from '../ui/RichTextEditor';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { Wand2, ThumbsDown, Check, X } from 'lucide-react';
+import { Wand2, ThumbsDown, Check } from 'lucide-react';
 import { DiffView } from '../shared/DiffView';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
@@ -24,19 +24,15 @@ interface SectionProps {
 
 export const Section = ({ sectionKey, title, content, onUpdate }: SectionProps) => {
     const {
-        audioRef,
         aiSuggestion,
         diff,
-        showAudioPlayer,
-        setShowAudioPlayer,
-        audioSrc,
         t,
         handleAcceptSuggestion,
         handleRejectSuggestion,
         handleAiAction,
         handleReadAloud,
         isProcessingAi,
-        ttsMutation,
+        isReadingAloud,
         words,
         chars
     } = useSectionLogic(sectionKey, content, onUpdate);
@@ -54,12 +50,7 @@ export const Section = ({ sectionKey, title, content, onUpdate }: SectionProps) 
                 <span className="mx-2">|</span>
                 <span>{chars} {t('builder.Section.characters')}</span>
             </div>
-            {showAudioPlayer && audioSrc && (
-                <div className="flex items-center gap-2 p-2 border rounded-lg bg-muted">
-                    <audio ref={audioRef} src={audioSrc} controls className="w-full h-10" />
-                    <Button variant="ghost" size="icon" onClick={() => setShowAudioPlayer(false)}><X className="h-4 w-4" /></Button>
-                </div>
-            )}
+           
             <div className="group relative space-y-4 mt-4">
                 <RichTextEditor
                     content={content}
@@ -67,7 +58,7 @@ export const Section = ({ sectionKey, title, content, onUpdate }: SectionProps) 
                     onAiAction={handleAiAction}
                     onReadAloud={handleReadAloud}
                     isProcessingAi={isProcessingAi}
-                    isReadingAloud={ttsMutation.isPending}
+                    isReadingAloud={isReadingAloud}
                 />
 
                 {aiSuggestion && (

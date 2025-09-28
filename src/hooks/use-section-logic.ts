@@ -4,11 +4,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks';
-import { useAuth } from '@/context/AuthContext';
 import { useMutation } from '@tanstack/react-query';
 import type { ManipulateTextOutput, ManipulateTextInput, SectionName } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useTextToSpeech } from '@/hooks';
 import { useWritingTool } from '@/hooks';
 import { computeDiff, DiffPart } from '@/lib/diff';
 import { processPlantUml } from '@/lib/utils';
@@ -24,15 +22,21 @@ const calculateCounts = (text: string) => {
 };
 
 export const useSectionLogic = (sectionKey: SectionName, content: string, onUpdate: (key: SectionName, value: string) => void) => {
-    const audioRef = useRef<HTMLAudioElement>(null);
     const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const [diff, setDiff] = useState<DiffPart[] | null>(null);
-    const [showAudioPlayer, setShowAudioPlayer] = useState(false);
-    const [audioSrc, setAudioSrc] = useState<string | null>(null);
+    const [isReading, setIsReading] = useState(false);
     const { toast } = useToast();
     const { t } = useLocalization();
-    const ttsMutation = useTextToSpeech();
     const [selection, setSelection] = useState<{ text: string, from: number, to: number } | null>(null);
+
+    // Stop speech synthesis when component unmounts or content changes
+    useEffect(() => {
+        return () => {
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+            }
+        };
+    }, [content]);
 
     const handleSuccess = (data: any) => {
         const resultText = data.rewrittenText || data.summarizedText || data.humanizedText || data.correctedText;
@@ -67,20 +71,13 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
     const humanizeMutation = useWritingTool('humanize-text', { onSuccess: handleSuccess, onError: handleError });
     const rewriteMutation = useWritingTool('rewrite-text', { onSuccess: handleSuccess, onError: handleError });
 
-    const isProcessingAi = summarizeMutation.isPending || expandMutation.isPending || grammarMutation.isPending || humanizeMutation.isPending || rewriteMutation.isPending || ttsMutation.isPending;
+    const isProcessingAi = summarizeMutation.isPending || expandMutation.isPending || grammarMutation.isPending || humanizeMutation.isPending || rewriteMutation.isPending;
 
     useEffect(() => {
         // When content is updated from outside (e.g. accepting a suggestion), clear old suggestions
         setAiSuggestion(null);
         setDiff(null);
     }, [content]);
-
-    // Effect to play audio when src changes
-    useEffect(() => {
-        if (audioSrc && showAudioPlayer && audioRef.current) {
-            audioRef.current.play().catch(e => console.error("Audio playback failed:", e));
-        }
-    }, [audioSrc, showAudioPlayer]);
 
 
     const handleAiAction = (action: string, payload?: any) => {
@@ -124,21 +121,20 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
     };
 
     const handleReadAloud = () => {
-        const text = content;
-        if (audioSrc) {
-            setShowAudioPlayer(true);
+        if (isReading || window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+            setIsReading(false);
             return;
         }
-        ttsMutation.mutate({ text }, {
-            onSuccess: (data) => {
-                setAudioSrc(data.audioDataUri);
-                setShowAudioPlayer(true);
-                toast({ title: t('builder.Section.toasts.ttsSuccessTitle'), description: t('builder.Section.toasts.ttsSuccessDesc')});
-            },
-             onError: (error) => {
-                toast({ title: 'Text-to-Speech Failed', description: error.message, variant: 'destructive' });
-            }
-        });
+
+        const utterance = new SpeechSynthesisUtterance(content);
+        utterance.onstart = () => setIsReading(true);
+        utterance.onend = () => setIsReading(false);
+        utterance.onerror = () => {
+            setIsReading(false);
+            toast({ title: 'Speech Error', description: 'Could not read the text aloud.', variant: 'destructive' });
+        };
+        window.speechSynthesis.speak(utterance);
     };
 
     const handleAcceptSuggestion = () => {
@@ -158,15 +154,11 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
     const processedContent = processPlantUml(content);
 
     return {
-        audioRef,
         aiSuggestion,
         diff,
-        showAudioPlayer,
-        setShowAudioPlayer,
-        audioSrc,
         t,
         isProcessingAi,
-        ttsMutation,
+        isReadingAloud: isReading,
         handleAiAction,
         handleReadAloud,
         handleAcceptSuggestion,
