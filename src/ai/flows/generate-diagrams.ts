@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -10,7 +9,169 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { getAgent } from '@/lib/db/queries';
 import type { AgentPrompt } from '@/lib/types';
-import { type GenerateDiagramInput, GenerateDiagramOutputSchema, type GenerateDiagramOutput } from '@/ai/schemas';
+import { type GenerateDiagramInput, GenerateDiagramOutputSchema, type GenerateDiagramOutput, DiagramTypeSchema } from '@/ai/schemas';
+
+
+const diagramSpecificInstructions: Record<z.infer<typeof DiagramTypeSchema>, string> = {
+    useCase: `
+### Use Case Diagram Instructions
+- **Actors**: Define actors using \`actor ActorName\` or \`:"Actor Name": as ActorAlias\`.
+- **Use Cases**: Define use cases inside a system boundary using \`rectangle "System Name" { ... }\`. Use cases are defined with parentheses, e.g., \`(Manage Account)\`.
+- **Relationships**: Connect actors to use cases with a simple arrow \`-->\`. Use \`--up-->\` for better layout if needed.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  left to right direction
+  actor "Customer" as user
+  rectangle "E-commerce Platform" {
+    user --up--> (Login)
+    user --> (View Products)
+    (View Products) .> (Search Products) : include
+    user --> (Manage Cart)
+    (Manage Cart) .> (Add Item) : include
+    (Manage Cart) .> (Remove Item) : include
+  }
+  @enduml
+  \`\`\`
+`,
+    class: `
+### Class Diagram Instructions
+- **Classes**: Define classes using \`class ClassName\`. You can add attributes and methods inside curly braces \`{...}\`. Use \`+ \` for public, \`- \` for private, \`# \` for protected.
+- **Relationships**:
+  - **Association**: \`Class1 "1" -- "0..*" Class2\` (add cardinality).
+  - **Inheritance**: \`Parent <|-- Child\`.
+  - **Composition**: \`Whole *-- Part\`.
+  - **Aggregation**: \`Container o-- Item\`.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  class User {
+    -userId: string
+    -email: string
+    +login()
+    +logout()
+  }
+  class Order {
+    -orderId: string
+    -orderDate: Date
+    +calculateTotal(): float
+  }
+  User "1" -- "0..*" Order : places
+  @enduml
+  \`\`\`
+`,
+    sequence: `
+### Sequence Diagram Instructions
+- **Participants**: Define participants using \`actor\`, \`participant\`, \`boundary\`, \`control\`, \`entity\`, or \`database\`.
+- **Messages**: Use arrows for messages: \`->\` for synchronous, \`->>\` for asynchronous, \`-->\` for return messages.
+- **Activation/Deactivation**: Use \`activate\` and \`deactivate\` to show when a participant is active.
+- **Control Flow**: Use \`alt/else\` for alternatives and \`loop\` for repetitions.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  actor User
+  participant "Web App" as App
+  activate User
+  User -> App: POST /login
+  activate App
+  App -> DB: verifyCredentials()
+  activate DB
+  DB --> App: User data
+  deactivate DB
+  App --> User: Auth Token
+  deactivate App
+  deactivate User
+  @enduml
+  \`\`\`
+`,
+    activity: `
+### Activity Diagram Instructions
+- **Start/End**: Use \`start\` and \`stop\` or \`end\`.
+- **Activities**: Describe activities using \`:[Action Description];\`.
+- **Conditionals**: Use \`if (condition) then (label)\` and \`else (label)\`. End with \`endif\`.
+- **Forks/Joins**: Use \`fork\` and \`end fork\` or \`fork again\` and \`join\`.
+- **Partitions (Swimlanes)**: Use \`|SwimlaneName|\` to group activities by actor/component.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  start
+  |User|
+  :Submit Login Form;
+  |System|
+  if (Credentials are valid?) then (yes)
+    :Redirect to Dashboard;
+    stop
+  else (no)
+    :Show Error Message;
+  endif
+  |User|
+  :Re-enter Credentials;
+  stop
+  @enduml
+  \`\`\`
+`,
+    component: `
+### Component Diagram Instructions
+- **Components**: Define components using \`[ComponentName]\`.
+- **Interfaces**: Define interfaces using \`() "InterfaceName"\`.
+- **Relationships**:
+  - **Dependency**: \`[Client] ..> [Service]\`
+  - **Realization**: \`[Implementation] ..|> (Interface)\`
+  - **Provided/Required Interface**: \`[Service] - (Interface)\` and \`(Interface) - [Client]\`.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  [API Gateway]
+  [Auth Service]
+  () "User Authentication" as AuthInterface
+
+  [API Gateway] ..> AuthInterface
+  [Auth Service] ..|> AuthInterface
+  @enduml
+  \`\`\`
+`,
+    archimate: `
+### ArchiMate Diagram Instructions
+- **Elements**: Use the format \`archimate "Element Name" as Alias <<ElementType>>\`.
+- **Layers**: Group elements by layer (Business, Application, Technology).
+- **Relationships**: Use standard ArchiMate relationship arrows (e.g., \`-->\`, \`..>\`).
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  archimate "CRM" as CRM <<ApplicationComponent>>
+  archimate "Customer Service" as CS <<BusinessProcess>>
+  CS -up-|> CRM : realizes
+  @enduml
+  \`\`\`
+`,
+    er: `
+### ER Diagram Instructions
+- **Entities**: Define entities using \`entity "EntityName" { ... }\`.
+- **Attributes**: Inside the entity, define attributes. Mark primary keys with \`* \` or \`PK \`.
+- **Relationships**: Use crow's foot notation for cardinality:
+  - **One-to-One**: \`EntityA ||--|| EntityB\`
+  - **One-to-Many**: \`EntityA ||--|{ EntityB\`
+  - **Many-to-Many**: Create a linking table.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  entity "User" {
+    * user_id : integer
+    --
+    email : varchar
+  }
+  entity "Post" {
+    * post_id : integer
+    --
+    title : varchar
+    user_id : integer <<FK>>
+  }
+  User ||--|{ Post
+  @enduml
+  \`\`\`
+`
+};
+
 
 export async function generateDiagram(input: GenerateDiagramInput): Promise<GenerateDiagramOutput> {
     const agentId = `generate-${input.diagramToGenerate}-diagram`;
@@ -18,10 +179,15 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
     if (!agent) {
         throw new Error(`Agent configuration for diagram type '${input.diagramToGenerate}' not found.`);
     }
+
     const agentPrompt = agent.prompt as AgentPrompt;
+    
+    // Combine base prompt with diagram-specific instructions into the system prompt
     const systemPrompt = `${agentPrompt.base}
-You are also an expert analyst. Before you generate the diagram, you must first review all the provided context sections (proposal, other report sections, other diagrams). From this context, intelligently identify and synthesize only the most relevant information needed to create the requested diagram.
-Your final output MUST be a JSON object containing two keys: 'plantUmlCode' and 'explanation'.`;
+${diagramSpecificInstructions[input.diagramToGenerate]}
+
+--- AVAILABLE CONTEXT FROM PROJECT ---
+You have access to the following documents. Review them and use the most relevant information to generate the diagram code that fulfills the user's request. Your output MUST be a JSON object containing two keys: 'plantUmlCode' and 'explanation'.`;
 
     const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
     const stringifiedPlan = input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '';
@@ -32,34 +198,25 @@ Your final output MUST be a JSON object containing two keys: 'plantUmlCode' and 
 
     const diagramPrompt = ai.definePrompt({
         name: `generate-${input.diagramToGenerate}-diagram-prompt`,
-        input: { schema: z.any() }, // Using any() since we are manually constructing the payload
+        input: { schema: z.any() }, 
         output: { schema: GenerateDiagramOutputSchema },
         system: systemPrompt,
         prompt: `
-{{#if guidelines}}
---- Guidelines ---
-{{#each guidelines}}
-- {{{this}}}
-{{/each}}
-{{/if}}
-
 {{#if instructionText}}
---- Additional Instructions ---
+--- USER INSTRUCTIONS ---
 {{{instructionText}}}
+---
 {{/if}}
-
---- AVAILABLE CONTEXT FROM PROJECT ---
-You have access to the following documents. Review them and use the most relevant information to generate the diagram.
 
 {{#if proposal}}
---- Main Input: Project Proposal ---
+--- Project Proposal ---
 \`\`\`json
 ${stringifiedProposal}
 \`\`\`
 {{/if}}
 
 {{#if projectPlan}}
---- Main Input: Project Plan ---
+--- Project Plan ---
 \`\`\`json
 ${stringifiedPlan}
 \`\`\`
@@ -100,13 +257,28 @@ File: {{this.fileName}}
 ---
 {{/each}}
 {{/if}}
+
+Now, generate the PlantUML code and a brief explanation based on all the provided context and the user's instructions.
 `,
     config: {
-        temperature: 0.2, // Low temp for precise PlantUML syntax
-        maxOutputTokens: 8192, // Increased to accommodate explanation
+        temperature: 0.1, // Very low temp for precise PlantUML syntax
+        maxOutputTokens: 8192,
     }
     });
 
     const { output } = await diagramPrompt({ ...input, textContext, mediaContext }, { model: agent.model || 'googleai/gemini-1.5-flash' });
-    return output!;
+    
+    if (!output) {
+      throw new Error("Diagram generation failed to produce an output.");
+    }
+    
+    // Clean the output to ensure it starts correctly
+    if (output.plantUmlCode && !output.plantUmlCode.trim().startsWith('@startuml')) {
+        output.plantUmlCode = '@startuml\n' + output.plantUmlCode;
+    }
+    if (output.plantUmlCode && !output.plantUmlCode.trim().endsWith('@enduml')) {
+        output.plantUmlCode = output.plantUmlCode + '\n@enduml';
+    }
+
+    return output;
 }

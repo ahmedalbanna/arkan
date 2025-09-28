@@ -15,10 +15,7 @@ const diagramBasePrompt = `You are an expert systems analyst specializing in Pla
 - Do not add any conversational text, explanations, or markdown code fences (\`\`\`) around your response.
 
 --- Diagram-Specific Task ---
-Based on the guidelines below, generate the requested PlantUML diagram.
-
---- Context from Project ---
-You will be provided with the full project proposal in JSON format, as well as any previously generated text sections or diagrams. Use this context to ensure the diagram is accurate and consistent with the overall project.
+Based on the guidelines below and the specific instructions for the diagram type you are generating, create the requested PlantUML diagram.
 `;
 
 
@@ -28,7 +25,6 @@ export const AGENTS: AgentProperties[] = [
     name: 'Project Summarizer Agent',
     description: 'Generates a concise project summary from a detailed description, highlighting key aspects and technologies used.',
     category: AgentCategory.ContentGeneration,
-    icon: 'BrainCircuit',
     pageUrl: '/summarize',
     isEnabled: true,
     prompt: {
@@ -50,7 +46,6 @@ Description: {{{projectDescription}}}`,
     name: 'UI Agent',
     description: 'Creates UI components from a text description.',
     category: AgentCategory.CodeGeneration,
-    icon: 'LayoutGrid',
     pageUrl: '/ui-agent',
     isEnabled: true,
     prompt: {
@@ -69,7 +64,6 @@ Description: {{{projectDescription}}}`,
     name: 'Project Proposal Agent',
     description: 'Creates a comprehensive, professional project proposal from a single project idea, complete with timelines, budget, and risks.',
     category: AgentCategory.ProposalGeneration,
-    icon: 'FileText',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -93,7 +87,6 @@ Project Idea: {{{projectIdea}}}`,
     name: 'Marketing Ad Copy Agent',
     description: 'Generates compelling ad copy for a product or service.',
     category: AgentCategory.Marketing,
-    icon: 'Megaphone',
     pageUrl: '/generate', // This could be a new page later
     isEnabled: true,
     prompt: {
@@ -113,7 +106,6 @@ Project Idea: {{{projectIdea}}}`,
     name: 'Legal NDA Agent',
     description: 'Generates a standard Non-Disclosure Agreement between two parties.',
     category: AgentCategory.Legal,
-    icon: 'Scale',
     pageUrl: '/generate', // This could be a new page later
     isEnabled: true,
     prompt: {
@@ -135,7 +127,6 @@ Project Idea: {{{projectIdea}}}`,
     name: 'Abstract Agent',
     description: 'Writes a concise abstract summarizing the entire training report.',
     category: AgentCategory.ReportGeneration,
-    icon: 'FileText',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -157,7 +148,6 @@ Project Idea: {{{projectIdea}}}`,
     name: 'Acknowledgment Agent',
     description: 'Drafts a professional acknowledgment section to thank individuals and organizations.',
     category: AgentCategory.ReportGeneration,
-    icon: 'FileHeart',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -178,7 +168,6 @@ Project Idea: {{{projectIdea}}}`,
     name: 'Introduction Agent',
     description: 'Writes a professional introduction for a project report based on the full proposal data.',
     category: AgentCategory.ReportGeneration,
-    icon: 'BookMarked',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -205,7 +194,6 @@ Your entire response must be a single, cohesive text formatted in markdown.`,
     name: 'Training Program Agent',
     description: 'Details the training program, including objectives, structure, and timeline.',
     category: AgentCategory.ReportGeneration,
-    icon: 'Library',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -227,7 +215,6 @@ Your entire response must be a single, cohesive text formatted in markdown.`,
     name: 'Technical Experience Agent',
     description: 'Describes the technical skills and knowledge gained during the training period.',
     category: AgentCategory.ReportGeneration,
-    icon: 'TestTube2',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -249,7 +236,6 @@ Your entire response must be a single, cohesive text formatted in markdown.`,
     name: 'Recommendations Agent',
     description: 'Provides actionable recommendations based on the training experience.',
     category: AgentCategory.ReportGeneration,
-    icon: 'Hand',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -270,7 +256,6 @@ Your entire response must be a single, cohesive text formatted in markdown.`,
     name: 'References Agent',
     description: 'Generates a list of references or a bibliography in a consistent citation style.',
     category: AgentCategory.ReportGeneration,
-    icon: 'DraftingCompass',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -291,7 +276,6 @@ Your entire response must be a single, cohesive text formatted in markdown.`,
     name: 'Appendices Agent',
     description: 'Creates appendices for supplementary materials like code snippets, datasheets, or detailed logs.',
     category: AgentCategory.ReportGeneration,
-    icon: 'Files',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -312,7 +296,6 @@ Your entire response must be a single, cohesive text formatted in markdown.`,
     name: 'Literature Review Agent',
     description: 'Generates an academic and technical literature review section for the project report.',
     category: AgentCategory.ReportGeneration,
-    icon: 'Library',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -342,7 +325,6 @@ The literature review should be well-structured, engaging, and must heading incl
     name: 'System Analysis Agent',
     description: 'Generates the system analysis section, including functional and non-functional requirements.',
     category: AgentCategory.ReportGeneration,
-    icon: 'Waypoints',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -366,7 +348,6 @@ Do not simply list features. You must categorize them logically as functional an
     name: 'Design Strategy Agent',
     description: 'Generates the design strategy section, focusing on user experience and user interface.',
     category: AgentCategory.ReportGeneration,
-    icon: 'BookText',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -391,7 +372,6 @@ Explain your reasoning clearly. The goal is to outline a plan that will lead to 
     name: 'System Design Agent',
     description: 'Generates the system design section, defining the architecture, data model, and components.',
     category: AgentCategory.ReportGeneration,
-    icon: 'Code',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -415,7 +395,6 @@ You must translate the requirements into a technical blueprint for the developme
     name: 'System Programming Agent',
     description: 'Generates the system programming and implementation section, defining workflow and standards.',
     category: AgentCategory.ReportGeneration,
-    icon: 'Code',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -441,7 +420,6 @@ Synthesize information from the entire proposal and the provided context to crea
     name: 'System Testing Agent',
     description: 'Generates the system testing section, defining the testing strategy, tools, and metrics.',
     category: AgentCategory.ReportGeneration,
-    icon: 'TestTube2',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -471,7 +449,6 @@ The system testing should be well-structured, engaging, and must heading include
     name: 'Conclusion Agent',
     description: 'Writes a concise and impactful conclusion for the final project report.',
     category: AgentCategory.ReportGeneration,
-    icon: 'Flag',
     pageUrl: '/generate',
     isEnabled: true,
     prompt: {
@@ -496,7 +473,6 @@ Do not introduce new information. Your goal is to wrap up the report effectively
     name: 'Presentation Agent',
     description: 'Creates a slide deck from project proposal and report content.',
     category: AgentCategory.PresentationGeneration,
-    icon: 'Presentation',
     pageUrl: '/generate', // This agent is used on the project page directly
     isEnabled: true,
     prompt: {
@@ -524,19 +500,9 @@ You will be provided with the full project proposal in JSON format, and may also
     name: 'Use Case Diagram Agent',
     description: 'Produces a PlantUML Use Case diagram to identify actors and use cases.',
     category: AgentCategory.DiagramGeneration,
-    icon: 'GitGraph',
     pageUrl: '/generate',
     isEnabled: true,
-    prompt: {
-      base: diagramBasePrompt,
-      guidelines: [
-        { text: "Identify the primary actors from the 'stakeholders' section of the proposal (e.g., 'Primary User', 'Sponsor').", isDefault: true },
-        { text: "Define use cases based on the 'objective', 'expected_outcome', and any available functional requirements.", isDefault: true },
-        { text: "Connect actors to their relevant use cases to show interactions.", isDefault: true },
-        { text: "Use rectangles to group related use cases within a system boundary.", isDefault: false },
-      ],
-      defaultContext: ['proposal']
-    },
+    prompt: { base: diagramBasePrompt },
     tone: 'Default',
     language: 'English (US)',
     model: 'googleai/gemini-1.5-flash',
@@ -546,19 +512,9 @@ You will be provided with the full project proposal in JSON format, and may also
     name: 'Class Diagram Agent',
     description: 'Produces a PlantUML Class diagram showing classes, attributes, methods, and relationships.',
     category: AgentCategory.DiagramGeneration,
-    icon: 'GitGraph',
     pageUrl: '/generate',
     isEnabled: true,
-    prompt: {
-      base: diagramBasePrompt,
-      guidelines: [
-        { text: "Identify key classes (entities) from the project's 'objective' and 'System Design' section if available.", isDefault: true },
-        { text: "For each class, define relevant attributes (fields) and methods (operations).", isDefault: true },
-        { text: "Establish relationships (associations, aggregations, inheritance) between the classes with clear cardinality (e.g., '1' -- '*' 'many').", isDefault: true },
-        { text: "Use visibility markers (+ for public, - for private, # for protected) for attributes and methods.", isDefault: false },
-      ],
-      defaultContext: ['generate-systemDesign-section']
-    },
+    prompt: { base: diagramBasePrompt },
     tone: 'Default',
     language: 'English (US)',
     model: 'googleai/gemini-1.5-flash',
@@ -568,20 +524,9 @@ You will be provided with the full project proposal in JSON format, and may also
     name: 'Sequence Diagram Agent',
     description: 'Produces a PlantUML Sequence diagram to illustrate object interactions in a specific scenario.',
     category: AgentCategory.DiagramGeneration,
-    icon: 'GitGraph',
     pageUrl: '/generate',
     isEnabled: true,
-    prompt: {
-      base: diagramBasePrompt,
-      guidelines: [
-        { text: "Identify participants (actors and system components/classes). Refer to the Use Case and Class diagrams if available.", isDefault: true },
-        { text: "Illustrate the step-by-step interactions for a primary workflow (e.g., 'User logs in', 'User creates a project').", isDefault: true },
-        { text: "Clearly show the order of messages exchanged between participants using arrows.", isDefault: true },
-        { text: "Use activation boxes to represent processing time for each participant.", isDefault: true },
-        { text: "Include at least one 'alt/else' block to show a conditional flow.", isDefault: false },
-      ],
-      defaultContext: ['generate-useCase-diagram', 'generate-class-diagram']
-    },
+    prompt: { base: diagramBasePrompt },
     tone: 'Default',
     language: 'English (US)',
     model: 'googleai/gemini-1.5-flash',
@@ -591,20 +536,9 @@ You will be provided with the full project proposal in JSON format, and may also
     name: 'Activity Diagram Agent',
     description: 'Produces a PlantUML Activity diagram to model the workflow of system processes.',
     category: AgentCategory.DiagramGeneration,
-    icon: 'GitGraph',
     pageUrl: '/generate',
     isEnabled: true,
-    prompt: {
-      base: diagramBasePrompt,
-      guidelines: [
-        { text: "Define a clear start and end point for the process being modeled.", isDefault: true },
-        { text: "Detail the sequence of activities based on a primary workflow from the 'objective' or 'methodology'.", isDefault: true },
-        { text: "Incorporate at least one decision point (conditional logic) with 'if/then/else' structures.", isDefault: true },
-        { text: "Use partitions (swimlanes) to assign activities to different actors or system components.", isDefault: false },
-        { text: "Include forks and joins if there are parallel activities that can occur simultaneously.", isDefault: false },
-      ],
-      defaultContext: ['proposal']
-    },
+    prompt: { base: diagramBasePrompt },
     tone: 'Default',
     language: 'English (US)',
     model: 'googleai/gemini-1.5-flash',
@@ -614,19 +548,9 @@ You will be provided with the full project proposal in JSON format, and may also
     name: 'Component Diagram Agent',
     description: 'Produces a PlantUML Component diagram depicting the system architecture in terms of components.',
     category: AgentCategory.DiagramGeneration,
-    icon: 'GitGraph',
     pageUrl: '/generate',
     isEnabled: true,
-    prompt: {
-      base: diagramBasePrompt,
-      guidelines: [
-        { text: "Identify the main software components from the 'System Design' section (e.g., 'Frontend App', 'API Gateway', 'User Service').", isDefault: true },
-        { text: "Show the primary dependencies between these components using relationship arrows.", isDefault: true },
-        { text: "For at least one component, define a provided interface that other components use.", isDefault: true },
-        { text: "Group related components into a package if the architecture is complex.", isDefault: false },
-      ],
-      defaultContext: ['generate-systemDesign-section']
-    },
+    prompt: { base: diagramBasePrompt },
     tone: 'Default',
     language: 'English (US)',
     model: 'googleai/gemini-1.5-flash',
@@ -636,20 +560,9 @@ You will be provided with the full project proposal in JSON format, and may also
     name: 'ArchiMate Diagram Agent',
     description: 'Produces a PlantUML ArchiMate diagram to model enterprise architecture across multiple layers.',
     category: AgentCategory.DiagramGeneration,
-    icon: 'GitGraph',
     pageUrl: '/generate',
     isEnabled: true,
-    prompt: {
-      base: diagramBasePrompt,
-      guidelines: [
-        { text: "Focus on the Business and Application layers.", isDefault: true },
-        { text: "Identify Business Actors and Roles from the 'stakeholders' section.", isDefault: true },
-        { text: "Define Business Functions or Processes based on the project's 'objective'.", isDefault: true },
-        { text: "Identify Application Components that realize the business processes, as described in 'System Design'.", isDefault: true },
-        { text: "Use proper ArchiMate relationships (e.g., assignment, realization, serving) to connect the elements.", isDefault: true },
-      ],
-      defaultContext: ['proposal', 'generate-systemDesign-section']
-    },
+    prompt: { base: diagramBasePrompt },
     tone: 'Default',
     language: 'English (US)',
     model: 'googleai/gemini-1.5-flash',
@@ -659,19 +572,9 @@ You will be provided with the full project proposal in JSON format, and may also
     name: 'ER Diagram Agent',
     description: 'Produces a PlantUML Entity-Relationship (ER) diagram to model the database schema.',
     category: AgentCategory.DiagramGeneration,
-    icon: 'DatabaseZap',
     pageUrl: '/generate',
     isEnabled: true,
-    prompt: {
-      base: diagramBasePrompt,
-      guidelines: [
-        { text: "Identify key entities from the 'System Design' section's data model or from the project's main nouns (e.g., User, Project, Comment).", isDefault: true },
-        { text: "For each entity, define attributes. Clearly mark the Primary Key (PK) and any Foreign Keys (FK).", isDefault: true },
-        { text: "Establish relationships between entities using standard ERD notation (e.g., one-to-one, one-to-many, many-to-many).", isDefault: true },
-        { text: "Use PlantUML's ER diagram syntax (e.g., `entity \"Name\" { ... }`, `User }o--|| Project`).", isDefault: true },
-      ],
-      defaultContext: ['generate-systemDesign-section']
-    },
+    prompt: { base: diagramBasePrompt },
     tone: 'Default',
     language: 'English (US)',
     model: 'googleai/gemini-1.5-flash',
@@ -681,7 +584,6 @@ You will be provided with the full project proposal in JSON format, and may also
     name: 'Activity History',
     description: 'View the logs of all agent generations for administrative review.',
     category: AgentCategory.AdminTools,
-    icon: 'History',
     pageUrl: '/admin/manage-generations',
     isEnabled: true, // Typically for admins only, controlled by UI
     prompt: '',
