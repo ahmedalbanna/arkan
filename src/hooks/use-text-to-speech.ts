@@ -3,7 +3,8 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { createSpecializedToolHook } from '@/core';
-import { getAuthenticatedToken, handleErrorUtility } from '@/lib/authUtils';
+import { getAuthenticatedToken } from '@/lib/authUtils';
+import { handleErrorUtility } from '@/lib/errorUtils';
 import type { TTSInput, TTSOutput } from '@/services';
 import { textToSpeechApi } from '@/services';
 import { useMutation } from '@tanstack/react-query';

@@ -89,3 +89,16 @@ export const sectionKeys = {
   lists: () => [...sectionKeys.all, 'list'] as const,
   detail: (id: string) => [...sectionKeys.all, 'detail', id] as const,
 };
+
+export const templateKeys = {
+    all: ['templates'] as const,
+    lists: () => [...templateKeys.all, 'list'] as const,
+    list: (type: string) => [...templateKeys.lists(), { type }] as const,
+    details: () => [...templateKeys.all, 'detail'] as const,
+    detail: (id: string) => [...templateKeys.details(), id] as const,
+    docx: () => [...templateKeys.lists(), 'docx'] as const,
+    pptx: () => [...templateKeys.lists(), 'pptx'] as const,
+    proposals: () => [...templateKeys.lists(), 'proposals'] as const,
+    reports: () => [...templateKeys.lists(), 'reports'] as const,
+    presentations: () => [...templateKeys.lists(), 'presentations'] as const,
+};
