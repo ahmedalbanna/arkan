@@ -9,7 +9,7 @@ import { useDiagramGenerationTools } from '@/hooks/use-diagram-generation-tools'
 import { cn } from '@/lib/utils';
 import { Loader2, PanelLeftClose } from 'lucide-react';
 import { SectionAccordionItem } from '../section/SectionAccordionItem';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '../ui/skeleton';
 
 const orderedDiagrams = DiagramTypeSchema.options;
 
@@ -38,8 +38,9 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
         t,
         agentsLoaded,
         isAnythingGenerating,
+        activeMutationKey,
         onGenerateDiagram,
-        diagramSections, // This is now a Record<string, Agent>
+        diagramSections,
         hasCreditsForGeneration,
     } = useDiagramGenerationTools();
 
@@ -66,13 +67,14 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
                         const agent = diagramSections[key];
                         if (!agent) return null;
 
+                        const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
                         return (
                             <SectionAccordionItem
                                 key={key}
                                 itemKey={key}
-                                agent={agent} // Pass the full agent object
+                                agent={agent}
                                 onGenerate={() => onGenerateDiagram(key)}
-                                isGenerating={isAnythingGenerating && activeMutationKey === key} // Assuming activeMutationKey is managed in the hook
+                                isGenerating={isGeneratingThis}
                                 isAnythingGenerating={isAnythingGenerating}
                                 hasCredits={!!hasCreditsForGeneration}
                             />

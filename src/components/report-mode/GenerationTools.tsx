@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { cn } from '@/lib/utils';
 import { PanelLeftClose } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useReportGenerationLogic } from '@/hooks';
 import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
 import { Button } from '../ui/button';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -15,14 +14,16 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSo
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Section } from '@/lib/models/section';
+import { Agent } from '@/lib/models/agent';
+import { SectionName } from '@/ai/schemas';
 
 interface SortableSectionItemProps {
-    id: string; // The ID of the section, which is a string.
-    agent: import('@/lib/models/agent').Agent;
+    id: string;
+    agent: Agent;
     isGenerating: boolean;
     isAnythingGenerating: boolean;
     hasCredits: boolean;
-    onGenerate: () => void; // Changed from onGenerate: (section: SectionNameType) => void;
+    onGenerate: () => void;
 }
 
 
@@ -59,17 +60,23 @@ interface GenerationToolsProps {
     onCollapseToggle: () => void;
     orderedSections: Section[];
     setOrderedSections: (sections: Section[]) => void;
+    isAnythingGenerating: boolean;
+    activeMutationKey: string | null;
+    onGenerateSection: (sectionId: SectionName) => void;
+    hasCreditsForSingleSection: boolean;
+    agents: Agent[];
 }
 
-export const GenerationTools = ({ onCollapseToggle, orderedSections, setOrderedSections }: GenerationToolsProps) => {
-    const {
-        isAnythingGenerating,
-        activeMutationKey,
-        onGenerateSection,
-        hasCreditsForSingleSection,
-        agents, // Assuming useReportGenerationLogic provides this
-    } = useReportGenerationLogic({ orderedSections, setOrderedSections });
-    
+export const GenerationTools = ({
+    onCollapseToggle,
+    orderedSections,
+    setOrderedSections,
+    isAnythingGenerating,
+    activeMutationKey,
+    onGenerateSection,
+    hasCreditsForSingleSection,
+    agents,
+}: GenerationToolsProps) => {
     const { t } = useLocalization();
 
     const sensors = useSensors(
@@ -111,7 +118,7 @@ export const GenerationTools = ({ onCollapseToggle, orderedSections, setOrderedS
                         <Accordion type="multiple" className="w-full space-y-1">
                             {orderedSections.map((section) => {
                                 const agent = agents?.find(a => a.id === section.agentId);
-                                if (!agent) return null; // Should not happen if data is consistent
+                                if (!agent) return null;
 
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === section.id;
                                 return (
@@ -119,7 +126,7 @@ export const GenerationTools = ({ onCollapseToggle, orderedSections, setOrderedS
                                         key={section.id}
                                         id={section.id}
                                         agent={agent}
-                                        onGenerate={() => onGenerateSection(section.id as any)}
+                                        onGenerate={() => onGenerateSection(section.id as SectionName)}
                                         isGenerating={isGeneratingThis}
                                         isAnythingGenerating={isAnythingGenerating}
                                         hasCredits={!!hasCreditsForSingleSection}

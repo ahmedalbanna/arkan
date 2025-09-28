@@ -2,10 +2,9 @@
 'use client';
 
 import { useReportModeGenerator } from '@/hooks';
-import { lazy, Suspense, useState } from 'react'; // Import useState
+import { lazy, Suspense, useState } from 'react';
 import { Skeleton } from '../ui/skeleton';
 import { GenerationTools } from './GenerationTools';
-import type { SectionName } from '@/ai/schemas';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { PanelLeftClose, PanelRightOpen } from 'lucide-react';
@@ -33,7 +32,17 @@ export default function ReportModeGenerator() {
         isPanelCollapsed,
         setIsPanelCollapsed,
         generatedSections,
+        isAnythingGenerating,
+        activeMutationKey,
+        onGenerateSection,
+        hasCreditsForSingleSection,
+        agents,
+        agentsLoaded
     } = useReportModeGenerator({ orderedSections, setOrderedSections });
+
+    if (!agentsLoaded) {
+        return <ReportSkeleton />;
+    }
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
@@ -54,12 +63,17 @@ export default function ReportModeGenerator() {
                     onCollapseToggle={() => setIsPanelCollapsed(true)}
                     orderedSections={orderedSections}
                     setOrderedSections={setOrderedSections}
+                    isAnythingGenerating={isAnythingGenerating}
+                    activeMutationKey={activeMutationKey}
+                    onGenerateSection={onGenerateSection}
+                    hasCreditsForSingleSection={hasCreditsForSingleSection}
+                    agents={agents}
                 />
             </div>
 
             <div className={cn("lg:overflow-y-auto pr-2", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
                 <Suspense fallback={<ReportSkeleton />}>
-                    <ReportResults generatedSections={generatedSections.map(s => s.id as SectionName)} />
+                    <ReportResults generatedSections={generatedSections.map(s => s.id as any)} />
                 </Suspense>
             </div>
         </div>

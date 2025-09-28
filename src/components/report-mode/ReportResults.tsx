@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React from 'react';
@@ -9,29 +8,41 @@ import type { SectionName } from '@/ai/schemas';
 import { FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useReportModeGenerator } from '@/hooks';
+import { useBuilderStore } from '@/hooks'; // Changed import
 import A4Page from '@/components/shared/A4Page';
+import { useLocalization } from '@/context/LocalizationContext'; // Changed import
+import { useAgents } from '@/hooks'; // Changed import
+import { AgentCategory } from '@/lib/models/agent'; // Changed import
+import { useMemo } from 'react'; // Changed import
 
 interface ReportResultsProps {
-  // NEW: Receive the list of generated sections directly as a prop
   generatedSections: SectionName[];
 }
 
 export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
-  // The hook is now only used for getting data and handlers, not for deriving `generatedSections`
-  const {
-    t,
-    sections,
-    getSectionTitle,
-    handleSectionUpdate,
-    orderedSections,
-    setOrderedSections,
-  } = useReportModeGenerator({ orderedSections: [], setOrderedSections: () => {} });
+  const { t } = useLocalization();
+  const { project, updateProject } = useBuilderStore();
+  const { agents } = useAgents();
+
+  const reportAgents = useMemo(() => {
+    if (!agents) return [];
+    return agents.filter(a => a.category === AgentCategory.ReportGeneration);
+  }, [agents]);
 
   const [currentPage, setCurrentPage] = React.useState(0);
   const totalPages = generatedSections.length;
   const hasContent = totalPages > 0;
   const currentSectionKey = hasContent ? generatedSections[currentPage] : undefined;
+
+  const getSectionTitle = React.useCallback((sectionKey: SectionName) => {
+    return reportAgents?.find(a => a.id.includes(sectionKey))?.name || sectionKey;
+  }, [reportAgents]);
+
+  const handleSectionUpdate = (key: SectionName, value: string) => {
+    updateProject(p => {
+      p.updateSectionContent(key, value);
+    });
+  };
 
   React.useEffect(() => {
     if (currentPage >= totalPages && totalPages > 0) {
@@ -68,7 +79,7 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
                         <Section
                             sectionKey={currentSectionKey}
                             title={getSectionTitle(currentSectionKey)}
-                            content={sections[currentSectionKey]!}
+                            content={project?.sections?.[currentSectionKey]!}
                             onUpdate={handleSectionUpdate}
                         />
                     </A4Page>

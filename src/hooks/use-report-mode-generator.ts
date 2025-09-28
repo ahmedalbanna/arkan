@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useTranslate, useSections } from '@/hooks';
+import { useTranslate, useGenerateReportSection } from '@/hooks';
 import { toast } from '@/hooks';
 import type { SectionName } from '@/ai/schemas';
 import { useBuilderStore } from '@/hooks';
@@ -12,8 +12,11 @@ import { useExport } from './use-export';
 import { useAgents } from './use-agents';
 import { AgentCategory } from '@/lib/models/agent';
 import { Section } from '@/lib/models/section';
+import { useAuth } from '@/context/AuthContext';
+import { useGenerationUIStore } from './useGenerationUIStore';
 
-export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: { orderedSections: import('@/lib/models/section').Section[], setOrderedSections: (sections: import('@/lib/models/section').Section[]) => void; }) => {
+
+export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: { orderedSections: Section[], setOrderedSections: (sections: Section[]) => void; }) => {
     const { t, locale } = useLocalization();
     const { project, setProject } = useBuilderStore();
     const translateMutation = useTranslate();
@@ -21,8 +24,7 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     
     const { exportReportDocx, isExporting } = useExport();
-    const { data: sectionConfigs } = useSections();
-    const { agents } = useAgents();
+    const { agents, isLoaded: agentsLoaded } = useAgents();
 
     const reportAgents = useMemo(() => {
         if (!agents) return [];
@@ -38,9 +40,7 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
 
     const handleSectionUpdate = (key: SectionName, value: string) => {
         if (!project) return;
-        project.updateSectionContent(key, value);
-        // Create a new Project instance to trigger a re-render in components that use the project object.
-        setProject(new Project(project.toStateObject()));
+        setProject(new Project({ ...project.toStateObject(), sections: { ...project.sections, [key]: value } }));
     };
 
     const handleTranslateAll = async (targetLang: 'en' | 'ar') => {
@@ -91,13 +91,42 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
 
         await exportReportDocx(project, translatedTitles, sectionsToInclude);
     };
-    
-    const getSectionTitle = useCallback((sectionKey: SectionName) => {
-        return reportAgents?.find(a => a.id.includes(sectionKey))?.name || sectionKey;
-    }, [reportAgents]);
+
+    // --- Start of logic from use-report-generation-logic ---
+    const { userProfile } = useAuth();
+    const [activeMutationKey, setActiveMutationKey] = useState<string | null>(null);
+    const { initializeDependentStates } = useGenerationUIStore();
+
+    const reportGenerationMutation = useGenerateReportSection();
+    const isAnythingGenerating = reportGenerationMutation.isPending;
+
+    const onGenerateSection = async (section: SectionName) => {
+        if (!project) return;
+        
+        const body = {
+            proposal: project.proposal,
+            projectPlan: project.projectPlan,
+            sectionToGenerate: section,
+            otherSections: project.sections,
+            otherDiagrams: Object.fromEntries(Object.entries(project.diagrams || {}).map(([key, value]) => [key, value?.plantUmlCode])),
+            exampleFiles: project.externalContext?.filter((c: any) => c.type === 'example'),
+            contextFiles: project.externalContext?.filter((c: any) => c.type === 'context'),
+        };
+
+        setActiveMutationKey(section);
+        reportGenerationMutation.mutate({ body });
+    };
+
+    const hasCreditsForSingleSection = useMemo(() => (userProfile ? userProfile.credits ?? 0 >= 1 : false), [userProfile]);
 
     useEffect(() => {
-        if (!orderedSections.length && reportAgents.length > 0) {
+        if (agentsLoaded && agents.length > 0 && orderedSections.length > 0) {
+            initializeDependentStates(agents, orderedSections);
+        }
+    }, [agentsLoaded, agents, orderedSections, initializeDependentStates]);
+
+    useEffect(() => {
+        if (!orderedSections.length && agentsLoaded) {
             const initialOrder = reportAgents.map(a => new Section({
                 id: a.id.replace('generate-', '').replace('-section', ''),
                 title: a.name,
@@ -106,7 +135,8 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
             })).sort((a, b) => a.title.localeCompare(b.title));
             setOrderedSections(initialOrder);
         }
-    }, [orderedSections.length, setOrderedSections, reportAgents]);
+    }, [orderedSections.length, setOrderedSections, reportAgents, agentsLoaded]);
+    // --- End of logic from use-report-generation-logic ---
 
 
     return {
@@ -120,9 +150,15 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         generatedSections,
         isExporting,
         handleExportReportDOCX,
-        sections, // Pass sections state
-        getSectionTitle, // Pass helper function
+        sections,
         orderedSections,
         setOrderedSections,
+        isAnythingGenerating,
+        activeMutationKey,
+        onGenerateSection,
+        hasCreditsForSingleSection,
+        agents: reportAgents,
+        agentsLoaded,
+        project,
     };
 };
