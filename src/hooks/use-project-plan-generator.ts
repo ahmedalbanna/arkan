@@ -2,7 +2,7 @@
 import type { ProjectProposal } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { createSpecializedToolHook } from '@/core';
+import { createProjectPlanToolHook } from '@/core';
 import { useBuilderStore, useToast } from '@/hooks';
 import { useGenerateProjectPlan } from '@/hooks/use-project-plan';
 import { getAuthenticatedToken } from '@/lib/authUtils';
@@ -38,7 +38,7 @@ export function useProjectPlanGenerator() {
     const [description, setDescription] = useState('');
     const [deliverables, setDeliverables] = useState('');
 
-    const specializedTool = createSpecializedToolHook({
+    const projectPlanTool = createProjectPlanToolHook({
         toolName: 'project-plan-generator',
         apiEndpoint: '/api/generate-project-plan',
         schema: projectPlanSchema,
@@ -46,7 +46,7 @@ export function useProjectPlanGenerator() {
         successMessage: t('projectPlan.generator.successToast') || 'Project plan generated successfully!',
         errorMessage: t('projectPlan.generator.errorToast') || 'Failed to generate project plan',
         enableFileUpload: false,
-        toolCategory: 'project-management',
+        planType: 'business',
         customFeatures: {
             formatOutput: (data: any) => {
                 if (data.projectPlan) {
@@ -66,14 +66,21 @@ export function useProjectPlanGenerator() {
                 return data.projectDescription?.length >= 10 &&
                     data.keyDeliverables?.length >= 5;
             },
-            getProgressSteps: () => [
-                'Analyzing project requirements',
-                'Defining project scope',
-                'Creating project phases',
-                'Identifying deliverables',
-                'Estimating timelines',
-                'Finalizing project plan'
-            ]
+            getPlanSections: () => [
+                'Project Overview',
+                'Objectives & Goals',
+                'Timeline & Milestones',
+                'Resource Requirements',
+                'Risk Assessment',
+                'Budget Planning',
+                'Success Metrics'
+            ],
+            getTimeline: (data: any) => {
+                return data.projectPlan?.timeline || [];
+            },
+            getMilestones: (data: any) => {
+                return data.projectPlan?.milestones || [];
+            }
         }
     })();
 
@@ -137,29 +144,31 @@ export function useProjectPlanGenerator() {
         t,
 
         // النموذج والحالة
-        form: specializedTool.form,
-        isProcessing: specializedTool.isProcessing || isProcessing,
+        form: projectPlanTool.form,
+        isProcessing: projectPlanTool.isProcessing || isProcessing,
 
         // النصوص والمحتوى
-        originalText: specializedTool.originalText,
-        processedText: specializedTool.processedText,
-        toolResult: specializedTool.toolResult,
+        originalText: projectPlanTool.originalText,
+        processedText: projectPlanTool.processedText,
+        generatedPlan: projectPlanTool.generatedPlan,
 
         // النسخ
-        isCopied: specializedTool.isCopied,
-        handleCopy: specializedTool.copyToClipboard,
+        isCopied: projectPlanTool.isCopied,
+        handleCopy: projectPlanTool.copyToClipboard,
 
         // المعالجة
-        onSubmit: specializedTool.handleSubmit,
-        reset: specializedTool.reset,
+        onSubmit: projectPlanTool.handleSubmit,
+        reset: projectPlanTool.reset,
 
         // النتائج والوظائف المساعدة
-        formatOutput: specializedTool.formatOutput,
-        validateInput: specializedTool.validateInput,
-        getProgressSteps: specializedTool.getProgressSteps,
+        formatOutput: projectPlanTool.formatOutput,
+        validateInput: projectPlanTool.validateInput,
+        getPlanSections: projectPlanTool.getPlanSections,
+        getTimeline: projectPlanTool.getTimeline,
+        getMilestones: projectPlanTool.getMilestones,
 
         // الطفرة (للتوافق مع الكود الموجود)
-        mutation: specializedTool.mutation,
+        mutation: projectPlanTool.mutation,
 
         // الوظائف المخصصة للمشاريع
         description,

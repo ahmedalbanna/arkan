@@ -3,7 +3,7 @@
 
 import { GeneratePresentationOutlineOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
-import { createContentGeneratorHook } from '@/core';
+import { createPresentationToolHook } from '@/core';
 import { z } from 'zod';
 
 // مخطط التحقق من البيانات
@@ -25,7 +25,7 @@ const defaultValues = {
 export function usePresentationOutlineLogic() {
   const { t } = useLocalization();
 
-  const contentGenerator = createContentGeneratorHook({
+  const presentationTool = createPresentationToolHook({
     toolName: 'presentation-outline',
     apiEndpoint: '/api/writing-tools/presentation-outline',
     schema: presentationOutlineSchema,
@@ -33,7 +33,7 @@ export function usePresentationOutlineLogic() {
     successMessage: t('writingTools.presentationOutline.successToast') || 'Outline generated successfully!',
     errorMessage: t('writingTools.presentationOutline.errorToast') || 'Failed to generate outline',
     enableFileUpload: false, // هذا الأداة لا تدعم رفع الملفات
-    outputFormat: 'json',
+    presentationType: 'outline',
     customFeatures: {
       formatOutput: (data: any) => {
         if (data.outline) {
@@ -53,24 +53,30 @@ export function usePresentationOutlineLogic() {
       validateInput: (data: any) => {
         return data.prompt?.length >= 5;
       },
-      getProgressSteps: () => [
-        'Analyzing topic',
-        'Researching content',
-        'Creating structure',
-        'Generating slides',
-        'Finalizing outline'
-      ]
+      getPresentationSections: () => [
+        'Introduction',
+        'Main Content',
+        'Examples',
+        'Conclusion',
+        'Q&A'
+      ],
+      getSlideCount: (data: any) => {
+        return data.outline?.length || 0;
+      },
+      getEstimatedDuration: (data: any) => {
+        return (data.outline?.length || 0) * 2; // دقيقتين لكل شريحة
+      }
     }
   })();
 
   // الحصول على النتائج من الطفرة
-  const results = contentGenerator.mutation.data as GeneratePresentationOutlineOutput | undefined;
+  const results = presentationTool.mutation.data as GeneratePresentationOutlineOutput | undefined;
 
   // معالج النسخ المخصص للعروض التقديمية
   const handleCopy = () => {
     if (!results) return;
     const textToCopy = `${results.cover.title}\n\n` + results.outline.map(item => `${item.title}\n${item.content}`).join('\n\n');
-    contentGenerator.copyToClipboard(textToCopy);
+    presentationTool.copyToClipboard(textToCopy);
   };
 
   return {
@@ -78,29 +84,31 @@ export function usePresentationOutlineLogic() {
     t,
 
     // النموذج والحالة
-    form: contentGenerator.form,
-    isProcessing: contentGenerator.isProcessing,
+    form: presentationTool.form,
+    isProcessing: presentationTool.isProcessing,
 
     // النصوص والمحتوى
-    originalText: contentGenerator.originalText,
-    processedText: contentGenerator.processedText,
-    generatedContent: contentGenerator.generatedContent,
+    originalText: presentationTool.originalText,
+    processedText: presentationTool.processedText,
+    generatedPresentation: presentationTool.generatedPresentation,
 
     // النسخ
-    isCopied: contentGenerator.isCopied,
+    isCopied: presentationTool.isCopied,
     handleCopy,
 
     // المعالجة
-    onSubmit: contentGenerator.handleSubmit,
-    reset: contentGenerator.reset,
+    onSubmit: presentationTool.onSubmit,
+    reset: presentationTool.reset,
 
     // النتائج والوظائف المساعدة
     results,
-    formatOutput: contentGenerator.formatOutput,
-    validateInput: contentGenerator.validateInput,
-    getProgressSteps: contentGenerator.getProgressSteps,
+    formatOutput: presentationTool.formatOutput,
+    validateInput: presentationTool.validateInput,
+    getPresentationSections: presentationTool.getPresentationSections,
+    getSlideCount: presentationTool.getSlideCount,
+    getEstimatedDuration: presentationTool.getEstimatedDuration,
 
     // الطفرة (للتوافق مع الكود الموجود)
-    mutation: contentGenerator.mutation,
+    mutation: presentationTool.mutation,
   };
 }
