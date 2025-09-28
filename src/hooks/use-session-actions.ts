@@ -57,7 +57,11 @@ export function useSessionActions() {
     const [isSavePromptOpen, setIsSavePromptOpen] = useState(false);
     const [projectName, setProjectName] = useState('');
 
-    const { project, loadProject, newSession, updateProject, setHasUnsavedChanges } = useBuilderStore();
+    // Subscribe to the project and hasUnsavedChanges states directly
+    const project = useBuilderStore(state => state.project);
+    const hasUnsavedChanges = useBuilderStore(state => state.hasUnsavedChanges);
+    const { loadProject, newSession, updateProject } = useBuilderStore();
+    
     const saveProjectMutation = useSaveProject();
     const updateProjectMutation = useUpdateProject();
 
@@ -221,5 +225,6 @@ export function useSessionActions() {
         handleExportProposal,
         handleExportReport,
         handleExportPresentation,
+        hasUnsavedChanges, // Expose the reactive state
     };
 }
