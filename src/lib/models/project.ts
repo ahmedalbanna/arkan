@@ -1,6 +1,6 @@
 
 
-import type { AnyProjectProposal, DiagramType, PresentationHistoryEntry, ProjectPlan } from '@/ai/schemas';
+import type { AnyProjectProposal, DiagramType, PresentationHistoryEntry, ProjectPlan, ProjectTask } from '@/ai/schemas';
 import { Diagram, type DiagramProperties } from './diagram';
 
 // --- Types moved from types.ts ---
@@ -391,6 +391,12 @@ export class Project implements SavedProject {
   // --- Project Plan Methods ---
   public setProjectPlan(plan: ProjectPlan | null): void {
     this._projectPlan = plan;
+  }
+
+  public updateTaskStatus(phaseIndex: number, taskIndex: number, newStatus: ProjectTask['status']): void {
+    if (this._projectPlan?.phases?.[phaseIndex]?.tasks?.[taskIndex]) {
+      this._projectPlan.phases[phaseIndex].tasks[taskIndex].status = newStatus;
+    }
   }
 
   // --- Code Generator Methods ---

@@ -4,6 +4,7 @@ export const ProjectTaskSchema = z.object({
     title: z.string().describe('A concise title for the task or user story.'),
     description: z.string().describe('A detailed description of the task, explaining what needs to be done.'),
     acceptanceCriteria: z.array(z.string()).describe('A list of specific, measurable criteria that must be met for the task to be considered complete.'),
+    status: z.enum(['To Do', 'In Progress', 'Done']).default('To Do').describe('The current status of the task.'),
 });
 export type ProjectTask = z.infer<typeof ProjectTaskSchema>;
 
