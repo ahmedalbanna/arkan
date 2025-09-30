@@ -4,8 +4,7 @@
 import { analyzeAcademicDocument } from '@/ai/flows/academic-solver';
 import { ApiAnalyzeSchema } from '@/ai/schemas';
 import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 
 export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {

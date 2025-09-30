@@ -8,7 +8,7 @@ import { generateProposal } from '@/ai/flows/generate-proposal';
 import { GenerateProposalInputSchema, type GenerateProposalInput } from '@/ai/schemas';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { logGeneration } from '@/services/generation-service';
+import { logGeneration } from '@/services';
 
 /**
  * معالج توليد المقترحات

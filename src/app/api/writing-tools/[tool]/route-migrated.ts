@@ -7,8 +7,7 @@
 
 import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { Analytics, PerformanceMonitor } from '@/lib/core/performance';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 
 // Import all flows and schemas
 import { aiResearcher } from '@/ai/flows/ai-researcher';

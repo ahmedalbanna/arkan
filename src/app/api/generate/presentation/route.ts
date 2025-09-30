@@ -4,8 +4,7 @@
 import { generatePresentation } from '@/ai/flows/generate-presentation';
 import { ApiGeneratePresentationSchema } from '@/ai/schemas';
 import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 
 const generatePresentationApiSchema = ApiGeneratePresentationSchema;
 

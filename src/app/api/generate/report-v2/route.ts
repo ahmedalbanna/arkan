@@ -9,7 +9,7 @@ import { GenerateSectionInputSchema } from '@/ai/schemas';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
-import { logGeneration } from '@/services/generation-service';
+import { logGeneration } from '@/services';
 
 /**
  * معالج توليد التقارير

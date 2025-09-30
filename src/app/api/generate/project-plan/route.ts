@@ -3,8 +3,7 @@
 
 import { generateProjectPlan } from '@/ai/flows/generate-project-plan';
 import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 
 const planSchema = z.object({

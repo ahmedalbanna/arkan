@@ -5,8 +5,7 @@ import { generateReportSection } from '@/ai/flows/generate-report-section';
 import { GenerateSectionInputSchema } from '@/ai/schemas';
 import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { adminDb } from '@/lib/firebase/server-init'; // Assuming you have a server-side Firebase Admin SDK init
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service'; // Assuming this is server-side
+import { deductCredit, logGeneration } from '@/services';
 
 export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {

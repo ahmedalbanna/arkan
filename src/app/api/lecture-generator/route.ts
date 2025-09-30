@@ -3,8 +3,7 @@
 
 import { createLectureUnit } from '@/ai/flows/create-lecture-unit';
 import { CreateLectureUnitInputSchema } from '@/ai/schemas/lecture-generator';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 
 export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {

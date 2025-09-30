@@ -3,8 +3,7 @@
 
 import { summarizeFullProject } from '@/ai/flows/summarize-project';
 import { AnyProjectProposalSchema } from '@/ai/schemas';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 
 const summarizeSchema = z.object({

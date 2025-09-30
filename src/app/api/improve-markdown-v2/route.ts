@@ -7,7 +7,7 @@
 import { improveReportMarkdown } from '@/ai/flows/improve-report-markdown';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { logGeneration } from '@/services/generation-service';
+import { logGeneration } from '@/services';
 import { z } from 'zod';
 
 // Schema لتحسين Markdown

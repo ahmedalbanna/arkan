@@ -2,8 +2,7 @@
 'use server';
 
 import { textToSpeech } from '@/ai/flows/text-to-speech';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 
 const ttsSchema = z.object({

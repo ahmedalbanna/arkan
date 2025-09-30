@@ -3,8 +3,7 @@
 
 import { imageToText } from '@/ai/flows/image-to-text';
 import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 
 const SUPPORTED_MIME_TYPES = [
     'application/pdf',

@@ -3,8 +3,7 @@
 
 import { manipulateText } from '@/ai/flows/manipulate-text';
 import { ManipulateTextInputSchema } from '@/ai/schemas';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 
 export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {

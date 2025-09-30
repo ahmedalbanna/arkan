@@ -2,8 +2,7 @@
 
 import { ai } from '@/ai/genkit';
 import { ImageToTextInputSchema, ImageToTextOutputSchema } from '@/ai/schemas';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 
 const explainDiagramSchema = ImageToTextInputSchema.extend({

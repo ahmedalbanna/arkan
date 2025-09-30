@@ -5,7 +5,7 @@
  */
 
 import { withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit } from '@/services/credit-service';
+import { deductCredit } from '@/services';
 import type {
     ApiHandler,
     ApiHandlerContext,

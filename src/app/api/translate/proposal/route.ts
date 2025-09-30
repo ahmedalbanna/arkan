@@ -4,8 +4,7 @@
 import { translateProposal } from '@/ai/flows/translate-proposal';
 import { ApiTranslateProposalSchema } from '@/ai/schemas';
 import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();

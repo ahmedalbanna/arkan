@@ -6,8 +6,7 @@
 
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 
 // استيراد جميع الـ flows والـ schemas
 import { aiResearcher } from '@/ai/flows/ai-researcher';

@@ -8,7 +8,7 @@ import { agentChat } from '@/ai/flows/agent-chat';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { getFirebaseClientDb } from '@/lib/core/api';
-import { logGeneration } from '@/services/generation-service';
+import { logGeneration } from '@/services';
 import { push, ref, serverTimestamp, update } from 'firebase/database';
 import { z } from 'zod';
 

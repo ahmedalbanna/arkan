@@ -7,7 +7,7 @@
 import { analyzeContext } from '@/ai/flows/analyze-context';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { logGeneration } from '@/services/generation-service';
+import { logGeneration } from '@/services';
 import { z } from 'zod';
 
 // Schema لملف واحد في الطلب

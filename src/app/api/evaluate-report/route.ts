@@ -3,8 +3,7 @@
 
 import { evaluateReport } from '@/ai/flows/evaluate-report';
 import { DiagramTypeSchema, ProjectProposalSchema, SectionNameSchema } from '@/ai/schemas';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 
 const evaluateReportSchema = z.object({

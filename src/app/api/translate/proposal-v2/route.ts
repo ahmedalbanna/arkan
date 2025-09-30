@@ -8,7 +8,7 @@ import { translateProposal } from '@/ai/flows/translate-proposal';
 import { ApiTranslateProposalSchema } from '@/ai/schemas';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { logGeneration } from '@/services/generation-service';
+import { logGeneration } from '@/services';
 
 /**
  * معالج ترجمة المقترحات

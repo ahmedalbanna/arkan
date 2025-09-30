@@ -8,7 +8,7 @@ import { createLectureUnit } from '@/ai/flows/create-lecture-unit';
 import { CreateLectureUnitInputSchema } from '@/ai/schemas/lecture-generator';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { logGeneration } from '@/services/generation-service';
+import { logGeneration } from '@/services';
 
 /**
  * معالج توليد المحاضرات

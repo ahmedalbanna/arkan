@@ -1,20 +1,20 @@
 
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  fetchSections as fetchSectionsApi,
-  createSection as createSectionApi,
-  updateSection as updateSectionApi,
-  deleteSection as deleteSectionApi,
-} from '@/services/section-service';
 import { useAuth } from '@/context/AuthContext';
-import { toast } from './use-toast';
-import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
+import { handleErrorUtility } from '@/lib/errorUtils';
+import {
+  createSection as createSectionApi,
+  deleteSection as deleteSectionApi,
+  fetchSections as fetchSectionsApi,
+  updateSection as updateSectionApi,
+} from '@/services';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from './use-toast';
 
-import { sectionKeys } from '@/lib/query-keys';
 import { Section, type SectionProperties } from '@/lib/models/section'; // NEW: Import our class
+import { sectionKeys } from '@/lib/query-keys';
 
 /**
  * Fetches dynamic sections.

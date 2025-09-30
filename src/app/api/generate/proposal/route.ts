@@ -3,8 +3,7 @@
 
 import { generateProposal } from '@/ai/flows/generate-proposal';
 import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 
 import { GenerateProposalInputSchema, type GenerateProposalInput } from '@/ai/schemas';
 

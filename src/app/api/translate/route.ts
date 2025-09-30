@@ -2,8 +2,7 @@
 'use server';
 
 import { translateText } from '@/ai/flows/translate-text';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 
 const translateSchema = z.object({

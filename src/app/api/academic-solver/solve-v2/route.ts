@@ -8,8 +8,7 @@ import { solveAcademicDocument } from '@/ai/flows/academic-solver';
 import { ApiSolveSchema } from '@/ai/schemas';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 
 /**
  * معالج حل المشاكل الأكاديمية

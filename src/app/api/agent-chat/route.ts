@@ -3,8 +3,7 @@
 
 import { agentChat } from '@/ai/flows/agent-chat';
 import { createApiResponseEnhanced, getFirebaseClientDb, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit, logGeneration } from '@/services';
 import { push, ref, serverTimestamp, update } from 'firebase/database';
 import { z } from 'zod';
 

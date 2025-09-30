@@ -3,7 +3,7 @@
 import { generateImage } from '@/ai/flows/generate-image';
 import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
-import { logGeneration } from '@/services/generation-service';
+import { logGeneration } from '@/services';
 import { getStorage } from 'firebase-admin/storage';
 import { z } from 'zod';
 
