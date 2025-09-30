@@ -27,13 +27,13 @@ npm run dev
 #### للعميل (React Components):
 ```typescript
 // ✅ صحيح
-import { PerformanceMonitor, Analytics } from '@/lib/core/client';
+import { PerformanceMonitor, Analytics } from '@/core/client';
 ```
 
 #### للخادم (API Routes):
 ```typescript
 // ✅ صحيح
-import { adminAuth, adminFirestore } from '@/lib/core/server';
+import { adminAuth, adminFirestore } from '@/core/server';
 ```
 
 ## 🔧 إذا لم يعمل

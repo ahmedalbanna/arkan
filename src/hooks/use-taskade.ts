@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 
 
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import app from '@/lib/core/firebase/client-init';
+import app from '@/core/firebase/client-init';
 import {
   StartGenerationPayload
 } from "@/lib/types";

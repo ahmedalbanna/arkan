@@ -5,8 +5,8 @@
  * مع استخدام النظام الجديد المحسن
  */
 
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { Analytics, PerformanceMonitor } from '@/lib/core/performance';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/core/api';
+import { Analytics, PerformanceMonitor } from '@/core/performance';
 import { createUser, getPaginatedUsers } from '@/lib/db/queries';
 import { z } from 'zod';
 
