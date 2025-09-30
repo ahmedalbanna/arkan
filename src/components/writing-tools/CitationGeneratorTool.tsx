@@ -1,18 +1,18 @@
 
 'use client';
 
-import { Controller } from 'react-hook-form';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Loader2, Sparkles, Copy, Check } from 'lucide-react';
-import { useLocalization } from '@/context/LocalizationContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-styles';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useLocalization } from '@/context/LocalizationContext';
 import { useCitationGeneratorLogic } from '@/hooks';
+import { markdownComponents } from '@/lib/markdown-styles';
+import { Check, Copy, Loader2, Sparkles } from 'lucide-react';
+import { Controller } from 'react-hook-form';
+import ReactMarkdown from 'react-markdown';
 
 export function CitationGeneratorTool() {
   const { t } = useLocalization();
@@ -20,7 +20,7 @@ export function CitationGeneratorTool() {
     form,
     mutation,
     onSubmit,
-    generatedCitations,
+    generatedContent,
     isCopied,
     handleCopy,
   } = useCitationGeneratorLogic();
@@ -73,11 +73,11 @@ export function CitationGeneratorTool() {
           </Button>
         </form>
 
-        {(mutation.isPending || generatedCitations.length > 0) && (
+        {(mutation.isPending || generatedContent?.citations?.length > 0) && (
           <div className="space-y-2 pt-6 border-t">
             <h3 className="font-semibold text-muted-foreground flex justify-between items-center">
               <span>{t('writingTools.citationGenerator.generatedLabel')}</span>
-              {generatedCitations.length > 0 && (
+              {generatedContent?.citations?.length > 0 && (
                 <Button variant="ghost" size="icon" onClick={handleCopy}>
                   {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                 </Button>
@@ -85,12 +85,12 @@ export function CitationGeneratorTool() {
             </h3>
             <ScrollArea className="h-72 rounded-md border p-4 bg-muted/30">
               {mutation.isPending ? (
-                  <div className="flex items-center justify-center h-full">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
               ) : (
                 <ul className="space-y-4">
-                  {generatedCitations.map((citation, index) => (
+                  {generatedContent?.citations?.map((citation: any, index: number) => (
                     <li key={index} className="text-sm font-mono prose dark:prose-invert max-w-none"><ReactMarkdown components={markdownComponents}>{citation}</ReactMarkdown></li>
                   ))}
                 </ul>

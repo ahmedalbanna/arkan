@@ -1,11 +1,11 @@
 
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import * as pdfjs from 'pdfjs-dist';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Loader2, ZoomIn, ZoomOut } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { ChevronLeft, ChevronRight, Loader2, ZoomIn, ZoomOut } from 'lucide-react';
+import * as pdfjs from 'pdfjs-dist';
+import { useEffect, useRef, useState } from 'react';
 
 // The worker is now copied to the public static path by next.config.js
 pdfjs.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
@@ -53,10 +53,11 @@ export function PdfPreview({ fileUri }: PdfPreviewProps) {
                 const canvas = canvasRef.current;
                 if (canvas) {
                     const context = canvas.getContext('2d');
-                    if(context) {
+                    if (context) {
                         canvas.height = viewport.height;
                         canvas.width = viewport.width;
                         const renderContext = {
+                            canvas: canvasRef.current,
                             canvasContext: context,
                             viewport,
                         };
@@ -86,7 +87,7 @@ export function PdfPreview({ fileUri }: PdfPreviewProps) {
                 <Button variant="outline" size="icon" onClick={goToPrevPage} disabled={currentPage <= 1 || isLoading}>
                     <ChevronLeft className="me-2 h-4 w-4" />
                 </Button>
-                 <span className="text-sm font-medium">Page {currentPage} of {numPages}</span>
+                <span className="text-sm font-medium">Page {currentPage} of {numPages}</span>
                 <Button variant="outline" size="icon" onClick={goToNextPage} disabled={currentPage >= numPages || isLoading}>
                     <ChevronRight className="me-2 h-4 w-4" />
                 </Button>
@@ -94,7 +95,7 @@ export function PdfPreview({ fileUri }: PdfPreviewProps) {
                 <Button variant="outline" size="icon" onClick={() => setScale(s => Math.max(0.5, s - 0.2))} disabled={scale <= 0.5 || isLoading}>
                     <ZoomOut className="me-2 h-4 w-4" />
                 </Button>
-                 <Button variant="outline" size="icon" onClick={() => setScale(s => Math.min(3, s + 0.2))} disabled={scale >= 3 || isLoading}>
+                <Button variant="outline" size="icon" onClick={() => setScale(s => Math.min(3, s + 0.2))} disabled={scale >= 3 || isLoading}>
                     <ZoomIn className="me-2 h-4 w-4" />
                 </Button>
             </div>

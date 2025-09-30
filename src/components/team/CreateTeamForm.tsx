@@ -36,7 +36,11 @@ export function CreateTeamForm() {
     });
 
     const mutation = useMutation({
-        mutationFn: createTeam,
+        mutationFn: async (data: CreateTeamData) => {
+            const token = await firebaseUser?.getIdToken();
+            if (!token) throw new Error('No token available');
+            return createTeam(data, token);
+        },
         onSuccess: () => {
             toast({
                 title: t('team.createSuccessTitle'),

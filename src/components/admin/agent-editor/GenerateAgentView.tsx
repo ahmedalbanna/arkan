@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useCreateAgent, useGenerateAgentConfig } from '@/hooks';
-import { AgentCategory, type AgentPrompt } from '@/lib/types';
+import { type AgentCategory, type AgentPrompt } from '@/lib/types';
 import { ArrowLeft, Bot, Braces, BrainCircuit, Check, Copy, Flame, Loader2, PlusCircle, RotateCcw, SendHorizonal, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
@@ -47,7 +47,7 @@ export function GenerateAgentView() {
     const [includeJsonOutput, setIncludeJsonOutput] = useState(false);
     const [contextFiles, setContextFiles] = useState<UploadedFile[]>([]);
     const [generatedData, setGeneratedData] = useState<GeneratedAgentData | null>(null);
-    const [selectedCategory, setSelectedCategory] = useState<AgentCategory>(AgentCategory.ContentGeneration);
+    const [selectedCategory, setSelectedCategory] = useState<AgentCategory>('ContentGeneration');
     const createAgentMutation = useCreateAgent();
 
     const generateMutation = useGenerateAgentConfig();
@@ -252,7 +252,7 @@ export function GenerateAgentView() {
                             <Select value={selectedCategory} onValueChange={(val) => setSelectedCategory(val as AgentCategory)}>
                                 <SelectTrigger id="agent-category" className="bg-white/5 border-white/20 h-12"><SelectValue placeholder={selectedCategory} /></SelectTrigger>
                                 <SelectContent>
-                                    {Object.values(AgentCategory).map(cat => <SelectItem key={cat} value={cat}>{cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</SelectItem>)}
+                                    {['ContentGeneration', 'Analysis', 'Research', 'Writing', 'Technical', 'Creative'].map(cat => <SelectItem key={cat} value={cat}>{cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                         </div>

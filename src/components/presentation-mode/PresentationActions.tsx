@@ -3,10 +3,8 @@
 
 import { Button } from '@/components/ui/button';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useGenerationUIStore } from '@/hooks';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { Loader2, Languages, Download, FileText } from 'lucide-react';
-import { useExport } from '@/hooks';
+import { useBuilderStore, useExport, useGenerationUIStore } from '@/hooks';
+import { Download, Languages, Loader2 } from 'lucide-react';
 
 interface PresentationActionsProps {
   isGenerating: boolean;
@@ -30,7 +28,7 @@ export const PresentationActions = ({ isGenerating, onTranslateAll, isTranslatin
 
   const handleExport = () => {
     if (project && slides) {
-        exportPresentationPptx(project, activePresentationId);
+      exportPresentationPptx(project, activePresentationId);
     }
   };
 
@@ -50,10 +48,10 @@ export const PresentationActions = ({ isGenerating, onTranslateAll, isTranslatin
         {locale === 'en' ? t('builder.presentationGenerator.translateButton.ar') : t('builder.presentationGenerator.translateButton.en')}
       </Button>
 
-        <Button variant="outline" size="sm" disabled={isBusy || !slides} onClick={handleExport}>
-            {isExporting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Download className="me-2 h-4 w-4" />}
-            {t('builder.presentationGenerator.exportButton')}
-        </Button>
+      <Button variant="outline" size="sm" disabled={isBusy || !slides} onClick={handleExport}>
+        {isExporting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Download className="me-2 h-4 w-4" />}
+        {t('builder.presentationGenerator.exportButton')}
+      </Button>
     </div>
   );
 };

@@ -1,7 +1,6 @@
 
 'use client';
 
-import { useSessionPlanGeneratorLogic } from '@/hooks/use-session-plan-generator-logic';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -9,10 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import { SessionPlanDisplay } from '@/components/writing-tools/SessionPlanDisplay';
+import { useSessionPlanGeneratorLogic } from '@/hooks/use-session-plan-generator-logic';
 import { Loader2 } from 'lucide-react';
 
 export const SessionPlanGenerator = () => {
-  const { form, mutation, result, onSubmit } = useSessionPlanGeneratorLogic();
+  const { form, mutation, generatedContent, onSubmit } = useSessionPlanGeneratorLogic();
 
   return (
     <div className="space-y-8">
@@ -116,7 +116,7 @@ export const SessionPlanGenerator = () => {
         </Card>
       )}
 
-      {result && <SessionPlanDisplay data={result} />}
+      {generatedContent && <SessionPlanDisplay data={generatedContent} />}
     </div>
   );
 };

@@ -1,17 +1,17 @@
 
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Sparkles, Package } from 'lucide-react';
-import { useToast } from '@/hooks';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
-import { useBuilderStore } from '@/hooks';
-import { useCodebaseStore } from '@/hooks';
+import { useBuilderStore, useToast } from '@/hooks';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Loader2, Package, Sparkles } from 'lucide-react';
+import { useState } from 'react';
+// import { useCodebaseStore } from '@/hooks'; // Not available
 import type { Codebase } from '@/ai/schemas';
-import FileTreeView from './FileTreeView';
 import { useLocalization } from '@/context/LocalizationContext';
+import FileTreeView from './FileTreeView';
 
 async function generateCodebaseApi(variables: { proposal: any; token: string }): Promise<Codebase> {
   const response = await fetch('/api/generate-codebase', {
@@ -33,8 +33,9 @@ export default function CodebaseGenerator() {
   const { toast } = useToast();
   const { firebaseUser, refetchUser } = useAuth();
   const queryClient = useQueryClient();
-  const { proposal } = useBuilderStore();
-  const { codebase, setCodebase } = useCodebaseStore();
+  const { project } = useBuilderStore();
+  const proposal = project?.proposal;
+  const [codebase, setCodebase] = useState<Codebase | null>(null);
   const { t, locale } = useLocalization();
   const mutation = useMutation({
     mutationFn: generateCodebaseApi,

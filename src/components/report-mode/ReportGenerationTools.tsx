@@ -2,15 +2,14 @@
 
 'use client';
 
-import React from 'react';
+import { type SectionName as SectionNameType } from '@/ai/schemas';
+import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
 import { Accordion } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { type SectionName as SectionNameType } from '@/ai/schemas';
-import { PanelLeftClose } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useReportGenerationLogic } from '@/hooks';
-import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
+import { useReportModeGenerator } from '@/hooks';
+import { cn } from '@/lib/utils';
+import { PanelLeftClose } from 'lucide-react';
 import { Button } from '../ui/button';
 
 interface GenerationToolsProps {
@@ -24,7 +23,8 @@ export const GenerationTools = ({ onCollapseToggle }: GenerationToolsProps) => {
         onGenerateSection,
         hasCreditsForSingleSection,
         orderedSections,
-    } = useReportGenerationLogic();
+        agents,
+    } = useReportModeGenerator();
 
     const isDisabled = isAnythingGenerating;
     const { t } = useLocalization();
@@ -38,20 +38,21 @@ export const GenerationTools = ({ onCollapseToggle }: GenerationToolsProps) => {
                         <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
                         <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
                     </div>
-                     <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
+                    <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
                         <PanelLeftClose className="h-5 w-5" />
                     </Button>
                 </div>
             </CardHeader>
             <CardContent className="flex-grow overflow-y-auto pr-2">
                 <Accordion type="multiple" className="w-full space-y-1">
-                    {orderedSections.map((key) => {
+                    {orderedSections.map((key: any) => {
                         const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
                         return (
                             <SectionAccordionItem
                                 key={key}
-                                sectionKey={key as SectionNameType}
-                                onGenerate={onGenerateSection}
+                                itemKey={key as SectionNameType}
+                                agent={agents.find((a: any) => a.id === key) || agents[0]}
+                                onGenerate={() => onGenerateSection(key as SectionNameType)}
                                 isGenerating={isGeneratingThis}
                                 isAnythingGenerating={isAnythingGenerating}
                                 hasCredits={!!hasCreditsForSingleSection}

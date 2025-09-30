@@ -15,12 +15,13 @@ import { useExport } from './use-export';
 import { useGenerationUIStore } from './useGenerationUIStore';
 
 
-export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: { orderedSections: Section[], setOrderedSections: (sections: Section[]) => void; }) => {
+export const useReportModeGenerator = () => {
     const { t, locale } = useLocalization();
     const { project, setProject } = useBuilderStore();
     const translateMutation = useTranslate();
     const [isTranslatingAll, setIsTranslatingAll] = useState(false);
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
+    const [orderedSections, setOrderedSections] = useState<Section[]>([]);
 
     const { exportReportDocx, isExporting } = useExport();
     const { agents, isLoaded: agentsLoaded } = useAgents();
@@ -150,7 +151,7 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         reportGenerationMutation.mutation.mutate({ body });
     };
 
-    const hasCreditsForSingleSection = useMemo(() => (userProfile ? userProfile.credits ?? 0 >= 1 : false), [userProfile]);
+    const hasCreditsForSingleSection = useMemo(() => Boolean(userProfile && (userProfile.credits ?? 0) >= 1), [userProfile]);
 
     useEffect(() => {
         if (agentsLoaded && agents.length > 0 && orderedSections.length > 0) {
@@ -196,15 +197,15 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
 
         // النظام الجديد من src/core
         reportTool,
-        isProcessing: reportTool.isProcessing,
-        processedText: reportTool.processedText,
-        reportContent: reportTool.reportContent,
-        isCopied: reportTool.isCopied,
-        handleCopy: reportTool.handleCopy,
-        onSubmit: reportTool.onSubmit,
-        reset: reportTool.reset,
-        getReportSections: reportTool.getReportSections,
-        validateReportStructure: reportTool.validateReportStructure,
-        formatReportOutput: reportTool.formatReportOutput,
+        reportToolProcessing: reportTool.isProcessing,
+        reportToolProcessedText: reportTool.processedText,
+        reportToolContent: reportTool.reportContent,
+        reportToolCopied: reportTool.isCopied,
+        reportToolHandleCopy: reportTool.handleCopy,
+        reportToolOnSubmit: reportTool.onSubmit,
+        reportToolReset: reportTool.reset,
+        reportToolGetSections: reportTool.getReportSections,
+        reportToolValidateStructure: reportTool.validateReportStructure,
+        reportToolFormatOutput: reportTool.formatReportOutput,
     };
 };

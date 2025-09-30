@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useDebounce } from '@/hooks';
-import { generationLogKeys } from '@/lib/core/query-keys';
+// import { generationLogKeys } from '@/lib/core/query-keys'; // Not available
 import type { GenerationLog } from '@/services';
 import { fetchGenerationLogs } from '@/services';
 import { useInfiniteQuery } from '@tanstack/react-query';
@@ -109,7 +109,7 @@ export default function GenerationLogViewer() {
         isFetchingNextPage,
         status,
     } = useInfiniteQuery({
-        queryKey: generationLogKeys.list({ agentId: debouncedAgentId, userId: debouncedUserId }),
+        queryKey: ['generation-logs', { agentId: debouncedAgentId, userId: debouncedUserId }],
         queryFn: async ({ pageParam }) => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
@@ -189,8 +189,8 @@ export default function GenerationLogViewer() {
                                         <TableCell className="font-medium">{log.agentId}</TableCell>
                                         <TableCell className="truncate max-w-[200px]">{log.userName}</TableCell>
                                         <TableCell>
-                                            <span title={new Date(log.createdAt).toLocaleString()}>
-                                                {formatDistanceToNow(new Date(log.createdAt), { addSuffix: true })}
+                                            <span title={log.createdAt ? new Date(log.createdAt).toLocaleString() : 'Unknown'}>
+                                                {log.createdAt ? formatDistanceToNow(new Date(log.createdAt), { addSuffix: true }) : 'Unknown'}
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right">

@@ -2,14 +2,14 @@
 'use client';
 
 import { useReportModeGenerator } from '@/hooks';
-import { lazy, Suspense, useState } from 'react';
+import type { Section } from '@/lib/models/section';
+import { cn } from '@/lib/utils';
+import { PanelRightOpen } from 'lucide-react';
+import { Suspense } from 'react';
+import { Button } from '../ui/button';
 import { Skeleton } from '../ui/skeleton';
 import { GenerationTools } from './GenerationTools';
-import { cn } from '@/lib/utils';
-import { Button } from '../ui/button';
-import { PanelLeftClose, PanelRightOpen } from 'lucide-react';
 import { ReportResults } from './ReportResults';
-import type { Section } from '@/lib/models/section';
 
 function ReportSkeleton() {
     return (
@@ -25,8 +25,6 @@ function ReportSkeleton() {
 }
 
 export default function ReportModeGenerator() {
-    const [orderedSections, setOrderedSections] = useState<Section[]>([]);
-    
     const {
         locale,
         isPanelCollapsed,
@@ -37,8 +35,10 @@ export default function ReportModeGenerator() {
         onGenerateSection,
         hasCreditsForSingleSection,
         agents,
-        agentsLoaded
-    } = useReportModeGenerator({ orderedSections, setOrderedSections });
+        agentsLoaded,
+        orderedSections,
+        setOrderedSections
+    } = useReportModeGenerator();
 
     if (!agentsLoaded) {
         return <ReportSkeleton />;
@@ -58,7 +58,7 @@ export default function ReportModeGenerator() {
                     </Button>
                 </div>
             )}
-             <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
+            <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
                 <GenerationTools
                     onCollapseToggle={() => setIsPanelCollapsed(true)}
                     orderedSections={orderedSections}
@@ -73,7 +73,7 @@ export default function ReportModeGenerator() {
 
             <div className={cn("lg:overflow-y-auto pr-2", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
                 <Suspense fallback={<ReportSkeleton />}>
-                    <ReportResults generatedSections={generatedSections.map(s => s.id as any)} />
+                    <ReportResults generatedSections={generatedSections.map((s: Section) => s.id as any)} />
                 </Suspense>
             </div>
         </div>

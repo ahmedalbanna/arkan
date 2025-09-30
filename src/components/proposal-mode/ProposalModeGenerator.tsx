@@ -65,6 +65,7 @@ export function ProposalModeGenerator() {
         isPanelCollapsed,
         setIsPanelCollapsed,
         markdownContent,
+        handleProposalUpdate,
     } = useProposalModeGeneratorLogic();
 
     const [viewMode, setViewMode] = useState<'formatted' | 'markdown'>('formatted');
@@ -122,7 +123,7 @@ export function ProposalModeGenerator() {
                     </CardHeader>
                     <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'formatted' | 'markdown')} className="flex flex-col flex-grow">
                         <div className="flex justify-between items-center px-4 py-2 border-y bg-background">
-                             <div className="flex-1">
+                            <div className="flex-1">
                                 <TabsList>
                                     <TabsTrigger value="formatted"><File className="me-2 h-4 w-4" /> Formatted</TabsTrigger>
                                     <TabsTrigger value="markdown"><Code className="me-2 h-4 w-4" /> Markdown</TabsTrigger>
@@ -141,7 +142,7 @@ export function ProposalModeGenerator() {
                                     </Button>
                                 </div>
                             )}
-                             <div className="flex-1 flex justify-end">
+                            <div className="flex-1 flex justify-end">
                                 {viewMode === 'formatted' && (
                                     <div className="flex items-center gap-1">
                                         <Button variant="ghost" size="icon" onClick={() => setZoom(z => Math.max(0.5, z - 0.1))}><ZoomOut className="h-4 w-4" /></Button>
@@ -164,7 +165,11 @@ export function ProposalModeGenerator() {
                                             </div>
                                         ) : (
                                             <Suspense fallback={<ProposalSkeleton />}>
-                                                <FormattedProposalView proposal={proposal} currentPage={currentPage} />
+                                                <FormattedProposalView
+                                                    proposal={proposal}
+                                                    currentPage={currentPage}
+                                                    onUpdate={handleProposalUpdate}
+                                                />
                                             </Suspense>
                                         )}
                                     </div>

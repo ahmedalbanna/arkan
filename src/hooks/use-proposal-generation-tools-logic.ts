@@ -2,13 +2,13 @@
 
 'use client';
 
+import type { AdvancedProposalFields } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useGenerateProposal, useGenerationUIStore } from '@/hooks';
-import type { AdvancedProposalFields } from '@/lib/models/project';
 import { useState } from 'react';
-import { useWritingTool } from './use-writing-tools';
 import { toast } from './use-toast';
+import { useWritingTool } from './use-writing-tools';
 
 export function useProposalGenerationToolsLogic() {
     const { t } = useLocalization();

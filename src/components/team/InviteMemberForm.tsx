@@ -34,7 +34,11 @@ export function InviteMemberForm({ teamId }: { teamId: string }) {
     });
 
     const mutation = useMutation({
-        mutationFn: inviteMember,
+        mutationFn: async (data: InviteMemberData) => {
+            const token = await firebaseUser?.getIdToken();
+            if (!token) throw new Error('No token available');
+            return inviteMember(teamId, data, token);
+        },
         onSuccess: (data, variables) => {
             queryClient.invalidateQueries({ queryKey: teamKeys.lists() });
             toast({

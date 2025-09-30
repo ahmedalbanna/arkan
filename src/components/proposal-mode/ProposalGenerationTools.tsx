@@ -2,20 +2,17 @@
 
 'use client';
 
-import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
-import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal, Lightbulb } from 'lucide-react';
-import type { AdvancedProposalFields } from '@/lib/models/project';
-import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { useProposalGenerationToolsLogic } from '@/hooks/use-proposal-generation-tools-logic';
+import { cn } from '@/lib/utils';
+import { Lightbulb, Loader2, Plus, SlidersHorizontal, Sparkles, Trash2 } from 'lucide-react';
 
 interface GenerateButtonProps {
     isGenerating: boolean;
@@ -59,33 +56,33 @@ const AdvancedFieldsForm = () => {
         <div className="space-y-4">
             <div className="space-y-1">
                 <Label htmlFor="projectTitle">Project Title</Label>
-                <Input id="projectTitle" name="projectTitle" value={advancedFields.projectTitle} onChange={handleFieldChange} placeholder="Enter the project title..."/>
+                <Input id="projectTitle" name="projectTitle" value={advancedFields.projectTitle} onChange={handleFieldChange} placeholder="Enter the project title..." />
                 <p className="text-xs text-muted-foreground">A clear, concise title that captures the essence of your project.</p>
             </div>
-             <div className="space-y-1">
+            <div className="space-y-1">
                 <Label htmlFor="projectObjective">Project Objective</Label>
-                <Textarea id="projectObjective" name="projectObjective" value={advancedFields.projectObjective} onChange={handleFieldChange} rows={3} placeholder="Describe the main objective of the project..."/>
+                <Textarea id="projectObjective" name="projectObjective" value={advancedFields.projectObjective} onChange={handleFieldChange} rows={3} placeholder="Describe the main objective of the project..." />
                 <p className="text-xs text-muted-foreground">What is the primary goal this project aims to achieve?</p>
             </div>
             <div className="space-y-1">
                 <Label htmlFor="expectedOutcomes">Expected Outcomes</Label>
-                <Textarea id="expectedOutcomes" name="expectedOutcomes" value={advancedFields.expectedOutcomes} onChange={handleFieldChange} rows={3} placeholder="List the expected outcomes and deliverables..."/>
-                 <p className="text-xs text-muted-foreground">What specific results and deliverables do you expect from this project?</p>
+                <Textarea id="expectedOutcomes" name="expectedOutcomes" value={advancedFields.expectedOutcomes} onChange={handleFieldChange} rows={3} placeholder="List the expected outcomes and deliverables..." />
+                <p className="text-xs text-muted-foreground">What specific results and deliverables do you expect from this project?</p>
             </div>
-             <div className="space-y-1">
+            <div className="space-y-1">
                 <Label htmlFor="timeline">Timeline</Label>
-                <Input id="timeline" name="timeline" value={advancedFields.timeline} onChange={handleFieldChange} placeholder="e.g., 6 months, Q4 2024"/>
+                <Input id="timeline" name="timeline" value={advancedFields.timeline} onChange={handleFieldChange} placeholder="e.g., 6 months, Q4 2024" />
                 <p className="text-xs text-muted-foreground">What is the estimated duration of the project?</p>
             </div>
             <div className="space-y-1">
                 <Label htmlFor="methodology">Methodology</Label>
-                <Input id="methodology" name="methodology" value={advancedFields.methodology} onChange={handleFieldChange} placeholder="e.g., Agile, Waterfall, Scrum"/>
+                <Input id="methodology" name="methodology" value={advancedFields.methodology} onChange={handleFieldChange} placeholder="e.g., Agile, Waterfall, Scrum" />
                 <p className="text-xs text-muted-foreground">What approach or process will be followed for this project?</p>
             </div>
-              <div className="space-y-1">
+            <div className="space-y-1">
                 <Label htmlFor="knowledge">Knowledge & Context</Label>
-                <Textarea id="knowledge" name="knowledge" value={advancedFields.knowledge} onChange={handleFieldChange} rows={5} placeholder="Provide background information, rationale, potential risks, and any other context..."/>
-                 <p className="text-xs text-muted-foreground">Provide any background info, rationale, risks, or other context to guide the AI.</p>
+                <Textarea id="knowledge" name="additionalContext" value={advancedFields.additionalContext || ''} onChange={handleFieldChange} rows={5} placeholder="Provide background information, rationale, potential risks, and any other context..." />
+                <p className="text-xs text-muted-foreground">Provide any background info, rationale, risks, or other context to guide the AI.</p>
             </div>
         </div>
     )
@@ -179,7 +176,7 @@ export const ProposalGenerationTools = ({
 
                 <Accordion type="multiple" className="w-full space-y-4">
                     <AccordionItem value="item-1">
-                        <AccordionTrigger className="font-semibold text-base"><SlidersHorizontal className="me-2 h-4 w-4"/>{t('builder.proposalGenerator.generationSettings')}</AccordionTrigger>
+                        <AccordionTrigger className="font-semibold text-base"><SlidersHorizontal className="me-2 h-4 w-4" />{t('builder.proposalGenerator.generationSettings')}</AccordionTrigger>
                         <AccordionContent className="pt-4 space-y-4">
                             <div className="space-y-2">
                                 <Label className="text-xs font-semibold text-muted-foreground">{t('builder.proposalGenerator.customGuidelinesLabel')}</Label>

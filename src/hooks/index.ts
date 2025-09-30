@@ -97,6 +97,7 @@ export * from './use-report-results';
 // ===== Diagram Tools Logic Hooks =====
 export * from './use-diagram-generation-tools';
 export * from './use-diagram-generator';
+export * from './use-docx-styles';
 
 // ===== Specialized Tools Logic Hooks =====
 export * from './use-guideline-editor';
@@ -164,8 +165,8 @@ export * from './useBuilderStore';
 export * from './useChatInterface';
 // Note: This store is not a module, so it's commented out
 // export * from './usePresentationStore';
+export * from './use-report-mode-generator';
 export * from './usePresentationTemplateManager';
-export * from './useReportModeGenerator';
 // Note: This store is not a module, so it's commented out
 // export * from './useReportStore';
 

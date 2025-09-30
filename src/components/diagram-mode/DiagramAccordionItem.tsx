@@ -2,13 +2,12 @@
 
 'use client';
 
-import React from 'react';
+import { type DiagramType } from '@/ai/schemas';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSectionAccordionItemLogic } from '@/hooks';
+import { FileText, Loader2, Sparkles } from 'lucide-react';
 
 export const DiagramAccordionItem = ({
     diagramType,
@@ -24,9 +23,10 @@ export const DiagramAccordionItem = ({
     const {
         t,
         title,
-        Icon,
         disabledReason,
-    } = useSectionAccordionItemLogic(diagramType);
+    } = useSectionAccordionItemLogic({ id: diagramType, name: diagramType } as any);
+
+    const Icon = FileText; // Default icon for diagrams
 
     // Context is now handled automatically by the AI, so we always enable generation if credits are available.
     const canGenerate = hasCredits;
@@ -40,7 +40,7 @@ export const DiagramAccordionItem = ({
                         {title}
                     </div>
                 </AccordionTrigger>
-                 <div className="p-2">
+                <div className="p-2">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -67,7 +67,7 @@ export const DiagramAccordionItem = ({
                 </div>
             </div>
             <AccordionContent className="space-y-4 p-4 text-xs text-muted-foreground">
-              {t('builder.diagramGenerator.autoContextNote')}
+                {t('builder.diagramGenerator.autoContextNote')}
             </AccordionContent>
         </AccordionItem>
     );

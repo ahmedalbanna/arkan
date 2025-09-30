@@ -1,6 +1,5 @@
 'use client';
 
-import { useCreatePresentationTemplate, useDeletePresentationTemplate, usePresentationTemplates, useUpdatePresentationTemplate } from '@/hooks';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
-import { toast, useSections } from '@/hooks';
+import { toast, usePresentationTemplateManager, useSections } from '@/hooks';
 import { PresentationTemplate } from '@/lib/models/presentationTemplate';
 import { useMemo, useState } from 'react';
 
@@ -147,7 +146,7 @@ function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDele
 function CreatePresentationTemplateDialog() {
     const { t } = useLocalization();
     const [isOpen, setIsOpen] = useState(false);
-    const createMutation = useCreatePresentationTemplate();
+    const templateManager = usePresentationTemplateManager();
     const { data: sections } = useSections();
     const reportSections = useMemo(() => (sections || []).filter(s => s.type === 'report'), [sections]);
     const form = useForm<CreatePresentationFormValues>({
@@ -162,7 +161,7 @@ function CreatePresentationTemplateDialog() {
 
 
     const handleSave = (data: CreatePresentationFormValues) => {
-        createMutation.mutate(data, {
+        templateManager.createTemplate(data, {
             onSuccess: () => {
                 toast({ title: 'Success', description: 'New presentation template created.' });
                 setIsOpen(false);
@@ -191,21 +190,21 @@ function CreatePresentationTemplateDialog() {
                         <FormField control={form.control} name="id" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Template ID</FormLabel>
-                                <FormControl><Input {...field} placeholder="e.g., weekly-update" disabled={createMutation.isPending} /></FormControl>
+                                <FormControl><Input {...field} placeholder="e.g., weekly-update" disabled={templateManager.isSaving} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="name" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Template Name</FormLabel>
-                                <FormControl><Input {...field} placeholder="e.g., Weekly Update" disabled={createMutation.isPending} /></FormControl>
+                                <FormControl><Input {...field} placeholder="e.g., Weekly Update" disabled={templateManager.isSaving} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="description" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Description</FormLabel>
-                                <FormControl><Textarea {...field} disabled={createMutation.isPending} rows={2} /></FormControl>
+                                <FormControl><Textarea {...field} disabled={templateManager.isSaving} rows={2} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
@@ -242,8 +241,8 @@ function CreatePresentationTemplateDialog() {
                         />
                         <DialogFooter>
                             <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
-                            <Button type="submit" disabled={createMutation.isPending}>
-                                {createMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="me-2 h-4 w-4" />}
+                            <Button type="submit" disabled={templateManager.isSaving}>
+                                {templateManager.isSaving ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="me-2 h-4 w-4" />}
                                 Create
                             </Button>
                         </DialogFooter>
@@ -257,17 +256,15 @@ function CreatePresentationTemplateDialog() {
 
 export function PresentationTemplateManager() {
     const { t } = useLocalization();
-    const { data: templates, isLoading, isError } = usePresentationTemplates();
-
-    const updateMutation = useUpdatePresentationTemplate();
-    const deleteMutation = useDeletePresentationTemplate();
+    const templateManager = usePresentationTemplateManager();
+    const { templates, isLoading, isError } = templateManager;
 
     const handleSave = (data: PresentationFormValues) => {
-        updateMutation.mutate({ templateId: data.id, data });
+        templateManager.updateTemplate(data.id, data);
     };
 
     const handleDelete = (templateId: string) => {
-        deleteMutation.mutate(templateId);
+        templateManager.deleteTemplate(templateId);
     };
 
     if (isLoading) return <Skeleton className="h-48 w-full" />
@@ -286,7 +283,7 @@ export function PresentationTemplateManager() {
             </CardHeader>
             <CardContent>
                 <Accordion type="single" collapsible className="w-full">
-                    {templates?.map(template => {
+                    {templates?.map((template: PresentationTemplate) => {
                         return (
                             <AccordionItem value={template.id} key={template.id}>
                                 <AccordionTrigger>{template.name}</AccordionTrigger>
@@ -294,9 +291,9 @@ export function PresentationTemplateManager() {
                                     <PresentationTemplateForm
                                         template={template}
                                         onSave={handleSave}
-                                        isSaving={updateMutation.isPending && updateMutation.variables?.templateId === template.id}
+                                        isSaving={templateManager.isSaving && templateManager.activeTemplateKey === template.id}
                                         onDelete={() => handleDelete(template.id)}
-                                        isDeleting={deleteMutation.isPending && deleteMutation.variables === template.id}
+                                        isDeleting={templateManager.isDeleting && templateManager.activeTemplateKey === template.id}
                                     />
                                 </AccordionContent>
                             </AccordionItem>

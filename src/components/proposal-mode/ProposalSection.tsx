@@ -1,7 +1,6 @@
 
 'use client';
 
-import React from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { formatKeyToTitle, hasContent } from '@/lib/proposal-utils';
 import { MarkdownViewer } from '../shared/MarkdownViewer';
@@ -63,8 +62,8 @@ interface ProposalSectionProps {
 export const ProposalSection = ({ sectionKey, title, content }: ProposalSectionProps) => {
     const { t } = useLocalization();
 
-    const wordCount = typeof content === 'string' ? content.split(/\s+/).filter(Boolean).length : 0;
-    const charCount = typeof content === 'string' ? content.length : 0;
+    const wordCount = typeof content === 'string' && content ? content.split(/\s+/).filter(Boolean).length : 0;
+    const charCount = typeof content === 'string' && content ? content.length : 0;
 
     return (
         <div className="space-y-4">
@@ -74,7 +73,7 @@ export const ProposalSection = ({ sectionKey, title, content }: ProposalSectionP
                 </h2>
                 {/* The toolbar is now part of the RichTextEditor's bubble menu */}
             </div>
-             {typeof content === 'string' && (
+            {typeof content === 'string' && (
                 <div className="space-y-1 text-xs text-muted-foreground">
                     <span>{wordCount} {t('builder.Section.words')}</span>
                     <span className="mx-2">|</span>

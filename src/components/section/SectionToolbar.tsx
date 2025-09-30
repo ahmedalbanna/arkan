@@ -1,44 +1,38 @@
 
 'use client';
 
+import { useLocalization } from '@/context/LocalizationContext';
 import {
-  BookText,
-  Brush,
-  GitCommitVertical,
-  Languages,
-  Loader2,
-  Maximize,
-  SpellCheck,
-  UserCheck,
-  Volume2,
+    BookText,
+    Brush,
+    Loader2,
+    Maximize,
+    SpellCheck,
+    UserCheck,
+    Volume2,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { useLocalization } from '@/context/LocalizationContext';
 import { Separator } from '../ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface SectionToolbarProps {
-  isProcessingAi: boolean;
-  isReadingAloud: boolean;
-  onAiAction: (action: string, payload?: any) => void;
-  onReadAloud: () => void;
+    isProcessingAi: boolean;
+    isReadingAloud: boolean;
+    onAiAction: (action: string, payload?: any) => void;
+    onReadAloud: () => void;
 }
 
 export function SectionToolbar({
-  isProcessingAi,
-  isReadingAloud,
-  onAiAction,
-  onReadAloud,
+    isProcessingAi,
+    isReadingAloud,
+    onAiAction,
+    onReadAloud,
 }: SectionToolbarProps) {
     const { t } = useLocalization();
     const isBusy = isProcessingAi || isReadingAloud;
@@ -57,7 +51,7 @@ export function SectionToolbar({
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('summarize')} disabled={isBusy} >
+                        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('summarize')} disabled={isBusy} >
                             <BookText className="h-4 w-4" />
                         </Button>
                     </TooltipTrigger>
@@ -66,7 +60,7 @@ export function SectionToolbar({
 
                 <Tooltip>
                     <TooltipTrigger asChild>
-                         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('expand')} disabled={isBusy} >
+                        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('expand')} disabled={isBusy} >
                             <Maximize className="h-4 w-4" />
                         </Button>
                     </TooltipTrigger>
@@ -84,14 +78,14 @@ export function SectionToolbar({
 
                 <Tooltip>
                     <TooltipTrigger asChild>
-                         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('humanize')} disabled={isBusy}>
+                        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('humanize')} disabled={isBusy}>
                             <UserCheck className="h-4 w-4" />
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent><p>{t('builder.Section.aiActions.humanize')}</p></TooltipContent>
                 </Tooltip>
 
-                 <DropdownMenu>
+                <DropdownMenu>
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <DropdownMenuTrigger asChild>
@@ -103,7 +97,7 @@ export function SectionToolbar({
                         <TooltipContent><p>{t('builder.Section.aiActions.rewrite')}</p></TooltipContent>
                     </Tooltip>
                     <DropdownMenuContent>
-                         {rewriteStyles.map(({ label, style }) => (
+                        {rewriteStyles.map(({ label, style }) => (
                             <DropdownMenuItem key={style} onClick={() => onAiAction('rewrite', { style })}>
                                 {label}
                             </DropdownMenuItem>
@@ -113,7 +107,7 @@ export function SectionToolbar({
 
                 <Separator orientation="vertical" className="h-6 mx-1" />
 
-                 <Tooltip>
+                <Tooltip>
                     <TooltipTrigger asChild>
                         <Button variant="ghost" size="icon" className="rounded-full" onClick={onReadAloud} disabled={isBusy}>
                             {isReadingAloud ? <Loader2 className="h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4" />}
