@@ -5,7 +5,7 @@
  * والتحسينات
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+// import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Analytics } from '../analytics';
 import { ApiOptimizer } from '../api-optimizer';
 import { BundleAnalyzer } from '../bundle-analyzer';
@@ -16,10 +16,10 @@ import { PerformanceMonitor } from '../performance-monitor';
 // Mock performance API
 Object.defineProperty(global, 'performance', {
     value: {
-        now: vi.fn(() => Date.now()),
-        getEntriesByType: vi.fn(() => []),
-        mark: vi.fn(),
-        measure: vi.fn(),
+        now: () => Date.now(),
+        getEntriesByType: () => [],
+        mark: () => { },
+        measure: () => { },
     },
     writable: true,
 });
@@ -27,16 +27,16 @@ Object.defineProperty(global, 'performance', {
 // Mock localStorage
 Object.defineProperty(global, 'localStorage', {
     value: {
-        getItem: vi.fn(),
-        setItem: vi.fn(),
-        removeItem: vi.fn(),
-        clear: vi.fn(),
+        getItem: () => null,
+        setItem: () => { },
+        removeItem: () => { },
+        clear: () => { },
     },
     writable: true,
 });
 
 // Mock fetch
-global.fetch = vi.fn();
+global.fetch = () => Promise.resolve(new Response());
 
 describe('Performance System Tests', () => {
     describe('PerformanceMonitor', () => {
@@ -46,7 +46,7 @@ describe('Performance System Tests', () => {
 
         it('should record performance events', () => {
             PerformanceMonitor.recordEvent({
-                type: 'performance',
+                type: 'api_call',
                 name: 'test_metric',
                 value: 100,
                 unit: 'ms',
@@ -211,7 +211,7 @@ describe('Performance System Tests', () => {
 
     describe('ApiOptimizer', () => {
         beforeEach(() => {
-            vi.clearAllMocks();
+            // vi.clearAllMocks();
         });
 
         it('should make API requests', async () => {

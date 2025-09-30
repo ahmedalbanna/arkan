@@ -360,10 +360,10 @@ export class Analytics {
         const sessionMap = new Map<string, { start: number; end: number }>();
 
         events.forEach(event => {
-            const session = sessionMap.get(event.sessionId) || { start: event.timestamp, end: event.timestamp };
+            const session = sessionMap.get(event.sessionId || '') || { start: event.timestamp, end: event.timestamp };
             session.start = Math.min(session.start, event.timestamp);
             session.end = Math.max(session.end, event.timestamp);
-            sessionMap.set(event.sessionId, session);
+            sessionMap.set(event.sessionId || '', session);
         });
 
         return Array.from(sessionMap.values()).map(session => session.end - session.start);

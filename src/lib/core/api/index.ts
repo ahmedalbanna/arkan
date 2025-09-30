@@ -15,10 +15,7 @@ export * from './middleware';
 export * from './handlers';
 
 // Legacy API Utils (for backward compatibility)
-export {
-    createApiResponseEnhanced, createApiResponse as createApiResponseLegacy,
-    handleApiErrorEnhanced, handleApiError as handleApiErrorLegacy, withAuth as withAuthLegacy
-} from './legacy-api-utils';
+export { createApiResponse as createApiResponse, createApiResponseEnhanced, handleApiError as handleApiError, handleApiErrorEnhanced, withAuth as withAuth } from './legacy-api-utils';
 
 // Enhanced API Utils (new system)
 export {

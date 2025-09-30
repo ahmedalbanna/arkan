@@ -1,0 +1,255 @@
+# Arkan Project Intelligence
+
+## Project Overview
+Arkan is a comprehensive AI-powered professional writing and document generation platform built with Next.js 15 and Firebase. It provides tools for generating proposals, reports, presentations, academic solutions, and various writing assistance tools.
+
+## Key Project Patterns
+
+### 1. Model-Driven Architecture
+- Each data entity has a dedicated model class in `src/lib/models/`
+- Models encapsulate business logic and provide controlled access to data
+- Use `Project` class as the central state container
+- Always use model methods for state manipulation, not direct property access
+
+### 2. AI Integration Pattern
+- AI flows are organized in `src/ai/` with clear separation:
+  - `config/` - AI model configurations
+  - `prompts/` - Prompt definitions
+  - `flows/` - Business logic orchestration
+  - `tools/` - External tool integrations
+  - `schemas/` - Zod validation schemas
+- Always use Zod schemas for AI input/output validation
+- Handle AI errors gracefully with fallback strategies
+
+### 3. Hook Factory Pattern
+- Reusable hooks are organized in `src/core/hooks/`
+- Use factory pattern for common functionality:
+  - `useFormHandler` - Form management
+  - `useFileUpload` - File handling
+  - `useTextProcessor` - Text processing
+  - `useProcessingState` - Loading states
+- Always provide comprehensive error handling in hooks
+
+### 4. Component Organization
+- UI components in `src/components/` with atomic design principles
+- Use Radix UI primitives with Tailwind CSS styling
+- Implement consistent loading states and error handling
+- Follow accessibility best practices
+
+### 5. State Management
+- Use Zustand for global state management
+- Project state is managed through `useBuilderStore`
+- Local component state for UI-specific state
+- React Query for server state caching
+
+## Critical Implementation Paths
+
+### 1. AI Generation Flow
+```typescript
+// 1. Validate input with Zod schema
+// 2. Prepare context and files
+// 3. Execute AI flow with error handling
+// 4. Validate output with schema
+// 5. Update project state
+// 6. Handle errors gracefully
+```
+
+### 2. File Upload Process
+```typescript
+// 1. Validate file type and size
+// 2. Extract text content
+// 3. Add to project external context
+// 4. Update UI state
+// 5. Handle errors and provide feedback
+```
+
+### 3. Export Generation
+```typescript
+// 1. Serialize project data
+// 2. Apply template formatting
+// 3. Generate file (DOCX/PPTX/PDF)
+// 4. Trigger download
+// 5. Handle errors and provide feedback
+```
+
+## User Preferences and Workflow
+
+### 1. Development Workflow
+- Always read memory bank files before starting work
+- Use TypeScript strictly - no `any` types unless absolutely necessary
+- Follow the established patterns for consistency
+- Test AI flows thoroughly before deployment
+- Document complex business logic
+
+### 2. Code Organization
+- Keep related functionality together
+- Use descriptive names for functions and variables
+- Implement proper error handling everywhere
+- Add JSDoc comments for complex functions
+- Follow the established file structure
+
+### 3. AI Development
+- Test prompts thoroughly before implementation
+- Use consistent error handling patterns
+- Implement proper loading states
+- Validate all AI inputs and outputs
+- Provide meaningful error messages to users
+
+## Project-Specific Patterns
+
+### 1. Feature Flag System
+```typescript
+// Use feature flags for gradual rollouts
+const isFeatureEnabled = (feature: string) => {
+  return features[feature]?.isEnabled ?? false;
+};
+```
+
+### 2. Error Handling
+```typescript
+// Use centralized error handling
+import { ErrorHandler } from '@/core';
+
+try {
+  await riskyOperation();
+} catch (error) {
+  ErrorHandler.handle(error, 'operationName');
+}
+```
+
+### 3. Form Management
+```typescript
+// Use the form handler hook for consistency
+const formHandler = useFormHandler({
+  schema: validationSchema,
+  onSubmit: handleSubmit,
+  defaultValues: initialValues,
+});
+```
+
+### 4. File Upload
+```typescript
+// Use the file upload hook for consistency
+const fileUpload = useFileUpload({
+  acceptedTypes: ['pdf', 'docx', 'txt'],
+  maxSize: 10 * 1024 * 1024, // 10MB
+  onSuccess: handleFileSuccess,
+});
+```
+
+## Known Challenges
+
+### 1. AI Response Quality
+- AI responses can be inconsistent
+- Implement proper validation and retry logic
+- Provide clear error messages when AI fails
+- Consider fallback strategies for critical operations
+
+### 2. Performance Optimization
+- AI operations can be slow
+- Implement proper loading states
+- Consider caching strategies for repeated operations
+- Optimize bundle size for better performance
+
+### 3. Mobile Responsiveness
+- Some components need mobile optimization
+- Test on various screen sizes
+- Ensure touch-friendly interfaces
+- Optimize for mobile performance
+
+### 4. Error Recovery
+- Provide clear error messages
+- Implement retry mechanisms where appropriate
+- Guide users to resolve issues
+- Log errors for debugging
+
+## Evolution of Project Decisions
+
+### 1. State Management Evolution
+- Started with React state, moved to Zustand for better performance
+- Centralized project state in single store
+- Added React Query for server state management
+
+### 2. AI Integration Evolution
+- Started with direct API calls, moved to Genkit for structure
+- Implemented proper error handling and validation
+- Added comprehensive logging and monitoring
+
+### 3. Component Architecture Evolution
+- Started with basic components, moved to atomic design
+- Implemented Radix UI for accessibility
+- Added comprehensive theming system
+
+### 4. Testing Strategy Evolution
+- Started with basic tests, expanded to comprehensive coverage
+- Added AI flow testing
+- Implemented E2E testing for critical paths
+
+## Tool Usage Patterns
+
+### 1. Development Tools
+- Use `npm run dev` for development server
+- Use `npm run genkit:dev` for AI development
+- Use `npm test` for running tests
+- Use `npm run typecheck` for TypeScript checking
+
+### 2. Code Quality Tools
+- ESLint for code linting
+- TypeScript for type checking
+- Jest for testing
+- Prettier for code formatting (if configured)
+
+### 3. Deployment Tools
+- Firebase CLI for deployment
+- Firebase emulators for local testing
+- Firebase console for monitoring
+
+## Best Practices
+
+### 1. Code Quality
+- Write self-documenting code
+- Use meaningful variable and function names
+- Implement proper error handling
+- Add comprehensive tests
+- Follow TypeScript best practices
+
+### 2. Performance
+- Optimize bundle size
+- Implement proper caching
+- Use lazy loading where appropriate
+- Monitor performance metrics
+- Optimize AI operations
+
+### 3. User Experience
+- Provide clear feedback for all operations
+- Implement proper loading states
+- Handle errors gracefully
+- Ensure accessibility compliance
+- Test on various devices and browsers
+
+### 4. Security
+- Validate all inputs
+- Implement proper authentication
+- Use secure coding practices
+- Regular security audits
+- Keep dependencies updated
+
+## Memory Bank Integration
+
+### 1. Always Read Memory Bank
+- Start every session by reading all memory bank files
+- Update memory bank when making significant changes
+- Use memory bank to understand project context
+- Keep memory bank files current and accurate
+
+### 2. Update Patterns
+- Document new patterns as they emerge
+- Update existing patterns when they evolve
+- Remove outdated patterns
+- Keep patterns consistent across the project
+
+### 3. Context Awareness
+- Use memory bank to understand project goals
+- Align new features with project vision
+- Consider impact on existing functionality
+- Maintain consistency with established patterns

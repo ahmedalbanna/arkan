@@ -3,9 +3,7 @@
 
 
 'use client';
-import type { AnyProjectProposal, ProjectPlan, ExternalContext } from "@/ai/schemas";
-import { app } from '@/lib';
-import { getFirestore, collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
+// import { app } from '@/lib';
 import type { ProjectState, SavedProject } from "@/lib/models/project"; // Import from model
 
 
@@ -33,7 +31,7 @@ export async function fetchProject(projectId: string, token: string): Promise<Sa
         headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!response.ok) {
-        if(response.status === 404) throw new Error("Project not found.");
+        if (response.status === 404) throw new Error("Project not found.");
         throw new Error('Failed to fetch project');
     }
     return await response.json();

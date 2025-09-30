@@ -51,7 +51,7 @@ export function createMockRequest(
         requestInit.body = JSON.stringify(body);
     }
 
-    return new NextRequest(url, requestInit);
+    return new NextRequest(url, requestInit as any);
 }
 
 /**
@@ -89,7 +89,7 @@ export const testAuthRoutes = {
             return { success: true, tests: ['POST', 'GET', 'DELETE'] };
         } catch (error) {
             console.error('❌ Auth Session Route test failed:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: (error as Error).message };
         }
     },
 
@@ -117,7 +117,7 @@ export const testAuthRoutes = {
             return { success: true, tests: ['POST', 'GET'] };
         } catch (error) {
             console.error('❌ Auth Logout Route test failed:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: (error as Error).message };
         }
     },
 
@@ -159,7 +159,7 @@ export const testAuthRoutes = {
             return { success: true, tests: ['POST (email)', 'POST (provider)', 'GET (stats)'] };
         } catch (error) {
             console.error('❌ Auth Signup Route test failed:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: (error as Error).message };
         }
     }
 };
@@ -203,7 +203,7 @@ export const testUserRoutes = {
             return { success: true, tests: ['GET', 'PUT', 'DELETE'] };
         } catch (error) {
             console.error('❌ User Profile Route test failed:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: (error as Error).message };
         }
     },
 
@@ -231,7 +231,7 @@ export const testUserRoutes = {
             return { success: true, tests: ['POST', 'GET'] };
         } catch (error) {
             console.error('❌ Reset Password Route test failed:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: (error as Error).message };
         }
     },
 
@@ -259,7 +259,7 @@ export const testUserRoutes = {
             return { success: true, tests: ['POST', 'DELETE'] };
         } catch (error) {
             console.error('❌ Upload Profile Picture Route test failed:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: (error as Error).message };
         }
     }
 };
@@ -303,7 +303,7 @@ export const testWritingToolsRoutes = {
             return { success: true, tests: ['POST', 'GET', 'OPTIONS'] };
         } catch (error) {
             console.error('❌ Writing Tools Route test failed:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: (error as Error).message };
         }
     }
 };
@@ -350,7 +350,7 @@ export const testAdminRoutes = {
             return { success: true, tests: ['GET', 'POST', 'OPTIONS'] };
         } catch (error) {
             console.error('❌ Admin Users Route test failed:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: (error as Error).message };
         }
     },
 
@@ -378,7 +378,7 @@ export const testAdminRoutes = {
             return { success: true, tests: ['GET', 'POST'] };
         } catch (error) {
             console.error('❌ Dashboard Stats Route test failed:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: (error as Error).message };
         }
     }
 };
@@ -389,7 +389,7 @@ export const testAdminRoutes = {
 export async function runMigrationTests() {
     console.log('🚀 Starting Migration Tests...\n');
 
-    const results = {
+    const results: any = {
         auth: {},
         users: {},
         writingTools: {},

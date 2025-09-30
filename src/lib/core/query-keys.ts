@@ -166,40 +166,40 @@ export const customKeys = {
  * إنشاء مفتاح مخصص
  */
 export function createCustomKey(parts: (string | number)[]): readonly string[] {
-    return parts.map(String) as const;
+    return parts.map(String);
 }
 
 /**
  * إنشاء مفتاح مع معاملات
  */
 export function createKeyWithParams(baseKey: readonly string[], params: Record<string, any>): readonly string[] {
-    return [...baseKey, params] as const;
+    return [...baseKey, JSON.stringify(params)];
 }
 
 /**
  * إنشاء مفتاح مع فلاتر
  */
 export function createKeyWithFilters(baseKey: readonly string[], filters: Record<string, any>): readonly string[] {
-    return [...baseKey, 'filters', filters] as const;
+    return [...baseKey, 'filters', JSON.stringify(filters)];
 }
 
 /**
  * إنشاء مفتاح مع ترتيب
  */
 export function createKeyWithSort(baseKey: readonly string[], sort: { field: string; direction: 'asc' | 'desc' }): readonly string[] {
-    return [...baseKey, 'sort', sort] as const;
+    return [...baseKey, 'sort', JSON.stringify(sort)];
 }
 
 /**
  * إنشاء مفتاح مع صفحة
  */
 export function createKeyWithPagination(baseKey: readonly string[], page: number, limit: number): readonly string[] {
-    return [...baseKey, 'pagination', { page, limit }] as const;
+    return [...baseKey, 'pagination', JSON.stringify({ page, limit })];
 }
 
 /**
  * إنشاء مفتاح مع نطاق زمني
  */
 export function createKeyWithTimeRange(baseKey: readonly string[], startDate: string, endDate: string): readonly string[] {
-    return [...baseKey, 'timeRange', { startDate, endDate }] as const;
+    return [...baseKey, 'timeRange', JSON.stringify({ startDate, endDate })];
 }

@@ -1,11 +1,11 @@
 
-import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
 import { format } from 'date-fns';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import type { DateRange } from 'react-day-picker';
-import type { TransactionData } from '@/lib/types';
+// import type { TransactionData } from '@/lib/types';
 
-export async function generateFinancialReportPdf(data: TransactionData[], dateRange: DateRange) {
+export async function generateFinancialReportPdf(data: any[], dateRange: DateRange) {
     const doc = new jsPDF();
     const container = document.createElement('div');
     container.style.position = 'absolute';

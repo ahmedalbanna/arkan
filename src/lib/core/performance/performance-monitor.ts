@@ -191,7 +191,7 @@ export class PerformanceMonitor {
                 this.recordEvent({
                     type: 'page_load',
                     name: 'page_load_time',
-                    value: navigation.loadEventEnd - navigation.navigationStart,
+                    value: navigation.loadEventEnd - (navigation as any).navigationStart,
                     unit: 'ms',
                     metadata: {
                         url: window.location.href,

@@ -1,0 +1,34 @@
+/.genkit/
+/.next/
+/.vercel/
+/.idx/
+/.vscode/
+/dataconnect/
+/node_modules/
+/firebase-debug.log
+/firestore-debug.log
+/database-debug.log
+/sqlite.db
+/dataconnect-generated
+/dataconnect
+/.firebase/
+/.gemini/
+/.git/
+/.github/
+/.vscode/
+/.yarn/
+/.yarn/patches
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+/Docxyfile
+/Docxyfile.bak
+/arkan.session.sql
+/package-lock.json
+/firebase-debug.log
+/firestore-debug.log
+/database-debug.log
+/sqlite.db

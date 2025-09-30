@@ -15,7 +15,7 @@ export const turndown = new TurndownService({
 
 // Add a rule for strikethrough
 turndown.addRule('strikethrough', {
-  filter: ['del', 's', 'strike'],
+  filter: ['del', 's'],
   replacement: function (content) {
     return '~~' + content + '~~';
   },

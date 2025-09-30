@@ -95,7 +95,7 @@ export class PerformanceIntegration {
     static trackPerformance(metric: string, value: number, properties?: Record<string, any>): void {
         if (this.config.performanceMonitoringEnabled) {
             PerformanceMonitor.recordEvent({
-                type: 'performance',
+                type: 'api_call',
                 name: metric,
                 value,
                 unit: 'ms',

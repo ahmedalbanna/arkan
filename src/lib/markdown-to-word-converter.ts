@@ -1,22 +1,22 @@
 // src/lib/markdown-to-word-converter.ts
 
+import { processPlantUml } from '@/lib/utils';
 import {
-  Document,
-  Packer,
-  IStylesOptions,
-  INumberingOptions,
   AlignmentType,
+  Document,
+  INumberingOptions,
+  IStylesOptions,
+  Packer,
 } from 'docx';
 import { saveAs } from 'file-saver';
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkGfm from 'remark-gfm';
 import { Root } from 'mdast';
-import { processPlantUml } from '@/lib/utils';
-import { ConversionOptions, DocxObject } from './word-converter/types';
-import { processFootnotes } from './word-converter/node-handlers';
+import remarkGfm from 'remark-gfm';
+import remarkParse from 'remark-parse';
+import { unified } from 'unified';
 import { convertAstToDocxObjects } from './word-converter/ast-converter';
-import { prepareHeadersAndFooters, buildDocumentSections } from './word-converter/document-builder';
+import { buildDocumentSections, prepareHeadersAndFooters } from './word-converter/document-builder';
+import { processFootnotes } from './word-converter/node-handlers';
+import { ConversionOptions, DocxObject } from './word-converter/types';
 
 /**
  * Parses markdown, processes it, and creates an array of docx objects and footnotes.
@@ -68,7 +68,7 @@ export async function convertMarkdownToWord(
 
   const captionStyleExists = finalStyles.paragraphStyles!.some(style => style.id === 'Caption');
   if (!captionStyleExists) {
-    finalStyles.paragraphStyles!.push({
+    (finalStyles.paragraphStyles as any).push({
       id: 'Caption',
       name: 'Caption',
       basedOn: 'Normal',
