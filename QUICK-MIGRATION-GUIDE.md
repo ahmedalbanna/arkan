@@ -62,10 +62,10 @@ import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 ### **بعد الهجرة:**
 ```typescript
 // للاستخدام المحسن
-import { withEnhancedAuth, handleApiErrorEnhanced, createApiResponseEnhanced } from '@/lib/core/api';
+import { withEnhancedAuth, handleApiErrorEnhanced, createApiResponseEnhanced } from '@/core/api';
 
 // أو للتوافق مع النظام القديم
-import { withAuthLegacy, handleApiErrorLegacy, createApiResponseLegacy } from '@/lib/core/api';
+import { withAuthLegacy, handleApiErrorLegacy, createApiResponseLegacy } from '@/core/api';
 ```
 
 ## ⚡ **اختبار سريع**

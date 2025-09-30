@@ -16,7 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/context/AuthContext';
 import { RawChatMessage, toast, useChatStore } from '@/hooks';
-import app from '@/lib/core/firebase/client-init';
+import app from '@/core/firebase/client-init';
 import { cn } from '@/lib/utils';
 import { initiateSupportChat } from '@/services';
 import { getDatabase, off, onValue, push, ref, serverTimestamp } from 'firebase/database';

@@ -91,7 +91,7 @@ src/lib/core/
 
 ### 1. نظام الثوابت الموحد
 ```typescript
-import { API_ENDPOINTS, SUPPORTED_FILE_TYPES } from '@/lib/core';
+import { API_ENDPOINTS, SUPPORTED_FILE_TYPES } from '@/core';
 
 // استخدام نقاط النهاية
 const response = await fetch(API_ENDPOINTS.WRITING_TOOLS.PARAPHRASE);
@@ -108,7 +108,7 @@ import {
   slugify,
   countWords,
   estimateReadingTime
-} from '@/lib/core';
+} from '@/core';
 
 // تنظيف النص من الأحرف الخاصة
 const cleanText = sanitizeText('<script>alert("xss")</script>');
@@ -133,7 +133,7 @@ import {
   validateFile,
   formatFileSize,
   createImagePreview
-} from '@/lib/core';
+} from '@/core';
 
 // تحويل الملف إلى base64
 const base64 = await fileToBase64(file);
@@ -157,7 +157,7 @@ import {
   handleClientError,
   handleAPIError,
   createError
-} from '@/lib/core';
+} from '@/core';
 
 // معالجة خطأ عام
 try {
@@ -183,7 +183,7 @@ import {
   generateUUID,
   encryptText,
   decryptText
-} from '@/lib/core';
+} from '@/core';
 
 // إنشاء hash
 const hash = await createHash('Hello World');

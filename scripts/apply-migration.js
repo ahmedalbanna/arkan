@@ -31,11 +31,11 @@ const migrationMap = {
 // Import mapping for updates
 const importMap = {
     // Legacy imports to new imports
-    "from '@/lib/api-utils'": "from '@/lib/core/api'",
+    "from '@/lib/api-utils'": "from '@/core/api'",
     "import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils'":
-        "import { withEnhancedAuth, handleApiErrorEnhanced, createApiResponseEnhanced } from '@/lib/core/api'",
+        "import { withEnhancedAuth, handleApiErrorEnhanced, createApiResponseEnhanced } from '@/core/api'",
     "import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils'":
-        "import { withAuthLegacy, handleApiErrorLegacy, createApiResponseLegacy } from '@/lib/core/api'"
+        "import { withAuthLegacy, handleApiErrorLegacy, createApiResponseLegacy } from '@/core/api'"
 };
 
 /**

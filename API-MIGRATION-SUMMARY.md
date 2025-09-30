@@ -111,7 +111,7 @@ import {
   withAuthLegacy,
   handleApiErrorLegacy,
   createApiResponseLegacy
-} from '@/lib/core/api';
+} from '@/core/api';
 ```
 
 ### **3. للنظام الجديد المحسن**
@@ -121,7 +121,7 @@ import {
   withEnhancedAuth,
   handleApiErrorEnhanced,
   createApiResponseEnhanced
-} from '@/lib/core/api';
+} from '@/core/api';
 ```
 
 ## 📈 **الفوائد المحققة**
