@@ -111,7 +111,7 @@ export abstract class SimpleService<TOutput = any> {
     protected abstract endpoint: string;
     protected abstract requiresAuth: boolean;
 
-    async call(token: string): Promise<TOutput> {
+    async call(token: string, ...args: any[]): Promise<TOutput> {
         try {
             const requestConfig: RequestInit = {
                 method: 'GET',
@@ -150,6 +150,11 @@ export abstract class SimpleService<TOutput = any> {
  */
 export abstract class ComplexService<TInput = any, TOutput = any> extends BaseService<TInput, TOutput> {
     protected method: 'POST' | 'PUT' | 'DELETE' | 'PATCH' = 'POST';
+    protected abstract inputSchema?: z.ZodSchema<TInput>;
+
+    async call(data: TInput, token: string, ...args: any[]): Promise<TOutput> {
+        return super.call(data, token);
+    }
 }
 
 /**
@@ -171,7 +176,7 @@ export abstract class CreditBasedService<TInput = any, TOutput = any> extends Co
 export abstract class AdminService<TInput = any, TOutput = any> extends ComplexService<TInput, TOutput> {
     protected requiresAuth = true;
 
-    async call(data: TInput, token: string): Promise<TOutput> {
+    async call(data: TInput, token: string, ...args: any[]): Promise<TOutput> {
         // يمكن إضافة منطق التحقق من الصلاحيات الإدارية هنا
         console.log('Admin operation requested');
         return super.call(data, token);

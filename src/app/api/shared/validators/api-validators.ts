@@ -140,8 +140,8 @@ export const UserSchemas = {
         name: BaseSchemas.name,
         email: BaseSchemas.email,
         password: BaseSchemas.password,
-        role: BaseSchemas.role.default('user'),
-        credits: BaseSchemas.nonNegativeNumber.default(10),
+        role: BaseSchemas.role,
+        credits: BaseSchemas.nonNegativeNumber,
     }),
 
     // تحديث المستخدم
@@ -171,7 +171,7 @@ export const ProjectSchemas = {
         title: BaseSchemas.title,
         description: BaseSchemas.description.optional(),
         type: z.enum(['proposal', 'report', 'presentation', 'academic'], 'Invalid project type'),
-        language: BaseSchemas.language.default('en'),
+        language: BaseSchemas.language,
         teamId: BaseSchemas.teamId.optional(),
     }),
 
@@ -211,7 +211,7 @@ export const TeamSchemas = {
     // دعوة عضو
     inviteMember: z.object({
         email: BaseSchemas.email,
-        role: z.enum(['member', 'admin'], 'Invalid team role').default('member'),
+        role: z.enum(['member', 'admin'], 'Invalid team role'),
     }),
 };
 

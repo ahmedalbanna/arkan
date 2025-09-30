@@ -54,7 +54,7 @@ export class GetTeamService extends SimpleService<TeamWithMembers> {
  */
 export class CreateTeamService extends ComplexService<CreateTeamData, TeamProperties> {
     protected endpoint = '/api/teams';
-    protected method = 'POST';
+    protected method: 'POST' = 'POST';
     protected inputSchema = TeamSchemas.createTeam;
     protected requiresAuth = true;
 }
@@ -64,7 +64,7 @@ export class CreateTeamService extends ComplexService<CreateTeamData, TeamProper
  */
 export class UpdateTeamService extends ComplexService<UpdateTeamData, TeamProperties> {
     protected endpoint = '/api/teams';
-    protected method = 'PUT';
+    protected method: 'PUT' = 'PUT';
     protected inputSchema = TeamSchemas.updateTeam;
     protected requiresAuth = true;
 
@@ -79,7 +79,8 @@ export class UpdateTeamService extends ComplexService<UpdateTeamData, TeamProper
  */
 export class DeleteTeamService extends ComplexService<{}, { message: string }> {
     protected endpoint = '/api/teams';
-    protected method = 'DELETE';
+    protected method: 'DELETE' = 'DELETE';
+    protected inputSchema = undefined;
     protected requiresAuth = true;
 
     async call(data: {}, token: string, teamId: string): Promise<{ message: string }> {
@@ -93,7 +94,7 @@ export class DeleteTeamService extends ComplexService<{}, { message: string }> {
  */
 export class InviteMemberService extends ComplexService<InviteMemberData, { message: string }> {
     protected endpoint = '/api/teams';
-    protected method = 'POST';
+    protected method: 'POST' = 'POST';
     protected inputSchema = TeamSchemas.inviteMember;
     protected requiresAuth = true;
 
@@ -108,7 +109,8 @@ export class InviteMemberService extends ComplexService<InviteMemberData, { mess
  */
 export class RemoveMemberService extends ComplexService<{}, { message: string }> {
     protected endpoint = '/api/teams';
-    protected method = 'DELETE';
+    protected method: 'DELETE' = 'DELETE';
+    protected inputSchema = undefined;
     protected requiresAuth = true;
 
     async call(data: {}, token: string, teamId: string, memberId: string): Promise<{ message: string }> {
@@ -122,7 +124,8 @@ export class RemoveMemberService extends ComplexService<{}, { message: string }>
  */
 export class UpdateMemberRoleService extends ComplexService<{ role: 'member' | 'admin' }, { message: string }> {
     protected endpoint = '/api/teams';
-    protected method = 'PUT';
+    protected method: 'PUT' = 'PUT';
+    protected inputSchema = undefined;
     protected requiresAuth = true;
 
     async call(data: { role: 'member' | 'admin' }, token: string, teamId: string, memberId: string): Promise<{ message: string }> {

@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { handleServerError } from '../../error-handling';
+import { handleServerError } from '../../error-handling/server-errors';
 
 /**
  * خيارات CORS
@@ -118,7 +118,7 @@ export function withCors(
             return response;
 
         } catch (error) {
-            return handleServerError(error, 'CORS Middleware');
+            return handleServerError(error as Error, 'CORS Middleware');
         }
     };
 }

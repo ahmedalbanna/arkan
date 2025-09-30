@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { handleServerError } from '../../error-handling';
+import { handleServerError } from '../../error-handling/server-errors';
 
 /**
  * خيارات التسجيل
@@ -109,7 +109,7 @@ export function withLogging(
                     searchParams: new URL(request.url).search,
                     headers: Object.fromEntries(request.headers.entries()),
                     userAgent: request.headers.get('user-agent') || undefined,
-                    ip: request.ip || request.headers.get('x-forwarded-for') || undefined,
+                    ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
                     userId: userId || undefined,
                     timestamp: Date.now(),
                 };
@@ -191,7 +191,7 @@ export function withLogging(
                 });
             }
 
-            return handleServerError(error, 'Logging Middleware');
+            return handleServerError(error as Error, 'Logging Middleware');
         }
     };
 }
@@ -234,7 +234,7 @@ export function withCustomLogging(
                     searchParams: new URL(request.url).search,
                     headers: Object.fromEntries(request.headers.entries()),
                     userAgent: request.headers.get('user-agent') || undefined,
-                    ip: request.ip || request.headers.get('x-forwarded-for') || undefined,
+                    ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
                     userId: userId || undefined,
                 };
 

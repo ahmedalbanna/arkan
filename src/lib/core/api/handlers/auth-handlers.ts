@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { handleServerError } from '../../error-handling';
+import { handleServerError } from '../../error-handling/server-errors';
 import { createApiHandler, createValidatedApiHandler } from './base-handler';
 
 /**

@@ -1,21 +1,26 @@
 // src/lib/word-converter/node-handlers.ts
 
 import {
-  Paragraph,
   AlignmentType,
   IRunOptions,
+  Paragraph,
 } from 'docx';
-import type { IFootnotesOptions } from 'docx';
-import { Root, FootnoteDefinition } from 'mdast';
-import { ConversionOptions } from './types';
+import { FootnoteDefinition, Root } from 'mdast';
 import { transformInlines } from './inline-converter';
+import { ConversionOptions } from './types';
+
+// Define footnote type locally
+interface DocxFootnote {
+  id: number;
+  children: any[];
+}
 
 export async function processFootnotes(
   ast: Root,
   options: ConversionOptions
-): Promise<{ footnoteIdMap: Map<string, number>; docxFootnotes: IFootnotesOptions['footnotes'] }> {
+): Promise<{ footnoteIdMap: Map<string, number>; docxFootnotes: Record<number, DocxFootnote> }> {
   const footnoteIdMap = new Map<string, number>();
-  const docxFootnotes: IFootnotesOptions['footnotes'] = {};
+  const docxFootnotes: Record<number, DocxFootnote> = {};
   let footnoteCounter = 1;
 
   const { isRtl = false, fonts = {} } = options;
@@ -49,7 +54,7 @@ export async function processFootnotes(
         );
       }
     }
-    docxFootnotes[id] = { children: footnoteParagraphs };
+    docxFootnotes[id] = { id, children: footnoteParagraphs };
   }
 
   return { footnoteIdMap, docxFootnotes };

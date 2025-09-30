@@ -8,7 +8,7 @@
 import { getUserProfile } from '@/lib/db/queries';
 import { adminAuth } from '@/lib/firebase/server-init';
 import { NextRequest, NextResponse } from 'next/server';
-import { handleServerError } from '../../error-handling';
+import { handleServerError } from '../../error-handling/server-errors';
 
 /**
  * خيارات middleware المصادقة
@@ -69,7 +69,7 @@ export function withAuth(
                 const authorization = request.headers.get('Authorization');
                 if (!authorization?.startsWith('Bearer ')) {
                     return handleServerError(
-                        { message: 'Unauthorized: Missing token' },
+                        'Unauthorized: Missing token',
                         'Authentication'
                     );
                 }
@@ -81,7 +81,7 @@ export function withAuth(
 
                     if (!decodedToken || !decodedToken.uid) {
                         return handleServerError(
-                            { message: 'Unauthorized: Invalid token' },
+                            'Unauthorized: Invalid token',
                             'Authentication'
                         );
                     }
@@ -90,7 +90,7 @@ export function withAuth(
                     const user = await getUserProfile(decodedToken.uid);
                     if (!user) {
                         return handleServerError(
-                            { message: 'Forbidden: User profile not found' },
+                            'Forbidden: User profile not found',
                             'Authentication'
                         );
                     }
@@ -98,7 +98,7 @@ export function withAuth(
                     // التحقق من الصلاحيات الإدارية
                     if (requireAdmin && user.role !== 'admin') {
                         return handleServerError(
-                            { message: 'Forbidden: Admin access required' },
+                            'Forbidden: Admin access required',
                             'Authorization'
                         );
                     }
@@ -106,21 +106,21 @@ export function withAuth(
                     // التحقق من الأدوار المسموحة
                     if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
                         return handleServerError(
-                            { message: 'Forbidden: Insufficient role' },
+                            'Forbidden: Insufficient role',
                             'Authorization'
                         );
                     }
 
                     // التحقق من الصلاحيات المطلوبة
                     if (requiredPermissions.length > 0) {
-                        const userPermissions = user.permissions || [];
+                        const userPermissions: string[] = [];
                         const hasAllPermissions = requiredPermissions.every(permission =>
                             userPermissions.includes(permission)
                         );
 
                         if (!hasAllPermissions) {
                             return handleServerError(
-                                { message: 'Forbidden: Insufficient permissions' },
+                                'Forbidden: Insufficient permissions',
                                 'Authorization'
                             );
                         }
@@ -134,7 +134,7 @@ export function withAuth(
                         params,
                         isAdmin: user.role === 'admin',
                         hasPermission: (permission: string) => {
-                            const userPermissions = user.permissions || [];
+                            const userPermissions: string[] = [];
                             return userPermissions.includes(permission);
                         },
                         isOwner: (resourceId: string) => {
@@ -148,7 +148,7 @@ export function withAuth(
                         const resourceId = params[ownerField] || params.id;
                         if (!authContext.isOwner(resourceId)) {
                             return handleServerError(
-                                { message: 'Forbidden: Access denied to this resource' },
+                                'Forbidden: Access denied to this resource',
                                 'Authorization'
                             );
                         }
@@ -158,7 +158,7 @@ export function withAuth(
 
                 } catch (error) {
                     return handleServerError(
-                        { message: 'Unauthorized: Invalid token' },
+                        'Unauthorized: Invalid token',
                         'Authentication'
                     );
                 }
@@ -178,7 +178,7 @@ export function withAuth(
             }
 
         } catch (error) {
-            return handleServerError(error, 'Authentication Middleware');
+            return handleServerError(error as Error, 'Authentication Middleware');
         }
     };
 }

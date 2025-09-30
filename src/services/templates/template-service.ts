@@ -6,7 +6,8 @@
 
 'use client';
 
-import type { DocxTemplateProperties, PptxTemplateProperties, ProposalTemplateProperties, ReportTemplateProperties } from "@/lib/types";
+import type { ProposalTemplateProperties } from "@/lib/models/proposalTemplate";
+import type { DocxTemplateProperties, PptxTemplateProperties, ReportTemplateProperties } from "@/lib/types";
 
 // === DOCX ===
 export async function fetchDocxTemplatesApi(): Promise<Record<string, DocxTemplateProperties>> {

@@ -44,7 +44,7 @@ export interface ResetPasswordResponse {
  */
 export class LoginService extends ComplexService<LoginCredentials, AuthResponse> {
     protected endpoint = '/api/auth/login';
-    protected method = 'POST';
+    protected method: 'POST' = 'POST';
     protected inputSchema = AuthSchemas.login;
     protected requiresAuth = false;
 }
@@ -54,7 +54,7 @@ export class LoginService extends ComplexService<LoginCredentials, AuthResponse>
  */
 export class SignupService extends ComplexService<SignupCredentials, SignupResponse> {
     protected endpoint = '/api/auth/signup';
-    protected method = 'POST';
+    protected method: 'POST' = 'POST';
     protected inputSchema = AuthSchemas.signup;
     protected requiresAuth = false;
 }
@@ -76,7 +76,7 @@ export class LogoutService extends SimpleService<{ message: string }> {
  */
 export class ResetPasswordService extends ComplexService<{ email: string }, ResetPasswordResponse> {
     protected endpoint = '/api/auth/reset-password';
-    protected method = 'POST';
+    protected method: 'POST' = 'POST';
     protected inputSchema = AuthSchemas.resetPassword;
     protected requiresAuth = false;
 }
@@ -86,7 +86,7 @@ export class ResetPasswordService extends ComplexService<{ email: string }, Rese
  */
 export class ChangePasswordService extends ComplexService<{ currentPassword: string; newPassword: string }, { message: string }> {
     protected endpoint = '/api/auth/change-password';
-    protected method = 'POST';
+    protected method: 'POST' = 'POST';
     protected inputSchema = AuthSchemas.changePassword;
     protected requiresAuth = true;
 }

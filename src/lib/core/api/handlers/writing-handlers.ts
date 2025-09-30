@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { handleServerError } from '../../error-handling';
+import { handleServerError } from '../../error-handling/server-errors';
 import { createValidatedApiHandler } from './base-handler';
 
 /**
@@ -79,6 +79,10 @@ const plagiarismCheckSchema = z.object({
 export const paraphraseHandler = createValidatedApiHandler(
     async (request: NextRequest, context: { params: { [key: string]: string } }, validatedData) => {
         try {
+            if (!validatedData) {
+                throw new Error('Validation data is required');
+            }
+
             const { text, mode, language, preserveFormatting } = validatedData;
 
             // TODO: تنفيذ منطق إعادة الصياغة
@@ -131,6 +135,10 @@ export const paraphraseHandler = createValidatedApiHandler(
 export const summarizeHandler = createValidatedApiHandler(
     async (request: NextRequest, context: { params: { [key: string]: string } }, validatedData) => {
         try {
+            if (!validatedData) {
+                throw new Error('Validation data is required');
+            }
+
             const { text, length, language, includeKeyPoints } = validatedData;
 
             // TODO: تنفيذ منطق الملخص
@@ -184,6 +192,10 @@ export const summarizeHandler = createValidatedApiHandler(
 export const generateQuizHandler = createValidatedApiHandler(
     async (request: NextRequest, context: { params: { [key: string]: string } }, validatedData) => {
         try {
+            if (!validatedData) {
+                throw new Error('Validation data is required');
+            }
+
             const { text, questionCount, questionTypes, difficulty, language } = validatedData;
 
             // TODO: تنفيذ منطق إنشاء الاختبارات
@@ -243,6 +255,10 @@ export const generateQuizHandler = createValidatedApiHandler(
 export const improveTextHandler = createValidatedApiHandler(
     async (request: NextRequest, context: { params: { [key: string]: string } }, validatedData) => {
         try {
+            if (!validatedData) {
+                throw new Error('Validation data is required');
+            }
+
             const { text, improvements, language, targetAudience } = validatedData;
 
             // TODO: تنفيذ منطق تحسين النص
@@ -259,7 +275,7 @@ export const improveTextHandler = createValidatedApiHandler(
                     improvements,
                     language,
                     targetAudience,
-                    improvementsApplied: improvements.map(imp => ({
+                    improvementsApplied: improvements.map((imp: string) => ({
                         type: imp,
                         description: `Applied ${imp} improvements`,
                         before: 'Original text',
@@ -299,6 +315,10 @@ export const improveTextHandler = createValidatedApiHandler(
 export const generateContentHandler = createValidatedApiHandler(
     async (request: NextRequest, context: { params: { [key: string]: string } }, validatedData) => {
         try {
+            if (!validatedData) {
+                throw new Error('Validation data is required');
+            }
+
             const { topic, type, length, language, tone, includeOutline } = validatedData;
 
             // TODO: تنفيذ منطق إنشاء المحتوى
@@ -358,6 +378,10 @@ export const generateContentHandler = createValidatedApiHandler(
 export const plagiarismCheckHandler = createValidatedApiHandler(
     async (request: NextRequest, context: { params: { [key: string]: string } }, validatedData) => {
         try {
+            if (!validatedData) {
+                throw new Error('Validation data is required');
+            }
+
             const { text, language, checkSources, sensitivity } = validatedData;
 
             // TODO: تنفيذ منطق التحقق من الانتحال
@@ -399,7 +423,7 @@ export const plagiarismCheckHandler = createValidatedApiHandler(
             return NextResponse.json(response, { status: 200 });
 
         } catch (error) {
-            return handleServerError(error, 'Plagiarism Check Handler');
+            return handleServerError(error as Error, 'Plagiarism Check Handler');
         }
     },
     plagiarismCheckSchema,

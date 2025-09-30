@@ -2,7 +2,7 @@
 
 import { useUpdateAgent } from '@/hooks';
 import { agentEditorSchema, type AgentEditorFormValues } from '@/lib/agent-editor-schema';
-// import type { Agent } from '@/lib/types';
+import type { Agent } from '@/lib/models/agent';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';

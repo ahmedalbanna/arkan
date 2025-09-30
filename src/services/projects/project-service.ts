@@ -61,7 +61,7 @@ export class GetProjectService extends SimpleService<SavedProject> {
  */
 export class CreateProjectService extends ComplexService<CreateProjectData, SavedProject> {
     protected endpoint = '/api/projects';
-    protected method = 'POST';
+    protected method: 'POST' = 'POST';
     protected inputSchema = ProjectSchemas.createProject;
     protected requiresAuth = true;
 }
@@ -71,7 +71,7 @@ export class CreateProjectService extends ComplexService<CreateProjectData, Save
  */
 export class UpdateProjectService extends ComplexService<UpdateProjectData, SavedProject> {
     protected endpoint = '/api/projects';
-    protected method = 'PUT';
+    protected method: 'PUT' = 'PUT';
     protected inputSchema = ProjectSchemas.updateProject;
     protected requiresAuth = true;
 
@@ -86,7 +86,8 @@ export class UpdateProjectService extends ComplexService<UpdateProjectData, Save
  */
 export class DeleteProjectService extends ComplexService<{}, { message: string }> {
     protected endpoint = '/api/projects';
-    protected method = 'DELETE';
+    protected method: 'DELETE' = 'DELETE';
+    protected inputSchema = undefined;
     protected requiresAuth = true;
 
     async call(data: {}, token: string, projectId: string): Promise<{ message: string }> {
@@ -100,7 +101,7 @@ export class DeleteProjectService extends ComplexService<{}, { message: string }
  */
 export class AddContextService extends ComplexService<AddContextData, { message: string }> {
     protected endpoint = '/api/projects';
-    protected method = 'PATCH';
+    protected method: 'PATCH' = 'PATCH';
     protected inputSchema = ProjectSchemas.addContext;
     protected requiresAuth = true;
 

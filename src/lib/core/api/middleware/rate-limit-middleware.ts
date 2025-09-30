@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { handleServerError } from '../../error-handling';
+import { handleServerError } from '../../error-handling/server-errors';
 
 /**
  * خيارات الحد من معدل الطلبات
@@ -53,7 +53,7 @@ function cleanupStore() {
  * الحصول على مفتاح فريد للطلب
  */
 function getRateLimitKey(request: NextRequest): string {
-    const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
     return `${ip}-${userAgent}`;
 }
@@ -109,16 +109,7 @@ export function withRateLimit(
                 const retryAfter = Math.ceil((data.resetTime - now) / 1000);
 
                 return handleServerError(
-                    {
-                        message: errorMessage || 'Too many requests',
-                        status: 429,
-                        details: {
-                            retryAfter,
-                            limit: maxRequests,
-                            remaining: 0,
-                            resetTime: data.resetTime,
-                        },
-                    },
+                    errorMessage || 'Too many requests',
                     'Rate Limit'
                 );
             }
@@ -135,7 +126,7 @@ export function withRateLimit(
             return response;
 
         } catch (error) {
-            return handleServerError(error, 'Rate Limit Middleware');
+            return handleServerError(error as Error, 'Rate Limit Middleware');
         }
     };
 }

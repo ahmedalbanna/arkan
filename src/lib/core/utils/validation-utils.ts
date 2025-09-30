@@ -8,8 +8,7 @@
 import {
     NUMBER_VALIDATION_RULES,
     TEXT_VALIDATION_RULES,
-    VALIDATION_MESSAGES,
-    VALIDATION_PATTERNS
+    VALIDATION_MESSAGES
 } from '../constants';
 
 /**
@@ -24,7 +23,7 @@ export function validateEmail(email: string): { valid: boolean; error?: string }
         return { valid: false, error: VALIDATION_MESSAGES.MAX_LENGTH(TEXT_VALIDATION_RULES.EMAIL_MAX) };
     }
 
-    if (!VALIDATION_PATTERNS.EMAIL_PATTERN.test(email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return { valid: false, error: VALIDATION_MESSAGES.INVALID_EMAIL };
     }
 
@@ -43,7 +42,7 @@ export function validatePhone(phone: string): { valid: boolean; error?: string }
         return { valid: false, error: VALIDATION_MESSAGES.MAX_LENGTH(TEXT_VALIDATION_RULES.PHONE_MAX) };
     }
 
-    if (!VALIDATION_PATTERNS.PHONE_PATTERN.test(phone)) {
+    if (!/^[\+]?[1-9][\d]{0,15}$/.test(phone)) {
         return { valid: false, error: VALIDATION_MESSAGES.INVALID_PHONE };
     }
 
@@ -110,7 +109,7 @@ export function validateUsername(username: string): { valid: boolean; errors: st
         errors.push(VALIDATION_MESSAGES.MAX_LENGTH(TEXT_VALIDATION_RULES.USERNAME_MAX));
     }
 
-    if (!VALIDATION_PATTERNS.ALPHANUMERIC_WITH_DASHES.test(username)) {
+    if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
         errors.push('يجب أن يحتوي اسم المستخدم على أحرف وأرقام وشرطات وشرطات سفلية فقط');
     }
 
@@ -172,17 +171,17 @@ export function validateUrl(url: string): { valid: boolean; error?: string } {
         return { valid: false, error: VALIDATION_MESSAGES.REQUIRED };
     }
 
-    if (url.length < TEXT_VALIDATION_RULES.URL_MIN) {
-        return { valid: false, error: VALIDATION_MESSAGES.MIN_LENGTH(TEXT_VALIDATION_RULES.URL_MIN) };
+    if (url.length < 10) {
+        return { valid: false, error: VALIDATION_MESSAGES.MIN_LENGTH(10) };
     }
 
-    if (url.length > TEXT_VALIDATION_RULES.URL_MAX) {
-        return { valid: false, error: VALIDATION_MESSAGES.MAX_LENGTH(TEXT_VALIDATION_RULES.URL_MAX) };
+    if (url.length > 2048) {
+        return { valid: false, error: VALIDATION_MESSAGES.MAX_LENGTH(2048) };
     }
 
     try {
         new URL(url);
-        if (!VALIDATION_PATTERNS.HTTP_PATTERN.test(url)) {
+        if (!/^https?:\/\/.+/.test(url)) {
             return { valid: false, error: VALIDATION_MESSAGES.INVALID_URL };
         }
         return { valid: true };
@@ -302,7 +301,7 @@ export function validateArabicText(text: string): { valid: boolean; error?: stri
         return { valid: false, error: VALIDATION_MESSAGES.REQUIRED };
     }
 
-    if (!VALIDATION_PATTERNS.ARABIC_TEXT.test(text)) {
+    if (!/^[\u0600-\u06FF\s]+$/.test(text)) {
         return { valid: false, error: 'يجب أن يحتوي النص على أحرف عربية فقط' };
     }
 
@@ -317,7 +316,7 @@ export function validateEnglishText(text: string): { valid: boolean; error?: str
         return { valid: false, error: VALIDATION_MESSAGES.REQUIRED };
     }
 
-    if (!VALIDATION_PATTERNS.ENGLISH_TEXT.test(text)) {
+    if (!/^[a-zA-Z\s]+$/.test(text)) {
         return { valid: false, error: 'يجب أن يحتوي النص على أحرف إنجليزية فقط' };
     }
 
@@ -332,7 +331,7 @@ export function validateMixedText(text: string): { valid: boolean; error?: strin
         return { valid: false, error: VALIDATION_MESSAGES.REQUIRED };
     }
 
-    if (!VALIDATION_PATTERNS.MIXED_TEXT.test(text)) {
+    if (!/^[\u0600-\u06FFa-zA-Z0-9\s.,!?]+$/.test(text)) {
         return { valid: false, error: 'يجب أن يحتوي النص على أحرف عربية أو إنجليزية أو أرقام فقط' };
     }
 
@@ -347,7 +346,7 @@ export function validateIBAN(iban: string): { valid: boolean; error?: string } {
         return { valid: false, error: VALIDATION_MESSAGES.REQUIRED };
     }
 
-    if (!VALIDATION_PATTERNS.IBAN.test(iban)) {
+    if (!/^[A-Z]{2}[0-9]{2}[A-Z0-9]{4}[0-9]{7}([A-Z0-9]?){0,16}$/.test(iban)) {
         return { valid: false, error: 'رقم IBAN غير صحيح' };
     }
 
@@ -362,7 +361,7 @@ export function validateCreditCard(cardNumber: string): { valid: boolean; error?
         return { valid: false, error: VALIDATION_MESSAGES.REQUIRED };
     }
 
-    if (!VALIDATION_PATTERNS.CREDIT_CARD.test(cardNumber)) {
+    if (!/^[0-9]{13,19}$/.test(cardNumber)) {
         return { valid: false, error: 'رقم البطاقة الائتمانية غير صحيح' };
     }
 
@@ -377,7 +376,7 @@ export function validateUUID(uuid: string): { valid: boolean; error?: string } {
         return { valid: false, error: VALIDATION_MESSAGES.REQUIRED };
     }
 
-    if (!VALIDATION_PATTERNS.UUID.test(uuid)) {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuid)) {
         return { valid: false, error: 'UUID غير صحيح' };
     }
 

@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError, ZodSchema } from 'zod';
-import { handleServerError } from '../../error-handling';
+import { handleServerError } from '../../error-handling/server-errors';
 
 /**
  * خيارات middleware التحقق
@@ -53,7 +53,7 @@ export function withValidation<T = any>(
                     } catch (error) {
                         if (!optional) {
                             return handleServerError(
-                                { message: 'Invalid JSON in request body' },
+                                'Invalid JSON in request body',
                                 'Validation'
                             );
                         }
@@ -91,7 +91,7 @@ export function withValidation<T = any>(
                         };
 
                         return handleServerError(
-                            { message: errorResponse.message, status: 400, details: errorResponse.errors },
+                            errorResponse.message,
                             'Validation'
                         );
                     }
@@ -103,7 +103,7 @@ export function withValidation<T = any>(
             }
 
         } catch (error) {
-            return handleServerError(error, 'Validation Middleware');
+            return handleServerError(error as Error, 'Validation Middleware');
         }
     };
 }
@@ -195,7 +195,7 @@ export function withMultiValidation<T = any>(
                         } catch (error) {
                             if (!optional) {
                                 return handleServerError(
-                                    { message: 'Invalid JSON in request body' },
+                                    'Invalid JSON in request body',
                                     'Validation'
                                 );
                             }
@@ -232,7 +232,7 @@ export function withMultiValidation<T = any>(
                             };
 
                             return handleServerError(
-                                { message: errorResponse.message, status: 400, details: errorResponse.errors },
+                                errorResponse.message,
                                 'Validation'
                             );
                         }

@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { handleServerError } from '../../error-handling';
+import { handleServerError } from '../../error-handling/server-errors';
 import { createApiHandler, createValidatedApiHandler } from './base-handler';
 
 /**
@@ -102,6 +102,10 @@ const exportToHtmlSchema = z.object({
 export const exportToDocxHandler = createValidatedApiHandler(
     async (request: NextRequest, context: { params: { [key: string]: string } }, validatedData) => {
         try {
+            if (!validatedData) {
+                throw new Error('Validation data is required');
+            }
+
             const { content, title, author, subject, keywords, template, includeTOC, includePageNumbers, fontSize, fontFamily, lineSpacing, margins } = validatedData;
 
             // TODO: تنفيذ منطق التصدير إلى Docx
@@ -162,6 +166,10 @@ export const exportToDocxHandler = createValidatedApiHandler(
 export const exportToPptxHandler = createValidatedApiHandler(
     async (request: NextRequest, context: { params: { [key: string]: string } }, validatedData) => {
         try {
+            if (!validatedData) {
+                throw new Error('Validation data is required');
+            }
+
             const { content, title, author, subject, keywords, template, slideLayout, includeSlideNumbers, includeSlideTitles, fontSize, fontFamily, colorScheme, aspectRatio } = validatedData;
 
             // TODO: تنفيذ منطق التصدير إلى Pptx
@@ -224,6 +232,10 @@ export const exportToPptxHandler = createValidatedApiHandler(
 export const exportToPdfHandler = createValidatedApiHandler(
     async (request: NextRequest, context: { params: { [key: string]: string } }, validatedData) => {
         try {
+            if (!validatedData) {
+                throw new Error('Validation data is required');
+            }
+
             const { content, title, author, subject, keywords, template, includeTOC, includePageNumbers, fontSize, fontFamily, lineSpacing, pageSize, orientation, margins } = validatedData;
 
             // TODO: تنفيذ منطق التصدير إلى PDF
@@ -287,6 +299,10 @@ export const exportToPdfHandler = createValidatedApiHandler(
 export const exportToHtmlHandler = createValidatedApiHandler(
     async (request: NextRequest, context: { params: { [key: string]: string } }, validatedData) => {
         try {
+            if (!validatedData) {
+                throw new Error('Validation data is required');
+            }
+
             const { content, title, author, subject, keywords, template, includeCSS, includeJS, responsive, darkMode, fontSize, fontFamily, colorScheme } = validatedData;
 
             // TODO: تنفيذ منطق التصدير إلى HTML

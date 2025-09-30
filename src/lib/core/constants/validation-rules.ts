@@ -62,7 +62,7 @@ export const NUMBER_VALIDATION_RULES = {
 /**
  * قواعد التحقق من الملفات
  */
-export const FILE_VALIDATION_RULES = {
+export const FILE_VALIDATION_RULES_V2 = {
     // أحجام الملفات (بالبايت)
     MAX_SIZE_SMALL: 1024 * 1024, // 1MB
     MAX_SIZE_MEDIUM: 5 * 1024 * 1024, // 5MB

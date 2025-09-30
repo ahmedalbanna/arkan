@@ -64,7 +64,7 @@ export class UserListService extends SimpleService<UserListResponse> {
  */
 export class CreateUserService extends AdminService<CreateUserData, UserProfile> {
     protected endpoint = '/api/admin/users';
-    protected method = 'POST';
+    protected method: 'POST' = 'POST';
     protected inputSchema = UserSchemas.createUser;
 }
 
@@ -73,7 +73,7 @@ export class CreateUserService extends AdminService<CreateUserData, UserProfile>
  */
 export class UpdateUserService extends AdminService<UpdateUserData, UserProfile> {
     protected endpoint = '/api/admin/users';
-    protected method = 'PUT';
+    protected method: 'PUT' = 'PUT';
     protected inputSchema = UserSchemas.updateUser;
 
     async call(data: UpdateUserData, token: string, userId: string): Promise<UserProfile> {
@@ -87,7 +87,9 @@ export class UpdateUserService extends AdminService<UpdateUserData, UserProfile>
  */
 export class DeleteUserService extends AdminService<{}, { message: string }> {
     protected endpoint = '/api/admin/users';
-    protected method = 'DELETE';
+    protected method: 'DELETE' = 'DELETE';
+    protected inputSchema = undefined;
+    protected requiresAuth = true;
 
     async call(data: {}, token: string, userId: string): Promise<{ message: string }> {
         const endpoint = `${this.endpoint}/${userId}`;
@@ -125,7 +127,8 @@ export class GetAdminsService extends SimpleService<UserProfile[]> {
  */
 export class SendPasswordResetService extends ComplexService<{}, { message: string }> {
     protected endpoint = '/api/users';
-    protected method = 'POST';
+    protected method: 'POST' = 'POST';
+    protected inputSchema = undefined;
     protected requiresAuth = true;
 
     async call(data: {}, token: string, userId: string): Promise<{ message: string }> {
