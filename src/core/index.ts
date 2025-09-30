@@ -66,6 +66,13 @@ export * from './export';
 // نظام إدارة القوالب الشامل
 export * from './templates';
 
+// نظام المراقبة والأداء
+export * from './monitoring/performance-tracker';
+
+// نظام تحسين Bundle والأداء
+export * from './utils/bundle-optimizer';
+export * from './utils/memory-manager';
+
 // تصدير الأنواع
 export type { AcademicSolverToolConfig } from './hooks/academic-solver-tools/use-academic-solver-factory';
 export type { CopyToastOptions, CopyToastResult } from './hooks/base/use-copy-toast';
@@ -75,4 +82,31 @@ export type { ProcessingStateOptions, ProcessingStateResult } from './hooks/base
 export type { PresentationToolConfig } from './hooks/presentation-tools/use-presentation-factory';
 export type { ProjectPlanToolConfig } from './hooks/project-plan-tools/use-project-plan-factory';
 export type { TextProcessorOptions, TextProcessorResult } from './hooks/writing-tools/use-text-processor';
+
+// تصدير أنواع الأداء والذاكرة
+export type { BundlePerformance, ComponentPerformance, HookPerformance, PerformanceConfig, PerformanceMetric, PerformanceReport } from './monitoring/performance-tracker';
+export type { BundleConfig, BundleMetrics, LazyComponentProps } from './utils/bundle-optimizer';
+export type { CacheEntry, MemoryConfig, MemoryStats } from './utils/memory-manager';
+
+// تهيئة النظام تلقائياً
+import { PerformanceTracker } from './monitoring/performance-tracker';
+import { MemoryManager } from './utils/memory-manager';
+
+// تهيئة إدارة الذاكرة
+MemoryManager.initialize({
+    maxCacheSize: 50 * 1024 * 1024, // 50MB
+    maxEntries: 1000,
+    cleanupInterval: 30000, // 30 seconds
+    warningThreshold: 0.7, // 70%
+    criticalThreshold: 0.9, // 90%
+});
+
+// تهيئة مراقبة الأداء
+PerformanceTracker.initialize({
+    enableTracking: process.env.NODE_ENV === 'development',
+    slowThreshold: 100, // 100ms
+    memoryThreshold: 10 * 1024 * 1024, // 10MB
+    reportInterval: 60000, // 1 minute
+    maxHistorySize: 1000
+});
 

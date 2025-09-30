@@ -13,3 +13,6 @@ export * from './use-academic-solver-refactored';
 // أمثلة نظام التصدير والقوالب
 export * from './use-export-example';
 
+// أمثلة تحسين الأداء
+export * from './use-performance-optimization-example';
+
