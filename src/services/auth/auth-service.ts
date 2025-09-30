@@ -104,23 +104,172 @@ export const authService = {
 
 /**
  * دالة تسجيل الدخول بالبريد الإلكتروني
+ * تستخدم Firebase Client SDK لإنشاء جلسة مصادقة صحيحة
  */
 export async function loginWithEmail(credentials: LoginCredentials): Promise<AuthResponse> {
-    return authService.login.call(credentials, '');
+    const { auth } = await import('@/lib/firebase/client-init');
+    const { signInWithEmailAndPassword } = await import('firebase/auth');
+
+    try {
+        // تسجيل الدخول باستخدام Firebase Client SDK
+        const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+        const user = userCredential.user;
+
+        if (!user) {
+            throw new Error('Authentication failed');
+        }
+
+        // الحصول على ID token
+        const idToken = await user.getIdToken();
+
+        // إنشاء جلسة مصادقة
+        await fetch('/api/auth/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken }),
+        });
+
+        // إنشاء ملف المستخدم إذا لم يكن موجوداً
+        await fetch('/api/auth/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`
+            },
+            body: JSON.stringify({
+                uid: user.uid,
+                email: user.email,
+                name: user.displayName,
+                phoneNumber: user.phoneNumber,
+            })
+        });
+
+        return {
+            user: {
+                id: user.uid,
+                email: user.email || '',
+                name: user.displayName || user.email?.split('@')[0] || 'User',
+                role: 'user' as const,
+            },
+            token: idToken,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        };
+    } catch (error: any) {
+        console.error('Login error:', error);
+
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+            throw new Error('Invalid email or password');
+        }
+
+        if (error.code === 'auth/invalid-email') {
+            throw new Error('Invalid email format');
+        }
+
+        if (error.code === 'auth/too-many-requests') {
+            throw new Error('Too many failed attempts. Please try again later.');
+        }
+
+        throw new Error('Login failed');
+    }
 }
 
 /**
  * دالة التسجيل
+ * تستخدم Firebase Client SDK لإنشاء حساب جديد وجلسة مصادقة
  */
 export async function signupUser(credentials: SignupCredentials): Promise<SignupResponse> {
-    return authService.signup.call(credentials, '');
+    const { auth } = await import('@/lib/firebase/client-init');
+    const { createUserWithEmailAndPassword, updateProfile } = await import('firebase/auth');
+
+    try {
+        // إنشاء حساب جديد باستخدام Firebase Client SDK
+        const userCredential = await createUserWithEmailAndPassword(auth, credentials.email, credentials.password);
+        const user = userCredential.user;
+
+        if (!user) {
+            throw new Error('Account creation failed');
+        }
+
+        // تحديث ملف المستخدم
+        await updateProfile(user, {
+            displayName: credentials.name,
+        });
+
+        // الحصول على ID token
+        const idToken = await user.getIdToken();
+
+        // إنشاء جلسة مصادقة
+        await fetch('/api/auth/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken }),
+        });
+
+        // إنشاء ملف المستخدم في Firestore
+        await fetch('/api/auth/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`
+            },
+            body: JSON.stringify({
+                uid: user.uid,
+                email: user.email,
+                name: credentials.name,
+                phoneNumber: user.phoneNumber,
+            })
+        });
+
+        return {
+            user: {
+                id: user.uid,
+                email: user.email || '',
+                name: credentials.name,
+                role: 'user' as const,
+            },
+            message: 'Account created successfully',
+        };
+    } catch (error: any) {
+        console.error('Signup error:', error);
+
+        if (error.code === 'auth/email-already-in-use') {
+            throw new Error('Email already in use');
+        }
+
+        if (error.code === 'auth/invalid-email') {
+            throw new Error('Invalid email format');
+        }
+
+        if (error.code === 'auth/weak-password') {
+            throw new Error('Password is too weak');
+        }
+
+        throw new Error('Account creation failed');
+    }
 }
 
 /**
  * دالة تسجيل الخروج
+ * تنظف الجلسة وتخرج من Firebase
  */
 export async function logoutUser(token: string): Promise<{ message: string }> {
-    return authService.logout.call(token);
+    try {
+        // تنظيف جلسة الخادم
+        await fetch('/api/auth/session', {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        // تسجيل الخروج من Firebase
+        const { auth } = await import('@/lib/firebase/client-init');
+        const { signOut } = await import('firebase/auth');
+        await signOut(auth);
+
+        return { message: 'Logged out successfully' };
+    } catch (error) {
+        console.error('Logout error:', error);
+        throw new Error('Logout failed');
+    }
 }
 
 /**

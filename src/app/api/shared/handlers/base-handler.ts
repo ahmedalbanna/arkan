@@ -91,7 +91,7 @@ export abstract class BaseApiHandler<TInput = any, TOutput = any> {
     ): Promise<void> {
         // يمكن إضافة نظام تسجيل هنا
         console.log(`Operation: ${operation}`, {
-            userId: context.user.id,
+            userId: context.user?.id || 'anonymous',
             endpoint: context.request.url,
             details
         });
@@ -124,7 +124,7 @@ export abstract class ComplexApiHandler<TInput = any, TOutput = any> extends Bas
     async handle(context: ApiHandlerContext): Promise<Response> {
         try {
             // التحقق من الصلاحيات الإدارية
-            if (this.requiresAdmin && context.user.role !== 'admin') {
+            if (this.requiresAdmin && context.user && context.user.role !== 'admin') {
                 return handleApiErrorEnhanced({
                     code: 'FORBIDDEN',
                     message: 'Admin access required'

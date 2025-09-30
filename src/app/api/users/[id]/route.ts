@@ -48,7 +48,7 @@ const userUpdateSchema = z.object({
 // PUT (update) a user profile
 export const PUT = withEnhancedAuth(async ({ request, params, user: requester }) => {
     try {
-        const { id: userId } = params;
+        const { id: userId } = await params;
         const body = await request.json();
         let validation;
 

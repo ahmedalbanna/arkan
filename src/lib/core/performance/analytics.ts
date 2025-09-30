@@ -190,8 +190,17 @@ export class Analytics {
         method: string,
         duration: number,
         success: boolean,
-        statusCode?: number
+        statusCode?: number,
+        userId?: string
     ): void {
+        // حفظ userId الحالي مؤقتاً
+        const currentUserId = this.userId;
+
+        // تعيين userId الجديد مؤقتاً
+        if (userId) {
+            this.userId = userId;
+        }
+
         this.track('api_call', 'api_call', {
             endpoint,
             method,
@@ -199,6 +208,9 @@ export class Analytics {
             statusCode,
             duration,
         }, duration);
+
+        // استعادة userId الأصلي
+        this.userId = currentUserId;
     }
 
     /**

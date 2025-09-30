@@ -113,6 +113,7 @@ export const withEnhancedAuth = (handler: EnhancedApiHandler, options: EnhancedA
                             method: request.method,
                             requestId,
                             success: true,
+                            userId: user.id,
                         },
                     });
 
@@ -123,7 +124,8 @@ export const withEnhancedAuth = (handler: EnhancedApiHandler, options: EnhancedA
                             request.method,
                             duration,
                             true,
-                            200
+                            200,
+                            user.id
                         );
                     }
                 }
@@ -166,7 +168,8 @@ export const withEnhancedAuth = (handler: EnhancedApiHandler, options: EnhancedA
                         request.method,
                         duration,
                         false,
-                        500
+                        500,
+                        undefined // userId not available in error context
                     );
                 }
             }
@@ -178,23 +181,34 @@ export const withEnhancedAuth = (handler: EnhancedApiHandler, options: EnhancedA
 
 /**
  * Authenticate request and return user data
+ * Supports both Bearer tokens and session cookies
  */
 async function authenticateRequest(request: NextRequest): Promise<{ user: any; token: string } | NextResponse> {
     try {
-        const authorization = request.headers.get('Authorization');
-        if (!authorization?.startsWith('Bearer ')) {
-            return handleApiErrorEnhanced(
-                new Error('Unauthorized: Missing token'),
-                'auth_missing_token'
-            );
-        }
+        let token: string | null = null;
+        let decodedToken: any = null;
 
-        const token = authorization.substring(7);
-        const decodedToken = await adminAuth.verifyIdToken(token, true);
+        // Try Bearer token first
+        const authorization = request.headers.get('Authorization');
+        if (authorization?.startsWith('Bearer ')) {
+            token = authorization.substring(7);
+            decodedToken = await adminAuth.verifyIdToken(token, true);
+        } else {
+            // Try session cookie
+            const sessionCookie = request.cookies.get('__session')?.value;
+            if (sessionCookie) {
+                try {
+                    decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
+                    token = sessionCookie; // Use session cookie as token
+                } catch (sessionError) {
+                    console.log('Session cookie verification failed:', sessionError);
+                }
+            }
+        }
 
         if (!decodedToken || !decodedToken.uid) {
             return handleApiErrorEnhanced(
-                new Error('Unauthorized: Invalid token'),
+                new Error('Unauthorized: Invalid or missing authentication'),
                 'auth_invalid_token'
             );
         }
@@ -207,7 +221,7 @@ async function authenticateRequest(request: NextRequest): Promise<{ user: any; t
             );
         }
 
-        return { user, token };
+        return { user, token: token || '' };
     } catch (error: any) {
         return handleApiErrorEnhanced(error, 'auth_verification');
     }

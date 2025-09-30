@@ -22,35 +22,43 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Handles setting/clearing the session cookie and ensuring user profile exists
 async function manageSessionAndProfile(user: FirebaseUser | null) {
   if (user) {
-    const idToken = await user.getIdToken(true);
-    // Set session cookie
-    await fetch('/api/auth/session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken }),
-    });
+    try {
+      const idToken = await user.getIdToken(true);
 
-    // Ensure a user profile exists in Firestore.
-    // This is a good place to handle it centrally for all auth methods.
-    await fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}` // Pass token for verification
-      },
-      body: JSON.stringify({
-        uid: user.uid,
-        email: user.email,
-        name: user.displayName,
-        phoneNumber: user.phoneNumber,
-      })
-    });
+      // Set session cookie
+      await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+      });
 
+      // Ensure a user profile exists in Firestore.
+      // This is a good place to handle it centrally for all auth methods.
+      await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}` // Pass token for verification
+        },
+        body: JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName,
+          phoneNumber: user.phoneNumber,
+        })
+      });
+    } catch (error) {
+      console.error('Error managing session and profile:', error);
+    }
   } else {
-    // Clear session cookie
-    await fetch('/api/auth/logout', {
-      method: 'POST',
-    });
+    try {
+      // Clear session cookie
+      await fetch('/api/auth/session', {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      console.error('Error clearing session:', error);
+    }
   }
 }
 
@@ -61,10 +69,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (firebaseUser?.uid) {
-      const unsubscribe = subscribeToUserProfile(firebaseUser.uid, (user) => {
+      const unsubscribePromise = subscribeToUserProfile(firebaseUser.uid, (user) => {
         queryClient.setQueryData(userKeys.profile(firebaseUser.uid), user);
       });
-      return () => unsubscribe();
+
+      return () => {
+        unsubscribePromise.then(unsubscribe => unsubscribe?.());
+      };
     }
   }, [firebaseUser, queryClient]);
 
@@ -124,3 +135,4 @@ export const useAuth = (): AuthContextType => {
 };
 
 export type { FirebaseUser };
+

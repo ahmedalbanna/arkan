@@ -26,12 +26,12 @@ export const withApiMiddleware = (
 
         try {
             // Rate Limiting
-            if (options.rateLimit) {
+            if (options.rateLimit && context.user) {
                 await checkRateLimit(context.user.id, options.rateLimit);
             }
 
             // Credit Deduction
-            if (options.creditCost && options.creditCost > 0) {
+            if (options.creditCost && options.creditCost > 0 && context.user) {
                 await deductCredit(context.user.id, options.creditCost);
             }
 
@@ -39,7 +39,7 @@ export const withApiMiddleware = (
             if (options.logging) {
                 await logApiCall({
                     requestId,
-                    userId: context.user.id,
+                    userId: context.user?.id || 'anonymous',
                     endpoint: context.request.url,
                     method: context.request.method,
                     timestamp: new Date().toISOString(),
@@ -64,7 +64,7 @@ export const withApiMiddleware = (
             if (options.logging) {
                 await logApiCall({
                     requestId,
-                    userId: context.user.id,
+                    userId: context.user?.id || 'anonymous',
                     endpoint: context.request.url,
                     method: context.request.method,
                     timestamp: new Date().toISOString(),

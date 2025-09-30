@@ -1,21 +1,19 @@
 
 'use client';
 
-import React from 'react';
+import { SectionName } from '@/ai/schemas';
+import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
 import { Accordion } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { PanelLeftClose } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
-import { Button } from '../ui/button';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { Section } from '@/lib/models/section';
 import { Agent } from '@/lib/models/agent';
-import { SectionName } from '@/ai/schemas';
+import { Section } from '@/lib/models/section';
+import { cn } from '@/lib/utils';
+import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { PanelLeftClose } from 'lucide-react';
+import { Button } from '../ui/button';
 
 interface SortableSectionItemProps {
     id: string;
@@ -26,7 +24,6 @@ interface SortableSectionItemProps {
     onGenerate: () => void;
 }
 
-
 function SortableSectionItem({ id, agent, ...props }: SortableSectionItemProps) {
     const {
         attributes,
@@ -34,7 +31,7 @@ function SortableSectionItem({ id, agent, ...props }: SortableSectionItemProps) 
         setNodeRef,
         transform,
         transition,
-    } = useSortable({id: id});
+    } = useSortable({ id: id });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -43,8 +40,8 @@ function SortableSectionItem({ id, agent, ...props }: SortableSectionItemProps) 
 
     return (
         <div ref={setNodeRef} style={style} {...attributes}>
-             <SectionAccordionItem
-                itemKey={id}
+            <SectionAccordionItem
+                itemKey={id as SectionName}
                 agent={agent}
                 onGenerate={props.onGenerate}
                 isGenerating={props.isGenerating}
@@ -82,16 +79,16 @@ export const GenerationTools = ({
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
-          coordinateGetter: sortableKeyboardCoordinates,
+            coordinateGetter: sortableKeyboardCoordinates,
         })
     );
 
     const handleDragEnd = (event: any) => {
-        const {active, over} = event;
+        const { active, over } = event;
         if (active.id !== over.id) {
-          const oldIndex = orderedSections.findIndex(s => s.id === active.id);
-          const newIndex = orderedSections.findIndex(s => s.id === over.id);
-          setOrderedSections(arrayMove(orderedSections, oldIndex, newIndex));
+            const oldIndex = orderedSections.findIndex(s => s.id === active.id);
+            const newIndex = orderedSections.findIndex(s => s.id === over.id);
+            setOrderedSections(arrayMove(orderedSections, oldIndex, newIndex));
         }
     };
 
@@ -107,7 +104,7 @@ export const GenerationTools = ({
                         <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
                         <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
                     </div>
-                     <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
+                    <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
                         <PanelLeftClose className="h-5 w-5" />
                     </Button>
                 </div>
