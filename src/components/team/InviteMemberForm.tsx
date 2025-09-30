@@ -1,21 +1,21 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { teamKeys } from '@/lib/query-keys';
-import { useToast } from '@/hooks';
+import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Loader2, Send } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { inviteMember } from '@/services';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useToast } from '@/hooks';
+import { teamKeys } from '@/lib/core/query-keys';
+import { inviteMember } from '@/services';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Loader2, Send } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const inviteSchema = z.object({
-  email: z.string().email('Please enter a valid email address.'),
+    email: z.string().email('Please enter a valid email address.'),
 });
 
 type InviteFormValues = z.infer<typeof inviteSchema>;

@@ -1,25 +1,25 @@
 
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from '@/hooks';
-import { templateKeys } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
-import { handleErrorUtility } from '@/lib/errorUtils';
+import { toast } from '@/hooks';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { 
-    createGenerativeTemplate, 
-    fetchPresentationTemplatesApi, 
-    fetchProposalTemplatesApi, 
-    fetchReportTemplatesApi, 
-    refreshTemplateImage as refreshTemplateImageApi,
-    updatePresentationTemplateApi, 
-    updateProposalTemplateApi, 
-    updateReportTemplateApi 
-} from '@/services/template-service';
+import { templateKeys } from '@/lib/core/query-keys';
+import { handleErrorUtility } from '@/lib/errorUtils';
 import { PresentationTemplate, type PresentationTemplateProperties } from '@/lib/models/presentationTemplate';
 import { ProposalTemplate, type ProposalTemplateProperties } from '@/lib/models/proposalTemplate';
 import { ReportTemplate, type ReportTemplateProperties } from '@/lib/models/reportTemplate';
+import {
+    createGenerativeTemplate,
+    fetchPresentationTemplatesApi,
+    fetchProposalTemplatesApi,
+    fetchReportTemplatesApi,
+    refreshTemplateImage as refreshTemplateImageApi,
+    updatePresentationTemplateApi,
+    updateProposalTemplateApi,
+    updateReportTemplateApi
+} from '@/services';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 
 // === Reusable hooks for each template type ===
@@ -55,19 +55,19 @@ export function usePresentationTemplates() {
 }
 
 export function useUpdateProposalTemplate() {
-  const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
-  return useMutation<any, Error, { templateId: string; data: Partial<ProposalTemplateProperties> }>({
-    mutationFn: async ({ templateId, data }) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return updateProposalTemplateApi(templateId, data, token);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: templateKeys.proposals() });
-      toast({ title: 'Template Saved' });
-    },
-    onError: (error) => handleErrorUtility(error, "Failed to save template"),
-  });
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+    return useMutation<any, Error, { templateId: string; data: Partial<ProposalTemplateProperties> }>({
+        mutationFn: async ({ templateId, data }) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return updateProposalTemplateApi(templateId, data, token);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: templateKeys.proposals() });
+            toast({ title: 'Template Saved' });
+        },
+        onError: (error) => handleErrorUtility(error, "Failed to save template"),
+    });
 }
 
 export function useUpdateReportTemplate() {
@@ -113,7 +113,7 @@ export function useRefreshTemplateImage(templateType: 'docx' | 'pptx' | 'proposa
         },
         onSuccess: () => {
             let keyToInvalidate;
-            switch(templateType) {
+            switch (templateType) {
                 case 'docx': keyToInvalidate = templateKeys.docx(); break;
                 case 'pptx': keyToInvalidate = templateKeys.pptx(); break;
                 case 'proposal': keyToInvalidate = templateKeys.proposals(); break;
@@ -123,7 +123,7 @@ export function useRefreshTemplateImage(templateType: 'docx' | 'pptx' | 'proposa
             if (keyToInvalidate) {
                 queryClient.invalidateQueries({ queryKey: keyToInvalidate });
             }
-             toast({ title: 'Image Refreshed', description: 'The preview image has been updated.' });
+            toast({ title: 'Image Refreshed', description: 'The preview image has been updated.' });
         },
         onError: (error) => {
             handleErrorUtility(error, 'Failed to refresh image');
@@ -133,19 +133,19 @@ export function useRefreshTemplateImage(templateType: 'docx' | 'pptx' | 'proposa
 
 
 export function useCreatePresentationTemplate() {
-  const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
-  return useMutation({
-    mutationFn: async (data: Omit<PresentationTemplateProperties, 'id'> & { id: string }) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return createGenerativeTemplate('presentation', data.id, data, token);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: templateKeys.presentations() });
-    },
-    onError: (error) => {
-      handleErrorUtility(error, "Failed to create presentation template");
-      throw error;
-    }
-  });
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+    return useMutation({
+        mutationFn: async (data: Omit<PresentationTemplateProperties, 'id'> & { id: string }) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return createGenerativeTemplate('presentation', data.id, data, token);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: templateKeys.presentations() });
+        },
+        onError: (error) => {
+            handleErrorUtility(error, "Failed to create presentation template");
+            throw error;
+        }
+    });
 }

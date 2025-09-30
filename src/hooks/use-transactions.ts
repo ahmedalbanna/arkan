@@ -3,8 +3,8 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
+import { transactionKeys } from '@/lib/core/query-keys';
 import { Transaction, type TransactionProperties } from '@/lib/models/transaction';
-import { transactionKeys } from '@/lib/query-keys';
 import { fetchUserTransactions as fetchUserTransactionsApi, getTransactions as getTransactionsApi, TransactionStatus } from '@/services';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 

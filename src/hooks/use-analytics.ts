@@ -4,8 +4,8 @@
 import { useAuth } from '@/context/AuthContext';
 import { createUIHook } from '@/core';
 import { getAuthenticatedToken } from '@/lib/authUtils';
+import { analyticsKeys } from '@/lib/core/query-keys';
 import { handleErrorUtility } from '@/lib/errorUtils';
-import { analyticsKeys } from '@/lib/query-keys';
 import { fetchUserStats, type UserDashboardStats } from '@/services';
 import { useQuery } from '@tanstack/react-query';
 

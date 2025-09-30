@@ -1,15 +1,14 @@
 
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { GeneratePresentationOutlineInput, GeneratePresentationOutlineOutput, GeneratePresentationOutput, PresentationHistoryEntry } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
-import { toast } from './use-toast';
-import { generatePresentationApi, generatePresentationOutlineApi } from '@/services';
-import type { GeneratePresentationOutput, PresentationHistoryEntry, GeneratePresentationOutlineInput, GeneratePresentationOutlineOutput } from '@/ai/schemas';
-import { useBuilderStore } from './useBuilderStore';
 import { useLocalization } from '@/context/LocalizationContext';
-import { userKeys } from '@/lib/query-keys';
-import { Project } from '@/lib/models/project';
+import { userKeys } from '@/lib/core/query-keys';
+import { generatePresentationApi, generatePresentationOutlineApi } from '@/services';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from './use-toast';
+import { useBuilderStore } from './useBuilderStore';
 import { useGenerationUIStore } from './useGenerationUIStore';
 
 interface GeneratePresentationVariables {
@@ -27,13 +26,13 @@ export function useGeneratePresentation() {
     return useMutation<GeneratePresentationOutput, Error, GeneratePresentationVariables>({
         mutationFn: generatePresentationApi,
         onSuccess: (data) => {
-            
+
             const newEntry: PresentationHistoryEntry = {
                 id: new Date().toISOString(),
                 name: `Presentation - ${new Date().toLocaleTimeString()}`,
                 slides: data.slides,
             };
-            
+
             updateProject(p => {
                 p.addPresentationToHistory(newEntry);
             });
@@ -69,7 +68,7 @@ export function useGeneratePresentationOutline(options?: {
             return generatePresentationOutlineApi(variables, token);
         },
         onSuccess: (data, variables, context) => {
-             if (firebaseUser) {
+            if (firebaseUser) {
                 queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
             }
             options?.onSuccess?.(data, variables, context);

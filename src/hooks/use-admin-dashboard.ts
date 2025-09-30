@@ -1,11 +1,10 @@
 
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { adminKeys } from '@/lib/query-keys';
-import { fetchDashboardStats, type DashboardStats } from '@/services/admin-service';
-import { getAuthenticatedToken } from '@/lib/authUtils';
+import { adminKeys } from '@/lib/core/query-keys';
+import { fetchDashboardStats, type DashboardStats } from '@/services';
+import { useQuery } from '@tanstack/react-query';
 
 export function useAdminDashboard() {
     const { firebaseUser } = useAuth();

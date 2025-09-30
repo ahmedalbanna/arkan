@@ -7,11 +7,10 @@ import { handleErrorUtility } from '@/lib/errorUtils';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from './use-toast';
 
-import { ExternalContext, GenerateProposalInput } from '@/ai/schemas';
+import { GenerateProposalInput } from '@/ai/schemas';
 import { generateProposalApi } from '@/services';
-import { useBuilderStore } from './useBuilderStore';
-import { userKeys } from '@/lib/query-keys';
 import { useQueryClient } from '@tanstack/react-query';
+import { useBuilderStore } from './useBuilderStore';
 
 
 export function useGenerateProposal() {

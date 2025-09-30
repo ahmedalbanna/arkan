@@ -1,27 +1,26 @@
 
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@/hooks/use-toast";
-import { agentKeys, categoryKeys } from "@/lib/query-keys";
-import { Agent, type AgentProperties, AgentCategory, AgentPrompt, AgentKnowledgeSource } from '@/lib/models/agent';
-import { useAuth } from "@/context/AuthContext";
-import { useMemo } from "react";
-import { handleErrorUtility } from "@/lib/errorUtils";
-import { getAuthenticatedToken } from "@/lib/authUtils";
-import {
-  fetchAgentApi,
-  updateAgentApi,
-  createAgentApi,
-  deleteAgentApi,
-  generateAgentConfigApi,
-  fetchAgentCategoriesApi,
-  createAgentCategoryApi,
-} from "@/services";
-import { type AgentEditorFormValues } from "@/lib/agent-editor-schema";
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "@/hooks/use-toast";
 import { useAgentStore } from "@/hooks/useAgentStore";
-import { AgentCategoryDetails } from "@/lib/models/agent";
+import { type AgentEditorFormValues } from "@/lib/agent-editor-schema";
+import { getAuthenticatedToken } from "@/lib/authUtils";
+import { agentKeys, categoryKeys } from '@/lib/core/query-keys';
+import { handleErrorUtility } from "@/lib/errorUtils";
+import { Agent, AgentCategoryDetails, AgentKnowledgeSource, type AgentProperties } from '@/lib/models/agent';
+import {
+  createAgentApi,
+  createAgentCategoryApi,
+  deleteAgentApi,
+  fetchAgentApi,
+  fetchAgentCategoriesApi,
+  generateAgentConfigApi,
+  updateAgentApi,
+} from "@/services";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 export { Agent };
 export type UpdateAgentVariables = {
@@ -94,12 +93,12 @@ export function useAgents() {
  */
 export function useAgent(agentId: string) {
   const { firebaseUser } = useAuth();
-  
+
   return useQuery<Agent | null>({
     queryKey: agentKeys.detail(agentId),
     queryFn: async () => {
       const token = await getAuthenticatedToken(firebaseUser);
-      const data = await fetchAgentApi(agentId, token); 
+      const data = await fetchAgentApi(agentId, token);
       if (!data) return null;
       return new Agent(data as AgentProperties);
     },
@@ -146,24 +145,24 @@ export function useUpdateAgent() {
  * @returns The result of the useMutation hook.
  */
 export function useCreateAgent() {
-    const { firebaseUser } = useAuth();
-    const { fetchAgents } = useAgentStore.getState();
+  const { firebaseUser } = useAuth();
+  const { fetchAgents } = useAgentStore.getState();
 
-    return useMutation<AgentProperties, Error, CreateAgentVariables>({
-        mutationFn: async (variables) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return createAgentApi(variables, token);
-        },
-        onSuccess: (newAgent) => {
-            toast({ title: 'Success', description: 'New AI agent created.' });
-            // Trigger a refetch of the store data.
-            fetchAgents();
-        },
-        onError: (error, newAgent, context) => {
-             handleErrorUtility(error, "Create Agent Failed");
-             throw error; // Re-throw to be handled by the form
-        },
-    });
+  return useMutation<AgentProperties, Error, CreateAgentVariables>({
+    mutationFn: async (variables) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return createAgentApi(variables, token);
+    },
+    onSuccess: (newAgent) => {
+      toast({ title: 'Success', description: 'New AI agent created.' });
+      // Trigger a refetch of the store data.
+      fetchAgents();
+    },
+    onError: (error, newAgent, context) => {
+      handleErrorUtility(error, "Create Agent Failed");
+      throw error; // Re-throw to be handled by the form
+    },
+  });
 }
 
 /**
@@ -171,31 +170,31 @@ export function useCreateAgent() {
  * @returns The result of the useMutation hook.
  */
 export function useDeleteAgent() {
-    const { firebaseUser } = useAuth();
-    const { fetchAgents } = useAgentStore.getState();
+  const { firebaseUser } = useAuth();
+  const { fetchAgents } = useAgentStore.getState();
 
-    return useMutation<any, Error, string>({
-        mutationFn: async (agentId: string) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return deleteAgentApi(agentId, token);
-        },
-        onSuccess: (data, agentId) => {
-            toast({ title: 'Agent Deleted', description: `Agent "${agentId}" was successfully deleted.` });
-            fetchAgents(); // Refetch the store data
-        },
-        onError: (error: Error) => {
-            handleErrorUtility(error, "Delete Failed");
-        }
-    });
+  return useMutation<any, Error, string>({
+    mutationFn: async (agentId: string) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return deleteAgentApi(agentId, token);
+    },
+    onSuccess: (data, agentId) => {
+      toast({ title: 'Agent Deleted', description: `Agent "${agentId}" was successfully deleted.` });
+      fetchAgents(); // Refetch the store data
+    },
+    onError: (error: Error) => {
+      handleErrorUtility(error, "Delete Failed");
+    }
+  });
 }
 
 export function useGenerateAgentConfig() {
-    const { firebaseUser } = useAuth();
+  const { firebaseUser } = useAuth();
 
-    return useMutation({
-        mutationFn: async (variables: { prompt: string, includeJsonOutput: boolean, contextFiles: UploadedFile[] }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return generateAgentConfigApi(variables, token);
-        }
-    })
+  return useMutation({
+    mutationFn: async (variables: { prompt: string, includeJsonOutput: boolean, contextFiles: UploadedFile[] }) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return generateAgentConfigApi(variables, token);
+    }
+  })
 }

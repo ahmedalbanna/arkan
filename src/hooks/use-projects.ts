@@ -3,23 +3,23 @@
 
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@/hooks";
-import { projectKeys } from "@/lib/query-keys";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "@/hooks";
+import { getAuthenticatedToken } from "@/lib/authUtils";
+import { projectKeys } from '@/lib/core/query-keys';
+import { handleErrorUtility } from "@/lib/errorUtils";
+import { Project, type ProjectProperties } from "@/lib/models/project"; // NEW: Import our class
 import {
-  fetchProjects as fetchProjectsApi,
-  fetchProject as fetchProjectApi,
   createProject,
   deleteProject,
+  fetchProject as fetchProjectApi,
+  fetchProjects as fetchProjectsApi,
   updateProject,
+  type ProjectState,
   type SavedProject,
 } from "@/services";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useBuilderStore } from "./useBuilderStore";
-import { handleErrorUtility } from "@/lib/errorUtils";
-import { getAuthenticatedToken } from "@/lib/authUtils";
-import { type ProjectState } from "@/services";
-import { Project, type ProjectProperties } from "@/lib/models/project"; // NEW: Import our class
 
 // Define types for mutation variables
 interface UpdateProjectVariables {
@@ -129,13 +129,13 @@ export function useUpdateProject() {
     },
     onSuccess: (updatedProjectData) => {
       const updatedProject = new Project(updatedProjectData as ProjectProperties);
-      
+
       // Invalidate the main project list
       queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
 
       // Update the specific project's query data in the cache
       queryClient.setQueryData(projectKeys.detail(updatedProject.id), updatedProjectData);
-      
+
       // Update the active project in the builder store
       setProject(updatedProject);
       setHasUnsavedChanges(false);

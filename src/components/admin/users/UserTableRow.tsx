@@ -1,22 +1,20 @@
 
 'use client';
 
-import { TableRow, TableCell } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, MessageSquare } from "lucide-react";
-import { format } from 'date-fns';
-import Link from 'next/link';
-import { useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { useAuth } from "@/context/AuthContext";
-import { userKeys } from "@/lib/query-keys";
-import { fetchUserProfileApi } from "@/services";
-import { useRouter } from "next/navigation";
-import { useChatStore } from "@/hooks";
-import { createConversationApi } from "@/services";
-import { toast } from "@/hooks";
 import { useLocalization } from "@/context/LocalizationContext";
+import { toast, useChatStore } from "@/hooks";
+import { userKeys } from '@/lib/core/query-keys';
 import { User } from '@/lib/models/user'; // NEW: Import our class
+import { createConversationApi, fetchUserProfileApi } from "@/services";
+import { useQueryClient } from "@tanstack/react-query";
+import { format } from 'date-fns';
+import { MessageSquare, Pencil } from "lucide-react";
+import Link from 'next/link';
+import { useRouter } from "next/navigation";
 
 interface UserTableRowProps {
     user: User;
@@ -65,21 +63,21 @@ export function UserTableRow({ user }: UserTableRowProps) {
             <TableCell>{user.email}</TableCell>
             <TableCell>
                 <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                {t(`roles.${user.role}`)}
+                    {t(`roles.${user.role}`)}
                 </Badge>
             </TableCell>
             <TableCell>{user.credits}</TableCell>
             <TableCell>{user.createdAt ? format(new Date(user.createdAt), 'd MMM yyyy') : 'N/A'}</TableCell>
             <TableCell className="text-right">
-               <Button variant="ghost" size="icon" onClick={() => handleStartChat(user)}>
-                  <MessageSquare className="h-4 w-4" />
-                  <span className="sr-only">{t('manageUsers.chatWithUserSr')}</span>
+                <Button variant="ghost" size="icon" onClick={() => handleStartChat(user)}>
+                    <MessageSquare className="h-4 w-4" />
+                    <span className="sr-only">{t('manageUsers.chatWithUserSr')}</span>
                 </Button>
-              <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)} aria-label={`${t('manageUsers.editUserSr')} ${user.name}`}>
-                <Link href={`/admin/manage-users/${user.id}/edit`}>
-                   <Pencil className="h-4 w-4" />
-                </Link>
-              </Button>
+                <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)} aria-label={`${t('manageUsers.editUserSr')} ${user.name}`}>
+                    <Link href={`/admin/manage-users/${user.id}/edit`}>
+                        <Pencil className="h-4 w-4" />
+                    </Link>
+                </Button>
             </TableCell>
         </TableRow>
     );

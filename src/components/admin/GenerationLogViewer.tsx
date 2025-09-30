@@ -1,25 +1,25 @@
 
 'use client';
 
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { generationLogKeys } from '@/lib/query-keys';
-import { fetchGenerationLogs } from '@/services';
-import type { GenerationLog } from '@/services';
-import { AlertCircle, Eye, Loader2, Search } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useAuth } from '@/context/AuthContext';
-import { formatDistanceToNow } from 'date-fns';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useTheme } from 'next-themes';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useAuth } from '@/context/AuthContext';
+import { useLocalization } from '@/context/LocalizationContext';
 import { useDebounce } from '@/hooks';
+import { generationLogKeys } from '@/lib/core/query-keys';
+import type { GenerationLog } from '@/services';
+import { fetchGenerationLogs } from '@/services';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { formatDistanceToNow } from 'date-fns';
+import { AlertCircle, Eye, Loader2, Search } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
-import { useLocalization } from '@/context/LocalizationContext';
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
@@ -76,7 +76,7 @@ function LogDetailView({ log }: { log: GenerationLog }) {
                 </div>
                 <div className="space-y-2">
                     <h4 className="font-semibold">Output</h4>
-                     <ScrollArea className="h-full max-h-[60vh] border rounded-md">
+                    <ScrollArea className="h-full max-h-[60vh] border rounded-md">
                         <ReactJson
                             src={log.output}
                             theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'}
@@ -101,13 +101,13 @@ export default function GenerationLogViewer() {
     const { firebaseUser, isLoading: authLoading } = useAuth();
 
     const {
-      data,
-      error,
-      fetchNextPage,
-      hasNextPage,
-      isFetching,
-      isFetchingNextPage,
-      status,
+        data,
+        error,
+        fetchNextPage,
+        hasNextPage,
+        isFetching,
+        isFetchingNextPage,
+        status,
     } = useInfiniteQuery({
         queryKey: generationLogKeys.list({ agentId: debouncedAgentId, userId: debouncedUserId }),
         queryFn: async ({ pageParam }) => {
@@ -160,7 +160,7 @@ export default function GenerationLogViewer() {
                             className="pl-10"
                         />
                     </div>
-                     <div className="relative flex-1">
+                    <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                             placeholder={t('manageGenerations.filterUserPlaceholder')}
@@ -214,7 +214,7 @@ export default function GenerationLogViewer() {
                     </Table>
                 </div>
                 <div className="flex items-center justify-center pt-8">
-                     <Button
+                    <Button
                         onClick={() => fetchNextPage()}
                         disabled={!hasNextPage || isFetchingNextPage}
                     >

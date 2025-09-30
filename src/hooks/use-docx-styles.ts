@@ -7,7 +7,7 @@ import { toast } from '@/hooks/use-toast';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import type { DocxTemplateKey, Template } from '@/lib/types';
-import { fetchDocxTemplatesApi, updateDocxTemplateApi } from '@/services/template-service';
+import { fetchDocxTemplatesApi, updateDocxTemplateApi } from '@/services';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import set from 'lodash.set';
 import { useState } from 'react';

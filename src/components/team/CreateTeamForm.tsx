@@ -1,23 +1,23 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext';
-import { teamKeys, userKeys } from '@/lib/query-keys';
-import { createTeam } from '@/services';
-import { useToast } from '@/hooks';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Loader2, PlusCircle } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useToast } from '@/hooks';
+import { teamKeys } from '@/lib/core/query-keys';
+import { createTeam } from '@/services';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Loader2, PlusCircle } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 
 const createTeamSchema = z.object({
-  name: z.string().min(3, 'Team name must be at least 3 characters long.'),
+    name: z.string().min(3, 'Team name must be at least 3 characters long.'),
 });
 
 type CreateTeamFormValues = z.infer<typeof createTeamSchema>;

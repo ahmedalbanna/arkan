@@ -9,7 +9,7 @@ import app from '@/lib/core/firebase/client-init';
 import {
   StartGenerationPayload
 } from "@/lib/types";
-import { startGenerationApi } from '@/services/taskade-service';
+import { startGenerationApi } from '@/services';
 import { getDatabase, off, onValue, ref } from 'firebase/database';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from './use-toast';

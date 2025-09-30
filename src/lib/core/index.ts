@@ -77,3 +77,5 @@ export type {
 export type {
     IntegrationConfig
 } from './performance/integration';
+
+export type * from './query-keys';

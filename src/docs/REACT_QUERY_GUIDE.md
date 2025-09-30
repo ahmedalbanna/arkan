@@ -22,7 +22,7 @@ To ensure consistency and avoid typos, we **always** use the query key factories
 ### Example Usage:
 
 ```typescript
-import { userKeys } from '@/lib/query-keys';
+import { userKeys } from '@/lib/core/query-keys';
 
 // Key for a list of users on a specific page
 const listKey = userKeys.list(1); // Returns ['users', 'list', { page: 1 }]
@@ -49,7 +49,7 @@ A custom hook for fetching data should:
 **Example: `src/hooks/use-user.ts`**
 ```typescript
 import { useQuery } from '@tanstack/react-query';
-import { userKeys } from '@/lib/query-keys';
+import { userKeys } from '@/lib/core/query-keys';
 
 async function fetchUserProfile(userId: string): Promise<UserProfile> {
   // ... fetch logic

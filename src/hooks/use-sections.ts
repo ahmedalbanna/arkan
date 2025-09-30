@@ -13,8 +13,8 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from './use-toast';
 
+import { sectionKeys } from '@/lib/core/query-keys';
 import { Section, type SectionProperties } from '@/lib/models/section'; // NEW: Import our class
-import { sectionKeys } from '@/lib/query-keys';
 
 /**
  * Fetches dynamic sections.

@@ -1,38 +1,28 @@
 
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Bot, Inbox, User, Search, MessageSquare, Loader2, PlusCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
+import { Bot, Inbox, Loader2, MessageSquare, PlusCircle } from 'lucide-react';
+import { useState } from 'react';
 
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { userKeys } from '@/lib/query-keys';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { createConversationApi } from '@/services';
-import { toast } from '@/hooks';
-import { useAuth } from '@/context/AuthContext';
-import { useChatStore } from '@/hooks';
-import { useRouter } from 'next/navigation';
-import type { UserProfile } from '@/lib/types';
-import { useUsers } from '@/hooks';
-import { formatDistanceToNow } from 'date-fns';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useAgents } from '@/hooks';
 import { useNewChatDialog } from '@/hooks/use-new-chat-dialog';
-import { Agent, type AgentProperties } from '@/lib/models/agent';
+import { Agent } from '@/lib/models/agent';
 import { Chat } from '@/lib/models/chat';
+import { formatDistanceToNow } from 'date-fns';
 
 
 interface ChatListProps {
-  agents: Agent[];
-  liveChats: Chat[]; // Now expects Chat[]
-  selectedChat: Chat | null; // Now expects Chat | null
-  onSelectChat: (chat: Chat) => void;
-  onSelectAgent: (agent: Agent) => void;
+    agents: Agent[];
+    liveChats: Chat[]; // Now expects Chat[]
+    selectedChat: Chat | null; // Now expects Chat | null
+    onSelectChat: (chat: Chat) => void;
+    onSelectAgent: (agent: Agent) => void;
 }
 
 
@@ -53,14 +43,14 @@ function NewChatDialog() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button size="sm"><PlusCircle className="me-2 h-4 w-4"/>New Chat</Button>
+                <Button size="sm"><PlusCircle className="me-2 h-4 w-4" />New Chat</Button>
             </DialogTrigger>
             <DialogContent className="p-0">
                 <DialogHeader className="p-4 border-b">
-                  <DialogTitle>Start a New Chat</DialogTitle>
-                  <DialogDescription>
-                    Select a user from the list to begin a conversation.
-                  </DialogDescription>
+                    <DialogTitle>Start a New Chat</DialogTitle>
+                    <DialogDescription>
+                        Select a user from the list to begin a conversation.
+                    </DialogDescription>
                 </DialogHeader>
                 <Command>
                     <CommandInput placeholder="Search users by name or email..." />
@@ -71,7 +61,7 @@ function NewChatDialog() {
                             {allUsers?.map((user) => (
                                 <CommandItem key={user.id} onSelect={() => onSelectUser(user)} disabled={isCreating}>
                                     <Avatar className="me-2 h-6 w-6">
-                                        <AvatarImage src={user.profilePictureUrl}/>
+                                        <AvatarImage src={user.profilePictureUrl} />
                                         <AvatarFallback>{user.getInitials()}</AvatarFallback>
                                     </Avatar>
                                     <div className="flex-grow">
@@ -83,8 +73,8 @@ function NewChatDialog() {
                             ))}
                         </CommandGroup>
                         {hasNextPage && (
-                             <CommandItem onSelect={() => fetchNextPage()} className="justify-center text-sm text-muted-foreground cursor-pointer">
-                                {isFetchingNextPage ? <Loader2 className="me-2 h-4 w-4 animate-spin"/> : null}
+                            <CommandItem onSelect={() => fetchNextPage()} className="justify-center text-sm text-muted-foreground cursor-pointer">
+                                {isFetchingNextPage ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : null}
                                 Load More
                             </CommandItem>
                         )}
@@ -112,7 +102,7 @@ function LiveChatListItem({ chat, isSelected, onSelect }: { chat: Chat, isSelect
                 <p className="text-xs text-muted-foreground truncate">{chat.lastMessage}</p>
             </div>
             {chat.lastMessageTimestamp && (
-                 <p className="text-xs text-muted-foreground self-start shrink-0">
+                <p className="text-xs text-muted-foreground self-start shrink-0">
                     {formatDistanceToNow(chat.lastMessageDate, { addSuffix: true })}
                 </p>
             )}
@@ -136,54 +126,54 @@ function AgentListItem({ agent, isSelected, onSelect }: { agent: Agent, isSelect
 }
 
 export function ChatList({ agents, liveChats, selectedChat, onSelectChat, onSelectAgent }: ChatListProps) {
-  const [activeTab, setActiveTab] = useState('chats');
+    const [activeTab, setActiveTab] = useState('chats');
 
-  return (
-    <div className="flex h-full flex-col bg-muted/50">
-      <div className="flex items-center justify-between p-4 border-b">
-         <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
-                <TabsTrigger value="chats" className="gap-2"><MessageSquare className="h-4 w-4" /> Chats</TabsTrigger>
-                <TabsTrigger value="agents" className="gap-2"><Bot className="h-4 w-4" /> Agents</TabsTrigger>
-            </TabsList>
-         </Tabs>
-         <NewChatDialog />
-      </div>
+    return (
+        <div className="flex h-full flex-col bg-muted/50">
+            <div className="flex items-center justify-between p-4 border-b">
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList>
+                        <TabsTrigger value="chats" className="gap-2"><MessageSquare className="h-4 w-4" /> Chats</TabsTrigger>
+                        <TabsTrigger value="agents" className="gap-2"><Bot className="h-4 w-4" /> Agents</TabsTrigger>
+                    </TabsList>
+                </Tabs>
+                <NewChatDialog />
+            </div>
 
-      <ScrollArea className="flex-1 p-2">
-         <nav className="grid gap-1">
-            {activeTab === 'chats' && (
-                liveChats.length > 0 ? liveChats.map(chat => (
-                    <LiveChatListItem
-                        key={chat.id}
-                        chat={chat}
-                        isSelected={selectedChat?.id === chat.id}
-                        onSelect={() => onSelectChat(chat)}
-                    />
-                )) : (
-                    <div className="text-center text-sm text-muted-foreground p-8">
-                        <Inbox className="mx-auto h-8 w-8 mb-2" />
-                        <p>No active conversations.</p>
-                    </div>
-                )
-            )}
-            {activeTab === 'agents' && (
-                agents.length > 0 ? agents.map((agent) => (
-                    <AgentListItem
-                        key={agent.id}
-                        agent={agent}
-                        isSelected={selectedChat?.id === agent.id}
-                        onSelect={() => onSelectAgent(agent)}
-                    />
-                )) : (
-                    <div className="text-center text-sm text-muted-foreground p-8">
-                        <Loader2 className="mx-auto h-8 w-8 animate-spin mb-2" />
-                        <p>Loading agents...</p>
-                    </div>
-                )
-            )}
-         </nav>
-      </ScrollArea>
-    </div>
-  );
+            <ScrollArea className="flex-1 p-2">
+                <nav className="grid gap-1">
+                    {activeTab === 'chats' && (
+                        liveChats.length > 0 ? liveChats.map(chat => (
+                            <LiveChatListItem
+                                key={chat.id}
+                                chat={chat}
+                                isSelected={selectedChat?.id === chat.id}
+                                onSelect={() => onSelectChat(chat)}
+                            />
+                        )) : (
+                            <div className="text-center text-sm text-muted-foreground p-8">
+                                <Inbox className="mx-auto h-8 w-8 mb-2" />
+                                <p>No active conversations.</p>
+                            </div>
+                        )
+                    )}
+                    {activeTab === 'agents' && (
+                        agents.length > 0 ? agents.map((agent) => (
+                            <AgentListItem
+                                key={agent.id}
+                                agent={agent}
+                                isSelected={selectedChat?.id === agent.id}
+                                onSelect={() => onSelectAgent(agent)}
+                            />
+                        )) : (
+                            <div className="text-center text-sm text-muted-foreground p-8">
+                                <Loader2 className="mx-auto h-8 w-8 animate-spin mb-2" />
+                                <p>Loading agents...</p>
+                            </div>
+                        )
+                    )}
+                </nav>
+            </ScrollArea>
+        </div>
+    );
 }

@@ -3,13 +3,13 @@
 
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
-import { userKeys } from "@/lib/query-keys";
-import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
-import { translateTextApi } from "@/services";
+import { userKeys } from '@/lib/core/query-keys';
+import { handleErrorUtility } from "@/lib/errorUtils";
 import { type TranslateTextOutput, type TranslateVariables } from "@/lib/types";
+import { translateTextApi } from "@/services";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 /**
  * Custom mutation hook for translating text using an AI flow.

@@ -3,8 +3,8 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
+import { teamKeys } from '@/lib/core/query-keys';
 import { handleErrorUtility } from '@/lib/errorUtils';
-import { teamKeys } from '@/lib/query-keys';
 import {
     createTeam as createTeamApi,
     inviteMember as inviteMemberApi

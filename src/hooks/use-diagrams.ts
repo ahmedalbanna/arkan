@@ -1,24 +1,22 @@
 
 'use client';
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/context/AuthContext";
-import { userKeys } from "@/lib/query-keys";
-import { handleErrorUtility } from "@/lib/errorUtils";
-import { getAuthenticatedToken } from "@/lib/authUtils";
-import { toast } from "./use-toast";
 import type { GenerateDiagramOutput, ImageToTextInput } from '@/ai/schemas';
-import {
-    generateDiagramApi,
-    updateDiagramApi,
-    explainDiagramApi,
-} from "@/services";
-import { useBuilderStore } from "./useBuilderStore";
 import { type DiagramType } from "@/ai/schemas";
-import { Project } from "@/lib/models/project";
+import { useAuth } from "@/context/AuthContext";
+import { getAuthenticatedToken } from "@/lib/authUtils";
+import { handleErrorUtility } from "@/lib/errorUtils";
+import {
+  explainDiagramApi,
+  generateDiagramApi,
+  updateDiagramApi,
+} from "@/services";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "./use-toast";
+import { useBuilderStore } from "./useBuilderStore";
 
 interface ExplainDiagramVariables extends ImageToTextInput {
-    prompt: string;
+  prompt: string;
 }
 
 /**
@@ -57,18 +55,18 @@ export function useGenerateDiagram() {
       return generateDiagramApi(body, token);
     },
     onSuccess: (data: GenerateDiagramOutput & { imageUrl: string }, variables: any) => {
-        const diagramKey = variables.diagramToGenerate as DiagramType;
-        
-        updateProject(p => {
-            p.setDiagram(diagramKey, {
-                plantUmlCode: data.plantUmlCode,
-                imageUrl: data.imageUrl,
-                explanation: data.explanation
-            });
+      const diagramKey = variables.diagramToGenerate as DiagramType;
+
+      updateProject(p => {
+        p.setDiagram(diagramKey, {
+          plantUmlCode: data.plantUmlCode,
+          imageUrl: data.imageUrl,
+          explanation: data.explanation
         });
-        
-        refetchUser();
-        toast({ title: "Diagram Generated", description: `Successfully created the ${diagramKey} diagram.` });
+      });
+
+      refetchUser();
+      toast({ title: "Diagram Generated", description: `Successfully created the ${diagramKey} diagram.` });
     },
     onError: (error: Error, variables) => {
       handleErrorUtility(error, `Failed to generate ${variables.diagramToGenerate} diagram`);
@@ -88,10 +86,10 @@ export function useUpdateDiagram(onSuccessCallback?: (data: { plantUmlCode: stri
       return updateDiagramApi(plantUmlCode, token);
     },
     onSuccess: (data, variables) => {
-       toast({ title: "Diagram Updated", description: "The diagram image has been refreshed." });
-       if(onSuccessCallback) {
-           onSuccessCallback(data, variables);
-       }
+      toast({ title: "Diagram Updated", description: "The diagram image has been refreshed." });
+      if (onSuccessCallback) {
+        onSuccessCallback(data, variables);
+      }
     },
     onError: (error: Error) => {
       handleErrorUtility(error, "Diagram update failed");

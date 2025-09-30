@@ -1,14 +1,14 @@
 
 'use client';
 
-import React, { createContext, useContext, ReactNode, useState, useEffect, useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
-import { auth } from '@/lib/firebase/client-init';
-import { subscribeToUserProfile, fetchUserProfileApi } from '@/services';
-import type { UserProfile } from '@/lib/types';
-import { userKeys } from '@/lib/query-keys';
 import { getAuthenticatedToken } from '@/lib/authUtils';
+import { userKeys } from '@/lib/core/query-keys';
+import { auth } from '@/lib/firebase/client-init';
+import type { UserProfile } from '@/lib/types';
+import { fetchUserProfileApi, subscribeToUserProfile } from '@/services';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
   firebaseUser: FirebaseUser | null;
@@ -33,17 +33,17 @@ async function manageSessionAndProfile(user: FirebaseUser | null) {
     // Ensure a user profile exists in Firestore.
     // This is a good place to handle it centrally for all auth methods.
     await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${idToken}` // Pass token for verification
-        },
-        body: JSON.stringify({
-            uid: user.uid,
-            email: user.email,
-            name: user.displayName,
-            phoneNumber: user.phoneNumber,
-        })
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}` // Pass token for verification
+      },
+      body: JSON.stringify({
+        uid: user.uid,
+        email: user.email,
+        name: user.displayName,
+        phoneNumber: user.phoneNumber,
+      })
     });
 
   } else {
@@ -72,17 +72,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { data: userProfile, isLoading: isProfileLoading } = useQuery<UserProfile | null>({
     queryKey: userKeys.profile(firebaseUser?.uid ?? ''),
     queryFn: async () => {
-        if (!firebaseUser) return null;
-        const token = await getAuthenticatedToken(firebaseUser);
-        return fetchUserProfileApi(firebaseUser.uid, token);
+      if (!firebaseUser) return null;
+      const token = await getAuthenticatedToken(firebaseUser);
+      return fetchUserProfileApi(firebaseUser.uid, token);
     },
     enabled: !!firebaseUser,
     staleTime: Infinity,
   });
 
   const refetchUser = useCallback(() => {
-    if(firebaseUser?.uid) {
-        queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
+    if (firebaseUser?.uid) {
+      queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
     }
   }, [firebaseUser, queryClient]);
 
@@ -105,10 +105,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{
-        firebaseUser,
-        userProfile: userProfile ?? null,
-        isLoading: authIsLoading || (!!firebaseUser && isProfileLoading),
-        refetchUser
+      firebaseUser,
+      userProfile: userProfile ?? null,
+      isLoading: authIsLoading || (!!firebaseUser && isProfileLoading),
+      refetchUser
     }}>
       {children}
     </AuthContext.Provider>

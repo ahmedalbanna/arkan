@@ -3,12 +3,8 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useDeleteDocxTemplate, useDocxStyles } from '@/hooks/use-docx-styles';
-import { getAuthenticatedToken } from '@/lib/authUtils';
 import type { DocxTemplateKey } from '@/lib/types';
-import { refreshTemplateImage } from '@/services/template-service'; // Assuming this service exists
-import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { toast } from './use-toast';
 import { useRefreshTemplateImage } from './use-templates';
 
 export function useDocxTemplateManager() {

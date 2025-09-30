@@ -5,10 +5,10 @@ import { PricingPlan } from "@/components/price/PricingCard";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks";
 import { getAuthenticatedToken } from "@/lib/authUtils";
+import { userKeys } from '@/lib/core/query-keys';
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { auth } from '@/lib/firebase/client-init';
 import { User, type UserProperties } from '@/lib/models/user'; // NEW: Import our User class
-import { userKeys } from '@/lib/query-keys';
 import type { UserProfile } from '@/lib/types';
 import {
   fetchAdminsApi,
@@ -46,7 +46,7 @@ export function useUsers() {
     queryKey: userKeys.lists(),
     queryFn: async ({ pageParam }) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return fetchUsersApi(USERS_PER_PAGE, pageParam as string | undefined, token);
+      return fetchUsersApi(token, { limit: USERS_PER_PAGE });
     },
     initialPageParam: undefined,
     getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
@@ -103,7 +103,7 @@ export function useUserProfile(userId: string) {
     });
 
     // Cleanup the subscription when the component unmounts
-    return () => unsubscribe();
+    return unsubscribe;
   }, [userId, queryClient]);
 
   // The component will use the data from the cache, which is kept up-to-date
@@ -137,7 +137,7 @@ export function useLogin() {
       if (user) {
         // After successful login, refetch user data to ensure context is updated
         refetchUser();
-        queryClient.invalidateQueries({ queryKey: userKeys.profile(user.uid) });
+        queryClient.invalidateQueries({ queryKey: userKeys.profile(user.user.id) });
         router.push("/generate");
         router.refresh();
         toast({
@@ -161,14 +161,14 @@ export function useGoogleSignIn() {
   return useMutation({
     mutationFn: loginWithGoogle,
     onSuccess: (user) => {
-      if (user) {
+      if (user && user.user) {
         refetchUser();
         queryClient.invalidateQueries({ queryKey: userKeys.all });
         router.push("/generate");
         router.refresh();
         toast({
           title: "Sign-In Successful",
-          description: `Welcome, ${user.displayName}!`,
+          description: `Welcome, ${user.user.name || 'User'}!`,
         });
       }
     },
@@ -355,13 +355,13 @@ export function usePurchaseCredits() {
     mutationFn: async (plan: PricingPlan) => {
       if (!firebaseUser) throw new Error("User not authenticated.");
       const token = await firebaseUser.getIdToken();
-      return purchaseCreditsApi(plan, token);
+      return purchaseCreditsApi({ plan, token });
     },
     onSuccess: (data, plan) => {
       queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser!.uid) });
       toast({
         title: "Purchase Successful!",
-        description: `Successfully purchased ${plan.credits} credits. New balance: ${data.newBalance}.`,
+        description: `Successfully purchased ${plan.credits} credits.`,
       });
     },
     onError: (error: Error) => {
