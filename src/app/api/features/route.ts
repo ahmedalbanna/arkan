@@ -1,8 +1,8 @@
 
 // src/app/api/features/route.ts
-import { adminDb } from '@/lib/firebase/server-init';
+import { createApiResponseEnhanced, handleApiErrorEnhanced } from '@/lib/core/api';
 import { defaultFeatures } from '@/lib/features';
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
+import { adminDb } from '@/lib/firebase/server-init';
 
 // This is a public endpoint that does not require authentication
 export async function GET() {
@@ -23,8 +23,8 @@ export async function GET() {
 
         const features = snapshot.docs.map(doc => doc.data());
 
-        return createApiResponse(features, 200);
+        return createApiResponseEnhanced(features, 200);
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 }

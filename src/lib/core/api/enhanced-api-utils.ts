@@ -250,7 +250,7 @@ export const handleApiErrorEnhanced = (error: any, context?: string, metadata?: 
     if (firebaseError instanceof CustomFirebaseError) {
         const appError = createServerError({
             type: 'AUTHENTICATION_ERROR',
-            code: firebaseError.code,
+            code: 'ACCESS_DENIED',
             message: firebaseError.message,
             level: 'high',
             source: 'api',
@@ -266,7 +266,7 @@ export const handleApiErrorEnhanced = (error: any, context?: string, metadata?: 
     // Handle generic errors
     const appError = createServerError({
         type: 'SERVER_ERROR',
-        code: 'API_ERROR',
+        code: 'API_ENDPOINT_NOT_FOUND',
         message: error.message || 'An unexpected server error occurred',
         level: 'high',
         source: 'api',

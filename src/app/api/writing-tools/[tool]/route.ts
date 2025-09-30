@@ -1,7 +1,6 @@
 
 'use server';
 
-import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 
@@ -24,7 +23,7 @@ import { rewriteText, summarizeTextWithRatio } from '@/ai/flows/text-stylist';
 import { topicExplainer } from '@/ai/flows/topic-explainer';
 import { writeDocument } from '@/ai/flows/write-document';
 import { AIResearcherInputSchema, DetectAIInputSchema, FactCheckInputSchema, GenerateCitationInputSchema, GeneratePlantUMLInputSchema, GeneratePresentationOutlineInputSchema, GenerateQuizInputSchema, GrammarCheckInputSchema, HumanizeTextInputSchema, IdeaGenerationInputSchema, ManipulateTextInputSchema, ParaphraseInputSchema, PlagiarismCheckInputSchema, RewriteTextInputSchema, SummarizeInputSchema, SummarizeTextWithRatioInputSchema, TopicExplainerInputSchema, WriteDocumentInputSchema } from '@/ai/schemas';
-
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 // Define a map for tool configurations
 const toolConfig = {
   'paraphrase': { flow: paraphraseText, schema: ParaphraseInputSchema, creditCost: 1 },
@@ -49,12 +48,12 @@ const toolConfig = {
 
 type ToolName = keyof typeof toolConfig;
 
-export const POST = withAuth(async ({ request, user, params }) => {
+export const POST = withEnhancedAuth(async ({ request, user, params }) => {
   const toolName = params.tool as ToolName;
 
   const config = toolConfig[toolName];
   if (!config) {
-    return handleApiError({ message: `Invalid tool: ${toolName}` }, 400);
+    return handleApiErrorEnhanced({ message: `Invalid tool: ${toolName}` }, 400);
   }
 
   const { flow, schema, creditCost } = config;
@@ -63,7 +62,7 @@ export const POST = withAuth(async ({ request, user, params }) => {
     const body = await request.json();
     const validation = schema.safeParse(body);
     if (!validation.success) {
-      return handleApiError(validation.error);
+      return handleApiErrorEnhanced(validation.error);
     }
 
     const result = await flow(validation.data as any);
@@ -78,9 +77,9 @@ export const POST = withAuth(async ({ request, user, params }) => {
       creditCost: creditCost,
     });
 
-    return createApiResponse(result, 200);
+    return createApiResponseEnhanced(result, 200);
 
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 });

@@ -1,9 +1,8 @@
 
-import { z } from 'zod';
+import { CustomFirebaseError } from '@/lib/firebase/error';
 import { adminDb } from '@/lib/firebase/server-init';
 import admin from 'firebase-admin';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-import { CustomFirebaseError } from '@/lib/firebase/error';
+import { z } from 'zod';
 
 const sendNotificationSchema = z.object({
   userId: z.string().min(1, 'User ID is required.'),
@@ -12,12 +11,12 @@ const sendNotificationSchema = z.object({
   link: z.string().url().optional(),
 });
 
-export const POST = withAuth(async ({ request }) => {
+export const POST = withEnhancedAuth(async ({ request }) => {
   try {
     const body = await request.json();
     const validation = sendNotificationSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiError(validation.error);
+      return handleApiErrorEnhanced(validation.error);
     }
 
     const { userId, title, body: notificationBody, link } = validation.data;
@@ -25,7 +24,7 @@ export const POST = withAuth(async ({ request }) => {
     // Get the user's device token from Firestore
     const tokenDoc = await adminDb.collection('deviceTokens').doc(userId).get();
     if (!tokenDoc.exists) {
-      return handleApiError({ message: 'User device token not found. They may not have granted notification permissions.' }, 404);
+      return handleApiErrorEnhanced({ message: 'User device token not found. They may not have granted notification permissions.' }, 404);
     }
 
     const { token } = tokenDoc.data() as { token: string };
@@ -45,15 +44,15 @@ export const POST = withAuth(async ({ request }) => {
 
     const response = await admin.messaging().send(message);
 
-    return createApiResponse({ messageId: response }, 200);
+    return createApiResponseEnhanced({ messageId: response }, 200);
 
   } catch (error) {
     console.error('Error sending push notification:', error);
     if (error instanceof CustomFirebaseError) { // Type assertion can be done here
-        if (error.code === 'messaging/registration-token-not-registered') {
-             return handleApiError({ message: 'Device token is no longer valid. The user may have uninstalled the app or revoked permissions.' }, 410);
-        }
+      if (error.code === 'messaging/registration-token-not-registered') {
+        return handleApiErrorEnhanced({ message: 'Device token is no longer valid. The user may have uninstalled the app or revoked permissions.' }, 410);
+      }
     }
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 }, { requireAdmin: true });

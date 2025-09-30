@@ -1,7 +1,6 @@
 
 'use server';
 
-import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { createTransaction } from '@/lib/db/queries';
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import { getStorage } from 'firebase-admin/storage';
@@ -12,7 +11,7 @@ export const config = {
   },
 };
 
-export const POST = withAuth(async ({ request }) => {
+export const POST = withEnhancedAuth(async ({ request }) => {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
@@ -25,7 +24,7 @@ export const POST = withAuth(async ({ request }) => {
     const userEmail = formData.get('userEmail') as string | null;
 
     if (!file || !userId || !planId || !credits || !price) {
-      return handleApiError({ message: 'Missing required fields.' }, 400);
+      return handleApiErrorEnhanced({ message: 'Missing required fields.' }, 400);
     }
 
     const storage = getStorage();
@@ -77,8 +76,8 @@ export const POST = withAuth(async ({ request }) => {
       await Promise.all(notificationPromises);
     }
 
-    return createApiResponse({ message: 'Request submitted successfully for review.', transactionId }, 200);
+    return createApiResponseEnhanced({ message: 'Request submitted successfully for review.', transactionId }, 200);
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 });

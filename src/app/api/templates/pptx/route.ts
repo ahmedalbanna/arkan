@@ -1,7 +1,7 @@
 // src/app/api/templates/pptx/route.ts
+import { createApiResponseEnhanced, handleApiErrorEnhanced } from '@/lib/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
 
 // This endpoint is public and does not require authentication
 // as all users need to be able to fetch the templates for exporting.
@@ -27,8 +27,8 @@ export async function GET() {
             templates[doc.id] = doc.data();
         });
 
-        return createApiResponse(templates, 200);
+        return createApiResponseEnhanced(templates, 200);
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 }

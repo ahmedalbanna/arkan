@@ -1,13 +1,10 @@
 
 'use server';
 
-import { z } from 'zod';
+import { analyzeContext } from '@/ai/flows/analyze-context';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-import { analyzeContext } from '@/ai/flows/analyze-context';
-import { imageToText } from '@/ai/flows/image-to-text';
-import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
+import { z } from 'zod';
 
 // Define the schema for a single file in the request
 const FileContextSchema = z.object({
@@ -23,12 +20,12 @@ const analyzeContextSchema = z.object({
 });
 
 
-export const POST = withAuth(async ({ request, user }) => {
+export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = analyzeContextSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiError(validation.error);
+      return handleApiErrorEnhanced(validation.error);
     }
 
     const agentInput = validation.data;
@@ -39,23 +36,23 @@ export const POST = withAuth(async ({ request, user }) => {
     await deductCredit(user.id, creditCost);
 
     await logGeneration({
-        agentId: 'analyze-context',
-        userId: user.id,
-        input: {
-            prompt: agentInput.prompt,
-            fileCount: agentInput.contextFiles.length
-        },
-        output: {
-            schema: "[...Zod Schema...]",
-            data: "[...JSON Data...]"
-        },
-        creditCost: creditCost,
+      agentId: 'analyze-context',
+      userId: user.id,
+      input: {
+        prompt: agentInput.prompt,
+        fileCount: agentInput.contextFiles.length
+      },
+      output: {
+        schema: "[...Zod Schema...]",
+        data: "[...JSON Data...]"
+      },
+      creditCost: creditCost,
     });
 
-    return createApiResponse(result, 200);
+    return createApiResponseEnhanced(result, 200);
 
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 });
 

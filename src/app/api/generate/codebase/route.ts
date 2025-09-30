@@ -1,23 +1,22 @@
 
 'use server';
 
-import { z } from 'zod';
+import { generateCodebase } from '@/ai/flows/generate-codebase';
+import { ProjectProposalSchema } from '@/ai/schemas';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
-import { generateCodebase } from '@/ai/flows/generate-codebase';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-import { ProjectProposalSchema } from '@/ai/schemas';
+import { z } from 'zod';
 
 const codebaseSchema = z.object({
   proposal: ProjectProposalSchema,
 });
 
-export const POST = withAuth(async ({ request, user }) => {
+export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = codebaseSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiError(validation.error);
+      return handleApiErrorEnhanced(validation.error);
     }
 
     const agentInput = { proposal: validation.data.proposal };
@@ -34,8 +33,8 @@ export const POST = withAuth(async ({ request, user }) => {
       creditCost: creditCost,
     });
 
-    return createApiResponse(result, 200);
+    return createApiResponseEnhanced(result, 200);
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 });

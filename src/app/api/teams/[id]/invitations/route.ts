@@ -1,16 +1,16 @@
 
 
 // src/app/api/teams/[id]/invitations/route.ts
-import { z } from 'zod';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+import { getUserProfile } from '@/lib/db/queries';
 import { adminDb } from '@/lib/firebase/server-init';
 import { TeamProperties } from '@/lib/models/team';
 import { TeamMember } from '@/lib/models/user';
-import { getUserProfile } from '@/lib/db/queries';
 import { FieldValue } from 'firebase-admin/firestore';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { z } from 'zod';
 
 const inviteMemberSchema = z.object({
-  email: z.string().email("Invalid email address"),
+    email: z.string().email("Invalid email address"),
 });
 
 // Helper to verify if the requester is the owner of the team
@@ -27,7 +27,7 @@ async function verifyTeamOwner(requesterId: string, teamId: string) {
     return team;
 }
 
-export const POST = withAuth(async ({ request, params, user }) => {
+export const POST = withEnhancedAuth(async ({ request, params, user }) => {
     const teamId = params.id;
     try {
         await verifyTeamOwner(user.id, teamId);
@@ -35,7 +35,7 @@ export const POST = withAuth(async ({ request, params, user }) => {
         const body = await request.json();
         const validation = inviteMemberSchema.safeParse(body);
         if (!validation.success) {
-            return handleApiError(validation.error);
+            return handleApiErrorEnhanced(validation.error);
         }
 
         const { email } = validation.data;
@@ -43,20 +43,20 @@ export const POST = withAuth(async ({ request, params, user }) => {
         // Find user by email
         const userQuery = await adminDb.collection('users').where('email', '==', email).limit(1).get();
         if (userQuery.empty) {
-            return handleApiError({ message: 'User with this email not found.' }, 404);
+            return handleApiErrorEnhanced({ message: 'User with this email not found.' }, 404);
         }
         const userDoc = userQuery.docs[0];
         const userId = userDoc.id;
         const userProfile = await getUserProfile(userId);
 
         if (!userProfile) {
-            return handleApiError({ message: 'User profile not found.' }, 404);
+            return handleApiErrorEnhanced({ message: 'User profile not found.' }, 404);
         }
 
         // Check if user is already a member
         const memberDoc = await adminDb.collection('teams').doc(teamId).collection('members').doc(userId).get();
         if (memberDoc.exists) {
-            return handleApiError({ message: 'User is already a member of this team.' }, 409);
+            return handleApiErrorEnhanced({ message: 'User is already a member of this team.' }, 409);
         }
 
         // Add user to the team with denormalized data
@@ -76,9 +76,9 @@ export const POST = withAuth(async ({ request, params, user }) => {
             teams: FieldValue.arrayUnion(teamId)
         });
 
-        return createApiResponse(newMember, 201);
+        return createApiResponseEnhanced(newMember, 201);
 
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 });

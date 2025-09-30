@@ -1,17 +1,16 @@
 'use server';
 
-import { z } from 'zod';
 import { resetUserPassword } from '@/lib/db/queries';
 import { generateRandomPassword } from '@/lib/utils'; // Assuming a utility for password generation
-import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { NextRequest } from 'next/server';
+import { z } from 'zod';
 
 const resetPasswordSchema = z.object({
   id: z.string().uuid(),
 });
 
 
-export const POST = withAuth(async ({ user, request }: { user: any, request: NextRequest }) => {
+export const POST = withEnhancedAuth(async ({ user, request }: { user: any, request: NextRequest }) => {
   try {
     // Note: The user ID from the URL parameter is not used here,
     // as the schema only validates the ID in the request body.
@@ -20,14 +19,14 @@ export const POST = withAuth(async ({ user, request }: { user: any, request: Nex
     const body = await request.json();
     const validation = resetPasswordSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiError(validation.error);
+      return handleApiErrorEnhanced(validation.error);
     }
 
     const { id } = validation.data;
     const newPassword = generateRandomPassword(8); // Generate a new random password
- await resetUserPassword(id, newPassword); // Pass the generated password
-    return createApiResponse({ message: 'User password reset successfully.' }, 200);
+    await resetUserPassword(id, newPassword); // Pass the generated password
+    return createApiResponseEnhanced({ message: 'User password reset successfully.' }, 200);
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 }, { requireAdmin: true });

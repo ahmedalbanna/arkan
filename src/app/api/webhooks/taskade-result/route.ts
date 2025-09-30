@@ -1,9 +1,9 @@
 
 'use server';
 
-import { NextResponse, type NextRequest } from 'next/server';
-import { handleApiError, createApiResponse } from '@/lib/api-utils';
-import { updateJob, getJob } from '@/lib/job-store';
+import { createApiResponseEnhanced, handleApiErrorEnhanced } from '@/lib/core/api';
+import { getJob, updateJob } from '@/lib/job-store';
+import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 
 const webhookPayloadSchema = z.object({
@@ -20,34 +20,34 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validation = webhookPayloadSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiError({ message: 'Invalid payload', errors: validation.error.flatten() }, 400);
+      return handleApiErrorEnhanced({ message: 'Invalid payload', errors: validation.error.flatten() }, 400);
     }
     const { jobId, status, resultText, error, apiToken } = validation.data;
 
     // 1. Retrieve the job from the store
     const job = await getJob(jobId);
     if (!job) {
-      return handleApiError({ message: 'Job not found' }, 404);
+      return handleApiErrorEnhanced({ message: 'Job not found' }, 404);
     }
 
     // 2. Verify the security token
     if (!job.token || job.token !== apiToken) {
-      return handleApiError({ message: 'Unauthorized: Invalid token' }, 401);
+      return handleApiErrorEnhanced({ message: 'Unauthorized: Invalid token' }, 401);
     }
 
     // 3. Update the job with the result
     if (status === 'failed') {
-        await updateJob(jobId, 'failed', error || 'Taskade workflow failed without an error message.');
-        console.log(`Job ${jobId} failed.`);
+      await updateJob(jobId, 'failed', error || 'Taskade workflow failed without an error message.');
+      console.log(`Job ${jobId} failed.`);
     } else {
-        await updateJob(jobId, 'completed', resultText);
-        console.log(`Job ${jobId} completed and result stored.`);
+      await updateJob(jobId, 'completed', resultText);
+      console.log(`Job ${jobId} completed and result stored.`);
     }
 
     // 4. Respond to Taskade to acknowledge receipt
-    return createApiResponse({ message: 'Result received' }, 200);
+    return createApiResponseEnhanced({ message: 'Result received' }, 200);
 
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 }

@@ -1,23 +1,22 @@
 
 'use server';
 
-import { z } from 'zod';
 import { translateText } from '@/ai/flows/translate-text';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { z } from 'zod';
 
 const translateSchema = z.object({
   text: z.string().min(1),
   targetLang: z.string().min(2),
 });
 
-export const POST = withAuth(async ({ request, user }) => {
+export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = translateSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiError(validation.error);
+      return handleApiErrorEnhanced(validation.error);
     }
 
     await deductCredit(user.id, 1);
@@ -34,8 +33,8 @@ export const POST = withAuth(async ({ request, user }) => {
     });
 
     const cleanedTranslatedText = result.translatedText.replace(/---.*?---/g, '');
-    return createApiResponse({ translatedText: cleanedTranslatedText }, 200);
+    return createApiResponseEnhanced({ translatedText: cleanedTranslatedText }, 200);
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 });

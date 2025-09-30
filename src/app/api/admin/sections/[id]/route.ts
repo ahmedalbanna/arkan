@@ -1,5 +1,4 @@
 // C:\Users\ahmed\source\repos\arkan\src\app\api\admin\sections\[id]\route.ts
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
@@ -11,36 +10,36 @@ const SectionUpdateSchema = z.object({
 });
 
 // PUT to update a section (Admin only)
-export const PUT = withAuth(async ({ request, params }) => {
+export const PUT = withEnhancedAuth(async ({ request, params }) => {
   try {
     const sectionId = params.id;
     if (!sectionId) {
-      return handleApiError({ message: 'Section ID is required' }, 400);
+      return handleApiErrorEnhanced({ message: 'Section ID is required' }, 400);
     }
     const body = await request.json();
     const validation = SectionUpdateSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiError(validation.error);
+      return handleApiErrorEnhanced(validation.error);
     }
     const docRef = adminDb.collection('sections').doc(sectionId);
     await docRef.update(validation.data);
     const updatedDoc = await docRef.get();
-    return createApiResponse({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
+    return createApiResponseEnhanced({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 }, { requireAdmin: true });
 
 // DELETE a section (Admin only)
-export const DELETE = withAuth(async ({ params }) => {
+export const DELETE = withEnhancedAuth(async ({ params }) => {
   try {
     const sectionId = params.id;
     if (!sectionId) {
-      return handleApiError({ message: 'Section ID is required' }, 400);
+      return handleApiErrorEnhanced({ message: 'Section ID is required' }, 400);
     }
     await adminDb.collection('sections').doc(sectionId).delete();
-    return createApiResponse({ message: 'Section deleted successfully' }, 200);
+    return createApiResponseEnhanced({ message: 'Section deleted successfully' }, 200);
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 }, { requireAdmin: true });

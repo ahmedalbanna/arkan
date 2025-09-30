@@ -2,7 +2,6 @@
 
 import { ai } from '@/ai/genkit';
 import { ImageToTextInputSchema, ImageToTextOutputSchema } from '@/ai/schemas';
-import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { z } from 'zod';
@@ -31,12 +30,12 @@ const explainDiagramPrompt = ai.definePrompt({
     }
 });
 
-export const POST = withAuth(async ({ request, user }) => {
+export const POST = withEnhancedAuth(async ({ request, user }) => {
     try {
         const body = await request.json();
         const validation = explainDiagramSchema.safeParse(body);
         if (!validation.success) {
-            return handleApiError(validation.error);
+            return handleApiErrorEnhanced(validation.error);
         }
 
         const agentInput = validation.data;
@@ -54,9 +53,9 @@ export const POST = withAuth(async ({ request, user }) => {
         });
 
         // The result from definePrompt has a different shape
-        return createApiResponse({ explanation: result?.output?.text }, 200);
+        return createApiResponseEnhanced({ explanation: result?.output?.text }, 200);
 
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 });

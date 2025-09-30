@@ -1,5 +1,4 @@
 
-import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import { FieldValue } from 'firebase-admin/firestore';
 import { z } from 'zod';
@@ -12,13 +11,13 @@ const verifyPaymentSchema = z.object({
   adminNotes: z.string().optional(),
 });
 
-export const POST = withAuth(async ({ request, user }) => {
+export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = verifyPaymentSchema.safeParse(body);
 
     if (!validation.success) {
-      return handleApiError({ errors: validation.error.flatten().fieldErrors }, 400);
+      return handleApiErrorEnhanced({ errors: validation.error.flatten().fieldErrors }, 400);
     }
 
     const { transactionId, userId, creditsToGrant, status, adminNotes } = validation.data;
@@ -66,8 +65,8 @@ export const POST = withAuth(async ({ request, user }) => {
       });
     }
 
-    return createApiResponse({ message: `Transaction ${status} successfully.` }, 200);
+    return createApiResponseEnhanced({ message: `Transaction ${status} successfully.` }, 200);
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 }, { requireAdmin: true });

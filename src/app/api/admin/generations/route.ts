@@ -1,25 +1,24 @@
 
 'use server';
 
-import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { getUserProfile } from '@/lib/db/queries';
+import { adminDb } from '@/lib/firebase/server-init';
+import { z } from 'zod';
 
 const getLogsQuerySchema = z.object({
-  limit: z.coerce.number().int().min(1).max(50).default(15),
-  agentId: z.string().optional(),
-  userId: z.string().optional(),
-  lastVisibleId: z.string().optional(),
+    limit: z.coerce.number().int().min(1).max(50).default(15),
+    agentId: z.string().optional(),
+    userId: z.string().optional(),
+    lastVisibleId: z.string().optional(),
 });
 
-export const GET = withAuth(async ({ request }) => {
+export const GET = withEnhancedAuth(async ({ request }) => {
     try {
         const { searchParams } = new URL(request.url);
         const queryValidation = getLogsQuerySchema.safeParse(Object.fromEntries(searchParams));
 
         if (!queryValidation.success) {
-            return handleApiError(queryValidation.error);
+            return handleApiErrorEnhanced(queryValidation.error);
         }
 
         const { limit, agentId, userId, lastVisibleId } = queryValidation.data;
@@ -57,13 +56,13 @@ export const GET = withAuth(async ({ request }) => {
         const logs = await Promise.all(logsPromises);
         const hasNextPage = snapshot.docs.length > limit;
 
-        return createApiResponse({
+        return createApiResponseEnhanced({
             logs,
             hasNextPage,
             lastVisibleId: hasNextPage && logs.length > 0 ? logs[logs.length - 1].id : null,
         }, 200);
 
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 }, { requireAdmin: true });

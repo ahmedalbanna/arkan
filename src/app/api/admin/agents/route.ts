@@ -1,7 +1,6 @@
 'use server';
 
 import { AgentPromptSchema } from '@/ai/schemas';
-import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
@@ -17,13 +16,13 @@ const CreateAgentSchema = z.object({
     icon: z.string().optional(),
 });
 
-export const POST = withAuth(async ({ request }) => {
+export const POST = withEnhancedAuth(async ({ request }) => {
     try {
         const body = await request.json();
         const validation = CreateAgentSchema.safeParse(body);
 
         if (!validation.success) {
-            return handleApiError(validation.error);
+            return handleApiErrorEnhanced(validation.error);
         }
 
         const { id, ...data } = validation.data;
@@ -32,14 +31,14 @@ export const POST = withAuth(async ({ request }) => {
         const doc = await agentRef.get();
 
         if (doc.exists) {
-            return handleApiError({ message: 'An agent with this ID already exists.' }, 409);
+            return handleApiErrorEnhanced({ message: 'An agent with this ID already exists.' }, 409);
         }
 
         await agentRef.set({ ...data, isEnabled: true, createdAt: new Date().toISOString() });
 
         const newAgent = await agentRef.get();
-        return createApiResponse({ id: newAgent.id, ...newAgent.data() }, 201);
+        return createApiResponseEnhanced({ id: newAgent.id, ...newAgent.data() }, 201);
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 }, { requireAdmin: true });

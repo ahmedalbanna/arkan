@@ -2,23 +2,22 @@
 'use server';
 
 import { generateProposal } from '@/ai/flows/generate-proposal';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
-import { z } from 'zod';
 
 import { GenerateProposalInputSchema, type GenerateProposalInput } from '@/ai/schemas';
-import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 
 // The schema for the API route now directly uses the AI flow's input schema.
 const generateProposalApiSchema = GenerateProposalInputSchema;
 
-export const POST = withAuth(async ({ request, user }) => {
+export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = generateProposalApiSchema.safeParse(body);
 
     if (!validation.success) {
-      return handleApiError(validation.error);
+      return handleApiErrorEnhanced(validation.error);
     }
 
     const { projectIdea, guidelines, externalContext, advancedFields } = validation.data;
@@ -48,8 +47,8 @@ export const POST = withAuth(async ({ request, user }) => {
       creditCost: creditCost,
     });
 
-    return createApiResponse(result, 200);
+    return createApiResponseEnhanced(result, 200);
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 });

@@ -1,11 +1,10 @@
 
 'use server';
 
-import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
 import { imageToText } from '@/ai/flows/image-to-text';
 import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
+import { deductCredit } from '@/services/credit-service';
+import { logGeneration } from '@/services/generation-service';
 
 const SUPPORTED_MIME_TYPES = [
     'application/pdf',
@@ -16,17 +15,17 @@ const SUPPORTED_MIME_TYPES = [
     'text/markdown',
 ];
 
-export const POST = withAuth(async ({ request, user }) => {
+export const POST = withEnhancedAuth(async ({ request, user }) => {
     try {
         const formData = await request.formData();
         const file = formData.get('file') as File;
 
         if (!file) {
-            return handleApiError({ message: 'No file uploaded.' }, 400);
+            return handleApiErrorEnhanced({ message: 'No file uploaded.' }, 400);
         }
 
         if (!SUPPORTED_MIME_TYPES.includes(file.type)) {
-            return handleApiError({ message: `Invalid file type. Supported types are: ${SUPPORTED_MIME_TYPES.join(', ')}` }, 400);
+            return handleApiErrorEnhanced({ message: `Invalid file type. Supported types are: ${SUPPORTED_MIME_TYPES.join(', ')}` }, 400);
         }
 
         // Standard credit deduction for processing
@@ -63,9 +62,9 @@ export const POST = withAuth(async ({ request, user }) => {
             creditCost: 1
         });
 
-        return createApiResponse({ markdown: markdownContent }, 200);
+        return createApiResponseEnhanced({ markdown: markdownContent }, 200);
 
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 });

@@ -50,7 +50,9 @@ export async function fetchUsersApi(limit: number, lastVisibleId: string | undef
     const error = await response.json();
     throw new Error(error.message || 'Failed to fetch users');
   }
-  return await response.json();
+  const result = await response.json();
+  // Extract data from enhanced API response structure
+  return result.data || result;
 }
 
 /**
@@ -95,7 +97,9 @@ export async function fetchUserProfileApi(userId: string, token: string): Promis
     const error = await response.json();
     throw new Error(error.message || 'Failed to fetch user profile');
   }
-  return await response.json();
+  const result = await response.json();
+  // Extract data from enhanced API response structure
+  return result.data || result;
 }
 
 
@@ -137,7 +141,9 @@ export async function serviceLogoutUser() {
     const errorData = await response.json();
     throw new Error(errorData.error || "Logout failed.");
   }
-  return response.json();
+  const result = await response.json();
+  // Extract data from enhanced API response structure
+  return result.data || result;
 }
 
 export async function serviceSignupUser(credentials: SignupCredentials) {
@@ -151,7 +157,9 @@ export async function serviceSignupUser(credentials: SignupCredentials) {
     const errorData = await response.json();
     throw errorData; // Throw the structured error from the API
   }
-  return response.json();
+  const result = await response.json();
+  // Extract data from enhanced API response structure
+  return result.data || result;
 }
 
 export async function createUserService(data: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt' | 'hasCompletedOnboarding'> & { password?: string }, token: string) {
@@ -167,7 +175,9 @@ export async function createUserService(data: Omit<UserProfile, 'id' | 'createdA
     const error = await response.json();
     throw new Error(error.message || 'Failed to create user.');
   }
-  return response.json();
+  const result = await response.json();
+  // Extract data from enhanced API response structure
+  return result.data || result;
 }
 
 
@@ -190,7 +200,9 @@ export async function sendPasswordResetEmailApi(userId: string, token: string) {
     const error = await response.json();
     throw new Error(error.message || "Failed to send password reset email.");
   }
-  return response.json();
+  const result = await response.json();
+  // Extract data from enhanced API response structure
+  return result.data || result;
 }
 
 export async function forgotPasswordService(email: string) {

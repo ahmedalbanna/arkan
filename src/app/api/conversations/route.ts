@@ -1,18 +1,17 @@
 
 'use server';
 
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-import { adminDb,adminRealtimeDb } from '@/lib/firebase/server-init';
+import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
 // GET handler
-export const GET = withAuth(async ({ user }) => {
+export const GET = withEnhancedAuth(async ({ user }) => {
   try {
     const userConversationsRef = adminRealtimeDb.ref(`userConversations/${user.id}`);
     const snapshot = await userConversationsRef.get();
 
     if (!snapshot.exists()) {
-      return createApiResponse([], 200);
+      return createApiResponseEnhanced([], 200);
     }
 
     const conversationIds = Object.keys(snapshot.val());
@@ -26,19 +25,19 @@ export const GET = withAuth(async ({ user }) => {
       // If it's an agent chat, hydrate the agent data from the static config
       if (convoData.agent && convoData.agent.id) {
         const agentDoc = await adminDb.collection('agents').doc(convoData.agent.id).get();
-          if (agentDoc.exists) {
-            const defaultAgent = agentDoc.data() as { icon: string };
-              convoData.agent.icon = defaultAgent.icon;
-          }
+        if (agentDoc.exists) {
+          const defaultAgent = agentDoc.data() as { icon: string };
+          convoData.agent.icon = defaultAgent.icon;
+        }
       }
       return { id, ...convoData };
     });
 
     const conversations = (await Promise.all(conversationPromises)).filter(c => c !== null);
 
-    return createApiResponse(conversations, 200);
+    return createApiResponseEnhanced(conversations, 200);
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 });
 
@@ -53,12 +52,12 @@ const createConversationSchema = z.object({
 
 
 // POST handler
-export const POST = withAuth(async ({ request, user }) => {
+export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = createConversationSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiError(validation.error);
+      return handleApiErrorEnhanced(validation.error);
     }
 
     const { participantIds, participantNames, title, isSupportChat, agent } = validation.data;
@@ -91,8 +90,8 @@ export const POST = withAuth(async ({ request, user }) => {
 
     await adminRealtimeDb.ref().update(updates);
 
-    return createApiResponse(conversationData, 201);
+    return createApiResponseEnhanced(conversationData, 201);
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 });

@@ -1,14 +1,13 @@
 
-import { getStorage } from 'firebase-admin/storage';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-
-export const POST = withAuth(async ({ request, params, user }) => {
+import { getStorage } from 'firebase-admin/storage';
+export const POST = withEnhancedAuth(async ({ request, params, user }) => {
     const { id: targetUserId } = params;
 
     // Check if the user is an admin or is updating their own profile
     if (user.role !== 'admin' && user.id !== targetUserId) {
-        return handleApiError({ message: 'Forbidden' }, 403);
+        return handleApiErrorEnhanced({ message: 'Forbidden' }, 403);
     }
 
     try {
@@ -16,12 +15,12 @@ export const POST = withAuth(async ({ request, params, user }) => {
         const file = formData.get('file') as File | null;
 
         if (!file) {
-            return handleApiError({ message: 'No file uploaded.' }, 400);
+            return handleApiErrorEnhanced({ message: 'No file uploaded.' }, 400);
         }
 
         const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
         if (!allowedTypes.includes(file.type)) {
-            return handleApiError({ message: 'Invalid file type. Only JPG, PNG, and WebP are allowed.' }, 400);
+            return handleApiErrorEnhanced({ message: 'Invalid file type. Only JPG, PNG, and WebP are allowed.' }, 400);
         }
 
         const storage = getStorage();
@@ -47,9 +46,9 @@ export const POST = withAuth(async ({ request, params, user }) => {
             updatedAt: new Date().toISOString(),
         });
 
-        return createApiResponse({ profilePictureUrl: publicUrl }, 200);
+        return createApiResponseEnhanced({ profilePictureUrl: publicUrl }, 200);
 
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 });

@@ -2,18 +2,18 @@
 
 'use server';
 
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+import { createTeamForUser, getUserTeams } from '@/lib/db/queries';
 import { z } from 'zod';
-import { getUserTeams, createTeamForUser } from '@/lib/db/queries';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 // GET /api/teams - Fetches all teams for the authenticated user
-export const GET = withAuth(async ({ user }) => {
-    try {
-        const teams = await getUserTeams(user.id);
-        return createApiResponse(teams, 200);
-    } catch (error) {
-        return handleApiError(error);
-    }
+export const GET = withEnhancedAuth(async ({ user }) => {
+  try {
+    const teams = await getUserTeams(user.id);
+    return createApiResponseEnhanced(teams, 200);
+  } catch (error) {
+    return handleApiErrorEnhanced(error);
+  }
 });
 
 
@@ -22,19 +22,19 @@ const createTeamSchema = z.object({
   name: z.string().min(3, "Team name must be at least 3 characters").max(50, "Team name cannot exceed 50 characters"),
 });
 
-export const POST = withAuth(async ({ request, user }) => {
+export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = createTeamSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiError(validation.error);
+      return handleApiErrorEnhanced(validation.error);
     }
 
     const { name } = validation.data;
     const newTeam = await createTeamForUser(user.id, name);
 
-    return createApiResponse(newTeam, 201);
+    return createApiResponseEnhanced(newTeam, 201);
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 });

@@ -1,9 +1,8 @@
 // src/app/api/templates/pptx/route.ts
-import { z } from 'zod';
+import { createGenerativeTemplate } from '@/lib/db/queries';
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
-import { withAuth, createApiResponse, handleApiError } from '@/lib/api-utils';
-import { createGenerativeTemplate } from '@/lib/db/queries';
+import { z } from 'zod';
 
 // This endpoint is public and does not require authentication
 // as all users need to be able to fetch the templates for exporting.
@@ -29,25 +28,25 @@ export async function GET() {
             templates[doc.id] = doc.data();
         });
 
-        return createApiResponse(templates, 200);
+        return createApiResponseEnhanced(templates, 200);
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 }
 
 
 const createPptxTemplateSchema = z.object({
-  id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID can only contain lowercase letters, numbers, and hyphens."),
-  name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "Description is required"),
+    id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID can only contain lowercase letters, numbers, and hyphens."),
+    name: z.string().min(1, "Name is required"),
+    description: z.string().min(1, "Description is required"),
 });
 
-export const POST = withAuth(async ({ request }) => {
+export const POST = withEnhancedAuth(async ({ request }) => {
     try {
         const body = await request.json();
         const validation = createPptxTemplateSchema.safeParse(body);
-        if(!validation.success) {
-            return handleApiError(validation.error);
+        if (!validation.success) {
+            return handleApiErrorEnhanced(validation.error);
         }
 
         const { id, name, description } = validation.data;
@@ -63,8 +62,8 @@ export const POST = withAuth(async ({ request }) => {
 
         const newTemplate = await createGenerativeTemplate('pptx', id, newTemplateData);
 
-        return createApiResponse(newTemplate, 201);
+        return createApiResponseEnhanced(newTemplate, 201);
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 }, { requireAdmin: true });

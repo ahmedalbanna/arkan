@@ -1,7 +1,7 @@
 
 'use server';
 
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
+import { createApiResponseEnhanced, handleApiErrorEnhanced } from '@/lib/core/api';
 import { getUserProfile } from '@/lib/db/queries';
 import { adminAuth, adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import type { UserRole } from '@/lib/models/user';
@@ -65,13 +65,13 @@ export async function POST(req: Request) {
         if (body.uid) {
             const validation = providerSignupSchema.safeParse(body);
             if (!validation.success) {
-                return handleApiError(validation.error);
+                return handleApiErrorEnhanced(validation.error);
             }
 
             const { uid, email, name, phoneNumber } = validation.data;
             const existingProfile = await getUserProfile(uid);
             if (existingProfile) {
-                return createApiResponse({ message: "User profile already exists.", user: existingProfile }, 200);
+                return createApiResponseEnhanced({ message: "User profile already exists.", user: existingProfile }, 200);
             }
 
             const newUserProfile = {
@@ -89,11 +89,11 @@ export async function POST(req: Request) {
 
             await adminDb.collection('users').doc(uid).set(newUserProfile);
             await notifyAdminsOfNewUser(newUserProfile);
-            return createApiResponse({ user: { uid, ...newUserProfile } }, 201);
+            return createApiResponseEnhanced({ user: { uid, ...newUserProfile } }, 201);
         } else {
             const validation = signupSchema.safeParse(body);
             if (!validation.success) {
-                return handleApiError(validation.error);
+                return handleApiErrorEnhanced(validation.error);
             }
             const { email, password, name } = validation.data;
 
@@ -115,16 +115,16 @@ export async function POST(req: Request) {
             await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);
             await notifyAdminsOfNewUser(newUserProfile);
 
-            return createApiResponse({ user: { uid: userRecord.uid, email: userRecord.email } }, 201);
+            return createApiResponseEnhanced({ user: { uid: userRecord.uid, email: userRecord.email } }, 201);
         }
     } catch (error: any) {
         if (error.code === 'auth/email-already-exists') {
-            return handleApiError({ message: "Email address is already in use by another account." }, 409);
+            return handleApiErrorEnhanced({ message: "Email address is already in use by another account." }, 409);
         } else if (error.code === 'auth/invalid-email') {
-            return handleApiError({ message: "The email address is not valid." }, 400);
+            return handleApiErrorEnhanced({ message: "The email address is not valid." }, 400);
         } else if (error.code === 'auth/weak-password') {
-            return handleApiError({ message: "The password is too weak. It must be at least 6 characters long." }, 400);
+            return handleApiErrorEnhanced({ message: "The password is too weak. It must be at least 6 characters long." }, 400);
         }
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 }

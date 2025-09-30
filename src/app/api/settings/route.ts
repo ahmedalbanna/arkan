@@ -1,6 +1,6 @@
 
+import { createApiResponseEnhanced, handleApiErrorEnhanced } from '@/lib/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
 
 async function getSettings() {
     const settingsRef = adminDb.collection('settings').doc('defaults');
@@ -23,8 +23,8 @@ async function getSettings() {
 export async function GET() {
     try {
         const settings = await getSettings();
-        return createApiResponse(settings, 200);
+        return createApiResponseEnhanced(settings, 200);
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 }

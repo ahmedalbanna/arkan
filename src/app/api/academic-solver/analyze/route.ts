@@ -1,19 +1,18 @@
 
 'use server';
 
-import { z } from 'zod';
-import { deductCredit } from '@/services/credit-service';
 import { analyzeAcademicDocument } from '@/ai/flows/academic-solver';
-import { logGeneration } from '@/services/generation-service';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { ApiAnalyzeSchema } from '@/ai/schemas';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+import { deductCredit } from '@/services/credit-service';
+import { logGeneration } from '@/services/generation-service';
 
-export const POST = withAuth(async ({ request, user }) => {
+export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = ApiAnalyzeSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiError(validation.error);
+      return handleApiErrorEnhanced(validation.error);
     }
 
     const agentInput = {
@@ -27,15 +26,15 @@ export const POST = withAuth(async ({ request, user }) => {
     await deductCredit(user.id, creditCost);
 
     await logGeneration({
-        agentId: `analyze-${validation.data.documentType}`,
-        userId: user.id,
-        input: agentInput,
-        output: result,
-        creditCost: creditCost,
+      agentId: `analyze-${validation.data.documentType}`,
+      userId: user.id,
+      input: agentInput,
+      output: result,
+      creditCost: creditCost,
     });
 
-    return createApiResponse(result, 200);
+    return createApiResponseEnhanced(result, 200);
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 });

@@ -35,7 +35,7 @@ export class ErrorHandler {
         toast({
             title: this.getErrorMessage(error),
             description: this.getErrorDescription(error),
-            variant,
+            variant: variant as 'default' | 'destructive' | null | undefined,
         });
     }
 

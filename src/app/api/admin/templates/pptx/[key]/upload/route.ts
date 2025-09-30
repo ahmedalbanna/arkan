@@ -1,14 +1,13 @@
 
 'use server';
 
-import { getStorage } from 'firebase-admin/storage';
 import { adminDb } from '@/lib/firebase/server-init';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { getStorage } from 'firebase-admin/storage';
 
-export const POST = withAuth(async ({ request, params, user }) => {
+export const POST = withEnhancedAuth(async ({ request, params, user }) => {
     const templateId = params.key;
     if (!templateId) {
-        return handleApiError({ message: 'Template ID is required.' }, 400);
+        return handleApiErrorEnhanced({ message: 'Template ID is required.' }, 400);
     }
 
     try {
@@ -16,12 +15,12 @@ export const POST = withAuth(async ({ request, params, user }) => {
         const file = formData.get('file') as File | null;
 
         if (!file) {
-            return handleApiError({ message: 'No file uploaded.' }, 400);
+            return handleApiErrorEnhanced({ message: 'No file uploaded.' }, 400);
         }
 
         const allowedTypes = ['application/vnd.openxmlformats-officedocument.presentationml.presentation'];
         if (!allowedTypes.includes(file.type)) {
-            return handleApiError({ message: 'Invalid file type. Only .pptx files are allowed.' }, 400);
+            return handleApiErrorEnhanced({ message: 'Invalid file type. Only .pptx files are allowed.' }, 400);
         }
 
         const storage = getStorage();
@@ -51,9 +50,9 @@ export const POST = withAuth(async ({ request, params, user }) => {
 
         const updatedDoc = await templateRef.get();
 
-        return createApiResponse({ ...updatedDoc.data() }, 200);
+        return createApiResponseEnhanced({ ...updatedDoc.data() }, 200);
 
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 }, { requireAdmin: true });

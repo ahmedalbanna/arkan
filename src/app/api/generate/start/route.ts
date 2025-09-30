@@ -1,10 +1,9 @@
 'use server';
 
-import { v4 as uuidv4 } from 'uuid';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { createJob, generateJobToken } from '@/lib/job-store';
+import { v4 as uuidv4 } from 'uuid';
 
-export const POST = withAuth(async ({ request, user }) => {
+export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const { inputContent, featureId } = body;
@@ -36,14 +35,14 @@ export const POST = withAuth(async ({ request, user }) => {
         apiToken: jobToken, // Pass our secure token to Taskade
       })
     }).catch(error => {
-        // Log the error but don't fail the user's request.
-        console.error(`Error triggering Taskade workflow for job ${jobId}:`, error);
+      // Log the error but don't fail the user's request.
+      console.error(`Error triggering Taskade workflow for job ${jobId}:`, error);
     });
 
     // 4. Immediately respond to the client with the job ID
-    return createApiResponse({ jobId }, 202); // 202 Accepted
+    return createApiResponseEnhanced({ jobId }, 202); // 202 Accepted
 
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 });

@@ -1,17 +1,16 @@
 
-import { getStorage } from 'firebase-admin/storage';
 import { createTransaction } from '@/lib/db/queries';
-import { getDatabase } from 'firebase-admin/database';
 import { adminDb } from '@/lib/firebase/server-init';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { getDatabase } from 'firebase-admin/database';
+import { getStorage } from 'firebase-admin/storage';
 
 export const config = {
-    api: {
-        bodyParser: false,
-    },
+  api: {
+    bodyParser: false,
+  },
 };
 
-export const POST = withAuth(async ({ request }) => {
+export const POST = withEnhancedAuth(async ({ request }) => {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
@@ -24,7 +23,7 @@ export const POST = withAuth(async ({ request }) => {
     const userEmail = formData.get('userEmail') as string | null;
 
     if (!file || !userId || !planId || !credits || !price) {
-      return handleApiError({ message: 'Missing required fields.' }, 400);
+      return handleApiErrorEnhanced({ message: 'Missing required fields.' }, 400);
     }
 
     const storage = getStorage();
@@ -69,15 +68,15 @@ export const POST = withAuth(async ({ request }) => {
       };
 
       const notificationPromises = adminsSnapshot.docs.map(adminDoc => {
-          const adminId = adminDoc.id;
-          const notificationRef = rtdb.ref(`notifications/${adminId}`).push();
-          return notificationRef.set(notificationPayload);
+        const adminId = adminDoc.id;
+        const notificationRef = rtdb.ref(`notifications/${adminId}`).push();
+        return notificationRef.set(notificationPayload);
       });
       await Promise.all(notificationPromises);
     }
 
-    return createApiResponse({ message: 'Request submitted successfully for review.', transactionId }, 200);
+    return createApiResponseEnhanced({ message: 'Request submitted successfully for review.', transactionId }, 200);
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 });

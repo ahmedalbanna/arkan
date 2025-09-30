@@ -1,7 +1,7 @@
 // src/app/api/templates/presentation/route.ts
-import { adminDb } from '@/lib/firebase/server-init';
+import { createApiResponseEnhanced, handleApiErrorEnhanced } from '@/lib/core/api';
 import { PRESENTATION_GENERATION_TEMPLATES as defaultTemplates } from '@/lib/db/seed-data/presentation-templates';
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
+import { adminDb } from '@/lib/firebase/server-init';
 
 // This is a public endpoint
 export async function GET() {
@@ -20,8 +20,8 @@ export async function GET() {
         }
 
         const templates = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        return createApiResponse(templates, 200);
+        return createApiResponseEnhanced(templates, 200);
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 }

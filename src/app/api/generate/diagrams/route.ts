@@ -2,13 +2,13 @@
 
 'use server';
 
-import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, ProjectPlanSchema, ExternalContextSchema, GenerateDiagramOutputSchema } from '@/ai/schemas';
 import { generateDiagram } from '@/ai/flows/generate-diagrams';
-import { deflateSync } from 'zlib';
+import { DiagramTypeSchema, ExternalContextSchema, ProjectPlanSchema, ProjectProposalSchema, SectionNameSchema } from '@/ai/schemas';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { deflateSync } from 'zlib';
+import { z } from 'zod';
 
 // Schema for a new diagram generation request
 const generateDiagramSchema = z.object({
@@ -55,21 +55,21 @@ async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
   return `/api/proxy-image?url=${encodeURIComponent(plantUmlUrl)}`;
 }
 
-export const POST = withAuth(async ({ request, user }) => {
+export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
 
     if (body.intent === 'update_diagram') {
       if (!body.plantUmlCode) {
-          return handleApiError({ message: 'PlantUML code is required for an update.' }, 400);
+        return handleApiErrorEnhanced({ message: 'PlantUML code is required for an update.' }, 400);
       }
       const imageUrl = await getPlantUmlImageUrl(body.plantUmlCode);
-      return createApiResponse({ plantUmlCode: body.plantUmlCode, imageUrl }, 200);
+      return createApiResponseEnhanced({ plantUmlCode: body.plantUmlCode, imageUrl }, 200);
     }
 
     const validation = generateDiagramSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiError(validation.error);
+      return handleApiErrorEnhanced(validation.error);
     }
 
     const creditCost = 1;
@@ -86,15 +86,15 @@ export const POST = withAuth(async ({ request, user }) => {
     };
 
     await logGeneration({
-        agentId: `generate-${validation.data.diagramToGenerate}-diagram`,
-        userId: user.id,
-        input: agentInput,
-        output: finalOutput,
-        creditCost: creditCost,
+      agentId: `generate-${validation.data.diagramToGenerate}-diagram`,
+      userId: user.id,
+      input: agentInput,
+      output: finalOutput,
+      creditCost: creditCost,
     });
 
-    return createApiResponse(finalOutput, 200);
+    return createApiResponseEnhanced(finalOutput, 200);
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 });

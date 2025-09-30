@@ -1,8 +1,7 @@
 // src/app/api/admin/dashboard-stats/route.ts
 
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-import { adminDb } from '@/lib/firebase/server-init';
 import { getUserProfile } from '@/lib/db/queries';
+import { adminDb } from '@/lib/firebase/server-init';
 
 async function getSummaryCounts() {
     const [usersSnapshot, generationsSnapshot, pendingTransactionsSnapshot] = await Promise.all([
@@ -65,7 +64,7 @@ async function getRecentActivity() {
 }
 
 
-export const GET = withAuth(async () => {
+export const GET = withEnhancedAuth(async () => {
     try {
         const [summaryCounts, agentUsageChartData, recentActivity] = await Promise.all([
             getSummaryCounts(),
@@ -79,9 +78,9 @@ export const GET = withAuth(async () => {
             recentActivity
         };
 
-        return createApiResponse(stats, 200);
+        return createApiResponseEnhanced(stats, 200);
 
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 }, { requireAdmin: true });

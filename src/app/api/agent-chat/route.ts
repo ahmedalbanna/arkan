@@ -1,12 +1,12 @@
 
 'use server';
 
-import { z } from 'zod';
+import { agentChat } from '@/ai/flows/agent-chat';
+import { createApiResponseEnhanced, getFirebaseClientDb, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
-import { agentChat } from '@/ai/flows/agent-chat';
-import { withAuth, handleApiError, createApiResponse, getFirebaseClientDb } from '@/lib/api-utils';
-import { push, serverTimestamp, update, ref } from 'firebase/database';
+import { push, ref, serverTimestamp, update } from 'firebase/database';
+import { z } from 'zod';
 
 const chatSchema = z.object({
   agentId: z.string(),
@@ -22,12 +22,12 @@ interface FirebaseMessage {
   timestamp: object; // serverTimestamp() returns an object
 }
 
-export const POST = withAuth(async ({ request, user }) => {
+export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = chatSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiError(validation.error);
+      return handleApiErrorEnhanced(validation.error);
     }
 
     const { agentId, message, conversationId } = validation.data;
@@ -84,9 +84,9 @@ export const POST = withAuth(async ({ request, user }) => {
       });
     }
 
-    return createApiResponse(result, 200);
+    return createApiResponseEnhanced(result, 200);
 
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 });

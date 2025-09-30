@@ -1,7 +1,7 @@
 // src/app/api/templates/docx/route.ts
+import { createApiResponseEnhanced, handleApiErrorEnhanced } from '@/lib/core/api';
+import { templates as defaultTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
 import { adminDb } from '@/lib/firebase/server-init';
-import { templates as defaultTemplates, type DocxTemplateKey  } from '@/lib/docx-styles';
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
 
 // This endpoint is public and does not require authentication
 // as all users need to be able to fetch the templates for exporting.
@@ -13,7 +13,7 @@ export async function GET() {
         // Lazy seeding: If no templates exist, populate them from the default config.
         if (snapshot.empty) {
             const batch = adminDb.batch();
-            (Object.keys(defaultTemplates) as DocxTemplateKey []).forEach(key => {
+            (Object.keys(defaultTemplates) as DocxTemplateKey[]).forEach(key => {
                 const template = defaultTemplates[key];
                 const docRef = stylesCollection.doc(key);
                 batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
@@ -27,8 +27,8 @@ export async function GET() {
             templates[doc.id] = doc.data();
         });
 
-        return createApiResponse(templates, 200);
+        return createApiResponseEnhanced(templates, 200);
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 }

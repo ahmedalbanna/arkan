@@ -21,7 +21,7 @@
 try {
   // ... logic
 } catch (error) {
-  return handleApiError(error);
+  return handleApiErrorEnhanced(error);
 }
 ```
 
@@ -92,7 +92,7 @@ Analytics.trackApiCall(
 ```typescript
 const { idToken } = await request.json();
 if (!idToken) {
-  return handleApiError({ message: 'ID token is required.' }, 400);
+  return handleApiErrorEnhanced({ message: 'ID token is required.' }, 400);
 }
 ```
 

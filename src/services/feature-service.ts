@@ -14,7 +14,9 @@ export async function fetchFeaturesApi(): Promise<Feature[]> {
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch features');
     }
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 /**
@@ -42,5 +44,7 @@ export async function updateFeatureApi(
         const error = await response.json();
         throw new Error(error.message || 'Failed to update feature.');
     }
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

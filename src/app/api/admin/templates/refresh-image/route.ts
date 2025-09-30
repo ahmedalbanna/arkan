@@ -1,11 +1,10 @@
 
 // src/app/api/templates/refresh-image/route.ts
-import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
-import { getStorage } from 'firebase-admin/storage';
 import { generateImage } from '@/ai/flows/generate-image';
+import { adminDb } from '@/lib/firebase/server-init';
 import { logGeneration } from '@/services/generation-service';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { getStorage } from 'firebase-admin/storage';
+import { z } from 'zod';
 
 
 const refreshImageSchema = z.object({
@@ -14,12 +13,12 @@ const refreshImageSchema = z.object({
   prompt: z.string(),
 });
 
-export const POST = withAuth(async ({ request, user }) => {
+export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = refreshImageSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiError(validation.error);
+      return handleApiErrorEnhanced(validation.error);
     }
 
     const { templateType, templateId, prompt } = validation.data;
@@ -28,7 +27,7 @@ export const POST = withAuth(async ({ request, user }) => {
     const { imageUrl: base64DataUri } = await generateImage(agentInput);
 
     if (!base64DataUri.startsWith('data:image/')) {
-        throw new Error('Invalid image data received from generation service.');
+      throw new Error('Invalid image data received from generation service.');
     }
 
     await logGeneration({
@@ -50,7 +49,7 @@ export const POST = withAuth(async ({ request, user }) => {
     const file = bucket.file(fileName);
 
     await file.save(imageBuffer, {
-        metadata: { contentType: mimeType },
+      metadata: { contentType: mimeType },
     });
 
     await file.makePublic();
@@ -60,15 +59,15 @@ export const POST = withAuth(async ({ request, user }) => {
     const templateRef = adminDb.collection('templates').doc(templateType).collection(collectionPath).doc(templateId);
 
     await templateRef.update({
-        imageUrl: publicUrl,
-        updatedAt: new Date().toISOString(),
+      imageUrl: publicUrl,
+      updatedAt: new Date().toISOString(),
     });
 
     const updatedDoc = await templateRef.get();
 
-    return createApiResponse({ ...updatedDoc.data() }, 200);
+    return createApiResponseEnhanced({ ...updatedDoc.data() }, 200);
 
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 }, { requireAdmin: true });

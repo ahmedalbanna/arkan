@@ -1,13 +1,12 @@
 
 
-import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
 import { ProjectStateSchema } from '@/ai/schemas';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+import { adminDb } from '@/lib/firebase/server-init';
 import { revalidatePath } from 'next/cache';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 // GET /api/projects - Fetches all projects for the authenticated user and their teams
-export const GET = withAuth(async ({ user }) => {
+export const GET = withEnhancedAuth(async ({ user }) => {
     try {
         // Fetch personal projects
         const personalProjectsQuery = adminDb.collection('projects')
@@ -42,20 +41,20 @@ export const GET = withAuth(async ({ user }) => {
         const projects = Array.from(projectsMap.values())
             .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
-        return createApiResponse(projects, 200);
+        return createApiResponseEnhanced(projects, 200);
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 });
 
 
 // POST /api/projects - Creates a new project
-export const POST = withAuth(async ({ request, user }) => {
+export const POST = withEnhancedAuth(async ({ request, user }) => {
     try {
         const body = await request.json();
         const validation = ProjectStateSchema.safeParse(body);
         if (!validation.success) {
-            return handleApiError({ errors: validation.error.flatten().fieldErrors }, 400);
+            return handleApiErrorEnhanced({ errors: validation.error.flatten().fieldErrors }, 400);
         }
 
         const newProject = {
@@ -69,8 +68,8 @@ export const POST = withAuth(async ({ request, user }) => {
         const projectRef = await adminDb.collection('projects').add(newProject);
         revalidatePath('/projects');
 
-        return createApiResponse({ id: projectRef.id, ...newProject }, 201);
+        return createApiResponseEnhanced({ id: projectRef.id, ...newProject }, 201);
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 });

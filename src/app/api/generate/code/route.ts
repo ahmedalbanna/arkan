@@ -1,23 +1,23 @@
 
 'use server';
 
-import { z } from 'zod';
 import { generateCode } from '@/ai/flows/generate-code';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { z } from 'zod';
 
 const generateCodeSchema = z.object({
   prompt: z.string().min(10, { message: 'Prompt must be at least 10 characters long.' }),
 });
 
-export const POST = withAuth(async ({ request, user }) => {
+export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = generateCodeSchema.safeParse(body);
 
     if (!validation.success) {
-      return handleApiError(validation.error);
+      return handleApiErrorEnhanced(validation.error);
     }
 
     const agentInput = validation.data;
@@ -27,15 +27,15 @@ export const POST = withAuth(async ({ request, user }) => {
     await deductCredit(user.id, creditCost);
 
     await logGeneration({
-        agentId: 'generate-code', // Assuming a static ID for this agent
-        userId: user.id,
-        input: agentInput,
-        output: result,
-        creditCost: creditCost,
+      agentId: 'generate-code', // Assuming a static ID for this agent
+      userId: user.id,
+      input: agentInput,
+      output: result,
+      creditCost: creditCost,
     });
 
-    return createApiResponse(result, 200);
+    return createApiResponseEnhanced(result, 200);
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 });

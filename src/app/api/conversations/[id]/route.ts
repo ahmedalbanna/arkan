@@ -1,28 +1,27 @@
 
 'use server';
 
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { adminRealtimeDb } from '@/lib/firebase/server-init';
 
-export const DELETE = withAuth(async ({ user, params }) => {
+export const DELETE = withEnhancedAuth(async ({ user, params }) => {
     try {
         const conversationId = params.id;
         if (!conversationId) {
-            return handleApiError({ message: 'Conversation ID is required.' }, 400);
+            return handleApiErrorEnhanced({ message: 'Conversation ID is required.' }, 400);
         }
 
         const convoRef = adminRealtimeDb.ref(`conversations/${conversationId}`);
         const convoSnapshot = await convoRef.get();
 
         if (!convoSnapshot.exists()) {
-             return handleApiError({ message: 'Conversation not found.' }, 404);
+            return handleApiErrorEnhanced({ message: 'Conversation not found.' }, 404);
         }
 
         const conversation = convoSnapshot.val();
 
         // Authorization: Check if the user is a participant
         if (!conversation.participantIds.includes(user.id)) {
-            return handleApiError({ message: 'Forbidden' }, 403);
+            return handleApiErrorEnhanced({ message: 'Forbidden' }, 403);
         }
 
         const updates: { [key: string]: null } = {};
@@ -34,9 +33,9 @@ export const DELETE = withAuth(async ({ user, params }) => {
 
         await adminRealtimeDb.ref().update(updates);
 
-        return createApiResponse({ message: 'Conversation deleted successfully' }, 200);
+        return createApiResponseEnhanced({ message: 'Conversation deleted successfully' }, 200);
 
     } catch (error) {
-        return handleApiError(error);
+        return handleApiErrorEnhanced(error);
     }
 });

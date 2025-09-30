@@ -2,14 +2,13 @@
 'use server';
 
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
-import { handleApiError, withAuth, createApiResponse } from '@/lib/api-utils';
 
-export const POST = withAuth(async ({ user }) => {
+export const POST = withEnhancedAuth(async ({ user }) => {
   try {
     // Find all admins
     const adminsSnapshot = await adminDb.collection('users').where('role', '==', 'admin').get();
     if (adminsSnapshot.empty) {
-      return handleApiError({ message: 'No support admins available.' }, 503);
+      return handleApiErrorEnhanced({ message: 'No support admins available.' }, 503);
     }
 
     const adminIds = adminsSnapshot.docs.map(doc => doc.id);
@@ -48,8 +47,8 @@ export const POST = withAuth(async ({ user }) => {
 
     await adminRealtimeDb.ref().update(updates);
 
-    return createApiResponse(newConversation, 201);
+    return createApiResponseEnhanced(newConversation, 201);
   } catch (error) {
-    return handleApiError(error);
+    return handleApiErrorEnhanced(error);
   }
 });
