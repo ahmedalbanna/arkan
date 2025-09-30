@@ -1,6 +1,5 @@
-
 /**
- * خدمات النظام الموحدة
+ * خدمات النظام الموحدة - المنظمة حسب الوظيفة
  *
  * هذا الملف يحتوي على جميع الصادرات للخدمات المنظمة حسب الوظيفة
  */
@@ -20,37 +19,29 @@ export * from './projects';
 // خدمات الفرق
 export * from './teams';
 
-// الخدمات القديمة (سيتم إعادة تنظيمها لاحقاً)
-export * from './academic-solver-service';
-export * from './admin-service';
-export * from './agent-service';
-export * from './ai-detector-service';
-export * from './ai-researcher-service';
-export * from './analytics-service';
-export * from './chat-service';
-export * from './context-service';
-export * from './diagram-service';
-export * from './document-processing-service';
-export * from './evaluation-service';
-export * from './fact-checker-service';
-export * from './feature-service';
-export * from './generation-log-service';
-export * from './generation-service';
-export * from './payment-service';
-export * from './plagiarism-checker-service';
-export * from './presentation-service';
+// خدمات الذكاء الاصطناعي
+export * from './ai';
+
+// خدمات الإدارة
+export * from './admin';
+
+// خدمات الدفع والمعاملات
+export * from './payment';
+
+// خدمات القوالب
+export * from './templates';
+
+// خدمات المحادثة
+export * from './chat';
+
+// خدمات التحليل والإحصائيات
+export * from './analytics';
+
+// خدمات المهام
+export * from './tasks';
+
+// الخدمات القديمة (سيتم إزالتها لاحقاً)
 export * from './project-plan-service';
 export * from './project-service';
-export * from './proposal-service';
-export * from './report-service';
-export * from './section-service';
-export * from './settings-service';
-export * from './taskade-service';
 export * from './team-service';
-export * from './text-to-speech-service';
-export * from './topic-explainer-service';
-export * from './transaction-service';
-export * from './translation-service';
 export * from './user-service';
-export * from './writing-tools-service';
-
