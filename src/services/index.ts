@@ -5,43 +5,44 @@
  */
 
 // الخدمات المشتركة
-export * from './shared';
+export * from '@/services/shared';
 
 // خدمات المصادقة
-export * from './auth';
+export * from '@/services/auth';
 
 // خدمات المستخدمين
-export * from './users';
+export * from '@/services/users';
 
 // خدمات المشاريع
-export * from './projects';
+export * from '@/services/projects';
 
 // خدمات الفرق
-export * from './teams';
+export * from '@/services/teams';
 
 // خدمات الذكاء الاصطناعي
-export * from './ai';
+export * from '@/services/ai';
 
 // خدمات الإدارة
-export * from './admin';
+export * from '@/services/admin';
 
 // خدمات الدفع والمعاملات
-export * from './payment';
+export * from '@/services/payment';
 
 // خدمات القوالب
-export * from './templates';
+export * from '@/services/templates';
 
 // خدمات المحادثة
-export * from './chat';
+export * from '@/services/chat';
 
 // خدمات التحليل والإحصائيات
-export * from './analytics';
+export * from '@/services/analytics';
 
 // خدمات المهام
-export * from './tasks';
+export * from '@/services/tasks';
 
 // الخدمات القديمة (سيتم إزالتها لاحقاً)
-export * from './project-plan-service';
-export * from './project-service';
-export * from './team-service';
-export * from './user-service';
+export * from '@/services/project-plan-service';
+export * from '@/services/project-service';
+export * from '@/services/team-service';
+export * from '@/services/user-service';
+

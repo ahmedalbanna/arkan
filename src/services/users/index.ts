@@ -4,5 +4,5 @@
  * هذا الملف يحتوي على جميع الصادرات لخدمات المستخدمين
  */
 
-export * from './user-service';
+export * from '@/services/users/user-service';
 

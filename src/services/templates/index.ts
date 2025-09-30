@@ -5,5 +5,5 @@
  */
 
 // خدمات القوالب العامة
-export * from './templates/template-service';
+export * from '@/services/templates/template-service';
 

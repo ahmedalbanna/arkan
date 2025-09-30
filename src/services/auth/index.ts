@@ -4,5 +4,5 @@
  * هذا الملف يحتوي على جميع الصادرات لخدمات المصادقة
  */
 
-export * from './auth-service';
+export * from '@/services/auth/auth-service';
 

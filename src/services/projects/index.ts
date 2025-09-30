@@ -4,5 +4,5 @@
  * هذا الملف يحتوي على جميع الصادرات لخدمات المشاريع
  */
 
-export * from './project-service';
+export * from '@/services/projects/project-service';
 

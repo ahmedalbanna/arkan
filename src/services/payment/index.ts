@@ -5,11 +5,11 @@
  */
 
 // خدمات الدفع الأساسية
-export * from './payment/payment-service';
+export * from '@/services/payment/payment-service';
 
 // خدمات المعاملات
-export * from './payment/transaction-service';
+export * from '@/services/payment/transaction-service';
 
 // خدمات الائتمانات
-export * from './payment/credit-service';
+export * from '@/services/payment/credit-service';
 

@@ -4,5 +4,5 @@
  * هذا الملف يحتوي على جميع الصادرات لخدمات الفرق
  */
 
-export * from './team-service';
+export * from '@/services/teams/team-service';
 

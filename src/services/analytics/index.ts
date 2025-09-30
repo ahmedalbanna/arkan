@@ -5,5 +5,5 @@
  */
 
 // خدمات التحليل والإحصائيات
-export * from './analytics/analytics-service';
+export * from '@/services/analytics/analytics-service';
 

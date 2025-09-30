@@ -5,5 +5,5 @@
  */
 
 // خدمات المحادثة الأساسية
-export * from './chat/chat-service';
+export * from '@/services/chat/chat-service';
 

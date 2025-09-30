@@ -5,5 +5,5 @@
  */
 
 // خدمات Taskade
-export * from './tasks/taskade-service';
+export * from '@/services/tasks/taskade-service';
 
