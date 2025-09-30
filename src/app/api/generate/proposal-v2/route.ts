@@ -14,10 +14,9 @@ import { logGeneration } from '@/services';
  * معالج توليد المقترحات
  */
 class GenerateProposalHandler extends CreditBasedApiHandler<GenerateProposalInput, any> {
-    protected requiresAdmin?: boolean | undefined;
     protected inputSchema = GenerateProposalInputSchema;
     protected creditCost = 1;
-
+    protected requiresAdmin = false;
     protected async processRequest(data: any, context: any) {
         const { projectIdea, guidelines, externalContext, advancedFields } = data;
         const { user } = context;

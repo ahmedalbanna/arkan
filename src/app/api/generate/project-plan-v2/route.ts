@@ -27,7 +27,7 @@ class GenerateProjectPlanHandler extends CreditBasedApiHandler<{
 }, any> {
     protected inputSchema = planSchema;
     protected creditCost = 2; // مهمة معقدة
-
+    protected requiresAdmin = false;
     protected async processRequest(data: any, context: any) {
         const { user } = context;
 

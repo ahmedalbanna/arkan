@@ -10,14 +10,14 @@ export const PUT = withEnhancedAuth(async ({ request, params }) => {
     try {
         const key = params.key;
         if (!key) {
-            return handleApiErrorEnhanced({ message: 'Template key is required.' }, 400);
+            return handleApiErrorEnhanced({ message: 'Template key is required.' }, '400');
         }
 
         const templateRef = adminDb.collection('templates').doc('docx').collection('styles').doc(key);
         const templateDoc = await templateRef.get();
 
         if (!templateDoc.exists) {
-            return handleApiErrorEnhanced({ message: 'DOCX template not found.' }, 404);
+            return handleApiErrorEnhanced({ message: 'DOCX template not found.' }, '404');
         }
 
         const body = await request.json();
@@ -42,19 +42,19 @@ export const DELETE = withEnhancedAuth(async ({ params }) => {
     try {
         const key = params.key;
         if (!key) {
-            return handleApiErrorEnhanced({ message: 'Template key is required.' }, 400);
+            return handleApiErrorEnhanced({ message: 'Template key is required.' }, '400');
         }
 
         // Prevent deletion of default templates
         if (['modern', 'classic', 'academic'].includes(key)) {
-            return handleApiErrorEnhanced({ message: 'Default templates cannot be deleted.' }, 403);
+            return handleApiErrorEnhanced({ message: 'Default templates cannot be deleted.' }, '403');
         }
 
         const templateRef = adminDb.collection('templates').doc('docx').collection('styles').doc(key);
         const templateDoc = await templateRef.get();
 
         if (!templateDoc.exists) {
-            return handleApiErrorEnhanced({ message: 'DOCX template not found.' }, 404);
+            return handleApiErrorEnhanced({ message: 'DOCX template not found.' }, '404');
         }
 
         await templateRef.delete();

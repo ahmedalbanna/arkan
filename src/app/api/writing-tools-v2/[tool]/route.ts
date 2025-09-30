@@ -7,6 +7,7 @@
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { deductCredit, logGeneration } from '@/services';
+import { z } from 'zod';
 
 // استيراد جميع الـ flows والـ schemas
 import { aiResearcher } from '@/ai/flows/ai-researcher';
@@ -76,8 +77,11 @@ type ToolName = keyof typeof toolConfig;
  */
 class WritingToolHandler extends CreditBasedApiHandler<any, any> {
     protected creditCost = 1; // التكلفة الافتراضية
-
-    protected async processRequest(data: any, context: any) {
+    protected requiresAdmin = false;
+    protected inputSchema = z.object({
+        tool: z.string(),
+    });
+    protected async processRequest(data: any, context: any): Promise<any> {
         const { params, user } = context;
         const toolName = params.tool as ToolName;
 

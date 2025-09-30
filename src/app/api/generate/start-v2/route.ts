@@ -26,7 +26,8 @@ class StartJobHandler extends ComplexApiHandler<{
     jobId: string;
 }> {
     protected inputSchema = startJobSchema;
-
+    protected creditCost = 1;
+    protected requiresAdmin = false;
     protected async processRequest(data: any, context: any) {
         const { inputContent, featureId } = data;
 

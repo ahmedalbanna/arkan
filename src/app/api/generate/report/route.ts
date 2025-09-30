@@ -26,14 +26,14 @@ export const POST = withEnhancedAuth(async ({ request, user }) => {
     const sectionDoc = await sectionDocRef.get();
 
     if (!sectionDoc.exists) {
-      return handleApiErrorEnhanced({ message: 'Section not found in database.' }, 404);
+      return handleApiErrorEnhanced({ message: 'Section not found in database.' }, '404');
     }
 
     const agentInfo = sectionDoc.data() as { agentId: string; title: string }; // Assuming these fields exist
     // const agentInfo = reportSections[agentInput.sectionToGenerate]; // Old static reference
 
     if (!agentInfo) {
-      return handleApiErrorEnhanced({ message: 'Unknown section requested.' }, 400);
+      return handleApiErrorEnhanced({ message: 'Unknown section requested.' }, '400');
     }
 
     const result = await generateReportSection(agentInput);

@@ -60,7 +60,7 @@ export const POST = withEnhancedAuth(async ({ request, user }) => {
 
     if (body.intent === 'update_diagram') {
       if (!body.plantUmlCode) {
-        return handleApiErrorEnhanced({ message: 'PlantUML code is required for an update.' }, 400);
+        return handleApiErrorEnhanced({ message: 'PlantUML code is required for an update.' }, '400');
       }
       const imageUrl = await getPlantUmlImageUrl(body.plantUmlCode);
       return createApiResponseEnhanced({ plantUmlCode: body.plantUmlCode, imageUrl }, 200);

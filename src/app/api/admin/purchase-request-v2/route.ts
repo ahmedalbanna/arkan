@@ -30,7 +30,8 @@ class PurchaseRequestHandler extends ComplexApiHandler<z.infer<typeof purchaseRe
     transactionId: string;
 }> {
     protected inputSchema = purchaseRequestSchema;
-
+    protected creditCost = 1;
+    protected requiresAdmin = true;
     protected async processRequest(data: z.infer<typeof purchaseRequestSchema>, context: any) {
         const { request } = context;
         const formData = await request.formData();

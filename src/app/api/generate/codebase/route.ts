@@ -3,13 +3,18 @@
 
 import { generateCodebase } from '@/ai/flows/generate-codebase';
 import { ProjectProposalSchema } from '@/ai/schemas';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 
+// Schema لتوليد الكودبيس
 const codebaseSchema = z.object({
   proposal: ProjectProposalSchema,
 });
 
+/**
+ * معالج توليد الكودبيس
+ */
 export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();

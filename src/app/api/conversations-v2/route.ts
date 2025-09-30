@@ -85,7 +85,8 @@ class CreateConversationHandler extends ComplexApiHandler<{
     agent: any;
 }> {
     protected inputSchema = createConversationSchema;
-
+    protected creditCost = 1;
+    protected requiresAdmin = false;
     protected async processRequest(data: any, context: any) {
         const { participantIds, participantNames, title, isSupportChat, agent } = data;
         const { user } = context;
@@ -113,7 +114,7 @@ class CreateConversationHandler extends ComplexApiHandler<{
 
         const updates: { [key: string]: any } = {};
         updates[`/conversations/${conversationId}`] = conversationData;
-        participantIds.forEach(id => {
+        participantIds.forEach((id: string) => {
             updates[`/userConversations/${id}/${conversationId}`] = true;
         });
 

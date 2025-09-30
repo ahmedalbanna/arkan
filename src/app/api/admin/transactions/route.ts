@@ -1,5 +1,6 @@
 
 // src/app/api/admin/transactions/route.ts
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { getTransactionsByDateRange, getTransactionsByStatus } from '@/lib/db/queries';
 import { z } from 'zod';
 
@@ -34,7 +35,7 @@ export const GET = withEnhancedAuth(async ({ request }) => {
       return createApiResponseEnhanced({ transactions, hasNextPage, lastVisibleId: newLastVisibleId }, 200);
     }
 
-    return handleApiErrorEnhanced({ message: 'Missing required parameters. Provide either status or both startDate and endDate.' }, 400);
+    return handleApiErrorEnhanced({ message: 'Missing required parameters. Provide either status or both startDate and endDate.' }, '400');
 
   } catch (error) {
     return handleApiErrorEnhanced(error);

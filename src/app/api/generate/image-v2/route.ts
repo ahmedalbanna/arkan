@@ -23,7 +23,7 @@ class GenerateImageHandler extends CreditBasedApiHandler<{
 }, any> {
     protected inputSchema = generateImageSchema;
     protected creditCost = 5; // توليد الصور مكلف
-
+    protected requiresAdmin = false;
     protected async processRequest(data: any, context: any) {
         const { user } = context;
 

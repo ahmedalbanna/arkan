@@ -19,6 +19,7 @@ class AnalyzeAcademicHandler extends CreditBasedApiHandler<{
 }, any> {
     protected inputSchema = ApiAnalyzeSchema;
     protected creditCost = 1;
+    protected requiresAdmin = false;
 
     protected async processRequest(data: any, context: any) {
         const { documentType, markdown } = data;

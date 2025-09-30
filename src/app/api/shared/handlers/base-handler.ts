@@ -128,7 +128,7 @@ export abstract class ComplexApiHandler<TInput = any, TOutput = any> extends Bas
                 return handleApiErrorEnhanced({
                     code: 'FORBIDDEN',
                     message: 'Admin access required'
-                }, 403);
+                }, '403');
             }
 
             // التحقق من صحة البيانات

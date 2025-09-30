@@ -1,18 +1,19 @@
 
 'use server';
 
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { getUserProfile } from '@/lib/db/queries';
 
 export const POST = withEnhancedAuth(async ({ params }) => {
     try {
         const { id: userId } = params;
         if (!userId) {
-            return handleApiErrorEnhanced({ message: 'User ID is required.' }, 400);
+            return handleApiErrorEnhanced({ message: 'User ID is required.' }, '400');
         }
 
         const user = await getUserProfile(userId);
         if (!user || !user.email) {
-            return handleApiErrorEnhanced({ message: 'User not found or has no email.' }, 404);
+            return handleApiErrorEnhanced({ message: 'User not found or has no email.' }, '404');
         }
 
         // This is a placeholder for sending a reset email.

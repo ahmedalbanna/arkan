@@ -17,7 +17,7 @@ import { logGeneration } from '@/services';
 class GenerateReportHandler extends CreditBasedApiHandler<any, any> {
     protected inputSchema = GenerateSectionInputSchema;
     protected creditCost = 1;
-
+    protected requiresAdmin = false;
     protected async processRequest(data: any, context: any) {
         const { user } = context;
 

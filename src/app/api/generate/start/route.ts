@@ -1,8 +1,12 @@
 'use server';
 
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { createJob, generateJobToken } from '@/lib/job-store';
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * معالج بدء المهام غير المتزامنة
+ */
 export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();

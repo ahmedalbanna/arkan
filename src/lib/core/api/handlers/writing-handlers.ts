@@ -208,11 +208,11 @@ export const generateQuizHandler = createValidatedApiHandler(
                 message: 'Quiz generated successfully',
                 data: {
                     originalText: text,
-                    questions: Array.from({ length: questionCount }, (_, i) => ({
+                    questions: Array.from({ length: questionCount || 5 }, (_, i) => ({
                         id: `q${i + 1}`,
-                        type: questionTypes[Math.floor(Math.random() * questionTypes.length)],
+                        type: questionTypes?.[Math.floor(Math.random() * (questionTypes?.length || 1))] || 'multiple-choice',
                         question: `Question ${i + 1} based on the text`,
-                        options: questionTypes.includes('multiple-choice') ? ['Option A', 'Option B', 'Option C', 'Option D'] : undefined,
+                        options: questionTypes?.includes('multiple-choice') ? ['Option A', 'Option B', 'Option C', 'Option D'] : undefined,
                         correctAnswer: 'Option A',
                         explanation: 'This is the correct answer because...',
                         difficulty,
@@ -275,7 +275,7 @@ export const improveTextHandler = createValidatedApiHandler(
                     improvements,
                     language,
                     targetAudience,
-                    improvementsApplied: improvements.map((imp: string) => ({
+                    improvementsApplied: improvements?.map((imp: string) => ({
                         type: imp,
                         description: `Applied ${imp} improvements`,
                         before: 'Original text',

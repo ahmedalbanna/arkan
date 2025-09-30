@@ -2,9 +2,9 @@
 
 import { ai } from '@/ai/genkit';
 import { ImageToTextInputSchema, ImageToTextOutputSchema } from '@/ai/schemas';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
-
 const explainDiagramSchema = ImageToTextInputSchema.extend({
     prompt: z.string().min(10, 'A prompt is required to explain the diagram.'),
 });

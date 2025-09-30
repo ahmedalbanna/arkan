@@ -71,7 +71,7 @@ const confirmResetPasswordSchema = z.object({
 export const loginHandler = createValidatedApiHandler(
     async (request: NextRequest, context: { params: { [key: string]: string } }, validatedData) => {
         try {
-            const { email, password, rememberMe } = validatedData;
+            const { email, password, rememberMe } = validatedData || {};
 
             // TODO: تنفيذ منطق تسجيل الدخول
             // 1. التحقق من صحة البيانات
@@ -157,7 +157,7 @@ export const logoutHandler = createApiHandler(
 export const registerHandler = createValidatedApiHandler(
     async (request: NextRequest, context: { params: { [key: string]: string } }, validatedData) => {
         try {
-            const { email, password, firstName, lastName, role } = validatedData;
+            const { email, password, firstName, lastName, role } = validatedData || {};
 
             // TODO: تنفيذ منطق التسجيل
             // 1. التحقق من عدم وجود المستخدم
@@ -210,7 +210,7 @@ export const registerHandler = createValidatedApiHandler(
 export const changePasswordHandler = createValidatedApiHandler(
     async (request: NextRequest, context: { params: { [key: string]: string } }, validatedData) => {
         try {
-            const { currentPassword, newPassword } = validatedData;
+            const { currentPassword, newPassword } = validatedData || {};
 
             // TODO: تنفيذ منطق تغيير كلمة المرور
             // 1. التحقق من كلمة المرور الحالية
@@ -252,7 +252,7 @@ export const changePasswordHandler = createValidatedApiHandler(
 export const resetPasswordHandler = createValidatedApiHandler(
     async (request: NextRequest, context: { params: { [key: string]: string } }, validatedData) => {
         try {
-            const { email } = validatedData;
+            const { email } = validatedData || {};
 
             // TODO: تنفيذ منطق إعادة تعيين كلمة المرور
             // 1. التحقق من وجود المستخدم
@@ -294,7 +294,7 @@ export const resetPasswordHandler = createValidatedApiHandler(
 export const confirmResetPasswordHandler = createValidatedApiHandler(
     async (request: NextRequest, context: { params: { [key: string]: string } }, validatedData) => {
         try {
-            const { token, newPassword } = validatedData;
+            const { token, newPassword } = validatedData || {};
 
             // TODO: تنفيذ منطق تأكيد إعادة تعيين كلمة المرور
             // 1. التحقق من صحة الرمز
@@ -336,7 +336,7 @@ export const confirmResetPasswordHandler = createValidatedApiHandler(
 export const updateProfileHandler = createValidatedApiHandler(
     async (request: NextRequest, context: { params: { [key: string]: string } }, validatedData) => {
         try {
-            const { firstName, lastName, email, phone, bio } = validatedData;
+            const { firstName, lastName, email, phone, bio } = validatedData || {};
 
             // TODO: تنفيذ منطق تحديث الملف الشخصي
             // 1. التحقق من صحة البيانات

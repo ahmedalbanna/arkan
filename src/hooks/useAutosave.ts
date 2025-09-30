@@ -58,7 +58,6 @@ export function useAdvancedAutosave() {
   projectRef.current = project;
 
   const uiHook = createUIHook({
-    hookName: 'advanced-autosave',
     initialState: {
       isEnabled: true,
       debounceDelay: 1500,
@@ -69,9 +68,9 @@ export function useAdvancedAutosave() {
       isSaving: false,
       saveHistory: [],
     },
-    customLogic: (state, setState, toast) => {
+    customLogic: (state: any, setState: any, toast: any) => {
       const handleToggleAutosave = () => {
-        setState(prev => ({ ...prev, isEnabled: !prev.isEnabled }));
+        setState((prev: any) => ({ ...prev, isEnabled: !prev.isEnabled }));
         toast({
           title: state.isEnabled ? 'Autosave disabled' : 'Autosave enabled',
           description: state.isEnabled ? 'Changes will not be saved automatically' : 'Changes will be saved automatically'
@@ -79,11 +78,11 @@ export function useAdvancedAutosave() {
       };
 
       const handleSetDebounceDelay = (delay: number) => {
-        setState(prev => ({ ...prev, debounceDelay: Math.max(500, Math.min(10000, delay)) }));
+        setState((prev: any) => ({ ...prev, debounceDelay: Math.max(500, Math.min(10000, delay)) }));
       };
 
       const handleSetSaveInterval = (interval: number) => {
-        setState(prev => ({ ...prev, saveInterval: Math.max(10000, Math.min(300000, interval)) }));
+        setState((prev: any) => ({ ...prev, saveInterval: Math.max(10000, Math.min(300000, interval)) }));
       };
 
       const handleForceSave = () => {
@@ -91,7 +90,7 @@ export function useAdvancedAutosave() {
         const currentProjectId = currentProject?.id;
 
         if (currentProjectId && !currentProjectId.startsWith('temp-') && firebaseUser) {
-          setState(prev => ({ ...prev, isSaving: true }));
+          setState((prev: any) => ({ ...prev, isSaving: true }));
 
           const stateToSave = currentProject.toStateObject();
           updateProjectMutation.mutate({
@@ -99,7 +98,7 @@ export function useAdvancedAutosave() {
             data: stateToSave,
           }, {
             onSuccess: () => {
-              setState(prev => ({
+              setState((prev: any) => ({
                 ...prev,
                 isSaving: false,
                 lastSaveTime: Date.now(),
@@ -109,7 +108,7 @@ export function useAdvancedAutosave() {
               toast({ title: 'Project saved successfully!' });
             },
             onError: (error) => {
-              setState(prev => ({
+              setState((prev: any) => ({
                 ...prev,
                 isSaving: false,
                 errorCount: prev.errorCount + 1,
@@ -122,7 +121,7 @@ export function useAdvancedAutosave() {
       };
 
       const handleClearHistory = () => {
-        setState(prev => ({ ...prev, saveHistory: [] }));
+        setState((prev: any) => ({ ...prev, saveHistory: [] }));
       };
 
       const getSaveStats = () => {
@@ -156,20 +155,20 @@ export function useAdvancedAutosave() {
   })();
 
   // Debounce the unsaved changes flag with configurable delay
-  const debouncedHasUnsavedChanges = useDebounce(hasUnsavedChanges, uiHook.debounceDelay);
+  const debouncedHasUnsavedChanges = useDebounce(hasUnsavedChanges, uiHook.state?.debounceDelay || 1500);
 
   useEffect(() => {
     const currentProject = projectRef.current;
     const currentProjectId = currentProject?.id;
 
-    if (currentProjectId && !currentProjectId.startsWith('temp-') && debouncedHasUnsavedChanges && firebaseUser && uiHook.isEnabled) {
+    if (currentProjectId && !currentProjectId.startsWith('temp-') && debouncedHasUnsavedChanges && firebaseUser && uiHook.state?.isEnabled) {
       const stateToSave = currentProject.toStateObject();
       updateProjectMutation.mutate({
         projectId: currentProjectId,
         data: stateToSave,
       }, {
         onSuccess: () => {
-          setState(prev => ({
+          uiHook.updateState((prev: any) => ({
             ...prev,
             lastSaveTime: Date.now(),
             saveCount: prev.saveCount + 1,
@@ -177,7 +176,7 @@ export function useAdvancedAutosave() {
           }));
         },
         onError: (error) => {
-          setState(prev => ({
+          uiHook.updateState((prev: any) => ({
             ...prev,
             errorCount: prev.errorCount + 1,
             saveHistory: [...prev.saveHistory.slice(-9), { timestamp: Date.now(), success: false, error: error.message }]
@@ -185,29 +184,29 @@ export function useAdvancedAutosave() {
         }
       });
     }
-  }, [debouncedHasUnsavedChanges, firebaseUser, updateProjectMutation, uiHook.isEnabled]);
+  }, [debouncedHasUnsavedChanges, firebaseUser, updateProjectMutation, uiHook.state?.isEnabled]);
 
   // Periodic save interval
   useEffect(() => {
-    if (!uiHook.isEnabled || !firebaseUser) return;
+    if (!uiHook.state?.isEnabled || !firebaseUser) return;
 
     const interval = setInterval(() => {
       const currentProject = projectRef.current;
       const currentProjectId = currentProject?.id;
       const now = Date.now();
 
-      if (currentProjectId && !currentProjectId.startsWith('temp-') && hasUnsavedChanges && (now - uiHook.lastSaveTime) > uiHook.saveInterval) {
-        uiHook.handleForceSave();
+      if (currentProjectId && !currentProjectId.startsWith('temp-') && hasUnsavedChanges && (now - (uiHook.state?.lastSaveTime || 0)) > (uiHook.state?.saveInterval || 30000)) {
+        uiHook.handleForceSave?.();
       }
-    }, uiHook.saveInterval);
+    }, uiHook.state?.saveInterval || 30000);
 
     return () => clearInterval(interval);
-  }, [uiHook.isEnabled, uiHook.saveInterval, uiHook.lastSaveTime, hasUnsavedChanges, firebaseUser]);
+  }, [uiHook.state?.isEnabled, uiHook.state?.saveInterval, uiHook.state?.lastSaveTime, hasUnsavedChanges, firebaseUser]);
 
   return {
     // الوظائف الأساسية
-    isEnabled: uiHook.isEnabled,
-    isSaving: uiHook.isSaving,
+    isEnabled: uiHook.state?.isEnabled || false,
+    isSaving: uiHook.state?.isSaving || false,
 
     // الوظائف الجديدة من UI Hook
     ...uiHook,

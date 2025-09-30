@@ -27,6 +27,8 @@ class CreateSessionHandler extends ComplexApiHandler<{
 }> {
     protected inputSchema = createSessionSchema;
     protected requiresAuth = false;
+    protected creditCost = 1;
+    protected requiresAdmin = false;
 
     protected async processRequest(data: any, context: any) {
         const { idToken } = data;

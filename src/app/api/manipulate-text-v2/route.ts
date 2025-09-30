@@ -16,6 +16,7 @@ import { logGeneration } from '@/services';
 class ManipulateTextHandler extends CreditBasedApiHandler<any, any> {
     protected inputSchema = ManipulateTextInputSchema;
     protected creditCost = 1;
+    protected requiresAdmin = false;
 
     protected async processRequest(data: any, context: any) {
         const { user } = context;

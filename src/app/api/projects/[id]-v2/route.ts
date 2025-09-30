@@ -36,11 +36,11 @@ const addContextSchema = z.object({
  * معالج جلب مشروع واحد
  */
 class GetProjectHandler extends SimpleApiHandler<any> {
-    protected async processRequest(context: any) {
+    protected async processRequest(context: any): Promise<any> {
         const { params, user } = context;
         const { id: projectId } = params;
         const project = await verifyProjectOwner(user.id, projectId);
-        return { id: projectId, ...project };
+        return { id: projectId, ...project } as any;
     }
 }
 
@@ -49,8 +49,9 @@ class GetProjectHandler extends SimpleApiHandler<any> {
  */
 class UpdateProjectHandler extends ComplexApiHandler<z.infer<typeof ProjectStateSchema>, any> {
     protected inputSchema = ProjectStateSchema;
-
-    protected async processRequest(data: z.infer<typeof ProjectStateSchema>, context: any) {
+    protected requiresAdmin = false;
+    protected creditCost = 1;
+    protected async processRequest(data: z.infer<typeof ProjectStateSchema>, context: any): Promise<any> {
         const { params, user } = context;
         const { id: projectId } = params;
         await verifyProjectOwner(user.id, projectId);
@@ -63,7 +64,7 @@ class UpdateProjectHandler extends ComplexApiHandler<z.infer<typeof ProjectState
         await adminDb.collection("projects").doc(projectId).update(updateData);
         revalidatePath('/projects');
 
-        return { id: projectId, ...updateData };
+        return { id: projectId, ...updateData } as any;
     }
 }
 
@@ -71,13 +72,13 @@ class UpdateProjectHandler extends ComplexApiHandler<z.infer<typeof ProjectState
  * معالج حذف مشروع
  */
 class DeleteProjectHandler extends SimpleApiHandler<{ message: string }> {
-    protected async processRequest(context: any) {
+    protected async processRequest(context: any): Promise<{ message: string }> {
         const { params, user } = context;
         const { id: projectId } = params;
         await verifyProjectOwner(user.id, projectId);
         await adminDb.collection("projects").doc(projectId).delete();
         revalidatePath('/projects');
-        return { message: 'Project deleted successfully' };
+        return { message: 'Project deleted successfully' } as { message: string };
     }
 }
 
@@ -86,7 +87,8 @@ class DeleteProjectHandler extends SimpleApiHandler<{ message: string }> {
  */
 class AddContextHandler extends ComplexApiHandler<z.infer<typeof addContextSchema>, { message: string }> {
     protected inputSchema = addContextSchema;
-
+    protected requiresAdmin = false;
+    protected creditCost = 1;
     protected async processRequest(data: z.infer<typeof addContextSchema>, context: any) {
         const { params, user } = context;
         const { id: projectId } = params;
@@ -98,7 +100,7 @@ class AddContextHandler extends ComplexApiHandler<z.infer<typeof addContextSchem
             updatedAt: new Date().toISOString(),
         });
 
-        return { message: 'Context added successfully' };
+        return { message: 'Context added successfully' } as { message: string };
     }
 }
 

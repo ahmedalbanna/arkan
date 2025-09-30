@@ -1,8 +1,8 @@
 
 'use server';
 
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { getJob } from '@/lib/job-store';
-
 interface RouteContext {
   params: {
     jobId: string;
@@ -11,6 +11,9 @@ interface RouteContext {
 
 // THIS ENDPOINT IS NO LONGER USED FOR POLLING
 // but it's kept in case a direct status check is needed in the future.
+/**
+ * معالج حالة المهمة
+ */
 export const GET = withEnhancedAuth(async ({ params }) => {
   try {
     const { jobId } = params;
@@ -18,7 +21,7 @@ export const GET = withEnhancedAuth(async ({ params }) => {
     const job = await getJob(jobId);
 
     if (!job) {
-      return handleApiErrorEnhanced({ message: 'Job not found' }, 404);
+      return handleApiErrorEnhanced({ message: 'Job not found' }, '404');
     }
 
     // Return the current status and the result if completed

@@ -53,7 +53,11 @@ class GetUserHandler extends SimpleApiHandler<any> {
  * معالج تحديث ملف المستخدم
  */
 class UpdateUserHandler extends ComplexApiHandler<z.infer<typeof adminUpdateUserSchema> | z.infer<typeof userUpdateSchema>, any> {
-    protected async processRequest(data: any, context: any) {
+    protected inputSchema = z.union([adminUpdateUserSchema, userUpdateSchema]);
+    protected requiresAdmin = true;
+    protected creditCost = 1;
+
+    protected async processRequest(data: any, context: any): Promise<any> {
         const { params, user: requester } = context;
         const { id: userId } = params;
 
@@ -82,7 +86,7 @@ class UpdateUserHandler extends ComplexApiHandler<z.infer<typeof adminUpdateUser
         revalidatePath('/admin/manage-users');
 
         const updatedUser = await getUserProfile(userId);
-        return updatedUser;
+        return updatedUser as unknown as any;
     }
 }
 
@@ -92,7 +96,7 @@ class UpdateUserHandler extends ComplexApiHandler<z.infer<typeof adminUpdateUser
 class DeleteUserHandler extends SimpleApiHandler<{ message: string }> {
     protected requiresAdmin = true;
 
-    protected async processRequest(context: any) {
+    protected async processRequest(context: any): Promise<{ message: string }> {
         const { params } = context;
         const { id: targetUserId } = params;
 

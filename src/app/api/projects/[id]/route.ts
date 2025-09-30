@@ -42,7 +42,7 @@ export const PUT = withEnhancedAuth(async ({ request, params, user }) => {
         const body = await request.json();
         const validation = ProjectStateSchema.safeParse(body);
         if (!validation.success) {
-            return handleApiErrorEnhanced({ errors: validation.error.flatten().fieldErrors }, 400);
+            return handleApiErrorEnhanced({ errors: validation.error.flatten().fieldErrors }, '400');
         }
 
         const updateData = {
@@ -88,7 +88,7 @@ export const PATCH = withEnhancedAuth(async ({ request, params, user }) => {
         const body = await request.json();
         const validation = addContextSchema.safeParse(body);
         if (!validation.success) {
-            return handleApiErrorEnhanced({ errors: validation.error.flatten().fieldErrors }, 400);
+            return handleApiErrorEnhanced({ errors: validation.error.flatten().fieldErrors }, '400');
         }
 
         const projectRef = adminDb.collection("projects").doc(projectId);

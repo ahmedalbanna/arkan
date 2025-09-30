@@ -7,7 +7,7 @@ export const POST = withEnhancedAuth(async ({ request, params, user }) => {
 
     // Check if the user is an admin or is updating their own profile
     if (user.role !== 'admin' && user.id !== targetUserId) {
-        return handleApiErrorEnhanced({ message: 'Forbidden' }, 403);
+        return handleApiErrorEnhanced({ message: 'Forbidden' }, '403');
     }
 
     try {
@@ -15,12 +15,12 @@ export const POST = withEnhancedAuth(async ({ request, params, user }) => {
         const file = formData.get('file') as File | null;
 
         if (!file) {
-            return handleApiErrorEnhanced({ message: 'No file uploaded.' }, 400);
+            return handleApiErrorEnhanced({ message: 'No file uploaded.' }, '400');
         }
 
         const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
         if (!allowedTypes.includes(file.type)) {
-            return handleApiErrorEnhanced({ message: 'Invalid file type. Only JPG, PNG, and WebP are allowed.' }, 400);
+            return handleApiErrorEnhanced({ message: 'Invalid file type. Only JPG, PNG, and WebP are allowed.' }, '400');
         }
 
         const storage = getStorage();

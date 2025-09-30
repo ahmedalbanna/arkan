@@ -100,7 +100,7 @@ export function createApiHandler<T = any>(
 
     // 5. المصادقة (أخيراً)
     if (requireAuth) {
-        wrappedHandler = withAuth(wrappedHandler, authOptions);
+        wrappedHandler = withAuth(wrappedHandler);
     }
 
     return wrappedHandler;

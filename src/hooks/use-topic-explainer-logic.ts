@@ -76,10 +76,10 @@ export function useTopicExplainerLogic() {
 
     // النسخ
     isCopied: contentGenerator.isCopied,
-    handleCopy: () => contentGenerator.copyToClipboard(contentGenerator.generatedContent || contentGenerator.processedText),
+    handleCopy: () => contentGenerator.copyToClipboard?.(contentGenerator.generatedContent || contentGenerator.processedText) || Promise.resolve(),
 
     // المعالجة
-    onSubmit: contentGenerator.handleSubmit,
+    onSubmit: contentGenerator.handleSubmit || (() => { }),
     reset: contentGenerator.reset,
 
     // النتائج والوظائف المساعدة

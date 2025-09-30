@@ -82,7 +82,7 @@ export function useCreateTeam() {
     return useMutation<TeamProperties, Error, { name: string }>({
         mutationFn: async (variables) => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return createTeamApi({ ...variables, token });
+            return createTeamApi(variables, token);
         },
         onSuccess: () => {
             // Invalidation might not be strictly necessary with the real-time listener,
@@ -102,7 +102,7 @@ export function useInviteMember() {
     return useMutation<any, Error, { teamId: string, email: string }>({
         mutationFn: async (variables) => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return inviteMemberApi({ ...variables, token });
+            return inviteMemberApi(variables, token);
         },
         onSuccess: () => {
             // Invalidation will trigger a refetch, but the real-time listener will also update.

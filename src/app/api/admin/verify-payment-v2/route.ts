@@ -33,7 +33,7 @@ class VerifyPaymentHandler extends ComplexApiHandler<{
 }> {
     protected inputSchema = verifyPaymentSchema;
     protected requiresAdmin = true;
-
+    protected creditCost = 1;
     protected async processRequest(data: any, context: any) {
         const { transactionId, userId, creditsToGrant, status, adminNotes } = data;
         const { user: adminUser } = context;

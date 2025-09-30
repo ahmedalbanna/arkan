@@ -23,7 +23,7 @@ class TextToSpeechHandler extends CreditBasedApiHandler<{
 }, any> {
     protected inputSchema = ttsSchema;
     protected creditCost = 1;
-
+    protected requiresAdmin = false;
     protected async processRequest(data: any, context: any) {
         const { text } = data;
         const { user } = context;

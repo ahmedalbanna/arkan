@@ -29,7 +29,8 @@ class StudentRequestHandler extends ComplexApiHandler<{
     projectId: string;
 }> {
     protected inputSchema = requestSchema;
-
+    protected creditCost = 1;
+    protected requiresAdmin = false;
     protected async processRequest(data: any, context: any) {
         const { request } = context;
         const formData = await request.formData();

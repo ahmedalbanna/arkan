@@ -21,7 +21,7 @@ console.log("Hello, World!");
       <h1 className="text-3xl font-bold mb-4 text-center">Rich Text Editor</h1>
       <p className="text-center text-muted-foreground mb-8">A powerful editor for all your writing needs.</p>
       <div className="max-w-4xl mx-auto">
-        <RichTextEditor content={markdownContent} />
+        <RichTextEditor content={markdownContent} onChange={() => { }} onAiAction={() => { }} onReadAloud={() => { }} isProcessingAi={false} isReadingAloud={false} />
       </div>
     </main>
   );

@@ -14,7 +14,7 @@ import type { TeamProperties, TeamWithMembers } from '@/lib/models/team';
  * معالج قائمة الفرق (GET)
  */
 class TeamListHandler extends SimpleApiHandler<TeamWithMembers[]> {
-    protected async processRequest(context: any) {
+    protected async processRequest(context: any): Promise<TeamWithMembers[]> {
         const { user } = context;
 
         if (!user.teams || user.teams.length === 0) {
@@ -26,7 +26,7 @@ class TeamListHandler extends SimpleApiHandler<TeamWithMembers[]> {
             .get();
 
         const teamsSnapshot = await teamsQuery;
-        const teams = [];
+        const teams: TeamWithMembers[] = [];
 
         for (const teamDoc of teamsSnapshot.docs) {
             const teamData = teamDoc.data();
@@ -49,7 +49,7 @@ class TeamListHandler extends SimpleApiHandler<TeamWithMembers[]> {
             });
         }
 
-        return teams;
+        return teams as TeamWithMembers[];
     }
 }
 
@@ -61,7 +61,8 @@ class CreateTeamHandler extends ComplexApiHandler<{
     description?: string;
 }, TeamProperties> {
     protected inputSchema = TeamSchemas.createTeam;
-
+    protected requiresAdmin = false;
+    protected creditCost = 1;
     protected async processRequest(data: any, context: any) {
         const { user } = context;
 
@@ -83,7 +84,7 @@ class CreateTeamHandler extends ComplexApiHandler<{
         return {
             id: docRef.id,
             ...teamData,
-        } as TeamProperties;
+        } as TeamWithMembers;
     }
 }
 
@@ -95,7 +96,8 @@ class UpdateTeamHandler extends ComplexApiHandler<{
     description?: string;
 }, TeamProperties> {
     protected inputSchema = TeamSchemas.updateTeam;
-
+    protected requiresAdmin = false;
+    protected creditCost = 1;
     protected async processRequest(data: any, context: any) {
         const { params, user } = context;
         const teamId = params?.id;
@@ -128,7 +130,7 @@ class UpdateTeamHandler extends ComplexApiHandler<{
             id: teamId,
             ...teamData,
             ...updateData,
-        } as TeamProperties;
+        } as TeamWithMembers;
     }
 }
 
@@ -136,6 +138,8 @@ class UpdateTeamHandler extends ComplexApiHandler<{
  * معالج حذف الفريق (DELETE)
  */
 class DeleteTeamHandler extends ComplexApiHandler<{}, { message: string }> {
+    protected requiresAdmin = false;
+    protected creditCost = 1;
     protected async processRequest(data: any, context: any) {
         const { params, user } = context;
         const teamId = params?.id;
@@ -189,6 +193,8 @@ class InviteMemberHandler extends ComplexApiHandler<{
 }, { message: string }> {
     protected inputSchema = TeamSchemas.inviteMember;
 
+    protected requiresAdmin = false;
+    protected creditCost = 1;
     protected async processRequest(data: any, context: any) {
         const { params, user } = context;
         const teamId = params?.id;
@@ -246,14 +252,14 @@ class InviteMemberHandler extends ComplexApiHandler<{
     }
 }
 
-// إنشاء المعالجات
+// إنشاء المعالجات وتصديرها
 const teamListHandler = new TeamListHandler();
 const createTeamHandler = new CreateTeamHandler();
 const updateTeamHandler = new UpdateTeamHandler();
 const deleteTeamHandler = new DeleteTeamHandler();
 const inviteMemberHandler = new InviteMemberHandler();
 
-// تصدير الـ handlers مع middleware
+// تصدير الـ handlers مع middleware للاستخدام في الطلبات
 export const GET = withApiMiddleware(
     teamListHandler.handle.bind(teamListHandler),
     { logging: true }

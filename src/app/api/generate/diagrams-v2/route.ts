@@ -72,7 +72,7 @@ async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
 class GenerateDiagramHandler extends CreditBasedApiHandler<any, any> {
     protected inputSchema = unifiedDiagramSchema;
     protected creditCost = 1;
-
+    protected requiresAdmin = false;
     protected async processRequest(data: any, context: any) {
         const { user } = context;
 

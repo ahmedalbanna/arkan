@@ -7,21 +7,21 @@ export const DELETE = withEnhancedAuth(async ({ user, params }) => {
     try {
         const conversationId = params.id;
         if (!conversationId) {
-            return handleApiErrorEnhanced({ message: 'Conversation ID is required.' }, 400);
+            return handleApiErrorEnhanced({ message: 'Conversation ID is required.' }, '400');
         }
 
         const convoRef = adminRealtimeDb.ref(`conversations/${conversationId}`);
         const convoSnapshot = await convoRef.get();
 
         if (!convoSnapshot.exists()) {
-            return handleApiErrorEnhanced({ message: 'Conversation not found.' }, 404);
+            return handleApiErrorEnhanced({ message: 'Conversation not found.' }, '404');
         }
 
         const conversation = convoSnapshot.val();
 
         // Authorization: Check if the user is a participant
         if (!conversation.participantIds.includes(user.id)) {
-            return handleApiErrorEnhanced({ message: 'Forbidden' }, 403);
+            return handleApiErrorEnhanced({ message: 'Forbidden' }, '403');
         }
 
         const updates: { [key: string]: null } = {};

@@ -7,6 +7,7 @@
 import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { ProjectSchemas } from '@/app/api/shared/validators/api-validators';
+import { handleApiErrorEnhanced } from '@/lib/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import type { SavedProject } from '@/lib/models/project';
 
@@ -14,7 +15,7 @@ import type { SavedProject } from '@/lib/models/project';
  * معالج قائمة المشاريع (GET)
  */
 class ProjectListHandler extends SimpleApiHandler<SavedProject[]> {
-    protected async processRequest(context: any) {
+    protected async processRequest(context: any): Promise<SavedProject[]> {
         const { user } = context;
 
         // جلب المشاريع الشخصية
@@ -50,7 +51,7 @@ class ProjectListHandler extends SimpleApiHandler<SavedProject[]> {
         const projects = Array.from(projectsMap.values())
             .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
-        return projects;
+        return projects as SavedProject[];
     }
 }
 
@@ -65,7 +66,8 @@ class CreateProjectHandler extends ComplexApiHandler<{
     teamId?: string;
 }, SavedProject> {
     protected inputSchema = ProjectSchemas.createProject;
-
+    protected requiresAdmin = false;
+    protected creditCost = 1;
     protected async processRequest(data: any, context: any) {
         const { user } = context;
 
@@ -81,10 +83,11 @@ class CreateProjectHandler extends ComplexApiHandler<{
 
         const docRef = await adminDb.collection('projects').add(projectData);
 
-        return {
+        const result = {
             id: docRef.id,
             ...projectData,
         } as SavedProject;
+        return result;
     }
 }
 
@@ -97,27 +100,28 @@ class UpdateProjectHandler extends ComplexApiHandler<{
     status?: 'active' | 'inactive' | 'pending';
 }, SavedProject> {
     protected inputSchema = ProjectSchemas.updateProject;
-
-    protected async processRequest(data: any, context: any) {
+    protected requiresAdmin = false;
+    protected creditCost = 1;
+    protected async processRequest(data: any, context: any): Promise<SavedProject> {
         const { params, user } = context;
         const projectId = params?.id;
 
         if (!projectId) {
-            throw new Error('Project ID is required');
+            return handleApiErrorEnhanced({ message: 'Project ID is required' }, '400');
         }
 
         // التحقق من أن المستخدم يملك المشروع أو عضو في الفريق
         const projectDoc = await adminDb.collection('projects').doc(projectId).get();
 
         if (!projectDoc.exists) {
-            throw new Error('Project not found');
+            return handleApiErrorEnhanced({ message: 'Project not found' }, '404');
         }
 
         const projectData = projectDoc.data();
 
         if (projectData?.userId !== user.id &&
             (!projectData?.teamId || !user.teams?.includes(projectData.teamId))) {
-            throw new Error('Access denied');
+            return handleApiErrorEnhanced({ message: 'Access denied' }, '403');
         }
 
         const updateData = {
@@ -139,30 +143,33 @@ class UpdateProjectHandler extends ComplexApiHandler<{
  * معالج حذف المشروع (DELETE)
  */
 class DeleteProjectHandler extends ComplexApiHandler<{}, { message: string }> {
-    protected async processRequest(data: any, context: any) {
+    protected inputSchema = ProjectSchemas.deleteProject;
+    protected requiresAdmin = false;
+    protected creditCost = 1;
+    protected async processRequest(data: any, context: any): Promise<{ message: string }> {
         const { params, user } = context;
         const projectId = params?.id;
 
         if (!projectId) {
-            throw new Error('Project ID is required');
+            return handleApiErrorEnhanced({ message: 'Project ID is required' }, '400');
         }
 
         // التحقق من أن المستخدم يملك المشروع
         const projectDoc = await adminDb.collection('projects').doc(projectId).get();
 
         if (!projectDoc.exists) {
-            throw new Error('Project not found');
+            return handleApiErrorEnhanced({ message: 'Project not found' }, '404');
         }
 
         const projectData = projectDoc.data();
 
         if (projectData?.userId !== user.id) {
-            throw new Error('Access denied');
+            return handleApiErrorEnhanced({ message: 'Access denied' }, '403');
         }
 
         await adminDb.collection('projects').doc(projectId).delete();
 
-        return { message: 'Project deleted successfully' };
+        return { message: 'Project deleted successfully' } as { message: string };
     }
 }
 
@@ -177,27 +184,28 @@ class AddContextHandler extends ComplexApiHandler<{
     fileSize?: number;
 }, { message: string }> {
     protected inputSchema = ProjectSchemas.addContext;
-
-    protected async processRequest(data: any, context: any) {
+    protected requiresAdmin = false;
+    protected creditCost = 1;
+    protected async processRequest(data: any, context: any): Promise<{ message: string }> {
         const { params, user } = context;
         const projectId = params?.id;
 
         if (!projectId) {
-            throw new Error('Project ID is required');
+            return handleApiErrorEnhanced({ message: 'Project ID is required' }, '400');
         }
 
         // التحقق من أن المستخدم يملك المشروع أو عضو في الفريق
         const projectDoc = await adminDb.collection('projects').doc(projectId).get();
 
         if (!projectDoc.exists) {
-            throw new Error('Project not found');
+            return handleApiErrorEnhanced({ message: 'Project not found' }, '404');
         }
 
         const projectData = projectDoc.data();
 
         if (projectData?.userId !== user.id &&
             (!projectData?.teamId || !user.teams?.includes(projectData.teamId))) {
-            throw new Error('Access denied');
+            return handleApiErrorEnhanced({ message: 'Access denied' }, '403');
         }
 
         const contextItem = {
@@ -215,7 +223,7 @@ class AddContextHandler extends ComplexApiHandler<{
             updatedAt: new Date().toISOString(),
         });
 
-        return { message: 'Context added successfully' };
+        return { message: 'Context added successfully' } as { message: string };
     }
 }
 

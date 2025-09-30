@@ -71,16 +71,16 @@ export const BaseSchemas = {
     phone: z.string().regex(/^\+?[\d\s-()]+$/, 'Invalid phone number'),
 
     // اللغة
-    language: z.enum(['ar', 'en'], 'Invalid language code'),
+    language: z.enum(['ar', 'en']),
 
     // الدور
-    role: z.enum(['user', 'admin'], 'Invalid role'),
+    role: z.enum(['user', 'admin']),
 
     // الحالة
-    status: z.enum(['active', 'inactive', 'pending'], 'Invalid status'),
+    status: z.enum(['active', 'inactive', 'pending']),
 
     // نوع الملف
-    fileType: z.enum(['pdf', 'docx', 'txt', 'md'], 'Invalid file type'),
+    fileType: z.enum(['pdf', 'docx', 'txt', 'md']),
 
     // حجم الملف (بالبايت)
     fileSize: z.number().max(10 * 1024 * 1024, 'File too large (max 10MB)'),
@@ -98,7 +98,7 @@ export const BaseSchemas = {
     sortBy: z.string().max(50, 'Sort field too long'),
 
     // اتجاه الفرز
-    sortOrder: z.enum(['asc', 'desc'], 'Invalid sort order').default('desc'),
+    sortOrder: z.enum(['asc', 'desc']).default('desc'),
 };
 
 /**
@@ -170,7 +170,7 @@ export const ProjectSchemas = {
     createProject: z.object({
         title: BaseSchemas.title,
         description: BaseSchemas.description.optional(),
-        type: z.enum(['proposal', 'report', 'presentation', 'academic'], 'Invalid project type'),
+        type: z.enum(['proposal', 'report', 'presentation', 'academic']),
         language: BaseSchemas.language,
         teamId: BaseSchemas.teamId.optional(),
     }),
@@ -184,7 +184,7 @@ export const ProjectSchemas = {
 
     // إضافة سياق للمشروع
     addContext: z.object({
-        type: z.enum(['file', 'text', 'url'], 'Invalid context type'),
+        type: z.enum(['file', 'text', 'url']),
         content: z.string().min(1, 'Content is required'),
         fileName: z.string().optional(),
         fileType: BaseSchemas.fileType.optional(),
@@ -211,7 +211,7 @@ export const TeamSchemas = {
     // دعوة عضو
     inviteMember: z.object({
         email: BaseSchemas.email,
-        role: z.enum(['member', 'admin'], 'Invalid team role'),
+        role: z.enum(['member', 'admin']),
     }),
 };
 
@@ -222,19 +222,19 @@ export const WritingToolSchemas = {
     // إعادة الصياغة
     paraphrase: z.object({
         text: BaseSchemas.text,
-        mode: z.enum(['formal', 'casual', 'academic'], 'Invalid paraphrase mode').default('formal'),
+        mode: z.enum(['formal', 'casual', 'academic']).default('formal'),
     }),
 
     // الملخص
     summarize: z.object({
         text: BaseSchemas.text,
-        length: z.enum(['short', 'medium', 'long'], 'Invalid summary length').default('medium'),
+        length: z.enum(['short', 'medium', 'long']).default('medium'),
     }),
 
     // تحسين النص
     improve: z.object({
         text: BaseSchemas.text,
-        style: z.enum(['professional', 'academic', 'casual'], 'Invalid style').default('professional'),
+        style: z.enum(['professional', 'academic', 'casual']).default('professional'),
     }),
 
     // فحص القواعد
@@ -266,7 +266,7 @@ export const AISchemas = {
     generatePresentation: z.object({
         projectId: BaseSchemas.projectId,
         slides: z.number().int().min(1).max(50).default(10),
-        style: z.enum(['professional', 'academic', 'creative'], 'Invalid style').default('professional'),
+        style: z.enum(['professional', 'academic', 'creative']).default('professional'),
         language: BaseSchemas.language.default('en'),
     }),
 
@@ -274,7 +274,7 @@ export const AISchemas = {
     solveAcademic: z.object({
         problem: BaseSchemas.text,
         subject: z.string().min(1, 'Subject is required'),
-        level: z.enum(['elementary', 'high-school', 'university', 'graduate'], 'Invalid level').default('university'),
+        level: z.enum(['elementary', 'high-school', 'university', 'graduate']).default('university'),
         language: BaseSchemas.language.default('en'),
     }),
 };
@@ -294,7 +294,7 @@ export const TransactionSchemas = {
     transactionHistory: z.object({
         page: BaseSchemas.page,
         limit: BaseSchemas.limit,
-        type: z.enum(['purchase', 'usage', 'refund'], 'Invalid transaction type').optional(),
+        type: z.enum(['purchase', 'usage', 'refund']).optional(),
         startDate: BaseSchemas.date.optional(),
         endDate: BaseSchemas.date.optional(),
     }),
@@ -306,7 +306,7 @@ export const TransactionSchemas = {
 export const AdminSchemas = {
     // إحصائيات لوحة التحكم
     dashboardStats: z.object({
-        period: z.enum(['day', 'week', 'month', 'year'], 'Invalid period').default('month'),
+        period: z.enum(['day', 'week', 'month', 'year']).default('month'),
         startDate: BaseSchemas.date.optional(),
         endDate: BaseSchemas.date.optional(),
     }),

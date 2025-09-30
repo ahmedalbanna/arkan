@@ -23,7 +23,7 @@ export const POST = withEnhancedAuth(async ({ request }) => {
     const userEmail = formData.get('userEmail') as string | null;
 
     if (!file || !userId || !planId || !credits || !price) {
-      return handleApiErrorEnhanced({ message: 'Missing required fields.' }, 400);
+      return handleApiErrorEnhanced({ message: 'Missing required fields.' }, '400');
     }
 
     const storage = getStorage();

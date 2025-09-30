@@ -146,10 +146,10 @@ export function useTextStylistLogic() {
 
     // النظام الجديد من src/core
     textStylistTool,
-    isProcessing: textStylistTool.isProcessing || isProcessing,
-    processedText: textStylistTool.processedText || processedText,
-    isCopied: textStylistTool.isCopied || isCopied,
-    handleCopy: textStylistTool.handleCopy || handleCopy,
+    isProcessing: textStylistTool.isProcessing,
+    processedText: textStylistTool.processedText,
+    isCopied: textStylistTool.isCopied,
+    handleCopy: textStylistTool.handleCopy,
     onSubmit: textStylistTool.onSubmit,
     reset: textStylistTool.reset,
   };

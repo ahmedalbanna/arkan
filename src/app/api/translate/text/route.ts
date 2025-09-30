@@ -5,12 +5,16 @@ import { translateText } from '@/ai/flows/translate-text';
 import { ApiTranslateTextSchema } from '@/ai/schemas';
 import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deductCredit, logGeneration } from '@/services';
+
+/**
+ * معالج ترجمة النصوص
+ */
 export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = ApiTranslateTextSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error);
+      return handleApiErrorEnhanced(validation.error, '400');
     }
 
     const agentInput = validation.data;
@@ -30,6 +34,6 @@ export const POST = withEnhancedAuth(async ({ request, user }) => {
     const cleanedTranslatedText = result.translatedText.replace(/---.*?---/g, '');
     return createApiResponseEnhanced({ translatedText: cleanedTranslatedText }, 200);
   } catch (error) {
-    return handleApiErrorEnhanced(error);
+    return handleApiErrorEnhanced(error, '500');
   }
 });

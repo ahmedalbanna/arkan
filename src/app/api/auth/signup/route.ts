@@ -119,11 +119,11 @@ export async function POST(req: Request) {
         }
     } catch (error: any) {
         if (error.code === 'auth/email-already-exists') {
-            return handleApiErrorEnhanced({ message: "Email address is already in use by another account." }, 409);
+            return handleApiErrorEnhanced({ message: "Email address is already in use by another account." }, '409');
         } else if (error.code === 'auth/invalid-email') {
-            return handleApiErrorEnhanced({ message: "The email address is not valid." }, 400);
+            return handleApiErrorEnhanced({ message: "The email address is not valid." }, '400');
         } else if (error.code === 'auth/weak-password') {
-            return handleApiErrorEnhanced({ message: "The password is too weak. It must be at least 6 characters long." }, 400);
+            return handleApiErrorEnhanced({ message: "The password is too weak. It must be at least 6 characters long." }, '400');
         }
         return handleApiErrorEnhanced(error);
     }

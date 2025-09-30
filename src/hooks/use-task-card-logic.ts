@@ -45,7 +45,6 @@ export function useTaskCardLogic({ phaseIndex, taskIndex, fieldName }: UseTaskCa
   };
 
   const uiHook = createUIHook({
-    hookName: 'task-card',
     initialState: {
       phaseIndex,
       taskIndex,
@@ -54,22 +53,22 @@ export function useTaskCardLogic({ phaseIndex, taskIndex, fieldName }: UseTaskCa
       isEditing: false,
       hasChanges: false,
     },
-    customLogic: (state, setState, toast) => {
+    customLogic: (state: any, setState: any, toast: any) => {
       const handleEdit = () => {
-        setState(prev => ({ ...prev, isEditing: true }));
+        setState((prev: any) => ({ ...prev, isEditing: true }));
       };
 
       const handleSave = () => {
-        setState(prev => ({ ...prev, isEditing: false, hasChanges: false }));
+        setState((prev: any) => ({ ...prev, isEditing: false, hasChanges: false }));
         toast({ title: 'Task updated successfully!' });
       };
 
       const handleCancel = () => {
-        setState(prev => ({ ...prev, isEditing: false, hasChanges: false }));
+        setState((prev: any) => ({ ...prev, isEditing: false, hasChanges: false }));
       };
 
       const handleContentChange = (newContent: string) => {
-        setState(prev => ({
+        setState((prev: any) => ({
           ...prev,
           content: newContent,
           hasChanges: newContent !== content

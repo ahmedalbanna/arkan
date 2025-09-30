@@ -46,7 +46,8 @@ async function verifyTeamOwner(request: Request, teamId: string) {
  */
 class InviteTeamMemberGeneralHandler extends ComplexApiHandler<z.infer<typeof inviteMemberSchema>, TeamMember> {
     protected inputSchema = inviteMemberSchema;
-
+    protected requiresAdmin = false;
+    protected creditCost = 1;
     protected async processRequest(data: z.infer<typeof inviteMemberSchema>, context: any) {
         const { request, params } = context;
         const teamId = params.id;
@@ -97,7 +98,7 @@ class InviteTeamMemberGeneralHandler extends ComplexApiHandler<z.infer<typeof in
     }
 }
 
-// إنشاء المعالج
+// إنشاء المعالج وتصديره
 const inviteTeamMemberGeneralHandler = new InviteTeamMemberGeneralHandler();
 
 // تصدير الـ handler مع middleware

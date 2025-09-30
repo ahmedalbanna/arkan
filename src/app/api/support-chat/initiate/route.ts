@@ -3,12 +3,16 @@
 
 import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
+
+/**
+ * معالج تهيئة الدردشة الدعمية
+ */
 export const POST = withEnhancedAuth(async ({ user }) => {
   try {
     // Find all admins
     const adminsSnapshot = await adminDb.collection('users').where('role', '==', 'admin').get();
     if (adminsSnapshot.empty) {
-      return handleApiErrorEnhanced({ message: 'No support admins available.' }, 503);
+      return handleApiErrorEnhanced({ message: 'No support admins available.' }, '503');
     }
 
     const adminIds = adminsSnapshot.docs.map(doc => doc.id);
@@ -49,6 +53,6 @@ export const POST = withEnhancedAuth(async ({ user }) => {
 
     return createApiResponseEnhanced(newConversation, 201);
   } catch (error) {
-    return handleApiErrorEnhanced(error);
+    return handleApiErrorEnhanced(error, '500');
   }
 });

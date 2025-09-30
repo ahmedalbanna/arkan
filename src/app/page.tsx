@@ -1,7 +1,6 @@
 'use client';
 
 import HomePageContent from '@/components/HomePageContent';
-import { adminDb } from '@/lib/firebase/server-init';
 
 // This is a server-side function that could be used to fetch data
 // In this case, we're not fetching any projects, so we pass an empty array.

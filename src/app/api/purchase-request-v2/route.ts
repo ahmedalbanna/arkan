@@ -6,6 +6,7 @@
 
 import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { handleApiErrorEnhanced } from '@/lib/core/api';
 import { createTransaction } from '@/lib/db/queries';
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import { getStorage } from 'firebase-admin/storage';
@@ -23,7 +24,10 @@ class PurchaseRequestHandler extends ComplexApiHandler<FormData, {
     message: string;
     transactionId: string;
 }> {
-    protected async processRequest(data: FormData, context: any) {
+    protected inputSchema = purchaseRequestSchema;
+    protected creditCost = 1;
+    protected requiresAdmin = false;
+    protected async processRequest(data: FormData, context: any): Promise<{ message: string; transactionId: string }> {
         const file = data.get('file') as File | null;
         const userId = data.get('userId') as string | null;
         const planId = data.get('planId') as string | null;
@@ -34,7 +38,7 @@ class PurchaseRequestHandler extends ComplexApiHandler<FormData, {
         const userEmail = data.get('userEmail') as string | null;
 
         if (!file || !userId || !planId || !credits || !price) {
-            throw new Error('Missing required fields.');
+            return handleApiErrorEnhanced({ message: 'Missing required fields.' }, '400');
         }
 
         // رفع الملف إلى Firebase Storage
@@ -73,7 +77,7 @@ class PurchaseRequestHandler extends ComplexApiHandler<FormData, {
         return {
             message: 'Request submitted successfully for review.',
             transactionId
-        };
+        } as { message: string; transactionId: string };
     }
 
     private async notifyAdmins(userName: string | null, userEmail: string | null, price: string | null) {

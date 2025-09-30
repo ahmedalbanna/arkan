@@ -16,7 +16,7 @@ import { logGeneration } from '@/services';
 class LectureGeneratorHandler extends CreditBasedApiHandler<any, any> {
     protected inputSchema = CreateLectureUnitInputSchema;
     protected creditCost = 5; // مهمة معقدة ومكلفة
-
+    protected requiresAdmin = false;
     protected async processRequest(data: any, context: any) {
         const { user } = context;
 

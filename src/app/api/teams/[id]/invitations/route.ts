@@ -9,6 +9,7 @@ import { TeamMember } from '@/lib/models/user';
 import { FieldValue } from 'firebase-admin/firestore';
 import { z } from 'zod';
 
+// Schema لدعوة عضو للفريق
 const inviteMemberSchema = z.object({
     email: z.string().email("Invalid email address"),
 });
@@ -27,6 +28,9 @@ async function verifyTeamOwner(requesterId: string, teamId: string) {
     return team;
 }
 
+/**
+ * معالج دعوة عضو للفريق
+ */
 export const POST = withEnhancedAuth(async ({ request, params, user }) => {
     const teamId = params.id;
     try {
@@ -35,7 +39,7 @@ export const POST = withEnhancedAuth(async ({ request, params, user }) => {
         const body = await request.json();
         const validation = inviteMemberSchema.safeParse(body);
         if (!validation.success) {
-            return handleApiErrorEnhanced(validation.error);
+            return handleApiErrorEnhanced(validation.error, '400');
         }
 
         const { email } = validation.data;
@@ -43,20 +47,20 @@ export const POST = withEnhancedAuth(async ({ request, params, user }) => {
         // Find user by email
         const userQuery = await adminDb.collection('users').where('email', '==', email).limit(1).get();
         if (userQuery.empty) {
-            return handleApiErrorEnhanced({ message: 'User with this email not found.' }, 404);
+            return handleApiErrorEnhanced({ message: 'User with this email not found.' }, '404');
         }
         const userDoc = userQuery.docs[0];
         const userId = userDoc.id;
         const userProfile = await getUserProfile(userId);
 
         if (!userProfile) {
-            return handleApiErrorEnhanced({ message: 'User profile not found.' }, 404);
+            return handleApiErrorEnhanced({ message: 'User profile not found.' }, '404');
         }
 
         // Check if user is already a member
         const memberDoc = await adminDb.collection('teams').doc(teamId).collection('members').doc(userId).get();
         if (memberDoc.exists) {
-            return handleApiErrorEnhanced({ message: 'User is already a member of this team.' }, 409);
+            return handleApiErrorEnhanced({ message: 'User is already a member of this team.' }, '409');
         }
 
         // Add user to the team with denormalized data
@@ -79,6 +83,6 @@ export const POST = withEnhancedAuth(async ({ request, params, user }) => {
         return createApiResponseEnhanced(newMember, 201);
 
     } catch (error) {
-        return handleApiErrorEnhanced(error);
+        return handleApiErrorEnhanced(error, '500');
     }
 });

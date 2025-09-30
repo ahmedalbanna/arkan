@@ -9,6 +9,7 @@ import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { UserSchemas } from '@/app/api/shared/validators/api-validators';
 import { createUser, getPaginatedUsers } from '@/lib/db/queries';
 import type { UserProfile } from '@/lib/types';
+import { z } from 'zod';
 
 /**
  * معالج قائمة المستخدمين (GET)
@@ -18,7 +19,11 @@ class UserListHandler extends SimpleApiHandler<{
     hasNextPage: boolean;
     lastVisibleId: string | null;
 }> {
-    protected async processRequest(context: any) {
+    protected async processRequest(context: any): Promise<{
+        users: UserProfile[];
+        hasNextPage: boolean;
+        lastVisibleId: string | null;
+    }> {
         const { searchParams } = new URL(context.request.url);
         const queryValidation = UserSchemas.userList.safeParse(Object.fromEntries(searchParams));
 
@@ -51,10 +56,11 @@ class CreateUserHandler extends ComplexApiHandler<{
 }, UserProfile> {
     protected inputSchema = UserSchemas.createUser;
     protected requiresAdmin = true;
+    protected creditCost = 1;
 
-    protected async processRequest(data: any, context: any) {
+    protected async processRequest(data: any, context: any): Promise<UserProfile> {
         const newUser = await createUser(data);
-        return newUser;
+        return newUser as unknown as UserProfile;
     }
 }
 
@@ -69,8 +75,8 @@ class UpdateUserHandler extends ComplexApiHandler<{
 }, UserProfile> {
     protected inputSchema = UserSchemas.updateUser;
     protected requiresAdmin = true;
-
-    protected async processRequest(data: any, context: any) {
+    protected creditCost = 1;
+    protected async processRequest(data: any, context: any): Promise<UserProfile> {
         const { params } = context;
         const userId = params?.id;
 
@@ -83,7 +89,7 @@ class UpdateUserHandler extends ComplexApiHandler<{
         // return updatedUser;
 
         // مؤقتاً نعيد البيانات كما هي
-        return { id: userId, ...data } as UserProfile;
+        return { id: userId, ...data } as unknown as UserProfile;
     }
 }
 
@@ -92,8 +98,9 @@ class UpdateUserHandler extends ComplexApiHandler<{
  */
 class DeleteUserHandler extends ComplexApiHandler<{}, { message: string }> {
     protected requiresAdmin = true;
-
-    protected async processRequest(data: any, context: any) {
+    protected creditCost = 1;
+    protected inputSchema = z.object({});
+    protected async processRequest(data: any, context: any): Promise<{ message: string }> {
         const { params } = context;
         const userId = params?.id;
 

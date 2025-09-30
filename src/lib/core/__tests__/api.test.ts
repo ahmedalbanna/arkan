@@ -4,7 +4,7 @@
  * هذا الملف يحتوي على اختبارات شاملة لجميع مكونات API
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { describe, expect, it, vi } from 'vitest';
 import {
     loginHandler,
@@ -49,7 +49,7 @@ describe('API Handlers Tests', () => {
     describe('Base Handler', () => {
         it('should create simple API handler', () => {
             const handler = createApiHandler(async (request, context) => {
-                return { success: true, message: 'Test' };
+                return NextResponse.json({ success: true, message: 'Test' });
             });
 
             expect(handler).toBeDefined();
@@ -58,7 +58,7 @@ describe('API Handlers Tests', () => {
 
         it('should create auth API handler', () => {
             const handler = createAuthApiHandler(async (request, context) => {
-                return { success: true, message: 'Test' };
+                return NextResponse.json({ success: true, message: 'Test' });
             });
 
             expect(handler).toBeDefined();
@@ -72,7 +72,7 @@ describe('API Handlers Tests', () => {
 
             const handler = createValidatedApiHandler(
                 async (request, context, validatedData) => {
-                    return { success: true, data: validatedData };
+                    return NextResponse.json({ success: true, data: validatedData });
                 },
                 schema as any,
                 'body'

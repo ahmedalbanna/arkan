@@ -2,6 +2,7 @@
 'use server';
 
 import { analyzeContext } from '@/ai/flows/analyze-context';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 

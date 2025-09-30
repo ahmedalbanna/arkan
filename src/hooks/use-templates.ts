@@ -26,7 +26,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export function useProposalTemplates() {
     return useQuery<ProposalTemplate[]>({
-        queryKey: templateKeys.proposals(),
+        queryKey: templateKeys.proposal(),
         queryFn: fetchProposalTemplatesApi,
         staleTime: 1000 * 60 * 5,
         select: (data) => data.map(t => new ProposalTemplate(t as ProposalTemplateProperties)),
@@ -36,7 +36,7 @@ export function useProposalTemplates() {
 
 export function useReportTemplates() {
     return useQuery<ReportTemplate[]>({
-        queryKey: templateKeys.reports(),
+        queryKey: templateKeys.report(),
         queryFn: fetchReportTemplatesApi,
         staleTime: 1000 * 60 * 5,
         select: (data) => data.map(t => new ReportTemplate(t as ReportTemplateProperties)),
@@ -46,7 +46,7 @@ export function useReportTemplates() {
 
 export function usePresentationTemplates() {
     return useQuery<PresentationTemplate[]>({
-        queryKey: templateKeys.presentations(),
+        queryKey: templateKeys.presentation(),
         queryFn: fetchPresentationTemplatesApi,
         staleTime: 1000 * 60 * 5,
         select: (data) => data.map(t => new PresentationTemplate(t as PresentationTemplateProperties)),
@@ -63,7 +63,7 @@ export function useUpdateProposalTemplate() {
             return updateProposalTemplateApi(templateId, data, token);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: templateKeys.proposals() });
+            queryClient.invalidateQueries({ queryKey: templateKeys.proposal() });
             toast({ title: 'Template Saved' });
         },
         onError: (error) => handleErrorUtility(error, "Failed to save template"),
@@ -79,7 +79,7 @@ export function useUpdateReportTemplate() {
             return updateReportTemplateApi(templateId, data, token);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: templateKeys.reports() });
+            queryClient.invalidateQueries({ queryKey: templateKeys.report() });
             toast({ title: 'Template Saved' });
         },
         onError: (error) => handleErrorUtility(error, 'Failed to save template'),
@@ -95,7 +95,7 @@ export function useUpdatePresentationTemplate() {
             return updatePresentationTemplateApi(templateId, data, token);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: templateKeys.presentations() });
+            queryClient.invalidateQueries({ queryKey: templateKeys.presentation() });
             toast({ title: 'Template Saved' });
         },
         onError: (error) => handleErrorUtility(error, 'Failed to save template'),
@@ -116,9 +116,9 @@ export function useRefreshTemplateImage(templateType: 'docx' | 'pptx' | 'proposa
             switch (templateType) {
                 case 'docx': keyToInvalidate = templateKeys.docx(); break;
                 case 'pptx': keyToInvalidate = templateKeys.pptx(); break;
-                case 'proposal': keyToInvalidate = templateKeys.proposals(); break;
-                case 'report': keyToInvalidate = templateKeys.reports(); break;
-                case 'presentation': keyToInvalidate = templateKeys.presentations(); break;
+                case 'proposal': keyToInvalidate = templateKeys.proposal(); break;
+                case 'report': keyToInvalidate = templateKeys.report(); break;
+                case 'presentation': keyToInvalidate = templateKeys.presentation(); break;
             }
             if (keyToInvalidate) {
                 queryClient.invalidateQueries({ queryKey: keyToInvalidate });
@@ -141,7 +141,7 @@ export function useCreatePresentationTemplate() {
             return createGenerativeTemplate('presentation', data.id, data, token);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: templateKeys.presentations() });
+            queryClient.invalidateQueries({ queryKey: templateKeys.presentation() });
         },
         onError: (error) => {
             handleErrorUtility(error, "Failed to create presentation template");

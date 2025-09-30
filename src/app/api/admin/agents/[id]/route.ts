@@ -11,7 +11,7 @@ export const GET = withEnhancedAuth(async ({ params }) => {
         const { id: agentId } = params;
         const agentDoc = await adminDb.collection("agents").doc(agentId).get();
         if (!agentDoc.exists) {
-            return handleApiErrorEnhanced({ message: 'Agent not found.' }, 404);
+            return handleApiErrorEnhanced({ message: 'Agent not found.' }, '404');
         }
 
         const data = agentDoc.data();
@@ -30,7 +30,7 @@ export const PUT = withEnhancedAuth(async ({ request, params }) => {
         const agentRef = adminDb.collection('agents').doc(agentId);
         const agentDoc = await agentRef.get();
         if (!agentDoc.exists) {
-            return handleApiErrorEnhanced({ message: 'Agent not found.' }, 404);
+            return handleApiErrorEnhanced({ message: 'Agent not found.' }, '404');
         }
 
         const body = await request.json();
@@ -57,12 +57,12 @@ export const DELETE = withEnhancedAuth(async ({ params }) => {
         const agentRef = adminDb.collection('agents').doc(agentId);
         const doc = await agentRef.get();
         if (!doc.exists) {
-            return handleApiErrorEnhanced({ message: 'Agent not found.' }, 404);
+            return handleApiErrorEnhanced({ message: 'Agent not found.' }, '404');
         }
 
         // Prevent deletion of default agents
         if (doc.data()?.isDefault) {
-            return handleApiErrorEnhanced({ message: 'Default agents cannot be deleted.' }, 403);
+            return handleApiErrorEnhanced({ message: 'Default agents cannot be deleted.' }, '403');
         }
 
         await agentRef.delete();

@@ -6,6 +6,7 @@
 
 import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { handleApiErrorEnhanced } from '@/lib/core/api';
 import { getJob } from '@/lib/job-store';
 
 interface RouteContext {
@@ -22,13 +23,15 @@ class JobStatusHandler extends SimpleApiHandler<{
     result?: any;
     error?: string;
 }> {
-    protected async processRequest(context: any, routeContext: RouteContext) {
-        const { jobId } = routeContext.params;
+    protected creditCost = 1;
+    protected requiresAdmin = false;
+    protected async processRequest(data: any, context: any) {
+        const { jobId } = context.params;
 
         const job = await getJob(jobId);
 
         if (!job) {
-            throw new Error('Job not found');
+            return handleApiErrorEnhanced({ message: 'Job not found' }, '404');
         }
 
         // إرجاع الحالة الحالية والنتيجة إذا تم الانتهاء

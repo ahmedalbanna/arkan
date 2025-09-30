@@ -9,14 +9,14 @@ import { ApiTranslateProposalSchema } from '@/ai/schemas';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { logGeneration } from '@/services';
-
+import { z } from 'zod';
 /**
  * معالج ترجمة المقترحات
  */
 class TranslateProposalHandler extends CreditBasedApiHandler<z.infer<typeof ApiTranslateProposalSchema>, any> {
     protected inputSchema = ApiTranslateProposalSchema;
     protected creditCost = 2;
-
+    protected requiresAdmin = false;
     protected async processRequest(data: z.infer<typeof ApiTranslateProposalSchema>, context: any) {
         const { user } = context;
 

@@ -8,12 +8,18 @@ import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
 import { getStorage } from 'firebase-admin/storage';
+import { z } from 'zod';
 
 /**
  * معالج رفع صورة الملف الشخصي للمستخدم
  */
 class UploadUserProfilePictureHandler extends ComplexApiHandler<any, { profilePictureUrl: string }> {
-    protected async processRequest(data: any, context: any) {
+    protected creditCost = 1;
+    protected requiresAdmin = true;
+    protected inputSchema = z.object({
+        file: z.any(),
+    });
+    protected async processRequest(data: any, context: any): Promise<{ profilePictureUrl: string }> {
         const { request, params, user } = context;
         const { id: targetUserId } = params;
 

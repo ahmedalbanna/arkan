@@ -15,12 +15,12 @@ export const GET = withEnhancedAuth(async ({ params, user: requester, token }) =
 
         // Authorization check: either admin or self
         if (requester.role !== 'admin' && requester.id !== targetUserId) {
-            return handleApiErrorEnhanced({ message: "Forbidden" }, 403);
+            return handleApiErrorEnhanced({ message: "Forbidden" }, '403');
         }
 
         const user = await getUserProfile(targetUserId);
         if (!user) {
-            return handleApiErrorEnhanced({ message: "User not found." }, 404);
+            return handleApiErrorEnhanced({ message: "User not found." }, '404');
         }
         return createApiResponseEnhanced(user, 200);
     } catch (error) {
@@ -47,7 +47,7 @@ export const PUT = withEnhancedAuth(async ({ request, params, user: requester })
         // An admin can update any field. A regular user can only update their own name/bio.
         if (requester.role !== 'admin') {
             if (userId !== requester.id) {
-                return handleApiErrorEnhanced({ message: "Forbidden" }, 403);
+                return handleApiErrorEnhanced({ message: "Forbidden" }, '403');
             }
             // If not admin, only allow name and bio updates
             const { name, bio, hasCompletedOnboarding } = body;
@@ -82,7 +82,7 @@ export const DELETE = withEnhancedAuth(async ({ params }) => {
     try {
         const targetUserId = params.id;
         if (!targetUserId) {
-            return handleApiErrorEnhanced({ message: "User ID is required" }, 400);
+            return handleApiErrorEnhanced({ message: "User ID is required" }, '400');
         }
         await deleteUser(targetUserId);
         revalidatePath("/admin/manage-users");

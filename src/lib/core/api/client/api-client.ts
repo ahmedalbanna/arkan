@@ -530,7 +530,7 @@ export class ApiClient extends BaseApiClient {
      * رفع ملف
      */
     async uploadFile(file: File, folder?: string, onProgress?: (progress: number) => void): Promise<FileUploadResponse> {
-        const response = await this.uploadFile<FileUploadResponse>(
+        const response = await super.uploadFile<FileUploadResponse>(
             API_ENDPOINTS.FILES.UPLOAD,
             file,
             onProgress

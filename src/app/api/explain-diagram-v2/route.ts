@@ -48,7 +48,7 @@ class ExplainDiagramHandler extends CreditBasedApiHandler<{
 }> {
     protected inputSchema = explainDiagramSchema;
     protected creditCost = 1;
-
+    protected requiresAdmin = false;
     protected async processRequest(data: any, context: any) {
         const { user } = context;
 
@@ -65,7 +65,7 @@ class ExplainDiagramHandler extends CreditBasedApiHandler<{
         });
 
         // النتيجة من definePrompt لها شكل مختلف
-        return { explanation: result?.output?.text };
+        return { explanation: result?.output?.text || '' };
     }
 }
 

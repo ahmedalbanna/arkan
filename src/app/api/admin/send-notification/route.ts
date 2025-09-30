@@ -24,7 +24,7 @@ export const POST = withEnhancedAuth(async ({ request }) => {
     // Get the user's device token from Firestore
     const tokenDoc = await adminDb.collection('deviceTokens').doc(userId).get();
     if (!tokenDoc.exists) {
-      return handleApiErrorEnhanced({ message: 'User device token not found. They may not have granted notification permissions.' }, 404);
+      return handleApiErrorEnhanced({ message: 'User device token not found. They may not have granted notification permissions.' }, '404');
     }
 
     const { token } = tokenDoc.data() as { token: string };
@@ -50,7 +50,7 @@ export const POST = withEnhancedAuth(async ({ request }) => {
     console.error('Error sending push notification:', error);
     if (error instanceof CustomFirebaseError) { // Type assertion can be done here
       if (error.code === 'messaging/registration-token-not-registered') {
-        return handleApiErrorEnhanced({ message: 'Device token is no longer valid. The user may have uninstalled the app or revoked permissions.' }, 410);
+        return handleApiErrorEnhanced({ message: 'Device token is no longer valid. The user may have uninstalled the app or revoked permissions.' }, '410');
       }
     }
     return handleApiErrorEnhanced(error);

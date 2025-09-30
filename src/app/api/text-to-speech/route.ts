@@ -2,19 +2,24 @@
 'use server';
 
 import { textToSpeech } from '@/ai/flows/text-to-speech';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 
+// Schema للتحويل إلى كلام
 const ttsSchema = z.object({
   text: z.string().min(1, 'Text content is required.'),
 });
 
+/**
+ * معالج التحويل إلى كلام
+ */
 export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = ttsSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error);
+      return handleApiErrorEnhanced(validation.error, '400');
     }
 
     const result = await textToSpeech({ text: validation.data.text });
@@ -32,6 +37,6 @@ export const POST = withEnhancedAuth(async ({ request, user }) => {
 
     return createApiResponseEnhanced(result, 200);
   } catch (error) {
-    return handleApiErrorEnhanced(error);
+    return handleApiErrorEnhanced(error, '500');
   }
 });

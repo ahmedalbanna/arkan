@@ -37,7 +37,7 @@ export const POST = withEnhancedAuth(async ({ request }) => {
         const doc = await categoryRef.get();
 
         if (doc.exists) {
-            return handleApiErrorEnhanced({ message: 'A category with this ID already exists.' }, 409);
+            return handleApiErrorEnhanced({ message: 'A category with this ID already exists.' }, '409');
         }
 
         const newCategory = { name };

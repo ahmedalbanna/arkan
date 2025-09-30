@@ -214,7 +214,7 @@ export const POST = withEnhancedAuth(async ({ request, user, params, startTime }
                 toolName,
                 availableTools: Object.keys(toolConfig)
             },
-            { status: 400 }
+
         );
     }
 
@@ -246,7 +246,7 @@ export const POST = withEnhancedAuth(async ({ request, user, params, startTime }
                     requiredCredits: creditCost,
                     availableCredits: user.credits
                 },
-                { status: 402 } // Payment Required
+                // Payment Required
             );
         }
 
@@ -376,7 +376,7 @@ export const GET = withEnhancedAuth(async ({ params, startTime }) => {
                     toolName,
                     availableTools: Object.keys(toolConfig)
                 },
-                { status: 404 }
+
             );
         }
 

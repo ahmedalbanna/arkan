@@ -19,7 +19,8 @@ const clearSchema = z.object({
  */
 class ClearNotificationsHandler extends ComplexApiHandler<z.infer<typeof clearSchema>, { message: string }> {
     protected inputSchema = clearSchema;
-
+    protected requiresAdmin = false;
+    protected creditCost = 1;
     protected async processRequest(data: z.infer<typeof clearSchema>, context: any) {
         const { user } = context;
         const { notificationIds } = data;

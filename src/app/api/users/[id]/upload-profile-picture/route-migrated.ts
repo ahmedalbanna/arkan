@@ -238,7 +238,7 @@ export const DELETE = withEnhancedAuth(async ({ params, user: requester, startTi
                 new Error('User not found'),
                 'profile_picture_delete_user_not_found',
                 { targetUserId },
-                { status: 404 }
+
             );
         }
 

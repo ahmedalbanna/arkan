@@ -27,7 +27,7 @@ class TranslateHandler extends CreditBasedApiHandler<{
 }> {
     protected inputSchema = translateSchema;
     protected creditCost = 1;
-
+    protected requiresAdmin = false;
     protected async processRequest(data: any, context: any) {
         const { text, targetLang } = data;
         const { user } = context;

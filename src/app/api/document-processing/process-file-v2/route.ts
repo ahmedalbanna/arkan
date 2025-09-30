@@ -9,6 +9,12 @@ import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdo
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { logGeneration } from '@/services';
+import { z } from 'zod';
+
+// Schema لمعالجة الملفات
+const processFileSchema = z.object({
+    file: z.any(),
+});
 
 const SUPPORTED_MIME_TYPES = [
     'application/pdf',
@@ -26,9 +32,11 @@ class ProcessFileHandler extends CreditBasedApiHandler<FormData, {
     markdown: string;
 }> {
     protected creditCost = 1;
-
+    protected requiresAdmin = false;
+    protected inputSchema = processFileSchema;
     protected async processRequest(data: FormData, context: any) {
         const { user } = context;
+        const file = data.get('file') as File;
         const file = data.get('file') as File;
 
         if (!file) {

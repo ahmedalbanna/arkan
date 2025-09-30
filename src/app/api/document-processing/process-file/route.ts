@@ -3,6 +3,7 @@
 
 import { imageToText } from '@/ai/flows/image-to-text';
 import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deductCredit, logGeneration } from '@/services';
 
 const SUPPORTED_MIME_TYPES = [
@@ -20,11 +21,11 @@ export const POST = withEnhancedAuth(async ({ request, user }) => {
         const file = formData.get('file') as File;
 
         if (!file) {
-            return handleApiErrorEnhanced({ message: 'No file uploaded.' }, 400);
+            return handleApiErrorEnhanced({ message: 'No file uploaded.' }, '400');
         }
 
         if (!SUPPORTED_MIME_TYPES.includes(file.type)) {
-            return handleApiErrorEnhanced({ message: `Invalid file type. Supported types are: ${SUPPORTED_MIME_TYPES.join(', ')}` }, 400);
+            return handleApiErrorEnhanced({ message: `Invalid file type. Supported types are: ${SUPPORTED_MIME_TYPES.join(', ')}` }, '400');
         }
 
         // Standard credit deduction for processing

@@ -42,14 +42,14 @@ vi.mock('../firebase/client-init', () => ({
 
 // Mock React hooks
 vi.mock('react', () => ({
-    useState: vi.fn((initial) => [initial, vi.fn()]),
-    useEffect: vi.fn((fn) => fn()),
-    useCallback: vi.fn((fn) => fn),
+    useState: vi.fn((initial: any) => [initial, vi.fn()]),
+    useEffect: vi.fn((fn: any) => fn()),
+    useCallback: vi.fn((fn: any) => fn),
 }));
 
 // Mock Firebase auth
 vi.mock('firebase/auth', () => ({
-    onAuthStateChanged: vi.fn((auth, callback) => {
+    onAuthStateChanged: vi.fn((auth: any, callback: any) => {
         callback(null); // Simulate no user
         return vi.fn(); // Return unsubscribe function
     }),

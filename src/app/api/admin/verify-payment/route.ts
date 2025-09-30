@@ -17,7 +17,7 @@ export const POST = withEnhancedAuth(async ({ request, user }) => {
     const validation = verifyPaymentSchema.safeParse(body);
 
     if (!validation.success) {
-      return handleApiErrorEnhanced({ errors: validation.error.flatten().fieldErrors }, 400);
+      return handleApiErrorEnhanced({ errors: validation.error.flatten().fieldErrors }, '400');
     }
 
     const { transactionId, userId, creditsToGrant, status, adminNotes } = validation.data;

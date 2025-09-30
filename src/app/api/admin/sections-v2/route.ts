@@ -35,6 +35,7 @@ class GetSectionsHandler extends SimpleApiHandler<any[]> {
 class CreateSectionHandler extends ComplexApiHandler<z.infer<typeof SectionSchema>, any> {
     protected inputSchema = SectionSchema;
     protected requiresAdmin = true;
+    protected creditCost = 1;
 
     protected async processRequest(data: z.infer<typeof SectionSchema>) {
         const { id, ...sectionData } = data;

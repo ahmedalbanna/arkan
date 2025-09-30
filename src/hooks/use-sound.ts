@@ -49,7 +49,6 @@ export function useSound() {
  */
 export function useAdvancedSound() {
   const uiHook = createUIHook({
-    hookName: 'advanced-sound',
     initialState: {
       isEnabled: true,
       volume: 0.5,
@@ -57,11 +56,11 @@ export function useAdvancedSound() {
       soundHistory: [],
       isPlaying: false,
     },
-    customLogic: (state, setState, toast) => {
+    customLogic: (state: any, setState: any, toast: any) => {
       const handlePlaySound = (sound: "success" | "error" | "notification" | "click") => {
         if (!state.isEnabled) return;
 
-        setState(prev => ({
+        setState((prev: any) => ({
           ...prev,
           currentSound: sound,
           isPlaying: true,
@@ -81,12 +80,12 @@ export function useAdvancedSound() {
 
         // Reset playing state after a short delay
         setTimeout(() => {
-          setState(prev => ({ ...prev, isPlaying: false }));
+          setState((prev: any) => ({ ...prev, isPlaying: false }));
         }, 100);
       };
 
       const handleToggleSound = () => {
-        setState(prev => ({ ...prev, isEnabled: !prev.isEnabled }));
+        setState((prev: any) => ({ ...prev, isEnabled: !prev.isEnabled }));
         toast({
           title: state.isEnabled ? 'Sound disabled' : 'Sound enabled',
           description: state.isEnabled ? 'UI sounds are now disabled' : 'UI sounds are now enabled'
@@ -94,14 +93,14 @@ export function useAdvancedSound() {
       };
 
       const handleSetVolume = (volume: number) => {
-        setState(prev => ({ ...prev, volume: Math.max(0, Math.min(1, volume)) }));
+        setState((prev: any) => ({ ...prev, volume: Math.max(0, Math.min(1, volume)) }));
         if (ion && typeof ion.volume === "function") {
           ion.volume(volume);
         }
       };
 
       const handleClearHistory = () => {
-        setState(prev => ({ ...prev, soundHistory: [] }));
+        setState((prev: any) => ({ ...prev, soundHistory: [] }));
       };
 
       const handlePlayHistory = (index: number) => {
@@ -128,7 +127,7 @@ export function useAdvancedSound() {
 
   return {
     // الوظائف الأساسية
-    playSound: uiHook.handlePlaySound,
+    playSound: uiHook.handlePlaySound || (() => { }),
 
     // الوظائف الجديدة من UI Hook
     ...uiHook,

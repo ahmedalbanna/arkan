@@ -63,6 +63,7 @@ class CreatePptxTemplateHandler extends ComplexApiHandler<{
 }, any> {
     protected inputSchema = createPptxTemplateSchema;
     protected requiresAdmin = true;
+    protected creditCost = 1;
 
     protected async processRequest(data: any, context: any) {
         const { id, name, description } = data;

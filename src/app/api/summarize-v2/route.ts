@@ -29,7 +29,7 @@ class SummarizeHandler extends CreditBasedApiHandler<{
 }> {
     protected inputSchema = summarizeSchema;
     protected creditCost = 1;
-
+    protected requiresAdmin = false;
     protected async processRequest(data: any, context: any) {
         const { user } = context;
 
@@ -37,14 +37,16 @@ class SummarizeHandler extends CreditBasedApiHandler<{
             text: data.text,
             maxLength: data.maxLength || 200,
             style: data.style || 'concise',
+            length: data.length || 'medium',
         };
+        const result = await summarizeText(agentInput as SummarizeInput);
         const result = await summarizeText(agentInput);
 
         // تسجيل العملية
         await logGeneration({
             agentId: 'summarize-text',
             userId: user.id,
-            input: { textLength: data.text.length, style: agentInput.style },
+            input: { textLength: data.text.length, style: agentInput.style, length: agentInput.length },
             output: { summaryLength: result.summary.length },
             creditCost: this.creditCost,
         });

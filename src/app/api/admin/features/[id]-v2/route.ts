@@ -20,6 +20,7 @@ const updateFeatureSchema = z.object({
 class UpdateFeatureHandler extends ComplexApiHandler<z.infer<typeof updateFeatureSchema>, any> {
     protected inputSchema = updateFeatureSchema;
     protected requiresAdmin = true;
+    protected creditCost = 1;
 
     protected async processRequest(data: z.infer<typeof updateFeatureSchema>, context: any) {
         const { params } = context;

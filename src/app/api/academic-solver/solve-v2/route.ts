@@ -19,6 +19,7 @@ class SolveAcademicHandler extends CreditBasedApiHandler<{
 }, any> {
     protected inputSchema = ApiSolveSchema;
     protected creditCost = 2; // التكلفة الافتراضية
+    protected requiresAdmin = false;
 
     protected async processRequest(data: any, context: any) {
         const { analyzedDocument, contextMarkdown } = data;

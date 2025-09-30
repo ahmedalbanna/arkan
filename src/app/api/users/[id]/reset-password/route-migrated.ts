@@ -52,7 +52,7 @@ export const POST = withEnhancedAuth(async ({ params, request, user: requester, 
                 new Error('User not found or has no email address'),
                 'reset_password_user_not_found',
                 { userId, hasEmail: !!user?.email },
-                { status: 404 }
+
             );
         }
 
@@ -161,7 +161,7 @@ export const GET = withEnhancedAuth(async ({ params, user: requester, startTime 
                 new Error('User not found'),
                 'reset_password_status_user_not_found',
                 { userId },
-                { status: 404 }
+
             );
         }
 

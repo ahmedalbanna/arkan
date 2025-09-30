@@ -52,10 +52,11 @@ class AdminCreateUserHandler extends ComplexApiHandler<{
 }, UserProfile> {
     protected inputSchema = UserSchemas.createUser;
     protected requiresAdmin = true;
+    protected creditCost = 1;
 
     protected async processRequest(data: any, context: any) {
         const newUser = await createUser(data);
-        return newUser;
+        return newUser as unknown as UserProfile;
     }
 }
 

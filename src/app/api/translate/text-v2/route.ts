@@ -9,14 +9,14 @@ import { ApiTranslateTextSchema } from '@/ai/schemas';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { logGeneration } from '@/services';
-
+import { z } from 'zod';
 /**
  * معالج ترجمة النصوص
  */
 class TranslateTextHandler extends CreditBasedApiHandler<z.infer<typeof ApiTranslateTextSchema>, { translatedText: string }> {
     protected inputSchema = ApiTranslateTextSchema;
     protected creditCost = 1;
-
+    protected requiresAdmin = false;
     protected async processRequest(data: z.infer<typeof ApiTranslateTextSchema>, context: any) {
         const { user } = context;
 

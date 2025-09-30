@@ -34,6 +34,7 @@ class GetAgentCategoriesHandler extends SimpleApiHandler<any[]> {
 class CreateAgentCategoryHandler extends ComplexApiHandler<z.infer<typeof createCategorySchema>, any> {
     protected inputSchema = createCategorySchema;
     protected requiresAdmin = true;
+    protected creditCost = 1;
 
     protected async processRequest(data: z.infer<typeof createCategorySchema>) {
         const { id, name } = data;

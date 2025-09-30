@@ -59,6 +59,7 @@ class GetSettingsHandler extends SimpleApiHandler<any> {
 class UpdateSettingsHandler extends ComplexApiHandler<z.infer<typeof settingsSchema>, any> {
     protected inputSchema = settingsSchema;
     protected requiresAdmin = true;
+    protected creditCost = 1;
 
     protected async processRequest(data: z.infer<typeof settingsSchema>) {
         const settingsRef = adminDb.collection('settings').doc('defaults');

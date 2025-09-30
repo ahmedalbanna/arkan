@@ -25,7 +25,7 @@ class ImproveMarkdownHandler extends CreditBasedApiHandler<{
 }, any> {
     protected inputSchema = improveMarkdownSchema;
     protected creditCost = 1;
-
+    protected requiresAdmin = false;
     protected async processRequest(data: any, context: any) {
         const { user } = context;
 

@@ -62,9 +62,9 @@ export function useAdvancedTextToSpeech() {
     successMessage: 'Speech generated successfully!',
     errorMessage: 'Failed to generate speech',
     enableFileUpload: false,
-    toolCategory: 'audio',
+    toolCategory: 'analysis',
     customFeatures: {
-      formatOutput: (data: any) => {
+      formatToolOutput: (data: any) => {
         if (data.audioUrl) {
           return {
             audioUrl: data.audioUrl,
@@ -140,16 +140,16 @@ export function useAdvancedTextToSpeech() {
 
     // النسخ
     isCopied: specializedTool.isCopied,
-    handleCopy: specializedTool.copyToClipboard,
+    handleCopy: specializedTool.handleCopy || (() => Promise.resolve()),
 
     // المعالجة
-    onSubmit: specializedTool.handleSubmit,
+    onSubmit: specializedTool.handleSubmit || (() => { }),
     reset: specializedTool.reset,
 
     // النتائج والوظائف المساعدة
-    formatOutput: specializedTool.formatOutput,
-    validateInput: specializedTool.validateInput,
-    getProgressSteps: specializedTool.getProgressSteps,
+    formatOutput: specializedTool.formatToolOutput,
+    validateInput: specializedTool.validateToolInput,
+    getProgressSteps: specializedTool.getProgressSteps || (() => []),
 
     // الطفرة (للتوافق مع الكود الموجود)
     mutation,

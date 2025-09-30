@@ -47,6 +47,8 @@ class GetUserHandler extends SimpleApiHandler<any> {
  */
 class UpdateUserHandler extends ComplexApiHandler<z.infer<typeof updateUserSchema>, any> {
     protected inputSchema = updateUserSchema;
+    protected creditCost = 1;
+    protected requiresAdmin = true;
 
     protected async processRequest(data: z.infer<typeof updateUserSchema>, context: any) {
         const { params, user: requester } = context;

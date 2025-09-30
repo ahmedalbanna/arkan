@@ -3,14 +3,18 @@
 
 import { createLectureUnit } from '@/ai/flows/create-lecture-unit';
 import { CreateLectureUnitInputSchema } from '@/ai/schemas/lecture-generator';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deductCredit, logGeneration } from '@/services';
 
+/**
+ * معالج توليد المحاضرات
+ */
 export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = CreateLectureUnitInputSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error);
+      return handleApiErrorEnhanced(validation.error, '400');
     }
 
     const agentInput = validation.data;
@@ -33,6 +37,6 @@ export const POST = withEnhancedAuth(async ({ request, user }) => {
 
     return createApiResponseEnhanced(result, 200);
   } catch (error) {
-    return handleApiErrorEnhanced(error);
+    return handleApiErrorEnhanced(error, '500');
   }
 });

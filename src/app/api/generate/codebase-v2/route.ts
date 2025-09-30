@@ -24,7 +24,7 @@ class GenerateCodebaseHandler extends CreditBasedApiHandler<{
 }, any> {
     protected inputSchema = codebaseSchema;
     protected creditCost = 5; // مهمة معقدة ومكلفة
-
+    protected requiresAdmin = false;
     protected async processRequest(data: any, context: any) {
         const { user } = context;
 

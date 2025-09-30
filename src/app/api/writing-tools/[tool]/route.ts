@@ -52,7 +52,7 @@ export const POST = withEnhancedAuth(async ({ request, user, params }) => {
 
   const config = toolConfig[toolName];
   if (!config) {
-    return handleApiErrorEnhanced({ message: `Invalid tool: ${toolName}` }, 400);
+    return handleApiErrorEnhanced({ message: `Invalid tool: ${toolName}` }, '400');
   }
 
   const { flow, schema, creditCost } = config;

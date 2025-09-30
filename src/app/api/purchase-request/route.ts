@@ -11,6 +11,9 @@ export const config = {
   },
 };
 
+/**
+ * معالج طلب الشراء
+ */
 export const POST = withEnhancedAuth(async ({ request }) => {
   try {
     const formData = await request.formData();
@@ -24,7 +27,7 @@ export const POST = withEnhancedAuth(async ({ request }) => {
     const userEmail = formData.get('userEmail') as string | null;
 
     if (!file || !userId || !planId || !credits || !price) {
-      return handleApiErrorEnhanced({ message: 'Missing required fields.' }, 400);
+      return handleApiErrorEnhanced({ message: 'Missing required fields.' }, '400');
     }
 
     const storage = getStorage();

@@ -23,6 +23,7 @@ const SectionUpdateSchema = z.object({
 class UpdateSectionHandler extends ComplexApiHandler<z.infer<typeof SectionUpdateSchema>, any> {
     protected inputSchema = SectionUpdateSchema;
     protected requiresAdmin = true;
+    protected creditCost = 1;
 
     protected async processRequest(data: z.infer<typeof SectionUpdateSchema>, context: any) {
         const { params } = context;

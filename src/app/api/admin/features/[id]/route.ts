@@ -11,14 +11,14 @@ export const PUT = withEnhancedAuth(async ({ request, params }) => {
   try {
     const id = params.id;
     if (!id) {
-      return handleApiErrorEnhanced({ message: 'Feature ID is required.' }, 400);
+      return handleApiErrorEnhanced({ message: 'Feature ID is required.' }, '400');
     }
 
     const featureRef = adminDb.collection('features').doc(id);
     const featureDoc = await featureRef.get();
 
     if (!featureDoc.exists) {
-      return handleApiErrorEnhanced({ message: 'Feature not found.' }, 404);
+      return handleApiErrorEnhanced({ message: 'Feature not found.' }, '404');
     }
 
     const body = await request.json();

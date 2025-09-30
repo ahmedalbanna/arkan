@@ -54,7 +54,7 @@ export const POST = withEnhancedAuth(async ({ request, user }) => {
         const body = await request.json();
         const validation = ProjectStateSchema.safeParse(body);
         if (!validation.success) {
-            return handleApiErrorEnhanced({ errors: validation.error.flatten().fieldErrors }, 400);
+            return handleApiErrorEnhanced({ errors: validation.error.flatten().fieldErrors }, '400');
         }
 
         const newProject = {

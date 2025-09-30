@@ -103,7 +103,11 @@ export function useUserProfile(userId: string) {
     });
 
     // Cleanup the subscription when the component unmounts
-    return unsubscribe;
+    return () => {
+      if (unsubscribe) {
+        unsubscribe.then(unsub => unsub?.());
+      }
+    };
   }, [userId, queryClient]);
 
   // The component will use the data from the cache, which is kept up-to-date
@@ -160,15 +164,15 @@ export function useGoogleSignIn() {
 
   return useMutation({
     mutationFn: loginWithGoogle,
-    onSuccess: (user) => {
-      if (user && user.user) {
+    onSuccess: (user: any) => {
+      if (user && user.displayName) {
         refetchUser();
         queryClient.invalidateQueries({ queryKey: userKeys.all });
         router.push("/generate");
         router.refresh();
         toast({
           title: "Sign-In Successful",
-          description: `Welcome, ${user.user.name || 'User'}!`,
+          description: `Welcome, ${user.displayName || user.email || 'User'}!`,
         });
       }
     },

@@ -31,7 +31,7 @@ export const POST = withEnhancedAuth(async ({ request }) => {
         const doc = await agentRef.get();
 
         if (doc.exists) {
-            return handleApiErrorEnhanced({ message: 'An agent with this ID already exists.' }, 409);
+            return handleApiErrorEnhanced({ message: 'An agent with this ID already exists.' }, '409');
         }
 
         await agentRef.set({ ...data, isEnabled: true, createdAt: new Date().toISOString() });

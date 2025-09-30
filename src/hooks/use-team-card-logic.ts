@@ -20,7 +20,6 @@ export function useTeamCardLogic(team: Team) {
   const members = useMemo(() => team.members.sort((a, b) => a.name.localeCompare(b.name)), [team.members]);
 
   const uiHook = createUIHook({
-    hookName: 'team-card',
     initialState: {
       team,
       isOwner,
@@ -29,26 +28,26 @@ export function useTeamCardLogic(team: Team) {
       isEditing: false,
       selectedMembers: [],
     },
-    customLogic: (state, setState, toast) => {
+    customLogic: (state: any, setState: any, toast: any) => {
       const handleToggleExpanded = () => {
-        setState(prev => ({ ...prev, isExpanded: !prev.isExpanded }));
+        setState((prev: any) => ({ ...prev, isExpanded: !prev.isExpanded }));
       };
 
       const handleEdit = () => {
-        setState(prev => ({ ...prev, isEditing: true }));
+        setState((prev: any) => ({ ...prev, isEditing: true }));
       };
 
       const handleSave = () => {
-        setState(prev => ({ ...prev, isEditing: false }));
+        setState((prev: any) => ({ ...prev, isEditing: false }));
         toast({ title: 'Team updated successfully!' });
       };
 
       const handleCancel = () => {
-        setState(prev => ({ ...prev, isEditing: false }));
+        setState((prev: any) => ({ ...prev, isEditing: false }));
       };
 
       const handleSelectMember = (memberId: string) => {
-        setState(prev => ({
+        setState((prev: any) => ({
           ...prev,
           selectedMembers: prev.selectedMembers.includes(memberId)
             ? prev.selectedMembers.filter(id => id !== memberId)
@@ -57,7 +56,7 @@ export function useTeamCardLogic(team: Team) {
       };
 
       const handleSelectAll = () => {
-        setState(prev => ({
+        setState((prev: any) => ({
           ...prev,
           selectedMembers: prev.selectedMembers.length === prev.members.length
             ? []
@@ -67,7 +66,7 @@ export function useTeamCardLogic(team: Team) {
 
       const handleRemoveSelected = () => {
         if (state.selectedMembers.length > 0) {
-          setState(prev => ({
+          setState((prev: any) => ({
             ...prev,
             selectedMembers: []
           }));

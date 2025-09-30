@@ -3,7 +3,9 @@ import { createApiResponseEnhanced, handleApiErrorEnhanced } from '@/lib/core/ap
 import { PROPOSAL_TEMPLATES as defaultTemplates } from '@/lib/db/seed-data/proposal-templates';
 import { adminDb } from '@/lib/firebase/server-init';
 
-// This endpoint is public for now, but could be restricted
+/**
+ * معالج جلب قوالب المقترحات
+ */
 export async function GET() {
     try {
         const collectionRef = adminDb.collection('templates').doc('proposal').collection('items');
@@ -22,6 +24,6 @@ export async function GET() {
         const templates = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         return createApiResponseEnhanced(templates, 200);
     } catch (error) {
-        return handleApiErrorEnhanced(error);
+        return handleApiErrorEnhanced(error, '500');
     }
 }

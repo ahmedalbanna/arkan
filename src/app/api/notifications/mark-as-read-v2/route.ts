@@ -19,7 +19,8 @@ const markAsReadSchema = z.object({
  */
 class MarkAsReadHandler extends ComplexApiHandler<z.infer<typeof markAsReadSchema>, { message: string }> {
     protected inputSchema = markAsReadSchema;
-
+    protected requiresAdmin = false;
+    protected creditCost = 1;
     protected async processRequest(data: z.infer<typeof markAsReadSchema>, context: any) {
         const { user } = context;
         const { notificationIds } = data;

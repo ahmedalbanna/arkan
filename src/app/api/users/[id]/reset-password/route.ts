@@ -1,18 +1,22 @@
 
 'use server';
 
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { getUserProfile } from '@/lib/db/queries';
 
+/**
+ * معالج إعادة تعيين كلمة المرور للمستخدم
+ */
 export const POST = withEnhancedAuth(async ({ params }) => {
     try {
         const { id: userId } = params;
         if (!userId) {
-            return handleApiErrorEnhanced({ message: 'User ID is required.' }, 400);
+            return handleApiErrorEnhanced({ message: 'User ID is required.' }, '400');
         }
 
         const user = await getUserProfile(userId);
         if (!user || !user.email) {
-            return handleApiErrorEnhanced({ message: 'User not found or has no email.' }, 404);
+            return handleApiErrorEnhanced({ message: 'User not found or has no email.' }, '404');
         }
 
         // This is a placeholder for sending a reset email.
@@ -25,6 +29,6 @@ export const POST = withEnhancedAuth(async ({ params }) => {
         return createApiResponseEnhanced({ message: `A password reset email has been sent to ${user.email}.` }, 200);
 
     } catch (error: any) {
-        return handleApiErrorEnhanced(error);
+        return handleApiErrorEnhanced(error, '500');
     }
 }, { requireAdmin: true });

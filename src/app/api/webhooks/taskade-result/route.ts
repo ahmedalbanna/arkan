@@ -20,19 +20,19 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validation = webhookPayloadSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiErrorEnhanced({ message: 'Invalid payload', errors: validation.error.flatten() }, 400);
+      return handleApiErrorEnhanced({ message: 'Invalid payload', errors: validation.error.flatten() }, '400');
     }
     const { jobId, status, resultText, error, apiToken } = validation.data;
 
     // 1. Retrieve the job from the store
     const job = await getJob(jobId);
     if (!job) {
-      return handleApiErrorEnhanced({ message: 'Job not found' }, 404);
+      return handleApiErrorEnhanced({ message: 'Job not found' }, '404');
     }
 
     // 2. Verify the security token
     if (!job.token || job.token !== apiToken) {
-      return handleApiErrorEnhanced({ message: 'Unauthorized: Invalid token' }, 401);
+      return handleApiErrorEnhanced({ message: 'Unauthorized: Invalid token' }, '401');
     }
 
     // 3. Update the job with the result

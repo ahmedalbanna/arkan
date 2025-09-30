@@ -2,6 +2,7 @@
 'use server';
 
 import { translateText } from '@/ai/flows/translate-text';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -10,12 +11,15 @@ const translateSchema = z.object({
   targetLang: z.string().min(2),
 });
 
+/**
+ * معالج ترجمة النصوص
+ */
 export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = translateSchema.safeParse(body);
     if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error);
+      return handleApiErrorEnhanced(validation.error, '400');
     }
 
     await deductCredit(user.id, 1);
@@ -34,6 +38,6 @@ export const POST = withEnhancedAuth(async ({ request, user }) => {
     const cleanedTranslatedText = result.translatedText.replace(/---.*?---/g, '');
     return createApiResponseEnhanced({ translatedText: cleanedTranslatedText }, 200);
   } catch (error) {
-    return handleApiErrorEnhanced(error);
+    return handleApiErrorEnhanced(error, '500');
   }
 });

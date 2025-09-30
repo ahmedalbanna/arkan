@@ -5,6 +5,7 @@
  * لجميع مكونات النظام الأساسي
  */
 
+import { NextResponse } from 'next/server';
 import { describe, expect, it, vi } from 'vitest';
 import {
     createApiHandler,
@@ -33,7 +34,7 @@ vi.mock('../firebase/client-init', () => ({
 // Mock Next.js
 vi.mock('next/server', () => ({
     NextResponse: {
-        json: vi.fn((data, options) => ({
+        json: vi.fn((data: any, options: any) => ({
             json: () => Promise.resolve(data),
             status: options?.status || 200,
             headers: new Map(),
@@ -45,7 +46,7 @@ describe('Core System Integration Tests', () => {
     describe('API Handlers', () => {
         it('should create simple API handler', () => {
             const handler = createApiHandler(async (request, context) => {
-                return { success: true, message: 'Test' };
+                return NextResponse.json({ success: true, message: 'Test' });
             });
 
             expect(handler).toBeDefined();
@@ -54,7 +55,7 @@ describe('Core System Integration Tests', () => {
 
         it('should create auth API handler', () => {
             const handler = createAuthApiHandler(async (request, context) => {
-                return { success: true, message: 'Test' };
+                return NextResponse.json({ success: true, message: 'Test' });
             });
 
             expect(handler).toBeDefined();
@@ -63,12 +64,12 @@ describe('Core System Integration Tests', () => {
 
         it('should create validated API handler', () => {
             const schema = {
-                parse: vi.fn((data) => data),
+                parse: vi.fn((data: any) => data),
             };
 
             const handler = createValidatedApiHandler(
                 async (request, context, validatedData) => {
-                    return { success: true, data: validatedData };
+                    return NextResponse.json({ success: true, data: validatedData });
                 },
                 schema as any,
                 'body'
@@ -81,8 +82,8 @@ describe('Core System Integration Tests', () => {
 
     describe('Middleware', () => {
         it('should create auth middleware', () => {
-            const handler = withAuth(async (request, context) => {
-                return { success: true };
+            const handler = withAuth(async (request: any, context: any) => {
+                return NextResponse.json({ success: true });
             });
 
             expect(handler).toBeDefined();
@@ -91,12 +92,12 @@ describe('Core System Integration Tests', () => {
 
         it('should create validation middleware', () => {
             const schema = {
-                parse: vi.fn((data) => data),
+                parse: vi.fn((data: any) => data),
             };
 
             const handler = withValidation(
                 async (request, context, validatedData) => {
-                    return { success: true, data: validatedData };
+                    return NextResponse.json({ success: true, data: validatedData });
                 },
                 { schema: schema as any }
             );
@@ -108,7 +109,7 @@ describe('Core System Integration Tests', () => {
         it('should create rate limit middleware', () => {
             const handler = withRateLimit(
                 async (request, context) => {
-                    return { success: true };
+                    return NextResponse.json({ success: true });
                 },
                 { maxRequests: 10, windowMs: 60000 }
             );
@@ -120,7 +121,7 @@ describe('Core System Integration Tests', () => {
         it('should create CORS middleware', () => {
             const handler = withCors(
                 async (request, context) => {
-                    return { success: true };
+                    return NextResponse.json({ success: true });
                 },
                 { origins: ['http://localhost:3000'] }
             );
@@ -132,7 +133,7 @@ describe('Core System Integration Tests', () => {
         it('should create logging middleware', () => {
             const handler = withLogging(
                 async (request, context) => {
-                    return { success: true };
+                    return NextResponse.json({ success: true });
                 },
                 { logRequests: true, logResponses: true }
             );
@@ -202,9 +203,24 @@ describe('Core System Integration Tests', () => {
             const user = {
                 uid: '123',
                 email: 'test@example.com',
+                emailVerified: true,
+                isAnonymous: false,
+                metadata: {},
+                providerData: [],
+                refreshToken: '',
+                tenantId: null,
+                delete: vi.fn(),
+                getIdToken: vi.fn(),
+                getIdTokenResult: vi.fn(),
+                reload: vi.fn(),
+                toJSON: vi.fn(),
+                displayName: 'Test User',
+                phoneNumber: null,
+                photoURL: null,
+                providerId: 'firebase',
                 role: UserRole.ADMIN,
                 permissions: [UserPermission.READ, UserPermission.WRITE, UserPermission.DELETE],
-            };
+            } as any;
 
             expect(AuthUtils.hasPermission(user, UserPermission.READ)).toBe(true);
             expect(AuthUtils.hasPermission(user, UserPermission.ADMIN)).toBe(false);
@@ -261,7 +277,7 @@ describe('Core System Integration Tests', () => {
     describe('Error Handling', () => {
         it('should handle client errors', () => {
             const error = new Error('Test error');
-            const result = handleClientError(error, 'Test Component');
+            const result = handleClientError(error, { component: 'Test Component' });
 
             expect(result).toBeDefined();
             expect(result.success).toBe(false);
@@ -270,7 +286,7 @@ describe('Core System Integration Tests', () => {
 
         it('should handle server errors', () => {
             const error = new Error('Test error');
-            const result = handleServerError(error, 'Test Handler');
+            const result = handleServerError('Test error', 'Test Handler');
 
             expect(result).toBeDefined();
             expect(result.status).toBe(500);
@@ -322,7 +338,7 @@ describe('Core System Integration Tests', () => {
             // Create handler with all middleware
             const handler = createApiHandler(
                 async (req, ctx) => {
-                    return { success: true, message: 'Test completed' };
+                    return NextResponse.json({ success: true, message: 'Test completed' });
                 },
                 {
                     requireAuth: true,

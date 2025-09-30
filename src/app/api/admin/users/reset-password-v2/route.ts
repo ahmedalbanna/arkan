@@ -21,7 +21,7 @@ const resetPasswordSchema = z.object({
 class ResetPasswordHandler extends ComplexApiHandler<z.infer<typeof resetPasswordSchema>, { message: string }> {
     protected inputSchema = resetPasswordSchema;
     protected requiresAdmin = true;
-
+    protected creditCost = 1;
     protected async processRequest(data: z.infer<typeof resetPasswordSchema>) {
         const { id } = data;
         const newPassword = generateRandomPassword(8); // Generate a new random password

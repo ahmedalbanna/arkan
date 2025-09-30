@@ -1,5 +1,6 @@
 'use server';
 
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { resetUserPassword } from '@/lib/db/queries';
 import { generateRandomPassword } from '@/lib/utils'; // Assuming a utility for password generation
 import { NextRequest } from 'next/server';

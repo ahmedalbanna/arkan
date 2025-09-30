@@ -26,6 +26,7 @@ class SendNotificationHandler extends ComplexApiHandler<z.infer<typeof sendNotif
 }> {
     protected inputSchema = sendNotificationSchema;
     protected requiresAdmin = true;
+    protected creditCost = 1;
 
     protected async processRequest(data: z.infer<typeof sendNotificationSchema>) {
         const { userId, title, body: notificationBody, link } = data;

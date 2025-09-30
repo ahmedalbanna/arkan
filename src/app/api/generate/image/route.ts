@@ -2,13 +2,18 @@
 'use server';
 
 import { generateImage } from '@/ai/flows/generate-image';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 
+// Schema لتوليد الصور
 const generateImageSchema = z.object({
   prompt: z.string().min(3, "Prompt must be at least 3 characters long."),
 });
 
+/**
+ * معالج توليد الصور
+ */
 export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();

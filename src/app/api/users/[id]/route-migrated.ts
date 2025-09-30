@@ -5,7 +5,7 @@
  * مع استخدام النظام الجديد المحسن
  */
 
-import { handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { Analytics, PerformanceMonitor } from '@/lib/core/performance';
 import { deleteUser, getUserProfile } from "@/lib/db/queries";
 import { adminDb } from '@/lib/firebase/server-init';
@@ -54,7 +54,7 @@ export const GET = withEnhancedAuth(async ({ params, user: requester, startTime 
                 new Error("User not found"),
                 'user_profile_not_found',
                 { targetUserId },
-                { status: 404 }
+
             );
         }
 
@@ -245,7 +245,7 @@ export const DELETE = withEnhancedAuth(async ({ params, user: requester, startTi
                 new Error("User not found"),
                 'user_deletion_not_found',
                 { targetUserId },
-                { status: 404 }
+
             );
         }
 

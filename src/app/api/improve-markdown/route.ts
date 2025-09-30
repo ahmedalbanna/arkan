@@ -2,6 +2,7 @@
 'use server';
 
 import { improveReportMarkdown } from '@/ai/flows/improve-report-markdown';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -10,6 +11,9 @@ const improveMarkdownSchema = z.object({
   userPrompt: z.string().min(10, 'Instructions for the AI must be at least 10 characters.'),
 });
 
+/**
+ * معالج تحسين Markdown
+ */
 export const POST = withEnhancedAuth(async ({ request, user }) => {
   try {
     const body = await request.json();

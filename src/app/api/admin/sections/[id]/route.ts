@@ -14,7 +14,7 @@ export const PUT = withEnhancedAuth(async ({ request, params }) => {
   try {
     const sectionId = params.id;
     if (!sectionId) {
-      return handleApiErrorEnhanced({ message: 'Section ID is required' }, 400);
+      return handleApiErrorEnhanced({ message: 'Section ID is required' }, '400');
     }
     const body = await request.json();
     const validation = SectionUpdateSchema.safeParse(body);
@@ -35,7 +35,7 @@ export const DELETE = withEnhancedAuth(async ({ params }) => {
   try {
     const sectionId = params.id;
     if (!sectionId) {
-      return handleApiErrorEnhanced({ message: 'Section ID is required' }, 400);
+      return handleApiErrorEnhanced({ message: 'Section ID is required' }, '400');
     }
     await adminDb.collection('sections').doc(sectionId).delete();
     return createApiResponseEnhanced({ message: 'Section deleted successfully' }, 200);
