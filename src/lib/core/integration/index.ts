@@ -2,11 +2,8 @@
  * نظام التكامل
  *
  * هذا الملف يحتوي على جميع مكونات نظام التكامل
- * بما في ذلك المحولات ودليل الهجرة
+ * بما في ذلك دليل الهجرة
  */
-
-// Legacy Adapters
-export * from './legacy-adapter';
 
 // Migration Guide
 export * from './migration-guide';
