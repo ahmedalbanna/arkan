@@ -3,6 +3,7 @@
 
 import { translatePresentation } from '@/ai/flows/translate-presentation';
 import { ApiTranslatePresentationSchema } from '@/ai/schemas';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 

@@ -11,7 +11,7 @@ import type {
     ApiHandlerContext,
     AuthContext,
     ValidationError
-} from './types/api-types';
+} from '../types/api-types';
 
 export abstract class BaseApiHandler<TInput = any, TOutput = any> {
     protected abstract inputSchema: z.ZodSchema<TInput>;

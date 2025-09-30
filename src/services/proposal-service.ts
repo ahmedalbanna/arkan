@@ -14,7 +14,7 @@ interface GenerateProposalVariables {
  * @returns A promise that resolves to the generated proposal data.
  */
 export async function generateProposalApi(variables: GenerateProposalVariables): Promise<string> {
-    const response = await fetch('/api/generate/proposal', {
+    const response = await fetch('/api/generate/proposal-v2', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

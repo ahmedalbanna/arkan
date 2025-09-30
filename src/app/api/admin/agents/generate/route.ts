@@ -2,6 +2,7 @@
 'use server';
 
 import { generateAgentConfig } from '@/ai/flows/generate-agent-config';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deductCredit } from '@/services/credit-service';
 import { z } from 'zod';
 
