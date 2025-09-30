@@ -1,9 +1,31 @@
 
+/**
+ * خدمات النظام الموحدة
+ *
+ * هذا الملف يحتوي على جميع الصادرات للخدمات المنظمة حسب الوظيفة
+ */
 
+// الخدمات المشتركة
+export * from './shared';
+
+// خدمات المصادقة
+export * from './auth';
+
+// خدمات المستخدمين
+export * from './users';
+
+// خدمات المشاريع
+export * from './projects';
+
+// خدمات الفرق
+export * from './teams';
+
+// الخدمات القديمة (سيتم إعادة تنظيمها لاحقاً)
 export * from './academic-solver-service';
-export * from './ai-detector-service';
-export * from './agent-service';
 export * from './admin-service';
+export * from './agent-service';
+export * from './ai-detector-service';
+export * from './ai-researcher-service';
 export * from './analytics-service';
 export * from './chat-service';
 export * from './context-service';
@@ -25,11 +47,10 @@ export * from './section-service';
 export * from './settings-service';
 export * from './taskade-service';
 export * from './team-service';
-
 export * from './text-to-speech-service';
 export * from './topic-explainer-service';
 export * from './transaction-service';
 export * from './translation-service';
 export * from './user-service';
 export * from './writing-tools-service';
-export * from './ai-researcher-service';
+

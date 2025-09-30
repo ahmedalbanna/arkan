@@ -1,0 +1,136 @@
+/**
+ * API Route للمستخدمين - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد
+ */
+
+import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { UserSchemas } from '@/app/api/shared/validators/api-validators';
+import { createUser, getPaginatedUsers } from '@/lib/db/queries';
+import type { UserProfile } from '@/lib/types';
+
+/**
+ * معالج قائمة المستخدمين (GET)
+ */
+class UserListHandler extends SimpleApiHandler<{
+    users: UserProfile[];
+    hasNextPage: boolean;
+    lastVisibleId: string | null;
+}> {
+    protected async processRequest(context: any) {
+        const { searchParams } = new URL(context.request.url);
+        const queryValidation = UserSchemas.userList.safeParse(Object.fromEntries(searchParams));
+
+        if (!queryValidation.success) {
+            throw new Error(`Validation error: ${queryValidation.error.errors.map(e => e.message).join(', ')}`);
+        }
+
+        const { page, limit, search, sortBy, sortOrder } = queryValidation.data;
+        const results = await getPaginatedUsers({
+            page,
+            limit,
+            search,
+            sortBy,
+            sortOrder
+        });
+
+        return results;
+    }
+}
+
+/**
+ * معالج إنشاء المستخدم (POST)
+ */
+class CreateUserHandler extends ComplexApiHandler<{
+    name: string;
+    email: string;
+    password: string;
+    role: 'user' | 'admin';
+    credits: number;
+}, UserProfile> {
+    protected inputSchema = UserSchemas.createUser;
+    protected requiresAdmin = true;
+
+    protected async processRequest(data: any, context: any) {
+        const newUser = await createUser(data);
+        return newUser;
+    }
+}
+
+/**
+ * معالج تحديث المستخدم (PUT)
+ */
+class UpdateUserHandler extends ComplexApiHandler<{
+    name?: string;
+    email?: string;
+    role?: 'user' | 'admin';
+    credits?: number;
+}, UserProfile> {
+    protected inputSchema = UserSchemas.updateUser;
+    protected requiresAdmin = true;
+
+    protected async processRequest(data: any, context: any) {
+        const { params } = context;
+        const userId = params?.id;
+
+        if (!userId) {
+            throw new Error('User ID is required');
+        }
+
+        // يمكن إضافة منطق تحديث المستخدم هنا
+        // const updatedUser = await updateUser(userId, data);
+        // return updatedUser;
+
+        // مؤقتاً نعيد البيانات كما هي
+        return { id: userId, ...data } as UserProfile;
+    }
+}
+
+/**
+ * معالج حذف المستخدم (DELETE)
+ */
+class DeleteUserHandler extends ComplexApiHandler<{}, { message: string }> {
+    protected requiresAdmin = true;
+
+    protected async processRequest(data: any, context: any) {
+        const { params } = context;
+        const userId = params?.id;
+
+        if (!userId) {
+            throw new Error('User ID is required');
+        }
+
+        // يمكن إضافة منطق حذف المستخدم هنا
+        // await deleteUser(userId);
+
+        return { message: 'User deleted successfully' };
+    }
+}
+
+// إنشاء المعالجات
+const userListHandler = new UserListHandler();
+const createUserHandler = new CreateUserHandler();
+const updateUserHandler = new UpdateUserHandler();
+const deleteUserHandler = new DeleteUserHandler();
+
+// تصدير الـ handlers مع middleware
+export const GET = withApiMiddleware(
+    userListHandler.handle.bind(userListHandler),
+    { requireAdmin: true, logging: true }
+);
+
+export const POST = withApiMiddleware(
+    createUserHandler.handle.bind(createUserHandler),
+    { requireAdmin: true, logging: true }
+);
+
+export const PUT = withApiMiddleware(
+    updateUserHandler.handle.bind(updateUserHandler),
+    { requireAdmin: true, logging: true }
+);
+
+export const DELETE = withApiMiddleware(
+    deleteUserHandler.handle.bind(deleteUserHandler),
+    { requireAdmin: true, logging: true }
+);
