@@ -1,11 +1,11 @@
 
 // src/app/api/templates/refresh-image/route.ts
 import { generateImage } from '@/ai/flows/generate-image';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import { logGeneration } from '@/services/generation-service';
 import { getStorage } from 'firebase-admin/storage';
 import { z } from 'zod';
-
 
 const refreshImageSchema = z.object({
   templateType: z.enum(['docx', 'pptx', 'proposal', 'report', 'presentation']),

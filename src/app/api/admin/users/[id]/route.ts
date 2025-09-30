@@ -1,9 +1,9 @@
 
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { deleteUser, getUserProfile } from "@/lib/db/queries";
 import { adminDb } from '@/lib/firebase/server-init';
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-
 
 // GET a single user profile.
 // This route is now protected by the verifyAccess logic within withEnhancedAuth,

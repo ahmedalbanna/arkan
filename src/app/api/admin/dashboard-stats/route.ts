@@ -1,8 +1,8 @@
 // src/app/api/admin/dashboard-stats/route.ts
 
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { getUserProfile } from '@/lib/db/queries';
 import { adminDb } from '@/lib/firebase/server-init';
-
 async function getSummaryCounts() {
     const [usersSnapshot, generationsSnapshot, pendingTransactionsSnapshot] = await Promise.all([
         adminDb.collection('users').count().get(),

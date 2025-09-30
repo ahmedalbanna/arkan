@@ -2,8 +2,8 @@
 
 // src/app/api/agents/[id]/route.ts
 import { ApiUpdateAgentSchema } from '@/ai/schemas';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
-
 
 // GET /api/agents/[id]
 export const GET = withEnhancedAuth(async ({ params }) => {

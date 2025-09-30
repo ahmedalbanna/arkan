@@ -1,7 +1,7 @@
 
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
-
 const updateDocxTemplateSchema = z.object({
     styles: z.object({}).passthrough(),
 });

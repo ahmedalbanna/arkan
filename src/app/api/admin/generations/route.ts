@@ -1,10 +1,10 @@
 
 'use server';
 
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { getUserProfile } from '@/lib/db/queries';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
-
 const getLogsQuerySchema = z.object({
     limit: z.coerce.number().int().min(1).max(50).default(15),
     agentId: z.string().optional(),

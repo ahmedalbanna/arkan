@@ -1,9 +1,9 @@
 // src/app/api/templates/pptx/route.ts
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { createGenerativeTemplate } from '@/lib/db/queries';
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 import { z } from 'zod';
-
 // This endpoint is public and does not require authentication
 // as all users need to be able to fetch the templates for exporting.
 export async function GET() {

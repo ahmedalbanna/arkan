@@ -1,7 +1,7 @@
 // C:\Users\ahmed\source\repos\arkan\src\app\api\admin\sections\[id]\route.ts
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
-
 const SectionUpdateSchema = z.object({
   title: z.string().min(1).optional(),
   icon: z.string().min(1).optional(),

@@ -1,9 +1,9 @@
 // src/app/api/templates/docx/route.ts
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { createGenerativeTemplate } from '@/lib/db/queries';
 import { templates as defaultTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
-
 // This endpoint is public and does not require authentication
 // as all users need to be able to fetch the templates for exporting.
 export async function GET() {

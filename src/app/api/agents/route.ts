@@ -1,6 +1,5 @@
 import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
-
 // GET all enabled agents
 export const GET = withEnhancedAuth(async ({ user }) => {
   try {

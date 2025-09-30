@@ -1,9 +1,9 @@
 
 'use server';
 
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import { getStorage } from 'firebase-admin/storage';
-
 export const POST = withEnhancedAuth(async ({ request, params, user }) => {
     const templateId = params.key;
     if (!templateId) {

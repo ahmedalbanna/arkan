@@ -1,9 +1,9 @@
 
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { CustomFirebaseError } from '@/lib/firebase/error';
 import { adminDb } from '@/lib/firebase/server-init';
 import admin from 'firebase-admin';
 import { z } from 'zod';
-
 const sendNotificationSchema = z.object({
   userId: z.string().min(1, 'User ID is required.'),
   title: z.string().min(1, 'Title is required.'),
