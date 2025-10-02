@@ -641,7 +641,14 @@ export function getTemplate(sectionType: ProposalSectionType, templateId: string
 // دالة للحصول على جميع قوالب قسم معين
 export function getSectionTemplates(sectionType: ProposalSectionType): ProposalTemplate[] {
     const sectionTemplates = PROPOSAL_SECTION_TEMPLATES[sectionType];
-    return Object.values(sectionTemplates || {});
+    if (!sectionTemplates) {
+        return [];
+    }
+
+    // تصفية القيم غير المعرفة أو الفارغة
+    return Object.values(sectionTemplates).filter((template): template is ProposalTemplate => {
+        return template && typeof template === 'object' && 'id' in template && 'description' in template;
+    });
 }
 
 // دالة لتطبيق قالب مع المتغيرات

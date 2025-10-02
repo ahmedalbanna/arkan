@@ -117,19 +117,28 @@ export function useProposalSectionGenerator(config: UseProposalSectionGeneratorC
             }));
         },
         onSuccess: (result) => {
+            console.log('🎉 نتيجة التوليد:', result);
+
+            // التحقق من وجود البيانات المطلوبة
+            const qualityScore = result?.qualityScore ?? result?.metadata?.qualityScore ?? 0;
+            const executionTime = result?.metadata?.executionTime ?? 0;
+            const iterations = result?.metadata?.iterations ?? 1;
+
+            console.log('📊 معلومات الجودة:', { qualityScore, executionTime, iterations });
+
             setState(prev => ({
                 ...prev,
                 isGenerating: false,
                 result,
-                qualityScore: result.qualityScore,
-                executionTime: result.metadata.executionTime,
-                iterations: result.metadata.iterations,
+                qualityScore,
+                executionTime,
+                iterations,
                 progress: { message: 'تم التوليد بنجاح', percentage: 100 }
             }));
 
             // إشعار النجاح
             toast.success('تم توليد القسم بنجاح! 🎉', {
-                description: `جودة: ${result.qualityScore}/100 - وقت التنفيذ: ${result.metadata.executionTime}ms`
+                description: `جودة: ${qualityScore}/100 - وقت التنفيذ: ${executionTime}ms`
             });
 
             // استدعاء callback النجاح
@@ -186,19 +195,30 @@ export function useProposalSectionGenerator(config: UseProposalSectionGeneratorC
 
     // دالة توليد القسم
     const generateSection = useCallback(() => {
-        const options: ProposalSectionGenerationOptions = {
+        console.log('🚀 بدء توليد القسم مع الإعدادات:', config);
+
+        const options: any = {
             type: config.type,
             projectContext: config.projectContext,
-            style: config.style || {
-                tone: 'professional',
-                length: 'moderate',
-                format: 'structured',
-                language: 'ar'
+            style: {
+                ...(config.style || {}),
+                tone: config.style?.tone || 'professional',
+                length: config.style?.length || 'moderate',
+                format: config.style?.format || 'structured',
+                language: config.style?.language || 'ar'
             },
             complexity: config.complexity || 'detailed',
             referenceContent: config.referenceContent,
-            intelligentSettings: config.intelligentSettings
+            intelligentSettings: config.intelligentSettings,
+            outputPreferences: {
+                includeOutline: true,
+                includeKeyPoints: true,
+                generateSuggestions: true,
+                validateContent: true
+            }
         };
+
+        console.log('📤 الخيارات المرسلة إلى API:', options);
 
         generateMutation.mutate(options);
     }, [config, generateMutation]);
@@ -379,30 +399,37 @@ export function useCompleteProposalGenerator() {
  * Hook لإحصائيات أقسام المقترح
  */
 export function useProposalStats() {
-    const [state, setState] = useState<ProposalStatsState>({
-        stats: null,
-        isLoading: false,
-        error: null
-    });
-
     // Query لجلب الإحصائيات
     const { data, isLoading, error, refetch } = useQuery({
         queryKey: ['proposal-stats'],
-        queryFn: () => intelligentProposalService.getStats(),
+        queryFn: async () => {
+            try {
+                const stats = await intelligentProposalService.getStats();
+                return stats;
+            } catch (error) {
+                console.error('خطأ في جلب الإحصائيات:', error);
+                // إرجاع بيانات افتراضية في حالة الخطأ
+                return {
+                    totalGenerated: 0,
+                    byType: {},
+                    byCategory: {},
+                    averageQuality: 0,
+                    averageWordCount: 0,
+                    mostUsedTypes: [],
+                    averageGenerationTime: 0
+                };
+            }
+        },
         staleTime: 5 * 60 * 1000, // 5 دقائق
-        refetchInterval: 30 * 1000 // تحديث كل 30 ثانية
+        refetchInterval: 30 * 1000, // تحديث كل 30 ثانية
+        retry: 3,
+        retryDelay: 1000
     });
 
-    useEffect(() => {
-        setState({
-            stats: data || null,
-            isLoading,
-            error: error?.message || null
-        });
-    }, [data, isLoading, error]);
-
     return {
-        ...state,
+        stats: data || null,
+        isLoading,
+        error: error?.message || null,
         refetch
     };
 }

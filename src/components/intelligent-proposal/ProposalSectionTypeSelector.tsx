@@ -182,10 +182,10 @@ export function ProposalSectionTypeSelector({
                                     {sections.map(([key, section]) => (
                                         <SectionCard
                                             key={key}
-                                            type={key}
+                                            type={key as ProposalSectionType}
                                             section={section}
                                             isSelected={selectedType === key}
-                                            onSelect={() => onTypeChange(key)}
+                                            onSelect={() => onTypeChange(key as ProposalSectionType)}
                                         />
                                     ))}
                                 </div>
@@ -194,10 +194,10 @@ export function ProposalSectionTypeSelector({
                                     {sections.map(([key, section]) => (
                                         <SectionListItem
                                             key={key}
-                                            type={key}
+                                            type={key as ProposalSectionType}
                                             section={section}
                                             isSelected={selectedType === key}
-                                            onSelect={() => onTypeChange(key)}
+                                            onSelect={() => onTypeChange(key as ProposalSectionType)}
                                         />
                                     ))}
                                 </div>

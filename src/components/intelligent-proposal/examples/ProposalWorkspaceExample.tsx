@@ -10,6 +10,7 @@ import {
     type ProposalSectionResult,
     type ProposalSectionType
 } from '@/components/intelligent-proposal';
+import { PerformanceMonitor } from '@/components/intelligent-proposal/PerformanceMonitor';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -95,7 +96,7 @@ const mockProjectData = {
 };
 
 export function ProposalWorkspaceExample() {
-    const [activeTab, setActiveTab] = useState<'generator' | 'builder' | 'stats'>('generator');
+    const [activeTab, setActiveTab] = useState<'generator' | 'builder' | 'stats' | 'performance'>('generator');
     const [selectedSection, setSelectedSection] = useState<ProposalSectionType>('executive_summary');
     const [generatedSections, setGeneratedSections] = useState<Record<string, ProposalSectionResult>>({});
 
@@ -201,7 +202,7 @@ export function ProposalWorkspaceExample() {
 
                 {/* شريط التنقل */}
                 <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)}>
-                    <TabsList className="grid w-full grid-cols-3 lg:w-96">
+                    <TabsList className="grid w-full grid-cols-4 lg:w-[500px]">
                         <TabsTrigger value="generator" className="flex items-center gap-2">
                             <Sparkles className="h-4 w-4" />
                             المولد
@@ -213,6 +214,10 @@ export function ProposalWorkspaceExample() {
                         <TabsTrigger value="stats" className="flex items-center gap-2">
                             <TrendingUp className="h-4 w-4" />
                             الإحصائيات
+                        </TabsTrigger>
+                        <TabsTrigger value="performance" className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            مراقبة الأداء
                         </TabsTrigger>
                     </TabsList>
 
@@ -633,6 +638,11 @@ export function ProposalWorkspaceExample() {
                                 </Button>
                             </CardContent>
                         </Card>
+                    </TabsContent>
+
+                    {/* مراقبة الأداء */}
+                    <TabsContent value="performance" className="space-y-6">
+                        <PerformanceMonitor />
                     </TabsContent>
                 </Tabs>
             </div>

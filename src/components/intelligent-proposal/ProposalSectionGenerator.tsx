@@ -45,7 +45,7 @@ import {
     Target,
     Zap
 } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 // import { ProposalSectionPreview } from './ProposalSectionPreview';
 import { ProposalSectionTypeSelector } from './ProposalSectionTypeSelector';
 import { ProposalTemplateSelector } from './ProposalTemplateSelector';
@@ -116,7 +116,7 @@ export function ProposalSectionGenerator({
     });
 
     // إعداد hook التوليد
-    const generatorConfig: UseProposalSectionGeneratorConfig = {
+    const generatorConfig = useMemo<UseProposalSectionGeneratorConfig>(() => ({
         type: selectedType,
         projectContext,
         style,
@@ -129,7 +129,7 @@ export function ProposalSectionGenerator({
         onSuccess: (result) => {
             onSectionGenerated?.(result);
         }
-    };
+    }), [selectedType, projectContext, style, complexity, existingSections, intelligentSettings, onSectionGenerated]);
 
     const generator = useProposalSectionGenerator(generatorConfig);
     const stats = useProposalStats();
@@ -139,13 +139,11 @@ export function ProposalSectionGenerator({
     const handleTypeChange = useCallback((type: ProposalSectionType) => {
         setSelectedType(type);
         const sectionInfo = PROPOSAL_SECTION_TYPES[type];
-        if (!title) {
-            setTitle(sectionInfo.title);
-        }
-        if (!description) {
-            setDescription(sectionInfo.description);
-        }
-    }, [title, description]);
+
+        // تحديث العنوان والوصف بناءً على النوع الجديد
+        setTitle(prev => prev || sectionInfo.title);
+        setDescription(prev => prev || sectionInfo.description);
+    }, []);
 
     // معالجة إضافة هدف
     const handleAddObjective = useCallback((objective: string) => {
@@ -161,7 +159,7 @@ export function ProposalSectionGenerator({
     const handleRemoveObjective = useCallback((index: number) => {
         setProjectContext(prev => ({
             ...prev,
-            objectives: prev.objectives.filter((_, i) => i !== index)
+            objectives: prev.objectives.filter((_: string, i: number) => i !== index)
         }));
     }, []);
 
@@ -415,7 +413,7 @@ ${generator.result.content}
                                         </div>
                                         {projectContext.objectives.length > 0 && (
                                             <div className="flex flex-wrap gap-1 mt-2">
-                                                {projectContext.objectives.map((objective, index) => (
+                                                {projectContext.objectives.map((objective: string, index: number) => (
                                                     <Badge
                                                         key={index}
                                                         variant="secondary"
@@ -816,7 +814,17 @@ ${generator.result.content}
                                         </span>
                                     </div>
                                     <div className="text-xs text-green-600 dark:text-green-400">
-                                        {generator.result.wordCount} كلمة - جودة: {generator.result.qualityScore}/100
+                                        {generator.result?.wordCount || 0} كلمة - جودة: {generator.result?.qualityScore || generator.qualityScore || 0}/100
+                                    </div>
+                                </div>
+
+                                {/* عرض المحتوى المولد */}
+                                <div className="mt-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900">
+                                    <h4 className="font-semibold mb-2">{generator.result?.title || title}</h4>
+                                    <div className="prose prose-sm max-w-none dark:prose-invert">
+                                        <pre className="whitespace-pre-wrap font-sans text-sm">
+                                            {generator.result?.content || 'لا يوجد محتوى متاح'}
+                                        </pre>
                                     </div>
                                 </div>
 
@@ -839,6 +847,20 @@ ${generator.result.content}
                                         <Download className="h-3 w-3" />
                                         تحميل
                                     </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            if (generator.result?.content) {
+                                                navigator.clipboard.writeText(generator.result.content);
+                                                // يمكن إضافة toast هنا
+                                            }
+                                        }}
+                                        className="flex-1 flex items-center gap-1"
+                                    >
+                                        <FileText className="h-3 w-3" />
+                                        نسخ
+                                    </Button>
                                 </div>
 
                                 {/* إحصائيات الأداء */}
@@ -858,11 +880,11 @@ ${generator.result.content}
                                 </div>
 
                                 {/* التوصيات */}
-                                {generator.result.suggestions.length > 0 && (
+                                {generator.result?.suggestions?.length > 0 && (
                                     <div className="space-y-2">
                                         <div className="text-sm font-medium">توصيات للتحسين:</div>
                                         <ul className="space-y-1">
-                                            {generator.result.suggestions.slice(0, 3).map((suggestion, index) => (
+                                            {generator.result?.suggestions?.slice(0, 3).map((suggestion, index) => (
                                                 <li key={index} className="text-xs text-muted-foreground flex items-start gap-2">
                                                     <AlertTriangle className="h-3 w-3 text-orange-500 mt-0.5 flex-shrink-0" />
                                                     <span>{suggestion}</span>
@@ -909,13 +931,9 @@ ${generator.result.content}
             </div>
 
             {/* نافذة المعاينة */}
-            {preview.isPreviewOpen && preview.previewSection && (
-                <ProposalSectionPreview
-                    section={preview.previewSection}
-                    isOpen={preview.isPreviewOpen}
-                    onClose={preview.closePreview}
-                />
-            )}
+            {/* {preview.isPreviewOpen && preview.previewSection && (
+                <div>معاينة القسم</div>
+            )} */}
         </div>
     );
 }

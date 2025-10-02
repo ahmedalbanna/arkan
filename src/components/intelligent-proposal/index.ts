@@ -3,6 +3,7 @@
  */
 
 // المكونات الأساسية
+export { PerformanceMonitor } from './PerformanceMonitor';
 export { ProposalSectionGenerator } from './ProposalSectionGenerator';
 export { ProposalSectionPreview } from './ProposalSectionPreview';
 export { ProposalSectionTypeSelector } from './ProposalSectionTypeSelector';

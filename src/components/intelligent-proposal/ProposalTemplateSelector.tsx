@@ -193,7 +193,7 @@ export function ProposalTemplateSelector({
                 <TabsContent value="templates" className="space-y-4">
                     {availableTemplates.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {availableTemplates.map((template) => (
+                            {availableTemplates.filter(template => template && template.id && template.description).map((template) => (
                                 <Card
                                     key={template.id}
                                     className={`cursor-pointer transition-all hover:shadow-md ${selectedTemplate?.id === template.id
@@ -206,13 +206,13 @@ export function ProposalTemplateSelector({
                                         <div className="flex items-start justify-between">
                                             <div className="space-y-1">
                                                 <div className="flex items-center gap-2">
-                                                    <CardTitle className="text-base">{template.name}</CardTitle>
+                                                    <CardTitle className="text-base">{template.name || 'قالب غير مسمى'}</CardTitle>
                                                     {selectedTemplate?.id === template.id && (
                                                         <CheckCircle className="h-4 w-4 text-blue-500" />
                                                     )}
                                                 </div>
                                                 <p className="text-xs text-muted-foreground">
-                                                    {template.description}
+                                                    {template.description || 'لا يوجد وصف متاح'}
                                                 </p>
                                             </div>
                                             <Badge

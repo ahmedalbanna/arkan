@@ -393,7 +393,29 @@ export class IntelligentProposalService {
     async generateSection(options: ProposalSectionGenerationOptions): Promise<ProposalSectionResult> {
         try {
             const response = await apiClient.post(this.baseUrl, options);
-            return response.data;
+            console.log('🔄 استجابة API كاملة:', response.data);
+
+            // التحقق من تنسيق الاستجابة
+            if (response.data?.success && response.data?.data) {
+                const result = response.data.data;
+                const metadata = response.data.metadata || {};
+
+                // دمج البيانات الأساسية مع metadata
+                return {
+                    ...result,
+                    qualityScore: metadata.qualityScore || result.qualityScore || 0,
+                    metadata: {
+                        generatedAt: new Date().toISOString(),
+                        executionTime: metadata.executionTime || 0,
+                        modelUsed: metadata.modelUsed || 'default',
+                        iterations: metadata.iterations || 1,
+                        qualityScore: metadata.qualityScore || result.qualityScore || 0
+                    }
+                };
+            } else {
+                // إذا كانت الاستجابة في تنسيق قديم
+                return response.data;
+            }
         } catch (error) {
             console.error('خطأ في توليد قسم المقترح:', error);
             throw new Error('فشل في توليد قسم المقترح');

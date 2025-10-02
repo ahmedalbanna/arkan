@@ -17,8 +17,12 @@ class CreditBasedApiHandler<T> {
     async handle(context: any) {
         try {
             const input = context.body || {};
-            return await this.processRequest(input, context);
+            console.log('Handler input:', JSON.stringify(input, null, 2));
+            const result = await this.processRequest(input, context);
+            console.log('Handler result:', result ? 'Success' : 'No result');
+            return result;
         } catch (error) {
+            console.error('Handler error:', error);
             throw error;
         }
     }
@@ -38,8 +42,21 @@ function withApiMiddleware(...handlers: any[]) {
             const body = await request.json();
             const context = { body, request };
             const handler = handlers[handlers.length - 1];
-            return Response.json(await handler(context));
+            const result = await handler(context);
+
+            // التأكد من أن النتيجة في التنسيق الصحيح
+            if (result && typeof result === 'object') {
+                return Response.json(result);
+            } else {
+                // إذا كانت النتيجة غير متوقعة، أرجع خطأ
+                console.error('Unexpected result format:', result);
+                return Response.json({
+                    success: false,
+                    error: 'Invalid response format'
+                }, { status: 500 });
+            }
         } catch (error) {
+            console.error('API Error:', error);
             return Response.json({
                 success: false,
                 error: error instanceof Error ? error.message : 'Unknown error'
@@ -148,6 +165,7 @@ class IntelligentProposalSectionHandler extends CreditBasedApiHandler<UnifiedPro
 
     async processRequest(input: UnifiedProposalSectionInput, context: any) {
         const startTime = Date.now();
+        console.log('🚀 Starting processRequest for type:', input.type);
 
         try {
             // حساب التكلفة الديناميكية
@@ -161,13 +179,11 @@ class IntelligentProposalSectionHandler extends CreditBasedApiHandler<UnifiedPro
                 description: input.description,
                 projectContext: input.projectContext,
                 referenceContent: input.referenceContent,
-                style: input.style || {
-                    tone: 'professional' as const,
-                    length: 'moderate' as const,
-                    format: 'structured' as const,
-                    language: 'ar' as const
+                style: {
+                    complexity: (input.complexity || 'detailed') as 'basic' | 'detailed' | 'comprehensive',
+                    tone: mapToneValue(input.style?.tone || 'professional'),
+                    length: mapLengthValue(input.style?.length || 'moderate')
                 },
-                complexity: input.complexity,
                 intelligentSettings: {
                     enableContextAnalysis: true,
                     enableIterativeImprovement: input.enableIterativeImprovement ?? true,
@@ -185,7 +201,13 @@ class IntelligentProposalSectionHandler extends CreditBasedApiHandler<UnifiedPro
             };
 
             // تشغيل تدفق التوليد الذكي
-            const result = await generateProposalSection(flowInput);
+            console.log('📝 Calling generateProposalSection with input type:', flowInput.type);
+            const result = await generateProposalSection(flowInput as any);
+            console.log('📝 generateProposalSection returned:', {
+                hasResult: !!result,
+                hasContent: !!result?.content,
+                contentLength: result?.content?.length || 0
+            });
 
             // حساب الوقت المستغرق
             const executionTime = Date.now() - startTime;
@@ -203,7 +225,7 @@ class IntelligentProposalSectionHandler extends CreditBasedApiHandler<UnifiedPro
             });
 
             // إرجاع النتيجة مع معلومات التنفيذ
-            return {
+            const response = {
                 success: true,
                 data: result,
                 metadata: {
@@ -215,6 +237,15 @@ class IntelligentProposalSectionHandler extends CreditBasedApiHandler<UnifiedPro
                     sectionInfo: PROPOSAL_SECTION_TYPES[input.type]
                 }
             };
+
+            console.log('✅ Returning response with data:', {
+                hasData: !!response.data,
+                dataType: typeof response.data,
+                contentLength: response.data?.content?.length || 0,
+                qualityScore: response.metadata.qualityScore
+            });
+
+            return response;
 
         } catch (error) {
             const executionTime = Date.now() - startTime;
@@ -360,7 +391,7 @@ class CompleteProposalHandler extends CreditBasedApiHandler<CompleteProposalInpu
                 };
 
                 // توليد القسم
-                const sectionResult = await generateProposalSection(sectionInput);
+                const sectionResult = await generateProposalSection(sectionInput as any);
                 results[sectionType] = sectionResult;
 
                 // تجميع الإحصائيات
@@ -624,6 +655,32 @@ class CompleteProposalHandler extends CreditBasedApiHandler<CompleteProposalInpu
     private estimateTokens(text: string): number {
         return Math.ceil(text.length / 4);
     }
+}
+
+// دالة مساعدة لتحويل قيم الطول
+function mapLengthValue(length: string): 'brief' | 'standard' | 'extensive' {
+    const mapping: { [key: string]: 'brief' | 'standard' | 'extensive' } = {
+        'concise': 'brief',
+        'moderate': 'standard',
+        'detailed': 'standard',
+        'extensive': 'extensive',
+        'brief': 'brief',
+        'standard': 'standard'
+    };
+    return mapping[length] || 'standard';
+}
+
+// دالة مساعدة لتحويل قيم النبرة
+function mapToneValue(tone: string): 'formal' | 'professional' | 'technical' | 'executive' {
+    const mapping: { [key: string]: 'formal' | 'professional' | 'technical' | 'executive' } = {
+        'academic': 'formal',
+        'business': 'professional',
+        'formal': 'formal',
+        'professional': 'professional',
+        'technical': 'technical',
+        'executive': 'executive'
+    };
+    return mapping[tone] || 'professional';
 }
 
 // إنشاء معالجات API
