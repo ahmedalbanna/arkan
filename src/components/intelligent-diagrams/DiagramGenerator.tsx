@@ -17,6 +17,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import {
     useDiagramGenerator,
+    useDiagramLibrary,
+    useDiagramPrompts,
     useDiagramStats,
     type UseDiagramGeneratorConfig
 } from '@/hooks/use-intelligent-diagrams';
@@ -78,28 +80,71 @@ export function DiagramGenerator({
     const [complexity, setComplexity] = useState<'basic' | 'detailed' | 'comprehensive'>('detailed');
     const [language, setLanguage] = useState<'ar' | 'en'>('ar');
 
-    // إعداد hook التوليد
+    // إعداد hook التوليد المحدث
     const generatorConfig: UseDiagramGeneratorConfig = {
         type: selectedType,
         title: title || DIAGRAM_TYPES[selectedType].title,
         description,
-        context: {
-            projectData,
-            sectionContent,
-            requirements,
-            stakeholders,
-            technologies
+        requirements,
+
+        // سياق المشروع المحدث
+        projectContext: {
+            title: projectData?.projectTitle,
+            description: projectData?.description,
+            domain: projectData?.domain,
+            requirements: requirements,
+            stakeholders: stakeholders,
+            technologies: technologies,
+            constraints: projectData?.constraints
         },
+
+        // محتوى مرجعي
+        referenceContent: {
+            sectionContent,
+            existingDiagrams: projectData?.existingDiagrams,
+            documentationLinks: projectData?.documentationLinks
+        },
+
         style,
         complexity,
         language,
+
+        // إعدادات ذكية جديدة
+        intelligentSettings: {
+            enableContextAnalysis: true,
+            enableIterativeImprovement: true,
+            enablePerformanceMonitoring: true,
+            qualityThreshold: 80,
+            maxIterations: 3,
+            adaptiveModelSelection: true
+        },
+
+        // تفضيلات المخرجات
+        outputPreferences: {
+            includeComments: true,
+            includeMetadata: true,
+            generateSuggestions: true,
+            validateSyntax: true
+        },
+
         onSuccess: (result) => {
             onDiagramGenerated?.(result);
+            // حفظ في المكتبة تلقائياً
+            library.saveDiagram({
+                title: result.title,
+                type: result.type,
+                plantUmlCode: result.plantUmlCode,
+                elementCount: result.elementCount,
+                qualityScore: result.performanceMetrics?.qualityScore,
+                tags: [selectedType, projectData?.domain].filter(Boolean)
+            });
         }
     };
 
     const generator = useDiagramGenerator(generatorConfig);
     const stats = useDiagramStats();
+    const promptManager = useDiagramPrompts();
+    const library = useDiagramLibrary();
 
     // معالجة تغيير نوع المخطط
     const handleTypeChange = useCallback((type: DiagramType) => {
@@ -177,10 +222,11 @@ export function DiagramGenerator({
                 {/* لوحة الإعدادات */}
                 <div className="lg:col-span-2 space-y-6">
                     <Tabs defaultValue="basic" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3">
+                        <TabsList className="grid w-full grid-cols-4">
                             <TabsTrigger value="basic">الإعدادات الأساسية</TabsTrigger>
                             <TabsTrigger value="context">السياق والمحتوى</TabsTrigger>
                             <TabsTrigger value="style">التصميم والتنسيق</TabsTrigger>
+                            <TabsTrigger value="prompts">البرومبتات الذكية</TabsTrigger>
                         </TabsList>
 
                         {/* الإعدادات الأساسية */}
@@ -410,6 +456,152 @@ export function DiagramGenerator({
                                 </CardContent>
                             </Card>
                         </TabsContent>
+
+                        {/* البرومبتات الذكية */}
+                        <TabsContent value="prompts" className="space-y-4">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Sparkles className="h-5 w-5" />
+                                        البرومبتات الذكية
+                                    </CardTitle>
+                                    <p className="text-sm text-muted-foreground">
+                                        إدارة وتخصيص البرومبتات المستخدمة في توليد المخططات
+                                    </p>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    {/* بناء برومبت مخصص */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-sm font-medium">بناء برومبت مخصص</Label>
+                                            <Button
+                                                onClick={() => {
+                                                    promptManager.buildPrompt({
+                                                        diagramType: selectedType,
+                                                        title: title || DIAGRAM_TYPES[selectedType].title,
+                                                        description,
+                                                        complexity,
+                                                        style,
+                                                        projectContext: generatorConfig.projectContext,
+                                                        requirements,
+                                                        stakeholders,
+                                                        language
+                                                    });
+                                                }}
+                                                disabled={promptManager.isBuildingPrompt}
+                                                size="sm"
+                                                variant="outline"
+                                                className="flex items-center gap-1"
+                                            >
+                                                {promptManager.isBuildingPrompt ? (
+                                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current"></div>
+                                                ) : (
+                                                    <Zap className="h-3 w-3" />
+                                                )}
+                                                بناء البرومبت
+                                            </Button>
+                                        </div>
+
+                                        {promptManager.builtPrompt && (
+                                            <div className="p-3 bg-muted rounded-lg">
+                                                <div className="text-xs font-medium mb-2">البرومبت المولد:</div>
+                                                <div className="text-xs text-muted-foreground max-h-32 overflow-y-auto">
+                                                    {promptManager.builtPrompt.substring(0, 500)}...
+                                                </div>
+                                                <div className="text-xs text-muted-foreground mt-2">
+                                                    الطول: {promptManager.builtPrompt.length} حرف
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* إحصائيات البرومبتات */}
+                                    <div className="pt-3 border-t space-y-3">
+                                        <div className="text-sm font-medium">إحصائيات البرومبتات</div>
+                                        <div className="grid grid-cols-2 gap-3 text-xs">
+                                            <div className="flex justify-between">
+                                                <span className="text-muted-foreground">المجموع:</span>
+                                                <span className="font-medium">{promptManager.totalPrompts}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-muted-foreground">التاريخ:</span>
+                                                <span className="font-medium">{promptManager.hasHistory ? 'متوفر' : 'فارغ'}</span>
+                                            </div>
+                                        </div>
+
+                                        {promptManager.hasHistory && (
+                                            <div className="space-y-2">
+                                                <div className="text-xs font-medium">آخر البرومبتات:</div>
+                                                <div className="space-y-1">
+                                                    {promptManager.promptHistory.slice(0, 3).map((item, index) => (
+                                                        <div key={index} className="flex items-center justify-between text-xs p-2 bg-muted/50 rounded">
+                                                            <span className="font-medium">{DIAGRAM_TYPES[item.type].title}</span>
+                                                            <span className="text-muted-foreground">
+                                                                {new Date(item.timestamp).toLocaleTimeString('ar')}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                <Button
+                                                    onClick={promptManager.clearHistory}
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="w-full text-xs"
+                                                >
+                                                    مسح التاريخ
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* إعدادات البرومبت */}
+                                    <div className="pt-3 border-t space-y-3">
+                                        <div className="text-sm font-medium">إعدادات البرومبت</div>
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <div className="space-y-1">
+                                                    <Label className="text-xs">تحليل السياق</Label>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        تحليل ذكي للمحتوى والمتطلبات
+                                                    </p>
+                                                </div>
+                                                <Switch
+                                                    checked={generatorConfig.intelligentSettings?.enableContextAnalysis}
+                                                    disabled
+                                                />
+                                            </div>
+
+                                            <div className="flex items-center justify-between">
+                                                <div className="space-y-1">
+                                                    <Label className="text-xs">التحسين التكراري</Label>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        تحسين المخرجات تلقائياً
+                                                    </p>
+                                                </div>
+                                                <Switch
+                                                    checked={generatorConfig.intelligentSettings?.enableIterativeImprovement}
+                                                    disabled
+                                                />
+                                            </div>
+
+                                            <div className="flex items-center justify-between">
+                                                <div className="space-y-1">
+                                                    <Label className="text-xs">مراقبة الأداء</Label>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        تتبع إحصائيات التوليد
+                                                    </p>
+                                                </div>
+                                                <Switch
+                                                    checked={generatorConfig.intelligentSettings?.enablePerformanceMonitoring}
+                                                    disabled
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
                     </Tabs>
 
                     {/* أزرار التحكم */}
@@ -418,7 +610,7 @@ export function DiagramGenerator({
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <Button
-                                        onClick={generator.generateDiagram}
+                                        onClick={() => generator.generateDiagram()}
                                         disabled={generator.isGenerating}
                                         size="lg"
                                         className="flex items-center gap-2"
@@ -560,7 +752,7 @@ export function DiagramGenerator({
                                     </Button>
                                 </div>
 
-                                {/* إحصائيات الأداء */}
+                                {/* إحصائيات الأداء المحسنة */}
                                 <div className="pt-3 border-t space-y-2">
                                     <div className="flex justify-between text-xs">
                                         <span className="text-muted-foreground">وقت التوليد:</span>
@@ -574,7 +766,67 @@ export function DiagramGenerator({
                                         <span className="text-muted-foreground">عدد العناصر:</span>
                                         <span className="font-medium">{generator.elementCount}</span>
                                     </div>
+                                    {generator.iterations && (
+                                        <div className="flex justify-between text-xs">
+                                            <span className="text-muted-foreground">التكرارات:</span>
+                                            <span className="font-medium text-blue-600">{generator.iterations}</span>
+                                        </div>
+                                    )}
+                                    {generator.modelUsed && (
+                                        <div className="flex justify-between text-xs">
+                                            <span className="text-muted-foreground">النموذج:</span>
+                                            <span className="font-medium text-purple-600">{generator.modelUsed}</span>
+                                        </div>
+                                    )}
                                 </div>
+
+                                {/* تحليل الجودة */}
+                                {generator.qualityAnalysis && (
+                                    <div className="pt-3 border-t space-y-2">
+                                        <div className="text-sm font-medium flex items-center gap-2">
+                                            <Target className="h-4 w-4" />
+                                            تحليل الجودة
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2 text-xs">
+                                            <div className="flex justify-between">
+                                                <span className="text-muted-foreground">الاكتمال:</span>
+                                                <span className="font-medium">{Math.round(generator.qualityAnalysis.completeness * 100)}%</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-muted-foreground">الوضوح:</span>
+                                                <span className="font-medium">{Math.round(generator.qualityAnalysis.clarity * 100)}%</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-muted-foreground">الدقة:</span>
+                                                <span className="font-medium">{Math.round(generator.qualityAnalysis.accuracy * 100)}%</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-muted-foreground">البناء:</span>
+                                                <span className={`font-medium ${generator.qualityAnalysis.syntaxValid ? 'text-green-600' : 'text-red-600'}`}>
+                                                    {generator.qualityAnalysis.syntaxValid ? 'صحيح' : 'خطأ'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* خطوات التحسين */}
+                                {generator.improvementSteps && generator.improvementSteps.length > 0 && (
+                                    <div className="pt-3 border-t space-y-2">
+                                        <div className="text-sm font-medium flex items-center gap-2">
+                                            <Sparkles className="h-4 w-4" />
+                                            خطوات التحسين
+                                        </div>
+                                        <ul className="space-y-1">
+                                            {generator.improvementSteps.slice(0, 3).map((step, index) => (
+                                                <li key={index} className="text-xs text-muted-foreground flex items-start gap-2">
+                                                    <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
+                                                    <span>{step}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
 
                                 {/* التوصيات */}
                                 {generator.result.suggestions.length > 0 && (
@@ -627,10 +879,108 @@ export function DiagramGenerator({
                 </div>
             </div>
 
+            {/* مكتبة المخططات المحفوظة */}
+            {library.diagrams.length > 0 && (
+                <Card className="mt-6">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Info className="h-5 w-5" />
+                            مكتبة المخططات ({library.totalDiagrams})
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                            المخططات المحفوظة تلقائياً من جلسات التوليد
+                        </p>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {library.diagrams.slice(0, 6).map((diagram) => (
+                                <div key={diagram.id} className="p-3 border rounded-lg space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <div className="text-sm font-medium truncate">{diagram.title}</div>
+                                        <Badge variant="outline" className="text-xs">
+                                            {DIAGRAM_TYPES[diagram.type].icon}
+                                        </Badge>
+                                    </div>
+                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                        <span>العناصر: {diagram.elementCount}</span>
+                                        {diagram.qualityScore && (
+                                            <span className="text-green-600">الجودة: {diagram.qualityScore}/100</span>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        {diagram.tags?.map((tag, index) => (
+                                            <Badge key={index} variant="secondary" className="text-xs px-1 py-0">
+                                                {tag}
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <Button
+                                            onClick={() => library.toggleFavorite(diagram.id)}
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-6 px-2"
+                                        >
+                                            {diagram.isFavorite ? '❤️' : '🤍'}
+                                        </Button>
+                                        <Button
+                                            onClick={() => library.deleteDiagram(diagram.id)}
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-6 px-2 text-red-500 hover:text-red-700"
+                                        >
+                                            🗑️
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {library.totalDiagrams > 6 && (
+                            <div className="mt-4 text-center">
+                                <Button variant="outline" size="sm">
+                                    عرض جميع المخططات ({library.totalDiagrams})
+                                </Button>
+                            </div>
+                        )}
+
+                        {/* إحصائيات المكتبة */}
+                        <div className="mt-4 pt-4 border-t">
+                            <div className="grid grid-cols-3 gap-4 text-center text-sm">
+                                <div>
+                                    <div className="font-medium">{library.favoriteCount}</div>
+                                    <div className="text-muted-foreground">المفضلة</div>
+                                </div>
+                                <div>
+                                    <div className="font-medium">{Math.round(library.averageQuality)}/100</div>
+                                    <div className="text-muted-foreground">متوسط الجودة</div>
+                                </div>
+                                <div>
+                                    <div className="font-medium">{Object.keys(library.typeDistribution).length}</div>
+                                    <div className="text-muted-foreground">أنواع مختلفة</div>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
             {/* نافذة المعاينة */}
             {showPreview && generator.result && (
                 <DiagramPreview
-                    diagram={generator.result}
+                    diagram={{
+                        ...generator.result,
+                        id: Date.now().toString(),
+                        relatedDiagrams: [],
+                        type: generator.result.type as DiagramType,
+                        metadata: {
+                            generatedAt: new Date().toISOString(),
+                            estimatedComplexity: complexity,
+                            elementCount: generator.result.elementCount,
+                            generationTime: generator.result.metadata.executionTime,
+                            qualityScore: generator.result.metadata.qualityScore
+                        }
+                    }}
                     isOpen={showPreview}
                     onClose={() => setShowPreview(false)}
                 />

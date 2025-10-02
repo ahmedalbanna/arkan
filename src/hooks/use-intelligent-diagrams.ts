@@ -1,10 +1,11 @@
 /**
  * Hooks ذكية لتوليد وإدارة مخططات PlantUML
- * توفر واجهة سهلة ومتقدمة للمكونات
+ * توفر واجهة سهلة ومتقدمة للمكونات مع دعم البرومبتات الذكية
  */
 
+import { generateDiagram } from '@/ai/flows/generate-diagram';
+import { DiagramPromptBuilder } from '@/ai/prompts/diagram-prompts';
 import type { SectionName } from '@/ai/schemas/enums';
-import { toast } from '@/hooks/use-toast';
 import {
     DIAGRAM_TYPES,
     DiagramUtils,
@@ -15,6 +16,7 @@ import {
 } from '@/services/intelligent-diagram-service';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 // أنواع البيانات للـ hooks
 export interface DiagramProgress {
@@ -27,23 +29,57 @@ export interface UseDiagramGeneratorConfig {
     type: DiagramType;
     title?: string;
     description?: string;
-    context?: {
-        projectData?: any;
-        sectionContent?: string;
+
+    // سياق المشروع المحدث
+    projectContext?: {
+        title?: string;
+        description?: string;
+        domain?: string;
         requirements?: string[];
         stakeholders?: string[];
         technologies?: string[];
+        constraints?: string[];
     };
+
+    // محتوى مرجعي
+    referenceContent?: {
+        sectionContent?: string;
+        existingDiagrams?: string[];
+        documentationLinks?: string[];
+    };
+
+    // إعدادات التصميم المحدثة
     style?: {
         theme?: 'default' | 'modern' | 'minimal' | 'colorful';
         direction?: 'top-bottom' | 'left-right' | 'bottom-top' | 'right-left';
         showDetails?: boolean;
         includeNotes?: boolean;
     };
+
     complexity?: 'basic' | 'detailed' | 'comprehensive';
     language?: 'ar' | 'en';
+    requirements?: string[];
+
+    // إعدادات ذكية جديدة
+    intelligentSettings?: {
+        enableContextAnalysis?: boolean;
+        enableIterativeImprovement?: boolean;
+        enablePerformanceMonitoring?: boolean;
+        qualityThreshold?: number;
+        maxIterations?: number;
+        adaptiveModelSelection?: boolean;
+    };
+
+    // تفضيلات المخرجات
+    outputPreferences?: {
+        includeComments?: boolean;
+        includeMetadata?: boolean;
+        generateSuggestions?: boolean;
+        validateSyntax?: boolean;
+    };
+
     autoGenerate?: boolean;
-    onSuccess?: (result: DiagramResult) => void;
+    onSuccess?: (result: any) => void;
     onError?: (error: Error) => void;
     onProgress?: (progress: DiagramProgress) => void;
 }
@@ -70,77 +106,101 @@ export function useDiagramGenerator(config: UseDiagramGeneratorConfig) {
 
     const mutation = useMutation({
         mutationFn: async () => {
-            const generationConfig: DiagramGenerationConfig = {
-                type: config.type,
+            // إعداد بيانات الإدخال للتدفق الذكي الجديد
+            const flowInput = {
                 title: config.title || DIAGRAM_TYPES[config.type].title,
-                description: config.description,
-                context: config.context || {},
+                description: config.description || '',
+                type: config.type,
+                complexity: config.complexity || 'detailed',
                 style: {
-                    theme: 'modern',
-                    direction: 'top-bottom',
+                    theme: 'modern' as const,
+                    direction: 'top-bottom' as const,
                     showDetails: true,
                     includeNotes: true,
                     ...config.style
                 },
-                complexity: config.complexity || 'detailed',
-                language: config.language || 'ar'
+                requirements: config.requirements || [],
+                language: config.language || 'ar',
+                projectContext: config.projectContext,
+                referenceContent: config.referenceContent,
+                intelligentSettings: {
+                    enableContextAnalysis: true,
+                    enableIterativeImprovement: true,
+                    enablePerformanceMonitoring: true,
+                    qualityThreshold: 80,
+                    maxIterations: 3,
+                    adaptiveModelSelection: true,
+                    ...config.intelligentSettings
+                },
+                outputPreferences: {
+                    includeComments: true,
+                    includeMetadata: true,
+                    generateSuggestions: true,
+                    validateSyntax: true,
+                    ...config.outputPreferences
+                }
             };
 
-            // تحديث التقدم
+            // تحديث التقدم - التحضير
             setProgress({
                 stage: 'preparing',
-                message: 'جاري تحضير بيانات المخطط...',
+                message: 'جاري تحضير بيانات المخطط والبرومبتات الذكية...',
                 percentage: 10
             });
             config.onProgress?.({
                 stage: 'preparing',
-                message: 'جاري تحضير بيانات المخطط...',
+                message: 'جاري تحضير بيانات المخطط والبرومبتات الذكية...',
                 percentage: 10
             });
 
+            // تحديث التقدم - التحليل
             setProgress({
                 stage: 'analyzing',
-                message: 'جاري تحليل السياق والمتطلبات...',
+                message: 'جاري تحليل السياق وبناء البرومبتات المخصصة...',
                 percentage: 30
             });
             config.onProgress?.({
                 stage: 'analyzing',
-                message: 'جاري تحليل السياق والمتطلبات...',
+                message: 'جاري تحليل السياق وبناء البرومبتات المخصصة...',
                 percentage: 30
             });
 
+            // تحديث التقدم - التوليد
             setProgress({
                 stage: 'generating',
-                message: 'جاري توليد كود PlantUML...',
+                message: 'جاري توليد كود PlantUML بالذكاء الاصطناعي...',
                 percentage: 60
             });
             config.onProgress?.({
                 stage: 'generating',
-                message: 'جاري توليد كود PlantUML...',
+                message: 'جاري توليد كود PlantUML بالذكاء الاصطناعي...',
                 percentage: 60
             });
 
-            const result = await IntelligentDiagramService.generateDiagram(generationConfig);
+            // استخدام التدفق الذكي الجديد
+            const result = await generateDiagram(flowInput as any);
 
+            // تحديث التقدم - التحسين
             setProgress({
                 stage: 'optimizing',
-                message: 'جاري تحسين وتحليل المخطط...',
+                message: 'جاري تحليل الجودة والتحسين النهائي...',
                 percentage: 90
             });
             config.onProgress?.({
                 stage: 'optimizing',
-                message: 'جاري تحسين وتحليل المخطط...',
+                message: 'جاري تحليل الجودة والتحسين النهائي...',
                 percentage: 90
             });
 
+            // تحديث التقدم - الإكمال
             setProgress({
                 stage: 'completed',
-                message: 'تم التوليد بنجاح!',
+                message: 'تم التوليد بنجاح باستخدام البرومبتات الذكية!',
                 percentage: 100
             });
             config.onProgress?.({
                 stage: 'completed',
-                message: 'تم التوليد بنجاح!',
+                message: 'تم التوليد بنجاح باستخدام البرومبتات الذكية!',
                 percentage: 100
             });
 
@@ -148,7 +208,7 @@ export function useDiagramGenerator(config: UseDiagramGeneratorConfig) {
         },
         onSuccess: (result) => {
             toast.success(`تم توليد ${DIAGRAM_TYPES[config.type].title} بنجاح!`, {
-                description: `جودة: ${result.metadata.qualityScore}/100 - وقت التنفيذ: ${result.metadata.generationTime}ms`
+                description: `جودة: ${result.performanceMetrics.qualityScore}/100 - وقت التنفيذ: ${result.performanceMetrics.executionTime}ms - تكرارات: ${result.performanceMetrics.iterations}`
             });
             config.onSuccess?.(result);
         },
@@ -167,10 +227,10 @@ export function useDiagramGenerator(config: UseDiagramGeneratorConfig) {
 
     // التوليد التلقائي عند تغيير الإعدادات
     useEffect(() => {
-        if (config.autoGenerate && config.context?.projectData) {
+        if (config.autoGenerate && config.projectContext) {
             mutation.mutate();
         }
-    }, [config.autoGenerate, config.type, JSON.stringify(config.context?.projectData)]);
+    }, [config.autoGenerate, config.type, JSON.stringify(config.projectContext)]);
 
     const diagramInfo = DIAGRAM_TYPES[config.type];
     const estimatedTime = DiagramUtils.formatEstimatedTime(diagramInfo.estimatedTime);
@@ -192,10 +252,17 @@ export function useDiagramGenerator(config: UseDiagramGeneratorConfig) {
         generateDiagram: mutation.mutate,
         reset: mutation.reset,
 
-        // إحصائيات
-        executionTime: mutation.data?.metadata?.generationTime,
-        qualityScore: mutation.data?.metadata?.qualityScore,
-        elementCount: mutation.data?.metadata?.elementCount,
+        // إحصائيات محدثة
+        executionTime: mutation.data?.performanceMetrics?.executionTime,
+        qualityScore: mutation.data?.performanceMetrics?.qualityScore,
+        elementCount: mutation.data?.elementCount,
+        iterations: mutation.data?.performanceMetrics?.iterations,
+        modelUsed: mutation.data?.performanceMetrics?.modelUsed,
+        improvementSteps: mutation.data?.performanceMetrics?.improvementSteps,
+
+        // تحليل الجودة
+        qualityAnalysis: mutation.data?.qualityAnalysis,
+        contextAnalysis: mutation.data?.contextAnalysis,
     };
 }
 
@@ -216,7 +283,7 @@ export function useDiagramCollection(config: UseDiagramCollectionConfig) {
             const relevantTypes = IntelligentDiagramService.getRelevantDiagramTypes(config.sectionName);
             const typesToGenerate = relevantTypes.slice(0, config.maxDiagrams || 3);
 
-            setProgress({ completed: 0, total: typesToGenerate.length });
+            setProgress({ completed: 0, total: typesToGenerate.length, current: undefined });
             config.onProgress?.({ completed: 0, total: typesToGenerate.length });
 
             const generatedResults: DiagramResult[] = [];
@@ -477,6 +544,326 @@ export function useDiagramManager() {
         // حالة المجموعة
         isEmpty: diagrams.length === 0,
         hasSelection: selectedDiagram !== null,
+    };
+}
+
+/**
+ * Hook لبناء البرومبتات الذكية
+ */
+export function useDiagramPrompts() {
+    const [promptBuilder] = useState(() => new DiagramPromptBuilder());
+    const [promptHistory, setPromptHistory] = useState<Array<{
+        type: DiagramType;
+        prompt: string;
+        timestamp: string;
+        config: any;
+    }>>([]);
+
+    const buildPromptMutation = useMutation({
+        mutationFn: async ({
+            diagramType,
+            title,
+            description,
+            complexity,
+            style,
+            projectContext,
+            requirements,
+            stakeholders,
+            language
+        }: {
+            diagramType: DiagramType;
+            title: string;
+            description?: string;
+            complexity?: 'basic' | 'detailed' | 'comprehensive';
+            style?: any;
+            projectContext?: any;
+            requirements?: string[];
+            stakeholders?: string[];
+            language?: 'ar' | 'en';
+        }) => {
+            const prompt = await promptBuilder.buildDiagramPrompt({
+                diagramType: diagramType as any,
+                title,
+                description,
+                complexity: complexity || 'detailed',
+                style,
+                projectContext,
+                requirements,
+                stakeholders,
+                language: language || 'ar'
+            });
+
+            // حفظ في التاريخ
+            setPromptHistory(prev => [...prev, {
+                type: diagramType,
+                prompt,
+                timestamp: new Date().toISOString(),
+                config: {
+                    diagramType,
+                    title,
+                    description,
+                    complexity,
+                    style,
+                    projectContext,
+                    requirements,
+                    stakeholders,
+                    language
+                }
+            }]);
+
+            return prompt;
+        },
+        onSuccess: (prompt) => {
+            toast.success('تم بناء البرومبت بنجاح!', {
+                description: `طول البرومبت: ${prompt.length} حرف`
+            });
+        },
+        onError: (error: Error) => {
+            toast.error('فشل في بناء البرومبت', {
+                description: error.message
+            });
+        }
+    });
+
+    const buildImprovementPromptMutation = useMutation({
+        mutationFn: async ({
+            currentDiagram,
+            qualityAssessment,
+            targetQuality,
+            focusAreas
+        }: {
+            currentDiagram: string;
+            qualityAssessment: any;
+            targetQuality: number;
+            focusAreas?: string[];
+        }) => {
+            return promptBuilder.buildImprovementPrompt({
+                currentDiagram,
+                qualityAssessment,
+                targetQuality,
+                focusAreas
+            });
+        },
+        onSuccess: () => {
+            toast.success('تم بناء برومبت التحسين بنجاح!');
+        },
+        onError: (error: Error) => {
+            toast.error('فشل في بناء برومبت التحسين', {
+                description: error.message
+            });
+        }
+    });
+
+    const buildValidationPromptMutation = useMutation({
+        mutationFn: async (diagramCode: string) => {
+            return promptBuilder.buildValidationPrompt(diagramCode);
+        },
+        onSuccess: () => {
+            toast.success('تم بناء برومبت التحقق بنجاح!');
+        },
+        onError: (error: Error) => {
+            toast.error('فشل في بناء برومبت التحقق', {
+                description: error.message
+            });
+        }
+    });
+
+    const clearHistory = useCallback(() => {
+        setPromptHistory([]);
+    }, []);
+
+    return {
+        // حالة البناء
+        isBuildingPrompt: buildPromptMutation.isPending,
+        isBuildingImprovement: buildImprovementPromptMutation.isPending,
+        isBuildingValidation: buildValidationPromptMutation.isPending,
+
+        // النتائج
+        builtPrompt: buildPromptMutation.data,
+        improvementPrompt: buildImprovementPromptMutation.data,
+        validationPrompt: buildValidationPromptMutation.data,
+
+        // الأخطاء
+        promptError: buildPromptMutation.error,
+        improvementError: buildImprovementPromptMutation.error,
+        validationError: buildValidationPromptMutation.error,
+
+        // دوال التحكم
+        buildPrompt: buildPromptMutation.mutate,
+        buildImprovementPrompt: buildImprovementPromptMutation.mutate,
+        buildValidationPrompt: buildValidationPromptMutation.mutate,
+        resetPrompts: () => {
+            buildPromptMutation.reset();
+            buildImprovementPromptMutation.reset();
+            buildValidationPromptMutation.reset();
+        },
+        clearHistory,
+
+        // التاريخ والإحصائيات
+        promptHistory,
+        hasHistory: promptHistory.length > 0,
+        totalPrompts: promptHistory.length,
+        promptsByType: promptHistory.reduce((acc, item) => {
+            acc[item.type] = (acc[item.type] || 0) + 1;
+            return acc;
+        }, {} as Record<DiagramType, number>)
+    };
+}
+
+/**
+ * Hook لمكتبة المخططات المحفوظة
+ */
+export interface SavedDiagram {
+    id: string;
+    title: string;
+    type: DiagramType;
+    plantUmlCode: string;
+    description?: string;
+    elementCount: number;
+    qualityScore?: number;
+    createdAt: string;
+    updatedAt: string;
+    tags?: string[];
+    isFavorite?: boolean;
+    isShared?: boolean;
+    metadata?: any;
+}
+
+export interface DiagramFilter {
+    searchTerm?: string;
+    type?: DiagramType;
+    tags?: string[];
+    sortBy?: 'recent' | 'name' | 'type' | 'quality';
+    isFavorite?: boolean;
+}
+
+export function useDiagramLibrary(filter?: DiagramFilter) {
+    const [diagrams, setDiagrams] = useState<SavedDiagram[]>([]);
+
+    // محاكاة البيانات (يمكن استبدالها بـ API حقيقي)
+    useEffect(() => {
+        // بيانات وهمية للاختبار
+        const mockDiagrams: SavedDiagram[] = [
+            {
+                id: '1',
+                title: 'مخطط فئات نظام المكتبة',
+                type: 'class',
+                plantUmlCode: '@startuml\nclass Book\nclass User\n@enduml',
+                elementCount: 2,
+                qualityScore: 85,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                isFavorite: true,
+                tags: ['مكتبة', 'نظام']
+            },
+            {
+                id: '2',
+                title: 'مخطط تسلسل عملية الدفع',
+                type: 'sequence',
+                plantUmlCode: '@startuml\nactor User\nUser -> System\n@enduml',
+                elementCount: 2,
+                qualityScore: 92,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                isFavorite: false,
+                tags: ['دفع', 'تجارة']
+            }
+        ];
+        setDiagrams(mockDiagrams);
+    }, []);
+
+    // تصفية المخططات
+    const filteredDiagrams = diagrams.filter(diagram => {
+        if (filter?.searchTerm && !diagram.title.toLowerCase().includes(filter.searchTerm.toLowerCase())) {
+            return false;
+        }
+        if (filter?.type && diagram.type !== filter.type) {
+            return false;
+        }
+        if (filter?.isFavorite && !diagram.isFavorite) {
+            return false;
+        }
+        if (filter?.tags && !filter.tags.some(tag => diagram.tags?.includes(tag))) {
+            return false;
+        }
+        return true;
+    });
+
+    // ترتيب المخططات
+    const sortedDiagrams = [...filteredDiagrams].sort((a, b) => {
+        switch (filter?.sortBy) {
+            case 'name':
+                return a.title.localeCompare(b.title);
+            case 'type':
+                return a.type.localeCompare(b.type);
+            case 'quality':
+                return (b.qualityScore || 0) - (a.qualityScore || 0);
+            case 'recent':
+            default:
+                return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        }
+    });
+
+    // دوال إدارة المخططات
+    const saveDiagram = useCallback((diagram: Omit<SavedDiagram, 'id' | 'createdAt' | 'updatedAt'>) => {
+        const newDiagram: SavedDiagram = {
+            ...diagram,
+            id: Date.now().toString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+        setDiagrams(prev => [newDiagram, ...prev]);
+        toast.success('تم حفظ المخطط بنجاح!');
+        return newDiagram;
+    }, []);
+
+    const deleteDiagram = useCallback(async (id: string) => {
+        setDiagrams(prev => prev.filter(d => d.id !== id));
+        toast.success('تم حذف المخطط بنجاح!');
+    }, []);
+
+    const toggleFavorite = useCallback(async (id: string) => {
+        setDiagrams(prev => prev.map(d =>
+            d.id === id ? { ...d, isFavorite: !d.isFavorite } : d
+        ));
+        const diagram = diagrams.find(d => d.id === id);
+        toast.success(diagram?.isFavorite ? 'تم إزالة من المفضلة' : 'تم إضافة للمفضلة');
+    }, [diagrams]);
+
+    const duplicateDiagram = useCallback(async (id: string) => {
+        const original = diagrams.find(d => d.id === id);
+        if (original) {
+            const duplicate = saveDiagram({
+                ...original,
+                title: `${original.title} - نسخة`,
+                isFavorite: false
+            });
+            return duplicate;
+        }
+        throw new Error('المخطط غير موجود');
+    }, [diagrams, saveDiagram]);
+
+    return {
+        // البيانات
+        diagrams: sortedDiagrams,
+        totalDiagrams: diagrams.length,
+        filteredCount: sortedDiagrams.length,
+
+        // دوال الإدارة
+        saveDiagram,
+        deleteDiagram,
+        toggleFavorite,
+        duplicateDiagram,
+
+        // الإحصائيات
+        favoriteCount: diagrams.filter(d => d.isFavorite).length,
+        typeDistribution: diagrams.reduce((acc, d) => {
+            acc[d.type] = (acc[d.type] || 0) + 1;
+            return acc;
+        }, {} as Record<DiagramType, number>),
+        averageQuality: diagrams.length > 0
+            ? diagrams.reduce((sum, d) => sum + (d.qualityScore || 0), 0) / diagrams.length
+            : 0
     };
 }
 

@@ -314,6 +314,8 @@ export function DiagramLibrary({
                 <DiagramPreview
                     diagram={{
                         ...selectedDiagram,
+                        suggestions: [],
+                        relatedDiagrams: [],
                         metadata: selectedDiagram.metadata || {
                             qualityScore: 85,
                             executionTime: 1200,

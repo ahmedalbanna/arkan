@@ -4,7 +4,6 @@
  */
 
 import type { SectionName } from '@/ai/schemas/enums';
-import { toast } from '@/hooks/use-toast';
 import {
     type CompleteReportResult,
     IntelligentReportService,
@@ -14,6 +13,7 @@ import {
 } from '@/services/intelligent-report-service';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 // أنواع البيانات للـ hooks
 export interface ReportProgress {
