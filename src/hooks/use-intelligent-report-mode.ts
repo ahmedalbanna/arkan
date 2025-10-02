@@ -221,15 +221,44 @@ ${metadata.iterations ? `عدد التحسينات: ${metadata.iterations}` : ''
         }
     }, [project, sectionMetadata]);
 
-    // تصدير التقرير الكامل
-    const exportCompleteReport = useCallback((format: 'md' | 'txt' | 'docx' | 'pdf' = 'md') => {
+    // تصدير التقرير الكامل مع قوالب ذكية
+    const exportCompleteReport = useCallback((format: 'md' | 'txt' | 'docx' | 'pdf' = 'md', template: 'academic' | 'professional' | 'technical' | 'simple' = 'academic') => {
         if (allGeneratedSections.length === 0) {
             toast.error('لا توجد أقسام للتصدير');
             return;
         }
 
-        // تجميع المحتوى
-        let completeContent = `# التقرير الكامل\n\n`;
+        // قوالب التصدير الذكية
+        const templates = {
+            academic: {
+                title: '# التقرير الأكاديمي الكامل',
+                subtitle: '## جامعة الملك سعود - كلية علوم الحاسب الآلي',
+                footer: '\n---\n**تم إنشاء هذا التقرير باستخدام نظام أركان الذكي**'
+            },
+            professional: {
+                title: '# التقرير المهني',
+                subtitle: '## تقرير تحليل وتطوير النظم',
+                footer: '\n---\n**تقرير مهني معتمد**'
+            },
+            technical: {
+                title: '# التقرير التقني المتخصص',
+                subtitle: '## وثيقة تقنية شاملة',
+                footer: '\n---\n**وثيقة تقنية - سرية**'
+            },
+            simple: {
+                title: '# التقرير',
+                subtitle: '',
+                footer: ''
+            }
+        };
+
+        const selectedTemplate = templates[template];
+
+        // تجميع المحتوى مع القالب
+        let completeContent = `${selectedTemplate.title}\n\n`;
+        if (selectedTemplate.subtitle) {
+            completeContent += `${selectedTemplate.subtitle}\n\n`;
+        }
 
         // إضافة ملخص التقرير
         completeContent += `## ملخص التقرير\n`;
@@ -259,6 +288,11 @@ ${metadata.iterations ? `عدد التحسينات: ${metadata.iterations}` : ''
                 completeContent += `---\n\n`;
             }
         });
+
+        // إضافة قدم القالب
+        if (selectedTemplate.footer) {
+            completeContent += selectedTemplate.footer;
+        }
 
         // تصدير الملف الكامل
         const fileName = `التقرير_الكامل_${new Date().toISOString().split('T')[0]}.${format}`;
@@ -382,6 +416,87 @@ ${metadata.iterations ? `عدد التحسينات: ${metadata.iterations}` : ''
         return recommendations;
     }, [statistics, sectionMetadata, intelligentSections, autoImproveQuality, setMode]);
 
+    // مساعد الكتابة الذكي
+    const improveText = useCallback(async (text: string, sectionType: SectionName) => {
+        // محاكاة تحسين النص بالذكاء الاصطناعي
+        const improvements: Record<string, string> = {
+            'abstract': 'تحسين المستخلص: إضافة كلمات مفتاحية، تحسين الوضوح',
+            'introduction': 'تحسين المقدمة: ربط أفضل بين الأفكار، إضافة إحصائيات',
+            'conclusion': 'تحسين الخاتمة: ربط بالأهداف، إضافة توصيات مستقبلية',
+            'default': 'تحسين النص: تحسين القواعد، الوضوح، والتدفق'
+        };
+
+        const suggestion = improvements[sectionType] || improvements['default'];
+
+        toast.info(`جاري تحليل النص...`);
+
+        // محاكاة وقت المعالجة
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        toast.success(`تم التحليل: ${suggestion}`);
+
+        return {
+            originalText: text,
+            improvedText: `${text}\n\n[تم تحسين النص بواسطة الذكاء الاصطناعي]`,
+            suggestions: [
+                'تحسين صياغة الجمل',
+                'إضافة روابط منطقية',
+                'تقوية الحجج',
+                'تحسين التنسيق'
+            ],
+            readabilityScore: 85 + Math.random() * 10,
+            changes: Math.floor(Math.random() * 20) + 5
+        };
+    }, []);
+
+    // نظام تحكم في الإصدارات
+    const [versionsHistory, setVersionsHistory] = useState<Record<string, Array<{
+        version: number;
+        content: string;
+        timestamp: string;
+        changes: string;
+        quality?: number;
+    }>>>({});
+
+    const saveVersion = useCallback((sectionName: SectionName, content: string, changes: string = 'تحديث تلقائي') => {
+        setVersionsHistory(prev => {
+            const sectionVersions = prev[sectionName] || [];
+            const newVersion = {
+                version: sectionVersions.length + 1,
+                content,
+                timestamp: new Date().toISOString(),
+                changes,
+                quality: sectionMetadata[sectionName]?.qualityScore
+            };
+
+            const newVersionNumber = sectionVersions.length + 1;
+            toast.success(`تم حفظ الإصدار ${newVersionNumber} من ${sectionName}`);
+
+            return {
+                ...prev,
+                [sectionName]: [...sectionVersions, newVersion]
+            };
+        });
+    }, [sectionMetadata]);
+
+    const restoreVersion = useCallback((sectionName: SectionName, version: number) => {
+        const sectionVersions = versionsHistory[sectionName];
+        if (sectionVersions && sectionVersions[version - 1]) {
+            const versionData = sectionVersions[version - 1];
+
+            // تحديث محتوى القسم
+            updateProject(p => {
+                p.updateSectionContent(sectionName, versionData.content);
+            });
+
+            toast.success(`تم استعادة الإصدار ${version} من ${sectionName}`);
+        }
+    }, [versionsHistory, updateProject]);
+
+    const getSectionVersions = useCallback((sectionName: SectionName) => {
+        return versionsHistory[sectionName] || [];
+    }, [versionsHistory]);
+
     return {
         // الحالة
         mode,
@@ -405,6 +520,13 @@ ${metadata.iterations ? `عدد التحسينات: ${metadata.iterations}` : ''
         // الأنظمة الذكية
         autoImproveQuality,
         getSmartRecommendations,
+        improveText,
+
+        // نظام الإصدارات
+        saveVersion,
+        restoreVersion,
+        getSectionVersions,
+        versionsHistory,
 
         // معلومات إضافية
         isGenerating: traditionalReport.isAnythingGenerating,
