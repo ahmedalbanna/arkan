@@ -17,11 +17,16 @@ Arkan follows a modern, modular architecture built on Next.js 15 with Firebase b
 - **Tailwind CSS**: Utility-first styling approach
 - **Theme System**: Dark/light mode with consistent theming
 
-### 3. AI Integration Pattern
-- **Genkit Framework**: Structured AI flow management
-- **Separation of Concerns**: Prompts, flows, and tools in separate modules
-- **Schema Validation**: Zod schemas for AI input/output validation
-- **Error Handling**: Comprehensive error management for AI operations
+### 3. Intelligent AI Integration Pattern (ENHANCED)
+- **Genkit Framework**: Structured AI flow management with intelligent enhancements
+- **Context-Aware Analysis**: Deep understanding of user input, complexity, and requirements
+- **Adaptive Model Selection**: Smart model choice based on task type and context analysis
+- **Dynamic Prompt Engineering**: Context-aware prompt building with optimization
+- **Quality Validation**: Multi-metric assessment of output quality and completeness
+- **Iterative Improvement**: Automatic refinement through multiple iterations
+- **Separation of Concerns**: Prompts, flows, tools, and intelligence modules in separate layers
+- **Schema Validation**: Enhanced Zod schemas with quality validation
+- **Error Handling**: Comprehensive error management with fallback strategies
 
 ## Key System Patterns
 
@@ -41,13 +46,20 @@ const useBuilderStore = create<ProjectState>((set, get) => ({
 }));
 ```
 
-### 2. AI Flow Architecture
+### 2. Enhanced AI Flow Architecture
 ```
 config/     → AI model configurations
-prompts/    → Prompt definitions
-flows/      → Business logic orchestration
+prompts/    → Intelligent prompt definitions with context analysis
+flows/      → Enhanced business logic with quality validation
 tools/      → External tool integrations
-schemas/    → Zod validation schemas
+schemas/    → Zod validation schemas with quality metrics
+core/       → NEW: Intelligent AI system components
+  ├── context-analyzer.ts          → Deep context understanding
+  ├── intelligent-prompt-builder.ts → Dynamic prompt optimization
+  ├── output-quality-validator.ts   → Multi-metric quality assessment
+  ├── adaptive-model-selector.ts    → Smart model selection
+  ├── iterative-improvement-engine.ts → Automatic output refinement
+  └── index.ts                     → Unified intelligent system interface
 ```
 
 ### 3. Hook Factory Pattern
@@ -70,7 +82,19 @@ const isFeatureEnabled = (feature: string) => {
 
 ## Data Flow Patterns
 
-### 1. AI Generation Flow
+### 1. Enhanced Intelligent AI Generation Flow
+1. **User Input** → Form validation and initial processing
+2. **Context Analysis** → Deep understanding of requirements, complexity, and audience
+3. **Model Selection** → Adaptive selection based on task type and context analysis
+4. **Prompt Engineering** → Dynamic prompt building with context optimization
+5. **AI Flow Execution** → Enhanced Genkit flow with intelligent model configuration
+6. **Quality Assessment** → Multi-metric validation of output quality
+7. **Iterative Improvement** → Automatic refinement if quality threshold not met
+8. **Result Processing** → Enhanced schema validation with quality checks
+9. **State Update** → Project model update with quality metrics
+10. **UI Refresh** → Component re-rendering with quality indicators
+
+### 2. Traditional AI Generation Flow (Legacy)
 1. **User Input** → Form validation
 2. **Context Preparation** → File uploads and context processing
 3. **AI Flow Execution** → Genkit flow with prompt and model

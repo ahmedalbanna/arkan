@@ -3,6 +3,9 @@
 'use server';
 
 import { defaultModel } from '@/ai/config/models';
+import { AdaptiveModelSelector } from '@/ai/core/adaptive-model-selector';
+import { ContextAnalyzer } from '@/ai/core/context-analyzer';
+import { IntelligentPromptBuilder } from '@/ai/core/intelligent-prompt-builder';
 import { ai } from '@/ai/genkit';
 import { GenerateProposalInputSchema, ProjectProposalSchema } from '@/ai/schemas';
 import { z } from 'zod';
@@ -14,27 +17,102 @@ const schemaString = JSON.stringify(jsonSchema, null, 2);
 export const generateProposalPrompt = ai.definePrompt(
   {
     name: 'generateProposalPrompt',
-    input: { schema: GenerateProposalInputSchema }, // Use the updated schema
+    input: { schema: GenerateProposalInputSchema },
     output: { schema: z.any() },
     model: defaultModel || 'googleai/gemini-2.0-flash',
-    system: `You are an expert project manager and technical writer. Your task is to generate a comprehensive and professional project proposal based on the provided idea and context.
+    system: async (input) => {
+      // محاولة استخدام النظام الذكي المحسن
+      try {
+        // تحليل السياق الذكي
+        const contextAnalysis = await ContextAnalyzer.analyzeContext({
+          userInput: input.projectIdea || '',
+          externalContext: input.externalContext,
+          guidelines: input.guidelines,
+        });
 
-**Your Reasoning Process:**
-1.  **Deconstruct the Core Idea**: First, deeply analyze the user's project idea to understand its fundamental purpose and scope.
-2.  **Infer and Elaborate**: Even if the user provides a simple idea, you must use your expertise to infer and brainstorm all the necessary components of a professional proposal. This includes creating a plausible and detailed:
-    - **Objective**: What is the primary goal?
-    - **Scope**: What is in and out of scope?
-    - **Methodology**: What approach (e.g., Agile, Waterfall) makes sense?
-    - **Timeline**: A realistic, phased timeline.
-    - **Budget**: A reasonable, itemized budget.
-    - **Stakeholders**: Likely roles involved.
-    - **Risks**: Potential challenges and how to mitigate them.
-3.  **Generate All Sections**: Fill out **every field** in the JSON schema with well-written, professional content. Do not leave fields blank unless they are truly not applicable. Use well-formed markdown for all string fields.
+        // اختيار النموذج المناسب
+        const modelConfig = AdaptiveModelSelector.selectOptimalModel(
+          contextAnalysis,
+          'generation'
+        );
 
---- OUTPUT SCHEMA ---
-Your entire response must be a single, valid JSON object that adheres to this schema. The 'description' fields in the schema are your primary instructions for what to generate for each property.
+        // بناء prompt ذكي
+        const promptTemplate = IntelligentPromptBuilder.buildPrompt({
+          taskType: 'generation',
+          domain: 'project-proposals',
+          contextAnalysis,
+          userInput: input.projectIdea || '',
+          externalContext: input.externalContext,
+        });
+
+        return `${promptTemplate.system}
+
+**مهمتك المحددة:**
+أنت خبير في إدارة المشاريع والكتابة التقنية. مهمتك هي إنتاج مقترح مشروع شامل ومهني بناءً على الفكرة والسياق المقدم.
+
+**عملية التفكير المطلوبة:**
+1. **تحليل الفكرة الأساسية**: حلل فكرة المشروع بعمق لفهم الغرض والنطاق الأساسي.
+2. **الاستنتاج والتوسع**: حتى لو قدم المستخدم فكرة بسيطة، استخدم خبرتك لاستنتاج وتطوير جميع مكونات المقترح المهني:
+   - **الهدف**: ما هو الهدف الأساسي؟
+   - **النطاق**: ما هو داخل وخارج النطاق؟
+   - **المنهجية**: ما النهج المناسب (مثل Agile، Waterfall)؟
+   - **الجدول الزمني**: جدول زمني واقعي ومرحلي
+   - **الميزانية**: ميزانية معقولة ومفصلة
+   - **أصحاب المصلحة**: الأدوار المحتملة المشاركة
+   - **المخاطر**: التحديات المحتملة وكيفية التعامل معها
+3. **إنتاج جميع الأقسام**: املأ **كل حقل** في مخطط JSON بمحتوى مكتوب جيداً ومهني.
+
+**السياق المتاح:**
+${promptTemplate.context}
+
+**التعليمات المفصلة:**
+${promptTemplate.instructions}
+
+**القيود والمحددات:**
+${promptTemplate.constraints}
+
+**تنسيق المخرجات:**
+${promptTemplate.outputFormat}
+
+--- مخطط المخرجات ---
+يجب أن تكون استجابتك بالكامل عبارة عن كائن JSON صالح واحد يلتزم بهذا المخطط:
 ${schemaString}
----`,
+---
+ملاحظة هامة:
+- يجب أن يكون الإخراج النهائي عبارة عن كائن JSON صالح فقط، بدون أي نص إضافي أو شرح أو تعليقات أو رموز برمجية أو علامات HTML أو Markdown.
+- إذا لم تتمكن من توليد كائن JSON صالح لأي سبب، أعد محاولة التوليد أو أعد صياغة الحقول بحيث تكون جميع القيم نصية وصالحة لـ JSON.
+- لا تضع أي نص خارج كائن JSON النهائي.
+`;
+
+      } catch (enhancedError) {
+        console.warn('⚠️ فشل النظام المحسن في الـ prompt، استخدام النظام الأساسي:', enhancedError);
+
+        // النظام الأساسي
+        return `أنت خبير في إدارة المشاريع والكتابة التقنية. مهمتك هي إنتاج مقترح مشروع شامل ومهني بناءً على الفكرة والسياق المقدم.
+
+**عملية التفكير المطلوبة:**
+1. **تحليل الفكرة الأساسية**: حلل فكرة المشروع بعمق لفهم الغرض والنطاق الأساسي.
+2. **الاستنتاج والتوسع**: حتى لو قدم المستخدم فكرة بسيطة، استخدم خبرتك لاستنتاج وتطوير جميع مكونات المقترح المهني:
+   - **الهدف**: ما هو الهدف الأساسي؟
+   - **النطاق**: ما هو داخل وخارج النطاق؟
+   - **المنهجية**: ما النهج المناسب (مثل Agile، Waterfall)؟
+   - **الجدول الزمني**: جدول زمني واقعي ومرحلي
+   - **الميزانية**: ميزانية معقولة ومفصلة
+   - **أصحاب المصلحة**: الأدوار المحتملة المشاركة
+   - **المخاطر**: التحديات المحتملة وكيفية التعامل معها
+3. **إنتاج جميع الأقسام**: املأ **كل حقل** في مخطط JSON بمحتوى مكتوب جيداً ومهني.
+
+--- مخطط المخرجات ---
+يجب أن تكون استجابتك بالكامل عبارة عن كائن JSON صالح واحد يلتزم بهذا المخطط:
+${schemaString}
+---
+ملاحظة هامة:
+- يجب أن يكون الإخراج النهائي عبارة عن كائن JSON صالح فقط، بدون أي نص إضافي أو شرح أو تعليقات أو رموز برمجية أو علامات HTML أو Markdown.
+- إذا لم تتمكن من توليد كائن JSON صالح لأي سبب، أعد محاولة التوليد أو أعد صياغة الحقول بحيث تكون جميع القيم نصية وصالحة لـ JSON.
+- لا تضع أي نص خارج كائن JSON النهائي.
+`;
+      }
+    },
     prompt: `
 {{#if advancedFields}}
 --- DETAILED PROJECT REQUIREMENTS ---

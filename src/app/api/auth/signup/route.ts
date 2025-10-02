@@ -127,13 +127,30 @@ class ProviderSignupHandler extends ComplexApiHandler<{
         const defaultCredits = await this.getNewUserCredits();
 
 
-        const userRecord = await adminAuth.createUser({ email, displayName: name });
+        // التحقق من وجود المستخدم أولاً
         const existingProfile = await getUserProfile(uid);
         if (existingProfile) {
             return {
                 message: "User profile already exists.",
                 user: existingProfile
             };
+        }
+
+        // محاولة إنشاء المستخدم مع معالجة خطأ الإيميل المكرر
+        let userRecord;
+        try {
+            userRecord = await adminAuth.createUser({ email, displayName: name });
+        } catch (error: any) {
+            if (error.code === 'auth/email-already-exists') {
+                // إذا كان الإيميل موجود، نحاول الحصول على المستخدم الموجود
+                try {
+                    userRecord = await adminAuth.getUserByEmail(email);
+                } catch (getUserError) {
+                    throw new Error('An account with this email address already exists.');
+                }
+            } else {
+                throw error;
+            }
         }
 
         const newUserProfile = {

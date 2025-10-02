@@ -194,7 +194,7 @@ export class PerformanceTracker {
             return fn();
         }
 
-        const startTime = performance.now();
+        const startTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
         let success = true;
         let result: T;
 
@@ -204,7 +204,7 @@ export class PerformanceTracker {
             success = false;
             throw error;
         } finally {
-            const executionTime = performance.now() - startTime;
+            const executionTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - startTime;
 
             this.addMetric('function_execution_time', executionTime, 'ms', {
                 function: functionName,
@@ -231,7 +231,7 @@ export class PerformanceTracker {
             return fn();
         }
 
-        const startTime = performance.now();
+        const startTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
         let success = true;
         let result: T;
 
@@ -241,7 +241,7 @@ export class PerformanceTracker {
             success = false;
             throw error;
         } finally {
-            const executionTime = performance.now() - startTime;
+            const executionTime = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - startTime;
 
             this.addMetric('async_function_execution_time', executionTime, 'ms', {
                 function: functionName,
@@ -344,6 +344,9 @@ export class PerformanceTracker {
 
     // مراقبة Core Web Vitals
     private static observeCoreWebVitals(): void {
+        // التأكد من أننا في بيئة المتصفح
+        if (typeof window === 'undefined') return;
+
         // Largest Contentful Paint (LCP)
         if ('PerformanceObserver' in window) {
             const lcpObserver = new PerformanceObserver((list) => {
@@ -406,6 +409,9 @@ export class PerformanceTracker {
 
     // مراقبة أداء الصفحة
     private static observePagePerformance(): void {
+        // التأكد من أننا في بيئة المتصفح
+        if (typeof window === 'undefined') return;
+
         // Navigation Timing
         window.addEventListener('load', () => {
             const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;

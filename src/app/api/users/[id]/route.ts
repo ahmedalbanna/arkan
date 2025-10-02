@@ -32,9 +32,9 @@ const userUpdateSchema = z.object({
  * معالج جلب ملف المستخدم
  */
 class GetUserHandler extends SimpleApiHandler<any> {
-    protected async processRequest(context: any) {
+    protected async processRequest(context: any): Promise<any> {
         const { params, user: requester } = context;
-        const { id: targetUserId } = params;
+        const { id: targetUserId } = await params;
 
         // Authorization check: either admin or self
         if (requester.role !== 'admin' && requester.id !== targetUserId) {
@@ -59,7 +59,7 @@ class UpdateUserHandler extends ComplexApiHandler<z.infer<typeof adminUpdateUser
 
     protected async processRequest(data: any, context: any): Promise<any> {
         const { params, user: requester } = context;
-        const { id: userId } = params;
+        const { id: userId } = await params;
 
         let validation;
 
@@ -97,7 +97,7 @@ class DeleteUserHandler extends SimpleApiHandler<{ message: string }> {
     protected requiresAdmin = true;
 
     protected async processRequest(context: any): Promise<{ message: string }> {
-        const { params } = context;
+        const { params } = await context;
         const { id: targetUserId } = params;
 
         if (!targetUserId) {

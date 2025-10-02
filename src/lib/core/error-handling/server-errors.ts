@@ -328,7 +328,15 @@ function logServerError(error: AppError, context?: string): void {
 async function reportServerError(error: AppError, context?: string): Promise<void> {
     try {
         // إرسال الخطأ إلى خدمة التتبع
-        await fetch(process.env.ERROR_REPORTING_URL || '/api/errors/report', {
+        const errorReportingUrl = process.env.ERROR_REPORTING_URL ||
+            (process.env.NEXT_PUBLIC_APP_URL ? `${process.env.NEXT_PUBLIC_APP_URL}/api/errors/report` : null);
+
+        if (!errorReportingUrl) {
+            console.warn('Error reporting URL not configured, skipping error report');
+            return;
+        }
+
+        await fetch(errorReportingUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

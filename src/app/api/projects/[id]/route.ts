@@ -38,7 +38,7 @@ const addContextSchema = z.object({
 class GetProjectHandler extends SimpleApiHandler<any> {
     protected async processRequest(context: any): Promise<any> {
         const { params, user } = context;
-        const { id: projectId } = params;
+        const { id: projectId } = await params;
         const project = await verifyProjectOwner(user.id, projectId);
         return { id: projectId, ...project } as any;
     }
@@ -53,7 +53,7 @@ class UpdateProjectHandler extends ComplexApiHandler<any, any> {
     protected creditCost = 1;
     protected async processRequest(data: any, context: any): Promise<any> {
         const { params, user } = context;
-        const { id: projectId } = params;
+        const { id: projectId } = await params;
         await verifyProjectOwner(user.id, projectId);
 
         const updateData = {
@@ -74,7 +74,7 @@ class UpdateProjectHandler extends ComplexApiHandler<any, any> {
 class DeleteProjectHandler extends SimpleApiHandler<{ message: string }> {
     protected async processRequest(context: any): Promise<{ message: string }> {
         const { params, user } = context;
-        const { id: projectId } = params;
+        const { id: projectId } = await params;
         await verifyProjectOwner(user.id, projectId);
         await adminDb.collection("projects").doc(projectId).delete();
         revalidatePath('/projects');
@@ -91,7 +91,7 @@ class AddContextHandler extends ComplexApiHandler<z.infer<typeof addContextSchem
     protected creditCost = 1;
     protected async processRequest(data: z.infer<typeof addContextSchema>, context: any) {
         const { params, user } = context;
-        const { id: projectId } = params;
+        const { id: projectId } = await params;
         await verifyProjectOwner(user.id, projectId);
 
         const projectRef = adminDb.collection("projects").doc(projectId);
