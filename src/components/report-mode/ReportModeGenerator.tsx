@@ -9,7 +9,7 @@ import { Suspense } from 'react';
 import { Button } from '../ui/button';
 import { Skeleton } from '../ui/skeleton';
 import { GenerationTools } from './GenerationTools';
-import { ReportResults } from './ReportResults';
+import { IntelligentReportResults } from './IntelligentReportResults';
 
 function ReportSkeleton() {
     return (
@@ -73,7 +73,21 @@ export default function ReportModeGenerator() {
 
             <div className={cn("lg:overflow-y-auto pr-2", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
                 <Suspense fallback={<ReportSkeleton />}>
-                    <ReportResults generatedSections={generatedSections.map((s: Section) => s.id as any)} />
+                    <IntelligentReportResults
+                        generatedSections={generatedSections.map((s: Section) => s.id as any)}
+                        onRegenerateSection={(sectionName) => {
+                            // يمكن إضافة منطق إعادة التوليد هنا
+                            console.log('Regenerating section:', sectionName);
+                        }}
+                        onExportSection={(sectionName) => {
+                            // يمكن إضافة منطق التصدير هنا
+                            console.log('Exporting section:', sectionName);
+                        }}
+                        onPreviewSection={(sectionName) => {
+                            // يمكن إضافة منطق المعاينة هنا
+                            console.log('Previewing section:', sectionName);
+                        }}
+                    />
                 </Suspense>
             </div>
         </div>

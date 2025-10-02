@@ -19,6 +19,7 @@ import {
     useRealTimePerformance,
     useReportBuilder
 } from '@/hooks/use-intelligent-report';
+import { useReportValidation } from '@/hooks/use-report-validation';
 import { SectionUtils } from '@/services/intelligent-report-service';
 import {
     AlertCircle,
@@ -37,6 +38,7 @@ import { ProgressTracker } from './ProgressTracker';
 import { QualityIndicator } from './QualityIndicator';
 import { ReportConfigPanel } from './ReportConfigPanel';
 import { SectionSelector } from './SectionSelector';
+import { ValidationInstructions } from './ValidationInstructions';
 
 interface IntelligentReportGeneratorProps {
     initialProposal?: any;
@@ -57,6 +59,19 @@ export function IntelligentReportGenerator({
     const reportBuilder = useReportBuilder();
     const performanceMonitoring = usePerformanceMonitoring();
     const realTimePerformance = useRealTimePerformance();
+
+    // التحقق من صحة المدخلات
+    const validation = useReportValidation({
+        operationType: mode === 'single' ? 'single-section' : 'complete-report',
+        sectionToGenerate: mode === 'single' ? selectedSingleSection : undefined,
+        sectionsToGenerate: mode === 'complete' ? reportBuilder.selectedSections : undefined,
+        proposal: reportBuilder.reportConfig.proposal || initialProposal,
+        projectPlan: reportBuilder.reportConfig.projectPlan || initialProjectPlan,
+        guidelines: reportBuilder.reportConfig.guidelines,
+        contextFiles: reportBuilder.reportConfig.contextFiles,
+        otherSections: reportBuilder.sectionResults as any,
+        instructionText: ''
+    });
 
     // إعداد التقرير الكامل
     const completeReport = useCompleteReport({
@@ -122,7 +137,7 @@ export function IntelligentReportGenerator({
     // حالة التوليد الحالية
     const isGenerating = mode === 'complete' ? completeReport.isGenerating : singleSection.isGenerating;
     const currentProgress = mode === 'complete' ? completeReport.progress : singleSection.progress;
-    const canGenerate = mode === 'complete' ? reportBuilder.canGenerate : (reportBuilder.reportConfig.proposal || initialProposal);
+    const canGenerate = validation.canGenerate && !isGenerating;
 
     return (
         <div className={`space-y-6 ${className}`}>
@@ -154,6 +169,25 @@ export function IntelligentReportGenerator({
                     </div>
                 </CardHeader>
             </Card>
+
+            {/* تعليمات التحقق من صحة المدخلات */}
+            {!validation.canGenerate && (
+                <ValidationInstructions
+                    validation={validation}
+                    onAddContext={() => {
+                        // يمكن إضافة منطق فتح حوار إضافة السياق
+                    }}
+                    onAddProjectInfo={() => {
+                        // يمكن إضافة منطق فتح حوار معلومات المشروع
+                    }}
+                    onUploadFiles={() => {
+                        // يمكن إضافة منطق رفع الملفات
+                    }}
+                    onConfigureSettings={() => {
+                        // يمكن إضافة منطق التركيز على لوحة الإعدادات
+                    }}
+                />
+            )}
 
             {/* لوحة التحكم الرئيسية */}
             <Tabs value={mode} onValueChange={(value) => setMode(value as 'single' | 'complete')}>
@@ -303,7 +337,7 @@ export function IntelligentReportGenerator({
                                 <QualityIndicator
                                     result={completeReport.result}
                                     mode="complete"
-                                    qualityAnalysis={completeReport.qualityAnalysis}
+                                    qualityAnalysis={completeReport.qualityAnalysis || undefined}
                                 />
                             )}
                         </div>
@@ -316,6 +350,12 @@ export function IntelligentReportGenerator({
                                 onConfigChange={reportBuilder.updateConfig}
                                 estimates={reportBuilder.estimates}
                                 estimatedCost={reportBuilder.estimatedCost}
+                                onAddProjectInfo={() => {
+                                    // يمكن إضافة منطق مخصص هنا إذا لزم الأمر
+                                }}
+                                onUploadFiles={() => {
+                                    // يمكن إضافة منطق رفع الملفات هنا
+                                }}
                             />
 
                             {/* لوحة الأداء */}

@@ -15,7 +15,6 @@ import { BookCheck, FilePlus2, FileText, FolderKanban, GanttChartSquare, GitGrap
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
-
 const LoadingSkeleton = () => (
   <div className="space-y-4">
     <Skeleton className="h-12 w-full" />
@@ -33,7 +32,7 @@ const ProposalModeGenerator = dynamic(() => import('@/components/proposal-mode/P
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
-const ReportGenerator = dynamic(() => import('@/components/report-mode/ReportModeGenerator'), {
+const ReportGenerator = dynamic(() => import('@/components/report-mode/IntelligentReportModeGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
@@ -58,6 +57,10 @@ const AcademicSolver = dynamic(() => import('@/components/academicSolver-mode/Ac
   loading: () => <LoadingSkeleton />,
 });
 const FileManager = dynamic(() => import('@/components/file/FileManager'), {
+  ssr: false,
+  loading: () => <LoadingSkeleton />,
+});
+const IntelligentReportGenerator = dynamic(() => import('@/components/intelligent-report/IntelligentReportGenerator').then(mod => mod.IntelligentReportGenerator), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
