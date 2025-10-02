@@ -591,9 +591,7 @@ export function usePerformanceTracking(componentName: string) {
 }
 
 // تصدير الـ utilities
-export {
-    PerformanceTracker
-};
+// PerformanceTracker is already exported as a class above
 
 // تصدير الـ types
 export type {

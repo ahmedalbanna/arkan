@@ -479,9 +479,7 @@ export function useMemoryOptimization(componentName: string) {
 }
 
 // تصدير الـ utilities
-export {
-    ComponentMemoryManager, MemoryManager
-};
+// MemoryManager and ComponentMemoryManager are already exported as classes above
 
 // تصدير الـ types
 export type {
