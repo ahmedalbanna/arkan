@@ -2,32 +2,23 @@
 
 'use client';
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-import type { PptxTemplate, PptxTemplateKey } from '@/lib/types';
+import { PptxStyleOptions, PptxTemplate } from '@/lib/types';
+
+
+
 export type { PptxTemplateKey } from '@/lib/types';
-=======
-import type { PptxTemplate } from '@/lib/types';
-import { fontFamily } from 'html2canvas/dist/types/css/property-descriptors/font-family';
->>>>>>> 36a35161 (Refines PPTX styling and slide content handling)
 
 const modern: PptxTemplate['styles'] = {
-=======
-import type { PptxTemplate, PptxStyleOptions } from '@/lib/types';
 
-
-export type PptxTemplateKey = 'modern' | 'dark' | 'professional' | string;
-const modern: PptxStyleOptions = {
->>>>>>> 22383861 (Adds speaker notes extraction and extends styling options)
     background: { color: 'FFFFFF' },
     title: { fontFace: 'Calibri', fontSize: 28, bold: true, color: '363636', align: 'left', valign: 'middle' },
     body: { fontFace: 'Calibri', fontSize: 18, color: '4f4f4f', align: 'left', lineSpacing: 25, valign: 'top' },
-    subtitle: { fontFace: 'Calibri', fontSize: 16, italic: true, color: '6c757d'},
+    subtitle: { fontFace: 'Calibri', fontSize: 16, italic: true, color: '6c757d' },
     blockquote: { fontFace: 'Calibri', fontSize: 16, color: '6c757d', italic: true, indent: 0.5, lineSpacing: 20, valign: 'top' },
     code: { fontFace: 'Courier New', fontSize: 12, fill: { color: 'F5F5F5' }, margin: 10, valign: 'top' },
     link: { color: '0052CC', underline: true },
     inlineCode: { fontFace: 'Courier New', color: 'E74C3C', highlight: 'F2F2F2', fontSize: 14 },
-    bullet: { type: 'bullet', code: {fontFamily: 'Calibri'} }, // A standard solid circle bullet
+    bullet: { type: 'bullet', code: { fontFamily: 'Calibri' } }, // A standard solid circle bullet
     border: { type: 'solid', pt: 1, color: 'D9D9D9' },
     table: {
         // Table-wide properties, including default cell styles
@@ -127,11 +118,11 @@ const professional: PptxStyleOptions = {
         color: '5A7D9A',
         lineColor: 'B0C4DE',
     },
-    border:{ type: 'solid', pt: 1, color: 'B0C4DE' }
+    border: { type: 'solid', pt: 1, color: 'B0C4DE' }
 };
 
 
-export const templates: Record<PptxTemplateKey, PptxTemplate> = {
+export const templates: Record<PptxTemplate['id'], PptxTemplate> = {
     modern: {
         id: 'modern',
         name: 'pptxTemplates.modern.name',
