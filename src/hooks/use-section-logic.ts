@@ -13,14 +13,14 @@ import { z } from 'zod';
 
 
 // Helper to calculate word and character counts
-const calculateCounts = (text: string) => {
-    if (!text) return { words: 0, chars: 0 };
+const calculateCounts = (text: string | null | undefined) => {
+    if (!text || typeof text !== 'string') return { words: 0, chars: 0 };
     const words = text.split(/\s+/).filter(Boolean).length;
     const chars = text.length;
     return { words, chars };
 };
 
-export const useSectionLogic = (sectionKey: SectionName, content: string, onUpdate: (key: SectionName, value: string) => void) => {
+export const useSectionLogic = (sectionKey: SectionName, content: string | null | undefined, onUpdate: (key: SectionName, value: string) => void) => {
     const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const [diff, setDiff] = useState<DiffPart[] | null>(null);
     const [isReading, setIsReading] = useState(false);
@@ -31,7 +31,7 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
     // Stop speech synthesis when component unmounts or content changes
     useEffect(() => {
         return () => {
-            if (window.speechSynthesis.speaking) {
+            if (typeof window !== 'undefined' && window.speechSynthesis && window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel();
             }
         };
@@ -120,8 +120,10 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
     };
 
     const handleReadAloud = (textToRead: string) => {
-        if (isReading || window.speechSynthesis.speaking) {
-            window.speechSynthesis.cancel();
+        if (isReading || (typeof window !== 'undefined' && window.speechSynthesis && window.speechSynthesis.speaking)) {
+            if (typeof window !== 'undefined' && window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
             setIsReading(false);
             return;
         }
@@ -133,7 +135,9 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
             setIsReading(false);
             toast({ title: 'Speech Error', description: 'Could not read the text aloud.', variant: 'destructive' });
         };
-        window.speechSynthesis.speak(utterance);
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+            window.speechSynthesis.speak(utterance);
+        }
     };
 
     const handleAcceptSuggestion = () => {
@@ -150,7 +154,7 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
     };
 
     const { words, chars } = calculateCounts(content);
-    const processedContent = processPlantUml(content);
+    const processedContent = processPlantUml(content || '');
 
     return {
         aiSuggestion,
@@ -201,7 +205,7 @@ export const useAdvancedSectionLogic = (sectionKey: SectionName, content: string
 
     useEffect(() => {
         return () => {
-            if (window.speechSynthesis.speaking) {
+            if (typeof window !== 'undefined' && window.speechSynthesis && window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel();
             }
         };
@@ -287,8 +291,10 @@ export const useAdvancedSectionLogic = (sectionKey: SectionName, content: string
     };
 
     const handleReadAloud = (textToRead: string) => {
-        if (isReading || window.speechSynthesis.speaking) {
-            window.speechSynthesis.cancel();
+        if (isReading || (typeof window !== 'undefined' && window.speechSynthesis && window.speechSynthesis.speaking)) {
+            if (typeof window !== 'undefined' && window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
             setIsReading(false);
             return;
         }
@@ -300,7 +306,9 @@ export const useAdvancedSectionLogic = (sectionKey: SectionName, content: string
             setIsReading(false);
             toast({ title: 'Speech Error', description: 'Could not read the text aloud.', variant: 'destructive' });
         };
-        window.speechSynthesis.speak(utterance);
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+            window.speechSynthesis.speak(utterance);
+        }
     };
 
     const handleAcceptSuggestion = () => {
@@ -317,7 +325,7 @@ export const useAdvancedSectionLogic = (sectionKey: SectionName, content: string
     };
 
     const { words, chars } = calculateCounts(content);
-    const processedContent = processPlantUml(content);
+    const processedContent = processPlantUml(content || '');
 
     return {
         // الوظائف الأساسية
@@ -338,11 +346,11 @@ export const useAdvancedSectionLogic = (sectionKey: SectionName, content: string
 
         // النظام الجديد من src/core
         sectionUITool,
-        form: sectionUITool.form,
-        uiState: sectionUITool.uiState,
-        updateUIState: sectionUITool.updateUIState,
-        resetUI: sectionUITool.resetUI,
+        form: sectionUITool.state.form,
+        uiState: sectionUITool.state.uiState,
+        updateUIState: sectionUITool.state.updateUIState,
+        resetUI: sectionUITool.state.resetUI,
         isLoading: sectionUITool.isLoading,
-        features: sectionUITool.features,
+        features: sectionUITool.state.features,
     };
 };

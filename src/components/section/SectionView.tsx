@@ -4,21 +4,19 @@
 
 import type { SectionName } from '@/ai/schemas';
 import { useSectionLogic } from '@/hooks';
-import React from 'react';
-import RichTextEditor from '../ui/RichTextEditor';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Wand2, ThumbsDown, Check } from 'lucide-react';
-import { DiffView } from '../shared/DiffView';
-import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { remark } from 'remark';
+import { Check, ThumbsDown, Wand2 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { DiffView } from '../shared/DiffView';
+import RichTextEditor from '../ui/RichTextEditor';
+import { Button } from '../ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 
 interface SectionProps {
     sectionKey: SectionName;
     title: string;
-    content: string; // The markdown content of the section
+    content: string | any; // The markdown content of the section, handling various types
     onUpdate: (key: SectionName, value: string) => void;
 }
 
@@ -40,7 +38,7 @@ export const Section = ({ sectionKey, title, content, onUpdate }: SectionProps) 
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                 <h2 className="font-semibold text-lg md:text-xl text-primary/90 font-headline flex items-center gap-2">
+                <h2 className="font-semibold text-lg md:text-xl text-primary/90 font-headline flex items-center gap-2">
                     {title}
                 </h2>
                 {/* The main toolbar is now handled by the BubbleMenu in the editor */}
@@ -50,7 +48,7 @@ export const Section = ({ sectionKey, title, content, onUpdate }: SectionProps) 
                 <span className="mx-2">|</span>
                 <span>{chars} {t('builder.Section.characters')}</span>
             </div>
-           
+
             <div className="group relative space-y-4 mt-4">
                 <RichTextEditor
                     content={content}

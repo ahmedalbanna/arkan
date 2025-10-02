@@ -2,14 +2,14 @@
 
 'use client';
 
+import { useDebounce } from '@/hooks';
+import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
+import TextAlign from '@tiptap/extension-text-align';
 import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { marked } from 'marked';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useDebounce } from '@/hooks';
+import React, { useEffect, useState } from 'react';
 import { SectionToolbar } from '../section/SectionToolbar';
-import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
-import TextAlign from '@tiptap/extension-text-align';
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -74,7 +74,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
 
 
 interface RichTextEditorProps {
-  content: string; // Expecting Markdown content
+  content: string | any; // Expecting Markdown content, but handling other types
   onChange: (markdown: string) => void;
   onAiAction: (action: string, payload?: any) => void;
   onReadAloud: (text: string) => void;
@@ -123,19 +123,26 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     const selectedText = editor.state.doc.textBetween(from, to);
     onAiAction(action, { ...payload, selectedText: selectedText || content });
   };
-  
+
   const handleReadAloudWrapper = () => {
     if (!editor) return;
     const { from, to } = editor.state.selection;
     const selectedText = editor.state.doc.textBetween(from, to);
-    onReadAloud(selectedText || content);
+    const contentString = typeof content === 'string' ? content : '';
+    onReadAloud(selectedText || contentString);
   }
 
   // Effect to update editor content when debounced prop changes
   useEffect(() => {
     if (editor && debouncedContent !== undefined) {
       const currentHtml = editor.getHTML();
-      const newHtml = marked.parse(debouncedContent) as string;
+
+      // التأكد من أن المحتوى string قبل تمريره إلى marked
+      const contentString = typeof debouncedContent === 'string'
+        ? debouncedContent
+        : JSON.stringify(debouncedContent) || '';
+
+      const newHtml = marked.parse(contentString) as string;
 
       if (currentHtml !== newHtml) {
         setIsUpdatingFromProp(true);
@@ -144,7 +151,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }
     }
   }, [debouncedContent, editor]);
-  
+
 
   return (
     <div dir={direction}>
