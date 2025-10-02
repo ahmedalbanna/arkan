@@ -22,8 +22,6 @@ export const SectionNameSchema = z.enum([
     'conclusion',
     'abstract',
     'acknowledgment',
-    'trainingProgram',
-    'technicalExperience',
     'recommendations',
     'references',
     'appendices'
