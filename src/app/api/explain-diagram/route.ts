@@ -1,14 +1,22 @@
-'use server';
+/**
+ * API Route لشرح المخططات - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لشرح المخططات
+ */
 
 import { ai } from '@/ai/genkit';
 import { ImageToTextInputSchema, ImageToTextOutputSchema } from '@/ai/schemas';
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit, logGeneration } from '@/services';
+import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { logGeneration } from '@/services';
 import { z } from 'zod';
+
+// Schema لشرح المخططات
 const explainDiagramSchema = ImageToTextInputSchema.extend({
     prompt: z.string().min(10, 'A prompt is required to explain the diagram.'),
 });
 
+// تعريف الـ prompt لشرح المخططات
 const explainDiagramPrompt = ai.definePrompt({
     name: 'explainDiagramPrompt',
     input: { schema: explainDiagramSchema },
@@ -29,32 +37,45 @@ const explainDiagramPrompt = ai.definePrompt({
     }
 });
 
-export const POST = withEnhancedAuth(async ({ request, user }) => {
-    try {
-        const body = await request.json();
-        const validation = explainDiagramSchema.safeParse(body);
-        if (!validation.success) {
-            return handleApiErrorEnhanced(validation.error);
-        }
+/**
+ * معالج شرح المخططات
+ */
+class ExplainDiagramHandler extends CreditBasedApiHandler<{
+    imageDataUri: string;
+    prompt: string;
+}, {
+    explanation: string;
+}> {
+    protected inputSchema = explainDiagramSchema;
+    protected creditCost = 1;
+    protected requiresAdmin = false;
+    protected async processRequest(data: any, context: any) {
+        const { user } = context;
 
-        const agentInput = validation.data;
+        const agentInput = data;
         const result = await explainDiagramPrompt(agentInput);
 
-        const creditCost = 1;
-        await deductCredit(user.id, creditCost);
-
+        // تسجيل العملية
         await logGeneration({
             agentId: 'explain-diagram',
             userId: user.id,
             input: { prompt: agentInput.prompt },
             output: { explanationLength: result?.output?.text?.length ?? 0 },
-            creditCost: creditCost,
+            creditCost: this.creditCost,
         });
 
-        // The result from definePrompt has a different shape
-        return createApiResponseEnhanced({ explanation: result?.output?.text }, 200);
-
-    } catch (error) {
-        return handleApiErrorEnhanced(error);
+        // النتيجة من definePrompt لها شكل مختلف
+        return { explanation: result?.output?.text || '' };
     }
-});
+}
+
+// إنشاء المعالج
+const explainDiagramHandler = new ExplainDiagramHandler();
+
+// تصدير الـ handler مع middleware
+export const POST = withApiMiddleware(
+    explainDiagramHandler.handle.bind(explainDiagramHandler),
+    {
+        logging: true
+    }
+);

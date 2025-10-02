@@ -1,34 +1,17 @@
+/**
+ * API Route لملف المستخدم - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لملف المستخدم
+ */
 
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { deleteUser, getUserProfile } from "@/lib/db/queries";
 import { adminDb } from '@/lib/firebase/server-init';
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-// GET a single user profile.
-// This route is now protected by the verifyAccess logic within withEnhancedAuth,
-// but for simplicity, we'll keep the direct GET like this.
-// A more robust implementation might move the ownership check into withEnhancedAuth itself.
-export const GET = withEnhancedAuth(async ({ params, user: requester, token }) => {
-    try {
-        const { id: targetUserId } = await params;
-
-        // Authorization check: either admin or self
-        if (requester.role !== 'admin' && requester.id !== targetUserId) {
-            return handleApiErrorEnhanced({ message: "Forbidden" }, '403');
-        }
-
-        const user = await getUserProfile(targetUserId);
-        if (!user) {
-            return handleApiErrorEnhanced({ message: "User not found." }, '404');
-        }
-        return createApiResponseEnhanced(user, 200);
-    } catch (error) {
-        return handleApiErrorEnhanced(error);
-    }
-});
-
-
+// Schema لتحديث المستخدم من قبل المدراء
 const adminUpdateUserSchema = z.object({
     name: z.string().min(1, 'Name is required').optional(),
     email: z.string().email('Invalid email address').optional(),
@@ -38,34 +21,62 @@ const adminUpdateUserSchema = z.object({
     hasCompletedOnboarding: z.boolean().optional(),
 });
 
+// Schema لتحديث المستخدم من قبل المستخدم نفسه
 const userUpdateSchema = z.object({
     name: z.string().min(1, 'Name is required').optional(),
     bio: z.string().optional(),
     hasCompletedOnboarding: z.boolean().optional(),
 });
 
+/**
+ * معالج جلب ملف المستخدم
+ */
+class GetUserHandler extends SimpleApiHandler<any> {
+    protected async processRequest(context: any) {
+        const { params, user: requester } = context;
+        const { id: targetUserId } = params;
 
-// PUT (update) a user profile
-export const PUT = withEnhancedAuth(async ({ request, params, user: requester }) => {
-    try {
-        const { id: userId } = await params;
-        const body = await request.json();
+        // Authorization check: either admin or self
+        if (requester.role !== 'admin' && requester.id !== targetUserId) {
+            throw new Error("Forbidden");
+        }
+
+        const user = await getUserProfile(targetUserId);
+        if (!user) {
+            throw new Error("User not found.");
+        }
+        return user;
+    }
+}
+
+/**
+ * معالج تحديث ملف المستخدم
+ */
+class UpdateUserHandler extends ComplexApiHandler<z.infer<typeof adminUpdateUserSchema> | z.infer<typeof userUpdateSchema>, any> {
+    protected inputSchema = z.union([adminUpdateUserSchema, userUpdateSchema]);
+    protected requiresAdmin = true;
+    protected creditCost = 1;
+
+    protected async processRequest(data: any, context: any): Promise<any> {
+        const { params, user: requester } = context;
+        const { id: userId } = params;
+
         let validation;
 
         // An admin can update any field. A regular user can only update their own name/bio/onboarding.
         if (requester.role !== 'admin') {
             if (userId !== requester.id) {
-                return handleApiErrorEnhanced({ message: "Forbidden: Users can only update their own profile." }, '403');
+                throw new Error("Forbidden: Users can only update their own profile.");
             }
             // If not admin, use the more restrictive schema
-            validation = userUpdateSchema.safeParse(body);
+            validation = userUpdateSchema.safeParse(data);
         } else {
             // Admins use the full schema
-            validation = adminUpdateUserSchema.safeParse(body);
+            validation = adminUpdateUserSchema.safeParse(data);
         }
 
         if (!validation.success) {
-            return handleApiErrorEnhanced(validation.error);
+            throw new Error(validation.error.message);
         }
 
         const updateData = { ...validation.data, updatedAt: new Date().toISOString() };
@@ -75,23 +86,47 @@ export const PUT = withEnhancedAuth(async ({ request, params, user: requester })
         revalidatePath('/admin/manage-users');
 
         const updatedUser = await getUserProfile(userId);
-        return createApiResponseEnhanced(updatedUser, 200);
-    } catch (error) {
-        return handleApiErrorEnhanced(error);
+        return updatedUser as unknown as any;
     }
-});
+}
 
+/**
+ * معالج حذف المستخدم
+ */
+class DeleteUserHandler extends SimpleApiHandler<{ message: string }> {
+    protected requiresAdmin = true;
 
-export const DELETE = withEnhancedAuth(async ({ params }) => {
-    try {
+    protected async processRequest(context: any): Promise<{ message: string }> {
+        const { params } = context;
         const { id: targetUserId } = params;
+
         if (!targetUserId) {
-            return handleApiErrorEnhanced({ message: "User ID is required" }, '400');
+            throw new Error("User ID is required");
         }
+
         await deleteUser(targetUserId);
         revalidatePath("/admin/manage-users");
-        return createApiResponseEnhanced({ message: `User ${targetUserId} deleted successfully` }, 200);
-    } catch (error) {
-        return handleApiErrorEnhanced(error);
+        return { message: `User ${targetUserId} deleted successfully` };
     }
-}, { requireAdmin: true });
+}
+
+// إنشاء المعالجات
+const getUserHandler = new GetUserHandler();
+const updateUserHandler = new UpdateUserHandler();
+const deleteUserHandler = new DeleteUserHandler();
+
+// تصدير الـ handlers مع middleware
+export const GET = withApiMiddleware(
+    getUserHandler.handle.bind(getUserHandler),
+    { logging: true }
+);
+
+export const PUT = withApiMiddleware(
+    updateUserHandler.handle.bind(updateUserHandler),
+    { logging: true }
+);
+
+export const DELETE = withApiMiddleware(
+    deleteUserHandler.handle.bind(deleteUserHandler),
+    { requireAdmin: true, logging: true }
+);

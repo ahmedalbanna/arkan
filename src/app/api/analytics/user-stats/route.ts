@@ -1,39 +1,40 @@
+/**
+ * API Route لإحصائيات المستخدم - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإحصائيات المستخدم
+ */
 
-
-import { NextResponse } from 'next/server';
-import { adminAuth, adminDb } from '@/lib/firebase/server-init';
-
+import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { getUserProfile } from '@/lib/db/queries';
+import { adminDb } from '@/lib/firebase/server-init';
 
-async function verifyUser(request: Request) {
+/**
+ * معالج إحصائيات المستخدم
+ */
+class UserStatsHandler extends SimpleApiHandler<{
+    totalGenerations: number;
+    creditsUsed: number;
+    agentUsageChartData: Array<{
+        name: string;
+        agentId: string;
+        count: number;
+    }>;
+    recentActivity: Array<{
+        id: string;
+        [key: string]: any;
+    }>;
+}> {
+    protected async processRequest(context: any) {
+        const { user } = context;
 
-    const authorization = request.headers.get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-        return { authorized: false, message: 'Unauthorized', userId: null };
-    }
-    const token = authorization.substring(7);
-    try {
-        const decodedToken = await adminAuth.verifyIdToken(token, true);
-        return { authorized: true, userId: decodedToken.uid };
-    } catch (error) {
-        return { authorized: false, message: 'Unauthorized', userId: null };
-    }
-}
-
-export async function GET(request: Request) {
-    const userCheck = await verifyUser(request);
-    if (!userCheck.authorized || !userCheck.userId) {
-        return NextResponse.json({ message: userCheck.message }, { status: 401 });
-    }
-
-    try {
-        const userProfile = await getUserProfile(userCheck.userId);
+        const userProfile = await getUserProfile(user.id);
         if (!userProfile) {
-            return NextResponse.json({ message: 'User profile not found.' }, { status: 404 });
+            throw new Error('User profile not found.');
         }
 
         const generationsSnapshot = await adminDb.collection('agent_generations')
-            .where('userId', '==', userCheck.userId)
+            .where('userId', '==', user.id)
             .orderBy('createdAt', 'desc')
             .get();
 
@@ -49,13 +50,13 @@ export async function GET(request: Request) {
         });
 
         const agentUsagePromises = Object.entries(agentUsage).map(async ([agentId, count]) => ({
-                name: await adminDb.collection('agents').doc(agentId).get().then(doc => doc.data()?.name || 'Unknown'),
-                agentId,
-                count,
-            }));
+            name: await adminDb.collection('agents').doc(agentId).get().then(doc => doc.data()?.name || 'Unknown'),
+            agentId,
+            count,
+        }));
 
         const agentUsageChartData = (await Promise.all(agentUsagePromises))
-            .sort((a, b) => b.count - a.count) // Sort after all promises are resolved
+            .sort((a, b) => b.count - a.count) // ترتيب بعد حل جميع الوعود
             .slice(0, 10);
 
         const recentActivity = generationsSnapshot.docs.slice(0, 5).map(doc => ({
@@ -63,16 +64,22 @@ export async function GET(request: Request) {
             ...doc.data()
         }));
 
-
-        return NextResponse.json({
+        return {
             totalGenerations,
             creditsUsed,
             agentUsageChartData,
             recentActivity,
-        }, { status: 200 });
-
-    } catch (error) {
-        console.error('Error fetching user stats:', error);
-        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+        };
     }
 }
+
+// إنشاء المعالج
+const userStatsHandler = new UserStatsHandler();
+
+// تصدير الـ handler مع middleware
+export const GET = withApiMiddleware(
+    userStatsHandler.handle.bind(userStatsHandler),
+    {
+        logging: true
+    }
+);

@@ -1,26 +1,44 @@
+/**
+ * API Route لتقرير المعاملات - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتقرير المعاملات
+ */
 
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { getTransactionsByDateRange } from '@/lib/db/queries';
 import { z } from 'zod';
 
+// Schema لتقرير المعاملات
 const getReportSchema = z.object({
-  startDate: z.string().datetime(),
-  endDate: z.string().datetime(),
+    startDate: z.string().datetime(),
+    endDate: z.string().datetime(),
 });
 
-export const GET = withEnhancedAuth(async ({ request }) => {
-  try {
-    const { searchParams } = new URL(request.url);
-    const queryValidation = getReportSchema.safeParse(Object.fromEntries(searchParams));
+/**
+ * معالج تقرير المعاملات
+ */
+class TransactionReportHandler extends SimpleApiHandler<any[]> {
+    protected async processRequest(context: any) {
+        const { searchParams } = new URL(context.request.url);
+        const queryValidation = getReportSchema.safeParse(Object.fromEntries(searchParams));
 
-    if (!queryValidation.success) {
-      return handleApiErrorEnhanced(queryValidation.error);
+        if (!queryValidation.success) {
+            throw new Error(`Validation error: ${queryValidation.error.errors.map(e => e.message).join(', ')}`);
+        }
+
+        const { startDate, endDate } = queryValidation.data;
+        const transactions = await getTransactionsByDateRange(startDate, endDate);
+
+        return transactions;
     }
+}
 
-    const { startDate, endDate } = queryValidation.data;
-    const transactions = await getTransactionsByDateRange(startDate, endDate);
-    return createApiResponseEnhanced(transactions, 200);
-  } catch (error) {
-    return handleApiErrorEnhanced(error);
-  }
-}, { requireAdmin: true });
+// إنشاء المعالج
+const transactionReportHandler = new TransactionReportHandler();
+
+// تصدير الـ handler مع middleware
+export const GET = withApiMiddleware(
+    transactionReportHandler.handle.bind(transactionReportHandler),
+    { requireAdmin: true, logging: true }
+);

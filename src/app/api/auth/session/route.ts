@@ -1,225 +1,178 @@
 /**
- * Auth Session Route - Migrated to New System
+ * API Route للجلسة - النسخة الجديدة الموحدة
  *
- * هذا الملف يحتوي على route المصادقة المهاجر
- * مع استخدام النظام الجديد المحسن
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإدارة الجلسات
  */
 
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { Analytics, PerformanceMonitor } from '@/lib/core/performance';
+import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { createApiResponseEnhanced } from '@/lib/core/api';
 import { adminAuth } from '@/lib/firebase/server-init';
+import { z } from 'zod';
 
-// Schema for request validation
-const sessionRequestSchema = {
-  idToken: {
-    type: 'string',
-    required: true,
-    minLength: 1,
-    message: 'ID token is required'
-  }
-};
+// Schema لإنشاء الجلسة
+const createSessionSchema = z.object({
+    idToken: z.string().min(1, 'ID token is required'),
+});
 
 /**
- * Create session cookie for authenticated user
+ * معالج إنشاء الجلسة (POST)
  */
-export const POST = withEnhancedAuth(async ({ request, startTime }) => {
-  try {
-    const body = await request.json();
+class CreateSessionHandler extends ComplexApiHandler<{
+    idToken: string;
+}, {
+    status: string;
+    expiresIn: number;
+    timestamp: string;
+}> {
+    protected inputSchema = createSessionSchema;
+    protected requiresAuth = false;
+    protected creditCost = 1;
+    protected requiresAdmin = false;
 
-    // Validate request
-    if (!body.idToken || typeof body.idToken !== 'string') {
-      return handleApiErrorEnhanced(
-        new Error('ID token is required and must be a string'),
-        'session_validation'
-      );
+    protected async processRequest(data: any, context: any) {
+        const { idToken } = data;
+
+        // إنشاء كوكي الجلسة
+        const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 أيام
+        const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+
+        // إعداد خيارات الكوكي
+        const cookieOptions = {
+            name: '__session',
+            value: sessionCookie,
+            maxAge: expiresIn,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            path: '/',
+            sameSite: 'lax' as const,
+        };
+
+        // تعيين الكوكي في الاستجابة
+        const response = createApiResponseEnhanced(
+            {
+                status: 'success',
+                expiresIn: expiresIn,
+                timestamp: new Date().toISOString()
+            },
+            200
+        );
+
+        response.cookies.set(cookieOptions);
+
+        return {
+            status: 'success',
+            expiresIn: expiresIn,
+            timestamp: new Date().toISOString()
+        };
     }
+}
 
-    const { idToken } = body;
-
-    // Create session cookie
-    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-    const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
-
-    // Set cookie options
-    const cookieOptions = {
-      name: '__session',
-      value: sessionCookie,
-      maxAge: expiresIn,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      path: '/',
-      sameSite: 'lax' as const,
+/**
+ * معالج الحصول على معلومات الجلسة (GET)
+ */
+class GetSessionHandler extends SimpleApiHandler<{
+    authenticated: boolean;
+    user?: {
+        id: string;
+        email: string;
+        name: string;
+        role: string;
     };
+    message?: string;
+    timestamp: string;
+}> {
+    protected async processRequest(context: any) {
+        const { user } = context;
 
-    // Create response
-    const response = createApiResponseEnhanced(
-      {
-        status: 'success',
-        expiresIn: expiresIn,
-        timestamp: new Date().toISOString()
-      },
-      200,
-      {
-        processingTime: performance.now() - startTime,
-        endpoint: 'auth/session'
-      }
-    );
-
-    // Set cookie
-    response.cookies.set(cookieOptions);
-
-    // Track performance
-    PerformanceMonitor.recordEvent({
-      type: 'api_call',
-      name: 'session_created',
-      value: performance.now() - startTime,
-      unit: 'ms',
-      metadata: {
-        endpoint: 'auth/session',
-        success: true
-      }
-    });
-
-    // Track analytics
-    Analytics.trackApiCall(
-      '/api/auth/session',
-      'POST',
-      performance.now() - startTime,
-      true,
-      200
-    );
-
-    return response;
-
-  } catch (error: any) {
-    // Track error performance
-    PerformanceMonitor.recordEvent({
-      type: 'error',
-      name: 'session_creation_failed',
-      value: performance.now() - startTime,
-      unit: 'ms',
-      metadata: {
-        endpoint: 'auth/session',
-        error: error.message
-      }
-    });
-
-    // Track error analytics
-    Analytics.trackApiCall(
-      '/api/auth/session',
-      'POST',
-      performance.now() - startTime,
-      false,
-      500
-    );
-
-    return handleApiErrorEnhanced(error, 'session_creation');
-  }
-}, {
-  requireAuth: false, // This endpoint doesn't require auth (it creates auth)
-  performanceTracking: true,
-  analytics: true,
-  rateLimit: {
-    maxRequests: 10, // Limit to 10 requests per minute
-    windowMs: 60000
-  }
-});
-
-/**
- * Get current session info (if exists)
- */
-export const GET = withEnhancedAuth(async ({ request, user, startTime }) => {
-  try {
-    if (!user) {
-      return createApiResponseEnhanced(
-        {
-          authenticated: false,
-          message: 'No active session'
-        },
-        200,
-        {
-          processingTime: performance.now() - startTime,
-          endpoint: 'auth/session'
+        if (!user) {
+            return {
+                authenticated: false,
+                message: 'No active session',
+                timestamp: new Date().toISOString()
+            };
         }
-      );
+
+        return {
+            authenticated: true,
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role
+            },
+            timestamp: new Date().toISOString()
+        };
     }
-
-    return createApiResponseEnhanced(
-      {
-        authenticated: true,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role
-        },
-        timestamp: new Date().toISOString()
-      },
-      200,
-      {
-        processingTime: performance.now() - startTime,
-        endpoint: 'auth/session'
-      }
-    );
-
-  } catch (error: any) {
-    return handleApiErrorEnhanced(error, 'session_info');
-  }
-}, {
-  requireAuth: false, // Allow checking session without auth
-  performanceTracking: true,
-  analytics: true
-});
+}
 
 /**
- * Delete session (logout)
+ * معالج حذف الجلسة (DELETE)
  */
-export const DELETE = withEnhancedAuth(async ({ request, user, startTime }) => {
-  try {
-    // Clear session cookie
-    const response = createApiResponseEnhanced(
-      {
-        status: 'success',
-        message: 'Session deleted successfully',
-        timestamp: new Date().toISOString()
-      },
-      200,
-      {
-        processingTime: performance.now() - startTime,
-        endpoint: 'auth/session'
-      }
-    );
+class DeleteSessionHandler extends SimpleApiHandler<{
+    status: string;
+    message: string;
+    timestamp: string;
+}> {
+    protected async processRequest(context: any) {
+        // إنشاء الاستجابة مع حذف الكوكي
+        const response = createApiResponseEnhanced(
+            {
+                status: 'success',
+                message: 'Session deleted successfully',
+                timestamp: new Date().toISOString()
+            },
+            200
+        );
 
-    // Clear cookie
-    response.cookies.set({
-      name: '__session',
-      value: '',
-      maxAge: 0,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      path: '/',
-    });
+        // حذف الكوكي
+        response.cookies.set({
+            name: '__session',
+            value: '',
+            maxAge: 0,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            path: '/',
+        });
 
-    // Track performance
-    PerformanceMonitor.recordEvent({
-      type: 'api_call',
-      name: 'session_deleted',
-      value: performance.now() - startTime,
-      unit: 'ms',
-      metadata: {
-        endpoint: 'auth/session',
-        userId: user?.id,
-        success: true
-      }
-    });
+        return {
+            status: 'success',
+            message: 'Session deleted successfully',
+            timestamp: new Date().toISOString()
+        };
+    }
+}
 
-    return response;
+// إنشاء المعالجات
+const createSessionHandler = new CreateSessionHandler();
+const getSessionHandler = new GetSessionHandler();
+const deleteSessionHandler = new DeleteSessionHandler();
 
-  } catch (error: any) {
-    return handleApiErrorEnhanced(error, 'session_deletion');
-  }
-}, {
-  requireAuth: false, // Allow logout without auth
-  performanceTracking: true,
-  analytics: true
-});
+// تصدير الـ handlers مع middleware
+export const POST = withApiMiddleware(
+    createSessionHandler.handle.bind(createSessionHandler),
+    {
+        requireAuth: false,
+        logging: true,
+        rateLimit: {
+            windowMs: 60000, // دقيقة واحدة
+            maxRequests: 10
+        }
+    }
+);
+
+export const GET = withApiMiddleware(
+    getSessionHandler.handle.bind(getSessionHandler),
+    {
+        requireAuth: false,
+        logging: true
+    }
+);
+
+export const DELETE = withApiMiddleware(
+    deleteSessionHandler.handle.bind(deleteSessionHandler),
+    {
+        requireAuth: false,
+        logging: true
+    }
+);

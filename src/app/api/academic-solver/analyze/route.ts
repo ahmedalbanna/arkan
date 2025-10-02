@@ -1,39 +1,58 @@
-
-'use server';
+/**
+ * API Route لتحليل المشاكل الأكاديمية - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتحليل المشاكل الأكاديمية
+ */
 
 import { analyzeAcademicDocument } from '@/ai/flows/academic-solver';
 import { ApiAnalyzeSchema } from '@/ai/schemas';
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit, logGeneration } from '@/services';
+import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { logGeneration } from '@/services';
 
-export const POST = withEnhancedAuth(async ({ request, user }) => {
-  try {
-    const body = await request.json();
-    const validation = ApiAnalyzeSchema.safeParse(body);
-    if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error);
+/**
+ * معالج تحليل المشاكل الأكاديمية
+ */
+class AnalyzeAcademicHandler extends CreditBasedApiHandler<{
+    documentType: string;
+    markdown: string;
+}, any> {
+    protected inputSchema = ApiAnalyzeSchema;
+    protected creditCost = 1;
+    protected requiresAdmin = false;
+
+    protected async processRequest(data: any, context: any) {
+        const { documentType, markdown } = data;
+        const { user } = context;
+
+        const agentInput = {
+            documentType,
+            markdownContent: markdown,
+        };
+
+        // تحليل المستند الأكاديمي
+        const result = await analyzeAcademicDocument(agentInput);
+
+        // تسجيل العملية
+        await logGeneration({
+            agentId: `analyze-${documentType}`,
+            userId: user.id,
+            input: agentInput,
+            output: result,
+            creditCost: this.creditCost,
+        });
+
+        return result;
     }
+}
 
-    const agentInput = {
-      documentType: validation.data.documentType,
-      markdownContent: validation.data.markdown,
-    };
-    const result = await analyzeAcademicDocument(agentInput);
+// إنشاء المعالج
+const analyzeAcademicHandler = new AnalyzeAcademicHandler();
 
-    // Deduct credit only after a successful generation
-    const creditCost = 1;
-    await deductCredit(user.id, creditCost);
-
-    await logGeneration({
-      agentId: `analyze-${validation.data.documentType}`,
-      userId: user.id,
-      input: agentInput,
-      output: result,
-      creditCost: creditCost,
-    });
-
-    return createApiResponseEnhanced(result, 200);
-  } catch (error) {
-    return handleApiErrorEnhanced(error);
-  }
-});
+// تصدير الـ handler مع middleware
+export const POST = withApiMiddleware(
+    analyzeAcademicHandler.handle.bind(analyzeAcademicHandler),
+    {
+        logging: true
+    }
+);

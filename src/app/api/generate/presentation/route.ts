@@ -1,46 +1,53 @@
-
-'use server';
+/**
+ * API Route لتوليد العروض التقديمية - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد العروض التقديمية
+ */
 
 import { generatePresentation } from '@/ai/flows/generate-presentation';
 import { ApiGeneratePresentationSchema } from '@/ai/schemas';
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit, logGeneration } from '@/services';
+import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { logGeneration } from '@/services';
 
-const generatePresentationApiSchema = ApiGeneratePresentationSchema;
+/**
+ * معالج توليد العروض التقديمية
+ */
+class GeneratePresentationHandler extends CreditBasedApiHandler<any, any> {
+    protected inputSchema = ApiGeneratePresentationSchema;
+    protected creditCost = 1;
+    protected requiresAdmin = false;
+    protected async processRequest(data: any, context: any) {
+        const { user } = context;
 
+        const agentInput = data;
+        const result = await generatePresentation(agentInput);
 
-export const POST = withEnhancedAuth(async ({ request, user }) => {
-  try {
-    const body = await request.json();
-    const validation = generatePresentationApiSchema.safeParse(body);
+        // تسجيل العملية
+        await logGeneration({
+            agentId: 'generate-presentation',
+            userId: user.id,
+            input: {
+                guidelineCount: agentInput.guidelines?.length || 0,
+                sourceDocumentCount: agentInput.sourceDocuments.length,
+            },
+            output: {
+                slideCount: result.slides.length
+            },
+            creditCost: this.creditCost,
+        });
 
-    if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error);
+        return result;
     }
+}
 
-    const agentInput = validation.data;
-    const result = await generatePresentation(agentInput);
+// إنشاء المعالج
+const generatePresentationHandler = new GeneratePresentationHandler();
 
-    const creditCost = 1;
-    await deductCredit(user.id, creditCost);
-
-    await logGeneration({
-      agentId: 'generate-presentation',
-      userId: user.id,
-      input: {
-        guidelineCount: agentInput.guidelines?.length || 0,
-        sourceDocumentCount: agentInput.sourceDocuments.length,
-      },
-      output: {
-        slideCount: result.slides.length
-      },
-      creditCost: creditCost,
-    });
-
-    return createApiResponseEnhanced(result, 200);
-  } catch (error) {
-    return handleApiErrorEnhanced(error);
-  }
-});
-
-
+// تصدير الـ handler مع middleware
+export const POST = withApiMiddleware(
+    generatePresentationHandler.handle.bind(generatePresentationHandler),
+    {
+        logging: true
+    }
+);

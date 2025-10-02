@@ -1,39 +1,47 @@
-
-'use server';
+/**
+ * API Route لترجمة النصوص - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لترجمة النصوص
+ */
 
 import { translateText } from '@/ai/flows/translate-text';
 import { ApiTranslateTextSchema } from '@/ai/schemas';
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit, logGeneration } from '@/services';
-
+import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { logGeneration } from '@/services';
+import { z } from 'zod';
 /**
  * معالج ترجمة النصوص
  */
-export const POST = withEnhancedAuth(async ({ request, user }) => {
-  try {
-    const body = await request.json();
-    const validation = ApiTranslateTextSchema.safeParse(body);
-    if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error, '400');
+class TranslateTextHandler extends CreditBasedApiHandler<z.infer<typeof ApiTranslateTextSchema>, { translatedText: string }> {
+    protected inputSchema = ApiTranslateTextSchema;
+    protected creditCost = 1;
+    protected requiresAdmin = false;
+    protected async processRequest(data: z.infer<typeof ApiTranslateTextSchema>, context: any) {
+        const { user } = context;
+
+        const agentInput = data;
+        const result = await translateText(agentInput);
+
+        // تسجيل العملية
+        await logGeneration({
+            agentId: 'translate-text',
+            userId: user.id,
+            input: agentInput,
+            output: result,
+            creditCost: this.creditCost,
+        });
+
+        const cleanedTranslatedText = result.translatedText.replace(/---.*?---/g, '');
+        return { translatedText: cleanedTranslatedText };
     }
+}
 
-    const agentInput = validation.data;
-    const result = await translateText(agentInput);
+// إنشاء المعالج
+const translateTextHandler = new TranslateTextHandler();
 
-    const creditCost = 1;
-    await deductCredit(user.id, creditCost);
-
-    await logGeneration({
-      agentId: 'translate-text',
-      userId: user.id,
-      input: agentInput,
-      output: result,
-      creditCost: creditCost,
-    });
-
-    const cleanedTranslatedText = result.translatedText.replace(/---.*?---/g, '');
-    return createApiResponseEnhanced({ translatedText: cleanedTranslatedText }, 200);
-  } catch (error) {
-    return handleApiErrorEnhanced(error, '500');
-  }
-});
+// تصدير الـ handler مع middleware
+export const POST = withApiMiddleware(
+    translateTextHandler.handle.bind(translateTextHandler),
+    { logging: true }
+);

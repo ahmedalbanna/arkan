@@ -1,43 +1,66 @@
+/**
+ * API Route للمعاملات - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للمعاملات
+ */
 
-// src/app/api/admin/transactions/route.ts
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { getTransactionsByDateRange, getTransactionsByStatus } from '@/lib/db/queries';
 import { z } from 'zod';
 
+// Schema لجلب المعاملات
 const getTransactionsSchema = z.object({
-  status: z.enum(['pending', 'verified', 'rejected']).optional(),
-  limit: z.coerce.number().int().min(1).max(50).default(6).optional(),
-  lastVisibleId: z.string().optional(),
-  startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
+    status: z.enum(['pending', 'verified', 'rejected']).optional(),
+    limit: z.coerce.number().int().min(1).max(50).default(6).optional(),
+    lastVisibleId: z.string().optional(),
+    startDate: z.string().datetime().optional(),
+    endDate: z.string().datetime().optional(),
 });
 
-export const GET = withEnhancedAuth(async ({ request }) => {
-  try {
-    const { searchParams } = new URL(request.url);
-    const queryValidation = getTransactionsSchema.safeParse(Object.fromEntries(searchParams));
+/**
+ * معالج جلب المعاملات
+ */
+class GetTransactionsHandler extends SimpleApiHandler<any> {
+    protected inputSchema = getTransactionsSchema;
+    protected requiresAdmin = true;
 
-    if (!queryValidation.success) {
-      return handleApiErrorEnhanced(queryValidation.error);
+    protected async processRequest(context: any) {
+        const { request } = context;
+        const { searchParams } = new URL(request.url);
+        const queryValidation = getTransactionsSchema.safeParse(Object.fromEntries(searchParams));
+
+        if (!queryValidation.success) {
+            throw new Error(queryValidation.error.message);
+        }
+
+        const { limit, lastVisibleId, status, startDate, endDate } = queryValidation.data;
+
+        // Handle report generation request
+        if (startDate && endDate) {
+            const transactions = await getTransactionsByDateRange(startDate, endDate);
+            return transactions;
+        }
+
+        // Handle status-based fetching for the console
+        if (status) {
+            const { transactions, hasNextPage, lastVisibleId: newLastVisibleId } = await getTransactionsByStatus({
+                status,
+                limit: limit!,
+                lastVisibleId
+            });
+            return { transactions, hasNextPage, lastVisibleId: newLastVisibleId };
+        }
+
+        throw new Error('Missing required parameters. Provide either status or both startDate and endDate.');
     }
+}
 
-    const { limit, lastVisibleId, status, startDate, endDate } = queryValidation.data;
+// إنشاء المعالج
+const getTransactionsHandler = new GetTransactionsHandler();
 
-    // Handle report generation request
-    if (startDate && endDate) {
-      const transactions = await getTransactionsByDateRange(startDate, endDate);
-      return createApiResponseEnhanced(transactions, 200);
-    }
-
-    // Handle status-based fetching for the console
-    if (status) {
-      const { transactions, hasNextPage, lastVisibleId: newLastVisibleId } = await getTransactionsByStatus({ status, limit: limit!, lastVisibleId });
-      return createApiResponseEnhanced({ transactions, hasNextPage, lastVisibleId: newLastVisibleId }, 200);
-    }
-
-    return handleApiErrorEnhanced({ message: 'Missing required parameters. Provide either status or both startDate and endDate.' }, '400');
-
-  } catch (error) {
-    return handleApiErrorEnhanced(error);
-  }
-}, { requireAdmin: true });
+// تصدير الـ handler مع middleware
+export const GET = withApiMiddleware(
+    getTransactionsHandler.handle.bind(getTransactionsHandler),
+    { requireAdmin: true, logging: true }
+);

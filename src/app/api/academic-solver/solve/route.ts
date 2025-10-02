@@ -1,40 +1,65 @@
-
-'use server';
+/**
+ * API Route لحل المشاكل الأكاديمية - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لحل المشاكل الأكاديمية
+ */
 
 import { solveAcademicDocument } from '@/ai/flows/academic-solver';
 import { ApiSolveSchema } from '@/ai/schemas';
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { deductCredit, logGeneration } from '@/services';
 
-export const POST = withEnhancedAuth(async ({ request, user }) => {
-  try {
-    const body = await request.json();
-    const validation = ApiSolveSchema.safeParse(body);
-    if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error);
+/**
+ * معالج حل المشاكل الأكاديمية
+ */
+class SolveAcademicHandler extends CreditBasedApiHandler<{
+    analyzedDocument: any;
+    contextMarkdown?: string;
+}, any> {
+    protected inputSchema = ApiSolveSchema;
+    protected creditCost = 2; // التكلفة الافتراضية
+    protected requiresAdmin = false;
+
+    protected async processRequest(data: any, context: any) {
+        const { analyzedDocument, contextMarkdown } = data;
+        const { user } = context;
+
+        // تحديد تكلفة الائتمانات بناءً على نوع المستند
+        const creditCost = analyzedDocument.documentType === 'exam' ? 3 : 2;
+
+        // خصم الائتمانات
+        await deductCredit(user.id, creditCost);
+
+        // حل المشكلة الأكاديمية
+        const result = await solveAcademicDocument({
+            analyzedDocument,
+            contextMarkdown
+        });
+
+        // تسجيل العملية
+        await logGeneration({
+            agentId: `solve-${analyzedDocument.documentType}`,
+            userId: user.id,
+            input: {
+                analyzedDocument,
+                contextMarkdown: !!contextMarkdown
+            },
+            output: result,
+            creditCost: creditCost,
+        });
+
+        return result;
     }
+}
 
-    const { analyzedDocument, contextMarkdown } = validation.data;
+// إنشاء المعالج
+const solveAcademicHandler = new SolveAcademicHandler();
 
-    // Deduct credit before the AI call
-    const creditCost = analyzedDocument.documentType === 'exam' ? 3 : 2;
-    await deductCredit(user.id, creditCost);
-
-    const result = await solveAcademicDocument({
-      analyzedDocument,
-      contextMarkdown
-    });
-
-    await logGeneration({
-      agentId: `solve-${analyzedDocument.documentType}`,
-      userId: user.id,
-      input: { analyzedDocument, contextMarkdown: !!contextMarkdown },
-      output: result,
-      creditCost: creditCost,
-    });
-
-    return createApiResponseEnhanced(result, 200);
-  } catch (error) {
-    return handleApiErrorEnhanced(error);
-  }
-});
+// تصدير الـ handler مع middleware
+export const POST = withApiMiddleware(
+    solveAcademicHandler.handle.bind(solveAcademicHandler),
+    {
+        logging: true
+    }
+);

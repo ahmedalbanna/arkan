@@ -1,9 +1,15 @@
+/**
+ * API Route لإعدادات النظام - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإعدادات النظام
+ */
 
-'use server';
-
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
+
+// Schema لحساب البنك
 const bankAccountSchema = z.object({
     bankName: z.string().min(1, 'Bank name is required.'),
     accountHolder: z.string().min(1, 'Account holder name is required.'),
@@ -14,12 +20,15 @@ const bankAccountSchema = z.object({
     }),
 });
 
+// Schema للإعدادات
 const settingsSchema = z.object({
     newUserCredits: z.coerce.number().int().min(0),
     bankAccounts: z.array(bankAccountSchema).optional(),
 });
 
-
+/**
+ * دالة مساعدة لجلب الإعدادات
+ */
 async function getSettings() {
     const settingsRef = adminDb.collection('settings').doc('defaults');
     const doc = await settingsRef.get();
@@ -34,30 +43,42 @@ async function getSettings() {
     return doc.data();
 }
 
-// GET /api/settings - This endpoint is public to allow fetching bank details
-export async function GET() {
-    try {
+/**
+ * معالج جلب الإعدادات
+ */
+class GetSettingsHandler extends SimpleApiHandler<any> {
+    protected async processRequest() {
         const settings = await getSettings();
-        return createApiResponseEnhanced(settings, 200);
-    } catch (error) {
-        return handleApiErrorEnhanced(error);
+        return settings;
     }
 }
 
-// PUT /api/settings - This endpoint remains admin-only
-export const PUT = withEnhancedAuth(async ({ request }) => {
-    try {
-        const body = await request.json();
-        const validation = settingsSchema.safeParse(body);
-        if (!validation.success) {
-            return handleApiErrorEnhanced(validation.error);
-        }
+/**
+ * معالج تحديث الإعدادات
+ */
+class UpdateSettingsHandler extends ComplexApiHandler<z.infer<typeof settingsSchema>, any> {
+    protected inputSchema = settingsSchema;
+    protected requiresAdmin = true;
+    protected creditCost = 1;
 
+    protected async processRequest(data: z.infer<typeof settingsSchema>) {
         const settingsRef = adminDb.collection('settings').doc('defaults');
-        await settingsRef.set(validation.data, { merge: true });
-
-        return createApiResponseEnhanced(validation.data, 200);
-    } catch (error) {
-        return handleApiErrorEnhanced(error);
+        await settingsRef.set(data, { merge: true });
+        return data;
     }
-}, { requireAdmin: true });
+}
+
+// إنشاء المعالجات
+const getSettingsHandler = new GetSettingsHandler();
+const updateSettingsHandler = new UpdateSettingsHandler();
+
+// تصدير الـ handlers مع middleware
+export const GET = withApiMiddleware(
+    getSettingsHandler.handle.bind(getSettingsHandler),
+    { requireAuth: false, logging: true } // Public endpoint for fetching settings
+);
+
+export const PUT = withApiMiddleware(
+    updateSettingsHandler.handle.bind(updateSettingsHandler),
+    { requireAdmin: true, logging: true }
+);

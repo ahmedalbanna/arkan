@@ -1,43 +1,54 @@
-
-'use server';
+/**
+ * API Route لتوليد الصور - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد الصور
+ */
 
 import { generateImage } from '@/ai/flows/generate-image';
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit, logGeneration } from '@/services';
+import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { logGeneration } from '@/services';
 import { z } from 'zod';
 
 // Schema لتوليد الصور
 const generateImageSchema = z.object({
-  prompt: z.string().min(3, "Prompt must be at least 3 characters long."),
+    prompt: z.string().min(3, "Prompt must be at least 3 characters long."),
 });
 
 /**
  * معالج توليد الصور
  */
-export const POST = withEnhancedAuth(async ({ request, user }) => {
-  try {
-    const body = await request.json();
-    const validation = generateImageSchema.safeParse(body);
+class GenerateImageHandler extends CreditBasedApiHandler<{
+    prompt: string;
+}, any> {
+    protected inputSchema = generateImageSchema;
+    protected creditCost = 5; // توليد الصور مكلف
+    protected requiresAdmin = false;
+    protected async processRequest(data: any, context: any) {
+        const { user } = context;
 
-    if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error);
+        const result = await generateImage(data);
+
+        // تسجيل العملية
+        await logGeneration({
+            agentId: 'generate-image',
+            userId: user.id,
+            input: data,
+            output: { imageUrl: `data:image/...;base64,...[TRUNCATED]` },
+            creditCost: this.creditCost
+        });
+
+        return result;
     }
+}
 
-    const result = await generateImage(validation.data);
+// إنشاء المعالج
+const generateImageHandler = new GenerateImageHandler();
 
-    const creditCost = 5;
-    await deductCredit(user.id, creditCost);
-
-    await logGeneration({
-      agentId: 'generate-image',
-      userId: user.id,
-      input: validation.data,
-      output: { imageUrl: `data:image/...;base64,...[TRUNCATED]` },
-      creditCost: creditCost
-    });
-
-    return createApiResponseEnhanced(result, 200);
-  } catch (error) {
-    return handleApiErrorEnhanced(error);
-  }
-});
+// تصدير الـ handler مع middleware
+export const POST = withApiMiddleware(
+    generateImageHandler.handle.bind(generateImageHandler),
+    {
+        logging: true
+    }
+);

@@ -1,56 +1,66 @@
-
-'use server';
+/**
+ * API Route لتوليد التقارير - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد التقارير
+ */
 
 import { generateReportSection } from '@/ai/flows/generate-report-section';
 import { GenerateSectionInputSchema } from '@/ai/schemas';
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { adminDb } from '@/lib/firebase/server-init'; // Assuming you have a server-side Firebase Admin SDK init
-import { deductCredit, logGeneration } from '@/services';
+import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { adminDb } from '@/lib/firebase/server-init';
+import { logGeneration } from '@/services';
 
-export const POST = withEnhancedAuth(async ({ request, user }) => {
-  try {
-    const body = await request.json();
-    const validation = GenerateSectionInputSchema.safeParse(body);
+/**
+ * معالج توليد التقارير
+ */
+class GenerateReportHandler extends CreditBasedApiHandler<any, any> {
+    protected inputSchema = GenerateSectionInputSchema;
+    protected creditCost = 1;
+    protected requiresAdmin = false;
+    protected async processRequest(data: any, context: any) {
+        const { user } = context;
 
-    if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error);
+        const agentInput = data;
+
+        // جلب معلومات القسم ديناميكياً من Firestore
+        const sectionDocRef = adminDb.collection('sections').doc(agentInput.sectionToGenerate);
+        const sectionDoc = await sectionDocRef.get();
+
+        if (!sectionDoc.exists) {
+            throw new Error('Section not found in database.');
+        }
+
+        const agentInfo = sectionDoc.data() as { agentId: string; title: string };
+
+        if (!agentInfo) {
+            throw new Error('Unknown section requested.');
+        }
+
+        const result = await generateReportSection(agentInput);
+
+        const transformedOutput = { [result.sectionName]: result.content };
+
+        // تسجيل العملية
+        await logGeneration({
+            agentId: agentInfo.agentId,
+            userId: user.id,
+            input: agentInput,
+            output: transformedOutput,
+            creditCost: this.creditCost,
+        });
+
+        return transformedOutput;
     }
+}
 
-    const creditCost = 1;
-    await deductCredit(user.id, creditCost);
+// إنشاء المعالج
+const generateReportHandler = new GenerateReportHandler();
 
-    const agentInput = validation.data;
-
-    // Fetch section info dynamically from Firestore
-    const sectionDocRef = adminDb.collection('sections').doc(agentInput.sectionToGenerate);
-    const sectionDoc = await sectionDocRef.get();
-
-    if (!sectionDoc.exists) {
-      return handleApiErrorEnhanced({ message: 'Section not found in database.' }, '404');
+// تصدير الـ handler مع middleware
+export const POST = withApiMiddleware(
+    generateReportHandler.handle.bind(generateReportHandler),
+    {
+        logging: true
     }
-
-    const agentInfo = sectionDoc.data() as { agentId: string; title: string }; // Assuming these fields exist
-    // const agentInfo = reportSections[agentInput.sectionToGenerate]; // Old static reference
-
-    if (!agentInfo) {
-      return handleApiErrorEnhanced({ message: 'Unknown section requested.' }, '400');
-    }
-
-    const result = await generateReportSection(agentInput);
-
-    const transformedOutput = { [result.sectionName]: result.content };
-
-    await logGeneration({
-      agentId: agentInfo.agentId,
-      userId: user.id,
-      input: agentInput,
-      output: transformedOutput,
-      creditCost: creditCost,
-    });
-
-    return createApiResponseEnhanced(transformedOutput, 200);
-
-  } catch (error) {
-    return handleApiErrorEnhanced(error);
-  }
-});
+);

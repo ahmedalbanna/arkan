@@ -1,22 +1,30 @@
+/**
+ * API Route لإعادة تعيين كلمة المرور للمستخدم - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإعادة تعيين كلمة المرور للمستخدم
+ */
 
-'use server';
-
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { getUserProfile } from '@/lib/db/queries';
 
 /**
  * معالج إعادة تعيين كلمة المرور للمستخدم
  */
-export const POST = withEnhancedAuth(async ({ params }) => {
-    try {
+class ResetUserPasswordHandler extends SimpleApiHandler<{ message: string }> {
+    protected requiresAdmin = true;
+
+    protected async processRequest(context: any) {
+        const { params } = context;
         const { id: userId } = params;
+
         if (!userId) {
-            return handleApiErrorEnhanced({ message: 'User ID is required.' }, '400');
+            throw new Error('User ID is required.');
         }
 
         const user = await getUserProfile(userId);
         if (!user || !user.email) {
-            return handleApiErrorEnhanced({ message: 'User not found or has no email.' }, '404');
+            throw new Error('User not found or has no email.');
         }
 
         // This is a placeholder for sending a reset email.
@@ -26,9 +34,15 @@ export const POST = withEnhancedAuth(async ({ params }) => {
         // For this demo, we'll just simulate success.
         console.log(`Password reset email would be sent to ${user.email}`);
 
-        return createApiResponseEnhanced({ message: `A password reset email has been sent to ${user.email}.` }, 200);
-
-    } catch (error: any) {
-        return handleApiErrorEnhanced(error, '500');
+        return { message: `A password reset email has been sent to ${user.email}.` };
     }
-}, { requireAdmin: true });
+}
+
+// إنشاء المعالج
+const resetUserPasswordHandler = new ResetUserPasswordHandler();
+
+// تصدير الـ handler مع middleware
+export const POST = withApiMiddleware(
+    resetUserPasswordHandler.handle.bind(resetUserPasswordHandler),
+    { requireAdmin: true, logging: true }
+);

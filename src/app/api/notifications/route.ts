@@ -1,15 +1,25 @@
+/**
+ * API Route للإشعارات - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للإشعارات
+ */
 
-// src/app/api/notifications/route.ts
-// This file is no longer used for fetching notifications with the new real-time approach,
-// but it's kept here in case a non-real-time fetch is needed in the future.
-// The primary fetching logic is now in `src/hooks/use-notifications.ts`.
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
 
-export const GET = withEnhancedAuth(async ({ user }) => {
-    try {
-        // This is a Firestore query. The app is now using RTDB for notifications.
-        // This endpoint would need to be updated to use the RTDB admin SDK if it were to be used.
+/**
+ * معالج قائمة الإشعارات
+ */
+class NotificationsListHandler extends SimpleApiHandler<Array<{
+    id: string;
+    [key: string]: any;
+}>> {
+    protected async processRequest(context: any) {
+        const { user } = context;
+
+        // هذا استعلام Firestore. التطبيق يستخدم الآن RTDB للإشعارات.
+        // هذا الـ endpoint يحتاج إلى تحديث لاستخدام RTDB admin SDK إذا كان سيتم استخدامه.
         const snapshot = await adminDb.collection('notifications')
             .where('userId', '==', user.id)
             .where('isRead', '==', false)
@@ -17,11 +27,22 @@ export const GET = withEnhancedAuth(async ({ user }) => {
             .limit(10)
             .get();
 
-        const notifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const notifications = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
 
-        return createApiResponseEnhanced(notifications, 200);
-
-    } catch (error) {
-        return handleApiErrorEnhanced(error, 'notifications_fetch');
+        return notifications;
     }
-});
+}
+
+// إنشاء المعالج
+const notificationsListHandler = new NotificationsListHandler();
+
+// تصدير الـ handler مع middleware
+export const GET = withApiMiddleware(
+    notificationsListHandler.handle.bind(notificationsListHandler),
+    {
+        logging: true
+    }
+);

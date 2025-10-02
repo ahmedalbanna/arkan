@@ -1,12 +1,19 @@
-// src/app/api/templates/docx/route.ts
-import { createApiResponseEnhanced, handleApiErrorEnhanced } from '@/lib/core/api';
+/**
+ * API Route لقوالب DOCX - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لقوالب DOCX مع Lazy Seeding
+ */
+
+import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { templates as defaultTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
 import { adminDb } from '@/lib/firebase/server-init';
 
-// This endpoint is public and does not require authentication
-// as all users need to be able to fetch the templates for exporting.
-export async function GET() {
-    try {
+/**
+ * معالج جلب قوالب DOCX مع Lazy Seeding
+ */
+class GetDocxTemplatesHandler extends SimpleApiHandler<{ [key: string]: any }> {
+    protected async processRequest() {
         const stylesCollection = adminDb.collection('templates').doc('docx').collection('styles');
         let snapshot = await stylesCollection.get();
 
@@ -27,8 +34,15 @@ export async function GET() {
             templates[doc.id] = doc.data();
         });
 
-        return createApiResponseEnhanced(templates, 200);
-    } catch (error) {
-        return handleApiErrorEnhanced(error);
+        return templates;
     }
 }
+
+// إنشاء المعالج
+const getDocxTemplatesHandler = new GetDocxTemplatesHandler();
+
+// تصدير الـ handler مع middleware
+export const GET = withApiMiddleware(
+    getDocxTemplatesHandler.handle.bind(getDocxTemplatesHandler),
+    { requireAuth: false, logging: true } // Public endpoint for fetching templates
+);

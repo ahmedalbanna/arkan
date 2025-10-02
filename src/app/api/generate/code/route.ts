@@ -1,40 +1,55 @@
-
-'use server';
+/**
+ * API Route لتوليد الكود - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد الكود
+ */
 
 import { generateCode } from '@/ai/flows/generate-code';
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit, logGeneration } from '@/services';
+import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { logGeneration } from '@/services';
 import { z } from 'zod';
 
+// Schema لتوليد الكود
 const generateCodeSchema = z.object({
-  prompt: z.string().min(10, { message: 'Prompt must be at least 10 characters long.' }),
+    prompt: z.string().min(10, { message: 'Prompt must be at least 10 characters long.' }),
 });
 
-export const POST = withEnhancedAuth(async ({ request, user }) => {
-  try {
-    const body = await request.json();
-    const validation = generateCodeSchema.safeParse(body);
+/**
+ * معالج توليد الكود
+ */
+class GenerateCodeHandler extends CreditBasedApiHandler<{
+    prompt: string;
+}, any> {
+    protected inputSchema = generateCodeSchema;
+    protected creditCost = 1;
+    protected requiresAdmin = false;
+    protected async processRequest(data: any, context: any) {
+        const { user } = context;
 
-    if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error);
+        const agentInput = data;
+        const result = await generateCode(agentInput);
+
+        // تسجيل العملية
+        await logGeneration({
+            agentId: 'generate-code',
+            userId: user.id,
+            input: agentInput,
+            output: result,
+            creditCost: this.creditCost,
+        });
+
+        return result;
     }
+}
 
-    const agentInput = validation.data;
-    const result = await generateCode(agentInput);
+// إنشاء المعالج
+const generateCodeHandler = new GenerateCodeHandler();
 
-    const creditCost = 1;
-    await deductCredit(user.id, creditCost);
-
-    await logGeneration({
-      agentId: 'generate-code', // Assuming a static ID for this agent
-      userId: user.id,
-      input: agentInput,
-      output: result,
-      creditCost: creditCost,
-    });
-
-    return createApiResponseEnhanced(result, 200);
-  } catch (error) {
-    return handleApiErrorEnhanced(error);
-  }
-});
+// تصدير الـ handler مع middleware
+export const POST = withApiMiddleware(
+    generateCodeHandler.handle.bind(generateCodeHandler),
+    {
+        logging: true
+    }
+);

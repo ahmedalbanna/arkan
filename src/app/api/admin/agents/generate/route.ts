@@ -1,11 +1,15 @@
-
-'use server';
+/**
+ * API Route لتوليد إعدادات الوكلاء - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد إعدادات الوكلاء
+ */
 
 import { generateAgentConfig } from '@/ai/flows/generate-agent-config';
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit } from '@/services';
+import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { z } from 'zod';
 
+// Schema لتوليد إعدادات الوكيل
 const generateSchema = z.object({
     prompt: z.string().min(10, "Prompt must be at least 10 characters long."),
     includeJsonOutput: z.boolean().optional(),
@@ -16,27 +20,43 @@ const generateSchema = z.object({
     })).optional(),
 });
 
-export const POST = withEnhancedAuth(async ({ request, user }) => {
-    try {
-        const body = await request.json();
-        const validation = generateSchema.safeParse(body);
-        if (!validation.success) {
-            return handleApiErrorEnhanced(validation.error);
-        }
+/**
+ * معالج توليد إعدادات الوكلاء
+ */
+class GenerateAgentConfigHandler extends CreditBasedApiHandler<{
+    prompt: string;
+    includeJsonOutput?: boolean;
+    contextFiles?: Array<{
+        name: string;
+        type: string;
+        content: string;
+    }>;
+}, any> {
+    protected inputSchema = generateSchema;
+    protected creditCost = 2; // توليد الوكيل مهمة أكثر تعقيداً
+    protected requiresAdmin = true;
+
+    protected async processRequest(data: any, context: any) {
+        const { user } = context;
 
         const result = await generateAgentConfig({
-            prompt: validation.data.prompt,
-            includeJsonOutput: validation.data.includeJsonOutput,
-            contextFiles: validation.data.contextFiles,
+            prompt: data.prompt,
+            includeJsonOutput: data.includeJsonOutput,
+            contextFiles: data.contextFiles,
         });
 
-        // Agent generation is a more complex task
-        await deductCredit(user.id, 2);
-
-        return createApiResponseEnhanced(result, 200);
-
-    } catch (error) {
-        return handleApiErrorEnhanced(error);
+        return result;
     }
+}
 
-}, { requireAdmin: true });
+// إنشاء المعالج
+const generateAgentConfigHandler = new GenerateAgentConfigHandler();
+
+// تصدير الـ handler مع middleware
+export const POST = withApiMiddleware(
+    generateAgentConfigHandler.handle.bind(generateAgentConfigHandler),
+    {
+        requireAdmin: true,
+        logging: true
+    }
+);

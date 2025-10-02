@@ -1,37 +1,46 @@
-
-'use server';
+/**
+ * API Route لترجمة العروض التقديمية - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لترجمة العروض التقديمية
+ */
 
 import { translatePresentation } from '@/ai/flows/translate-presentation';
 import { ApiTranslatePresentationSchema } from '@/ai/schemas';
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit, logGeneration } from '@/services';
+import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { logGeneration } from '@/services';
+import { z } from 'zod';
+/**
+ * معالج ترجمة العروض التقديمية
+ */
+class TranslatePresentationHandler extends CreditBasedApiHandler<z.infer<typeof ApiTranslatePresentationSchema>, any> {
+    protected inputSchema = ApiTranslatePresentationSchema;
+    protected creditCost = 2;
+    protected requiresAdmin = false;
+    protected async processRequest(data: z.infer<typeof ApiTranslatePresentationSchema>, context: any) {
+        const { user } = context;
 
+        const agentInput = data;
+        const result = await translatePresentation(agentInput);
 
-export const POST = withEnhancedAuth(async ({ request, user }) => {
-  try {
-    const body = await request.json();
-    const validation = ApiTranslatePresentationSchema.safeParse(body);
+        // تسجيل العملية
+        await logGeneration({
+            agentId: 'translate-presentation',
+            userId: user.id,
+            input: { ...agentInput, presentation: `Presentation ID: ${agentInput.presentation.id}` },
+            output: { ...result, presentation: `Presentation ID: ${result.id}` },
+            creditCost: this.creditCost,
+        });
 
-    if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error);
+        return result;
     }
+}
 
-    const agentInput = validation.data;
-    const result = await translatePresentation(agentInput);
+// إنشاء المعالج
+const translatePresentationHandler = new TranslatePresentationHandler();
 
-    const creditCost = 2;
-    await deductCredit(user.id, creditCost);
-
-    await logGeneration({
-      agentId: 'translate-presentation',
-      userId: user.id,
-      input: { ...agentInput, presentation: `Presentation ID: ${agentInput.presentation.id}` },
-      output: { ...result, presentation: `Presentation ID: ${result.id}` },
-      creditCost: creditCost,
-    });
-
-    return createApiResponseEnhanced(result, 200);
-  } catch (error) {
-    return handleApiErrorEnhanced(error);
-  }
-});
+// تصدير الـ handler مع middleware
+export const POST = withApiMiddleware(
+    translatePresentationHandler.handle.bind(translatePresentationHandler),
+    { logging: true }
+);

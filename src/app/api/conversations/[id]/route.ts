@@ -1,27 +1,37 @@
+/**
+ * API Route لحذف المحادثات - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لحذف المحادثات
+ */
 
-'use server';
-
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { adminRealtimeDb } from '@/lib/firebase/server-init';
-export const DELETE = withEnhancedAuth(async ({ user, params }) => {
-    try {
+
+/**
+ * معالج حذف المحادثة
+ */
+class DeleteConversationHandler extends SimpleApiHandler<{ message: string }> {
+    protected async processRequest(context: any) {
+        const { params, user } = context;
         const conversationId = params.id;
+
         if (!conversationId) {
-            return handleApiErrorEnhanced({ message: 'Conversation ID is required.' }, '400');
+            throw new Error('Conversation ID is required.');
         }
 
         const convoRef = adminRealtimeDb.ref(`conversations/${conversationId}`);
         const convoSnapshot = await convoRef.get();
 
         if (!convoSnapshot.exists()) {
-            return handleApiErrorEnhanced({ message: 'Conversation not found.' }, '404');
+            throw new Error('Conversation not found.');
         }
 
         const conversation = convoSnapshot.val();
 
         // Authorization: Check if the user is a participant
         if (!conversation.participantIds.includes(user.id)) {
-            return handleApiErrorEnhanced({ message: 'Forbidden' }, '403');
+            throw new Error('Forbidden');
         }
 
         const updates: { [key: string]: null } = {};
@@ -33,9 +43,15 @@ export const DELETE = withEnhancedAuth(async ({ user, params }) => {
 
         await adminRealtimeDb.ref().update(updates);
 
-        return createApiResponseEnhanced({ message: 'Conversation deleted successfully' }, 200);
-
-    } catch (error) {
-        return handleApiErrorEnhanced(error);
+        return { message: 'Conversation deleted successfully' };
     }
-});
+}
+
+// إنشاء المعالج
+const deleteConversationHandler = new DeleteConversationHandler();
+
+// تصدير الـ handler مع middleware
+export const DELETE = withApiMiddleware(
+    deleteConversationHandler.handle.bind(deleteConversationHandler),
+    { logging: true }
+);

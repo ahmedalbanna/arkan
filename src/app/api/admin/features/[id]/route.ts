@@ -1,38 +1,54 @@
+/**
+ * API Route لتحديث الميزات - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتحديث الميزات
+ */
 
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
+// Schema لتحديث الميزة
 const updateFeatureSchema = z.object({
-  isEnabled: z.boolean(),
+    isEnabled: z.boolean(),
 });
 
-export const PUT = withEnhancedAuth(async ({ request, params }) => {
-  try {
-    const id = params.id;
-    if (!id) {
-      return handleApiErrorEnhanced({ message: 'Feature ID is required.' }, '400');
+/**
+ * معالج تحديث الميزة
+ */
+class UpdateFeatureHandler extends ComplexApiHandler<z.infer<typeof updateFeatureSchema>, any> {
+    protected inputSchema = updateFeatureSchema;
+    protected requiresAdmin = true;
+    protected creditCost = 1;
+
+    protected async processRequest(data: z.infer<typeof updateFeatureSchema>, context: any) {
+        const { params } = context;
+        const id = params.id;
+
+        if (!id) {
+            throw new Error('Feature ID is required.');
+        }
+
+        const featureRef = adminDb.collection('features').doc(id);
+        const featureDoc = await featureRef.get();
+
+        if (!featureDoc.exists) {
+            throw new Error('Feature not found.');
+        }
+
+        await featureRef.update({ isEnabled: data.isEnabled });
+        const updatedDoc = await featureRef.get();
+
+        return { id: updatedDoc.id, ...updatedDoc.data() };
     }
+}
 
-    const featureRef = adminDb.collection('features').doc(id);
-    const featureDoc = await featureRef.get();
+// إنشاء المعالج
+const updateFeatureHandler = new UpdateFeatureHandler();
 
-    if (!featureDoc.exists) {
-      return handleApiErrorEnhanced({ message: 'Feature not found.' }, '404');
-    }
-
-    const body = await request.json();
-    const validation = updateFeatureSchema.safeParse(body);
-
-    if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error);
-    }
-
-    await featureRef.update({ isEnabled: validation.data.isEnabled });
-    const updatedDoc = await featureRef.get();
-
-    return createApiResponseEnhanced({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
-  } catch (error) {
-    return handleApiErrorEnhanced(error);
-  }
-}, { requireAdmin: true });
+// تصدير الـ handler مع middleware
+export const PUT = withApiMiddleware(
+    updateFeatureHandler.handle.bind(updateFeatureHandler),
+    { requireAdmin: true, logging: true }
+);

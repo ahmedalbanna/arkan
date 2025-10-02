@@ -1,10 +1,16 @@
+/**
+ * API Route لسجل التوليدات - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لسجل التوليدات
+ */
 
-'use server';
-
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { getUserProfile } from '@/lib/db/queries';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
+
+// Schema لاستعلام السجلات
 const getLogsQuerySchema = z.object({
     limit: z.coerce.number().int().min(1).max(50).default(15),
     agentId: z.string().optional(),
@@ -12,13 +18,20 @@ const getLogsQuerySchema = z.object({
     lastVisibleId: z.string().optional(),
 });
 
-export const GET = withEnhancedAuth(async ({ request }) => {
-    try {
+/**
+ * معالج جلب سجل التوليدات
+ */
+class GetGenerationsLogHandler extends SimpleApiHandler<any> {
+    protected inputSchema = getLogsQuerySchema;
+    protected requiresAdmin = true;
+
+    protected async processRequest(context: any) {
+        const { request } = context;
         const { searchParams } = new URL(request.url);
         const queryValidation = getLogsQuerySchema.safeParse(Object.fromEntries(searchParams));
 
         if (!queryValidation.success) {
-            return handleApiErrorEnhanced(queryValidation.error);
+            throw new Error(queryValidation.error.message);
         }
 
         const { limit, agentId, userId, lastVisibleId } = queryValidation.data;
@@ -56,13 +69,19 @@ export const GET = withEnhancedAuth(async ({ request }) => {
         const logs = await Promise.all(logsPromises);
         const hasNextPage = snapshot.docs.length > limit;
 
-        return createApiResponseEnhanced({
+        return {
             logs,
             hasNextPage,
             lastVisibleId: hasNextPage && logs.length > 0 ? logs[logs.length - 1].id : null,
-        }, 200);
-
-    } catch (error) {
-        return handleApiErrorEnhanced(error);
+        };
     }
-}, { requireAdmin: true });
+}
+
+// إنشاء المعالج
+const getGenerationsLogHandler = new GetGenerationsLogHandler();
+
+// تصدير الـ handler مع middleware
+export const GET = withApiMiddleware(
+    getGenerationsLogHandler.handle.bind(getGenerationsLogHandler),
+    { requireAdmin: true, logging: true }
+);

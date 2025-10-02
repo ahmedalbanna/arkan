@@ -1,42 +1,51 @@
-
-'use server';
+/**
+ * API Route لتوليد المحاضرات - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد المحاضرات
+ */
 
 import { createLectureUnit } from '@/ai/flows/create-lecture-unit';
 import { CreateLectureUnitInputSchema } from '@/ai/schemas/lecture-generator';
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit, logGeneration } from '@/services';
+import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { logGeneration } from '@/services';
 
 /**
  * معالج توليد المحاضرات
  */
-export const POST = withEnhancedAuth(async ({ request, user }) => {
-  try {
-    const body = await request.json();
-    const validation = CreateLectureUnitInputSchema.safeParse(body);
-    if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error, '400');
+class LectureGeneratorHandler extends CreditBasedApiHandler<any, any> {
+    protected inputSchema = CreateLectureUnitInputSchema;
+    protected creditCost = 5; // مهمة معقدة ومكلفة
+    protected requiresAdmin = false;
+    protected async processRequest(data: any, context: any) {
+        const { user } = context;
+
+        const agentInput = data;
+        const result = await createLectureUnit(agentInput);
+
+        // تسجيل العملية
+        await logGeneration({
+            agentId: 'create-lecture-unit',
+            userId: user.id,
+            input: agentInput,
+            output: {
+                lectureChars: result.theoreticalLecture.lectureContent.length,
+                sessionActivities: result.practicalSession.activities.length,
+            },
+            creditCost: this.creditCost,
+        });
+
+        return result;
     }
+}
 
-    const agentInput = validation.data;
-    const result = await createLectureUnit(agentInput);
+// إنشاء المعالج
+const lectureGeneratorHandler = new LectureGeneratorHandler();
 
-    // Define a credit cost for this complex generation
-    const creditCost = 5;
-    await deductCredit(user.id, creditCost);
-
-    await logGeneration({
-      agentId: 'create-lecture-unit',
-      userId: user.id,
-      input: agentInput,
-      output: {
-        lectureChars: result.theoreticalLecture.lectureContent.length,
-        sessionActivities: result.practicalSession.activities.length,
-      },
-      creditCost: creditCost,
-    });
-
-    return createApiResponseEnhanced(result, 200);
-  } catch (error) {
-    return handleApiErrorEnhanced(error, '500');
-  }
-});
+// تصدير الـ handler مع middleware
+export const POST = withApiMiddleware(
+    lectureGeneratorHandler.handle.bind(lectureGeneratorHandler),
+    {
+        logging: true
+    }
+);

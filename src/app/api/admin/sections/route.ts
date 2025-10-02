@@ -1,39 +1,61 @@
-// C:\Users\ahmed\source\repos\arkan\src\app\api\admin\sections\route.ts
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+/**
+ * API Route لإدارة الأقسام - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإدارة الأقسام
+ */
+
+import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
+
+// Schema للأقسام
 const SectionSchema = z.object({
-  id: z.string().min(3, 'ID must be at least 3 characters'),
-  title: z.string().min(1, 'Title is required'),
-  icon: z.string().min(1, 'Icon is required'),
-  agentId: z.string().min(1, 'Agent is required'),
-  type: z.enum(['report', 'diagram', 'presentation']),
+    id: z.string().min(3, 'ID must be at least 3 characters'),
+    title: z.string().min(1, 'Title is required'),
+    icon: z.string().min(1, 'Icon is required'),
+    agentId: z.string().min(1, 'Agent is required'),
+    type: z.enum(['report', 'diagram', 'presentation']),
 });
 
-// GET all sections
-export const GET = withEnhancedAuth(async ({ user }) => {
-  try {
-    const snapshot = await adminDb.collection('sections').orderBy('title').get();
-    const sections = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return createApiResponseEnhanced(sections, 200);
-  } catch (error) {
-    return handleApiErrorEnhanced(error);
-  }
-});
-
-// POST a new section (Admin only)
-export const POST = withEnhancedAuth(async ({ request }) => {
-  try {
-    const body = await request.json();
-    const validation = SectionSchema.safeParse(body);
-    if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error);
+/**
+ * معالج جلب جميع الأقسام
+ */
+class GetSectionsHandler extends SimpleApiHandler<any[]> {
+    protected async processRequest() {
+        const snapshot = await adminDb.collection('sections').orderBy('title').get();
+        const sections = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return sections;
     }
-    const { id, ...data } = validation.data;
-    const docRef = adminDb.collection('sections').doc(id);
-    await docRef.set(data);
-    return createApiResponseEnhanced({ id, ...data }, 201);
-  } catch (error) {
-    return handleApiErrorEnhanced(error);
-  }
-}, { requireAdmin: true });
+}
+
+/**
+ * معالج إنشاء قسم جديد
+ */
+class CreateSectionHandler extends ComplexApiHandler<z.infer<typeof SectionSchema>, any> {
+    protected inputSchema = SectionSchema;
+    protected requiresAdmin = true;
+    protected creditCost = 1;
+
+    protected async processRequest(data: z.infer<typeof SectionSchema>) {
+        const { id, ...sectionData } = data;
+        const docRef = adminDb.collection('sections').doc(id);
+        await docRef.set(sectionData);
+        return { id, ...sectionData };
+    }
+}
+
+// إنشاء المعالجات
+const getSectionsHandler = new GetSectionsHandler();
+const createSectionHandler = new CreateSectionHandler();
+
+// تصدير الـ handlers مع middleware
+export const GET = withApiMiddleware(
+    getSectionsHandler.handle.bind(getSectionsHandler),
+    { logging: true }
+);
+
+export const POST = withApiMiddleware(
+    createSectionHandler.handle.bind(createSectionHandler),
+    { requireAdmin: true, logging: true }
+);

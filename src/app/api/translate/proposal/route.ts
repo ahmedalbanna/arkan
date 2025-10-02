@@ -1,38 +1,46 @@
-
-'use server';
+/**
+ * API Route لترجمة المقترحات - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لترجمة المقترحات
+ */
 
 import { translateProposal } from '@/ai/flows/translate-proposal';
 import { ApiTranslateProposalSchema } from '@/ai/schemas';
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit, logGeneration } from '@/services';
-
+import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { logGeneration } from '@/services';
+import { z } from 'zod';
 /**
  * معالج ترجمة المقترحات
  */
-export const POST = withEnhancedAuth(async ({ request, user }) => {
-  try {
-    const body = await request.json();
-    const validation = ApiTranslateProposalSchema.safeParse(body);
-    if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error, '400');
+class TranslateProposalHandler extends CreditBasedApiHandler<z.infer<typeof ApiTranslateProposalSchema>, any> {
+    protected inputSchema = ApiTranslateProposalSchema;
+    protected creditCost = 2;
+    protected requiresAdmin = false;
+    protected async processRequest(data: z.infer<typeof ApiTranslateProposalSchema>, context: any) {
+        const { user } = context;
+
+        const agentInput = data;
+        const result = await translateProposal(agentInput);
+
+        // تسجيل العملية
+        await logGeneration({
+            agentId: 'translate-proposal',
+            userId: user.id,
+            input: { targetLang: agentInput.targetLang, proposalTitle: agentInput.proposal.title },
+            output: { proposalTitle: result.title },
+            creditCost: this.creditCost,
+        });
+
+        return result;
     }
+}
 
-    const agentInput = validation.data;
-    const result = await translateProposal(agentInput);
+// إنشاء المعالج
+const translateProposalHandler = new TranslateProposalHandler();
 
-    const creditCost = 2;
-    await deductCredit(user.id, creditCost);
-
-    await logGeneration({
-      agentId: 'translate-proposal',
-      userId: user.id,
-      input: { targetLang: agentInput.targetLang, proposalTitle: agentInput.proposal.title },
-      output: { proposalTitle: result.title },
-      creditCost: creditCost,
-    });
-
-    return createApiResponseEnhanced(result, 200);
-  } catch (error) {
-    return handleApiErrorEnhanced(error, '500');
-  }
-});
+// تصدير الـ handler مع middleware
+export const POST = withApiMiddleware(
+    translateProposalHandler.handle.bind(translateProposalHandler),
+    { logging: true }
+);

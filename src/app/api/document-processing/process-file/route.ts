@@ -1,10 +1,20 @@
-
-'use server';
+/**
+ * API Route لمعالجة الملفات - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لمعالجة الملفات
+ */
 
 import { imageToText } from '@/ai/flows/image-to-text';
 import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit, logGeneration } from '@/services';
+import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { logGeneration } from '@/services';
+import { z } from 'zod';
+
+// Schema لمعالجة الملفات
+const processFileSchema = z.object({
+    file: z.any(),
+});
 
 const SUPPORTED_MIME_TYPES = [
     'application/pdf',
@@ -15,21 +25,26 @@ const SUPPORTED_MIME_TYPES = [
     'text/markdown',
 ];
 
-export const POST = withEnhancedAuth(async ({ request, user }) => {
-    try {
-        const formData = await request.formData();
-        const file = formData.get('file') as File;
+/**
+ * معالج معالجة الملفات
+ */
+class ProcessFileHandler extends CreditBasedApiHandler<FormData, {
+    markdown: string;
+}> {
+    protected creditCost = 1;
+    protected requiresAdmin = false;
+    protected inputSchema = processFileSchema;
+    protected async processRequest(data: FormData, context: any) {
+        const { user } = context;
+        const file = data.get('file') as File;
 
         if (!file) {
-            return handleApiErrorEnhanced({ message: 'No file uploaded.' }, '400');
+            throw new Error('No file uploaded.');
         }
 
         if (!SUPPORTED_MIME_TYPES.includes(file.type)) {
-            return handleApiErrorEnhanced({ message: `Invalid file type. Supported types are: ${SUPPORTED_MIME_TYPES.join(', ')}` }, '400');
+            throw new Error(`Invalid file type. Supported types are: ${SUPPORTED_MIME_TYPES.join(', ')}`);
         }
-
-        // Standard credit deduction for processing
-        await deductCredit(user.id, 1);
 
         const fileArrayBuffer = await file.arrayBuffer();
         const base64 = Buffer.from(fileArrayBuffer).toString('base64');
@@ -48,23 +63,32 @@ export const POST = withEnhancedAuth(async ({ request, user }) => {
             result = await imageToText({ imageDataUri: dataUri });
             markdownContent = 'text' in result ? result.text : '';
         } else {
-            // For plain text or markdown, we just decode it.
+            // للملفات النصية أو Markdown، نقوم بفك تشفيرها فقط
             agentId = 'text-file-to-markdown';
             markdownContent = Buffer.from(await file.arrayBuffer()).toString('utf-8');
             result = { markdown: markdownContent };
         }
 
+        // تسجيل العملية
         await logGeneration({
             agentId,
             userId: user.id,
-            input: { fileName: file.name, fileType: file.type }, // Don't log the full data URI
+            input: { fileName: file.name, fileType: file.type }, // لا نسجل الـ data URI كاملاً
             output: { markdownLength: markdownContent.length },
-            creditCost: 1
+            creditCost: this.creditCost
         });
 
-        return createApiResponseEnhanced({ markdown: markdownContent }, 200);
-
-    } catch (error) {
-        return handleApiErrorEnhanced(error);
+        return { markdown: markdownContent };
     }
-});
+}
+
+// إنشاء المعالج
+const processFileHandler = new ProcessFileHandler();
+
+// تصدير الـ handler مع middleware
+export const POST = withApiMiddleware(
+    processFileHandler.handle.bind(processFileHandler),
+    {
+        logging: true
+    }
+);

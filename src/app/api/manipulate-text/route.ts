@@ -1,38 +1,49 @@
-
-'use server';
+/**
+ * API Route لمعالجة النصوص - النسخة الجديدة الموحدة
+ *
+ * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لمعالجة النصوص
+ */
 
 import { manipulateText } from '@/ai/flows/manipulate-text';
 import { ManipulateTextInputSchema } from '@/ai/schemas';
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
-import { deductCredit, logGeneration } from '@/services';
+import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
+import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { logGeneration } from '@/services';
 
 /**
  * معالج معالجة النصوص
  */
-export const POST = withEnhancedAuth(async ({ request, user }) => {
-  try {
-    const body = await request.json();
-    const validation = ManipulateTextInputSchema.safeParse(body);
-    if (!validation.success) {
-      return handleApiErrorEnhanced(validation.error, '400');
+class ManipulateTextHandler extends CreditBasedApiHandler<any, any> {
+    protected inputSchema = ManipulateTextInputSchema;
+    protected creditCost = 1;
+    protected requiresAdmin = false;
+
+    protected async processRequest(data: any, context: any) {
+        const { user } = context;
+
+        const agentInput = data;
+        const result = await manipulateText(agentInput);
+
+        // تسجيل العملية
+        await logGeneration({
+            agentId: 'manipulate-text',
+            userId: user.id,
+            input: agentInput,
+            output: result,
+            creditCost: this.creditCost,
+        });
+
+        return result;
     }
+}
 
-    const creditCost = 1;
-    await deductCredit(user.id, creditCost);
+// إنشاء المعالج
+const manipulateTextHandler = new ManipulateTextHandler();
 
-    const agentInput = validation.data;
-    const result = await manipulateText(agentInput);
-
-    await logGeneration({
-      agentId: 'manipulate-text',
-      userId: user.id,
-      input: agentInput,
-      output: result,
-      creditCost: creditCost,
-    });
-
-    return createApiResponseEnhanced(result, 200);
-  } catch (error) {
-    return handleApiErrorEnhanced(error, '500');
-  }
-});
+// تصدير الـ handler مع middleware
+export const POST = withApiMiddleware(
+    manipulateTextHandler.handle.bind(manipulateTextHandler),
+    {
+        logging: true
+    }
+);
