@@ -34,11 +34,12 @@ import {
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { IntelligentReportResults } from '../report-mode/IntelligentReportResults';
+import { EnhancedProgressTracker } from './EnhancedProgressTracker';
 import { PerformanceDashboard } from './PerformanceDashboard';
-import { ProgressTracker } from './ProgressTracker';
 import { QualityIndicator } from './QualityIndicator';
 import { ReportConfigPanel } from './ReportConfigPanel';
 import { SectionSelector } from './SectionSelector';
+import { SmartModeRecommendations } from './SmartModeRecommendations';
 import { ValidationInstructions } from './ValidationInstructions';
 interface IntelligentReportGeneratorProps {
     initialProposal?: any;
@@ -53,7 +54,7 @@ export function IntelligentReportGenerator({
     onReportGenerated,
     className
 }: IntelligentReportGeneratorProps) {
-    const [mode, setMode] = useState<'single' | 'complete'>('complete');
+    const [mode, setMode] = useState<'single' | 'complete' | 'recommendations'>('recommendations');
     const [selectedSingleSection, setSelectedSingleSection] = useState<SectionName>('introduction');
 
     const reportBuilder = useReportBuilder();
@@ -190,17 +191,40 @@ export function IntelligentReportGenerator({
             )}
 
             {/* لوحة التحكم الرئيسية */}
-            <Tabs value={mode} onValueChange={(value) => setMode(value as 'single' | 'complete')}>
-                <TabsList className="grid w-full grid-cols-2">
+            <Tabs value={mode} onValueChange={(value) => setMode(value as 'single' | 'complete' | 'recommendations')}>
+                <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="recommendations" className="flex items-center gap-2">
+                        <Brain className="h-4 w-4" />
+                        التوصيات الذكية
+                    </TabsTrigger>
                     <TabsTrigger value="single" className="flex items-center gap-2">
                         <FileText className="h-4 w-4" />
                         قسم فردي
                     </TabsTrigger>
                     <TabsTrigger value="complete" className="flex items-center gap-2">
-                        <Brain className="h-4 w-4" />
+                        <Target className="h-4 w-4" />
                         تقرير كامل
                     </TabsTrigger>
                 </TabsList>
+
+                {/* التوصيات الذكية */}
+                <TabsContent value="recommendations" className="space-y-4">
+                    <SmartModeRecommendations
+                        proposal={reportBuilder.reportConfig.proposal || initialProposal}
+                        projectPlan={reportBuilder.reportConfig.projectPlan || initialProjectPlan}
+                        contextFiles={reportBuilder.reportConfig.contextFiles}
+                        sectionsToGenerate={reportBuilder.selectedSections}
+                        guidelines={reportBuilder.reportConfig.guidelines}
+                        onModeSelected={(selectedMode) => {
+                            console.log('تم اختيار الوضع:', selectedMode);
+                            // يمكن إضافة منطق تطبيق الوضع المختار
+                        }}
+                        onSectionModeChanged={(section, mode) => {
+                            console.log(`تم تغيير وضع القسم ${section} إلى:`, mode);
+                            // يمكن إضافة منطق تطبيق الوضع على المستوى الخاص بالقسم
+                        }}
+                    />
+                </TabsContent>
 
                 {/* توليد قسم فردي */}
                 <TabsContent value="single" className="space-y-4">
@@ -262,9 +286,22 @@ export function IntelligentReportGenerator({
 
                             {/* تتبع التقدم */}
                             {isGenerating && (
-                                <ProgressTracker
+                                <EnhancedProgressTracker
                                     progress={currentProgress}
                                     mode="single"
+                                    sectionsToGenerate={[selectedSingleSection]}
+                                    onPause={() => {
+                                        // يمكن إضافة منطق الإيقاف المؤقت للقسم الفردي
+                                    }}
+                                    onResume={() => {
+                                        // يمكن إضافة منطق المتابعة للقسم الفردي
+                                    }}
+                                    onCancelGeneration={() => {
+                                        // يمكن إضافة منطق الإلغاء للقسم الفردي
+                                    }}
+                                    onRetrySection={() => {
+                                        // لا يوجد حاجة لإعادة المحاولة للقسم الفردي
+                                    }}
                                 />
                             )}
 
@@ -325,10 +362,22 @@ export function IntelligentReportGenerator({
 
                             {/* تتبع التقدم للتقرير الكامل */}
                             {isGenerating && (
-                                <ProgressTracker
+                                <EnhancedProgressTracker
                                     progress={currentProgress}
                                     mode="complete"
                                     sectionsToGenerate={reportBuilder.selectedSections}
+                                    onPause={() => {
+                                        // يمكن إضافة منطق الإيقاف المؤقت للتقرير الكامل
+                                    }}
+                                    onResume={() => {
+                                        // يمكن إضافة منطق المتابعة للتقرير الكامل
+                                    }}
+                                    onCancelGeneration={() => {
+                                        // يمكن إضافة منطق الإلغاء للتقرير الكامل
+                                    }}
+                                    onRetrySection={(section) => {
+                                        // يمكن إضافة منطق إعادة المحاولة للقسم
+                                    }}
                                 />
                             )}
 

@@ -205,6 +205,223 @@ export const SUPPORTED_SECTIONS: Record<SectionName, {
 export class IntelligentReportService {
 
     /**
+     * تحليل السياق وتقديم توصيات للوضع المناسب
+     */
+    static async getModeRecommendation(config: {
+        proposal?: any;
+        projectPlan?: any;
+        contextFiles?: Array<{ fileName: string; content: string; type: string }>;
+        sectionsToGenerate?: SectionName[];
+        guidelines?: string[];
+    }): Promise<{
+        recommendedMode: 'intelligent' | 'traditional' | 'hybrid';
+        confidence: number;
+        reasoning: string[];
+        sectionRecommendations: Record<SectionName, {
+            recommendedMode: 'intelligent' | 'traditional';
+            reason: string;
+            complexity: 'low' | 'medium' | 'high';
+        }>;
+    }> {
+
+        // تحليل تعقيد المشروع
+        const projectComplexity = this.analyzeProjectComplexity(config.proposal, config.projectPlan);
+
+        // تحليل المحتوى المتاح
+        const contentAnalysis = this.analyzeAvailableContent(config.contextFiles);
+
+        // تحليل الأقسام المطلوبة
+        const sectionAnalysis = this.analyzeRequiredSections(config.sectionsToGenerate || []);
+
+        // حساب التقويم العام
+        let recommendedMode: 'intelligent' | 'traditional' | 'hybrid' = 'traditional';
+        let confidence = 0.5;
+        const reasoning: string[] = [];
+
+        // المعايير للتوصية بالوضع الذكي
+        if (projectComplexity.score >= 7) {
+            recommendedMode = 'intelligent';
+            confidence += 0.3;
+            reasoning.push('المشروع معقد ويتطلب تحليل سياق متقدم');
+        }
+
+        if (contentAnalysis.hasVisualContent || contentAnalysis.documentCount >= 3) {
+            recommendedMode = 'intelligent';
+            confidence += 0.2;
+            reasoning.push('محتوى غني يتطلب تحليل ذكي');
+        }
+
+        if (sectionAnalysis.hasComplexSections) {
+            recommendedMode = 'intelligent';
+            confidence += 0.2;
+            reasoning.push('أقسام معقدة تتطلب تحسين تكراري');
+        }
+
+        if (contentAnalysis.contextQuality >= 8) {
+            recommendedMode = 'intelligent';
+            confidence += 0.15;
+            reasoning.push('جودة السياق عالية تسمح بالتوليد الذكي');
+        }
+
+        // تقليل التوصية إذا كان المحتوى محدود
+        if (contentAnalysis.contextQuality < 5) {
+            recommendedMode = 'traditional';
+            confidence -= 0.2;
+            reasoning.push('المحتوى محدود، الوضع التقليدي أكثر ملاءمة');
+        }
+
+        // تقييم الحاجة للوضع المختلط
+        const mixedNeeds = sectionAnalysis.sections.some(s => s.complexity === 'high') &&
+            sectionAnalysis.sections.some(s => s.complexity === 'low');
+
+        if (mixedNeeds && confidence >= 0.6) {
+            recommendedMode = 'hybrid';
+            reasoning.push('أقسام متنوعة التعقيد تتطلب وضع مختلط');
+        }
+
+        // إنتاج توصيات الأقسام
+        const sectionRecommendations: Record<SectionName, {
+            recommendedMode: 'intelligent' | 'traditional';
+            reason: string;
+            complexity: 'low' | 'medium' | 'high';
+        }> = sectionAnalysis.sections.reduce((acc, section) => {
+            const sectionInfo = SUPPORTED_SECTIONS[section.name];
+            acc[section.name] = {
+                recommendedMode: section.complexity === 'high' ? 'intelligent' : 'traditional',
+                reason: section.complexity === 'high' ? 'أقسام متعددة التبعيات' : 'أقسام بسيطة نسبياً',
+                complexity: section.complexity
+            };
+            return acc;
+        }, {} as Record<SectionName, { recommendedMode: 'intelligent' | 'traditional'; reason: string; complexity: 'low' | 'medium' | 'high'; }>);
+
+        return {
+            recommendedMode,
+            confidence: Math.max(0, Math.min(1, confidence)),
+            reasoning,
+            sectionRecommendations
+        };
+    }
+
+    /**
+     * تحليل تعقيد المشروع
+     */
+    private static analyzeProjectComplexity(proposal?: any, projectPlan?: any): {
+        score: number;
+        factors: string[];
+    } {
+        let score = 0;
+        const factors: string[] = [];
+
+        if (proposal) {
+            const proposalLength = JSON.stringify(proposal).length;
+            if (proposalLength > 5000) {
+                score += 2;
+                factors.push('عرض تقديمي متكامل ومفصل');
+            }
+
+            if (proposal.budget && parseFloat(proposal.budget) > 100000) {
+                score += 1;
+                factors.push('مشروع بميزانية كبيرة');
+            }
+        }
+
+        if (projectPlan) {
+            const planLength = JSON.stringify(projectPlan).length;
+            if (planLength > 3000) {
+                score += 2;
+                factors.push('خطة مشروع مفصلة');
+            }
+
+            if (projectPlan.timeline && projectPlan.timeline.phases?.length > 5) {
+                score += 1;
+                factors.push('خطط زمنية معقدة');
+            }
+        }
+
+        return {
+            score: Math.min(10, score),
+            factors
+        };
+    }
+
+    /**
+     * تحليل المحتوى المتاح
+     */
+    private static analyzeAvailableContent(contextFiles?: Array<{ fileName: string; content: string; type: string }>): {
+        contextQuality: number;
+        documentCount: number;
+        hasVisualContent: boolean;
+        totalContentSize: number;
+    } {
+        if (!contextFiles || contextFiles.length === 0) {
+            return {
+                contextQuality: 3,
+                documentCount: 0,
+                hasVisualContent: false,
+                totalContentSize: 0
+            };
+        }
+
+        let contextQuality = 5;
+        let totalContentSize = 0;
+        let hasVisualContent = false;
+
+        contextFiles.forEach(file => {
+            totalContentSize += file.content.length;
+
+            if (file.content.length > 1000) {
+                contextQuality += 1;
+            }
+
+            if (['image', 'chart', 'diagram'].includes(file.type)) {
+                hasVisualContent = true;
+                contextQuality += 2;
+            }
+        });
+
+        const avgQuality = Math.min(10, contextQuality / contextFiles.length);
+
+        return {
+            contextQuality: avgQuality,
+            documentCount: contextFiles.length,
+            hasVisualContent,
+            totalContentSize
+        };
+    }
+
+    /**
+     * تحليل الأقسام المطلوبة
+     */
+    private static analyzeRequiredSections(sectionsToGenerate: SectionName[]): {
+        hasComplexSections: boolean;
+        sections: Array<{
+            name: SectionName;
+            complexity: 'low' | 'medium' | 'high';
+            dependencies: number;
+        }>;
+    } {
+        const sections = sectionsToGenerate.map(section => {
+            const info = SUPPORTED_SECTIONS[section];
+            const dependencies = info.dependencies.length;
+            const complexity: 'low' | 'medium' | 'high' = dependencies > 2 ? 'high' :
+                dependencies > 0 ? 'medium' : 'low';
+
+            return {
+                name: section,
+                complexity,
+                dependencies
+            };
+        });
+
+        const hasComplexSections = sections.some(s => s.complexity === 'high');
+
+        return {
+            hasComplexSections,
+            sections
+        };
+    }
+
+    /**
      * توليد قسم فردي بالنظام الذكي
      */
     static async generateSingleSection(config: {
