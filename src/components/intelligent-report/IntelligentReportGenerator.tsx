@@ -33,13 +33,13 @@ import {
     Zap
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
+import { IntelligentReportResults } from '../report-mode/IntelligentReportResults';
 import { PerformanceDashboard } from './PerformanceDashboard';
 import { ProgressTracker } from './ProgressTracker';
 import { QualityIndicator } from './QualityIndicator';
 import { ReportConfigPanel } from './ReportConfigPanel';
 import { SectionSelector } from './SectionSelector';
 import { ValidationInstructions } from './ValidationInstructions';
-
 interface IntelligentReportGeneratorProps {
     initialProposal?: any;
     initialProjectPlan?: any;
@@ -448,6 +448,11 @@ export function IntelligentReportGenerator({
                     )}
                 </CardContent>
             </Card>
+
+            <IntelligentReportResults
+                generatedSections={reportBuilder.selectedSections}
+                sectionMetadata={reportBuilder.sectionResults as any}
+            />
         </div>
     );
 }

@@ -17,6 +17,7 @@ interface SectionMetadata {
     isIntelligent?: boolean;
     creditCost?: number;
     timestamp?: string;
+    content?: string; // إضافة المحتوى للـ metadata
 }
 
 export function useIntelligentReportMode() {
@@ -35,42 +36,130 @@ export function useIntelligentReportMode() {
         return [...new Set([...traditionalSections, ...intelligentSections])];
     }, [traditionalReport.generatedSections, intelligentSections]);
 
-    // نظام الحفظ التلقائي
+    // نظام الحفظ التلقائي المحسن
     useEffect(() => {
-        // حفظ metadata في localStorage
-        if (Object.keys(sectionMetadata).length > 0) {
+        // حفظ البيانات في localStorage مع تحديث مستمر
+        if (Object.keys(sectionMetadata).length > 0 || intelligentSections.length > 0) {
             try {
                 const dataToSave = {
                     intelligentSections,
                     sectionMetadata,
                     timestamp: Date.now(),
-                    projectId: project?.id
+                    projectId: project?.id,
+                    version: '2.0' // إصدار البيانات
                 };
                 localStorage.setItem('arkan_intelligent_report_data', JSON.stringify(dataToSave));
+
+                // حفظ نسخة احتياطية
+                localStorage.setItem('arkan_intelligent_report_backup', JSON.stringify(dataToSave));
             } catch (error) {
                 console.warn('فشل في حفظ بيانات التقرير تلقائياً:', error);
             }
         }
     }, [intelligentSections, sectionMetadata, project?.id]);
 
-    // استعادة البيانات عند بدء التشغيل
+    // استعادة البيانات المحسنة
     useEffect(() => {
         try {
             const savedData = localStorage.getItem('arkan_intelligent_report_data');
             if (savedData) {
                 const parsedData = JSON.parse(savedData);
-                // التحقق من أن البيانات تخص نفس المشروع وليست قديمة جداً (24 ساعة)
+
+                // التحقق من صحة البيانات
                 if (parsedData.projectId === project?.id &&
-                    Date.now() - parsedData.timestamp < 24 * 60 * 60 * 1000) {
-                    setIntelligentSections(parsedData.intelligentSections || []);
-                    setSectionMetadata(parsedData.sectionMetadata || {});
-                    toast.success('تم استعادة البيانات المحفوظة تلقائياً');
+                    Date.now() - parsedData.timestamp < 7 * 24 * 60 * 60 * 1000) { // 7 أيام
+
+                    // استعادة البيانات تدريجياً
+                    if (parsedData.intelligentSections?.length > 0) {
+                        setIntelligentSections(parsedData.intelligentSections);
+                    }
+
+                    if (parsedData.sectionMetadata && Object.keys(parsedData.sectionMetadata).length > 0) {
+                        setSectionMetadata(parsedData.sectionMetadata);
+                    }
+
+                    // تحديث محتوى المشروع من البيانات المحفوظة
+                    if (parsedData.sectionMetadata) {
+                        Object.entries(parsedData.sectionMetadata).forEach(([sectionName, metadata]: [string, any]) => {
+                            if (metadata.content && project?.sections?.[sectionName as SectionName] !== metadata.content) {
+                                updateProject(p => {
+                                    p.updateSectionContent(sectionName as SectionName, metadata.content);
+                                });
+                            }
+                        });
+                    }
+
+                    toast.success(`تم استعادة ${parsedData.intelligentSections?.length || 0} أقسام ذكية`);
                 }
             }
         } catch (error) {
             console.warn('فشل في استعادة البيانات المحفوظة:', error);
+            // محاولة استعادة من النسخة الاحتياطية
+            try {
+                const backupData = localStorage.getItem('arkan_intelligent_report_backup');
+                if (backupData) {
+                    const parsedBackup = JSON.parse(backupData);
+                    if (parsedBackup.projectId === project?.id) {
+                        setIntelligentSections(parsedBackup.intelligentSections || []);
+                        setSectionMetadata(parsedBackup.sectionMetadata || {});
+                        toast.info('تم استعادة البيانات من النسخة الاحتياطية');
+                    }
+                }
+            } catch (backupError) {
+                console.warn('فشل في استعادة النسخة الاحتياطية:', backupError);
+            }
         }
-    }, [project?.id]);
+    }, [project?.id, updateProject]);
+
+    // دالة لاستعادة الأقسام المحفوظة
+    const restoreSavedSections = useCallback(() => {
+        try {
+            const savedData = localStorage.getItem('arkan_intelligent_report_data');
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+
+                if (parsedData.projectId === project?.id) {
+                    // استعادة الأقسام
+                    if (parsedData.intelligentSections?.length > 0) {
+                        setIntelligentSections(parsedData.intelligentSections);
+                    }
+
+                    // استعادة metadata
+                    if (parsedData.sectionMetadata && Object.keys(parsedData.sectionMetadata).length > 0) {
+                        setSectionMetadata(parsedData.sectionMetadata);
+
+                        // تحديث محتوى المشروع من البيانات المحفوظة
+                        Object.entries(parsedData.sectionMetadata).forEach(([sectionName, metadata]: [string, any]) => {
+                            if (metadata.content && project?.sections?.[sectionName as SectionName] !== metadata.content) {
+                                updateProject(p => {
+                                    p.updateSectionContent(sectionName as SectionName, metadata.content);
+                                });
+                            }
+                        });
+                    }
+
+                    toast.success(`تم استعادة ${parsedData.intelligentSections?.length || 0} أقسام ذكية`);
+                    return true;
+                }
+            }
+        } catch (error) {
+            console.warn('فشل في استعادة الأقسام المحفوظة:', error);
+        }
+        return false;
+    }, [project?.id, updateProject]);
+
+    // دالة لحذف البيانات المحفوظة
+    const clearSavedData = useCallback(() => {
+        try {
+            localStorage.removeItem('arkan_intelligent_report_data');
+            localStorage.removeItem('arkan_intelligent_report_backup');
+            setIntelligentSections([]);
+            setSectionMetadata({});
+            toast.success('تم حذف البيانات المحفوظة');
+        } catch (error) {
+            console.warn('فشل في حذف البيانات المحفوظة:', error);
+        }
+    }, []);
 
     // معالج نتائج النظام الذكي
     const handleIntelligentResult = useCallback((result: SingleSectionResult | CompleteReportResult) => {
@@ -92,17 +181,34 @@ export function useIntelligentReportMode() {
                 return prev;
             });
 
-            // حفظ metadata
+            // حفظ metadata مع المحتوى
+            const metadata: SectionMetadata = {
+                isIntelligent: true,
+                generationTime: result.metadata?.executionTime,
+                creditCost: result.metadata?.creditCost,
+                timestamp: result.metadata?.timestamp || new Date().toISOString(),
+                qualityScore: 85, // تقدير افتراضي
+                content: singleResult.content // حفظ المحتوى في metadata
+            };
+
             setSectionMetadata(prev => ({
                 ...prev,
-                [sectionName]: {
-                    isIntelligent: true,
-                    generationTime: result.metadata?.executionTime,
-                    creditCost: result.metadata?.creditCost,
-                    timestamp: result.metadata?.timestamp,
-                    qualityScore: 85 // تقدير افتراضي
-                }
+                [sectionName]: metadata
             }));
+
+            // حفظ فوري في localStorage
+            try {
+                const currentData = {
+                    intelligentSections: [...new Set([...intelligentSections, sectionName])],
+                    sectionMetadata: { ...sectionMetadata, [sectionName]: metadata },
+                    timestamp: Date.now(),
+                    projectId: project?.id,
+                    version: '2.0'
+                };
+                localStorage.setItem('arkan_intelligent_report_data', JSON.stringify(currentData));
+            } catch (error) {
+                console.warn('فشل في الحفظ الفوري:', error);
+            }
 
             toast.success(`تم توليد ${sectionName} بنجاح!`, {
                 description: `النظام الذكي - الوقت: ${result.metadata?.executionTime || 0}ms`
@@ -123,7 +229,7 @@ export function useIntelligentReportMode() {
             const newSections = Object.keys(completeResult.generatedSections) as SectionName[];
             setIntelligentSections(prev => [...new Set([...prev, ...newSections])]);
 
-            // حفظ metadata لكل قسم
+            // حفظ metadata لكل قسم مع المحتوى
             const newMetadata: Record<string, SectionMetadata> = {};
             Object.entries(completeResult.sectionMetadata).forEach(([sectionName, metadata]) => {
                 newMetadata[sectionName] = {
@@ -134,11 +240,26 @@ export function useIntelligentReportMode() {
                     modelUsed: metadata.modelUsed,
                     creditCost: completeResult.metadata?.creditCost ?
                         Math.ceil((completeResult.metadata.creditCost || 0) / newSections.length) : undefined,
-                    timestamp: completeResult.metadata?.timestamp
+                    timestamp: completeResult.metadata?.timestamp || new Date().toISOString(),
+                    content: completeResult.generatedSections[sectionName] // حفظ المحتوى في metadata
                 };
             });
 
             setSectionMetadata(prev => ({ ...prev, ...newMetadata }));
+
+            // حفظ فوري في localStorage
+            try {
+                const currentData = {
+                    intelligentSections: [...new Set([...intelligentSections, ...newSections])],
+                    sectionMetadata: { ...sectionMetadata, ...newMetadata },
+                    timestamp: Date.now(),
+                    projectId: project?.id,
+                    version: '2.0'
+                };
+                localStorage.setItem('arkan_intelligent_report_data', JSON.stringify(currentData));
+            } catch (error) {
+                console.warn('فشل في الحفظ الفوري:', error);
+            }
 
             toast.success(`تم توليد التقرير الكامل بنجاح!`, {
                 description: `${completeResult.overallMetrics.successfulSections}/${completeResult.overallMetrics.totalSections} أقسام - جودة متوسطة: ${completeResult.overallMetrics.averageQuality.toFixed(1)}/100`
@@ -527,6 +648,10 @@ ${metadata.iterations ? `عدد التحسينات: ${metadata.iterations}` : ''
         restoreVersion,
         getSectionVersions,
         versionsHistory,
+
+        // نظام الحفظ والاستعادة
+        restoreSavedSections,
+        clearSavedData,
 
         // معلومات إضافية
         isGenerating: traditionalReport.isAnythingGenerating,
