@@ -25,6 +25,7 @@ import { SectionUtils } from '@/services/intelligent-report-service';
 import {
     AlertCircle,
     ArrowUpRightIcon,
+    BarChart3,
     Brain,
     Clock,
     Database,
@@ -35,11 +36,13 @@ import {
     RotateCcw,
     Settings,
     Target,
+    Users,
     Zap
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { IntelligentReportResults } from '../report-mode/IntelligentReportResults';
 import { AdvancedContextAnalysisPanel } from './AdvancedContextAnalysisPanel';
+import { CollaborationPanel } from './CollaborationPanel';
 import { EnhancedProgressTracker } from './EnhancedProgressTracker';
 import { HybridModeConfig } from './HybridModeConfig';
 import { IntelligentCacheManager } from './IntelligentCacheManager';
@@ -49,6 +52,7 @@ import { QualityIndicator } from './QualityIndicator';
 import { ReportConfigPanel } from './ReportConfigPanel';
 import { SectionSelector } from './SectionSelector';
 import { SmartModeRecommendations } from './SmartModeRecommendations';
+import { UserAnalyticsDashboard } from './UserAnalyticsDashboard';
 import { ValidationInstructions } from './ValidationInstructions';
 interface IntelligentReportGeneratorProps {
     initialProposal?: any;
@@ -63,7 +67,7 @@ export function IntelligentReportGenerator({
     onReportGenerated,
     className
 }: IntelligentReportGeneratorProps) {
-    const [mode, setMode] = useState<'single' | 'complete' | 'recommendations' | 'hybrid' | 'quality' | 'context-analysis' | 'caching'>('recommendations');
+    const [mode, setMode] = useState<'single' | 'complete' | 'recommendations' | 'hybrid' | 'quality' | 'context-analysis' | 'caching' | 'analytics' | 'collaboration'>('recommendations');
     const [selectedSingleSection, setSelectedSingleSection] = useState<SectionName>('introduction');
 
     const reportBuilder = useReportBuilder();
@@ -209,8 +213,8 @@ export function IntelligentReportGenerator({
             )}
 
             {/* لوحة التحكم الرئيسية */}
-            <Tabs value={mode} onValueChange={(value) => setMode(value as 'single' | 'complete' | 'recommendations' | 'hybrid' | 'quality' | 'context-analysis' | 'caching')}>
-                <TabsList className="grid w-full grid-cols-7">
+            <Tabs value={mode} onValueChange={(value) => setMode(value as 'single' | 'complete' | 'recommendations' | 'hybrid' | 'quality' | 'context-analysis' | 'caching' | 'analytics' | 'collaboration')}>
+                <TabsList className="grid w-full grid-cols-9">
                     <TabsTrigger value="recommendations" className="flex items-center gap-2">
                         <Brain className="h-4 w-4" />
                         التوصيات الذكية
@@ -230,6 +234,14 @@ export function IntelligentReportGenerator({
                     <TabsTrigger value="caching" className="flex items-center gap-2">
                         <Database className="h-4 w-4" />
                         التخزين المؤقت
+                    </TabsTrigger>
+                    <TabsTrigger value="analytics" className="flex items-center gap-2">
+                        <BarChart3 className="h-4 w-4" />
+                        التحليلات
+                    </TabsTrigger>
+                    <TabsTrigger value="collaboration" className="flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        التعاون
                     </TabsTrigger>
                     <TabsTrigger value="single" className="flex items-center gap-2">
                         <FileText className="h-4 w-4" />
@@ -348,6 +360,23 @@ export function IntelligentReportGenerator({
                             console.log('مكتمل التحسين:', result);
                             // يمكن إضافة منطق إشعارات النجاح
                         }}
+                    />
+                </TabsContent>
+
+                {/* لوحة التحليلات والإحصائيات */}
+                <TabsContent value="analytics" className="space-y-4">
+                    <UserAnalyticsDashboard
+                        userId={reportBuilder.reportConfig.userId}
+                        sessionId={`session_${Date.now()}`}
+                    />
+                </TabsContent>
+
+                {/* لوحة التعاون والتشارك مع الفريق */}
+                <TabsContent value="collaboration" className="space-y-4">
+                    <CollaborationPanel
+                        reportId={reportBuilder.reportConfig.reportId || `report_${Date.now()}`}
+                        currentUserId={reportBuilder.reportConfig.userId || `user_${Date.now()}`}
+                        currentUserName={reportBuilder.reportConfig.userName || 'مستخدم غير محدد'}
                     />
                 </TabsContent>
 
