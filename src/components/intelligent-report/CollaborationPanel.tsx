@@ -18,6 +18,7 @@ import {
     CheckCircle,
     Clock,
     Eye,
+    Info,
     MessageSquare,
     Plus,
     Reply,
