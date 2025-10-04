@@ -33,8 +33,28 @@ const PostProcessingStepSchema = z.object({
     template: z.string().optional(),
 });
 
+const ReportGenerationModeSchema = z.enum(['traditional', 'intelligent', 'hybrid']).optional();
+
+const IntelligentSettingsSchema = z.object({
+    enableContextAnalysis: z.boolean().optional(),
+    enableIterativeImproved: z.boolean().optional(),
+    enablePerformanceMonitoring: z.boolean().optional(),
+    qualityThreshold: z.number().optional(),
+    maxRetries: z.number().optional(),
+}).optional();
+
+const HybridSettingsSchema = z.object({
+    enabled: z.boolean().optional(),
+    intelligentThreshold: z.number().optional(),
+    fallbackToTraditional: z.boolean().optional(),
+    sectionModes: z.record(z.string(), z.enum(['traditional', 'intelligent'])).optional(),
+}).optional();
+
 const FullReportModeConfigSchema = z.object({
     mode: z.literal("Full Report Mode"),
+    generationMode: ReportGenerationModeSchema,
+    intelligentSettings: IntelligentSettingsSchema,
+    hybridSettings: HybridSettingsSchema,
     reportTitle: z.string().optional(),
     language: z.string().optional(),
     version: z.string().optional(),

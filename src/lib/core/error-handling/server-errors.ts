@@ -404,6 +404,10 @@ function getStatusCode(error: AppError): number {
         case 'SERVER_ERROR':
             return 500;
         case 'CLIENT_ERROR':
+            // للمشاريع غير الموجودة، نُرجع 404
+            if (error.code === 'API_ENDPOINT_NOT_FOUND') {
+                return 404;
+            }
             return 400;
         case 'FILE_ERROR':
             return 400;

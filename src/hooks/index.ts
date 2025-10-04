@@ -155,7 +155,6 @@ export * from './use-project-plan';
 export * from './use-proposal-actions-logic';
 export * from './use-proposal-generation';
 export * from './use-sections';
-export * from './use-taskade';
 export * from './use-team-card-logic';
 export * from './use-translation';
 export * from './use-translation-view-logic';

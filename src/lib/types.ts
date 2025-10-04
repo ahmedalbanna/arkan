@@ -8,7 +8,7 @@ export type { DiagramProperties } from '@/lib/models/diagram';
 export type { DocxTemplate, DocxTemplateProperties } from '@/lib/models/docxTemplate';
 export type { GeneratableDocumentProperties, GenerationStatus } from '@/lib/models/generatableDocument';
 export type { PptxTemplate, PptxTemplateProperties } from '@/lib/models/pptxTemplate';
-export type { AcademicSolverStage, AcademicSolverState, ContextFileType, FullReportModeConfig, GeneratedProposalSection, LinkedAsset, PostProcessingStep, PostProcessingStepResult, ProjectProperties, ProjectState, ProposalVersionHistory, ReportSectionConfig, SavedProject, SavedProposalState } from '@/lib/models/project';
+export type { AcademicSolverStage, AcademicSolverState, ContextFileType, FullReportModeConfig, GeneratedProposalSection, LinkedAsset, PostProcessingStep, PostProcessingStepResult, ProjectProperties, ProjectState, ProposalVersionHistory, ReportGenerationMode, ReportSectionConfig, SavedProject, SavedProposalState } from '@/lib/models/project';
 export type { ReportTemplateProperties } from '@/lib/models/reportTemplate';
 export type { Section, SectionProperties, SectionType } from '@/lib/models/section';
 export type { Team, TeamProperties, TeamWithMembers } from '@/lib/models/team';

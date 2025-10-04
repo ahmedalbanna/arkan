@@ -8,19 +8,36 @@ import { ProjectStateSchema } from '@/ai/schemas';
 import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
+import { tempProjectManager } from '@/lib/services/temp-project-manager';
 import { FieldValue } from 'firebase-admin/firestore';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
 // Helper to verify user owns the project
 const verifyProjectOwner = async (requesterId: string, projectId: string) => {
+    // التحقق من صحة المشروع المؤقت أولاً
+    if (projectId.startsWith('temp-')) {
+        const isValidTemp = await tempProjectManager.validateTempProject(projectId);
+        if (!isValidTemp) {
+            const notFoundError = new Error('Temporary project has expired or does not exist');
+            notFoundError.name = 'ProjectNotFoundError';
+            throw notFoundError;
+        }
+    }
+
     const projectDoc = await adminDb.collection('projects').doc(projectId).get();
     if (!projectDoc.exists) {
-        throw new Error('Project not found');
+        // إنشاء خطأ مخصص للمشروع غير الموجود
+        const notFoundError = new Error('Project not found');
+        notFoundError.name = 'ProjectNotFoundError';
+        throw notFoundError;
     }
     const project = projectDoc.data();
     if (project?.userId !== requesterId) {
-        throw new Error('Forbidden: You do not own this project');
+        // إنشاء خطأ مخصص للصلاحيات
+        const forbiddenError = new Error('Forbidden: You do not own this project');
+        forbiddenError.name = 'ProjectAccessDeniedError';
+        throw forbiddenError;
     }
     return project;
 };

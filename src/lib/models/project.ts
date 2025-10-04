@@ -5,8 +5,28 @@ import { Diagram, type DiagramProperties } from './diagram';
 
 // --- Types moved from types.ts ---
 
+/** أنواع توليد التقارير المتاحة */
+export type ReportGenerationMode = 'traditional' | 'intelligent' | 'hybrid';
+
 export interface FullReportModeConfig {
   mode: "Full Report Mode";
+  /** نوع توليد التقرير المستخدم */
+  generationMode?: ReportGenerationMode;
+  /** إعدادات النظام الذكي */
+  intelligentSettings?: {
+    enableContextAnalysis?: boolean;
+    enableIterativeImproved?: boolean;
+    enablePerformanceMonitoring?: boolean;
+    qualityThreshold?: number;
+    maxRetries?: number;
+  };
+  /** إعدادات النظام المختلط */
+  hybridSettings?: {
+    enabled?: boolean;
+    intelligentThreshold?: number;
+    fallbackToTraditional?: boolean;
+    sectionModes?: Record<string, 'traditional' | 'intelligent'>;
+  };
   reportTitle?: string;
   language?: string;
   version?: string;
@@ -341,6 +361,51 @@ export class Project implements SavedProject {
 
   public updateSectionContent(sectionName: SectionName, newContent: string): void {
     this._sections = { ...this._sections, [sectionName]: newContent };
+  }
+
+  // --- Report Generation Mode Methods ---
+  public setReportGenerationMode(mode: ReportGenerationMode): void {
+    if (!this._reportConfig) {
+      this._reportConfig = {
+        mode: "Full Report Mode",
+        generationMode: mode,
+        sections: []
+      };
+    } else {
+      this._reportConfig.generationMode = mode;
+    }
+  }
+
+  public getReportGenerationMode(): ReportGenerationMode {
+    return this._reportConfig?.generationMode ?? 'traditional';
+  }
+
+  public setIntelligentSettings(settings: FullReportModeConfig['intelligentSettings']): void {
+    if (!this._reportConfig) {
+      this._reportConfig = {
+        mode: "Full Report Mode",
+        sections: []
+      };
+    }
+    this._reportConfig.intelligentSettings = settings;
+  }
+
+  public getIntelligentSettings(): FullReportModeConfig['intelligentSettings'] {
+    return this._reportConfig?.intelligentSettings;
+  }
+
+  public setHybridSettings(settings: FullReportModeConfig['hybridSettings']): void {
+    if (!this._reportConfig) {
+      this._reportConfig = {
+        mode: "Full Report Mode",
+        sections: []
+      };
+    }
+    this._reportConfig.hybridSettings = settings;
+  }
+
+  public getHybridSettings(): FullReportModeConfig['hybridSettings'] {
+    return this._reportConfig?.hybridSettings;
   }
 
   // --- Diagram Methods ---

@@ -277,6 +277,39 @@ export const handleApiErrorEnhanced = (error: any, context?: string, metadata?: 
         return handleServerError(appError, 'API');
     }
 
+    // Handle custom project errors
+    if (error.name === 'ProjectNotFoundError') {
+        const appError = createServerError({
+            type: 'CLIENT_ERROR',
+            code: 'API_ENDPOINT_NOT_FOUND',
+            message: error.message,
+            level: 'medium',
+            source: 'api',
+            context: {
+                originalError: error,
+                context: context || 'API',
+                ...metadata,
+            }
+        });
+        return handleServerError(appError, 'API');
+    }
+
+    if (error.name === 'ProjectAccessDeniedError') {
+        const appError = createServerError({
+            type: 'AUTHORIZATION_ERROR',
+            code: 'ACCESS_DENIED',
+            message: error.message,
+            level: 'high',
+            source: 'api',
+            context: {
+                originalError: error,
+                context: context || 'API',
+                ...metadata,
+            }
+        });
+        return handleServerError(appError, 'API');
+    }
+
     // Handle generic errors
     const appError = createServerError({
         type: 'SERVER_ERROR',

@@ -33,7 +33,14 @@
     "migration:check": "npm run lint && npm run typecheck",
     "migration:full": "npm run migration:check && npm run migration:apply && npm run test",
     "migration:rollback": "npm run migration:restore && npm run test",
-    "analyze": "ANALYZE=true npm run build"
+    "analyze": "ANALYZE=true npm run build",
+    "docs:generate": "node scripts/generate-component-docs.js generate",
+    "docs:update": "node scripts/generate-component-docs.js update",
+    "docs:clean": "node scripts/generate-component-docs.js clean",
+    "docs:check-links": "markdown-link-check docs/**/*.md",
+    "docs:quality-check": "npm run docs:check-links && npm run docs:generate",
+    "docs:serve": "npx serve docs -p 3001",
+    "docs:build": "npm run docs:generate && npm run docs:quality-check"
   },
   "dependencies": {
     "@dataconnect/generated": "file:dataconnect-generated/js/example-connector",

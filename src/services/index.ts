@@ -37,8 +37,6 @@ export * from '@/services/chat';
 // خدمات التحليل والإحصائيات
 export * from '@/services/analytics';
 
-// خدمات المهام
-export * from '@/services/tasks';
 
 // الخدمات المفقودة التي تحتاجها hooks
 export * from '@/services/project-plan-service';
@@ -57,7 +55,6 @@ export { deductCredit } from '@/services/payment/credit-service';
 export { submitPaymentProof } from '@/services/payment/payment-service';
 export { fetchTransactionsForReport, fetchUserTransactions, getTransactions, verifyPayment } from '@/services/payment/transaction-service';
 export { addContextToProjectApi, createProject, deleteProject, fetchProject, fetchProjects, updateProject } from '@/services/projects/project-service';
-export { getJobStatusApi, startGenerationApi } from '@/services/tasks/taskade-service';
 export { createTeam, deleteTeam, fetchTeam, fetchUserTeams, inviteMember, removeMember, updateMemberRole, updateTeam } from '@/services/teams/team-service';
 export { createGenerativeTemplate, deletePptxTemplateApi, fetchDocxTemplatesApi, fetchPptxTemplatesApi, fetchPresentationTemplatesApi, fetchProposalTemplatesApi, fetchReportTemplatesApi, refreshTemplateImage, updateDocxTemplateApi, updatePptxTemplateApi, updatePresentationTemplateApi, updateProposalTemplateApi, updateReportTemplateApi, uploadPptxTemplateFileApi } from '@/services/templates/template-service';
 export { createUserApi, deleteUserApi, fetchAdminsApi, fetchUserProfileApi, fetchUsersApi, sendPasswordResetEmailApi, updateUserApi } from '@/services/users/user-service';

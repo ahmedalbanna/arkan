@@ -1,21 +1,21 @@
 
 
+import { AcademicDocumentTypeSchema, AnalyzedDocumentSchema, DiagramTypeSchema, PresentationSlideSchema, ProjectPlanSchema, ProjectProposalSchema, SectionNameSchema, SolvedDocumentSchema } from '@/ai/schemas';
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema, ProjectPlanSchema, AcademicDocumentTypeSchema, AnalyzedDocumentSchema, SolvedDocumentSchema } from '@/ai/schemas';
 
 const ReportSectionConfigSchema = z.object({
-  sectionName: z.string(),
-  agentId: z.string(),
-  prompt: z.object({
-    base: z.string(),
-    guidelines: z.array(z.object({ text: z.string(), isDefault: z.boolean() })),
-  }),
-  contexts: z.array(z.any()),
-  controlOutput: z.object({
-     format: z.string().optional(),
-     maxLength: z.number().optional(),
-  }).optional(),
-  dependencies: z.array(z.string()).optional(),
+    sectionName: z.string(),
+    agentId: z.string(),
+    prompt: z.object({
+        base: z.string(),
+        guidelines: z.array(z.object({ text: z.string(), isDefault: z.boolean() })),
+    }),
+    contexts: z.array(z.any()),
+    controlOutput: z.object({
+        format: z.string().optional(),
+        maxLength: z.number().optional(),
+    }).optional(),
+    dependencies: z.array(z.string()).optional(),
 });
 
 const PostProcessingStepSchema = z.object({
@@ -26,35 +26,55 @@ const PostProcessingStepSchema = z.object({
     template: z.string().optional(),
 });
 
+const ReportGenerationModeSchema = z.enum(['traditional', 'intelligent', 'hybrid']).optional();
+
+const IntelligentSettingsSchema = z.object({
+    enableContextAnalysis: z.boolean().optional(),
+    enableIterativeImproved: z.boolean().optional(),
+    enablePerformanceMonitoring: z.boolean().optional(),
+    qualityThreshold: z.number().optional(),
+    maxRetries: z.number().optional(),
+}).optional();
+
+const HybridSettingsSchema = z.object({
+    enabled: z.boolean().optional(),
+    intelligentThreshold: z.number().optional(),
+    fallbackToTraditional: z.boolean().optional(),
+    sectionModes: z.record(z.string(), z.enum(['traditional', 'intelligent'])).optional(),
+}).optional();
+
 const FullReportModeConfigSchema = z.object({
-  mode: z.literal("Full Report Mode"),
-  reportTitle: z.string().optional(),
-  language: z.string().optional(),
-  version: z.string().optional(),
-  author: z.object({
-    name: z.string().optional(),
-    id: z.string().optional(),
-  }).optional(),
-  metadata: z.object({
-    creationDate: z.string().optional(),
-    lastModifiedDate: z.string().optional(),
-    tags: z.array(z.string()).optional(),
-  }).optional(),
-  styling: z.object({
-    template: z.string().optional(),
-    colors: z.object({
-      primary: z.string().optional(),
-      background: z.string().optional(),
-      accent: z.string().optional(),
+    mode: z.literal("Full Report Mode"),
+    generationMode: ReportGenerationModeSchema,
+    intelligentSettings: IntelligentSettingsSchema,
+    hybridSettings: HybridSettingsSchema,
+    reportTitle: z.string().optional(),
+    language: z.string().optional(),
+    version: z.string().optional(),
+    author: z.object({
+        name: z.string().optional(),
+        id: z.string().optional(),
     }).optional(),
-    fonts: z.object({
-       headline: z.string().optional(),
-       body: z.string().optional(),
-       code: z.string().optional(),
+    metadata: z.object({
+        creationDate: z.string().optional(),
+        lastModifiedDate: z.string().optional(),
+        tags: z.array(z.string()).optional(),
     }).optional(),
-  }).optional(),
-  sections: z.array(ReportSectionConfigSchema),
-  postProcessing: z.array(PostProcessingStepSchema).optional(),
+    styling: z.object({
+        template: z.string().optional(),
+        colors: z.object({
+            primary: z.string().optional(),
+            background: z.string().optional(),
+            accent: z.string().optional(),
+        }).optional(),
+        fonts: z.object({
+            headline: z.string().optional(),
+            body: z.string().optional(),
+            code: z.string().optional(),
+        }).optional(),
+    }).optional(),
+    sections: z.array(ReportSectionConfigSchema),
+    postProcessing: z.array(PostProcessingStepSchema).optional(),
 });
 
 

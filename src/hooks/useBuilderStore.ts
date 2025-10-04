@@ -1,11 +1,11 @@
 
 "use client";
 
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
 import { toast } from "@/hooks";
 import { Project, type ProjectProperties } from "@/lib/models/project";
-import type { SavedProject, ContextFileType } from "@/lib/types";
+import type { ContextFileType, ReportGenerationMode, SavedProject } from "@/lib/types";
+import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 // The new state is dramatically simplified
 export interface BuilderState {
@@ -22,6 +22,9 @@ interface BuilderActions {
   // Add new actions for direct manipulation, which will call the updater
   addExternalContext: (fileName: string, content: string, type: ContextFileType) => void;
   replaceExternalContext: (index: number, newItem: { fileName: string, content: string, type: ContextFileType }) => void;
+  // Report Generation Mode actions
+  setReportGenerationMode: (mode: ReportGenerationMode) => void;
+  getCurrentReportGenerationMode: () => ReportGenerationMode;
 }
 
 const initialState: BuilderState = {
@@ -71,10 +74,23 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
 
       replaceExternalContext: (index: number, newItem: { fileName: string, content: string, type: ContextFileType }) => {
         get().updateProject(p => {
-            if (p.externalContext) {
-                p.externalContext[index] = newItem;
-            }
+          if (p.externalContext) {
+            p.externalContext[index] = newItem;
+          }
         });
+      },
+
+      // Report Generation Mode methods
+      setReportGenerationMode: (mode: ReportGenerationMode) => {
+        get().updateProject(p => p.setReportGenerationMode(mode));
+        toast({
+          title: "تم تحديث نوع التقرير",
+          description: `النوع المحدد الآن: ${mode === 'traditional' ? 'تقليدي' : mode === 'intelligent' ? 'ذكي' : 'مختلط'}`,
+        });
+      },
+
+      getCurrentReportGenerationMode: () => {
+        return get().project?.getReportGenerationMode() ?? 'traditional';
       },
 
       setHasUnsavedChanges: (status) => set({ hasUnsavedChanges: status }),
