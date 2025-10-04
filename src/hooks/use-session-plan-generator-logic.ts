@@ -26,7 +26,7 @@ const defaultValues = {
  */
 export const useSessionPlanGeneratorLogic = createContentGeneratorHook({
   toolName: 'session-plan-generator',
-  apiEndpoint: '/api/writing-tools/generate-session-plan',
+  apiEndpoint: 'generate-session-plan',
   schema: sessionPlanSchema,
   defaultValues,
   successMessage: 'Session plan generated successfully!',

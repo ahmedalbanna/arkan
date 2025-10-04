@@ -41,7 +41,7 @@ export function useProposalToolsEnhanced() {
     // Proposal Mode Generator Hook
     const useProposalModeGenerator = createProposalToolHook({
         toolName: 'proposal-mode-generator',
-        apiEndpoint: '/api/writing-tools/proposal-mode-generator',
+        apiEndpoint: 'proposal-mode-generator',
         schema: proposalModeGeneratorSchema,
         defaultValues: {
             projectDescription: '',
@@ -107,7 +107,7 @@ export function useProposalToolsEnhanced() {
     // Proposal Generation Tools Hook
     const useProposalGenerationTools = createAdvancedProposalToolHook({
         toolName: 'proposal-generation-tools',
-        apiEndpoint: '/api/writing-tools/proposal-generation-tools',
+        apiEndpoint: 'proposal-generation-tools',
         schema: proposalGenerationToolsSchema,
         defaultValues: {
             type: 'business',
@@ -169,7 +169,7 @@ export function useProposalToolsEnhanced() {
     // Proposal Actions Hook
     const useProposalActions = createProposalToolHook({
         toolName: 'proposal-actions',
-        apiEndpoint: '/api/writing-tools/proposal-actions',
+        apiEndpoint: 'proposal-actions',
         schema: proposalActionsSchema,
         defaultValues: {
             action: 'create',

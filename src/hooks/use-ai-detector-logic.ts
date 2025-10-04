@@ -24,7 +24,7 @@ export function useAIDetectorLogic() {
 
   const textProcessor = useTextProcessor({
     toolName: 'ai-detector',
-    apiEndpoint: '/api/writing-tools/ai-detector',
+    apiEndpoint: 'ai-detector',
     schema: aiDetectorSchema,
     defaultValues,
     successMessage: t('writingTools.aiDetector.toastAnalysisSuccess') || 'Analysis completed successfully!',

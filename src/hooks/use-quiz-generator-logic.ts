@@ -20,7 +20,7 @@ const defaultValues = {
  */
 export const useQuizGeneratorLogic = createContentGeneratorHook({
   toolName: 'quiz-generator',
-  apiEndpoint: '/api/writing-tools/quiz-generator',
+  apiEndpoint: 'quiz-generator',
   schema: quizGeneratorSchema,
   defaultValues,
   successMessage: 'Quiz generated successfully!',

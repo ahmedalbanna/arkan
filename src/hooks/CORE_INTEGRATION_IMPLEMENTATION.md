@@ -162,7 +162,7 @@ export function useEnhancedWritingTool(
 ) {
   return createWritingToolHook({
     toolName: tool,
-    apiEndpoint: `/api/writing-tools/${tool}`,
+    apiEndpoint: `${tool}`,
     schema,
     defaultValues,
     successMessage: `${tool} completed successfully!`,

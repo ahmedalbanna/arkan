@@ -27,7 +27,7 @@ export function usePresentationOutlineLogic() {
 
   const presentationTool = createPresentationToolHook({
     toolName: 'presentation-outline',
-    apiEndpoint: '/api/writing-tools/presentation-outline',
+    apiEndpoint: 'presentation-outline',
     schema: presentationOutlineSchema,
     defaultValues,
     successMessage: t('writingTools.presentationOutline.successToast') || 'Outline generated successfully!',

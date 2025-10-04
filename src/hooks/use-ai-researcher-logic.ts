@@ -48,7 +48,7 @@ export function useAIResearcherLogic() {
 
   const specializedTool = createSpecializedToolHook({
     toolName: 'ai-researcher',
-    apiEndpoint: '/api/writing-tools/ai-researcher',
+    apiEndpoint: 'ai-researcher',
     schema: researcherSchema,
     defaultValues,
     successMessage: t('writingTools.aiResearcher.toastResearchSuccess') || 'Research completed successfully!',

@@ -26,7 +26,7 @@ export function useSummarizerLogic() {
 
   const textProcessor = useTextProcessor({
     toolName: 'summarizer',
-    apiEndpoint: '/api/writing-tools/summarize',
+    apiEndpoint: 'summarize',
     schema: summarizerSchema,
     defaultValues,
     successMessage: t('writingTools.summarizer.successToast'),

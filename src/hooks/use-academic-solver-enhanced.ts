@@ -31,7 +31,7 @@ export function useAcademicSolverEnhanced() {
 
     const academicSolverTool = createAcademicSolverToolHook({
         toolName: 'academic-solver-enhanced',
-        apiEndpoint: '/api/writing-tools/academic-solver',
+        apiEndpoint: 'academic-solver',
         schema: academicSolverSchema,
         defaultValues,
         successMessage: t('academicSolver.successToast') || 'Problem solved successfully!',

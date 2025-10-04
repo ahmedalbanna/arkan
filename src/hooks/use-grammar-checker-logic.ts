@@ -22,7 +22,7 @@ const defaultValues = {
 export function useGrammarCheckerLogic() {
   const textProcessor = useTextProcessor({
     toolName: 'grammar-checker',
-    apiEndpoint: '/api/writing-tools/grammar-checker',
+    apiEndpoint: 'grammar-checker',
     schema: grammarSchema,
     defaultValues,
     successMessage: 'Grammar check successful!',

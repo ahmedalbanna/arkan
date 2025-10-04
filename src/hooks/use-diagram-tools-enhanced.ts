@@ -38,7 +38,7 @@ export function useDiagramToolsEnhanced() {
     // PlantUML Generator Hook
     const usePlantUmlGenerator = createDiagramToolHook({
         toolName: 'plant-uml-generator',
-        apiEndpoint: '/api/writing-tools/plant-uml-generator',
+        apiEndpoint: 'plant-uml-generator',
         schema: plantUmlGeneratorSchema,
         defaultValues: {
             description: '',
@@ -89,7 +89,7 @@ export function useDiagramToolsEnhanced() {
     // Diagram Generator Hook
     const useDiagramGenerator = createAdvancedDiagramToolHook({
         toolName: 'diagram-generator',
-        apiEndpoint: '/api/writing-tools/diagram-generator',
+        apiEndpoint: 'diagram-generator',
         schema: diagramGeneratorSchema,
         defaultValues: {
             prompt: '',
@@ -137,7 +137,7 @@ export function useDiagramToolsEnhanced() {
     // Diagram Viewer Hook
     const useDiagramViewer = createDiagramToolHook({
         toolName: 'diagram-viewer',
-        apiEndpoint: '/api/writing-tools/diagram-viewer',
+        apiEndpoint: 'diagram-viewer',
         schema: diagramViewerSchema,
         defaultValues: {
             diagramId: '',
@@ -179,7 +179,7 @@ export function useDiagramToolsEnhanced() {
     // Diagram Generation Tools Hook (Legacy compatibility)
     const useDiagramGenerationTools = createAdvancedDiagramToolHook({
         toolName: 'diagram-generation-tools',
-        apiEndpoint: '/api/writing-tools/diagram-generation-tools',
+        apiEndpoint: 'diagram-generation-tools',
         schema: z.object({
             type: z.enum(['flowchart', 'mindmap', 'orgchart', 'timeline']).optional(),
             data: z.any().optional(),

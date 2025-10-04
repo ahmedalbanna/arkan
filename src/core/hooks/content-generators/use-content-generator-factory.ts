@@ -73,7 +73,7 @@ export function createContentGeneratorHook(config: ContentGeneratorConfig) {
 
             // النسخ
             isCopied: textProcessor.isCopied,
-            handleCopy: () => textProcessor.copyToClipboard(processedOutput || textProcessor.processedText),
+            handleCopy: (generatedContent: any) => textProcessor.copyToClipboard(processedOutput || textProcessor.processedText),
 
             // رفع الملفات
             isUploading: textProcessor.isUploading,

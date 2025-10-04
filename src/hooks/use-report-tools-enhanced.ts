@@ -57,7 +57,7 @@ export function useReportToolsEnhanced() {
     // Report Generator Hook
     const useReportGenerator = createReportToolHook({
         toolName: 'report-generator',
-        apiEndpoint: '/api/writing-tools/report-generator',
+        apiEndpoint: 'report-generator',
         schema: reportGeneratorSchema,
         defaultValues: {
             topic: '',
@@ -111,7 +111,7 @@ export function useReportToolsEnhanced() {
     // Document Writer Hook
     const useDocumentWriter = createAdvancedReportToolHook({
         toolName: 'document-writer',
-        apiEndpoint: '/api/writing-tools/document-writer',
+        apiEndpoint: 'document-writer',
         schema: documentWriterSchema,
         defaultValues: {
             title: '',
@@ -158,7 +158,7 @@ export function useReportToolsEnhanced() {
     // AI Researcher Hook
     const useAIResearcher = createAdvancedReportToolHook({
         toolName: 'ai-researcher',
-        apiEndpoint: '/api/writing-tools/ai-researcher',
+        apiEndpoint: 'ai-researcher',
         schema: aiResearcherSchema,
         defaultValues: {
             query: '',
@@ -202,7 +202,7 @@ export function useReportToolsEnhanced() {
     // Topic Explainer Hook
     const useTopicExplainer = createReportToolHook({
         toolName: 'topic-explainer',
-        apiEndpoint: '/api/writing-tools/topic-explainer',
+        apiEndpoint: 'topic-explainer',
         schema: topicExplainerSchema,
         defaultValues: {
             topic: '',
@@ -246,7 +246,7 @@ export function useReportToolsEnhanced() {
     // Session Plan Generator Hook
     const useSessionPlanGenerator = createReportToolHook({
         toolName: 'session-plan-generator',
-        apiEndpoint: '/api/writing-tools/session-plan-generator',
+        apiEndpoint: 'session-plan-generator',
         schema: sessionPlanGeneratorSchema,
         defaultValues: {
             topic: '',

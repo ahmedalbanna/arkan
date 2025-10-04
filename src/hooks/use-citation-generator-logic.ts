@@ -22,7 +22,7 @@ const defaultValues = {
  */
 export const useCitationGeneratorLogic = createContentGeneratorHook({
   toolName: 'citation-generator',
-  apiEndpoint: '/api/writing-tools/citation-generator',
+  apiEndpoint: 'citation-generator',
   schema: citationGeneratorSchema,
   defaultValues,
   successMessage: 'Citations generated successfully!',

@@ -48,7 +48,7 @@ const defaultValues = {
 export function usePlantUmlGeneratorLogic() {
   const diagramTool = createDiagramToolHook({
     toolName: 'plantuml-generator',
-    apiEndpoint: '/api/writing-tools/generate-plantuml',
+    apiEndpoint: 'generate-plantuml',
     schema: plantUmlSchema,
     defaultValues,
     successMessage: 'PlantUML diagram generated successfully!',

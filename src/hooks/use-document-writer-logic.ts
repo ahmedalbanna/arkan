@@ -29,8 +29,8 @@ export function useDocumentWriterLogic() {
   const { t } = useLocalization();
 
   const contentGenerator = createContentGeneratorHook({
-    toolName: 'document-writer',
-    apiEndpoint: '/api/writing-tools/write-document',
+    toolName: 'write-document',
+    apiEndpoint: 'write-document',
     schema: documentWriterSchema,
     defaultValues,
     successMessage: t('writingTools.documentWriter.successToast') || 'Document generated successfully!',
@@ -74,10 +74,10 @@ export function useDocumentWriterLogic() {
     const submissionData = {
       ...data,
       tableOfContents: data.tableOfContents ?
-        data.tableOfContents.split('\n').filter(line => line.trim() !== '') :
+        data.tableOfContents.split('\n').filter((line: string) => line.trim() !== '') :
         undefined,
     };
-    contentGenerator.handleSubmit(submissionData);
+    contentGenerator.onSubmit(submissionData);
   };
 
   // الحصول على المحتوى المُولد
@@ -86,7 +86,7 @@ export function useDocumentWriterLogic() {
   // معالج النسخ المخصص
   const handleCopy = () => {
     if (!generatedContent) return;
-    contentGenerator.copyToClipboard(generatedContent);
+    contentGenerator.handleCopy(generatedContent);
   };
 
   return {

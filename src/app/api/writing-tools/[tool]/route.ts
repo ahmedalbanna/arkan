@@ -6,6 +6,8 @@
 
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import type { ApiHandlerContext } from '@/app/api/shared/types/api-types';
+import { createApiResponseEnhanced, handleApiErrorEnhanced } from '@/lib/core/api';
 import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -78,9 +80,32 @@ type ToolName = keyof typeof toolConfig;
 class WritingToolHandler extends CreditBasedApiHandler<any, any> {
     protected creditCost = 1; // التكلفة الافتراضية
     protected requiresAdmin = false;
-    protected inputSchema = z.object({
-        tool: z.string(),
-    });
+    protected inputSchema = z.any(); // Allow any input - tool-specific validation happens in processRequest
+
+    async handle(context: ApiHandlerContext): Promise<Response> {
+        try {
+            // التحقق من صحة البيانات
+            const validatedData = await this.validateInput(context.request);
+
+            // تحديد تكلفة الائتمانات بناءً على الأداة
+            const toolName = context.params?.tool as ToolName;
+            const config = toolConfig[toolName];
+            const creditCost = config?.creditCost || this.creditCost;
+
+            // خصم الائتمانات
+            if (creditCost > 0 && context.user) {
+                await deductCredit(context.user.id, creditCost);
+            }
+
+            // معالجة الطلب
+            const result = await this.processRequest(validatedData, context);
+
+            return createApiResponseEnhanced(result, 200);
+        } catch (error) {
+            return handleApiErrorEnhanced(error);
+        }
+    }
+
     protected async processRequest(data: any, context: any): Promise<any> {
         const { params, user } = context;
         const toolName = params.tool as ToolName;
@@ -111,16 +136,6 @@ class WritingToolHandler extends CreditBasedApiHandler<any, any> {
         });
 
         return result;
-    }
-
-    // تحديد تكلفة الائتمانات بناءً على الأداة
-    protected async deductCredits(userId: string, amount: number): Promise<void> {
-        const { params } = this.context || {};
-        const toolName = params?.tool as ToolName;
-        const config = toolConfig[toolName];
-        const creditCost = config?.creditCost || amount;
-
-        await deductCredit(userId, creditCost);
     }
 }
 

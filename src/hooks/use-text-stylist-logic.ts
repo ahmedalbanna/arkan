@@ -35,7 +35,7 @@ export function useTextStylistLogic() {
   // استخدام النظام الجديد من src/core
   const textStylistTool = createWritingToolHook({
     toolName: 'text-stylist',
-    apiEndpoint: '/api/writing-tools/text-stylist',
+    apiEndpoint: 'text-stylist',
     schema: formSchema,
     defaultValues: { text: '', style: 'None' },
     successMessage: t('writingTools.textStylist.successToast') || 'Text styled successfully!',

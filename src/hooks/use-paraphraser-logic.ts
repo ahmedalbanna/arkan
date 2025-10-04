@@ -27,7 +27,7 @@ export function useParaphraserLogic() {
 
   const textProcessor = useTextProcessor({
     toolName: 'paraphraser',
-    apiEndpoint: '/api/writing-tools/paraphrase',
+    apiEndpoint: 'paraphrase',
     schema: paraphraserSchema,
     defaultValues,
     successMessage: t('writingTools.paraphraser.toastSuccess'),

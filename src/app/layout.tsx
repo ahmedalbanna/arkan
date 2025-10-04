@@ -97,6 +97,11 @@ const AUTH_PATHS = ['/login', '/signup', '/forgot-password'];
 
 // This function runs on the server for every request
 async function handleAuthRedirects(pathname: string) {
+  // Skip authentication checks for API routes
+  if (pathname.startsWith('/api/')) {
+    return;
+  }
+
   const sessionCookie = (await cookies()).get('__session')?.value;
 
   let isAuthenticated = false;

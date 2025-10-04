@@ -44,7 +44,7 @@ export function usePresentationToolsEnhanced() {
     // Presentation Outline Hook
     const usePresentationOutline = createPresentationToolHook({
         toolName: 'presentation-outline',
-        apiEndpoint: '/api/writing-tools/presentation-outline',
+        apiEndpoint: 'presentation-outline',
         schema: presentationOutlineSchema,
         defaultValues: {
             topic: '',
@@ -98,7 +98,7 @@ export function usePresentationToolsEnhanced() {
     // Presentation Generator Hook
     const usePresentationGenerator = createAdvancedPresentationToolHook({
         toolName: 'presentation-generator',
-        apiEndpoint: '/api/writing-tools/presentation-generator',
+        apiEndpoint: 'presentation-generator',
         schema: presentationGeneratorSchema,
         defaultValues: {
             topic: '',
@@ -166,7 +166,7 @@ export function usePresentationToolsEnhanced() {
     // Presentation Template Manager Hook
     const usePresentationTemplateManager = createPresentationToolHook({
         toolName: 'presentation-template-manager',
-        apiEndpoint: '/api/writing-tools/presentation-template-manager',
+        apiEndpoint: 'presentation-template-manager',
         schema: presentationTemplateManagerSchema,
         defaultValues: {
             templateId: '',

@@ -22,7 +22,7 @@ const defaultValues = {
 export function usePlagiarismCheckerLogic() {
   const textProcessor = useTextProcessor({
     toolName: 'plagiarism-checker',
-    apiEndpoint: '/api/writing-tools/plagiarism-checker',
+    apiEndpoint: 'plagiarism-checker',
     schema: plagiarismSchema,
     defaultValues,
     successMessage: 'Plagiarism check completed successfully!',

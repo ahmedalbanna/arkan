@@ -22,7 +22,7 @@ const defaultValues = {
 export function useFactCheckerLogic() {
   const textProcessor = useTextProcessor({
     toolName: 'fact-checker',
-    apiEndpoint: '/api/writing-tools/fact-checker',
+    apiEndpoint: 'fact-checker',
     schema: factCheckerSchema,
     defaultValues,
     successMessage: 'Fact-check completed successfully!',

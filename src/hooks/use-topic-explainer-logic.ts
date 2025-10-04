@@ -23,7 +23,7 @@ export function useTopicExplainerLogic() {
 
   const contentGenerator = createContentGeneratorHook({
     toolName: 'topic-explainer',
-    apiEndpoint: '/api/writing-tools/topic-explainer',
+    apiEndpoint: 'topic-explainer',
     schema: topicExplainerSchema,
     defaultValues,
     successMessage: t('writingTools.topicExplainer.successToast') || 'Topic explained successfully!',
