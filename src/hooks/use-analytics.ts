@@ -9,6 +9,15 @@ import { handleErrorUtility } from '@/lib/errorUtils';
 import { fetchUserStats, type UserDashboardStats } from '@/services';
 import { useQuery } from '@tanstack/react-query';
 
+// أنواع محسنة للتحليلات
+interface ChartDataPoint {
+  label: string;
+  value: number;
+  date: Date;
+  category?: string;
+  metadata?: Record<string, unknown>;
+}
+
 export function useUserStats() {
   const { firebaseUser } = useAuth();
   const userId = firebaseUser?.uid;
@@ -114,7 +123,7 @@ export function useAdvancedAnalytics() {
         setState(prev => ({ ...prev, exportFormat: format }));
       };
 
-      const handleFilterChange = (filterType: 'dateRange' | 'categories' | 'projects', value: any) => {
+      const handleFilterChange = (filterType: 'dateRange' | 'categories' | 'projects', value: unknown) => {
         setState(prev => ({
           ...prev,
           filters: {
@@ -136,7 +145,7 @@ export function useAdvancedAnalytics() {
         toast({ title: 'Filters cleared successfully!' });
       };
 
-      const handleChartDataUpdate = (data: any[]) => {
+      const handleChartDataUpdate = (data: ChartDataPoint[]) => {
         setState(prev => ({ ...prev, chartData: data }));
       };
 

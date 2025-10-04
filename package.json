@@ -12,6 +12,16 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:models": "jest models/",
+    "test:components": "jest components/",
+    "test:hooks": "jest hooks/",
+    "test:ai": "jest ai/",
+    "test:security": "jest security/",
+    "test:integration": "jest integration/",
+    "test:all": "jest --coverage --verbose",
+    "test:report": "node scripts/test-coverage.js",
+    "test:ci": "npm run test:coverage && npm run test:report",
     "seed:firestore": "tsx src/lib/db/seed.ts",
     "seed:templates": "tsx src/lib/db/seed-templates.ts",
     "seed:categories": "tsx src/lib/db/seed-agent-categories.ts",
@@ -22,7 +32,8 @@
     "migration:test": "node scripts/apply-migration.js test",
     "migration:check": "npm run lint && npm run typecheck",
     "migration:full": "npm run migration:check && npm run migration:apply && npm run test",
-    "migration:rollback": "npm run migration:restore && npm run test"
+    "migration:rollback": "npm run migration:restore && npm run test",
+    "analyze": "ANALYZE=true npm run build"
   },
   "dependencies": {
     "@dataconnect/generated": "file:dataconnect-generated/js/example-connector",
@@ -120,8 +131,10 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.4.6",
+    "@next/bundle-analyzer": "^15.5.4",
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/file-saver": "^2.0.7",
     "@types/jest": "^29.5.14",
     "@types/jszip": "^3.4.1",

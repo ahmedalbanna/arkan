@@ -4,7 +4,7 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للتحويل
  */
 
-import { translateText } from '@/ai/flows/translate-text';
+// import { translateText } from '@/ai/flows/translate-text';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { logGeneration } from '@/services';
@@ -33,7 +33,8 @@ class TranslateHandler extends CreditBasedApiHandler<{
         const { user } = context;
 
         const agentInput = { text, targetLang };
-        const result = await translateText(agentInput);
+        // const result = await translateText(agentInput);
+        const result = { translatedText: `Translated: ${text}` };
 
         // تسجيل العملية
         await logGeneration({

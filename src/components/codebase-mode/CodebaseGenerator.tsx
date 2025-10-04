@@ -11,9 +11,10 @@ import { useState } from 'react';
 // import { useCodebaseStore } from '@/hooks'; // Not available
 import type { Codebase } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
+import { ProposalData } from '@/lib/core/types/flexible-content-types';
 import FileTreeView from './FileTreeView';
 
-async function generateCodebaseApi(variables: { proposal: any; token: string }): Promise<Codebase> {
+async function generateCodebaseApi(variables: { proposal: ProposalData; token: string }): Promise<Codebase> {
   const response = await fetch('/api/generate-codebase', {
     method: 'POST',
     headers: {

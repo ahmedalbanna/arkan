@@ -12,7 +12,7 @@ export type ProcessStatus = 'idle' | 'loading' | 'success' | 'error';
 /**
  * نتيجة العملية
  */
-export interface ProcessResult<T = any> {
+export interface ProcessResult<T = unknown> {
     success: boolean;
     data?: T;
     error?: string;
@@ -35,13 +35,13 @@ export interface ErrorState {
     hasError: boolean;
     error?: string;
     code?: string;
-    details?: Record<string, any>;
+    details?: Record<string, unknown>;
 }
 
 /**
  * حالة النموذج
  */
-export interface FormState<T = any> {
+export interface FormState<T = unknown> {
     data: T;
     errors: Record<keyof T, string>;
     isDirty: boolean;
@@ -148,8 +148,8 @@ export interface EventData {
     type: EventType;
     timestamp: Date;
     userId?: string;
-    data: Record<string, any>;
-    metadata?: Record<string, any>;
+    data: Record<string, unknown>;
+    metadata?: Record<string, unknown>;
 }
 
 /**
@@ -196,7 +196,7 @@ export interface TaskData {
     createdAt: Date;
     updatedAt: Date;
     completedAt?: Date;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 }
 
 /**
@@ -217,7 +217,7 @@ export interface CacheSettings {
 /**
  * بيانات التخزين المؤقت
  */
-export interface CacheData<T = any> {
+export interface CacheData<T = unknown> {
     key: string;
     value: T;
     timestamp: number;
@@ -238,7 +238,7 @@ export interface IntegrationStatus {
     connected: boolean;
     lastSync?: Date;
     error?: string;
-    config?: Record<string, any>;
+    config?: Record<string, unknown>;
 }
 
 /**
@@ -251,7 +251,7 @@ export type ExportType = 'document' | 'presentation' | 'spreadsheet' | 'image' |
  */
 export interface AdvancedExportOptions extends ExportOptions {
     template?: string;
-    styles?: Record<string, any>;
+    styles?: Record<string, unknown>;
     layout?: {
         orientation: 'portrait' | 'landscape';
         margins: {
@@ -281,14 +281,14 @@ export interface ConversionOptions {
     type: ConversionType;
     input: FileSettings;
     output: Partial<FileSettings>;
-    options: Record<string, any>;
+    options: Record<string, unknown>;
     progress?: (percent: number) => void;
 }
 
 /**
  * مساعد للتحقق من نوع العملية
  */
-export const isProcessResult = <T>(value: any): value is ProcessResult<T> => {
+export const isProcessResult = <T>(value: unknown): value is ProcessResult<T> => {
     return typeof value === 'object' &&
         value !== null &&
         typeof value.success === 'boolean';
@@ -297,7 +297,7 @@ export const isProcessResult = <T>(value: any): value is ProcessResult<T> => {
 /**
  * مساعد للتحقق من نوع المهمة
  */
-export const isTaskData = (value: any): value is TaskData => {
+export const isTaskData = (value: unknown): value is TaskData => {
     return typeof value === 'object' &&
         value !== null &&
         typeof value.id === 'string' &&
@@ -308,7 +308,7 @@ export const isTaskData = (value: any): value is TaskData => {
 /**
  * مساعد للتحقق من نوع الإشعار
  */
-export const isNotificationData = (value: any): value is NotificationData => {
+export const isNotificationData = (value: unknown): value is NotificationData => {
     return typeof value === 'object' &&
         value !== null &&
         typeof value.id === 'string' &&

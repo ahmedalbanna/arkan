@@ -13,7 +13,7 @@ import type {
     ValidationError
 } from '../types/api-types';
 
-export abstract class BaseApiHandler<TInput = any, TOutput = any> {
+export abstract class BaseApiHandler<TInput = unknown, TOutput = unknown> {
     protected abstract inputSchema: z.ZodSchema<TInput>;
     protected abstract processRequest(
         data: TInput,
@@ -87,7 +87,7 @@ export abstract class BaseApiHandler<TInput = any, TOutput = any> {
     protected async logOperation(
         context: ApiHandlerContext,
         operation: string,
-        details?: any
+        details?: Record<string, unknown>
     ): Promise<void> {
         // يمكن إضافة نظام تسجيل هنا
         console.log(`Operation: ${operation}`, {
@@ -101,7 +101,7 @@ export abstract class BaseApiHandler<TInput = any, TOutput = any> {
 /**
  * معالج API للعمليات البسيطة (GET)
  */
-export abstract class SimpleApiHandler<TOutput = any> {
+export abstract class SimpleApiHandler<TOutput = unknown> {
     protected abstract processRequest(context: ApiHandlerContext): Promise<TOutput>;
 
     async handle(context: ApiHandlerContext): Promise<Response> {
@@ -117,7 +117,7 @@ export abstract class SimpleApiHandler<TOutput = any> {
 /**
  * معالج API للعمليات المعقدة (POST/PUT/DELETE)
  */
-export abstract class ComplexApiHandler<TInput = any, TOutput = any> extends BaseApiHandler<TInput, TOutput> {
+export abstract class ComplexApiHandler<TInput = unknown, TOutput = unknown> extends BaseApiHandler<TInput, TOutput> {
     protected abstract creditCost?: number;
     protected abstract requiresAdmin?: boolean;
 
@@ -153,7 +153,7 @@ export abstract class ComplexApiHandler<TInput = any, TOutput = any> extends Bas
 /**
  * معالج API للعمليات التي تتطلب خصم ائتمانات
  */
-export abstract class CreditBasedApiHandler<TInput = any, TOutput = any> extends ComplexApiHandler<TInput, TOutput> {
+export abstract class CreditBasedApiHandler<TInput = unknown, TOutput = unknown> extends ComplexApiHandler<TInput, TOutput> {
     protected abstract creditCost: number;
 
     async handle(context: ApiHandlerContext): Promise<Response> {

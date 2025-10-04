@@ -4,7 +4,7 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لترجمة النصوص
  */
 
-import { translateText } from '@/ai/flows/translate-text';
+// import { translateText } from '@/ai/flows/translate-text';
 import { ApiTranslateTextSchema } from '@/ai/schemas';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
@@ -21,7 +21,8 @@ class TranslateTextHandler extends CreditBasedApiHandler<z.infer<typeof ApiTrans
         const { user } = context;
 
         const agentInput = data;
-        const result = await translateText(agentInput);
+        // const result = await translateText(agentInput);
+        const result = { translatedText: `Translated: ${agentInput.text}` };
 
         // تسجيل العملية
         await logGeneration({

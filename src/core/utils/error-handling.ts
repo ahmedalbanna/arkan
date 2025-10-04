@@ -1,14 +1,19 @@
 /**
- * نظام معالجة الأخطاء المركزي
+ * نظام معالجة الأخطاء المركزي المحسن
  * يوفر معالجة موحدة للأخطاء في جميع أنحاء التطبيق
+ * مع دعم النظام المحسن الجديد
  */
 
-import { toast } from '@/hooks';
+import { toast } from '@/hooks/use-toast';
 import type { AppError, ToastVariant } from '../types/common';
+import { EnhancedError, ErrorCategory, ErrorSeverity } from '../types/error-types';
+import { ErrorMonitoringService } from './error-monitoring';
 
 export class ErrorHandler {
+    private static monitoringService = ErrorMonitoringService.getInstance();
+
     /**
-     * معالجة شاملة للأخطاء
+     * معالجة شاملة للأخطاء (النظام القديم - للتوافق العكسي)
      * @param error الخطأ المراد معالجته
      * @param context السياق الذي حدث فيه الخطأ
      * @param showToast هل يجب إظهار إشعار للمستخدم
@@ -23,6 +28,85 @@ export class ErrorHandler {
         if (showToast) {
             this.showToast(appError);
         }
+    }
+
+    /**
+     * معالجة محسنة للأخطاء (النظام الجديد)
+     * @param error الخطأ المراد معالجته
+     * @param category فئة الخطأ
+     * @param severity شدة الخطأ
+     * @param context السياق الإضافي
+     */
+    static handleEnhanced(
+        error: unknown,
+        category: ErrorCategory,
+        severity: ErrorSeverity = 'medium',
+        context?: {
+            operationId?: string;
+            userId?: string;
+            sessionId?: string;
+            requestId?: string;
+            showToast?: boolean;
+        }
+    ): EnhancedError {
+        // تحويل الخطأ إلى EnhancedError
+        const enhancedError = this.convertToEnhancedError(error, category, severity, context);
+
+        // تسجيل الخطأ في نظام المراقبة
+        this.monitoringService.recordError(enhancedError, context?.operationId);
+
+        // إظهار إشعار للمستخدم
+        if (context?.showToast !== false) {
+            this.showEnhancedToast(enhancedError);
+        }
+
+        return enhancedError;
+    }
+
+    /**
+     * تحويل الخطأ إلى EnhancedError
+     */
+    private static convertToEnhancedError(
+        error: unknown,
+        category: ErrorCategory,
+        severity: ErrorSeverity,
+        context?: any
+    ): EnhancedError {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+
+        return {
+            code: 'SYSTEM_ERROR',
+            message: errorMessage,
+            category,
+            severity,
+            userMessage: errorMessage,
+            userGuidance: 'يرجى المحاولة مرة أخرى',
+            suggestedActions: ['أعد المحاولة', 'تحديث الصفحة', 'اتصل بالدعم الفني'],
+            technicalDetails: errorMessage,
+            isRetryable: true,
+            fallbackAvailable: false,
+            timestamp: new Date().toISOString(),
+            userId: context?.userId,
+            sessionId: context?.sessionId,
+            requestId: context?.requestId,
+            context: { originalError: error }
+        };
+    }
+
+    /**
+     * إظهار إشعار محسن للمستخدم
+     */
+    private static showEnhancedToast(error: EnhancedError): void {
+        const actionsText = error.suggestedActions.length > 0
+            ? `\n\nSuggested actions:\n${error.suggestedActions.slice(0, 2).map(action => `• ${action}`).join('\n')}`
+            : '';
+
+        toast({
+            title: error.userMessage,
+            description: `${error.userGuidance}${actionsText}`,
+            variant: error.severity === 'critical' ? 'destructive' : 'default',
+            duration: error.severity === 'critical' ? 10000 : 5000
+        });
     }
 
     /**

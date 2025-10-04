@@ -8,7 +8,7 @@ export type { DiagramProperties } from '@/lib/models/diagram';
 export type { DocxTemplate, DocxTemplateProperties } from '@/lib/models/docxTemplate';
 export type { GeneratableDocumentProperties, GenerationStatus } from '@/lib/models/generatableDocument';
 export type { PptxTemplate, PptxTemplateProperties } from '@/lib/models/pptxTemplate';
-export type { ContextFileType, FullReportModeConfig, GeneratedProposalSection, LinkedAsset, PostProcessingStep, PostProcessingStepResult, ProjectProperties, ProjectState, ProposalVersionHistory, ReportSectionConfig, SavedProject, SavedProposalState, AcademicSolverState, AcademicSolverStage } from '@/lib/models/project';
+export type { AcademicSolverStage, AcademicSolverState, ContextFileType, FullReportModeConfig, GeneratedProposalSection, LinkedAsset, PostProcessingStep, PostProcessingStepResult, ProjectProperties, ProjectState, ProposalVersionHistory, ReportSectionConfig, SavedProject, SavedProposalState } from '@/lib/models/project';
 export type { ReportTemplateProperties } from '@/lib/models/reportTemplate';
 export type { Section, SectionProperties, SectionType } from '@/lib/models/section';
 export type { Team, TeamProperties, TeamWithMembers } from '@/lib/models/team';
@@ -47,7 +47,7 @@ export interface HeaderFooterContent {
 
 export interface ConversionOptions {
   styles?: import('docx').IStylesOptions;
-  customStyles?: any;
+  customStyles?: Record<string, unknown>;
   paper?: {
     size?: { width: number; height: number };
     margins?: { top: number; right: number; bottom: number; left: number };
@@ -64,11 +64,20 @@ export interface ConversionOptions {
 }
 
 export interface PptxStyleOptions {
-  [key: string]: any; // Placeholder for now, will refine if needed
+  theme?: string;
+  colors?: Record<string, string>;
+  fonts?: Record<string, string>;
+  layouts?: Record<string, unknown>;
+  animations?: Record<string, unknown>;
 }
 
 export interface DocxStyleOptions {
-  [key: string]: any; // Placeholder for now, will refine if needed
+  fonts?: Record<string, string>;
+  colors?: Record<string, string>;
+  spacing?: Record<string, number>;
+  margins?: Record<string, number>;
+  headers?: Record<string, unknown>;
+  footers?: Record<string, unknown>;
 }
 
 // Misc types from various hooks/services
@@ -117,4 +126,3 @@ export interface VerifyPaymentVariables {
 
 export type TransactionStatus = 'pending' | 'verified' | 'rejected';
 
-    

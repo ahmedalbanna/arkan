@@ -24,7 +24,7 @@ export interface HttpHeaders {
 export interface HttpRequestOptions {
     method: HttpMethod;
     headers?: HttpHeaders;
-    body?: any;
+    body?: unknown;
     timeout?: number;
     retries?: number;
     retryDelay?: number;
@@ -33,7 +33,7 @@ export interface HttpRequestOptions {
 /**
  * استجابة HTTP
  */
-export interface HttpResponse<T = any> {
+export interface HttpResponse<T = unknown> {
     data: T;
     status: number;
     statusText: string;
@@ -48,7 +48,7 @@ export interface HttpError {
     message: string;
     status?: number;
     code?: string;
-    details?: any;
+    details?: unknown;
     response?: HttpResponse;
 }
 
@@ -125,7 +125,7 @@ export interface AuthResponse {
 /**
  * طلب تحديث البيانات
  */
-export interface UpdateRequest<T = any> {
+export interface UpdateRequest<T = unknown> {
     id: string;
     data: Partial<T>;
     version?: number;
@@ -134,7 +134,7 @@ export interface UpdateRequest<T = any> {
 /**
  * استجابة تحديث البيانات
  */
-export interface UpdateResponse<T = any> {
+export interface UpdateResponse<T = unknown> {
     data: T;
     message: string;
     version: number;
@@ -163,7 +163,7 @@ export interface DeleteResponse {
  */
 export interface SearchRequest {
     query: string;
-    filters?: Record<string, any>;
+    filters?: Record<string, unknown>;
     sort?: {
         field: string;
         order: 'asc' | 'desc';
@@ -177,7 +177,7 @@ export interface SearchRequest {
 /**
  * استجابة البحث
  */
-export interface SearchResponse<T = any> {
+export interface SearchResponse<T = unknown> {
     data: T[];
     total: number;
     page: number;
@@ -186,7 +186,7 @@ export interface SearchResponse<T = any> {
     hasNext: boolean;
     hasPrev: boolean;
     query: string;
-    filters: Record<string, any>;
+    filters: Record<string, unknown>;
 }
 
 /**
@@ -195,7 +195,7 @@ export interface SearchResponse<T = any> {
 export interface FileUploadRequest {
     file: File;
     folder?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
     onProgress?: (progress: number) => void;
 }
 
@@ -238,9 +238,9 @@ export interface FileDownloadResponse {
  * طلب التصدير
  */
 export interface ExportRequest {
-    data: any;
+    data: unknown;
     format: 'pdf' | 'docx' | 'pptx' | 'txt' | 'json';
-    options?: Record<string, any>;
+    options?: Record<string, unknown>;
     template?: string;
 }
 
@@ -262,11 +262,11 @@ export interface ExportResponse {
 export interface ConvertRequest {
     input: {
         type: string;
-        data: any;
+        data: unknown;
     };
     output: {
         type: string;
-        options?: Record<string, any>;
+        options?: Record<string, unknown>;
     };
 }
 
@@ -274,10 +274,10 @@ export interface ConvertRequest {
  * استجابة التحويل
  */
 export interface ConvertResponse {
-    data: any;
+    data: unknown;
     format: string;
     size: number;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 }
 
 /**
@@ -293,7 +293,7 @@ export interface AIRequest {
         frequencyPenalty?: number;
         presencePenalty?: number;
     };
-    context?: any;
+    context?: unknown;
 }
 
 /**
@@ -308,7 +308,7 @@ export interface AIResponse {
         totalTokens: number;
     };
     finishReason: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 }
 
 /**
@@ -316,7 +316,7 @@ export interface AIResponse {
  */
 export interface WebSocketRequest {
     type: string;
-    data: any;
+    data: unknown;
     id?: string;
 }
 
@@ -325,7 +325,7 @@ export interface WebSocketRequest {
  */
 export interface WebSocketResponse {
     type: string;
-    data: any;
+    data: unknown;
     id?: string;
     error?: string;
 }
@@ -348,28 +348,31 @@ export interface WebSocketConfig {
 /**
  * مساعد للتحقق من نوع الاستجابة
  */
-export const isHttpResponse = <T>(value: any): value is HttpResponse<T> => {
+export const isHttpResponse = <T>(value: unknown): value is HttpResponse<T> => {
     return typeof value === 'object' &&
         value !== null &&
-        typeof value.data !== 'undefined' &&
-        typeof value.status === 'number';
+        'data' in value &&
+        'status' in value &&
+        typeof (value as HttpResponse<T>).status === 'number';
 };
 
 /**
  * مساعد للتحقق من نوع الخطأ
  */
-export const isHttpError = (value: any): value is HttpError => {
+export const isHttpError = (value: unknown): value is HttpError => {
     return typeof value === 'object' &&
         value !== null &&
-        typeof value.message === 'string';
+        'message' in value &&
+        typeof (value as HttpError).message === 'string';
 };
 
 /**
  * مساعد للتحقق من نوع المصادقة
  */
-export const isAuthContext = (value: any): value is AuthContext => {
+export const isAuthContext = (value: unknown): value is AuthContext => {
     return typeof value === 'object' &&
         value !== null &&
-        typeof value.user === 'object' &&
-        typeof value.token === 'string';
+        'user' in value &&
+        'token' in value &&
+        typeof (value as AuthContext).token === 'string';
 };

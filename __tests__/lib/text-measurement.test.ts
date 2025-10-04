@@ -1,5 +1,5 @@
-import { calculateLineCount, calculateCodeLineCount } from '@/lib/pptx-convert/text-measurement';
 import { POINTS_PER_INCH } from '@/lib/pptx-convert/constants';
+import { calculateCodeLineCount, calculateLineCount } from '@/lib/pptx-convert/text-measurement';
 
 // The mock in jest.setup.js calculates width as text.length * 6.
 // So, if maxWidthInches is 1, maxWidthPx will be 72.
@@ -53,10 +53,12 @@ describe('calculateCodeLineCount', () => {
     });
 
     it('should wrap long lines that exceed the max width', () => {
-        // 20 chars * 6px/char = 120px. 120px / 72px/line = 1.66 -> ceil(1.66) = 2 lines
-        const longLine = 'this is a very long line of code'; // length > 12
+        // Using the mocked canvas context: 6px per character
+        // "this is a very long line of code" = 33 characters = 198px
+        // 198px / 72px max width = 2.75 -> ceil(2.75) = 3 lines
+        const longLine = 'this is a very long line of code'; // 33 chars
         const text = `short line\n${longLine}`;
-        expect(calculateCodeLineCount(text, FONT_FACE, FONT_SIZE, MAX_WIDTH_INCHES)).toBe(3); // 1 for short line, 2 for long line
+        expect(calculateCodeLineCount(text, FONT_FACE, FONT_SIZE, MAX_WIDTH_INCHES)).toBe(4); // 1 for short line, 3 for long line
     });
 
     it('should handle empty lines within the code block', () => {

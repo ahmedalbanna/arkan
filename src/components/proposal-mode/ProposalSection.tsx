@@ -2,12 +2,16 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
+import {
+    FlexibleContent,
+    SafeUpdateFunction
+} from '@/lib/core/types/flexible-content-types';
 import { formatKeyToTitle, hasContent } from '@/lib/proposal-utils';
 import { MarkdownViewer } from '../shared/MarkdownViewer';
 
 // --- Start of new ValueRenderer logic ---
 
-const ValueRenderer = ({ data }: { data: any }) => {
+const ValueRenderer = ({ data }: { data: FlexibleContent }) => {
     if (!hasContent(data)) {
         return null;
     }
@@ -55,8 +59,8 @@ const ValueRenderer = ({ data }: { data: any }) => {
 interface ProposalSectionProps {
     sectionKey: string;
     title: string;
-    content: any; // Accept any type of content
-    onUpdate: (key: string, value: any) => void;
+    content: FlexibleContent; // Accept flexible content types
+    onUpdate: SafeUpdateFunction;
 }
 
 export const ProposalSection = ({ sectionKey, title, content }: ProposalSectionProps) => {

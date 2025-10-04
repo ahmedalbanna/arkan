@@ -7,7 +7,7 @@
 import { z } from 'zod';
 
 // أنواع الاستجابة الموحدة
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
     success: true;
     data: T;
     message?: string;
@@ -20,14 +20,14 @@ export interface ApiError {
     error: {
         code: string;
         message: string;
-        details?: any;
+        details?: Record<string, unknown>;
     };
     timestamp: string;
     requestId: string;
 }
 
 // أنواع الطلبات الموحدة
-export interface ApiRequest<T = any> {
+export interface ApiRequest<T = unknown> {
     data: T;
     timestamp: string;
     requestId: string;
@@ -48,7 +48,7 @@ export interface AuthContext {
 export interface ValidationError {
     field: string;
     message: string;
-    value?: any;
+    value?: unknown;
 }
 
 export interface AuthError {
@@ -59,7 +59,7 @@ export interface AuthError {
 export interface BusinessError {
     code: 'INSUFFICIENT_CREDITS' | 'RATE_LIMIT_EXCEEDED' | 'RESOURCE_NOT_FOUND';
     message: string;
-    details?: any;
+    details?: Record<string, unknown>;
 }
 
 // أنواع Middleware
@@ -107,7 +107,7 @@ export interface ServiceConfig {
     timeout?: number;
 }
 
-export interface ServiceResponse<T = any> {
+export interface ServiceResponse<T = unknown> {
     data: T;
     success: boolean;
     message?: string;
@@ -149,7 +149,7 @@ export interface PermissionCheck {
     userId: string;
     resource: string;
     action: 'read' | 'write' | 'delete' | 'admin';
-    context?: any;
+    context?: Record<string, unknown>;
 }
 
 export interface PermissionResult {

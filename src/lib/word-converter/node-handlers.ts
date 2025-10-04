@@ -12,7 +12,7 @@ import { ConversionOptions } from './types';
 // Define footnote type locally
 interface DocxFootnote {
   id: number;
-  children: any[];
+  children: Paragraph[];
 }
 
 export async function processFootnotes(
@@ -38,7 +38,7 @@ export async function processFootnotes(
       font: defaultFontName ? { name: defaultFontName } : undefined,
     };
     if (isRtl) {
-      (runOptions as any).rightToLeft = true;
+      (runOptions as IRunOptions & { rightToLeft?: boolean }).rightToLeft = true;
     }
 
 

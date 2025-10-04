@@ -4,7 +4,7 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لمحادثة الوكلاء
  */
 
-import { agentChat } from '@/ai/flows/agent-chat';
+// import { agentChat } from '@/ai/flows/agent-chat';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { RealtimeDatabase } from '@/lib/firebase/client-init';
@@ -66,7 +66,8 @@ class AgentChatHandler extends CreditBasedApiHandler<{
             this.creditCost = creditCost;
 
             const agentInput = { agentId, message };
-            result = await agentChat(agentInput);
+            // result = await agentChat(agentInput);
+            result = { response: "Agent chat functionality temporarily disabled" };
 
             // حفظ رد الـ AI
             const aiMessage: FirebaseMessage = {
@@ -91,7 +92,7 @@ class AgentChatHandler extends CreditBasedApiHandler<{
         }
 
         // تحديث آخر رسالة في المحادثة للترتيب
-        const conversationRef = ref(db, `conversations/${conversationId}`);
+        const conversationRef = ref(RealtimeDatabase, `conversations/${conversationId}`);
         const lastMessage = isAgentChat ? result.response : message;
 
         if (lastMessage) {

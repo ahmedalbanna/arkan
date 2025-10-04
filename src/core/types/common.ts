@@ -24,14 +24,14 @@ export type TextProcessingMode = 'standard' | 'creative' | 'formal' | 'casual';
 export type TextLength = 'short' | 'medium' | 'long';
 
 // أنواع الاستجابة
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
     success: boolean;
     data?: T;
     error?: string;
     message?: string;
 }
 
-export interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
+export interface PaginatedResponse<T = unknown> extends ApiResponse<T[]> {
     pagination: {
         page: number;
         limit: number;
@@ -44,7 +44,7 @@ export interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
 export interface AppError {
     code: string;
     message: string;
-    details?: any;
+    details?: Record<string, unknown>;
     timestamp: string;
 }
 

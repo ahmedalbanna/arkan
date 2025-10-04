@@ -7,7 +7,7 @@
 
 import { z } from 'zod';
 
-export abstract class BaseService<TInput = any, TOutput = any> {
+export abstract class BaseService<TInput = unknown, TOutput = unknown> {
     protected abstract endpoint: string;
     protected abstract method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
     protected abstract inputSchema?: z.ZodSchema<TInput>;
@@ -107,11 +107,11 @@ export abstract class BaseService<TInput = any, TOutput = any> {
 /**
  * خدمة للعمليات البسيطة (GET)
  */
-export abstract class SimpleService<TOutput = any> {
+export abstract class SimpleService<TOutput = unknown> {
     protected abstract endpoint: string;
     protected abstract requiresAuth: boolean;
 
-    async call(token: string, ...args: any[]): Promise<TOutput> {
+    async call(token: string, ...args: unknown[]): Promise<TOutput> {
         try {
             const requestConfig: RequestInit = {
                 method: 'GET',
@@ -148,11 +148,11 @@ export abstract class SimpleService<TOutput = any> {
 /**
  * خدمة للعمليات المعقدة (POST/PUT/DELETE)
  */
-export abstract class ComplexService<TInput = any, TOutput = any> extends BaseService<TInput, TOutput> {
+export abstract class ComplexService<TInput = unknown, TOutput = unknown> extends BaseService<TInput, TOutput> {
     protected method: 'POST' | 'PUT' | 'DELETE' | 'PATCH' = 'POST';
     protected abstract inputSchema?: z.ZodSchema<TInput>;
 
-    async call(data: TInput, token: string, ...args: any[]): Promise<TOutput> {
+    async call(data: TInput, token: string, ...args: unknown[]): Promise<TOutput> {
         return super.call(data, token);
     }
 }
@@ -160,7 +160,7 @@ export abstract class ComplexService<TInput = any, TOutput = any> extends BaseSe
 /**
  * خدمة للعمليات التي تتطلب ائتمانات
  */
-export abstract class CreditBasedService<TInput = any, TOutput = any> extends ComplexService<TInput, TOutput> {
+export abstract class CreditBasedService<TInput = unknown, TOutput = unknown> extends ComplexService<TInput, TOutput> {
     protected abstract creditCost: number;
 
     async call(data: TInput, token: string): Promise<TOutput> {
@@ -173,10 +173,10 @@ export abstract class CreditBasedService<TInput = any, TOutput = any> extends Co
 /**
  * خدمة للعمليات الإدارية
  */
-export abstract class AdminService<TInput = any, TOutput = any> extends ComplexService<TInput, TOutput> {
+export abstract class AdminService<TInput = unknown, TOutput = unknown> extends ComplexService<TInput, TOutput> {
     protected requiresAuth = true;
 
-    async call(data: TInput, token: string, ...args: any[]): Promise<TOutput> {
+    async call(data: TInput, token: string, ...args: unknown[]): Promise<TOutput> {
         // يمكن إضافة منطق التحقق من الصلاحيات الإدارية هنا
         console.log('Admin operation requested');
         return super.call(data, token);
@@ -186,14 +186,14 @@ export abstract class AdminService<TInput = any, TOutput = any> extends ComplexS
 /**
  * خدمة للعمليات العامة (بدون مصادقة)
  */
-export abstract class PublicService<TInput = any, TOutput = any> extends BaseService<TInput, TOutput> {
+export abstract class PublicService<TInput = unknown, TOutput = unknown> extends BaseService<TInput, TOutput> {
     protected requiresAuth = false;
 }
 
 /**
  * خدمة للعمليات المحدودة
  */
-export abstract class RateLimitedService<TInput = any, TOutput = any> extends ComplexService<TInput, TOutput> {
+export abstract class RateLimitedService<TInput = unknown, TOutput = unknown> extends ComplexService<TInput, TOutput> {
     protected abstract rateLimit: {
         windowMs: number;
         maxRequests: number;

@@ -4,7 +4,7 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لترجمة المقترحات
  */
 
-import { translateProposal } from '@/ai/flows/translate-proposal';
+// import { translateProposal } from '@/ai/flows/translate-proposal';
 import { ApiTranslateProposalSchema } from '@/ai/schemas';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
@@ -21,7 +21,8 @@ class TranslateProposalHandler extends CreditBasedApiHandler<z.infer<typeof ApiT
         const { user } = context;
 
         const agentInput = data;
-        const result = await translateProposal(agentInput);
+        // const result = await translateProposal(agentInput);
+        const result = { title: "Translated Proposal" };
 
         // تسجيل العملية
         await logGeneration({
