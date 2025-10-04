@@ -27,7 +27,9 @@ import {
     ArrowUpRightIcon,
     Brain,
     Clock,
+    Database,
     FileText,
+    Maximize2,
     Pause,
     Play,
     RotateCcw,
@@ -37,8 +39,10 @@ import {
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { IntelligentReportResults } from '../report-mode/IntelligentReportResults';
+import { AdvancedContextAnalysisPanel } from './AdvancedContextAnalysisPanel';
 import { EnhancedProgressTracker } from './EnhancedProgressTracker';
 import { HybridModeConfig } from './HybridModeConfig';
+import { IntelligentCacheManager } from './IntelligentCacheManager';
 import { PerformanceDashboard } from './PerformanceDashboard';
 import { QualityImprovementPanel } from './QualityImprovementPanel';
 import { QualityIndicator } from './QualityIndicator';
@@ -59,7 +63,7 @@ export function IntelligentReportGenerator({
     onReportGenerated,
     className
 }: IntelligentReportGeneratorProps) {
-    const [mode, setMode] = useState<'single' | 'complete' | 'recommendations' | 'hybrid' | 'quality'>('recommendations');
+    const [mode, setMode] = useState<'single' | 'complete' | 'recommendations' | 'hybrid' | 'quality' | 'context-analysis' | 'caching'>('recommendations');
     const [selectedSingleSection, setSelectedSingleSection] = useState<SectionName>('introduction');
 
     const reportBuilder = useReportBuilder();
@@ -205,8 +209,8 @@ export function IntelligentReportGenerator({
             )}
 
             {/* لوحة التحكم الرئيسية */}
-            <Tabs value={mode} onValueChange={(value) => setMode(value as 'single' | 'complete' | 'recommendations' | 'hybrid' | 'quality')}>
-                <TabsList className="grid w-full grid-cols-5">
+            <Tabs value={mode} onValueChange={(value) => setMode(value as 'single' | 'complete' | 'recommendations' | 'hybrid' | 'quality' | 'context-analysis' | 'caching')}>
+                <TabsList className="grid w-full grid-cols-7">
                     <TabsTrigger value="recommendations" className="flex items-center gap-2">
                         <Brain className="h-4 w-4" />
                         التوصيات الذكية
@@ -217,15 +221,21 @@ export function IntelligentReportGenerator({
                     </TabsTrigger>
                     <TabsTrigger value="quality" className="flex items-center gap-2">
                         <ArrowUpRightIcon className="h-4 w-4" />
-
                         تحسين الجودة
+                    </TabsTrigger>
+                    <TabsTrigger value="context-analysis" className="flex items-center gap-2">
+                        <Maximize2 className="h-4 w-4" />
+                        تحليل السياق
+                    </TabsTrigger>
+                    <TabsTrigger value="caching" className="flex items-center gap-2">
+                        <Database className="h-4 w-4" />
+                        التخزين المؤقت
                     </TabsTrigger>
                     <TabsTrigger value="single" className="flex items-center gap-2">
                         <FileText className="h-4 w-4" />
                         قسم فردي
                     </TabsTrigger>
                     <TabsTrigger value="complete" className="flex items-center gap-2">
-
                         <Target className="h-4 w-4" />
                         تقرير كامل
                     </TabsTrigger>
@@ -305,6 +315,38 @@ export function IntelligentReportGenerator({
                         onImprovementApplied={(improvedContent, changes) => {
                             console.log('تحسين مطبق:', { improvedContent, changes });
                             // يمكن إضافة منطق تطبيق التحسين على المحتوى الحالي
+                        }}
+                    />
+                </TabsContent>
+
+                {/* تحليل السياق المتقدم */}
+                <TabsContent value="context-analysis" className="space-y-4">
+                    <AdvancedContextAnalysisPanel
+                        contextFiles={reportBuilder.reportConfig.contextFiles || []}
+                        reportSections={completeReport.result?.generatedSections || {}}
+                        onAnalysisResult={(analysis) => {
+                            console.log('تحليل السياق المتقدم:', analysis);
+                            // يمكن إضافة منطق حفظ نتائج التحليل
+                        }}
+                        onRecommendationsGenerated={(recommendations) => {
+                            console.log('توصيات السياق:', recommendations);
+                            // يمكن إضافة منطق عرض التوصيات في بقية الواجهة
+                        }}
+                    />
+                </TabsContent>
+
+                {/* إدارة التخزين المؤقت الذكي */}
+                <TabsContent value="caching" className="space-y-4">
+                    <IntelligentCacheManager
+                        currentSessionId={`session_${Date.now()}`}
+                        userId={reportBuilder.reportConfig.userId || undefined}
+                        onCacheStatsChanged={(stats) => {
+                            console.log('تحديث إحصائيات التخزين المؤقت:', stats);
+                            // يمكن إضافة منطق إشعارات الأداء
+                        }}
+                        onOptimizationComplete={(result) => {
+                            console.log('مكتمل التحسين:', result);
+                            // يمكن إضافة منطق إشعارات النجاح
                         }}
                     />
                 </TabsContent>
