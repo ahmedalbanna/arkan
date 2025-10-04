@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useHybridReport } from '@/hooks/use-hybrid-report';
 import {
     useCompleteReport,
     useIntelligentSection,
@@ -23,19 +24,23 @@ import { useReportValidation } from '@/hooks/use-report-validation';
 import { SectionUtils } from '@/services/intelligent-report-service';
 import {
     AlertCircle,
+    ArrowUpRightIcon,
     Brain,
     Clock,
     FileText,
     Pause,
     Play,
     RotateCcw,
+    Settings,
     Target,
     Zap
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { IntelligentReportResults } from '../report-mode/IntelligentReportResults';
 import { EnhancedProgressTracker } from './EnhancedProgressTracker';
+import { HybridModeConfig } from './HybridModeConfig';
 import { PerformanceDashboard } from './PerformanceDashboard';
+import { QualityImprovementPanel } from './QualityImprovementPanel';
 import { QualityIndicator } from './QualityIndicator';
 import { ReportConfigPanel } from './ReportConfigPanel';
 import { SectionSelector } from './SectionSelector';
@@ -54,12 +59,21 @@ export function IntelligentReportGenerator({
     onReportGenerated,
     className
 }: IntelligentReportGeneratorProps) {
-    const [mode, setMode] = useState<'single' | 'complete' | 'recommendations'>('recommendations');
+    const [mode, setMode] = useState<'single' | 'complete' | 'recommendations' | 'hybrid' | 'quality'>('recommendations');
     const [selectedSingleSection, setSelectedSingleSection] = useState<SectionName>('introduction');
 
     const reportBuilder = useReportBuilder();
     const performanceMonitoring = usePerformanceMonitoring();
     const realTimePerformance = useRealTimePerformance();
+
+    // إضافة دعم الوضع المختلط
+    const hybridReport = useHybridReport();
+    const [hybridConfig, setHybridConfig] = useState({
+        enabled: false,
+        sectionModes: {} as Record<SectionName, 'intelligent' | 'traditional'>,
+        intelligentThreshold: 7,
+        fallbackToTraditional: true
+    });
 
     // التحقق من صحة المدخلات
     const validation = useReportValidation({
@@ -191,17 +205,27 @@ export function IntelligentReportGenerator({
             )}
 
             {/* لوحة التحكم الرئيسية */}
-            <Tabs value={mode} onValueChange={(value) => setMode(value as 'single' | 'complete' | 'recommendations')}>
-                <TabsList className="grid w-full grid-cols-3">
+            <Tabs value={mode} onValueChange={(value) => setMode(value as 'single' | 'complete' | 'recommendations' | 'hybrid' | 'quality')}>
+                <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="recommendations" className="flex items-center gap-2">
                         <Brain className="h-4 w-4" />
                         التوصيات الذكية
+                    </TabsTrigger>
+                    <TabsTrigger value="hybrid" className="flex items-center gap-2">
+                        <Zap className="h-4 w-4" />
+                        وضع مختلط
+                    </TabsTrigger>
+                    <TabsTrigger value="quality" className="flex items-center gap-2">
+                        <ArrowUpRightIcon className="h-4 w-4" />
+
+                        تحسين الجودة
                     </TabsTrigger>
                     <TabsTrigger value="single" className="flex items-center gap-2">
                         <FileText className="h-4 w-4" />
                         قسم فردي
                     </TabsTrigger>
                     <TabsTrigger value="complete" className="flex items-center gap-2">
+
                         <Target className="h-4 w-4" />
                         تقرير كامل
                     </TabsTrigger>
@@ -222,6 +246,65 @@ export function IntelligentReportGenerator({
                         onSectionModeChanged={(section, mode) => {
                             console.log(`تم تغيير وضع القسم ${section} إلى:`, mode);
                             // يمكن إضافة منطق تطبيق الوضع على المستوى الخاص بالقسم
+                        }}
+                    />
+                </TabsContent>
+
+                {/* الوضع المختلط */}
+                <TabsContent value="hybrid" className="space-y-4">
+                    <HybridModeConfig
+                        sectionsToGenerate={reportBuilder.selectedSections}
+                        currentConfig={hybridConfig}
+                        onConfigChange={(config) => {
+                            setHybridConfig(config);
+                            console.log('تم تحديث إعدادات الوضع المختلط:', config);
+                        }}
+                    />
+
+                    {/* عرض الخيارات الشائعة */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Settings className="h-5 w-5" />
+                                الإعدادات السريعة
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Button variant="outline" className="flex items-center gap-2">
+                                    <Brain className="h-4 w-4" />
+                                    جميع الأقسام ذكية
+                                </Button>
+                                <Button variant="outline" className="flex items-center gap-2">
+                                    <Target className="h-4 w-4" />
+                                    جميع الأقسام تقليدية
+                                </Button>
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                                اضغط على أحد هذه الأزرار لتطبيق الوضع على جميع الأقسام بشكل سريع.
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* تحسين الجودة */}
+                <TabsContent value="quality" className="space-y-4">
+                    <QualityImprovementPanel
+                        content={
+                            singleSection.result?.singleSection ||
+                                completeReport.result?.generatedSections ?
+                                JSON.stringify(completeReport.result.generatedSections) :
+                                ''
+                        }
+                        contentType={singleSection.result ? 'section' : 'complete-report'}
+                        sectionType={singleSection.result ? selectedSingleSection : undefined}
+                        onQualityChange={(qualityScore) => {
+                            console.log('تحديث الجودة:', qualityScore);
+                            // يمكن إضافة منطق حفظ تاريخ الجودة
+                        }}
+                        onImprovementApplied={(improvedContent, changes) => {
+                            console.log('تحسين مطبق:', { improvedContent, changes });
+                            // يمكن إضافة منطق تطبيق التحسين على المحتوى الحالي
                         }}
                     />
                 </TabsContent>
