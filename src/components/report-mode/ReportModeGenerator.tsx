@@ -6,10 +6,10 @@ import type { Section } from '@/lib/models/section';
 import { cn } from '@/lib/utils';
 import { PanelRightOpen } from 'lucide-react';
 import { Suspense } from 'react';
+import { IntelligentReportResults } from '../intelligent-report/IntelligentReportResults';
 import { Button } from '../ui/button';
 import { Skeleton } from '../ui/skeleton';
 import { GenerationTools } from './GenerationTools';
-import { IntelligentReportResults } from './IntelligentReportResults';
 
 function ReportSkeleton() {
     return (

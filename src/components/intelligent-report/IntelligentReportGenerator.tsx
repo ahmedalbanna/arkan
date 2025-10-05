@@ -40,12 +40,12 @@ import {
     Zap
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
-import { IntelligentReportResults } from '../report-mode/IntelligentReportResults';
 import { AdvancedContextAnalysisPanel } from './AdvancedContextAnalysisPanel';
 import { CollaborationPanel } from './CollaborationPanel';
 import { EnhancedProgressTracker } from './EnhancedProgressTracker';
 import { HybridModeConfig } from './HybridModeConfig';
 import { IntelligentCacheManager } from './IntelligentCacheManager';
+import { IntelligentReportResults } from './IntelligentReportResults';
 import { PerformanceDashboard } from './PerformanceDashboard';
 import { QualityImprovementPanel } from './QualityImprovementPanel';
 import { QualityIndicator } from './QualityIndicator';

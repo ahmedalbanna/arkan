@@ -66,7 +66,7 @@ const ProposalModeGenerator = createOptimizedDynamicComponent(
 );
 
 const ReportGenerator = createOptimizedDynamicComponent(
-  () => import('@/components/report-mode/IntelligentReportModeGenerator'),
+  () => import('@/components/intelligent-report/IntelligentReportModeGenerator'),
   { preload: true }
 );
 
@@ -99,7 +99,7 @@ const FileManager = createOptimizedDynamicComponent(
 );
 
 const IntelligentReportGenerator = createOptimizedDynamicComponent(
-  () => import('@/components/intelligent-report/IntelligentReportGenerator').then(mod => ({ default: mod.IntelligentReportGenerator }))
+  () => import('@/components/intelligent-report/EnhancedIntelligentReportGenerator').then(mod => ({ default: mod.EnhancedIntelligentReportGenerator }))
 );
 
 

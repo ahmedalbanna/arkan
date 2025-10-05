@@ -23,9 +23,9 @@ import {
     Zap
 } from 'lucide-react';
 import { Suspense } from 'react';
+import { IntelligentReportResults } from '../intelligent-report/IntelligentReportResults';
+import { GenerationTools } from '../report-mode/GenerationTools';
 import { Skeleton } from '../ui/skeleton';
-import { GenerationTools } from './GenerationTools';
-import { IntelligentReportResults } from './IntelligentReportResults';
 
 function ReportSkeleton() {
     return (
