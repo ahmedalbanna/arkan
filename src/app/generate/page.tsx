@@ -66,7 +66,7 @@ const ProposalModeGenerator = createOptimizedDynamicComponent(
 );
 
 const ReportGenerator = createOptimizedDynamicComponent(
-  () => import('@/components/intelligent-report/IntelligentReportModeGenerator'),
+  () => import('@/components/report-mode/ReportModeGenerator'),
   { preload: true }
 );
 

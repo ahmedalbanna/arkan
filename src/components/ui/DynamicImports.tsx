@@ -64,11 +64,11 @@ export const DynamicComponents = {
     ReportConfigPanel: createDynamicComponent(() => import('@/components/intelligent-report/ReportConfigPanel')),
 
     // مكونات المقترحات
-    ProposalSectionGenerator: createDynamicComponent(() => import('@/components/intelligent-proposal/ProposalSectionGenerator')),
+    ProposalSectionGenerator: createDynamicComponent(() => import('../maintaince/intelligent-proposal/ProposalSectionGenerator')),
 
     // مكونات المخططات
-    DiagramGenerator: createDynamicComponent(() => import('@/components/intelligent-diagrams/DiagramGenerator')),
-    DiagramLibrary: createDynamicComponent(() => import('@/components/intelligent-diagrams/DiagramLibrary')),
+    DiagramGenerator: createDynamicComponent(() => import('../maintaince/intelligent-diagrams/DiagramGenerator')),
+    DiagramLibrary: createDynamicComponent(() => import('../maintaince/intelligent-diagrams/DiagramLibrary')),
 
     // مكونات الإدارة
     AdminDashboard: createDynamicComponent(() => import('@/components/admin/AdminDashboard')),

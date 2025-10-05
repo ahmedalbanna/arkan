@@ -65,11 +65,11 @@ export const BundleOptimizedComponents = {
     ReportConfigPanel: createBundleOptimizedComponent(() => import('@/components/intelligent-report/ReportConfigPanel')),
 
     // مكونات المقترحات
-    ProposalSectionGenerator: createBundleOptimizedComponent(() => import('@/components/intelligent-proposal/ProposalSectionGenerator')),
+    ProposalSectionGenerator: createBundleOptimizedComponent(() => import('../maintaince/intelligent-proposal/ProposalSectionGenerator')),
 
     // مكونات المخططات
-    DiagramGenerator: createBundleOptimizedComponent(() => import('@/components/intelligent-diagrams/DiagramGenerator')),
-    DiagramLibrary: createBundleOptimizedComponent(() => import('@/components/intelligent-diagrams/DiagramLibrary')),
+    DiagramGenerator: createBundleOptimizedComponent(() => import('../maintaince/intelligent-diagrams/DiagramGenerator')),
+    DiagramLibrary: createBundleOptimizedComponent(() => import('../maintaince/intelligent-diagrams/DiagramLibrary')),
 
     // مكونات الإدارة
     AdminDashboard: createBundleOptimizedComponent(() => import('@/components/admin/AdminDashboard')),

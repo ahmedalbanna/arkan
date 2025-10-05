@@ -472,7 +472,7 @@ export class IntelligentReportService {
                 percentage: 30
             });
 
-            const response = await apiClient.post<SingleSectionResult>('/api/generate/report', requestConfig);
+            const response = await apiClient.post<SingleSectionResult>('/api/generate/report/intellgent', requestConfig);
 
             config.onProgress?.({
                 stage: 'completed',
@@ -568,7 +568,7 @@ export class IntelligentReportService {
                 sectionProgress
             });
 
-            const response = await apiClient.post<CompleteReportResult>('/api/generate/report', requestConfig);
+            const response = await apiClient.post<CompleteReportResult>('/api/generate/report/intellgent', requestConfig);
 
             // تحديث تقدم الأقسام بناءً على النتائج
             Object.entries(response.sectionMetadata).forEach(([section, metadata]) => {
@@ -606,7 +606,7 @@ export class IntelligentReportService {
      * الحصول على إحصائيات الأداء
      */
     static async getPerformanceStats(): Promise<PerformanceStats> {
-        return await apiClient.get<PerformanceStats>('/api/generate/report');
+        return await apiClient.get<PerformanceStats>('/api/generate/report/intellgent');
     }
 
     /**
