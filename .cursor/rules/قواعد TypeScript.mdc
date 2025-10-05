@@ -1,0 +1,31 @@
+---
+description: "قواعد TypeScript للمشروع"
+globs: ["*.ts", "*.tsx"]
+alwaysApply: true
+---
+
+# قواعد TypeScript
+
+## معايير الكود
+- استخدم TypeScript الصارم (strict mode)
+- تجنب استخدام `any` إلا في الحالات الضرورية
+- استخدم interfaces بدلاً من types للكائنات المعقدة
+- أضف JSDoc للدوال العامة
+
+## أمثلة الكود المطلوب
+```typescript
+// ✅ جيد
+interface UserProps {
+  id: string;
+  name: string;
+  email: string;
+}
+
+// ❌ تجنب
+const user: any = { ... }
+```
+
+## معالجة الأخطاء
+- استخدم try-catch blocks مع أنواع أخطاء محددة
+- أضف error boundaries في React components
+- استخدم Result pattern للعمليات التي قد تفشل

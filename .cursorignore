@@ -1,34 +1,192 @@
-/.genkit/
+# ===========================================
+# CURSOR IGNORE FILE - مشروع Arkan
+# ===========================================
+
+# Build and Cache Directories
 /.next/
 /.vercel/
+/.genkit/
 /.idx/
-/.vscode/
-/dataconnect/
-/node_modules/
-/firebase-debug.log
-/firestore-debug.log
-/database-debug.log
-/sqlite.db
-/dataconnect-generated
-/dataconnect
 /.firebase/
 /.gemini/
-/.git/
-/.github/
-/.vscode/
 /.yarn/
-/.yarn/patches
-# Log files
-*.log
+/.yarn/patches/
+/coverage/
+/dist/
+/build/
+/out/
 
-# Temporary files
+# Dependencies
+/node_modules/
+/package-lock.json
+/.pnp
+/.pnp.js
+/yarn-error.log
+/yarn-debug.log*
+/npm-debug.log*
+/lerna-debug.log*
+
+# Runtime and Database Files
+*.log
 *.tmp
 *.temp
-/Docxyfile
-/Docxyfile.bak
-/arkan.session.sql
-/package-lock.json
+*.sqlite
+*.db
+*.session
 /firebase-debug.log
 /firestore-debug.log
 /database-debug.log
 /sqlite.db
+/arkan.session.sql
+
+# IDE and Editor Files
+/.vscode/
+/.idea/
+/.vs/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Version Control
+/.git/
+/.github/
+/.gitignore
+
+# Firebase and Cloud Files
+/firebase-debug.log
+/firestore-debug.log
+/database-debug.log
+/dataconnect/
+/dataconnect-generated/
+/.firebase/
+/firebase-adminsdk-*.json
+/docudec-firebase-adminsdk-*.json
+/arkan-docudec-firebase-adminsdk-*.json
+
+# Configuration and Generated Files
+/package-lock.json
+/yarn.lock
+/.env.local
+/.env.development.local
+/.env.test.local
+/.env.production.local
+/tsconfig.tsbuildinfo
+/next-env.d.ts
+
+# Documentation Generation
+/Doxyfile
+/Doxyfile.bak
+/generate_doxygen_docs.sh
+/graph.gv
+/dependencygraph.svg
+
+# Generated Files
+/tsconfig.tsbuildinfo
+/next-env.d.ts
+/dataconnect-generated/
+/Doxyfile
+/Doxyfile.bak
+
+# Testing and Coverage
+/coverage/
+/__tests__/coverage/
+*.lcov
+/clover.xml
+/coverage-final.json
+/lcov-report/
+/lcov.info
+
+# Performance and Analysis Files
+/ADVANCED_PERFORMANCE_OPTIMIZATIONS.md
+/BUNDLE_OPTIMIZATION_SUMMARY.md
+/TESTING_ENHANCEMENT_REPORT.md
+/TYPE_SAFETY_FINAL_SUMMARY.md
+/TYPE_SAFETY_IMPROVEMENTS_FINAL.md
+/TYPE_SAFETY_IMPROVEMENTS_SUMMARY.md
+/TYPES_SAFETY_SUMMARY_ARABIC.md
+/TYPES_SAFETY_SUMMARY_ENGLISH.md
+/QUICK_TYPE_SAFETY_SUMMARY.md
+
+# Development Scripts and Tools
+/scripts/
+/debug-proposal-section.js
+/ts_dependency_graph.sh
+
+# Temporary and Cache Files
+*.cache
+*.pid
+*.seed
+*.pid.lock
+.npm
+.eslintcache
+.stylelintcache
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Archive Files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Media Files (if not needed for development)
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.webm
+*.mp3
+*.wav
+*.flac
+*.aac
+
+# Large Data Files
+*.csv
+*.json.bak
+*.sql
+*.dump
+
+# Backup Files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Consider ignoring large documentation files
+/docs/api-conversion-*.md
+/docs/*-summary.md
+/docs/*-guide.md
+
+# Consider ignoring analysis files
+/*_SUMMARY.md
+/*_REPORT.md
+/*_OPTIMIZATIONS.md
+
+
+# Firebase Keys (Security)
+/firebase-adminsdk-*.json
+/docudec-firebase-adminsdk-*.json
+/arkan-docudec-firebase-adminsdk-*.json
+
+# Large Documentation (Optional)
+/docs/api-conversion-*.md
+/docs/*-summary.md
+/*_SUMMARY.md
+/*_REPORT.md
+
+# Temporary Files
+*.tmp
+*.temp
+*.cache
+*.bak
+*.backup
