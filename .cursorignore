@@ -190,3 +190,8 @@ Thumbs.db
 *.cache
 *.bak
 *.backup
+
+/locales/
+/__tests__/
+/public/
+/src/do

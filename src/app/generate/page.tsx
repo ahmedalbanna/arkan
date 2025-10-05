@@ -99,7 +99,7 @@ const FileManager = createOptimizedDynamicComponent(
 );
 
 const IntelligentReportGenerator = createOptimizedDynamicComponent(
-  () => import('@/components/intelligent-report/EnhancedIntelligentReportGenerator').then(mod => ({ default: mod.EnhancedIntelligentReportGenerator }))
+  () => import('@/components/report-mode/ReportModeGenerator').then(mod => ({ preload: true }))
 );
 
 

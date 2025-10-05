@@ -9,36 +9,36 @@
 
 ### المرحلة 2: تحويل API Routes الأساسية
 - ✅ **المصادقة (Auth)**:
-  - `signup-v2` - التسجيل مع دعم المزودين الخارجيين
-  - `logout-v2` - تسجيل الخروج مع حذف الكوكيز
-  - `session-v2` - إدارة الجلسات (إنشاء/قراءة/حذف)
+  - `signup` - التسجيل مع دعم المزودين الخارجيين
+  - `logout` - تسجيل الخروج مع حذف الكوكيز
+  - `session` - إدارة الجلسات (إنشاء/قراءة/حذف)
 
 - ✅ **المستخدمين (Users)**:
-  - `users-v2` - إدارة المستخدمين مع pagination
-  - `projects-v2` - إدارة المشاريع مع دعم الفرق
-  - `teams-v2` - إدارة الفرق مع إدارة الأعضاء
+  - `users` - إدارة المستخدمين مع pagination
+  - `projects` - إدارة المشاريع مع دعم الفرق
+  - `teams` - إدارة الفرق مع إدارة الأعضاء
 
 ### المرحلة 3: تحويل API Routes للذكاء الاصطناعي
 - ✅ **المشاكل الأكاديمية**:
-  - `solve-v2` - حل المشاكل الأكاديمية مع تكلفة ائتمانات متغيرة
-  - `analyze-v2` - تحليل المشاكل الأكاديمية
+  - `solve` - حل المشاكل الأكاديمية مع تكلفة ائتمانات متغيرة
+  - `analyze` - تحليل المشاكل الأكاديمية
 
 - ✅ **التوليد**:
-  - `proposal-v2` - توليد المقترحات مع دعم الحقول المتقدمة
+  - `proposal` - توليد المقترحات مع دعم الحقول المتقدمة
 
 - ✅ **أدوات الكتابة**:
-  - `writing-tools-v2/[tool]` - نظام موحد لجميع أدوات الكتابة
+  - `writing-tools/[tool]` - نظام موحد لجميع أدوات الكتابة
 
 ### المرحلة 4: تحويل API Routes للإدارة
 - ✅ **لوحة التحكم**:
-  - `dashboard-stats-v2` - إحصائيات شاملة مع تحسين الأداء
+  - `dashboard-stats` - إحصائيات شاملة مع تحسين الأداء
 
 - ✅ **إدارة المستخدمين**:
-  - `users-v2` - إدارة المستخدمين مع pagination وتحقق من الصلاحيات
+  - `users` - إدارة المستخدمين مع pagination وتحقق من الصلاحيات
 
 ### المرحلة 5: تحويل API Routes للمعاملات
 - ✅ **التقارير**:
-  - `report-v2` - تقارير المعاملات مع فلترة بالتاريخ
+  - `report` - تقارير المعاملات مع فلترة بالتاريخ
 
 ### المرحلة 6: التوثيق الشامل
 - ✅ **دليل التحويل**: دليل مفصل لعملية التحويل
@@ -136,44 +136,44 @@ export const POST = withApiMiddleware(
 ## 📋 قائمة API Routes المحولة
 
 ### المصادقة (Auth)
-1. `POST /api/auth/signup-v2` - التسجيل
-2. `POST /api/auth/logout-v2` - تسجيل الخروج
-3. `POST /api/auth/session-v2` - إنشاء جلسة
-4. `GET /api/auth/session-v2` - معلومات الجلسة
-5. `DELETE /api/auth/session-v2` - حذف الجلسة
+1. `POST /api/auth/signup` - التسجيل
+2. `POST /api/auth/logout` - تسجيل الخروج
+3. `POST /api/auth/session` - إنشاء جلسة
+4. `GET /api/auth/session` - معلومات الجلسة
+5. `DELETE /api/auth/session` - حذف الجلسة
 
 ### المستخدمين (Users)
-6. `GET /api/users-v2` - قائمة المستخدمين
-7. `POST /api/users-v2` - إنشاء مستخدم
-8. `PUT /api/users-v2` - تحديث مستخدم
-9. `DELETE /api/users-v2` - حذف مستخدم
+6. `GET /api/users` - قائمة المستخدمين
+7. `POST /api/users` - إنشاء مستخدم
+8. `PUT /api/users` - تحديث مستخدم
+9. `DELETE /api/users` - حذف مستخدم
 
 ### المشاريع (Projects)
-10. `GET /api/projects-v2` - قائمة المشاريع
-11. `POST /api/projects-v2` - إنشاء مشروع
-12. `PUT /api/projects-v2` - تحديث مشروع
-13. `DELETE /api/projects-v2` - حذف مشروع
-14. `PATCH /api/projects-v2` - إضافة سياق
+10. `GET /api/projects` - قائمة المشاريع
+11. `POST /api/projects` - إنشاء مشروع
+12. `PUT /api/projects` - تحديث مشروع
+13. `DELETE /api/projects` - حذف مشروع
+14. `PATCH /api/projects` - إضافة سياق
 
 ### الفرق (Teams)
-15. `GET /api/teams-v2` - قائمة الفرق
-16. `POST /api/teams-v2` - إنشاء فريق
-17. `PUT /api/teams-v2` - تحديث فريق
-18. `DELETE /api/teams-v2` - حذف فريق
+15. `GET /api/teams` - قائمة الفرق
+16. `POST /api/teams` - إنشاء فريق
+17. `PUT /api/teams` - تحديث فريق
+18. `DELETE /api/teams` - حذف فريق
 
 ### الذكاء الاصطناعي (AI)
-19. `POST /api/academic-solver/solve-v2` - حل المشاكل الأكاديمية
-20. `POST /api/academic-solver/analyze-v2` - تحليل المشاكل الأكاديمية
-21. `POST /api/generate/proposal-v2` - توليد المقترحات
-22. `POST /api/writing-tools-v2/[tool]` - أدوات الكتابة
+19. `POST /api/academic-solver/solve` - حل المشاكل الأكاديمية
+20. `POST /api/academic-solver/analyze` - تحليل المشاكل الأكاديمية
+21. `POST /api/generate/proposal` - توليد المقترحات
+22. `POST /api/writing-tools/[tool]` - أدوات الكتابة
 
 ### الإدارة (Admin)
-23. `GET /api/admin/dashboard-stats-v2` - إحصائيات لوحة التحكم
-24. `GET /api/admin/users-v2` - قائمة المستخدمين للإدارة
-25. `POST /api/admin/users-v2` - إنشاء مستخدم من الإدارة
+23. `GET /api/admin/dashboard-stats` - إحصائيات لوحة التحكم
+24. `GET /api/admin/users` - قائمة المستخدمين للإدارة
+25. `POST /api/admin/users` - إنشاء مستخدم من الإدارة
 
 ### المعاملات (Transactions)
-26. `GET /api/transactions/report-v2` - تقرير المعاملات
+26. `GET /api/transactions/report` - تقرير المعاملات
 
 ## 🚀 الخطوات التالية
 
