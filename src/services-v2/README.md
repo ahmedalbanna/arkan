@@ -120,7 +120,7 @@
 import { BaseService } from '@/services-v2/core/base-service';
 import { AuthService } from '@/services-v2/infrastructure/auth/auth-service';
 import { ProjectService } from '@/services-v2/business/projects/project-service';
-import { IntelligentReportService } from '@/services-v2/intelligent/generation/report-service';
+import { IntelligentReportServiceV2 } from '@/services-v2/intelligent/generation/report-service';
 
 // استخدام الخدمات
 const reportService = new IntelligentReportService();
