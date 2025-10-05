@@ -1,349 +1,480 @@
 /**
- * خدمة تحليل السياق المتقدم - Intelligent v2.0
+ * خدمة التحليل المتقدم للسياق - Services v2.0
  *
- * خدمة محسنة لتحليل السياق المتقدم مع دعم المحتوى متعدد الوسائط
+ * خدمة محسنة للتحليل المتقدم للسياق مع دعم المحتوى متعدد الوسائط مع مراقبة متقدمة
  */
 
-import { z } from 'zod';
-import { IntelligentServiceV2, errorHandler } from '../../core/base-service';
+import { BaseService } from '../../core/base-service';
+import { ErrorHandler } from '../../core/error-handler';
+import { PerformanceMonitor } from '../../core/performance-monitor';
 
-// مخططات التحقق من البيانات
-const ContextAnalysisSchema = z.object({
-  content: z.string().min(1, 'Content is required for analysis'),
-  contentType: z.enum(['text', 'image', 'chart', 'diagram', 'table', 'code', 'pdf', 'audio', 'video']).default('text'),
-  options: z.object({
-    includeSemantic: z.boolean().default(true),
-    includeSentiment: z.boolean().default(true),
-    includeKeywords: z.boolean().default(true),
-    includeEntities: z.boolean().default(true),
-    includeComplexity: z.boolean().default(true),
-    maxKeywords: z.number().min(1).max(50).default(20),
-    language: z.string().default('ar'),
-  }).optional(),
-});
+export type MediaType = 'text' | 'image' | 'chart' | 'diagram' | 'table' | 'code' | 'pdf' | 'audio' | 'video';
 
-// أنواع البيانات
-export interface ContextAnalysisOptions {
-  includeSemantic?: boolean;
-  includeSentiment?: boolean;
-  includeKeywords?: boolean;
-  includeEntities?: boolean;
-  includeComplexity?: boolean;
-  maxKeywords?: number;
-  language?: string;
-}
-
-export interface ContextAnalysisResult {
-  content: string;
-  contentType: string;
-  analysis: {
-    semantic: {
-      topics: string[];
-      themes: string[];
-      intent: string;
-      relevance: number;
-    };
-    sentiment: {
-      overall: 'positive' | 'negative' | 'neutral';
-      confidence: number;
-      emotions: Record<string, number>;
-    };
-    keywords: {
-      main: string[];
-      secondary: string[];
-      frequency: Record<string, number>;
-    };
-    entities: {
-      people: string[];
-      organizations: string[];
-      locations: string[];
-      dates: string[];
-      numbers: string[];
-    };
-    complexity: {
-      level: 'low' | 'medium' | 'high';
-      score: number;
-      factors: string[];
-    };
-  };
-  metadata: {
-    analysisTime: number;
+export interface NamedEntity {
+    name: string;
+    type: string;
+    relevance: number;
     confidence: number;
-    language: string;
-    processingModel: string;
-  };
+    positions: Array<{ start: number; end: number }>;
 }
 
-/**
- * خدمة تحليل السياق المتقدم المحسنة
- */
-export class AdvancedContextAnalysisServiceV2 extends IntelligentServiceV2<{ content: string, contentType?: string, options?: ContextAnalysisOptions }, ContextAnalysisResult> {
-  protected aiConfig = {
-    model: 'gemini-pro',
-    temperature: 0.2,
-    maxTokens: 2000,
-    enableCaching: true,
-    enableQualityCheck: true,
-  };
-
-  constructor() {
-    super(
-      {
-        endpoint: '/api/intelligent/context-analysis',
-        method: 'POST',
-        requiresAuth: true,
-        timeout: 30000,
-        retries: 2,
-        retryDelay: 3000,
-      },
-      {
-        name: 'AdvancedContextAnalysisService',
-        version: '2.0.0',
-        description: 'Advanced context analysis service with multi-modal support',
-        category: 'intelligent',
-        dependencies: ['Genkit', 'Google AI', 'NLP Libraries'],
-        performance: {
-          averageResponseTime: 0,
-          successRate: 0,
-          lastHealthCheck: new Date(),
-        },
-      }
-    );
-  }
-
-  protected async validateInput(data: unknown): Promise<{ content: string, contentType?: string, options?: ContextAnalysisOptions }> {
-    const result = ContextAnalysisSchema.safeParse(data);
-    if (!result.success) {
-      throw new Error(`Context analysis validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
-    }
-    return result.data;
-  }
-
-  /**
-   * معالجة البيانات قبل الاستدعاء الذكي
-   */
-  protected async preprocessData(data: { content: string, contentType?: string, options?: ContextAnalysisOptions }, options: any): Promise<{ content: string, contentType?: string, options?: ContextAnalysisOptions }> {
-    // تحسين البيانات قبل المعالجة الذكية
-    const enhancedData = {
-      ...data,
-      options: {
-        includeSemantic: true,
-        includeSentiment: true,
-        includeKeywords: true,
-        includeEntities: true,
-        includeComplexity: true,
-        maxKeywords: 20,
-        language: 'ar',
-        ...data.options,
-      },
-    };
-
-    return enhancedData;
-  }
-
-  /**
-   * معالجة النتائج بعد الاستدعاء الذكي
-   */
-  protected async postprocessResult(result: ContextAnalysisResult, options: any): Promise<ContextAnalysisResult> {
-    // تحسين النتائج بعد المعالجة الذكية
-    return {
-      ...result,
-      metadata: {
-        ...result.metadata,
-        analysisTime: Date.now(),
-      },
-    };
-  }
-
-  /**
-   * تحليل السياق المتقدم للمحتوى
-   */
-  async analyzeContext(content: string, contentType: string = 'text', options?: ContextAnalysisOptions): Promise<ContextAnalysisResult> {
-    try {
-      const startTime = Date.now();
-
-      // استخدام الاستدعاء الذكي للتحليل
-      const result = await this.intelligentCall({
-        content,
-        contentType,
-        options,
-      });
-
-      const analysisTime = Date.now() - startTime;
-
-      // إضافة معلومات الأداء
-      result.metadata.analysisTime = analysisTime;
-
-      return result;
-    } catch (error) {
-      errorHandler.handle(error, {
-        service: 'AdvancedContextAnalysisService',
-        operation: 'analyzeContext',
-        metadata: { contentType, contentLength: content.length },
-      });
-      throw error;
-    }
-  }
-
-  /**
-   * تحليل السياق لملف محدد
-   */
-  async analyzeFile(file: {
-    name: string;
-    content: string;
-    type: string;
-  }, options?: ContextAnalysisOptions): Promise<ContextAnalysisResult> {
-    try {
-      const startTime = Date.now();
-
-      // استخدام الاستدعاء الذكي لتحليل الملف
-      const result = await this.intelligentCall({
-        content: file.content,
-        contentType: file.type as any,
-        options,
-      });
-
-      const analysisTime = Date.now() - startTime;
-
-      // إضافة معلومات الملف
-      result.metadata.analysisTime = analysisTime;
-
-      return result;
-    } catch (error) {
-      errorHandler.handle(error, {
-        service: 'AdvancedContextAnalysisService',
-        operation: 'analyzeFile',
-        metadata: { fileName: file.name, fileType: file.type },
-      });
-      throw error;
-    }
-  }
-
-  /**
-   * تحليل مجموعة من الملفات
-   */
-  async analyzeMultipleFiles(files: Array<{
-    name: string;
-    content: string;
-    type: string;
-  }>, options?: ContextAnalysisOptions): Promise<ContextAnalysisResult[]> {
-    try {
-      const startTime = Date.now();
-
-      // تحليل كل ملف على حدة
-      const results = await Promise.all(
-        files.map(file => this.analyzeFile(file, options))
-      );
-
-      const totalTime = Date.now() - startTime;
-
-      console.log(`Analyzed ${files.length} files in ${totalTime}ms`);
-
-      return results;
-    } catch (error) {
-      errorHandler.handle(error, {
-        service: 'AdvancedContextAnalysisService',
-        operation: 'analyzeMultipleFiles',
-        metadata: { fileCount: files.length },
-      });
-      throw error;
-    }
-  }
+export interface ContextRelationship {
+    sourceId: string;
+    targetId: string;
+    relationshipType: 'similar' | 'related' | 'contradicts' | 'supports' | 'references';
+    strength: number;
+    description: string;
 }
 
-/**
- * خدمة تحليل السياق للنصوص العربية
- */
-export class ArabicContextAnalysisServiceV2 extends IntelligentServiceV2<{ text: string }, {
-  topics: string[];
-  sentiment: 'positive' | 'negative' | 'neutral';
-  keywords: string[];
-  entities: {
-    persons: string[];
-    organizations: string[];
-    locations: string[];
-  };
-  summary: string;
-}> {
-  protected aiConfig = {
-    model: 'gemini-pro',
-    temperature: 0.1,
-    maxTokens: 1500,
-    enableCaching: true,
-    enableQualityCheck: true,
-  };
+export interface ChartData {
+    chartType: 'bar' | 'line' | 'pie' | 'scatter' | 'area';
+    title?: string;
+    dataPoints: Array<{
+        label: string;
+        value: number | string;
+        category?: string;
+    }>;
+    insights: string[];
+}
 
-  constructor() {
-    super(
-      {
-        endpoint: '/api/intelligent/arabic-context-analysis',
-        method: 'POST',
-        requiresAuth: true,
-        timeout: 20000,
-        retries: 2,
-        retryDelay: 2000,
-      },
-      {
-        name: 'ArabicContextAnalysisService',
-        version: '2.0.0',
-        description: 'Arabic language context analysis service',
-        category: 'intelligent',
-        dependencies: ['Genkit', 'Google AI', 'Arabic NLP'],
-        performance: {
-          averageResponseTime: 0,
-          successRate: 0,
-          lastHealthCheck: new Date(),
-        },
-      }
-    );
-  }
-
-  protected async validateInput(data: unknown): Promise<{ text: string }> {
-    const schema = z.object({
-      text: z.string().min(10, 'Text must be at least 10 characters for analysis'),
-    });
-
-    const result = schema.safeParse(data);
-    if (!result.success) {
-      throw new Error(`Arabic context analysis validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
-    }
-    return result.data;
-  }
-
-  protected async preprocessData(data: { text: string }, options: any): Promise<{ text: string }> {
-    return data;
-  }
-
-  protected async postprocessResult(result: { topics: string[], sentiment: 'positive' | 'negative' | 'neutral', keywords: string[], entities: { persons: string[], organizations: string[], locations: string[] }, summary: string }, options: any): Promise<{ topics: string[], sentiment: 'positive' | 'negative' | 'neutral', keywords: string[], entities: { persons: string[], organizations: string[], locations: string[] }, summary: string }> {
-    return result;
-  }
-
-  /**
-   * تحليل السياق للنصوص العربية
-   */
-  async analyzeArabicText(text: string): Promise<{
-    topics: string[];
-    sentiment: 'positive' | 'negative' | 'neutral';
-    keywords: string[];
-    entities: {
-      persons: string[];
-      organizations: string[];
-      locations: string[];
-    };
+export interface TableData {
+    headers: string[];
+    rows: Array<Array<string | number>>;
     summary: string;
-  }> {
-    try {
-      return await this.intelligentCall({ text });
-    } catch (error) {
-      errorHandler.handle(error, {
-        service: 'ArabicContextAnalysisService',
-        operation: 'analyzeArabicText',
-      });
-      throw error;
-    }
-  }
+    insights: string[];
 }
 
-// نسخ من الخدمات الأصلية للحفاظ على التوافق
-export class AdvancedContextAnalysisService extends AdvancedContextAnalysisServiceV2 { }
-export class ArabicContextAnalysisService extends ArabicContextAnalysisServiceV2 { }
+export interface CodeAnalysis {
+    language: string;
+    complexity: number;
+    functions: Array<{
+        name: string;
+        parameters: string[];
+        returnType: string;
+        complexity: number;
+    }>;
+    imports: string[];
+    exports: string[];
+    issues: string[];
+}
+
+export interface AdvancedContextItem {
+    id: string;
+    type: MediaType;
+    fileName: string;
+    content: string;
+    extractedData?: {
+        textContent?: string;
+        imageDescriptions?: string[];
+        chartData?: ChartData;
+        tableData?: TableData;
+        codeAnalysis?: CodeAnalysis;
+    };
+    metadata: {
+        size: number;
+        mimeType: string;
+        uploadDate: Date;
+        quality: number;
+    };
+    semanticAnalysis: {
+        keywords: string[];
+        topics: string[];
+        entities: NamedEntity[];
+        sentiment: 'positive' | 'negative' | 'neutral';
+        complexity: 'low' | 'medium' | 'high';
+    };
+    relationships: ContextRelationship[];
+}
+
+export interface AdvancedContextAnalysis {
+    id: string;
+    items: AdvancedContextItem[];
+    overallAnalysis: {
+        mainTopics: string[];
+        keyEntities: NamedEntity[];
+        sentiment: 'positive' | 'negative' | 'neutral';
+        complexity: 'low' | 'medium' | 'high';
+        coherence: number;
+        completeness: number;
+    };
+    relationships: ContextRelationship[];
+    insights: string[];
+    recommendations: string[];
+    metadata: {
+        totalItems: number;
+        analysisTime: number;
+        confidence: number;
+        processingDate: Date;
+    };
+}
+
+export class AdvancedContextAnalysisServiceV2 extends BaseService {
+    constructor() {
+        super('AdvancedContextAnalysisServiceV2');
+    }
+
+    /**
+     * تحليل سياق متقدم مع مراقبة الأداء
+     */
+    async analyzeAdvancedContext(
+        items: Omit<AdvancedContextItem, 'id' | 'semanticAnalysis' | 'relationships'>[],
+        token?: string
+    ): Promise<AdvancedContextAnalysis> {
+        const operationId = this.startOperation('analyzeAdvancedContext');
+
+        try {
+            const response = await fetch('/api/advanced-context-analysis/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                },
+                body: JSON.stringify({ items })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to analyze advanced context');
+            }
+
+            const analysis = await response.json();
+            this.endOperation(operationId, { success: true, itemCount: items.length });
+            return analysis;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AdvancedContextAnalysisServiceV2.analyzeAdvancedContext');
+            throw error;
+        }
+    }
+
+    /**
+     * تحليل عنصر سياق واحد مع مراقبة شاملة
+     */
+    async analyzeContextItem(item: Omit<AdvancedContextItem, 'id' | 'semanticAnalysis' | 'relationships'>): Promise<AdvancedContextItem> {
+        const operationId = this.startOperation('analyzeContextItem');
+
+        try {
+            const response = await fetch('/api/advanced-context-analysis/analyze-item', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(item)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to analyze context item');
+            }
+
+            const analyzedItem = await response.json();
+            this.endOperation(operationId, { success: true, mediaType: item.type });
+            return analyzedItem;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AdvancedContextAnalysisServiceV2.analyzeContextItem');
+            throw error;
+        }
+    }
+
+    /**
+     * استخراج البيانات من ملف مع مراقبة الأداء
+     */
+    async extractDataFromFile(file: File, options?: {
+        extractImages?: boolean;
+        extractTables?: boolean;
+        extractCharts?: boolean;
+        ocrEnabled?: boolean;
+    }): Promise<{
+        textContent?: string;
+        imageDescriptions?: string[];
+        chartData?: ChartData[];
+        tableData?: TableData[];
+        metadata: {
+            fileType: string;
+            size: number;
+            processingTime: number;
+        };
+    }> {
+        const operationId = this.startOperation('extractDataFromFile');
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            if (options) {
+                formData.append('options', JSON.stringify(options));
+            }
+
+            const response = await fetch('/api/advanced-context-analysis/extract', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to extract data from file');
+            }
+
+            const extractedData = await response.json();
+            this.endOperation(operationId, { success: true, fileSize: file.size });
+            return extractedData;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AdvancedContextAnalysisServiceV2.extractDataFromFile');
+            throw error;
+        }
+    }
+
+    /**
+     * تحليل العلاقات بين عناصر السياق مع مراقبة شاملة
+     */
+    async analyzeContextRelationships(items: AdvancedContextItem[]): Promise<ContextRelationship[]> {
+        const operationId = this.startOperation('analyzeContextRelationships');
+
+        try {
+            const response = await fetch('/api/advanced-context-analysis/relationships', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ items })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to analyze context relationships');
+            }
+
+            const relationships = await response.json();
+            this.endOperation(operationId, { success: true, itemCount: items.length });
+            return relationships;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AdvancedContextAnalysisServiceV2.analyzeContextRelationships');
+            throw error;
+        }
+    }
+
+    /**
+     * توليد رؤى من التحليل مع مراقبة الأداء
+     */
+    async generateInsights(analysis: AdvancedContextAnalysis): Promise<{
+        keyInsights: string[];
+        trends: string[];
+        recommendations: string[];
+        nextSteps: string[];
+    }> {
+        const operationId = this.startOperation('generateInsights');
+
+        try {
+            const response = await fetch('/api/advanced-context-analysis/insights', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ analysis })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to generate insights');
+            }
+
+            const insights = await response.json();
+            this.endOperation(operationId, { success: true });
+            return insights;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AdvancedContextAnalysisServiceV2.generateInsights');
+            throw error;
+        }
+    }
+
+    /**
+     * حفظ تحليل سياق مع مراقبة شاملة
+     */
+    async saveContextAnalysis(analysis: AdvancedContextAnalysis, name?: string, token?: string): Promise<{
+        id: string;
+        name: string;
+        savedAt: string;
+    }> {
+        const operationId = this.startOperation('saveContextAnalysis');
+
+        try {
+            const response = await fetch('/api/advanced-context-analysis/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                },
+                body: JSON.stringify({
+                    analysis,
+                    name: name || `تحليل ${new Date().toLocaleDateString()}`
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to save context analysis');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AdvancedContextAnalysisServiceV2.saveContextAnalysis');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب تحليلات محفوظة مع مراقبة الأداء
+     */
+    async getSavedAnalyses(token: string): Promise<Array<{
+        id: string;
+        name: string;
+        itemCount: number;
+        savedAt: string;
+        insightsCount: number;
+    }>> {
+        const operationId = this.startOperation('getSavedAnalyses');
+
+        try {
+            const response = await fetch('/api/advanced-context-analysis/saved', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch saved analyses');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, analysisCount: result.analyses?.length || 0 });
+            return result.analyses || [];
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AdvancedContextAnalysisServiceV2.getSavedAnalyses');
+            throw error;
+        }
+    }
+
+    /**
+     * حذف تحليل محفوظ مع مراقبة شاملة
+     */
+    async deleteSavedAnalysis(analysisId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('deleteSavedAnalysis');
+
+        try {
+            const response = await fetch(`/api/advanced-context-analysis/saved/${analysisId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to delete saved analysis');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AdvancedContextAnalysisServiceV2.deleteSavedAnalysis');
+            throw error;
+        }
+    }
+
+    /**
+     * تصدير تحليل إلى تنسيق مختلف مع مراقبة الأداء
+     */
+    async exportAnalysis(
+        analysis: AdvancedContextAnalysis,
+        format: 'json' | 'pdf' | 'markdown',
+        token?: string
+    ): Promise<{
+        format: string;
+        data: string;
+        filename: string;
+    }> {
+        const operationId = this.startOperation('exportAnalysis');
+
+        try {
+            const response = await fetch('/api/advanced-context-analysis/export', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                },
+                body: JSON.stringify({ analysis, format })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to export analysis');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, format });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AdvancedContextAnalysisServiceV2.exportAnalysis');
+            throw error;
+        }
+    }
+
+    /**
+     * تحليل مشابهة المحتوى مع مراقبة شاملة
+     */
+    async findSimilarContent(
+        content: string,
+        threshold: number = 0.7,
+        token?: string
+    ): Promise<Array<{
+        item: AdvancedContextItem;
+        similarity: number;
+        matchingFactors: string[];
+    }>> {
+        const operationId = this.startOperation('findSimilarContent');
+
+        try {
+            const response = await fetch('/api/advanced-context-analysis/similar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                },
+                body: JSON.stringify({ content, threshold })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to find similar content');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, resultCount: result.similarItems?.length || 0 });
+            return result.similarItems || [];
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AdvancedContextAnalysisServiceV2.findSimilarContent');
+            throw error;
+        }
+    }
+}

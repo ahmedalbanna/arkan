@@ -1,18 +1,21 @@
 /**
- * خدمات التعاون والمحادثة - Business v2.0
+ * خدمات التعاون - Services v2.0
  *
- * خدمات التعاون المتقدمة والتواصل في الوقت الفعلي
+ * تصدير جميع خدمات التعاون المحسنة
  */
 
-// خدمات المحادثة الأساسية
-export * from './chat-service';
+export {
+    CollaborationServiceV2,
+    type Comment,
+    type CommentReaction,
+    type ApprovalWorkflow,
+    type SharedFile,
+    type TaskAssignment
+} from './collaboration-service';
 
-// خدمات التعاون المتقدمة
-export * from './collaboration-service';
-
-// خدمات إدارة المشاريع المشتركة
-export * from './project-sharing-service';
-
-// خدمات الإشعارات والتنبيهات
-export * from './notification-service';
-
+export {
+    ChatServiceV2,
+    type RawChatSession,
+    type ChatMessage,
+    type CreateConversationData
+} from './chat-service';

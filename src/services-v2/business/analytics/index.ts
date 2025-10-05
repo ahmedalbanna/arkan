@@ -1,18 +1,12 @@
 /**
- * خدمات التحليلات والإحصائيات - Business v2.0
+ * خدمات التحليلات - Services v2.0
  *
- * تحليل شامل لبيانات النظام ومقاييس الأداء والجودة
+ * تصدير جميع خدمات التحليلات المحسنة
  */
 
-// خدمات التحليلات الأساسية
-export * from './analytics-service';
-
-// خدمات مراقبة الجودة
-export * from './quality-service';
-
-// خدمات تحليل السلوك
-export * from './behavior-service';
-
-// خدمات التقارير والإحصائيات
-export * from './reporting-service';
-
+export {
+    AnalyticsServiceV2,
+    type UserDashboardStats,
+    type SystemAnalytics,
+    type GenerationAnalytics
+} from './analytics-service';

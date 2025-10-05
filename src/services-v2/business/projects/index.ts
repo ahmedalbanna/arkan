@@ -1,21 +1,21 @@
 /**
- * خدمات المشاريع - Business v2.0
+ * خدمات المشاريع - Services v2.0
  *
- * إدارة شاملة للمشاريع والخطط والموارد
+ * تصدير جميع خدمات المشاريع المحسنة
  */
 
-// خدمات إدارة المشاريع الأساسية
-export * from './project-service';
+export {
+    ProjectServiceV2,
+    type CreateProjectData,
+    type UpdateProjectData,
+    type AddContextData,
+    type ProjectSection,
+    type SavedProject
+} from './project-service';
 
-// خدمات تخطيط المشاريع
-export * from './plan-service';
-
-// خدمات إدارة الموارد
-export * from './resource-service';
-
-// خدمات مشاركة المشاريع
-export * from './sharing-service';
-
-// خدمات مراقبة المشاريع
-export * from './monitoring-service';
-
+export {
+    ProjectPlanServiceV2,
+    type ProjectPlan,
+    type GenerateProjectPlanInput,
+    type GeneratePlanVariables
+} from './project-plan-service';

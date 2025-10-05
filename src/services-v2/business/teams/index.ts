@@ -1,18 +1,14 @@
 /**
- * خدمات الفرق - Business v2.0
+ * خدمات الفرق - Services v2.0
  *
- * إدارة شاملة للفرق والتعاون والتواصل
+ * تصدير جميع خدمات الفرق المحسنة
  */
 
-// خدمات إدارة الفرق الأساسية
-export * from './team-service';
-
-// خدمات إدارة الأعضاء
-export * from './member-service';
-
-// خدمات التواصل والإشعارات
-export * from './notification-service';
-
-// خدمات التحليل والإحصائيات
-export * from './analytics-service';
-
+export {
+    TeamServiceV2,
+    type CreateTeamData,
+    type UpdateTeamData,
+    type InviteMemberData,
+    type TeamProperties,
+    type TeamWithMembers
+} from './team-service';

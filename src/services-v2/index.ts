@@ -163,6 +163,17 @@ export function createService<TInput, TOutput>(config: {
     return config;
 }
 
+// خدمات محددة مهمة للوصول السريع (تم نقلها من المجلد القديم)
+export { DocumentProcessingServiceV2 } from './intelligent/document-processing/document-processing-service';
+export { WritingToolsServiceV2 } from './intelligent/writing-tools/writing-tools-service';
+export { AdvancedContextAnalysisServiceV2 } from './intelligent/context-analysis/advanced-context-analysis-service';
+export { ProjectServiceV2 } from './business/projects/project-service';
+export { ProjectPlanServiceV2 } from './business/projects/project-plan-service';
+export { TeamServiceV2 } from './business/teams/team-service';
+export { AuthServiceV2 } from './infrastructure/auth/auth-service';
+export { CollaborationServiceV2 } from './business/collaboration/collaboration-service';
+export { ChatServiceV2 } from './business/collaboration/chat-service';
+
 /**
  * ملخص للهيكل الجديد - Services v2.0 مكتمل:
  *

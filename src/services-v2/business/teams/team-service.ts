@@ -1,34 +1,13 @@
 /**
- * خدمة الفرق - Business v2.0
+ * خدمة الفرق - Services v2.0
  *
- * خدمة إدارة الفرق والتعاون المحسنة
+ * خدمة محسنة لإدارة الفرق مع مراقبة متقدمة
  */
 
-import { z } from 'zod';
-import { BaseServiceV2, errorHandler } from '../../core/base-service';
+import { BaseService } from '../../core/base-service';
+import { ErrorHandler } from '../../core/error-handler';
+import { PerformanceMonitor } from '../../core/performance-monitor';
 
-// مخططات التحقق من البيانات
-const CreateTeamSchema = z.object({
-    name: z.string().min(1, 'Team name is required'),
-    description: z.string().optional(),
-});
-
-const UpdateTeamSchema = z.object({
-    name: z.string().optional(),
-    description: z.string().optional(),
-});
-
-const InviteMemberSchema = z.object({
-    email: z.string().email('Invalid email format'),
-    role: z.enum(['member', 'admin']),
-});
-
-const UpdateMemberRoleSchema = z.object({
-    userId: z.string().min(1, 'User ID is required'),
-    role: z.enum(['member', 'admin']),
-});
-
-// أنواع البيانات
 export interface CreateTeamData {
     name: string;
     description?: string;
@@ -44,672 +23,750 @@ export interface InviteMemberData {
     role: 'member' | 'admin';
 }
 
-export interface UpdateMemberRoleData {
-    userId: string;
-    role: 'member' | 'admin';
-}
-
-export interface TeamMember {
-    id: string;
-    name: string;
-    email: string;
-    role: 'member' | 'admin';
-    joinedAt: Date;
-    status: 'active' | 'inactive' | 'pending';
-}
-
-export interface Team {
+export interface TeamProperties {
     id: string;
     name: string;
     description?: string;
     ownerId: string;
-    createdAt: Date;
-    updatedAt: Date;
-    members: TeamMember[];
-    settings: {
-        isPublic: boolean;
-        allowMemberInvites: boolean;
-        requireApproval: boolean;
-    };
+    createdAt: string;
+    updatedAt: string;
+    memberCount: number;
+    projectCount: number;
 }
 
-/**
- * خدمة إنشاء الفرق المحسنة
- */
-export class CreateTeamServiceV2 extends BaseServiceV2 {
-    protected endpoint = '/api/teams';
-    protected method: 'POST' = 'POST';
-    protected requiresAuth = true;
-
-    constructor() {
-        super(
-            {
-                endpoint: '/api/teams',
-                method: 'POST',
-                requiresAuth: true,
-                timeout: 10000,
-                retries: 2,
-                retryDelay: 1000,
-            },
-            {
-                name: 'CreateTeamService',
-                version: '2.0.0',
-                description: 'Enhanced team creation service',
-                category: 'business',
-                dependencies: ['Firestore', 'Firebase Auth'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
-                },
-            }
-        );
-    }
-
-    protected async validateInput(data: unknown): Promise<CreateTeamData> {
-        const result = CreateTeamSchema.safeParse(data);
-        if (!result.success) {
-            throw new Error(`Team creation validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
-        }
-        return result.data;
-    }
-
-    /**
-     * إنشاء فريق جديد
-     */
-    async createTeam(data: CreateTeamData, token?: string): Promise<Team> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة إنشاء الفريق
-            const newTeam: Team = {
-                id: `team_${Date.now()}`,
-                name: data.name,
-                description: data.description,
-                ownerId: 'current-user-id', // سيتم استبدالها بالمستخدم الحالي
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                members: [],
-                settings: {
-                    isPublic: false,
-                    allowMemberInvites: true,
-                    requireApproval: false,
-                },
-            };
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return newTeam;
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'CreateTeamService',
-                operation: 'createTeam',
-                metadata: { teamName: data.name },
-            });
-            throw error;
-        }
-    }
-}
-
-/**
- * خدمة إدارة الفرق المحسنة
- */
-export class TeamManagementServiceV2 extends BaseServiceV2 {
-    protected endpoint = '/api/teams';
-    protected method: 'GET' = 'GET';
-    protected requiresAuth = true;
-
-    constructor() {
-        super(
-            {
-                endpoint: '/api/teams',
-                method: 'GET',
-                requiresAuth: true,
-                timeout: 10000,
-                retries: 2,
-                retryDelay: 1000,
-            },
-            {
-                name: 'TeamManagementService',
-                version: '2.0.0',
-                description: 'Enhanced team management service',
-                category: 'business',
-                dependencies: ['Firestore', 'Firebase Auth'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
-                },
-            }
-        );
-    }
-
-    protected async validateInput(data: unknown): Promise<unknown> {
-        return data;
-    }
-
-    /**
-     * الحصول على جميع فرق المستخدم
-     */
-    async getUserTeams(token?: string): Promise<Team[]> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة قائمة الفرق
-            const teams: Team[] = [
-                {
-                    id: 'team_1',
-                    name: 'فريق التطوير',
-                    description: 'فريق تطوير المشاريع',
-                    ownerId: 'user_1',
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                    members: [
-                        {
-                            id: 'user_1',
-                            name: 'أحمد محمد',
-                            email: 'ahmed@example.com',
-                            role: 'admin',
-                            joinedAt: new Date(),
-                            status: 'active',
-                        },
-                    ],
-                    settings: {
-                        isPublic: false,
-                        allowMemberInvites: true,
-                        requireApproval: false,
-                    },
-                },
-            ];
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return teams;
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'TeamManagementService',
-                operation: 'getUserTeams',
-            });
-            throw error;
-        }
-    }
-
-    /**
-     * الحصول على فريق محدد
-     */
-    async getTeam(id: string, token?: string): Promise<Team | null> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة الحصول على فريق محدد
-            const team: Team = {
-                id,
-                name: `فريق ${id}`,
-                description: `وصف الفريق ${id}`,
-                ownerId: 'user_1',
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                members: [
-                    {
-                        id: 'user_1',
-                        name: 'أحمد محمد',
-                        email: 'ahmed@example.com',
-                        role: 'admin',
-                        joinedAt: new Date(),
-                        status: 'active',
-                    },
-                ],
-                settings: {
-                    isPublic: false,
-                    allowMemberInvites: true,
-                    requireApproval: false,
-                },
-            };
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return team;
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'TeamManagementService',
-                operation: 'getTeam',
-                metadata: { teamId: id },
-            });
-            throw error;
-        }
-    }
-
-    /**
-     * تحديث فريق
-     */
-    async updateTeam(id: string, data: UpdateTeamData, token?: string): Promise<Team> {
-        try {
-            const startTime = Date.now();
-
-            // التحقق من صحة البيانات
-            const result = UpdateTeamSchema.safeParse(data);
-            if (!result.success) {
-                throw new Error(`Team update validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
-            }
-
-            // محاكاة تحديث الفريق
-            const updatedTeam: Team = {
-                id,
-                name: data.name || `فريق محدث ${id}`,
-                description: data.description,
-                ownerId: 'user_1',
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                members: [],
-                settings: {
-                    isPublic: false,
-                    allowMemberInvites: true,
-                    requireApproval: false,
-                },
-            };
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return updatedTeam;
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'TeamManagementService',
-                operation: 'updateTeam',
-                metadata: { teamId: id },
-            });
-            throw error;
-        }
-    }
-
-    /**
-     * حذف فريق
-     */
-    async deleteTeam(id: string, token?: string): Promise<void> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة حذف الفريق
-            console.log(`Deleting team ${id}`);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'TeamManagementService',
-                operation: 'deleteTeam',
-                metadata: { teamId: id },
-            });
-            throw error;
-        }
-    }
-}
-
-/**
- * خدمة إدارة أعضاء الفريق المحسنة
- */
-export class TeamMemberServiceV2 extends BaseServiceV2 {
-    protected endpoint = '/api/teams/members';
-    protected method: 'POST' = 'POST';
-    protected requiresAuth = true;
-
-    constructor() {
-        super(
-            {
-                endpoint: '/api/teams/members',
-                method: 'POST',
-                requiresAuth: true,
-                timeout: 10000,
-                retries: 2,
-                retryDelay: 1000,
-            },
-            {
-                name: 'TeamMemberService',
-                version: '2.0.0',
-                description: 'Enhanced team member management service',
-                category: 'business',
-                dependencies: ['Firestore', 'Firebase Auth'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
-                },
-            }
-        );
-    }
-
-    protected async validateInput(data: unknown): Promise<InviteMemberData> {
-        const result = InviteMemberSchema.safeParse(data);
-        if (!result.success) {
-            throw new Error(`Member invitation validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
-        }
-        return result.data;
-    }
-
-    /**
-     * دعوة عضو جديد للفريق
-     */
-    async inviteMember(teamId: string, data: InviteMemberData, token?: string): Promise<void> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة دعوة العضو
-            console.log(`Inviting member ${data.email} to team ${teamId} with role ${data.role}`);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'TeamMemberService',
-                operation: 'inviteMember',
-                metadata: { teamId, email: data.email, role: data.role },
-            });
-            throw error;
-        }
-    }
-
-    /**
-     * إزالة عضو من الفريق
-     */
-    async removeMember(teamId: string, userId: string, token?: string): Promise<void> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة إزالة العضو
-            console.log(`Removing user ${userId} from team ${teamId}`);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'TeamMemberService',
-                operation: 'removeMember',
-                metadata: { teamId, userId },
-            });
-            throw error;
-        }
-    }
-
-    /**
-     * تحديث دور العضو في الفريق
-     */
-    async updateMemberRole(teamId: string, data: UpdateMemberRoleData, token?: string): Promise<void> {
-        try {
-            const startTime = Date.now();
-
-            // التحقق من صحة البيانات
-            const result = UpdateMemberRoleSchema.safeParse(data);
-            if (!result.success) {
-                throw new Error(`Member role update validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
-            }
-
-            // محاكاة تحديث دور العضو
-            console.log(`Updating role for user ${data.userId} in team ${teamId} to ${data.role}`);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'TeamMemberService',
-                operation: 'updateMemberRole',
-                metadata: { teamId, userId: data.userId, role: data.role },
-            });
-            throw error;
-        }
-    }
-
-    /**
-     * الحصول على أعضاء الفريق
-     */
-    async getTeamMembers(teamId: string, token?: string): Promise<TeamMember[]> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة قائمة أعضاء الفريق
-            const members: TeamMember[] = [
-                {
-                    id: 'user_1',
-                    name: 'أحمد محمد',
-                    email: 'ahmed@example.com',
-                    role: 'admin',
-                    joinedAt: new Date(),
-                    status: 'active',
-                },
-                {
-                    id: 'user_2',
-                    name: 'فاطمة علي',
-                    email: 'fatima@example.com',
-                    role: 'member',
-                    joinedAt: new Date(),
-                    status: 'active',
-                },
-            ];
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return members;
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'TeamMemberService',
-                operation: 'getTeamMembers',
-                metadata: { teamId },
-            });
-            throw error;
-        }
-    }
-}
-
-/**
- * خدمة إشعارات الفريق المحسنة
- */
-export class TeamNotificationServiceV2 extends BaseServiceV2 {
-    protected endpoint = '/api/teams/notifications';
-    protected method: 'POST' = 'POST';
-    protected requiresAuth = true;
-
-    constructor() {
-        super(
-            {
-                endpoint: '/api/teams/notifications',
-                method: 'POST',
-                requiresAuth: true,
-                timeout: 5000,
-                retries: 2,
-                retryDelay: 1000,
-            },
-            {
-                name: 'TeamNotificationService',
-                version: '2.0.0',
-                description: 'Enhanced team notification service',
-                category: 'business',
-                dependencies: ['Firestore', 'Notification Service'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
-                },
-            }
-        );
-    }
-
-    protected async validateInput(data: unknown): Promise<{ teamId: string, message: string, type: string }> {
-        const schema = z.object({
-            teamId: z.string().min(1),
-            message: z.string().min(1),
-            type: z.string().optional(),
-        });
-
-        const result = schema.safeParse(data);
-        if (!result.success) {
-            throw new Error(`Notification validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
-        }
-        return result.data;
-    }
-
-    /**
-     * إرسال إشعار للفريق
-     */
-    async sendTeamNotification(teamId: string, message: string, type: string = 'info', token?: string): Promise<void> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة إرسال الإشعار
-            console.log(`Sending ${type} notification to team ${teamId}: ${message}`);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'TeamNotificationService',
-                operation: 'sendTeamNotification',
-                metadata: { teamId, type },
-            });
-            throw error;
-        }
-    }
-
-    /**
-     * الحصول على إشعارات الفريق
-     */
-    async getTeamNotifications(teamId: string, token?: string): Promise<Array<{
+export interface TeamWithMembers extends TeamProperties {
+    members: Array<{
         id: string;
-        message: string;
-        type: string;
-        createdAt: Date;
-        read: boolean;
-    }>> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة قائمة الإشعارات
-            const notifications = [
-                {
-                    id: 'notif_1',
-                    message: 'تم إنشاء مشروع جديد',
-                    type: 'info',
-                    createdAt: new Date(),
-                    read: false,
-                },
-            ];
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return notifications;
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'TeamNotificationService',
-                operation: 'getTeamNotifications',
-                metadata: { teamId },
-            });
-            throw error;
-        }
-    }
+        userId: string;
+        userName: string;
+        userEmail: string;
+        role: 'owner' | 'admin' | 'member';
+        joinedAt: string;
+    }>;
+    projects: Array<{
+        id: string;
+        name: string;
+        status: string;
+        memberCount: number;
+    }>;
 }
 
-/**
- * خدمة إحصائيات الفريق المحسنة
- */
-export class TeamAnalyticsServiceV2 extends BaseServiceV2 {
-    protected endpoint = '/api/teams/analytics';
-    protected method: 'GET' = 'GET';
-    protected requiresAuth = true;
-
+export class TeamServiceV2 extends BaseService {
     constructor() {
-        super(
-            {
-                endpoint: '/api/teams/analytics',
-                method: 'GET',
-                requiresAuth: true,
-                timeout: 10000,
-                retries: 2,
-                retryDelay: 1000,
-            },
-            {
-                name: 'TeamAnalyticsService',
-                version: '2.0.0',
-                description: 'Enhanced team analytics service',
-                category: 'business',
-                dependencies: ['Firestore', 'Analytics'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
-                },
-            }
-        );
-    }
-
-    protected async validateInput(data: unknown): Promise<unknown> {
-        return data;
+        super('TeamServiceV2');
     }
 
     /**
-     * الحصول على إحصائيات الفريق
+     * إنشاء فريق جديد مع مراقبة الأداء
      */
-    async getTeamStats(teamId: string, token?: string): Promise<{
+    async createTeam(data: CreateTeamData, token: string): Promise<TeamProperties> {
+        const operationId = this.startOperation('createTeam');
+
+        try {
+            const response = await fetch('/api/teams', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to create team');
+            }
+
+            const team = await response.json();
+            this.endOperation(operationId, { success: true });
+            return team;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.createTeam');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب قائمة الفرق مع مراقبة شاملة
+     */
+    async fetchUserTeams(token: string): Promise<TeamWithMembers[]> {
+        const operationId = this.startOperation('fetchUserTeams');
+
+        try {
+            const response = await fetch('/api/teams', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch user teams');
+            }
+
+            const teams = await response.json();
+            this.endOperation(operationId, { success: true, teamCount: teams.length });
+            return teams;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.fetchUserTeams');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب فريق محدد مع مراقبة الأداء
+     */
+    async fetchTeam(teamId: string, token: string): Promise<TeamWithMembers | null> {
+        const operationId = this.startOperation('fetchTeam');
+
+        try {
+            const response = await fetch(`/api/teams/${teamId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    this.endOperation(operationId, { success: true, result: 'not-found' });
+                    return null;
+                }
+                throw new Error('Failed to fetch team');
+            }
+
+            const team = await response.json();
+            this.endOperation(operationId, { success: true });
+            return team;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.fetchTeam');
+            throw error;
+        }
+    }
+
+    /**
+     * تحديث فريق مع مراقبة شاملة
+     */
+    async updateTeam(teamId: string, data: UpdateTeamData, token: string): Promise<TeamProperties> {
+        const operationId = this.startOperation('updateTeam');
+
+        try {
+            const response = await fetch(`/api/teams/${teamId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to update team');
+            }
+
+            const team = await response.json();
+            this.endOperation(operationId, { success: true });
+            return team;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.updateTeam');
+            throw error;
+        }
+    }
+
+    /**
+     * حذف فريق مع مراقبة الأداء
+     */
+    async deleteTeam(teamId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('deleteTeam');
+
+        try {
+            const response = await fetch(`/api/teams/${teamId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to delete team');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.deleteTeam');
+            throw error;
+        }
+    }
+
+    /**
+     * دعوة عضو للفريق مع مراقبة شاملة
+     */
+    async inviteMember(teamId: string, data: InviteMemberData, token: string): Promise<{
+        inviteId: string;
+        email: string;
+        role: string;
+        expiresAt: string;
+        inviteUrl: string;
+    }> {
+        const operationId = this.startOperation('inviteMember');
+
+        try {
+            const response = await fetch(`/api/teams/${teamId}/invite`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to invite member');
+            }
+
+            const invite = await response.json();
+            this.endOperation(operationId, { success: true });
+            return invite;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.inviteMember');
+            throw error;
+        }
+    }
+
+    /**
+     * إزالة عضو من الفريق مع مراقبة الأداء
+     */
+    async removeMember(teamId: string, memberId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('removeMember');
+
+        try {
+            const response = await fetch(`/api/teams/${teamId}/members/${memberId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to remove member');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.removeMember');
+            throw error;
+        }
+    }
+
+    /**
+     * تحديث دور عضو في الفريق مع مراقبة شاملة
+     */
+    async updateMemberRole(
+        teamId: string,
+        memberId: string,
+        role: 'member' | 'admin',
+        token: string
+    ): Promise<{
+        memberId: string;
+        role: string;
+        updatedAt: string;
+    }> {
+        const operationId = this.startOperation('updateMemberRole');
+
+        try {
+            const response = await fetch(`/api/teams/${teamId}/members/${memberId}/role`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ role })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to update member role');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.updateMemberRole');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب أعضاء الفريق مع مراقبة الأداء
+     */
+    async getTeamMembers(teamId: string, token: string): Promise<Array<{
+        id: string;
+        userId: string;
+        userName: string;
+        userEmail: string;
+        role: 'owner' | 'admin' | 'member';
+        joinedAt: string;
+        lastActive?: string;
+    }>> {
+        const operationId = this.startOperation('getTeamMembers');
+
+        try {
+            const response = await fetch(`/api/teams/${teamId}/members`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch team members');
+            }
+
+            const members = await response.json();
+            this.endOperation(operationId, { success: true, memberCount: members.length });
+            return members;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.getTeamMembers');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب مشاريع الفريق مع مراقبة شاملة
+     */
+    async getTeamProjects(teamId: string, token: string): Promise<Array<{
+        id: string;
+        name: string;
+        description?: string;
+        status: 'active' | 'completed' | 'archived';
+        createdAt: string;
+        memberCount: number;
+    }>> {
+        const operationId = this.startOperation('getTeamProjects');
+
+        try {
+            const response = await fetch(`/api/teams/${teamId}/projects`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch team projects');
+            }
+
+            const projects = await response.json();
+            this.endOperation(operationId, { success: true, projectCount: projects.length });
+            return projects;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.getTeamProjects');
+            throw error;
+        }
+    }
+
+    /**
+     * إضافة مشروع للفريق مع مراقبة الأداء
+     */
+    async addProjectToTeam(
+        teamId: string,
+        projectId: string,
+        token: string
+    ): Promise<{
+        teamId: string;
+        projectId: string;
+        addedAt: string;
+    }> {
+        const operationId = this.startOperation('addProjectToTeam');
+
+        try {
+            const response = await fetch(`/api/teams/${teamId}/projects`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ projectId })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to add project to team');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.addProjectToTeam');
+            throw error;
+        }
+    }
+
+    /**
+     * إزالة مشروع من الفريق مع مراقبة شاملة
+     */
+    async removeProjectFromTeam(teamId: string, projectId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('removeProjectFromTeam');
+
+        try {
+            const response = await fetch(`/api/teams/${teamId}/projects/${projectId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to remove project from team');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.removeProjectFromTeam');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب إحصائيات الفريق مع مراقبة الأداء
+     */
+    async getTeamStats(teamId: string, token: string): Promise<{
         totalMembers: number;
         activeMembers: number;
         totalProjects: number;
         completedProjects: number;
         recentActivity: Array<{
-            userId: string;
+            userName: string;
             action: string;
-            timestamp: Date;
+            timestamp: string;
+        }>;
+        memberGrowth: Array<{
+            date: string;
+            count: number;
         }>;
     }> {
+        const operationId = this.startOperation('getTeamStats');
+
         try {
-            const startTime = Date.now();
-
-            // محاكاة إحصائيات الفريق
-            const stats = {
-                totalMembers: 5,
-                activeMembers: 4,
-                totalProjects: 12,
-                completedProjects: 8,
-                recentActivity: [
-                    {
-                        userId: 'user_1',
-                        action: 'created project',
-                        timestamp: new Date(),
-                    },
-                ],
-            };
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return stats;
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'TeamAnalyticsService',
-                operation: 'getTeamStats',
-                metadata: { teamId },
+            const response = await fetch(`/api/teams/${teamId}/stats`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch team stats');
+            }
+
+            const stats = await response.json();
+            this.endOperation(operationId, { success: true });
+            return stats;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.getTeamStats');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب دعوات الفريق المعلقة مع مراقبة شاملة
+     */
+    async getPendingInvites(teamId: string, token: string): Promise<Array<{
+        id: string;
+        email: string;
+        role: string;
+        invitedAt: string;
+        expiresAt: string;
+        status: 'pending' | 'accepted' | 'expired';
+    }>> {
+        const operationId = this.startOperation('getPendingInvites');
+
+        try {
+            const response = await fetch(`/api/teams/${teamId}/invites`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch pending invites');
+            }
+
+            const invites = await response.json();
+            this.endOperation(operationId, { success: true, inviteCount: invites.length });
+            return invites;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.getPendingInvites');
+            throw error;
+        }
+    }
+
+    /**
+     * إلغاء دعوة عضو مع مراقبة الأداء
+     */
+    async cancelInvite(teamId: string, inviteId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('cancelInvite');
+
+        try {
+            const response = await fetch(`/api/teams/${teamId}/invites/${inviteId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to cancel invite');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.cancelInvite');
+            throw error;
+        }
+    }
+
+    /**
+     * مغادرة الفريق مع مراقبة شاملة
+     */
+    async leaveTeam(teamId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('leaveTeam');
+
+        try {
+            const response = await fetch(`/api/teams/${teamId}/leave`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to leave team');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.leaveTeam');
+            throw error;
+        }
+    }
+
+    /**
+     * نقل ملكية الفريق مع مراقبة الأداء
+     */
+    async transferOwnership(
+        teamId: string,
+        newOwnerId: string,
+        token: string
+    ): Promise<{
+        previousOwner: string;
+        newOwner: string;
+        transferredAt: string;
+    }> {
+        const operationId = this.startOperation('transferOwnership');
+
+        try {
+            const response = await fetch(`/api/teams/${teamId}/transfer-ownership`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ newOwnerId })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to transfer ownership');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.transferOwnership');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب إحصائيات عامة للفرق مع مراقبة شاملة
+     */
+    async getTeamsStats(token: string): Promise<{
+        totalTeams: number;
+        totalMembers: number;
+        averageTeamSize: number;
+        teamsBySize: Record<string, number>;
+        recentActivity: Array<{
+            teamName: string;
+            action: string;
+            timestamp: string;
+        }>;
+    }> {
+        const operationId = this.startOperation('getTeamsStats');
+
+        try {
+            const response = await fetch('/api/teams/stats', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch teams stats');
+            }
+
+            const stats = await response.json();
+            this.endOperation(operationId, { success: true });
+            return stats;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.getTeamsStats');
+            throw error;
+        }
+    }
+
+    /**
+     * البحث في الفرق مع مراقبة الأداء
+     */
+    async searchTeams(query: string, filters: {
+        memberCount?: { min?: number; max?: number };
+        createdAfter?: string;
+        hasProjects?: boolean;
+        limit?: number;
+        offset?: number;
+    } = {}, token: string): Promise<{
+        teams: TeamProperties[];
+        totalCount: number;
+        hasMore: boolean;
+    }> {
+        const operationId = this.startOperation('searchTeams');
+
+        try {
+            const queryParams = new URLSearchParams({ q: query });
+
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value !== undefined) {
+                    if (typeof value === 'object') {
+                        Object.entries(value).forEach(([subKey, subValue]) => {
+                            if (subValue !== undefined) {
+                                queryParams.append(`${key}[${subKey}]`, subValue.toString());
+                            }
+                        });
+                    } else {
+                        queryParams.append(key, value.toString());
+                    }
+                }
+            });
+
+            const response = await fetch(`/api/teams/search?${queryParams.toString()}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to search teams');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, resultCount: result.teams?.length || 0 });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.searchTeams');
+            throw error;
+        }
+    }
+
+    /**
+     * فحص صحة الفريق مع مراقبة شاملة
+     */
+    async checkTeamHealth(teamId: string, token: string): Promise<{
+        status: 'healthy' | 'warning' | 'critical';
+        metrics: {
+            memberActivity: number;
+            projectProgress: number;
+            collaborationScore: number;
+        };
+        issues: string[];
+        recommendations: string[];
+    }> {
+        const operationId = this.startOperation('checkTeamHealth');
+
+        try {
+            const response = await fetch(`/api/teams/${teamId}/health`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to check team health');
+            }
+
+            const health = await response.json();
+            this.endOperation(operationId, { success: true, status: health.status });
+            return health;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'TeamServiceV2.checkTeamHealth');
             throw error;
         }
     }
 }
-
-// نسخ من الخدمات الأصلية للحفاظ على التوافق
-export class TeamService extends TeamManagementServiceV2 { }
-export class CreateTeamService extends CreateTeamServiceV2 { }
-export class TeamMemberService extends TeamMemberServiceV2 { }
-export class TeamNotificationService extends TeamNotificationServiceV2 { }
-export class TeamAnalyticsService extends TeamAnalyticsServiceV2 { }

@@ -1,41 +1,14 @@
 /**
- * خدمة المصادقة - Infrastructure v2.0
+ * خدمة المصادقة - Services v2.0
  *
- * خدمة محدثة تستخدم BaseServiceV2 مع مراقبة متقدمة للأداء والأخطاء
+ * خدمة محسنة للمصادقة والتسجيل مع مراقبة متقدمة
  */
 
-import { z } from 'zod';
-import { BaseServiceV2, ComplexServiceV2 } from '../../core/base-service';
+import { BaseService } from '../../core/base-service';
+import { ErrorHandler } from '../../core/error-handler';
+import { PerformanceMonitor } from '../../core/performance-monitor';
 
-// مخططات التحقق من البيانات
-const LoginSchema = z.object({
-    email: z.string().email('Invalid email format'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
-const SignupSchema = z.object({
-    name: z.string().min(2, 'Name must be at least 2 characters'),
-    email: z.string().email('Invalid email format'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
-const ResetPasswordSchema = z.object({
-    email: z.string().email('Invalid email format'),
-});
-
-const ChangePasswordSchema = z.object({
-    currentPassword: z.string().min(1, 'Current password is required'),
-    newPassword: z.string().min(6, 'New password must be at least 6 characters'),
-});
-
-// أنواع البيانات
 export interface LoginCredentials {
-    email: string;
-    password: string;
-}
-
-export interface SignupCredentials {
-    name: string;
     email: string;
     password: string;
 }
@@ -49,6 +22,12 @@ export interface AuthResponse {
     };
     token: string;
     expiresAt: string;
+}
+
+export interface SignupCredentials {
+    name: string;
+    email: string;
+    password: string;
 }
 
 export interface SignupResponse {
@@ -65,303 +44,454 @@ export interface ResetPasswordResponse {
     message: string;
 }
 
-export interface ChangePasswordResponse {
-    message: string;
+export interface ChangePasswordCredentials {
+    currentPassword: string;
+    newPassword: string;
 }
 
-/**
- * خدمة تسجيل الدخول المحسنة
- */
-export class LoginServiceV2 extends ComplexServiceV2<LoginCredentials, AuthResponse> {
-    protected endpoint = '/api/auth/login';
-    protected method: 'POST' = 'POST';
-    protected inputSchema = LoginSchema;
-    protected requiresAuth = false;
+export interface SessionInfo {
+    userId: string;
+    sessionId: string;
+    createdAt: string;
+    expiresAt: string;
+    ipAddress?: string;
+    userAgent?: string;
+}
 
+export class AuthServiceV2 extends BaseService {
     constructor() {
-        super(
-            {
-                endpoint: '/api/auth/login',
-                method: 'POST',
-                requiresAuth: false,
-                timeout: 10000,
-                retries: 2,
-                retryDelay: 1000,
-            },
-            {
-                name: 'LoginService',
-                version: '2.0.0',
-                description: 'User login service with enhanced security',
-                category: 'infrastructure',
-                dependencies: ['Firebase Auth', 'JWT'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
-                },
-            }
-        );
+        super('AuthServiceV2');
     }
 
-    protected async validateInput(data: unknown): Promise<LoginCredentials> {
-        const result = LoginSchema.safeParse(data);
-        if (!result.success) {
-            throw new Error(`Login validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
+    /**
+     * تسجيل الدخول مع مراقبة الأداء
+     */
+    async loginWithEmail(credentials: LoginCredentials): Promise<AuthResponse> {
+        const operationId = this.startOperation('loginWithEmail');
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(credentials)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Login failed');
+            }
+
+            const authResponse = await response.json();
+            this.endOperation(operationId, { success: true });
+            return authResponse;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AuthServiceV2.loginWithEmail');
+            throw error;
         }
-        return result.data;
     }
-}
 
-/**
- * خدمة التسجيل المحسنة
- */
-export class SignupServiceV2 extends ComplexServiceV2<SignupCredentials, SignupResponse> {
-    protected endpoint = '/api/auth/signup';
-    protected method: 'POST' = 'POST';
-    protected inputSchema = SignupSchema;
-    protected requiresAuth = false;
+    /**
+     * تسجيل حساب جديد مع مراقبة شاملة
+     */
+    async signupUser(credentials: SignupCredentials): Promise<SignupResponse> {
+        const operationId = this.startOperation('signupUser');
 
-    constructor() {
-        super(
-            {
-                endpoint: '/api/auth/signup',
+        try {
+            const response = await fetch('/api/auth/signup', {
                 method: 'POST',
-                requiresAuth: false,
-                timeout: 15000,
-                retries: 1,
-                retryDelay: 2000,
-            },
-            {
-                name: 'SignupService',
-                version: '2.0.0',
-                description: 'User registration service with validation',
-                category: 'infrastructure',
-                dependencies: ['Firebase Auth', 'Email Service'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
+                headers: {
+                    'Content-Type': 'application/json'
                 },
-            }
-        );
-    }
+                body: JSON.stringify(credentials)
+            });
 
-    protected async validateInput(data: unknown): Promise<SignupCredentials> {
-        const result = SignupSchema.safeParse(data);
-        if (!result.success) {
-            throw new Error(`Signup validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Signup failed');
+            }
+
+            const signupResponse = await response.json();
+            this.endOperation(operationId, { success: true });
+            return signupResponse;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AuthServiceV2.signupUser');
+            throw error;
         }
-        return result.data;
     }
-}
 
-/**
- * خدمة إعادة تعيين كلمة المرور المحسنة
- */
-export class ResetPasswordServiceV2 extends ComplexServiceV2<{ email: string }, ResetPasswordResponse> {
-    protected endpoint = '/api/auth/reset-password';
-    protected method: 'POST' = 'POST';
-    protected inputSchema = ResetPasswordSchema;
-    protected requiresAuth = false;
+    /**
+     * تسجيل الخروج مع مراقبة الأداء
+     */
+    async logoutUser(token: string): Promise<void> {
+        const operationId = this.startOperation('logoutUser');
 
-    constructor() {
-        super(
-            {
-                endpoint: '/api/auth/reset-password',
+        try {
+            const response = await fetch('/api/auth/logout', {
                 method: 'POST',
-                requiresAuth: false,
-                timeout: 10000,
-                retries: 2,
-                retryDelay: 1000,
-            },
-            {
-                name: 'ResetPasswordService',
-                version: '2.0.0',
-                description: 'Password reset service with email delivery',
-                category: 'infrastructure',
-                dependencies: ['Email Service', 'Firebase Auth'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
-                },
-            }
-        );
-    }
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
 
-    protected async validateInput(data: unknown): Promise<{ email: string }> {
-        const result = ResetPasswordSchema.safeParse(data);
-        if (!result.success) {
-            throw new Error(`Reset password validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Logout failed');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AuthServiceV2.logoutUser');
+            throw error;
         }
-        return result.data;
     }
-}
 
-/**
- * خدمة تغيير كلمة المرور المحسنة
- */
-export class ChangePasswordServiceV2 extends ComplexServiceV2<{ currentPassword: string, newPassword: string }, ChangePasswordResponse> {
-    protected endpoint = '/api/auth/change-password';
-    protected method: 'POST' = 'POST';
-    protected inputSchema = ChangePasswordSchema;
-    protected requiresAuth = true;
+    /**
+     * إعادة تعيين كلمة المرور مع مراقبة شاملة
+     */
+    async resetPassword(email: string): Promise<ResetPasswordResponse> {
+        const operationId = this.startOperation('resetPassword');
 
-    constructor() {
-        super(
-            {
-                endpoint: '/api/auth/change-password',
+        try {
+            const response = await fetch('/api/auth/reset-password', {
                 method: 'POST',
-                requiresAuth: true,
-                timeout: 10000,
-                retries: 2,
-                retryDelay: 1000,
-            },
-            {
-                name: 'ChangePasswordService',
-                version: '2.0.0',
-                description: 'Password change service with security validation',
-                category: 'infrastructure',
-                dependencies: ['Firebase Auth', 'Security Validation'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
+                headers: {
+                    'Content-Type': 'application/json'
                 },
-            }
-        );
-    }
+                body: JSON.stringify({ email })
+            });
 
-    protected async validateInput(data: unknown): Promise<{ currentPassword: string, newPassword: string }> {
-        const result = ChangePasswordSchema.safeParse(data);
-        if (!result.success) {
-            throw new Error(`Change password validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Reset password failed');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AuthServiceV2.resetPassword');
+            throw error;
         }
-        return result.data;
     }
-}
 
-/**
- * خدمة تسجيل الخروج المحسنة
- */
-export class LogoutServiceV2 extends BaseServiceV2 {
-    protected endpoint = '/api/auth/logout';
-    protected method: 'POST' = 'POST';
-    protected requiresAuth = true;
+    /**
+     * تغيير كلمة المرور مع مراقبة الأداء
+     */
+    async changePassword(credentials: ChangePasswordCredentials, token: string): Promise<{
+        message: string;
+        updatedAt: string;
+    }> {
+        const operationId = this.startOperation('changePassword');
 
-    constructor() {
-        super(
-            {
-                endpoint: '/api/auth/logout',
+        try {
+            const response = await fetch('/api/auth/change-password', {
                 method: 'POST',
-                requiresAuth: true,
-                timeout: 5000,
-                retries: 1,
-                retryDelay: 1000,
-            },
-            {
-                name: 'LogoutService',
-                version: '2.0.0',
-                description: 'User logout service with session cleanup',
-                category: 'infrastructure',
-                dependencies: ['Firebase Auth', 'Session Management'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
+                body: JSON.stringify(credentials)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Change password failed');
             }
-        );
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AuthServiceV2.changePassword');
+            throw error;
+        }
     }
 
-    protected async validateInput(data: unknown): Promise<unknown> {
-        // لا نحتاج إلى بيانات إدخال لتسجيل الخروج
-        return data;
-    }
-}
+    /**
+     * التحقق من صحة الرمز المميز مع مراقبة شاملة
+     */
+    async verifyToken(token: string): Promise<{
+        valid: boolean;
+        user?: {
+            id: string;
+            email: string;
+            name: string;
+            role: string;
+        };
+        expiresAt?: string;
+    }> {
+        const operationId = this.startOperation('verifyToken');
 
-/**
- * خدمة التحقق من الجلسة المحسنة
- */
-export class SessionServiceV2 extends BaseServiceV2 {
-    protected endpoint = '/api/auth/session';
-    protected method: 'GET' = 'GET';
-    protected requiresAuth = true;
+        try {
+            const response = await fetch('/api/auth/verify', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
 
-    constructor() {
-        super(
-            {
-                endpoint: '/api/auth/session',
-                method: 'GET',
-                requiresAuth: true,
-                timeout: 5000,
-                retries: 2,
-                retryDelay: 1000,
-            },
-            {
-                name: 'SessionService',
-                version: '2.0.0',
-                description: 'Session validation service',
-                category: 'infrastructure',
-                dependencies: ['Firebase Auth', 'JWT'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
-                },
+            if (!response.ok) {
+                this.endOperation(operationId, { success: true, valid: false });
+                return { valid: false };
             }
-        );
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, valid: result.valid });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AuthServiceV2.verifyToken');
+            throw error;
+        }
     }
 
-    protected async validateInput(data: unknown): Promise<unknown> {
-        return data;
-    }
-}
+    /**
+     * إعادة إرسال رمز التحقق مع مراقبة الأداء
+     */
+    async resendVerification(email: string): Promise<{
+        message: string;
+        expiresAt: string;
+    }> {
+        const operationId = this.startOperation('resendVerification');
 
-/**
- * خدمة إدارة الرموز المميزة المحسنة
- */
-export class TokenServiceV2 extends BaseServiceV2 {
-    protected endpoint = '/api/auth/token';
-    protected method: 'POST' = 'POST';
-    protected requiresAuth = true;
-
-    constructor() {
-        super(
-            {
-                endpoint: '/api/auth/token',
+        try {
+            const response = await fetch('/api/auth/resend-verification', {
                 method: 'POST',
-                requiresAuth: true,
-                timeout: 10000,
-                retries: 2,
-                retryDelay: 1000,
-            },
-            {
-                name: 'TokenService',
-                version: '2.0.0',
-                description: 'JWT token management service',
-                category: 'infrastructure',
-                dependencies: ['JWT', 'Redis Cache'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
+                headers: {
+                    'Content-Type': 'application/json'
                 },
+                body: JSON.stringify({ email })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Resend verification failed');
             }
-        );
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AuthServiceV2.resendVerification');
+            throw error;
+        }
     }
 
-    protected async validateInput(data: unknown): Promise<unknown> {
-        // يمكن إضافة مخطط للتحقق من بيانات الرمز المميز هنا
-        return data;
+    /**
+     * التحقق من البريد الإلكتروني مع مراقبة شاملة
+     */
+    async verifyEmail(token: string): Promise<{
+        verified: boolean;
+        message: string;
+    }> {
+        const operationId = this.startOperation('verifyEmail');
+
+        try {
+            const response = await fetch('/api/auth/verify-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ token })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Email verification failed');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, verified: result.verified });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AuthServiceV2.verifyEmail');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب معلومات الجلسة مع مراقبة الأداء
+     */
+    async getSessionInfo(token: string): Promise<SessionInfo> {
+        const operationId = this.startOperation('getSessionInfo');
+
+        try {
+            const response = await fetch('/api/auth/session', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to get session info');
+            }
+
+            const sessionInfo = await response.json();
+            this.endOperation(operationId, { success: true });
+            return sessionInfo;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AuthServiceV2.getSessionInfo');
+            throw error;
+        }
+    }
+
+    /**
+     * إنهاء جميع الجلسات مع مراقبة شاملة
+     */
+    async revokeAllSessions(token: string): Promise<{
+        message: string;
+        revokedSessions: number;
+    }> {
+        const operationId = this.startOperation('revokeAllSessions');
+
+        try {
+            const response = await fetch('/api/auth/revoke-all-sessions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to revoke all sessions');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, revokedCount: result.revokedSessions });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AuthServiceV2.revokeAllSessions');
+            throw error;
+        }
+    }
+
+    /**
+     * تسجيل الدخول بحساب جوجل مع مراقبة الأداء
+     */
+    async loginWithGoogle(credentials: {
+        idToken: string;
+        accessToken?: string;
+    }): Promise<AuthResponse> {
+        const operationId = this.startOperation('loginWithGoogle');
+
+        try {
+            const response = await fetch('/api/auth/google', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(credentials)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Google login failed');
+            }
+
+            const authResponse = await response.json();
+            this.endOperation(operationId, { success: true });
+            return authResponse;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AuthServiceV2.loginWithGoogle');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب إحصائيات المصادقة مع مراقبة شاملة
+     */
+    async getAuthStats(token: string, timeRange: 'day' | 'week' | 'month' = 'week'): Promise<{
+        totalLogins: number;
+        uniqueUsers: number;
+        failedAttempts: number;
+        loginByMethod: Record<string, number>;
+        topCountries: Array<{
+            country: string;
+            count: number;
+        }>;
+    }> {
+        const operationId = this.startOperation('getAuthStats');
+
+        try {
+            const response = await fetch(`/api/auth/stats?range=${timeRange}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch auth stats');
+            }
+
+            const stats = await response.json();
+            this.endOperation(operationId, { success: true });
+            return stats;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AuthServiceV2.getAuthStats');
+            throw error;
+        }
+    }
+
+    /**
+     * فحص صحة المصادقة مع مراقبة الأداء
+     */
+    async checkAuthHealth(): Promise<{
+        status: 'healthy' | 'degraded' | 'unhealthy';
+        responseTime: number;
+        errorRate: number;
+        uptime: number;
+    }> {
+        const operationId = this.startOperation('checkAuthHealth');
+
+        try {
+            const response = await fetch('/api/auth/health', {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Auth service health check failed');
+            }
+
+            const health = await response.json();
+            this.endOperation(operationId, { success: true, status: health.status });
+            return health;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'AuthServiceV2.checkAuthHealth');
+            throw error;
+        }
     }
 }
-
-// نسخ من الخدمات الأصلية للحفاظ على التوافق
-export class LoginService extends LoginServiceV2 { }
-export class SignupService extends SignupServiceV2 { }
-export class ResetPasswordService extends ResetPasswordServiceV2 { }
-export class ChangePasswordService extends ChangePasswordServiceV2 { }
-export class LogoutService extends LogoutServiceV2 { }
-export class SessionService extends SessionServiceV2 { }
-export class TokenService extends TokenServiceV2 { }

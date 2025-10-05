@@ -1,36 +1,13 @@
 /**
- * خدمة المشاريع - Business v2.0
+ * خدمة المشاريع - Services v2.0
  *
- * خدمة إدارة المشاريع والمحتوى المحسنة
+ * خدمة محسنة لإدارة المشاريع مع مراقبة متقدمة
  */
 
-import { z } from 'zod';
-import { BaseServiceV2, errorHandler } from '../../core/base-service';
+import { BaseService } from '../../core/base-service';
+import { ErrorHandler } from '../../core/error-handler';
+import { PerformanceMonitor } from '../../core/performance-monitor';
 
-// مخططات التحقق من البيانات
-const CreateProjectSchema = z.object({
-    title: z.string().min(1, 'Project title is required'),
-    description: z.string().optional(),
-    type: z.enum(['proposal', 'report', 'presentation', 'academic']),
-    language: z.enum(['ar', 'en']),
-    teamId: z.string().optional(),
-});
-
-const UpdateProjectSchema = z.object({
-    title: z.string().optional(),
-    description: z.string().optional(),
-    status: z.enum(['active', 'inactive', 'pending']).optional(),
-});
-
-const AddContextSchema = z.object({
-    type: z.enum(['file', 'text', 'url']),
-    content: z.string().min(1, 'Content is required'),
-    fileName: z.string().optional(),
-    fileType: z.enum(['pdf', 'docx', 'txt', 'md']).optional(),
-    fileSize: z.number().optional(),
-});
-
-// أنواع البيانات
 export interface CreateProjectData {
     title: string;
     description?: string;
@@ -53,7 +30,18 @@ export interface AddContextData {
     fileSize?: number;
 }
 
-export interface Project {
+export interface ProjectSection {
+    id: string;
+    name: string;
+    content: string;
+    type: string;
+    status: 'draft' | 'in_progress' | 'completed' | 'needs_review';
+    wordCount: number;
+    lastModified: string;
+    metadata?: Record<string, any>;
+}
+
+export interface SavedProject {
     id: string;
     title: string;
     description?: string;
@@ -61,559 +49,759 @@ export interface Project {
     language: 'ar' | 'en';
     status: 'active' | 'inactive' | 'pending';
     teamId?: string;
-    createdAt: Date;
-    updatedAt: Date;
-    sections?: Record<string, any>;
-    externalContext?: any[];
+    sections: ProjectSection[];
+    externalContext: Array<{
+        id: string;
+        type: string;
+        name: string;
+        size: number;
+        uploadedAt: string;
+    }>;
+    createdAt: string;
+    updatedAt: string;
+    lastAccessed: string;
 }
 
-/**
- * خدمة إنشاء المشاريع المحسنة
- */
-export class CreateProjectServiceV2 extends BaseServiceV2 {
-    protected endpoint = '/api/projects';
-    protected method: 'POST' = 'POST';
-    protected requiresAuth = true;
-
+export class ProjectServiceV2 extends BaseService {
     constructor() {
-        super(
-            {
-                endpoint: '/api/projects',
+        super('ProjectServiceV2');
+    }
+
+    /**
+     * إنشاء مشروع جديد مع مراقبة الأداء
+     */
+    async createProject(data: CreateProjectData, token: string): Promise<SavedProject> {
+        const operationId = this.startOperation('createProject');
+
+        try {
+            const response = await fetch('/api/projects', {
                 method: 'POST',
-                requiresAuth: true,
-                timeout: 10000,
-                retries: 2,
-                retryDelay: 1000,
-            },
-            {
-                name: 'CreateProjectService',
-                version: '2.0.0',
-                description: 'Enhanced project creation service',
-                category: 'business',
-                dependencies: ['Firestore', 'Firebase Auth'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
-            }
-        );
-    }
-
-    protected async validateInput(data: unknown): Promise<CreateProjectData> {
-        const result = CreateProjectSchema.safeParse(data);
-        if (!result.success) {
-            throw new Error(`Project creation validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
-        }
-        return result.data;
-    }
-
-    /**
-     * إنشاء مشروع جديد
-     */
-    async createProject(data: CreateProjectData, token?: string): Promise<Project> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة إنشاء المشروع
-            const newProject: Project = {
-                id: `proj_${Date.now()}`,
-                title: data.title,
-                description: data.description,
-                type: data.type,
-                language: data.language,
-                status: 'active',
-                teamId: data.teamId,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            };
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return newProject;
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'CreateProjectService',
-                operation: 'createProject',
-                metadata: { type: data.type },
+                body: JSON.stringify(data)
             });
-            throw error;
-        }
-    }
-}
 
-/**
- * خدمة إدارة المشاريع المحسنة
- */
-export class ProjectManagementServiceV2 extends BaseServiceV2 {
-    protected endpoint = '/api/projects';
-    protected method: 'GET' = 'GET';
-    protected requiresAuth = true;
-
-    constructor() {
-        super(
-            {
-                endpoint: '/api/projects',
-                method: 'GET',
-                requiresAuth: true,
-                timeout: 10000,
-                retries: 2,
-                retryDelay: 1000,
-            },
-            {
-                name: 'ProjectManagementService',
-                version: '2.0.0',
-                description: 'Enhanced project management service',
-                category: 'business',
-                dependencies: ['Firestore', 'Firebase Auth'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
-                },
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to create project');
             }
-        );
-    }
 
-    protected async validateInput(data: unknown): Promise<unknown> {
-        return data;
-    }
-
-    /**
-     * الحصول على جميع مشاريع المستخدم
-     */
-    async getUserProjects(token?: string): Promise<Project[]> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة قائمة المشاريع
-            const projects: Project[] = [
-                {
-                    id: 'proj_1',
-                    title: 'مشروع تجريبي 1',
-                    description: 'وصف المشروع الأول',
-                    type: 'report',
-                    language: 'ar',
-                    status: 'active',
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                },
-                {
-                    id: 'proj_2',
-                    title: 'مشروع تجريبي 2',
-                    description: 'وصف المشروع الثاني',
-                    type: 'proposal',
-                    language: 'en',
-                    status: 'active',
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                },
-            ];
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return projects;
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ProjectManagementService',
-                operation: 'getUserProjects',
-            });
-            throw error;
-        }
-    }
-
-    /**
-     * الحصول على مشروع محدد
-     */
-    async getProject(id: string, token?: string): Promise<Project | null> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة الحصول على مشروع محدد
-            const project: Project = {
-                id,
-                title: `مشروع ${id}`,
-                description: `وصف المشروع ${id}`,
-                type: 'report',
-                language: 'ar',
-                status: 'active',
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            };
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
+            const project = await response.json();
+            this.endOperation(operationId, { success: true });
             return project;
+
         } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ProjectManagementService',
-                operation: 'getProject',
-                metadata: { projectId: id },
-            });
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.createProject');
             throw error;
         }
     }
 
     /**
-     * تحديث مشروع
+     * جلب قائمة المشاريع مع مراقبة شاملة
      */
-    async updateProject(id: string, data: UpdateProjectData, token?: string): Promise<Project> {
-        try {
-            const startTime = Date.now();
+    async fetchProjects(token: string): Promise<SavedProject[]> {
+        const operationId = this.startOperation('fetchProjects');
 
-            // التحقق من صحة البيانات
-            const result = UpdateProjectSchema.safeParse(data);
-            if (!result.success) {
-                throw new Error(`Project update validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
+        try {
+            const response = await fetch('/api/projects', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch projects');
             }
 
-            // محاكاة تحديث المشروع
-            const updatedProject: Project = {
-                id,
-                title: data.title || `مشروع محدث ${id}`,
-                description: data.description,
-                type: 'report',
-                language: 'ar',
-                status: data.status || 'active',
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            };
+            const projects = await response.json();
+            this.endOperation(operationId, { success: true, projectCount: projects.length });
+            return projects;
 
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return updatedProject;
         } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ProjectManagementService',
-                operation: 'updateProject',
-                metadata: { projectId: id },
-            });
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.fetchProjects');
             throw error;
         }
     }
 
     /**
-     * حذف مشروع
+     * جلب مشروع محدد مع مراقبة الأداء
      */
-    async deleteProject(id: string, token?: string): Promise<void> {
+    async fetchProject(projectId: string, token: string): Promise<SavedProject | null> {
+        const operationId = this.startOperation('fetchProject');
+
         try {
-            const startTime = Date.now();
-
-            // محاكاة حذف المشروع
-            console.log(`Deleting project ${id}`);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ProjectManagementService',
-                operation: 'deleteProject',
-                metadata: { projectId: id },
+            const response = await fetch(`/api/projects/${projectId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    this.endOperation(operationId, { success: true, result: 'not-found' });
+                    return null;
+                }
+                throw new Error('Failed to fetch project');
+            }
+
+            const project = await response.json();
+            this.endOperation(operationId, { success: true });
+            return project;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.fetchProject');
             throw error;
         }
     }
-}
 
-/**
- * خدمة إدارة سياق المشروع المحسنة
- */
-export class ProjectContextServiceV2 extends BaseServiceV2 {
-    protected endpoint = '/api/projects/context';
-    protected method: 'POST' = 'POST';
-    protected requiresAuth = true;
+    /**
+     * تحديث مشروع مع مراقبة شاملة
+     */
+    async updateProject(projectId: string, data: UpdateProjectData, token: string): Promise<SavedProject> {
+        const operationId = this.startOperation('updateProject');
 
-    constructor() {
-        super(
-            {
-                endpoint: '/api/projects/context',
+        try {
+            const response = await fetch(`/api/projects/${projectId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to update project');
+            }
+
+            const project = await response.json();
+            this.endOperation(operationId, { success: true });
+            return project;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.updateProject');
+            throw error;
+        }
+    }
+
+    /**
+     * حذف مشروع مع مراقبة الأداء
+     */
+    async deleteProject(projectId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('deleteProject');
+
+        try {
+            const response = await fetch(`/api/projects/${projectId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to delete project');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.deleteProject');
+            throw error;
+        }
+    }
+
+    /**
+     * إضافة سياق خارجي للمشروع مع مراقبة شاملة
+     */
+    async addContextToProject(projectId: string, contextData: AddContextData, token: string): Promise<{
+        id: string;
+        type: string;
+        name: string;
+        size: number;
+        uploadedAt: string;
+    }> {
+        const operationId = this.startOperation('addContextToProject');
+
+        try {
+            const response = await fetch(`/api/projects/${projectId}/context`, {
                 method: 'POST',
-                requiresAuth: true,
-                timeout: 15000,
-                retries: 2,
-                retryDelay: 2000,
-            },
-            {
-                name: 'ProjectContextService',
-                version: '2.0.0',
-                description: 'Enhanced project context management service',
-                category: 'business',
-                dependencies: ['Firestore', 'File Processing'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
-            }
-        );
-    }
-
-    protected async validateInput(data: unknown): Promise<AddContextData> {
-        const result = AddContextSchema.safeParse(data);
-        if (!result.success) {
-            throw new Error(`Context validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
-        }
-        return result.data;
-    }
-
-    /**
-     * إضافة سياق خارجي للمشروع
-     */
-    async addContextToProject(projectId: string, data: AddContextData, token?: string): Promise<void> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة إضافة السياق للمشروع
-            console.log(`Adding context to project ${projectId}:`, data);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ProjectContextService',
-                operation: 'addContextToProject',
-                metadata: { projectId, contextType: data.type },
+                body: JSON.stringify(contextData)
             });
-            throw error;
-        }
-    }
 
-    /**
-     * الحصول على سياق المشروع
-     */
-    async getProjectContext(projectId: string, token?: string): Promise<any[]> {
-        try {
-            const startTime = Date.now();
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to add context to project');
+            }
 
-            // محاكاة الحصول على سياق المشروع
-            const context = [
-                {
-                    id: 'ctx_1',
-                    type: 'file',
-                    content: 'محتوى الملف الأول',
-                    fileName: 'document1.pdf',
-                    fileType: 'pdf',
-                    fileSize: 1024000,
-                },
-            ];
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
+            const context = await response.json();
+            this.endOperation(operationId, { success: true });
             return context;
+
         } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ProjectContextService',
-                operation: 'getProjectContext',
-                metadata: { projectId },
-            });
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.addContextToProject');
             throw error;
         }
     }
-}
 
-/**
- * خدمة مشاركة المشاريع المحسنة
- */
-export class ProjectSharingServiceV2 extends BaseServiceV2 {
-    protected endpoint = '/api/projects/share';
-    protected method: 'POST' = 'POST';
-    protected requiresAuth = true;
+    /**
+     * حذف سياق خارجي من المشروع مع مراقبة الأداء
+     */
+    async removeContextFromProject(projectId: string, contextId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('removeContextFromProject');
 
-    constructor() {
-        super(
-            {
-                endpoint: '/api/projects/share',
+        try {
+            const response = await fetch(`/api/projects/${projectId}/context/${contextId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to remove context from project');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.removeContextFromProject');
+            throw error;
+        }
+    }
+
+    /**
+     * إضافة قسم جديد للمشروع مع مراقبة شاملة
+     */
+    async addProjectSection(
+        projectId: string,
+        sectionData: {
+            name: string;
+            content: string;
+            type: string;
+        },
+        token: string
+    ): Promise<ProjectSection> {
+        const operationId = this.startOperation('addProjectSection');
+
+        try {
+            const response = await fetch(`/api/projects/${projectId}/sections`, {
                 method: 'POST',
-                requiresAuth: true,
-                timeout: 10000,
-                retries: 2,
-                retryDelay: 1000,
-            },
-            {
-                name: 'ProjectSharingService',
-                version: '2.0.0',
-                description: 'Enhanced project sharing service',
-                category: 'business',
-                dependencies: ['Firestore', 'Firebase Auth'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
-            }
-        );
-    }
-
-    protected async validateInput(data: unknown): Promise<{ projectId: string, userId: string, permissions: string[] }> {
-        const schema = z.object({
-            projectId: z.string().min(1),
-            userId: z.string().min(1),
-            permissions: z.array(z.string()),
-        });
-
-        const result = schema.safeParse(data);
-        if (!result.success) {
-            throw new Error(`Sharing validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
-        }
-        return result.data;
-    }
-
-    /**
-     * مشاركة مشروع مع مستخدم آخر
-     */
-    async shareProject(projectId: string, userId: string, permissions: string[] = ['read'], token?: string): Promise<void> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة مشاركة المشروع
-            console.log(`Sharing project ${projectId} with user ${userId}`, { permissions });
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ProjectSharingService',
-                operation: 'shareProject',
-                metadata: { projectId, userId, permissions },
+                body: JSON.stringify(sectionData)
             });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to add project section');
+            }
+
+            const section = await response.json();
+            this.endOperation(operationId, { success: true });
+            return section;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.addProjectSection');
             throw error;
         }
     }
 
     /**
-     * إلغاء مشاركة مشروع
+     * تحديث قسم في المشروع مع مراقبة الأداء
      */
-    async unshareProject(projectId: string, userId: string, token?: string): Promise<void> {
+    async updateProjectSection(
+        projectId: string,
+        sectionId: string,
+        updates: Partial<ProjectSection>,
+        token: string
+    ): Promise<ProjectSection> {
+        const operationId = this.startOperation('updateProjectSection');
+
         try {
-            const startTime = Date.now();
-
-            // محاكاة إلغاء مشاركة المشروع
-            console.log(`Unsharing project ${projectId} from user ${userId}`);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ProjectSharingService',
-                operation: 'unshareProject',
-                metadata: { projectId, userId },
+            const response = await fetch(`/api/projects/${projectId}/sections/${sectionId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(updates)
             });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to update project section');
+            }
+
+            const section = await response.json();
+            this.endOperation(operationId, { success: true });
+            return section;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.updateProjectSection');
             throw error;
         }
     }
-}
 
-/**
- * خدمة إحصائيات المشاريع المحسنة
- */
-export class ProjectAnalyticsServiceV2 extends BaseServiceV2 {
-    protected endpoint = '/api/projects/analytics';
-    protected method: 'GET' = 'GET';
-    protected requiresAuth = true;
+    /**
+     * حذف قسم من المشروع مع مراقبة شاملة
+     */
+    async deleteProjectSection(projectId: string, sectionId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('deleteProjectSection');
 
-    constructor() {
-        super(
-            {
-                endpoint: '/api/projects/analytics',
-                method: 'GET',
-                requiresAuth: true,
-                timeout: 10000,
-                retries: 2,
-                retryDelay: 1000,
-            },
-            {
-                name: 'ProjectAnalyticsService',
-                version: '2.0.0',
-                description: 'Enhanced project analytics service',
-                category: 'business',
-                dependencies: ['Firestore', 'Analytics'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
-                },
+        try {
+            const response = await fetch(`/api/projects/${projectId}/sections/${sectionId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to delete project section');
             }
-        );
-    }
 
-    protected async validateInput(data: unknown): Promise<unknown> {
-        return data;
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.deleteProjectSection');
+            throw error;
+        }
     }
 
     /**
-     * الحصول على إحصائيات المشاريع
+     * مشاركة مشروع مع مراقبة الأداء
      */
-    async getProjectStats(token?: string): Promise<{
+    async shareProject(
+        projectId: string,
+        shareWith: string[],
+        permissions: 'view' | 'edit' | 'admin',
+        token: string
+    ): Promise<{
+        shareId: string;
+        shareUrl: string;
+        expiresAt?: string;
+    }> {
+        const operationId = this.startOperation('shareProject');
+
+        try {
+            const response = await fetch(`/api/projects/${projectId}/share`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    shareWith,
+                    permissions
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to share project');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, shareWithCount: shareWith.length });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.shareProject');
+            throw error;
+        }
+    }
+
+    /**
+     * إلغاء مشاركة مشروع مع مراقبة شاملة
+     */
+    async unshareProject(projectId: string, shareId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('unshareProject');
+
+        try {
+            const response = await fetch(`/api/projects/${projectId}/share/${shareId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to unshare project');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.unshareProject');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب إحصائيات المشاريع مع مراقبة الأداء
+     */
+    async getProjectStats(token: string): Promise<{
         totalProjects: number;
         activeProjects: number;
-        completedProjects: number;
         projectsByType: Record<string, number>;
         recentActivity: Array<{
             projectId: string;
+            projectName: string;
             action: string;
-            timestamp: Date;
+            timestamp: string;
         }>;
+        storageUsage: number;
     }> {
+        const operationId = this.startOperation('getProjectStats');
+
         try {
-            const startTime = Date.now();
-
-            // محاكاة إحصائيات المشاريع
-            const stats = {
-                totalProjects: 25,
-                activeProjects: 18,
-                completedProjects: 7,
-                projectsByType: {
-                    report: 12,
-                    proposal: 8,
-                    presentation: 3,
-                    academic: 2,
-                },
-                recentActivity: [
-                    {
-                        projectId: 'proj_1',
-                        action: 'created',
-                        timestamp: new Date(),
-                    },
-                    {
-                        projectId: 'proj_2',
-                        action: 'updated',
-                        timestamp: new Date(),
-                    },
-                ],
-            };
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return stats;
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ProjectAnalyticsService',
-                operation: 'getProjectStats',
+            const response = await fetch('/api/projects/stats', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch project stats');
+            }
+
+            const stats = await response.json();
+            this.endOperation(operationId, { success: true });
+            return stats;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.getProjectStats');
+            throw error;
+        }
+    }
+
+    /**
+     * نسخ مشروع مع مراقبة شاملة
+     */
+    async duplicateProject(projectId: string, newName: string, token: string): Promise<SavedProject> {
+        const operationId = this.startOperation('duplicateProject');
+
+        try {
+            const response = await fetch(`/api/projects/${projectId}/duplicate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ name: newName })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to duplicate project');
+            }
+
+            const project = await response.json();
+            this.endOperation(operationId, { success: true });
+            return project;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.duplicateProject');
+            throw error;
+        }
+    }
+
+    /**
+     * تصدير مشروع مع مراقبة الأداء
+     */
+    async exportProject(
+        projectId: string,
+        format: 'pdf' | 'docx' | 'json' | 'markdown',
+        options?: {
+            includeSections?: string[];
+            includeContext?: boolean;
+            includeMetadata?: boolean;
+        },
+        token?: string
+    ): Promise<{
+        format: string;
+        data: string;
+        filename: string;
+        size: number;
+    }> {
+        const operationId = this.startOperation('exportProject');
+
+        try {
+            const response = await fetch(`/api/projects/${projectId}/export`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                },
+                body: JSON.stringify({ format, options })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to export project');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, format });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.exportProject');
+            throw error;
+        }
+    }
+
+    /**
+     * استيراد مشروع من ملف مع مراقبة شاملة
+     */
+    async importProject(file: File, token: string): Promise<SavedProject> {
+        const operationId = this.startOperation('importProject');
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/api/projects/import', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to import project');
+            }
+
+            const project = await response.json();
+            this.endOperation(operationId, { success: true, fileSize: file.size });
+            return project;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.importProject');
+            throw error;
+        }
+    }
+
+    /**
+     * البحث في المشاريع مع مراقبة الأداء
+     */
+    async searchProjects(query: string, filters: {
+        type?: string;
+        status?: string;
+        teamId?: string;
+        limit?: number;
+        offset?: number;
+    } = {}, token: string): Promise<{
+        projects: SavedProject[];
+        totalCount: number;
+        hasMore: boolean;
+    }> {
+        const operationId = this.startOperation('searchProjects');
+
+        try {
+            const queryParams = new URLSearchParams({ q: query });
+
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value !== undefined) {
+                    queryParams.append(key, value.toString());
+                }
+            });
+
+            const response = await fetch(`/api/projects/search?${queryParams.toString()}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to search projects');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, resultCount: result.projects?.length || 0 });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.searchProjects');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب مشاريع مشتركة مع المستخدم مع مراقبة شاملة
+     */
+    async getSharedProjects(token: string): Promise<SavedProject[]> {
+        const operationId = this.startOperation('getSharedProjects');
+
+        try {
+            const response = await fetch('/api/projects/shared', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch shared projects');
+            }
+
+            const projects = await response.json();
+            this.endOperation(operationId, { success: true, projectCount: projects.length });
+            return projects;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.getSharedProjects');
+            throw error;
+        }
+    }
+
+    /**
+     * إضافة تعاون على مشروع مع مراقبة الأداء
+     */
+    async addCollaborator(
+        projectId: string,
+        collaborator: {
+            userId: string;
+            permissions: 'view' | 'edit' | 'admin';
+        },
+        token: string
+    ): Promise<{
+        collaboratorId: string;
+        userId: string;
+        permissions: string;
+        addedAt: string;
+    }> {
+        const operationId = this.startOperation('addCollaborator');
+
+        try {
+            const response = await fetch(`/api/projects/${projectId}/collaborators`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(collaborator)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to add collaborator');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.addCollaborator');
+            throw error;
+        }
+    }
+
+    /**
+     * إزالة تعاون من مشروع مع مراقبة شاملة
+     */
+    async removeCollaborator(projectId: string, collaboratorId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('removeCollaborator');
+
+        try {
+            const response = await fetch(`/api/projects/${projectId}/collaborators/${collaboratorId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to remove collaborator');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.removeCollaborator');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب تعاوني المشروع مع مراقبة الأداء
+     */
+    async getProjectCollaborators(projectId: string, token: string): Promise<Array<{
+        id: string;
+        userId: string;
+        userName: string;
+        userEmail: string;
+        permissions: 'view' | 'edit' | 'admin';
+        joinedAt: string;
+    }>> {
+        const operationId = this.startOperation('getProjectCollaborators');
+
+        try {
+            const response = await fetch(`/api/projects/${projectId}/collaborators`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch project collaborators');
+            }
+
+            const collaborators = await response.json();
+            this.endOperation(operationId, { success: true, collaboratorCount: collaborators.length });
+            return collaborators;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ProjectServiceV2.getProjectCollaborators');
             throw error;
         }
     }
 }
-
-// نسخ من الخدمات الأصلية للحفاظ على التوافق
-export class ProjectService extends ProjectManagementServiceV2 { }
-export class CreateProjectService extends CreateProjectServiceV2 { }
-export class ProjectContextService extends ProjectContextServiceV2 { }
-export class ProjectSharingService extends ProjectSharingServiceV2 { }
-export class ProjectAnalyticsService extends ProjectAnalyticsServiceV2 { }

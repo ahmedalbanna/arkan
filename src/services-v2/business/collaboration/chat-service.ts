@@ -1,716 +1,810 @@
 /**
- * خدمة المحادثة والتعاون - Business v2.0
+ * خدمة المحادثة - Services v2.0
  *
- * خدمة محادثة محسنة مع دعم متقدم للتعاون والتواصل في الوقت الفعلي
+ * خدمة محسنة للمحادثة والدردشة مع الوكلاء مع مراقبة متقدمة
  */
 
-import { z } from 'zod';
-import { BaseServiceV2, errorHandler } from '../../core/base-service';
+import { BaseService } from '../../core/base-service';
+import { ErrorHandler } from '../../core/error-handler';
+import { PerformanceMonitor } from '../../core/performance-monitor';
 
-// مخططات التحقق من البيانات
-const MessageSchema = z.object({
-    conversationId: z.string().min(1, 'Conversation ID is required'),
-    content: z.string().min(1, 'Message content is required'),
-    type: z.enum(['text', 'file', 'image', 'system']).default('text'),
-    metadata: z.record(z.unknown()).optional(),
-    replyTo: z.string().optional(),
-});
+export interface RawChatSession {
+    id: string;
+    title: string;
+    participants: Array<{
+        id: string;
+        name: string;
+        role: 'user' | 'agent' | 'system';
+    }>;
+    messages: ChatMessage[];
+    createdAt: string;
+    updatedAt: string;
+    isActive: boolean;
+    type: 'user_agent' | 'support' | 'group';
+}
 
-const ConversationSchema = z.object({
-    title: z.string().min(1, 'Conversation title is required'),
-    participants: z.array(z.string()).min(1, 'At least one participant is required'),
-    type: z.enum(['direct', 'group', 'support']).default('direct'),
-    metadata: z.record(z.unknown()).optional(),
-});
-
-const ConversationQuerySchema = z.object({
-    participantId: z.string().optional(),
-    type: z.enum(['direct', 'group', 'support']).optional(),
-    limit: z.number().min(1).max(100).default(20),
-    offset: z.number().min(0).default(0),
-});
-
-// أنواع البيانات
-export interface Message {
+export interface ChatMessage {
     id: string;
     conversationId: string;
     senderId: string;
+    senderName: string;
+    senderRole: 'user' | 'agent' | 'system';
     content: string;
-    type: 'text' | 'file' | 'image' | 'system';
-    metadata?: Record<string, unknown>;
-    replyTo?: string;
-    createdAt: Date;
-    updatedAt: Date;
-    readBy: string[];
-    edited: boolean;
-    editedAt?: Date;
+    timestamp: string;
+    messageType: 'text' | 'image' | 'file' | 'system';
+    metadata?: {
+        fileUrl?: string;
+        fileName?: string;
+        fileSize?: number;
+        imageUrl?: string;
+        tokensUsed?: number;
+        processingTime?: number;
+    };
 }
 
-export interface Conversation {
+export interface AgentProperties {
     id: string;
-    title: string;
-    participants: string[];
-    type: 'direct' | 'group' | 'support';
-    lastMessage?: Message;
-    createdAt: Date;
-    updatedAt: Date;
-    metadata?: Record<string, unknown>;
-    unreadCount: number;
-    isArchived: boolean;
+    name: string;
+    description: string;
+    categoryId: string;
+    prompt: string;
+    model: string;
+    temperature: number;
+    maxTokens: number;
+    systemPrompt?: string;
+    tools?: string[];
+    isActive: boolean;
 }
 
-export interface ConversationQuery {
-    participantId?: string;
-    type?: 'direct' | 'group' | 'support';
-    limit?: number;
-    offset?: number;
+export interface CreateConversationData {
+    participantIds: string[];
+    participantNames: Record<string, string>;
+    title?: string;
+    isSupportChat?: boolean;
+    agent?: AgentProperties;
 }
 
-/**
- * خدمة المحادثة المحسنة
- */
-export class ChatServiceV2 extends BaseServiceV2 {
-    protected endpoint = '/api/chat';
-    protected method: 'POST' = 'POST';
-    protected requiresAuth = true;
-
+export class ChatServiceV2 extends BaseService {
     constructor() {
-        super(
-            {
-                endpoint: '/api/chat',
-                method: 'POST',
-                requiresAuth: true,
-                timeout: 10000,
-                retries: 2,
-                retryDelay: 1000,
-            },
-            {
-                name: 'ChatService',
-                version: '2.0.0',
-                description: 'Enhanced chat and collaboration service',
-                category: 'business',
-                dependencies: ['Firestore', 'Firebase Auth', 'Real-time Updates'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
-                },
-            }
-        );
-    }
-
-    protected async validateInput(data: unknown): Promise<Message> {
-        const result = MessageSchema.safeParse(data);
-        if (!result.success) {
-            throw new Error(`Message validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
-        }
-        return result.data as Message;
+        super('ChatServiceV2');
     }
 
     /**
-     * إرسال رسالة جديدة
+     * إنشاء محادثة جديدة مع مراقبة الأداء
      */
-    async sendMessage(message: Omit<Message, 'id' | 'createdAt' | 'updatedAt' | 'readBy' | 'edited'>): Promise<Message> {
+    async createConversation(data: CreateConversationData, token: string): Promise<RawChatSession> {
+        const operationId = this.startOperation('createConversation');
+
         try {
-            const startTime = Date.now();
+            if (!token) {
+                throw new Error("User not authenticated");
+            }
 
-            // محاكاة إنشاء رسالة جديدة
-            const newMessage: Message = {
-                id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                ...message,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                readBy: [message.senderId],
-                edited: false,
-            };
-
-            console.log('Sending message:', newMessage);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return newMessage;
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ChatService',
-                operation: 'sendMessage',
-                metadata: { conversationId: message.conversationId },
+            const response = await fetch('/api/conversations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
             });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to create conversation');
+            }
+
+            const conversation = await response.json();
+            this.endOperation(operationId, { success: true });
+            return conversation;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.createConversation');
             throw error;
         }
     }
 
     /**
-     * الحصول على رسائل المحادثة
+     * بدء محادثة دعم فني مع مراقبة شاملة
+     */
+    async initiateSupportChat(token: string): Promise<RawChatSession> {
+        const operationId = this.startOperation('initiateSupportChat');
+
+        try {
+            if (!token) {
+                throw new Error("User not authenticated");
+            }
+
+            const response = await fetch('/api/support-chat/initiate', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to initiate support chat');
+            }
+
+            const conversation = await response.json();
+            this.endOperation(operationId, { success: true });
+            return conversation;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.initiateSupportChat');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب محادثات المستخدم مع مراقبة الأداء
+     */
+    async getUserConversations(token: string): Promise<RawChatSession[]> {
+        const operationId = this.startOperation('getUserConversations');
+
+        try {
+            const response = await fetch('/api/conversations', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch user conversations');
+            }
+
+            const conversations = await response.json();
+            this.endOperation(operationId, { success: true, conversationCount: conversations.length });
+            return conversations;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.getUserConversations');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب محادثة محددة مع مراقبة شاملة
+     */
+    async getConversation(conversationId: string, token: string): Promise<RawChatSession | null> {
+        const operationId = this.startOperation('getConversation');
+
+        try {
+            const response = await fetch(`/api/conversations/${conversationId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    this.endOperation(operationId, { success: true, result: 'not-found' });
+                    return null;
+                }
+                throw new Error('Failed to fetch conversation');
+            }
+
+            const conversation = await response.json();
+            this.endOperation(operationId, { success: true });
+            return conversation;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.getConversation');
+            throw error;
+        }
+    }
+
+    /**
+     * إرسال رسالة في محادثة مع مراقبة الأداء
+     */
+    async sendMessage(
+        conversationId: string,
+        content: string,
+        messageType: 'text' | 'image' | 'file' = 'text',
+        metadata?: any,
+        token?: string
+    ): Promise<ChatMessage> {
+        const operationId = this.startOperation('sendMessage');
+
+        try {
+            const response = await fetch(`/api/conversations/${conversationId}/messages`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                },
+                body: JSON.stringify({
+                    content,
+                    messageType,
+                    metadata
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to send message');
+            }
+
+            const message = await response.json();
+            this.endOperation(operationId, { success: true, messageType });
+            return message;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.sendMessage');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب رسائل محادثة مع مراقبة شاملة
      */
     async getConversationMessages(
         conversationId: string,
-        options: { limit?: number; offset?: number; before?: Date } = {}
+        token: string,
+        limit: number = 50,
+        before?: string
     ): Promise<{
-        messages: Message[];
+        messages: ChatMessage[];
         hasMore: boolean;
-        nextOffset?: number;
+        nextCursor?: string;
     }> {
+        const operationId = this.startOperation('getConversationMessages');
+
         try {
-            const startTime = Date.now();
+            const queryParams = new URLSearchParams({
+                limit: limit.toString()
+            });
 
-            // محاكاة رسائل المحادثة
-            const mockMessages: Message[] = [
-                {
-                    id: 'msg_1',
-                    conversationId,
-                    senderId: 'user1',
-                    content: 'مرحباً! كيف يمكنني مساعدتك؟',
-                    type: 'text',
-                    createdAt: new Date(Date.now() - 3600000),
-                    updatedAt: new Date(Date.now() - 3600000),
-                    readBy: ['user1', 'user2'],
-                    edited: false,
-                },
-                {
-                    id: 'msg_2',
-                    conversationId,
-                    senderId: 'user2',
-                    content: 'أحتاج مساعدة في إنشاء تقرير',
-                    type: 'text',
-                    createdAt: new Date(Date.now() - 1800000),
-                    updatedAt: new Date(Date.now() - 1800000),
-                    readBy: ['user1', 'user2'],
-                    edited: false,
-                },
-                {
-                    id: 'msg_3',
-                    conversationId,
-                    senderId: 'user1',
-                    content: 'بالتأكيد! ما هو موضوع التقرير؟',
-                    type: 'text',
-                    createdAt: new Date(Date.now() - 900000),
-                    updatedAt: new Date(Date.now() - 900000),
-                    readBy: ['user1', 'user2'],
-                    edited: false,
-                },
-            ];
-
-            // تطبيق الفلاتر الزمنية
-            let filteredMessages = mockMessages;
-            if (options.before) {
-                filteredMessages = filteredMessages.filter(msg => msg.createdAt < options.before!);
+            if (before) {
+                queryParams.append('before', before);
             }
 
-            // ترتيب حسب التاريخ (الأحدث أولاً)
-            filteredMessages.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
-            // تطبيق التقسيم
-            const offset = options.offset || 0;
-            const limit = options.limit || 50;
-            const paginatedMessages = filteredMessages.slice(offset, offset + limit);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return {
-                messages: paginatedMessages,
-                hasMore: (offset + limit) < filteredMessages.length,
-                nextOffset: (offset + limit) < filteredMessages.length ? offset + limit : undefined,
-            };
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ChatService',
-                operation: 'getConversationMessages',
-                metadata: { conversationId, limit: options.limit },
+            const response = await fetch(`/api/conversations/${conversationId}/messages?${queryParams.toString()}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
-            throw error;
-        }
-    }
 
-    /**
-     * الحصول على قائمة المحادثات
-     */
-    async getConversations(query: ConversationQuery): Promise<{
-        conversations: Conversation[];
-        totalCount: number;
-        hasMore: boolean;
-    }> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة محادثات المستخدم
-            const mockConversations: Conversation[] = [
-                {
-                    id: 'conv_1',
-                    title: 'محادثة مع أحمد',
-                    participants: ['user1', 'user2'],
-                    type: 'direct',
-                    lastMessage: {
-                        id: 'msg_1',
-                        conversationId: 'conv_1',
-                        senderId: 'user1',
-                        content: 'مرحباً! كيف يمكنني مساعدتك؟',
-                        type: 'text',
-                        createdAt: new Date(Date.now() - 3600000),
-                        updatedAt: new Date(Date.now() - 3600000),
-                        readBy: ['user1', 'user2'],
-                        edited: false,
-                    },
-                    createdAt: new Date(Date.now() - 86400000),
-                    updatedAt: new Date(Date.now() - 3600000),
-                    unreadCount: 0,
-                    isArchived: false,
-                },
-                {
-                    id: 'conv_2',
-                    title: 'فريق التطوير',
-                    participants: ['user1', 'user2', 'user3', 'user4'],
-                    type: 'group',
-                    lastMessage: {
-                        id: 'msg_2',
-                        conversationId: 'conv_2',
-                        senderId: 'user3',
-                        content: 'تم إنجاز المهمة بنجاح',
-                        type: 'text',
-                        createdAt: new Date(Date.now() - 1800000),
-                        updatedAt: new Date(Date.now() - 1800000),
-                        readBy: ['user1', 'user2', 'user3'],
-                        edited: false,
-                    },
-                    createdAt: new Date(Date.now() - 172800000),
-                    updatedAt: new Date(Date.now() - 1800000),
-                    unreadCount: 1,
-                    isArchived: false,
-                },
-                {
-                    id: 'conv_3',
-                    title: 'الدعم الفني',
-                    participants: ['user1', 'support_agent'],
-                    type: 'support',
-                    lastMessage: {
-                        id: 'msg_3',
-                        conversationId: 'conv_3',
-                        senderId: 'support_agent',
-                        content: 'سيتم حل المشكلة قريباً',
-                        type: 'text',
-                        createdAt: new Date(Date.now() - 900000),
-                        updatedAt: new Date(Date.now() - 900000),
-                        readBy: ['user1'],
-                        edited: false,
-                    },
-                    createdAt: new Date(Date.now() - 259200000),
-                    updatedAt: new Date(Date.now() - 900000),
-                    unreadCount: 0,
-                    isArchived: false,
-                },
-            ];
-
-            // تطبيق الفلاتر
-            let filteredConversations = mockConversations;
-
-            if (query.participantId) {
-                filteredConversations = filteredConversations.filter(conv =>
-                    conv.participants.includes(query.participantId!)
-                );
+            if (!response.ok) {
+                throw new Error('Failed to fetch conversation messages');
             }
 
-            if (query.type) {
-                filteredConversations = filteredConversations.filter(conv => conv.type === query.type);
-            }
-
-            // ترتيب حسب آخر رسالة
-            filteredConversations.sort((a, b) => {
-                const aTime = a.lastMessage?.createdAt.getTime() || a.updatedAt.getTime();
-                const bTime = b.lastMessage?.createdAt.getTime() || b.updatedAt.getTime();
-                return bTime - aTime;
-            });
-
-            // تطبيق التقسيم
-            const offset = query.offset || 0;
-            const limit = query.limit || 20;
-            const paginatedConversations = filteredConversations.slice(offset, offset + limit);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return {
-                conversations: paginatedConversations,
-                totalCount: filteredConversations.length,
-                hasMore: (offset + limit) < filteredConversations.length,
-            };
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ChatService',
-                operation: 'getConversations',
-                metadata: { participantId: query.participantId, type: query.type },
-            });
-            throw error;
-        }
-    }
-
-    /**
-     * إنشاء محادثة جديدة
-     */
-    async createConversation(conversation: Omit<Conversation, 'id' | 'createdAt' | 'updatedAt' | 'unreadCount' | 'isArchived'>): Promise<Conversation> {
-        try {
-            const startTime = Date.now();
-
-            const newConversation: Conversation = {
-                id: `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                ...conversation,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                unreadCount: 0,
-                isArchived: false,
-            };
-
-            console.log('Creating conversation:', newConversation);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return newConversation;
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ChatService',
-                operation: 'createConversation',
-                metadata: { title: conversation.title, type: conversation.type },
-            });
-            throw error;
-        }
-    }
-
-    /**
-     * تحديث حالة قراءة الرسائل
-     */
-    async markMessagesAsRead(conversationId: string, messageIds: string[]): Promise<void> {
-        try {
-            const startTime = Date.now();
-
-            console.log(`Marking messages as read in conversation ${conversationId}:`, messageIds);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ChatService',
-                operation: 'markMessagesAsRead',
-                metadata: { conversationId, messageCount: messageIds.length },
-            });
-            throw error;
-        }
-    }
-
-    /**
-     * حذف رسالة
-     */
-    async deleteMessage(messageId: string): Promise<boolean> {
-        try {
-            const startTime = Date.now();
-
-            console.log(`Deleting message ${messageId}`);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return true;
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ChatService',
-                operation: 'deleteMessage',
-                metadata: { messageId },
-            });
-            throw error;
-        }
-    }
-
-    /**
-     * تعديل رسالة
-     */
-    async editMessage(messageId: string, newContent: string): Promise<Message> {
-        try {
-            const startTime = Date.now();
-
-            console.log(`Editing message ${messageId} with new content`);
-
-            // محاكاة رسالة محدثة
-            const editedMessage: Message = {
-                id: messageId,
-                conversationId: 'conv_1',
-                senderId: 'user1',
-                content: newContent,
-                type: 'text',
-                createdAt: new Date(Date.now() - 3600000),
-                updatedAt: new Date(),
-                readBy: ['user1', 'user2'],
-                edited: true,
-                editedAt: new Date(),
-            };
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return editedMessage;
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ChatService',
-                operation: 'editMessage',
-                metadata: { messageId },
-            });
-            throw error;
-        }
-    }
-
-    /**
-     * البحث في الرسائل
-     */
-    async searchMessages(query: string, options: {
-        conversationId?: string;
-        limit?: number;
-        offset?: number;
-    } = {}): Promise<{
-        messages: Message[];
-        totalCount: number;
-        hasMore: boolean;
-    }> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة نتائج البحث
-            const searchResults: Message[] = [
-                {
-                    id: 'msg_1',
-                    conversationId: 'conv_1',
-                    senderId: 'user1',
-                    content: `نتيجة بحث تحتوي على: ${query}`,
-                    type: 'text',
-                    createdAt: new Date(Date.now() - 3600000),
-                    updatedAt: new Date(Date.now() - 3600000),
-                    readBy: ['user1', 'user2'],
-                    edited: false,
-                },
-            ];
-
-            // تطبيق التقسيم
-            const offset = options.offset || 0;
-            const limit = options.limit || 20;
-            const paginatedResults = searchResults.slice(offset, offset + limit);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return {
-                messages: paginatedResults,
-                totalCount: searchResults.length,
-                hasMore: (offset + limit) < searchResults.length,
-            };
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ChatService',
-                operation: 'searchMessages',
-                metadata: { query, conversationId: options.conversationId },
-            });
-            throw error;
-        }
-    }
-
-    /**
-     * الحصول على إحصائيات المحادثات
-     */
-    async getChatStats(userId: string): Promise<{
-        totalConversations: number;
-        activeConversations: number;
-        totalMessages: number;
-        unreadMessages: number;
-        averageResponseTime: number;
-        mostActiveConversation: string;
-    }> {
-        try {
-            const startTime = Date.now();
-
-            // محاكاة إحصائيات المحادثات
-            const stats = {
-                totalConversations: 15,
-                activeConversations: 8,
-                totalMessages: 342,
-                unreadMessages: 7,
-                averageResponseTime: 45, // دقائق
-                mostActiveConversation: 'conv_2',
-            };
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return stats;
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'ChatService',
-                operation: 'getChatStats',
-                metadata: { userId },
-            });
-            throw error;
-        }
-    }
-}
-
-/**
- * خدمة التعاون المتقدمة
- */
-export class CollaborationServiceV2 extends BaseServiceV2 {
-    protected endpoint = '/api/collaboration';
-    protected method: 'POST' = 'POST';
-    protected requiresAuth = true;
-
-    constructor() {
-        super(
-            {
-                endpoint: '/api/collaboration',
-                method: 'POST',
-                requiresAuth: true,
-                timeout: 15000,
-                retries: 2,
-                retryDelay: 2000,
-            },
-            {
-                name: 'CollaborationService',
-                version: '2.0.0',
-                description: 'Enhanced collaboration and teamwork service',
-                category: 'business',
-                dependencies: ['Real-time Updates', 'File Sharing', 'Project Management'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
-                },
-            }
-        );
-    }
-
-    protected async validateInput(data: unknown): Promise<unknown> {
-        return data;
-    }
-
-    /**
-     * مشاركة ملف في المحادثة
-     */
-    async shareFile(conversationId: string, file: {
-        name: string;
-        size: number;
-        type: string;
-        url: string;
-        thumbnail?: string;
-    }): Promise<{
-        id: string;
-        conversationId: string;
-        fileName: string;
-        fileSize: number;
-        fileType: string;
-        fileUrl: string;
-        thumbnailUrl?: string;
-        uploadedAt: Date;
-        uploadedBy: string;
-    }> {
-        try {
-            const startTime = Date.now();
-
-            const sharedFile = {
-                id: `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                conversationId,
-                fileName: file.name,
-                fileSize: file.size,
-                fileType: file.type,
-                fileUrl: file.url,
-                thumbnailUrl: file.thumbnail,
-                uploadedAt: new Date(),
-                uploadedBy: 'current-user',
-            };
-
-            console.log('Sharing file in conversation:', sharedFile);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
-            return sharedFile;
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'CollaborationService',
-                operation: 'shareFile',
-                metadata: { conversationId, fileName: file.name },
-            });
-            throw error;
-        }
-    }
-
-    /**
-     * دعوة مستخدمين للمشاركة في المشروع
-     */
-    async inviteToProject(projectId: string, userEmails: string[], role: 'viewer' | 'editor' | 'admin' = 'viewer'): Promise<{
-        invited: string[];
-        alreadyMembers: string[];
-        failed: string[];
-    }> {
-        try {
-            const startTime = Date.now();
-
-            console.log(`Inviting users to project ${projectId}:`, { userEmails, role });
-
-            // محاكاة نتائج الدعوة
-            const result = {
-                invited: userEmails.slice(0, 2),
-                alreadyMembers: userEmails.slice(2, 3),
-                failed: userEmails.slice(3),
-            };
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, messageCount: result.messages?.length || 0 });
             return result;
+
         } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'CollaborationService',
-                operation: 'inviteToProject',
-                metadata: { projectId, userCount: userEmails.length, role },
-            });
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.getConversationMessages');
             throw error;
         }
     }
 
     /**
-     * تحديث أذونات المستخدم في المشروع
+     * حذف رسالة مع مراقبة الأداء
      */
-    async updateProjectPermissions(projectId: string, userId: string, permissions: {
-        canView: boolean;
-        canEdit: boolean;
-        canDelete: boolean;
-        canInvite: boolean;
-        canExport: boolean;
-    }): Promise<void> {
+    async deleteMessage(conversationId: string, messageId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('deleteMessage');
+
         try {
-            const startTime = Date.now();
-
-            console.log(`Updating permissions for user ${userId} in project ${projectId}:`, permissions);
-
-            const responseTime = Date.now() - startTime;
-            this.updatePerformanceMetrics(responseTime, true);
-        } catch (error) {
-            this.updatePerformanceMetrics(0, false);
-            errorHandler.handle(error, {
-                service: 'CollaborationService',
-                operation: 'updateProjectPermissions',
-                metadata: { projectId, userId },
+            const response = await fetch(`/api/conversations/${conversationId}/messages/${messageId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to delete message');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.deleteMessage');
+            throw error;
+        }
+    }
+
+    /**
+     * تحديث رسالة مع مراقبة شاملة
+     */
+    async updateMessage(
+        conversationId: string,
+        messageId: string,
+        content: string,
+        token: string
+    ): Promise<ChatMessage> {
+        const operationId = this.startOperation('updateMessage');
+
+        try {
+            const response = await fetch(`/api/conversations/${conversationId}/messages/${messageId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ content })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to update message');
+            }
+
+            const message = await response.json();
+            this.endOperation(operationId, { success: true });
+            return message;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.updateMessage');
+            throw error;
+        }
+    }
+
+    /**
+     * حذف محادثة مع مراقبة الأداء
+     */
+    async deleteConversation(conversationId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('deleteConversation');
+
+        try {
+            const response = await fetch(`/api/conversations/${conversationId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to delete conversation');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.deleteConversation');
+            throw error;
+        }
+    }
+
+    /**
+     * محادثة مع وكيل ذكي مع مراقبة شاملة
+     */
+    async agentChat(
+        conversationId: string,
+        message: string,
+        agentId: string,
+        token?: string
+    ): Promise<{
+        response: string;
+        agentResponse: ChatMessage;
+        usage: {
+            tokensUsed: number;
+            processingTime: number;
+        };
+    }> {
+        const operationId = this.startOperation('agentChat');
+
+        try {
+            const response = await fetch(`/api/conversations/${conversationId}/agent-chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                },
+                body: JSON.stringify({
+                    message,
+                    agentId
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to chat with agent');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, tokensUsed: result.usage?.tokensUsed || 0 });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.agentChat');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب محادثات الدعم الفني مع مراقبة الأداء
+     */
+    async getSupportConversations(token: string): Promise<RawChatSession[]> {
+        const operationId = this.startOperation('getSupportConversations');
+
+        try {
+            const response = await fetch('/api/support-chat/conversations', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch support conversations');
+            }
+
+            const conversations = await response.json();
+            this.endOperation(operationId, { success: true, conversationCount: conversations.length });
+            return conversations;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.getSupportConversations');
+            throw error;
+        }
+    }
+
+    /**
+     * إغلاق محادثة دعم فني مع مراقبة شاملة
+     */
+    async closeSupportConversation(conversationId: string, rating?: number, feedback?: string, token?: string): Promise<void> {
+        const operationId = this.startOperation('closeSupportConversation');
+
+        try {
+            const response = await fetch(`/api/support-chat/${conversationId}/close`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                },
+                body: JSON.stringify({
+                    rating,
+                    feedback
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to close support conversation');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.closeSupportConversation');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب إحصائيات المحادثات مع مراقبة الأداء
+     */
+    async getChatStats(token?: string, timeRange: 'day' | 'week' | 'month' = 'week'): Promise<{
+        totalConversations: number;
+        totalMessages: number;
+        activeConversations: number;
+        averageResponseTime: number;
+        topAgents: Array<{
+            agentId: string;
+            agentName: string;
+            conversationCount: number;
+        }>;
+        messageTrends: Array<{
+            date: string;
+            count: number;
+        }>;
+    }> {
+        const operationId = this.startOperation('getChatStats');
+
+        try {
+            const response = await fetch(`/api/conversations/stats?range=${timeRange}`, {
+                headers: {
+                    ...(token && { 'Authorization': `Bearer ${token}` }),
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch chat stats');
+            }
+
+            const stats = await response.json();
+            this.endOperation(operationId, { success: true });
+            return stats;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.getChatStats');
+            throw error;
+        }
+    }
+
+    /**
+     * البحث في المحادثات مع مراقبة شاملة
+     */
+    async searchConversations(
+        query: string,
+        filters: {
+            participantId?: string;
+            type?: 'user_agent' | 'support' | 'group';
+            hasUnread?: boolean;
+            limit?: number;
+            offset?: number;
+        } = {},
+        token: string
+    ): Promise<{
+        conversations: RawChatSession[];
+        totalCount: number;
+        hasMore: boolean;
+    }> {
+        const operationId = this.startOperation('searchConversations');
+
+        try {
+            const queryParams = new URLSearchParams({ q: query });
+
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value !== undefined) {
+                    queryParams.append(key, value.toString());
+                }
+            });
+
+            const response = await fetch(`/api/conversations/search?${queryParams.toString()}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to search conversations');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, resultCount: result.conversations?.length || 0 });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.searchConversations');
+            throw error;
+        }
+    }
+
+    /**
+     * حفظ محادثة كمفضلة مع مراقبة الأداء
+     */
+    async favoriteConversation(conversationId: string, token: string): Promise<{
+        conversationId: string;
+        favoritedAt: string;
+    }> {
+        const operationId = this.startOperation('favoriteConversation');
+
+        try {
+            const response = await fetch(`/api/conversations/${conversationId}/favorite`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to favorite conversation');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.favoriteConversation');
+            throw error;
+        }
+    }
+
+    /**
+     * إلغاء حفظ محادثة من المفضلة مع مراقبة شاملة
+     */
+    async unfavoriteConversation(conversationId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('unfavoriteConversation');
+
+        try {
+            const response = await fetch(`/api/conversations/${conversationId}/favorite`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to unfavorite conversation');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.unfavoriteConversation');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب المحادثات المفضلة مع مراقبة الأداء
+     */
+    async getFavoriteConversations(token: string): Promise<RawChatSession[]> {
+        const operationId = this.startOperation('getFavoriteConversations');
+
+        try {
+            const response = await fetch('/api/conversations/favorites', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch favorite conversations');
+            }
+
+            const conversations = await response.json();
+            this.endOperation(operationId, { success: true, conversationCount: conversations.length });
+            return conversations;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.getFavoriteConversations');
+            throw error;
+        }
+    }
+
+    /**
+     * تصدير محادثة مع مراقبة شاملة
+     */
+    async exportConversation(
+        conversationId: string,
+        format: 'json' | 'pdf' | 'txt',
+        token: string
+    ): Promise<{
+        format: string;
+        data: string;
+        filename: string;
+        size: number;
+    }> {
+        const operationId = this.startOperation('exportConversation');
+
+        try {
+            const response = await fetch(`/api/conversations/${conversationId}/export`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ format })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to export conversation');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, format });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.exportConversation');
+            throw error;
+        }
+    }
+
+    /**
+     * أرشفة محادثة مع مراقبة الأداء
+     */
+    async archiveConversation(conversationId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('archiveConversation');
+
+        try {
+            const response = await fetch(`/api/conversations/${conversationId}/archive`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to archive conversation');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.archiveConversation');
+            throw error;
+        }
+    }
+
+    /**
+     * إلغاء أرشفة محادثة مع مراقبة شاملة
+     */
+    async unarchiveConversation(conversationId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('unarchiveConversation');
+
+        try {
+            const response = await fetch(`/api/conversations/${conversationId}/archive`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to unarchive conversation');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.unarchiveConversation');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب المحادثات المؤرشفة مع مراقبة الأداء
+     */
+    async getArchivedConversations(token: string): Promise<RawChatSession[]> {
+        const operationId = this.startOperation('getArchivedConversations');
+
+        try {
+            const response = await fetch('/api/conversations/archived', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch archived conversations');
+            }
+
+            const conversations = await response.json();
+            this.endOperation(operationId, { success: true, conversationCount: conversations.length });
+            return conversations;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'ChatServiceV2.getArchivedConversations');
             throw error;
         }
     }
 }
-
-// نسخ من الخدمات الأصلية للحفاظ على التوافق
-export class ChatService extends ChatServiceV2 { }
-export class CollaborationService extends CollaborationServiceV2 { }

@@ -13,6 +13,12 @@ export * from './context-analysis';
 // خدمات التوليد الذكية
 export * from './generation';
 
+// معالجة المستندات الذكية
+export * from './document-processing';
+
+// أدوات الكتابة الذكية
+export * from './writing-tools';
+
 // تقييم الجودة والتحسين
 export * from './quality-assessment';
 
