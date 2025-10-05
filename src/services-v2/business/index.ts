@@ -1,24 +1,29 @@
 /**
- * خدمات الأعمال - Business v2.0
+ * خدمات الأعمال - Services v2.0
  *
- * وظائف الأعمال الأساسية للتطبيق مع مراقبة متقدمة للأداء
+ * تصدير جميع خدمات الأعمال المحسنة
  */
 
-// إدارة المستخدمين
+// خدمات المستخدمين
 export * from './users';
 
-// إدارة المشاريع
+// خدمات المشاريع
 export * from './projects';
 
-// إدارة الفرق والتعاون
+// خدمات الفرق
 export * from './teams';
 
-// إدارة القوالب
-export * from './templates';
+// خدمات التعاون
+export * from './collaboration';
 
-// خدمات الدفع والائتمانات
-export * from './payment';
-
-// تحليل البيانات والإحصائيات
+// خدمات التحليلات
 export * from './analytics';
 
+// خدمات الدفع
+export * from './payment';
+
+// خدمات القوالب
+export * from './templates';
+
+// خدمات الإدارة
+export * from './admin';

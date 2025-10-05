@@ -1,71 +1,68 @@
 /**
- * خدمة توليد التقارير الذكية - Intelligent v2.0
+ * خدمة توليد التقارير الذكية - Services v2.0
  *
- * خدمة محسنة لتوليد التقارير مع دعم متقدم للذكاء الاصطناعي والمراقبة
+ * خدمة محسنة للتعامل مع API توليد التقارير مع مراقبة متقدمة
  */
 
-import { z } from 'zod';
-import { IntelligentServiceV2, errorHandler } from '../../core/base-service';
+import { BaseService } from '../../core/base-service';
+import { ErrorHandler } from '../../core/error-handler';
+import { PerformanceMonitor } from '../../core/performance-monitor';
 
-// مخططات التحقق من البيانات
-const ReportGenerationSchema = z.object({
-    operationType: z.enum(['single-section', 'complete-report']),
-    sectionToGenerate: z.string().optional(),
-    sectionsToGenerate: z.array(z.string()).optional(),
-    proposal: z.unknown().optional(),
-    projectPlan: z.unknown().optional(),
-    guidelines: z.array(z.string()).optional(),
-    contextFiles: z.array(z.object({
-        fileName: z.string(),
-        content: z.string(),
-        type: z.string(),
-    })).optional(),
-    qualityThreshold: z.number().min(0).max(1).default(0.7),
-    enableIterativeImprovement: z.boolean().default(true),
-    enablePerformanceMonitoring: z.boolean().default(true),
-    generateInOrder: z.boolean().default(false),
-    useIntelligentDependencies: z.boolean().default(true),
-    maxRetries: z.number().min(1).max(5).default(3),
-    otherSections: z.record(z.string()).optional(),
-    instructionText: z.string().optional(),
-    exampleFiles: z.array(z.object({
-        fileName: z.string(),
-        content: z.string(),
-    })).optional(),
-});
+export type SectionName =
+    | 'executive_summary'
+    | 'problem_statement'
+    | 'objectives'
+    | 'scope'
+    | 'methodology'
+    | 'timeline'
+    | 'budget'
+    | 'team'
+    | 'deliverables'
+    | 'risk_assessment'
+    | 'success_criteria'
+    | 'conclusion'
+    | 'appendices'
+    | 'systemDesign'
+    | 'systemProgramming'
+    | 'designStrategy'
+    | 'testingStrategy'
+    | 'deploymentStrategy'
+    | 'maintenanceStrategy'
+    | 'securityConsiderations'
+    | 'performanceOptimization'
+    | 'scalabilityPlanning'
+    | 'userExperience'
+    | 'dataManagement'
+    | 'integrationStrategy'
+    | 'migrationStrategy'
+    | 'trainingDocumentation'
+    | 'supportStrategy'
+    | 'monitoringEvaluation'
+    | 'lessonsLearned'
+    | 'futureRecommendations'
+    | 'costBenefitAnalysis'
+    | 'roiAnalysis'
+    | 'stakeholderAnalysis'
+    | 'communicationPlan'
+    | 'changeManagement'
+    | 'qualityAssurance'
+    | 'riskManagement'
+    | 'resourcePlanning'
+    | 'procurementStrategy'
+    | 'vendorManagement'
+    | 'legalCompliance'
+    | 'ethicalConsiderations'
+    | 'sustainabilityPlanning'
+    | 'innovationStrategy'
+    | 'knowledgeTransfer'
+    | 'projectClosure';
 
-const SectionGenerationSchema = z.object({
-    sectionName: z.string(),
-    content: z.string(),
-    metadata: z.object({
-        operationType: z.string(),
-        executionTime: z.number(),
-        creditCost: z.number(),
-        timestamp: z.string(),
-    }),
-});
-
-const CompleteReportSchema = z.object({
-    generatedSections: z.record(z.string()),
-    sectionMetadata: z.record(z.object({
-        operationType: z.string(),
-        executionTime: z.number(),
-        creditCost: z.number(),
-        timestamp: z.string(),
-    })),
-    totalExecutionTime: z.number(),
-    totalCreditCost: z.number(),
-    overallQuality: z.number(),
-    improvementIterations: z.number(),
-});
-
-// أنواع البيانات
 export interface IntelligentReportConfig {
     operationType: 'single-section' | 'complete-report';
-    sectionToGenerate?: string;
-    sectionsToGenerate?: string[];
-    proposal?: unknown;
-    projectPlan?: unknown;
+    sectionToGenerate?: SectionName;
+    sectionsToGenerate?: SectionName[];
+    proposal?: any;
+    projectPlan?: any;
     guidelines?: string[];
     contextFiles?: Array<{
         fileName: string;
@@ -101,389 +98,496 @@ export interface SingleSectionResult {
 export interface CompleteReportResult {
     generatedSections: Record<string, string>;
     sectionMetadata: Record<string, {
-        operationType: string;
         executionTime: number;
         creditCost: number;
-        timestamp: string;
+        qualityScore?: number;
+        iterations?: number;
     }>;
-    totalExecutionTime: number;
-    totalCreditCost: number;
-    overallQuality: number;
-    improvementIterations: number;
+    reportMetadata: {
+        operationType: 'complete-report';
+        totalExecutionTime: number;
+        totalCreditCost: number;
+        sectionsGenerated: number;
+        averageQualityScore?: number;
+        totalIterations?: number;
+        timestamp: string;
+    };
 }
 
-/**
- * خدمة توليد التقارير الذكية المحسنة
- */
-export class IntelligentReportServiceV2 extends IntelligentServiceV2<IntelligentReportConfig, SingleSectionResult | CompleteReportResult> {
-    protected aiConfig = {
-        model: 'gemini-pro',
-        temperature: 0.7,
-        maxTokens: 4000,
-        enableCaching: true,
-        enableQualityCheck: true,
-    };
-
+export class IntelligentReportServiceV2 extends BaseService {
     constructor() {
-        super(
-            {
-                endpoint: '/api/ai/generate-report',
-                method: 'POST',
-                requiresAuth: true,
-                timeout: 60000,
-                retries: 2,
-                retryDelay: 5000,
-            },
-            {
-                name: 'IntelligentReportService',
-                version: '2.0.0',
-                description: 'Advanced AI-powered report generation service',
-                category: 'intelligent',
-                dependencies: ['Genkit', 'Google AI', 'Firestore'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
-                },
-            }
-        );
-    }
-
-    protected async validateInput(data: unknown): Promise<IntelligentReportConfig> {
-        const result = ReportGenerationSchema.safeParse(data);
-        if (!result.success) {
-            throw new Error(`Report generation validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
-        }
-        return result.data;
+        super('IntelligentReportServiceV2');
     }
 
     /**
-     * معالجة البيانات قبل الاستدعاء الذكي
+     * توليد قسم تقرير ذكي مع مراقبة الأداء
      */
-    protected async preprocessData(data: IntelligentReportConfig, options: any): Promise<IntelligentReportConfig> {
-        // تحسين البيانات قبل المعالجة الذكية
-        const enhancedData: IntelligentReportConfig = {
-            ...data,
-            qualityThreshold: data.qualityThreshold || 0.8,
-            enableIterativeImprovement: data.enableIterativeImprovement ?? true,
-            maxRetries: data.maxRetries || 3,
-        };
+    async generateSection(config: IntelligentReportConfig, token: string): Promise<SingleSectionResult> {
+        const operationId = this.startOperation('generateSection');
 
-        // إضافة معالجة متقدمة للسياق إذا كان متوفراً
-        if (data.contextFiles && data.contextFiles.length > 0) {
-            // يمكن إضافة تحليل متقدم للملفات هنا
-            console.log(`Processing ${data.contextFiles.length} context files`);
-        }
-
-        return enhancedData;
-    }
-
-    /**
-     * معالجة النتائج بعد الاستدعاء الذكي
-     */
-    protected async postprocessResult(
-        result: SingleSectionResult | CompleteReportResult,
-        options: any
-    ): Promise<SingleSectionResult | CompleteReportResult> {
-        // تحسين النتائج بعد المعالجة الذكية
-
-        if ('singleSection' in result) {
-            // معالجة نتيجة قسم واحد
-            const enhancedResult: SingleSectionResult = {
-                ...result,
-                metadata: {
-                    ...result.metadata,
-                    timestamp: new Date().toISOString(),
-                },
-            };
-
-            // إضافة تحقق من الجودة إذا كان مفعلاً
-            if (options.enableQualityCheck) {
-                const quality = this.assessQuality(result.content);
-                console.log(`Section quality assessment: ${quality}`);
-            }
-
-            return enhancedResult;
-        } else {
-            // معالجة نتيجة تقرير كامل
-            const enhancedResult: CompleteReportResult = {
-                ...result,
-                overallQuality: result.overallQuality || 0.8,
-                improvementIterations: result.improvementIterations || 0,
-            };
-
-            return enhancedResult;
-        }
-    }
-
-    /**
-     * تقييم جودة المحتوى المولد
-     */
-    private assessQuality(content: string): number {
-        // خوارزمية بسيطة لتقييم الجودة
-        let quality = 0.5; // جودة أساسية
-
-        // فحص الطول
-        if (content.length > 500) quality += 0.2;
-        if (content.length > 1000) quality += 0.1;
-
-        // فحص وجود هيكل
-        if (content.includes('\n\n')) quality += 0.1;
-        if (content.includes('##') || content.includes('**')) quality += 0.1;
-
-        // فحص وجود محتوى مفيد
-        if (content.length > 100 && !content.includes('lorem ipsum')) quality += 0.1;
-
-        return Math.min(quality, 1.0);
-    }
-
-    /**
-     * توليد قسم واحد من التقرير
-     */
-    async generateSection(config: IntelligentReportConfig): Promise<SingleSectionResult> {
         try {
-            const startTime = Date.now();
+            const response = await fetch('/api/intelligent-report/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(config)
+            });
 
-            // استخدام الاستدعاء الذكي
-            const result = await this.intelligentCall<SingleSectionResult>(config);
-
-            const executionTime = Date.now() - startTime;
-
-            // إضافة معلومات الأداء
-            if ('singleSection' in result) {
-                result.metadata.executionTime = executionTime;
-                result.metadata.creditCost = this.calculateCreditCost(executionTime, config);
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to generate report section');
             }
 
-            return result as SingleSectionResult;
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, sectionType: config.sectionToGenerate });
+            return result;
+
         } catch (error) {
-            errorHandler.handle(error, {
-                service: 'IntelligentReportService',
-                operation: 'generateSection',
-                metadata: {
-                    operationType: config.operationType,
-                    sectionToGenerate: config.sectionToGenerate,
-                },
-            });
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'IntelligentReportServiceV2.generateSection');
             throw error;
         }
     }
 
     /**
-     * توليد تقرير كامل
+     * توليد تقرير كامل ذكي مع مراقبة شاملة
      */
-    async generateCompleteReport(config: IntelligentReportConfig): Promise<CompleteReportResult> {
+    async generateCompleteReport(config: IntelligentReportConfig, token?: string): Promise<CompleteReportResult> {
+        const operationId = this.startOperation('generateCompleteReport');
+
         try {
-            const startTime = Date.now();
+            const response = await fetch('/api/intelligent-report/generate-complete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                },
+                body: JSON.stringify(config)
+            });
 
-            // استخدام الاستدعاء الذكي للتقرير الكامل
-            const result = await this.intelligentCall<CompleteReportResult>(config);
-
-            const executionTime = Date.now() - startTime;
-
-            // إضافة معلومات الأداء
-            if (!('singleSection' in result)) {
-                result.totalExecutionTime = executionTime;
-                result.totalCreditCost = this.calculateCreditCost(executionTime, config);
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to generate complete report');
             }
 
-            return result as CompleteReportResult;
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, sectionCount: Object.keys(result.generatedSections || {}).length });
+            return result;
+
         } catch (error) {
-            errorHandler.handle(error, {
-                service: 'IntelligentReportService',
-                operation: 'generateCompleteReport',
-                metadata: {
-                    operationType: config.operationType,
-                    sectionsToGenerate: config.sectionsToGenerate,
-                },
-            });
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'IntelligentReportServiceV2.generateCompleteReport');
             throw error;
         }
     }
 
     /**
-     * حساب تكلفة الائتمانات بناءً على وقت التنفيذ
+     * تحسين قسم تقرير مع مراقبة الأداء
      */
-    private calculateCreditCost(executionTime: number, config: IntelligentReportConfig): number {
-        // حساب بسيط للتكلفة بناءً على الوقت والتعقيد
-        const baseCost = 1;
-        const timeMultiplier = Math.min(executionTime / 10000, 5); // حد أقصى 5x
-        const complexityMultiplier = config.sectionsToGenerate ?
-            config.sectionsToGenerate.length * 0.5 : 1;
-
-        return Math.ceil(baseCost * timeMultiplier * complexityMultiplier);
-    }
-}
-
-/**
- * خدمة تحسين جودة التقارير
- */
-export class ReportQualityServiceV2 extends IntelligentServiceV2<{ content: string, targetQuality: number }, { improvedContent: string, qualityScore: number }> {
-    protected aiConfig = {
-        model: 'gemini-pro',
-        temperature: 0.3,
-        maxTokens: 2000,
-        enableCaching: true,
-        enableQualityCheck: true,
-    };
-
-    constructor() {
-        super(
-            {
-                endpoint: '/api/ai/improve-report-quality',
-                method: 'POST',
-                requiresAuth: true,
-                timeout: 30000,
-                retries: 2,
-                retryDelay: 3000,
-            },
-            {
-                name: 'ReportQualityService',
-                version: '2.0.0',
-                description: 'AI-powered report quality improvement service',
-                category: 'intelligent',
-                dependencies: ['Genkit', 'Google AI'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
-                },
-            }
-        );
-    }
-
-    protected async validateInput(data: unknown): Promise<{ content: string, targetQuality: number }> {
-        const schema = z.object({
-            content: z.string().min(100, 'Content must be at least 100 characters'),
-            targetQuality: z.number().min(0).max(1),
-        });
-
-        const result = schema.safeParse(data);
-        if (!result.success) {
-            throw new Error(`Quality improvement validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
-        }
-        return result.data;
-    }
-
-    protected async preprocessData(data: { content: string, targetQuality: number }, options: any): Promise<{ content: string, targetQuality: number }> {
-        return data;
-    }
-
-    protected async postprocessResult(
-        result: { improvedContent: string, qualityScore: number },
-        options: any
-    ): Promise<{ improvedContent: string, qualityScore: number }> {
-        return result;
-    }
-
-    /**
-     * تحسين جودة محتوى التقرير
-     */
-    async improveQuality(content: string, targetQuality: number = 0.8): Promise<{ improvedContent: string, qualityScore: number }> {
-        try {
-            return await this.intelligentCall({
-                content,
-                targetQuality,
-            });
-        } catch (error) {
-            errorHandler.handle(error, {
-                service: 'ReportQualityService',
-                operation: 'improveQuality',
-            });
-            throw error;
-        }
-    }
-}
-
-/**
- * خدمة تحليل محتوى التقرير
- */
-export class ReportAnalysisServiceV2 extends IntelligentServiceV2<{ content: string }, {
-    summary: string;
-    keyPoints: string[];
-    sentiment: 'positive' | 'negative' | 'neutral';
-    readability: number;
-    completeness: number;
-}> {
-    protected aiConfig = {
-        model: 'gemini-pro',
-        temperature: 0.2,
-        maxTokens: 1500,
-        enableCaching: true,
-        enableQualityCheck: false,
-    };
-
-    constructor() {
-        super(
-            {
-                endpoint: '/api/ai/analyze-report',
-                method: 'POST',
-                requiresAuth: true,
-                timeout: 20000,
-                retries: 2,
-                retryDelay: 2000,
-            },
-            {
-                name: 'ReportAnalysisService',
-                version: '2.0.0',
-                description: 'AI-powered report content analysis service',
-                category: 'intelligent',
-                dependencies: ['Genkit', 'Google AI'],
-                performance: {
-                    averageResponseTime: 0,
-                    successRate: 0,
-                    lastHealthCheck: new Date(),
-                },
-            }
-        );
-    }
-
-    protected async validateInput(data: unknown): Promise<{ content: string }> {
-        const schema = z.object({
-            content: z.string().min(50, 'Content must be at least 50 characters'),
-        });
-
-        const result = schema.safeParse(data);
-        if (!result.success) {
-            throw new Error(`Analysis validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
-        }
-        return result.data;
-    }
-
-    protected async preprocessData(data: { content: string }, options: any): Promise<{ content: string }> {
-        return data;
-    }
-
-    protected async postprocessResult(
-        result: { summary: string, keyPoints: string[], sentiment: 'positive' | 'negative' | 'neutral', readability: number, completeness: number },
-        options: any
-    ): Promise<{ summary: string, keyPoints: string[], sentiment: 'positive' | 'negative' | 'neutral', readability: number, completeness: number }> {
-        return result;
-    }
-
-    /**
-     * تحليل محتوى التقرير
-     */
-    async analyzeContent(content: string): Promise<{
-        summary: string;
-        keyPoints: string[];
-        sentiment: 'positive' | 'negative' | 'neutral';
-        readability: number;
-        completeness: number;
+    async improveSection(
+        sectionName: string,
+        currentContent: string,
+        improvements: string[],
+        token: string
+    ): Promise<{
+        improvedContent: string;
+        changes: string[];
+        qualityScore: number;
     }> {
+        const operationId = this.startOperation('improveSection');
+
         try {
-            return await this.intelligentCall({ content });
-        } catch (error) {
-            errorHandler.handle(error, {
-                service: 'ReportAnalysisService',
-                operation: 'analyzeContent',
+            const response = await fetch('/api/intelligent-report/improve-section', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    sectionName,
+                    currentContent,
+                    improvements
+                })
             });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to improve report section');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, improvementCount: improvements.length });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'IntelligentReportServiceV2.improveSection');
+            throw error;
+        }
+    }
+
+    /**
+     * إعادة توليد قسم تقرير مع مراقبة شاملة
+     */
+    async regenerateSection(
+        sectionName: string,
+        config: IntelligentReportConfig,
+        token?: string
+    ): Promise<SingleSectionResult> {
+        const operationId = this.startOperation('regenerateSection');
+
+        try {
+            const response = await fetch('/api/intelligent-report/regenerate-section', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                },
+                body: JSON.stringify({
+                    sectionName,
+                    config
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to regenerate report section');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'IntelligentReportServiceV2.regenerateSection');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب قائمة الأقسام المدعومة مع مراقبة الأداء
+     */
+    async getSupportedSections(): Promise<Array<{
+        name: SectionName;
+        title: string;
+        description: string;
+        category: string;
+        complexity: 'low' | 'medium' | 'high';
+        dependencies?: SectionName[];
+    }>> {
+        const operationId = this.startOperation('getSupportedSections');
+
+        try {
+            const response = await fetch('/api/intelligent-report/sections', {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch supported sections');
+            }
+
+            const sections = await response.json();
+            this.endOperation(operationId, { success: true, sectionCount: sections.length });
+            return sections;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'IntelligentReportServiceV2.getSupportedSections');
+            throw error;
+        }
+    }
+
+    /**
+     * اقتراح هيكل تقرير بناءً على المتطلبات مع مراقبة شاملة
+     */
+    async suggestReportStructure(context: {
+        reportType: string;
+        targetAudience: string;
+        industry?: string;
+        complexity?: 'basic' | 'detailed' | 'comprehensive';
+    }): Promise<{
+        suggestedSections: SectionName[];
+        rationale: string[];
+        estimatedLength: number;
+        estimatedTime: number;
+    }> {
+        const operationId = this.startOperation('suggestReportStructure');
+
+        try {
+            const response = await fetch('/api/intelligent-report/suggest-structure', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(context)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to suggest report structure');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, sectionCount: result.suggestedSections?.length || 0 });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'IntelligentReportServiceV2.suggestReportStructure');
+            throw error;
+        }
+    }
+
+    /**
+     * تقييم جودة تقرير مع مراقبة الأداء
+     */
+    async evaluateReportQuality(sections: Record<string, string>): Promise<{
+        overallScore: number;
+        sectionScores: Record<string, number>;
+        strengths: string[];
+        weaknesses: string[];
+        recommendations: string[];
+        metadata: {
+            totalWords: number;
+            sectionsAnalyzed: number;
+            analysisTime: number;
+        };
+    }> {
+        const operationId = this.startOperation('evaluateReportQuality');
+
+        try {
+            const response = await fetch('/api/intelligent-report/evaluate-quality', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ sections })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to evaluate report quality');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, sectionCount: Object.keys(sections).length });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'IntelligentReportServiceV2.evaluateReportQuality');
+            throw error;
+        }
+    }
+
+    /**
+     * حفظ تقرير في المكتبة مع مراقبة شاملة
+     */
+    async saveReport(
+        sections: Record<string, string>,
+        name: string,
+        category?: string,
+        token?: string
+    ): Promise<{
+        id: string;
+        name: string;
+        category: string;
+        sectionsCount: number;
+        savedAt: string;
+    }> {
+        const operationId = this.startOperation('saveReport');
+
+        try {
+            const response = await fetch('/api/intelligent-report/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                },
+                body: JSON.stringify({
+                    sections,
+                    name,
+                    category: category || 'general'
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to save report');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, sectionCount: Object.keys(sections).length });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'IntelligentReportServiceV2.saveReport');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب التقارير المحفوظة مع مراقبة الأداء
+     */
+    async getSavedReports(token: string, category?: string): Promise<Array<{
+        id: string;
+        name: string;
+        category: string;
+        sectionsCount: number;
+        totalWords: number;
+        createdAt: string;
+        updatedAt: string;
+    }>> {
+        const operationId = this.startOperation('getSavedReports');
+
+        try {
+            const queryParams = category ? `?category=${category}` : '';
+            const response = await fetch(`/api/intelligent-report/saved${queryParams}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch saved reports');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, reportCount: result.reports?.length || 0 });
+            return result.reports || [];
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'IntelligentReportServiceV2.getSavedReports');
+            throw error;
+        }
+    }
+
+    /**
+     * حذف تقرير محفوظ مع مراقبة شاملة
+     */
+    async deleteSavedReport(reportId: string, token: string): Promise<void> {
+        const operationId = this.startOperation('deleteSavedReport');
+
+        try {
+            const response = await fetch(`/api/intelligent-report/saved/${reportId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to delete saved report');
+            }
+
+            this.endOperation(operationId, { success: true });
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'IntelligentReportServiceV2.deleteSavedReport');
+            throw error;
+        }
+    }
+
+    /**
+     * تصدير تقرير إلى تنسيق مختلف مع مراقبة الأداء
+     */
+    async exportReport(
+        sections: Record<string, string>,
+        format: 'pdf' | 'docx' | 'html' | 'markdown',
+        options?: {
+            includeMetadata?: boolean;
+            customStyling?: Record<string, any>;
+            template?: string;
+        },
+        token?: string
+    ): Promise<{
+        format: string;
+        data: string;
+        filename: string;
+        size: number;
+    }> {
+        const operationId = this.startOperation('exportReport');
+
+        try {
+            const response = await fetch('/api/intelligent-report/export', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                },
+                body: JSON.stringify({
+                    sections,
+                    format,
+                    options
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to export report');
+            }
+
+            const result = await response.json();
+            this.endOperation(operationId, { success: true, format, sectionCount: Object.keys(sections).length });
+            return result;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'IntelligentReportServiceV2.exportReport');
+            throw error;
+        }
+    }
+
+    /**
+     * جلب إحصائيات توليد التقارير مع مراقبة شاملة
+     */
+    async getGenerationStats(token?: string, timeRange: 'day' | 'week' | 'month' = 'week'): Promise<{
+        totalGenerations: number;
+        totalSections: number;
+        averageQualityScore: number;
+        averageGenerationTime: number;
+        topSections: Array<{
+            sectionName: string;
+            generationCount: number;
+        }>;
+        usageByTime: Array<{
+            date: string;
+            count: number;
+        }>;
+    }> {
+        const operationId = this.startOperation('getGenerationStats');
+
+        try {
+            const response = await fetch(`/api/intelligent-report/stats?range=${timeRange}`, {
+                headers: {
+                    ...(token && { 'Authorization': `Bearer ${token}` }),
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch generation stats');
+            }
+
+            const stats = await response.json();
+            this.endOperation(operationId, { success: true });
+            return stats;
+
+        } catch (error) {
+            this.endOperation(operationId, { success: false, error: error.message });
+            ErrorHandler.handle(error, 'IntelligentReportServiceV2.getGenerationStats');
             throw error;
         }
     }
 }
-
-// نسخ من الخدمات الأصلية للحفاظ على التوافق
-export class IntelligentReportService extends IntelligentReportServiceV2 { }
-export class ReportQualityService extends ReportQualityServiceV2 { }
-export class ReportAnalysisService extends ReportAnalysisServiceV2 { }

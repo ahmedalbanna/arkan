@@ -19,6 +19,16 @@ export * from './business';
 // خدمات الذكاء الاصطناعي (Intelligent Services)
 export * from './intelligent';
 
+// خدمات محددة مهمة للوصول السريع
+export { IntelligentReportServiceV2 } from './intelligent/generation/report-service';
+export { IntelligentProposalServiceV2 } from './intelligent/generation/proposal-service';
+export { IntelligentDiagramServiceV2 } from './intelligent/generation/diagram-service';
+export { QualityImprovementServiceV2 } from './intelligent/quality-assessment/quality-improvement-service';
+export { IntelligentCachingServiceV2 } from './intelligent/caching/intelligent-caching-service';
+export { AdminServiceV2 } from './business/admin/admin-service';
+export { PaymentServiceV2 } from './business/payment/payment-service';
+export { UserAnalyticsServiceV2 } from './business/analytics/user-analytics-service';
+
 // خدمات المساعدة (Helper Services)
 export * from './helpers';
 

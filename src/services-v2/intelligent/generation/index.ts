@@ -1,27 +1,17 @@
 /**
- * خدمات التوليد الذكية - Intelligent v2.0
+ * خدمات التوليد الذكية - Services v2.0
  *
- * خدمات توليد المحتوى الذكية مع دعم متقدم للذكاء الاصطناعي
+ * تصدير جميع خدمات التوليد الذكية المحسنة
  */
 
-// خدمات توليد التقارير
-export * from './report-service';
+// خدمة التوليد العامة
+export { GeneralGenerationServiceV2 } from './general-generation-service';
 
-// خدمات توليد المقترحات
-export * from './proposal-service';
+// خدمة توليد المخططات
+export { IntelligentDiagramServiceV2 } from './diagram-service';
 
-// خدمات توليد المحتوى العام
-export * from './content-service';
+// خدمة توليد المقترحات
+export { IntelligentProposalServiceV2 } from './proposal-service';
 
-// خدمات توليد الرسوم البيانية والتصاميم
-export * from './diagram-service';
-
-// خدمات توليد العروض التقديمية
-export * from './presentation-service';
-
-// خدمات توليد النصوص والمحتوى
-export * from './text-service';
-
-// خدمات توليد الكود
-export * from './code-service';
-
+// خدمة توليد التقارير
+export { IntelligentReportServiceV2 } from './report-service';
