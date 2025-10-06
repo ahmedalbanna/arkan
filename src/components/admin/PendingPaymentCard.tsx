@@ -1,16 +1,16 @@
 
 'use client';
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLocalization } from "@/context/LocalizationContext";
+import { useVerifyPayment } from "@/hooks/use-transactions";
+import type { TransactionData } from "@/lib/db/queries";
 import { format } from 'date-fns';
 import { Check, ExternalLink, Loader2, ThumbsDown } from "lucide-react";
-import type { TransactionData } from "@/lib/db/queries";
-import { useVerifyPayment } from "@/hooks/use-transactions";
 import { useState } from "react";
 import { Textarea } from "../ui/textarea";
-import { useLocalization } from "@/context/LocalizationContext";
 
 interface PendingPaymentCardProps {
     transaction: TransactionData;
@@ -25,7 +25,6 @@ export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
         mutate({
             transactionId: transaction.id,
             userId: transaction.userId,
-            creditsToGrant: transaction.credits,
             status,
             adminNotes: adminNotes || (status === 'verified' ? 'Payment approved.' : 'Payment rejected.'),
         });
@@ -63,14 +62,14 @@ export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
                         disabled={isPending || transaction.status !== 'pending'}
                     />
                 </div>
-                 {transaction.verifiedBy && transaction.verifiedAt && (
+                {transaction.verifiedBy && transaction.verifiedAt && (
                     <p className="text-xs text-muted-foreground pt-2 border-t">
                         Processed on {format(new Date(transaction.verifiedAt), 'd MMM yyyy')}
                     </p>
                 )}
             </CardContent>
             {transaction.status === 'pending' && (
-                 <CardFooter className="gap-2 justify-end">
+                <CardFooter className="gap-2 justify-end">
                     <Button
                         size="sm"
                         variant="destructive"

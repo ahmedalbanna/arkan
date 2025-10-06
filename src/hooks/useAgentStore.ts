@@ -1,22 +1,41 @@
-import { create } from 'zustand';
 import { db } from '@/lib/firebase/client-init';
+import type { AgentData } from '@/lib/types';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import {
-  LucideIcon, FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText as BookTextIcon, Presentation, DatabaseZap, History, FileHeart, Hand, DraftingCompass, Files, LayoutGrid, Scale, Megaphone, PencilRuler, Users
+  BookMarked, BookText as BookTextIcon,
+  BrainCircuit,
+  Code,
+  DatabaseZap,
+  DraftingCompass,
+  FileHeart,
+  Files,
+  FileSpreadsheet, FileText,
+  Flag,
+  GitGraph,
+  Hand,
+  History,
+  LayoutGrid,
+  Library,
+  LucideIcon,
+  Megaphone, PencilRuler,
+  Presentation,
+  Scale,
+  TestTube2,
+  Users,
+  Waypoints
 } from 'lucide-react';
-import type { AgentData, AgentPrompt } from '@/lib/types';
+import { create } from 'zustand';
 
 const iconMap: Record<string, LucideIcon> = {
   FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText: BookTextIcon, Presentation, DatabaseZap, History, FileHeart, Hand, DraftingCompass, Files, LayoutGrid, Scale, Megaphone, PencilRuler, Users
 };
 
-export interface DynamicAgentData extends Omit<AgentData, 'icon'> {
-  id: string;
+export interface DynamicAgentData extends AgentData {
   icon: string;
 }
 
 export interface AgentWithComponent extends DynamicAgentData {
-    iconComponent: LucideIcon;
+  iconComponent: LucideIcon;
 }
 
 interface AgentState {
@@ -60,7 +79,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     }
   },
   getIconComponent: (iconName: string) => {
-      return iconMap[iconName];
+    return iconMap[iconName];
   },
 }));
 

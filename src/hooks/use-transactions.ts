@@ -12,7 +12,7 @@ import { toast } from './use-toast';
 export interface VerifyPaymentVariables {
     transactionId: string;
     userId: string;
-    status: 'approved' | 'rejected';
+    status: 'verified' | 'rejected';
     adminNotes?: string;
 }
 

@@ -3,11 +3,11 @@
 
 'use client';
 
-import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { writingToolApi } from '@/services/writing-tools-service';
 import { handleErrorUtility } from '@/lib/errorUtils';
+import { writingToolApi } from '@/services/writing-tools-service';
+import { useMutation } from '@tanstack/react-query';
 
 /**
  * Generic custom mutation hook for all writing tools.
@@ -15,7 +15,7 @@ import { handleErrorUtility } from '@/lib/errorUtils';
  * @param options Optional callbacks for onSuccess and onError.
  * @returns The result of the useMutation hook.
  */
-export function useWritingTool<TData = any, TVariables = any>(
+export function useWritingTool<TVariables = any, TData = any>(
   endpoint: string,
   options?: {
     onSuccess?: (data: TData, variables: TVariables) => void;
@@ -30,15 +30,15 @@ export function useWritingTool<TData = any, TVariables = any>(
       return writingToolApi(endpoint, { data: variables, token });
     },
     onSuccess: (data, variables) => {
-        refetchUser(); // Invalidate user to update credits
-        options?.onSuccess?.(data, variables);
+      refetchUser(); // Invalidate user to update credits
+      options?.onSuccess?.(data, variables);
     },
     onError: (error, variables) => {
-        if (options?.onError) {
-            options.onError(error, variables);
-        } else {
-            handleErrorUtility(error, "AI Tool Failed");
-        }
+      if (options?.onError) {
+        options.onError(error, variables);
+      } else {
+        handleErrorUtility(error, "AI Tool Failed");
+      }
     }
   });
 }

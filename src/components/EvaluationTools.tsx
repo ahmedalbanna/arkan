@@ -1,41 +1,41 @@
 
 'use client';
 
-import { z } from 'zod';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { CheckCircle, FileText, Loader2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/context/AuthContext';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useEvaluateReport } from '@/hooks/use-evaluation';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useAuth } from '@/context/AuthContext';
-import { useQueryClient } from '@tanstack/react-query';
-import { useLocalization } from '@/context/LocalizationContext';
-import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
-import { useEvaluateReport } from '@/hooks/use-evaluation';
+import { useReportStore } from '@/hooks/useReportStore';
 import { processFileApi } from '@/services/document-processing-service'; // Keep this import
+import { useQueryClient } from '@tanstack/react-query';
+import { CheckCircle, FileText, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { z } from 'zod';
 
 const ProposalPayloadSchema = z.object({
- projectPlan: z.object({
- timeline: z.string().default(''),
- keyDeliverables: z.string().default(''),
- }).optional(),
- category: z.string().default(''),
- title: z.string().default(''),
- executiveSummary: z.string().default(''),
- problemStatement: z.string().default(''),
- proposedSolution: z.object({
- overview: z.string().default(''),
- technicalApproach: z.string().default(''),
- keyFeatures: z.string().default(''),
- }).default({ overview: '', technicalApproach: '', keyFeatures: '' }),
- budgetBreakdown: z.string().default(''),
- // Add other fields that might be present in your actual proposal type
- // and provide default values or make them optional as needed.
- // For example:
- // evaluation: z.string().optional(),
+    projectPlan: z.object({
+        timeline: z.string().default(''),
+        keyDeliverables: z.string().default(''),
+    }).default({ timeline: '', keyDeliverables: '' }),
+    category: z.string().default(''),
+    title: z.string().default(''),
+    executiveSummary: z.string().default(''),
+    problemStatement: z.string().default(''),
+    proposedSolution: z.object({
+        overview: z.string().default(''),
+        technicalApproach: z.string().default(''),
+        keyFeatures: z.string().default(''),
+    }).default({ overview: '', technicalApproach: '', keyFeatures: '' }),
+    budgetBreakdown: z.string().default(''),
+    // Add other fields that might be present in your actual proposal type
+    // and provide default values or make them optional as needed.
+    // For example:
+    // evaluation: z.string().optional(),
 });
 
 export const EvaluationTools = () => {
@@ -65,7 +65,7 @@ export const EvaluationTools = () => {
 
     const handleProcessPdf = async () => {
         if (!pdfFile || !firebaseUser) {
-             toast({ title: t('builder.toasts.authError'), description: t('builder.reportGenerator.toasts.loginToProcess'), variant: 'destructive' });
+            toast({ title: t('builder.toasts.authError'), description: t('builder.reportGenerator.toasts.loginToProcess'), variant: 'destructive' });
             return
         };
         setIsProcessingPdf(true);
@@ -121,33 +121,33 @@ export const EvaluationTools = () => {
         }
     }
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-            <Textarea
-                name="acceptanceCriteria"
-                placeholder={t('builder.reportGenerator.criteriaPlaceholder')}
-                rows={6}
-                value={criteria}
-                onChange={(e) => setCriteria(e.target.value)}
-                disabled={mutation.isPending}
-            />
-        </div>
-        <div className="flex gap-2">
-            <Input type="file" accept=".pdf" onChange={handleFileChange} disabled={mutation.isPending || isProcessingPdf} className="text-xs" />
-            <Button type="button" size="sm" onClick={handleProcessPdf} disabled={!pdfFile || mutation.isPending || isProcessingPdf}>
-                {isProcessingPdf ? <Loader2 className="me-2 h-4 w-4 animate-spin"/> : <FileText className="me-2 h-4 w-4"/>}
-                {t('builder.reportGenerator.processPdf')}
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+                <Textarea
+                    name="acceptanceCriteria"
+                    placeholder={t('builder.reportGenerator.criteriaPlaceholder')}
+                    rows={6}
+                    value={criteria}
+                    onChange={(e) => setCriteria(e.target.value)}
+                    disabled={mutation.isPending}
+                />
+            </div>
+            <div className="flex gap-2">
+                <Input type="file" accept=".pdf" onChange={handleFileChange} disabled={mutation.isPending || isProcessingPdf} className="text-xs" />
+                <Button type="button" size="sm" onClick={handleProcessPdf} disabled={!pdfFile || mutation.isPending || isProcessingPdf}>
+                    {isProcessingPdf ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <FileText className="me-2 h-4 w-4" />}
+                    {t('builder.reportGenerator.processPdf')}
+                </Button>
+            </div>
+            <Button
+                type="submit"
+                disabled={mutation.isPending || !criteria}
+                className="w-full font-headline"
+            >
+                {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <CheckCircle className="me-2 h-4 w-4" />}
+                {t('builder.reportGenerator.evaluateReport')}
             </Button>
-        </div>
-         <Button
-            type="submit"
-            disabled={mutation.isPending || !criteria}
-            className="w-full font-headline"
-        >
-        {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <CheckCircle className="me-2 h-4 w-4" />}
-        {t('builder.reportGenerator.evaluateReport')}
-        </Button>
-    </form>
-  );
+        </form>
+    );
 };
