@@ -17,8 +17,6 @@ export * from './utils/error-handling';
 // export * from './constants/file-types';
 export * from './constants/validation-rules';
 
-// الأمثلة (للتطوير فقط)
-export * from './examples/use-paraphraser-refactored';
 
 // النظام الأساسي - Core System
 // يوفر جميع الـ hooks والأدوات الأساسية للمشروع
@@ -56,6 +54,9 @@ export * from './hooks/academic-solver-tools/use-academic-solver-factory';
 
 // Hooks الأدوات المتخصصة
 export * from './hooks/specialized-tools/use-specialized-factory';
+
+// Hooks الأداء والتحسين
+export * from './hooks/performance';
 
 // Hooks UI/UX
 export * from './ui/use-ui-factory';

@@ -22,6 +22,11 @@ export { createAdvancedProjectPlanToolHook, createProjectPlanToolHook } from './
 // Hooks أدوات الحل الأكاديمي
 export { createAcademicSolverToolHook, createAdvancedAcademicSolverToolHook } from './academic-solver-tools/use-academic-solver-factory';
 
+// Hooks الأداء والتحسين
+export {
+    useAdvancedCache, useAdvancedMemoryManager, useAdvancedPerformanceMonitor, useAdvancedResourceOptimizer, useBasicPerformanceMonitor, useBasicResourceOptimizer, useComprehensivePerformanceSystem, useMemoryManager, usePerformanceMonitor, useQuickCache, useQuickMemoryManager, useResourceOptimizer, useSmartCache
+} from './performance';
+
 // تصدير الأنواع
 export type { AcademicSolverToolConfig } from './academic-solver-tools/use-academic-solver-factory';
 export type { CopyToastOptions, CopyToastResult } from './base/use-copy-toast';
@@ -31,4 +36,11 @@ export type { ProcessingStateOptions, ProcessingStateResult } from './base/use-p
 export type { PresentationToolConfig } from './presentation-tools/use-presentation-factory';
 export type { ProjectPlanToolConfig } from './project-plan-tools/use-project-plan-factory';
 export type { TextProcessorOptions, TextProcessorResult } from './writing-tools/use-text-processor';
+
+// أنواع الأداء والتحسين
+export type {
+    CacheConfig, CachedItem, CacheItem,
+    CacheStats, CacheStrategy, MemoryManager, MemoryManagerConfig,
+    MemoryUsageStats, OptimizationAction, PerformanceAlert, PerformanceMetric, PerformanceMonitor, PerformanceMonitorConfig, PerformanceReport, PerformanceThreshold, ResourceOptimizationConfig, ResourceOptimizer, ResourceUsage, SmartCache
+} from './performance';
 

@@ -1,508 +1,448 @@
 /**
- * Memory Manager Hook متقدم
- *
- * يوفر إدارة ذكية للذاكرة مع مراقبة وتحسين الأداء
+ * نظام إدارة الذاكرة الذكي للعمليات الطويلة
+ * يوفر إدارة ذكية للذاكرة مع تحسين الأداء وتقليل استهلاك الموارد
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export interface MemoryManagerOptions {
-    /** تمكين مراقبة الذاكرة */
-    enableMonitoring?: boolean;
-    /** معدل مراقبة الذاكرة بالميللي ثانية */
-    monitoringInterval?: number;
-    /** حد أقصى لاستخدام الذاكرة بالميجابايت */
-    memoryThreshold?: number;
-    /** إستراتيجية التنظيف */
-    cleanupStrategy?: 'lru' | 'lfu' | 'ttl' | 'hybrid';
-    /** حجم Cache لأغراض التنظيف */
-    cacheSizeLimit?: number;
-    /** مدة تنظيف دوري بالميللي ثانية */
-    cleanupInterval?: number;
+export interface MemoryManagerConfig {
+    maxMemoryUsage?: number; // الحد الأقصى لاستخدام الذاكرة (بالميجابايت)
+    cleanupInterval?: number; // فترة التنظيف (بالميلي ثانية)
+    enableCompression?: boolean; // تفعيل ضغط البيانات
+    enablePersistence?: boolean; // تفعيل الحفظ المؤقت
+    maxCacheSize?: number; // الحد الأقصى لحجم التخزين المؤقت
 }
 
-export interface MemoryInfo {
-    /** استخدام الذاكرة الحالي بالميجابايت */
-    usedJSHeapSize: number;
-    /** ماكسيموم حجم الذاكرة المتاح */
-    totalJSHeapSize: number;
-    /** الحد الأقصى للذاكرة */
-    jsHeapSizeLimit: number;
-    /** نسبة الاستخدام */
-    usagePercentage: number;
-    /** ما إذا كان البحث عن تجاوز الحد */
-    isOverThreshold: boolean;
+export interface MemoryUsageStats {
+    usedMemory: number; // الذاكرة المستخدمة (بالميجابايت)
+    totalMemory: number; // إجمالي الذاكرة المتاحة (بالميجابايت)
+    cacheSize: number; // حجم التخزين المؤقت (بالميجابايت)
+    activeOperations: number; // عدد العمليات النشطة
+    lastCleanup: Date; // آخر عملية تنظيف
 }
 
-export interface CacheEntry<T> {
+export interface CachedItem<T = any> {
     key: string;
-    value: T;
+    data: T;
     timestamp: number;
+    size: number;
     accessCount: number;
     lastAccessed: number;
-    size: number;
-    priority: number;
+    compressed?: boolean;
 }
 
-export interface MemoryManagerReturn {
-    /** معلومات الذاكرة الحالية */
-    memoryInfo: MemoryInfo;
-    /** Cache management */
-    cache: {
-        set: <T>(key: string, value: T, priority?: number) => void;
-        get: <T>(key: string) => T | null;
-        delete: (key: string) => boolean;
-        clear: () => void;
-        stats: {
-            size: number;
-            memoryUsed: number;
-            hitRate: number;
-            avgAccessTime: number;
-        };
-    };
-    /** ذكية garbage collection */
-    gc: {
-        /** فرض تنظيف فوري */
-        force: () => void;
-        /** تنظيف حسب الأولوية */
-        cleanupByPriority: (threshold: number) => number;
-        /** تنظيف العناصر القديمة */
-        cleanupOldItems: (maxAge: number) => number;
-        /** تحليل الذاكرة */
-        analyze: () => void;
-    };
-    /** أدوات التحليل */
-    analytics: {
-        /** تاريخ استخدام الذاكرة */
-        memoryHistory: Array<{ timestamp: number; usage: number }>;
-        /** ذروات الاستخدام */
-        peakUsage: number;
-        /** متوسط الاستخدام */
-        averageUsage: number;
-        /** تقرير حالة الذاكرة */
-        healthReport: {
-            status: 'healthy' | 'warning' | 'critical';
-            recommendations: string[];
-        };
+export interface MemoryManager {
+    // إدارة الذاكرة
+    getMemoryStats: () => MemoryUsageStats;
+    cleanup: () => Promise<void>;
+    optimize: () => Promise<void>;
+
+    // إدارة التخزين المؤقت
+    setCache: <T>(key: string, data: T, ttl?: number) => Promise<void>;
+    getCache: <T>(key: string) => Promise<T | null>;
+    removeCache: (key: string) => Promise<void>;
+    clearCache: () => Promise<void>;
+
+    // إدارة العمليات
+    startOperation: (operationId: string) => void;
+    endOperation: (operationId: string) => void;
+    isOperationActive: (operationId: string) => boolean;
+
+    // إدارة البيانات المؤقتة
+    setTempData: <T>(key: string, data: T) => void;
+    getTempData: <T>(key: string) => T | null;
+    removeTempData: (key: string) => void;
+
+    // مراقبة الأداء
+    getPerformanceMetrics: () => {
+        averageResponseTime: number;
+        cacheHitRate: number;
+        memoryEfficiency: number;
+        operationSuccessRate: number;
     };
 }
 
 /**
- * Memory Manager Hook ذكي ومتطور
+ * Hook لإدارة الذاكرة الذكية
  */
-export function useMemoryManager(options: MemoryManagerOptions = {}): MemoryManagerReturn {
+export function useMemoryManager(config: MemoryManagerConfig = {}): MemoryManager {
     const {
-        enableMonitoring = true,
-        monitoringInterval = 5000,
-        memoryThreshold = 100,
-        cleanupStrategy = 'hybrid',
-        cacheSizeLimit = 1000,
-        cleanupInterval = 60000
-    } = options;
+        maxMemoryUsage = 100, // 100 MB افتراضياً
+        cleanupInterval = 30000, // 30 ثانية
+        enableCompression = true,
+        enablePersistence = true,
+        maxCacheSize = 50 // 50 MB
+    } = config;
 
-    // State management
-    const [memoryInfo, setMemoryInfo] = useState<MemoryInfo>({
-        usedJSHeapSize: 0,
-        totalJSHeapSize: 0,
-        jsHeapSizeLimit: 0,
-        usagePercentage: 0,
-        isOverThreshold: false
+    // حالة الذاكرة
+    const [memoryStats, setMemoryStats] = useState<MemoryUsageStats>({
+        usedMemory: 0,
+        totalMemory: 0,
+        cacheSize: 0,
+        activeOperations: 0,
+        lastCleanup: new Date()
     });
 
-    const [memoryHistory, setMemoryHistory] = useState<Array<{ timestamp: number; usage: number }>>([]);
-    const [peakUsage, setPeakUsage] = useState(0);
-
-    // Refs for performance optimization
-    const cacheRef = useRef<Map<string, CacheEntry<any>>>(new Map());
-    const statsRef = useRef({
-        hits: 0,
-        misses: 0,
-        totalAccessTime: 0,
-        accessCount: 0
+    // مراجع للتخزين المؤقت والعمليات
+    const cacheRef = useRef<Map<string, CachedItem>>(new Map());
+    const tempDataRef = useRef<Map<string, any>>(new Map());
+    const activeOperationsRef = useRef<Set<string>>(new Set());
+    const performanceMetricsRef = useRef({
+        responseTimes: [] as number[],
+        cacheHits: 0,
+        cacheMisses: 0,
+        operationSuccesses: 0,
+        operationFailures: 0
     });
 
-    // Performance API access
-    const getMemoryInfo = useCallback((): MemoryInfo => {
-        if (typeof window !== 'undefined' && (window as any).performance?.memory) {
-            const memory = (window as any).performance.memory;
-            const used = memory.usedJSHeapSize / (1024 * 1024); // تحويل إلى MB
-            const total = memory.totalJSHeapSize / (1024 * 1024);
-            const limit = memory.jsHeapSizeLimit / (1024 * 1024);
+    // مراقبة استخدام الذاكرة
+    const updateMemoryStats = useCallback(() => {
+        if (typeof window !== 'undefined' && 'memory' in performance) {
+            const memory = (performance as any).memory;
+            const cacheSize = Array.from(cacheRef.current.values())
+                .reduce((total, item) => total + item.size, 0) / (1024 * 1024); // تحويل إلى MB
 
-            return {
-                usedJSHeapSize: used,
-                totalJSHeapSize: total,
-                jsHeapSizeLimit: limit,
-                usagePercentage: Math.round((used / limit) * 100),
-                isOverThreshold: used > memoryThreshold
-            };
-        }
-
-        return {
-            usedJSHeapSize: 0,
-            totalJSHeapSize: 0,
-            jsHeapSizeLimit: 0,
-            usagePercentage: 0,
-            isOverThreshold: false
-        };
-    }, [memoryThreshold]);
-
-    // حساب حجم البيانات في الذاكرة
-    const calculateSize = useCallback((value: any): number => {
-        try {
-            const serialized = JSON.stringify(value);
-            return new Blob([serialized]).size / 1024; // KB
-        } catch {
-            return 1; // KB افتراضي
-        }
-    }, []);
-
-    // تنظيف Cache بناءً على الإستراتيجية
-    const cleanupCache = useCallback((forceAmount?: number): number => {
-        const cache = cacheRef.current;
-        const entries = Array.from(cache.entries());
-
-        if (entries.length === 0) return 0;
-
-        let sizeToCleanup = forceAmount || Math.max(cacheSizeLimit * 0.1, entries.length * 0.1);
-        let cleaned = 0;
-
-        // تطبيق إستراتيجية التنظيف
-        let sortedEntries = entries;
-
-        switch (cleanupStrategy) {
-            case 'lru':
-                // Least Recently Used
-                sortedEntries = entries.sort((a, b) =>
-                    a[1].lastAccessed - b[1].lastAccessed
-                );
-                break;
-            case 'lfu':
-                // Least Frequently Used
-                sortedEntries = entries.sort((a, b) =>
-                    a[1].accessCount - b[1].accessCount
-                );
-                break;
-            case 'ttl':
-                // Time To Live
-                const now = Date.now();
-                sortedEntries = entries.filter(([_, entry]) =>
-                    now - entry.timestamp > 300000 // 5 دقائق
-                ).sort((a, b) => a[1].timestamp - b[1].timestamp);
-                break;
-            case 'hybrid':
-                // استراتيجية مختلطة (LRU + LFU + TTL)
-                const hybridNow = Date.now();
-                sortedEntries = entries
-                    .map(([key, entry]) => ({
-                        key,
-                        entry: {
-                            ...entry,
-                            score: (entry.accessCount * 10) / (hybridNow - entry.lastAccessed) + (hybridNow - entry.timestamp) / 1000000
-                        }
-                    }))
-                    .sort((a, b) => a.entry.score - b.entry.score)
-                    .map(({ key, entry }) => [key, entry] as [string, CacheEntry<any>]);
-                break;
-        }
-
-        // تنفيذ التنظيف
-        for (const [key, entry] of sortedEntries) {
-            if (cleaned >= sizeToCleanup) break;
-
-            cache.delete(key);
-            cleaned++;
-        }
-
-        if (cleaned > 0) {
-            console.log(`🧹 Memory cleanup: removed ${cleaned} items`);
-
-            // فرض garbage collection
-            if (typeof window !== 'undefined' && (window as any).gc) {
-                (window as any).gc();
-            }
-        }
-
-        return cleaned;
-    }, [cleanupStrategy, cacheSizeLimit]);
-
-    // تنظيف أولوية
-    const cleanupByPriority = useCallback((threshold: number): number => {
-        const cache = cacheRef.current;
-        const entries = Array.from(cache.entries());
-
-        const lowPriorityItems = entries
-            .filter(([_, entry]) => entry.priority < threshold)
-            .sort((a, b) => a[1].priority - b[1].priority);
-
-        let cleaned = 0;
-        for (const [key] of lowPriorityItems) {
-            cache.delete(key);
-            cleaned++;
-        }
-
-        return cleaned;
-    }, []);
-
-    // تنظيف العناصر القديمة
-    const cleanupOldItems = useCallback((maxAge: number): number => {
-        const cache = cacheRef.current;
-        const now = Date.now();
-        let cleaned = 0;
-
-        for (const [key, entry] of cache) {
-            if (now - entry.timestamp > maxAge) {
-                cache.delete(key);
-                cleaned++;
-            }
-        }
-
-        return cleaned;
-    }, []);
-
-    // تحليل الذاكرة المتقدم
-    const analyzeMemory = useCallback(() => {
-        const cache = cacheRef.current;
-        const memoryData = getMemoryInfo();
-
-        console.group('🔍 Memory Analysis Report');
-        console.log('Current Usage:', memoryData.usedJSHeapSize.toFixed(2), 'MB');
-        console.log('Usage Percentage:', memoryData.usagePercentage + '%');
-        console.log('Cache Size:', cache.size);
-        console.log('Memory History Length:', memoryHistory.length);
-        console.log('Peak Usage:', peakUsage.toFixed(2), 'MB');
-
-        // تحليل Cache
-        const cacheAnalysis = Array.from(cache.values()).reduce(
-            (acc, entry) => {
-                acc.totalSize += entry.size;
-                acc.totalAccess += entry.accessCount;
-                acc.avgAge += Date.now() - entry.timestamp;
-                return acc;
-            },
-            { totalSize: 0, totalAccess: 0, avgAge: 0 }
-        );
-
-        console.log('Cache Analysis:');
-        console.log('- Total Cache Size:', cacheAnalysis.totalSize.toFixed(2), 'KB');
-        console.log('- Average Access Count:', (cacheAnalysis.totalAccess / cache.size).toFixed(2));
-        console.log('- Average Age:', (cacheAnalysis.avgAge / cache.size / 1000).toFixed(2), 'sec');
-        console.groupEnd();
-
-        return {
-            memoryData,
-            cacheAnalysis,
-            recommendations: getRecommendations(memoryData, cacheAnalysis)
-        };
-    }, [memoryHistory, peakUsage, getMemoryInfo]);
-
-    // اقتراحات التحسين
-    const getRecommendations = useCallback((memoryData: MemoryInfo, cacheAnalysis: any): string[] => {
-        const recommendations: string[] = [];
-
-        if (memoryData.usagePercentage > 80) {
-            recommendations.push('⚠️ High memory usage detected. Consider reducing cache size.');
-        }
-
-        if (memoryData.isOverThreshold) {
-            recommendations.push('🚨 Memory threshold exceeded. Immediate cleanup recommended.');
-        }
-
-        if (cacheAnalysis.totalSize > 1000) { // 1MB
-            recommendations.push('💾 Large cache size. Consider implementing cache invalidation.');
-        }
-
-        if (memoryHistory.length > 100) {
-            recommendations.push('📊 Memory history is large. Consider clearing old records.');
-        }
-
-        return recommendations;
-    }, []);
-
-    // مراقبة الذاكرة دورياً
-    useEffect(() => {
-        if (!enableMonitoring) return;
-
-        const monitorInterval = setInterval(() => {
-            const newMemoryInfo = getMemoryInfo();
-            setMemoryInfo(newMemoryInfo);
-
-            // تحديث التاريخ
-            setMemoryHistory(prev => {
-                const updated = [...prev, {
-                    timestamp: Date.now(),
-                    usage: newMemoryInfo.usedJSHeapSize
-                }];
-
-                // الاحتفاظ بآخر 100 نقطة فقط
-                return updated.slice(-100);
+            setMemoryStats({
+                usedMemory: memory.usedJSHeapSize / (1024 * 1024),
+                totalMemory: memory.totalJSHeapSize / (1024 * 1024),
+                cacheSize,
+                activeOperations: activeOperationsRef.current.size,
+                lastCleanup: new Date()
             });
+        }
+    }, []);
 
-            // تحديث الذروة
-            if (newMemoryInfo.usedJSHeapSize > peakUsage) {
-                setPeakUsage(newMemoryInfo.usedJSHeapSize);
+    // ضغط البيانات
+    const compressData = useCallback((data: any): string => {
+        if (!enableCompression) return JSON.stringify(data);
+
+        try {
+            // استخدام ضغط بسيط للبيانات الكبيرة
+            const jsonString = JSON.stringify(data);
+            if (jsonString.length > 1000) {
+                // ضغط بسيط باستخدام تقنيات JavaScript
+                return btoa(jsonString); // Base64 encoding
             }
+            return jsonString;
+        } catch (error) {
+            console.warn('Failed to compress data:', error);
+            return JSON.stringify(data);
+        }
+    }, [enableCompression]);
 
-            // تنبيه وإجراء تنظيف إذا لزم الأمر
-            if (newMemoryInfo.isOverThreshold || newMemoryInfo.usagePercentage > 85) {
-                console.warn('⚠️ High memory usage detected:', newMemoryInfo);
+    // إلغاء ضغط البيانات
+    const decompressData = useCallback((compressedData: string): any => {
+        if (!enableCompression) return JSON.parse(compressedData);
 
-                // نظف فورياً
-                const cleaned = cleanupCache(cacheSizeLimit * 0.3);
-                console.log(`🧹 Emergency cleanup: removed ${cleaned} items`);
+        try {
+            // محاولة إلغاء الضغط
+            if (compressedData.startsWith('data:')) {
+                return JSON.parse(atob(compressedData));
             }
-        }, monitoringInterval);
+            return JSON.parse(compressedData);
+        } catch (error) {
+            console.warn('Failed to decompress data:', error);
+            return JSON.parse(compressedData);
+        }
+    }, [enableCompression]);
 
-        return () => clearInterval(monitorInterval);
-    }, [enableMonitoring, monitoringInterval, getMemoryInfo, peakUsage, cleanupCache, cacheSizeLimit]);
+    // حساب حجم البيانات
+    const calculateDataSize = useCallback((data: any): number => {
+        try {
+            const jsonString = JSON.stringify(data);
+            return new Blob([jsonString]).size;
+        } catch (error) {
+            return 0;
+        }
+    }, []);
 
-    // تنظيف دوري
+    // تنظيف التخزين المؤقت القديم
+    const cleanupOldCache = useCallback(() => {
+        const now = Date.now();
+        const maxAge = 5 * 60 * 1000; // 5 دقائق
+        const maxCacheSizeBytes = maxCacheSize * 1024 * 1024; // تحويل إلى بايت
+
+        let currentCacheSize = 0;
+        const entries = Array.from(cacheRef.current.entries());
+
+        // ترتيب حسب آخر استخدام
+        entries.sort((a, b) => b[1].lastAccessed - a[1].lastAccessed);
+
+        // إزالة العناصر القديمة أو التي تتجاوز الحد الأقصى
+        for (const [key, item] of entries) {
+            if (now - item.timestamp > maxAge || currentCacheSize + item.size > maxCacheSizeBytes) {
+                cacheRef.current.delete(key);
+            } else {
+                currentCacheSize += item.size;
+            }
+        }
+    }, [maxCacheSize]);
+
+    // تنظيف الذاكرة العامة
+    const cleanup = useCallback(async () => {
+        console.log('🧹 Starting memory cleanup...');
+
+        // تنظيف التخزين المؤقت القديم
+        cleanupOldCache();
+
+        // تنظيف البيانات المؤقتة القديمة
+        const now = Date.now();
+        const maxTempAge = 2 * 60 * 1000; // 2 دقيقة
+        for (const [key, data] of tempDataRef.current.entries()) {
+            if (data.timestamp && now - data.timestamp > maxTempAge) {
+                tempDataRef.current.delete(key);
+            }
+        }
+
+        // إجبار garbage collection إذا كان متاحاً
+        if (typeof window !== 'undefined' && 'gc' in window) {
+            (window as any).gc();
+        }
+
+        updateMemoryStats();
+        console.log('✅ Memory cleanup completed');
+    }, [cleanupOldCache, updateMemoryStats]);
+
+    // تحسين الذاكرة
+    const optimize = useCallback(async () => {
+        console.log('⚡ Starting memory optimization...');
+
+        // تحسين التخزين المؤقت
+        const cacheEntries = Array.from(cacheRef.current.entries());
+        cacheEntries.sort((a, b) => b[1].accessCount - a[1].accessCount);
+
+        // الاحتفاظ فقط بالعناصر الأكثر استخداماً
+        const keepCount = Math.floor(cacheEntries.length * 0.7); // الاحتفاظ بـ 70%
+        for (let i = keepCount; i < cacheEntries.length; i++) {
+            cacheRef.current.delete(cacheEntries[i][0]);
+        }
+
+        // ضغط البيانات المتبقية
+        if (enableCompression) {
+            for (const [key, item] of cacheRef.current.entries()) {
+                if (!item.compressed && item.size > 1024) { // ضغط البيانات الأكبر من 1KB
+                    try {
+                        const compressed = compressData(item.data);
+                        cacheRef.current.set(key, {
+                            ...item,
+                            data: compressed,
+                            compressed: true,
+                            size: compressed.length
+                        });
+                    } catch (error) {
+                        console.warn(`Failed to compress cache item ${key}:`, error);
+                    }
+                }
+            }
+        }
+
+        updateMemoryStats();
+        console.log('✅ Memory optimization completed');
+    }, [enableCompression, compressData, updateMemoryStats]);
+
+    // إدارة التخزين المؤقت
+    const setCache = useCallback(async <T>(key: string, data: T, ttl: number = 300000) => {
+        const size = calculateDataSize(data);
+        const compressed = enableCompression && size > 1024;
+        const processedData = compressed ? compressData(data) : data;
+
+        const cacheItem: CachedItem<T> = {
+            key,
+            data: processedData as T,
+            timestamp: Date.now(),
+            size,
+            accessCount: 0,
+            lastAccessed: Date.now(),
+            compressed
+        };
+
+        cacheRef.current.set(key, cacheItem);
+
+        // حفظ في localStorage إذا كان مفعلاً
+        if (enablePersistence && typeof window !== 'undefined') {
+            try {
+                localStorage.setItem(`cache_${key}`, JSON.stringify(cacheItem));
+            } catch (error) {
+                console.warn('Failed to persist cache item:', error);
+            }
+        }
+
+        updateMemoryStats();
+    }, [calculateDataSize, enableCompression, enablePersistence, compressData, updateMemoryStats]);
+
+    const getCache = useCallback(async <T>(key: string): Promise<T | null> => {
+        let cacheItem = cacheRef.current.get(key);
+
+        // محاولة التحميل من localStorage إذا لم يكن في الذاكرة
+        if (!cacheItem && enablePersistence && typeof window !== 'undefined') {
+            try {
+                const stored = localStorage.getItem(`cache_${key}`);
+                if (stored) {
+                    const parsedItem = JSON.parse(stored) as CachedItem<T>;
+                    cacheItem = parsedItem;
+                    cacheRef.current.set(key, parsedItem);
+                }
+            } catch (error) {
+                console.warn('Failed to load cache from storage:', error);
+            }
+        }
+
+        if (!cacheItem) {
+            performanceMetricsRef.current.cacheMisses++;
+            return null;
+        }
+
+        // تحديث إحصائيات الوصول
+        cacheItem.accessCount++;
+        cacheItem.lastAccessed = Date.now();
+        performanceMetricsRef.current.cacheHits++;
+
+        // إلغاء الضغط إذا لزم الأمر
+        let data = cacheItem.data;
+        if (cacheItem.compressed) {
+            data = decompressData(cacheItem.data as string);
+        }
+
+        return data as T;
+    }, [enablePersistence, decompressData]);
+
+    const removeCache = useCallback(async (key: string) => {
+        cacheRef.current.delete(key);
+
+        if (enablePersistence && typeof window !== 'undefined') {
+            localStorage.removeItem(`cache_${key}`);
+        }
+
+        updateMemoryStats();
+    }, [enablePersistence, updateMemoryStats]);
+
+    const clearCache = useCallback(async () => {
+        cacheRef.current.clear();
+
+        if (enablePersistence && typeof window !== 'undefined') {
+            const keys = Object.keys(localStorage);
+            keys.forEach(key => {
+                if (key.startsWith('cache_')) {
+                    localStorage.removeItem(key);
+                }
+            });
+        }
+
+        updateMemoryStats();
+    }, [enablePersistence, updateMemoryStats]);
+
+    // إدارة العمليات
+    const startOperation = useCallback((operationId: string) => {
+        activeOperationsRef.current.add(operationId);
+        updateMemoryStats();
+    }, [updateMemoryStats]);
+
+    const endOperation = useCallback((operationId: string) => {
+        activeOperationsRef.current.delete(operationId);
+        updateMemoryStats();
+    }, [updateMemoryStats]);
+
+    const isOperationActive = useCallback((operationId: string) => {
+        return activeOperationsRef.current.has(operationId);
+    }, []);
+
+    // إدارة البيانات المؤقتة
+    const setTempData = useCallback(<T>(key: string, data: T) => {
+        tempDataRef.current.set(key, {
+            data,
+            timestamp: Date.now()
+        });
+    }, []);
+
+    const getTempData = useCallback(<T>(key: string): T | null => {
+        const item = tempDataRef.current.get(key);
+        return item ? item.data : null;
+    }, []);
+
+    const removeTempData = useCallback((key: string) => {
+        tempDataRef.current.delete(key);
+    }, []);
+
+    // مراقبة الأداء
+    const getPerformanceMetrics = useCallback(() => {
+        const { responseTimes, cacheHits, cacheMisses, operationSuccesses, operationFailures } = performanceMetricsRef.current;
+
+        const totalCacheRequests = cacheHits + cacheMisses;
+        const totalOperations = operationSuccesses + operationFailures;
+
+        return {
+            averageResponseTime: responseTimes.length > 0
+                ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length
+                : 0,
+            cacheHitRate: totalCacheRequests > 0 ? (cacheHits / totalCacheRequests) * 100 : 0,
+            memoryEfficiency: memoryStats.totalMemory > 0
+                ? ((memoryStats.totalMemory - memoryStats.usedMemory) / memoryStats.totalMemory) * 100
+                : 0,
+            operationSuccessRate: totalOperations > 0 ? (operationSuccesses / totalOperations) * 100 : 0
+        };
+    }, [memoryStats]);
+
+    // إعداد التنظيف التلقائي
     useEffect(() => {
-        const cleanupInterval = setInterval(() => {
-            cleanupCache();
-            cleanupOldItems(300000); // تنظيف العناصر القديمة (5 دقائق)
+        const interval = setInterval(() => {
+            updateMemoryStats();
+
+            // تنظيف تلقائي إذا تجاوز استخدام الذاكرة الحد الأقصى
+            if (memoryStats.usedMemory > maxMemoryUsage) {
+                cleanup();
+            }
         }, cleanupInterval);
 
-        return () => clearInterval(cleanupInterval);
-    }, [cleanupCache, cleanupOldItems, cleanupInterval]);
+        return () => clearInterval(interval);
+    }, [cleanupInterval, maxMemoryUsage, memoryStats.usedMemory, cleanup, updateMemoryStats]);
 
-    // Cache API
-    const cache = {
-        set: <T>(key: string, value: T, priority: number = 1) => {
-            const cache = cacheRef.current;
-            const size = calculateSize(value);
-
-            cache.set(key, {
-                key,
-                value,
-                timestamp: Date.now(),
-                accessCount: 0,
-                lastAccessed: Date.now(),
-                size,
-                priority
-            });
-
-            // التحقق من الحد الأقصى للحجم
-            if (cache.size > cacheSizeLimit) {
-                cleanupCache(cacheSizeLimit * 0.1);
-            }
-        },
-
-        get: <T>(key: string): T | null => {
-            const startTime = performance.now();
-            const cache = cacheRef.current;
-            const entry = cache.get(key);
-
-            if (entry) {
-                entry.accessCount++;
-                entry.lastAccessed = Date.now();
-                statsRef.current.hits++;
-
-                const accessTime = performance.now() - startTime;
-                statsRef.current.totalAccessTime += accessTime;
-
-                return entry.value;
-            }
-
-            statsRef.current.misses++;
-            return null;
-        },
-
-        delete: (key: string): boolean => {
-            const removed = cacheRef.current.delete(key);
-            return removed;
-        },
-
-        clear: () => {
-            cacheRef.current.clear();
-            statsRef.current = { hits: 0, misses: 0, totalAccessTime: 0, accessCount: 0 };
-            console.log('🗑️ Memory cache cleared');
-        },
-
-        stats: {
-            get size() { return cacheRef.current.size; },
-            get memoryUsed() {
-                return Array.from(cacheRef.current.values())
-                    .reduce((sum, entry) => sum + entry.size, 0);
-            },
-            get hitRate() {
-                const total = statsRef.current.hits + statsRef.current.misses;
-                return total > 0 ? (statsRef.current.hits / total) * 100 : 0;
-            },
-            get avgAccessTime() {
-                return statsRef.current.accessCount > 0
-                    ? statsRef.current.totalAccessTime / statsRef.current.accessCount
-                    : 0;
-            }
-        }
-    };
-
-    // أدوات GC
-    const gc = {
-        force: () => {
-            const cleaned = cleanupCache(cacheSizeLimit * 0.5); // نظف 50%
-            console.log(`🧹 Force cleanup: removed ${cleaned} items`);
-
-            if (typeof window !== 'undefined' && (window as any).gc) {
-                (window as any).gc();
-            }
-        },
-
-        cleanupByPriority,
-        cleanupOldItems,
-        analyze: analyzeMemory
-    };
-
-    // أدوات التحليل
-    const analytics = {
-        memoryHistory,
-        peakUsage,
-
-        get averageUsage() {
-            if (memoryHistory.length === 0) return 0;
-            const sum = memoryHistory.reduce((acc, entry) => acc + entry.usage, 0);
-            return sum / memoryHistory.length;
-        },
-
-        get healthReport() {
-            const memoryData = memoryInfo;
-            const cacheStats = cache.stats;
-
-            let status: 'healthy' | 'warning' | 'critical' = 'healthy';
-            const recommendations: string[] = [];
-
-            if (memoryData.usagePercentage > 90 || memoryData.isOverThreshold) {
-                status = 'critical';
-                recommendations.push('🚨 Critical memory usage - immediate action required');
-            } else if (memoryData.usagePercentage > 75) {
-                status = 'warning';
-                recommendations.push('⚠️ High memory usage - consider optimization');
-            }
-
-            if (cacheStats.hitRate < 50) {
-                status = status === 'healthy' ? 'warning' : status;
-                recommendations.push('📉 Low cache hit rate - review caching strategy');
-            }
-
-            if (cacheStats.memoryUsed > 5) { // 5MB
-                status = status === 'healthy' ? 'warning' : status;
-                recommendations.push('💾 Large cache memory usage - consider size limits');
-            }
-
-            if (recommendations.length === 0) {
-                recommendations.push('✅ Memory usage within healthy parameters');
-            }
-
-            return { status, recommendations };
-        }
-    };
+    // تنظيف عند إلغاء التحميل
+    useEffect(() => {
+        return () => {
+            cleanup();
+        };
+    }, [cleanup]);
 
     return {
-        memoryInfo,
-        cache,
-        gc,
-        analytics
+        getMemoryStats: () => memoryStats,
+        cleanup,
+        optimize,
+        setCache,
+        getCache,
+        removeCache,
+        clearCache,
+        startOperation,
+        endOperation,
+        isOperationActive,
+        setTempData,
+        getTempData,
+        removeTempData,
+        getPerformanceMetrics
     };
 }
 
-export default useMemoryManager;
+/**
+ * Hook مبسط لإدارة الذاكرة السريعة
+ */
+export function useQuickMemoryManager() {
+    return useMemoryManager({
+        maxMemoryUsage: 50,
+        cleanupInterval: 15000,
+        enableCompression: false,
+        enablePersistence: false,
+        maxCacheSize: 20
+    });
+}
+
+/**
+ * Hook متقدم لإدارة الذاكرة مع جميع الميزات
+ */
+export function useAdvancedMemoryManager() {
+    return useMemoryManager({
+        maxMemoryUsage: 200,
+        cleanupInterval: 10000,
+        enableCompression: true,
+        enablePersistence: true,
+        maxCacheSize: 100
+    });
+}
