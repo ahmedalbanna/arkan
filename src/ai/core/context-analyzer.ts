@@ -203,7 +203,7 @@ export class ContextAnalyzer {
         const files = externalContext?.map(file => ({
             name: file.fileName,
             type: file.type,
-            relevance: this.calculateRelevance(file.content, file.type)
+            relevance: this.calculateRelevance(file.content || '', file.type)
         })) || [];
 
         return {
@@ -219,7 +219,11 @@ export class ContextAnalyzer {
 
         if (type === 'context') relevance += 0.3;
         if (type === 'example') relevance += 0.2;
-        if (content.length > 1000) relevance += 0.1;
+
+        // التحقق من وجود المحتوى قبل حساب الطول
+        if (content && typeof content === 'string' && content.length > 1000) {
+            relevance += 0.1;
+        }
 
         return Math.min(relevance, 1.0);
     }

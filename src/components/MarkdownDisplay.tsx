@@ -3,18 +3,17 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { useLocalization } from '@/context/LocalizationContext';
+import { toast, useWritingTool } from '@/hooks';
 import { markdownComponents } from '@/lib/markdown-styles';
+import { Check, FileDown, Loader2, Sparkles, ThumbsDown, Wand2 } from 'lucide-react';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-// import { exportMarkdownAsDocx } from '@/lib/docx-exporter'; // Not available
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useLocalization } from '@/context/LocalizationContext';
-import { toast, useWritingTool } from '@/hooks';
-import { Check, FileDown, Loader2, Sparkles, ThumbsDown, Wand2 } from 'lucide-react';
 
 export function MarkdownDisplay() {
     const { t } = useLocalization();
@@ -50,11 +49,14 @@ function helloWorld() {
 
     const handleExport = async () => {
         setIsExporting(true);
-        // await exportMarkdownAsDocx(markdown, "markdown-export"); // Function not available
-        console.log('Export functionality not available');
+        // TODO: Implement export functionality
+        toast({
+            title: t('markdownDisplay.exportNotAvailable'),
+            description: t('markdownDisplay.exportNotAvailableDesc'),
+            variant: "destructive"
+        });
         setIsExporting(false);
     };
-
 
     const handleImproveMarkdown = async () => {
         if (!markdown.trim() || !userPrompt.trim()) {

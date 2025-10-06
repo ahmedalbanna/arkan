@@ -11,8 +11,6 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { usePptxStyles } from '@/hooks/use-pptx-styles';
 import { PptxTemplateProperties } from '@/lib/models/pptxTemplate';
 import { PptxTemplateKey } from '@/lib/pptx-styles';
-
-
 import { Loader2, Save } from 'lucide-react';
 import Image from 'next/image';
 

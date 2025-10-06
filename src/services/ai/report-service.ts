@@ -14,17 +14,37 @@
  * @returns A promise that resolves to the generated section data.
  */
 export async function generateReportSectionApi(body: any, token: string): Promise<any> {
-    const response = await fetch('/api/generate/report', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(body),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to generate report section');
+    try {
+        const response = await fetch('/api/generate/report', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(body),
+        });
+
+        if (!response.ok) {
+            let errorMessage = 'Failed to generate report section';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.message || errorData.error || errorMessage;
+            } catch (parseError) {
+                errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+            }
+            throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+
+        // Validate response structure
+        if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
+            throw new Error('Empty response from server');
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Report generation API error:', error);
+        throw error instanceof Error ? error : new Error('Network error occurred');
     }
-    return await response.json();
 }

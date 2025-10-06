@@ -1,55 +1,44 @@
 /**
- * API Route لتوليد التقارير - النسخة الجديدة الموحدة
+ * API Route لتوليد التقارير - النسخة المحسنة بالقوالب الذكية
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد التقارير
+ * هذا الملف يستخدم النظام المحسن بالقوالب الذكية المتخصصة لكل قسم
  */
 
 import { generateReportSection } from '@/ai/flows/generate-report-section';
 import { GenerateSectionInputSchema } from '@/ai/schemas';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { adminDb } from '@/lib/firebase/server-init';
 import { logGeneration } from '@/services';
 
 /**
- * معالج توليد التقارير
+ * معالج توليد التقارير المحسن بالقوالب الذكية
  */
 class GenerateReportHandler extends CreditBasedApiHandler<any, any> {
     protected inputSchema = GenerateSectionInputSchema;
     protected creditCost = 1;
     protected requiresAdmin = false;
+
     protected async processRequest(data: any, context: any) {
         const { user } = context;
-
         const agentInput = data;
 
-        // جلب معلومات القسم ديناميكياً من Firestore
-        const sectionDocRef = adminDb.collection('sections').doc(agentInput.sectionToGenerate);
-        const sectionDoc = await sectionDocRef.get();
+        console.log(`🚀 بدء توليد قسم "${agentInput.sectionToGenerate}" باستخدام القوالب الذكية`);
 
-        if (!sectionDoc.exists) {
-            throw new Error('Section not found in database.');
-        }
-
-        const agentInfo = sectionDoc.data() as { agentId: string; title: string };
-
-        if (!agentInfo) {
-            throw new Error('Unknown section requested.');
-        }
-
+        // استخدام النظام المحسن بالقوالب الذكية
         const result = await generateReportSection(agentInput);
 
         const transformedOutput = { [result.sectionName]: result.content };
 
-        // تسجيل العملية
+        // تسجيل العملية مع معلومات إضافية عن القالب المستخدم
         await logGeneration({
-            agentId: agentInfo.agentId,
+            agentId: `smart-template-${agentInput.sectionToGenerate}`,
             userId: user.id,
             input: agentInput,
             output: transformedOutput,
-            creditCost: this.creditCost,
+            creditCost: this.creditCost
         });
 
+        console.log(`✅ تم توليد قسم "${agentInput.sectionToGenerate}" بنجاح باستخدام القالب الذكي`);
         return transformedOutput;
     }
 }

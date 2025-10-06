@@ -36,15 +36,15 @@ export function useGenerateReportSection() {
 
   const reportTool = createReportToolHook({
     toolName: 'report-section-generator',
-    apiEndpoint: '/api/generate-report-section',
+    apiEndpoint: '/api/generate/report',
     schema: reportGenerationSchema,
     defaultValues,
     successMessage: 'Report section generated successfully!',
     errorMessage: 'Failed to generate report section',
     enableFileUpload: false,
-    reportType: 'academic',
+    reportType: 'technical',
     customFeatures: {
-      formatOutput: (data: any) => {
+      formatReportOutput: (data: any) => {
         if (data.content) {
           return {
             content: data.content,
@@ -58,7 +58,7 @@ export function useGenerateReportSection() {
         }
         return data;
       },
-      validateInput: (data: any) => {
+      validateReportStructure: (data: any) => {
         return data.sectionToGenerate?.length > 0;
       },
       getReportSections: () => [
@@ -80,7 +80,52 @@ export function useGenerateReportSection() {
     },
     onSuccess: (data, variables) => {
       const sectionKey = variables.body.sectionToGenerate as SectionName;
-      const content = Object.values(data)[0] as string;
+
+      console.log('Raw API response:', data); // Debug log
+
+      // Handle different response formats safely
+      let content: string;
+
+      // Check if data is a string (direct content)
+      if (typeof data === 'string') {
+        content = data;
+      }
+      // Check if data has a 'data' property with section content
+      else if (data && typeof data === 'object' && data.data && data.data[sectionKey]) {
+        content = data.data[sectionKey];
+      }
+      // Check if data has the section key as a property
+      else if (data && typeof data === 'object' && data[sectionKey]) {
+        content = data[sectionKey];
+      }
+      // Check if data has a 'content' property
+      else if (data && typeof data === 'object' && data.content) {
+        content = data.content;
+      }
+      // Check if data is an object with section name as key (like {"abstract": "content"})
+      else if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+        const firstKey = Object.keys(data)[0];
+        const firstValue = data[firstKey];
+
+        // If the value is a string, use it directly
+        if (typeof firstValue === 'string') {
+          content = firstValue;
+        }
+        // If the value is an object with content property
+        else if (firstValue && typeof firstValue === 'object' && firstValue.content) {
+          content = firstValue.content;
+        }
+        // Otherwise, stringify the value
+        else {
+          content = JSON.stringify(firstValue, null, 2);
+        }
+      }
+      else {
+        console.error('Unexpected response format:', data);
+        return;
+      }
+
+      console.log('Extracted content:', content); // Debug log
 
       // Use the new updater function for safe and centralized state updates
       updateProject(p => {
@@ -107,15 +152,15 @@ export function useGenerateReportSection() {
 
     // النسخ
     isCopied: reportTool.isCopied,
-    handleCopy: reportTool.copyToClipboard,
+    handleCopy: reportTool.handleCopy,
 
     // المعالجة
-    onSubmit: reportTool.handleSubmit,
+    onSubmit: reportTool.onSubmit,
     reset: reportTool.reset,
 
     // النتائج والوظائف المساعدة
-    formatOutput: reportTool.formatOutput,
-    validateInput: reportTool.validateInput,
+    formatOutput: reportTool.formatReportOutput,
+    validateInput: reportTool.validateReportStructure,
     getReportSections: reportTool.getReportSections,
 
     // الطفرة (للتوافق مع الكود الموجود)

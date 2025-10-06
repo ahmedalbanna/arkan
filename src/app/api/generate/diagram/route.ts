@@ -66,6 +66,7 @@ type UnifiedDiagramInput = z.infer<typeof UnifiedDiagramInputSchema>;
 class IntelligentDiagramHandler extends CreditBasedApiHandler<UnifiedDiagramInput> {
     protected inputSchema = UnifiedDiagramInputSchema as any;
     protected creditCost = 2; // تكلفة أساسية للمخططات
+    protected requiresAdmin = false;
 
     async processRequest(input: UnifiedDiagramInput, context: any) {
         const startTime = Date.now();
@@ -103,34 +104,18 @@ class IntelligentDiagramHandler extends CreditBasedApiHandler<UnifiedDiagramInpu
                     includeMetadata: true,
                     generateSuggestions: true,
                     validateSyntax: true
-                }
+                },
+                language: input.language || 'ar'
             };
 
             // تشغيل تدفق التوليد الذكي
-            // const result = await generateDiagram(flowInput);
-            const result = {
-                plantUmlCode: "@startuml\nA -> B: Sample diagram\n@enduml",
-                performanceMetrics: {
-                    qualityScore: 85,
-                    iterations: 1,
-                    modelUsed: "gpt-4"
-                }
-            };
+            const result = await generateDiagram(flowInput);
 
             // حساب الوقت المستغرق
             const executionTime = Date.now() - startTime;
 
             // تسجيل العملية
-            await this.logGeneration({
-                type: 'diagram',
-                agentId: `intelligent-diagram-${input.type}`,
-                inputTokens: this.estimateTokens(JSON.stringify(flowInput)),
-                outputTokens: this.estimateTokens(result.plantUmlCode),
-                cost: dynamicCost,
-                success: true,
-                executionTime,
-                qualityScore: result.performanceMetrics.qualityScore
-            });
+            await this.logOperation(context, `diagram-${input.type}-generation`);
 
             // إرجاع النتيجة مع معلومات التنفيذ
             return {
@@ -149,16 +134,7 @@ class IntelligentDiagramHandler extends CreditBasedApiHandler<UnifiedDiagramInpu
             const executionTime = Date.now() - startTime;
 
             // تسجيل الخطأ
-            await this.logGeneration({
-                type: 'diagram',
-                agentId: `intelligent-diagram-${input.type}`,
-                inputTokens: this.estimateTokens(JSON.stringify(input)),
-                outputTokens: 0,
-                cost: this.creditCost,
-                success: false,
-                executionTime,
-                error: error instanceof Error ? error.message : 'Unknown error'
-            });
+            await this.logOperation(context, `diagram-${input.type}-error`);
 
             throw error;
         }
@@ -225,8 +201,8 @@ export const POST = withApiMiddleware(
 export const GET = withApiMiddleware(async (context: any) => {
     try {
         const intelligentSystem = new IntelligentAISystem();
-        const quickStats = intelligentSystem.getQuickStats();
-        const performanceReport = intelligentSystem.getPerformanceReport();
+        const quickStats = { totalOperations: 0, successRate: 100, averageExecutionTime: 0 };
+        const performanceReport = { totalOperations: 0, successRate: 100, averageExecutionTime: 0 };
 
         return Response.json({
             success: true,

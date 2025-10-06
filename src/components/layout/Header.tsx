@@ -1,27 +1,25 @@
 
-
 'use client';
-
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { useLocalization } from '@/context/LocalizationContext';
-import { cn } from '@/lib/utils';
-import { AreaChart, Bell, BookOpenCheck, Bot, CreditCard, FileImage, FileText, FolderOpen, Gem, History, HomeIcon, Languages, LayoutDashboard, LogOut, Menu, Palette, PencilLine, PencilRuler, PenSquare, Settings, SlidersHorizontal, Trash2, User, UserCog, UserPlus, Users, Wrench } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/context/AuthContext';
+import { useLocalization } from '@/context/LocalizationContext';
 import { useChatStore, useClearAllNotifications, useLogout, useMarkNotificationsAsRead } from '@/hooks';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { Notification } from '@/lib/types';
+import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+import { AreaChart, Bell, BookOpenCheck, Bot, CreditCard, FileImage, FileText, FolderOpen, Gem, History, HomeIcon, Languages, LayoutDashboard, LogOut, Menu, Palette, PencilLine, PencilRuler, PenSquare, Settings, SlidersHorizontal, Trash2, User, UserCog, UserPlus, Users, Wrench } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 
