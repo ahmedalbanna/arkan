@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from './use-toast';
 import { generatePresentationApi, generatePresentationOutlineApi } from '@/services/presentation-service';
-import type { GeneratePresentationOutput, PresentationHistoryEntry, GeneratePresentationOutlineOutput, GeneratePresentationOutlineInput } from '@/ai/schemas';
+import type { GeneratePresentationOutlineInput, GeneratePresentationOutlineOutput } from '@/ai/schemas';
 import { usePresentationStore } from './usePresentationStore';
 import { useLocalization } from '@/context/LocalizationContext';
 import { userKeys } from '@/lib/query-keys';
@@ -21,10 +21,10 @@ export function useGeneratePresentation() {
     const { firebaseUser } = useAuth();
     const { addPresentationToHistory } = usePresentationStore();
 
-    return useMutation<GeneratePresentationOutput, Error, GeneratePresentationVariables>({
+    return useMutation<any, Error, GeneratePresentationVariables>({
         mutationFn: generatePresentationApi,
         onSuccess: (data) => {
-            const newEntry: PresentationHistoryEntry = {
+            const newEntry = {
                 id: new Date().toISOString(),
                 name: `Presentation - ${new Date().toLocaleTimeString()}`,
                 slides: data.slides,

@@ -3,7 +3,7 @@
  * يختار أفضل نموذج AI بناءً على نوع المهمة والسياق
  */
 
-import { defaultModel, imageGenerationModel, proModel } from '../config/models';
+import { defaultModel, imageGenerationModel, proModel } from '@/ai/config/models';
 import { ContextAnalysisResult } from './context-analyzer';
 
 export interface ModelConfig {

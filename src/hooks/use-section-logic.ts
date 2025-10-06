@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/use-section-logic.md
 
 'use client';
@@ -6,29 +7,13 @@ import { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation } from '@tanstack/react-query';
-import type { ManipulateTextOutput, ManipulateTextInput, SectionName } from '@/ai/schemas';
+import type { ManipulateTextInput, SectionName } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTextToSpeech } from '@/hooks/use-text-to-speech';
 import { useWritingTool } from '@/hooks/use-writing-tools';
 import { computeDiff, DiffPart } from '@/lib/diff';
 import { processPlantUml } from '@/lib/utils';
-
-// API call function for text manipulation
-async function manipulateTextApi(variables: { data: ManipulateTextInput, token: string }): Promise<ManipulateTextOutput> {
-    const response = await fetch('/api/manipulate-text', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}`,
-        },
-        body: JSON.stringify(variables.data),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to manipulate text');
-    }
-    return response.json();
-}
+import { manipulateTextApi } from '@/services/generation-service';
 
 // Helper to calculate word and character counts
 const calculateCounts = (text: string) => {
@@ -58,7 +43,10 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
     }, [content]);
 
     const manipulateMutation = useMutation({
-        mutationFn: manipulateTextApi,
+        mutationFn: async (data: ManipulateTextInput) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return manipulateTextApi({ data, token });
+        },
         onSuccess: (data) => {
             setAiSuggestion(data.rewrittenText);
             setDiff(computeDiff(content, data.rewrittenText));
@@ -109,16 +97,15 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
     }, [audioSrc, showAudioPlayer]);
 
 
-    const handleAiAction = async (command: string) => {
+    const handleAiAction = (command: string) => {
         if (!firebaseUser) {
             toast({ title: t('builder.toasts.authError'), variant: "destructive" });
             return;
         }
         setAiSuggestion(null);
         setDiff(null);
-        const token = await firebaseUser.getIdToken();
         const data = { textToManipulate: content, command };
-        manipulateMutation.mutate({ data, token });
+        manipulateMutation.mutate(data);
     };
 
     const handleReadAloud = () => {

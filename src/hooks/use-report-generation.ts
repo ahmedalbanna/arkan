@@ -2,14 +2,13 @@
 // For a detailed explanation of the data flow, see docs/data-flows/report-section-generation.md
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { generateReportSectionApi, generateFullReportApi } from '@/services/report-service';
 import { toast } from './use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { SectionName } from '@/ai/schemas';
 import { useReportStore } from './useReportStore';
-import { userKeys } from '@/lib/query-keys';
 
 export function useGenerateReportSection() {
   const { firebaseUser, refetchUser } = useAuth();

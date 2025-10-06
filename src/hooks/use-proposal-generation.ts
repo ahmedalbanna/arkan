@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -17,7 +16,7 @@ export interface GenerateProposalBody {
     projectIdea: string;
     templateId: string;
     customGuidelines: string[];
-    externalContext: ExternalContext[];
+    externalContext?: ExternalContext[];
     advancedFields?: AdvancedProposalFields;
 }
 

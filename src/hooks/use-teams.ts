@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -31,13 +32,9 @@ export function useTeams() {
 
 export function useCreateTeam() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
     
-    return useMutation<Team, Error, { name: string }>({
-        mutationFn: async (variables) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return createTeamApi({ ...variables, token });
-        },
+    return useMutation<Team, Error, { name: string; token: string }>({
+        mutationFn: createTeamApi,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: teamKeys.lists() });
         },
@@ -49,13 +46,9 @@ export function useCreateTeam() {
 
 export function useInviteMember() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
 
-    return useMutation<any, Error, { teamId: string, email: string }>({
-        mutationFn: async (variables) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return inviteMemberApi({ ...variables, token });
-        },
+    return useMutation<any, Error, { teamId: string; email: string; token: string }>({
+        mutationFn: inviteMemberApi,
         onSuccess: () => {
              queryClient.invalidateQueries({ queryKey: teamKeys.lists() });
         },

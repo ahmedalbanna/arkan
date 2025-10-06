@@ -3,11 +3,10 @@
 
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { writingToolApi } from '@/services/writing-tools-service';
-import { toast } from '@/hooks/use-toast';
 import { handleErrorUtility } from '@/lib/errorUtils';
 
 /**
