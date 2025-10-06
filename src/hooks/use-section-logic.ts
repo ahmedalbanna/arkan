@@ -3,17 +3,18 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/context/AuthContext';
-import { useMutation } from '@tanstack/react-query';
 import type { ManipulateTextInput, SectionName } from '@/ai/schemas';
+import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTextToSpeech } from '@/hooks/use-text-to-speech';
+import { useToast } from '@/hooks/use-toast';
 import { useWritingTool } from '@/hooks/use-writing-tools';
+import { getAuthenticatedToken } from '@/lib/authUtils';
 import { computeDiff, DiffPart } from '@/lib/diff';
 import { processPlantUml } from '@/lib/utils';
 import { manipulateTextApi } from '@/services/generation-service';
+import { useMutation } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
 
 // Helper to calculate word and character counts
 const calculateCounts = (text: string) => {
@@ -71,7 +72,7 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
                 setAiSuggestion(data.rewrittenText);
                 setDiff(computeDiff(content, data.rewrittenText));
             },
-            onError: (error: any) => toast({ title: t('builder.Section.toasts.rewriteFailed'), description: error.message, variant: "destructive"})
+            onError: (error: any) => toast({ title: t('builder.Section.toasts.rewriteFailed'), description: error.message, variant: "destructive" })
         });
     }
 
@@ -83,7 +84,7 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
                 setAiSuggestion(data.humanizedText);
                 setDiff(computeDiff(content, data.humanizedText));
             },
-            onError: (error: any) => toast({ title: t('builder.Section.toasts.humanizeFailed'), description: error.message, variant: "destructive"})
+            onError: (error: any) => toast({ title: t('builder.Section.toasts.humanizeFailed'), description: error.message, variant: "destructive" })
         });
     }
 
@@ -117,7 +118,7 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
             onSuccess: (data) => {
                 setAudioSrc(data.audioDataUri);
                 setShowAudioPlayer(true);
-                toast({ title: t('builder.Section.toasts.ttsSuccessTitle'), description: t('builder.Section.toasts.ttsSuccessDesc')});
+                toast({ title: t('builder.Section.toasts.ttsSuccessTitle'), description: t('builder.Section.toasts.ttsSuccessDesc') });
             },
         });
     };

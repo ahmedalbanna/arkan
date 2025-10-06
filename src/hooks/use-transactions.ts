@@ -1,14 +1,20 @@
 
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { transactionKeys, userKeys } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
-import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { toast } from './use-toast';
+import { handleErrorUtility } from '@/lib/errorUtils';
+import { transactionKeys, userKeys } from '@/lib/query-keys';
 import { verifyPayment as verifyPaymentApi } from '@/services/transaction-service';
-import { VerifyPaymentVariables } from '@/lib/types';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from './use-toast';
+
+export interface VerifyPaymentVariables {
+    transactionId: string;
+    userId: string;
+    status: 'approved' | 'rejected';
+    adminNotes?: string;
+}
 
 
 /**

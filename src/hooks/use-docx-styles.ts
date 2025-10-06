@@ -1,27 +1,27 @@
 
 'use client';
 
-import * as React from 'react';
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
-import { handleErrorUtility } from "@/lib/errorUtils";
+import { toast } from "@/hooks/use-toast";
 import { getAuthenticatedToken } from "@/lib/authUtils";
-import {
-  fetchDocxTemplates as fetchDocxTemplatesApi,
-  updateDocxTemplate,
-  createDocxTemplate,
-  deleteDocxTemplate,
-} from "@/services/template-service";
-import type { DocxTemplate, DocxTemplatesRecord } from '@/services/template-service';
-import type { IStylesOptions } from 'docx';
 import { templates as defaultTemplates } from '@/lib/docx-styles';
+import { handleErrorUtility } from "@/lib/errorUtils";
 import { TemplateKey } from '@/lib/types';
+import type { DocxTemplate, DocxTemplatesRecord } from '@/services/template-service';
+import {
+    createDocxTemplate,
+    deleteDocxTemplate,
+    fetchDocxTemplates as fetchDocxTemplatesApi,
+    updateDocxTemplate,
+} from "@/services/template-service";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { IStylesOptions } from 'docx';
+import * as React from 'react';
 
 
 export const docxTemplateKeys = {
-  all: ["docx-templates"] as const,
-  lists: () => [...docxTemplateKeys.all, "list"] as const,
+    all: ["docx-templates"] as const,
+    lists: () => [...docxTemplateKeys.all, "list"] as const,
 };
 
 export function useDocxStyles() {
@@ -35,7 +35,7 @@ export function useDocxStyles() {
         queryKey: docxTemplateKeys.lists(),
         queryFn: fetchDocxTemplatesApi,
         staleTime: 1000 * 60 * 5, // 5 minutes
-        initialData: defaultTemplates as Record<string, DocxTemplate>,
+        initialData: defaultTemplates as unknown as Record<string, DocxTemplate>,
         meta: {
             onError: (error: Error) => handleErrorUtility(error, "Failed to fetch DOCX templates"),
         },
@@ -70,7 +70,7 @@ export function useDocxStyles() {
         if (activeTemplateKey) {
             setLocalChanges(prev => {
                 const newStyles = JSON.parse(JSON.stringify(prev[activeTemplateKey] || templates?.[activeTemplateKey]?.styles || {}));
-                
+
                 let current = newStyles;
                 const keys = path.split('.');
                 for (let i = 0; i < keys.length - 1; i++) {
@@ -83,7 +83,7 @@ export function useDocxStyles() {
             });
         }
     };
-    
+
     const saveChanges = (key: string) => {
         const changesToSave = localChanges[key];
         if (changesToSave) {
@@ -91,7 +91,7 @@ export function useDocxStyles() {
         }
     };
 
-    return { 
+    return {
         templates,
         isLoaded: !isLoading,
         activeTemplateKey,
@@ -108,7 +108,7 @@ export function useCreateDocxTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
     return useMutation({
-        mutationFn: async (data: {id: string, name: string, description: string}) => {
+        mutationFn: async (data: { id: string, name: string, description: string }) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return createDocxTemplate(data, token);
         },

@@ -9,8 +9,8 @@ import {
     IntelligentPromptBuilder
 } from '@/ai/core';
 import { ai } from '@/ai/genkit';
-import type { SectionName } from '@/ai/schemas/enums';
 import { z } from 'genkit';
+import { SectionName } from '../schemas';
 
 // مخطط عام لمدخلات الـ prompts المتخصصة
 const SectionPromptInputSchema = z.object({

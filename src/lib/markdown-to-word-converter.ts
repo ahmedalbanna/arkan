@@ -1,44 +1,38 @@
 // src/lib/markdown-to-word-converter.ts
 
+import { getProxiedImageBuffer, processPlantUml } from '@/lib/utils';
 import {
-  Document,
-  Packer,
-  Paragraph,
-  TextRun,
-  HeadingLevel,
-  IStylesOptions,
-  SectionType,
-  WidthType,
-  Table,
-  TableRow,
-  TableCell,
-  FootnoteReferenceRun,
-  IFootnotesOptions,
-  ImageRun,
-  ExternalHyperlink,
-  ShadingType,
   AlignmentType,
-  Header,
+  Document,
+  ExternalHyperlink,
   Footer,
-  PageNumber,
+  FootnoteReferenceRun,
+  Header,
+  HeadingLevel,
   IHeaderOptions,
-  ISectionOptions,
   INumberingOptions,
-  TableOfContents,
-  FootNotes,
-  EmphasisMarkType,
-  FootNoteReferenceRunAttributes,
-  FootnoteReference,
-  FootnoteReferenceElement,
+  IRunOptions,
+  ISectionOptions,
+  IStylesOptions,
+  ImageRun,
+  Packer,
+  PageNumber,
+  Paragraph,
+  SectionType,
+  ShadingType,
   SimpleField,
-  IRunOptions
+  Table,
+  TableCell,
+  TableOfContents,
+  TableRow,
+  TextRun,
+  WidthType
 } from 'docx';
 import { saveAs } from 'file-saver';
-import { unified, type Plugin } from 'unified';
-import remarkParse from 'remark-parse';
+import { FootnoteDefinition, List, PhrasingContent, Root, RootContent } from 'mdast';
 import remarkGfm from 'remark-gfm';
-import { Root, List, PhrasingContent, RootContent, FootnoteDefinition } from 'mdast';
-import { getProxiedImageBuffer, processPlantUml } from '@/lib/utils';
+import remarkParse from 'remark-parse';
+import { unified } from 'unified';
 
 // Define font options for different language scripts
 interface FontOptions {
@@ -97,7 +91,7 @@ async function transformInlines(
         runs.push(new TextRun({
           ...options,
           text: node.value,
-          font: { ...options.font, name: codeFont },
+          font: options.font && typeof options.font === 'object' ? { ...options.font, name: codeFont } : { name: codeFont },
           shading: { type: ShadingType.CLEAR, fill: 'F2F2F2' },
         }));
         break;
@@ -131,9 +125,9 @@ async function processFootnotes(
   ast: Root,
   isRtl = false,
   fonts: FontOptions = {}
-): Promise<{ footnoteIdMap: Map<string, number>; docxFootnotes: IFootnotesOptions }> {
+): Promise<{ footnoteIdMap: Map<string, number>; docxFootnotes: Record<number, { children: Paragraph[] }> }> {
   const footnoteIdMap = new Map<string, number>();
-  const docxFootnotes: IFootnotesOptions = {};
+  const docxFootnotes: Record<number, { children: Paragraph[] }> = {};
   let footnoteCounter = 1;
 
   const footnoteDefs = ast.children.filter(
@@ -145,9 +139,10 @@ async function processFootnotes(
     footnoteIdMap.set(node.identifier, id);
 
     const defaultFontName = isRtl ? fonts.rtl : fonts.default;
-    const runOptions: IRunOptions = {};
-    if (isRtl) runOptions.rightToLeft = true;
-    if (defaultFontName) runOptions.font = { name: defaultFontName };
+    const runOptions: IRunOptions = {
+      ...(isRtl && { rightToLeft: true }),
+      ...(defaultFontName && { font: { name: defaultFontName } })
+    };
 
     const footnoteParagraphs: Paragraph[] = [];
     for (const contentNode of node.children) {
@@ -177,9 +172,10 @@ async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, num
   const docxObjects: DocxObject[] = [];
 
   const defaultFontName = isRtl ? fonts.rtl : fonts.default;
-  const baseRunOptions: IRunOptions = {};
-  if (isRtl) baseRunOptions.rightToLeft = true;
-  if (defaultFontName) baseRunOptions.font = { name: defaultFontName };
+  const baseRunOptions: IRunOptions = {
+    ...(isRtl && { rightToLeft: true }),
+    ...(defaultFontName && { font: { name: defaultFontName } })
+  };
 
   const baseParagraphOptions = {
     bidirectional: isRtl,
@@ -239,7 +235,7 @@ async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, num
           new Paragraph({
             ...baseParagraphOptions,
             children: await transformInlines(node.children, footnoteIdMap, baseRunOptions, fonts),
-            heading: `Heading${node.depth}` as HeadingLevel,
+            heading: `Heading${node.depth}` as typeof HeadingLevel[keyof typeof HeadingLevel],
           })
         );
         break;
@@ -293,7 +289,7 @@ async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, num
           docxObjects.push(new Paragraph({
             children: [
               new TextRun({ text: "Table ", bold: true }),
-              new SimpleField(`SEQ Table \\* ARABIC`, true),
+              new SimpleField(`SEQ Table \\* ARABIC`),
               new TextRun({ text: ": ", bold: true }),
               new TextRun(captionText),
             ],
@@ -338,7 +334,8 @@ async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, num
         const textRuns = codeLines.map((line, index) => {
           const textRun = new TextRun({
             text: line,
-            font: { name: codeFont, size: 18 }, // 9pt font for code
+            font: { name: codeFont },
+            size: 18, // 9pt font for code
           });
           // Add a line break except for the last line
           return index < codeLines.length - 1 ? [textRun, new TextRun({ break: 1 })] : [textRun];
@@ -429,15 +426,7 @@ function prepareHeadersAndFooters(options: ConversionOptions): {
   }
   if (header?.default || watermark) {
     const defaultHeaderOptions: IHeaderOptions = { children: header?.default || [] };
-    if (watermark) {
-      defaultHeaderOptions.watermark = {
-        type: 'text',
-        text: watermark,
-        color: "D3D3D3", // Light Grey
-        font: "Calibri",
-        angle: -45,
-      };
-    }
+    // Note: watermark property is not available in IHeaderOptions, removing this feature
     headerConfiguration.default = new Header(defaultHeaderOptions);
   }
 
@@ -493,7 +482,9 @@ async function buildDocumentSections(
       properties: {
         type: SectionType.NEXT_PAGE,
       },
-      children: coverPageChildren,
+      children: coverPageChildren.filter((child): child is Paragraph | Table =>
+        child instanceof Paragraph || child instanceof Table
+      ),
     });
   }
 
@@ -540,9 +531,8 @@ async function buildDocumentSections(
       properties: {
         type: SectionType.NEXT_PAGE,
         page: {
-          margins: paper?.margins,
+          margin: paper?.margins,
           size: paper?.size,
-          orientation: chunk.orientation,
         },
         titlePage: hasCoverPage && isFirstContentSection ? !!(options.header?.first || options.footer?.first) : false,
       },
@@ -569,27 +559,28 @@ export async function convertMarkdownToWord(
 ) {
   const { styles, isRtl, fonts = {} } = options;
   // Create a mutable copy of styles to avoid side effects on the original options object
-  const finalStyles: IStylesOptions = {
-    ...styles,
-    paragraphStyles: [...(styles?.paragraphStyles || [])],
-  };
+  const existingParagraphStyles = styles?.paragraphStyles || [];
+  const captionStyleExists = existingParagraphStyles.some(style => style.id === 'Caption');
 
-  // Ensure Caption style exists for table and figure captions
-  const captionStyleExists = finalStyles.paragraphStyles!.some(style => style.id === 'Caption');
-  if (!captionStyleExists) {
-    finalStyles.paragraphStyles!.push({
-      id: 'Caption',
-      name: 'Caption',
-      basedOn: 'Normal',
-      next: 'Normal',
-      quickFormat: true,
-      run: { size: 18, italics: true, color: '595959' }, // 9pt, Italic, Grey
-      paragraph: {
-        alignment: AlignmentType.CENTER,
-        spacing: { before: 120, after: 240 }, // 6pt before, 12pt after
-      },
-    });
-  }
+  const finalStyles: IStylesOptions = {
+    default: styles?.default,
+    paragraphStyles: captionStyleExists ? existingParagraphStyles : [
+      ...existingParagraphStyles,
+      {
+        id: 'Caption',
+        name: 'Caption',
+        basedOn: 'Normal',
+        next: 'Normal',
+        quickFormat: true,
+        run: { size: 18, italics: true, color: '595959' }, // 9pt, Italic, Grey
+        paragraph: {
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 120, after: 240 }, // 6pt before, 12pt after
+        },
+      }
+    ],
+    characterStyles: styles?.characterStyles,
+  };
 
   const { docxObjects, docxFootnotes } = await createDocxContent(markdown, isRtl, fonts);
 

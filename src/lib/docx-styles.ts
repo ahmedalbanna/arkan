@@ -1,7 +1,7 @@
 'use client';
 
+import type { IParagraphOptions, IStylesOptions } from 'docx';
 import { AlignmentType, ShadingType } from 'docx';
-import type { IStylesOptions, IParagraphOptions } from 'docx';
 
 // New interface for custom, non-standard styles
 export interface CustomStyles {
@@ -173,49 +173,6 @@ const modernStyles: IStylesOptions = {
         }
     ],
     characterStyles: commonCharacterStyles,
-    tableStyles: [
-        {
-            id: 'CustomTableStyle',
-            name: 'Custom Table',
-            basedOn: 'TableNormal',
-            run: {
-                size: 20, // 10pt
-                font: { name: 'Calibri' },
-            },
-            paragraph: {
-                spacing: { before: 100, after: 100 },
-            },
-            table: {
-                cellMargin: {
-                    top: 100,
-                    bottom: 100,
-                    left: 100,
-                    right: 100,
-                },
-                borders: {
-                    insideHorizontal: { style: 'single', size: 1, color: 'D9D9D9' },
-                    insideVertical: { style: 'single', size: 1, color: 'D9D9D9' },
-                    top: { style: 'single', size: 2, color: 'BFBFBF' },
-                    bottom: { style: 'single', size: 2, color: 'BFBFBF' },
-                    left: { style: 'single', size: 2, color: 'BFBFBF' },
-                    right: { style: 'single', size: 2, color: 'BFBFBF' },
-                },
-            },
-            tableRow: {
-                // These properties are applied to all rows
-            },
-            tableCell: {
-                // These properties are applied to all cells
-                verticalAlign: 'center',
-            },
-            conditionalFormatting: {
-                firstRow: {
-                    run: { bold: true },
-                    tableCell: { shading: { type: 'clear', fill: 'F2F2F2' } },
-                },
-            }
-        }
-    ]
 };
 
 const classicStyles: IStylesOptions = {
