@@ -12,9 +12,9 @@ import { ContextAnalyzer } from '@/ai/core/context-analyzer';
 import { IterativeImprovementEngine } from '@/ai/core/iterative-improvement-engine';
 import { OutputQualityValidator } from '@/ai/core/output-quality-validator';
 import { ai } from '@/ai/genkit';
+import { GenerateProposalInputSchema, ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { GenerateProposalInputSchema, ProjectProposalSchema, type GenerateProposalInput, type ProjectProposal } from '@/ai/schemas';
 
 const PromptInputSchema = z.object({
   projectIdea: z.string(),
@@ -26,13 +26,13 @@ const PromptInputSchema = z.object({
 const jsonSchema = zodToJsonSchema(ProjectProposalSchema, "ProjectProposal");
 const schemaString = JSON.stringify(jsonSchema, null, 2);
 
-  export const generateProposalPrompt = ai.definePrompt(
-    {
-      name: 'generateProposalPrompt',
-      input: { schema: PromptInputSchema },
-      output: { schema: ProjectProposalSchema },
-      model: 'googleai/gemini-1.5-flash',
-      system: `You are an expert project manager and technical writer. Your task is to generate a comprehensive and professional project proposal based on the provided idea and context.
+export const generateProposalPrompt = ai.definePrompt(
+  {
+    name: 'generateProposalPrompt',
+    input: { schema: PromptInputSchema },
+    output: { schema: ProjectProposalSchema },
+    model: 'googleai/gemini-1.5-flash',
+    system: `You are an expert project manager and technical writer. Your task is to generate a comprehensive and professional project proposal based on the provided idea and context.
 Your entire response must be a valid JSON object that adheres to the provided output schema.
 For all string fields in the schema, you MUST use well-formed markdown syntax. This includes properly formatted lists, bold text, etc., where appropriate.
 The 'description' fields in the JSON schema below are your primary instructions for what to generate for each property.
@@ -40,7 +40,7 @@ The 'description' fields in the JSON schema below are your primary instructions 
 --- OUTPUT SCHEMA ---
 ${schemaString}
 ---`,
-      prompt: `
+    prompt: `
 {{#if guidelines}}
 --- Guidelines ---
 {{#each guidelines}}
@@ -71,12 +71,12 @@ File: {{this.fileName}}
 --- Main Input: Project Idea ---
 {{{projectIdea}}}
 `,
-      config: {
-        temperature: 0.7,
-        maxOutputTokens: 8192,
-      },
+    config: {
+      temperature: 0.7,
+      maxOutputTokens: 8192,
     },
-  );
+  },
+);
 
 export const generateProposal = ai.defineFlow(
   {
@@ -87,24 +87,12 @@ export const generateProposal = ai.defineFlow(
   async (input): Promise<ProjectProposal> => {
     const { projectIdea, guidelines, externalContext } = input;
 
-<<<<<<< HEAD
-    const textContext = externalContext?.filter(f => !f.content.startsWith('data:')) || [];
-    const mediaContext = externalContext?.filter(f => f.content.startsWith('data:')) || [];
-
-    const { output } = await generateProposalPrompt({
-      projectIdea,
-      guidelines,
-      textContext,
-      mediaContext,
-    });
-=======
     try {
       console.log('🚀 بدء توليد المقترح بالنظام المحسن...');
 
       // محاولة استخدام النظام الذكي المحسن
       try {
         console.log('🧠 محاولة استخدام النظام الذكي المحسن...');
->>>>>>> 8d4968ff (🎉 تم إنجاز المشروع بنجاح كامل!)
 
         // 1. تحليل السياق الذكي
         console.log('📊 تحليل السياق...');
