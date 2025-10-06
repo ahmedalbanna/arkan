@@ -5,6 +5,7 @@ import { SectionName } from '@/ai/schemas';
 import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
 import { Accordion } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { LoadingIndicator, SectionLoadingCard } from '@/components/ui/loading-indicators';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Agent } from '@/lib/models/agent';
 import { Section } from '@/lib/models/section';
@@ -22,9 +23,18 @@ interface SortableSectionItemProps {
     isAnythingGenerating: boolean;
     hasCredits: boolean;
     onGenerate: () => void;
+    // إضافة خصائص جديدة للتحسين
+    generationState?: {
+        isLoading: boolean;
+        isSuccess?: boolean;
+        isError?: boolean;
+        progress?: number;
+        message?: string;
+    };
+    onRetry?: () => void;
 }
 
-function SortableSectionItem({ id, agent, ...props }: SortableSectionItemProps) {
+function SortableSectionItem({ id, agent, generationState, onRetry, ...props }: SortableSectionItemProps) {
     const {
         attributes,
         listeners,
@@ -38,6 +48,21 @@ function SortableSectionItem({ id, agent, ...props }: SortableSectionItemProps) 
         transition,
     };
 
+    // إذا كان هناك حالة توليد محسنة، استخدم مكون التحميل الجديد
+    if (generationState && (generationState.isLoading || generationState.isSuccess || generationState.isError)) {
+        return (
+            <div ref={setNodeRef} style={style} {...attributes}>
+                <SectionLoadingCard
+                    sectionName={agent.name}
+                    state={generationState}
+                    onRetry={onRetry}
+                    className="mb-2"
+                />
+            </div>
+        );
+    }
+
+    // استخدام المكون الأصلي للحالات العادية
     return (
         <div ref={setNodeRef} style={style} {...attributes}>
             <SectionAccordionItem
@@ -62,6 +87,15 @@ interface GenerationToolsProps {
     onGenerateSection: (sectionId: SectionName) => void;
     hasCreditsForSingleSection: boolean;
     agents: Agent[];
+    // إضافة خصائص جديدة للتحسين
+    generationStates?: Record<string, {
+        isLoading: boolean;
+        isSuccess?: boolean;
+        isError?: boolean;
+        progress?: number;
+        message?: string;
+    }>;
+    onRetrySection?: (sectionId: string) => void;
 }
 
 export const GenerationTools = ({
@@ -73,6 +107,8 @@ export const GenerationTools = ({
     onGenerateSection,
     hasCreditsForSingleSection,
     agents,
+    generationStates = {},
+    onRetrySection,
 }: GenerationToolsProps) => {
     const { t } = useLocalization();
 
@@ -95,6 +131,13 @@ export const GenerationTools = ({
 
     const isDisabled = isAnythingGenerating;
 
+    // حساب إحصائيات التوليد
+    const generationStats = {
+        total: orderedSections.length,
+        completed: Object.values(generationStates).filter(state => state.isSuccess).length,
+        failed: Object.values(generationStates).filter(state => state.isError).length,
+        generating: Object.values(generationStates).filter(state => state.isLoading).length,
+    };
 
     return (
         <Card className={cn("flex flex-col h-full", (isDisabled) && 'opacity-50 pointer-events-none')}>
@@ -103,6 +146,22 @@ export const GenerationTools = ({
                     <div>
                         <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
                         <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
+
+                        {/* مؤشر حالة التوليد */}
+                        {isAnythingGenerating && (
+                            <div className="mt-2">
+                                <LoadingIndicator
+                                    state={{
+                                        isLoading: true,
+                                        message: `Generating ${activeMutationKey || 'section'}...`,
+                                        progress: generationStats.completed > 0 ?
+                                            (generationStats.completed / generationStats.total) * 100 : 0
+                                    }}
+                                    size="sm"
+                                    showProgress={true}
+                                />
+                            </div>
+                        )}
                     </div>
                     <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
                         <PanelLeftClose className="h-5 w-5" />
@@ -118,6 +177,14 @@ export const GenerationTools = ({
                                 if (!agent) return null;
 
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === section.id;
+                                const sectionState = generationStates[section.id] || {
+                                    isLoading: isGeneratingThis,
+                                    isSuccess: false,
+                                    isError: false,
+                                    progress: isGeneratingThis ? 50 : undefined,
+                                    message: isGeneratingThis ? 'Generating...' : undefined
+                                };
+
                                 return (
                                     <SortableSectionItem
                                         key={section.id}
@@ -127,6 +194,9 @@ export const GenerationTools = ({
                                         isGenerating={isGeneratingThis}
                                         isAnythingGenerating={isAnythingGenerating}
                                         hasCredits={!!hasCreditsForSingleSection}
+                                        // إضافة حالة التوليد المحسنة
+                                        generationState={sectionState}
+                                        onRetry={onRetrySection ? () => onRetrySection(section.id) : undefined}
                                     />
                                 );
                             })}
