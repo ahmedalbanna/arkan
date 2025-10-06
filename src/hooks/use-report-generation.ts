@@ -6,7 +6,6 @@ import { SectionName } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { createReportToolHook } from '@/core';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { cleanExtractedContent, createDetailedErrorMessage, extractContentFromResponse, validateApiResponse } from '@/lib/utils/response-extractor';
 import { generateReportSectionApi } from '@/services';
 import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
@@ -84,65 +83,60 @@ export function useGenerateReportSection() {
 
       console.log('Raw API response:', data); // Debug log
 
-      try {
-        // التحقق من صحة الاستجابة قبل المعالجة
-        if (!validateApiResponse(data, sectionKey)) {
-          throw new Error('Invalid or empty response from server');
-        }
+      // Handle different response formats safely
+      let content: string;
 
-        // استخراج المحتوى باستخدام الدالة المبسطة
-        const extractedResult = extractContentFromResponse(data, sectionKey);
-
-        // تنظيف المحتوى المستخرج
-        const cleanedContent = cleanExtractedContent(extractedResult.content);
-
-        console.log('Extracted content:', cleanedContent); // Debug log
-        console.log('Content metadata:', extractedResult.metadata); // Debug log
-
-        // تحديث حالة المشروع بالمحتوى المنظف
-        updateProject(p => {
-          p.updateSectionContent(sectionKey, cleanedContent);
-        });
-
-        // إظهار رسالة نجاح مع معلومات إضافية
-        const wordCount = extractedResult.metadata?.wordCount || cleanedContent.split(' ').length;
-        toast({
-          title: `Section "${sectionKey}" generated successfully!`,
-          description: `${wordCount} words generated`,
-          variant: "default"
-        });
-
-        refetchUser(); // تحديث الرصيد
-      } catch (error) {
-        console.error('Error processing response:', error);
-
-        // إنشاء رسالة خطأ مفصلة
-        const errorMessage = createDetailedErrorMessage(
-          error instanceof Error ? error : new Error('Unknown error'),
-          sectionKey,
-          data
-        );
-
-        toast({
-          title: `Failed to process "${sectionKey}" response`,
-          description: errorMessage,
-          variant: "destructive"
-        });
+      // Check if data is a string (direct content)
+      if (typeof data === 'string') {
+        content = data;
       }
-    },
-    onError: (error: Error, variables) => {
-      const sectionKey = variables.body.sectionToGenerate as SectionName;
+      // Check if data has a 'data' property with section content
+      else if (data && typeof data === 'object' && data.data && data.data[sectionKey]) {
+        content = data.data[sectionKey];
+      }
+      // Check if data has the section key as a property
+      else if (data && typeof data === 'object' && data[sectionKey]) {
+        content = data[sectionKey];
+      }
+      // Check if data has a 'content' property
+      else if (data && typeof data === 'object' && data.content) {
+        content = data.content;
+      }
+      // Check if data is an object with section name as key (like {"abstract": "content"})
+      else if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+        const firstKey = Object.keys(data)[0];
+        const firstValue = data[firstKey];
 
-      // إنشاء رسالة خطأ محسنة
-      const errorMessage = createDetailedErrorMessage(error, sectionKey);
+        // If the value is a string, use it directly
+        if (typeof firstValue === 'string') {
+          content = firstValue;
+        }
+        // If the value is an object with content property
+        else if (firstValue && typeof firstValue === 'object' && firstValue.content) {
+          content = firstValue.content;
+        }
+        // Otherwise, stringify the value
+        else {
+          content = JSON.stringify(firstValue, null, 2);
+        }
+      }
+      else {
+        console.error('Unexpected response format:', data);
+        return;
+      }
 
-      toast({
-        title: `Failed to generate "${sectionKey}"`,
-        description: errorMessage,
-        variant: "destructive"
+      console.log('Extracted content:', content); // Debug log
+
+      // Use the new updater function for safe and centralized state updates
+      updateProject(p => {
+        p.updateSectionContent(sectionKey, content);
       });
 
-      console.error(`Report generation error for ${sectionKey}:`, error);
+      refetchUser(); // To update credits
+    },
+    onError: (error: Error, variables) => {
+      const item = variables.body.sectionToGenerate;
+      toast({ title: `Failed to generate "${item}"`, description: error.message, variant: "destructive" });
     },
   });
 
