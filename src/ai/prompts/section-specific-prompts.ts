@@ -12,6 +12,43 @@ import { ai } from '@/ai/genkit';
 import type { SectionName } from '@/ai/schemas/enums';
 import { z } from 'genkit';
 
+/**
+ * Factory pattern لإنشاء قوالب الأقسام مع تقليل التكرار
+ */
+class SectionPromptFactory {
+    private static baseTemplate = {
+        commonInstructions: [
+            'استخدم لغة واضحة ومهنية',
+            'تأكد من صحة المعلومات',
+            'اربط المحتوى بأهداف المشروع',
+            'اتبع المعايير الأكاديمية'
+        ],
+        commonQualityFocus: ['clarity', 'completeness', 'relevance']
+    };
+
+    static createTemplate(sectionType: SectionName, config: {
+        title: string;
+        description: string;
+        systemPrompt: string;
+        userPrompt: string;
+        qualityFocus: string[];
+        specificInstructions: string[];
+    }) {
+        return {
+            systemPrompt: `${config.systemPrompt}
+
+**المبادئ العامة:**
+${this.baseTemplate.commonInstructions.map(instruction => `- ${instruction}`).join('\n')}`,
+            userPrompt: `${config.userPrompt}
+
+**التعليمات المحددة:**
+${config.specificInstructions.map(instruction => `- ${instruction}`).join('\n')}`,
+            qualityFocus: [...this.baseTemplate.commonQualityFocus, ...config.qualityFocus],
+            specificInstructions: [...this.baseTemplate.commonInstructions, ...config.specificInstructions]
+        };
+    }
+}
+
 // مخطط عام لمدخلات الـ prompts المتخصصة
 const SectionPromptInputSchema = z.object({
     sectionType: z.string(),
@@ -23,7 +60,7 @@ const SectionPromptInputSchema = z.object({
 });
 
 /**
- * قوالب الـ prompts المتخصصة لكل قسم
+ * قوالب الـ prompts المتخصصة لكل قسم (محسنة لتقليل التكرار)
  */
 export const SECTION_PROMPT_TEMPLATES: Partial<Record<SectionName, {
     systemPrompt: string;
@@ -65,7 +102,9 @@ export const SECTION_PROMPT_TEMPLATES: Partial<Record<SectionName, {
     },
 
     // شكر وتقدير
-    'acknowledgment': {
+    'acknowledgment': SectionPromptFactory.createTemplate('acknowledgment', {
+        title: 'شكر وتقدير',
+        description: 'صفحة شكر مهنية لجميع المساهمين',
         systemPrompt: `أنت خبير في كتابة صفحات الشكر والتقدير في التقارير الأكاديمية والمهنية. مهمتك كتابة شكر مناسب ومهني.
 
 **عناصر الشكر المثالي:**
@@ -80,21 +119,18 @@ export const SECTION_PROMPT_TEMPLATES: Partial<Record<SectionName, {
 2. الزملاء والفريق
 3. المؤسسات والجهات الداعمة
 4. الأهل والأصدقاء`,
-
         userPrompt: `اكتب صفحة شكر وتقدير مناسبة للتقرير. يجب أن تشمل:
 - شكر المشرفين والأساتذة
 - تقدير الزملاء والفريق
 - شكر المؤسسات الداعمة
 - استخدام لغة مهنية ومعبرة`,
-
-        qualityFocus: ['appropriateness', 'completeness', 'professionalism'],
+        qualityFocus: ['appropriateness', 'professionalism'],
         specificInstructions: [
-            'استخدم لغة مهنية ومحترمة',
             'اشكر جميع المساهمين المناسبين',
             'حافظ على الإيجاز والوضوح',
             'تجنب المبالغة في التعبير'
         ]
-    },
+    }),
 
     // المقدمة
     'introduction': {
@@ -415,7 +451,9 @@ export const SECTION_PROMPT_TEMPLATES: Partial<Record<SectionName, {
     },
 
     // المراجع
-    'references': {
+    'references': SectionPromptFactory.createTemplate('references', {
+        title: 'المراجع',
+        description: 'قائمة مراجع دقيقة ومكتملة',
         systemPrompt: `أنت خبير في إعداد قوائم المراجع والمصادر الأكاديمية. مهمتك إعداد قائمة مراجع دقيقة ومكتملة.
 
 **معايير المراجع المثالية:**
@@ -432,25 +470,25 @@ export const SECTION_PROMPT_TEMPLATES: Partial<Record<SectionName, {
 4. التقارير والوثائق
 5. المؤتمرات والندوات
 6. المصادر الرقمية`,
-
         userPrompt: `أعد قائمة مراجع شاملة ودقيقة تشمل:
 - جميع المصادر المستخدمة في التقرير
 - معلومات كاملة لكل مرجع
 - اتباع نمط استشهاد موحد
 - ترتيب أبجدي أو زمني مناسب
 - تنوع في أنواع المصادر`,
-
-        qualityFocus: ['accuracy', 'completeness', 'formatting', 'consistency'],
+        qualityFocus: ['accuracy', 'formatting', 'consistency'],
         specificInstructions: [
             'تأكد من دقة جميع المعلومات',
             'اتبع نمط استشهاد موحد',
             'رتب المراجع بشكل منطقي',
             'تأكد من اكتمال المعلومات المطلوبة'
         ]
-    },
+    }),
 
     // الملاحق
-    'appendices': {
+    'appendices': SectionPromptFactory.createTemplate('appendices', {
+        title: 'الملاحق',
+        description: 'ملاحق منظمة للمواد الداعمة',
         systemPrompt: `أنت خبير في إعداد ملاحق التقارير التقنية والأكاديمية. مهمتك تنظيم المواد الداعمة بشكل مفيد ومنظم.
 
 **عناصر الملاحق المثالية:**
@@ -467,22 +505,20 @@ export const SECTION_PROMPT_TEMPLATES: Partial<Record<SectionName, {
 4. الوثائق والنماذج
 5. البيانات الخام
 6. المواد المرجعية`,
-
         userPrompt: `أعد ملاحق شاملة ومنظمة تشمل:
 - المواد الداعمة للتقرير
 - تنظيم واضح ومنطقي
 - فهرسة وترقيم مناسب
 - ربط واضح بالمحتوى الرئيسي
 - سهولة الوصول والمراجعة`,
-
-        qualityFocus: ['relevance', 'organization', 'completeness', 'accessibility'],
+        qualityFocus: ['relevance', 'organization', 'accessibility'],
         specificInstructions: [
             'نظم المواد بشكل منطقي',
             'أضف فهرسة وترقيم واضح',
             'تأكد من صلة المواد بالتقرير',
             'اجعل الوصول للمعلومات سهلاً'
         ]
-    }
+    })
 };
 
 /**

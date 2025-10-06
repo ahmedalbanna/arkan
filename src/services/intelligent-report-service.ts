@@ -6,7 +6,7 @@
 import type { SectionName } from '@/ai/schemas/enums';
 import { apiClient } from '@/services/shared/api-client';
 
-// أنواع البيانات للخدمة الذكية
+// أنواع البيانات للخدمة الذكية المبسطة
 export interface IntelligentReportConfig {
     operationType: 'single-section' | 'complete-report';
     sectionToGenerate?: SectionName;
@@ -22,15 +22,6 @@ export interface IntelligentReportConfig {
     qualityThreshold?: number;
     enableIterativeImprovement?: boolean;
     enablePerformanceMonitoring?: boolean;
-    generateInOrder?: boolean;
-    useIntelligentDependencies?: boolean;
-    maxRetries?: number;
-    otherSections?: Record<string, string>;
-    instructionText?: string;
-    exampleFiles?: Array<{
-        fileName: string;
-        content: string;
-    }>;
 }
 
 export interface SingleSectionResult {
@@ -205,7 +196,7 @@ export const SUPPORTED_SECTIONS: Record<SectionName, {
 export class IntelligentReportService {
 
     /**
-     * تحليل السياق وتقديم توصيات للوضع المناسب
+     * تحليل السياق وتقديم توصيات للوضع المناسب (مبسط)
      */
     static async getModeRecommendation(config: {
         proposal?: any;
@@ -214,14 +205,9 @@ export class IntelligentReportService {
         sectionsToGenerate?: SectionName[];
         guidelines?: string[];
     }): Promise<{
-        recommendedMode: 'intelligent' | 'traditional' | 'hybrid';
+        recommendedMode: 'intelligent';
         confidence: number;
         reasoning: string[];
-        sectionRecommendations: Record<SectionName, {
-            recommendedMode: 'intelligent' | 'traditional';
-            reason: string;
-            complexity: 'low' | 'medium' | 'high';
-        }>;
     }> {
 
         // تحليل تعقيد المشروع
@@ -233,72 +219,41 @@ export class IntelligentReportService {
         // تحليل الأقسام المطلوبة
         const sectionAnalysis = this.analyzeRequiredSections(config.sectionsToGenerate || []);
 
-        // حساب التقويم العام
-        let recommendedMode: 'intelligent' | 'traditional' | 'hybrid' = 'traditional';
-        let confidence = 0.5;
+        // حساب التقويم العام (مبسط - دائماً ذكي)
+        let confidence = 0.7; // قيمة افتراضية جيدة
         const reasoning: string[] = [];
 
-        // المعايير للتوصية بالوضع الذكي
+        // المعايير لزيادة الثقة في النظام الذكي
         if (projectComplexity.score >= 7) {
-            recommendedMode = 'intelligent';
-            confidence += 0.3;
+            confidence += 0.2;
             reasoning.push('المشروع معقد ويتطلب تحليل سياق متقدم');
         }
 
         if (contentAnalysis.hasVisualContent || contentAnalysis.documentCount >= 3) {
-            recommendedMode = 'intelligent';
-            confidence += 0.2;
+            confidence += 0.15;
             reasoning.push('محتوى غني يتطلب تحليل ذكي');
         }
 
         if (sectionAnalysis.hasComplexSections) {
-            recommendedMode = 'intelligent';
-            confidence += 0.2;
+            confidence += 0.1;
             reasoning.push('أقسام معقدة تتطلب تحسين تكراري');
         }
 
         if (contentAnalysis.contextQuality >= 8) {
-            recommendedMode = 'intelligent';
-            confidence += 0.15;
+            confidence += 0.05;
             reasoning.push('جودة السياق عالية تسمح بالتوليد الذكي');
         }
 
-        // تقليل التوصية إذا كان المحتوى محدود
+        // تقليل الثقة إذا كان المحتوى محدود
         if (contentAnalysis.contextQuality < 5) {
-            recommendedMode = 'traditional';
-            confidence -= 0.2;
-            reasoning.push('المحتوى محدود، الوضع التقليدي أكثر ملاءمة');
+            confidence -= 0.1;
+            reasoning.push('المحتوى محدود، لكن النظام الذكي سيتعامل معه بكفاءة');
         }
-
-        // تقييم الحاجة للوضع المختلط
-        const mixedNeeds = sectionAnalysis.sections.some(s => s.complexity === 'high') &&
-            sectionAnalysis.sections.some(s => s.complexity === 'low');
-
-        if (mixedNeeds && confidence >= 0.6) {
-            recommendedMode = 'hybrid';
-            reasoning.push('أقسام متنوعة التعقيد تتطلب وضع مختلط');
-        }
-
-        // إنتاج توصيات الأقسام
-        const sectionRecommendations: Record<SectionName, {
-            recommendedMode: 'intelligent' | 'traditional';
-            reason: string;
-            complexity: 'low' | 'medium' | 'high';
-        }> = sectionAnalysis.sections.reduce((acc, section) => {
-            const sectionInfo = SUPPORTED_SECTIONS[section.name];
-            acc[section.name] = {
-                recommendedMode: section.complexity === 'high' ? 'intelligent' : 'traditional',
-                reason: section.complexity === 'high' ? 'أقسام متعددة التبعيات' : 'أقسام بسيطة نسبياً',
-                complexity: section.complexity
-            };
-            return acc;
-        }, {} as Record<SectionName, { recommendedMode: 'intelligent' | 'traditional'; reason: string; complexity: 'low' | 'medium' | 'high'; }>);
 
         return {
-            recommendedMode,
-            confidence: Math.max(0, Math.min(1, confidence)),
-            reasoning,
-            sectionRecommendations
+            recommendedMode: 'intelligent', // دائماً ذكي
+            confidence: Math.max(0.5, Math.min(1, confidence)),
+            reasoning
         };
     }
 
@@ -422,7 +377,7 @@ export class IntelligentReportService {
     }
 
     /**
-     * توليد قسم فردي بالنظام الذكي
+     * توليد قسم فردي بالنظام الذكي (مبسط)
      */
     static async generateSingleSection(config: {
         sectionToGenerate: SectionName;
@@ -430,9 +385,6 @@ export class IntelligentReportService {
         projectPlan?: any;
         guidelines?: string[];
         contextFiles?: Array<{ fileName: string; content: string; type: string }>;
-        otherSections?: Record<string, string>;
-        instructionText?: string;
-        exampleFiles?: Array<{ fileName: string; content: string }>;
         qualityThreshold?: number;
         enableIterativeImprovement?: boolean;
         enablePerformanceMonitoring?: boolean;
@@ -450,9 +402,6 @@ export class IntelligentReportService {
             projectPlan: config.projectPlan,
             guidelines: config.guidelines,
             contextFiles: config.contextFiles,
-            otherSections: config.otherSections,
-            instructionText: config.instructionText,
-            exampleFiles: config.exampleFiles,
             qualityThreshold: config.qualityThreshold || SUPPORTED_SECTIONS[config.sectionToGenerate].qualityThreshold,
             enableIterativeImprovement: config.enableIterativeImprovement ?? true,
             enablePerformanceMonitoring: config.enablePerformanceMonitoring ?? true
@@ -472,7 +421,7 @@ export class IntelligentReportService {
                 percentage: 30
             });
 
-            const response = await apiClient.post<SingleSectionResult>('/api/generate/report/intellgent', requestConfig);
+            const response = await apiClient.post('/api/generate/report/intellgent', requestConfig);
 
             config.onProgress?.({
                 stage: 'completed',
@@ -480,7 +429,7 @@ export class IntelligentReportService {
                 percentage: 100
             });
 
-            return response;
+            return response.data || response;
 
         } catch (error) {
             config.onProgress?.({
@@ -493,7 +442,7 @@ export class IntelligentReportService {
     }
 
     /**
-     * توليد تقرير كامل بالتدفق الذكي
+     * توليد تقرير كامل بالتدفق الذكي (مبسط)
      */
     static async generateCompleteReport(config: {
         sectionsToGenerate?: SectionName[];
@@ -504,9 +453,6 @@ export class IntelligentReportService {
         qualityThreshold?: number;
         enableIterativeImprovement?: boolean;
         enablePerformanceMonitoring?: boolean;
-        generateInOrder?: boolean;
-        useIntelligentDependencies?: boolean;
-        maxRetries?: number;
         onProgress?: (progress: {
             stage: string;
             message: string;
@@ -536,10 +482,7 @@ export class IntelligentReportService {
             contextFiles: config.contextFiles,
             qualityThreshold: config.qualityThreshold || 85,
             enableIterativeImprovement: config.enableIterativeImprovement ?? true,
-            enablePerformanceMonitoring: config.enablePerformanceMonitoring ?? true,
-            generateInOrder: config.generateInOrder ?? true,
-            useIntelligentDependencies: config.useIntelligentDependencies ?? true,
-            maxRetries: config.maxRetries || 3
+            enablePerformanceMonitoring: config.enablePerformanceMonitoring ?? true
         };
 
         // تحضير تتبع التقدم
@@ -568,10 +511,11 @@ export class IntelligentReportService {
                 sectionProgress
             });
 
-            const response = await apiClient.post<CompleteReportResult>('/api/generate/report/intellgent', requestConfig);
+            const response = await apiClient.post('/api/generate/report/intellgent', requestConfig);
+            const result = response.data || response;
 
             // تحديث تقدم الأقسام بناءً على النتائج
-            Object.entries(response.sectionMetadata).forEach(([section, metadata]) => {
+            Object.entries(result.sectionMetadata).forEach(([section, metadata]: [string, any]) => {
                 if (sectionProgress[section]) {
                     sectionProgress[section] = {
                         status: 'completed',
@@ -583,13 +527,13 @@ export class IntelligentReportService {
 
             config.onProgress?.({
                 stage: 'completed',
-                message: `تم توليد ${response.overallMetrics.successfulSections}/${response.overallMetrics.totalSections} أقسام بنجاح!`,
+                message: `تم توليد ${result.overallMetrics.successfulSections}/${result.overallMetrics.totalSections} أقسام بنجاح!`,
                 percentage: 100,
-                completedSections: Object.keys(response.generatedSections),
+                completedSections: Object.keys(result.generatedSections),
                 sectionProgress
             });
 
-            return response;
+            return result;
 
         } catch (error) {
             config.onProgress?.({

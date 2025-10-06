@@ -117,78 +117,28 @@ const SECTION_DEPENDENCIES: Partial<Record<SectionName, SectionName[]>> = {
 };
 
 /**
- * إعدادات الجودة المخصصة لكل قسم
+ * إعدادات الجودة المبسطة للأقسام
  */
-const SECTION_QUALITY_SETTINGS: Partial<Record<SectionName, {
-    threshold: number;
-    focusAreas: string[];
-    criticalRequirements: string[];
-}>> = {
-    'abstract': {
-        threshold: 90,
-        focusAreas: ['conciseness', 'completeness', 'clarity'],
-        criticalRequirements: ['Must summarize all key points', 'Must be under 300 words', 'Must be standalone']
-    },
-    'acknowledgment': {
-        threshold: 80,
-        focusAreas: ['appropriateness', 'completeness'],
-        criticalRequirements: ['Must acknowledge key contributors', 'Must be professional tone']
-    },
-    'introduction': {
-        threshold: 85,
-        focusAreas: ['clarity', 'structure', 'engagement'],
-        criticalRequirements: ['Must establish context', 'Must state objectives', 'Must outline structure']
-    },
-    'literatureReview': {
-        threshold: 88,
-        focusAreas: ['comprehensiveness', 'analysis', 'relevance'],
-        criticalRequirements: ['Must review relevant literature', 'Must identify gaps', 'Must justify approach']
-    },
-    'systemAnalysis': {
-        threshold: 87,
-        focusAreas: ['thoroughness', 'technical accuracy', 'clarity'],
-        criticalRequirements: ['Must analyze current state', 'Must identify requirements', 'Must be technically sound']
-    },
-    'designStrategy': {
-        threshold: 86,
-        focusAreas: ['logic', 'feasibility', 'alignment'],
-        criticalRequirements: ['Must justify design decisions', 'Must align with requirements', 'Must be implementable']
-    },
-    'systemDesign': {
-        threshold: 88,
-        focusAreas: ['technical detail', 'completeness', 'clarity'],
-        criticalRequirements: ['Must provide detailed design', 'Must include architecture', 'Must be implementable']
-    },
-    'systemProgramming': {
-        threshold: 85,
-        focusAreas: ['technical accuracy', 'implementation detail', 'best practices'],
-        criticalRequirements: ['Must describe implementation', 'Must include code examples', 'Must follow best practices']
-    },
-    'systemTesting': {
-        threshold: 86,
-        focusAreas: ['comprehensiveness', 'methodology', 'results'],
-        criticalRequirements: ['Must describe test strategy', 'Must include test cases', 'Must present results']
-    },
-    'recommendations': {
-        threshold: 84,
-        focusAreas: ['practicality', 'justification', 'clarity'],
-        criticalRequirements: ['Must be actionable', 'Must be justified', 'Must be prioritized']
-    },
-    'conclusion': {
-        threshold: 87,
-        focusAreas: ['synthesis', 'completeness', 'impact'],
-        criticalRequirements: ['Must summarize findings', 'Must address objectives', 'Must suggest future work']
-    },
-    'references': {
-        threshold: 95,
-        focusAreas: ['accuracy', 'completeness', 'formatting'],
-        criticalRequirements: ['Must be accurate', 'Must be complete', 'Must follow citation style']
-    },
-    'appendices': {
-        threshold: 80,
-        focusAreas: ['relevance', 'organization', 'completeness'],
-        criticalRequirements: ['Must be relevant', 'Must be well-organized', 'Must support main content']
-    }
+const SIMPLIFIED_QUALITY_SETTINGS = {
+    high: { threshold: 88, focusAreas: ['technical_accuracy', 'completeness', 'clarity'] },
+    medium: { threshold: 85, focusAreas: ['clarity', 'structure', 'relevance'] },
+    low: { threshold: 80, focusAreas: ['completeness', 'relevance', 'professionalism'] }
+};
+
+const SECTION_COMPLEXITY_MAP: Partial<Record<SectionName, 'high' | 'medium' | 'low'>> = {
+    'abstract': 'high',
+    'systemDesign': 'high',
+    'systemAnalysis': 'high',
+    'designStrategy': 'high',
+    'literatureReview': 'high',
+    'systemProgramming': 'medium',
+    'systemTesting': 'medium',
+    'introduction': 'medium',
+    'conclusion': 'medium',
+    'recommendations': 'medium',
+    'acknowledgment': 'low',
+    'references': 'low',
+    'appendices': 'low'
 };
 
 /**
@@ -405,15 +355,16 @@ async function generateSectionIntelligently(
 }> {
     const sectionStart = Date.now();
 
-    // الحصول على إعدادات الجودة للقسم
-    const qualitySettings = SECTION_QUALITY_SETTINGS[section];
-    const qualityThreshold = qualitySettings ? Math.max(input.qualityThreshold, qualitySettings.threshold) : input.qualityThreshold;
+    // الحصول على إعدادات الجودة المبسطة للقسم
+    const complexity = SECTION_COMPLEXITY_MAP[section] || 'medium';
+    const qualitySettings = SIMPLIFIED_QUALITY_SETTINGS[complexity];
+    const qualityThreshold = Math.max(input.qualityThreshold, qualitySettings.threshold);
 
-    // تحضير التوجيهات المخصصة للقسم
+    // تحضير التوجيهات المخصصة للقسم (مبسطة)
     const sectionGuidelines = [
         ...(input.guidelines || []),
-        ...(qualitySettings?.criticalRequirements || []),
-        ...(qualitySettings ? [`Focus areas: ${qualitySettings.focusAreas.join(', ')}`] : [])
+        `Focus areas: ${qualitySettings.focusAreas.join(', ')}`,
+        `Quality threshold: ${qualityThreshold}/100`
     ];
 
     // تحضير الأقسام الأخرى كسياق
@@ -426,16 +377,14 @@ async function generateSectionIntelligently(
         }
     }
 
-    // إعداد مدخلات التوليد
+    // إعداد مدخلات التوليد (مبسط)
     const sectionInput: GenerateSectionInput = {
         sectionToGenerate: section,
         proposal: input.proposal,
         projectPlan: input.projectPlan,
         guidelines: sectionGuidelines,
-        instructionText: `Generate a high-quality ${section} section that meets all critical requirements${qualitySettings ? ` and focuses on ${qualitySettings.focusAreas.join(', ')}` : ''}.`,
         otherSections: Object.keys(relevantSections).length > 0 ? relevantSections : undefined,
-        contextFiles: input.contextFiles,
-        exampleFiles: undefined // يمكن إضافة أمثلة مخصصة لكل قسم
+        contextFiles: input.contextFiles
     };
 
     // توليد القسم
