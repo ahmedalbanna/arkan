@@ -13,7 +13,7 @@ import {
     type DiagramGenerationConfig,
     type DiagramResult,
     type DiagramType
-} from '@/services/intelligent-diagram-service';
+} from '@/services-v2/intelligent/generation/diagram-service';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';

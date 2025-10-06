@@ -15,7 +15,7 @@ import {
     type ProposalSectionStats,
     type ProposalSectionType,
     type ProposalStyle
-} from '@/services/intelligent-proposal-service';
+} from '@/services-v2/intelligent/generation/proposal-service';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
