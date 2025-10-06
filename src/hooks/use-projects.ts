@@ -27,7 +27,13 @@ interface UpdateProjectVariables {
   data: ProjectState;
 }
 
-type SaveProjectVariables = ProjectState & { name: string };
+interface SaveProjectVariables {
+  name: string;
+  type: 'proposal' | 'report' | 'presentation' | 'academic';
+  language: 'ar' | 'en';
+  description?: string;
+  teamId?: string;
+}
 
 /**
  * Fetches a list of projects.
@@ -69,6 +75,7 @@ export function useProjects() {
  */
 export function useProject(projectId: string) {
   const { firebaseUser } = useAuth();
+
   return useQuery({
     queryKey: projectKeys.detail(projectId),
     queryFn: async (): Promise<SavedProject> => {
@@ -78,7 +85,16 @@ export function useProject(projectId: string) {
     enabled: !!firebaseUser && !!projectId,
     meta: {
       onError: (error: Error) => {
-        handleErrorUtility(error, "Failed to fetch project");
+        // معالجة خاصة لأخطاء المشاريع المؤقتة
+        if (error.message.includes('Temporary projects are now managed in browser cache')) {
+          toast({
+            title: "المشروع المؤقت غير متاح",
+            description: "المشاريع المؤقتة تُحفظ الآن في المتصفح. يرجى حفظ المشروع أولاً.",
+            variant: "destructive",
+          });
+        } else {
+          handleErrorUtility(error, "Failed to fetch project");
+        }
       },
     },
     // NEW: Transform the raw data into a Project instance
@@ -97,7 +113,15 @@ export function useSaveProject() {
   return useMutation<SavedProject, Error, SaveProjectVariables>({
     mutationFn: async (data) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return createProject(data, token);
+      // تحويل SaveProjectVariables إلى CreateProjectData
+      const createData = {
+        title: data.name,
+        type: data.type,
+        language: data.language,
+        description: data.description,
+        teamId: data.teamId,
+      };
+      return createProject(createData, token);
     },
     onSuccess: (newProjectData) => {
       const newProject = new Project(newProjectData as ProjectProperties);

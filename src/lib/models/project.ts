@@ -316,8 +316,30 @@ export class Project implements SavedProject {
     };
   }
 
-  public toStateObject(): SavedProject {
-    return this.toJSON();
+  public toStateObject(): ProjectState {
+    const plainDiagrams: Partial<Record<DiagramType, DiagramProperties>> = {};
+    for (const key in this._diagrams) {
+      plainDiagrams[key as DiagramType] = this._diagrams[key as DiagramType]?.toStateObject();
+    }
+
+    // ✅ إرجاع حالة المشروع فقط بدون حقول id, userId, createdAt, updatedAt
+    return {
+      name: this._name,
+      projectIdea: this._projectIdea,
+      proposal: this._proposal,
+      reportConfig: this._reportConfig,
+      generatedProposalState: this._generatedProposalState,
+      sections: this._sections,
+      translatedSections: this._translatedSections,
+      evaluation: this._evaluation,
+      diagrams: plainDiagrams,
+      presentation: this._presentation,
+      codeGenerator: this._codeGenerator,
+      externalContext: this._externalContext,
+      academicSolver: this._academicSolver,
+      teamId: this._teamId,
+      projectPlan: this._projectPlan,
+    };
   }
 
 

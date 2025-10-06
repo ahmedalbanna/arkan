@@ -56,7 +56,14 @@ export function useSessionActions() {
 
     const handleExportProposal = async (format: 'docx' | 'pdf' | 'html') => {
         if (project && project.proposal) {
-            const result = await exportProposal(project.proposal, format, {
+            // إنشاء مقترح مع الحقول المطلوبة
+            const proposalData = {
+                title: (project.proposal as any)?.title || project.name || 'Untitled Proposal',
+                category: (project.proposal as any)?.category || 'General',
+                ...project.proposal
+            };
+
+            const result = await exportProposal(proposalData, format, {
                 includeImages: true,
                 templateId: 'modern-proposal-template',
                 customStyles: {
@@ -109,7 +116,7 @@ export function useSessionActions() {
 
         const result = await exportPresentation(
             latestPresentation.slides || [],
-            latestPresentation.title || 'Untitled Presentation',
+            latestPresentation.name || 'Untitled Presentation',
             'pptx',
             {
                 includeImages: true,
@@ -210,12 +217,18 @@ export function useSessionActions() {
         const projectToSave = useBuilderStore.getState().project!;
         const projectData = projectToSave.toStateObject();
         const finalName = projectToSave.name || 'Untitled Project';
-        const saveData = { ...projectData, name: finalName };
-
 
         if (projectToSave.id && !projectToSave.id.startsWith('temp-')) {
-            updateProjectMutation.mutate({ projectId: projectToSave.id, data: saveData });
+            updateProjectMutation.mutate({ projectId: projectToSave.id, data: projectData });
         } else {
+            // إنشاء بيانات الحفظ مع الحقول المطلوبة
+            const saveData = {
+                name: finalName,
+                type: 'proposal' as const, // نوع افتراضي
+                language: 'ar' as const, // لغة افتراضية
+                description: projectToSave.projectIdea || '',
+                teamId: projectToSave.teamId ?? undefined
+            };
             saveProjectMutation.mutate(saveData);
         }
     }
@@ -245,10 +258,16 @@ export function useSessionActions() {
 
     const handleSaveAsCloud = () => {
         if (!project) return;
-        const projectData = project.toJSON();
         const finalSaveAsName = saveAsName.trim() || project.name || (project.proposal as any)?.title || 'Untitled Project';
 
-        const saveData = { ...projectData, name: String(finalSaveAsName), id: '' };
+        // إنشاء بيانات الحفظ مع الحقول المطلوبة
+        const saveData = {
+            name: String(finalSaveAsName),
+            type: 'proposal' as const, // نوع افتراضي
+            language: 'ar' as const, // لغة افتراضية
+            description: project.projectIdea || '',
+            teamId: project.teamId ?? undefined
+        };
 
         saveProjectMutation.mutate(saveData, {
             onSuccess: (newProjectData) => {

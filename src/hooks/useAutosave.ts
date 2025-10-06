@@ -33,6 +33,7 @@ export function useAutosave() {
     const currentProjectId = currentProject?.id;
 
     // Trigger save only if there's a current project ID, debounced changes are true, and the user is logged in.
+    // المشاريع المؤقتة تُحفظ في المتصفح تلقائياً، والمشاريع المحفوظة تُحفظ في الخادم
     if (currentProjectId && !currentProjectId.startsWith('temp-') && debouncedHasUnsavedChanges && firebaseUser) {
       // Don't show a toast for autosave, it would be too noisy.
       const stateToSave = currentProject.toStateObject();

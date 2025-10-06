@@ -5,7 +5,7 @@
  */
 
 import { ProjectSchemas } from '@/app/api/shared/validators/api-validators';
-import type { SavedProject } from '@/lib/models/project';
+import type { ProjectState, SavedProject } from '@/lib/models/project';
 import { apiClient } from '../shared/api-client';
 import { ComplexService, SimpleService } from '../shared/base-service';
 
@@ -69,13 +69,13 @@ export class CreateProjectService extends ComplexService<CreateProjectData, Save
 /**
  * خدمة تحديث المشروع
  */
-export class UpdateProjectService extends ComplexService<UpdateProjectData, SavedProject> {
+export class UpdateProjectService extends ComplexService<ProjectState, SavedProject> {
     protected endpoint = '/api/projects';
     protected method: 'PUT' = 'PUT';
-    protected inputSchema = ProjectSchemas.updateProject;
+    protected inputSchema = undefined; // سيتم التحقق من الصحة في API route
     protected requiresAuth = true;
 
-    async call(data: UpdateProjectData, token: string, projectId: string): Promise<SavedProject> {
+    async call(data: ProjectState, token: string, projectId: string): Promise<SavedProject> {
         const endpoint = `${this.endpoint}/${projectId}`;
         return apiClient.put(endpoint, data, { token });
     }
@@ -149,7 +149,7 @@ export async function createProject(data: CreateProjectData, token: string): Pro
  */
 export async function updateProject(
     projectId: string,
-    data: UpdateProjectData,
+    data: ProjectState,
     token: string
 ): Promise<SavedProject> {
     return projectService.update.call(data, token, projectId);
