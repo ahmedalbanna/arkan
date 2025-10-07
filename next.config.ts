@@ -54,7 +54,31 @@ const nextConfig: NextConfig = {
       fs: false,
       path: false,
       crypto: false,
+      os: false,
+      stream: false,
+      util: false,
     };
+
+    // Handle handlebars and other problematic modules
+    config.module.rules.push({
+      test: /\.handlebars$/,
+      use: 'handlebars-loader'
+    });
+
+    // Ignore problematic modules that cause webpack warnings
+    config.externals = config.externals || [];
+    if (!isServer) {
+      config.externals.push({
+        'handlebars': 'handlebars',
+        'dotprompt': 'dotprompt'
+      });
+    }
+
+    // Suppress specific webpack warnings
+    config.ignoreWarnings = [
+      /require\.extensions is not supported by webpack/,
+      /Module not found: Error: Can't resolve/,
+    ];
 
     return config;
   },

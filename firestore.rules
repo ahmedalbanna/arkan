@@ -5,11 +5,17 @@ service cloud.firestore {
 
     // --- Helper Functions ---
     function isAdmin() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return request.auth != null &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     function isOwner(userId) {
-      return request.auth.uid == userId;
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isAuthenticated() {
+      return request.auth != null;
     }
 
     // --- Admin-only Collections ---
@@ -41,19 +47,19 @@ service cloud.firestore {
 
     // --- Features Collection ---
     match /features/{featureId} {
-      allow read, list: if request.auth != null;
+      allow read, list: if isAuthenticated();
       allow create, update, delete: if isAdmin();
     }
 
     // --- Agents Collection ---
     match /agents/{agentId} {
-      allow read, list: if request.auth != null;
+      allow read, list: if isAuthenticated();
       allow create, update, delete: if isAdmin();
     }
 
     // --- Sections Collection (for UI configuration) ---
     match /sections/{sectionId} {
-      allow read, list: if request.auth != null;
+      allow read, list: if isAuthenticated();
       allow create, update, delete: if isAdmin();
     }
 
