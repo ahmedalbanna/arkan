@@ -1,9 +1,20 @@
 
 'use client';
 
-import { ParaphraserTool } from '@/components/writing-tools/ParaphraserTool';
-import { Repeat } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
+import { Repeat } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+
+// Dynamic import for ParaphraserTool to reduce initial bundle size
+const ParaphraserTool = dynamic(() => import('@/components/writing-tools/ParaphraserTool'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-96">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  ),
+});
 
 export default function ParaphraserPage() {
   const { t } = useLocalization();
@@ -18,7 +29,13 @@ export default function ParaphraserPage() {
           {t('writingTools.paraphraser.pageSubtitle')}
         </p>
       </div>
-      <ParaphraserTool />
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      }>
+        <ParaphraserTool />
+      </Suspense>
     </div>
   );
 }

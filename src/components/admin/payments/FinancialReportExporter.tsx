@@ -1,22 +1,21 @@
 
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useAuth } from '@/context/AuthContext';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useToast } from '@/hooks/use-toast';
+import type { TransactionData } from '@/lib/db/queries';
+import { cn } from '@/lib/utils';
+import { fetchTransactionsForReport } from '@/services/transaction-service';
+import { format } from 'date-fns';
+import { jsPDF } from 'jspdf';
+import { Calendar as CalendarIcon, Download, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { DateRange } from 'react-day-picker';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar as CalendarIcon, Download, Loader2 } from 'lucide-react';
-import { format } from 'date-fns';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/context/AuthContext';
-import { fetchTransactionsForReport } from '@/services/transaction-service';
-import type { TransactionData } from '@/lib/db/queries';
-import { useToast } from '@/hooks/use-toast';
-import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
-import { useLocalization } from '@/context/LocalizationContext';
 
 async function generatePdf(data: TransactionData[], dateRange: DateRange) {
     const doc = new jsPDF();
@@ -74,6 +73,8 @@ async function generatePdf(data: TransactionData[], dateRange: DateRange) {
     container.innerHTML = html;
     document.body.appendChild(container);
 
+    // Dynamic import for html2canvas to reduce bundle size
+    const html2canvas = (await import('html2canvas')).default;
     const canvas = await html2canvas(container);
     const imgData = canvas.toDataURL('image/png');
 
@@ -112,7 +113,7 @@ export function FinancialReportExporter() {
             });
 
             if (transactions.length === 0) {
-                 toast({
+                toast({
                     title: t('adminFinancialReport.noData'),
                     description: t('adminFinancialReport.noDataDesc'),
                 });

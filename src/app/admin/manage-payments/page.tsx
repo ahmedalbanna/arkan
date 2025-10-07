@@ -1,9 +1,20 @@
 
 'use client';
 
-import { PaymentVerificationConsole } from "@/components/admin/payments/PaymentVerificationConsole";
 import { useLocalization } from "@/context/LocalizationContext";
 import { CreditCard } from "lucide-react";
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+
+// Dynamic import for PaymentVerificationConsole to reduce initial bundle size
+const PaymentVerificationConsole = dynamic(() => import("@/components/admin/payments/PaymentVerificationConsole"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-96">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  ),
+});
 
 export default function ManagePaymentsPage() {
   const { t } = useLocalization();
@@ -19,7 +30,13 @@ export default function ManagePaymentsPage() {
           {t('managePayments.pageSubtitle')}
         </p>
       </div>
-      <PaymentVerificationConsole />
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      }>
+        <PaymentVerificationConsole />
+      </Suspense>
     </div>
   );
 }

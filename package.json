@@ -8,6 +8,7 @@
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "next build",
+    "build:analyze": "ANALYZE=true npm run build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
@@ -99,10 +100,12 @@
     "unified": "^11.0.5",
     "uuid": "^10.0.0",
     "wav": "^1.0.2",
+    "web-vitals": "^5.1.0",
     "zod": "^3.24.2",
     "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.5.4",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^16.0.0",
     "@types/file-saver": "^2.0.7",

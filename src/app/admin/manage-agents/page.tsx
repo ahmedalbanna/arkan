@@ -1,9 +1,20 @@
 
 'use client';
 
-import AgentManager from "@/components/AgentManager";
-import { Bot } from "lucide-react";
 import { useLocalization } from "@/context/LocalizationContext";
+import { Bot } from "lucide-react";
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+
+// Dynamic import for AgentManager to reduce initial bundle size
+const AgentManager = dynamic(() => import("@/components/AgentManager"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-96">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  ),
+});
 
 export default function ManageAgentsPage() {
   const { t } = useLocalization();
@@ -19,7 +30,13 @@ export default function ManageAgentsPage() {
           {t('agentManager.pageSubtitle')}
         </p>
       </div>
-      <AgentManager />
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      }>
+        <AgentManager />
+      </Suspense>
     </div>
   );
 }

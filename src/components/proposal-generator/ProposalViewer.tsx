@@ -2,24 +2,30 @@
 
 'use client';
 
-import React from 'react';
 import { type AnyProjectProposal } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTheme } from 'next-themes';
 import dynamic from 'next/dynamic';
+import { memo } from 'react';
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
-export default function ProposalViewer({ proposal, onUpdate, readOnly = false }: { proposal: AnyProjectProposal; onUpdate?: (path: string, value: any) => void; readOnly?: boolean; }) {
+interface ProposalViewerProps {
+    proposal: AnyProjectProposal;
+    onUpdate?: (path: string, value: any) => void;
+    readOnly?: boolean;
+}
+
+const ProposalViewer = memo(function ProposalViewer({ proposal, onUpdate, readOnly = false }: ProposalViewerProps) {
     const { t } = useLocalization();
     const { resolvedTheme } = useTheme();
 
     if (!proposal) return null;
 
     return (
-        <ReactJson 
-            src={proposal} 
-            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} 
+        <ReactJson
+            src={proposal}
+            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'}
             displayDataTypes={false}
             name={false}
             quotesOnKeys={false}
@@ -40,4 +46,6 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
             } : false}
         />
     );
-}
+});
+
+export default ProposalViewer;

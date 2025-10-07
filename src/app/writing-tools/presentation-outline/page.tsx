@@ -1,9 +1,20 @@
 
 'use client';
 
-import { PresentationOutlineTool } from '@/components/writing-tools/PresentationOutlineTool';
-import { Presentation } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
+import { Presentation } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+
+// Dynamic import for PresentationOutlineTool to reduce initial bundle size
+const PresentationOutlineTool = dynamic(() => import('@/components/writing-tools/PresentationOutlineTool'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-96">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  ),
+});
 
 export default function PresentationOutlinePage() {
   const { t } = useLocalization();
@@ -18,7 +29,13 @@ export default function PresentationOutlinePage() {
           {t('writingTools.presentationOutline.pageSubtitle')}
         </p>
       </div>
-      <PresentationOutlineTool />
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      }>
+        <PresentationOutlineTool />
+      </Suspense>
     </div>
   );
 }

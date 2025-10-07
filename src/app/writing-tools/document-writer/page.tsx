@@ -1,9 +1,20 @@
 
 'use client';
 
-import { DocumentWriterTool } from '@/components/writing-tools/DocumentWriterTool';
-import { FileEdit } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
+import { FileEdit } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+
+// Dynamic import for DocumentWriterTool to reduce initial bundle size
+const DocumentWriterTool = dynamic(() => import('@/components/writing-tools/DocumentWriterTool'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-96">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  ),
+});
 
 export default function DocumentWriterPage() {
   const { t } = useLocalization();
@@ -18,7 +29,13 @@ export default function DocumentWriterPage() {
           {t('writingTools.documentWriter.pageSubtitle')}
         </p>
       </div>
-      <DocumentWriterTool />
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      }>
+        <DocumentWriterTool />
+      </Suspense>
     </div>
   );
 }

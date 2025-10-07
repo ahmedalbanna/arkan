@@ -1,17 +1,16 @@
 
 'use client';
 
-import { useState, lazy, Suspense } from 'react';
-import { AlertCircle, PanelLeftOpen, PanelRightOpen } from 'lucide-react';
-import { GenerationTools } from './ReportGenerationTools';
-import { useLocalization } from '../../context/LocalizationContext';
-import { useTranslate } from '@/hooks/use-translation';
-import { toast } from '@/hooks/use-toast';
 import type { SectionName } from '@/ai/schemas';
+import { toast } from '@/hooks/use-toast';
+import { useTranslate } from '@/hooks/use-translation';
 import { useReportStore } from '@/hooks/useReportStore';
-import { Skeleton } from '../ui/skeleton';
 import { cn } from '@/lib/utils';
+import { lazy, memo, Suspense, useState } from 'react';
+import { useLocalization } from '../../context/LocalizationContext';
 import { Button } from '../ui/button';
+import { Skeleton } from '../ui/skeleton';
+import { GenerationTools } from './ReportGenerationTools';
 
 const ReportResults = lazy(() => import('./ReportResults').then(mod => ({ default: mod.ReportResults })));
 
@@ -23,7 +22,7 @@ function ReportResultsSkeleton() {
     )
 }
 
-export default function ReportModeGenerator() {
+const ReportModeGenerator = memo(function ReportModeGenerator() {
     const { t, locale } = useLocalization();
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     const {
@@ -75,10 +74,10 @@ export default function ReportModeGenerator() {
 
     return (
         <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-            
+
             {isPanelCollapsed && (
-                 <div className="hidden lg:block lg:col-span-1 sticky top-24">
-                     <Button
+                <div className="hidden lg:block lg:col-span-1 sticky top-24">
+                    <Button
                         variant="secondary"
                         className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
                         onClick={() => setIsPanelCollapsed(false)}
@@ -90,7 +89,7 @@ export default function ReportModeGenerator() {
 
             {/* Left Column: Generation Tools */}
             <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
-                <GenerationTools onTranslateAll={handleTranslateAll} isTranslating={isTranslatingAll} onCollapseToggle={() => setIsPanelCollapsed(true)}/>
+                <GenerationTools onTranslateAll={handleTranslateAll} isTranslating={isTranslatingAll} onCollapseToggle={() => setIsPanelCollapsed(true)} />
             </div>
 
             {/* Right Column: Report Results */}
@@ -101,4 +100,6 @@ export default function ReportModeGenerator() {
             </div>
         </div>
     );
-}
+});
+
+export default ReportModeGenerator;

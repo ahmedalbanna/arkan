@@ -1,9 +1,20 @@
 
 'use client';
 
-import UserManagementConsole from '@/components/admin/users/UserManagementConsole';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Users } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+
+// Dynamic import for UserManagementConsole to reduce initial bundle size
+const UserManagementConsole = dynamic(() => import('@/components/admin/users/UserManagementConsole'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-96">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  ),
+});
 
 export default function ManageUsersPage() {
   const { t } = useLocalization();
@@ -19,7 +30,13 @@ export default function ManageUsersPage() {
           {t('manageUsers.pageSubtitle')}
         </p>
       </div>
-      <UserManagementConsole />
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      }>
+        <UserManagementConsole />
+      </Suspense>
     </div>
   );
 }

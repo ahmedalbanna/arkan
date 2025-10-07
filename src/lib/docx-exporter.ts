@@ -2,17 +2,26 @@
 
 'use client';
 
-import { Document, Packer, Paragraph, HeadingLevel, SectionType, Header, Footer, PageNumber, AlignmentType, Table, TextRun, TableRow, TableCell, WidthType, ImageRun, IStylesOptions, INumberingOptions, IRunOptions, TableOfContents } from 'docx';
+import { type DiagramType, type ProjectProposal, type SectionName } from '@/ai/schemas';
 import { saveAs } from 'file-saver';
-import { type ProjectProposal, type DiagramType, type SectionName } from '@/ai/schemas';
-import { templates, type TemplateKey } from './docx-styles';
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkGfm from 'remark-gfm';
+import type { List, PhrasingContent, Root } from 'mdast';
 import rehypeStringify from 'rehype-stringify';
-import type { Root, PhrasingContent, List } from 'mdast';
-import { processPlantUml } from './utils';
+import remarkGfm from 'remark-gfm';
+import remarkParse from 'remark-parse';
+import { unified } from 'unified';
+import { templates, type TemplateKey } from './docx-styles';
 import { exportComponentAsPDF } from './pdf-exporter';
+import { processPlantUml } from './utils';
+
+// Dynamic imports for docx library
+let docxLib: any = null;
+
+async function getDocxLib() {
+    if (!docxLib) {
+        docxLib = await import('docx');
+    }
+    return docxLib;
+}
 
 /**
  * Formats a camelCase or snake_case key into a human-readable title.
@@ -35,17 +44,19 @@ function formatKeyToTitle(key: string): string {
  * @param markdown - The markdown string to parse.
  * @returns A promise that resolves to an array of docx objects.
  */
-export async function createDocxParagraphs(markdown: string): Promise<(Paragraph | Table)[]> {
+export async function createDocxParagraphs(markdown: string): Promise<any[]> {
+    const { Paragraph, Table } = await getDocxLib();
 
     if (!markdown) return [];
 
     const processedMarkdown = processPlantUml(markdown);
     const ast = unified().use(remarkParse).use(remarkGfm).parse(processedMarkdown) as Root;
-    const docxObjects: (Paragraph | Table)[] = [];
+    const docxObjects: any[] = [];
 
     // Make transformInlines async to handle image fetching
-    const transformInlines = async (nodes: PhrasingContent[], options: IRunOptions = {}): Promise<(TextRun | ImageRun)[]> => {
-        const runs: (TextRun | ImageRun)[] = [];
+    const transformInlines = async (nodes: PhrasingContent[], options: any = {}): Promise<any[]> => {
+        const { TextRun, ImageRun } = await getDocxLib();
+        const runs: any[] = [];
         for (const node of nodes) {
             switch (node.type) {
                 case 'strong':
@@ -65,7 +76,7 @@ export async function createDocxParagraphs(markdown: string): Promise<(Paragraph
                         const proxiedUrl = `/api/proxy-image?url=${encodeURIComponent(node.url)}`;
                         const imageBuffer = await getProxiedImageBuffer(proxiedUrl);
                         if (imageBuffer) {
-                             // Regular inline images can be smaller
+                            // Regular inline images can be smaller
                             const isPlantUML = node.url.includes('plantuml.com');
                             const width = isPlantUML ? 550 : 200;
                             const height = isPlantUML ? 400 : 150;
@@ -118,18 +129,18 @@ export async function createDocxParagraphs(markdown: string): Promise<(Paragraph
             case 'paragraph':
                 const imageNode = node.children.find(child => child.type === 'image');
                 if (imageNode && imageNode.type === 'image') {
-                     const proxiedUrl = `/api/proxy-image?url=${encodeURIComponent(imageNode.url)}`;
-                     const imageBuffer = await getProxiedImageBuffer(proxiedUrl);
-                     if (imageBuffer) {
-                         docxObjects.push(new Paragraph({
-                             children: [new ImageRun({ data: imageBuffer, transformation: { width: 550, height: 400 } })],
-                             alignment: AlignmentType.CENTER,
-                         }));
-                     } else {
-                         docxObjects.push(new Paragraph({ children: [new TextRun(`[Image failed to load: ${imageNode.alt}]`)] }));
-                     }
+                    const proxiedUrl = `/api/proxy-image?url=${encodeURIComponent(imageNode.url)}`;
+                    const imageBuffer = await getProxiedImageBuffer(proxiedUrl);
+                    if (imageBuffer) {
+                        docxObjects.push(new Paragraph({
+                            children: [new ImageRun({ data: imageBuffer, transformation: { width: 550, height: 400 } })],
+                            alignment: AlignmentType.CENTER,
+                        }));
+                    } else {
+                        docxObjects.push(new Paragraph({ children: [new TextRun(`[Image failed to load: ${imageNode.alt}]`)] }));
+                    }
                 } else {
-                     docxObjects.push(new Paragraph({
+                    docxObjects.push(new Paragraph({
                         children: await transformInlines(node.children),
                         spacing: { after: 120 },
                     }));
@@ -188,7 +199,7 @@ const numbering: INumberingOptions = {
 async function getProxiedImageBuffer(imageUrl: string): Promise<ArrayBuffer | null> {
     try {
         const response = await fetch(imageUrl);
- if (response.status !== 200) {
+        if (response.status !== 200) {
             console.warn(`Failed to fetch proxied image from ${imageUrl}. Status: ${response.status}`);
             return null;
         }
@@ -202,7 +213,7 @@ async function getProxiedImageBuffer(imageUrl: string): Promise<ArrayBuffer | nu
 async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: any }>> {
     try {
         const response = await fetch('/api/admin/templates/docx');
- if (response.status !== 200) {
+        if (response.status !== 200) {
             console.error('Failed to fetch DOCX templates from server, falling back to defaults.');
             return templates;
         }
@@ -220,7 +231,8 @@ async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: any 
  * @param templateKey - The key of the style template to use.
  */
 export async function exportMarkdownAsDocx(markdownContent: string, fileName: string, templateKey: TemplateKey = 'modern') {
-    
+    const { Document, Packer } = await getDocxLib();
+
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
     const docxContent = await createDocxParagraphs(markdownContent);
@@ -234,7 +246,7 @@ export async function exportMarkdownAsDocx(markdownContent: string, fileName: st
     });
 
     const blob = await Packer.toBlob(doc);
- saveAs(blob, `${fileName}.docx`);
+    saveAs(blob, `${fileName}.docx`);
 }
 
 
@@ -262,7 +274,7 @@ export async function exportSectionAsDocx(title: string, markdownContent: string
     });
 
     const blob = await Packer.toBlob(doc);
- saveAs(blob, `${title.replace(/\s+/g, '_')}.docx`);
+    saveAs(blob, `${title.replace(/\s+/g, '_')}.docx`);
 }
 
 /**
@@ -274,15 +286,15 @@ function applyStylesToElement(element: HTMLElement, styles: IRunOptions) {
     if (!styles) return;
     if (styles.font) {
         element.style.fontFamily = typeof styles.font === 'string'
- ? styles.font
- : (styles.font as { name: string })?.name ?? 'Calibri';
+            ? styles.font
+            : (styles.font as { name: string })?.name ?? 'Calibri';
 
     }
     if (styles.size) {
- element.style.fontSize = `${Number(styles.size ?? 22) / 2}pt`;
+        element.style.fontSize = `${Number(styles.size ?? 22) / 2}pt`;
     }
     if (styles.color) {
- element.style.color = `#${styles.color || '333333'}`;
+        element.style.color = `#${styles.color || '333333'}`;
     }
     if (styles.bold) {
         element.style.fontWeight = 'bold';
@@ -312,7 +324,7 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
             .process(md);
         return String(file);
     };
-    
+
     // Create a hidden element to render the proposal for PDF generation
     const container = document.createElement('div');
     container.style.position = 'absolute';
@@ -320,7 +332,7 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
     container.style.width = '800px';
     container.style.padding = '40px';
     container.style.backgroundColor = 'white';
-    
+
     let htmlContent = `<div id="pdf-content">`;
     // Apply default document styles to the container
     applyStylesToElement(container, styles.default?.document?.run);
@@ -328,7 +340,7 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
     // Title and Category
     htmlContent += `<h1 style="text-align: center;">${proposal.title}</h1>`;
     htmlContent += `<p style="text-align: center; font-style: italic;">${proposal.category}</p>`;
-    
+
     const sections: { title: string, content: string | string[] }[] = [
         { title: "Executive Summary", content: await markdownToHtml(proposal.executiveSummary) },
         { title: "Problem Statement", content: await markdownToHtml(proposal.problemStatement) },
@@ -336,7 +348,7 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
         { title: "Project Plan", content: await markdownToHtml(proposal.projectPlan.timeline + "\n\n" + proposal.projectPlan.keyDeliverables) },
         { title: "Budget Breakdown", content: await markdownToHtml(proposal.budgetBreakdown) },
     ];
-    
+
     for (const section of sections) {
         const content = Array.isArray(section.content) ? section.content.join(' ') : section.content;
         if (content.trim()) {
@@ -364,6 +376,7 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
  * @param templateKey - The key of the style template to use.
  */
 export async function exportProposalAsDocx(proposal: ProjectProposal, templateKey: TemplateKey) {
+    const { Document, Packer, Paragraph, HeadingLevel, SectionType, Header, Footer, PageNumber, AlignmentType, Table, TextRun, TableRow, TableCell, WidthType, ImageRun, IStylesOptions, INumberingOptions, IRunOptions, TableOfContents } = await getDocxLib();
 
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
@@ -377,14 +390,14 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
             ...(await createDocxParagraphs(contentString)),
         ];
     };
-    
+
     // A helper for nested object sections
     const createNestedSection = async (title: string, data: Record<string, string | string[]>) => {
-        const children: (Paragraph|Table)[] = [];
+        const children: any[] = [];
         for (const [key, value] of Object.entries(data)) {
             if (value && value.length > 0) {
-                 children.push(new Paragraph({ text: formatKeyToTitle(key), heading: HeadingLevel.HEADING_2 }));
-                 children.push(...await createDocxParagraphs(Array.isArray(value) ? value.join('\n- ') : value));
+                children.push(new Paragraph({ text: formatKeyToTitle(key), heading: HeadingLevel.HEADING_2 }));
+                children.push(...await createDocxParagraphs(Array.isArray(value) ? value.join('\n- ') : value));
             }
         }
         if (children.length === 0) return [];
@@ -459,6 +472,7 @@ export async function exportReportAsDocx(
     translatedTitles: { [key in SectionName]?: string; },
     sectionsToInclude?: SectionName[]
 ) {
+    const { Document, Packer, Paragraph, HeadingLevel, SectionType, Header, Footer, PageNumber, AlignmentType, Table, TextRun, TableRow, TableCell, WidthType, ImageRun, IStylesOptions, INumberingOptions, IRunOptions, TableOfContents } = await getDocxLib();
 
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
@@ -478,7 +492,7 @@ export async function exportReportAsDocx(
     });
     const resolvedReportBody = (await Promise.all(reportBodyPromises)).flat();
 
-    const reportBody: (Paragraph | TableOfContents | Table)[] = [
+    const reportBody: any[] = [
         new TableOfContents("Table of Contents", {
             hyperlink: true,
             headingStyleRange: "1-3",
@@ -523,8 +537,8 @@ export async function exportReportAsDocx(
                     alignment: AlignmentType.CENTER,
                 }));
             } else if (result) {
-                 const diagramTitle = result.key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
- reportBody.push(new Paragraph({ text: `[Failed to load image for diagram: ${diagramTitle}]` }));
+                const diagramTitle = result.key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                reportBody.push(new Paragraph({ text: `[Failed to load image for diagram: ${diagramTitle}]` }));
             }
         }
     }

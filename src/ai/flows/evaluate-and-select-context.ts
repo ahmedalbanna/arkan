@@ -10,21 +10,26 @@
 
 import { ai } from '@/ai/genkit';
 import { EvaluateContextInputSchema, EvaluateContextOutputSchema, type EvaluateContextInput, type EvaluateContextOutput, type SectionName } from '@/ai/schemas';
-import { useAgents } from '@/hooks/use-agents';
+import { adminDb } from '@/lib/firebase/admin';
 import { AgentPrompt } from '@/lib/types';
-// ...
-const { agents, isLoaded } = useAgents();
 
 
 // Helper function to get agent details (prompt, guidelines)
-const getAgentDetails = (sectionKey: SectionName) => {
-    const agent = agents.find(a => a.id === `generate-${sectionKey}-section`);
-    if (!agent) return null;
-    const prompt = agent.prompt as AgentPrompt;
-    return {
-        basePrompt: prompt.base,
-        availableGuidelines: prompt.guidelines?.map(g => g.text) || [],
-    };
+const getAgentDetails = async (sectionKey: SectionName) => {
+    try {
+        const agentsSnapshot = await adminDb.collection('agents').get();
+        const agents = agentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const agent = agents.find(a => a.id === `generate-${sectionKey}-section`);
+        if (!agent) return null;
+        const prompt = agent.prompt as AgentPrompt;
+        return {
+            basePrompt: prompt.base,
+            availableGuidelines: prompt.guidelines?.map(g => g.text) || [],
+        };
+    } catch (error) {
+        console.error('Error fetching agent details:', error);
+        return null;
+    }
 };
 
 
@@ -33,11 +38,11 @@ export async function evaluateAndSelectContext(input: EvaluateContextInput): Pro
     const { proposal, existingSections, existingDiagrams, sectionsToGenerate } = input;
 
     // Create a detailed context string with all available agent prompts and guidelines
-    const agentDetailsContext = sectionsToGenerate.map(sectionKey => {
-        const details = getAgentDetails(sectionKey);
+    const agentDetailsContext = await Promise.all(sectionsToGenerate.map(async sectionKey => {
+        const details = await getAgentDetails(sectionKey);
         if (!details) return ``;
         return `--- Agent for: ${sectionKey} ---\nBase Prompt: ${details.basePrompt}\nAvailable Guidelines:\n${details.availableGuidelines.map(g => `- ${g}`).join('\n')}\n`;
-    }).join('\n');
+    }));
 
 
     const prompt = ai.definePrompt({
@@ -123,7 +128,7 @@ ${JSON.stringify(input.projectPlan, null, 2)}
 {{/if}}
 
 --- AGENT CAPABILITIES FOR REFERENCE ---
-${agentDetailsContext}
+${agentDetailsContext.join('\n')}
 ---
 `,
         config: {

@@ -12,6 +12,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { LocalizationProvider } from '@/context/LocalizationContext';
 import { adminAuth } from '@/lib/firebase/admin';
 import { cn } from '@/lib/utils';
+import { WebVitalsReporter } from '@/lib/web-vitals';
 import type { Metadata } from 'next';
 import { redirect } from 'next/dist/client/components/navigation';
 // Temporarily disabled Google Fonts due to network connectivity issues
@@ -103,6 +104,7 @@ export default async function RootLayout({
               <AuthProvider>
                 <FirebaseMessagingProvider>
                   <LanguageDirectionManager>
+                    <WebVitalsReporter />
                     <Header />
                     <main className="flex-grow">{children}</main>
                     <SupportChatWidget />

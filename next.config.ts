@@ -1,6 +1,11 @@
 
 import type { NextConfig } from 'next';
 
+// Bundle analyzer configuration
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const nextConfig: NextConfig = {
   reactStrictMode: true, // Enable React strict mode for better development experience
   output: 'standalone',
@@ -12,9 +17,16 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
 
-  // Font optimization
+  // Performance optimizations
   experimental: {
-    // optimizeFonts: true, // This option doesn't exist in Next.js 15.3.3
+    // optimizeCss: true, // Removed - causing critters module error
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'recharts'],
+    // modularizeImports removed - not supported in Next.js 15.3.3
+  },
+
+  // Bundle optimization
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
   },
   images: {
     remotePatterns: [
@@ -39,7 +51,7 @@ const nextConfig: NextConfig = {
     ],
   },
   allowedDevOrigins: ["https://9000-firebase-studio-1754388625396.cluster-64pjnskmlbaxowh5lzq6i7v4ra.cloudworkstations.dev", "https://6000-firebase-studio-1754388625396.cluster-64pjnskmlbaxowh5lzq6i7v4ra.cloudworkstations.dev"],
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
     // Handle PDF.js worker for client-side
     if (!isServer) {
       config.resolve.alias = {
@@ -74,6 +86,45 @@ const nextConfig: NextConfig = {
       });
     }
 
+    // Optimize bundle splitting for better caching
+    if (!dev) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+            priority: 10,
+          },
+          firebase: {
+            test: /[\\/]node_modules[\\/](firebase|@firebase)[\\/]/,
+            name: 'firebase',
+            chunks: 'all',
+            priority: 20,
+          },
+          ui: {
+            test: /[\\/]node_modules[\\/](@radix-ui|lucide-react)[\\/]/,
+            name: 'ui',
+            chunks: 'all',
+            priority: 15,
+          },
+          charts: {
+            test: /[\\/]node_modules[\\/](recharts|d3)[\\/]/,
+            name: 'charts',
+            chunks: 'all',
+            priority: 12,
+          },
+          documents: {
+            test: /[\\/]node_modules[\\/](docx|pptxgenjs|pdfjs-dist)[\\/]/,
+            name: 'documents',
+            chunks: 'all',
+            priority: 12,
+          },
+        },
+      };
+    }
+
     // Suppress specific webpack warnings
     config.ignoreWarnings = [
       /require\.extensions is not supported by webpack/,
@@ -97,4 +148,4 @@ const nextConfig: NextConfig = {
   }
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

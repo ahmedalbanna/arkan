@@ -1,11 +1,20 @@
 
 'use client';
 
-import { Document, Packer, Paragraph, HeadingLevel } from 'docx';
-import { saveAs } from 'file-saver';
 import { AnalyzedDocument, SolvedDocument } from '@/ai/schemas';
-import { templates, type TemplateKey } from './docx-styles';
+import { saveAs } from 'file-saver';
 import { createDocxParagraphs } from './docx-exporter';
+import { templates, type TemplateKey } from './docx-styles';
+
+// Dynamic imports for docx library
+let docxLib: any = null;
+
+async function getDocxLib() {
+    if (!docxLib) {
+        docxLib = await import('docx');
+    }
+    return docxLib;
+}
 
 async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: any }>> {
     try {
@@ -26,6 +35,8 @@ export async function exportDocumentAsDocx(
     solvedDocument: SolvedDocument,
     templateKey: TemplateKey = 'modern'
 ) {
+    const { Document, Packer, Paragraph, HeadingLevel } = await getDocxLib();
+
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
 
@@ -33,7 +44,7 @@ export async function exportDocumentAsDocx(
 
     for (const pair of solvedDocument.solutions) {
         docxContent.push(...await createDocxParagraphs(pair.question));
-        docxContent.push(new Paragraph({ text: "Solution:", style: "IntenseQuote"}));
+        docxContent.push(new Paragraph({ text: "Solution:", style: "IntenseQuote" }));
         docxContent.push(...await createDocxParagraphs(pair.solution));
         docxContent.push(new Paragraph({ text: "" })); // Add a spacer
     }

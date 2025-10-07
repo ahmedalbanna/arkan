@@ -1,9 +1,20 @@
 
 'use client';
 
-import Dashboard from '@/components/admin/dashboard/Dashboard';
 import { useLocalization } from '@/context/LocalizationContext';
 import { LayoutDashboard } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+
+// Dynamic import for Dashboard component to reduce initial bundle size
+const Dashboard = dynamic(() => import('@/components/admin/dashboard/Dashboard'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-96">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  ),
+});
 
 export default function DashboardPage() {
   const { t } = useLocalization();
@@ -19,7 +30,13 @@ export default function DashboardPage() {
           {t('adminDashboard.pageSubtitle')}
         </p>
       </div>
-      <Dashboard />
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      }>
+        <Dashboard />
+      </Suspense>
     </div>
   );
 }
