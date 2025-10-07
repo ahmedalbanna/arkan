@@ -6,15 +6,14 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { GrammarCheckInputSchema, type GrammarCheckInput, GrammarCheckOutputSchema, type GrammarCheckOutput } from '@/ai/schemas';
+import { GrammarCheckInputSchema, GrammarCheckOutputSchema, type GrammarCheckInput, type GrammarCheckOutput } from '@/ai/schemas';
 
 const grammarCheckPrompt = ai.definePrompt({
-    name: 'grammarCheckPrompt',
-    input: { schema: GrammarCheckInputSchema },
-    output: { schema: GrammarCheckOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
-    prompt: `You are an expert English grammar and spelling checker. Your task is to analyze the following text, correct any errors, and provide a clear explanation for each correction.
+  name: 'grammarCheckPrompt',
+  input: { schema: GrammarCheckInputSchema },
+  output: { schema: GrammarCheckOutputSchema },
+  model: 'googleai/gemini-2.0-flash',
+  prompt: `You are an expert English grammar and spelling checker. Your task is to analyze the following text, correct any errors, and provide a clear explanation for each correction.
 
 **Instructions:**
 1.  Read the original text and identify all grammatical errors, spelling mistakes, and punctuation issues.
@@ -26,21 +25,21 @@ const grammarCheckPrompt = ai.definePrompt({
 {{{text}}}
 ---
 `,
-    config: {
-        temperature: 0.1, // Very low temp for accuracy
-    }
-  });
+  config: {
+    temperature: 0.1, // Very low temp for accuracy
+  }
+});
 
 const grammarCheckFlow = ai.defineFlow({
-    name: 'grammarCheckFlow',
-    inputSchema: GrammarCheckInputSchema,
-    outputSchema: GrammarCheckOutputSchema,
+  name: 'grammarCheckFlow',
+  inputSchema: GrammarCheckInputSchema,
+  outputSchema: GrammarCheckOutputSchema,
 }, async (input) => {
-    const { output } = await grammarCheckPrompt(input);
-    if (!output) {
-        throw new Error("Grammar check failed.");
-    }
-    return output;
+  const { output } = await grammarCheckPrompt(input);
+  if (!output) {
+    throw new Error("Grammar check failed.");
+  }
+  return output;
 });
 
 export async function grammarCheck(input: GrammarCheckInput): Promise<GrammarCheckOutput> {

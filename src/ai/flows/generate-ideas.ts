@@ -6,15 +6,14 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { IdeaGenerationInputSchema, type IdeaGenerationInput, IdeaGenerationOutputSchema, type IdeaGenerationOutput } from '@/ai/schemas';
+import { IdeaGenerationInputSchema, IdeaGenerationOutputSchema, type IdeaGenerationInput, type IdeaGenerationOutput } from '@/ai/schemas';
 
 const generateIdeasPrompt = ai.definePrompt({
-    name: 'generateIdeasPrompt',
-    input: { schema: IdeaGenerationInputSchema },
-    output: { schema: IdeaGenerationOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
-    prompt: `You are an expert strategist and innovator. Your task is to generate creative and actionable ideas based on the user's provided context.
+  name: 'generateIdeasPrompt',
+  input: { schema: IdeaGenerationInputSchema },
+  output: { schema: IdeaGenerationOutputSchema },
+  model: 'googleai/gemini-2.0-flash',
+  prompt: `You are an expert strategist and innovator. Your task is to generate creative and actionable ideas based on the user's provided context.
 
 **User's Context:**
 - **Specialization:** {{{specialization}}}
@@ -40,21 +39,21 @@ const generateIdeasPrompt = ai.definePrompt({
 
 Your output must be a valid JSON object containing an array of these ideas.
 `,
-    config: {
-        temperature: 0.9, // Higher temperature for more creative brainstorming
-    }
-  });
+  config: {
+    temperature: 0.9, // Higher temperature for more creative brainstorming
+  }
+});
 
 const generateIdeasFlow = ai.defineFlow({
-    name: 'generateIdeasFlow',
-    inputSchema: IdeaGenerationInputSchema,
-    outputSchema: IdeaGenerationOutputSchema,
+  name: 'generateIdeasFlow',
+  inputSchema: IdeaGenerationInputSchema,
+  outputSchema: IdeaGenerationOutputSchema,
 }, async (input) => {
-    const { output } = await generateIdeasPrompt(input);
-    if (!output) {
-      throw new Error('Idea generation failed to produce an output.');
-    }
-    return output;
+  const { output } = await generateIdeasPrompt(input);
+  if (!output) {
+    throw new Error('Idea generation failed to produce an output.');
+  }
+  return output;
 });
 
 export async function generateIdeas(input: IdeaGenerationInput): Promise<IdeaGenerationOutput> {

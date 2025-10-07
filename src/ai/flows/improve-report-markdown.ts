@@ -6,15 +6,14 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { ImproveMarkdownInputSchema, type ImproveMarkdownInput, ImproveMarkdownOutputSchema, type ImproveMarkdownOutput } from '@/ai/schemas';
+import { ImproveMarkdownInputSchema, ImproveMarkdownOutputSchema, type ImproveMarkdownInput, type ImproveMarkdownOutput } from '@/ai/schemas';
 
 const improveMarkdownPrompt = ai.definePrompt({
-    name: 'improveReportMarkdownPrompt',
-    input: { schema: ImproveMarkdownInputSchema },
-    output: { schema: ImproveMarkdownOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
-    prompt: `You are an expert technical editor and document formatter. A user has provided a full report in Markdown format and a set of instructions for how to improve it.
+  name: 'improveReportMarkdownPrompt',
+  input: { schema: ImproveMarkdownInputSchema },
+  output: { schema: ImproveMarkdownOutputSchema },
+  model: 'googleai/gemini-2.0-flash',
+  prompt: `You are an expert technical editor and document formatter. A user has provided a full report in Markdown format and a set of instructions for how to improve it.
 
 Your tasks are to:
 1.  **Analyze the Instructions**: Carefully read the user's prompt to understand their goals (e.g., make it more formal, add a summary, remove specific sections, check for consistency).
@@ -34,16 +33,16 @@ Your tasks are to:
 });
 
 const improveReportMarkdownFlow = ai.defineFlow({
-    name: 'improveReportMarkdownFlow',
-    inputSchema: ImproveMarkdownInputSchema,
-    outputSchema: ImproveMarkdownOutputSchema
+  name: 'improveReportMarkdownFlow',
+  inputSchema: ImproveMarkdownInputSchema,
+  outputSchema: ImproveMarkdownOutputSchema
 }, async (input) => {
-    const { output } = await improveMarkdownPrompt(input);
-    if (!output) {
-      throw new Error('Failed to improve markdown.');
-    }
-    output.improvedMarkdown = output.improvedMarkdown.replace(/---/g, '').trim();
-    return output;
+  const { output } = await improveMarkdownPrompt(input);
+  if (!output) {
+    throw new Error('Failed to improve markdown.');
+  }
+  output.improvedMarkdown = output.improvedMarkdown.replace(/---/g, '').trim();
+  return output;
 });
 
 export async function improveReportMarkdown(input: ImproveMarkdownInput): Promise<ImproveMarkdownOutput> {

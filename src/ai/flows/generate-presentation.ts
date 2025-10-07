@@ -8,14 +8,14 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
 import {
   GeneratePresentationInputSchema,
-  type GeneratePresentationInput,
   GeneratePresentationOutputSchema,
+  type GeneratePresentationInput,
   type GeneratePresentationOutput,
 } from '@/ai/schemas';
 import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-templates';
+import { z } from 'zod';
 
 
 export async function generatePresentation(input: GeneratePresentationInput): Promise<GeneratePresentationOutput> {
@@ -29,11 +29,11 @@ const generatePresentationFlow = ai.defineFlow(
     outputSchema: GeneratePresentationOutputSchema,
   },
   async (input) => {
-    
+
     // Separate media from text files for the prompt
     const textContext = input.sourceDocuments?.filter(f => !f.content.startsWith('data:')) || [];
     const mediaContext = input.sourceDocuments?.filter(f => f.content.startsWith('data:')) || [];
-    
+
     const template = PRESENTATION_GENERATION_TEMPLATES.find(t => t.id === input.templateId);
     const relevantSections = template?.relevantReportSectionIds || [];
 
@@ -41,7 +41,7 @@ const generatePresentationFlow = ai.defineFlow(
       name: 'generatePresentationPrompt',
       input: { schema: z.any() }, // Using any() since we are manually constructing the payload
       output: { schema: GeneratePresentationOutputSchema },
-      model: 'googleai/gemini-1.5-flash',
+      model: 'googleai/gemini-2.0-flash',
       prompt: `You are an expert presentation creator. Your task is to analyze the provided source documents and create a compelling presentation slide deck.
 
 **Your Process:**
@@ -103,8 +103,8 @@ ${JSON.stringify(input.projectPlan, null, 2)}
 {{/each}}
 `,
       config: {
-          temperature: 0.7,
-          maxOutputTokens: 8192,
+        temperature: 0.7,
+        maxOutputTokens: 8192,
       }
     });
 

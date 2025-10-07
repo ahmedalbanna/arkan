@@ -3,13 +3,13 @@
 'use server';
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
 import { ProjectStateSchema } from '@/ai/schemas';
+import { addTaskToPhaseTool } from '@/ai/tools/addTaskToPhase';
+import { generateDiagramTool } from '@/ai/tools/generateDiagram';
+import { generateProjectPlanTool } from '@/ai/tools/generateProjectPlan'; // Import the new tool
 import { generateSectionTool } from '@/ai/tools/generateReportSection';
 import { updateProposalFieldTool } from '@/ai/tools/updateProposalField';
-import { generateDiagramTool } from '@/ai/tools/generateDiagram';
-import { addTaskToPhaseTool } from '@/ai/tools/addTaskToPhase';
-import { generateProjectPlanTool } from '@/ai/tools/generateProjectPlan'; // Import the new tool
+import { z } from 'zod';
 
 const ChatInputSchema = z.object({
   message: z.string().describe("The user's message or command."),
@@ -26,7 +26,7 @@ export const projectChat = ai.defineFlow(
     const stringifiedProjectState = JSON.stringify(input.projectState, null, 2);
 
     const llmResponse = await ai.generate({
-        prompt: `You are an AI project assistant. The user has sent you a message about their project. The full context of their current project is provided as a JSON object.
+      prompt: `You are an AI project assistant. The user has sent you a message about their project. The full context of their current project is provided as a JSON object.
 
 Your task is to be as helpful as possible. Analyze the user's message and decide if you should:
 1.  Respond with a simple text message.
@@ -49,20 +49,20 @@ Current Project State:
 ${stringifiedProjectState}
 ---
 `,
-        model: 'googleai/gemini-1.5-flash',
-        tools: [
-            generateSectionTool,
-            updateProposalFieldTool,
-            generateDiagramTool,
-            addTaskToPhaseTool,
-            generateProjectPlanTool, // Add the new tool here
-        ]
+      model: 'googleai/gemini-2.0-flash',
+      tools: [
+        generateSectionTool,
+        updateProposalFieldTool,
+        generateDiagramTool,
+        addTaskToPhaseTool,
+        generateProjectPlanTool, // Add the new tool here
+      ]
     });
 
     // Clean up the response text before returning
     const cleanedResponse = llmResponse.output();
     if (typeof cleanedResponse === 'object' && cleanedResponse !== null && 'text' in cleanedResponse && typeof cleanedResponse.text === 'string') {
-        cleanedResponse.text = cleanedResponse.text.replace(/---/g, '').trim();
+      cleanedResponse.text = cleanedResponse.text.replace(/---/g, '').trim();
     }
 
     return cleanedResponse;

@@ -28,7 +28,7 @@ export const generateProposalPrompt = ai.definePrompt(
     name: 'generateProposalPrompt',
     input: { schema: PromptInputSchema },
     output: { schema: ProjectProposalSchema },
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
     system: `You are an expert project manager and technical writer. Your task is to generate a comprehensive and professional project proposal based on the provided idea and context.
 Your entire response must be a valid JSON object that adheres to the provided output schema.
 For all string fields in the schema, you MUST use well-formed markdown syntax. This includes properly formatted lists, bold text, etc., where appropriate.

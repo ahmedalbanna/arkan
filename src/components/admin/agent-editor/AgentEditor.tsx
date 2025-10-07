@@ -2,27 +2,25 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useUpdateAgent } from '@/hooks/use-agents';
-import type { Agent, AgentPrompt, AgentKnowledgeSource } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
-import { Loader2, Save, Bot, BookOpen, Wrench, MessageSquare, ListChecks, Link as LinkIcon, BotMessageSquare, PencilRuler } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useForm, FormProvider } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { useUpdateAgent } from '@/hooks/use-agents';
+import type { Agent } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import KnowledgeTab from './KnowledgeTab';
-import ToolsTab from './ToolsTab';
-import GuidelinesTab from './GuidelinesTab';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { BookOpen, Bot, BotMessageSquare, Link as LinkIcon, ListChecks, Loader2, PencilRuler, Wrench } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { z } from 'zod';
 import AutomationTab from './AutomationTab';
 import ContextTab from './ContextTab';
 import GeneralTab from './GeneralTab';
+import GuidelinesTab from './GuidelinesTab';
+import KnowledgeTab from './KnowledgeTab';
 import OutputTab from './OutputTab';
-import Link from 'next/link';
+import ToolsTab from './ToolsTab';
 
 
 interface AgentEditorProps {
@@ -31,9 +29,9 @@ interface AgentEditorProps {
 }
 
 const agentKnowledgeSourceSchema = z.object({
-    name: z.string(),
-    type: z.enum(['file', 'text', 'web']),
-    content: z.string(),
+  name: z.string(),
+  type: z.enum(['file', 'text', 'web']),
+  content: z.string(),
 });
 
 const agentGuidelineSchema = z.object({
@@ -93,21 +91,21 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
   const updateAgentMutation = useUpdateAgent();
 
   const form = useForm<AgentEditorFormValues>({
-      resolver: zodResolver(agentEditorSchema),
-      defaultValues: {
-          name: initialData.name,
-          category: initialData.category,
-          prompt: initialData.prompt,
-          toolIds: initialData.toolIds || [],
-          knowledge: initialData.knowledge || [],
-          introduction: initialData.introduction || '',
-          placeholder: initialData.placeholder || 'Ask me anything...',
-          conversationStarters: initialData.conversationStarters || [],
-          tone: initialData.tone || 'Default',
-          language: initialData.language || 'English (US)',
-          model: initialData.model || 'googleai/gemini-1.5-flash',
+    resolver: zodResolver(agentEditorSchema),
+    defaultValues: {
+      name: initialData.name,
+      category: initialData.category,
+      prompt: initialData.prompt,
+      toolIds: initialData.toolIds || [],
+      knowledge: initialData.knowledge || [],
+      introduction: initialData.introduction || '',
+      placeholder: initialData.placeholder || 'Ask me anything...',
+      conversationStarters: initialData.conversationStarters || [],
+      tone: initialData.tone || 'Default',
+      language: initialData.language || 'English (US)',
+      model: initialData.model || 'googleai/gemini-2.0-flash',
 
-      }
+    }
   });
 
   const isComplexPrompt = typeof form.watch('prompt') === 'object';
@@ -116,14 +114,14 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
     const promptFromUrl = searchParams.get('prompt');
 
     const getInitialPrompt = () => {
-        if(typeof initialData.prompt === 'string') {
-            return promptFromUrl ? decodeURIComponent(promptFromUrl) : initialData.prompt;
-        }
-        if(typeof initialData.prompt === 'object') {
-            const newBase = promptFromUrl ? decodeURIComponent(promptFromUrl) : initialData.prompt.base;
-            return { ...initialData.prompt, base: newBase };
-        }
-        return '';
+      if (typeof initialData.prompt === 'string') {
+        return promptFromUrl ? decodeURIComponent(promptFromUrl) : initialData.prompt;
+      }
+      if (typeof initialData.prompt === 'object') {
+        const newBase = promptFromUrl ? decodeURIComponent(promptFromUrl) : initialData.prompt.base;
+        return { ...initialData.prompt, base: newBase };
+      }
+      return '';
     }
 
     form.reset({
@@ -137,7 +135,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       conversationStarters: initialData.conversationStarters || [],
       tone: initialData.tone || 'Default',
       language: initialData.language || 'English (US)',
-      model: initialData.model || 'googleai/gemini-1.5-flash',
+      model: initialData.model || 'googleai/gemini-2.0-flash',
     });
   }, [initialData, searchParams, form]);
 
@@ -169,7 +167,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
         return <ToolsTab />;
       case 'context':
         return <ContextTab />;
-       case 'automation':
+      case 'automation':
         return <AutomationTab />;
       default:
         return <div><CardTitle>{navItems.find(n => n.id === activeTab)?.label}</CardTitle><p>Coming soon...</p></div>;

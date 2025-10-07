@@ -192,7 +192,7 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
             <Select onValueChange={field.onChange} value={field.value}>
               <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
               <SelectContent>
-                <SelectItem value="googleai/gemini-1.5-flash">Gemini 1.5 Flash</SelectItem>
+                <SelectItem value="googleai/gemini-2.0-flash">Gemini 1.5 Flash</SelectItem>
                 <SelectItem value="googleai/gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
               </SelectContent>
             </Select>

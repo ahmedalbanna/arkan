@@ -6,14 +6,14 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { ExplainDiagramInputSchema, type ExplainDiagramInput, ExplainDiagramOutputSchema, type ExplainDiagramOutput } from '@/ai/schemas';
+import { ExplainDiagramInputSchema, ExplainDiagramOutputSchema, type ExplainDiagramInput, type ExplainDiagramOutput } from '@/ai/schemas';
 
 const explainDiagramPrompt = ai.definePrompt({
-    name: 'explainDiagramPrompt',
-    input: { schema: ExplainDiagramInputSchema },
-    output: { schema: ExplainDiagramOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
-    prompt: `You are an expert systems analyst. Your task is to provide a detailed explanation of the provided diagram.
+  name: 'explainDiagramPrompt',
+  input: { schema: ExplainDiagramInputSchema },
+  output: { schema: ExplainDiagramOutputSchema },
+  model: 'googleai/gemini-2.0-flash',
+  prompt: `You are an expert systems analyst. Your task is to provide a detailed explanation of the provided diagram.
 
 Follow these guidelines:
 1.  **Identify Type**: First, identify the type of diagram (e.g., Class Diagram, Use Case, Flowchart, ERD).
@@ -30,16 +30,16 @@ Diagram Image:
 });
 
 const explainDiagramFlow = ai.defineFlow({
-    name: 'explainDiagramFlow',
-    inputSchema: ExplainDiagramInputSchema,
-    outputSchema: ExplainDiagramOutputSchema,
+  name: 'explainDiagramFlow',
+  inputSchema: ExplainDiagramInputSchema,
+  outputSchema: ExplainDiagramOutputSchema,
 }, async (input) => {
-    const { output } = await explainDiagramPrompt(input);
-    if (!output) {
-      throw new Error("Explanation generation failed.");
-    }
-    output.explanation = output.explanation.replace(/---/g, '').trim();
-    return output;
+  const { output } = await explainDiagramPrompt(input);
+  if (!output) {
+    throw new Error("Explanation generation failed.");
+  }
+  output.explanation = output.explanation.replace(/---/g, '').trim();
+  return output;
 });
 
 export async function explainDiagram(input: ExplainDiagramInput): Promise<ExplainDiagramOutput> {

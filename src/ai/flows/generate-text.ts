@@ -9,9 +9,8 @@
  * - GenerateTextOutput - The return type for the generateText function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-import { GenerateTextInputSchema, type GenerateTextInput, GenerateTextOutputSchema, type GenerateTextOutput } from '@/ai/schemas';
+import { ai } from '@/ai/genkit';
+import { GenerateTextInputSchema, GenerateTextOutputSchema, type GenerateTextInput, type GenerateTextOutput } from '@/ai/schemas';
 
 export async function generateText(input: GenerateTextInput): Promise<GenerateTextOutput> {
   return generateTextFlow(input);
@@ -19,9 +18,9 @@ export async function generateText(input: GenerateTextInput): Promise<GenerateTe
 
 const promptTemplate = ai.definePrompt({
   name: 'generateTextPrompt',
-  input: {schema: GenerateTextInputSchema},
-  output: {schema: GenerateTextOutputSchema},
-  model: 'googleai/gemini-1.5-flash',
+  input: { schema: GenerateTextInputSchema },
+  output: { schema: GenerateTextOutputSchema },
+  model: 'googleai/gemini-2.0-flash',
   prompt: `You are a writing assistant. Generate text based on the following prompt.
 
 Prompt: {{{prompt}}}
@@ -36,7 +35,7 @@ const generateTextFlow = ai.defineFlow(
     outputSchema: GenerateTextOutputSchema,
   },
   async input => {
-    const {output} = await promptTemplate(input);
+    const { output } = await promptTemplate(input);
     return output!;
   }
 );

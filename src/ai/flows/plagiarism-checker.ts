@@ -5,15 +5,14 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { PlagiarismCheckInputSchema, type PlagiarismCheckInput, PlagiarismCheckOutputSchema, type PlagiarismCheckOutput } from '@/ai/schemas';
+import { PlagiarismCheckInputSchema, PlagiarismCheckOutputSchema, type PlagiarismCheckInput, type PlagiarismCheckOutput } from '@/ai/schemas';
 
 const plagiarismCheckPrompt = ai.definePrompt({
-    name: 'plagiarismCheckPrompt',
-    input: { schema: PlagiarismCheckInputSchema },
-    output: { schema: PlagiarismCheckOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
-    prompt: `You are an advanced plagiarism detection engine. Your task is to analyze the following text for originality and find real web sources for any matching content.
+  name: 'plagiarismCheckPrompt',
+  input: { schema: PlagiarismCheckInputSchema },
+  output: { schema: PlagiarismCheckOutputSchema },
+  model: 'googleai/gemini-2.0-flash',
+  prompt: `You are an advanced plagiarism detection engine. Your task is to analyze the following text for originality and find real web sources for any matching content.
 
 **Your Process:**
 1.  **Analyze Content:** Carefully read the text and identify phrases, sentences, and ideas that may not be original.
@@ -32,15 +31,15 @@ const plagiarismCheckPrompt = ai.definePrompt({
 });
 
 const plagiarismCheckFlow = ai.defineFlow({
-    name: 'plagiarismCheckFlow',
-    inputSchema: PlagiarismCheckInputSchema,
-    outputSchema: PlagiarismCheckOutputSchema,
+  name: 'plagiarismCheckFlow',
+  inputSchema: PlagiarismCheckInputSchema,
+  outputSchema: PlagiarismCheckOutputSchema,
 }, async (input) => {
-    const { output } = await plagiarismCheckPrompt(input);
-    if (!output) {
-      throw new Error('Plagiarism check failed to produce an output.');
-    }
-    return output;
+  const { output } = await plagiarismCheckPrompt(input);
+  if (!output) {
+    throw new Error('Plagiarism check failed to produce an output.');
+  }
+  return output;
 });
 
 export async function plagiarismCheck(input: PlagiarismCheckInput): Promise<PlagiarismCheckOutput> {

@@ -8,8 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { RewriteToMarkdownInputSchema, type RewriteToMarkdownInput, RewriteToMarkdownOutputSchema, type RewriteToMarkdownOutput } from '@/ai/schemas';
+import { RewriteToMarkdownInputSchema, RewriteToMarkdownOutputSchema, type RewriteToMarkdownInput, type RewriteToMarkdownOutput } from '@/ai/schemas';
 
 export async function rewriteToMarkdown(input: RewriteToMarkdownInput): Promise<RewriteToMarkdownOutput> {
   return rewriteToMarkdownFlow(input);
@@ -26,7 +25,7 @@ const rewriteToMarkdownFlow = ai.defineFlow(
       name: 'rewriteToMarkdownPrompt',
       input: { schema: RewriteToMarkdownInputSchema },
       output: { schema: RewriteToMarkdownOutputSchema },
-      model: 'googleai/gemini-1.5-flash',
+      model: 'googleai/gemini-2.0-flash',
       prompt: `You are an expert document editor. Your task is to take a raw text input, which was extracted from a PDF, and rewrite it into clean, well-structured markdown.
 
 Follow these guidelines:
@@ -40,12 +39,12 @@ Raw Text Input:
 {{{rawText}}}
 ---
 `,
-        config: {
-            temperature: 0.1, // Very low temp for accurate formatting
-            maxOutputTokens: 8192,
-        }
+      config: {
+        temperature: 0.1, // Very low temp for accurate formatting
+        maxOutputTokens: 8192,
+      }
     });
-    
+
     const { output } = await prompt(input);
     if (!output) {
       throw new Error('Failed to rewrite text to markdown.');

@@ -6,15 +6,14 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { HumanizeTextInputSchema, type HumanizeTextInput, HumanizeTextOutputSchema, type HumanizeTextOutput } from '@/ai/schemas';
+import { HumanizeTextInputSchema, HumanizeTextOutputSchema, type HumanizeTextInput, type HumanizeTextOutput } from '@/ai/schemas';
 
 const humanizeTextPrompt = ai.definePrompt({
-    name: 'humanizeTextPrompt',
-    input: { schema: HumanizeTextInputSchema },
-    output: { schema: HumanizeTextOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
-    prompt: `You are a world-class editor and ghostwriter, a true linguistic chameleon whose specialty is subtlety and authenticity. Your expertise is in transforming robotic, AI-generated text into prose that is indistinguishable from authentic, high-quality human writing. Your primary goal is to rewrite the text to achieve the lowest possible AI-detection score by eliminating statistical patterns and injecting genuine, natural human variation.
+  name: 'humanizeTextPrompt',
+  input: { schema: HumanizeTextInputSchema },
+  output: { schema: HumanizeTextOutputSchema },
+  model: 'googleai/gemini-2.0-flash',
+  prompt: `You are a world-class editor and ghostwriter, a true linguistic chameleon whose specialty is subtlety and authenticity. Your expertise is in transforming robotic, AI-generated text into prose that is indistinguishable from authentic, high-quality human writing. Your primary goal is to rewrite the text to achieve the lowest possible AI-detection score by eliminating statistical patterns and injecting genuine, natural human variation.
 
 Rewrite the provided text to maximize its 'human' score by focusing on these principles:
 
@@ -32,21 +31,21 @@ Rewrite the provided text to maximize its 'human' score by focusing on these pri
 {{{text}}}
 
 **Your Humanized Version (Return ONLY the rewritten text):**`,
-    config: {
-        temperature: 0.95, // Even higher temperature for maximum creativity and variation
-    }
-  });
+  config: {
+    temperature: 0.95, // Even higher temperature for maximum creativity and variation
+  }
+});
 
 const humanizeTextFlow = ai.defineFlow({
-    name: 'humanizeTextFlow',
-    inputSchema: HumanizeTextInputSchema,
-    outputSchema: HumanizeTextOutputSchema,
+  name: 'humanizeTextFlow',
+  inputSchema: HumanizeTextInputSchema,
+  outputSchema: HumanizeTextOutputSchema,
 }, async (input) => {
-    const { output } = await humanizeTextPrompt(input);
-    if (!output) {
-      throw new Error("Failed to humanize text.");
-    }
-    return output;
+  const { output } = await humanizeTextPrompt(input);
+  if (!output) {
+    throw new Error("Failed to humanize text.");
+  }
+  return output;
 });
 
 export async function humanizeText(input: HumanizeTextInput): Promise<HumanizeTextOutput> {

@@ -4,16 +4,16 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
 import {
   AnalyzedDocumentSchema,
-  type AnalyzedDocument,
-  SolvedDocumentSchema,
-  type SolvedDocument,
   AnalyzeDocumentInputSchema,
+  SolvedDocumentSchema,
   SolveDocumentInputSchema,
+  type AnalyzedDocument,
+  type SolvedDocument,
   type SolveDocumentInput,
 } from '@/ai/schemas';
+import { z } from 'zod';
 
 // 1. Analyze Document Flow
 
@@ -21,7 +21,7 @@ const analysisPrompt = ai.definePrompt({
   name: 'analyzeAcademicDocumentPrompt',
   input: { schema: AnalyzeDocumentInputSchema },
   output: { schema: AnalyzedDocumentSchema },
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-2.0-flash',
   prompt: `You are an expert academic analyst. Your task is to analyze the following academic document content provided in Markdown. The document is a/an '{{{documentType}}}'.
 
     1.  Identify the main **subject** and a concise **title**.
@@ -34,10 +34,10 @@ const analysisPrompt = ai.definePrompt({
     {{{markdownContent}}}
     ---
     `,
-    config: {
-        temperature: 0.3, // Low temperature for consistent structuring
-    }
-  });
+  config: {
+    temperature: 0.3, // Low temperature for consistent structuring
+  }
+});
 
 const analyzeAcademicDocumentFlow = ai.defineFlow(
   {
@@ -72,7 +72,7 @@ const solvePrompt = ai.definePrompt({
   name: 'solveAcademicDocumentPrompt',
   input: { schema: SolveDocumentInputSchema },
   output: { schema: SolvedDocumentSchema },
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-2.0-flash',
   prompt: `You are an expert tutor specializing in **{{{analyzedDocument.subject}}}**. Your task is to provide a comprehensive and accurate solution to the following '{{{analyzedDocument.documentType}}}'. **You must provide your response in {{{analyzedDocument.language}}}**.
 
     {{#if contextMarkdown}}
@@ -81,9 +81,9 @@ const solvePrompt = ai.definePrompt({
     {{{contextMarkdown}}}
     -------------------------
     {{/if}}
-    
+
     For each question in the provided document, generate a detailed, well-structured solution. Present the final output as an array of question/solution pairs.
-    
+
     - For each question, provide a step-by-step solution.
     - Format all mathematical equations and steps clearly using Markdown.
     - Ensure your final output is an array of objects, where each object contains a 'question' and its corresponding 'solution'.
@@ -93,17 +93,17 @@ const solvePrompt = ai.definePrompt({
     {{{analyzedDocument.structuredContent}}}
     ---
     `,
-    config: {
-        temperature: 0.4, // Slightly more creative for detailed explanations
-        maxOutputTokens: 4096,
-    }
-  });
+  config: {
+    temperature: 0.4, // Slightly more creative for detailed explanations
+    maxOutputTokens: 4096,
+  }
+});
 
 const solveAcademicDocumentFlow = ai.defineFlow({
-    name: 'solveAcademicDocumentFlow',
-    inputSchema: SolveDocumentInputSchema,
-    outputSchema: SolvedDocumentSchema,
-  },
+  name: 'solveAcademicDocumentFlow',
+  inputSchema: SolveDocumentInputSchema,
+  outputSchema: SolvedDocumentSchema,
+},
   async (input) => {
     const { output } = await solvePrompt(input);
     if (!output) {
@@ -117,7 +117,7 @@ const solveAcademicDocumentFlow = ai.defineFlow({
     }));
 
     return output;
-});
+  });
 
 export async function solveAcademicDocument(input: SolveDocumentInput): Promise<SolvedDocument> {
   const validation = SolveDocumentInputSchema.safeParse(input);

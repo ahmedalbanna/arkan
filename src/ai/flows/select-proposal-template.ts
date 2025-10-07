@@ -7,9 +7,9 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { PROPOSAL_TEMPLATES } from '@/lib/proposal-templates';
 import { SelectProposalTemplateInputSchema, SelectProposalTemplateOutputSchema } from '@/ai/schemas';
+import { PROPOSAL_TEMPLATES } from '@/lib/proposal-templates';
+import { z } from 'zod';
 
 export async function selectProposalTemplate(input: z.infer<typeof SelectProposalTemplateInputSchema>): Promise<z.infer<typeof SelectProposalTemplateOutputSchema>> {
   const availableTemplates = PROPOSAL_TEMPLATES.filter(t => t.id !== 'automatic-ai')
@@ -20,7 +20,7 @@ export async function selectProposalTemplate(input: z.infer<typeof SelectProposa
     name: 'selectProposalTemplatePrompt',
     input: { schema: SelectProposalTemplateInputSchema },
     output: { schema: SelectProposalTemplateOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
     prompt: `You are an expert project analyst. Your task is to analyze a user's project idea and select the most suitable proposal template from the provided list.
 
 **Available Templates:**

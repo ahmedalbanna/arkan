@@ -9,13 +9,11 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { type SectionName } from '@/ai/schemas';
+import { EvaluateContextInputSchema, EvaluateContextOutputSchema, type EvaluateContextInput, type EvaluateContextOutput, type SectionName } from '@/ai/schemas';
 import { useAgents } from '@/hooks/use-agents';
+import { AgentPrompt } from '@/lib/types';
 // ...
 const { agents, isLoaded } = useAgents();
-import { EvaluateContextInputSchema, type EvaluateContextInput, EvaluateContextOutputSchema, type EvaluateContextOutput } from '@/ai/schemas';
-import { AgentPrompt } from '@/lib/types';
 
 
 // Helper function to get agent details (prompt, guidelines)
@@ -32,22 +30,22 @@ const getAgentDetails = (sectionKey: SectionName) => {
 
 export async function evaluateAndSelectContext(input: EvaluateContextInput): Promise<EvaluateContextOutput> {
 
-  const { proposal, existingSections, existingDiagrams, sectionsToGenerate } = input;
+    const { proposal, existingSections, existingDiagrams, sectionsToGenerate } = input;
 
-  // Create a detailed context string with all available agent prompts and guidelines
-  const agentDetailsContext = sectionsToGenerate.map(sectionKey => {
-      const details = getAgentDetails(sectionKey);
-      if (!details) return ``;
-      return `--- Agent for: ${sectionKey} ---\nBase Prompt: ${details.basePrompt}\nAvailable Guidelines:\n${details.availableGuidelines.map(g => `- ${g}`).join('\n')}\n`;
-  }).join('\n');
+    // Create a detailed context string with all available agent prompts and guidelines
+    const agentDetailsContext = sectionsToGenerate.map(sectionKey => {
+        const details = getAgentDetails(sectionKey);
+        if (!details) return ``;
+        return `--- Agent for: ${sectionKey} ---\nBase Prompt: ${details.basePrompt}\nAvailable Guidelines:\n${details.availableGuidelines.map(g => `- ${g}`).join('\n')}\n`;
+    }).join('\n');
 
 
-  const prompt = ai.definePrompt({
-    name: 'evaluateAndSelectContextPrompt',
-    input: { schema: EvaluateContextInputSchema },
-    output: { schema: EvaluateContextOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
-    prompt: `You are an expert project analyst and AI coordinator. Your task is to analyze a project's current state and create an optimal generation plan for a list of target sections.
+    const prompt = ai.definePrompt({
+        name: 'evaluateAndSelectContextPrompt',
+        input: { schema: EvaluateContextInputSchema },
+        output: { schema: EvaluateContextOutputSchema },
+        model: 'googleai/gemini-2.0-flash',
+        prompt: `You are an expert project analyst and AI coordinator. Your task is to analyze a project's current state and create an optimal generation plan for a list of target sections.
 
 **Your Analysis Process:**
 
@@ -128,12 +126,12 @@ ${JSON.stringify(input.projectPlan, null, 2)}
 ${agentDetailsContext}
 ---
 `,
-    config: {
-        temperature: 0.3,
-        maxOutputTokens: 8192,
-    }
-  });
+        config: {
+            temperature: 0.3,
+            maxOutputTokens: 8192,
+        }
+    });
 
-  const { output } = await prompt(input);
-  return output!;
+    const { output } = await prompt(input);
+    return output!;
 }

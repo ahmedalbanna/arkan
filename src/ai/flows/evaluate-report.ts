@@ -7,16 +7,14 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { detectAiContent } from './detect-ai-content';
-import { EvaluateReportInputSchema, type EvaluateReportInput, EvaluateReportOutputSchema, type EvaluateReportOutput } from '@/ai/schemas';
+import { EvaluateReportInputSchema, EvaluateReportOutputSchema, type EvaluateReportInput, type EvaluateReportOutput } from '@/ai/schemas';
 
 const evaluateReportPrompt = ai.definePrompt(
   {
     name: 'evaluateReportPrompt',
     input: { schema: EvaluateReportInputSchema },
     output: { schema: EvaluateReportOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
     prompt: async (input) => {
       const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : 'No proposal provided.';
       return `You are an expert quality assurance analyst and document reviewer. Your task is to evaluate a comprehensive project report based on a given set of acceptance criteria.

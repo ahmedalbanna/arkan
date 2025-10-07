@@ -8,8 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { TranslateTextInputSchema, type TranslateTextInput, TranslateTextOutputSchema, type TranslateTextOutput } from '@/ai/schemas';
+import { TranslateTextInputSchema, TranslateTextOutputSchema, type TranslateTextInput, type TranslateTextOutput } from '@/ai/schemas';
 
 export async function translateText(
   input: TranslateTextInput
@@ -28,7 +27,7 @@ const translateTextFlow = ai.defineFlow(
       name: 'translateTextPrompt',
       input: { schema: TranslateTextInputSchema },
       output: { schema: TranslateTextOutputSchema },
-      model: 'googleai/gemini-1.5-flash',
+      model: 'googleai/gemini-2.0-flash',
       prompt: `You are an expert translator. Your task is to translate the given text into the specified target language while perfectly preserving all markdown formatting.
 
 **CRITICAL INSTRUCTIONS:**
@@ -44,7 +43,7 @@ const translateTextFlow = ai.defineFlow(
 ---
 `,
       config: {
-          temperature: 0.2,
+        temperature: 0.2,
       }
     });
 

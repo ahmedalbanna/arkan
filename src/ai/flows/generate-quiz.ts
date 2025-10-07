@@ -6,14 +6,13 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { GenerateQuizInputSchema, type GenerateQuizInput, GenerateQuizOutputSchema, type GenerateQuizOutput, QuestionTypeSchema } from '@/ai/schemas';
+import { GenerateQuizInputSchema, GenerateQuizOutputSchema, type GenerateQuizInput, type GenerateQuizOutput } from '@/ai/schemas';
 
 const multipleChoiceQuizPrompt = ai.definePrompt({
     name: 'multipleChoiceQuizPrompt',
     input: { schema: GenerateQuizInputSchema },
     output: { schema: GenerateQuizOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
     prompt: `You are an expert educator and quiz creator. Your task is to generate a multiple-choice quiz based on the provided text.
 
 **Instructions:**
@@ -36,7 +35,7 @@ const trueFalseQuizPrompt = ai.definePrompt({
     name: 'trueFalseQuizPrompt',
     input: { schema: GenerateQuizInputSchema },
     output: { schema: GenerateQuizOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
     prompt: `You are an expert educator and quiz creator. Your task is to generate a true/false quiz based on the provided text.
 
 **Instructions:**
@@ -59,7 +58,7 @@ const directQuestionQuizPrompt = ai.definePrompt({
     name: 'directQuestionQuizPrompt',
     input: { schema: GenerateQuizInputSchema },
     output: { schema: GenerateQuizOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
     prompt: `You are an expert educator and quiz creator. Your task is to generate a direct question quiz based on the provided text.
 
 **Instructions:**
@@ -99,15 +98,15 @@ const generateQuizFlow = ai.defineFlow({
     }
     const { output } = await promptToUse(input);
     if (!output) {
-      throw new Error("Quiz generation failed.");
+        throw new Error("Quiz generation failed.");
     }
     return output;
 });
 
 export async function generateQuiz(input: GenerateQuizInput): Promise<GenerateQuizOutput> {
-  const validation = GenerateQuizInputSchema.safeParse(input);
-  if (!validation.success) {
-    throw new Error(`Invalid input for generateQuiz: ${validation.error.message}`);
-  }
-  return generateQuizFlow(validation.data);
+    const validation = GenerateQuizInputSchema.safeParse(input);
+    if (!validation.success) {
+        throw new Error(`Invalid input for generateQuiz: ${validation.error.message}`);
+    }
+    return generateQuizFlow(validation.data);
 }

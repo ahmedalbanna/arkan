@@ -8,10 +8,10 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/ai/schemas';
 import { getAgent } from '@/lib/db/queries';
 import type { AgentPrompt } from '@/lib/types';
-import { GenerateSectionInputSchema, type GenerateSectionInput, GenerateSectionOutputSchema, type GenerateSectionOutput } from '@/ai/schemas';
+import { z } from 'genkit';
 
 // Define a specific schema for the prompt's input variables for better type safety and clarity.
 const ReportSectionPromptInputSchema = GenerateSectionInputSchema.and(
@@ -24,12 +24,12 @@ const ReportSectionPromptInputSchema = GenerateSectionInputSchema.and(
 
 // Define the prompt outside the flow to prevent re-registration
 const reportSectionPrompt = ai.definePrompt({
-    name: 'generateReportSectionPrompt', // Static name
-    input: { schema: ReportSectionPromptInputSchema },
-    output: { schema: GenerateSectionOutputSchema },
-    model: 'googleai/gemini-1.5-flash', // Default model, will be overridden by agent config.
-    system: '{{systemPrompt}}', // System prompt will be passed in
-    prompt: `
+  name: 'generateReportSectionPrompt', // Static name
+  input: { schema: ReportSectionPromptInputSchema },
+  output: { schema: GenerateSectionOutputSchema },
+  model: 'googleai/gemini-2.0-flash', // Default model, will be overridden by agent config.
+  system: '{{systemPrompt}}', // System prompt will be passed in
+  prompt: `
 CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
 
 {{#if guidelines}}
@@ -98,7 +98,7 @@ File: {{this.fileName}}
 \`\`\`
 {{/if}}
 `,
-  });
+});
 
 
 export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
@@ -125,7 +125,7 @@ export async function generateReportSection(input: GenerateSectionInput): Promis
 
   const { output } = await reportSectionPrompt(
     promptVariables,
-    { model: agent.model || 'googleai/gemini-1.5-flash' }
+    { model: agent.model || 'googleai/gemini-2.0-flash' }
   );
 
   if (!output) {
