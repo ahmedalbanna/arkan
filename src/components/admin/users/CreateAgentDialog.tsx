@@ -1,34 +1,35 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useCreateAgent, useCreateAgentCategory, useAgentCategories } from '@/hooks/use-agents';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, PlusCircle } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useAgentCategories, useCreateAgent, useCreateAgentCategory } from '@/hooks/use-agents';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2, PlusCircle } from 'lucide-react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const createAgentSchema = z.object({
-  id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID must be lowercase and contain only letters, numbers, and hyphens."),
-  name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "Description is required"),
-  category: z.string().min(1, "Category is required."),
-  pageUrl: z.string().min(1, "Page URL is required").startsWith('/', "URL must start with /"),
-  prompt: z.string().min(10, "Prompt must be at least 10 characters"),
+    id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID must be lowercase and contain only letters, numbers, and hyphens."),
+    name: z.string().min(1, "Name is required"),
+    description: z.string().min(1, "Description is required"),
+    category: z.string().min(1, "Category is required."),
+    pageUrl: z.string().min(1, "Page URL is required").startsWith('/', "URL must start with /"),
+    prompt: z.string().min(10, "Prompt must be at least 10 characters"),
+    icon: z.string().min(1, "Icon is required"),
 });
 
 type CreateAgentFormValues = z.infer<typeof createAgentSchema>;
 
 const createCategorySchema = z.object({
-  id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID must be lowercase, and can only contain letters, numbers, and hyphens."),
-  name: z.string().min(1, "Name is required"),
+    id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID must be lowercase, and can only contain letters, numbers, and hyphens."),
+    name: z.string().min(1, "Name is required"),
 });
 type CreateCategoryFormValues = z.infer<typeof createCategorySchema>;
 
@@ -50,8 +51,8 @@ export function CreateCategoryDialog() {
                 form.reset();
             },
             onError: (error: any) => {
-                if(error.errors) {
-                    for(const key in error.errors) {
+                if (error.errors) {
+                    for (const key in error.errors) {
                         form.setError(key as any, { message: error.errors[key][0] });
                     }
                 }
@@ -60,9 +61,9 @@ export function CreateCategoryDialog() {
     }
 
     return (
-         <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                 <Button size="sm" variant="outline"><PlusCircle className="me-2 h-4 w-4" />New Category</Button>
+                <Button size="sm" variant="outline"><PlusCircle className="me-2 h-4 w-4" />New Category</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
@@ -71,7 +72,7 @@ export function CreateCategoryDialog() {
                         Create a new category to organize your AI agents.
                     </DialogDescription>
                 </DialogHeader>
-                 <Form {...form}>
+                <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField control={form.control} name="id" render={({ field }) => (
                             <FormItem>
@@ -109,10 +110,16 @@ export function CreateAgentDialog() {
 
     const form = useForm<CreateAgentFormValues>({
         resolver: zodResolver(createAgentSchema),
-        defaultValues: { id: '', name: '', description: '', category: 'content-generation', pageUrl: '/', prompt: '' },
+        defaultValues: { id: '', name: '', description: '', category: 'content-generation', pageUrl: '/', prompt: '', icon: 'bot' },
     });
 
     const onSubmit = (data: CreateAgentFormValues) => {
+        // Validate icon selection
+        if (!data.icon || data.icon.trim() === '') {
+            form.setError('icon', { message: 'Please select an icon for the agent' });
+            return;
+        }
+
         createAgentMutation.mutate(data, {
             onSuccess: () => {
                 setIsOpen(false);
@@ -123,6 +130,9 @@ export function CreateAgentDialog() {
                     for (const key in error.errors) {
                         form.setError(key as keyof CreateAgentFormValues, { message: error.errors[key][0] });
                     }
+                } else {
+                    // Handle general errors
+                    form.setError('root', { message: error.message || 'Failed to create agent' });
                 }
             }
         });
@@ -131,7 +141,7 @@ export function CreateAgentDialog() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                 <Button size="sm"><PlusCircle className="me-2 h-4 w-4" />{t('agentManager.newAgentButton')}</Button>
+                <Button size="sm"><PlusCircle className="me-2 h-4 w-4" />{t('agentManager.newAgentButton')}</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[625px]">
                 <DialogHeader>
@@ -149,7 +159,7 @@ export function CreateAgentDialog() {
                                 <FormMessage />
                             </FormItem>
                         )} />
-                         <FormField control={form.control} name="name" render={({ field }) => (
+                        <FormField control={form.control} name="name" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>{t('agentManager.createDialog.nameLabel')}</FormLabel>
                                 <FormControl><Input {...field} placeholder={t('agentManager.createDialog.namePlaceholder')} disabled={createAgentMutation.isPending} /></FormControl>
@@ -163,8 +173,40 @@ export function CreateAgentDialog() {
                                 <FormMessage />
                             </FormItem>
                         )} />
+                        <FormField control={form.control} name="icon" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>{t('agentManager.createDialog.iconLabel')}</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={createAgentMutation.isPending}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder={t('agentManager.createDialog.selectIconPlaceholder')} /></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="bot">Bot</SelectItem>
+                                        <SelectItem value="brain-circuit">Brain Circuit</SelectItem>
+                                        <SelectItem value="file-text">File Text</SelectItem>
+                                        <SelectItem value="code">Code</SelectItem>
+                                        <SelectItem value="library">Library</SelectItem>
+                                        <SelectItem value="test-tube-2">Test Tube</SelectItem>
+                                        <SelectItem value="waypoints">Waypoints</SelectItem>
+                                        <SelectItem value="flag">Flag</SelectItem>
+                                        <SelectItem value="book-marked">Book Marked</SelectItem>
+                                        <SelectItem value="presentation">Presentation</SelectItem>
+                                        <SelectItem value="database-zap">Database Zap</SelectItem>
+                                        <SelectItem value="history">History</SelectItem>
+                                        <SelectItem value="file-heart">File Heart</SelectItem>
+                                        <SelectItem value="hand">Hand</SelectItem>
+                                        <SelectItem value="drafting-compass">Drafting Compass</SelectItem>
+                                        <SelectItem value="files">Files</SelectItem>
+                                        <SelectItem value="layout-grid">Layout Grid</SelectItem>
+                                        <SelectItem value="scale">Scale</SelectItem>
+                                        <SelectItem value="megaphone">Megaphone</SelectItem>
+                                        <SelectItem value="pencil-ruler">Pencil Ruler</SelectItem>
+                                        <SelectItem value="users">Users</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
                         <div className="grid grid-cols-2 gap-4">
-                             <FormField control={form.control} name="category" render={({ field }) => (
+                            <FormField control={form.control} name="category" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>{t('agentManager.createDialog.categoryLabel')}</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value} disabled={createAgentMutation.isPending}>
@@ -184,7 +226,7 @@ export function CreateAgentDialog() {
                                 </FormItem>
                             )} />
                         </div>
-                         <FormField control={form.control} name="prompt" render={({ field }) => (
+                        <FormField control={form.control} name="prompt" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>{t('agentManager.createDialog.promptLabel')}</FormLabel>
                                 <FormControl><Textarea {...field} rows={5} className="font-mono text-xs" disabled={createAgentMutation.isPending} /></FormControl>

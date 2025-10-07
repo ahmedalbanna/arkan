@@ -1,5 +1,6 @@
+import { PdfPreview } from '@/components/PdfPreview';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { PdfPreview } from '../PdfPreview';
+
 
 // Mock PDF.js
 const mockPdfJs = {

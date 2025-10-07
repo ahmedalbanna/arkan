@@ -2,26 +2,21 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Bot, BrainCircuit, Check, Copy, Flame, SendHorizonal, ThumbsDown, RotateCcw, X, PlusCircle, Braces, UploadCloud, File, XCircle, ChevronDown, CheckCircle, Pencil } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { cn } from '@/lib/utils';
+import { useLocalization } from '@/context/LocalizationContext';
 import { useCreateAgent, useGenerateAgentConfig } from '@/hooks/use-agents';
 import { toast } from '@/hooks/use-toast';
 import { AgentCategory, type AgentPrompt } from '@/lib/types';
-import { Loader2 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useMutation } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext';
-import { generateAgentConfigApi } from '@/services/agent-service';
-import { Switch } from '@/components/ui/switch';
+import { ArrowLeft, Bot, Braces, BrainCircuit, Check, Copy, Flame, Loader2, PlusCircle, RotateCcw, SendHorizonal, XCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useLocalization } from '@/context/LocalizationContext';
 
 const suggestionChips = [
     { label: 'agentGenerator.chips.taskManager', icon: Check },
@@ -55,6 +50,7 @@ export function GenerateAgentView() {
     const [contextFiles, setContextFiles] = useState<UploadedFile[]>([]);
     const [generatedData, setGeneratedData] = useState<GeneratedAgentData | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<AgentCategory>(AgentCategory.ContentGeneration);
+    const [selectedIcon, setSelectedIcon] = useState<string>('bot');
     const createAgentMutation = useCreateAgent();
 
     const generateMutation = useGenerateAgentConfig();
@@ -123,6 +119,7 @@ export function GenerateAgentView() {
             pageUrl: '/admin/chats', // Default URL for custom agents
             prompt: agentPrompt,
             knowledge: knowledgeSources,
+            icon: selectedIcon, // Use selected icon
         };
 
         createAgentMutation.mutate(agentData, {
@@ -145,7 +142,7 @@ export function GenerateAgentView() {
     };
 
     const handleRegenerate = () => {
-       handleGenerate();
+        handleGenerate();
     };
 
     const renderPromptingView = () => (
@@ -215,7 +212,7 @@ export function GenerateAgentView() {
     );
 
     const renderGeneratingView = () => (
-         <div className="w-full max-w-3xl text-center">
+        <div className="w-full max-w-3xl text-center">
             <h1 className="text-4xl font-bold flex items-center justify-center gap-3 mb-2">
                 {t('agentGenerator.title')} <Bot className="h-10 w-10" />
             </h1>
@@ -239,8 +236,8 @@ export function GenerateAgentView() {
                 <div className="glowing-border p-4 rounded-xl text-left">
                     <p>{prompt}</p>
                 </div>
-                 <div className="flex justify-center">
-                     <div {...getRootProps()} className="cursor-pointer">
+                <div className="flex justify-center">
+                    <div {...getRootProps()} className="cursor-pointer">
                         <input {...getInputProps()} />
                         <Button variant="outline" className="bg-white/5 border-white/20 hover:bg-white/10 text-white">
                             <PlusCircle className="me-2 h-4 w-4" />
@@ -249,22 +246,51 @@ export function GenerateAgentView() {
                     </div>
                 </div>
                 <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
                         <div>
                             <Label htmlFor="agent-name" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.name')}</Label>
                             <Input id="agent-name" value={generatedData?.name || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, name: e.target.value } : null)} className="bg-white/5 border-white/20 h-12" />
                         </div>
                         <div>
                             <Label htmlFor="agent-category" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.category')}</Label>
-                             <Select value={selectedCategory} onValueChange={(val) => setSelectedCategory(val as AgentCategory)}>
+                            <Select value={selectedCategory} onValueChange={(val) => setSelectedCategory(val as AgentCategory)}>
                                 <SelectTrigger id="agent-category" className="bg-white/5 border-white/20 h-12"><SelectValue placeholder={selectedCategory} /></SelectTrigger>
                                 <SelectContent>
                                     {Object.values(AgentCategory).map(cat => <SelectItem key={cat} value={cat}>{cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                         </div>
+                        <div>
+                            <Label htmlFor="agent-icon" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.icon')}</Label>
+                            <Select value={selectedIcon} onValueChange={setSelectedIcon}>
+                                <SelectTrigger id="agent-icon" className="bg-white/5 border-white/20 h-12"><SelectValue placeholder={selectedIcon} /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="bot">Bot</SelectItem>
+                                    <SelectItem value="brain-circuit">Brain Circuit</SelectItem>
+                                    <SelectItem value="file-text">File Text</SelectItem>
+                                    <SelectItem value="code">Code</SelectItem>
+                                    <SelectItem value="library">Library</SelectItem>
+                                    <SelectItem value="test-tube-2">Test Tube</SelectItem>
+                                    <SelectItem value="waypoints">Waypoints</SelectItem>
+                                    <SelectItem value="flag">Flag</SelectItem>
+                                    <SelectItem value="book-marked">Book Marked</SelectItem>
+                                    <SelectItem value="presentation">Presentation</SelectItem>
+                                    <SelectItem value="database-zap">Database Zap</SelectItem>
+                                    <SelectItem value="history">History</SelectItem>
+                                    <SelectItem value="file-heart">File Heart</SelectItem>
+                                    <SelectItem value="hand">Hand</SelectItem>
+                                    <SelectItem value="drafting-compass">Drafting Compass</SelectItem>
+                                    <SelectItem value="files">Files</SelectItem>
+                                    <SelectItem value="layout-grid">Layout Grid</SelectItem>
+                                    <SelectItem value="scale">Scale</SelectItem>
+                                    <SelectItem value="megaphone">Megaphone</SelectItem>
+                                    <SelectItem value="pencil-ruler">Pencil Ruler</SelectItem>
+                                    <SelectItem value="users">Users</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
-                     <div>
+                    <div>
                         <Label htmlFor="agent-description" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.description')}</Label>
                         <Textarea id="agent-description" value={generatedData?.description || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, description: e.target.value } : null)} className="bg-white/5 border-white/20 min-h-[70px]" />
                     </div>
@@ -272,18 +298,18 @@ export function GenerateAgentView() {
                         <Label htmlFor="agent-instructions" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.instructions')}</Label>
                         <Textarea id="agent-instructions" value={generatedData?.instructions || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, instructions: e.target.value } : null)} className="bg-white/5 border-white/20 min-h-[100px]" />
                     </div>
-                     <div>
+                    <div>
                         <Label htmlFor="agent-guidelines" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.guidelines')}</Label>
                         <Textarea id="agent-guidelines" value={generatedData?.guidelines || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, guidelines: e.target.value } : null)} className="bg-white/5 border-white/20 min-h-[100px]" />
                     </div>
                 </div>
                 <div className="flex justify-center gap-4">
                     <Button variant="secondary" onClick={handleAccept} disabled={createAgentMutation.isPending}>
-                        {createAgentMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin"/> : <Check className="h-4 w-4"/>}
+                        {createAgentMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                         <span className="ml-2">{t('agentGenerator.review.acceptButton')}</span>
                     </Button>
                     <Button variant="outline" onClick={handleRegenerate} disabled={generateMutation.isPending}>
-                        {generateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin"/> : <RotateCcw className="h-4 w-4" />}
+                        {generateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
                         <span className="ml-2">{t('agentGenerator.review.regenerateButton')}</span>
                     </Button>
                 </div>
