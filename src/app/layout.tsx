@@ -1,51 +1,49 @@
 
 
-import type { Metadata } from 'next';
-import { Poppins, PT_Sans, Cairo, Almarai } from 'next/font/google';
-import './globals.css';
-import { cn } from '@/lib/utils';
-import { Header } from '@/components/layout/Header';
-import { Toaster } from '@/components/ui/toaster';
-import { LocalizationProvider } from '@/context/LocalizationContext';
-import LanguageDirectionManager from '@/components/LanguageDirectionManager';
-import { ThemeProvider } from '@/components/ThemeProvider';
-import { AuthProvider } from '@/context/AuthContext';
-import { Footer } from '@/components/layout/Footer';
-import QueryProvider from '@/components/QueryProvider';
-import { cookies, headers } from 'next/headers';
-import { redirect } from 'next/dist/client/components/navigation';
-import { adminAuth } from '@/lib/firebase/admin';
 import SupportChatWidget from '@/components/chat/SupportChatWidget';
 import FirebaseMessagingProvider from '@/components/FirebaseMessagingProvider';
+// FontLoader removed - using system fonts instead
+import LanguageDirectionManager from '@/components/LanguageDirectionManager';
+import { Header } from '@/components/layout/Header';
+import QueryProvider from '@/components/QueryProvider';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { Toaster } from '@/components/ui/toaster';
+import { AuthProvider } from '@/context/AuthContext';
+import { LocalizationProvider } from '@/context/LocalizationContext';
+import { adminAuth } from '@/lib/firebase/admin';
+import { cn } from '@/lib/utils';
+import type { Metadata } from 'next';
+import { redirect } from 'next/dist/client/components/navigation';
+// Temporarily disabled Google Fonts due to network connectivity issues
+// import { Almarai, Cairo, Poppins, PT_Sans } from 'next/font/google';
+import { cookies, headers } from 'next/headers';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Arkan - Professional Portfolio Platform',
   description: 'Showcase your work, discover talent, and interact with a community of professionals.',
 };
 
-const fontBody = PT_Sans({
-  subsets: ['latin'],
-  weight: ['400', '700'],
+// System font configuration - no external dependencies
+const fontBody = {
   variable: '--font-body',
-});
+  className: 'font-sans',
+};
 
-const fontHeadline = Poppins({
-  subsets: ['latin'],
-  weight: ['400', '600', '700'],
+const fontHeadline = {
   variable: '--font-headline',
-});
+  className: 'font-sans',
+};
 
-const fontAlmarai = Almarai({
-  subsets: ['arabic'],
-  weight: ['400', '700'],
+const fontAlmarai = {
   variable: '--font-almarai',
-});
+  className: 'font-sans',
+};
 
-const fontCairo = Cairo({
-    subsets: ['arabic'],
-    weight: ['400', '700'],
-    variable: '--font-cairo'
-})
+const fontCairo = {
+  variable: '--font-cairo',
+  className: 'font-sans',
+};
 
 // List of public paths that do not require authentication
 const PUBLIC_PATHS = ['/login', '/signup', '/forgot-password', '/design', '/docs', '/request'];
@@ -56,13 +54,13 @@ async function handleAuthRedirects(pathname: string) {
   const sessionCookie = (await cookies()).get('__session')?.value;
 
   let isAuthenticated = false;
-  if(sessionCookie) {
+  if (sessionCookie) {
     try {
-        await adminAuth.verifySessionCookie(sessionCookie, true);
-        isAuthenticated = true;
+      await adminAuth.verifySessionCookie(sessionCookie, true);
+      isAuthenticated = true;
     } catch (error) {
-       // Ignore verification errors, treat as not authenticated
-       isAuthenticated = false;
+      // Ignore verification errors, treat as not authenticated
+      isAuthenticated = false;
     }
   }
 
@@ -104,12 +102,12 @@ export default async function RootLayout({
             <LocalizationProvider>
               <AuthProvider>
                 <FirebaseMessagingProvider>
-                    <LanguageDirectionManager>
+                  <LanguageDirectionManager>
                     <Header />
                     <main className="flex-grow">{children}</main>
                     <SupportChatWidget />
                     <Toaster />
-                    </LanguageDirectionManager>
+                  </LanguageDirectionManager>
                 </FirebaseMessagingProvider>
               </AuthProvider>
             </LocalizationProvider>

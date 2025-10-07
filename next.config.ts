@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+
+  // Font optimization
+  experimental: {
+    // optimizeFonts: true, // This option doesn't exist in Next.js 15.3.3
+  },
   images: {
     remotePatterns: [
       {
