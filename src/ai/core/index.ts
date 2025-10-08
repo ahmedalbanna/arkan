@@ -3,27 +3,14 @@
  * يوفر واجهة موحدة للوصول لجميع مكونات النظام الذكي
  */
 
-import {
-    AdaptiveModelSelector,
-    type ModelConfig,
-    type ModelSelectionCriteria
-} from './adaptive-model-selector';
+import { AdaptiveModelSelector, type ModelConfig, type ModelSelectionCriteria } from './adaptive-model-selector';
 import { ContextAnalyzer, type ContextAnalysisResult } from './context-analyzer';
-import {
-    IntelligentPromptBuilder, type PromptBuildingConfig, type PromptTemplate
-} from './intelligent-prompt-builder';
-import {
-    IterativeImprovementEngine, type ImprovementConfig, type ImprovementIteration,
-    type ImprovementSession
-} from './iterative-improvement-engine';
-import {
-    OutputQualityValidator, type QualityIssue, type QualityMetrics, type ValidationResult
-} from './output-quality-validator';
-import {
-    PerformanceMonitor, type PerformanceMetrics,
-    type PerformanceReport,
-    type PerformanceSession
-} from './performance-monitor';
+import { IntelligentPromptBuilder, type PromptBuildingConfig, type PromptTemplate } from './intelligent-prompt-builder';
+import { IterativeImprovementEngine, type ImprovementConfig, type ImprovementIteration, type ImprovementSession } from './iterative-improvement-engine';
+import { OutputQualityValidator, type QualityIssue, type QualityMetrics, type ValidationResult } from './output-quality-validator';
+import { PerformanceMonitor, type PerformanceMetrics, type PerformanceReport, type PerformanceSession } from './performance-monitor';
+import type { TaskType } from '../schemas/task-types';
+
 
 // إعادة تصدير جميع المكونات
 export {
@@ -46,7 +33,7 @@ export class IntelligentAISystem {
      */
     static async runIntelligentFlow(config: {
         userInput: string;
-        taskType: 'generation' | 'analysis' | 'translation' | 'improvement';
+        taskType: TaskType;
         domain: string;
         externalContext?: Array<{ fileName: string; content: string; type: string }>;
         guidelines?: string[];
@@ -241,7 +228,7 @@ export class IntelligentAISystem {
      */
     static selectModel(
         contextAnalysis: ContextAnalysisResult,
-        taskType: 'generation' | 'analysis' | 'translation' | 'improvement'
+        taskType: TaskType
     ) {
         return AdaptiveModelSelector.selectOptimalModel(contextAnalysis, taskType);
     }
@@ -265,7 +252,7 @@ export class IntelligentAISystem {
      * بناء prompt ذكي
      */
     static buildSmartPrompt(config: {
-        taskType: 'generation' | 'analysis' | 'translation' | 'improvement';
+        taskType: TaskType;
         domain: string;
         contextAnalysis: ContextAnalysisResult;
         userInput: string;
@@ -352,7 +339,7 @@ export const AIHelpers = {
     /**
      * اقتراح النموذج المناسب
      */
-    async suggestModel(text: string, taskType: 'generation' | 'analysis' | 'translation' | 'improvement') {
+    async suggestModel(text: string, taskType: TaskType) {
         const contextAnalysis = await ContextAnalyzer.analyzeContext({
             userInput: text
         });

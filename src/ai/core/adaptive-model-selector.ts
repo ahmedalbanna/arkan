@@ -4,26 +4,9 @@
  */
 
 import { defaultModel, imageGenerationModel, proModel } from '@/ai/config/models';
+import { ModelConfigSchema, ModelSelectionCriteriaSchema, TaskTypeSchema, type ModelConfig, type ModelSelectionCriteria } from '../schemas/intelligent-system';
 import { ContextAnalysisResult } from './context-analyzer';
-
-export interface ModelConfig {
-    modelId: string;
-    temperature: number;
-    maxOutputTokens: number;
-    topP?: number;
-    topK?: number;
-    reasoning: string;
-}
-
-export interface ModelSelectionCriteria {
-    taskType: 'generation' | 'analysis' | 'translation' | 'improvement' | 'creative' | 'technical';
-    contentComplexity: 'low' | 'medium' | 'high' | 'expert';
-    outputLength: 'short' | 'medium' | 'long' | 'very_long';
-    accuracyRequirement: 'standard' | 'high' | 'critical';
-    speedRequirement: 'fast' | 'balanced' | 'quality_first';
-    contextSize: number;
-    languageRequirement: 'ar' | 'en' | 'multilingual';
-}
+import { z } from 'zod';
 
 export class AdaptiveModelSelector {
 
@@ -32,7 +15,7 @@ export class AdaptiveModelSelector {
      */
     static selectOptimalModel(
         contextAnalysis: ContextAnalysisResult,
-        taskType: ModelSelectionCriteria['taskType'],
+        taskType: z.infer<typeof TaskTypeSchema>,
         additionalCriteria?: Partial<ModelSelectionCriteria>
     ): ModelConfig {
 
@@ -47,7 +30,7 @@ export class AdaptiveModelSelector {
      */
     private static buildSelectionCriteria(
         contextAnalysis: ContextAnalysisResult,
-        taskType: ModelSelectionCriteria['taskType'],
+        taskType: z.infer<typeof TaskTypeSchema>,
         additionalCriteria?: Partial<ModelSelectionCriteria>
     ): ModelSelectionCriteria {
 
@@ -69,7 +52,7 @@ export class AdaptiveModelSelector {
         // تحديد متطلبات اللغة
         const languageRequirement = this.determineLanguageRequirement(contextAnalysis);
 
-        return {
+        const criteriaObject = {
             taskType,
             contentComplexity,
             outputLength,
@@ -79,6 +62,9 @@ export class AdaptiveModelSelector {
             languageRequirement,
             ...additionalCriteria
         };
+        
+        // Validate with Zod before returning
+        return ModelSelectionCriteriaSchema.parse(criteriaObject);
     }
 
     /**
@@ -316,8 +302,8 @@ export class AdaptiveModelSelector {
             default:
                 selectedModelId = defaultModel.name;
         }
-
-        return {
+        
+        const configObject = {
             modelId: selectedModelId,
             temperature,
             maxOutputTokens,
@@ -325,6 +311,8 @@ export class AdaptiveModelSelector {
             topK,
             reasoning: this.generateSelectionReasoning(model, criteria)
         };
+
+        return ModelConfigSchema.parse(configObject);
     }
 
     /**

@@ -3,6 +3,7 @@
  * يحسن المخرجات تدريجياً من خلال عدة تكرارات
  */
 
+import { TaskType } from '../schemas/task-types';
 import { AdaptiveModelSelector, ModelConfig } from './adaptive-model-selector';
 import { ContextAnalysisResult, ContextAnalyzer } from './context-analyzer';
 import { IntelligentPromptBuilder, PromptBuildingConfig } from './intelligent-prompt-builder';
@@ -46,7 +47,7 @@ export class IterativeImprovementEngine {
      */
     static async runImprovementSession(
         originalInput: string,
-        taskType: 'generation' | 'analysis' | 'translation' | 'improvement',
+        taskType: TaskType,
         domain: string,
         externalContext?: Array<{ fileName: string; content: string; type: string }>,
         config: ImprovementConfig = {}

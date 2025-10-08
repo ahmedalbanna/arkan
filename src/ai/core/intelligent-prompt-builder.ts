@@ -2,7 +2,7 @@
  * نظام بناء Prompts ذكي ومتكيف
  * يبني prompts محسنة بناءً على تحليل السياق والمتطلبات
  */
-
+import { TaskType } from '../schemas/task-types';
 import { ContextAnalysisResult } from './context-analyzer';
 
 export interface PromptTemplate {
@@ -15,7 +15,7 @@ export interface PromptTemplate {
 }
 
 export interface PromptBuildingConfig {
-    taskType: 'generation' | 'analysis' | 'translation' | 'improvement';
+    taskType: TaskType;
     domain: string;
     contextAnalysis: ContextAnalysisResult;
     userInput: string;
