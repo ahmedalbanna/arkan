@@ -289,7 +289,7 @@ export default function SupportChatWidget() {
                     </div>
                 ) : (
                 <>
-                    <CardContent className="flex-grow overflow-hidden">
+                    <CardContent className="grow overflow-hidden">
                         <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
                             <div className="space-y-4">
                                 {messages.map((message, index) => (

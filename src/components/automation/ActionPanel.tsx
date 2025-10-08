@@ -40,7 +40,7 @@ export function ActionPanel() {
             <Button variant="ghost" size="icon" className="h-7 w-7"><X className="h-4 w-4" /></Button>
         </div>
       </CardHeader>
-      <CardContent className="p-4 space-y-4 flex-grow">
+      <CardContent className="p-4 space-y-4 grow">
         <div className="space-y-1">
           <Label>Action</Label>
           <Select defaultValue="run-agent-command">

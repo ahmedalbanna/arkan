@@ -176,7 +176,7 @@ export function FactCheckerTool() {
                             <div key={index} className="border p-4 rounded-lg space-y-2">
                                 <div className="flex justify-between items-start">
                                     <p className="font-medium italic">"{claim.statement}"</p>
-                                    <Badge variant={badgeVariant} className="flex-shrink-0 ml-4">
+                                    <Badge variant={badgeVariant} className="shrink-0 ml-4">
                                         <Icon className={`mr-1 h-3.5 w-3.5 ${color}`} />
                                         {claim.status}
                                     </Badge>

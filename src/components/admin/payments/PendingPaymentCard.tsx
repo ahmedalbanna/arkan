@@ -43,7 +43,7 @@ export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
                     {format(new Date(transaction.createdAt), 'd MMM yyyy, h:mm a')}
                 </CardDescription>
             </CardHeader>
-            <CardContent className="flex-grow space-y-3 text-sm">
+            <CardContent className="grow space-y-3 text-sm">
                 <p><strong>{t('managePayments.userLabel')}:</strong> {transaction.userName} ({transaction.userEmail})</p>
                 <p><strong>{t('managePayments.amountLabel')}:</strong> ${transaction.price.toFixed(2)}</p>
                 <p><strong>{t('managePayments.creditsLabel')}:</strong> {transaction.credits}</p>

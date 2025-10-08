@@ -24,7 +24,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const OutlineItem = ({ item, level = 0 }: { item: GeneratePresentationOutlineOutput['outline'][0], level?: number }) => {
+const OutlineItem = ({ item, level = 0 }: { item: GeneratePresentationOutlineOutput['outline-solid'][0], level?: number }) => {
     const [isOpen, setIsOpen] = useState(true);
     const hasChildren = item.children && item.children.length > 0;
 
@@ -56,7 +56,7 @@ export function PresentationOutlineTool() {
   const mutation = useWritingTool('/api/generate/presentation-outline', {
     onSuccess: (data: any) => {
         setGeneratedOutline(data);
-        toast({ title: "Outline Generated!", description: "Review the outline and choose a template to proceed."});
+        toast({ title: "Outline Generated!", description: "Review the outline-solid and choose a template to proceed."});
     },
     onError: (error) => {
         toast({ title: "Outline Generation Failed", description: error.message, variant: "destructive" });

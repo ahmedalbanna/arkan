@@ -150,7 +150,7 @@ const ToolsSkeleton = () => (
                 </div>
             </div>
         </CardHeader>
-        <CardContent className="flex-grow space-y-6">
+        <CardContent className="grow space-y-6">
             {/* Tabs skeleton */}
             <div className="space-y-2">
                 <Skeleton className="h-10 w-full" />
@@ -206,7 +206,7 @@ export const ProposalGenerationTools = ({
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="flex-grow overflow-y-auto pr-2 space-y-4">
+            <CardContent className="grow overflow-y-auto pr-2 space-y-4">
                 <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="simple">Simple</TabsTrigger>

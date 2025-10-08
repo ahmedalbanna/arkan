@@ -112,7 +112,7 @@ export default function DiagramViewer({
 
     return (
         <Card className="min-h-[600px] w-full flex flex-col">
-            <CardContent className="flex-grow p-4 md:p-6">
+            <CardContent className="grow p-4 md:p-6">
                 <div className="flex h-full items-center justify-center relative group">
                     {viewMode === 'image' && (
                         <Image

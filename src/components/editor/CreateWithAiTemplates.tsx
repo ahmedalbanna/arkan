@@ -68,7 +68,7 @@ export function CreateWithAiTemplates({
             <CardDescription className="text-sm">Select a visual style for your presentation.</CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="p-4 flex-grow overflow-y-auto">
+      <CardContent className="p-4 grow overflow-y-auto">
         {isLoading ? (
             <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
                 <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />

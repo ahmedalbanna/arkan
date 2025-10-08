@@ -159,7 +159,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                     </Button>
                 </div>
             </CardHeader>
-            <CardContent className="flex-grow overflow-y-auto pr-2">
+            <CardContent className="grow overflow-y-auto pr-2">
                 <Tabs defaultValue="generate" className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="generate">Generate</TabsTrigger>
@@ -201,7 +201,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                             <div className="flex gap-2">
                                 <Button
                                     onClick={onGenerateFullReport}
-                                    className="w-full mb-4 font-headline flex-grow"
+                                    className="w-full mb-4 font-headline grow"
                                     disabled={!canGenerateFullReport || isDisabled}
                                 >
                                     {activeMutationKey === 'full-report' ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}

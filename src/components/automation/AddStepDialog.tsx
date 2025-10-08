@@ -99,7 +99,7 @@ export function AddStepDialog() {
             {filters.map(filter => (
                  <Button
                     key={filter.id}
-                    variant={activeFilter === filter.id ? 'secondary' : 'outline'}
+                    variant={activeFilter === filter.id ? 'secondary' : 'outline-solid'}
                     onClick={() => setActiveFilter(filter.id)}
                     className="gap-2"
                 >

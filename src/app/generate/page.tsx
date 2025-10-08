@@ -163,9 +163,9 @@ function GeneratePageContent() {
   }, [features, activeTab, enabledTabs]);
 
   return (
-    <div className="relative flex-grow flex flex-col">
+    <div className="relative grow flex flex-col">
       <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
-      <div className="flex-grow flex flex-col mx-auto px-4 py-8 w-full">
+      <div className="grow flex flex-col mx-auto px-4 py-8 w-full">
         <div className="flex justify-between items-start mb-4 gap-4 max-w-full">
           <div className="flex-1 space-y-1 overflow-auto">
              <h1 className="text-xl font-semibold text-foreground truncate" title={projectName}>
@@ -184,11 +184,11 @@ function GeneratePageContent() {
             <SessionActions />
           </div>
         </div>
-        <div className="flex flex-col flex-grow">
+        <div className="flex flex-col grow">
             {!featuresLoaded ? (
                 <LoadingSkeleton />
             ) : (
-                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
+                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col grow">
                     <TabsList className="grid w-full h-auto grid-cols-2 sm:grid-cols-4 lg:grid-cols-8">
                         <TabsTrigger value="files" className="gap-2">
                             <FolderKanban className="h-4 w-4" /> {t('builder.tabs.files')}
@@ -230,7 +230,7 @@ function GeneratePageContent() {
                         )}
                     </TabsList>
 
-                    <div className="w-full flex-grow mt-4">
+                    <div className="w-full grow mt-4">
                         <TabsContent value="files" className="h-full animate-fade-in">
                             {activeTab === 'files' && <FileManager />}
                         </TabsContent>

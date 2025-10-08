@@ -116,7 +116,7 @@ function FileTreeView({ codebase }: { codebase: Codebase }) {
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-grow overflow-hidden">
+      <CardContent className="grow overflow-hidden">
         <ScrollArea className="h-full border rounded-md p-4">
           <Tree data={fileTree} />
         </ScrollArea>
@@ -439,7 +439,7 @@ function ComponentGenerator() {
             <DialogHeader className="flex-row items-center justify-between border-b pb-2">
               <DialogTitle>{t('builder.codeGenerator.componentGenerator.expandedTitle')}</DialogTitle>
             </DialogHeader>
-            <div className="flex-grow min-h-0">
+            <div className="grow min-h-0">
               {renderPreview(true)}
             </div>
           </DialogContent>

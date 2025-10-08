@@ -115,7 +115,7 @@ function PptxTemplateSkeleton() {
                 <Skeleton className="h-6 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
             </CardHeader>
-            <CardContent className="flex-grow space-y-4">
+            <CardContent className="grow space-y-4">
                 <Skeleton className="w-full aspect-video rounded-md" />
                 <Skeleton className="h-10 w-full" />
                 <Skeleton className="h-10 w-full" />
@@ -240,7 +240,7 @@ export default function PptxTemplateManager() {
                         )}
                     </div>
                 </CardHeader>
-                <CardContent className="flex-grow space-y-4">
+                <CardContent className="grow space-y-4">
                 <div className="relative group">
                     <PptxTemplatePreview styles={styles} />
                      <Button

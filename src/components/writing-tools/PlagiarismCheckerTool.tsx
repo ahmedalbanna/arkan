@@ -163,7 +163,7 @@ export function PlagiarismCheckerTool() {
                         <div key={index} className="border p-4 rounded-lg space-y-2">
                             <div className="flex justify-between items-start gap-4">
                                 <p className="font-semibold">{match.title}</p>
-                                <Badge variant={match.similarity > 75 ? 'destructive' : match.similarity > 50 ? 'secondary' : 'outline'}>
+                                <Badge variant={match.similarity > 75 ? 'destructive' : match.similarity > 50 ? 'secondary' : 'outline-solid'}>
                                   {t('writingTools.plagiarismChecker.matchBadge').replace('{similarity}', match.similarity.toString())}
                                 </Badge>
                             </div>

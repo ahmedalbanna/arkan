@@ -11,12 +11,12 @@ export default function ParallelTranslatePanel({ content, onClose }: { content: 
   
   return (
     <div className="flex flex-col h-full bg-slate-50">
-      <div className="flex-shrink-0 bg-white border-b border-slate-200 p-2 flex items-center justify-between">
+      <div className="shrink-0 bg-white border-b border-slate-200 p-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" onClick={onClose}><X className="w-5 h-5"/></Button>
             <span className="font-semibold">Parallel Translate</span>
         </div>
-        <div className="flex-grow flex items-center justify-center gap-4">
+        <div className="grow flex items-center justify-center gap-4">
             <div className="flex items-center gap-2">
                  <span className="text-sm">Translation Service:</span>
                  <Select defaultValue="gemini">
@@ -72,12 +72,12 @@ export default function ParallelTranslatePanel({ content, onClose }: { content: 
             <Button variant="ghost" size="icon"><Printer className="w-5 h-5"/></Button>
         </div>
       </div>
-      <div className="flex-grow flex p-4 gap-4 overflow-y-auto">
-        <div className="grid grid-cols-2 gap-4 flex-grow">
-          <div className="bg-white p-8 rounded-lg border shadow-sm">
+      <div className="grow flex p-4 gap-4 overflow-y-auto">
+        <div className="grid grid-cols-2 gap-4 grow">
+          <div className="bg-white p-8 rounded-lg border shadow-xs">
             <p className="leading-loose">{content}</p>
           </div>
-          <div className="bg-white p-8 rounded-lg border shadow-sm">
+          <div className="bg-white p-8 rounded-lg border shadow-xs">
             <p className="leading-loose">{translatedContent}</p>
           </div>
         </div>

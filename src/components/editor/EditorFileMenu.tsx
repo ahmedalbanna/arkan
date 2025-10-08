@@ -41,7 +41,7 @@ export const EditorFileMenu = ({ onClose, recentFiles }: { onClose: () => void, 
                                 className={`w-full justify-start text-base font-normal h-11 ${item.active ? 'bg-blue-100 text-blue-700' : ''}`}
                             >
                                 {item.icon}
-                                <span className="flex-grow text-left">{item.label}</span>
+                                <span className="grow text-left">{item.label}</span>
                                 {item.hasArrow && <ChevronRight className="w-4 h-4" />}
                             </Button>
                         ))}
@@ -60,7 +60,7 @@ export const EditorFileMenu = ({ onClose, recentFiles }: { onClose: () => void, 
                                     <p className="font-medium text-slate-800 text-sm">{file.name.split(' - ')[0]}</p>
                                     <p className="text-xs text-slate-500">{file.location}</p>
                                 </div>
-                                <span className="text-xs text-slate-400 ml-auto flex-shrink-0">{file.modified.split(' ')[1]}</span>
+                                <span className="text-xs text-slate-400 ml-auto shrink-0">{file.modified.split(' ')[1]}</span>
                             </button>
                         ))}
                     </div>

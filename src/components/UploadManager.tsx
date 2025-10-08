@@ -155,7 +155,7 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
               {t('builder.files.fileManagerDesc')}
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex-grow flex flex-col gap-4">
+          <CardContent className="grow flex flex-col gap-4">
             <Tabs defaultValue="upload" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="upload">{t('builder.files.uploadFilesTab')}</TabsTrigger>
@@ -170,9 +170,9 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
             </Tabs>
             
             {externalContext && externalContext.length > 0 && (
-                <div className="space-y-2 flex-grow flex flex-col min-h-0">
+                <div className="space-y-2 grow flex flex-col min-h-0">
                     <h3 className="text-sm font-medium text-muted-foreground">{t('builder.files.toasts.uploadedContext')}</h3>
-                    <ScrollArea className="flex-grow border rounded-lg">
+                    <ScrollArea className="grow border rounded-lg">
                         <ul className="space-y-1 list-none p-2">
                             {externalContext.map((item, index) => (
                                 <li key={index} className="flex items-center justify-between p-2 rounded-md hover:bg-muted">

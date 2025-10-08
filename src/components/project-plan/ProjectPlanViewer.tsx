@@ -82,7 +82,7 @@ export default function ProjectPlanViewer({ projectPlan }: { projectPlan: Projec
           {t('builder.projectPlan.viewerDescription')}
         </CardDescription>
       </CardHeader>
-      <div className="flex-grow bg-slate-200 dark:bg-slate-900/50 p-4 rounded-b-lg">
+      <div className="grow bg-slate-200 dark:bg-slate-900/50 p-4 rounded-b-lg">
         <ScrollArea className="h-full">
             {currentPhase ? (
                  <A4Page key={currentPhase.phaseName} title={currentPhase.phaseName}>

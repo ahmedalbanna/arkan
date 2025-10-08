@@ -150,7 +150,7 @@ export function Header() {
   const hasNoCredits = userProfile && userProfile.credits === 0;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60">
       <div className="flex h-16 items-center px-4 justify-between">
         <div className="flex items-center gap-2">
             <div className="md:hidden">
@@ -162,7 +162,7 @@ export function Header() {
                 </SheetTrigger>
                 <SheetContent side={locale === 'ar' ? 'right' : 'left'} className="w-full max-w-sm flex flex-col">
                     <SheetTitle className="sr-only">{isClient ? t('header.openMenu') : 'Open Menu'}</SheetTitle>
-                    <ScrollArea className="flex-grow mt-8">
+                    <ScrollArea className="grow mt-8">
                     <nav className="flex flex-col gap-4 pr-6">
                         {isClient ? renderNavLinks(navLinks, true) : <Skeleton className="h-10 w-full" />}
                         {userProfile?.role === 'admin' && (

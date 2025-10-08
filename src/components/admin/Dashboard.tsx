@@ -37,7 +37,7 @@ function RecentActivitySkeleton() {
                 {Array.from({ length: 5 }).map((_, i) => (
                     <div key={i} className="flex items-center gap-4">
                         <Skeleton className="h-9 w-9 rounded-full" />
-                        <div className="grid gap-1 flex-grow">
+                        <div className="grid gap-1 grow">
                             <Skeleton className="h-4 w-4/5" /><Skeleton className="h-3 w-3/5" />
                         </div>
                     </div>

@@ -40,7 +40,7 @@ export function TeamCard({ team }: TeamCardProps) {
                                         <AvatarImage src={member.profilePictureUrl} />
                                         <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
-                                    <div className="flex-grow">
+                                    <div className="grow">
                                         <p className="font-medium">{member.name}</p>
                                         <p className="text-sm text-muted-foreground">{member.email}</p>
                                     </div>

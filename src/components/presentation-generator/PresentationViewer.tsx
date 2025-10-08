@@ -77,13 +77,13 @@ const PresentationViewer = memo(function PresentationViewer({ activePresentation
         </CardDescription>
       </CardHeader>
 
-      <div className="flex-grow flex flex-col p-4 bg-muted/40 overflow-y-auto">
+      <div className="grow flex flex-col p-4 bg-muted/40 overflow-y-auto">
         {/* Slide View */}
         <div className="w-full aspect-video bg-background shadow-md rounded-lg p-8 flex flex-col">
           <h3 className="text-3xl font-bold mb-4 line-clamp-2">
             {slide.title}
           </h3>
-          <div className="flex-grow text-lg">
+          <div className="grow text-lg">
             <ul className="list-disc pl-6 space-y-3">
               {slide.content.map((item, index) => (
                 <li key={index}>{item}</li>

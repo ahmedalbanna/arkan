@@ -96,7 +96,7 @@ export function AddTriggerDialog() {
             {filters.map(filter => (
                  <Button
                     key={filter.id}
-                    variant={activeFilter === filter.id ? 'secondary' : 'outline'}
+                    variant={activeFilter === filter.id ? 'secondary' : 'outline-solid'}
                     onClick={() => setActiveFilter(filter.id)}
                     className="gap-2"
                 >
@@ -124,7 +124,7 @@ export function AddTriggerDialog() {
                   <Button key={i} variant="outline" className="w-full h-auto justify-start text-left">
                     <div className="flex items-center gap-3 p-2 w-full">
                       <action.icon />
-                      <div className="flex-grow">
+                      <div className="grow">
                         <p className="font-semibold">{action.title}</p>
                         <p className="text-sm text-muted-foreground font-normal">{action.description}</p>
                       </div>

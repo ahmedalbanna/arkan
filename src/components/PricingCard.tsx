@@ -46,7 +46,7 @@ export function PricingCard({ plan }: { plan: PricingPlan }) {
                     <span className="text-muted-foreground"> / {t('pricing.oneTime')}</span>
                 </CardDescription>
             </CardHeader>
-            <CardContent className="flex-grow space-y-4">
+            <CardContent className="grow space-y-4">
                 <p className="font-semibold">{plan.credits} {t('pricing.aiCredits')}</p>
                 <ul className="space-y-2">
                     {plan.features.map((feature, i) => (

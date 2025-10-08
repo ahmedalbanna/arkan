@@ -106,7 +106,7 @@ const FileTreeView = memo(function FileTreeView({ codebase }: FileTreeViewProps)
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-grow overflow-hidden">
+      <CardContent className="grow overflow-hidden">
         <ScrollArea className="h-full border rounded-md p-4">
           <Tree data={fileTree} />
         </ScrollArea>

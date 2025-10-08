@@ -133,7 +133,7 @@ function helloWorld() {
                     {aiSuggestion ? t('markdownDisplay.aiSuggestionReadyDesc') : t('markdownDisplay.renderedOutputDesc')}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex-grow">
+              <CardContent className="grow">
                  {aiSuggestion ? (
                     <div className="space-y-4">
                         <ScrollArea className="h-[50vh] rounded-md border p-4 bg-muted/50">

@@ -83,7 +83,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                     {t('projects.updated', { time: formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true }) })}
                 </CardDescription>
             </CardHeader>
-            <CardContent className="flex-grow">
+            <CardContent className="grow">
                 <p className="text-sm text-muted-foreground line-clamp-3">
                     {(project.proposal?.objective || t('projects.noDescription')) as React.ReactNode}
                 </p>

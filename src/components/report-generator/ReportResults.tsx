@@ -97,7 +97,7 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
           <ChevronRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
-        <ScrollArea className="flex-grow">
+        <ScrollArea className="grow">
             {currentSectionKey && (
                  <A4Page key={currentSectionKey} title={getSectionTitle(currentSectionKey)}>
                     <Section

@@ -140,7 +140,7 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
           {fields.map((field, index) => (
             <div key={field.id} className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-muted-foreground" />
-              <Input {...control.register(`conversationStarters.${index}.value`)} className="flex-grow" />
+              <Input {...control.register(`conversationStarters.${index}.value`)} className="grow" />
               <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}><X className="h-4 w-4" /></Button>
             </div>
           ))}

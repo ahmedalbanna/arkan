@@ -357,7 +357,7 @@ export type IdeaGenerationOutput = z.infer<typeof IdeaGenerationOutputSchema>;
 // generate-presentation-outline.ts
 export const GeneratePresentationOutlineInputSchema = z.object({
   prompt: z.string().describe('The topic or prompt for the presentation.'),
-  documentation: z.string().optional().describe('Optional documentation or context to base the outline on.'),
+  documentation: z.string().optional().describe('Optional documentation or context to base the outline-solid on.'),
 });
 export type GeneratePresentationOutlineInput = z.infer<typeof GeneratePresentationOutlineInputSchema>;
 
@@ -370,7 +370,7 @@ type OutlineItem = {
 export const OutlineItemSchema: z.ZodSchema<OutlineItem> = z.object({
   title: z.string().describe('The title of the slide or section.'),
   content: z.string().describe('A brief description of the content for this item.'),
-  children: z.array(z.lazy(() => OutlineItemSchema)).optional().describe('Sub-items for this outline entry.'),
+  children: z.array(z.lazy(() => OutlineItemSchema)).optional().describe('Sub-items for this outline-solid entry.'),
 });
 
 export const GeneratePresentationOutlineOutputSchema = z.object({

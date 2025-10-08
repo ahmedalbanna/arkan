@@ -37,7 +37,7 @@ export function CreateWithAiPanel({ isOpen, onOpenChange }: { isOpen: boolean, o
     const outlineMutation = useGeneratePresentationOutline({
         onSuccess: (data) => {
             setGeneratedOutline(data);
-            toast({ title: "Outline Generated!", description: "Review the outline and choose a template to proceed."});
+            toast({ title: "Outline Generated!", description: "Review the outline-solid and choose a template to proceed."});
         },
         onError: (error) => {
             toast({ title: "Outline Generation Failed", description: error.message, variant: "destructive" });
@@ -67,7 +67,7 @@ export function CreateWithAiPanel({ isOpen, onOpenChange }: { isOpen: boolean, o
           <X className="w-4 h-4" />
         </Button>
       </CardHeader>
-      <CardContent className="p-4 flex-grow space-y-4">
+      <CardContent className="p-4 grow space-y-4">
         {aiOptions.map(option => (
           <Button key={option.label} variant="outline" className="w-full justify-between h-auto py-2">
             <div className="flex items-center gap-3">

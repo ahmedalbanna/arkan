@@ -132,8 +132,8 @@ export default function AnalystAgent() {
                 <CardDescription>{t('builder.files.analystAgentDesc')}</CardDescription>
             </CardHeader>
             <Form {...form}>
-                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex-grow flex flex-col min-h-0">
-                    <CardContent className="space-y-4 flex-grow flex flex-col min-h-0">
+                 <form onSubmit={form.handleSubmit(onSubmit)} className="grow flex flex-col min-h-0">
+                    <CardContent className="space-y-4 grow flex flex-col min-h-0">
                         <FormField
                             control={form.control}
                             name="prompt"
@@ -158,7 +158,7 @@ export default function AnalystAgent() {
                         </Button>
 
                         {(isProcessing || markdownResult) && (
-                            <div className="space-y-2 pt-4 border-t flex-grow flex flex-col min-h-0">
+                            <div className="space-y-2 pt-4 border-t grow flex flex-col min-h-0">
                                 <div className="flex justify-between items-center">
                                     <h4 className="font-semibold text-sm">{t('builder.files.generatedReportTitle')}</h4>
                                     {analysisMutation.data && (
@@ -185,7 +185,7 @@ export default function AnalystAgent() {
                                         </Dialog>
                                     )}
                                 </div>
-                                <ScrollArea className="flex-grow border rounded-md bg-muted/50 p-4">
+                                <ScrollArea className="grow border rounded-md bg-muted/50 p-4">
                                      <div className="prose dark:prose-invert max-w-none text-sm">
                                         {isProcessing ? (
                                              <div className="flex items-center justify-center h-full">

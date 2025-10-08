@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 
 
 const A4Page = ({ children, title }: { children: React.ReactNode, title?: string }) => (
-    <div className="bg-background shadow-lg p-8 md:p-12 mx-auto my-4 max-w-[210mm] w-full overflow-hidden" style={{ minHeight: '297mm' }}>
+    <div className="bg-background shadow-lg p-8 md:p-12 mx-auto my-4 max-w-a4 w-full overflow-hidden" style={{ minHeight: '297mm' }}>
         {title && <h2 className="text-2xl font-bold font-headline text-primary border-b pb-2 mb-6">{title}</h2>}
         <div className="prose dark:prose-invert max-w-none text-sm">{children}</div>
     </div>
@@ -191,7 +191,7 @@ export default function AcademicSolver() {
                 </Button>
             </div>
         </CardHeader>
-        <CardContent className="space-y-4 flex-grow overflow-y-auto pr-2">
+        <CardContent className="space-y-4 grow overflow-y-auto pr-2">
              <RadioGroup
                 value={documentType || undefined}
                 onValueChange={(value) => setDocumentType(value as 'exam' | 'homework')}
@@ -268,7 +268,7 @@ export default function AcademicSolver() {
               </div>
          </div>
        </CardHeader>
-       <div className="flex-grow bg-slate-200 dark:bg-slate-900/50 p-4 rounded-b-lg">
+       <div className="grow bg-slate-200 dark:bg-slate-900/50 p-4 rounded-b-lg">
            <ScrollArea className="h-[calc(100vh-350px)]" >
              {renderContentPage()}
            </ScrollArea>

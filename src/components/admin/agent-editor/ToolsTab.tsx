@@ -40,7 +40,7 @@ export default function ToolsTab() {
         {filters.map(filter => (
           <Button
             key={filter}
-            variant={activeFilter === filter ? 'default' : 'outline'}
+            variant={activeFilter === filter ? 'default' : 'outline-solid'}
             onClick={() => setActiveFilter(filter)}
             className="rounded-full"
           >

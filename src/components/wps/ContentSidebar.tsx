@@ -53,7 +53,7 @@ export function ContentSidebar({ activeItem, setActiveItem }: { activeItem: stri
 
     return (
         <aside className="w-64 bg-slate-50 border-r border-slate-200 flex flex-col p-2">
-            <div className="flex-grow">
+            <div className="grow">
                 <nav className="space-y-1">
                     {mainNavItems.map(createNavItem)}
                 </nav>

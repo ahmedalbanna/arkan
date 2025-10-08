@@ -200,7 +200,7 @@ export function ProposalModeGenerator() {
                                 {t('builder.presentationGenerator.next')}
                                 <ChevronRight className="h-4 w-4 ml-2" />
                             </Button>
-                            <div className="flex-grow" />
+                            <div className="grow" />
                             <div className="flex items-center gap-1">
                                 <Button variant="ghost" size="icon" onClick={() => setZoom(z => Math.max(0.5, z - 0.1))}><ZoomOut className="h-4 w-4" /></Button>
                                 <span className="text-sm font-semibold w-12 text-center">{Math.round(zoom * 100)}%</span>

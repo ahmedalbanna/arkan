@@ -76,7 +76,7 @@ export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerPro
                 <div className={getScoreColor(evaluation.evaluationScore)}>
                     {getScoreIcon(evaluation.evaluationScore)}
                 </div>
-                <div className="flex-grow">
+                <div className="grow">
                     <div className="flex justify-between items-center mb-1">
                         <span className="text-sm font-medium">{t('builder.reportGenerator.qualityScore')}</span>
                         <span className={`font-bold text-lg ${getScoreColor(evaluation.evaluationScore)}`}>
@@ -97,12 +97,12 @@ export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerPro
                         <li key={index} className="flex flex-col items-start gap-2 border-b pb-3 last:border-b-0">
                             <div className="flex items-start gap-2 w-full">
                                 <StatusIcon className={`h-4 w-4 mt-1 shrink-0 ${statusColor}`}/>
-                                <span className="flex-grow">{item.point}</span>
+                                <span className="grow">{item.point}</span>
                             </div>
                             {item.solution && item.sectionKey && (
                                 <div className="pl-6 w-full">
                                     <div className="flex items-center gap-2 p-2 rounded-md bg-background border border-dashed">
-                                        <p className="text-xs text-muted-foreground flex-grow italic">"{item.solution}"</p>
+                                        <p className="text-xs text-muted-foreground grow italic">"{item.solution}"</p>
                                         <Button
                                             size="sm"
                                             variant="secondary"

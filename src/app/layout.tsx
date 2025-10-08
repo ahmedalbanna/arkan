@@ -106,7 +106,7 @@ export default async function RootLayout({
                   <LanguageDirectionManager>
                     <WebVitalsReporter />
                     <Header />
-                    <main className="flex-grow">{children}</main>
+                    <main className="grow">{children}</main>
                     <SupportChatWidget />
                     <Toaster />
                   </LanguageDirectionManager>

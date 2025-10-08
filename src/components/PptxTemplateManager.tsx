@@ -49,7 +49,7 @@ export default function PptxTemplateManager() {
               <CardTitle className="font-headline">{t(template.name)}</CardTitle>
               <CardDescription>{t(template.description)}</CardDescription>
             </CardHeader>
-            <CardContent className="flex-grow space-y-4">
+            <CardContent className="grow space-y-4">
                <Image
                   src={template.imageUrl}
                   alt={`${t(template.name)} preview`}

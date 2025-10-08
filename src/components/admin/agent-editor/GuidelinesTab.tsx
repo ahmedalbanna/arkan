@@ -42,7 +42,7 @@ export default function GuidelinesTab({ isComplexPrompt }: { isComplexPrompt: bo
             <Textarea
               {...control.register(`prompt.guidelines.${index}.text`)}
               rows={2}
-              className="flex-grow"
+              className="grow"
               placeholder={t('agentEditor.guidelinePlaceholder')}
             />
             <Button

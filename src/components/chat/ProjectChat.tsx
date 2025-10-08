@@ -119,7 +119,7 @@ export default function ProjectChat() {
                         <X className="h-4 w-4" />
                     </Button>
                 </CardHeader>
-                <CardContent className="flex-grow overflow-hidden">
+                <CardContent className="grow overflow-hidden">
                     <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
                         <div className="space-y-4">
                             {messages.map((message, index) => (

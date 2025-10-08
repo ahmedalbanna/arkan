@@ -242,7 +242,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                     </Button>
                 </div>
             </CardHeader>
-            <CardContent className="flex-grow overflow-y-auto pr-2">
+            <CardContent className="grow overflow-y-auto pr-2">
                 <Tabs defaultValue="generate" className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="generate">{t('builder.presentationGenerator.generateTab')}</TabsTrigger>

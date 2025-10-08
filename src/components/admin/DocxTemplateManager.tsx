@@ -110,8 +110,8 @@ function DocxTemplateSkeleton() {
                 <Skeleton className="h-6 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
             </CardHeader>
-            <CardContent className="flex-grow space-y-4">
-                <Skeleton className="w-full aspect-[400/565] rounded-md" />
+            <CardContent className="grow space-y-4">
+                <Skeleton className="w-full aspect-400/565 rounded-md" />
                 <Skeleton className="h-10 w-full" />
                 <Skeleton className="h-10 w-full" />
             </CardContent>
@@ -143,7 +143,7 @@ function TemplatePreview({ styles }: { styles: any }) {
     } as React.CSSProperties;
 
     return (
-        <div className="w-full aspect-[400/565] rounded-md border bg-white p-6 overflow-hidden" style={cssVariables}>
+        <div className="w-full aspect-400/565 rounded-md border bg-white p-6 overflow-hidden" style={cssVariables}>
             <div className={componentStyles.previewBody}>
                 <h1 className={`${componentStyles.previewH1} mb-4 pb-2 border-b`}>Sample Document Title</h1>
                 <p className="mb-4">
@@ -250,7 +250,7 @@ export default function DocxTemplateManager() {
                   )}
               </div>
             </CardHeader>
-            <CardContent className="flex-grow space-y-4">
+            <CardContent className="grow space-y-4">
                <div className="relative group">
                     <TemplatePreview styles={template.styles} />
                      <Button

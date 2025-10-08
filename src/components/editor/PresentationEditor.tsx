@@ -12,7 +12,7 @@ export default function PresentationEditor({ isCreateWithAiOpen, onCreateWithAiO
     const activePresentation = presentation?.history.find(p => p.id === activePresentationId);
 
     return (
-        <div className="flex-grow flex bg-slate-200 overflow-hidden">
+        <div className="grow flex bg-slate-200 overflow-hidden">
             <aside className="w-48 bg-white p-2 overflow-y-auto border-r border-slate-200">
                 <div className="space-y-2">
                     {activePresentation?.slides.map((slide, index) => (
@@ -28,7 +28,7 @@ export default function PresentationEditor({ isCreateWithAiOpen, onCreateWithAiO
                     )}
                 </div>
             </aside>
-            <main className="flex-grow p-8 flex items-center justify-center">
+            <main className="grow p-8 flex items-center justify-center">
                  <div className="w-full h-full bg-white shadow-md">
                     {activePresentation ? (
                         <PresentationViewer activePresentation={activePresentation} />

@@ -45,7 +45,7 @@ export default function AutomationBuilder() {
   return (
     <div className="h-full flex flex-col">
         <AutomationHeader />
-        <ResizablePanelGroup direction="horizontal" className="flex-grow">
+        <ResizablePanelGroup direction="horizontal" className="grow">
         <ResizablePanel defaultSize={70}>
             <WorkflowCanvas />
         </ResizablePanel>

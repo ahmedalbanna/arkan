@@ -359,7 +359,7 @@ export function PdfPreview({
                     <ChevronRight className="h-4 w-4" />
                 </Button>
 
-                <div className="flex-grow" />
+                <div className="grow" />
 
                 {/* Zoom controls */}
                 <div className="flex items-center gap-1">
@@ -409,7 +409,7 @@ export function PdfPreview({
             </div>
 
             {/* PDF Content */}
-            <div className="flex-grow w-full relative">
+            <div className="grow w-full relative">
                 {state.isLoading && (
                     <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-20">
                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -420,7 +420,7 @@ export function PdfPreview({
                     <div className="flex justify-center p-4">
                         <canvas
                             ref={canvasRef}
-                            className="border border-border rounded shadow-sm"
+                            className="border border-border rounded shadow-xs"
                             style={{ maxWidth: '100%', height: 'auto' }}
                         />
                     </div>

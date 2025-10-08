@@ -189,9 +189,9 @@ export default function HomePage() {
     <div className="flex h-screen bg-slate-100 text-slate-900">
        <div className="w-20 bg-slate-200 border-r border-slate-300 flex flex-col items-center py-4 space-y-4 z-10">
           <div className="w-8 h-8 bg-[#2E68EB] rounded" />
-          <nav className="flex flex-col items-center space-y-1 flex-grow w-full">
+          <nav className="flex flex-col items-center space-y-1 grow w-full">
               {navRailItems.map(item => <NavItem key={item.label} icon={item.icon} label={item.label} isActive={activeNavItem === item.name} onClick={() => handleNavClick(item.name)} />)}
-              <div className="flex-grow" />
+              <div className="grow" />
               <div className="w-full px-2">
                 <hr className="border-slate-300 my-2" />
               </div>

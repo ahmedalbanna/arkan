@@ -47,7 +47,7 @@ export function PresentationViewer({ activePresentation }: PresentationViewerPro
   return (
     <div className="flex flex-col h-full bg-white p-8">
       <h2 className="text-3xl font-bold mb-2">{slide.title}</h2>
-      <div className="flex-grow">
+      <div className="grow">
           <ul className="list-disc pl-5 space-y-2 text-lg">
             {slide.content.map((item, index) => (
               <li key={index}>

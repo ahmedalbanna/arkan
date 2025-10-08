@@ -100,7 +100,7 @@ function NewChatDialog() {
                                         <AvatarImage src={user.profilePictureUrl}/>
                                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
-                                    <div className="flex-grow">
+                                    <div className="grow">
                                         <span>{user.name}</span>
                                         <span className="text-xs text-muted-foreground ml-2">{user.email}</span>
                                     </div>

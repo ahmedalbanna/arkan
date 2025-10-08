@@ -65,7 +65,7 @@ export function InviteMemberForm({ teamId }: { teamId: string }) {
                     control={form.control}
                     name="email"
                     render={({ field }) => (
-                        <FormItem className="flex-grow">
+                        <FormItem className="grow">
                             <FormControl>
                                 <Input
                                     type="email"

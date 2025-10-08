@@ -90,7 +90,7 @@ export function PromptTemplateLibrary() {
                     className="w-full justify-start gap-2"
                 >
                     <Bot className="h-4 w-4" />
-                    <span className="flex-grow text-left">{t('promptLibrary.categories.all')}</span>
+                    <span className="grow text-left">{t('promptLibrary.categories.all')}</span>
                      <Badge variant="outline" className="text-xs">{PROMPT_TEMPLATES.length}</Badge>
                 </Button>
                 {filteredCategories.map(category => (
@@ -101,7 +101,7 @@ export function PromptTemplateLibrary() {
                         className="w-full justify-start gap-2"
                     >
                         <category.icon className="h-4 w-4" />
-                        <span className="flex-grow text-left">{t(`promptLibrary.categories.${category.id}`)}</span>
+                        <span className="grow text-left">{t(`promptLibrary.categories.${category.id}`)}</span>
                         <Badge variant="outline" className="text-xs">{category.count}</Badge>
                     </Button>
                 ))}

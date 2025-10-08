@@ -62,7 +62,7 @@ export function DocumentTabs({ tabs, activeTab, setActiveTab, addTab, removeTab 
        <Button variant="ghost" size="icon" onClick={() => addTab('new')} className="ml-2 h-8 w-8">
         <Plus className="w-4 h-4" />
       </Button>
-      <div className="flex-grow" />
+      <div className="grow" />
       <div className="flex items-center gap-1 px-2">
           <Avatar className="h-6 w-6">
               <AvatarImage src="https://placehold.co/24x24.png" alt="User" data-ai-hint="person" />

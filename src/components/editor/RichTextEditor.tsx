@@ -11,7 +11,7 @@ import React from 'react';
 export default function RichTextEditor({ onTranslateClick }: { onTranslateClick: () => void }) {
  
   return (
-    <div className="flex-grow p-4 md:p-8 lg:p-12 bg-slate-200">
+    <div className="grow p-4 md:p-8 lg:p-12 bg-slate-200">
         <div className="relative mx-auto max-w-4xl min-h-full bg-white shadow-lg rounded-sm p-8 md:p-16">
             <Popover>
                 <PopoverTrigger asChild>

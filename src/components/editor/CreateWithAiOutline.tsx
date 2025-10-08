@@ -10,7 +10,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { CreateWithAiTemplates } from './CreateWithAiTemplates';
 
 interface OutlineItemProps {
-  item: GeneratePresentationOutlineOutput['outline'][0];
+  item: GeneratePresentationOutlineOutput['outline-solid'][0];
   level?: number;
 }
 
@@ -50,10 +50,10 @@ export function CreateWithAiOutline({
   onBack: () => void;
   onClose: () => void;
 }) {
-    const [view, setView] = useState<'outline' | 'templates'>('outline');
+    const [view, setView] = useState<'outline-solid' | 'templates'>('outline-solid');
     
     if (view === 'templates') {
-        return <CreateWithAiTemplates outline={outline} onBack={() => setView('outline')} onClose={onClose} />;
+        return <CreateWithAiTemplates outline={outline} onBack={() => setView('outline-solid')} onClose={onClose} />;
     }
 
   return (
@@ -62,7 +62,7 @@ export function CreateWithAiOutline({
         <CardTitle className="text-base font-semibold">Review Outline</CardTitle>
         <CardDescription className="text-sm">Review the generated outline below. You can make edits later.</CardDescription>
       </CardHeader>
-      <CardContent className="p-4 flex-grow overflow-hidden">
+      <CardContent className="p-4 grow overflow-hidden">
         <ScrollArea className="h-full">
             <div className="space-y-2">
                 {outline.outline.map((item, index) => (
