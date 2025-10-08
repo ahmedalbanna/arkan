@@ -7,10 +7,16 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { GenerateDiagramOutputSchema, type GenerateDiagramInput, type GenerateDiagramOutput } from '@/ai/schemas';
+import { GenerateDiagramOutputSchema, type GenerateDiagramInput, type GenerateDiagramOutput, SectionName } from '@/ai/schemas';
 import { getAgent } from '@/lib/db/queries';
 import type { AgentPrompt } from '@/lib/types';
 import { z } from 'genkit';
+import {
+    ContextAnalyzer,
+    AdaptiveModelSelector,
+    IntelligentPromptBuilder,
+} from '@/ai/core';
+
 
 export async function generateDiagram(input: GenerateDiagramInput): Promise<GenerateDiagramOutput> {
     const agentId = `generate-${input.diagramToGenerate}-diagram`;
@@ -18,21 +24,42 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
     if (!agent) {
         throw new Error(`Agent configuration for diagram type '${input.diagramToGenerate}' not found.`);
     }
+
     const agentPrompt = agent.prompt as AgentPrompt;
     const basePrompt = agentPrompt.base;
 
+    // 1. Analyze Context
+    const contextAnalysis = await ContextAnalyzer.analyzeContext({
+        userInput: `Generate a ${input.diagramToGenerate} diagram. ${input.instructionText || ''}`,
+        externalContext: input.externalContext,
+        guidelines: input.guidelines
+    });
+
+    // 2. Select Model
+    const modelConfig = AdaptiveModelSelector.selectOptimalModel(contextAnalysis, 'technical');
+
+    // 3. Build Intelligent Prompt
+    const intelligentPromptTemplate = IntelligentPromptBuilder.buildPrompt({
+        taskType: 'technical',
+        domain: 'diagram-generation',
+        contextAnalysis,
+        userInput: `Please generate a ${input.diagramToGenerate} diagram. ${input.instructionText || ''}`,
+        externalContext: input.externalContext,
+    });
+
+    const finalSystemPrompt = `${basePrompt}\n\n${intelligentPromptTemplate.system}`;
+    
     const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
     const stringifiedPlan = input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '';
 
-    // Separate media from text files for the prompt
     const textContext = input.externalContext?.filter(f => !f.content.startsWith('data:')) || [];
     const mediaContext = input.externalContext?.filter(f => f.content.startsWith('data:')) || [];
 
     const diagramPrompt = ai.definePrompt({
         name: `generate-${input.diagramToGenerate}-diagram-prompt`,
-        input: { schema: z.any() }, // Using any() since we are manually constructing the payload
+        input: { schema: z.any() },
         output: { schema: GenerateDiagramOutputSchema },
-        system: basePrompt,
+        system: finalSystemPrompt,
         prompt: `
 {{#if guidelines}}
 --- Guidelines ---
@@ -41,10 +68,9 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
 {{/each}}
 {{/if}}
 
-{{#if instructionText}}
---- Additional Instructions ---
-{{{instructionText}}}
-{{/if}}
+--- Intelligent Context Analysis ---
+${intelligentPromptTemplate.context}
+${intelligentPromptTemplate.instructions}
 
 --- Context from Project ---
 {{#if textContext}}
@@ -98,11 +124,14 @@ ${stringifiedPlan}
 {{/if}}
 `,
         config: {
-            temperature: 0.2, // Low temp for precise PlantUML syntax
-            maxOutputTokens: 2048,
+            temperature: modelConfig.temperature,
+            maxOutputTokens: modelConfig.maxOutputTokens,
         }
     });
 
-    const { output } = await diagramPrompt({ ...input, textContext, mediaContext }, { model: agent.model || 'googleai/gemini-2.0-flash' });
-    return output!;
+    const { output } = await diagramPrompt({ ...input, textContext, mediaContext }, { model: agent.model || modelConfig.modelId });
+    if (!output) {
+        throw new Error('Diagram generation failed to produce output.');
+    }
+    return output;
 }
