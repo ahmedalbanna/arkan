@@ -15,6 +15,7 @@ const SUPPORTED_MIME_TYPES = [
     'text/plain',
     'text/markdown',
 ];
+const MAX_FILE_SIZE_MB = 10;
 
 export const POST = withAuth(async ({ request, user }) => {
     try {
@@ -23,6 +24,10 @@ export const POST = withAuth(async ({ request, user }) => {
 
         if (!file) {
             return handleApiError({ message: 'No file uploaded.' }, 400);
+        }
+
+        if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+             return handleApiError({ message: `File size exceeds the limit of ${MAX_FILE_SIZE_MB}MB.` }, 413);
         }
 
         if (!SUPPORTED_MIME_TYPES.includes(file.type)) {
