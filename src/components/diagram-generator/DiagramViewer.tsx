@@ -1,24 +1,23 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import type { DiagramType } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import Image from 'next/image';
-import { Loader2, Download, Copy, Check, RefreshCw, PenSquare, Eye, Wand2, FileText } from 'lucide-react';
-import { saveAs } from 'file-saver';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAuth } from '@/context/AuthContext';
-import { toast } from '@/hooks/use-toast';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-styles';
-import { ScrollArea } from '../ui/scroll-area';
-import { Card, CardContent } from '../ui/card';
-import type { DiagramData } from '@/hooks/useDiagramStore';
-import type { DiagramType } from '@/ai/schemas';
 import { useExplainDiagram } from '@/hooks/use-diagrams';
+import { toast } from '@/hooks/use-toast';
+import type { DiagramData } from '@/hooks/useDiagramStore';
 import { useSectionStore } from '@/hooks/useSectionStore';
+import { markdownComponents } from '@/lib/markdown-styles';
+import { saveAs } from 'file-saver';
+import { Check, Copy, Download, Eye, FileText, Loader2, PenSquare, RefreshCw } from 'lucide-react';
+import Image from 'next/image';
+import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { Card, CardContent } from '../ui/card';
+import { ScrollArea } from '../ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface DiagramViewerProps {
     diagramKey: DiagramType;
@@ -53,7 +52,7 @@ export default function DiagramViewer({
     const handleCopy = () => {
         navigator.clipboard.writeText(diagramData.plantUmlCode).then(() => {
             setIsCopied(true);
-            toast({title: "Copied!", description: "PlantUML code copied to clipboard."});
+            toast({ title: "Copied!", description: "PlantUML code copied to clipboard." });
             setTimeout(() => setIsCopied(false), 2000);
         });
     };
@@ -66,35 +65,48 @@ export default function DiagramViewer({
             saveAs(blob, `${diagramTitle.replace(/\s+/g, '_')}.png`);
         } catch (error) {
             console.error('Download failed:', error);
-            toast({title: "Download Failed", variant: "destructive"});
+            toast({ title: "Download Failed", variant: "destructive" });
         } finally {
             setIsDownloading(false);
         }
     };
 
-     const handleExplainClick = () => {
+    const handleExplainClick = () => {
         // Switch to the explanation view
         setViewMode('explanation');
 
         // Only generate if an explanation doesn't exist and one isn't already being generated
         if (!diagramData.explanation && !explainMutation.isPending) {
-             const blob = fetch(diagramData.imageUrl).then(res => res.blob()).then(blob => {
-                 const reader = new FileReader();
-                reader.readAsDataURL(blob);
-                reader.onloadend = async () => {
-                    const base64data = reader.result as string;
-                     explainMutation.mutate(base64data, {
-                        onSuccess: (data) => {
-                            onExplanationSave(data.explanation);
-                            toast({ title: t('builder.diagramGenerator.tooltips.explanationReady') });
-                        },
-                        onError: (error) => {
-                            toast({ title: t('builder.diagramGenerator.tooltips.explanationFailed'), description: error.message, variant: "destructive" });
-                            setViewMode('image'); // Go back to image view on error
+            fetch(diagramData.imageUrl)
+                .then(res => res.blob())
+                .then(blob => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onloadend = async () => {
+                        const base64data = reader.result as string;
+                        // Ensure the data URI starts with data:image/
+                        if (base64data.startsWith('data:image/')) {
+                            explainMutation.mutate(base64data, {
+                                onSuccess: (data) => {
+                                    onExplanationSave(data.explanation);
+                                    toast({ title: t('builder.diagramGenerator.tooltips.explanationReady') });
+                                },
+                                onError: (error) => {
+                                    toast({ title: t('builder.diagramGenerator.tooltips.explanationFailed'), description: error.message, variant: "destructive" });
+                                    setViewMode('image'); // Go back to image view on error
+                                }
+                            });
+                        } else {
+                            toast({ title: t('builder.diagramGenerator.tooltips.explanationFailed'), description: "Invalid image data format", variant: "destructive" });
+                            setViewMode('image');
                         }
-                    });
-                }
-             });
+                    };
+                })
+                .catch(error => {
+                    console.error('Failed to fetch image for explanation:', error);
+                    toast({ title: t('builder.diagramGenerator.tooltips.explanationFailed'), description: "Failed to load image", variant: "destructive" });
+                    setViewMode('image');
+                });
         }
     };
 
@@ -123,38 +135,38 @@ export default function DiagramViewer({
                     )}
                     {viewMode === 'explanation' && (
                         <ScrollArea className="h-full w-full">
-                             <div className="prose dark:prose-invert max-w-none p-4">
+                            <div className="prose dark:prose-invert max-w-none p-4">
                                 {explainMutation.isPending ? (
                                     <div className="text-center p-8 text-muted-foreground">
                                         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
                                         <p>{t('builder.diagramGenerator.tooltips.explaining')}</p>
-                                   </div>
+                                    </div>
                                 ) : diagramData.explanation ? (
                                     <ReactMarkdown components={markdownComponents}>{diagramData.explanation}</ReactMarkdown>
                                 ) : (
                                     <div className="text-center p-8 text-muted-foreground">
                                         <p>{t('builder.diagramGenerator.tooltips.explanationPlaceholder')}</p>
-                                   </div>
+                                    </div>
                                 )}
                             </div>
                         </ScrollArea>
                     )}
                 </div>
             </CardContent>
-             <div className="flex items-center justify-between p-2 border-t bg-background rounded-b-lg">
+            <div className="flex items-center justify-between p-2 border-t bg-background rounded-b-lg">
                 <div className="flex items-center gap-1">
                     <Button variant={viewMode === 'image' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('image')}>
-                        <Eye className="h-4 w-4 mr-2"/> {t('builder.diagramGenerator.view')}
+                        <Eye className="h-4 w-4 mr-2" /> {t('builder.diagramGenerator.view')}
                     </Button>
                     <Button variant={viewMode === 'code' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('code')}>
-                        <PenSquare className="h-4 w-4 mr-2"/> {t('builder.diagramGenerator.edit')}
+                        <PenSquare className="h-4 w-4 mr-2" /> {t('builder.diagramGenerator.edit')}
                     </Button>
                     <Button variant={viewMode === 'explanation' ? 'secondary' : 'ghost'} size="sm" onClick={handleExplainClick} disabled={explainMutation.isPending}>
-                        {explainMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2"/>}
+                        {explainMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
                         {t('builder.diagramGenerator.explain')}
                     </Button>
                 </div>
-                 <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -165,10 +177,10 @@ export default function DiagramViewer({
                             <TooltipContent><p>{isCopied ? t('builder.diagramGenerator.tooltips.copied') : t('builder.diagramGenerator.tooltips.copy')}</p></TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
-                     <TooltipProvider>
+                    <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload} disabled={isDownloading} aria-label={t('builder.diagramGenerator.tooltips.download')}>
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload} disabled={isDownloading} aria-label={t('builder.diagramGenerator.tooltips.download')}>
                                     {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                                 </Button>
                             </TooltipTrigger>
@@ -176,16 +188,16 @@ export default function DiagramViewer({
                         </Tooltip>
                     </TooltipProvider>
                     {onUpdate && (
-                         <Button
+                        <Button
                             onClick={onUpdate}
                             size="sm"
                             disabled={isUpdating || isReadOnly}
-                            >
+                        >
                             {isUpdating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <RefreshCw className="me-2 h-4 w-4" />}
                             {t('builder.diagramGenerator.updateDiagram')}
                         </Button>
                     )}
-                 </div>
+                </div>
             </div>
         </Card>
     );

@@ -2,11 +2,47 @@
 
 
 import { ProjectStateSchema } from '@/ai/schemas';
-import { revalidatePath } from 'next/cache';
+import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { FieldValue } from 'firebase-admin/firestore';
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+
+/**
+ * Sanitizes data to be Firestore-compatible by removing or converting invalid types
+ */
+function sanitizeForFirestore(data: any): any {
+    if (data === null || data === undefined) {
+        return null;
+    }
+
+    if (typeof data === 'string' || typeof data === 'number' || typeof data === 'boolean') {
+        return data;
+    }
+
+    if (data instanceof Date) {
+        return data.toISOString();
+    }
+
+    if (Array.isArray(data)) {
+        return data.map(item => sanitizeForFirestore(item));
+    }
+
+    if (typeof data === 'object') {
+        const sanitized: any = {};
+        for (const [key, value] of Object.entries(data)) {
+            // Skip functions and undefined values
+            if (typeof value === 'function' || value === undefined) {
+                continue;
+            }
+            sanitized[key] = sanitizeForFirestore(value);
+        }
+        return sanitized;
+    }
+
+    // For any other types (functions, symbols, etc.), convert to string
+    return String(data);
+}
 
 
 // Helper to verify user owns the project - integrated into withAuth now
@@ -36,7 +72,7 @@ export const GET = withAuth(async ({ params, user }) => {
 // PUT (update) a project
 export const PUT = withAuth(async ({ request, params, user }) => {
     try {
-        const {id:projectId} =await params;
+        const { id: projectId } = await params;
         await verifyProjectOwner(user.id, projectId);
 
         const body = await request.json();
@@ -50,7 +86,10 @@ export const PUT = withAuth(async ({ request, params, user }) => {
             updatedAt: new Date().toISOString()
         };
 
-        await adminDb.collection("projects").doc(projectId).update(updateData);
+        // Sanitize the data to ensure it's Firestore-compatible
+        const sanitizedUpdateData = sanitizeForFirestore(updateData);
+
+        await adminDb.collection("projects").doc(projectId).update(sanitizedUpdateData);
         revalidatePath('/projects');
 
         return createApiResponse({ id: projectId, ...updateData }, 200);
@@ -75,9 +114,9 @@ export const DELETE = withAuth(async ({ params, user }) => {
 
 // PATCH (partially update) a project, e.g., to add context
 const addContextSchema = z.object({
-  fileName: z.string(),
-  content: z.string(),
-  type: z.enum(['context', 'example']),
+    fileName: z.string(),
+    content: z.string(),
+    type: z.enum(['context', 'example']),
 });
 
 export const PATCH = withAuth(async ({ request, params, user }) => {
@@ -87,7 +126,7 @@ export const PATCH = withAuth(async ({ request, params, user }) => {
 
         const body = await request.json();
         const validation = addContextSchema.safeParse(body);
-         if (!validation.success) {
+        if (!validation.success) {
             return handleApiError({ errors: validation.error.flatten().fieldErrors }, 400);
         }
 
@@ -96,7 +135,7 @@ export const PATCH = withAuth(async ({ request, params, user }) => {
             externalContext: FieldValue.arrayUnion(validation.data),
             updatedAt: new Date().toISOString(),
         });
-        
+
         return createApiResponse({ message: 'Context added successfully' }, 200);
 
     } catch (error) {

@@ -1,14 +1,19 @@
 
 'use server';
 
-import { z } from 'zod';
+import { explainDiagram } from '@/ai/flows/explain-diagram';
+import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
-import { explainDiagram } from '@/ai/flows/explain-diagram';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { z } from 'zod';
 
 const explainDiagramSchema = z.object({
-  imageDataUri: z.string().startsWith('data:image/'),
+  imageDataUri: z.string().refine(
+    (val) => val.startsWith('data:image/'),
+    {
+      message: "Invalid input: must start with \"data:image/\"",
+    }
+  ),
 });
 
 export const POST = withAuth(async ({ request, user }) => {
@@ -18,10 +23,10 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-    
+
     const agentInput = validation.data;
     const result = await explainDiagram(agentInput);
-    
+
     const creditCost = 1;
     await deductCredit(user.id, creditCost);
 

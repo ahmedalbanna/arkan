@@ -23,8 +23,13 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Proxying from this domain is not allowed.' }, { status: 400 });
   }
 
+  // Add User-Agent header to avoid being blocked
+  const headers: HeadersInit = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+  };
+
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { headers });
     if (!response.ok) {
       throw new Error(`Failed to fetch image: ${response.statusText} (${response.status})`);
     }

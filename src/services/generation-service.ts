@@ -21,8 +21,14 @@ interface GenerationLog {
  */
 export async function logGeneration(logData: Omit<GenerationLog, 'createdAt'>): Promise<void> {
     try {
+        // Sanitize the input and output data to ensure they're Firestore-compatible
+        const sanitizedInput = sanitizeForFirestore(logData.input);
+        const sanitizedOutput = sanitizeForFirestore(logData.output);
+
         const generationLog: GenerationLog = {
             ...logData,
+            input: sanitizedInput,
+            output: sanitizedOutput,
             createdAt: new Date().toISOString(),
         };
         await adminDb.collection('agent_generations').add(generationLog);
@@ -32,6 +38,42 @@ export async function logGeneration(logData: Omit<GenerationLog, 'createdAt'>): 
         // The primary function (e.g., generating a proposal) should still succeed
         // even if logging fails.
     }
+}
+
+/**
+ * Sanitizes data to be Firestore-compatible by removing or converting invalid types
+ */
+function sanitizeForFirestore(data: any): any {
+    if (data === null || data === undefined) {
+        return null;
+    }
+
+    if (typeof data === 'string' || typeof data === 'number' || typeof data === 'boolean') {
+        return data;
+    }
+
+    if (data instanceof Date) {
+        return data.toISOString();
+    }
+
+    if (Array.isArray(data)) {
+        return data.map(item => sanitizeForFirestore(item));
+    }
+
+    if (typeof data === 'object') {
+        const sanitized: any = {};
+        for (const [key, value] of Object.entries(data)) {
+            // Skip functions and undefined values
+            if (typeof value === 'function' || value === undefined) {
+                continue;
+            }
+            sanitized[key] = sanitizeForFirestore(value);
+        }
+        return sanitized;
+    }
+
+    // For any other types (functions, symbols, etc.), convert to string
+    return String(data);
 }
 
 

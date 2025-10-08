@@ -17,6 +17,11 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
 
+  // Server configuration to prevent port conflicts
+  server: {
+    port: process.env.PORT ? parseInt(process.env.PORT) : 9002,
+  },
+
   // Performance optimizations
   experimental: {
     // optimizeCss: true, // Removed - causing critters module error

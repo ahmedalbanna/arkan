@@ -1,28 +1,28 @@
 
 'use client';
 
-import React from 'react';
+import { DiagramTypeSchema, SectionName, type DiagramType } from '@/ai/schemas';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAgents } from '@/hooks/use-agents';
-import { cn } from '@/lib/utils';
-import { useSectionStore } from '@/hooks/useSectionStore';
-import { DiagramTypeSchema, SectionName, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, GitGraph, PanelLeftClose } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useReportStore } from '@/hooks/useReportStore';
-import { useDiagramStore } from '@/hooks/useDiagramStore';
+import { useAgents } from '@/hooks/use-agents';
 import { useExplainDiagram, useGenerateDiagram } from '@/hooks/use-diagrams';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { GuidelineEditor } from '../generate/GuidelineEditor';
-import { ContextSelector } from '../generate/ContextSelector';
-import { getSelectedGuidelines } from '@/lib/guideline-utils';
+import { useToast } from '@/hooks/use-toast';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
+import { useReportStore } from '@/hooks/useReportStore';
+import { useSectionStore } from '@/hooks/useSectionStore';
+import { getSelectedGuidelines } from '@/lib/guideline-utils';
+import { cn } from '@/lib/utils';
+import { GitGraph, Loader2, PanelLeftClose, Sparkles } from 'lucide-react';
+import React from 'react';
+import { ContextSelector } from '../generate/ContextSelector';
+import { GuidelineEditor } from '../generate/GuidelineEditor';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 const orderedDiagrams = DiagramTypeSchema.options;
 
@@ -36,7 +36,7 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
     const { toast } = useToast();
     const { userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
-    const explainMutation = useExplainDiagram();    const { diagramSections, getIconComponent } = useSectionStore();
+    const explainMutation = useExplainDiagram(); const { diagramSections, getIconComponent } = useSectionStore();
 
     const { setDiagram, setDiagramExplanation } = useDiagramStore();
 
@@ -50,26 +50,36 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
 
         // Now, automatically trigger the explanation
         try {
-            fetch(data.imageUrl).then(res => res.blob()).then(blob => {
-                 const reader = new FileReader();
-                reader.readAsDataURL(blob);
-                reader.onloadend = async () => {
-                    const base64data = reader.result as string;
-                    explainMutation.mutate(base64data, {
-                        onSuccess: (explanationData) => {
-                            onDiagramExplanationSave(diagramKey, explanationData.explanation);
-                            toast({ title: "Explanation Ready", description: "The AI has finished explaining the diagram." });
-                        },
-                        onError: (error) => {
-                            console.error("Failed to auto-explain diagram:", error);
-                            toast({ title: "Explanation Failed", description: "Could not automatically explain the new diagram.", variant: "destructive" });
+            fetch(data.imageUrl)
+                .then(res => res.blob())
+                .then(blob => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onloadend = async () => {
+                        const base64data = reader.result as string;
+                        // Ensure the data URI starts with data:image/
+                        if (base64data.startsWith('data:image/')) {
+                            explainMutation.mutate(base64data, {
+                                onSuccess: (explanationData) => {
+                                    onDiagramExplanationSave(diagramKey, explanationData.explanation);
+                                    toast({ title: "Explanation Ready", description: "The AI has finished explaining the diagram." });
+                                },
+                                onError: (error) => {
+                                    console.error("Failed to auto-explain diagram:", error);
+                                    toast({ title: "Explanation Failed", description: "Could not automatically explain the new diagram.", variant: "destructive" });
+                                }
+                            });
+                        } else {
+                            console.error("Invalid image data format for explanation");
                         }
-                    });
-                };
-            });
+                    };
+                })
+                .catch(error => {
+                    console.error("Failed to prepare image for explanation:", error);
+                });
 
         } catch (error) {
-             console.error("Failed to prepare image for explanation:", error);
+            console.error("Failed to prepare image for explanation:", error);
         }
     });
 
@@ -98,8 +108,8 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
             proposal: selectedContext.proposal ? fullState.proposal : undefined,
             projectPlan: selectedContext.projectPlan ? fullState.projectPlan : undefined,
             diagramToGenerate: diagramType,
-            otherSections: Object.keys(selectedContext.sections).filter(k => selectedContext.sections[k]).reduce((acc, k) => ({...acc, [k]: fullState.sections?.[k as SectionName]}), {}),
-            otherDiagrams: Object.keys(selectedContext.diagrams).filter(k => selectedContext.diagrams[k]).reduce((acc, k) => ({...acc, [k]: fullState.diagrams?.[k as DiagramType]?.plantUmlCode}), {}),
+            otherSections: Object.keys(selectedContext.sections).filter(k => selectedContext.sections[k]).reduce((acc, k) => ({ ...acc, [k]: fullState.sections?.[k as SectionName] }), {}),
+            otherDiagrams: Object.keys(selectedContext.diagrams).filter(k => selectedContext.diagrams[k]).reduce((acc, k) => ({ ...acc, [k]: fullState.diagrams?.[k as DiagramType]?.plantUmlCode }), {}),
             guidelines: getSelectedGuidelines(agent, guidelineState[diagramType]),
             externalContext: selectedExternalContext,
         };
@@ -142,7 +152,7 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
                             <AccordionItem value={key} key={key}>
                                 <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
                                     <div className="flex items-center gap-2">
-                                        <Icon/> {t(title)}
+                                        <Icon /> {t(title)}
                                     </div>
                                 </AccordionTrigger>
                                 <AccordionContent className="space-y-4 p-4">
