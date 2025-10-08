@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -12,24 +11,59 @@ import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateS
 import { getAgent } from '@/lib/db/queries';
 import type { AgentPrompt } from '@/lib/types';
 import { z } from 'genkit';
+import {
+    ContextAnalyzer,
+    AdaptiveModelSelector,
+    IntelligentPromptBuilder,
+} from '@/ai/core';
 
-// Define a specific schema for the prompt's input variables for better type safety and clarity.
-const ReportSectionPromptInputSchema = GenerateSectionInputSchema.and(
-  z.object({
-    systemPrompt: z.string(),
-    stringifiedProposal: z.string(),
-    stringifiedPlan: z.string(),
-  })
-);
+// This is the main flow that will be called by the API
+export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
+    const { sectionToGenerate } = input;
+    const agentId = `generate-${sectionToGenerate}-section`;
 
-// Define the prompt outside the flow to prevent re-registration
-const reportSectionPrompt = ai.definePrompt({
-  name: 'generateReportSectionPrompt', // Static name
-  input: { schema: ReportSectionPromptInputSchema },
-  output: { schema: GenerateSectionOutputSchema },
-  model: 'googleai/gemini-2.0-flash', // Default model, will be overridden by agent config.
-  system: '{{systemPrompt}}', // System prompt will be passed in
-  prompt: `
+    const agent = await getAgent(agentId);
+    if (!agent) {
+        console.error(`Agent configuration not found for ID: '${agentId}'`);
+        throw new Error(`Configuration for the report section '${sectionToGenerate}' is missing or invalid.`);
+    }
+
+    const agentPrompt = agent.prompt as AgentPrompt;
+    const basePrompt = agentPrompt.base;
+
+    // 1. Analyze Context
+    const contextAnalysis = await ContextAnalyzer.analyzeContext({
+        userInput: `Generate the ${sectionToGenerate} section. ${input.instructionText || ''}`,
+        externalContext: input.externalContext,
+        guidelines: input.guidelines
+    });
+
+    // 2. Select Model
+    const modelConfig = AdaptiveModelSelector.selectOptimalModel(contextAnalysis, 'technical');
+
+    // 3. Build Intelligent Prompt
+    const intelligentPromptTemplate = IntelligentPromptBuilder.buildPrompt({
+        taskType: 'technical',
+        domain: `report-generation-${sectionToGenerate}`,
+        contextAnalysis,
+        userInput: `Please generate the content for the '${sectionToGenerate}' section of the report.`,
+        externalContext: input.externalContext,
+    });
+
+    const finalSystemPrompt = `${basePrompt}\n\n${intelligentPromptTemplate.system}`;
+    const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
+    const stringifiedPlan = input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '';
+
+    const textContext = input.externalContext?.filter(f => !f.content.startsWith('data:')) || [];
+    const mediaContext = input.externalContext?.filter(f => f.content.startsWith('data:')) || [];
+
+    // Define the prompt dynamically within the flow
+    const reportSectionPrompt = ai.definePrompt({
+        name: `generate-report-section-prompt-${sectionToGenerate}`, // Dynamic name to avoid conflicts
+        input: { schema: z.any() },
+        output: { schema: GenerateSectionOutputSchema },
+        system: finalSystemPrompt,
+        prompt: `
 CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
 
 {{#if guidelines}}
@@ -43,6 +77,11 @@ CRITICAL: Your final output must be a JSON object where the 'sectionName' field 
 --- Additional Instructions ---
 {{{instructionText}}}
 {{/if}}
+
+--- Intelligent Context Analysis ---
+${intelligentPromptTemplate.context}
+${intelligentPromptTemplate.instructions}
+---
 
 --- Context from Project ---
 {{#if exampleFiles}}
@@ -98,40 +137,25 @@ File: {{this.fileName}}
 \`\`\`
 {{/if}}
 `,
-});
+    });
 
+    const promptVariables = {
+        ...input,
+        stringifiedProposal,
+        stringifiedPlan,
+        exampleFiles: input.exampleFiles,
+        contextFiles: input.contextFiles,
+    };
 
-export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
-  const { sectionToGenerate } = input;
-  const agentId = `generate-${sectionToGenerate}-section`;
+    const { output } = await reportSectionPrompt(
+        promptVariables,
+        { model: agent.model || modelConfig.modelId, ...modelConfig }
+    );
 
-  const agent = await getAgent(agentId);
-  if (!agent) {
-    console.error(`Agent configuration not found for ID: '${agentId}'`);
-    throw new Error(`Configuration for the report section '${sectionToGenerate}' is missing or invalid.`);
-  }
+    if (!output) {
+        console.error(`AI failed to generate content for section: ${sectionToGenerate}`);
+        throw new Error(`The AI failed to generate a response for the '${sectionToGenerate}' section. Please try again.`);
+    }
 
-  // It's safer to validate the prompt structure, but we trust the data from `getAgent` for now.
-  // A more robust implementation might use a Zod schema to parse `agent.prompt`.
-  const agentPrompt = agent.prompt as AgentPrompt;
-  const systemPrompt = agentPrompt.base;
-
-  const promptVariables = {
-    ...input,
-    systemPrompt,
-    stringifiedProposal: input.proposal ? JSON.stringify(input.proposal, null, 2) : '',
-    stringifiedPlan: input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '',
-  };
-
-  const { output } = await reportSectionPrompt(
-    promptVariables,
-    { model: agent.model || 'googleai/gemini-2.0-flash' }
-  );
-
-  if (!output) {
-    console.error(`AI failed to generate content for section: ${sectionToGenerate}`);
-    throw new Error(`The AI failed to generate a response for the '${sectionToGenerate}' section. Please try again.`);
-  }
-
-  return output;
+    return output;
 }
