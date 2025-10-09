@@ -6,12 +6,12 @@
  * The default model for most general-purpose tasks.
  * It's fast and cost-effective.
  */
-export const defaultModel = 'gemini-2.0-flash-exp';
+export const defaultModel = 'googleai/gemini-2.0-flash';
 
 /**
  * A more powerful model for complex reasoning, analysis, and creative tasks.
  */
-export const proModel = 'gemini-1.5-pro';
+export const proModel = 'googleai/gemini-2.0-flash';
 
 /**
  * A model specifically for image generation.

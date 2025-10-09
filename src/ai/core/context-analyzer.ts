@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod';
+import { ContextItem, ContextOrganizer, OrganizedContext } from './context-organizer';
 
 export interface ContextAnalysisResult {
     // تحليل نوع المحتوى المطلوب
@@ -22,11 +23,12 @@ export interface ContextAnalysisResult {
     // المتطلبات المحددة
     specificRequirements: string[];
 
-    // السياق الخارجي المتاح
+    // السياق الخارجي المتاح (منظم حسب المعرفة)
     availableContext: {
         files: Array<{ name: string; type: string; relevance: number }>;
         previousSections: string[];
         guidelines: string[];
+        organizedContext?: OrganizedContext; // السياقات المنظمة حسب المعرفة
     };
 
     // التوصيات للنموذج
@@ -39,7 +41,7 @@ export interface ContextAnalysisResult {
 
 export class ContextAnalyzer {
     /**
-     * تحليل شامل للسياق والمتطلبات
+     * تحليل شامل للسياق والمتطلبات مع تنظيم السياقات حسب المعرفة
      */
     static async analyzeContext(input: {
         userInput: string;
@@ -47,6 +49,7 @@ export class ContextAnalyzer {
         externalContext?: Array<{ fileName: string; content: string; type: string }>;
         guidelines?: string[];
         previousOutput?: string;
+        targetSection?: string;
     }): Promise<ContextAnalysisResult> {
 
         // تحليل نوع المحتوى من النص
@@ -64,8 +67,31 @@ export class ContextAnalyzer {
         // استخراج المتطلبات المحددة
         const specificRequirements = this.extractRequirements(input.userInput, input.guidelines);
 
-        // تحليل السياق المتاح
+        // تحليل السياق المتاح مع التنظيم الذكي
         const availableContext = this.analyzeAvailableContext(input.externalContext, input.guidelines);
+
+        // تنظيم السياقات حسب المعرفة والأهمية
+        let organizedContext: OrganizedContext | undefined;
+        if (input.externalContext && input.externalContext.length > 0) {
+            const contextItems: ContextItem[] = input.externalContext.map(ctx => ({
+                fileName: ctx.fileName,
+                content: ctx.content,
+                type: ctx.type as any, // سيتم التحقق من الصحة في ContextOrganizer
+                metadata: {
+                    wordCount: ctx.content.length,
+                    language: this.detectLanguage(ctx.content)
+                }
+            }));
+
+            organizedContext = ContextOrganizer.organizeContexts(
+                contextItems,
+                input.targetSection,
+                specificRequirements
+            );
+
+            // تحديث availableContext لتشمل السياقات المنظمة
+            availableContext.organizedContext = organizedContext;
+        }
 
         // توصية النموذج المناسب
         const modelRecommendation = this.recommendModel(contentType, complexityLevel, targetAudience);
@@ -80,6 +106,11 @@ export class ContextAnalyzer {
             availableContext,
             modelRecommendation
         };
+    }
+
+    private static detectLanguage(content: string): 'ar' | 'en' {
+        const arabicRegex = /[\u0600-\u06FF]/;
+        return arabicRegex.test(content) ? 'ar' : 'en';
     }
 
     private static detectContentType(input: string): ContextAnalysisResult['contentType'] {

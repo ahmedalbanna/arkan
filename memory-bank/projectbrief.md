@@ -4,15 +4,16 @@
 **Arkan** is a comprehensive AI-powered professional writing and document generation platform built with Next.js 15 and Firebase. It serves as a complete solution for generating professional documents, presentations, diagrams, and academic content using advanced AI capabilities.
 
 ## Core Mission
-To democratize professional document creation by providing powerful AI tools that can generate high-quality proposals, reports, presentations, and academic solutions from simple ideas and context.
+To democratize professional document creation by providing powerful AI tools that can generate high-quality proposals, reports, presentations, and academic solutions from simple ideas and context, with intelligent context organization and knowledge-based content structuring.
 
 ## Primary Goals
-1. **Document Generation**: Create professional proposals, reports, and technical documents
-2. **Academic Support**: Solve exam and homework problems using AI analysis
+1. **Document Generation**: Create professional proposals, reports, and technical documents with intelligent context organization
+2. **Academic Support**: Solve exam and homework problems using AI analysis with contextual understanding
 3. **Visual Content**: Generate diagrams, presentations, and code snippets
 4. **Writing Tools**: Provide comprehensive writing assistance and content optimization
 5. **Team Collaboration**: Enable team-based project management and sharing
 6. **Template System**: Offer customizable templates for various document types
+7. **Context Intelligence**: Smart organization and prioritization of context based on knowledge types and relevance
 
 ## Target Users
 - **Students**: Academic problem solving, homework assistance, report generation

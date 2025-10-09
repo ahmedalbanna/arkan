@@ -140,7 +140,7 @@ describe('Test Validation Tools', () => {
                 user: { id: 'user1', name: 'Test User' },
             };
 
-            const store    createMockStore(initialState);
+            const store = createMockStore(initialState);
 
             expect(store).toHaveProperty('getState');
             expect(store).toHaveProperty('dispatch');

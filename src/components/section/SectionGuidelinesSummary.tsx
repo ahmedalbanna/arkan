@@ -1,0 +1,109 @@
+'use client';
+
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useGenerationUIStore } from '@/hooks';
+import { AlertCircle, CheckCircle, FileText, Plus } from 'lucide-react';
+
+interface GuidelinesSummaryProps {
+    itemKey: string;
+}
+
+export function GuidelinesSummary({ itemKey }: GuidelinesSummaryProps) {
+    const { t } = useLocalization();
+    const { guidelineState, oneTimeInstructions } = useGenerationUIStore();
+    const guidelines = guidelineState[itemKey];
+    const oneTimeInstruction = oneTimeInstructions[itemKey];
+
+    if (!guidelines && !oneTimeInstruction) {
+        return (
+            <Card className="border-dashed">
+                <CardContent className="p-4">
+                    <div className="text-center text-sm text-muted-foreground">
+                        {t('builder.reportGenerator.noGuidelinesConfigured')}
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
+
+    const guidelineItems = [];
+
+    // إضافة التعليمات لمرة واحدة
+    if (oneTimeInstruction && oneTimeInstruction.trim() !== '') {
+        guidelineItems.push({
+            type: 'oneTime',
+            icon: AlertCircle,
+            label: t('builder.reportGenerator.oneTimeInstructions'),
+            value: oneTimeInstruction,
+            color: 'bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-200'
+        });
+    }
+
+    // إضافة الإرشادات المحددة
+    if (guidelines) {
+        const checkedCount = guidelines.checked.filter(Boolean).length;
+        const totalCount = guidelines.checked.length;
+
+        if (checkedCount > 0) {
+            guidelineItems.push({
+                type: 'default',
+                icon: CheckCircle,
+                label: t('builder.reportGenerator.defaultGuidelines'),
+                value: `${checkedCount}/${totalCount} ${t('builder.reportGenerator.selected')}`,
+                color: 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200'
+            });
+        }
+
+        // إضافة الإرشادات المخصصة
+        if (guidelines.custom && guidelines.custom.length > 0) {
+            guidelineItems.push({
+                type: 'custom',
+                icon: Plus,
+                label: t('builder.reportGenerator.customGuidelines'),
+                value: `${guidelines.custom.length} ${t('builder.reportGenerator.added')}`,
+                color: 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200'
+            });
+        }
+    }
+
+    return (
+        <Card>
+            <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    {t('builder.reportGenerator.guidelinesSettings')}
+                </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+                <div className="space-y-3">
+                    {guidelineItems.map((item, index) => {
+                        const Icon = item.icon;
+                        return (
+                            <div key={index} className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Icon className="h-4 w-4 text-muted-foreground" />
+                                        <span className="text-sm font-medium">{item.label}</span>
+                                    </div>
+                                    <Badge
+                                        variant="secondary"
+                                        className={`${item.color} border-0`}
+                                    >
+                                        {item.value}
+                                    </Badge>
+                                </div>
+                                {item.type === 'oneTime' && (
+                                    <div className="text-xs text-muted-foreground pl-6">
+                                        "{item.value}"
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            </CardContent>
+        </Card>
+    );
+}

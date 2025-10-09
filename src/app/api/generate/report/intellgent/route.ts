@@ -27,7 +27,27 @@ const SimplifiedReportInputSchema = z.object({
     // البيانات الأساسية
     proposal: z.any().optional().describe('بيانات مقترح المشروع'),
     projectPlan: z.any().optional().describe('خطة المشروع'),
-    guidelines: z.array(z.string()).optional().describe('التوجيهات العامة'),
+    otherSections: z.record(z.string()).optional().describe('الأقسام الأخرى المحددة'),
+    otherDiagrams: z.record(z.string()).optional().describe('الرسوم البيانية الأخرى المحددة'),
+    externalContext: z.array(z.object({
+        fileName: z.string(),
+        content: z.string(),
+        type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']).describe('نوع السياق المعرفي')
+    })).optional().describe('السياق الخارجي المحدد مع تصنيف نوع المعرفة'),
+
+    // إعدادات التوليد الجديدة
+    style: z.object({
+        formality: z.number().min(0).max(100).optional().describe('مستوى الرسمية'),
+        tone: z.enum(['professional', 'academic', 'casual', 'persuasive']).optional().describe('النبرة'),
+        wordCount: z.number().optional().describe('عدد الكلمات المطلوب')
+    }).optional().describe('إعدادات الأسلوب'),
+
+    // الإرشادات والتعليمات الجديدة
+    guidelines: z.array(z.string()).optional().describe('الإرشادات المخصصة'),
+    oneTimeInstructions: z.string().optional().describe('تعليمات لمرة واحدة'),
+    selectedGuidelines: z.array(z.boolean()).optional().describe('الإرشادات الافتراضية المحددة'),
+
+    // البيانات التقليدية (للتوافق مع النظام القديم)
     contextFiles: z.array(z.object({
         fileName: z.string(),
         content: z.string(),
@@ -37,7 +57,16 @@ const SimplifiedReportInputSchema = z.object({
     // إعدادات التوليد الذكي المبسطة
     qualityThreshold: z.number().min(70).max(100).default(85).describe('عتبة الجودة المطلوبة'),
     enableIterativeImprovement: z.boolean().default(true).describe('تفعيل التحسين التكراري'),
-    enablePerformanceMonitoring: z.boolean().default(true).describe('تفعيل مراقبة الأداء')
+    enablePerformanceMonitoring: z.boolean().default(true).describe('تفعيل مراقبة الأداء'),
+
+    // معلومات إضافية
+    hasContext: z.boolean().optional().describe('هل تم تحديد سياق'),
+    generationMetadata: z.object({
+        formality: z.number().optional(),
+        tone: z.string().optional(),
+        wordCount: z.string().optional(),
+        timestamp: z.string().optional()
+    }).optional().describe('معلومات التوليد الإضافية')
 });
 
 type SimplifiedReportInput = z.infer<typeof SimplifiedReportInputSchema>;
@@ -134,14 +163,43 @@ class IntelligentReportHandler extends CreditBasedApiHandler<any, any> {
             throw new Error(`القسم ${data.sectionToGenerate} غير موجود في قاعدة البيانات`);
         }
 
-        // إعداد مدخلات توليد القسم
+        // إعداد مدخلات توليد القسم مع البيانات الجديدة
         const sectionInput = {
             sectionToGenerate: data.sectionToGenerate,
             proposal: data.proposal,
             projectPlan: data.projectPlan,
+            otherSections: data.otherSections,
+            otherDiagrams: data.otherDiagrams,
+            externalContext: data.externalContext,
+
+            // إعدادات التوليد الجديدة
+            style: data.style,
+
+            // الإرشادات والتعليمات الجديدة
             guidelines: data.guidelines,
-            contextFiles: data.contextFiles
+            oneTimeInstructions: data.oneTimeInstructions,
+            selectedGuidelines: data.selectedGuidelines,
+
+            // البيانات التقليدية (للتوافق)
+            contextFiles: data.contextFiles,
+
+            // إعدادات التوليد الذكي
+            qualityThreshold: data.qualityThreshold,
+            enableIterativeImprovement: data.enableIterativeImprovement,
+            enablePerformanceMonitoring: data.enablePerformanceMonitoring,
+
+            // معلومات إضافية
+            hasContext: data.hasContext,
+            generationMetadata: data.generationMetadata
         };
+
+        console.log('📤 مدخلات توليد القسم:', {
+            sectionToGenerate: sectionInput.sectionToGenerate,
+            hasStyle: !!sectionInput.style,
+            hasGuidelines: !!sectionInput.guidelines?.length,
+            hasOneTimeInstructions: !!sectionInput.oneTimeInstructions,
+            hasContext: sectionInput.hasContext
+        });
 
         // توليد القسم باستخدام النظام الذكي المحسن
         const result = await generateReportSection(sectionInput as any);
@@ -149,7 +207,12 @@ class IntelligentReportHandler extends CreditBasedApiHandler<any, any> {
         return {
             sectionName: result.sectionName,
             content: result.content,
-            singleSection: true
+            singleSection: true,
+            generationSettings: {
+                style: data.style,
+                guidelines: data.guidelines,
+                oneTimeInstructions: data.oneTimeInstructions
+            }
         };
     }
 

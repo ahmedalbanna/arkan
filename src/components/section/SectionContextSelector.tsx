@@ -6,10 +6,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore } from '@/hooks';
+import { useContextSelector } from '@/hooks';
 import { cn } from '@/lib/utils';
 import { BookCheck, FileSpreadsheet, FileText, GanttChartSquare, GitGraph } from 'lucide-react';
-// import { useContextSelector } from '@/hooks'; // Not available
 
 interface ContextSelectorProps {
     itemKey: string;
@@ -17,18 +16,19 @@ interface ContextSelectorProps {
 
 export function ContextSelector({ itemKey }: ContextSelectorProps) {
     const { t } = useLocalization();
-    const { project } = useBuilderStore();
 
-    // Mock data since useContextSelector is not available
-    const proposal = project?.proposal;
-    const projectPlan = project?.projectPlan;
-    const generatedSections: any[] = [];
-    const generatedDiagrams: any[] = [];
-    const externalContext: any[] = [];
-    const currentSelection = { proposal: false, projectPlan: false };
-    const toggleContextSelection = () => { };
-    const reportSections: any[] = [];
-    const diagramSections: any[] = [];
+    // استخدام hook تحديد السياق الحقيقي
+    const {
+        proposal,
+        projectPlan,
+        toggleContextSelection,
+        reportSections,
+        diagramSections,
+        currentSelection,
+        generatedSections,
+        generatedDiagrams,
+        externalContext,
+    } = useContextSelector(itemKey);
 
     return (
         <ScrollArea className="h-60 w-full">
@@ -38,14 +38,34 @@ export function ContextSelector({ itemKey }: ContextSelectorProps) {
 
                     {/* Project Proposal */}
                     <div className="flex items-center space-x-2">
-                        <Checkbox id={`context-proposal-${itemKey}`} checked={false} onCheckedChange={() => { }} disabled={!proposal} />
-                        <Label htmlFor={`context-proposal-${itemKey}`} className="text-sm font-normal"><div className="flex items-center gap-2"><FileSpreadsheet className="h-4 w-4" /> Project Proposal</div></Label>
+                        <Checkbox
+                            id={`context-proposal-${itemKey}`}
+                            checked={currentSelection.proposal}
+                            onCheckedChange={(checked) => toggleContextSelection(itemKey, 'proposal', null, !!checked)}
+                            disabled={!proposal}
+                        />
+                        <Label htmlFor={`context-proposal-${itemKey}`} className="text-sm font-normal">
+                            <div className="flex items-center gap-2">
+                                <FileSpreadsheet className="h-4 w-4" />
+                                {t('builder.reportGenerator.projectProposal')}
+                            </div>
+                        </Label>
                     </div>
 
                     {/* Project Plan */}
                     <div className="flex items-center space-x-2">
-                        <Checkbox id={`context-plan-${itemKey}`} checked={false} onCheckedChange={() => { }} disabled={!projectPlan} />
-                        <Label htmlFor={`context-plan-${itemKey}`} className="text-sm font-normal"><div className="flex items-center gap-2"><GanttChartSquare className="h-4 w-4" /> Project Plan</div></Label>
+                        <Checkbox
+                            id={`context-plan-${itemKey}`}
+                            checked={currentSelection.projectPlan}
+                            onCheckedChange={(checked) => toggleContextSelection(itemKey, 'projectPlan', null, !!checked)}
+                            disabled={!projectPlan}
+                        />
+                        <Label htmlFor={`context-plan-${itemKey}`} className="text-sm font-normal">
+                            <div className="flex items-center gap-2">
+                                <GanttChartSquare className="h-4 w-4" />
+                                {t('builder.reportGenerator.projectPlan')}
+                            </div>
+                        </Label>
                     </div>
 
                     {/* Generated Sections */}

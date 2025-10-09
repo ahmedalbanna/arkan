@@ -1,14 +1,14 @@
 
 'use client';
 
-import { type DiagramType, type SectionName } from '@/ai/schemas';
+import { type DiagramType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAgents, useBuilderStore, useGenerateDiagram, useToast } from '@/hooks';
-import React, { useEffect, useMemo } from 'react';
-import { useAgentStore } from './useAgentStore';
-import { useGenerationUIStore } from './useGenerationUIStore';
+import { useAgents, useBuilderStore, useGenerateDiagram } from '@/hooks';
 import { Agent, AgentCategory } from '@/lib/models/agent';
+import React, { useMemo } from 'react';
+import { useSectionGenerationData } from './use-section-generation-data';
+import { useGenerationUIStore } from './useGenerationUIStore';
 
 export const useDiagramGenerationTools = () => {
     const { t } = useLocalization();
@@ -41,19 +41,22 @@ export const useDiagramGenerationTools = () => {
 
     const onGenerateDiagram = (diagramType: DiagramType) => {
         if (!project) return;
-        
-        // The AI now handles context automatically. We pass all available context.
-        const body = {
-            proposal: project.proposal,
-            projectPlan: project.projectPlan,
-            diagramToGenerate: diagramType,
-            otherSections: project.sections,
-            otherDiagrams: Object.fromEntries(Object.entries(project.diagrams || {}).map(([key, value]) => [key, value?.plantUmlCode])),
-            externalContext: project.externalContext,
-            // Guidelines and instructions can still be passed if needed in the future
-        };
+
+        // استخدام البيانات المحسنة من SectionAccordionItem
+        const generationData = useSectionGenerationData(diagramType);
+        const apiData = generationData.prepareApiData({
+            diagramToGenerate: diagramType
+        });
+
+        // التحقق من صحة البيانات
+        const validation = generationData.validateData();
+        if (!validation.isValid) {
+            console.warn('Validation errors:', validation.errors);
+            // يمكن إضافة toast للتحذير هنا
+        }
+
         setActiveMutationKey(diagramType);
-        diagramMutation.mutate(body);
+        diagramMutation.mutate(apiData);
     };
 
     return {

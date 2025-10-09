@@ -1,12 +1,12 @@
 
 'use client';
 
+import { SectionName } from '@/ai/schemas';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useContextSelector } from '@/hooks';
 import { markdownComponents } from '@/lib/markdown-styles';
 import ReactMarkdown from 'react-markdown';
-// import { useContextSelector } from '@/hooks'; // Not available
-import { SectionName } from '@/ai/schemas';
 
 interface ContextViewerProps {
     itemKey: string;
@@ -24,15 +24,7 @@ export function ContextViewer({ itemKey }: ContextViewerProps) {
         selectedDiagrams,
         selectedExternalContext,
         hasContext,
-    } = {
-        selectedSections: [],
-        selectedDiagrams: [],
-        selectedExternalContext: [],
-        hasContext: false,
-        currentSelection: { proposal: false, projectPlan: false },
-        projectPlan: null,
-        reportSections: {}
-    };
+    } = useContextSelector(itemKey);
 
     return (
         <ScrollArea className="h-full max-h-[calc(75vh-100px)]">

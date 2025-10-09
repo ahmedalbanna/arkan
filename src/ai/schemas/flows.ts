@@ -418,7 +418,34 @@ export const GenerateSectionInputSchema = z.object({
     contextFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional().describe("An array of context documents to be used for factual information."),
     guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
     instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
-}).refine(data => data.proposal || data.projectPlan || (data.contextFiles && data.contextFiles.length > 0) || (data.otherSections && Object.keys(data.otherSections).length > 0) || (data.otherDiagrams && Object.keys(data.otherDiagrams).length > 0) || (data.exampleFiles && data.exampleFiles.length > 0), {
+
+    // البيانات الجديدة من SectionAccordionItem
+    externalContext: z.array(z.object({
+        fileName: z.string(),
+        content: z.string(),
+        type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']).describe('نوع السياق المعرفي')
+    })).optional().describe("External context files selected from SectionAccordionItem with knowledge type classification"),
+
+    // إعدادات التوليد الجديدة
+    style: z.object({
+        formality: z.number().min(0).max(100).optional().describe('Formality level from 0-100'),
+        tone: z.enum(['professional', 'academic', 'casual', 'persuasive']).optional().describe('Writing tone'),
+        wordCount: z.number().optional().describe('Target word count')
+    }).optional().describe('Style settings from SectionAccordionItem'),
+
+    // الإرشادات والتعليمات الجديدة
+    oneTimeInstructions: z.string().optional().describe('One-time instructions from SectionAccordionItem'),
+    selectedGuidelines: z.array(z.boolean()).optional().describe('Selected default guidelines from SectionAccordionItem'),
+
+    // معلومات إضافية
+    hasContext: z.boolean().optional().describe('Whether context was selected'),
+    generationMetadata: z.object({
+        formality: z.number().optional(),
+        tone: z.string().optional(),
+        wordCount: z.string().optional(),
+        timestamp: z.string().optional()
+    }).optional().describe('Additional generation metadata')
+}).refine(data => data.proposal || data.projectPlan || (data.contextFiles && data.contextFiles.length > 0) || (data.otherSections && Object.keys(data.otherSections).length > 0) || (data.otherDiagrams && Object.keys(data.otherDiagrams).length > 0) || (data.exampleFiles && data.exampleFiles.length > 0) || (data.externalContext && data.externalContext.length > 0), {
     message: "A proposal, project plan, or external context is required to generate a report section.",
     path: ["proposal"], // You can associate the error with a specific path
 });
@@ -796,4 +823,4 @@ export const EvaluateReportOutputSchema = z.object({
 });
 export type EvaluateReportOutput = z.infer<typeof EvaluateReportOutputSchema>;
 
-    
+

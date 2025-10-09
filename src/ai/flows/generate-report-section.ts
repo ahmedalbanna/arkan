@@ -13,6 +13,7 @@ import {
   OutputQualityValidator,
   PerformanceMonitor
 } from '@/ai/core';
+import { createOrganizedPrompt } from '@/ai/core/context-organizer';
 import { ai } from '@/ai/genkit';
 import { createIntelligentSectionPrompt, getSectionQualityRequirements } from '@/ai/prompts/section-specific-prompts';
 import type { SectionName } from '@/ai/schemas';
@@ -25,6 +26,27 @@ const ReportSectionPromptInputSchema = GenerateSectionInputSchema.and(
   z.object({
     stringifiedProposal: z.string(),
     stringifiedPlan: z.string(),
+    // البيانات الجديدة من SectionAccordionItem
+    styleSettings: z.object({
+      formality: z.number().optional(),
+      tone: z.string().optional(),
+      wordCount: z.number().optional()
+    }).optional(),
+    guidelinesSettings: z.object({
+      customGuidelines: z.array(z.string()).optional(),
+      oneTimeInstructions: z.string().optional(),
+      selectedGuidelines: z.array(z.boolean()).optional()
+    }).optional(),
+    contextSettings: z.object({
+      hasContext: z.boolean().optional(),
+      selectedSections: z.record(z.string()).optional(),
+      selectedDiagrams: z.record(z.string()).optional(),
+      externalContext: z.array(z.object({
+        fileName: z.string(),
+        content: z.string(),
+        type: z.string()
+      })).optional()
+    }).optional()
   })
 );
 
@@ -135,9 +157,40 @@ export async function generateReportSection(input: GenerateSectionInput): Promis
     console.log('📊 تحليل السياق...');
     const contextStart = Date.now();
 
-    // تحضير السياق الخارجي للتحليل
+    // تحضير السياق الخارجي للتحليل مع البيانات الجديدة
     const externalContext = [];
 
+    // استخدام البيانات الجديدة من SectionAccordionItem إذا كانت متاحة
+    if (input.externalContext && input.externalContext.length > 0) {
+      input.externalContext.forEach(item => {
+        if (item.content && typeof item.content === 'string') {
+          const processed = enhanceContentProcessing(item.content, item.fileName.replace(/\.[^/.]+$/, ""), 'file');
+          externalContext.push(processed);
+        }
+      });
+    }
+
+    // استخدام الأقسام المحددة من SectionAccordionItem
+    if (input.otherSections) {
+      Object.entries(input.otherSections).forEach(([key, content]) => {
+        if (content && typeof content === 'string') {
+          const processed = enhanceContentProcessing(content, `section-${key}`, 'section');
+          externalContext.push(processed);
+        }
+      });
+    }
+
+    // استخدام الرسوم البيانية المحددة من SectionAccordionItem
+    if (input.otherDiagrams) {
+      Object.entries(input.otherDiagrams).forEach(([key, content]) => {
+        if (content && typeof content === 'string') {
+          const processed = enhanceContentProcessing(content, `diagram-${key}`, 'diagram');
+          externalContext.push(processed);
+        }
+      });
+    }
+
+    // البيانات التقليدية (للتوافق مع النظام القديم)
     if (input.proposal) {
       const proposalMarkdown = proposalToMarkdown(input.proposal);
       externalContext.push({
@@ -153,15 +206,6 @@ export async function generateReportSection(input: GenerateSectionInput): Promis
         fileName: "project-plan.md",
         content: planMarkdown,
         type: "context"
-      });
-    }
-
-    if (input.otherSections) {
-      Object.entries(input.otherSections).forEach(([key, content]) => {
-        if (content && typeof content === 'string') {
-          const processed = enhanceContentProcessing(content, `section-${key}`, 'section');
-          externalContext.push(processed);
-        }
       });
     }
 
@@ -183,11 +227,24 @@ export async function generateReportSection(input: GenerateSectionInput): Promis
       });
     }
 
-    // تحليل السياق
+    // تحليل السياق مع الإرشادات الجديدة
+    const guidelines = [];
+
+    // إضافة الإرشادات المخصصة من SectionAccordionItem
+    if (input.guidelines && input.guidelines.length > 0) {
+      guidelines.push(...input.guidelines);
+    }
+
+    // إضافة التعليمات لمرة واحدة من SectionAccordionItem
+    if (input.oneTimeInstructions) {
+      guidelines.push(`One-time instruction: ${input.oneTimeInstructions}`);
+    }
+
     const contextAnalysis = await ContextAnalyzer.analyzeContext({
       userInput: `Generate ${sectionToGenerate} section for project report`,
       externalContext,
-      guidelines: input.guidelines || []
+      guidelines,
+      targetSection: sectionToGenerate
     });
 
     const contextTime = Date.now() - contextStart;
@@ -223,9 +280,16 @@ export async function generateReportSection(input: GenerateSectionInput): Promis
 
     console.log(`🤖 النموذج المختار: ${modelConfig.modelId} (${modelConfig.reasoning || 'من القالب الذكي'})`);
 
-    // 4. بناء الـ prompt المحسن
-    console.log('⚡ بناء الـ prompt المحسن...');
+    // 4. بناء الـ prompt المحسن مع السياقات المنظمة
+    console.log('⚡ بناء الـ prompt المحسن مع السياقات المنظمة...');
     const promptStart = Date.now();
+
+    // إنشاء مطالبة منظمة من السياقات إذا كانت متاحة
+    let organizedContextPrompt = '';
+    if (contextAnalysis.availableContext.organizedContext) {
+      organizedContextPrompt = createOrganizedPrompt(contextAnalysis.availableContext.organizedContext);
+      console.log(`📚 تم تنظيم ${contextAnalysis.availableContext.organizedContext.statistics.totalItems} سياق في مطالبة منظمة`);
+    }
 
     const reportSectionPrompt = ai.definePrompt({
       name: 'generateReportSectionPrompt',
@@ -249,6 +313,9 @@ ${intelligentTemplate.userPrompt}
 --- Additional Instructions ---
 {{{instructionText}}}
 {{/if}}
+
+--- ORGANIZED CONTEXT BY KNOWLEDGE TYPE ---
+${organizedContextPrompt ? organizedContextPrompt : 'No organized context available.'}
 
 --- AVAILABLE CONTEXT FROM PROJECT ---
 You have access to the following documents. Review them and use the most relevant information to generate the requested section.

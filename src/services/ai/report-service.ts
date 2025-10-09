@@ -10,21 +10,31 @@ import { createDetailedErrorMessage, validateApiResponse } from '@/lib/utils/res
 
 /**
  * Calls the API to generate a single report section with enhanced error handling.
- * @param body The request body containing the generation context.
+ * @param body The request body containing the generation context with new SectionAccordionItem data.
  * @param token The user's authentication token.
  * @returns A promise that resolves to the generated section data.
  */
 export async function generateReportSectionApi(body: any, token: string): Promise<any> {
     try {
-        console.log('🚀 Starting report section generation:', body.sectionToGenerate);
+        console.log('🚀 Starting enhanced report section generation:', {
+            sectionToGenerate: body.sectionToGenerate,
+            hasStyle: !!body.style,
+            hasGuidelines: !!body.guidelines?.length,
+            hasOneTimeInstructions: !!body.oneTimeInstructions,
+            hasContext: body.hasContext,
+            externalContextCount: body.externalContext?.length || 0
+        });
 
-        const response = await fetch('/api/generate/report', {
+        const response = await fetch('/api/generate/report/intellgent', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(body),
+            body: JSON.stringify({
+                operationType: 'single-section',
+                ...body
+            }),
         });
 
         // التحقق من حالة الاستجابة
