@@ -1,5 +1,7 @@
 
 
+'use client';
+
 import type { AnyProjectProposal, PresentationHistoryEntry, ProjectPlan } from '@/ai/schemas';
 import type { DocxTemplateSchema, PptxTemplateSchema, PresentationGenerationTemplateSchema, ProposalTemplateSchema, ReportGenerationTemplateSchema } from '@/ai/schemas/template-schemas';
 import { LucideIcon } from 'lucide-react';
@@ -19,9 +21,8 @@ export type { PricingPlan } from '@/components/PricingCard';
 export type { SignupCredentials } from '@/components/SignupForm';
 export type { GenerateProposalBody } from '@/hooks/use-proposal-generation';
 export type { VerifyPaymentVariables } from '@/hooks/use-transactions';
-export type { ExternalContext as AcademicContextFile, AcademicSolverStage, AcademicSolverState } from '@/hooks/useAcademicSolverStore';
+export type { AcademicSolverStage, AcademicSolverState } from '@/hooks/useAcademicSolverStore';
 export type { AgentChatSession, ChatMessage, ChatSession } from '@/hooks/useChatStore';
-export type { ContextFileType, ExternalContext } from '@/hooks/useReportStore';
 export type { Team, TeamMember, UserProfile } from '@/lib/db/queries';
 export type { DiffPart } from '@/lib/diff';
 export type { TeamWithMembers } from '@/services/team-service';
@@ -252,6 +253,7 @@ export interface SavedProposalState {
   updatedAt?: string;
 }
 
+
 // --- Main Project State ---
 
 export interface ProjectState {
@@ -342,4 +344,12 @@ export interface BankAccount {
 export interface AppSettings {
   newUserCredits: number;
   bankAccounts: BankAccount[];
+}
+
+export type ContextFileType = 'context' | 'example' | 'question' | 'textbook' | 'guidelines';
+
+export interface AcademicContextFile {
+    fileName: string;
+    content: string;
+    type: ContextFileType;
 }
