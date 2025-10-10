@@ -1,374 +1,338 @@
-# النظام الذكي المحسن للذكاء الاصطناعي (مبسط)
+# نظام الذكاء الاصطناعي المحسن - Enhanced AI Core System
 
 ## نظرة عامة
 
-هذا النظام الذكي المحسن يوفر مجموعة شاملة من الأدوات لجعل تدفق الذكاء الاصطناعي أكثر ذكاءً ودقة. تم تبسيط النظام مؤخراً لإزالة التعقيد غير الضروري مع الحفاظ على جميع الوظائف الذكية الأساسية.
+نظام الذكاء الاصطناعي المحسن هو قلب منصة Arkan، يوفر نظاماً ذكياً ومتكاملاً لتوليد المحتوى وتحليله وتحسينه باستخدام أحدث تقنيات الذكاء الاصطناعي. النظام مصمم ليكون قابلاً للتوسع وقابلاً للتخصيص مع مراقبة شاملة للأداء.
 
-## المكونات الأساسية
+## المكونات الرئيسية
 
-### 1. محلل السياق الذكي (Context Analyzer)
-```typescript
-import { ContextAnalyzer } from '@/ai/core';
+### 1. 🧠 تحليل السياق الذكي (Context Analyzer)
+- **الملف**: `context-analyzer.ts`
+- **الوظيفة**: تحليل شامل للمدخلات والسياق الخارجي
+- **الميزات**:
+  - تحديد نوع المحتوى المطلوب
+  - تقييم مستوى التعقيد
+  - تحديد الجمهور المستهدف
+  - تحليل السياق الثقافي واللغوي
+  - استخراج المتطلبات المحددة
 
-const analysis = await ContextAnalyzer.analyzeContext({
-  userInput: "تطوير تطبيق جوال",
-  externalContext: files,
-  guidelines: ["يجب أن يكون سهل الاستخدام"]
-});
-```
+### 2. 🎯 اختيار النماذج التكيفي (Adaptive Model Selector)
+- **الملف**: `adaptive-model-selector.ts`
+- **الوظيفة**: اختيار أفضل نموذج AI بناءً على المهمة والسياق
+- **الميزات**:
+  - تقييم النماذج المتاحة
+  - تكوين المعاملات تلقائياً
+  - دعم النماذج الاحتياطية
+  - تحسين التكلفة والأداء
 
-**الميزات:**
-- تحليل نوع المحتوى (تقني، تجاري، أكاديمي، إبداعي)
-- تحديد مستوى التعقيد (أساسي، متوسط، متقدم، خبير)
-- تحديد الجمهور المستهدف (عام، تقني، تنفيذي، أكاديمي)
-- تحليل اللغة والسياق الثقافي
-- استخراج المتطلبات المحددة
-- توصية النموذج المناسب
+### 3. 📝 بناء المحفزات الذكي (Intelligent Prompt Builder)
+- **الملف**: `intelligent-prompt-builder.ts`
+- **الوظيفة**: بناء محفزات محسنة ومخصصة
+- **الميزات**:
+  - بناء محفزات ديناميكية
+  - تخصيص حسب نوع المهمة
+  - تنظيم السياق الخارجي
+  - إضافة الأمثلة والقيود
 
-### 2. بناء الـ Prompts الذكي (Intelligent Prompt Builder)
-```typescript
-import { IntelligentPromptBuilder } from '@/ai/core';
+### 4. 🔄 محرك التحسين التكراري (Iterative Improvement Engine)
+- **الملف**: `iterative-improvement-engine.ts`
+- **الوظيفة**: تحسين المخرجات تدريجياً من خلال عدة تكرارات
+- **الميزات**:
+  - تحسين تكراري ذكي
+  - تقييم الجودة المستمر
+  - تبديل النماذج عند الحاجة
+  - تقارير مفصلة للتحسين
 
-const promptTemplate = IntelligentPromptBuilder.buildPrompt({
-  taskType: 'generation',
-  domain: 'project-proposals',
-  contextAnalysis,
-  userInput: "فكرة المشروع",
-  externalContext: files
-});
+### 5. ✅ التحقق من جودة المخرجات (Output Quality Validator)
+- **الملف**: `output-quality-validator.ts`
+- **الوظيفة**: تقييم شامل لجودة المخرجات واقتراح التحسينات
+- **الميزات**:
+  - مقاييس جودة متعددة
+  - تحديد المشاكل تلقائياً
+  - اقتراحات التحسين
+  - تقييم الدقة والشمولية
 
-const compiledPrompt = IntelligentPromptBuilder.compilePrompt(promptTemplate);
-```
+### 6. 📊 مراقب الأداء (Performance Monitor)
+- **الملف**: `performance-monitor.ts`
+- **الوظيفة**: مراقبة شاملة لأداء النظام
+- **الميزات**:
+  - تتبع أوقات التنفيذ
+  - مراقبة استخدام الموارد
+  - تحليل اتجاهات الأداء
+  - تقارير مفصلة
 
-**الميزات:**
-- بناء system prompts محسنة حسب السياق
-- تخصيص التعليمات حسب نوع المهمة
-- إضافة أمثلة وقيود مناسبة
-- تنسيق المخرجات المطلوب
-- دعم التحسين التكراري
+### 7. 🛠️ معالج أخطاء الذكاء الاصطناعي (AI Error Handler)
+- **الملف**: `ai-error-handler.ts`
+- **الوظيفة**: معالجة متقدمة لأخطاء الذكاء الاصطناعي
+- **الميزات**:
+  - استراتيجيات تعافي متعددة
+  - نماذج احتياطية
+  - تبسيط المحفزات
+  - تسجيل شامل للأخطاء
 
-### 3. مُقيم جودة المخرجات (Output Quality Validator)
-```typescript
-import { OutputQualityValidator } from '@/ai/core';
-
-const validation = await OutputQualityValidator.validateOutput(
-  output,
-  originalInput,
-  contextAnalysis
-);
-
-console.log(`نقاط الجودة: ${validation.metrics.overall}/100`);
-```
-
-**مقاييس الجودة:**
-- **الاكتمال (Completeness)**: مدى تغطية جميع المتطلبات
-- **الدقة (Accuracy)**: صحة المعلومات وعدم التناقض
-- **الصلة (Relevance)**: مدى صلة المحتوى بالموضوع
-- **الوضوح (Clarity)**: سهولة الفهم ووضوح اللغة
-- **الهيكل (Structure)**: التنظيم والتسلسل المنطقي
-
-### 4. مُختار النماذج التكيفي (Adaptive Model Selector)
-```typescript
-import { AdaptiveModelSelector } from '@/ai/core';
-
-const modelConfig = AdaptiveModelSelector.selectOptimalModel(
-  contextAnalysis,
-  'generation'
-);
-
-console.log(`النموذج المختار: ${modelConfig.modelId}`);
-console.log(`السبب: ${modelConfig.reasoning}`);
-```
-
-**معايير الاختيار:**
-- نوع المهمة (توليد، تحليل، ترجمة، تحسين)
-- تعقيد المحتوى
-- متطلبات الدقة
-- متطلبات السرعة
-- طول المخرجات المتوقع
-- حجم السياق
-
-### 5. محرك التحسين التكراري (Iterative Improvement Engine)
-```typescript
-import { IterativeImprovementEngine } from '@/ai/core';
-
-const session = await IterativeImprovementEngine.runImprovementSession(
-  userInput,
-  'generation',
-  'project-proposals',
-  externalContext,
-  {
-    maxIterations: 3,
-    qualityThreshold: 85,
-    improvementStrategy: 'balanced'
-  }
-);
-```
-
-**استراتيجيات التحسين:**
-- **Aggressive**: تحسينات جذرية وشاملة
-- **Balanced**: تحسينات متوازنة (الافتراضي)
-- **Conservative**: تحسينات طفيفة ومحافظة
+### 8. 🗂️ منظم السياقات (Context Organizer)
+- **الملف**: `context-organizer.ts`
+- **الوظيفة**: تنظيم ذكي للسياقات حسب المعرفة والأهمية
+- **الميزات**:
+  - تصنيف السياقات حسب نوع المعرفة
+  - ترتيب حسب الأولوية
+  - حساب الصلة بالمهمة
+  - إحصائيات مفصلة
 
 ## الواجهة الموحدة
 
-### استخدام النظام الكامل
+### IntelligentAISystem
+الواجهة الرئيسية التي توحد جميع المكونات:
+
 ```typescript
 import { IntelligentAISystem } from '@/ai/core';
 
+// تشغيل تدفق ذكي كامل
 const result = await IntelligentAISystem.runIntelligentFlow({
-  userInput: "فكرة المشروع",
-  taskType: 'generation',
-  domain: 'project-proposals',
-  externalContext: files,
+  userInput: "أنشئ خطة عمل لمشروع تقني",
+  taskType: "generation",
+  domain: "business",
+  externalContext: [...],
+  guidelines: [...],
   qualityThreshold: 85,
   maxIterations: 3,
-  enableIterativeImprovement: true
+  enableIterativeImprovement: true,
+  enablePerformanceMonitoring: true
 });
-
-console.log(`الجودة النهائية: ${result.qualityScore}/100`);
-console.log(`عدد التكرارات: ${result.iterations}`);
 ```
 
-### المساعدات السريعة
+## أمثلة الاستخدام
+
+### 1. تحليل سريع للسياق
 ```typescript
 import { AIHelpers } from '@/ai/core';
 
-// تحليل سريع
-const analysis = await AIHelpers.quickAnalyze("النص المراد تحليله");
+const analysis = await AIHelpers.quickAnalyze("أنشئ تقرير تقني عن الذكاء الاصطناعي");
+console.log(analysis);
+// {
+//   contentType: "technical",
+//   complexity: "intermediate",
+//   audience: "technical",
+//   language: "ar",
+//   recommendedModel: "googleai/gemini-1.5-pro"
+// }
+```
 
-// تقييم سريع
+### 2. تقييم سريع للجودة
+```typescript
 const validation = await AIHelpers.quickValidate(output, input);
-
-// اقتراح النموذج
-const suggestion = await AIHelpers.suggestModel(text, 'generation');
+console.log(validation);
+// {
+//   score: 85,
+//   isGood: true,
+//   needsImprovement: false,
+//   mainIssues: []
+// }
 ```
 
-## أمثلة عملية
-
-### مثال بسيط
+### 3. اقتراح النموذج المناسب
 ```typescript
-import { IntelligentAISystem } from '@/ai/core';
-
-const result = await IntelligentAISystem.runIntelligentFlow({
-  userInput: "تطوير تطبيق جوال لإدارة المهام",
-  taskType: 'generation',
-  domain: 'mobile-apps',
-  enableIterativeImprovement: true
-});
+const suggestion = await AIHelpers.suggestModel(text, "generation");
+console.log(suggestion);
+// {
+//   model: "googleai/gemini-1.5-pro",
+//   reasoning: "Complex technical content requires advanced reasoning capabilities",
+//   temperature: 0.3,
+//   maxTokens: 8192
+// }
 ```
 
-### مثال متقدم مع سياق خارجي
-```typescript
-const externalContext = [
-  {
-    fileName: "requirements.pdf",
-    content: "المتطلبات التفصيلية...",
-    type: "context"
-  }
-];
+## التكوين والإعداد
 
-const result = await IntelligentAISystem.runIntelligentFlow({
-  userInput: "تطوير منصة تجارة إلكترونية",
-  taskType: 'generation',
-  domain: 'e-commerce',
-  externalContext,
-  guidelines: [
-    "استخدم أحدث التقنيات",
-    "ركز على الأمان",
-    "دعم اللغة العربية"
-  ],
-  qualityThreshold: 90,
-  maxIterations: 4
-});
+### 1. تكوين النماذج
+```typescript
+// في src/ai/config/models.ts
+export const defaultModel = 'googleai/gemini-2.0-flash';
+export const proModel = 'googleai/gemini-1.5-pro';
+export const imageGenerationModel = 'googleai/gemini-2.0-flash-preview-image-generation';
 ```
 
-## التكامل مع النظام الحالي
-
-### تحديث Prompts الموجودة
+### 2. تكوين معايير الجودة
 ```typescript
-// في ملف الـ prompt
-import { ContextAnalyzer, IntelligentPromptBuilder } from '@/ai/core';
-
-export const enhancedPrompt = ai.definePrompt({
-  system: async (input) => {
-    const contextAnalysis = await ContextAnalyzer.analyzeContext({
-      userInput: input.text,
-      externalContext: input.files
-    });
-
-    const promptTemplate = IntelligentPromptBuilder.buildPrompt({
-      taskType: 'generation',
-      domain: 'your-domain',
-      contextAnalysis,
-      userInput: input.text
-    });
-
-    return IntelligentPromptBuilder.compilePrompt(promptTemplate);
-  }
-});
-```
-
-### تحديث Flows الموجودة
-```typescript
-// في ملف الـ flow
-import { OutputQualityValidator, IterativeImprovementEngine } from '@/ai/core';
-
-export const enhancedFlow = ai.defineFlow({
-  // ... التكوين الأساسي
-}, async (input) => {
-  // التوليد الأولي
-  const initialOutput = await yourExistingPrompt(input);
-
-  // تقييم الجودة
-  const validation = await OutputQualityValidator.validateOutput(
-    initialOutput,
-    input.text,
-    contextAnalysis
-  );
-
-  // التحسين إذا لزم الأمر
-  if (validation.needsImprovement) {
-    const session = await IterativeImprovementEngine.runImprovementSession(
-      input.text,
-      'generation',
-      'your-domain',
-      input.externalContext,
-      { maxIterations: 2, qualityThreshold: 80 }
-    );
-
-    return session.finalOutput;
-  }
-
-  return initialOutput;
-});
-```
-
-## مقاييس الأداء
-
-### مقاييس الجودة
-- **0-49**: جودة ضعيفة - يحتاج تحسين كبير
-- **50-69**: جودة مقبولة - يحتاج تحسين
-- **70-84**: جودة جيدة - قابل للاستخدام
-- **85-94**: جودة ممتازة - عالي الجودة
-- **95-100**: جودة استثنائية - مثالي
-
-### مؤشرات الأداء
-```typescript
-// مراقبة الأداء
-const performanceMetrics = {
-  averageQualityScore: 87.5,
-  improvementRate: 0.73, // 73% من الحالات تحسنت
-  averageIterations: 2.1,
-  modelSelectionAccuracy: 0.91
+const config = {
+  qualityThreshold: 85,        // الحد الأدنى للجودة المقبولة
+  maxIterations: 3,            // الحد الأقصى للتكرارات
+  enableIterativeImprovement: true,
+  enablePerformanceMonitoring: true
 };
+```
+
+## مراقبة الأداء
+
+### 1. الحصول على تقرير الأداء
+```typescript
+const report = IntelligentAISystem.getPerformanceReport();
+console.log(report);
+// {
+//   totalSessions: 150,
+//   averageExecutionTime: 2500,
+//   averageQualityScore: 87,
+//   successRate: 94,
+//   recommendations: [...]
+// }
+```
+
+### 2. إحصائيات سريعة
+```typescript
+const stats = IntelligentAISystem.getQuickPerformanceStats();
+console.log(stats);
+// {
+//   activeSessions: 3,
+//   completedSessions: 147,
+//   avgQualityToday: 89,
+//   avgExecutionTimeToday: 2100
+// }
 ```
 
 ## أفضل الممارسات
 
-### 1. تحليل السياق
-- قدم أكبر قدر من السياق الخارجي
-- استخدم إرشادات واضحة ومحددة
-- حدد نوع المحتوى المطلوب بوضوح
+### 1. استخدام النظام الذكي
+- استخدم `IntelligentAISystem.runIntelligentFlow()` للمهام المعقدة
+- استخدم `AIHelpers` للعمليات السريعة
+- فعّل مراقبة الأداء في الإنتاج
 
-### 2. اختيار النموذج
-- اتركه للنظام ليختار تلقائياً
-- راجع التوصيات والأسباب
-- استخدم النماذج المتقدمة للمهام المعقدة
+### 2. إدارة السياق
+- قدم سياق خارجي مفصل للمهام المعقدة
+- استخدم الإرشادات لتوجيه النموذج
+- نظم السياقات حسب الأهمية
 
-### 3. التحسين التكراري
-- استخدمه للمهام المهمة
-- اضبط عتبة الجودة حسب الحاجة
-- راقب عدد التكرارات لتجنب الإفراط
+### 3. تحسين الجودة
+- استخدم التحسين التكراري للمهام المهمة
+- راقب مقاييس الجودة بانتظام
+- اضبط المعايير حسب احتياجاتك
 
-### 4. مراقبة الجودة
-- راجع مقاييس الجودة بانتظام
-- تابع المشاكل الشائعة
-- حسن الإرشادات بناءً على النتائج
+### 4. معالجة الأخطاء
+- استخدم معالج الأخطاء المدمج
+- راقب الأخطاء الشائعة
+- استخدم النماذج الاحتياطية
 
-## استكشاف الأخطاء
+## التطوير والصيانة
 
-### مشاكل شائعة وحلولها
-
-#### جودة منخفضة مستمرة
+### 1. إضافة نموذج جديد
 ```typescript
-// تحقق من السياق والإرشادات
-const analysis = await ContextAnalyzer.analyzeContext({
-  userInput: input,
-  guidelines: moreSpecificGuidelines // إرشادات أكثر تحديداً
+// في adaptive-model-selector.ts
+private static getAvailableModels() {
+  return [
+    // ... النماذج الموجودة
+    {
+      id: 'new-model-id',
+      name: 'New Model Name',
+      strengths: ['new_capability'],
+      weaknesses: ['limitation'],
+      maxTokens: 16000,
+      languages: ['ar', 'en'],
+      costEfficiency: 'high'
+    }
+  ];
+}
+```
+
+### 2. إضافة مقياس جودة جديد
+```typescript
+// في output-quality-validator.ts
+private static async calculateQualityMetrics(...) {
+  // ... المقاييس الموجودة
+  const newMetric = this.assessNewMetric(output, contextAnalysis);
+
+  const overall = Math.round(
+    // ... المقاييس الموجودة
+    (newMetric * 0.1)  // إضافة المقياس الجديد
+  );
+}
+```
+
+### 3. إضافة استراتيجية تحسين جديدة
+```typescript
+// في iterative-improvement-engine.ts
+private static generateFallbackImprovementPrompt(...) {
+  switch (strategy) {
+    case 'new_strategy':
+      prompt += '- استراتيجية جديدة للتحسين\n';
+      break;
+    // ... الاستراتيجيات الموجودة
+  }
+}
+```
+
+## الاختبار
+
+### 1. اختبار المكونات الفردية
+```typescript
+import { ContextAnalyzer } from '@/ai/core';
+
+describe('ContextAnalyzer', () => {
+  test('should analyze context correctly', async () => {
+    const result = await ContextAnalyzer.analyzeContext({
+      userInput: 'test input',
+      externalContext: []
+    });
+
+    expect(result.contentType).toBeDefined();
+    expect(result.complexityLevel).toBeDefined();
+  });
 });
 ```
 
-#### عدم تحسن في التكرارات
+### 2. اختبار التدفق الكامل
 ```typescript
-// جرب استراتيجية تحسين مختلفة
-const session = await IterativeImprovementEngine.runImprovementSession(
-  input,
-  taskType,
-  domain,
-  context,
-  {
-    improvementStrategy: 'aggressive', // بدلاً من 'balanced'
-    allowModelSwitching: true
-  }
-);
+import { IntelligentAISystem } from '@/ai/core';
+
+describe('IntelligentAISystem', () => {
+  test('should run complete flow', async () => {
+    const result = await IntelligentAISystem.runIntelligentFlow({
+      userInput: 'test input',
+      taskType: 'generation',
+      domain: 'test'
+    });
+
+    expect(result.output).toBeDefined();
+    expect(result.qualityScore).toBeGreaterThan(0);
+  });
+});
 ```
 
-#### اختيار نموذج غير مناسب
-```typescript
-// راجع تحليل السياق
-console.log('تحليل السياق:', contextAnalysis);
-console.log('توصية النموذج:', contextAnalysis.modelRecommendation);
+## استكشاف الأخطاء
 
-// أو اختر يدوياً
-const customConfig = {
-  modelId: 'googleai/gemini-1.5-pro',
-  temperature: 0.3,
-  maxOutputTokens: 8192,
-  reasoning: 'اختيار يدوي للمهام المعقدة'
-};
-```
+### 1. مشاكل الأداء
+- تحقق من تقرير الأداء
+- راقب استخدام الذاكرة
+- اضبط عدد التكرارات
 
-## الدعم والمساهمة
+### 2. مشاكل الجودة
+- راجع معايير الجودة
+- تحقق من السياق المقدم
+- جرب نماذج مختلفة
 
-### تسجيل المشاكل
-- استخدم console.log لتتبع التدفق
-- احفظ جلسات التحسين للمراجعة
-- راجع مقاييس الجودة بالتفصيل
+### 3. مشاكل الأخطاء
+- راجع سجل الأخطاء
+- تحقق من النماذج الاحتياطية
+- راقب معدل النجاح
 
-### تطوير النظام
-- أضف معايير جودة جديدة
-- حسن خوارزميات اختيار النموذج
-- طور استراتيجيات تحسين جديدة
+## المساهمة
+
+للمساهمة في تطوير النظام:
+
+1. اقرأ التوثيق الحالي
+2. فهم المعمارية والأنماط
+3. اكتب اختبارات شاملة
+4. اتبع معايير الكود
+5. قدم توثيقاً مفصلاً
+
+## الدعم
+
+للحصول على الدعم:
+- راجع التوثيق المفصل لكل مكون
+- تحقق من أمثلة الاستخدام
+- راجع سجل الأخطاء
+- تواصل مع فريق التطوير
 
 ---
 
-## التحسينات الجديدة (التبسيط)
-
-### ما تم تبسيطه:
-- ✅ **إزالة الوضع المختلط** - تم إزالة التعقيد غير الضروري للوضع المختلط
-- ✅ **تبسيط API** - تقليل المعاملات من 60+ إلى 10 معاملات أساسية
-- ✅ **تحسين قوالب الأقسام** - استخدام Factory pattern لتقليل التكرار
-- ✅ **إعدادات جودة مبسطة** - 3 مستويات بدلاً من 13 إعداد مخصص
-- ✅ **إزالة الخيارات المعقدة** - التركيز على الوظائف الأساسية
-
-### ما تم الحفاظ عليه:
-- ✅ **جميع المكونات الذكية الأساسية** - ContextAnalyzer, OutputQualityValidator, إلخ
-- ✅ **التحسين التكراري** - تحسين المخرجات تدريجياً
-- ✅ **مراقبة الأداء** - تتبع شامل للأداء والجودة
-- ✅ **اختيار النماذج التكيفي** - اختيار النموذج الأنسب
-- ✅ **قوالب الأقسام المتخصصة** - قوالب مخصصة لكل قسم
-
-## الخلاصة
-
-هذا النظام الذكي المبسط يوفر تحسيناً كبيراً في جودة مخرجات الذكاء الاصطناعي من خلال:
-
-✅ **فهم أعمق للسياق** - تحليل شامل للمتطلبات والسياق
-✅ **اختيار أمثل للنماذج** - اختيار النموذج الأنسب لكل مهمة
-✅ **prompts محسنة** - بناء prompts ديناميكية ومخصصة
-✅ **تقييم شامل للجودة** - مقاييس متعددة لضمان الجودة
-✅ **تحسين تكراري** - تحسين المخرجات تدريجياً
-✅ **شفافية كاملة** - تفسير واضح لجميع القرارات
-✅ **بساطة في الاستخدام** - API مبسط وسهل الفهم
-
-النتيجة: **تحسن 30-50% في جودة المخرجات** مع **تقليل 35% في تعقيد الكود** وواجهة أبسط وأوضح للمطورين.
+**آخر تحديث**: 2024
+**الإصدار**: 1.0
+**المشروع**: Arkan - منصة إنشاء المستندات المدعومة بالذكاء الاصطناعي
