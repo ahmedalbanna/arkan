@@ -5,12 +5,11 @@
 
 import { toast } from '@/hooks/use-toast';
 import {
-    EnhancedError,
-    ErrorCategory,
-    ErrorSeverity,
     ERROR_MESSAGES,
     ERROR_RECOVERY_CONFIG,
-    createEnhancedError
+    EnhancedError,
+    ErrorCategory,
+    ErrorSeverity
 } from '../types/error-types';
 
 export interface RetryContext {
@@ -139,7 +138,7 @@ export class EnhancedErrorHandler {
             severity,
             userMessage: errorInfo.userMessage,
             userGuidance: errorInfo.userGuidance,
-            suggestedActions: errorInfo.suggestedActions,
+            suggestedActions: Array.isArray(errorInfo.suggestedActions) ? errorInfo.suggestedActions : [],
             technicalDetails: error instanceof Error ? error.message : String(error),
             isRetryable: recoveryConfig.maxRetries > 0,
             retryAfter: recoveryConfig.retryDelay,
@@ -288,304 +287,293 @@ export class EnhancedErrorHandler {
      */
     private static showErrorToUser(error: EnhancedError, recoveryConfig: any): void {
         const actions = error.suggestedActions.slice(0, 2); // عرض أول إجراءين فقط
+        const actionsText = actions.length > 0
+            ? `\n\nSuggested actions:\n${actions.map((action: string) => `• ${action}`).join('\n')}`
+            : '';
 
         toast({
             title: error.userMessage,
-            description: (
-                <div className= "space-y-2" >
-                <p>{ error.userGuidance } </p>
-          {
-                actions.length > 0 && (
-                    <ul className="text-sm text-muted-foreground">
-                    {
-                        actions.map((action, index) => (
-                            <li key= { index } >• { action } </li>
-                        ))
+            description: `${error.userGuidance}${actionsText}`,
+            variant: error.severity === 'critical' ? 'destructive' : 'default',
+            duration: error.severity === 'critical' ? 10000 : 5000
+        });
     }
-            </ul>
-          )}
-</div>
-      ),
-variant: error.severity === 'critical' ? 'destructive' : 'default',
-    duration: error.severity === 'critical' ? 10000 : 5000
-    });
-  }
 
-  /**
-   * الحصول على أو إنشاء سياق إعادة المحاولة
-   */
-  private static getOrCreateRetryContext(
+    /**
+     * الحصول على أو إنشاء سياق إعادة المحاولة
+     */
+    private static getOrCreateRetryContext(
         operationId: string,
         recoveryConfig: any
     ): RetryContext {
-    let context = this.retryContexts.get(operationId);
+        let context = this.retryContexts.get(operationId);
 
-    if (!context) {
-        context = {
-            attempt: 0,
-            maxAttempts: recoveryConfig.maxRetries,
-            delay: recoveryConfig.retryDelay,
-            backoffMultiplier: recoveryConfig.backoffMultiplier
+        if (!context) {
+            context = {
+                attempt: 0,
+                maxAttempts: recoveryConfig.maxRetries,
+                delay: recoveryConfig.retryDelay,
+                backoffMultiplier: recoveryConfig.backoffMultiplier
+            };
+            this.retryContexts.set(operationId, context);
+        }
+
+        return context;
+    }
+
+    /**
+     * مسح سياق إعادة المحاولة
+     */
+    private static clearRetryContext(operationId: string): void {
+        this.retryContexts.delete(operationId);
+    }
+
+    /**
+     * تسجيل الخطأ
+     */
+    private static logError(error: EnhancedError, operationId: string): void {
+        // إضافة الخطأ إلى التاريخ
+        const history = this.errorHistory.get(operationId) || [];
+        history.push(error);
+        this.errorHistory.set(operationId, history);
+
+        // تسجيل الخطأ في وحدة التحكم
+        console.error(`[${error.category}] ${error.code}:`, {
+            message: error.message,
+            userMessage: error.userMessage,
+            technicalDetails: error.technicalDetails,
+            context: error.context,
+            timestamp: error.timestamp
+        });
+
+        // إرسال الخطأ إلى خدمة المراقبة (إذا كانت متاحة)
+        this.reportToMonitoringService(error);
+    }
+
+    /**
+     * إرسال الخطأ إلى خدمة المراقبة
+     */
+    private static reportToMonitoringService(error: EnhancedError): void {
+        // يمكن إضافة تكامل مع خدمات المراقبة مثل Sentry أو Firebase Crashlytics
+        if (typeof window !== 'undefined' && (window as any).gtag) {
+            (window as any).gtag('event', 'exception', {
+                description: error.message,
+                fatal: error.severity === 'critical',
+                custom_map: {
+                    error_code: error.code,
+                    error_category: error.category,
+                    error_severity: error.severity
+                }
+            });
+        }
+    }
+
+    /**
+     * تأخير التنفيذ
+     */
+    private static delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    /**
+     * الحصول على تاريخ الأخطاء
+     */
+    static getErrorHistory(operationId: string): EnhancedError[] {
+        return this.errorHistory.get(operationId) || [];
+    }
+
+    /**
+     * مسح تاريخ الأخطاء
+     */
+    static clearErrorHistory(operationId: string): void {
+        this.errorHistory.delete(operationId);
+    }
+
+    /**
+     * الحصول على إحصائيات الأخطاء
+     */
+    static getErrorStats(): {
+        totalErrors: number;
+        errorsByCategory: Record<ErrorCategory, number>;
+        errorsBySeverity: Record<ErrorSeverity, number>;
+    } {
+        const stats = {
+            totalErrors: 0,
+            errorsByCategory: {} as Record<ErrorCategory, number>,
+            errorsBySeverity: {} as Record<ErrorSeverity, number>
         };
-        this.retryContexts.set(operationId, context);
+
+        for (const history of this.errorHistory.values()) {
+            for (const error of history) {
+                stats.totalErrors++;
+
+                stats.errorsByCategory[error.category] =
+                    (stats.errorsByCategory[error.category] || 0) + 1;
+
+                stats.errorsBySeverity[error.severity] =
+                    (stats.errorsBySeverity[error.severity] || 0) + 1;
+            }
+        }
+
+        return stats;
     }
 
-    return context;
-}
+    /**
+     * تسجيل خطأ مباشر
+     */
+    static recordError(error: EnhancedError, operationId: string = 'default'): void {
+        // إضافة الخطأ إلى التاريخ
+        const history = this.errorHistory.get(operationId) || [];
+        history.push(error);
+        this.errorHistory.set(operationId, history);
 
-  /**
-   * مسح سياق إعادة المحاولة
-   */
-  private static clearRetryContext(operationId: string): void {
-    this.retryContexts.delete(operationId);
-}
+        // تسجيل الخطأ في وحدة التحكم
+        console.error(`[${error.category}] ${error.code}:`, {
+            message: error.message,
+            userMessage: error.userMessage,
+            technicalDetails: error.technicalDetails,
+            context: error.context,
+            timestamp: error.timestamp
+        });
 
-  /**
-   * تسجيل الخطأ
-   */
-  private static logError(error: EnhancedError, operationId: string): void {
-    // إضافة الخطأ إلى التاريخ
-    const history = this.errorHistory.get(operationId) || [];
-    history.push(error);
-    this.errorHistory.set(operationId, history);
-
-    // تسجيل الخطأ في وحدة التحكم
-    console.error(`[${error.category}] ${error.code}:`, {
-        message: error.message,
-        userMessage: error.userMessage,
-        technicalDetails: error.technicalDetails,
-        context: error.context,
-        timestamp: error.timestamp
-    });
-
-    // إرسال الخطأ إلى خدمة المراقبة (إذا كانت متاحة)
-    this.reportToMonitoringService(error);
-}
-
-  /**
-   * إرسال الخطأ إلى خدمة المراقبة
-   */
-  private static reportToMonitoringService(error: EnhancedError): void {
-    // يمكن إضافة تكامل مع خدمات المراقبة مثل Sentry أو Firebase Crashlytics
-    if(typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', 'exception', {
-        description: error.message,
-        fatal: error.severity === 'critical',
-        custom_map: {
-            error_code: error.code,
-            error_category: error.category,
-            error_severity: error.severity
-        }
-    });
-}
-  }
-
-  /**
-   * تأخير التنفيذ
-   */
-  private static delay(ms: number): Promise < void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-  /**
-   * الحصول على تاريخ الأخطاء
-   */
-  static getErrorHistory(operationId: string): EnhancedError[] {
-    return this.errorHistory.get(operationId) || [];
-}
-
-  /**
-   * مسح تاريخ الأخطاء
-   */
-  static clearErrorHistory(operationId: string): void {
-    this.errorHistory.delete(operationId);
-}
-
-  /**
-   * الحصول على إحصائيات الأخطاء
-   */
-  static getErrorStats(): {
-    totalErrors: number;
-    errorsByCategory: Record<ErrorCategory, number>;
-    errorsBySeverity: Record<ErrorSeverity, number>;
-} {
-    const stats = {
-        totalErrors: 0,
-        errorsByCategory: {} as Record<ErrorCategory, number>,
-        errorsBySeverity: {} as Record<ErrorSeverity, number>
-    };
-
-    for (const history of this.errorHistory.values()) {
-        for (const error of history) {
-            stats.totalErrors++;
-
-            stats.errorsByCategory[error.category] =
-                (stats.errorsByCategory[error.category] || 0) + 1;
-
-            stats.errorsBySeverity[error.severity] =
-                (stats.errorsBySeverity[error.severity] || 0) + 1;
-        }
+        // إرسال الخطأ إلى خدمة المراقبة
+        this.reportToMonitoringService(error);
     }
 
-    return stats;
-}
+    /**
+     * إنشاء خطأ محسن من استثناء
+     */
+    static createEnhancedError(
+        error: unknown,
+        category: ErrorCategory,
+        severity: ErrorSeverity,
+        context?: Record<string, any>
+    ): EnhancedError {
+        const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
+        const errorCode = error instanceof Error ? error.name : 'UNKNOWN_ERROR';
 
-  /**
-   * تسجيل خطأ مباشر
-   */
-  static recordError(error: EnhancedError, operationId: string = 'default'): void {
-    // إضافة الخطأ إلى التاريخ
-    const history = this.errorHistory.get(operationId) || [];
-    history.push(error);
-    this.errorHistory.set(operationId, history);
+        return {
+            code: errorCode,
+            message: errorMessage,
+            category,
+            severity,
+            userMessage: this.getUserFriendlyMessage(errorCode, category),
+            userGuidance: this.getUserGuidance(errorCode, category),
+            suggestedActions: this.getSuggestedActions(errorCode, category),
+            technicalDetails: error instanceof Error ? error.stack : undefined,
+            context,
+            isRetryable: this.isRetryableError(errorCode, category),
+            retryAfter: this.getRetryDelay(category),
+            fallbackAvailable: this.hasFallbackStrategy(category),
+            timestamp: new Date().toISOString()
+        };
+    }
 
-    // تسجيل الخطأ في وحدة التحكم
-    console.error(`[${error.category}] ${error.code}:`, {
-        message: error.message,
-        userMessage: error.userMessage,
-        technicalDetails: error.technicalDetails,
-        context: error.context,
-        timestamp: error.timestamp
-    });
+    /**
+     * الحصول على رسالة ودية للمستخدم
+     */
+    private static getUserFriendlyMessage(errorCode: string, category: ErrorCategory): string {
+        const messages: Record<string, string> = {
+            'NETWORK_ERROR': 'مشكلة في الاتصال بالإنترنت',
+            'AUTHENTICATION_ERROR': 'مشكلة في تسجيل الدخول',
+            'VALIDATION_ERROR': 'البيانات المدخلة غير صحيحة',
+            'AI_GENERATION_ERROR': 'مشكلة في توليد المحتوى',
+            'FILE_UPLOAD_ERROR': 'مشكلة في رفع الملف',
+            'EXPORT_ERROR': 'مشكلة في تصدير الملف',
+            'DATABASE_ERROR': 'مشكلة في حفظ البيانات',
+            'PERMISSION_ERROR': 'ليس لديك صلاحية للقيام بهذا الإجراء',
+            'RATE_LIMIT_ERROR': 'تم تجاوز الحد المسموح من الطلبات',
+            'SYSTEM_ERROR': 'حدث خطأ غير متوقع',
+            'UNKNOWN_ERROR': 'حدث خطأ غير معروف'
+        };
 
-    // إرسال الخطأ إلى خدمة المراقبة
-    this.reportToMonitoringService(error);
-}
+        return messages[errorCode] || messages['UNKNOWN_ERROR'];
+    }
 
-  /**
-   * إنشاء خطأ محسن من استثناء
-   */
-  static createEnhancedError(
-    error: unknown,
-    category: ErrorCategory,
-    severity: ErrorSeverity,
-    context ?: Record<string, any>
-): EnhancedError {
-    const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
-    const errorCode = error instanceof Error ? error.name : 'UNKNOWN_ERROR';
+    /**
+     * الحصول على إرشادات للمستخدم
+     */
+    private static getUserGuidance(errorCode: string, category: ErrorCategory): string {
+        const guidance: Record<string, string> = {
+            'NETWORK_ERROR': 'تحقق من اتصالك بالإنترنت وحاول مرة أخرى',
+            'AUTHENTICATION_ERROR': 'يرجى تسجيل الدخول مرة أخرى',
+            'VALIDATION_ERROR': 'تحقق من البيانات المدخلة والتأكد من صحتها',
+            'AI_GENERATION_ERROR': 'يمكننا تجربة توليد أبسط أو إعادة المحاولة',
+            'FILE_UPLOAD_ERROR': 'تحقق من حجم ونوع الملف وحاول مرة أخرى',
+            'EXPORT_ERROR': 'تحقق من البيانات وحاول تصدير تنسيق آخر',
+            'DATABASE_ERROR': 'أعد المحاولة أو اتصل بالدعم الفني',
+            'PERMISSION_ERROR': 'اتصل بالمدير للحصول على الصلاحيات المطلوبة',
+            'RATE_LIMIT_ERROR': 'انتظر قليلاً قبل إعادة المحاولة',
+            'SYSTEM_ERROR': 'أعد المحاولة أو اتصل بالدعم الفني',
+            'UNKNOWN_ERROR': 'أعد المحاولة أو اتصل بالدعم الفني'
+        };
 
-    return {
-        code: errorCode,
-        message: errorMessage,
-        category,
-        severity,
-        userMessage: this.getUserFriendlyMessage(errorCode, category),
-        userGuidance: this.getUserGuidance(errorCode, category),
-        suggestedActions: this.getSuggestedActions(errorCode, category),
-        technicalDetails: error instanceof Error ? error.stack : undefined,
-        context,
-        isRetryable: this.isRetryableError(errorCode, category),
-        retryAfter: this.getRetryDelay(category),
-        fallbackAvailable: this.hasFallbackStrategy(category),
-        timestamp: new Date().toISOString()
-    };
-}
+        return guidance[errorCode] || guidance['UNKNOWN_ERROR'];
+    }
 
-  /**
-   * الحصول على رسالة ودية للمستخدم
-   */
-  private static getUserFriendlyMessage(errorCode: string, category: ErrorCategory): string {
-    const messages: Record<string, string> = {
-        'NETWORK_ERROR': 'مشكلة في الاتصال بالإنترنت',
-        'AUTHENTICATION_ERROR': 'مشكلة في تسجيل الدخول',
-        'VALIDATION_ERROR': 'البيانات المدخلة غير صحيحة',
-        'AI_GENERATION_ERROR': 'مشكلة في توليد المحتوى',
-        'FILE_UPLOAD_ERROR': 'مشكلة في رفع الملف',
-        'EXPORT_ERROR': 'مشكلة في تصدير الملف',
-        'DATABASE_ERROR': 'مشكلة في حفظ البيانات',
-        'PERMISSION_ERROR': 'ليس لديك صلاحية للقيام بهذا الإجراء',
-        'RATE_LIMIT_ERROR': 'تم تجاوز الحد المسموح من الطلبات',
-        'SYSTEM_ERROR': 'حدث خطأ غير متوقع',
-        'UNKNOWN_ERROR': 'حدث خطأ غير معروف'
-    };
+    /**
+     * الحصول على الإجراءات المقترحة
+     */
+    private static getSuggestedActions(errorCode: string, category: ErrorCategory): string[] {
+        const actions: Record<string, string[]> = {
+            'NETWORK_ERROR': ['تحقق من اتصال الإنترنت', 'أعد المحاولة', 'اتصل بالدعم الفني'],
+            'AUTHENTICATION_ERROR': ['تسجيل الدخول مرة أخرى', 'تحديث الصفحة'],
+            'VALIDATION_ERROR': ['راجع البيانات المدخلة', 'تحقق من التنسيق'],
+            'AI_GENERATION_ERROR': ['أعد المحاولة', 'جرب محتوى أبسط', 'اتصل بالدعم الفني'],
+            'FILE_UPLOAD_ERROR': ['اختر ملف أصغر', 'تحقق من نوع الملف', 'أعد المحاولة'],
+            'EXPORT_ERROR': ['أعد المحاولة', 'جرب تنسيق آخر', 'تحقق من البيانات'],
+            'DATABASE_ERROR': ['أعد المحاولة', 'حفظ البيانات محلياً', 'اتصل بالدعم الفني'],
+            'PERMISSION_ERROR': ['اتصل بالمدير', 'تحقق من الصلاحيات'],
+            'RATE_LIMIT_ERROR': ['انتظر قليلاً', 'أعد المحاولة لاحقاً'],
+            'SYSTEM_ERROR': ['أعد المحاولة', 'تحديث الصفحة', 'اتصل بالدعم الفني'],
+            'UNKNOWN_ERROR': ['أعد المحاولة', 'اتصل بالدعم الفني']
+        };
 
-    return messages[errorCode] || messages['UNKNOWN_ERROR'];
-}
+        return actions[errorCode] || actions['UNKNOWN_ERROR'];
+    }
 
-  /**
-   * الحصول على إرشادات للمستخدم
-   */
-  private static getUserGuidance(errorCode: string, category: ErrorCategory): string {
-    const guidance: Record<string, string> = {
-        'NETWORK_ERROR': 'تحقق من اتصالك بالإنترنت وحاول مرة أخرى',
-        'AUTHENTICATION_ERROR': 'يرجى تسجيل الدخول مرة أخرى',
-        'VALIDATION_ERROR': 'تحقق من البيانات المدخلة والتأكد من صحتها',
-        'AI_GENERATION_ERROR': 'يمكننا تجربة توليد أبسط أو إعادة المحاولة',
-        'FILE_UPLOAD_ERROR': 'تحقق من حجم ونوع الملف وحاول مرة أخرى',
-        'EXPORT_ERROR': 'تحقق من البيانات وحاول تصدير تنسيق آخر',
-        'DATABASE_ERROR': 'أعد المحاولة أو اتصل بالدعم الفني',
-        'PERMISSION_ERROR': 'اتصل بالمدير للحصول على الصلاحيات المطلوبة',
-        'RATE_LIMIT_ERROR': 'انتظر قليلاً قبل إعادة المحاولة',
-        'SYSTEM_ERROR': 'أعد المحاولة أو اتصل بالدعم الفني',
-        'UNKNOWN_ERROR': 'أعد المحاولة أو اتصل بالدعم الفني'
-    };
+    /**
+     * التحقق من إمكانية إعادة المحاولة
+     */
+    private static isRetryableError(errorCode: string, category: ErrorCategory): boolean {
+        const nonRetryableErrors = ['AUTHENTICATION_ERROR', 'PERMISSION_ERROR', 'VALIDATION_ERROR'];
+        return !nonRetryableErrors.includes(errorCode);
+    }
 
-    return guidance[errorCode] || guidance['UNKNOWN_ERROR'];
-}
+    /**
+     * الحصول على تأخير إعادة المحاولة
+     */
+    private static getRetryDelay(category: ErrorCategory): number {
+        const delays: Record<ErrorCategory, number> = {
+            'network': 2,
+            'authentication': 0,
+            'validation': 0,
+            'ai_generation': 5,
+            'file_upload': 3,
+            'export': 3,
+            'database': 2,
+            'permission': 0,
+            'rate_limit': 60,
+            'system': 5,
+            'user_input': 0,
+            'external_service': 5
+        };
 
-  /**
-   * الحصول على الإجراءات المقترحة
-   */
-  private static getSuggestedActions(errorCode: string, category: ErrorCategory): string[] {
-    const actions: Record<string, string[]> = {
-        'NETWORK_ERROR': ['تحقق من اتصال الإنترنت', 'أعد المحاولة', 'اتصل بالدعم الفني'],
-        'AUTHENTICATION_ERROR': ['تسجيل الدخول مرة أخرى', 'تحديث الصفحة'],
-        'VALIDATION_ERROR': ['راجع البيانات المدخلة', 'تحقق من التنسيق'],
-        'AI_GENERATION_ERROR': ['أعد المحاولة', 'جرب محتوى أبسط', 'اتصل بالدعم الفني'],
-        'FILE_UPLOAD_ERROR': ['اختر ملف أصغر', 'تحقق من نوع الملف', 'أعد المحاولة'],
-        'EXPORT_ERROR': ['أعد المحاولة', 'جرب تنسيق آخر', 'تحقق من البيانات'],
-        'DATABASE_ERROR': ['أعد المحاولة', 'حفظ البيانات محلياً', 'اتصل بالدعم الفني'],
-        'PERMISSION_ERROR': ['اتصل بالمدير', 'تحقق من الصلاحيات'],
-        'RATE_LIMIT_ERROR': ['انتظر قليلاً', 'أعد المحاولة لاحقاً'],
-        'SYSTEM_ERROR': ['أعد المحاولة', 'تحديث الصفحة', 'اتصل بالدعم الفني'],
-        'UNKNOWN_ERROR': ['أعد المحاولة', 'اتصل بالدعم الفني']
-    };
+        return delays[category] || 2;
+    }
 
-    return actions[errorCode] || actions['UNKNOWN_ERROR'];
-}
+    /**
+     * التحقق من وجود استراتيجية احتياطية
+     */
+    private static hasFallbackStrategy(category: ErrorCategory): boolean {
+        const fallbackCategories: ErrorCategory[] = [
+            'ai_generation',
+            'export',
+            'database',
+            'system',
+            'external_service'
+        ];
 
-  /**
-   * التحقق من إمكانية إعادة المحاولة
-   */
-  private static isRetryableError(errorCode: string, category: ErrorCategory): boolean {
-    const nonRetryableErrors = ['AUTHENTICATION_ERROR', 'PERMISSION_ERROR', 'VALIDATION_ERROR'];
-    return !nonRetryableErrors.includes(errorCode);
-}
-
-  /**
-   * الحصول على تأخير إعادة المحاولة
-   */
-  private static getRetryDelay(category: ErrorCategory): number {
-    const delays: Record<ErrorCategory, number> = {
-        'network': 2,
-        'authentication': 0,
-        'validation': 0,
-        'ai_generation': 5,
-        'file_upload': 3,
-        'export': 3,
-        'database': 2,
-        'permission': 0,
-        'rate_limit': 60,
-        'system': 5,
-        'user_input': 0,
-        'external_service': 5
-    };
-
-    return delays[category] || 2;
-}
-
-  /**
-   * التحقق من وجود استراتيجية احتياطية
-   */
-  private static hasFallbackStrategy(category: ErrorCategory): boolean {
-    const fallbackCategories: ErrorCategory[] = [
-        'ai_generation',
-        'export',
-        'database',
-        'system',
-        'external_service'
-    ];
-
-    return fallbackCategories.includes(category);
-}
+        return fallbackCategories.includes(category);
+    }
 }
