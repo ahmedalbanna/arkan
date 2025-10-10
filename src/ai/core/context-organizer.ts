@@ -224,6 +224,8 @@ export class ContextOrganizer {
         if (context.type === 'guidelines') relevance += 0.3;
         if (context.type === 'textbook') relevance += 0.2;
         if (context.type === 'context') relevance += 0.1;
+        if (context.type === 'example') relevance += 0.1;
+        if (context.type === 'question') relevance += 0.1;
 
         // زيادة الصلة حسب وجود كلمات مفتاحية في القسم المستهدف
         if (targetSection) {

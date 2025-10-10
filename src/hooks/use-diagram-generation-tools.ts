@@ -7,7 +7,6 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useAgents, useBuilderStore, useGenerateDiagram } from '@/hooks';
 import { Agent, AgentCategory } from '@/lib/models/agent';
 import React, { useMemo } from 'react';
-import { useSectionGenerationData } from './use-section-generation-data';
 import { useGenerationUIStore } from './useGenerationUIStore';
 
 export const useDiagramGenerationTools = () => {
@@ -17,7 +16,6 @@ export const useDiagramGenerationTools = () => {
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
     const { project } = useBuilderStore();
     const { initializeDependentStates } = useGenerationUIStore();
-
 
     const diagramAgents = useMemo(() => {
         if (!agents) return [];
@@ -34,7 +32,6 @@ export const useDiagramGenerationTools = () => {
         }, {} as Record<string, Agent>);
     }, [diagramAgents]);
 
-
     const diagramMutation = useGenerateDiagram();
     const isAnythingGenerating = diagramMutation.isPending;
     const hasCreditsForGeneration = userProfile ? userProfile.credits ?? 0 >= 1 : false;
@@ -42,18 +39,12 @@ export const useDiagramGenerationTools = () => {
     const onGenerateDiagram = (diagramType: DiagramType) => {
         if (!project) return;
 
-        // استخدام البيانات المحسنة من SectionAccordionItem
-        const generationData = useSectionGenerationData(diagramType);
-        const apiData = generationData.prepareApiData({
-            diagramToGenerate: diagramType
-        });
-
-        // التحقق من صحة البيانات
-        const validation = generationData.validateData();
-        if (!validation.isValid) {
-            console.warn('Validation errors:', validation.errors);
-            // يمكن إضافة toast للتحذير هنا
-        }
+        // إنشاء البيانات مباشرة بدلاً من استخدام hook
+        const apiData = {
+            diagramToGenerate: diagramType,
+            projectId: project.id,
+            // يمكن إضافة المزيد من البيانات المطلوبة هنا
+        };
 
         setActiveMutationKey(diagramType);
         diagramMutation.mutate(apiData);

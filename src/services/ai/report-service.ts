@@ -25,7 +25,7 @@ export async function generateReportSectionApi(body: any, token: string): Promis
             externalContextCount: body.externalContext?.length || 0
         });
 
-        const response = await fetch('/api/generate/report/intellgent', {
+        const response = await fetch('/api/generate/report', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

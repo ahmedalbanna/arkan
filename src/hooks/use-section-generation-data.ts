@@ -145,7 +145,8 @@ export function useSectionGenerationData(itemKey: string) {
             guidelines,
             oneTimeInstruction,
             organizedContext,
-            organizedPrompt
+            organizedPrompt,
+            hasContext
         };
     }, [
         itemKey,
@@ -198,7 +199,7 @@ export function useSectionGenerationData(itemKey: string) {
             // الإرشادات والتعليمات
             guidelines: generationData.guidelines?.custom || [],
             oneTimeInstructions: generationData.oneTimeInstruction || '',
-            selectedGuidelines: generationData.guidelines?.default || [],
+            selectedGuidelines: generationData.guidelines?.checked || [],
 
             // معلومات إضافية
             hasContext: generationData.hasContext,

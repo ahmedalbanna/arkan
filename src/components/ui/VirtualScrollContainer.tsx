@@ -4,7 +4,7 @@
  * مكون حاوية التمرير الافتراضية فائق الأداء
  */
 
-import React, { useState, useEffect, useRef, useMemo, forwardRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, forwardRef, useCallback } from 'react';
 import { useVirtualScroller } from '@/core/hooks/performance/use-virtual-scroller';
 
 export interface VirtualScrollContainerProps<T = any> {

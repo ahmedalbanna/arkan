@@ -6,6 +6,7 @@
 import { z } from 'zod';
 import { ContextItem, ContextOrganizer, OrganizedContext } from './context-organizer';
 
+
 export interface ContextAnalysisResult {
     // تحليل نوع المحتوى المطلوب
     contentType: 'technical' | 'business' | 'academic' | 'creative' | 'mixed';
@@ -240,7 +241,8 @@ export class ContextAnalyzer {
         return {
             files,
             previousSections: [], // سيتم تحديثها حسب السياق
-            guidelines: guidelines || []
+            guidelines: guidelines || [],
+            organizedContext: undefined as OrganizedContext | undefined
         };
     }
 
@@ -250,6 +252,9 @@ export class ContextAnalyzer {
 
         if (type === 'context') relevance += 0.3;
         if (type === 'example') relevance += 0.2;
+        if (type === 'questions') relevance += 0.2;
+        if (type === 'textbook') relevance += 0.2;
+        if (type === 'guidelines') relevance += 0.2;
 
         // التحقق من وجود المحتوى قبل حساب الطول
         if (content && typeof content === 'string' && content.length > 1000) {

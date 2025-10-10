@@ -1,19 +1,19 @@
 
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import Image from 'next/image';
-import { Loader2, Download, Copy, Check, RefreshCw, PenSquare, Eye, FileText } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-styles';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card, CardContent } from '@/components/ui/card';
 import type { DiagramType } from '@/ai/schemas';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useDiagramViewer } from '@/hooks';
+import { markdownComponents } from '@/lib/markdown-styles';
 import type { Diagram } from '@/lib/models/diagram';
+import { Check, Copy, Download, Eye, FileText, Loader2, PenSquare, RefreshCw } from 'lucide-react';
+import Image from 'next/image';
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 interface DiagramViewerProps {
     diagramKey: DiagramType;
@@ -52,7 +52,7 @@ export default function DiagramViewer({
         <Card className="min-h-[600px] w-full flex flex-col">
             <CardContent className="flex-grow p-4 md:p-6">
                 <div className="flex h-full items-center justify-center relative group">
-                    {viewMode === 'image' && (
+                    {viewMode === 'image' && diagramData.imageUrl && (
                         <Image
                             src={diagramData.imageUrl}
                             alt={`Rendered ${diagramTitle}`}
@@ -61,6 +61,11 @@ export default function DiagramViewer({
                             className="w-full h-auto object-contain"
                             unoptimized
                         />
+                    )}
+                    {viewMode === 'image' && !diagramData.imageUrl && (
+                        <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
+                            <p>{t('builder.diagramGenerator.tooltips.noImage')}</p>
+                        </div>
                     )}
                     {viewMode === 'code' && (
                         <Textarea
@@ -91,20 +96,20 @@ export default function DiagramViewer({
                     )}
                 </div>
             </CardContent>
-             <div className="flex items-center justify-between p-2 border-t bg-background rounded-b-lg">
+            <div className="flex items-center justify-between p-2 border-t bg-background rounded-b-lg">
                 <div className="flex items-center gap-1">
                     <Button variant={viewMode === 'image' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('image')}>
-                        <Eye className="h-4 w-4 mr-2"/> {t('builder.diagramGenerator.view')}
+                        <Eye className="h-4 w-4 mr-2" /> {t('builder.diagramGenerator.view')}
                     </Button>
                     <Button variant={viewMode === 'code' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('code')} disabled={isProcessing}>
-                        <PenSquare className="h-4 w-4 mr-2"/> {t('builder.diagramGenerator.edit')}
+                        <PenSquare className="h-4 w-4 mr-2" /> {t('builder.diagramGenerator.edit')}
                     </Button>
                     <Button variant={viewMode === 'explanation' ? 'secondary' : 'ghost'} size="sm" onClick={handleExplainClick} disabled={isProcessing}>
-                         {explainMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2"/>}
+                        {explainMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
                         {t('builder.diagramGenerator.explain')}
                     </Button>
                 </div>
-                 <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -115,10 +120,10 @@ export default function DiagramViewer({
                             <TooltipContent><p>{isCopied ? t('builder.diagramGenerator.tooltips.copied') : t('builder.diagramGenerator.tooltips.copy')}</p></TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
-                     <TooltipProvider>
+                    <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload} disabled={isProcessing} aria-label={t('builder.diagramGenerator.tooltips.download')}>
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload} disabled={isProcessing} aria-label={t('builder.diagramGenerator.tooltips.download')}>
                                     {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                                 </Button>
                             </TooltipTrigger>
@@ -126,16 +131,16 @@ export default function DiagramViewer({
                         </Tooltip>
                     </TooltipProvider>
                     {onUpdate && (
-                         <Button
+                        <Button
                             onClick={onUpdate}
                             size="sm"
                             disabled={isProcessing}
-                            >
+                        >
                             {isUpdating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <RefreshCw className="me-2 h-4 w-4" />}
                             {t('builder.diagramGenerator.updateDiagram')}
                         </Button>
                     )}
-                 </div>
+                </div>
             </div>
         </Card>
     );
