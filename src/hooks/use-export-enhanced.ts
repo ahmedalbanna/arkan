@@ -4,13 +4,14 @@
 
 'use client';
 
-import type { AnalyzedDocument, PresentationSlide, ProjectProposal, SolvedDocument } from '@/ai/schemas';
+import type { AnalyzedDocument, PresentationSlide, SolvedDocument } from '@/ai/schemas';
 import {
     useAcademicExport,
     usePresentationExport,
     useProposalExport,
     useReportExport
 } from '@/core';
+import type { ProjectProposal } from '@/lib/models/proposal';
 
 export interface ExportEnhancedOptions {
     includeImages?: boolean;

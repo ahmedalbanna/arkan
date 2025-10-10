@@ -8,8 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { GenerateImageInputSchema, type GenerateImageInput, GenerateImageOutputSchema, type GenerateImageOutput } from '@/ai/schemas';
+import { GenerateImageInputSchema, GenerateImageOutputSchema, type GenerateImageInput, type GenerateImageOutput } from '@/ai/schemas';
 
 export async function generateImage(input: GenerateImageInput): Promise<GenerateImageOutput> {
   return generateImageFlow(input);
@@ -33,7 +32,7 @@ const generateImageFlow = ai.defineFlow(
     if (!media || !media.url) {
       throw new Error("Image generation failed to produce an image.");
     }
-    
+
     return { imageUrl: media.url };
   }
 );

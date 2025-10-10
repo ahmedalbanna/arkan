@@ -1,15 +1,15 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { saveAs } from 'file-saver';
-import { toast } from '@/hooks';
-import { useLocalization } from '@/context/LocalizationContext';
 import type { DiagramType } from '@/ai/schemas';
+import { useLocalization } from '@/context/LocalizationContext';
+import { toast } from '@/hooks';
 import type { Diagram } from '@/lib/models/diagram';
-import { useSections } from './use-sections';
+import { arrayBufferToBase64, getProxiedImageBuffer } from '@/lib/utils';
+import { saveAs } from 'file-saver';
+import { useState } from 'react';
 import { useExplainDiagram } from './use-diagrams'; // Import the mutation hook
-import { getProxiedImageBuffer, arrayBufferToBase64 } from '@/lib/utils';
+import { useSections } from './use-sections';
 
 
 interface DiagramViewerProps {
@@ -32,14 +32,14 @@ export const useDiagramViewer = ({
     const { data: sectionConfigs } = useSections();
     const diagramConfig = sectionConfigs?.find(s => s.id === diagramKey);
     const diagramTitle = diagramConfig ? t(diagramConfig.title) : 'Diagram';
-    
+
     const explainMutation = useExplainDiagram(diagramKey, {
         onSuccess: (data) => {
             onExplanationSave(data.explanation);
-            toast({ title: t('builder.diagramGenerator.tooltips.explanationReady')});
+            toast({ title: t('builder.diagramGenerator.tooltips.explanationReady') });
         },
         onError: (error) => {
-            toast({ title: t('builder.diagramGenerator.tooltips.explanationFailed'), description: error.message, variant: 'destructive'});
+            toast({ title: t('builder.diagramGenerator.tooltips.explanationFailed'), description: error.message, variant: 'destructive' });
         }
     });
 
@@ -58,11 +58,11 @@ export const useDiagramViewer = ({
         try {
             // Use the proxied URL to fetch the image data
             const proxiedImage = await getProxiedImageBuffer(diagramData.imageUrl);
-            if(proxiedImage) {
+            if (proxiedImage) {
                 const blob = new Blob([proxiedImage.buffer], { type: proxiedImage.contentType });
                 saveAs(blob, `${diagramTitle.replace(/\s+/g, '_')}.png`);
             } else {
-                 throw new Error("Failed to fetch image data.");
+                throw new Error("Failed to fetch image data.");
             }
         } catch (error) {
             console.error('Download failed:', error);
@@ -71,13 +71,13 @@ export const useDiagramViewer = ({
             setIsDownloading(false);
         }
     };
-    
+
     const handleExplainClick = async () => {
         setViewMode('explanation');
         if (diagramData?.explanation || explainMutation.isPending) {
             return;
         }
-        
+
         toast({
             title: 'Generating Explanation',
             description: 'The AI is analyzing the diagram. This may take a moment.',
@@ -89,7 +89,7 @@ export const useDiagramViewer = ({
                 throw new Error("Could not fetch diagram image for analysis.");
             }
             const dataUri = `data:${imageBuffer.contentType};base64,${arrayBufferToBase64(imageBuffer.buffer)}`;
-            
+
             explainMutation.mutate({
                 imageDataUri: dataUri,
                 prompt: `Explain this ${diagramTitle}. Describe its purpose, components, and relationships.`

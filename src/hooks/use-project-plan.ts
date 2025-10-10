@@ -1,15 +1,14 @@
 
 'use client';
 
-import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { toast } from './use-toast';
-import type { ProjectPlan } from '@/ai/schemas';
+import { handleErrorUtility } from '@/lib/errorUtils';
+import type { ProjectPlan } from '@/lib/models/plan';
 import { generateProjectPlanApi } from '@/services';
+import { useMutation } from '@tanstack/react-query';
+import { toast } from './use-toast';
 import { useBuilderStore } from './useBuilderStore';
-import { Project } from '@/lib/models/project';
 
 interface GeneratePlanVariables {
     projectDescription: string;

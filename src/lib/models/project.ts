@@ -1,32 +1,14 @@
 
 
-import type { AnyProjectProposal, DiagramType, PresentationHistoryEntry, ProjectPlan, ProjectTask } from '@/ai/schemas';
+
+import type { AnyProjectProposal, DiagramType, PresentationHistoryEntry } from '@/ai/schemas';
 import { Diagram, type DiagramProperties } from './diagram';
+import type { ProjectPlan, ProjectTask } from './plan';
 
 // --- Types moved from types.ts ---
 
-/** أنواع توليد التقارير المتاحة */
-export type ReportGenerationMode = 'traditional' | 'intelligent' | 'hybrid';
-
 export interface FullReportModeConfig {
   mode: "Full Report Mode";
-  /** نوع توليد التقرير المستخدم */
-  generationMode?: ReportGenerationMode;
-  /** إعدادات النظام الذكي */
-  intelligentSettings?: {
-    enableContextAnalysis?: boolean;
-    enableIterativeImproved?: boolean;
-    enablePerformanceMonitoring?: boolean;
-    qualityThreshold?: number;
-    maxRetries?: number;
-  };
-  /** إعدادات النظام المختلط */
-  hybridSettings?: {
-    enabled?: boolean;
-    intelligentThreshold?: number;
-    fallbackToTraditional?: boolean;
-    sectionModes?: Record<string, 'traditional' | 'intelligent'>;
-  };
   reportTitle?: string;
   language?: string;
   version?: string;
@@ -316,30 +298,8 @@ export class Project implements SavedProject {
     };
   }
 
-  public toStateObject(): ProjectState {
-    const plainDiagrams: Partial<Record<DiagramType, DiagramProperties>> = {};
-    for (const key in this._diagrams) {
-      plainDiagrams[key as DiagramType] = this._diagrams[key as DiagramType]?.toStateObject();
-    }
-
-    // ✅ إرجاع حالة المشروع فقط بدون حقول id, userId, createdAt, updatedAt
-    return {
-      name: this._name,
-      projectIdea: this._projectIdea,
-      proposal: this._proposal,
-      reportConfig: this._reportConfig,
-      generatedProposalState: this._generatedProposalState,
-      sections: this._sections,
-      translatedSections: this._translatedSections,
-      evaluation: this._evaluation,
-      diagrams: plainDiagrams,
-      presentation: this._presentation,
-      codeGenerator: this._codeGenerator,
-      externalContext: this._externalContext,
-      academicSolver: this._academicSolver,
-      teamId: this._teamId,
-      projectPlan: this._projectPlan,
-    };
+  public toStateObject(): SavedProject {
+    return this.toJSON();
   }
 
 
@@ -383,51 +343,6 @@ export class Project implements SavedProject {
 
   public updateSectionContent(sectionName: SectionName, newContent: string): void {
     this._sections = { ...this._sections, [sectionName]: newContent };
-  }
-
-  // --- Report Generation Mode Methods ---
-  public setReportGenerationMode(mode: ReportGenerationMode): void {
-    if (!this._reportConfig) {
-      this._reportConfig = {
-        mode: "Full Report Mode",
-        generationMode: mode,
-        sections: []
-      };
-    } else {
-      this._reportConfig.generationMode = mode;
-    }
-  }
-
-  public getReportGenerationMode(): ReportGenerationMode {
-    return this._reportConfig?.generationMode ?? 'traditional';
-  }
-
-  public setIntelligentSettings(settings: FullReportModeConfig['intelligentSettings']): void {
-    if (!this._reportConfig) {
-      this._reportConfig = {
-        mode: "Full Report Mode",
-        sections: []
-      };
-    }
-    this._reportConfig.intelligentSettings = settings;
-  }
-
-  public getIntelligentSettings(): FullReportModeConfig['intelligentSettings'] {
-    return this._reportConfig?.intelligentSettings;
-  }
-
-  public setHybridSettings(settings: FullReportModeConfig['hybridSettings']): void {
-    if (!this._reportConfig) {
-      this._reportConfig = {
-        mode: "Full Report Mode",
-        sections: []
-      };
-    }
-    this._reportConfig.hybridSettings = settings;
-  }
-
-  public getHybridSettings(): FullReportModeConfig['hybridSettings'] {
-    return this._reportConfig?.hybridSettings;
   }
 
   // --- Diagram Methods ---

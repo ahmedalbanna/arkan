@@ -2,7 +2,6 @@
 
 'use client';
 
-import React from 'react';
 import { type AnyProjectProposal } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTheme } from 'next-themes';
@@ -17,9 +16,9 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
     if (!proposal) return null;
 
     return (
-        <ReactJson 
-            src={proposal} 
-            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} 
+        <ReactJson
+            src={proposal}
+            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'}
             displayDataTypes={false}
             name={false}
             quotesOnKeys={false}

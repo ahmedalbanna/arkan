@@ -7,22 +7,18 @@
  */
 
 import {
-  GenerateTheoreticalLectureInputSchema,
-  type GenerateTheoreticalLectureInput,
-  type GenerateTheoreticalLectureOutput,
-  GenerateSessionPlanInputSchema,
-  type GenerateSessionPlanInput,
-  type GenerateSessionPlanOutput,
-  CreateLectureUnitInputSchema,
-  type CreateLectureUnitInput,
-  type CreateLectureUnitOutput,
-} from '@/ai/schemas/lecture-generator';
+  generateSessionPlan,
+} from '@/ai/flows/generate-session-plan';
 import {
   generateTheoreticalLecture,
 } from '@/ai/flows/generate-theoretical-lecture';
 import {
-  generateSessionPlan,
-} from '@/ai/flows/generate-session-plan';
+  CreateLectureUnitInputSchema,
+  type CreateLectureUnitInput,
+  type CreateLectureUnitOutput,
+  type GenerateSessionPlanInput,
+  type GenerateTheoreticalLectureInput
+} from '@/ai/schemas/flows';
 
 /**
  * Generates a complete lecture unit, including a theoretical lecture

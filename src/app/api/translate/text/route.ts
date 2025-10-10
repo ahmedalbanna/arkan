@@ -5,11 +5,16 @@
  */
 
 // import { translateText } from '@/ai/flows/translate-text';
-import { ApiTranslateTextSchema } from '@/ai/schemas';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
+
+export const ApiTranslateTextSchema = z.object({
+    text: z.string(),
+    targetLang: z.string(),
+});
+
 /**
  * معالج ترجمة النصوص
  */

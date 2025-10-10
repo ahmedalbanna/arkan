@@ -1,18 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { type CreateLectureUnitInput, type CreateLectureUnitOutput } from '@/ai/schemas/flows';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { type CreateLectureUnitOutput, type CreateLectureUnitInput } from '@/ai/schemas/lecture-generator';
-import { useToast } from '@/hooks/use-toast';
+import { SessionPlanDisplay } from '@/components/writing-tools/SessionPlanDisplay';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { markdownComponents } from '@/lib/markdown-styles';
+import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { SessionPlanDisplay } from '@/components/writing-tools/SessionPlanDisplay';
-import { markdownComponents } from '@/lib/markdown-styles';
 
 // A simple component to render markdown content
 const MarkdownPreview = ({ content }: { content: string }) => {

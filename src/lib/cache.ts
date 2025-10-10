@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { SectionName, DiagramType } from '@/ai/schemas';
+import type { DiagramType, SectionName } from '@/ai/schemas';
 
 const CACHE_PREFIX = 'arkan-api-cache-';
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours

@@ -5,11 +5,20 @@
  */
 
 import { generatePresentation } from '@/ai/flows/generate-presentation';
-import { ApiGeneratePresentationSchema } from '@/ai/schemas';
+import { ProjectPlanSchema, ProjectProposalSchema } from '@/ai/schemas/project';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { logGeneration } from '@/services';
+import { z } from 'zod';
 
+export const ApiGeneratePresentationSchema = z.object({
+    proposal: z.lazy(() => ProjectProposalSchema).nullable().optional(),
+    projectPlan: z.lazy(() => ProjectPlanSchema).nullable().optional(),
+    sourceDocuments: z.array(z.object({
+        fileName: z.string(),
+        content: z.string(),
+    })).min(1, "At least one source document is required."),
+});
 /**
  * معالج توليد العروض التقديمية
  */

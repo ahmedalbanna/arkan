@@ -1,7 +1,8 @@
 
 'use client';
 
-import { useMemo, useState } from 'react';
+import type { ProjectTask } from '@/ai/schemas';
+import { useBuilderStore } from '@/hooks';
 import {
   DndContext,
   DragEndEvent,
@@ -12,18 +13,17 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { arrayMove, SortableContext } from '@dnd-kit/sortable';
+import { SortableContext } from '@dnd-kit/sortable';
+import { useMemo, useState } from 'react';
 import { KanbanColumn } from './KanbanColumn';
 import { KanbanTaskCard } from './KanbanTaskCard';
-import { useBuilderStore } from '@/hooks';
-import type { ProjectPlan, ProjectTask } from '@/ai/schemas';
 
 type KanbanColumnId = 'To Do' | 'In Progress' | 'Done';
 
 export function KanbanBoard() {
   const { project, updateProject } = useBuilderStore();
   const projectPlan = project?.projectPlan;
-  
+
   const [activeTask, setActiveTask] = useState<ProjectTask | null>(null);
 
   const sensors = useSensors(
@@ -68,25 +68,25 @@ export function KanbanBoard() {
   function onDragOver(event: DragOverEvent) {
     const { active, over } = event;
     if (!over) return;
-  
+
     const activeId = active.id;
     const overId = over.id;
-  
+
     if (activeId === overId) return;
-  
+
     const isActiveATask = active.data.current?.type === 'Task';
     const isOverATask = over.data.current?.type === 'Task';
     const isOverAColumn = over.data.current?.type === 'Column';
-  
+
     if (!isActiveATask) return;
 
     if (isActiveATask && isOverAColumn) {
-        const activePhaseIndex = projectPlan?.phases.findIndex(p => p.tasks.some(t => t.title === activeId));
-        const activeTaskIndex = projectPlan?.phases[activePhaseIndex!].tasks.findIndex(t => t.title === activeId);
+      const activePhaseIndex = projectPlan?.phases.findIndex(p => p.tasks.some(t => t.title === activeId));
+      const activeTaskIndex = projectPlan?.phases[activePhaseIndex!].tasks.findIndex(t => t.title === activeId);
 
-        if (activePhaseIndex !== undefined && activeTaskIndex !== undefined) {
-             updateProject(p => p.updateTaskStatus(activePhaseIndex, activeTaskIndex, overId as KanbanColumnId));
-        }
+      if (activePhaseIndex !== undefined && activeTaskIndex !== undefined) {
+        updateProject(p => p.updateTaskStatus(activePhaseIndex, activeTaskIndex, overId as KanbanColumnId));
+      }
     }
   }
 
@@ -110,11 +110,11 @@ export function KanbanBoard() {
             />
           ))}
         </SortableContext>
-        
+
         <DragOverlay>
-            {activeTask && (
-                <KanbanTaskCard task={activeTask} />
-            )}
+          {activeTask && (
+            <KanbanTaskCard task={activeTask} />
+          )}
         </DragOverlay>
 
       </DndContext>

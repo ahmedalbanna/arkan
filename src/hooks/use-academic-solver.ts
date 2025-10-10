@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useMutation } from '@tanstack/react-query';
+import type { AcademicDocumentType, AnalyzedDocument, SolvedDocument } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { analyzeApi, solveApi } from '@/services';
-import type { AnalyzedDocument, SolvedDocument, AcademicDocumentType } from '@/ai/schemas';
+import { useMutation } from '@tanstack/react-query';
 
 interface AnalyzeVariables {
   markdown: string;

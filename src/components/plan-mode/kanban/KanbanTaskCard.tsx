@@ -1,11 +1,11 @@
 
 'use client';
 
+import type { ProjectTask } from '@/ai/schemas';
+import { Card } from '@/components/ui/card';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GripVertical } from 'lucide-react';
-import type { ProjectTask } from '@/ai/schemas';
 
 interface KanbanTaskCardProps {
   task: ProjectTask;

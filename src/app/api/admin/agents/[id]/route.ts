@@ -1,9 +1,17 @@
 
 
 // src/app/api/agents/[id]/route.ts
-import { ApiUpdateAgentSchema } from '@/ai/schemas';
 import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
+import { AgentPromptSchema } from '@/lib/template-schemas';
+import { z } from 'zod';
+
+export const ApiUpdateAgentSchema = z.object({
+    name: z.string().min(1, "Name is required").optional(),
+    prompt: z.union([z.string().min(10), AgentPromptSchema]).optional(),
+    isEnabled: z.boolean().optional(),
+    category: z.string().optional(),
+});
 
 // GET /api/agents/[id]
 export const GET = withEnhancedAuth(async ({ params }) => {

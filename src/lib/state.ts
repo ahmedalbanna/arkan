@@ -1,8 +1,8 @@
 
 import { z } from 'zod';
-import { AcademicDocumentTypeSchema, DiagramTypeSchema, SectionNameSchema } from './enums';
-import { AnalyzedDocumentSchema, PresentationSlideSchema, SolvedDocumentSchema } from './flows';
-import { ProjectPlanSchema } from './project';
+import { AcademicDocumentTypeSchema, DiagramTypeSchema, SectionNameSchema } from '../ai/schemas/enums';
+import { AnalyzedDocumentSchema, PresentationSlideSchema, SolvedDocumentSchema } from '../ai/schemas/flows';
+import { ProjectPlanSchema } from '../ai/schemas/project';
 
 const academicSolverContextFileSchema = z.object({
     fileName: z.string(),

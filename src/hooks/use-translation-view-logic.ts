@@ -3,12 +3,10 @@
 
 'use client';
 
-import { useLocalization } from '@/context/LocalizationContext';
-import { useTranslate } from '@/hooks';
-import { useToast } from '@/hooks';
 import { SectionName } from '@/ai/schemas';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useToast, useTranslate } from '@/hooks';
 import { useBuilderStore } from './useBuilderStore';
-import { Project } from '@/lib/models/project';
 
 export const useTranslationViewLogic = (sectionKey: SectionName, originalContent: string) => {
     const { t, locale } = useLocalization();

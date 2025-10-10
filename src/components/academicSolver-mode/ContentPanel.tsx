@@ -1,15 +1,15 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import type { AnalyzedDocument, SolvedDocument } from '@/ai/schemas';
+import A4Page from '@/components/shared/A4Page';
 import { Button } from '@/components/ui/button';
-import { Loader2, Wand2, FileText, ChevronLeft, ChevronRight, BrainCircuit } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-styles';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import A4Page from '@/components/shared/A4Page';
-import type { AnalyzedDocument, SolvedDocument } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
+import { markdownComponents } from '@/lib/markdown-styles';
+import { BrainCircuit, ChevronLeft, ChevronRight, FileText, Loader2, Wand2 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 interface ContentPanelProps {
     stage: 'idle' | 'analyzing' | 'readyToSolve' | 'solving' | 'solved';

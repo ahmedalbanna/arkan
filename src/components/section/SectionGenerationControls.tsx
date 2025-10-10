@@ -1,13 +1,12 @@
 'use client';
 
-import React from 'react';
+import { SectionName as SectionNameType } from '@/ai/schemas';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useGenerationUIStore } from '@/hooks';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { SectionName as SectionNameType } from '@/ai/schemas';
 
 export const SectionGenerationControls = ({ sectionKey }: { sectionKey: SectionNameType }) => {
     const { t } = useLocalization();

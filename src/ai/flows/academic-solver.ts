@@ -3,18 +3,18 @@
  * @fileOverview AI agents for analyzing and solving academic documents (exams, homework).
  */
 
-import { z } from 'zod';
 import { ai } from '@/ai/genkit';
+import { analysisPrompt, solvePrompt } from '@/ai/prompts/academic-solver';
 import {
   type AnalyzedDocument,
-  SolvedDocumentSchema,
   type SolvedDocument,
-  AnalyzeDocumentInputSchema,
-  SolveDocumentInputSchema,
   type SolveDocumentInput,
-  AnalyzedDocumentSchema
+  AnalyzedDocumentSchema,
+  AnalyzeDocumentInputSchema,
+  SolvedDocumentSchema,
+  SolveDocumentInputSchema
 } from '@/ai/schemas';
-import { analysisPrompt, solvePrompt } from '@/ai/prompts/academic-solver';
+import { z } from 'zod';
 
 
 const analyzeAcademicDocumentFlow = ai.defineFlow(
@@ -44,10 +44,10 @@ export async function analyzeAcademicDocument(input: z.infer<typeof AnalyzeDocum
 }
 
 const solveAcademicDocumentFlow = ai.defineFlow({
-    name: 'solveAcademicDocumentFlow',
-    inputSchema: SolveDocumentInputSchema,
-    outputSchema: SolvedDocumentSchema,
-  },
+  name: 'solveAcademicDocumentFlow',
+  inputSchema: SolveDocumentInputSchema,
+  outputSchema: SolvedDocumentSchema,
+},
   async (input) => {
     const { output } = await solvePrompt(input);
     if (!output) {
@@ -61,7 +61,7 @@ const solveAcademicDocumentFlow = ai.defineFlow({
     }));
 
     return output;
-});
+  });
 
 export async function solveAcademicDocument(input: SolveDocumentInput): Promise<SolvedDocument> {
   const validation = SolveDocumentInputSchema.safeParse(input);

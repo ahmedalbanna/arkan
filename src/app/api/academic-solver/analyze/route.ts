@@ -5,10 +5,16 @@
  */
 
 import { analyzeAcademicDocument } from '@/ai/flows/academic-solver';
-import { ApiAnalyzeSchema } from '@/ai/schemas';
+import { AcademicDocumentTypeSchema } from '@/ai/schemas/enums';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { logGeneration } from '@/services';
+import { z } from 'zod';
+
+export const ApiAnalyzeSchema = z.object({
+    documentType: AcademicDocumentTypeSchema,
+    markdown: z.string().min(20, 'Markdown content is too short.'),
+});
 
 /**
  * معالج تحليل المشاكل الأكاديمية

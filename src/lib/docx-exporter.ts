@@ -1,13 +1,13 @@
 
 'use client';
 
-import { Document, Packer, Paragraph, AlignmentType, Table, TextRun, Header, Footer, PageNumber, SectionType } from 'docx';
-import { saveAs } from 'file-saver';
 import { type ProjectProposal } from '@/ai/schemas';
-import { templates, type DocxTemplateKey } from './docx-styles';
+import { AlignmentType, Document, Footer, Header, Packer, PageNumber, Paragraph, SectionType, Table, TextRun } from 'docx';
+import { saveAs } from 'file-saver';
+import { templates } from './docx-styles';
 import { createDocxContent } from './markdown-to-word-converter';
-import { formatKeyToTitle, hasContent } from './proposal-utils';
 import { exportComponentAsPDF } from './pdf-exporter';
+import { formatKeyToTitle, hasContent } from './proposal-utils';
 
 const defaultStyles = templates.modern.styles;
 

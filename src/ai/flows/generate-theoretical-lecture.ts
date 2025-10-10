@@ -11,7 +11,7 @@ import {
   GenerateTheoreticalLectureOutputSchema,
   type GenerateTheoreticalLectureInput,
   type GenerateTheoreticalLectureOutput,
-} from '@/ai/schemas/lecture-generator';
+} from '@/ai/schemas/flows';
 import { withRetry } from '@/lib/ai-utils';
 
 // Define the AI Prompt

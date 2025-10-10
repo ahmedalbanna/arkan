@@ -1,8 +1,8 @@
 
 'use client';
 
-import type { ProjectPlan } from '@/ai/schemas';
 import type { GenerateProjectPlanInput } from '@/ai/schemas';
+import type { ProjectPlan } from '@/lib/models/plan';
 
 interface GeneratePlanVariables extends GenerateProjectPlanInput {
   token: string;

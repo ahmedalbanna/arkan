@@ -2,23 +2,20 @@
 
 'use client';
 
-import type { DiagramType, SectionName as SectionNameType } from '@/ai/schemas';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAgents, useBuilderStore, useGenerationUIStore, useSections, useToast } from '@/hooks';
-import { getSelectedGuidelines } from '@/lib/guideline-utils';
+import { useAgents, useBuilderStore, useGenerationUIStore, useToast } from '@/hooks';
 import { Project } from '@/lib/models/project';
 import { cn } from '@/lib/utils';
-import { Loader2, PanelLeftClose, Sparkles, History } from 'lucide-react';
-import React, { useState } from 'react';
-import { AcademicUploaders } from '../academicSolver-mode/AcademicUploaders';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { ScrollArea } from '../ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
+import { History, Loader2, Sparkles } from 'lucide-react';
+import { AcademicUploaders } from '../academicSolver-mode/AcademicUploaders';
+import { ScrollArea } from '../ui/scroll-area';
 import { Skeleton } from '../ui/skeleton';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface PresentationGenerationToolsProps {
     isDisabled: boolean;

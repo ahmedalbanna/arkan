@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDiagramGenerationTools } from '@/hooks/use-diagram-generation-tools';
 import { cn } from '@/lib/utils';
-import { Loader2, PanelLeftClose } from 'lucide-react';
+import { PanelLeftClose } from 'lucide-react';
 import { SectionAccordionItem } from '../section/SectionAccordionItem';
 import { Skeleton } from '../ui/skeleton';
 

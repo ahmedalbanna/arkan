@@ -1,39 +1,39 @@
 
 'use client';
 
-import { usePresentationOutlineLogic } from '@/hooks';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { GeneratePresentationOutlineOutput } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Sparkles, Copy, Check, ChevronDown, ChevronRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
+import { usePresentationOutlineLogic } from '@/hooks';
+import { Check, ChevronDown, ChevronRight, Copy, Loader2, Sparkles } from 'lucide-react';
 import { useState } from 'react';
-import { GeneratePresentationOutlineOutput } from '@/ai/schemas';
 
 const OutlineItem = ({ item, level = 0 }: { item: GeneratePresentationOutlineOutput['outline'][0], level?: number }) => {
-    const [isOpen, setIsOpen] = useState(true);
-    const hasChildren = item.children && item.children.length > 0;
+  const [isOpen, setIsOpen] = useState(true);
+  const hasChildren = item.children && item.children.length > 0;
 
-    return (
-        <div style={{ paddingLeft: `${level * 1.5}rem`}}>
-            <div className="flex items-center gap-2 py-1">
-                {hasChildren ? (
-                    <button onClick={() => setIsOpen(!isOpen)} className="p-1 -ml-1">
-                        {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                    </button>
-                ) : <div className="w-6 h-6"/>}
-                <h4 className="font-semibold">{item.title}</h4>
-            </div>
-            {isOpen && (
-                <div className="text-sm text-muted-foreground pl-8 border-l-2 ml-3">
-                    <p className="py-1">{item.content}</p>
-                    {hasChildren && item.children?.map((child, index) => <OutlineItem key={index} item={child} level={level + 1} />)}
-                </div>
-            )}
+  return (
+    <div style={{ paddingLeft: `${level * 1.5}rem` }}>
+      <div className="flex items-center gap-2 py-1">
+        {hasChildren ? (
+          <button onClick={() => setIsOpen(!isOpen)} className="p-1 -ml-1">
+            {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          </button>
+        ) : <div className="w-6 h-6" />}
+        <h4 className="font-semibold">{item.title}</h4>
+      </div>
+      {isOpen && (
+        <div className="text-sm text-muted-foreground pl-8 border-l-2 ml-3">
+          <p className="py-1">{item.content}</p>
+          {hasChildren && item.children?.map((child, index) => <OutlineItem key={index} item={child} level={level + 1} />)}
         </div>
-    )
+      )}
+    </div>
+  )
 }
 
 export function PresentationOutlineTool() {
@@ -100,10 +100,10 @@ export function PresentationOutlineTool() {
                 </div>
               ) : results && (
                 <div className="space-y-4">
-                    <h3 className="text-lg font-bold">{results.cover.title}</h3>
-                    <div className="space-y-2">
-                        {results.outline.map((item, index) => <OutlineItem key={index} item={item} />)}
-                    </div>
+                  <h3 className="text-lg font-bold">{results.cover.title}</h3>
+                  <div className="space-y-2">
+                    {results.outline.map((item, index) => <OutlineItem key={index} item={item} />)}
+                  </div>
                 </div>
               )}
             </ScrollArea>

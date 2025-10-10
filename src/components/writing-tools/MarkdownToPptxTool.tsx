@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { PptxStyleOptionsSchema } from '@/ai/schemas/template-schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -17,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { convertMarkdownToPdf, convertMarkdownToPptx } from '@/lib/markdown-to-pptx-converter';
 import { templates } from '@/lib/pptx-styles';
+import { PptxStyleOptionsSchema } from '@/lib/template-schemas';
 import type { PptxStyleOptions } from '@/lib/types';
 
 const markdownToPptxSchema = z.object({

@@ -1,15 +1,13 @@
 'use client';
 
+import type { AnyProjectProposal } from '@/ai/schemas';
+import { useAuth } from '@/context/AuthContext';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useBuilderStore, useEvaluateReport, useToast } from '@/hooks';
+import { processFileApi } from '@/services';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { z } from 'zod';
-import { useLocalization } from '@/context/LocalizationContext';
-import { useToast } from '@/hooks';
-import { useQueryClient } from '@tanstack/react-query';
-import { useBuilderStore } from '@/hooks';
-import { useAuth } from '@/context/AuthContext';
-import { useEvaluateReport } from '@/hooks';
-import { processFileApi } from '@/services';
-import type { AnyProjectProposal } from '@/ai/schemas';
 
 // This schema is used to validate the proposal data before sending it to the API.
 const ProposalPayloadSchema = z.custom<AnyProjectProposal>((val) => typeof val === 'object', {

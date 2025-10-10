@@ -5,10 +5,15 @@
  */
 
 import { solveAcademicDocument } from '@/ai/flows/academic-solver';
-import { ApiSolveSchema } from '@/ai/schemas';
+import { AnalyzedDocumentSchema } from '@/ai/schemas/flows';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { deductCredit, logGeneration } from '@/services';
+import { z } from 'zod';
+export const ApiSolveSchema = z.object({
+    analyzedDocument: AnalyzedDocumentSchema,
+    contextMarkdown: z.string().optional(),
+});
 
 /**
  * معالج حل المشاكل الأكاديمية

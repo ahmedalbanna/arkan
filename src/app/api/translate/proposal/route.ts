@@ -5,11 +5,17 @@
  */
 
 // import { translateProposal } from '@/ai/flows/translate-proposal';
-import { ApiTranslateProposalSchema } from '@/ai/schemas';
+import { ProjectProposalSchema } from '@/ai/schemas/project';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
+
+export const ApiTranslateProposalSchema = z.object({
+    proposal: ProjectProposalSchema,
+    targetLang: z.string(),
+});
+
 /**
  * معالج ترجمة المقترحات
  */

@@ -1,12 +1,12 @@
 // src/ai/prompts/academic-solver.ts
 'use server';
 
-import { ai } from '@/ai/genkit';
 import { defaultModel } from '@/ai/config/models';
+import { ai } from '@/ai/genkit';
 import {
   AnalyzedDocumentSchema,
-  SolvedDocumentSchema,
   AnalyzeDocumentInputSchema,
+  SolvedDocumentSchema,
   SolveDocumentInputSchema,
 } from '@/ai/schemas';
 
@@ -27,9 +27,9 @@ export const analysisPrompt = ai.definePrompt({
     {{{markdownContent}}}
     ---
     `,
-    config: {
-        temperature: 0.3, // Low temperature for consistent structuring
-    }
+  config: {
+    temperature: 0.3, // Low temperature for consistent structuring
+  }
 });
 
 export const solvePrompt = ai.definePrompt({
@@ -45,9 +45,9 @@ export const solvePrompt = ai.definePrompt({
     {{{contextMarkdown}}}
     -------------------------
     {{/if}}
-    
+
     For each question in the provided document, generate a detailed, well-structured solution. Present the final output as an array of question/solution pairs.
-    
+
     - For each question, provide a step-by-step solution.
     - Format all mathematical equations and steps clearly using Markdown.
     - Ensure your final output is an array of objects, where each object contains a 'question' and its corresponding 'solution'.
@@ -57,8 +57,8 @@ export const solvePrompt = ai.definePrompt({
     {{{analyzedDocument.structuredContent}}}
     ---
     `,
-    config: {
-        temperature: 0.4, // Slightly more creative for detailed explanations
-        maxOutputTokens: 4096,
-    }
+  config: {
+    temperature: 0.4, // Slightly more creative for detailed explanations
+    maxOutputTokens: 4096,
+  }
 });

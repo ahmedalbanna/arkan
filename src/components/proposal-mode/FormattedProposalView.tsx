@@ -1,8 +1,8 @@
 
 'use client';
 
-import { type ProjectProposal } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
+import { type ProjectProposal } from '@/lib/models/proposal';
 import { formatKeyToTitle, hasContent } from '@/lib/proposal-utils';
 import { cn } from '@/lib/utils';
 import React, { useMemo } from 'react';
@@ -36,7 +36,7 @@ export default function FormattedProposalView({ proposal, currentPage, onUpdate 
 
     const orderedKeys = useMemo(() =>
         Object.keys(proposal).filter(key => key !== 'title' && key !== 'category' && hasContent(proposal[key as keyof typeof proposal])),
-    [proposal]
+        [proposal]
     );
 
     if (currentPage === 0) {

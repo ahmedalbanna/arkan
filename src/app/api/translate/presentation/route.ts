@@ -5,11 +5,17 @@
  */
 
 // import { translatePresentation } from '@/ai/flows/translate-presentation';
-import { ApiTranslatePresentationSchema } from '@/ai/schemas';
+import { PresentationHistoryEntrySchema } from '@/ai/schemas/flows';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
+
+export const ApiTranslatePresentationSchema = z.object({
+    presentation: PresentationHistoryEntrySchema,
+    targetLang: z.string(),
+});
+
 /**
  * معالج ترجمة العروض التقديمية
  */

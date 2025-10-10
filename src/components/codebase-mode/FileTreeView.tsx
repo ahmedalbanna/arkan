@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { File, Folder, Download, FolderOpen, Loader2 } from 'lucide-react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import type { Codebase } from '@/ai/schemas';
-import JSZip from 'jszip';
-import { saveAs } from 'file-saver';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks';
+import { saveAs } from 'file-saver';
+import JSZip from 'jszip';
+import { Download, File, Folder, Loader2 } from 'lucide-react';
+import { useState } from 'react';
 
 interface FileTreeViewProps {
   codebase: Codebase;
@@ -96,19 +96,19 @@ export default function FileTreeView({ codebase }: FileTreeViewProps) {
     <Card className="h-full flex flex-col">
       <CardHeader>
         <div className="flex justify-between items-start">
-            <div>
-                <CardTitle className="font-headline text-2xl text-primary">Generated Codebase</CardTitle>
-                <CardDescription>Review the generated files and download the ZIP archive.</CardDescription>
-            </div>
-            <Button onClick={handleDownload} disabled={isZipping}>
-                {isZipping ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Download className="me-2 h-4 w-4" />}
-                Download .ZIP
-            </Button>
+          <div>
+            <CardTitle className="font-headline text-2xl text-primary">Generated Codebase</CardTitle>
+            <CardDescription>Review the generated files and download the ZIP archive.</CardDescription>
+          </div>
+          <Button onClick={handleDownload} disabled={isZipping}>
+            {isZipping ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Download className="me-2 h-4 w-4" />}
+            Download .ZIP
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden">
         <ScrollArea className="h-full border rounded-md p-4">
-            <Tree data={fileTree} />
+          <Tree data={fileTree} />
         </ScrollArea>
       </CardContent>
     </Card>

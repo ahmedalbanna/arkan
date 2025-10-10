@@ -9,8 +9,8 @@ interface FontOptions {
 }
 
 import type { PresentationSlide } from "@/ai/schemas";
-import { templates } from "./pptx-styles";
 import { convertMarkdownToPptx } from './markdown-to-pptx-converter';
+import { templates } from "./pptx-styles";
 
 const defaultStyles = templates.modern.styles;
 
@@ -19,7 +19,7 @@ export async function exportPresentationAsPptx(
     options: { isRtl?: boolean, fonts?: FontOptions } = {}
 ) {
     const styles = defaultStyles;
-    
+
     // Combine slides into a single markdown string
     const markdown = slides.map(slide => {
         let slideContent = `# ${slide.title}\n\n`;
