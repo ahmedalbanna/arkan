@@ -3,6 +3,8 @@
  * يوفر واجهة موحدة لجميع مكونات النظام الذكي مع دعم التدفقات المتخصصة
  */
 
+import { AIRequestSchema } from '../../core/schemas/validation-schemas';
+import { EnhancedErrorHandler } from '../../core/utils/enhanced-error-handler';
 import { AdaptiveModelSelector, ModelConfig } from './adaptive-model-selector';
 import { AIErrorHandler } from './ai-error-handler';
 import { ContextAnalysisResult, ContextAnalyzer } from './context-analyzer';
@@ -64,6 +66,23 @@ export class IntelligentAISystem {
         let sessionId: string | undefined;
 
         try {
+            // التحقق من صحة البيانات باستخدام Zod
+            const validationResult = AIRequestSchema.safeParse({
+                userInput: config.userInput,
+                taskType: config.taskType,
+                domain: config.domain,
+                externalContext: config.externalContext,
+                guidelines: config.guidelines,
+                qualityThreshold: config.qualityThreshold,
+                maxIterations: config.maxIterations,
+                enableIterativeImprovement: config.enableIterativeImprovement,
+                enablePerformanceMonitoring: config.enablePerformanceMonitoring
+            });
+
+            if (!validationResult.success) {
+                throw new Error(`Invalid configuration: ${validationResult.error.errors.map(e => e.message).join(', ')}`);
+            }
+
             // بدء مراقبة الأداء إذا كان مفعلاً
             if (config.enablePerformanceMonitoring) {
                 sessionId = PerformanceMonitor.startSession({
@@ -73,17 +92,53 @@ export class IntelligentAISystem {
                 });
             }
 
-            // تحليل السياق
-            const contextAnalysisStartTime = Date.now();
-            const contextAnalysis = await ContextAnalyzer.analyzeContext({
-                userInput: config.userInput,
-                projectType: config.domain,
-                externalContext: config.externalContext,
-                guidelines: config.guidelines
-            });
+            // تحليل السياق مع معالجة أخطاء محسنة
+            let contextAnalysis: ContextAnalysisResult;
+            try {
+                const contextAnalysisStartTime = Date.now();
+                contextAnalysis = await ContextAnalyzer.analyzeContext({
+                    userInput: config.userInput,
+                    projectType: config.domain,
+                    externalContext: config.externalContext,
+                    guidelines: config.guidelines
+                });
 
-            if (sessionId) {
-                PerformanceMonitor.recordPhaseTime(sessionId, 'contextAnalysisTime', Date.now() - contextAnalysisStartTime);
+                if (sessionId) {
+                    PerformanceMonitor.recordPhaseTime(sessionId, 'contextAnalysisTime', Date.now() - contextAnalysisStartTime);
+                }
+            } catch (error) {
+                const errorResult = await EnhancedErrorHandler.handleWithRetry(
+                    async () => { throw error; },
+                    {
+                        operationId: 'context-analysis',
+                        category: 'ai_generation',
+                        severity: 'medium'
+                    }
+                );
+
+                if (!errorResult.success) {
+                    throw new Error(`Context analysis failed: ${errorResult.error?.message}`);
+                }
+
+                // استخدام تحليل افتراضي في حالة الفشل
+                contextAnalysis = {
+                    contentType: 'mixed',
+                    complexityLevel: 'basic',
+                    targetAudience: 'general',
+                    language: 'ar',
+                    culturalContext: 'middle-east',
+                    specificRequirements: [],
+                    availableContext: {
+                        files: [],
+                        previousSections: [],
+                        guidelines: []
+                    },
+                    modelRecommendation: {
+                        primary: 'googleai/gemini-2.0-flash',
+                        fallback: 'googleai/gemini-1.5-pro',
+                        reasoning: 'Default model due to analysis failure'
+                    }
+                };
             }
 
             // تنظيم السياق إذا كان مفعلاً
@@ -103,37 +158,53 @@ export class IntelligentAISystem {
                 );
             }
 
-            // التحقق من التدفق المتخصص
+            // التحقق من التدفق المتخصص مع معالجة أخطاء محسنة
             if (config.taskType === 'specialized' && config.specializedFlowName) {
-                const specializedResult = await FlowIntegrationManager.executeSpecializedFlow({
-                    flowName: config.specializedFlowName,
-                    category: config.specializedFlowCategory || 'content-generation',
-                    input: {
-                        userInput: config.userInput,
-                        externalContext: config.externalContext,
-                        guidelines: config.guidelines
-                    },
-                    contextAnalysis,
-                    qualityThreshold: config.qualityThreshold,
-                    enablePerformanceMonitoring: config.enablePerformanceMonitoring,
-                    enableErrorHandling: config.enableErrorHandling
-                });
+                try {
+                    const specializedFlowResult = await FlowIntegrationManager.executeSpecializedFlow({
+                        flowName: config.specializedFlowName,
+                        category: config.specializedFlowCategory || 'content-generation',
+                        input: {
+                            userInput: config.userInput,
+                            externalContext: config.externalContext,
+                            guidelines: config.guidelines
+                        },
+                        contextAnalysis,
+                        qualityThreshold: config.qualityThreshold,
+                        enablePerformanceMonitoring: config.enablePerformanceMonitoring,
+                        enableErrorHandling: config.enableErrorHandling
+                    });
 
-                if (sessionId) {
-                    PerformanceMonitor.endSession(sessionId, specializedResult.success);
+                    if (sessionId) {
+                        PerformanceMonitor.endSession(sessionId, specializedFlowResult.success);
+                    }
+
+                    return {
+                        success: specializedFlowResult.success,
+                        data: specializedFlowResult.data,
+                        error: specializedFlowResult.error,
+                        executionTime: Date.now() - startTime,
+                        qualityScore: specializedFlowResult.qualityScore,
+                        modelUsed: specializedFlowResult.modelUsed,
+                        contextAnalysis,
+                        organizedContext,
+                        specializedFlowResult: specializedFlowResult
+                    };
+                } catch (error) {
+                    // معالجة أخطاء التدفق المتخصص
+                    const errorResult = await EnhancedErrorHandler.handleWithRetry(
+                        async () => { throw error; },
+                        {
+                            operationId: 'specialized-flow',
+                            category: 'ai_generation',
+                            severity: 'medium'
+                        }
+                    );
+
+                    if (!errorResult.success) {
+                        throw new Error(`Specialized flow failed: ${errorResult.error?.message}`);
+                    }
                 }
-
-                return {
-                    success: specializedResult.success,
-                    data: specializedResult.data,
-                    error: specializedResult.error,
-                    executionTime: Date.now() - startTime,
-                    qualityScore: specializedResult.qualityScore,
-                    modelUsed: specializedResult.modelUsed,
-                    contextAnalysis,
-                    organizedContext,
-                    specializedFlowResult: specializedResult
-                };
             }
 
             // اختيار النموذج المناسب
@@ -244,7 +315,7 @@ export class IntelligentAISystem {
             };
 
         } catch (error) {
-            // معالجة الأخطاء إذا كان مفعلاً
+            // معالجة الأخطاء المحسنة إذا كان مفعلاً
             if (config.enableErrorHandling) {
                 const errorContext = {
                     model: 'unknown',
@@ -254,16 +325,42 @@ export class IntelligentAISystem {
                     maxAttempts: 3
                 };
 
-                const errorResult = await AIErrorHandler.handleAIError(error, errorContext);
+                // استخدام معالجة الأخطاء المحسنة
+                const errorResult = await EnhancedErrorHandler.handleWithRetry(
+                    async () => {
+                        const aiErrorResult = await AIErrorHandler.handleAIError(error, errorContext);
 
-                if (errorResult.success && errorResult.result) {
+                        if (aiErrorResult.success && aiErrorResult.result) {
+                            return aiErrorResult.result;
+                        }
+
+                        throw new Error(aiErrorResult.error?.message || 'AI error handling failed');
+                    },
+                    {
+                        operationId: 'error-handling',
+                        category: 'ai_generation',
+                        severity: 'high'
+                    }
+                );
+
+                if (errorResult.success) {
                     return {
                         success: true,
-                        data: errorResult.result,
+                        data: 'Fallback result due to error handling',
                         executionTime: Date.now() - startTime,
                         contextAnalysis: undefined
                     };
                 }
+            }
+
+            // تسجيل الخطأ في خدمة المراقبة
+            if (typeof window !== 'undefined' && (window as any).gtag) {
+                (window as any).gtag('event', 'ai_system_error', {
+                    error_message: error instanceof Error ? error.message : String(error),
+                    task_type: config.taskType,
+                    domain: config.domain,
+                    execution_time: Date.now() - startTime
+                });
             }
 
             // إنهاء مراقبة الأداء مع فشل
@@ -436,9 +533,16 @@ export class IntelligentAISystem {
         // هذا مثال مبسط - في التطبيق الحقيقي يجب استخدام Genkit أو مكتبة مشابهة
         const fullPrompt = IntelligentPromptBuilder.compilePrompt(promptTemplate);
 
-        // محاكاة التوليد
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        return `نتيجة التوليد للنموذج ${modelConfig.modelId}:\n${fullPrompt.substring(0, 200)}...`;
+        // محاكاة التوليد مع إمكانية حدوث أخطاء
+        return new Promise<string>((resolve, reject) => {
+            setTimeout(() => {
+                // محاكاة أخطاء عشوائية للاختبار
+                if (Math.random() < 0.1) { // 10% احتمال خطأ
+                    reject(new Error('Network timeout during generation'));
+                } else {
+                    resolve(`نتيجة التوليد للنموذج ${modelConfig.modelId}:\n${fullPrompt.substring(0, 200)}...`);
+                }
+            }, 1000);
+        });
     }
 }
