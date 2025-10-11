@@ -4,10 +4,10 @@
  */
 
 import {
-    AIHelpers,
     ContextAnalyzer,
     IntelligentAISystem,
     PerformanceMonitor,
+    QuickAIHelpers,
     type ContextAnalysisResult
 } from '../index';
 
@@ -416,14 +416,14 @@ describe('IntelligentAISystem', () => {
     });
 });
 
-describe('AIHelpers', () => {
+describe('QuickAIHelpers', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
 
     describe('quickAnalyze', () => {
         it('should perform quick analysis', async () => {
-            const result = await AIHelpers.quickAnalyze('أنشئ خطة عمل لمشروع تقني');
+            const result = await QuickAIHelpers.quickAnalyze('أنشئ خطة عمل لمشروع تقني');
 
             expect(result).toBeDefined();
             expect(result.contentType).toBeDefined();
@@ -434,7 +434,7 @@ describe('AIHelpers', () => {
         });
 
         it('should handle empty input', async () => {
-            const result = await AIHelpers.quickAnalyze('');
+            const result = await QuickAIHelpers.quickAnalyze('');
 
             expect(result).toBeDefined();
             expect(result.contentType).toBeDefined();
@@ -443,7 +443,7 @@ describe('AIHelpers', () => {
 
     describe('quickValidate', () => {
         it('should perform quick validation', async () => {
-            const result = await AIHelpers.quickValidate(
+            const result = await QuickAIHelpers.quickValidate(
                 'هذا محتوى عالي الجودة',
                 'أنشئ محتوى عالي الجودة'
             );
@@ -459,7 +459,7 @@ describe('AIHelpers', () => {
 
     describe('suggestModel', () => {
         it('should suggest appropriate model', async () => {
-            const result = await AIHelpers.suggestModel(
+            const result = await QuickAIHelpers.suggestModel(
                 'أنشئ نظام إدارة قاعدة بيانات',
                 'generation'
             );
@@ -473,9 +473,9 @@ describe('AIHelpers', () => {
         });
 
         it('should suggest different models for different task types', async () => {
-            const generationResult = await AIHelpers.suggestModel('أنشئ محتوى', 'generation');
-            const analysisResult = await AIHelpers.suggestModel('حلل هذا المحتوى', 'analysis');
-            const translationResult = await AIHelpers.suggestModel('ترجم هذا النص', 'translation');
+            const generationResult = await QuickAIHelpers.suggestModel('أنشئ محتوى', 'generation');
+            const analysisResult = await QuickAIHelpers.suggestModel('حلل هذا المحتوى', 'analysis');
+            const translationResult = await QuickAIHelpers.suggestModel('ترجم هذا النص', 'translation');
 
             expect(generationResult.model).toBeDefined();
             expect(analysisResult.model).toBeDefined();

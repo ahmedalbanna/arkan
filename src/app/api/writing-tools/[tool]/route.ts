@@ -12,23 +12,7 @@ import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 
 // استيراد جميع الـ flows والـ schemas
-import { aiResearcher } from '@/ai/flows/ai-researcher';
-import { detectAiContent } from '@/ai/flows/detect-ai-content';
-import { factCheckText } from '@/ai/flows/fact-checker';
-import { generateCitation } from '@/ai/flows/generate-citation';
-import { generateIdeas } from '@/ai/flows/generate-ideas';
-import { generatePlantUML } from '@/ai/flows/generate-plantuml';
-import { generatePresentationOutline } from '@/ai/flows/generate-presentation-outline';
-import { generateQuiz } from '@/ai/flows/generate-quiz';
-import { grammarCheck } from '@/ai/flows/grammar-checker';
-import { humanizeText } from '@/ai/flows/humanize-text';
-import { manipulateText } from '@/ai/flows/manipulate-text';
-import { paraphraseText } from '@/ai/flows/paraphrase-text';
-import { plagiarismCheck } from '@/ai/flows/plagiarism-checker';
-import { summarizeText } from '@/ai/flows/summarize-text';
-import { rewriteText, summarizeTextWithRatio } from '@/ai/flows/text-stylist';
-import { topicExplainer } from '@/ai/flows/topic-explainer';
-import { writeDocument } from '@/ai/flows/write-document';
+import { aiResearcher, detectAiContent, factCheckText, generateCitation, generateIdeas, generatePlantUML, generatePresentationOutline, generateQuiz, grammarCheck, humanizeText, manipulateText, paraphraseText, plagiarismCheck, rewriteText, summarizeText, summarizeTextWithRatio, topicExplainer, writeDocument } from '@/ai/flows/unified';
 import {
     AIResearcherInputSchema,
     DetectAIInputSchema,

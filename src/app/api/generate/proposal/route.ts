@@ -4,7 +4,7 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد المقترحات
  */
 
-import { generateProposal } from '@/ai/flows/generate-proposal';
+import { generateProposal } from '@/ai/flows/unified';
 import { GenerateProposalInputSchema, type GenerateProposalInput } from '@/ai/schemas';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';

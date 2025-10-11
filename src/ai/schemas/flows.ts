@@ -14,6 +14,14 @@ import {
 } from './enums';
 import { ProjectPlanSchema, ProjectProposalSchema } from './project';
 
+// select-context
+export const ExternalContextSchema = z.object({
+    fileName: z.string(),
+    content: z.string(),
+    type: ExternalContextTypeSchema
+});
+export type ExternalContext = z.infer<typeof ExternalContextSchema>;
+
 // academic-solver.ts
 export const AnalyzedDocumentSchema = z.object({
     documentType: AcademicDocumentTypeSchema.describe('The type of document, either "exam" or "homework".'),
@@ -209,15 +217,12 @@ export const GenerateCodebaseInputSchema = z.object({
 // generate-diagrams.ts
 export const GenerateDiagramInputSchema = z.object({
     proposal: ProjectProposalSchema.optional().nullable(),
-    projectPlan: ProjectPlanSchema.optional().nullable().describe("The detailed project plan with phases and tasks."),
+    projectPlan: ProjectPlanSchema.optional().nullable(),
     diagramToGenerate: DiagramTypeSchema.describe("The type of diagram to generate."),
     otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context."),
     otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context."),
-    externalContext: z.array(z.object({
-        fileName: z.string(),
-        content: z.string(),
-    })).optional().describe("An array of external documents (text or data URIs) provided by the user."),
     guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
+    externalContext: z.array(ExternalContextSchema).optional().describe("An array of external documents (text or data URIs) provided by the user."),
     instructionText: z.string().optional().describe("Additional instructions for generation (e.g., tone, formality)."),
 });
 export type GenerateDiagramInput = z.infer<typeof GenerateDiagramInputSchema>;
@@ -755,13 +760,6 @@ export const WriteDocumentOutputSchema = z.object({
 });
 export type WriteDocumentOutput = z.infer<typeof WriteDocumentOutputSchema>;
 
-// evaluate-and-select-context.ts
-export const ExternalContextSchema = z.object({
-    fileName: z.string(),
-    content: z.string(),
-    type: ExternalContextTypeSchema
-});
-export type ExternalContext = z.infer<typeof ExternalContextSchema>;
 
 export const EvaluateContextInputSchema = z.object({
     proposal: ProjectProposalSchema.optional().nullable().describe("The original project proposal."),
@@ -899,10 +897,10 @@ export type CreateLectureUnitOutput = z.infer<typeof CreateLectureUnitOutputSche
 export const GenerateProposalOutputSchema = z.object({
     title: z.string().describe(
         "A clear and descriptive title for the project. This should be engaging and summarize the project's core purpose."
-    ),
+    ).optional(),
     category: z.string().describe(
         "A relevant category for the project (e.g., 'Software Development', 'UI/UX Design', 'AI', 'Student Training')."
-    ),
+    ).optional(),
 }).passthrough();
 export type GenerateProposalOutput = z.infer<typeof GenerateProposalOutputSchema>;
 
@@ -916,3 +914,32 @@ export const GenerateCodebaseOutputSchema = z.object({
     codebase: z.string().describe("The generated codebase."),
 });
 export type GenerateCodebaseOutput = z.infer<typeof GenerateCodebaseOutputSchema>;
+
+// Define a specific schema for the prompt's input variables for better type safety and clarity.
+const ReportSectionPromptInputSchema = GenerateSectionInputSchema.and(
+    z.object({
+        stringifiedProposal: z.string(),
+        stringifiedPlan: z.string(),
+        // البيانات الجديدة من SectionAccordionItem
+        styleSettings: z.object({
+            formality: z.number().optional(),
+            tone: z.string().optional(),
+            wordCount: z.number().optional()
+        }).optional(),
+        guidelinesSettings: z.object({
+            customGuidelines: z.array(z.string()).optional(),
+            oneTimeInstructions: z.string().optional(),
+            selectedGuidelines: z.array(z.boolean()).optional()
+        }).optional(),
+        contextSettings: z.object({
+            hasContext: z.boolean().optional(),
+            selectedSections: z.record(z.string()).optional(),
+            selectedDiagrams: z.record(z.string()).optional(),
+            externalContext: z.array(z.object({
+                fileName: z.string(),
+                content: z.string(),
+                type: z.string()
+            })).optional()
+        }).optional()
+    })
+);

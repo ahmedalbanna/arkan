@@ -109,7 +109,7 @@ class IntelligentDiagramHandler extends CreditBasedApiHandler<UnifiedDiagramInpu
             };
 
             // تشغيل تدفق التوليد الذكي
-            const result = await generateDiagram(flowInput);
+            const result = await generateDiagram(flowInput as any);
 
             // حساب الوقت المستغرق
             const executionTime = Date.now() - startTime;
@@ -123,10 +123,7 @@ class IntelligentDiagramHandler extends CreditBasedApiHandler<UnifiedDiagramInpu
                 data: result,
                 metadata: {
                     executionTime,
-                    creditCost: dynamicCost,
-                    qualityScore: result.performanceMetrics.qualityScore,
-                    iterations: result.performanceMetrics.iterations,
-                    modelUsed: result.performanceMetrics.modelUsed
+                    creditCost: dynamicCost
                 }
             };
 
