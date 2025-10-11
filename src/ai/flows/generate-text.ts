@@ -10,23 +10,12 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { generateTextPrompt } from '@/ai/prompts/generate-text';
 import { GenerateTextInputSchema, GenerateTextOutputSchema, type GenerateTextInput, type GenerateTextOutput } from '@/ai/schemas';
 
 export async function generateText(input: GenerateTextInput): Promise<GenerateTextOutput> {
   return generateTextFlow(input);
 }
-
-const promptTemplate = ai.definePrompt({
-  name: 'generateTextPrompt',
-  input: { schema: GenerateTextInputSchema },
-  output: { schema: GenerateTextOutputSchema },
-  model: 'googleai/gemini-2.0-flash',
-  prompt: `You are a writing assistant. Generate text based on the following prompt.
-
-Prompt: {{{prompt}}}
-
-Generated Text:`,
-});
 
 const generateTextFlow = ai.defineFlow(
   {
@@ -35,7 +24,7 @@ const generateTextFlow = ai.defineFlow(
     outputSchema: GenerateTextOutputSchema,
   },
   async input => {
-    const { output } = await promptTemplate(input);
+    const { output } = await generateTextPrompt(input);
     return output!;
   }
 );

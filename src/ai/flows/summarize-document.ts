@@ -11,22 +11,12 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { summarizeDocumentPrompt } from '@/ai/prompts/summarize-document';
 import { SummarizeDocumentInputSchema, SummarizeDocumentOutputSchema, type SummarizeDocumentInput, type SummarizeDocumentOutput } from '@/ai/schemas';
 
 export async function summarizeDocument(input: SummarizeDocumentInput): Promise<SummarizeDocumentOutput> {
   return summarizeDocumentFlow(input);
 }
-
-const prompt = ai.definePrompt({
-  name: 'summarizeDocumentPrompt',
-  input: { schema: SummarizeDocumentInputSchema },
-  output: { schema: SummarizeDocumentOutputSchema },
-  model: 'googleai/gemini-2.0-flash',
-  prompt: `You are an expert summarizer, able to distill the most important information from a document.
-
-  Please provide a concise summary of the following document:
-  {{media url=documentDataUri}}`,
-});
 
 const summarizeDocumentFlow = ai.defineFlow(
   {
@@ -35,7 +25,7 @@ const summarizeDocumentFlow = ai.defineFlow(
     outputSchema: SummarizeDocumentOutputSchema,
   },
   async input => {
-    const { output } = await prompt(input);
+    const { output } = await summarizeDocumentPrompt(input);
     return output!;
   }
 );

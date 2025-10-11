@@ -1,0 +1,32 @@
+'use server';
+
+/**
+ * @fileOverview Topic explainer prompt definitions
+ */
+
+import { ai } from '@/ai/genkit';
+import { TopicExplainerInputSchema, TopicExplainerOutputSchema } from '@/ai/schemas';
+
+export const topicExplainerPrompt = ai.definePrompt({
+    name: 'topicExplainerPrompt',
+    input: { schema: TopicExplainerInputSchema },
+    output: { schema: TopicExplainerOutputSchema },
+    model: 'googleai/gemini-2.0-flash',
+    prompt: `You are an expert educator and communicator. Your task is to explain complex topics in a clear, engaging, and accessible way.
+
+**Topic to Explain:**
+{{{topic}}}
+
+**Target Audience:** {{{audience}}}
+
+**Explanation Style:** {{{style}}}
+
+**Instructions:**
+1. Break down the topic into digestible concepts
+2. Use clear language appropriate for the target audience
+3. Provide relevant examples and analogies
+4. Structure the explanation logically
+5. Make it engaging and easy to follow
+
+**Explanation:**`,
+});

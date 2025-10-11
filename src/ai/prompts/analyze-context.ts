@@ -1,0 +1,66 @@
+'use server';
+
+/**
+ * @fileOverview Context analysis prompt definitions
+ */
+
+import { ai } from '@/ai/genkit';
+import { AnalyzeContextOutputSchema } from '@/ai/schemas';
+import { z } from 'zod';
+
+export const analysisPrompt = ai.definePrompt({
+    name: 'analyzeContextPrompt',
+    input: {
+        schema: z.object({
+            prompt: z.string(),
+            textFiles: z.any(),
+            mediaFiles: z.any(),
+        })
+    },
+    output: { schema: AnalyzeContextOutputSchema },
+    model: 'googleai/gemini-2.0-flash',
+    prompt: `You are an expert data analyst and schema designer. Your task is to analyze a user's prompt and a set of context files, then generate a structured JSON object with a corresponding Zod schema.
+
+**Your Two-Step Process:**
+
+1.  **Design the Schema**:
+    *   First, carefully read the user's prompt to understand exactly what information they want to extract or analyze.
+    *   Based on their request, design a Zod schema that perfectly structures this information. The schema should be a \`z.object(...)\` with appropriately typed fields (e.g., \`z.string()\`, \`z.number()\`, \`z.array(...)\`).
+    *   Provide this Zod schema as a single string in the \`schema\` field of your response.
+
+2.  **Extract and Structure the Data**:
+    *   Next, thoroughly analyze all the provided context files (both text and media). Each file is tagged with a 'type' (e.g., 'context', 'example', 'question', 'textbook') which tells you how to use it.
+    *   Use files tagged as **'example'** as a reference for writing style, tone, and structure.
+    *   Use files tagged as **'context'**, **'question'**, or **'textbook'** for factual data and information.
+    *   Extract the relevant pieces of information that match the user's prompt.
+    *   Populate a JSON object with this extracted data, ensuring it **strictly conforms** to the Zod schema you just designed.
+    *   Place this JSON object in the \`data\` field of your response.
+
+---
+
+**USER PROMPT:**
+\`\`\`
+{{{prompt}}}
+\`\`\`
+
+---
+
+**CONTEXT FILES TO ANALYZE:**
+{{#each textFiles}}
+--- File: {{this.fileName}} (Type: {{this.type}}) ---
+{{{this.content}}}
+---
+{{/each}}
+{{#each mediaFiles}}
+--- File: {{this.fileName}} (Type: {{this.type}}) ---
+{{media url=this.content}}
+---
+{{/each}}
+---
+
+**CRITICAL INSTRUCTIONS:**
+-   Your entire output MUST be a single, valid JSON object that conforms to the \`AnalyzeContextOutputSchema\`.
+-   The Zod schema you generate for the \`schema\` field must be a valid, executable Zod schema string.
+-   The object you create for the \`data\` field must validate against the schema you designed.
+`,
+});

@@ -10,25 +10,12 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { aiProofreadDocumentPrompt } from '@/ai/prompts/ai-proofread-document';
 import { AiProofreadDocumentInputSchema, AiProofreadDocumentOutputSchema, type AiProofreadDocumentInput, type AiProofreadDocumentOutput } from '@/ai/schemas';
 
 export async function aiProofreadDocument(input: AiProofreadDocumentInput): Promise<AiProofreadDocumentOutput> {
   return aiProofreadDocumentFlow(input);
 }
-
-const prompt = ai.definePrompt({
-  name: 'aiProofreadDocumentPrompt',
-  input: { schema: AiProofreadDocumentInputSchema },
-  output: { schema: AiProofreadDocumentOutputSchema },
-  model: 'googleai/gemini-2.0-flash',
-  prompt: `You are an AI proofreading assistant. Review the document text and provide suggestions for spelling, grammar, and style corrections.
-
-Document Text: {{{documentText}}}
-
-Constraints (if any): {{{constraints}}}
-
-Proofread Document:`,
-});
 
 const aiProofreadDocumentFlow = ai.defineFlow(
   {
@@ -37,7 +24,7 @@ const aiProofreadDocumentFlow = ai.defineFlow(
     outputSchema: AiProofreadDocumentOutputSchema,
   },
   async input => {
-    const { output } = await prompt(input);
+    const { output } = await aiProofreadDocumentPrompt(input);
     return output!;
   }
 );
