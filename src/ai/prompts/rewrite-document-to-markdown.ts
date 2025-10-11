@@ -7,7 +7,7 @@
 import { ai } from '@/ai/genkit';
 import { RewriteDocumentInputSchema, RewriteDocumentOutputSchema } from '@/ai/schemas';
 
-export const generateMarkdownPrompt = ai.definePrompt({
+export const rewriteDocumentPrompt = ai.definePrompt({
     name: 'generateMarkdownFromDocumentPrompt',
     input: { schema: RewriteDocumentInputSchema },
     output: { schema: RewriteDocumentOutputSchema },

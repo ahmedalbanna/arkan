@@ -8,7 +8,7 @@ import { ai } from '@/ai/genkit';
 import { GenerateProjectPlanInputSchema, ProjectPlanSchema } from '@/ai/schemas';
 import { z } from 'zod';
 
-export const planPrompt = ai.definePrompt({
+export const generateProjectPlanPrompt = ai.definePrompt({
     name: 'generateProjectPlanPrompt',
     input: { schema: GenerateProjectPlanInputSchema.extend({ phaseRangeText: z.string() }) },
     output: { schema: ProjectPlanSchema },

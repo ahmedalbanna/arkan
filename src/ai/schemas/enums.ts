@@ -7,7 +7,19 @@ export const DiagramTypeSchema = z.enum([
     'activity',
     'component',
     'archimate',
-    'er'
+    'er',
+    'gantt',
+    'mindmap',
+    'network',
+    'state',
+    'wireframe',
+    'flowchart',
+    'deployment',
+    'object',
+    'communication',
+    'interaction',
+    'timing',
+    'wireframe'
 ]);
 export type DiagramType = z.infer<typeof DiagramTypeSchema>;
 

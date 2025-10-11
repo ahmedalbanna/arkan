@@ -27,7 +27,7 @@ export const styleInstructions: Record<string, string> = {
 };
 
 // Rewrite text prompt
-export const rewriteTextPrompt = `You are an expert editor. Your task is to rewrite the following text based on the provided style instruction, preserving the core meaning and markdown formatting.
+export const textStylistPrompt = `You are an expert editor. Your task is to rewrite the following text based on the provided style instruction, preserving the core meaning and markdown formatting.
 Return only the rewritten text.
 
 **Style Instruction**: {{instruction}}

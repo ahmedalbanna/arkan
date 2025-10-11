@@ -896,3 +896,12 @@ export const CreateLectureUnitOutputSchema = z.object({
 
 export type CreateLectureUnitInput = z.infer<typeof CreateLectureUnitInputSchema>;
 export type CreateLectureUnitOutput = z.infer<typeof CreateLectureUnitOutputSchema>;
+export const GenerateProposalOutputSchema = z.object({
+    title: z.string().describe(
+        "A clear and descriptive title for the project. This should be engaging and summarize the project's core purpose."
+    ),
+    category: z.string().describe(
+        "A relevant category for the project (e.g., 'Software Development', 'UI/UX Design', 'AI', 'Student Training')."
+    ),
+}).passthrough();
+export type GenerateProposalOutput = z.infer<typeof GenerateProposalOutputSchema>;

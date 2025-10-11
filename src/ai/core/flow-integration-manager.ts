@@ -9,41 +9,51 @@ import { ContextAnalysisResult, ContextAnalyzer } from './context-analyzer';
 import { OutputQualityValidator } from './output-quality-validator';
 import { PerformanceMonitor } from './performance-monitor';
 
-// استيراد التدفقات المتخصصة
-import { aiProofreadDocument } from '../flows/ai-proofread-document';
-import { aiResearcher } from '../flows/ai-researcher';
-import { analyzeContext } from '../flows/analyze-context';
-import { detectAiContent } from '../flows/detect-ai-content';
-import { evaluateReport } from '../flows/evaluate-report';
-import { factCheckText } from '../flows/fact-checker';
-import { generateAgentConfig } from '../flows/generate-agent-config';
-import { generateCitation } from '../flows/generate-citation';
-import { generateCode } from '../flows/generate-code';
-import { generateCodebase } from '../flows/generate-codebase';
-import { generateDiagram } from '../flows/generate-diagrams';
-import { generateIdeas } from '../flows/generate-ideas';
-import { generatePlantUML } from '../flows/generate-plantuml';
-import { generatePresentation } from '../flows/generate-presentation';
-import { generatePresentationOutline } from '../flows/generate-presentation-outline';
-import { generateProjectPlan } from '../flows/generate-project-plan';
-import { generateQuiz } from '../flows/generate-quiz';
-import { generateText } from '../flows/generate-text';
-import { generateTheoreticalLecture } from '../flows/generate-theoretical-lecture';
-import { grammarCheck } from '../flows/grammar-checker';
-import { humanizeText } from '../flows/humanize-text';
-import { imageToText } from '../flows/image-to-text';
-import { improveReportMarkdown } from '../flows/improve-report-markdown';
-import { manipulateText } from '../flows/manipulate-text';
-import { paraphraseText } from '../flows/paraphrase-text';
-import { plagiarismCheck } from '../flows/plagiarism-checker';
-import { rewriteDocumentToMarkdown } from '../flows/rewrite-document-to-markdown';
-import { rewriteToMarkdown } from '../flows/rewrite-to-markdown';
-import { summarizeDocument } from '../flows/summarize-document';
-import { summarizeFullProject, summarizeProject } from '../flows/summarize-project';
-import { summarizeText } from '../flows/summarize-text';
-import { rewriteText, summarizeTextWithRatio } from '../flows/text-stylist';
-import { topicExplainer } from '../flows/topic-explainer';
-import { writeDocument } from '../flows/write-document';
+// استيراد التدفقات المتخصصة من النظام الجديد
+import {
+    // معالجة النصوص
+    aiProofreadDocument,
+    aiResearcher,
+    // التحليل
+    analyzeContext,
+    detectAiContent,
+    evaluateReport,
+    factCheckText,
+    generateAgentConfig,
+    generateCitation,
+    generateCode,
+    generateCodebase,
+    // المرئي
+    generateDiagram,
+    generateIdeas,
+    generatePlantUML,
+    generatePresentation,
+    generatePresentationOutline,
+    generateProjectPlan,
+    generateQuiz,
+    // توليد المحتوى
+    generateText,
+    // الأكاديمي
+    generateTheoreticalLecture,
+    grammarCheck,
+    humanizeText,
+    imageToText,
+    improveReportMarkdown,
+    manipulateText,
+    paraphraseText,
+    plagiarismCheck,
+    rewriteDocumentToMarkdown,
+    rewriteText,
+    rewriteToMarkdown,
+    summarizeDocument,
+    summarizeFullProject,
+    summarizeProject,
+    summarizeText,
+    summarizeTextWithRatio,
+    topicExplainer,
+    // معالجة المستندات
+    writeDocument
+} from '../flows';
 
 /**
  * أنواع التدفقات المتخصصة

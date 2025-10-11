@@ -593,7 +593,7 @@ ${intelligentPrompt.constraints}`;
 /**
  * إنشاء prompt محسن لقسم محدد مع السياق الكامل
  */
-export const createSectionPrompt = ai.definePrompt({
+export const generateReportSectionPrompt = ai.definePrompt({
     name: 'createSectionPrompt',
     input: { schema: SectionPromptInputSchema },
     output: { schema: z.string() },

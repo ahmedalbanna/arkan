@@ -1,9 +1,10 @@
 import { ai } from '@/ai/genkit';
-import { GenerateDiagramOutputSchema } from '@/ai/schemas';
+import { DiagramTypeSchema, GenerateDiagramOutputSchema } from '@/ai/schemas';
 import { z } from 'genkit';
 
-export const diagramSpecificInstructions: Record<z.infer<typeof z.enum(['useCase', 'class', 'sequence', 'activity', 'component', 'archimate', 'er']) >, string > = {
-    useCase: `
+
+export const diagramSpecificInstructions: Record<z.infer<typeof DiagramTypeSchema>, string> = {
+  useCase: `
 ### Use Case Diagram Instructions
 - **Actors**: Define actors using \`actor ActorName\` or \`:"Actor Name": as ActorAlias\`.
 - **Use Cases**: Define use cases inside a system boundary using \`rectangle "System Name" { ... }\`. Use cases are defined with parentheses, e.g., \`(Manage Account)\`.
@@ -24,7 +25,7 @@ export const diagramSpecificInstructions: Record<z.infer<typeof z.enum(['useCase
   @enduml
   \`\`\`
 `,
-        class: `
+  class: `
 ### Class Diagram Instructions
 - **Classes**: Define classes using \`class ClassName\`. You can add attributes and methods inside curly braces \`{...}\`. Use \`+ \` for public, \`- \` for private, \`# \` for protected.
 - **Relationships**:
@@ -50,7 +51,7 @@ export const diagramSpecificInstructions: Record<z.infer<typeof z.enum(['useCase
   @enduml
   \`\`\`
 `,
-            sequence: `
+  sequence: `
 ### Sequence Diagram Instructions
 - **Participants**: Define participants using \`actor\`, \`participant\`, \`boundary\`, \`control\`, \`entity\`, or \`database\`.
 - **Messages**: Use arrows for messages: \`->\` for synchronous, \`->>\` for asynchronous, \`-->\` for return messages.
@@ -74,7 +75,7 @@ export const diagramSpecificInstructions: Record<z.infer<typeof z.enum(['useCase
   @enduml
   \`\`\`
 `,
-                activity: `
+  activity: `
 ### Activity Diagram Instructions
 - **Start/End**: Use \`start\` and \`stop\` or \`end\`.
 - **Activities**: Describe activities using \`:[Action Description];\`.
@@ -100,7 +101,7 @@ export const diagramSpecificInstructions: Record<z.infer<typeof z.enum(['useCase
   @enduml
   \`\`\`
 `,
-                    component: `
+  component: `
 ### Component Diagram Instructions
 - **Components**: Define components using \`[ComponentName]\`.
 - **Interfaces**: Define interfaces using \`() "InterfaceName"\`.
@@ -120,7 +121,7 @@ export const diagramSpecificInstructions: Record<z.infer<typeof z.enum(['useCase
   @enduml
   \`\`\`
 `,
-                        archimate: `
+  archimate: `
 ### ArchiMate Diagram Instructions
 - **Elements**: Use the format \`archimate "Element Name" as Alias <<ElementType>>\`.
 - **Layers**: Group elements by layer (Business, Application, Technology).
@@ -134,7 +135,7 @@ export const diagramSpecificInstructions: Record<z.infer<typeof z.enum(['useCase
   @enduml
   \`\`\`
 `,
-                            er: `
+  er: `
 ### ER Diagram Instructions
 - **Entities**: Define entities using \`entity "EntityName" { ... }\`.
 - **Attributes**: Inside the entity, define attributes. Mark primary keys with \`* \` or \`PK \`.
@@ -159,21 +160,148 @@ export const diagramSpecificInstructions: Record<z.infer<typeof z.enum(['useCase
   User ||--|{ Post
   @enduml
   \`\`\`
-`
+`,
+  gantt: `
+### Gantt Chart Instructions
+- **Tasks**: Define tasks using \`task "TaskName" { ... }\`.
+- **Dependencies**: Use \`taskA --> taskB\` for dependencies.
+- **Time Constraints**: Use \`startDate\` and \`endDate\` for time constraints.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  gantt
+  @enduml
+  \`\`\`
+`,
+  mindmap: `
+### Mind Map Instructions
+- **Nodes**: Define nodes using \`node "NodeName" { ... }\`.
+- **Relationships**: Use \`nodeA --> nodeB\` for relationships.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  mindmap
+  @enduml
+  \`\`\`
+`,
+  network: `
+### Network Diagram Instructions
+- **Nodes**: Define nodes using \`node "NodeName" { ... }\`.
+- **Relationships**: Use \`nodeA --> nodeB\` for relationships.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  network
+  @enduml
+  \`\`\`
+`,
+  state: `
+### State Diagram Instructions
+- **States**: Define states using \`state "StateName" { ... }\`.
+- **Transitions**: Use \`stateA --> stateB\` for transitions.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  state
+  @enduml
+  \`\`\`
+`,
+  object: `
+### Object Diagram Instructions
+- **Objects**: Define objects using \`object "ObjectName" { ... }\`.
+- **Attributes**: Inside the object, define attributes. Mark primary keys with \`* \` or \`PK \`.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  object
+  @enduml
+  \`\`\`
+`,
+  communication: `
+### Communication Diagram Instructions
+- **Participants**: Define participants using \`actor\`, \`participant\`, \`boundary\`, \`control\`, \`entity\`, or \`database\`.
+- **Messages**: Use arrows for messages: \`->\` for synchronous, \`->>\` for asynchronous, \`-->\` for return messages.
+- **Activation/Deactivation**: Use \`activate\` and \`deactivate\` to show when a participant is active.
+- **Control Flow**: Use \`alt/else\` for alternatives and \`loop\` for repetitions.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  communication
+  @enduml
+  \`\`\`
+`,
+  flowchart: `
+### Flowchart Instructions
+- **Nodes**: Define nodes using \`node "NodeName" { ... }\`.
+- **Relationships**: Use \`nodeA --> nodeB\` for relationships.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  flowchart
+  @enduml
+  \`\`\`
+`,
+  timing: `
+### Timing Diagram Instructions
+- **Events**: Define events using \`event "EventName" { ... }\`.
+- **Relationships**: Use \`eventA --> eventB\` for relationships.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  timing
+  @enduml
+  \`\`\`
+`,
+  interaction: `
+### Interaction Diagram Instructions
+- **Participants**: Define participants using \`actor\`, \`participant\`, \`boundary\`, \`control\`, \`entity\`, or \`database\`.
+- **Messages**: Use arrows for messages: \`->\` for synchronous, \`->>\` for asynchronous, \`-->\` for return messages.
+- **Activation/Deactivation**: Use \`activate\` and \`deactivate\` to show when a participant is active.
+- **Control Flow**: Use \`alt/else\` for alternatives and \`loop\` for repetitions.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  interaction
+  @enduml
+  \`\`\`
+`,
+  wireframe: `
+### Wireframe Instructions
+- **Components**: Define components using \`[ComponentName]\`.
+- **Relationships**: Use \`[Client] ..> [Service]\` for relationships.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  wireframe
+  @enduml
+  \`\`\`
+`,
+  deployment: `
+### Deployment Diagram Instructions
+- **Nodes**: Define nodes using \`node "NodeName" { ... }\`.
+- **Relationships**: Use \`nodeA --> nodeB\` for relationships.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  deployment
+  @enduml
+  \`\`\`
+`,
 };
 
+
 export const generateDiagramPrompt = ai.definePrompt({
-    name: 'generateDiagramPrompt',
-    input: { schema: z.any() },
-    output: { schema: GenerateDiagramOutputSchema },
-    model: 'googleai/gemini-2.0-flash',
-    prompt: async (input) => {
-        const { diagramToGenerate, instructionText, proposal, projectPlan, otherSections, otherDiagrams, textContext, mediaContext } = input;
+  name: 'generateDiagramPrompt',
+  input: { schema: z.any() },
+  output: { schema: GenerateDiagramOutputSchema },
+  model: 'googleai/gemini-2.0-flash',
+  prompt: async (input) => {
+    const { diagramToGenerate, instructionText, proposal, projectPlan, otherSections, otherDiagrams, textContext, mediaContext } = input;
 
-        const stringifiedProposal = proposal ? JSON.stringify(proposal, null, 2) : '';
-        const stringifiedPlan = projectPlan ? JSON.stringify(projectPlan, null, 2) : '';
+    const stringifiedProposal = proposal ? JSON.stringify(proposal, null, 2) : '';
+    const stringifiedPlan = projectPlan ? JSON.stringify(projectPlan, null, 2) : '';
 
-        return `
+    return `
 {{#if instructionText}}
 --- USER INSTRUCTIONS ---
 {{{instructionText}}}
@@ -232,9 +360,9 @@ File: {{this.fileName}}
 
 Now, generate the PlantUML code and a brief explanation based on all the provided context and the user's instructions.
 `;
-    },
-    config: {
-        temperature: 0.1, // Very low temp for precise PlantUML syntax
-        maxOutputTokens: 8192,
-    }
+  },
+  config: {
+    temperature: 0.1, // Very low temp for precise PlantUML syntax
+    maxOutputTokens: 8192,
+  }
 });
