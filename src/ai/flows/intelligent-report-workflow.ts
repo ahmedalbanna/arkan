@@ -10,7 +10,7 @@ import {
 import { ai } from '@/ai/genkit';
 import { type GenerateSectionInput } from '@/ai/schemas';
 import type { SectionName } from '@/ai/schemas/enums';
-import { z } from 'genkit';
+import { z } from 'zod';
 import { generateReportSection } from './generate-report-section';
 
 // مخطط لإدخال التدفق الذكي الشامل

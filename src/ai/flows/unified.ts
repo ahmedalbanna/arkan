@@ -219,7 +219,7 @@ export {
 
 // توليد أقسام التقرير
 export {
-    generateCompleteReport, generateReportSection, getReportGenerationStats
+    generateReportSection
 } from './generate-report-section';
 
 // التحليل
