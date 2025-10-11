@@ -201,7 +201,7 @@ export class UnifiedFlows {
 // معالجة النصوص
 export {
     aiProofreadDocument, detectAiContent, grammarCheck, humanizeText, manipulateText, paraphraseText, plagiarismCheck, summarizeText
-} from './text-processing';
+} from '@/ai/flows/text-processing';
 
 // توليد المحتوى
 export {

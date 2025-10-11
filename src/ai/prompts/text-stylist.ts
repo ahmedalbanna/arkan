@@ -1,4 +1,3 @@
-'use server';
 
 /**
  * @fileOverview Text styling prompt definitions

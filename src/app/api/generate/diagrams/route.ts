@@ -4,7 +4,7 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد المخططات
  */
 
-import { generateDiagram } from '@/ai/flows/generate-diagrams';
+import { generateDiagram } from '@/ai/flows/visual';
 import { DiagramTypeSchema, ExternalContextSchema, ProjectPlanSchema, ProjectProposalSchema, SectionNameSchema } from '@/ai/schemas';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
