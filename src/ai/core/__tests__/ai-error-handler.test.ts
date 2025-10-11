@@ -430,4 +430,321 @@ More complex requirements here.
             expect(result.strategies).toBeDefined();
         });
     });
+
+    describe('Edge Cases and Boundary Conditions', () => {
+        it('should handle null error object', async () => {
+            const context = {
+                model: 'googleai/gemini-1.5-pro',
+                prompt: 'test',
+                input: 'test',
+                attempt: 1,
+                maxAttempts: 3
+            };
+
+            const result = await AIErrorHandler.handleAIError(null, context);
+
+            expect(result).toBeDefined();
+            expect(result.success).toBe(false);
+            expect(result.error).toBeDefined();
+        });
+
+        it('should handle undefined error object', async () => {
+            const context = {
+                model: 'googleai/gemini-1.5-pro',
+                prompt: 'test',
+                input: 'test',
+                attempt: 1,
+                maxAttempts: 3
+            };
+
+            const result = await AIErrorHandler.handleAIError(undefined, context);
+
+            expect(result).toBeDefined();
+            expect(result.success).toBe(false);
+            expect(result.error).toBeDefined();
+        });
+
+        it('should handle error with no message', async () => {
+            const error = new Error();
+            const context = {
+                model: 'googleai/gemini-1.5-pro',
+                prompt: 'test',
+                input: 'test',
+                attempt: 1,
+                maxAttempts: 3
+            };
+
+            const result = await AIErrorHandler.handleAIError(error, context);
+
+            expect(result).toBeDefined();
+            expect(result.error).toBeDefined();
+            expect(result.error?.message).toBeDefined();
+        });
+
+        it('should handle non-Error objects', async () => {
+            const error = { message: 'Custom error object', code: 'CUSTOM_ERROR' };
+            const context = {
+                model: 'googleai/gemini-1.5-pro',
+                prompt: 'test',
+                input: 'test',
+                attempt: 1,
+                maxAttempts: 3
+            };
+
+            const result = await AIErrorHandler.handleAIError(error, context);
+
+            expect(result).toBeDefined();
+            expect(result.success).toBe(false);
+            expect(result.error).toBeDefined();
+        });
+
+        it('should handle string errors', async () => {
+            const error = 'Simple string error';
+            const context = {
+                model: 'googleai/gemini-1.5-pro',
+                prompt: 'test',
+                input: 'test',
+                attempt: 1,
+                maxAttempts: 3
+            };
+
+            const result = await AIErrorHandler.handleAIError(error, context);
+
+            expect(result).toBeDefined();
+            expect(result.error).toBeDefined();
+            expect(result.error?.technicalDetails).toBe('Simple string error');
+        });
+
+        it('should handle very long error messages', async () => {
+            const longMessage = 'Error: '.repeat(1000);
+            const error = new Error(longMessage);
+            const context = {
+                model: 'googleai/gemini-1.5-pro',
+                prompt: 'test',
+                input: 'test',
+                attempt: 1,
+                maxAttempts: 3
+            };
+
+            const result = await AIErrorHandler.handleAIError(error, context);
+
+            expect(result).toBeDefined();
+            expect(result.error).toBeDefined();
+            expect(result.error?.technicalDetails).toBeDefined();
+        });
+
+        it('should handle mixed case error patterns', async () => {
+            const errors = [
+                new Error('TIMEOUT'),
+                new Error('Timeout'),
+                new Error('timeout'),
+                new Error('TiMeOuT')
+            ];
+
+            for (const error of errors) {
+                const context = {
+                    model: 'googleai/gemini-1.5-pro',
+                    prompt: 'test',
+                    input: 'test',
+                    attempt: 1,
+                    maxAttempts: 3
+                };
+
+                const result = await AIErrorHandler.handleAIError(error, context);
+
+                expect(result).toBeDefined();
+                expect(result.error).toBeDefined();
+            }
+        });
+
+        it('should handle empty context fields', async () => {
+            const error = new Error('Test error');
+            const context = {
+                model: '',
+                prompt: '',
+                input: '',
+                attempt: 1,
+                maxAttempts: 3
+            };
+
+            const result = await AIErrorHandler.handleAIError(error, context);
+
+            expect(result).toBeDefined();
+            expect(result.error).toBeDefined();
+        });
+
+        it('should handle invalid model names', async () => {
+            const error = new Error('Model not found');
+            const context = {
+                model: 'invalid-model-123',
+                prompt: 'test',
+                input: 'test',
+                attempt: 1,
+                maxAttempts: 3
+            };
+
+            const result = await AIErrorHandler.handleAIError(error, context);
+
+            expect(result).toBeDefined();
+            expect(result.error).toBeDefined();
+            expect(result.strategies).toBeDefined();
+        });
+
+        it('should provide retry strategies when retryable', async () => {
+            const error = new Error('Timeout');
+            const context = {
+                model: 'googleai/gemini-1.5-pro',
+                prompt: 'test',
+                input: 'test',
+                attempt: 1,
+                maxAttempts: 5
+            };
+
+            const result = await AIErrorHandler.handleAIError(error, context);
+
+            expect(result.strategies).toBeDefined();
+            expect(result.strategies!.length).toBeGreaterThan(0);
+
+            const retryStrategy = result.strategies!.find(s => s.type === 'retry');
+            expect(retryStrategy).toBeDefined();
+        });
+
+        it('should provide fallback strategies when available', async () => {
+            const error = new Error('Rate limit exceeded');
+            const context = {
+                model: 'googleai/gemini-1.5-pro',
+                prompt: 'test',
+                input: 'test',
+                attempt: 1,
+                maxAttempts: 3,
+                fallbackModel: 'googleai/gemini-2.0-flash'
+            };
+
+            const result = await AIErrorHandler.handleAIError(error, context);
+
+            expect(result.strategies).toBeDefined();
+
+            const fallbackStrategy = result.strategies!.find(s => s.type === 'fallback_model');
+            expect(fallbackStrategy).toBeDefined();
+        });
+
+        it('should order strategies by confidence', async () => {
+            const error = new Error('Timeout');
+            const context = {
+                model: 'googleai/gemini-1.5-pro',
+                prompt: 'test',
+                input: 'test',
+                attempt: 1,
+                maxAttempts: 3,
+                fallbackModel: 'googleai/gemini-2.0-flash'
+            };
+
+            const result = await AIErrorHandler.handleAIError(error, context);
+
+            expect(result.strategies).toBeDefined();
+
+            if (result.strategies && result.strategies.length > 1) {
+                for (let i = 0; i < result.strategies.length - 1; i++) {
+                    expect(result.strategies[i].confidence).toBeGreaterThanOrEqual(
+                        result.strategies[i + 1].confidence
+                    );
+                }
+            }
+        });
+
+        it('should include user guidance in all errors', async () => {
+            const errors = [
+                new Error('Timeout'),
+                new Error('Rate limit'),
+                new Error('Invalid request'),
+                new Error('Network error')
+            ];
+
+            for (const error of errors) {
+                const context = {
+                    model: 'googleai/gemini-1.5-pro',
+                    prompt: 'test',
+                    input: 'test',
+                    attempt: 1,
+                    maxAttempts: 3
+                };
+
+                const result = await AIErrorHandler.handleAIError(error, context);
+
+                expect(result.error).toBeDefined();
+                expect(result.error?.userMessage).toBeDefined();
+                expect(result.error?.userGuidance).toBeDefined();
+                expect(result.error?.suggestedActions).toBeDefined();
+                expect(result.error?.suggestedActions.length).toBeGreaterThan(0);
+            }
+        });
+    });
+
+    describe('Helper Methods', () => {
+        it('getFallbackModel should return correct fallback', () => {
+            const fallbacks = [
+                { input: 'googleai/gemini-1.5-pro', expected: 'googleai/gemini-2.0-flash' },
+                { input: 'googleai/gemini-2.0-flash', expected: 'googleai/gemini-1.5-flash' },
+                { input: 'googleai/gemini-1.5-flash', expected: 'googleai/gemini-2.0-flash' }
+            ];
+
+            for (const { input, expected } of fallbacks) {
+                const fallback = AIErrorHandler.getFallbackModel(input);
+                expect(fallback).toBe(expected);
+            }
+        });
+
+        it('getFallbackModel should return null for unknown models', () => {
+            const fallback = AIErrorHandler.getFallbackModel('unknown-model');
+            expect(fallback).toBeNull();
+        });
+
+        it('simplifyPrompt should remove complex sections', () => {
+            const complexPrompt = `
+### Instructions
+Do something complex
+
+### Examples
+Example 1: Complex example
+Example 2: Another example
+
+### Constraints
+Must follow rules
+            `;
+
+            const simplified = AIErrorHandler.simplifyPrompt(complexPrompt);
+
+            expect(simplified).toBeDefined();
+            expect(simplified).not.toContain('### Examples');
+            expect(simplified).not.toContain('### Constraints');
+        });
+
+        it('reduceContextSize should limit string length', () => {
+            const largeContext = 'x'.repeat(5000);
+            const reduced = AIErrorHandler.reduceContextSize(largeContext, 1000);
+
+            expect(reduced.length).toBeLessThanOrEqual(1003); // 1000 + '...'
+        });
+
+        it('reduceContextSize should limit array length', () => {
+            const largeArray = Array(1000).fill('item');
+            const reduced = AIErrorHandler.reduceContextSize(largeArray, 500);
+
+            expect(Array.isArray(reduced)).toBe(true);
+            expect(reduced.length).toBeLessThanOrEqual(5);
+        });
+
+        it('reduceContextSize should limit object size', () => {
+            const largeObject: Record<string, string> = {};
+            for (let i = 0; i < 1000; i++) {
+                largeObject[`key${i}`] = 'value'.repeat(100);
+            }
+
+            const reduced = AIErrorHandler.reduceContextSize(largeObject, 1000);
+
+            expect(typeof reduced).toBe('object');
+            const reducedKeys = Object.keys(reduced);
+            expect(reducedKeys.length).toBeLessThan(1000);
+        });
+    });
 });

@@ -609,4 +609,293 @@ describe('ContextAnalyzer', () => {
             expect(result.availableContext.organizedContext).toEqual(mockOrganizedContext);
         });
     });
+
+    describe('Edge Cases and Error Scenarios', () => {
+        it('should handle empty user input gracefully', async () => {
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: ''
+            });
+
+            expect(result).toBeDefined();
+            expect(result.contentType).toBeDefined();
+            expect(result.complexityLevel).toBe('basic');
+        });
+
+        it('should handle very short input', async () => {
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: 'كود'
+            });
+
+            expect(result).toBeDefined();
+            expect(result.contentType).toBeDefined();
+            expect(result.language).toBe('ar');
+        });
+
+        it('should handle null/undefined external context', async () => {
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: 'أنشئ نظام',
+                externalContext: undefined,
+                guidelines: undefined
+            });
+
+            expect(result).toBeDefined();
+            expect(result.availableContext.files).toEqual([]);
+            expect(result.availableContext.guidelines).toEqual([]);
+        });
+
+        it('should handle empty external context array', async () => {
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: 'أنشئ نظام',
+                externalContext: [],
+                guidelines: []
+            });
+
+            expect(result).toBeDefined();
+            expect(result.availableContext.files).toEqual([]);
+            expect(result.availableContext.guidelines).toEqual([]);
+        });
+
+        it('should handle malformed external context', async () => {
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: 'أنشئ نظام',
+                externalContext: [
+                    {
+                        fileName: '',
+                        content: null as any,
+                        type: 'context'
+                    }
+                ]
+            });
+
+            expect(result).toBeDefined();
+            expect(result.availableContext.files).toBeDefined();
+        });
+
+        it('should handle extremely long user input', async () => {
+            const longInput = 'أنشئ نظام إدارة متقدم '.repeat(500);
+
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: longInput
+            });
+
+            expect(result).toBeDefined();
+            expect(result.complexityLevel).toBeIn(['advanced', 'expert']);
+        });
+
+        it('should handle mixed language input (Arabic and English)', async () => {
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: 'أنشئ API system متقدم'
+            });
+
+            expect(result).toBeDefined();
+            expect(result.language).toBeIn(['ar', 'en']);
+            expect(result.contentType).toBe('technical');
+        });
+
+        it('should handle special characters and symbols', async () => {
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: 'أنشئ نظام @#$% مع ^&*() تقنيات'
+            });
+
+            expect(result).toBeDefined();
+            expect(result.contentType).toBeDefined();
+        });
+
+        it('should handle numeric-only content', async () => {
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: '123456789'
+            });
+
+            expect(result).toBeDefined();
+            expect(result.contentType).toBe('mixed');
+        });
+
+        it('should handle content with only punctuation', async () => {
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: '... !!! ???'
+            });
+
+            expect(result).toBeDefined();
+            expect(result.complexityLevel).toBe('basic');
+        });
+
+        it('should handle whitespace-only input', async () => {
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: '   \n\t   '
+            });
+
+            expect(result).toBeDefined();
+            expect(result.complexityLevel).toBe('basic');
+        });
+
+        it('should handle large number of external contexts', async () => {
+            const largeContextArray = Array(100).fill(null).map((_, i) => ({
+                fileName: `file-${i}.txt`,
+                content: `محتوى الملف ${i}`,
+                type: 'context'
+            }));
+
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: 'أنشئ نظام',
+                externalContext: largeContextArray
+            });
+
+            expect(result).toBeDefined();
+            expect(result.availableContext.files.length).toBeLessThanOrEqual(100);
+            expect(result.complexityLevel).toBeIn(['advanced', 'expert']);
+        });
+
+        it('should handle context with empty content', async () => {
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: 'أنشئ نظام',
+                externalContext: [
+                    {
+                        fileName: 'empty-file.txt',
+                        content: '',
+                        type: 'context'
+                    }
+                ]
+            });
+
+            expect(result).toBeDefined();
+            expect(result.availableContext.files).toBeDefined();
+        });
+
+        it('should handle duplicate external contexts', async () => {
+            const duplicateContext = {
+                fileName: 'duplicate.txt',
+                content: 'محتوى مكرر',
+                type: 'context'
+            };
+
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: 'أنشئ نظام',
+                externalContext: [duplicateContext, duplicateContext, duplicateContext]
+            });
+
+            expect(result).toBeDefined();
+            expect(result.availableContext.files).toBeDefined();
+        });
+
+        it('should handle invalid context types', async () => {
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: 'أنشئ نظام',
+                externalContext: [
+                    {
+                        fileName: 'file.txt',
+                        content: 'محتوى',
+                        type: 'invalid-type' as any
+                    }
+                ]
+            });
+
+            expect(result).toBeDefined();
+            expect(result.availableContext.files).toBeDefined();
+        });
+
+        it('should handle very long guidelines array', async () => {
+            const longGuidelines = Array(100).fill('إرشاد مهم');
+
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: 'أنشئ نظام',
+                guidelines: longGuidelines
+            });
+
+            expect(result).toBeDefined();
+            expect(result.specificRequirements.length).toBeGreaterThan(0);
+        });
+
+        it('should handle requirements extraction with no patterns', async () => {
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: 'simple text without any requirements patterns'
+            });
+
+            expect(result).toBeDefined();
+            expect(result.specificRequirements).toBeDefined();
+            expect(Array.isArray(result.specificRequirements)).toBe(true);
+        });
+
+        it('should handle conflicting content type indicators', async () => {
+            const result = await ContextAnalyzer.analyzeContext({
+                userInput: 'أنشئ business plan تقني technical مع creative design أكاديمي research'
+            });
+
+            expect(result).toBeDefined();
+            expect(result.contentType).toBe('mixed');
+        });
+
+        it('should handle all cultural contexts', async () => {
+            const contexts = [
+                { input: 'أنشئ نظام في الشرق الأوسط', expected: 'middle-east' },
+                { input: 'Create a system in Europe', expected: 'western' },
+                { input: 'أنشئ نظام عالمي', expected: 'global' }
+            ];
+
+            for (const { input, expected } of contexts) {
+                const result = await ContextAnalyzer.analyzeContext({
+                    userInput: input
+                });
+
+                expect(result.culturalContext).toBeIn([expected, 'global']);
+            }
+        });
+
+        it('should handle all audience types', async () => {
+            const audiences = [
+                { input: 'حل واجب للطلاب', expected: 'student' },
+                { input: 'بحث أكاديمي', expected: 'academic' },
+                { input: 'تقرير تنفيذي للإدارة', expected: 'executive' },
+                { input: 'كود تقني للمطورين', expected: 'technical' },
+                { input: 'محتوى للجمهور', expected: 'general' }
+            ];
+
+            for (const { input, expected } of audiences) {
+                const result = await ContextAnalyzer.analyzeContext({
+                    userInput: input
+                });
+
+                expect(result.targetAudience).toBeIn([expected, 'general']);
+            }
+        });
+    });
+
+    describe('Model Recommendation Validation', () => {
+        it('should always return valid model recommendations', async () => {
+            const inputs = [
+                'أنشئ نظام تقني معقد',
+                'كتابة إبداعية',
+                'تحليل بيانات',
+                'ترجمة نص',
+                'محتوى بسيط'
+            ];
+
+            for (const input of inputs) {
+                const result = await ContextAnalyzer.analyzeContext({
+                    userInput: input
+                });
+
+                expect(result.modelRecommendation).toBeDefined();
+                expect(result.modelRecommendation.primary).toBeDefined();
+                expect(result.modelRecommendation.primary).toContain('gemini');
+                expect(result.modelRecommendation.fallback).toBeDefined();
+                expect(result.modelRecommendation.fallback).toContain('gemini');
+                expect(result.modelRecommendation.reasoning).toBeDefined();
+                expect(typeof result.modelRecommendation.reasoning).toBe('string');
+            }
+        });
+
+        it('should recommend appropriate models for complexity', async () => {
+            // Expert level should recommend pro model
+            const expertResult = await ContextAnalyzer.analyzeContext({
+                userInput: 'أنشئ معمارية نظام معقدة مع تحسين الأداء وتكامل متعدد'.repeat(10),
+                externalContext: Array(5).fill(null).map((_, i) => ({
+                    fileName: `doc-${i}.txt`,
+                    content: 'محتوى معقد',
+                    type: 'context'
+                }))
+            });
+
+            expect(expertResult.modelRecommendation.primary).toContain('gemini-1.5-pro');
+        });
+    });
 });

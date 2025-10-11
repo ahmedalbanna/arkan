@@ -827,4 +827,321 @@ describe('AdaptiveModelSelector', () => {
             expect(modelConfig1.topK).toBe(modelConfig2.topK);
         });
     });
+
+    describe('Edge Cases and Error Scenarios', () => {
+        it('should handle empty context analysis gracefully', () => {
+            const contextAnalysis: ContextAnalysisResult = {
+                contentType: 'mixed',
+                complexityLevel: 'basic',
+                targetAudience: 'general',
+                language: 'ar',
+                culturalContext: 'middle-east',
+                specificRequirements: [],
+                availableContext: {
+                    files: [],
+                    previousSections: [],
+                    guidelines: []
+                },
+                modelRecommendation: {
+                    primary: 'googleai/gemini-2.0-flash',
+                    fallback: 'googleai/gemini-1.5-pro',
+                    reasoning: 'Default model'
+                }
+            };
+
+            const modelConfig = AdaptiveModelSelector.selectOptimalModel(
+                contextAnalysis,
+                'generation'
+            );
+
+            expect(modelConfig).toBeDefined();
+            expect(modelConfig.modelId).toBeDefined();
+            expect(modelConfig.reasoning).toBeDefined();
+        });
+
+        it('should handle undefined additional criteria', () => {
+            const contextAnalysis: ContextAnalysisResult = {
+                contentType: 'technical',
+                complexityLevel: 'expert',
+                targetAudience: 'technical',
+                language: 'ar',
+                culturalContext: 'middle-east',
+                specificRequirements: [],
+                availableContext: {
+                    files: [],
+                    previousSections: [],
+                    guidelines: []
+                },
+                modelRecommendation: {
+                    primary: 'googleai/gemini-1.5-pro',
+                    fallback: 'googleai/gemini-2.0-flash',
+                    reasoning: 'Technical content'
+                }
+            };
+
+            const modelConfig = AdaptiveModelSelector.selectOptimalModel(
+                contextAnalysis,
+                'technical',
+                undefined
+            );
+
+            expect(modelConfig).toBeDefined();
+            expect(modelConfig.modelId).toBeDefined();
+        });
+
+        it('should handle empty specific requirements', () => {
+            const contextAnalysis: ContextAnalysisResult = {
+                contentType: 'business',
+                complexityLevel: 'intermediate',
+                targetAudience: 'executive',
+                language: 'ar',
+                culturalContext: 'middle-east',
+                specificRequirements: [],
+                availableContext: {
+                    files: [],
+                    previousSections: [],
+                    guidelines: []
+                },
+                modelRecommendation: {
+                    primary: 'googleai/gemini-1.5-pro',
+                    fallback: 'googleai/gemini-2.0-flash',
+                    reasoning: 'Business content'
+                }
+            };
+
+            const modelConfig = AdaptiveModelSelector.selectOptimalModel(
+                contextAnalysis,
+                'generation'
+            );
+
+            expect(modelConfig).toBeDefined();
+            expect(modelConfig.reasoning).toBeDefined();
+        });
+
+        it('should handle extreme output length requirements', () => {
+            const contextAnalysis: ContextAnalysisResult = {
+                contentType: 'technical',
+                complexityLevel: 'expert',
+                targetAudience: 'technical',
+                language: 'ar',
+                culturalContext: 'middle-east',
+                specificRequirements: [],
+                availableContext: {
+                    files: [],
+                    previousSections: [],
+                    guidelines: []
+                },
+                modelRecommendation: {
+                    primary: 'googleai/gemini-1.5-pro',
+                    fallback: 'googleai/gemini-2.0-flash',
+                    reasoning: 'Technical content'
+                }
+            };
+
+            const modelConfig = AdaptiveModelSelector.selectOptimalModel(
+                contextAnalysis,
+                'technical',
+                {
+                    outputLength: 'very_long'
+                }
+            );
+
+            expect(modelConfig.maxOutputTokens).toBeGreaterThanOrEqual(16384);
+            expect(modelConfig.maxOutputTokens).toBeLessThanOrEqual(32768);
+        });
+
+        it('should handle conflicting criteria (speed vs quality)', () => {
+            const contextAnalysis: ContextAnalysisResult = {
+                contentType: 'technical',
+                complexityLevel: 'expert',
+                targetAudience: 'technical',
+                language: 'ar',
+                culturalContext: 'middle-east',
+                specificRequirements: [],
+                availableContext: {
+                    files: [],
+                    previousSections: [],
+                    guidelines: []
+                },
+                modelRecommendation: {
+                    primary: 'googleai/gemini-1.5-pro',
+                    fallback: 'googleai/gemini-2.0-flash',
+                    reasoning: 'Technical content'
+                }
+            };
+
+            const modelConfig = AdaptiveModelSelector.selectOptimalModel(
+                contextAnalysis,
+                'technical',
+                {
+                    speedRequirement: 'fast',
+                    accuracyRequirement: 'critical'
+                }
+            );
+
+            // Should prioritize accuracy over speed for critical requirements
+            expect(modelConfig).toBeDefined();
+            expect(modelConfig.temperature).toBeLessThanOrEqual(0.3);
+        });
+
+        it('should handle very long context size', () => {
+            const largeContext = Array(100).fill({
+                fileName: 'large-file.txt',
+                content: 'Large content...'.repeat(1000),
+                type: 'context'
+            });
+
+            const contextAnalysis: ContextAnalysisResult = {
+                contentType: 'technical',
+                complexityLevel: 'expert',
+                targetAudience: 'technical',
+                language: 'ar',
+                culturalContext: 'middle-east',
+                specificRequirements: [],
+                availableContext: {
+                    files: largeContext.map((ctx, i) => ({
+                        name: `file-${i}.txt`,
+                        type: 'context',
+                        relevance: 0.8
+                    })),
+                    previousSections: [],
+                    guidelines: []
+                },
+                modelRecommendation: {
+                    primary: 'googleai/gemini-1.5-pro',
+                    fallback: 'googleai/gemini-2.0-flash',
+                    reasoning: 'Long context'
+                }
+            };
+
+            const modelConfig = AdaptiveModelSelector.selectOptimalModel(
+                contextAnalysis,
+                'technical'
+            );
+
+            expect(modelConfig).toBeDefined();
+            // Should prefer models with long context support
+            expect(modelConfig.modelId).toContain('gemini');
+        });
+
+        it('should handle multilingual requirements', () => {
+            const contextAnalysis: ContextAnalysisResult = {
+                contentType: 'mixed',
+                complexityLevel: 'intermediate',
+                targetAudience: 'general',
+                language: 'ar',
+                culturalContext: 'global',
+                specificRequirements: [],
+                availableContext: {
+                    files: [],
+                    previousSections: [],
+                    guidelines: []
+                },
+                modelRecommendation: {
+                    primary: 'googleai/gemini-2.0-flash',
+                    fallback: 'googleai/gemini-1.5-pro',
+                    reasoning: 'Multilingual content'
+                }
+            };
+
+            const modelConfig = AdaptiveModelSelector.selectOptimalModel(
+                contextAnalysis,
+                'translation',
+                {
+                    languageRequirement: 'multilingual'
+                }
+            );
+
+            expect(modelConfig).toBeDefined();
+            expect(modelConfig.temperature).toBeLessThanOrEqual(0.2);
+        });
+    });
+
+    describe('Adaptation Based on Results', () => {
+        it('should decrease temperature on low quality scores', () => {
+            const initialConfig = AdaptiveModelSelector.getDefaultConfig();
+            const initialTemp = initialConfig.temperature;
+
+            const updatedConfig = AdaptiveModelSelector.adaptConfigBasedOnResults(
+                initialConfig,
+                60, // جودة منخفضة
+                ['incomplete_content']
+            );
+
+            expect(updatedConfig.temperature).toBeLessThan(initialTemp);
+            expect(updatedConfig.reasoning).toContain('تقليل الحرارة');
+        });
+
+        it('should increase output tokens on incomplete content', () => {
+            const initialConfig = AdaptiveModelSelector.getDefaultConfig();
+            const initialTokens = initialConfig.maxOutputTokens;
+
+            const updatedConfig = AdaptiveModelSelector.adaptConfigBasedOnResults(
+                initialConfig,
+                70,
+                ['incomplete_content']
+            );
+
+            expect(updatedConfig.maxOutputTokens).toBeGreaterThan(initialTokens);
+            expect(updatedConfig.reasoning).toContain('زيادة طول المخرجات');
+        });
+
+        it('should handle multiple issues simultaneously', () => {
+            const initialConfig = AdaptiveModelSelector.getDefaultConfig();
+
+            const updatedConfig = AdaptiveModelSelector.adaptConfigBasedOnResults(
+                initialConfig,
+                55, // جودة منخفضة جداً
+                ['incomplete_content', 'unclear_language']
+            );
+
+            expect(updatedConfig.temperature).toBeLessThan(initialConfig.temperature);
+            expect(updatedConfig.maxOutputTokens).toBeGreaterThan(initialConfig.maxOutputTokens);
+            expect(updatedConfig.reasoning).toContain('تقليل الحرارة');
+            expect(updatedConfig.reasoning).toContain('زيادة طول المخرجات');
+        });
+
+        it('should not change config on high quality scores', () => {
+            const initialConfig = AdaptiveModelSelector.getDefaultConfig();
+
+            const updatedConfig = AdaptiveModelSelector.adaptConfigBasedOnResults(
+                initialConfig,
+                90, // جودة عالية
+                []
+            );
+
+            expect(updatedConfig.temperature).toBe(initialConfig.temperature);
+            expect(updatedConfig.maxOutputTokens).toBe(initialConfig.maxOutputTokens);
+        });
+
+        it('should cap temperature at minimum value', () => {
+            let config = AdaptiveModelSelector.getDefaultConfig();
+
+            // محاولة تقليل الحرارة عدة مرات
+            for (let i = 0; i < 10; i++) {
+                config = AdaptiveModelSelector.adaptConfigBasedOnResults(
+                    config,
+                    50,
+                    []
+                );
+            }
+
+            expect(config.temperature).toBeGreaterThanOrEqual(0.1);
+        });
+
+        it('should cap max tokens at maximum value', () => {
+            let config = AdaptiveModelSelector.getDefaultConfig();
+
+            // محاولة زيادة الرموز عدة مرات
+            for (let i = 0; i < 10; i++) {
+                config = AdaptiveModelSelector.adaptConfigBasedOnResults(
+                    config,
+                    60,
+                    ['incomplete_content']
+                );
+            }
+
+            expect(config.maxOutputTokens).toBeLessThanOrEqual(16384);
+        });
+    });
 });
