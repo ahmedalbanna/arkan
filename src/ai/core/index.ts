@@ -24,6 +24,7 @@ import {
     type PerformanceReport,
     type PerformanceSession
 } from './performance-monitor';
+import { QuickAIHelpers } from './quick-helpers';
 
 // إعادة تصدير جميع المكونات
 export {
@@ -304,8 +305,10 @@ export class IntelligentAISystem {
     }
 }
 
+
 /**
- * مساعدات سريعة للاستخدام الشائع
+ * مساعدات سريعة للاستخدام الشائع (Legacy - للتوافق مع الإصدارات السابقة)
+ * @deprecated استخدم QuickHelpers بدلاً من ذلك للحصول على ميزات محسنة
  */
 export const AIHelpers = {
 
@@ -313,60 +316,32 @@ export const AIHelpers = {
      * تحليل سريع لنوع المحتوى
      */
     async quickAnalyze(text: string) {
-        const analysis = await ContextAnalyzer.analyzeContext({
-            userInput: text
-        });
-
-        return {
-            contentType: analysis.contentType,
-            complexity: analysis.complexityLevel,
-            audience: analysis.targetAudience,
-            language: analysis.language,
-            recommendedModel: analysis.modelRecommendation.primary
-        };
+        const result = await QuickAIHelpers.quickAnalyze(text);
+        if (!result.success) {
+            throw new Error(result.error);
+        }
+        return result.data;
     },
 
     /**
      * تقييم سريع للجودة
      */
     async quickValidate(output: string, input: string) {
-        // تحليل سريع للسياق
-        const contextAnalysis = await ContextAnalyzer.analyzeContext({
-            userInput: input
-        });
-
-        const validation = await OutputQualityValidator.validateOutput(
-            output,
-            input,
-            contextAnalysis
-        );
-
-        return {
-            score: validation.metrics.overall,
-            isGood: validation.metrics.overall >= 70,
-            needsImprovement: validation.needsImprovement,
-            mainIssues: validation.issues.slice(0, 3).map(issue => issue.description)
-        };
+        const result = await QuickAIHelpers.quickValidate(output, input);
+        if (!result.success) {
+            throw new Error(result.error);
+        }
+        return result.data;
     },
 
     /**
      * اقتراح النموذج المناسب
      */
     async suggestModel(text: string, taskType: 'generation' | 'analysis' | 'translation' | 'improvement') {
-        const contextAnalysis = await ContextAnalyzer.analyzeContext({
-            userInput: text
-        });
-
-        const modelConfig = AdaptiveModelSelector.selectOptimalModel(
-            contextAnalysis,
-            taskType
-        );
-
-        return {
-            model: modelConfig.modelId,
-            reasoning: modelConfig.reasoning,
-            temperature: modelConfig.temperature,
-            maxTokens: modelConfig.maxOutputTokens
-        };
+        const result = await QuickAIHelpers.suggestModel(text, taskType);
+        if (!result.success) {
+            throw new Error(result.error);
+        }
+        return result.data;
     }
 };
