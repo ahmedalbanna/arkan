@@ -7,7 +7,7 @@
 import { ai } from '@/ai/genkit';
 import { ImageToTextInputSchema, ImageToTextOutputSchema } from '@/ai/schemas';
 
-export const extractTextPrompt = ai.definePrompt({
+export const imageToTextPrompt = ai.definePrompt({
     name: 'extractTextFromImagePrompt',
     input: { schema: ImageToTextInputSchema },
     output: { schema: ImageToTextOutputSchema },

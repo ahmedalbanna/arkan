@@ -8,7 +8,7 @@ import { ai } from '@/ai/genkit';
 import {
     GenerateSessionPlanInputSchema,
     GenerateSessionPlanOutputSchema,
-} from '@/ai/schemas/lecture-generator';
+} from '@/ai/schemas';
 
 export const generateSessionPlanPrompt = ai.definePrompt({
     name: 'generateSessionPlanPrompt',

@@ -7,7 +7,7 @@
 import { ai } from '@/ai/genkit';
 import { AiProofreadDocumentInputSchema, AiProofreadDocumentOutputSchema } from '@/ai/schemas';
 
-export const aiProofreadDocumentPrompt = ai.definePrompt({
+export const aiProofreadPrompt = ai.definePrompt({
     name: 'aiProofreadDocumentPrompt',
     input: { schema: AiProofreadDocumentInputSchema },
     output: { schema: AiProofreadDocumentOutputSchema },

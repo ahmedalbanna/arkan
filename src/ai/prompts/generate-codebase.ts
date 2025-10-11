@@ -7,7 +7,7 @@
 import { ai } from '@/ai/genkit';
 import { CodebaseSchema, GenerateCodebaseInputSchema } from '@/ai/schemas';
 
-export const codebasePrompt = ai.definePrompt({
+export const generateCodebasePrompt = ai.definePrompt({
     name: 'generateCodebasePrompt',
     input: { schema: GenerateCodebaseInputSchema },
     output: { schema: CodebaseSchema },

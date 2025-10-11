@@ -3,8 +3,6 @@
  * نقطة دخول واحدة لجميع التدفقات المصنفة
  */
 
-'use server';
-
 import { FlowCategory, FlowRegistry } from './registry';
 
 // استيراد جميع التدفقات المصنفة
@@ -43,7 +41,7 @@ export class UnifiedFlows {
         const startTime = Date.now();
 
         try {
-            const flow = FlowRegistry.get(request.flowName);
+            const flow = await FlowRegistry.get(request.flowName);
             if (!flow) {
                 throw new Error(`Flow '${request.flowName}' not found`);
             }
@@ -74,12 +72,12 @@ export class UnifiedFlows {
     /**
      * الحصول على جميع التدفقات المتاحة
      */
-    static getAvailableFlows(): Array<{
+    static async getAvailableFlows(): Promise<Array<{
         name: string;
         category: FlowCategory;
         description: string;
-    }> {
-        const flows = FlowRegistry.getAll();
+    }>> {
+        const flows = await FlowRegistry.getAll();
         return Array.from(flows.values()).map(flow => ({
             name: flow.name,
             category: flow.category,
@@ -90,15 +88,15 @@ export class UnifiedFlows {
     /**
      * الحصول على التدفقات حسب الفئة
      */
-    static getFlowsByCategory(category: FlowCategory): Array<{
+    static async getFlowsByCategory(category: FlowCategory): Promise<Array<{
         name: string;
         category: FlowCategory;
         description: string;
-    }> {
-        const flows = FlowRegistry.getByCategory(category);
+    }>> {
+        const flows = await FlowRegistry.getByCategory(category);
         return flows.map(flow => ({
             name: flow.name,
-            category: flow.category,
+            category: flow?.category,
             description: flow.description
         }));
     }
@@ -106,23 +104,23 @@ export class UnifiedFlows {
     /**
      * التحقق من وجود تدفق
      */
-    static hasFlow(flowName: string): boolean {
-        return FlowRegistry.has(flowName);
+    static async hasFlow(flowName: string): Promise<boolean> {
+        return await FlowRegistry.has(flowName);
     }
 
     /**
      * الحصول على معلومات تدفق
      */
-    static getFlowInfo(flowName: string): {
+    static async getFlowInfo(flowName: string): Promise<{
         name: string;
         category: FlowCategory;
         description: string;
-    } | null {
-        const flow = FlowRegistry.get(flowName);
+    } | null> {
+        const flow = await FlowRegistry.get(flowName);
         if (!flow) return null;
 
         return {
-            name: flow.name,
+            name: flow?.name,
             category: flow.category,
             description: flow.description
         };
@@ -131,8 +129,12 @@ export class UnifiedFlows {
     /**
      * الحصول على إحصائيات التدفقات
      */
-    static getStats() {
-        return FlowRegistry.getStats();
+    static async getStats(): Promise<{
+        totalFlows: number;
+        flowsByCategory: Record<FlowCategory, number>;
+        categoryList: FlowCategory[];
+    }> {
+        return await FlowRegistry.getStats();
     }
 
     /**
@@ -204,7 +206,7 @@ export {
 // توليد المحتوى
 export {
     generateAgentConfig, generateCitation, generateCode,
-    generateCodebase, generateIdeas, generateImage, generateQuiz, generateText, topicExplainer
+    generateCodebase, generateIdeas, generateQuiz, generateText, topicExplainer
 } from './content-generation';
 
 // معالجة المستندات
@@ -212,7 +214,7 @@ export {
     generatePresentation,
     generatePresentationOutline,
     generateProjectPlan, generateProposal,
-    generateReportSection, improveReportMarkdown, rewriteDocumentToMarkdown, rewriteText, rewriteToMarkdown, summarizeDocument, summarizeFullProject, summarizeProject, summarizeTextWithRatio, writeDocument
+    improveReportMarkdown, rewriteDocumentToMarkdown, rewriteText, rewriteToMarkdown, summarizeDocument, summarizeFullProject, summarizeProject, summarizeTextWithRatio, writeDocument
 } from './document-processing';
 
 // التحليل
@@ -233,6 +235,7 @@ export {
 
 // التدفقات الخاصة
 export { generateProposalSection } from './generate-proposal-section';
+export { generateReportSection } from './generate-report-section';
 export { intelligentReportWorkflow } from './intelligent-report-workflow';
 
 

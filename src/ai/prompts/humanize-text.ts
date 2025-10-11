@@ -7,7 +7,7 @@
 import { ai } from '@/ai/genkit';
 import { HumanizeTextInputSchema, HumanizeTextOutputSchema } from '@/ai/schemas';
 
-export const humanizeTextPrompt = ai.definePrompt({
+export const humanizePrompt = ai.definePrompt({
     name: 'humanizeTextPrompt',
     input: { schema: HumanizeTextInputSchema },
     output: { schema: HumanizeTextOutputSchema },

@@ -224,7 +224,7 @@ export type GenerateDiagramInput = z.infer<typeof GenerateDiagramInputSchema>;
 
 export const GenerateDiagramOutputSchema = z.object({
     plantUmlCode: z.string().describe("The complete PlantUML code for the diagram, starting with @startuml and ending with @enduml."),
-    explanation: z.string().describe("A detailed explanation of the generated diagram, formatted in markdown."),
+    explanation: z.string().describe("A detailed explanation of the generated diagram, formatted in markdown.")
 });
 export type GenerateDiagramOutput = z.infer<typeof GenerateDiagramOutputSchema>;
 
@@ -905,3 +905,14 @@ export const GenerateProposalOutputSchema = z.object({
     ),
 }).passthrough();
 export type GenerateProposalOutput = z.infer<typeof GenerateProposalOutputSchema>;
+
+
+export type GenerateAgentConfigInput = z.infer<typeof GenerateAgentConfigInputSchema>;
+
+
+export type GenerateCodebaseInput = z.infer<typeof GenerateCodebaseInputSchema>;
+
+export const GenerateCodebaseOutputSchema = z.object({
+    codebase: z.string().describe("The generated codebase."),
+});
+export type GenerateCodebaseOutput = z.infer<typeof GenerateCodebaseOutputSchema>;

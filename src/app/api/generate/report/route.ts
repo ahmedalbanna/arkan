@@ -4,7 +4,8 @@
  * هذا الملف يستخدم النظام المحسن بالقوالب الذكية المتخصصة لكل قسم
  */
 
-import { generateReportSection } from '@/ai/flows/generate-report-section';
+
+import { generateReportSection } from '@/ai/flows/unified';
 import { GenerateSectionInputSchema } from '@/ai/schemas';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';

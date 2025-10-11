@@ -13,9 +13,9 @@ import { generateAgentConfigPrompt } from '@/ai/prompts/generate-agent-config';
 import { generateCitationPrompt } from '@/ai/prompts/generate-citation';
 import { generateCodePrompt } from '@/ai/prompts/generate-code';
 import { generateCodebasePrompt } from '@/ai/prompts/generate-codebase';
-import { generateImagePrompt } from '@/ai/prompts/generate-diagrams';
+import { generateDiagramPrompt } from '@/ai/prompts/generate-diagrams';
 import { generateIdeasPrompt } from '@/ai/prompts/generate-ideas';
-import { generateQuizPrompt } from '@/ai/prompts/generate-quiz';
+import { multipleChoiceQuizPrompt } from '@/ai/prompts/generate-quiz';
 import { generateTextPrompt } from '@/ai/prompts/generate-text';
 import { topicExplainerPrompt } from '@/ai/prompts/topic-explainer';
 
@@ -48,7 +48,6 @@ import {
     type GenerateCodeOutput,
     type GenerateCodebaseInput,
     type GenerateImageInput,
-    type GenerateImageOutput,
     type GenerateQuizInput,
     type GenerateQuizOutput,
     type GenerateTextInput,
@@ -147,7 +146,7 @@ createGenkitFlow(
     GenerateQuizInputSchema,
     GenerateQuizOutputSchema,
     async (input: GenerateQuizInput) => {
-        const { output } = await generateQuizPrompt(input);
+        const { output } = await multipleChoiceQuizPrompt(input);
         if (!output) {
             throw new Error('Quiz generation failed');
         }
@@ -163,7 +162,7 @@ createGenkitFlow(
     GenerateImageInputSchema,
     GenerateImageOutputSchema,
     async (input: GenerateImageInput) => {
-        const { output } = await generateImagePrompt(input);
+        const { output } = await generateDiagramPrompt(input);
         if (!output) {
             throw new Error('Image generation failed');
         }
@@ -295,27 +294,27 @@ export async function generateQuiz(input: GenerateQuizInput): Promise<GenerateQu
         inputSchema: GenerateQuizInputSchema,
         outputSchema: GenerateQuizOutputSchema
     }, async (input) => {
-        const { output } = await generateQuizPrompt(input);
+        const { output } = await multipleChoiceQuizPrompt(input);
         if (!output) throw new Error('Quiz generation failed');
         return output;
     })(validation.data);
 }
 
-export async function generateImage(input: GenerateImageInput): Promise<GenerateImageOutput> {
-    const validation = GenerateImageInputSchema.safeParse(input);
-    if (!validation.success) {
-        throw new Error(`Invalid input for generateImage: ${validation.error.message}`);
-    }
-    return ai.defineFlow({
-        name: 'generateImageFlow',
-        inputSchema: GenerateImageInputSchema,
-        outputSchema: GenerateImageOutputSchema
-    }, async (input) => {
-        const { output } = await generateImagePrompt(input);
-        if (!output) throw new Error('Image generation failed');
-        return output;
-    })(validation.data);
-}
+// export async function generateImage(input: GenerateImageInput): Promise<GenerateImageOutput> {
+//     const validation = GenerateImageInputSchema.safeParse(input);
+//     if (!validation.success) {
+//         throw new Error(`Invalid input for generateImage: ${validation.error.message}`);
+//     }
+//     return ai.defineFlow({
+//         name: 'generateImageFlow',
+//         inputSchema: GenerateImageInputSchema,
+//         outputSchema: GenerateImageOutputSchema
+//     }, async (input) => {
+//         const { output } = await generateImagePrompt(input);
+//         if (!output) throw new Error('Image generation failed');
+//         return output;
+//     })(validation.data);
+// }
 
 export async function topicExplainer(input: TopicExplainerInput): Promise<TopicExplainerOutput> {
     const validation = TopicExplainerInputSchema.safeParse(input);

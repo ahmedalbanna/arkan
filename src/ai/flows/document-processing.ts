@@ -16,10 +16,9 @@ import { generateProposalPrompt } from '@/ai/prompts/generate-proposal';
 import { improveMarkdownPrompt } from '@/ai/prompts/improve-report-markdown';
 import { rewriteDocumentPrompt } from '@/ai/prompts/rewrite-document-to-markdown';
 import { rewriteToMarkdownPrompt } from '@/ai/prompts/rewrite-to-markdown';
-import { generateReportSectionPrompt } from '@/ai/prompts/section-specific-prompts';
 import { summarizeDocumentPrompt } from '@/ai/prompts/summarize-document';
 import { fullReportSummaryPrompt, summarizeProjectPrompt } from '@/ai/prompts/summarize-project';
-import { textStylistPrompt } from '@/ai/prompts/text-stylist';
+import { summarizeTextWithRatioPrompt, textStylistPrompt } from '@/ai/prompts/text-stylist';
 import { defaultWriteDocumentPrompt, universitySubjectMaterialPrompt } from '@/ai/prompts/write-document';
 
 // استيراد المخططات
@@ -31,8 +30,6 @@ import {
     GenerateProjectPlanInputSchema,
     GenerateProposalInputSchema,
     GenerateProposalOutputSchema,
-    GenerateSectionInputSchema,
-    GenerateSectionOutputSchema,
     ImproveMarkdownInputSchema,
     ImproveMarkdownOutputSchema,
     ProjectPlanSchema,
@@ -59,8 +56,6 @@ import {
     type GenerateProjectPlanInput,
     type GenerateProposalInput,
     type GenerateProposalOutput,
-    type GenerateSectionInput,
-    type GenerateSectionOutput,
     type ImproveMarkdownInput,
     type ImproveMarkdownOutput,
     type RewriteDocumentInput,
@@ -281,21 +276,7 @@ export async function generateProposal(input: GenerateProposalInput): Promise<Ge
     })(validation.data);
 }
 
-export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
-    const validation = GenerateSectionInputSchema.safeParse(input);
-    if (!validation.success) {
-        throw new Error(`Invalid input for generateReportSection: ${validation.error.message}`);
-    }
-    return ai.defineFlow({
-        name: 'generateReportSectionFlow',
-        inputSchema: GenerateSectionInputSchema,
-        outputSchema: GenerateSectionOutputSchema
-    }, async (input) => {
-        const { output } = await generateReportSectionPrompt(input);
-        if (!output) throw new Error("Report section generation failed.");
-        return output;
-    })(validation.data);
-}
+// generateReportSection تم نقله إلى generate-report-section.ts للاستخدام المحسن
 
 export async function generatePresentation(input: GeneratePresentationInput): Promise<GeneratePresentationOutput> {
     const validation = GeneratePresentationInputSchema.safeParse(input);
@@ -394,7 +375,11 @@ export async function summarizeFullProject(input: SummarizeFullProjectInput): Pr
         inputSchema: SummarizeFullProjectInputSchema,
         outputSchema: SummarizeFullProjectOutputSchema
     }, async (input) => {
-        const { output } = await fullReportSummaryPrompt(input);
+        const { output } = await fullReportSummaryPrompt({
+            proposal: input.proposal,
+            reportMarkdown: input.reportMarkdown,
+            jsonStringifiedProposal: JSON.stringify(input.proposal)
+        });
         if (!output) throw new Error('Full project summarization failed.');
         return output;
     })(validation.data);
@@ -458,9 +443,17 @@ export async function rewriteText(input: RewriteTextInput): Promise<RewriteTextO
         inputSchema: RewriteTextInputSchema,
         outputSchema: RewriteTextOutputSchema
     }, async (input) => {
-        const { output } = await textStylistPrompt(input);
+        const prompt = textStylistPrompt
+            .replace('{{instruction}}', input.style)
+            .replace('{{text}}', input.text);
+
+        const { output } = await ai.generate({
+            model: 'gemini-pro',
+            prompt: prompt
+        });
+
         if (!output) throw new Error("Text rewrite failed.");
-        return output;
+        return { rewrittenText: output.text };
     })(validation.data);
 }
 
@@ -474,8 +467,16 @@ export async function summarizeTextWithRatio(input: SummarizeTextWithRatioInput)
         inputSchema: SummarizeTextWithRatioInputSchema,
         outputSchema: SummarizeTextWithRatioOutputSchema
     }, async (input) => {
-        const { output } = await textStylistPrompt(input);
+        const prompt = summarizeTextWithRatioPrompt
+            .replace('{{ratio}}', input.ratio.toString())
+            .replace('{{text}}', input.text);
+
+        const { output } = await ai.generate({
+            model: 'gemini-pro',
+            prompt: prompt
+        });
+
         if (!output) throw new Error("Text summarization with ratio failed.");
-        return output;
+        return { summarizedText: output.text };
     })(validation.data);
 }

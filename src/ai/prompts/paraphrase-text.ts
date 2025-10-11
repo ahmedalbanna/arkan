@@ -15,7 +15,7 @@ const styleDescriptions: Record<ParaphraseMode, string> = {
     simplify: "Rewrite the text to be simpler and easier to understand for a general audience.",
 };
 
-export const paraphraseTextPrompt = ai.definePrompt({
+export const paraphrasePrompt = ai.definePrompt({
     name: 'paraphraseTextPrompt',
     input: { schema: ParaphraseInputSchema },
     output: { schema: ParaphraseOutputSchema },

@@ -13,7 +13,7 @@ const lengthDescriptions: Record<SummarizeLength, string> = {
     long: "a detailed summary, covering all significant topics and arguments.",
 };
 
-export const summarizeTextPrompt = ai.definePrompt({
+export const summarizePrompt = ai.definePrompt({
     name: 'summarizeTextPrompt',
     input: { schema: SummarizeInputSchema },
     output: { schema: SummarizeOutputSchema },

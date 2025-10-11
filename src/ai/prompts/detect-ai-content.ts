@@ -7,7 +7,7 @@
 import { ai } from '@/ai/genkit';
 import { DetectAIInputSchema, DetectAIOutputSchema } from '@/ai/schemas';
 
-export const detectAiPrompt = ai.definePrompt({
+export const detectAIPrompt = ai.definePrompt({
     name: 'detectAiContentPrompt',
     input: { schema: DetectAIInputSchema },
     output: { schema: DetectAIOutputSchema },
