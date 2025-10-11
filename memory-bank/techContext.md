@@ -114,7 +114,18 @@ src/
 src/ai/
 ├── config/             # AI model configurations
 ├── prompts/            # Prompt definitions
-├── flows/              # AI business logic
+├── flows/              # Categorized AI flows system
+│   ├── registry.ts              # Central flow registry
+│   ├── unified.ts               # Unified interface
+│   ├── index.ts                 # Main index
+│   ├── text-processing.ts       # Text processing flows (8 flows)
+│   ├── content-generation.ts    # Content generation flows (9 flows)
+│   ├── document-processing.ts   # Document processing flows (10 flows)
+│   ├── analysis.ts              # Analysis flows (5 flows)
+│   ├── academic.ts              # Academic flows (5 flows)
+│   ├── visual.ts                # Visual flows (2 flows)
+│   └── __tests__/               # Comprehensive test suite
+│       └── categorized-flows.test.ts
 ├── tools/              # External AI tools
 ├── schemas/            # Zod validation schemas
 └── core/               # Enhanced AI core system with comprehensive documentation and testing

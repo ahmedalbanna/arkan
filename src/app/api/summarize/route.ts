@@ -4,7 +4,7 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للتلخيص
  */
 
-import { summarizeText } from '@/ai/flows/summarize-text';
+import { summarizeText } from '@/ai/flows/unified';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { logGeneration } from '@/services';
@@ -39,7 +39,7 @@ class SummarizeHandler extends CreditBasedApiHandler<{
             style: data.style || 'concise',
             length: data.length || 'medium',
         };
-        const result = await summarizeText(agentInput as SummarizeInput);
+        const result = await summarizeText(agentInput as any);
 
         // تسجيل العملية
         await logGeneration({

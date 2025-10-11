@@ -300,21 +300,22 @@ export async function generateQuiz(input: GenerateQuizInput): Promise<GenerateQu
     })(validation.data);
 }
 
-// export async function generateImage(input: GenerateImageInput): Promise<GenerateImageOutput> {
-//     const validation = GenerateImageInputSchema.safeParse(input);
-//     if (!validation.success) {
-//         throw new Error(`Invalid input for generateImage: ${validation.error.message}`);
-//     }
-//     return ai.defineFlow({
-//         name: 'generateImageFlow',
-//         inputSchema: GenerateImageInputSchema,
-//         outputSchema: GenerateImageOutputSchema
-//     }, async (input) => {
-//         const { output } = await generateImagePrompt(input);
-//         if (!output) throw new Error('Image generation failed');
-//         return output;
-//     })(validation.data);
-// }
+export async function generateImage(input: GenerateImageInput) //: Promise<GenerateImageOutput>
+{
+    const validation = GenerateImageInputSchema.safeParse(input);
+    if (!validation.success) {
+        throw new Error(`Invalid input for generateImage: ${validation.error.message}`);
+    }
+    // return ai.defineFlow({
+    //     name: 'generateImageFlow',
+    //     inputSchema: GenerateImageInputSchema,
+    //     outputSchema: GenerateImageOutputSchema
+    // }, async (input) => {
+    //     const { output } = await generateImagePrompt(input);
+    //     if (!output) throw new Error('Image generation failed');
+    //     return output;
+    // })(validation.data);
+}
 
 export async function topicExplainer(input: TopicExplainerInput): Promise<TopicExplainerOutput> {
     const validation = TopicExplainerInputSchema.safeParse(input);

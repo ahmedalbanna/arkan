@@ -2,24 +2,23 @@
 
 'use client';
 
-import { useState } from 'react';
-import type { Agent } from '@/lib/models/agent';
-import type { AgentCategoryDetails as AgentCategory } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
-import { Loader2, Save, Bot, BookOpen, Wrench, MessageSquare, ListChecks, Link as LinkIcon, BotMessageSquare, PencilRuler } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { FormProvider } from 'react-hook-form';
-import { cn } from '@/lib/utils';
-import KnowledgeTab from './KnowledgeTab';
-import ToolsTab from './ToolsTab';
-import GuidelinesTab from './GuidelinesTab';
-import AutomationTab from './AutomationTab';
-import ContextTab from './ContextTab';
-import GeneralTab from './GeneralTab';
-import OutputTab from './OutputTab';
 import { useAgentEditor } from '@/hooks';
 import { type AgentEditorFormValues } from '@/lib/agent-editor-schema';
+import type { Agent } from '@/lib/models/agent';
+import type { AgentCategoryDetails as AgentCategory } from '@/lib/types';
+import { cn } from '@/lib/utils';
+import { BookOpen, Bot, Link as LinkIcon, ListChecks, Loader2, PencilRuler, Wrench } from 'lucide-react';
+import { useState } from 'react';
+import { FormProvider } from 'react-hook-form';
+import ContextTab from './ContextTab';
+import GeneralTab from './GeneralTab';
+import GuidelinesTab from './GuidelinesTab';
+import KnowledgeTab from './KnowledgeTab';
+import OutputTab from './OutputTab';
+import ToolsTab from './ToolsTab';
 
 
 interface AgentEditorProps {
@@ -62,7 +61,7 @@ export default function AgentEditor({ agentId, initialData, categories, allAgent
     { id: 'knowledge', label: t('agentEditor.knowledgeTitle'), icon: BookOpen },
     { id: 'tools', label: t('agentEditor.toolsTitle'), icon: Wrench },
     { id: 'context', label: t('agentEditor.contextTitle'), icon: LinkIcon },
-    { id: 'automation', label: t('agentEditor.automationTitle'), icon: BotMessageSquare },
+
   ];
 
   const renderContent = () => {
@@ -79,8 +78,6 @@ export default function AgentEditor({ agentId, initialData, categories, allAgent
         return <ToolsTab />;
       case 'context':
         return <ContextTab allAgents={allAgents} />;
-       case 'automation':
-        return <AutomationTab />;
       default:
         return <div><CardTitle>{navItems.find(n => n.id === activeTab)?.label}</CardTitle><p>Coming soon...</p></div>;
     }

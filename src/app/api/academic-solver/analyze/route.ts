@@ -4,7 +4,7 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتحليل المشاكل الأكاديمية
  */
 
-import { analyzeAcademicDocument } from '@/ai/flows/academic-solver';
+import { analyzeAcademicDocument } from '@/ai/flows/unified';
 import { AcademicDocumentTypeSchema } from '@/ai/schemas/enums';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';

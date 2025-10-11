@@ -206,7 +206,7 @@ export {
 // توليد المحتوى
 export {
     generateAgentConfig, generateCitation, generateCode,
-    generateCodebase, generateIdeas, generateQuiz, generateText, topicExplainer
+    generateCodebase, generateIdeas, generateImage, generateQuiz, generateText, topicExplainer
 } from './content-generation';
 
 // معالجة المستندات
@@ -216,6 +216,11 @@ export {
     generateProjectPlan, generateProposal,
     improveReportMarkdown, rewriteDocumentToMarkdown, rewriteText, rewriteToMarkdown, summarizeDocument, summarizeFullProject, summarizeProject, summarizeTextWithRatio, writeDocument
 } from './document-processing';
+
+// توليد أقسام التقرير
+export {
+    generateCompleteReport, generateReportSection, getReportGenerationStats
+} from './generate-report-section';
 
 // التحليل
 export {
@@ -233,10 +238,7 @@ export {
     generatePlantUML
 } from './visual';
 
-// التدفقات الخاصة
-export { generateProposalSection } from './generate-proposal-section';
-export { generateReportSection } from './generate-report-section';
-export { intelligentReportWorkflow } from './intelligent-report-workflow';
+
 
 
 

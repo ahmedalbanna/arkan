@@ -4,7 +4,7 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد إعدادات الوكلاء
  */
 
-import { generateAgentConfig } from '@/ai/flows/generate-agent-config';
+import { generateAgentConfig } from '@/ai/flows/unified';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { z } from 'zod';

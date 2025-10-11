@@ -4,7 +4,7 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتحليل السياق
  */
 
-import { analyzeContext } from '@/ai/flows/analyze-context';
+import { analyzeContext } from '@/ai/flows/unified';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { logGeneration } from '@/services';

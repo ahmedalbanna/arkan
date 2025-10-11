@@ -4,7 +4,7 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد العروض التقديمية
  */
 
-import { generatePresentation } from '@/ai/flows/generate-presentation';
+import { generatePresentation } from '@/ai/flows/unified';
 import { ProjectPlanSchema, ProjectProposalSchema } from '@/ai/schemas/project';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';

@@ -4,7 +4,7 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لمعالجة النصوص
  */
 
-import { manipulateText } from '@/ai/flows/manipulate-text';
+import { manipulateText } from '@/ai/flows/unified';
 import { ManipulateTextInputSchema } from '@/ai/schemas';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';

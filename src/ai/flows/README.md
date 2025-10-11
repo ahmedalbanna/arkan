@@ -16,8 +16,8 @@ src/ai/flows/
 ├── document-processing.ts   # معالجة المستندات (10 تدفقات)
 ├── analysis.ts              # التحليل (5 تدفقات)
 ├── academic.ts              # الأكاديمي (5 تدفقات)
-├── visual.ts                # المرئي (2 تدفقات)
-└── generate-proposal-section.ts  # تدفق خاص
+└── visual.ts                # المرئي (2
+
 ```
 
 ## 🚀 الميزات الجديدة

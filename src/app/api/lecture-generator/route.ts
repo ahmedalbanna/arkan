@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد المحاضرات
  */
 
-import { createLectureUnit } from '@/ai/flows/create-lecture-unit';
-import { CreateLectureUnitInputSchema } from '@/ai/schemas/lecture-generator';
+import { createLectureUnit } from '@/ai/flows/unified';
+import { CreateLectureUnitInputSchema } from '@/ai/schemas';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { logGeneration } from '@/services';
@@ -21,7 +21,7 @@ class LectureGeneratorHandler extends CreditBasedApiHandler<any, any> {
         const { user } = context;
 
         const agentInput = data;
-        const result = await createLectureUnit(agentInput);
+        const result = await createLectureUnit(agentInput as any);
 
         // تسجيل العملية
         await logGeneration({

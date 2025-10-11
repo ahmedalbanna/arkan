@@ -4,7 +4,7 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتلخيص المشروع
  */
 
-import { summarizeFullProject } from '@/ai/flows/summarize-project';
+import { summarizeFullProject } from '@/ai/flows/unified';
 import { AnyProjectProposalSchema } from '@/ai/schemas';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
@@ -34,7 +34,7 @@ class SummarizeProjectHandler extends CreditBasedApiHandler<{
             proposal: data.proposal,
             reportMarkdown: data.reportMarkdown || '',
         };
-        const result = await summarizeFullProject(agentInput);
+        const result = await summarizeFullProject(agentInput as any);
 
         // تسجيل العملية
         await logGeneration({

@@ -4,8 +4,7 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لمعالجة الملفات
  */
 
-import { imageToText } from '@/ai/flows/image-to-text';
-import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
+import { imageToText, rewriteDocumentToMarkdown } from '@/ai/flows/unified';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { logGeneration } from '@/services';
@@ -13,7 +12,7 @@ import { z } from 'zod';
 
 // Schema لمعالجة الملفات
 const processFileSchema = z.object({
-    file: z.any(),
+    file: z.instanceof(File),
 });
 
 const SUPPORTED_MIME_TYPES = [
@@ -28,15 +27,19 @@ const SUPPORTED_MIME_TYPES = [
 /**
  * معالج معالجة الملفات
  */
-class ProcessFileHandler extends CreditBasedApiHandler<FormData, {
+class ProcessFileHandler extends CreditBasedApiHandler<{
+    file: File;
+}, {
     markdown: string;
 }> {
     protected creditCost = 1;
     protected requiresAdmin = false;
     protected inputSchema = processFileSchema;
-    protected async processRequest(data: FormData, context: any) {
+    protected async processRequest(data: {
+        file: File;
+    }, context: any) {
         const { user } = context;
-        const file = data.get('file') as File;
+        const file = data.file;
 
         if (!file) {
             throw new Error('No file uploaded.');

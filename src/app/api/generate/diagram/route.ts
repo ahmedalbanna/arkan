@@ -4,7 +4,7 @@
  */
 
 import { IntelligentAISystem } from '@/ai/core';
-import { generateDiagram } from '@/ai/flows/generate-diagram';
+import { generateDiagram } from '@/ai/flows/unified';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { z } from 'zod';

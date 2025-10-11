@@ -4,7 +4,7 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد الصور
  */
 
-import { generateImage } from '@/ai/flows/generate-image';
+import { generateImage } from '@/ai/flows/unified';
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { logGeneration } from '@/services';
@@ -27,7 +27,7 @@ class GenerateImageHandler extends CreditBasedApiHandler<{
     protected async processRequest(data: any, context: any) {
         const { user } = context;
 
-        const result = await generateImage(data);
+        const result = await generateImage(data as any);
 
         // تسجيل العملية
         await logGeneration({

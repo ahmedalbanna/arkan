@@ -1,6 +1,5 @@
 
 // src/app/api/templates/refresh-image/route.ts
-import { generateImage } from '@/ai/flows/generate-image';
 import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import { logGeneration } from '@/services';
@@ -24,11 +23,11 @@ export const POST = withEnhancedAuth(async ({ request, user }) => {
     const { templateType, templateId, prompt } = validation.data;
 
     const agentInput = { prompt };
-    const { imageUrl: base64DataUri } = await generateImage(agentInput);
+    // const { imageUrl: base64DataUri } = await generateImage(agentInput);
 
-    if (!base64DataUri.startsWith('data:image/')) {
-      throw new Error('Invalid image data received from generation service.');
-    }
+    // if (!base64DataUri.startsWith('data:image/')) {
+    //   throw new Error('Invalid image data received from generation service.');
+    // }
 
     await logGeneration({
       agentId: 'generate-template-image',
@@ -41,16 +40,16 @@ export const POST = withEnhancedAuth(async ({ request, user }) => {
     const storage = getStorage();
     const bucket = storage.bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'arkan-docudec.appspot.com');
 
-    const base64Data = base64DataUri.split(',')[1];
-    const imageBuffer = Buffer.from(base64Data, 'base64');
-    const mimeType = base64DataUri.match(/data:(image\/[^;]+);base64,/)?.[1] || 'image/png';
+    // const base64Data = base64DataUri.split(',')[1];
+    // const imageBuffer = Buffer.from(base64Data, 'base64');
+    // const mimeType = base64DataUri.match(/data:(image\/[^;]+);base64,/)?.[1] || 'image/png';
 
     const fileName = `template_previews/${templateType}/${templateId}-${Date.now()}.png`;
     const file = bucket.file(fileName);
 
-    await file.save(imageBuffer, {
-      metadata: { contentType: mimeType },
-    });
+    // await file.save(imageBuffer, {
+    //   metadata: { contentType: mimeType },
+    // });
 
     await file.makePublic();
     const publicUrl = file.publicUrl();
