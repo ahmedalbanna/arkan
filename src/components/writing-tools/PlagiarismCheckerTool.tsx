@@ -121,7 +121,7 @@ export function PlagiarismCheckerTool() {
                                 {t('writingTools.plagiarismChecker.matchBadge').replace('{similarity}', match.similarity.toString())}
                               </Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground italic">"{match.summary}"</p>
+                            <p className="text-sm text-muted-foreground italic">&quot;{match.summary}&quot;</p>
                             <Link href={match.source} target="_blank" className="text-xs text-primary hover:underline flex items-center gap-1">
                               {match.source} <ExternalLink className="inline h-3 w-3" />
                             </Link>

@@ -163,7 +163,7 @@ export default function LectureGeneratorPage() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="professorNotes" className="font-headline">Professor's Notes (Optional)</Label>
+                                        <Label htmlFor="professorNotes" className="font-headline">Professor&apos;s Notes (Optional)</Label>
                                         <Textarea
                                             id="professorNotes"
                                             name="professorNotes"

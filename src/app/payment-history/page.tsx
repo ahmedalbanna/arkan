@@ -180,7 +180,7 @@ export default function PaymentHistoryPage() {
                                     <CreditCard className="h-12 w-12 text-white" />
                                 </div>
                                 <h3 className="text-lg font-semibold mb-2">No Transactions Yet</h3>
-                                <p className="mb-4">You haven't made any payments or credit purchases.</p>
+                                <p className="mb-4">You haven&apos;t made any payments or credit purchases.</p>
                                 <div className="flex items-center justify-center gap-2 text-sm">
                                     <Shield className="h-4 w-4" />
                                     <span>All transactions are secure and encrypted</span>

@@ -68,7 +68,7 @@ createGenkitFlow(
             throw new Error('Solution failed to produce an output.');
         }
         // تنظيف المحتوى المُولد
-        output.solutions = output.solutions.map(solution => ({ ...solution, solution: solution.solution.replace(/---/g, '').trim() }));
+        output.solutions = output.solutions.map((solution: any) => ({ ...solution, solution: solution.solution.replace(/---/g, '').trim() }));
         return output;
     }
 );
@@ -176,7 +176,7 @@ export async function solveAcademicDocument(input: SolveDocumentInput): Promise<
     }, async (input) => {
         const { output } = await solvePrompt(input);
         if (!output) throw new Error('Solution failed to produce an output.');
-        output.solutions = output.solutions.map(solution => ({ ...solution, solution: solution.solution.replace(/---/g, '').trim() }));
+        output.solutions = output.solutions.map((solution: any) => ({ ...solution, solution: solution.solution.replace(/---/g, '').trim() }));
         return output;
     })(validation.data);
 }
@@ -246,6 +246,6 @@ export async function createLectureUnit(input: CreateLectureUnitInput): Promise<
     return {
         theoreticalLecture: theoreticalLectureOutput,
         practicalSession: practicalSessionOutput,
-        progress: 'Generated complete lecture unit with both theoretical and practical components.'
+        // progress: 'Generated complete lecture unit with both theoretical and practical components.' as const
     };
 }

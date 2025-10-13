@@ -1,10 +1,10 @@
 
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { useLocalization } from '@/context/LocalizationContext';
 import { SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 
 export default function ManageGenerationTemplatesPage() {
   const { t } = useLocalization();
@@ -16,7 +16,7 @@ export default function ManageGenerationTemplatesPage() {
           Feature Removed
         </h1>
         <p className="text-lg text-muted-foreground mt-4">
-          The concept of 'Generation Templates' has been removed to simplify the user experience. Agent and style configurations are now managed separately.
+          The concept of &apos;Generation Templates&apos; has been removed to simplify the user experience. Agent and style configurations are now managed separately.
         </p>
          <Button asChild className="mt-6">
             <Link href="/admin/dashboard">

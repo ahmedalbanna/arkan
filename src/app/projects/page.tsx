@@ -194,7 +194,7 @@ export default function MyProjectsPage() {
                             </span>
                             {searchQuery && (
                                 <Badge variant="secondary">
-                                    Search: "{searchQuery}"
+                                    Search: &quot;{searchQuery}&quot;
                                 </Badge>
                             )}
                             {selectedType !== 'all' && (

@@ -4,8 +4,8 @@
  * مكون حاوية التمرير الافتراضية فائق الأداء
  */
 
-import React, { useState, useEffect, useRef, useMemo, forwardRef, useCallback } from 'react';
 import { useVirtualScroller } from '@/core/hooks/performance/use-virtual-scroller';
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export interface VirtualScrollContainerProps<T = any> {
     /** البيانات المعروضة */
@@ -62,9 +62,7 @@ export const VirtualScrollContainer = forwardRef<HTMLDivElement, VirtualScrollCo
         ...props
     },
     ref
-)
-
-{
+)=>{
 
     // Refs للحاوية والعناصر
     const containerRef = useRef<HTMLDivElement>(null);
@@ -195,7 +193,7 @@ export const VirtualScrollContainer = forwardRef<HTMLDivElement, VirtualScrollCo
             )}
         </div>
     );
-});
+})
 
 VirtualScrollContainer.displayName = 'VirtualScrollContainer';
 

@@ -270,47 +270,17 @@ export function ExampleCustomErrorBoundary() {
 export function ExampleMultiLevelErrorHandling() {
     const [level, setLevel] = useState<'low' | 'medium' | 'high' | 'critical'>('low');
 
-    const getErrorHandler = () => {
-        switch (level) {
-            case 'critical':
-                return useErrorHandler({
-                    category: 'ai_generation',
-                    severity: 'critical',
-                    operationId: 'critical-error',
-                    enableRetry: false,
-                    enableReporting: true
-                });
-            case 'high':
-                return useErrorHandler({
-                    category: 'ai_generation',
-                    severity: 'high',
-                    operationId: 'high-error',
-                    enableRetry: true,
-                    maxRetries: 2,
-                    enableReporting: true
-                });
-            case 'medium':
-                return useErrorHandler({
-                    category: 'ai_generation',
-                    severity: 'medium',
-                    operationId: 'medium-error',
-                    enableRetry: true,
-                    maxRetries: 3,
-                    enableReporting: false
-                });
-            default:
-                return useErrorHandler({
-                    category: 'ai_generation',
-                    severity: 'low',
-                    operationId: 'low-error',
-                    enableRetry: true,
-                    maxRetries: 5,
-                    enableReporting: false
-                });
-        }
-    };
+    // استخدام useErrorHandler في مستوى المكون
+    const errorHandler = useErrorHandler({
+        category: 'ai_generation',
+        severity: level,
+        operationId: `${level}-error`,
+        enableRetry: level !== 'critical',
+        maxRetries: level === 'critical' ? 0 : level === 'high' ? 2 : level === 'medium' ? 3 : 5,
+        enableReporting: level === 'critical' || level === 'high'
+    });
 
-    const { error, handleError, clearError, retry } = getErrorHandler();
+    const { error, handleError, clearError, retry } = errorHandler;
 
     const simulateError = async () => {
         const errorMessage = `خطأ ${level} المستوى`;

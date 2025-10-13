@@ -62,7 +62,7 @@ export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerPro
                                         {item.solution && item.sectionKey && (
                                             <div className="pl-6 w-full">
                                                 <div className="flex items-center gap-2 p-2 rounded-md bg-gradient-to-r from-background/80 to-primary/5 backdrop-blur-sm border border-dashed shadow-soft hover:shadow-glow transition-all duration-200">
-                                                    <p className="text-xs text-muted-foreground flex-grow italic">"{item.solution}"</p>
+                                                    <p className="text-xs text-muted-foreground flex-grow italic">&quot;{item.solution}&quot;</p>
                                                     <Button
                                                         size="sm"
                                                         variant="secondary"

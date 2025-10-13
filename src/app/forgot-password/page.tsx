@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
                     Reset Password
                   </h1>
                   <p className="text-balance text-muted-foreground mt-2">
-                    Don't worry, it happens to the best of us
+                    Don&apos;t worry, it happens to the best of us
                   </p>
                 </AnimatedContainer>
               </div>
@@ -52,7 +52,7 @@ export default function ForgotPasswordPage() {
                   <CardHeader className="space-y-1">
                     <CardTitle className="text-2xl text-center">Forgot Password?</CardTitle>
                     <CardDescription className="text-center">
-                      Enter your email address and we'll send you a reset link
+                      Enter your email address and we&apos;ll send you a reset link
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -90,7 +90,7 @@ export default function ForgotPasswordPage() {
                 </div>
                 <h2 className="text-3xl font-headline font-bold mb-2">Need Help?</h2>
                 <p className="text-lg text-muted-foreground">
-                  We're here to help you get back into your account
+                  We&apos;re here to help you get back into your account
                 </p>
               </div>
 

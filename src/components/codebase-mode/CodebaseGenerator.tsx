@@ -121,7 +121,7 @@ export default function CodebaseGenerator() {
                       <Package className="w-16 h-16 mx-auto text-white" />
                     </div>
                     <h3 className="text-lg font-semibold font-headline">Your Codebase Will Appear Here</h3>
-                    <p>Click "Generate Codebase" to scaffold your project files based on your proposal.</p>
+                    <p>Click &quot;Generate Codebase&quot; to scaffold your project files based on your proposal.</p>
                   </div>
                 </Card>
               </AnimatedContainer>

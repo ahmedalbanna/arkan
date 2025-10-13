@@ -134,7 +134,7 @@ export function FactCheckerTool() {
                           <AnimatedContainer key={index} animation="fade-in-up" delay={700 + index * 100}>
                             <div className="border p-4 rounded-lg space-y-2 bg-gradient-to-r from-background/50 to-primary/5 backdrop-blur-sm shadow-soft hover:shadow-glow transition-all duration-200">
                               <div className="flex justify-between items-start">
-                                <p className="font-medium italic">"{claim.statement}"</p>
+                                <p className="font-medium italic">&quot;{claim.statement}&quot;</p>
                                 <Badge variant={badgeVariant} className="flex-shrink-0 ml-4 shadow-soft">
                                   <Icon className={`mr-1 h-3.5 w-3.5 ${color}`} />
                                   {claim.status}

@@ -299,7 +299,7 @@ export default function EditUserForm({ user }: { user: User }) {
                                 )}
                             </CardContent>
                             <CardFooter className="justify-between">
-                                <Button type="submit" disabled={isPending} className="font-headline" variant="gradient" className="hover:shadow-glow">
+                                <Button type="submit" disabled={isPending} className="font-headline hover:shadow-glow" variant="gradient">
                                     <Save className="me-2 h-4 w-4" />
                                     {t('editUser.saveButton')}
                                 </Button>

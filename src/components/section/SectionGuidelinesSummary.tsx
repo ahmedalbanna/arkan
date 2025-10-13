@@ -105,7 +105,7 @@ export function GuidelinesSummary({ itemKey }: GuidelinesSummaryProps) {
                                         </div>
                                         {item.type === 'oneTime' && (
                                             <div className="text-xs text-muted-foreground pl-6 p-2 rounded-lg bg-gradient-to-r from-muted/30 to-primary/5">
-                                                "{item.value}"
+                                                &quot;{item.value}&quot;
                                             </div>
                                         )}
                                     </div>

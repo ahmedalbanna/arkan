@@ -1,8 +1,8 @@
 
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
 
@@ -19,7 +19,7 @@ export default function AcademicSolverPage() {
         </CardHeader>
         <CardContent>
           <p>
-            You can now access all the academic solving tools directly within the builder's tabbed interface.
+            You can now access all the academic solving tools directly within the builder&apos;s tabbed interface.
           </p>
           <Button asChild className="mt-6">
             <Link href="/generate?tab=academic">

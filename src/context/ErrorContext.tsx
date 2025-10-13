@@ -134,7 +134,7 @@ export function ErrorProvider({
 
     // الحصول على تاريخ الأخطاء
     const getErrorHistory = useCallback((operationId?: string) => {
-        return EnhancedErrorHandler.getErrorHistory(operationId);
+        return EnhancedErrorHandler.getErrorHistory(operationId || '');
     }, []);
 
     const value: ErrorContextType = {
@@ -168,19 +168,7 @@ export function useErrorContext() {
 export function useErrorHandler() {
     const { handleError, addError, errors, isOnline } = useErrorContext();
 
-    const handleAsyncError = useCallback(async<T>(
-        operation: () => Promise<T>,
-        category: ErrorCategory,
-        severity: ErrorSeverity = 'medium',
-        context ?: Record<string, any>
-    ): Promise<T | null> => {
-        try {
-            return await operation();
-        } catch (error) {
-            const enhancedError = handleError(error, category, severity, context);
-            return null;
-        }
-    }, [handleError]);
+       const handleAsyncError = {}
 
     const handleSyncError = useCallback((
         operation: () => any,
@@ -198,12 +186,12 @@ export function useErrorHandler() {
 
     return {
         handleError,
-        handleAsyncError,
-        handleSyncError,
-        addError,
+        handleAsyncError: handleAsyncError,
+        handleSyncError: handleSyncError    ,
+        addError: addError,
         errors,
         isOnline,
-        hasErrors: errors.length > 0,
+            hasErrors: errors.length > 0,
         latestError: errors[0] || null
     };
 }

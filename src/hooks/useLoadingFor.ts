@@ -5,9 +5,9 @@
 
 'use client';
 
-import { useCallback, useRef, useEffect } from 'react';
+import { useLoadingState } from '@/context/LoadingContext';
 import { useToast } from '@/hooks';
-import { useLoadingState, LoadingStateData } from '@/context/LoadingContext';
+import { useCallback, useEffect, useRef } from 'react';
 
 /**
  * Hook للعمليات غير المتزامنة مع معالجة تلقائية للأخطاء
@@ -163,8 +163,8 @@ export const useFileOperation = (
         onSuccess: (result: { file: File; content: string }) => {
             options.onSuccess?.(result.file, result.content);
         },
-        onError: options.onError,
-        as const);
+        onError: options.onError
+    } as const);
 
     const uploadFile = useCallback(async (file: File) => {
         // فحص حجم الملف

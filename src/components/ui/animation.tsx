@@ -299,7 +299,7 @@ const ParallaxAnimation = React.forwardRef<HTMLDivElement, ParallaxAnimationProp
                         }
                     }
                     if (elementRef.current !== node) {
-                        elementRef.current = node as HTMLElement
+                        elementRef
                     }
                 }}
                 className={className}

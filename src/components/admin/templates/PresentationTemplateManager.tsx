@@ -124,7 +124,7 @@ function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDele
                             <AlertDialogContent>
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>This action cannot be undone. This will permanently delete the "{template.name}" template.</AlertDialogDescription>
+                                    <AlertDialogDescription>This action cannot be undone. This will permanently delete the &quot;{template.name}&quot; template.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>

@@ -1,19 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: [
-      'firebase-admin',
-      '@google-cloud/storage',
-      'google-auth-library',
-      'gcp-metadata',
-      'gtoken',
-      'teeny-request',
-      'http-proxy-agent',
-      'https-proxy-agent',
-      'agent-base',
-      '@firebase/database-compat'
-    ],
+    // إزالة serverComponentsExternalPackages القديم
   },
+  // نقل serverComponentsExternalPackages إلى المستوى الرئيسي
+  serverExternalPackages: [
+    'firebase-admin',
+    '@google-cloud/storage',
+    'google-auth-library',
+    'gcp-metadata',
+    'gtoken',
+    'teeny-request',
+    'http-proxy-agent',
+    'https-proxy-agent',
+    'agent-base',
+    '@firebase/database-compat'
+  ],
   webpack: (config, { isServer }) => {
     // حل مشكلة الوحدات غير المتوفرة في المتصفح
     if (!isServer) {
@@ -55,7 +57,6 @@ const nextConfig = {
     return config;
   },
   // تحسين الأداء
-  swcMinify: true,
   compress: true,
   // إعدادات الصور
   images: {

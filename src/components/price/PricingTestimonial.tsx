@@ -93,7 +93,7 @@ export function PricingTestimonial({ testimonials, className }: PricingTestimoni
 
                                     {/* Content */}
                                     <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                                        "{testimonial.content}"
+                                        &quot;{testimonial.content}&quot;
                                     </p>
 
                                     {/* User Info */}
