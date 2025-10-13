@@ -6,7 +6,7 @@
 
 import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { handleApiErrorEnhanced } from '@/lib/core/api';
+import { handleApiErrorEnhanced } from '@/core/api';
 import { createTransaction } from '@/lib/db/queries';
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import { getStorage } from 'firebase-admin/storage';

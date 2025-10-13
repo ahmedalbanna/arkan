@@ -7,7 +7,7 @@
 import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { ProjectSchemas } from '@/app/api/shared/validators/api-validators';
-import { handleApiErrorEnhanced } from '@/lib/core/api';
+import { handleApiErrorEnhanced } from '@/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import type { SavedProject } from '@/lib/models/project';
 

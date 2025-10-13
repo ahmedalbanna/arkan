@@ -13,13 +13,13 @@
 export * from './constants';
 
 // Types
-export * from './types';
+export * from '../../core/types';
 
 // Utils
 // export * from './utils';
 
 // Error Handling
-export * from './error-handling';
+export * from '../../core/error-handling';
 
 // Client-side components (safe for browser)
 // export * from './client';
@@ -35,47 +35,48 @@ export type {
 export type {
     HttpError, HttpHeaders, HttpMethod, HttpRequestOptions,
     HttpResponse
-} from './types/api';
+} from '../../core/types/api';
 
 export type {
     AuthResult,
     LoginCredentials,
     RegisterCredentials
-} from './auth/auth-service';
+} from '../../core/auth/auth-service';
 
 export type {
     AuthState
-} from './auth/auth-hooks';
+} from '../../core/auth/auth-hooks';
 
 export type {
     ExtendedUser,
     PermissionCheckResult, UserPermission, UserRole
-} from './auth/auth-utils';
+} from '../../core/auth/auth-utils';
 
 export type {
     BundleStats
-} from './performance/bundle-analyzer';
+} from '../../core/performance/bundle-analyzer';
 
 export type {
     PerformanceEvent, PerformanceMetrics
-} from './performance/performance-monitor';
+} from '../../core/performance/performance-monitor';
 
 export type {
     AdvancedCacheOptions,
     CacheStats
-} from './performance/cache-optimizer';
+} from '../../core/performance/cache-optimizer';
 
 export type {
     ApiBatch, ApiOptimizationOptions,
     ApiRequest
-} from './performance/api-optimizer';
+} from '../../core/performance/api-optimizer';
 
 export type {
     AnalyticsEvent, AnalyticsEventType, AppMetrics, UserMetrics
-} from './performance/analytics';
+} from '../../core/performance/analytics';
 
 export type {
     IntegrationConfig
-} from './performance/integration';
+} from '../../core/performance/integration';
 
 export type * from './query-keys';
+

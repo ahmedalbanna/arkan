@@ -5,7 +5,7 @@
  * المستخدمة في التطبيق
  */
 
-import { SUPPORTED_FILE_TYPES } from '../constants';
+import { SUPPORTED_FILE_TYPES } from '../../lib/core/constants';
 
 /**
  * تحويل ArrayBuffer إلى base64

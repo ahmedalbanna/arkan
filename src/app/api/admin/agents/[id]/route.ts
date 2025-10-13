@@ -1,7 +1,7 @@
 
 
 // src/app/api/agents/[id]/route.ts
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/lib/core/api';
+import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import { AgentPromptSchema } from '@/lib/template-schemas';
 import { z } from 'zod';

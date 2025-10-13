@@ -4,7 +4,7 @@
  * يوفر مراقبة أداء فورية وشاملة مع تحسينات تلقائية
  */
 
-import { PerformanceMonitor } from '@/lib/core/performance/performance-monitor';
+import { PerformanceMonitor } from '@/core/performance/performance-monitor';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface RealTimePerformanceOptions {

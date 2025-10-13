@@ -6,7 +6,7 @@
  */
 
 // نقاط نهاية API
-export * from './api-endpoints';
+export * from '../../../core/constants/api-endpoints';
 
 // أنواع الملفات
 export * from './file-types';

@@ -4,7 +4,7 @@
  * هذا الملف يحتوي على جميع middleware المستخدمة في نظام API الموحد
  */
 
-import { withEnhancedAuth } from '@/lib/core/api';
+import { withEnhancedAuth } from '@/core/api';
 import { deductCredit } from '@/services';
 import type {
     ApiHandler,

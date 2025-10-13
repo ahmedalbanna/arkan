@@ -7,7 +7,7 @@
 
 'use client';
 
-import { API_ENDPOINTS } from '../../constants';
+import { API_ENDPOINTS } from '../../../lib/core/constants';
 import {
     AuthRequest,
     AuthResponse,

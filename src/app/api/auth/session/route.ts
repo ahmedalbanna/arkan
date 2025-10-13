@@ -6,7 +6,7 @@
 
 import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { createApiResponseEnhanced } from '@/lib/core/api';
+import { createApiResponseEnhanced } from '@/core/api';
 import { adminAuth } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 

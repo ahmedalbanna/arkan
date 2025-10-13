@@ -7,7 +7,7 @@
 import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
 import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import type { ApiHandlerContext } from '@/app/api/shared/types/api-types';
-import { createApiResponseEnhanced, handleApiErrorEnhanced } from '@/lib/core/api';
+import { createApiResponseEnhanced, handleApiErrorEnhanced } from '@/core/api';
 import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 

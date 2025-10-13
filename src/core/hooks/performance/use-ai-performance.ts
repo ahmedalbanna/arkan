@@ -5,7 +5,7 @@
  * مع deduplication وcaching وretry logic ذكي
  */
 
-import { PerformanceMonitor } from '@/lib/core/performance/performance-monitor';
+import { PerformanceMonitor } from '@/core/performance/performance-monitor';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 export interface AIPerformanceOptions {

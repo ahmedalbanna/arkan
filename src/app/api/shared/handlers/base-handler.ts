@@ -5,7 +5,7 @@
  * يوفر بنية موحدة لمعالجة الطلبات والاستجابات
  */
 
-import { createApiResponseEnhanced, handleApiErrorEnhanced } from '@/lib/core/api';
+import { createApiResponseEnhanced, handleApiErrorEnhanced } from '@/core/api';
 import { z } from 'zod';
 import type {
     ApiHandlerContext,

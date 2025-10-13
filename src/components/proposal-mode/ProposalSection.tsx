@@ -7,7 +7,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import {
     FlexibleContent,
     SafeUpdateFunction
-} from '@/lib/core/types/flexible-content-types';
+} from '@/core/types/flexible-content-types';
 import { formatKeyToTitle, hasContent } from '@/lib/proposal-utils';
 import { FileText } from 'lucide-react';
 import { MarkdownViewer } from '../shared/MarkdownViewer';

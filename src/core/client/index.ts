@@ -1,12 +1,12 @@
 /**
- * الخادم - Server-side Module
+ * العميل - Client-side Module
  *
- * هذا الملف يحتوي على جميع المكونات التي تعمل على الخادم فقط
- * ويشمل مكتبات Firebase Admin و Google Cloud
+ * هذا الملف يحتوي على جميع المكونات التي تعمل على العميل فقط
+ * ولا تحتوي على أي مكتبات server-side
  */
 
 // Constants
-export * from '../constants';
+export * from '../../lib/core/constants';
 
 // Types
 export * from '../types';
@@ -14,28 +14,25 @@ export * from '../types';
 // Utils
 // export * from '../utils';
 
-// Error Handling (Server-side)
+// Error Handling (Client-side only)
 export * from '../error-handling';
 
-// Server-side Firebase
-export * from '../firebase/server-init';
+// Client-side Firebase
+export * from '../firebase/client-init';
 
-// API (Server-side)
-// export * from '../api';
+// Cache (Client-side)
+export * from '../../lib/core/cache';
 
-// Auth (Server-side)
-export * from '../auth';
+// Query Keys
+export * from '../../lib/core/query-keys';
 
-// Integration (Server-side)
-export * from '../integration';
-
-// Performance (Server-side)
+// Performance (Client-side safe)
 export * from '../performance';
 
 // Re-export commonly used types
 export type {
     ErrorState, LoadingState, ProcessResult
-} from '../types/common';
+} from '../../lib/core/types/common';
 
 export type {
     HttpError, HttpHeaders, HttpMethod, HttpRequestOptions,
