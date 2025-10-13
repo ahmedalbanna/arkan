@@ -7,8 +7,8 @@
 
 import { generateReportSection } from '@/ai/flows/unified';
 import { GenerateSectionInputSchema } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { logGeneration } from '@/services';
 
 /**
@@ -49,7 +49,7 @@ const generateReportHandler = new GenerateReportHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    generateReportHandler.handle.bind(generateReportHandler),
+    generateReportHandler,
     {
         logging: true
     }

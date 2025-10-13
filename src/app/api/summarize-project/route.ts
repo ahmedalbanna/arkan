@@ -6,8 +6,8 @@
 
 import { summarizeFullProject } from '@/ai/flows/unified';
 import { AnyProjectProposalSchema } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -54,7 +54,7 @@ const summarizeProjectHandler = new SummarizeProjectHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    summarizeProjectHandler.handle.bind(summarizeProjectHandler),
+    summarizeProjectHandler,
     {
         logging: true
     }

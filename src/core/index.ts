@@ -62,7 +62,7 @@ export * from './hooks/performance';
 export * from './ui/use-ui-factory';
 
 // نظام التصدير الشامل
-export * from './export';
+// export * from './export';
 
 // نظام إدارة القوالب الشامل
 export * from './templates';
@@ -71,8 +71,8 @@ export * from './templates';
 export * from './monitoring/performance-tracker';
 
 // نظام تحسين Bundle والأداء
-export * from './utils/bundle-optimizer';
-export * from './utils/memory-manager';
+// export * from './utils/bundle-optimizer';
+// export * from './utils/memory-manager';
 
 // تصدير الأنواع
 export type { AcademicSolverToolConfig } from './hooks/academic-solver-tools/use-academic-solver-factory';
@@ -86,7 +86,7 @@ export type { TextProcessorOptions, TextProcessorResult } from './hooks/writing-
 
 // تصدير أنواع الأداء والذاكرة
 export type { BundlePerformance, ComponentPerformance, HookPerformance, PerformanceConfig, PerformanceMetric, PerformanceReport } from './monitoring/performance-tracker';
-export type { BundleConfig, BundleMetrics, LazyComponentProps } from './utils/bundle-optimizer';
+// export type { BundleConfig, BundleMetrics, LazyComponentProps } from './utils/bundle-optimizer';
 export type { CacheEntry, MemoryConfig, MemoryStats } from './utils/memory-manager';
 
 // تهيئة النظام تلقائياً
@@ -95,7 +95,7 @@ import { MemoryManager } from './utils/memory-manager';
 
 // تهيئة إدارة الذاكرة
 MemoryManager.initialize({
-    maxCacheSize: 50 * 1024 * 1024, // 50MB
+    maxCacheSize: 100 * 1024 * 1024, // 50MB
     maxEntries: 1000,
     cleanupInterval: 30000, // 30 seconds
     warningThreshold: 0.7, // 70%
@@ -110,4 +110,84 @@ PerformanceTracker.initialize({
     reportInterval: 60000, // 1 minute
     maxHistorySize: 1000
 });
+
+// /**
+//  * النظام الأساسي الموحد
+//  *
+//  * هذا الملف يحتوي على جميع مكونات النظام الأساسي الموحد
+//  * بما في ذلك الثوابت والأنواع والأدوات ومعالجة الأخطاء
+//  *
+//  * ملاحظة: هذا الملف للاستخدام العام. للاستخدام المحدد:
+//  * - استخدم './client' للعميل
+//  * - استخدم './server' للخادم
+//  */
+
+
+// Types
+// export * from './types';
+
+// Utils
+// export * from './utils';
+
+// Error Handling
+
+
+// Client-side components (safe for browser)
+// export * from './client';
+
+// Server-side components (Node.js only)
+// export * from './server';
+
+// Re-export commonly used types
+export type {
+    ErrorState, LoadingState, ProcessResult
+} from './types/common';
+
+export type {
+    HttpError, HttpHeaders, HttpMethod, HttpRequestOptions,
+    HttpResponse
+} from './types/api';
+
+export type {
+    AuthResult,
+    LoginCredentials,
+    RegisterCredentials
+} from './auth/auth-service';
+
+export type {
+    AuthState
+} from './auth/auth-hooks';
+
+export type {
+    ExtendedUser,
+    PermissionCheckResult, UserPermission, UserRole
+} from './auth/auth-utils';
+
+export type {
+    BundleStats
+} from './performance/bundle-analyzer';
+
+export type {
+    PerformanceEvent, PerformanceMetrics
+} from './performance/performance-monitor';
+
+export type {
+    AdvancedCacheOptions,
+    CacheStats
+} from './performance/cache-optimizer';
+
+export type {
+    ApiBatch, ApiOptimizationOptions,
+    ApiRequest
+} from './performance/api-optimizer';
+
+export type {
+    AnalyticsEvent, AnalyticsEventType, AppMetrics, UserMetrics
+} from './performance/analytics';
+
+export type {
+    IntegrationConfig
+} from './performance/integration';
+
+export type * from './utils/query-keys';
 

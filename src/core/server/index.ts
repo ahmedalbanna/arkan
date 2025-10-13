@@ -6,7 +6,7 @@
  */
 
 // Constants
-export * from '../../lib/core/constants';
+export * from '../constants';
 
 // Types
 export * from '../types';
@@ -35,7 +35,7 @@ export * from '../performance';
 // Re-export commonly used types
 export type {
     ErrorState, LoadingState, ProcessResult
-} from '../../lib/core/types/common';
+} from '../../core/types/common';
 
 export type {
     HttpError, HttpHeaders, HttpMethod, HttpRequestOptions,

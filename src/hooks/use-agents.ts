@@ -3,12 +3,12 @@
 
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
 import { useAuth } from "@/context/AuthContext";
+import { getAuthenticatedToken } from "@/core/utils/authUtils";
+import { handleErrorUtility } from "@/core/utils/errorUtils";
+import { agentKeys, categoryKeys } from '@/core/utils/query-keys';
 import { toast } from "@/hooks/use-toast";
 import { useAgentStore } from "@/hooks/useAgentStore";
 import { type AgentEditorFormValues } from "@/lib/agent-editor-schema";
-import { getAuthenticatedToken } from "@/lib/authUtils";
-import { agentKeys, categoryKeys } from '@/lib/core/query-keys';
-import { handleErrorUtility } from "@/lib/errorUtils";
 import { Agent, AgentCategoryDetails, AgentKnowledgeSource, type AgentProperties } from '@/lib/models/agent';
 import {
   createAgentApi,

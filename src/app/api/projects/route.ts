@@ -4,10 +4,10 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للمشاريع
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { ProjectSchemas } from '@/app/api/shared/validators/api-validators';
 import { handleApiErrorEnhanced } from '@/core/api';
+import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ProjectSchemas } from '@/core/validation/api-validators';
 import { adminDb } from '@/lib/firebase/server-init';
 import type { SavedProject } from '@/lib/models/project';
 
@@ -236,26 +236,26 @@ const addContextHandler = new AddContextHandler();
 
 // تصدير الـ handlers مع middleware
 export const GET = withApiMiddleware(
-    projectListHandler.handle.bind(projectListHandler),
+    projectListHandler,
     { logging: true }
 );
 
 export const POST = withApiMiddleware(
-    createProjectHandler.handle.bind(createProjectHandler),
+    createProjectHandler,
     { logging: true }
 );
 
 export const PUT = withApiMiddleware(
-    updateProjectHandler.handle.bind(updateProjectHandler),
+    updateProjectHandler,
     { logging: true }
 );
 
 export const DELETE = withApiMiddleware(
-    deleteProjectHandler.handle.bind(deleteProjectHandler),
+    deleteProjectHandler,
     { logging: true }
 );
 
 export const PATCH = withApiMiddleware(
-    addContextHandler.handle.bind(addContextHandler),
+    addContextHandler,
     { logging: true }
 );

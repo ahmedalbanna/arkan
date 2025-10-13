@@ -6,8 +6,8 @@
 
 import { evaluateReport } from '@/ai/flows/unified';
 import { DiagramTypeSchema, ProjectProposalSchema, SectionNameSchema } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -56,7 +56,7 @@ const evaluateReportHandler = new EvaluateReportHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    evaluateReportHandler.handle.bind(evaluateReportHandler),
+    evaluateReportHandler,
     {
         logging: true
     }

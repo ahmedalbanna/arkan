@@ -5,8 +5,8 @@
 
 import { IntelligentAISystem } from '@/ai/core';
 import { generateDiagram } from '@/ai/flows/unified';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { z } from 'zod';
 
 // مخطط الإدخال الموحد للمخططات الذكية
@@ -189,13 +189,18 @@ const intelligentDiagramHandler = new IntelligentDiagramHandler();
  * POST - توليد مخطط ذكي
  */
 export const POST = withApiMiddleware(
-    intelligentDiagramHandler.handle.bind(intelligentDiagramHandler)
+    intelligentDiagramHandler,
+    {
+        logging: true
+    }
 );
 
 /**
  * GET - إحصائيات النظام ومعلومات الأداء
  */
-export const GET = withApiMiddleware(async (context: any) => {
+export const GET = withApiMiddleware(intelligentDiagramHandler, {
+    logging: true
+});
     try {
         const intelligentSystem = new IntelligentAISystem();
         const quickStats = { totalOperations: 0, successRate: 100, averageExecutionTime: 0 };
@@ -246,4 +251,4 @@ export const GET = withApiMiddleware(async (context: any) => {
             details: error instanceof Error ? error.message : 'Unknown error'
         }, { status: 500 });
     }
-});
+};

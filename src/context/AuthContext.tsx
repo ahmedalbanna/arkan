@@ -1,8 +1,8 @@
 
 'use client';
 
-import { getAuthenticatedToken } from '@/lib/authUtils';
-import { userKeys } from '@/lib/core/query-keys';
+import { getAuthenticatedToken } from '@/core/utils/authUtils';
+import { userKeys } from '@/core/utils/query-keys';
 import { auth } from '@/lib/firebase/client-init';
 import type { UserProfile } from '@/lib/types';
 import { fetchUserProfileApi, subscribeToUserProfile } from '@/services';

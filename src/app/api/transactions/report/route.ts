@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتقرير المعاملات
  */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { getTransactionsByDateRange } from '@/lib/db/queries';
 import { z } from 'zod';
 
@@ -39,6 +39,6 @@ const transactionReportHandler = new TransactionReportHandler();
 
 // تصدير الـ handler مع middleware
 export const GET = withApiMiddleware(
-    transactionReportHandler.handle.bind(transactionReportHandler),
+    transactionReportHandler,
     { requireAdmin: true, logging: true }
 );

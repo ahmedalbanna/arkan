@@ -1,8 +1,8 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
+import { userKeys } from '@/core/utils/query-keys';
 import { useToast } from '@/hooks';
-import { userKeys } from '@/lib/core/query-keys';
 import { createUserApi } from '@/services';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';

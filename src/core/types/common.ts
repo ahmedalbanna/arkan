@@ -1,88 +1,326 @@
 /**
- * الأنواع المشتركة المستخدمة في جميع أنحاء التطبيق
- * يوفر نقطة مرجعية واحدة للأنواع الأساسية
+ * الأنواع الأساسية المشتركة
+ *
+ * هذا الملف يحتوي على الأنواع الأساسية المستخدمة في جميع أنحاء التطبيق
  */
 
-// أنواع الحالة الأساسية
-export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
+/**
+ * حالة العملية العامة
+ */
+export type ProcessStatus = 'idle' | 'loading' | 'success' | 'error';
 
-export type ProcessingState = 'idle' | 'processing' | 'completed' | 'failed';
-
-// أنواع الملفات
-export type FileType = 'pdf' | 'txt' | 'md' | 'docx' | 'doc';
-
-export type AcceptedFileTypes = {
-    'application/pdf': string[];
-    'text/plain': string[];
-    'text/markdown': string[];
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': string[];
-};
-
-// أنواع النصوص
-export type TextProcessingMode = 'standard' | 'creative' | 'formal' | 'casual';
-
-export type TextLength = 'short' | 'medium' | 'long';
-
-// أنواع الاستجابة
-export interface ApiResponse<T = unknown> {
+/**
+ * نتيجة العملية
+ */
+export interface ProcessResult<T = unknown> {
     success: boolean;
     data?: T;
     error?: string;
     message?: string;
 }
 
-export interface PaginatedResponse<T = unknown> extends ApiResponse<T[]> {
-    pagination: {
-        page: number;
-        limit: number;
-        total: number;
-        totalPages: number;
+/**
+ * حالة التحميل
+ */
+export interface LoadingState {
+    isLoading: boolean;
+    progress?: number;
+    message?: string;
+}
+
+/**
+ * حالة الخطأ
+ */
+export interface ErrorState {
+    hasError: boolean;
+    error?: string;
+    code?: string;
+    details?: Record<string, unknown>;
+}
+
+/**
+ * حالة النموذج
+ */
+export interface FormState<T = unknown> {
+    data: T;
+    errors: Record<keyof T, string>;
+    isDirty: boolean;
+    isValid: boolean;
+    isSubmitting: boolean;
+}
+
+/**
+ * خيارات التصفية
+ */
+export interface FilterOptions {
+    search?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+    page?: number;
+    limit?: number;
+    dateFrom?: Date;
+    dateTo?: Date;
+}
+
+/**
+ * نتيجة الصفحات
+ */
+export interface PaginatedResult<T> {
+    data: T[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+}
+
+/**
+ * خيارات التصدير
+ */
+export interface ExportOptions {
+    format: 'pdf' | 'docx' | 'pptx' | 'txt' | 'json';
+    includeImages?: boolean;
+    includeCharts?: boolean;
+    watermark?: string;
+    password?: string;
+}
+
+/**
+ * إعدادات الملف
+ */
+export interface FileSettings {
+    name: string;
+    size: number;
+    type: string;
+    lastModified: Date;
+    path?: string;
+    url?: string;
+}
+
+/**
+ * إعدادات المستخدم
+ */
+export interface UserSettings {
+    theme: 'light' | 'dark' | 'auto';
+    language: 'ar' | 'en';
+    timezone: string;
+    notifications: {
+        email: boolean;
+        push: boolean;
+        sms: boolean;
     };
 }
 
-// أنواع الأخطاء
-export interface AppError {
-    code: string;
-    message: string;
-    details?: Record<string, unknown>;
-    timestamp: string;
+/**
+ * إعدادات التطبيق
+ */
+export interface AppSettings {
+    version: string;
+    environment: 'development' | 'staging' | 'production';
+    features: Record<string, boolean>;
+    limits: {
+        maxFileSize: number;
+        maxFilesPerUpload: number;
+        maxProjectsPerUser: number;
+    };
 }
 
-// أنواع الإشعارات
-export type ToastVariant = 'default' | 'destructive' | 'success' | 'warning';
+/**
+ * نوع الحدث
+ */
+export type EventType =
+    | 'user.created'
+    | 'user.updated'
+    | 'user.deleted'
+    | 'project.created'
+    | 'project.updated'
+    | 'project.deleted'
+    | 'file.uploaded'
+    | 'file.downloaded'
+    | 'export.completed'
+    | 'error.occurred';
 
-export interface ToastOptions {
-    title: string;
-    description?: string;
-    variant?: ToastVariant;
-    duration?: number;
+/**
+ * بيانات الحدث
+ */
+export interface EventData {
+    type: EventType;
+    timestamp: Date;
+    userId?: string;
+    data: Record<string, unknown>;
+    metadata?: Record<string, unknown>;
 }
 
-// أنواع النماذج
-export interface FormField {
-    name: string;
-    label: string;
-    type: 'text' | 'textarea' | 'select' | 'checkbox' | 'radio';
-    required?: boolean;
-    placeholder?: string;
-    options?: { value: string; label: string }[];
-}
+/**
+ * نوع الإشعار
+ */
+export type NotificationType = 'info' | 'success' | 'warning' | 'error';
 
-export interface FormConfig {
-    fields: FormField[];
-    submitText: string;
-    resetText?: string;
-}
-
-// أنواع الأدوات
-export type ToolCategory = 'writing' | 'analysis' | 'generation' | 'conversion';
-
-export interface ToolConfig {
+/**
+ * بيانات الإشعار
+ */
+export interface NotificationData {
     id: string;
-    name: string;
-    description: string;
-    category: ToolCategory;
-    icon?: string;
-    enabled: boolean;
-    requiresAuth: boolean;
+    type: NotificationType;
+    title: string;
+    message: string;
+    duration?: number;
+    action?: {
+        label: string;
+        handler: () => void;
+    };
+    dismissible?: boolean;
 }
+
+/**
+ * نوع المهمة
+ */
+export type TaskType = 'export' | 'import' | 'process' | 'generate' | 'convert';
+
+/**
+ * حالة المهمة
+ */
+export type TaskStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+/**
+ * بيانات المهمة
+ */
+export interface TaskData {
+    id: string;
+    type: TaskType;
+    status: TaskStatus;
+    progress: number;
+    message?: string;
+    error?: string;
+    createdAt: Date;
+    updatedAt: Date;
+    completedAt?: Date;
+    metadata?: Record<string, unknown>;
+}
+
+/**
+ * نوع التخزين المؤقت
+ */
+export type CacheType = 'memory' | 'localStorage' | 'sessionStorage' | 'indexedDB';
+
+/**
+ * إعدادات التخزين المؤقت
+ */
+export interface CacheSettings {
+    type: CacheType;
+    ttl: number; // Time to live in milliseconds
+    maxSize?: number;
+    compression?: boolean;
+}
+
+/**
+ * بيانات التخزين المؤقت
+ */
+export interface CacheData<T = unknown> {
+    key: string;
+    value: T;
+    timestamp: number;
+    ttl: number;
+    compressed?: boolean;
+}
+
+/**
+ * نوع التكامل
+ */
+export type IntegrationType = 'firebase' | 'ai' | 'storage' | 'email' | 'sms';
+
+/**
+ * حالة التكامل
+ */
+export interface IntegrationStatus {
+    type: IntegrationType;
+    connected: boolean;
+    lastSync?: Date;
+    error?: string;
+    config?: Record<string, unknown>;
+}
+
+/**
+ * نوع التصدير
+ */
+export type ExportType = 'document' | 'presentation' | 'spreadsheet' | 'image' | 'archive';
+
+/**
+ * إعدادات التصدير المتقدمة
+ */
+export interface AdvancedExportOptions extends ExportOptions {
+    template?: string;
+    styles?: Record<string, unknown>;
+    layout?: {
+        orientation: 'portrait' | 'landscape';
+        margins: {
+            top: number;
+            right: number;
+            bottom: number;
+            left: number;
+        };
+    };
+    metadata?: {
+        title?: string;
+        author?: string;
+        subject?: string;
+        keywords?: string[];
+    };
+}
+
+/**
+ * نوع التحويل
+ */
+export type ConversionType = 'markdown-to-docx' | 'markdown-to-pptx' | 'docx-to-pdf' | 'pptx-to-pdf';
+
+/**
+ * إعدادات التحويل
+ */
+export interface ConversionOptions {
+    type: ConversionType;
+    input: FileSettings;
+    output: Partial<FileSettings>;
+    options: Record<string, unknown>;
+    progress?: (percent: number) => void;
+}
+
+/**
+ * مساعد للتحقق من نوع العملية
+ */
+export const isProcessResult = <T>(value: unknown): value is ProcessResult<T> => {
+    return typeof value === 'object' &&
+        value !== null &&
+        'success' in value &&
+        typeof (value as any).success === 'boolean';
+};
+
+/**
+ * مساعد للتحقق من نوع المهمة
+ */
+export const isTaskData = (value: unknown): value is TaskData => {
+    return typeof value === 'object' &&
+        value !== null &&
+        'id' in value &&
+        'type' in value &&
+        'status' in value &&
+        typeof (value as any).id === 'string' &&
+        typeof (value as any).type === 'string' &&
+        typeof (value as any).status === 'string';
+};
+
+/**
+ * مساعد للتحقق من نوع الإشعار
+ */
+export const isNotificationData = (value: unknown): value is NotificationData => {
+    return typeof value === 'object' &&
+        value !== null &&
+        'id' in value &&
+        'type' in value &&
+        'title' in value &&
+        'message' in value &&
+        typeof (value as any).id === 'string' &&
+        typeof (value as any).type === 'string' &&
+        typeof (value as any).title === 'string' &&
+        typeof (value as any).message === 'string';
+};

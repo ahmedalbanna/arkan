@@ -2,7 +2,7 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { adminKeys } from '@/lib/core/query-keys';
+import { adminKeys } from '@/core/utils/query-keys';
 import { fetchDashboardStats, type DashboardStats } from '@/services';
 import { useQuery } from '@tanstack/react-query';
 

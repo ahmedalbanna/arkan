@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لمعاملات المستخدم
  */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { getTransactionsByUserId } from '@/lib/db/queries';
 
 /**
@@ -25,7 +25,7 @@ const userTransactionsHandler = new UserTransactionsHandler();
 
 // تصدير الـ handler مع middleware
 export const GET = withApiMiddleware(
-    userTransactionsHandler.handle.bind(userTransactionsHandler),
+    userTransactionsHandler,
     {
         logging: true
     }

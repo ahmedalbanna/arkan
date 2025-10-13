@@ -6,8 +6,8 @@
 
 import { generateProposal } from '@/ai/flows/unified';
 import { GenerateProposalInputSchema, type GenerateProposalInput } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { logGeneration } from '@/services';
 
 /**
@@ -54,7 +54,7 @@ const generateProposalHandler = new GenerateProposalHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    generateProposalHandler.handle.bind(generateProposalHandler),
+    generateProposalHandler,
     {
         logging: true
     }

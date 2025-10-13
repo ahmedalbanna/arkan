@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للميزات
  */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { defaultFeatures } from '@/lib/features';
 import { adminDb } from '@/lib/firebase/server-init';
 
@@ -38,7 +38,7 @@ const featuresListHandler = new FeaturesListHandler();
 
 // تصدير الـ handler مع middleware
 export const GET = withApiMiddleware(
-    featuresListHandler.handle.bind(featuresListHandler),
+    featuresListHandler,
     {
         requireAuth: false, // هذا الـ endpoint عام ولا يتطلب مصادقة
         logging: true

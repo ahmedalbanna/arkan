@@ -1,13 +1,13 @@
 
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/authUtils';
+import { getAuthenticatedToken } from '@/core/utils/authUtils';
+import { handleErrorUtility } from '@/core/utils/errorUtils';
 import { agentChatApi, deleteConversationApi } from '@/services';
-import { useChatStore } from './useChatStore';
+import { useMutation } from '@tanstack/react-query';
 import { toast } from './use-toast';
-import { handleErrorUtility } from '@/lib/errorUtils';
+import { useChatStore } from './useChatStore';
 
 
 export function useDeleteChat() {

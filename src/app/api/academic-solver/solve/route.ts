@@ -6,8 +6,8 @@
 
 import { solveAcademicDocument } from '@/ai/flows/unified';
 import { AnalyzedDocumentSchema } from '@/ai/schemas/flows';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 export const ApiSolveSchema = z.object({
@@ -63,7 +63,7 @@ const solveAcademicHandler = new SolveAcademicHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    solveAcademicHandler.handle.bind(solveAcademicHandler),
+    solveAcademicHandler,
     {
         logging: true
     }

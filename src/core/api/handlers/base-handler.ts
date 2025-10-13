@@ -6,8 +6,33 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { ZodSchema } from 'zod';
+import { ZodSchema, z } from 'zod';
+import { TypedApiHandler } from '../../types/api-types';
 import { withAuth, withCors, withLogging, withRateLimit, withValidation } from '../middleware';
+
+// أنواع محلية للبيانات
+interface ApiHandlerContext {
+    request: Request;
+    user?: {
+        id: string;
+        email: string;
+        role: string;
+    };
+}
+
+interface AuthContext {
+    user: {
+        id: string;
+        email: string;
+        role: string;
+    };
+}
+
+interface ValidationError {
+    field: string;
+    message: string;
+    value?: any;
+}
 
 /**
  * خيارات معالج API
@@ -100,7 +125,7 @@ export function createApiHandler<T = any>(
 
     // 5. المصادقة (أخيراً)
     if (requireAuth) {
-        wrappedHandler = withAuth(wrappedHandler);
+        wrappedHandler = withAuth(wrappedHandler as any, authOptions);
     }
 
     return wrappedHandler;
@@ -126,8 +151,8 @@ export function createSimpleApiHandler(
 /**
  * معالج API مع مصادقة
  */
-export function createAuthApiHandler(
-    handler: (request: NextRequest, context: { params: { [key: string]: string } }) => Promise<NextResponse | Response>,
+export function createAuthApiHandler<T = any>(
+    handler: ApiHandler<T>,
     authOptions: ApiHandlerOptions['authOptions'] = {}
 ): (request: NextRequest, context: { params: { [key: string]: string } }) => Promise<NextResponse | Response> {
     return createApiHandler(handler, {
@@ -180,4 +205,226 @@ export function createFullApiHandler<T = any>(
     options: ApiHandlerOptions
 ): (request: NextRequest, context: { params: { [key: string]: string } }) => Promise<NextResponse | Response> {
     return createApiHandler(handler, options);
+}
+
+/**
+ * معالج API الأساسي المجرد
+ */
+export abstract class BaseApiHandler<TInput = unknown, TOutput = unknown> implements TypedApiHandler<TInput, TOutput> {
+    protected abstract inputSchema: z.ZodSchema<TInput>;
+    protected abstract processRequest(
+        data: TInput,
+        context: ApiHandlerContext
+    ): Promise<TOutput>;
+
+    /**
+     * معالجة الطلب الرئيسية
+     */
+    async handle(context: ApiHandlerContext): Promise<Response> {
+        try {
+            // التحقق من صحة البيانات
+            const validatedData = await this.validateInput(context.request);
+
+            // معالجة الطلب
+            const result = await this.processRequest(validatedData, context);
+
+            // إرجاع الاستجابة
+            return new Response(JSON.stringify({ success: true, data: result }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        } catch (error) {
+            return new Response(JSON.stringify({
+                success: false,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+    }
+
+    /**
+     * التحقق من صحة البيانات المدخلة
+     */
+    protected async validateInput(request: Request): Promise<TInput> {
+        try {
+            const body = await request.json();
+            const validation = this.inputSchema.safeParse(body);
+
+            if (!validation.success) {
+                const validationError: ValidationError = {
+                    field: 'input',
+                    message: 'Invalid input data',
+                    value: validation.error.errors
+                };
+                throw validationError;
+            }
+
+            return validation.data;
+        } catch (error) {
+            if (error instanceof SyntaxError) {
+                const validationError: ValidationError = {
+                    field: 'json',
+                    message: 'Invalid JSON format',
+                    value: null
+                };
+                throw validationError;
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * التحقق من الصلاحيات
+     */
+    protected async checkPermissions(
+        user: AuthContext['user'],
+        resource: string,
+        action: string
+    ): Promise<boolean> {
+        // يمكن توسيع هذا لاحقاً لإضافة نظام صلاحيات معقد
+        return true;
+    }
+
+    /**
+     * تسجيل العملية
+     */
+    protected async logOperation(
+        context: ApiHandlerContext,
+        operation: string,
+        details?: Record<string, unknown>
+    ): Promise<void> {
+        // يمكن إضافة نظام تسجيل هنا
+        console.log(`Operation: ${operation}`, {
+            userId: context.user?.id || 'anonymous',
+            endpoint: context.request.url,
+            details
+        });
+    }
+}
+
+/**
+ * معالج API للعمليات البسيطة (GET)
+ */
+export abstract class SimpleApiHandler<TOutput = unknown> implements TypedApiHandler<unknown, TOutput> {
+    protected abstract processRequest(context: ApiHandlerContext): Promise<TOutput>;
+
+    async handle(context: ApiHandlerContext): Promise<Response> {
+        try {
+            const result = await this.processRequest(context);
+            return new Response(JSON.stringify({ success: true, data: result }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        } catch (error) {
+            return new Response(JSON.stringify({
+                success: false,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+    }
+}
+
+/**
+ * معالج API للعمليات المعقدة (POST/PUT/DELETE)
+ */
+export abstract class ComplexApiHandler<TInput = unknown, TOutput = unknown> extends BaseApiHandler<TInput, TOutput> {
+    protected abstract creditCost?: number;
+    protected abstract requiresAdmin?: boolean;
+
+    async handle(context: ApiHandlerContext): Promise<Response> {
+        try {
+            // التحقق من الصلاحيات الإدارية
+            if (this.requiresAdmin && context.user && context.user.role !== 'admin') {
+                return new Response(JSON.stringify({
+                    success: false,
+                    error: {
+                        code: 'FORBIDDEN',
+                        message: 'Admin access required'
+                    }
+                }), {
+                    status: 403,
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            }
+
+            // التحقق من صحة البيانات
+            const validatedData = await this.validateInput(context.request);
+
+            // معالجة الطلب
+            const result = await this.processRequest(validatedData, context);
+
+            // تسجيل العملية
+            await this.logOperation(context, 'api_call', {
+                creditCost: this.creditCost,
+                requiresAdmin: this.requiresAdmin
+            });
+
+            return new Response(JSON.stringify({ success: true, data: result }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        } catch (error) {
+            return new Response(JSON.stringify({
+                success: false,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+    }
+}
+
+/**
+ * معالج API للعمليات التي تتطلب خصم ائتمانات
+ */
+export abstract class CreditBasedApiHandler<TInput = unknown, TOutput = unknown> extends ComplexApiHandler<TInput, TOutput> {
+    protected abstract creditCost: number;
+
+    async handle(context: ApiHandlerContext): Promise<Response> {
+        try {
+            // التحقق من صحة البيانات
+            const validatedData = await this.validateInput(context.request);
+
+            // خصم الائتمانات
+            if (this.creditCost > 0 && context.user) {
+                await this.deductCredits(context.user.id, this.creditCost);
+            }
+
+            // معالجة الطلب
+            const result = await this.processRequest(validatedData, context);
+
+            // تسجيل العملية
+            await this.logOperation(context, 'credit_based_api_call', {
+                creditCost: this.creditCost
+            });
+
+            return new Response(JSON.stringify({ success: true, data: result }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        } catch (error) {
+            return new Response(JSON.stringify({
+                success: false,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+    }
+
+    /**
+     * خصم الائتمانات
+     */
+    private async deductCredits(userId: string, amount: number): Promise<void> {
+        // يمكن استيراد خدمة الائتمانات هنا
+        // await deductCredit(userId, amount);
+        console.log(`Deducting ${amount} credits from user ${userId}`);
+    }
 }

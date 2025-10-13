@@ -9,7 +9,7 @@ import {
     NUMBER_VALIDATION_RULES,
     TEXT_VALIDATION_RULES,
     VALIDATION_MESSAGES
-} from '../../lib/core/constants';
+} from '../constants';
 
 /**
  * التحقق من صحة البريد الإلكتروني

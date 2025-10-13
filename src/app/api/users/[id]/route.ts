@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لملف المستخدم
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { deleteUser, getUserProfile } from "@/lib/db/queries";
 import { adminDb } from '@/lib/firebase/server-init';
 import { revalidatePath } from "next/cache";
@@ -117,16 +117,16 @@ const deleteUserHandler = new DeleteUserHandler();
 
 // تصدير الـ handlers مع middleware
 export const GET = withApiMiddleware(
-    getUserHandler.handle.bind(getUserHandler),
+    getUserHandler,
     { logging: true }
 );
 
 export const PUT = withApiMiddleware(
-    updateUserHandler.handle.bind(updateUserHandler),
+    updateUserHandler,
     { logging: true }
 );
 
 export const DELETE = withApiMiddleware(
-    deleteUserHandler.handle.bind(deleteUserHandler),
+    deleteUserHandler,
     { requireAdmin: true, logging: true }
 );

@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإحصائيات المستخدم
  */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { getUserProfile } from '@/lib/db/queries';
 import { adminDb } from '@/lib/firebase/server-init';
 
@@ -78,7 +78,7 @@ const userStatsHandler = new UserStatsHandler();
 
 // تصدير الـ handler مع middleware
 export const GET = withApiMiddleware(
-    userStatsHandler.handle.bind(userStatsHandler),
+    userStatsHandler,
     {
         logging: true
     }

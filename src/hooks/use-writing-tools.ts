@@ -4,8 +4,8 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { createWritingToolHook } from '@/core';
-import { getAuthenticatedToken } from '@/lib/authUtils';
-import { handleErrorUtility } from '@/lib/errorUtils';
+import { getAuthenticatedToken } from '@/core/utils/authUtils';
+import { handleErrorUtility } from '@/core/utils/errorUtils';
 import { writingToolApi } from '@/services';
 import { useMutation } from '@tanstack/react-query';
 

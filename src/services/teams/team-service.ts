@@ -4,10 +4,10 @@
  * هذا الملف يحتوي على جميع وظائف إدارة الفرق
  */
 
-import { TeamSchemas } from '@/app/api/shared/validators/api-validators';
+import { apiClient } from '@/core/api/client/api-client';
+import { ComplexService, SimpleService } from '@/core/api/client/base-client';
+import { TeamSchemas } from '@/core/validation/api-validators';
 import type { TeamProperties, TeamWithMembers } from '@/lib/models/team';
-import { apiClient } from '../shared/api-client';
-import { ComplexService, SimpleService } from '../shared/base-service';
 
 export interface CreateTeamData {
     name: string;
@@ -32,7 +32,12 @@ export class TeamListService extends SimpleService<TeamWithMembers[]> {
     protected requiresAuth = true;
 
     async call(token: string): Promise<TeamWithMembers[]> {
-        return apiClient.get(this.endpoint, { token });
+        const response = await this.client.get<TeamWithMembers[]>(this.endpoint, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -45,7 +50,12 @@ export class GetTeamService extends SimpleService<TeamWithMembers> {
 
     async call(token: string, teamId: string): Promise<TeamWithMembers> {
         const endpoint = `${this.endpoint}/${teamId}`;
-        return apiClient.get(endpoint, { token });
+        const response = await this.client.get<TeamWithMembers>(endpoint, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -70,7 +80,12 @@ export class UpdateTeamService extends ComplexService<UpdateTeamData, TeamProper
 
     async call(data: UpdateTeamData, token: string, teamId: string): Promise<TeamProperties> {
         const endpoint = `${this.endpoint}/${teamId}`;
-        return apiClient.put(endpoint, data, { token });
+        const response = await this.client.put<TeamProperties>(endpoint, data, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -85,7 +100,12 @@ export class DeleteTeamService extends ComplexService<{}, { message: string }> {
 
     async call(data: {}, token: string, teamId: string): Promise<{ message: string }> {
         const endpoint = `${this.endpoint}/${teamId}`;
-        return apiClient.delete(endpoint, { token });
+        const response = await this.client.delete<{ message: string }>(endpoint, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -100,7 +120,12 @@ export class InviteMemberService extends ComplexService<InviteMemberData, { mess
 
     async call(data: InviteMemberData, token: string, teamId: string): Promise<{ message: string }> {
         const endpoint = `${this.endpoint}/${teamId}/invitations`;
-        return apiClient.post(endpoint, data, { token });
+        const response = await this.client.post<{ message: string }>(endpoint, data, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -115,7 +140,12 @@ export class RemoveMemberService extends ComplexService<{}, { message: string }>
 
     async call(data: {}, token: string, teamId: string, memberId: string): Promise<{ message: string }> {
         const endpoint = `${this.endpoint}/${teamId}/members/${memberId}`;
-        return apiClient.delete(endpoint, { token });
+        const response = await this.client.delete<{ message: string }>(endpoint, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -130,7 +160,12 @@ export class UpdateMemberRoleService extends ComplexService<{ role: 'member' | '
 
     async call(data: { role: 'member' | 'admin' }, token: string, teamId: string, memberId: string): Promise<{ message: string }> {
         const endpoint = `${this.endpoint}/${teamId}/members/${memberId}`;
-        return apiClient.put(endpoint, data, { token });
+        const response = await this.client.put<{ message: string }>(endpoint, data, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -138,14 +173,14 @@ export class UpdateMemberRoleService extends ComplexService<{ role: 'member' | '
  * دوال مساعدة للفرق
  */
 export const teamService = {
-    list: new TeamListService(),
-    get: new GetTeamService(),
-    create: new CreateTeamService(),
-    update: new UpdateTeamService(),
-    delete: new DeleteTeamService(),
-    inviteMember: new InviteMemberService(),
-    removeMember: new RemoveMemberService(),
-    updateMemberRole: new UpdateMemberRoleService(),
+    get list() { return new TeamListService(apiClient); },
+    get get() { return new GetTeamService(apiClient); },
+    get create() { return new CreateTeamService(apiClient); },
+    get update() { return new UpdateTeamService(apiClient); },
+    get delete() { return new DeleteTeamService(apiClient); },
+    get inviteMember() { return new InviteMemberService(apiClient); },
+    get removeMember() { return new RemoveMemberService(apiClient); },
+    get updateMemberRole() { return new UpdateMemberRoleService(apiClient); },
 };
 
 /**

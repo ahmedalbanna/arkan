@@ -5,7 +5,7 @@
 //  */
 
 // import { textToSpeech } from '@/ai/flows/unified';
-// import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
+// import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
 // import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 // import { logGeneration } from '@/services';
 // import { z } from 'zod';

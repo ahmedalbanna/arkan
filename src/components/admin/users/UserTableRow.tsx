@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useAuth } from "@/context/AuthContext";
 import { useLocalization } from "@/context/LocalizationContext";
+import { userKeys } from '@/core/utils/query-keys';
 import { toast, useChatStore } from "@/hooks";
-import { userKeys } from '@/lib/core/query-keys';
 import { User } from '@/lib/models/user'; // NEW: Import our class
 import { createConversationApi, fetchUserProfileApi } from "@/services";
 import { useQueryClient } from "@tanstack/react-query";

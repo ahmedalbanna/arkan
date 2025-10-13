@@ -3,9 +3,9 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { createUIHook } from '@/core';
+import { getAuthenticatedToken } from '@/core/utils/authUtils';
+import { handleErrorUtility } from '@/core/utils/errorUtils';
 import { toast } from '@/hooks/use-toast';
-import { getAuthenticatedToken } from '@/lib/authUtils';
-import { handleErrorUtility } from '@/lib/errorUtils';
 import type { DocxTemplateKey, Template } from '@/lib/types';
 import { fetchDocxTemplatesApi, updateDocxTemplateApi } from '@/services';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';

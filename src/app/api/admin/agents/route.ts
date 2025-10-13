@@ -5,8 +5,8 @@
  */
 
 import { AgentPromptSchema } from '@/ai/schemas';
-import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
@@ -73,7 +73,7 @@ const createAgentHandler = new CreateAgentHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    createAgentHandler.handle.bind(createAgentHandler),
+    createAgentHandler,
     {
         requireAdmin: true,
         logging: true

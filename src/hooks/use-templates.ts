@@ -2,10 +2,10 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
+import { getAuthenticatedToken } from '@/core/utils/authUtils';
+import { handleErrorUtility } from '@/core/utils/errorUtils';
+import { templateKeys } from '@/core/utils/query-keys';
 import { toast } from '@/hooks';
-import { getAuthenticatedToken } from '@/lib/authUtils';
-import { templateKeys } from '@/lib/core/query-keys';
-import { handleErrorUtility } from '@/lib/errorUtils';
 import { PresentationTemplate, type PresentationTemplateProperties } from '@/lib/models/presentationTemplate';
 import { ProposalTemplate, type ProposalTemplateProperties } from '@/lib/models/proposalTemplate';
 import { ReportTemplate, type ReportTemplateProperties } from '@/lib/models/reportTemplate';

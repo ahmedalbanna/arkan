@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإعادة تعيين كلمة المرور العامة
  */
 
-import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { resetUserPassword } from '@/lib/db/queries';
 import { generateRandomPassword } from '@/lib/utils';
 import { z } from 'zod';
@@ -35,6 +35,6 @@ const resetPasswordHandler = new ResetPasswordHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    resetPasswordHandler.handle.bind(resetPasswordHandler),
+    resetPasswordHandler,
     { requireAdmin: true, logging: true }
 );

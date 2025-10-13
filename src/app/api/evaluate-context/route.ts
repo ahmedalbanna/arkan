@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتقييم السياق المهمل
  */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 
 /**
  * معالج تقييم السياق المهمل
@@ -21,6 +21,6 @@ const evaluateContextDeprecatedHandler = new EvaluateContextDeprecatedHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    evaluateContextDeprecatedHandler.handle.bind(evaluateContextDeprecatedHandler),
+    evaluateContextDeprecatedHandler,
     { logging: true }
 );

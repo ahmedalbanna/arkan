@@ -11,6 +11,10 @@ export type {
 } from './flexible-content-types';
 
 // تصدير الدوال المساعدة لاستخدامها في الكود
+export * from './ai-types';
+export * from './api-types';
+export * from './export-types';
+export * from './flexible-content-types';
 export {
     handleContentError, isFlexibleContent,
     isProposalData,
@@ -19,6 +23,7 @@ export {
     toProposalData,
     toSectionData
 } from './flexible-content-types';
+export * from './service-types';
 
 /**
  * دوال مساعدة للتعامل مع الأنواع بشكل آمن
@@ -83,3 +88,4 @@ export const CommonErrors = {
  * أنواع للأخطاء الشائعة
  */
 export type CommonErrorType = typeof CommonErrors[keyof typeof CommonErrors];
+

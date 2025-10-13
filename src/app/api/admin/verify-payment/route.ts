@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للتحقق من الدفع
  */
 
-import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import { FieldValue } from 'firebase-admin/firestore';
 import { z } from 'zod';
@@ -117,7 +117,7 @@ const verifyPaymentHandler = new VerifyPaymentHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    verifyPaymentHandler.handle.bind(verifyPaymentHandler),
+    verifyPaymentHandler,
     {
         requireAdmin: true,
         logging: true

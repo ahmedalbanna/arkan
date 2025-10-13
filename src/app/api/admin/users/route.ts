@@ -4,9 +4,9 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإدارة المستخدمين
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { UserSchemas } from '@/app/api/shared/validators/api-validators';
+import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { UserSchemas } from '@/core/validation/api-validators';
 import { createUser, getPaginatedUsers } from '@/lib/db/queries';
 import type { UserProfile } from '@/lib/types';
 import { z } from 'zod';
@@ -66,11 +66,11 @@ const adminCreateUserHandler = new AdminCreateUserHandler();
 
 // تصدير الـ handlers مع middleware
 export const GET = withApiMiddleware(
-    adminUserListHandler.handle.bind(adminUserListHandler),
+    adminUserListHandler,
     { requireAdmin: true, logging: true }
 );
 
 export const POST = withApiMiddleware(
-    adminCreateUserHandler.handle.bind(adminCreateUserHandler),
+    adminCreateUserHandler,
     { requireAdmin: true, logging: true }
 );

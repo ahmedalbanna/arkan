@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لقوالب DOCX مع Lazy Seeding
  */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { templates as defaultTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
 import { adminDb } from '@/lib/firebase/server-init';
 
@@ -43,6 +43,6 @@ const getDocxTemplatesHandler = new GetDocxTemplatesHandler();
 
 // تصدير الـ handler مع middleware
 export const GET = withApiMiddleware(
-    getDocxTemplatesHandler.handle.bind(getDocxTemplatesHandler),
+    getDocxTemplatesHandler,
     { requireAuth: false, logging: true } // Public endpoint for fetching templates
 );

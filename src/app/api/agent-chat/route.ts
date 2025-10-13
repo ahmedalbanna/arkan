@@ -5,8 +5,8 @@
  */
 
 // import { agentChat } from '@/ai/flows/agent-chat';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { RealtimeDatabase } from '@/lib/firebase/client-init';
 import { logGeneration } from '@/services';
 import { push, ref, serverTimestamp, update } from 'firebase/database';
@@ -111,7 +111,7 @@ const agentChatHandler = new AgentChatHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    agentChatHandler.handle.bind(agentChatHandler),
+    agentChatHandler,
     {
         logging: true
     }

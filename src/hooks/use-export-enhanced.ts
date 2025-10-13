@@ -5,12 +5,8 @@
 'use client';
 
 import type { AnalyzedDocument, PresentationSlide, SolvedDocument } from '@/ai/schemas';
-import {
-    useAcademicExport,
-    usePresentationExport,
-    useProposalExport,
-    useReportExport
-} from '@/core';
+import { useAcademicExport, usePresentationExport, useProposalExport, useReportExport } from '@/core/export';
+
 import type { ProjectProposal } from '@/lib/models/proposal';
 
 export interface ExportEnhancedOptions {

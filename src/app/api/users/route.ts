@@ -4,9 +4,9 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { UserSchemas } from '@/app/api/shared/validators/api-validators';
+import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { UserSchemas } from '@/core/validation/api-validators';
 import { createUser, getPaginatedUsers } from '@/lib/db/queries';
 import type { UserProfile } from '@/lib/types';
 import { z } from 'zod';
@@ -123,21 +123,21 @@ const deleteUserHandler = new DeleteUserHandler();
 
 // تصدير الـ handlers مع middleware
 export const GET = withApiMiddleware(
-    userListHandler.handle.bind(userListHandler),
+    userListHandler,
     { requireAdmin: true, logging: true }
 );
 
 export const POST = withApiMiddleware(
-    createUserHandler.handle.bind(createUserHandler),
+    createUserHandler,
     { requireAdmin: true, logging: true }
 );
 
 export const PUT = withApiMiddleware(
-    updateUserHandler.handle.bind(updateUserHandler),
+    updateUserHandler,
     { requireAdmin: true, logging: true }
 );
 
 export const DELETE = withApiMiddleware(
-    deleteUserHandler.handle.bind(deleteUserHandler),
+    deleteUserHandler,
     { requireAdmin: true, logging: true }
 );

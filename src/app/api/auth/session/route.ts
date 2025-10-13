@@ -4,9 +4,9 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإدارة الجلسات
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { createApiResponseEnhanced } from '@/core/api';
+import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { adminAuth } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
@@ -150,7 +150,7 @@ const deleteSessionHandler = new DeleteSessionHandler();
 
 // تصدير الـ handlers مع middleware
 export const POST = withApiMiddleware(
-    createSessionHandler.handle.bind(createSessionHandler),
+    createSessionHandler,
     {
         requireAuth: false,
         logging: true,
@@ -162,7 +162,7 @@ export const POST = withApiMiddleware(
 );
 
 export const GET = withApiMiddleware(
-    getSessionHandler.handle.bind(getSessionHandler),
+    getSessionHandler,
     {
         requireAuth: false,
         logging: true
@@ -170,7 +170,7 @@ export const GET = withApiMiddleware(
 );
 
 export const DELETE = withApiMiddleware(
-    deleteSessionHandler.handle.bind(deleteSessionHandler),
+    deleteSessionHandler,
     {
         requireAuth: false,
         logging: true

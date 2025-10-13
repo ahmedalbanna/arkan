@@ -4,10 +4,10 @@
  * هذا الملف يحتوي على جميع وظائف إدارة المشاريع
  */
 
-import { ProjectSchemas } from '@/app/api/shared/validators/api-validators';
+import { apiClient } from '@/core/api/client/api-client';
+import { ComplexService, SimpleService } from '@/core/api/client/base-client';
+import { ProjectSchemas } from '@/core/validation/api-validators';
 import type { ProjectState, SavedProject } from '@/lib/models/project';
-import { apiClient } from '../shared/api-client';
-import { ComplexService, SimpleService } from '../shared/base-service';
 
 export interface CreateProjectData {
     title: string;
@@ -39,7 +39,12 @@ export class ProjectListService extends SimpleService<SavedProject[]> {
     protected requiresAuth = true;
 
     async call(token: string): Promise<SavedProject[]> {
-        return apiClient.get(this.endpoint, { token });
+        const response = await this.client.get<SavedProject[]>(this.endpoint, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -52,7 +57,12 @@ export class GetProjectService extends SimpleService<SavedProject> {
 
     async call(token: string, projectId: string): Promise<SavedProject> {
         const endpoint = `${this.endpoint}/${projectId}`;
-        return apiClient.get(endpoint, { token });
+        const response = await this.client.get<SavedProject>(endpoint, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -77,7 +87,12 @@ export class UpdateProjectService extends ComplexService<ProjectState, SavedProj
 
     async call(data: ProjectState, token: string, projectId: string): Promise<SavedProject> {
         const endpoint = `${this.endpoint}/${projectId}`;
-        return apiClient.put(endpoint, data, { token });
+        const response = await this.client.put<SavedProject>(endpoint, data, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -92,7 +107,12 @@ export class DeleteProjectService extends ComplexService<{}, { message: string }
 
     async call(data: {}, token: string, projectId: string): Promise<{ message: string }> {
         const endpoint = `${this.endpoint}/${projectId}`;
-        return apiClient.delete(endpoint, { token });
+        const response = await this.client.delete<{ message: string }>(endpoint, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -107,7 +127,12 @@ export class AddContextService extends ComplexService<AddContextData, { message:
 
     async call(data: AddContextData, token: string, projectId: string): Promise<{ message: string }> {
         const endpoint = `${this.endpoint}/${projectId}`;
-        return apiClient.patch(endpoint, data, { token });
+        const response = await this.client.patch<{ message: string }>(endpoint, data, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -115,12 +140,12 @@ export class AddContextService extends ComplexService<AddContextData, { message:
  * دوال مساعدة للمشاريع
  */
 export const projectService = {
-    list: new ProjectListService(),
-    get: new GetProjectService(),
-    create: new CreateProjectService(),
-    update: new UpdateProjectService(),
-    delete: new DeleteProjectService(),
-    addContext: new AddContextService(),
+    get list() { return new ProjectListService(apiClient); },
+    get get() { return new GetProjectService(apiClient); },
+    get create() { return new CreateProjectService(apiClient); },
+    get update() { return new UpdateProjectService(apiClient); },
+    get delete() { return new DeleteProjectService(apiClient); },
+    get addContext() { return new AddContextService(apiClient); },
 };
 
 /**

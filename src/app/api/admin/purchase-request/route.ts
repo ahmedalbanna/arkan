@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لطلبات الشراء
  */
 
-import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { createTransaction } from '@/lib/db/queries';
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import { getStorage } from 'firebase-admin/storage';
@@ -101,6 +101,6 @@ const purchaseRequestHandler = new PurchaseRequestHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    purchaseRequestHandler.handle.bind(purchaseRequestHandler),
+    purchaseRequestHandler,
     { logging: true }
 );

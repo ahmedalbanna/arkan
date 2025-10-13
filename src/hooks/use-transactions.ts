@@ -2,8 +2,8 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/authUtils';
-import { transactionKeys } from '@/lib/core/query-keys';
+import { getAuthenticatedToken } from '@/core/utils/authUtils';
+import { transactionKeys } from '@/core/utils/query-keys';
 import { Transaction, type TransactionProperties } from '@/lib/models/transaction';
 import { fetchUserTransactions as fetchUserTransactionsApi, getTransactions as getTransactionsApi, TransactionStatus } from '@/services';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';

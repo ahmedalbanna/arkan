@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإرسال الإشعارات
  */
 
-import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
 import admin from 'firebase-admin';
 import { z } from 'zod';
@@ -63,6 +63,6 @@ const sendNotificationHandler = new SendNotificationHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    sendNotificationHandler.handle.bind(sendNotificationHandler),
+    sendNotificationHandler,
     { requireAdmin: true, logging: true }
 );

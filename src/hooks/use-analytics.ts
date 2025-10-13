@@ -3,9 +3,9 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { createUIHook } from '@/core';
-import { getAuthenticatedToken } from '@/lib/authUtils';
-import { analyticsKeys } from '@/lib/core/query-keys';
-import { handleErrorUtility } from '@/lib/errorUtils';
+import { getAuthenticatedToken } from '@/core/utils/authUtils';
+import { handleErrorUtility } from '@/core/utils/errorUtils';
+import { analyticsKeys } from '@/core/utils/query-keys';
 import { fetchUserStats, type UserDashboardStats } from '@/services';
 import { useQuery } from '@tanstack/react-query';
 

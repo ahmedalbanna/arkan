@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإدارة فئات الوكلاء
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
@@ -58,11 +58,11 @@ const createAgentCategoryHandler = new CreateAgentCategoryHandler();
 
 // تصدير الـ handlers مع middleware
 export const GET = withApiMiddleware(
-    getAgentCategoriesHandler.handle.bind(getAgentCategoriesHandler),
+    getAgentCategoriesHandler,
     { requireAdmin: true, logging: true }
 );
 
 export const POST = withApiMiddleware(
-    createAgentCategoryHandler.handle.bind(createAgentCategoryHandler),
+    createAgentCategoryHandler,
     { requireAdmin: true, logging: true }
 );

@@ -6,10 +6,10 @@
  */
 
 // نقاط نهاية API
-export * from '../../../core/constants/api-endpoints';
+export * from './api-endpoints';
 
 // أنواع الملفات
-export * from '../../../core/constants/file-types';
+export * from './file-types';
 
 // قواعد التحقق
 export * from './validation-rules';

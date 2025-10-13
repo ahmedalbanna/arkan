@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لقوالب DOCX
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { createGenerativeTemplate } from '@/lib/db/queries';
 import { templates as defaultTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
 import { adminDb } from '@/lib/firebase/server-init';
@@ -88,7 +88,7 @@ const createDocxTemplateHandler = new CreateDocxTemplateHandler();
 
 // تصدير الـ handlers مع middleware
 export const GET = withApiMiddleware(
-    docxTemplatesListHandler.handle.bind(docxTemplatesListHandler),
+    docxTemplatesListHandler,
     {
         requireAuth: false, // هذا الـ endpoint عام ولا يتطلب مصادقة
         logging: true
@@ -96,7 +96,7 @@ export const GET = withApiMiddleware(
 );
 
 export const POST = withApiMiddleware(
-    createDocxTemplateHandler.handle.bind(createDocxTemplateHandler),
+    createDocxTemplateHandler,
     {
         requireAdmin: true,
         logging: true

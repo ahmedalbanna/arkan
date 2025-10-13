@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتحديث الميزات
  */
 
-import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
@@ -49,6 +49,6 @@ const updateFeatureHandler = new UpdateFeatureHandler();
 
 // تصدير الـ handler مع middleware
 export const PUT = withApiMiddleware(
-    updateFeatureHandler.handle.bind(updateFeatureHandler),
+    updateFeatureHandler,
     { requireAdmin: true, logging: true }
 );

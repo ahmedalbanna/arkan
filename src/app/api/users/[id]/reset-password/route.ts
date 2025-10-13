@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإعادة تعيين كلمة المرور للمستخدم
  */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { getUserProfile } from '@/lib/db/queries';
 
 /**
@@ -43,6 +43,6 @@ const resetUserPasswordHandler = new ResetUserPasswordHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    resetUserPasswordHandler.handle.bind(resetUserPasswordHandler),
+    resetUserPasswordHandler,
     { requireAdmin: true, logging: true }
 );

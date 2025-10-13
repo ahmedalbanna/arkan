@@ -7,16 +7,56 @@
 
 'use client';
 
-import { API_ENDPOINTS } from '../../../lib/core/constants';
-import {
-    AuthRequest,
-    AuthResponse,
-    ExportResponse,
-    FileUploadResponse,
-    UserProfile
-} from '../../types';
+import { API_ENDPOINTS } from '../../constants';
 import { TypedSearchResponse } from '../../types/improved-types';
 import { BaseApiClient } from './base-client';
+
+// أنواع محلية للبيانات
+interface AuthRequest {
+    email: string;
+    password: string;
+}
+
+interface AuthResponse {
+    token: string;
+    user: UserProfile;
+    expiresIn: number;
+}
+
+interface ExportResponse {
+    url: string;
+    filename: string;
+    size: number;
+    expiresAt: Date;
+}
+
+interface FileUploadResponse {
+    id: string;
+    filename: string;
+    url: string;
+    size: number;
+    type: string;
+}
+
+interface UserProfile {
+    id: string;
+    name: string;
+    email: string;
+    avatar?: string;
+    role: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+/**
+ * إعدادات عميل API
+ */
+export interface ApiClientConfig {
+    baseUrl?: string;
+    timeout?: number;
+    retries?: number;
+    retryDelay?: number;
+}
 
 // أنواع محسنة للبيانات
 interface TransactionData {
@@ -721,4 +761,91 @@ export class ApiClient extends BaseApiClient {
         const response = await this.get<{ features: FeatureData[] }>(API_ENDPOINTS.SETTINGS.FEATURES);
         return response.data;
     }
+
+    // ==================== طرق HTTP إضافية ====================
+
+    /**
+     * PATCH request - تحديث جزئي
+     */
+    async patch<TInput = any, TOutput = any>(
+        endpoint: string,
+        data: TInput,
+        options: {
+            token?: string;
+            headers?: Record<string, string>;
+            timeout?: number;
+        } = {}
+    ): Promise<TOutput> {
+        const response = await this.put<TOutput>(endpoint, data, options);
+        return response.data;
+    }
+
+    /**
+     * استدعاء API endpoint مخصص
+     */
+    async call<TInput = any, TOutput = any>(
+        endpoint: string,
+        options: {
+            method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+            data?: TInput;
+            token?: string;
+            headers?: Record<string, string>;
+            timeout?: number;
+        } = {}
+    ): Promise<TOutput> {
+        const {
+            method = 'GET',
+            data,
+            token,
+            headers = {},
+            timeout,
+        } = options;
+
+        // إعداد الرؤوس مع المصادقة
+        const requestHeaders: Record<string, string> = { ...headers };
+        if (token) {
+            requestHeaders['Authorization'] = `Bearer ${token}`;
+        }
+
+        const requestOptions = {
+            headers: requestHeaders,
+            timeout,
+        };
+
+        switch (method) {
+            case 'GET':
+                const getResponse = await this.get<TOutput>(endpoint, requestOptions);
+                return getResponse.data;
+            case 'POST':
+                const postResponse = await this.post<TOutput>(endpoint, data!, requestOptions);
+                return postResponse.data;
+            case 'PUT':
+                const putResponse = await this.put<TOutput>(endpoint, data!, requestOptions);
+                return putResponse.data;
+            case 'DELETE':
+                const deleteResponse = await this.delete<TOutput>(endpoint, requestOptions);
+                return deleteResponse.data;
+            case 'PATCH':
+                const patchResponse = await this.patch<any>(endpoint, data!, requestOptions);
+                return patchResponse.data as TOutput;
+            default:
+                throw new Error(`Unsupported HTTP method: ${method}`);
+        }
+    }
+
 }
+
+/**
+ * عميل API افتراضي
+ */
+export const apiClient = new ApiClient();
+
+/**
+ * عميل API للإدارة
+ */
+export const adminApiClient = new ApiClient();
+
+/**
+ * عميل API للعمليات العامة
+ */
+export const publicApiClient = new ApiClient();

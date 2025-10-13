@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإعدادات النظام
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
@@ -74,11 +74,11 @@ const updateSettingsHandler = new UpdateSettingsHandler();
 
 // تصدير الـ handlers مع middleware
 export const GET = withApiMiddleware(
-    getSettingsHandler.handle.bind(getSettingsHandler),
+    getSettingsHandler,
     { requireAuth: false, logging: true } // Public endpoint for fetching settings
 );
 
 export const PUT = withApiMiddleware(
-    updateSettingsHandler.handle.bind(updateSettingsHandler),
+    updateSettingsHandler,
     { requireAdmin: true, logging: true }
 );

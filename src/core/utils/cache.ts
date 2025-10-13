@@ -7,7 +7,7 @@
 
 'use client';
 
-import { createHash } from '../../core/utils/crypto-utils';
+import { createHash } from './crypto-utils';
 
 /**
  * خيارات Cache

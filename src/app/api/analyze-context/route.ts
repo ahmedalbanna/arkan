@@ -5,8 +5,8 @@
  */
 
 import { analyzeContext } from '@/ai/flows/unified';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -67,7 +67,7 @@ const analyzeContextHandler = new AnalyzeContextHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    analyzeContextHandler.handle.bind(analyzeContextHandler),
+    analyzeContextHandler,
     {
         logging: true
     }

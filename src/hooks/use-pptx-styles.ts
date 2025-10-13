@@ -3,10 +3,10 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { createUIHook } from '@/core';
+import { getAuthenticatedToken } from '@/core/utils/authUtils';
+import { handleErrorUtility } from '@/core/utils/errorUtils';
+import { templateKeys } from '@/core/utils/query-keys';
 import { toast } from '@/hooks';
-import { getAuthenticatedToken } from '@/lib/authUtils';
-import { templateKeys } from '@/lib/core/query-keys';
-import { handleErrorUtility } from '@/lib/errorUtils';
 import type { PptxTemplate } from '@/lib/models/pptxTemplate';
 import type { PptxStyleOptions, PptxTemplateKey } from '@/lib/types';
 import { deletePptxTemplateApi, fetchPptxTemplatesApi, updatePptxTemplateApi, uploadPptxTemplateFileApi } from '@/services';

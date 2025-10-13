@@ -3,10 +3,10 @@
 
 import { PricingPlan } from "@/components/price/PricingCard";
 import { useAuth } from "@/context/AuthContext";
+import { getAuthenticatedToken } from "@/core/utils/authUtils";
+import { handleErrorUtility } from "@/core/utils/errorUtils";
+import { userKeys } from '@/core/utils/query-keys';
 import { toast } from "@/hooks";
-import { getAuthenticatedToken } from "@/lib/authUtils";
-import { userKeys } from '@/lib/core/query-keys';
-import { handleErrorUtility } from "@/lib/errorUtils";
 import { auth } from '@/lib/firebase/client-init';
 import { User, type UserProperties } from '@/lib/models/user'; // NEW: Import our User class
 import type { UserProfile } from '@/lib/types';

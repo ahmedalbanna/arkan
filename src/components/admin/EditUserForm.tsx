@@ -29,8 +29,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
+import { userKeys } from '@/core/utils/query-keys';
 import { useSendPasswordReset, useToast } from '@/hooks';
-import { userKeys } from '@/lib/core/query-keys';
 import type { User } from '@/lib/models/user';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Camera, Loader2, MailQuestion, Save, Trash2, Upload } from 'lucide-react';

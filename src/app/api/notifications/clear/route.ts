@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لمسح الإشعارات
  */
 
-import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { adminRealtimeDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
@@ -41,6 +41,6 @@ const clearNotificationsHandler = new ClearNotificationsHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    clearNotificationsHandler.handle.bind(clearNotificationsHandler),
+    clearNotificationsHandler,
     { logging: true }
 );

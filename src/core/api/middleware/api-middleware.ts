@@ -6,21 +6,22 @@
 
 import { withEnhancedAuth } from '@/core/api';
 import { deductCredit } from '@/services';
+import { NextResponse } from 'next/server';
 import type {
-    ApiHandler,
     ApiHandlerContext,
     ApiLogEntry,
-    ApiMiddlewareOptions
-} from '../types/api-types';
+    ApiMiddlewareOptions,
+    TypedApiHandler
+} from '../../types/api-types';
 
 /**
  * Middleware الرئيسي لجميع API endpoints
  */
 export const withApiMiddleware = (
-    handler: ApiHandler,
+    handler: TypedApiHandler,
     options: ApiMiddlewareOptions = {}
 ) => {
-    return withEnhancedAuth(async (context: ApiHandlerContext) => {
+    return withEnhancedAuth(async (context: ApiHandlerContext): Promise<NextResponse | Response> => {
         const startTime = Date.now();
         const requestId = generateRequestId();
 
@@ -49,7 +50,7 @@ export const withApiMiddleware = (
             }
 
             // تنفيذ المعالج
-            const response = await handler(context);
+            const response = await handler.handle(context);
 
             // تحديث مدة التنفيذ
             const duration = Date.now() - startTime;
@@ -57,7 +58,7 @@ export const withApiMiddleware = (
                 await updateApiLog(requestId, { duration, statusCode: response.status });
             }
 
-            return response;
+            return response as unknown as NextResponse;
         } catch (error) {
             // تسجيل الخطأ
             const duration = Date.now() - startTime;
@@ -120,7 +121,7 @@ function generateRequestId(): string {
  * Middleware للتحقق من الصلاحيات
  */
 export const withPermissionCheck = (
-    handler: ApiHandler,
+    handler: TypedApiHandler,
     permission: string
 ) => {
     return withApiMiddleware(handler, {
@@ -132,7 +133,7 @@ export const withPermissionCheck = (
  * Middleware للعمليات التي تتطلب ائتمانات
  */
 export const withCreditDeduction = (
-    handler: ApiHandler,
+    handler: TypedApiHandler,
     creditCost: number
 ) => {
     return withApiMiddleware(handler, {
@@ -145,7 +146,7 @@ export const withCreditDeduction = (
  * Middleware للعمليات الإدارية
  */
 export const withAdminAccess = (
-    handler: ApiHandler
+    handler: TypedApiHandler
 ) => {
     return withApiMiddleware(handler, {
         requireAdmin: true,
@@ -157,7 +158,7 @@ export const withAdminAccess = (
  * Middleware للعمليات العامة (بدون مصادقة)
  */
 export const withPublicAccess = (
-    handler: ApiHandler
+    handler: TypedApiHandler
 ) => {
     return withApiMiddleware(handler, {
         requireAuth: false,
@@ -169,7 +170,7 @@ export const withPublicAccess = (
  * Middleware للعمليات المحدودة
  */
 export const withRateLimit = (
-    handler: ApiHandler,
+    handler: TypedApiHandler,
     rateLimit: { windowMs: number; maxRequests: number }
 ) => {
     return withApiMiddleware(handler, {
@@ -182,7 +183,7 @@ export const withRateLimit = (
  * Middleware مركب للعمليات المعقدة
  */
 export const withFullMiddleware = (
-    handler: ApiHandler,
+    handler: TypedApiHandler,
     options: {
         creditCost?: number;
         requireAdmin?: boolean;

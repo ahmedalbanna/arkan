@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإحصائيات لوحة التحكم
  */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { getUserProfile } from '@/lib/db/queries';
 import { adminDb } from '@/lib/firebase/server-init';
 
@@ -107,7 +107,7 @@ const dashboardStatsHandler = new DashboardStatsHandler();
 
 // تصدير الـ handler مع middleware
 export const GET = withApiMiddleware(
-    dashboardStatsHandler.handle.bind(dashboardStatsHandler),
+    dashboardStatsHandler,
     {
         requireAdmin: true,
         logging: true

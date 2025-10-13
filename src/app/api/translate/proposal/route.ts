@@ -6,8 +6,8 @@
 
 // import { translateProposal } from '@/ai/flows/translate-proposal';
 import { ProjectProposalSchema } from '@/ai/schemas/project';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -48,6 +48,6 @@ const translateProposalHandler = new TranslateProposalHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    translateProposalHandler.handle.bind(translateProposalHandler),
+    translateProposalHandler,
     { logging: true }
 );

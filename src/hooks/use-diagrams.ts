@@ -4,8 +4,8 @@
 import type { GenerateDiagramOutput, ImageToTextInput } from '@/ai/schemas';
 import { type DiagramType } from "@/ai/schemas";
 import { useAuth } from "@/context/AuthContext";
-import { getAuthenticatedToken } from "@/lib/authUtils";
-import { handleErrorUtility } from "@/lib/errorUtils";
+import { getAuthenticatedToken } from "@/core/utils/authUtils";
+import { handleErrorUtility } from "@/core/utils/errorUtils";
 import {
   explainDiagramApi,
   generateDiagramApi,

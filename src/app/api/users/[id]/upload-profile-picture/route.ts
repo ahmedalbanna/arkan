@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لرفع صورة الملف الشخصي للمستخدم
  */
 
-import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
 import { getStorage } from 'firebase-admin/storage';
 import { z } from 'zod';
@@ -72,6 +72,6 @@ const uploadUserProfilePictureHandler = new UploadUserProfilePictureHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    uploadUserProfilePictureHandler.handle.bind(uploadUserProfilePictureHandler),
+    uploadUserProfilePictureHandler,
     { logging: true }
 );

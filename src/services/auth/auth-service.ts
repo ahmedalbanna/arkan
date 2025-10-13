@@ -4,10 +4,10 @@
  * هذا الملف يحتوي على جميع وظائف المصادقة والتسجيل
  */
 
-import { AuthSchemas } from '@/app/api/shared/validators/api-validators';
 import type { SignupCredentials } from "@/components/auth/SignupForm";
-import { apiClient } from '../shared/api-client';
-import { ComplexService, SimpleService } from '../shared/base-service';
+import { apiClient } from '@/core/api/client/api-client';
+import { ComplexService, SimpleService } from '@/core/api/client/base-client';
+import { AuthSchemas } from '@/core/validation/api-validators';
 
 export interface LoginCredentials {
     email: string;
@@ -67,7 +67,12 @@ export class LogoutService extends SimpleService<{ message: string }> {
     protected requiresAuth = true;
 
     async call(token: string): Promise<{ message: string }> {
-        return apiClient.post(this.endpoint, {}, { token });
+        const response = await this.client.post<{ message: string }>(this.endpoint, {}, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -95,11 +100,11 @@ export class ChangePasswordService extends ComplexService<{ currentPassword: str
  * دوال مساعدة للمصادقة
  */
 export const authService = {
-    login: new LoginService(),
-    signup: new SignupService(),
-    logout: new LogoutService(),
-    resetPassword: new ResetPasswordService(),
-    changePassword: new ChangePasswordService(),
+    get login() { return new LoginService(apiClient); },
+    get signup() { return new SignupService(apiClient); },
+    get logout() { return new LogoutService(apiClient); },
+    get resetPassword() { return new ResetPasswordService(apiClient); },
+    get changePassword() { return new ChangePasswordService(apiClient); },
 };
 
 /**

@@ -6,7 +6,7 @@
  */
 
 // Constants
-export * from '../../lib/core/constants';
+export * from '../constants';
 
 // Types
 export * from '../types';
@@ -21,10 +21,10 @@ export * from '../error-handling';
 export * from '../firebase/client-init';
 
 // Cache (Client-side)
-export * from '../../lib/core/cache';
+export * from '../utils/cache';
 
 // Query Keys
-export * from '../../lib/core/query-keys';
+export * from '../utils/query-keys';
 
 // Performance (Client-side safe)
 export * from '../performance';

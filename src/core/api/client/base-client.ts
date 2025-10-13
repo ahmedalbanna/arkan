@@ -7,14 +7,60 @@
 
 'use client';
 
+import { z } from 'zod';
 import { handleClientError } from '../../error-handling';
-import {
-    ApiClientConfig,
-    AuthContext,
-    HttpError,
-    HttpRequestOptions,
-    HttpResponse
-} from '../../types';
+
+// أنواع محلية للبيانات
+interface ApiClientConfig {
+    baseURL?: string;
+    timeout?: number;
+    retries?: number;
+    retryDelay?: number;
+    defaultHeaders?: Record<string, string>;
+    interceptors?: {
+        request?: (config: HttpRequestOptions) => HttpRequestOptions;
+        response?: <T>(response: HttpResponse<T>) => HttpResponse<T>;
+        error?: (error: HttpError) => HttpError;
+    };
+}
+
+interface AuthContext {
+    token: string;
+    user?: {
+        id: string;
+        email: string;
+        role: string;
+    };
+}
+
+interface HttpError {
+    message: string;
+    status?: number;
+    code?: string;
+    details?: Record<string, unknown>;
+    response?: {
+        data: any;
+        status: number;
+        statusText: string;
+        headers: Record<string, string>;
+        config: HttpRequestOptions;
+    };
+}
+
+interface HttpRequestOptions {
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+    headers?: Record<string, string>;
+    body?: any;
+    timeout?: number;
+}
+
+interface HttpResponse<T = any> {
+    data: T;
+    status: number;
+    statusText: string;
+    headers: Record<string, string>;
+    config: HttpRequestOptions;
+}
 
 /**
  * إعدادات العميل الافتراضية
@@ -397,5 +443,182 @@ export class BaseApiClient {
      */
     getConfig(): ApiClientConfig {
         return { ...this.config };
+    }
+
+    /**
+     * التحقق من صحة البيانات المدخلة باستخدام Zod
+     */
+    public validateInput<T>(data: T, schema?: z.ZodSchema<T>): T {
+        if (!schema) {
+            return data;
+        }
+
+        const result = schema.safeParse(data);
+        if (!result.success) {
+            throw new Error(`Validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
+        }
+
+        return result.data;
+    }
+
+    /**
+     * استدعاء API endpoint مع التحقق من صحة البيانات
+     */
+    async callWithValidation<TInput = unknown, TOutput = unknown>(
+        endpoint: string,
+        data: TInput,
+        schema?: z.ZodSchema<TInput>,
+        options: Partial<HttpRequestOptions> = {}
+    ): Promise<HttpResponse<TOutput>> {
+        const validatedData = this.validateInput(data, schema);
+        return this.post<TOutput>(endpoint, validatedData, options);
+    }
+}
+
+/**
+ * خدمة أساسية للعمليات البسيطة (GET)
+ */
+export abstract class SimpleService<TOutput = unknown> {
+    protected abstract endpoint: string;
+    protected abstract requiresAuth: boolean;
+
+    constructor(protected client: BaseApiClient) {}
+
+    async call(token?: string, ...args: unknown[]): Promise<TOutput> {
+        try {
+            const options: Partial<HttpRequestOptions> = {};
+
+            if (this.requiresAuth && token) {
+                options.headers = {
+                    'Authorization': `Bearer ${token}`,
+                };
+            }
+
+            const response = await this.client.get<TOutput>(this.endpoint, options);
+            return response.data;
+        } catch (error) {
+            if (error instanceof Error) {
+                throw error;
+            }
+            throw new Error('Unknown error occurred');
+        }
+    }
+}
+
+/**
+ * خدمة للعمليات المعقدة (POST/PUT/DELETE)
+ */
+export abstract class ComplexService<TInput = unknown, TOutput = unknown> {
+    protected abstract endpoint: string;
+    protected abstract method: 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+    protected abstract inputSchema?: z.ZodSchema<TInput>;
+    protected abstract requiresAuth: boolean;
+
+    constructor(protected client: BaseApiClient) {}
+
+    /**
+     * التحقق من صحة البيانات المدخلة باستخدام Zod
+     */
+    protected validateInput<T>(data: T, schema?: z.ZodSchema<T>): T {
+        if (!schema) {
+            return data;
+        }
+
+        const result = schema.safeParse(data);
+        if (!result.success) {
+            throw new Error(`Validation error: ${result.error.errors.map(e => e.message).join(', ')}`);
+        }
+
+        return result.data;
+    }
+
+    async call(data: TInput, token?: string, ...args: unknown[]): Promise<TOutput> {
+        try {
+            // التحقق من صحة البيانات
+            const validatedData = this.validateInput(data, this.inputSchema);
+
+            const options: Partial<HttpRequestOptions> = {};
+
+            if (this.requiresAuth && token) {
+                options.headers = {
+                    'Authorization': `Bearer ${token}`,
+                };
+            }
+
+            let response: HttpResponse<TOutput>;
+
+            switch (this.method) {
+                case 'POST':
+                    response = await this.client.post<TOutput>(this.endpoint, validatedData, options);
+                    break;
+                case 'PUT':
+                    response = await this.client.put<TOutput>(this.endpoint, validatedData, options);
+                    break;
+                case 'PATCH':
+                    response = await this.client.patch<TOutput>(this.endpoint, validatedData, options);
+                    break;
+                case 'DELETE':
+                    response = await this.client.delete<TOutput>(this.endpoint, options);
+                    break;
+                default:
+                    throw new Error(`Unsupported method: ${this.method}`);
+            }
+
+            return response.data;
+        } catch (error) {
+            if (error instanceof Error) {
+                throw error;
+            }
+            throw new Error('Unknown error occurred');
+        }
+    }
+}
+
+/**
+ * خدمة للعمليات التي تتطلب ائتمانات
+ */
+export abstract class CreditBasedService<TInput = unknown, TOutput = unknown> extends ComplexService<TInput, TOutput> {
+    protected abstract creditCost: number;
+
+    async call(data: TInput, token?: string): Promise<TOutput> {
+        // يمكن إضافة منطق التحقق من الائتمانات هنا
+        console.log(`This operation costs ${this.creditCost} credits`);
+        return super.call(data, token);
+    }
+}
+
+/**
+ * خدمة للعمليات الإدارية
+ */
+export abstract class AdminService<TInput = unknown, TOutput = unknown> extends ComplexService<TInput, TOutput> {
+    protected requiresAuth = true;
+
+    async call(data: TInput, token?: string, ...args: unknown[]): Promise<TOutput> {
+        // يمكن إضافة منطق التحقق من الصلاحيات الإدارية هنا
+        console.log('Admin operation requested');
+        return super.call(data, token);
+    }
+}
+
+/**
+ * خدمة للعمليات العامة (بدون مصادقة)
+ */
+export abstract class PublicService<TInput = unknown, TOutput = unknown> extends ComplexService<TInput, TOutput> {
+    protected requiresAuth = false;
+}
+
+/**
+ * خدمة للعمليات المحدودة
+ */
+export abstract class RateLimitedService<TInput = unknown, TOutput = unknown> extends ComplexService<TInput, TOutput> {
+    protected abstract rateLimit: {
+        windowMs: number;
+        maxRequests: number;
+    };
+
+    async call(data: TInput, token?: string): Promise<TOutput> {
+        // يمكن إضافة منطق Rate Limiting هنا
+        console.log(`Rate limit: ${this.rateLimit.maxRequests} requests per ${this.rateLimit.windowMs}ms`);
+        return super.call(data, token);
     }
 }

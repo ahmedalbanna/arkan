@@ -5,8 +5,8 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
+import { teamKeys } from '@/core/utils/query-keys';
 import { useToast } from '@/hooks';
-import { teamKeys } from '@/lib/core/query-keys';
 import { inviteMember } from '@/services';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';

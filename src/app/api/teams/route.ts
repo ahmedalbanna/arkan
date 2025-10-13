@@ -4,9 +4,9 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للفرق
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { TeamSchemas } from '@/app/api/shared/validators/api-validators';
+import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { TeamSchemas } from '@/core/validation/api-validators';
 import { adminDb } from '@/lib/firebase/server-init';
 import type { TeamProperties, TeamWithMembers } from '@/lib/models/team';
 
@@ -261,21 +261,21 @@ const inviteMemberHandler = new InviteMemberHandler();
 
 // تصدير الـ handlers مع middleware للاستخدام في الطلبات
 export const GET = withApiMiddleware(
-    teamListHandler.handle.bind(teamListHandler),
+    teamListHandler,
     { logging: true }
 );
 
 export const POST = withApiMiddleware(
-    createTeamHandler.handle.bind(createTeamHandler),
+    createTeamHandler,
     { logging: true }
 );
 
 export const PUT = withApiMiddleware(
-    updateTeamHandler.handle.bind(updateTeamHandler),
+    updateTeamHandler,
     { logging: true }
 );
 
 export const DELETE = withApiMiddleware(
-    deleteTeamHandler.handle.bind(deleteTeamHandler),
+    deleteTeamHandler,
     { logging: true }
 );

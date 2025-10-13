@@ -2,8 +2,8 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/authUtils';
-import { handleErrorUtility } from '@/lib/errorUtils';
+import { getAuthenticatedToken } from '@/core/utils/authUtils';
+import { handleErrorUtility } from '@/core/utils/errorUtils';
 import {
   createSection as createSectionApi,
   deleteSection as deleteSectionApi,
@@ -13,7 +13,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from './use-toast';
 
-import { sectionKeys } from '@/lib/core/query-keys';
+import { sectionKeys } from '@/core/utils/query-keys';
 import { Section, type SectionProperties } from '@/lib/models/section'; // NEW: Import our class
 
 /**

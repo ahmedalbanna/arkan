@@ -4,7 +4,7 @@
 //  * هذا الملف يحتوي على endpoint لتحويل مشروع مؤقت إلى دائم
 //  */
 
-// import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
+// import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
 // import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 // import { tempProjectManager } from '@/lib/services/temp-project-manager';
 // import { z } from 'zod';

@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للإعدادات
  */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
 
 /**
@@ -37,7 +37,7 @@ const settingsHandler = new SettingsHandler();
 
 // تصدير الـ handler مع middleware
 export const GET = withApiMiddleware(
-    settingsHandler.handle.bind(settingsHandler),
+    settingsHandler,
     {
         requireAuth: false, // هذا الـ endpoint عام ولا يتطلب مصادقة
         logging: true

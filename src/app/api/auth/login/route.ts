@@ -1,7 +1,7 @@
-import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import type { ApiHandlerContext } from '@/app/api/shared/types/api-types';
-import { AuthSchemas } from '@/app/api/shared/validators/api-validators';
+import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import type { ApiHandlerContext } from '@/core/types/api-types';
+import { AuthSchemas } from '@/core/validation/api-validators';
 import { adminAuth } from '@/lib/firebase/server-init';
 
 /**
@@ -65,8 +65,8 @@ class LoginHandler extends ComplexApiHandler<{ email: string; password: string }
     }
 }
 
-const handler = new LoginHandler();
-export const POST = withApiMiddleware(handler.handle.bind(handler), {
+const loginHandler = new LoginHandler();
+export const POST = withApiMiddleware(loginHandler, {
     requireAuth: false,
     logging: true
 });

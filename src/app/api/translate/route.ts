@@ -5,8 +5,8 @@
  */
 
 // import { translateText } from '@/ai/flows/translate-text';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -59,7 +59,7 @@ const translateHandler = new TranslateHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    translateHandler.handle.bind(translateHandler),
+    translateHandler,
     {
         logging: true
     }

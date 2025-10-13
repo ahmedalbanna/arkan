@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإدارة المشاريع الفردية
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
 import { ProjectStateSchema } from '@/lib/project-state-schema';
 import { FieldValue } from 'firebase-admin/firestore';
@@ -125,21 +125,21 @@ const addContextHandler = new AddContextHandler();
 
 // تصدير الـ handlers مع middleware
 export const GET = withApiMiddleware(
-    getProjectHandler.handle.bind(getProjectHandler),
+    getProjectHandler,
     { logging: true }
 );
 
 export const PUT = withApiMiddleware(
-    updateProjectHandler.handle.bind(updateProjectHandler),
+    updateProjectHandler,
     { logging: true }
 );
 
 export const DELETE = withApiMiddleware(
-    deleteProjectHandler.handle.bind(deleteProjectHandler),
+    deleteProjectHandler,
     { logging: true }
 );
 
 export const PATCH = withApiMiddleware(
-    addContextHandler.handle.bind(addContextHandler),
+    addContextHandler,
     { logging: true }
 );

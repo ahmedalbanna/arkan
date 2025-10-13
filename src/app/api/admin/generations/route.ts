@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لسجل التوليدات
  */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { getUserProfile } from '@/lib/db/queries';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
@@ -82,6 +82,6 @@ const getGenerationsLogHandler = new GetGenerationsLogHandler();
 
 // تصدير الـ handler مع middleware
 export const GET = withApiMiddleware(
-    getGenerationsLogHandler.handle.bind(getGenerationsLogHandler),
+    getGenerationsLogHandler,
     { requireAdmin: true, logging: true }
 );

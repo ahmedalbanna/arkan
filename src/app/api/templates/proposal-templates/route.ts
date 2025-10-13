@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لقوالب المقترحات مع Lazy Seeding
  */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { PROPOSAL_TEMPLATES as defaultTemplates } from '@/lib/db/seed-data/proposal-templates';
 import { adminDb } from '@/lib/firebase/server-init';
 
@@ -37,6 +37,6 @@ const getProposalTemplatesHandler = new GetProposalTemplatesHandler();
 
 // تصدير الـ handler مع middleware
 export const GET = withApiMiddleware(
-    getProposalTemplatesHandler.handle.bind(getProposalTemplatesHandler),
+    getProposalTemplatesHandler,
     { requireAuth: false, logging: true } // Public endpoint for fetching templates
 );

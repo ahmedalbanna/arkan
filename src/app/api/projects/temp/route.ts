@@ -4,7 +4,7 @@
 //  * هذا الملف يحتوي على endpoints لإدارة المشاريع المؤقتة
 //  */
 
-// import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
+// import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
 // import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 // import { tempProjectManager } from '@/lib/services/temp-project-manager';
 // import { z } from 'zod';

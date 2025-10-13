@@ -3,7 +3,7 @@
 
 import type { AcademicDocumentType, AnalyzedDocument, SolvedDocument } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/authUtils';
+import { getAuthenticatedToken } from '@/core/utils/authUtils';
 import { analyzeApi, solveApi } from '@/services';
 import { useMutation } from '@tanstack/react-query';
 

@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لحذف المحادثات
  */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { adminRealtimeDb } from '@/lib/firebase/server-init';
 
 /**
@@ -52,6 +52,6 @@ const deleteConversationHandler = new DeleteConversationHandler();
 
 // تصدير الـ handler مع middleware
 export const DELETE = withApiMiddleware(
-    deleteConversationHandler.handle.bind(deleteConversationHandler),
+    deleteConversationHandler,
     { logging: true }
 );

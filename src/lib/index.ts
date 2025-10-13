@@ -1,6 +1,6 @@
 // Core Module - العناصر الأساسية الموحدة
 // للاستخدام العام (يشمل العميل والخادم)
-export * from './core';
+export * from '../core';
 
 // // للاستخدام المحدد
 // export * from './core/client'; // للعميل فقط

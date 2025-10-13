@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لدعوات الفرق العامة
  */
 
-import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { getUserProfile } from '@/lib/db/queries';
 import { adminAuth, adminDb } from '@/lib/firebase/server-init';
 import { TeamProperties } from '@/lib/models/team';
@@ -103,6 +103,6 @@ const inviteTeamMemberGeneralHandler = new InviteTeamMemberGeneralHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    inviteTeamMemberGeneralHandler.handle.bind(inviteTeamMemberGeneralHandler),
+    inviteTeamMemberGeneralHandler,
     { logging: true }
 );

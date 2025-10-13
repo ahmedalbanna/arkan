@@ -6,8 +6,8 @@
 
 import { generatePresentation } from '@/ai/flows/unified';
 import { ProjectPlanSchema, ProjectProposalSchema } from '@/ai/schemas/project';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -55,7 +55,7 @@ const generatePresentationHandler = new GeneratePresentationHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    generatePresentationHandler.handle.bind(generatePresentationHandler),
+    generatePresentationHandler,
     {
         logging: true
     }

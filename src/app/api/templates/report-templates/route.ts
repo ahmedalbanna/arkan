@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لقوالب التقارير مع Lazy Seeding
  */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { REPORT_GENERATION_TEMPLATES as defaultTemplates } from '@/lib/db/seed-data/report-templates';
 import { adminDb } from '@/lib/firebase/server-init';
 
@@ -37,6 +37,6 @@ const getReportTemplatesHandler = new GetReportTemplatesHandler();
 
 // تصدير الـ handler مع middleware
 export const GET = withApiMiddleware(
-    getReportTemplatesHandler.handle.bind(getReportTemplatesHandler),
+    getReportTemplatesHandler,
     { requireAuth: false, logging: true } // Public endpoint for fetching templates
 );

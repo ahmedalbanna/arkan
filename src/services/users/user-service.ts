@@ -4,10 +4,10 @@
  * هذا الملف يحتوي على جميع وظائف إدارة المستخدمين
  */
 
-import { UserSchemas } from '@/app/api/shared/validators/api-validators';
+import { apiClient } from '@/core/api/client/api-client';
+import { AdminService, ComplexService, SimpleService } from '@/core/api/client/base-client';
+import { UserSchemas } from '@/core/validation/api-validators';
 import type { UserProfile } from '@/lib/types';
-import { apiClient } from '../shared/api-client';
-import { AdminService, ComplexService, SimpleService } from '../shared/base-service';
 
 export interface UserListResponse {
     users: UserProfile[];
@@ -55,7 +55,12 @@ export class UserListService extends SimpleService<UserListResponse> {
         if (params.sortOrder) searchParams.append('sortOrder', params.sortOrder);
 
         const endpoint = `${this.endpoint}?${searchParams.toString()}`;
-        return apiClient.get(endpoint, { token });
+        const response = await this.client.get<UserListResponse>(endpoint, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -78,7 +83,12 @@ export class UpdateUserService extends AdminService<UpdateUserData, UserProfile>
 
     async call(data: UpdateUserData, token: string, userId: string): Promise<UserProfile> {
         const endpoint = `${this.endpoint}/${userId}`;
-        return apiClient.put(endpoint, data, { token });
+        const response = await this.client.put<UserProfile>(endpoint, data, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -93,7 +103,12 @@ export class DeleteUserService extends AdminService<{}, { message: string }> {
 
     async call(data: {}, token: string, userId: string): Promise<{ message: string }> {
         const endpoint = `${this.endpoint}/${userId}`;
-        return apiClient.delete(endpoint, { token });
+        const response = await this.client.delete<{ message: string }>(endpoint, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -106,7 +121,12 @@ export class GetUserService extends SimpleService<UserProfile> {
 
     async call(token: string, userId: string): Promise<UserProfile> {
         const endpoint = `${this.endpoint}/${userId}`;
-        return apiClient.get(endpoint, { token });
+        const response = await this.client.get<UserProfile>(endpoint, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -118,7 +138,8 @@ export class GetAdminsService extends SimpleService<UserProfile[]> {
     protected requiresAuth = false;
 
     async call(): Promise<UserProfile[]> {
-        return apiClient.get(this.endpoint);
+        const response = await this.client.get<UserProfile[]>(this.endpoint);
+        return response.data;
     }
 }
 
@@ -133,7 +154,12 @@ export class SendPasswordResetService extends ComplexService<{}, { message: stri
 
     async call(data: {}, token: string, userId: string): Promise<{ message: string }> {
         const endpoint = `${this.endpoint}/${userId}/reset-password`;
-        return apiClient.post(endpoint, data, { token });
+        const response = await this.client.post<{ message: string }>(endpoint, data, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return response.data;
     }
 }
 
@@ -141,13 +167,13 @@ export class SendPasswordResetService extends ComplexService<{}, { message: stri
  * دوال مساعدة للمستخدمين
  */
 export const userService = {
-    list: new UserListService(),
-    create: new CreateUserService(),
-    update: new UpdateUserService(),
-    delete: new DeleteUserService(),
-    get: new GetUserService(),
-    getAdmins: new GetAdminsService(),
-    sendPasswordReset: new SendPasswordResetService(),
+    get list() { return new UserListService(apiClient); },
+    get create() { return new CreateUserService(apiClient); },
+    get update() { return new UpdateUserService(apiClient); },
+    get delete() { return new DeleteUserService(apiClient); },
+    get get() { return new GetUserService(apiClient); },
+    get getAdmins() { return new GetAdminsService(apiClient); },
+    get sendPasswordReset() { return new SendPasswordResetService(apiClient); },
 };
 
 /**

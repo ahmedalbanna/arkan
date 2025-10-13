@@ -1,9 +1,9 @@
 
 'use client';
 
+import { getAuthenticatedToken } from '@/core/utils/authUtils';
+import { handleErrorUtility } from '@/core/utils/errorUtils';
 import { useMutation } from '@tanstack/react-query';
-import { getAuthenticatedToken } from '@/lib/authUtils';
-import { handleErrorUtility } from '@/lib/errorUtils';
 
 // Note: The `useNotifications` hook which used `onValue` is now integrated into `useChatStore`.
 // This file is kept for the mutation hooks which are still relevant.

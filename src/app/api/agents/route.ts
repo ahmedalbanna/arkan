@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للوكلاء
  */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
 
 /**
@@ -35,7 +35,7 @@ const agentsListHandler = new AgentsListHandler();
 
 // تصدير الـ handler مع middleware
 export const GET = withApiMiddleware(
-    agentsListHandler.handle.bind(agentsListHandler),
+    agentsListHandler,
     {
         logging: true
     }

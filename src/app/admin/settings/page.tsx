@@ -2,8 +2,8 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
+import { getAuthenticatedToken } from '@/core/utils/authUtils';
 import { useToast } from '@/hooks';
-import { getAuthenticatedToken } from '@/lib/authUtils';
 import type { AppSettings } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';

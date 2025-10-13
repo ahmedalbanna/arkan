@@ -4,9 +4,9 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { getAuthenticatedToken } from "@/lib/authUtils";
-import { featureKeys } from '@/lib/core/query-keys';
-import { handleErrorUtility } from "@/lib/errorUtils";
+import { getAuthenticatedToken } from "@/core/utils/authUtils";
+import { handleErrorUtility } from "@/core/utils/errorUtils";
+import { featureKeys } from '@/core/utils/query-keys';
 import {
   fetchFeaturesApi,
   updateFeatureApi,

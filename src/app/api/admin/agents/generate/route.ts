@@ -5,8 +5,8 @@
  */
 
 import { generateAgentConfig } from '@/ai/flows/unified';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { z } from 'zod';
 
 // Schema لتوليد إعدادات الوكيل
@@ -54,7 +54,7 @@ const generateAgentConfigHandler = new GenerateAgentConfigHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    generateAgentConfigHandler.handle.bind(generateAgentConfigHandler),
+    generateAgentConfigHandler,
     {
         requireAdmin: true,
         logging: true

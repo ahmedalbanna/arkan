@@ -6,8 +6,8 @@
 
 import { generateDiagram } from '@/ai/flows/unified';
 import { DiagramTypeSchema, ExternalContextSchema, ProjectPlanSchema, ProjectProposalSchema, SectionNameSchema } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { logGeneration } from '@/services';
 import { deflateSync } from 'zlib';
 import { z } from 'zod';
@@ -114,7 +114,7 @@ const generateDiagramHandler = new GenerateDiagramHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    generateDiagramHandler.handle.bind(generateDiagramHandler),
+    generateDiagramHandler,
     {
         logging: true
     }

@@ -6,8 +6,8 @@
 
 // import { translatePresentation } from '@/ai/flows/translate-presentation';
 import { PresentationHistoryEntrySchema } from '@/ai/schemas/flows';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -48,6 +48,6 @@ const translatePresentationHandler = new TranslatePresentationHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    translatePresentationHandler.handle.bind(translatePresentationHandler),
+    translatePresentationHandler,
     { logging: true }
 );

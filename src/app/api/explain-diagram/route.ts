@@ -6,8 +6,8 @@
 
 import { ai } from '@/ai/genkit';
 import { ImageToTextInputSchema, ImageToTextOutputSchema } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -74,7 +74,7 @@ const explainDiagramHandler = new ExplainDiagramHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    explainDiagramHandler.handle.bind(explainDiagramHandler),
+    explainDiagramHandler,
     {
         logging: true
     }

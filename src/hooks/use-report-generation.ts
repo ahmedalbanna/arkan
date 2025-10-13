@@ -5,7 +5,7 @@
 import { SectionName } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { createReportToolHook } from '@/core';
-import { getAuthenticatedToken } from '@/lib/authUtils';
+import { getAuthenticatedToken } from '@/core/utils/authUtils';
 import { generateReportSectionApi } from '@/services';
 import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';

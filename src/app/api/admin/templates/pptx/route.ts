@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لقوالب PPTX
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { createGenerativeTemplate } from '@/lib/db/queries';
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
@@ -88,7 +88,7 @@ const createPptxTemplateHandler = new CreatePptxTemplateHandler();
 
 // تصدير الـ handlers مع middleware
 export const GET = withApiMiddleware(
-    pptxTemplatesListHandler.handle.bind(pptxTemplatesListHandler),
+    pptxTemplatesListHandler,
     {
         requireAuth: false, // هذا الـ endpoint عام ولا يتطلب مصادقة
         logging: true
@@ -96,7 +96,7 @@ export const GET = withApiMiddleware(
 );
 
 export const POST = withApiMiddleware(
-    createPptxTemplateHandler.handle.bind(createPptxTemplateHandler),
+    createPptxTemplateHandler,
     {
         requireAdmin: true,
         logging: true

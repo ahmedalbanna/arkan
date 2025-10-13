@@ -4,5 +4,9 @@
  * هذا الملف يحتوي على جميع الصادرات لخدمات المصادقة
  */
 
-export * from '@/services/auth/auth-service';
+// تصدير الدوال فقط، وليس كائنات الخدمة
+export {
+    changePassword, loginWithEmail, logoutUser,
+    resetPassword, signupUser, type AuthResponse, type LoginCredentials, type ResetPasswordResponse, type SignupResponse
+} from '@/services/auth/auth-service';
 

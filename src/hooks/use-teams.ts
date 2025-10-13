@@ -2,12 +2,12 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/authUtils';
-import { teamKeys } from '@/lib/core/query-keys';
-import { handleErrorUtility } from '@/lib/errorUtils';
+import { getAuthenticatedToken } from '@/core/utils/authUtils';
+import { handleErrorUtility } from '@/core/utils/errorUtils';
+import { teamKeys } from '@/core/utils/query-keys';
 import {
-    createTeam as createTeamApi,
-    inviteMember as inviteMemberApi
+  createTeam as createTeamApi,
+  inviteMember as inviteMemberApi
 } from '@/services';
 import { useMutation, useQuery, useQueryClient, useQueryClient as useTanstackQueryClient } from '@tanstack/react-query';
 // Import our new class

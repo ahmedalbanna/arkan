@@ -4,10 +4,10 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لأدوات الكتابة
  */
 
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import type { ApiHandlerContext } from '@/app/api/shared/types/api-types';
 import { createApiResponseEnhanced, handleApiErrorEnhanced } from '@/core/api';
+import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import type { ApiHandlerContext } from '@/core/types/api-types';
 import { deductCredit, logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -128,7 +128,7 @@ const writingToolHandler = new WritingToolHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    writingToolHandler.handle.bind(writingToolHandler),
+    writingToolHandler,
     {
         logging: true
     }

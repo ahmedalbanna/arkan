@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للتسجيل
  */
 
-import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { getUserProfile } from '@/lib/db/queries';
 import { adminAuth, adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import type { UserRole } from '@/lib/models/user';
@@ -242,7 +242,7 @@ const unifiedSignupHandler = new UnifiedSignupHandler();
 
 // تصدير الـ handlers مع middleware
 export const POST = withApiMiddleware(
-    unifiedSignupHandler.handle.bind(unifiedSignupHandler),
+    unifiedSignupHandler,
     {
         requireAuth: false,
         logging: true

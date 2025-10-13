@@ -4,8 +4,8 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لقوالب PPTX مع Lazy Seeding
  */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 
@@ -43,6 +43,6 @@ const getPptxTemplatesHandler = new GetPptxTemplatesHandler();
 
 // تصدير الـ handler مع middleware
 export const GET = withApiMiddleware(
-    getPptxTemplatesHandler.handle.bind(getPptxTemplatesHandler),
+    getPptxTemplatesHandler,
     { requireAuth: false, logging: true } // Public endpoint for fetching templates
 );

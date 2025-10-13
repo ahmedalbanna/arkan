@@ -4,10 +4,10 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتسجيل الخروج
  */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { createApiResponseEnhanced } from '@/core/api';
-import { ApiHandlerContext } from '../../shared/types/api-types';
+import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
+import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiHandlerContext } from '@/core/types/api-types';
 
 /**
  * معالج تسجيل الخروج
@@ -35,7 +35,7 @@ const logoutHandler = new LogoutHandler();
 
 // تصدير الـ handler مع middleware
 export const POST = withApiMiddleware(
-    logoutHandler.handle.bind(logoutHandler),
+    logoutHandler,
     {
         requireAuth: true,
         logging: true
