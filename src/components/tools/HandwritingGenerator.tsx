@@ -1,16 +1,17 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
+import { AnimatedContainer } from '@/components/ui/animation';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, RefreshCw } from 'lucide-react';
-import { Handwriting } from '@/lib/handwriting';
+import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
+import { Handwriting } from '@/lib/handwriting';
+import { Download, RefreshCw } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 const HANDWRITING_FONTS = [
   { name: 'Homemade Apple', value: "'Homemade Apple', cursive" },
@@ -92,28 +93,31 @@ export default function HandwritingGenerator() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline">{t('writingTools.handwriting.outputTitle')}</CardTitle>
-            <CardDescription>
-              {t('writingTools.handwriting.outputDescription')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="w-full border rounded-md">
-              <canvas ref={canvasRef}></canvas>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      <div>
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('writingTools.handwriting.controlsTitle')}</CardTitle>
-            <CardDescription>{t('writingTools.handwriting.controlsDescription')}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+      <AnimatedContainer animation="fade-in-up">
+        <div className="lg:col-span-2">
+          <Card className="backdrop-blur-md bg-gradient-to-br from-background/70 to-primary/5 border border-primary/10 shadow-soft hover:shadow-glow">
+            <CardHeader className="rounded-t-lg bg-gradient-to-r from-background/60 to-primary/5">
+              <CardTitle className="font-headline">{t('writingTools.handwriting.outputTitle')}</CardTitle>
+              <CardDescription>
+                {t('writingTools.handwriting.outputDescription')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="w-full border rounded-md bg-gradient-to-br from-muted/30 to-primary/5">
+                <canvas ref={canvasRef}></canvas>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </AnimatedContainer>
+      <AnimatedContainer animation="fade-in-up" delay={100}>
+        <div>
+          <Card className="backdrop-blur-md bg-gradient-to-br from-background/70 to-primary/5 border border-primary/10 shadow-soft hover:shadow-glow">
+            <CardHeader className="rounded-t-lg bg-gradient-to-r from-background/60 to-primary/5">
+              <CardTitle className="font-headline">{t('writingTools.handwriting.controlsTitle')}</CardTitle>
+              <CardDescription>{t('writingTools.handwriting.controlsDescription')}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="text-input">{t('writingTools.handwriting.textLabel')}</Label>
               <Textarea
@@ -186,19 +190,20 @@ export default function HandwritingGenerator() {
                 onChange={(e) => setBackgroundColor(e.target.value)}
               />
             </div>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-2">
-            <Button onClick={handleRedraw} className="w-full">
-              <RefreshCw className="me-2 h-4 w-4" />
-              {t('writingTools.handwriting.redrawButton')}
-            </Button>
-            <Button onClick={handleDownload} variant="secondary" className="w-full">
-              <Download className="me-2 h-4 w-4" />
-              {t('writingTools.handwriting.downloadButton')}
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
+            </CardContent>
+            <CardFooter className="flex flex-col gap-2">
+              <Button onClick={handleRedraw} className="w-full" variant="gradient">
+                <RefreshCw className="me-2 h-4 w-4" />
+                {t('writingTools.handwriting.redrawButton')}
+              </Button>
+              <Button onClick={handleDownload} variant="secondary" className="w-full hover:shadow-soft">
+                <Download className="me-2 h-4 w-4" />
+                {t('writingTools.handwriting.downloadButton')}
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      </AnimatedContainer>
     </div>
   );
 }

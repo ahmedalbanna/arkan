@@ -1,7 +1,9 @@
 'use client';
 
+import { AnimatedContainer, StaggeredAnimation } from '@/components/ui/animation';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CardHeader } from '@/components/ui/card';
+import { Card, CardHeader } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/context/AuthContext';
@@ -10,7 +12,7 @@ import { getAuthenticatedToken } from '@/lib/authUtils';
 import { Chat } from '@/lib/models/chat';
 import { cn } from '@/lib/utils';
 import { getDatabase, off, onValue, orderByChild, query, ref } from 'firebase/database';
-import { Bot, Info, Loader2, Paperclip, RotateCcw, Send, Settings2, User } from 'lucide-react';
+import { Bot, Clock, Info, Loader2, MessageSquare, Paperclip, RotateCcw, Send, Settings2, Sparkles, User } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 interface ChatMessage {
@@ -20,24 +22,41 @@ interface ChatMessage {
     timestamp: number;
 }
 
-function MessageBubble({ role, content }: { role: 'user' | 'assistant', content: string }) {
+function MessageBubble({ role, content, timestamp }: { role: 'user' | 'assistant', content: string, timestamp?: number }) {
     const isUser = role === 'user';
+    const Icon = isUser ? User : Bot;
+
     return (
-        <div className={cn("flex items-start gap-3", isUser && "justify-end")}>
-            {!isUser && (
-                <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
-                    <Bot className="h-5 w-5" />
+        <AnimatedContainer animation="fade-in-up" delay={100}>
+            <div className={cn("flex items-start gap-3 group", isUser && "justify-end")}>
+                {!isUser && (
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-primary-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-soft">
+                        <Icon className="h-5 w-5 text-white" />
+                    </div>
+                )}
+                <div className={cn(
+                    "relative p-4 rounded-2xl max-w-lg shadow-soft transition-all duration-200 group-hover:shadow-medium",
+                    isUser
+                        ? 'bg-gradient-to-br from-primary to-primary-600 text-primary-foreground'
+                        : 'bg-gradient-to-br from-muted to-muted/80 border border-border/50'
+                )}>
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{content}</p>
+                    {timestamp && (
+                        <div className={cn(
+                            "text-xs mt-2 opacity-70",
+                            isUser ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                        )}>
+                            {new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                    )}
                 </div>
-            )}
-            <div className={cn("p-3 rounded-lg max-w-lg", isUser ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
-                <p className="text-sm whitespace-pre-wrap">{content}</p>
+                {isUser && (
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-secondary to-secondary-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-soft">
+                        <Icon className="h-5 w-5 text-white" />
+                    </div>
+                )}
             </div>
-            {isUser && (
-                <div className="h-8 w-8 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shrink-0">
-                    <User className="h-5 w-5" />
-                </div>
-            )}
-        </div>
+        </AnimatedContainer>
     )
 }
 
@@ -68,13 +87,11 @@ export function ConversationView({ chat }: { chat: Chat | null }) {
             }
         });
 
-        // Cleanup listener on unmount or when chat changes
         return () => {
             off(messagesRef, 'value', listener);
         };
 
     }, [chat]);
-
 
     useEffect(() => {
         if (scrollAreaRef.current) {
@@ -87,7 +104,6 @@ export function ConversationView({ chat }: { chat: Chat | null }) {
 
     const agentChatMutation = useAgentChat();
 
-
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim() || !firebaseUser || !chat) return;
@@ -96,7 +112,6 @@ export function ConversationView({ chat }: { chat: Chat | null }) {
         setInput('');
 
         const token = await getAuthenticatedToken(firebaseUser);
-
         const agentId = chat.agent?.id || 'user-chat';
 
         agentChatMutation.mutate({
@@ -107,16 +122,28 @@ export function ConversationView({ chat }: { chat: Chat | null }) {
         });
     }
 
-
     if (!chat) {
         return (
-            <div className="flex h-full flex-col items-center justify-center bg-background p-8">
-                <div className="text-center">
-                    <h2 className="text-2xl font-semibold">Select a Conversation</h2>
-                    <p className="mt-2 text-muted-foreground max-w-sm">
-                        Choose a conversation or an agent from the sidebar to get started.
-                    </p>
-                </div>
+            <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-background to-primary/5 p-8">
+                <AnimatedContainer animation="fade-in-up" delay={200}>
+                    <Card variant="glass" className="p-8 text-center max-w-md">
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="p-4 rounded-full bg-gradient-to-br from-primary to-primary-600 shadow-glow">
+                                <MessageSquare className="h-12 w-12 text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-headline font-semibold mb-2">Select a Conversation</h2>
+                                <p className="text-muted-foreground">
+                                    Choose a conversation or an agent from the sidebar to get started with AI-powered chat.
+                                </p>
+                            </div>
+                            <Badge variant="secondary" className="flex items-center gap-1">
+                                <Sparkles className="h-3 w-3" />
+                                AI-Powered Chat
+                            </Badge>
+                        </div>
+                    </Card>
+                </AnimatedContainer>
             </div>
         );
     }
@@ -124,59 +151,108 @@ export function ConversationView({ chat }: { chat: Chat | null }) {
     const isLoading = agentChatMutation.isPending;
 
     return (
-        <div className="flex h-full flex-col">
-            <CardHeader className="flex flex-row items-center justify-between border-b p-4">
-                <h2 className="text-lg font-semibold">{chat.title}</h2>
-                <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8"><RotateCcw className="h-4 w-4" /></Button>
-                </div>
-            </CardHeader>
+        <div className="flex h-full flex-col bg-gradient-to-b from-background to-primary/5">
+            <AnimatedContainer animation="fade-in-down" delay={200}>
+                <CardHeader className="flex flex-row items-center justify-between border-b bg-gradient-to-r from-primary/5 to-blue-500/5 p-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-primary-600">
+                            <MessageSquare className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-headline font-semibold">{chat.title}</h2>
+                            <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="secondary" className="text-xs">
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    Active
+                                </Badge>
+                                {chat.agent && (
+                                    <Badge variant="outline" className="text-xs">
+                                        <Sparkles className="h-3 w-3 mr-1" />
+                                        AI Agent
+                                    </Badge>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:shadow-soft transition-all duration-200">
+                            <RotateCcw className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </CardHeader>
+            </AnimatedContainer>
 
             <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
                 <div className="space-y-6">
-                    {messages.map((msg, index) => (
-                        <MessageBubble key={index} role={msg.role} content={msg.content} />
-                    ))}
+                    <StaggeredAnimation animation="fade-in-up" staggerDelay={100}>
+                        {messages.map((msg, index) => (
+                            <MessageBubble
+                                key={index}
+                                role={msg.role}
+                                content={msg.content}
+                                timestamp={msg.timestamp}
+                            />
+                        ))}
+                    </StaggeredAnimation>
                     {isLoading && (
-                        <div className="flex items-start gap-3 justify-start">
-                            <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
-                                <Bot className="h-5 w-5" />
+                        <AnimatedContainer animation="fade-in-up" delay={200}>
+                            <div className="flex items-start gap-3 justify-start">
+                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-primary-600 flex items-center justify-center shrink-0 shadow-soft">
+                                    <Bot className="h-5 w-5 text-white" />
+                                </div>
+                                <div className="p-4 rounded-2xl bg-gradient-to-br from-muted to-muted/80 border border-border/50 shadow-soft">
+                                    <div className="flex items-center gap-2">
+                                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                                        <span className="text-sm text-muted-foreground">AI is thinking...</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="p-3 rounded-lg bg-muted">
-                                <Loader2 className="h-5 w-5 animate-spin" />
-                            </div>
-                        </div>
+                        </AnimatedContainer>
                     )}
                 </div>
             </ScrollArea>
 
-            <div className="p-4 border-t bg-background">
-                <form onSubmit={handleSendMessage}>
-                    <div className="relative">
-                        <Textarea
-                            placeholder={`Chat with ${chat.title}...`}
-                            className="w-full resize-none rounded-lg border border-input bg-muted pr-16 py-3"
-                            rows={1}
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' && !e.shiftKey) {
-                                    e.preventDefault();
-                                    handleSendMessage(e);
-                                }
-                            }}
-                            disabled={isLoading}
-                        />
-                        <Button type="submit" size="icon" className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-primary text-primary-foreground" disabled={!input.trim() || isLoading}>
-                            <Send className="h-4 w-4" />
+            <div className="p-4 border-t bg-gradient-to-r from-background to-primary/5">
+                <AnimatedContainer animation="fade-in-up" delay={400}>
+                    <form onSubmit={handleSendMessage}>
+                        <div className="relative">
+                            <Textarea
+                                placeholder={`Chat with ${chat.title}...`}
+                                className="w-full resize-none rounded-2xl border border-input bg-background/50 backdrop-blur-sm pr-16 py-3 shadow-soft focus:shadow-medium transition-all duration-200"
+                                rows={1}
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleSendMessage(e);
+                                    }
+                                }}
+                                disabled={isLoading}
+                            />
+                            <Button
+                                type="submit"
+                                size="icon"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary-600 text-primary-foreground hover:shadow-glow transition-all duration-200"
+                                disabled={!input.trim() || isLoading}
+                            >
+                                <Send className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </form>
+                    <div className="flex items-center gap-2 mt-3">
+                        <Button variant="outline" size="sm" className="gap-1.5 hover:shadow-soft transition-all duration-200">
+                            <Settings2 className="h-4 w-4" />
+                            <span className="hidden sm:inline">General</span>
+                        </Button>
+                        <Button variant="ghost" size="icon" className="hover:shadow-soft transition-all duration-200">
+                            <Paperclip className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="hover:shadow-soft transition-all duration-200">
+                            <Info className="h-4 w-4" />
                         </Button>
                     </div>
-                </form>
-                <div className="flex items-center gap-2 mt-2">
-                    <Button variant="outline" size="sm" className="gap-1.5"><Settings2 className="h-4 w-4" /> General</Button>
-                    <Button variant="ghost" size="icon"><Paperclip className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon"><Info className="h-4 w-4" /></Button>
-                </div>
+                </AnimatedContainer>
             </div>
         </div>
     );

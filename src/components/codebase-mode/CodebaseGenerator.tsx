@@ -1,6 +1,7 @@
 
 'use client';
 
+import { AnimatedContainer } from '@/components/ui/animation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
@@ -67,45 +68,66 @@ export default function CodebaseGenerator() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="relative h-full">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5 rounded-lg opacity-50 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl animate-float pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl animate-float pointer-events-none" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-blue-500/10 rounded-full blur-lg animate-float pointer-events-none" style={{ animationDelay: '4s' }}></div>
 
-      <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Codebase Scaffolding</CardTitle>
-            <CardDescription>Generate a complete boilerplate for your project.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={handleGenerate} disabled={!proposal || mutation.isPending} className="w-full">
-              {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-              Generate Codebase
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-      <div className="lg:col-span-9 lg:overflow-y-auto lg:pr-2">
-        {mutation.isPending && (
-          <Card className="flex items-center justify-center h-full min-h-[400px]">
-            <div className="text-center text-muted-foreground p-8">
-              <Loader2 className="w-16 h-16 mx-auto mb-4 animate-spin" />
-              <h3 className="text-lg font-semibold">Generating Codebase...</h3>
-              <p>The AI is building your project structure. This may take a moment.</p>
-            </div>
-          </Card>
-        )}
-        {!mutation.isPending && codebase ? (
-          <FileTreeView codebase={codebase} />
-        ) : (
-          !mutation.isPending && (
-            <Card className="flex items-center justify-center h-full min-h-[400px]">
-              <div className="text-center text-muted-foreground p-8">
-                <Package className="w-16 h-16 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold">Your Codebase Will Appear Here</h3>
-                <p>Click "Generate Codebase" to scaffold your project files based on your proposal.</p>
-              </div>
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+
+        <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
+          <AnimatedContainer animation="fade-in-up" delay={200}>
+            <Card variant="glass" className="backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200">
+              <CardHeader className="bg-gradient-to-r from-emerald-500/10 to-emerald-600/10">
+                <CardTitle className="font-headline">Codebase Scaffolding</CardTitle>
+                <CardDescription>Generate a complete boilerplate for your project.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6">
+                <Button onClick={handleGenerate} disabled={!proposal || mutation.isPending} className="w-full hover:shadow-glow transition-all duration-200" variant="gradient">
+                  {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
+                  Generate Codebase
+                </Button>
+              </CardContent>
             </Card>
-          )
-        )}
+          </AnimatedContainer>
+        </div>
+        <div className="lg:col-span-9 lg:overflow-y-auto lg:pr-2">
+          {mutation.isPending && (
+            <AnimatedContainer animation="fade-in-up" delay={300}>
+              <Card variant="glass" className="flex items-center justify-center h-full min-h-[400px] backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200">
+                <div className="text-center text-muted-foreground p-8">
+                  <div className="p-4 rounded-full bg-gradient-to-br from-primary to-primary-600 mb-4 shadow-soft">
+                    <Loader2 className="w-16 h-16 mx-auto animate-spin text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold font-headline">Generating Codebase...</h3>
+                  <p>The AI is building your project structure. This may take a moment.</p>
+                </div>
+              </Card>
+            </AnimatedContainer>
+          )}
+          {!mutation.isPending && codebase ? (
+            <AnimatedContainer animation="fade-in-up" delay={400}>
+              <FileTreeView codebase={codebase} />
+            </AnimatedContainer>
+          ) : (
+            !mutation.isPending && (
+              <AnimatedContainer animation="fade-in-up" delay={300}>
+                <Card variant="glass" className="flex items-center justify-center h-full min-h-[400px] backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200">
+                  <div className="text-center text-muted-foreground p-8">
+                    <div className="p-4 rounded-full bg-gradient-to-br from-muted to-muted-foreground mb-4 shadow-soft">
+                      <Package className="w-16 h-16 mx-auto text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold font-headline">Your Codebase Will Appear Here</h3>
+                    <p>Click "Generate Codebase" to scaffold your project files based on your proposal.</p>
+                  </div>
+                </Card>
+              </AnimatedContainer>
+            )
+          )}
+        </div>
       </div>
     </div>
   );

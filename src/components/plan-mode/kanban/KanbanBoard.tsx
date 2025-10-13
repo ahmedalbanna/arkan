@@ -2,16 +2,17 @@
 'use client';
 
 import type { ProjectTask } from '@/ai/schemas';
+import { AnimatedContainer } from '@/components/ui/animation';
 import { useBuilderStore } from '@/hooks';
 import {
-  DndContext,
-  DragEndEvent,
-  DragOverEvent,
-  DragOverlay,
-  DragStartEvent,
-  PointerSensor,
-  useSensor,
-  useSensors,
+    DndContext,
+    DragEndEvent,
+    DragOverEvent,
+    DragOverlay,
+    DragStartEvent,
+    PointerSensor,
+    useSensor,
+    useSensors,
 } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
 import { useMemo, useState } from 'react';
@@ -93,31 +94,34 @@ export function KanbanBoard() {
   if (!projectPlan) return <div>No project plan loaded.</div>;
 
   return (
-    <div className="grid grid-cols-3 gap-4 p-4 h-full">
-      <DndContext
-        sensors={sensors}
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
-        onDragOver={onDragOver}
-      >
-        <SortableContext items={columns}>
-          {columns.map((colId) => (
-            <KanbanColumn
-              key={colId}
-              id={colId}
-              title={colId}
-              tasks={tasksByStatus[colId]}
-            />
-          ))}
-        </SortableContext>
+    <AnimatedContainer animation="fade-in-up" delay={200}>
+      <div className="grid grid-cols-3 gap-4 p-4 h-full">
+        <DndContext
+          sensors={sensors}
+          onDragStart={onDragStart}
+          onDragEnd={onDragEnd}
+          onDragOver={onDragOver}
+        >
+          <SortableContext items={columns}>
+            {columns.map((colId, index) => (
+              <AnimatedContainer key={colId} animation="fade-in-up" delay={300 + (index * 100)}>
+                <KanbanColumn
+                  id={colId}
+                  title={colId}
+                  tasks={tasksByStatus[colId]}
+                />
+              </AnimatedContainer>
+            ))}
+          </SortableContext>
 
-        <DragOverlay>
-          {activeTask && (
-            <KanbanTaskCard task={activeTask} />
-          )}
-        </DragOverlay>
+          <DragOverlay>
+            {activeTask && (
+              <KanbanTaskCard task={activeTask} />
+            )}
+          </DragOverlay>
 
-      </DndContext>
-    </div>
+        </DndContext>
+      </div>
+    </AnimatedContainer>
   );
 }

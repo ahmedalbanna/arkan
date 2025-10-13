@@ -19,14 +19,14 @@ interface DiagramGenerationToolsProps {
 
 function ToolsSkeleton() {
     return (
-        <Card className="flex flex-col h-full">
-            <CardHeader>
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-full mt-2" />
+        <Card className="flex flex-col h-full backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-blue-500/5">
+                <Skeleton className="h-6 w-3/4 bg-gradient-to-r from-muted to-muted/80" />
+                <Skeleton className="h-4 w-full mt-2 bg-gradient-to-r from-muted to-muted/80" />
             </CardHeader>
             <CardContent className="flex-grow space-y-2 pt-6">
                 {Array.from({ length: 7 }).map((_, i) => (
-                    <Skeleton key={i} className="h-12 w-full" />
+                    <Skeleton key={i} className="h-12 w-full bg-gradient-to-r from-muted to-muted/80" />
                 ))}
             </CardContent>
         </Card>
@@ -49,14 +49,19 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
     }
 
     return (
-        <Card className={cn("flex flex-col h-full", isAnythingGenerating && 'opacity-50 pointer-events-none')}>
-            <CardHeader>
+        <Card className={cn("flex flex-col h-full backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200", isAnythingGenerating && 'opacity-50 pointer-events-none')}>
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-blue-500/5">
                 <div className="flex justify-between items-center">
                     <div>
                         <CardTitle className="font-headline">{t('builder.diagramGenerator.toolsTitle')}</CardTitle>
                         <CardDescription>{t('builder.diagramGenerator.toolsDesc')}</CardDescription>
                     </div>
-                    <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="hidden lg:inline-flex hover:shadow-soft transition-all duration-200"
+                        onClick={onCollapseToggle}
+                    >
                         <PanelLeftClose className="h-5 w-5" />
                     </Button>
                 </div>

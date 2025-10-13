@@ -1,12 +1,15 @@
 
 'use client';
 
+import { AnimatedContainer } from '@/components/ui/animation';
+import { Badge } from '@/components/ui/badge';
 import { useLocalization } from '@/context/LocalizationContext';
 import {
     FlexibleContent,
     SafeUpdateFunction
 } from '@/lib/core/types/flexible-content-types';
 import { formatKeyToTitle, hasContent } from '@/lib/proposal-utils';
+import { FileText } from 'lucide-react';
 import { MarkdownViewer } from '../shared/MarkdownViewer';
 
 // --- Start of new ValueRenderer logic ---
@@ -70,25 +73,35 @@ export const ProposalSection = ({ sectionKey, title, content }: ProposalSectionP
     const charCount = typeof content === 'string' && content ? content.length : 0;
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <h2 className="font-semibold text-lg md:text-xl text-primary/90 font-headline">
-                    {title}
-                </h2>
-                {/* The toolbar is now part of the RichTextEditor's bubble menu */}
-            </div>
-            {typeof content === 'string' && (
-                <div className="space-y-1 text-xs text-muted-foreground">
-                    <span>{wordCount} {t('builder.Section.words')}</span>
-                    <span className="mx-2">|</span>
-                    <span>{charCount} {t('builder.Section.characters')}</span>
-                </div>
-            )}
+        <AnimatedContainer animation="fade-in-up" delay={200}>
+            <div className="space-y-6">
+                <AnimatedContainer animation="fade-in-up" delay={300}>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-primary-600 shadow-soft">
+                                <FileText className="h-5 w-5 text-white" />
+                            </div>
+                            <h2 className="font-semibold text-lg md:text-xl text-primary/90 font-headline">
+                                {title}
+                            </h2>
+                        </div>
+                        {typeof content === 'string' && (
+                            <Badge variant="secondary" className="shadow-soft">
+                                {wordCount} {t('builder.Section.words')} • {charCount} {t('builder.Section.characters')}
+                            </Badge>
+                        )}
+                    </div>
+                </AnimatedContainer>
 
-            <div className="group relative space-y-4 mt-4">
-                {/* Use the new ValueRenderer to display the content */}
-                <ValueRenderer data={content} />
+                <AnimatedContainer animation="fade-in-up" delay={400}>
+                    <div className="group relative space-y-4">
+                        <div className="rounded-lg border bg-gradient-to-r from-background/50 to-primary/5 backdrop-blur-sm shadow-soft hover:shadow-glow transition-all duration-200 p-4">
+                            {/* Use the new ValueRenderer to display the content */}
+                            <ValueRenderer data={content} />
+                        </div>
+                    </div>
+                </AnimatedContainer>
             </div>
-        </div>
+        </AnimatedContainer>
     );
 };

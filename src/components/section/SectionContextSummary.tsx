@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatedContainer } from '@/components/ui/animation';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -22,13 +23,15 @@ export function ContextSummary({ itemKey }: ContextSummaryProps) {
 
     if (!hasContext) {
         return (
-            <Card className="border-dashed">
-                <CardContent className="p-4">
-                    <div className="text-center text-sm text-muted-foreground">
-                        {t('builder.reportGenerator.noContextSelected')}
-                    </div>
-                </CardContent>
-            </Card>
+            <AnimatedContainer animation="fade-in-up" delay={200}>
+                <Card variant="glass" className="border-dashed backdrop-blur-md shadow-soft">
+                    <CardContent className="p-4">
+                        <div className="text-center text-sm text-muted-foreground">
+                            {t('builder.reportGenerator.noContextSelected')}
+                        </div>
+                    </CardContent>
+                </Card>
+            </AnimatedContainer>
         );
     }
 
@@ -85,29 +88,34 @@ export function ContextSummary({ itemKey }: ContextSummaryProps) {
     });
 
     return (
-        <Card>
-            <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">
-                    {t('builder.reportGenerator.selectedContext')}
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-                <div className="flex flex-wrap gap-2">
-                    {contextItems.map((item, index) => {
-                        const Icon = item.icon;
-                        return (
-                            <Badge
-                                key={index}
-                                variant="secondary"
-                                className={`${item.color} border-0`}
-                            >
-                                <Icon className="h-3 w-3 mr-1" />
-                                {item.label}
-                            </Badge>
-                        );
-                    })}
-                </div>
-            </CardContent>
-        </Card>
+        <AnimatedContainer animation="fade-in-up" delay={200}>
+            <Card variant="glass" className="backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200">
+                <CardHeader className="pb-3 bg-gradient-to-r from-primary/5 to-blue-500/5">
+                    <CardTitle className="text-sm font-medium font-headline">
+                        {t('builder.reportGenerator.selectedContext')}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                    <div className="flex flex-wrap gap-2">
+                        {contextItems.map((item, index) => {
+                            const Icon = item.icon;
+                            return (
+                                <AnimatedContainer key={index} animation="fade-in-up" delay={100 + (index * 100)}>
+                                    <Badge
+                                        variant="secondary"
+                                        className={`${item.color} border-0 shadow-soft hover:shadow-medium transition-all duration-200`}
+                                    >
+                                        <div className="p-1 rounded-md bg-gradient-to-br from-muted/50 to-muted/80 mr-1">
+                                            <Icon className="h-3 w-3" />
+                                        </div>
+                                        {item.label}
+                                    </Badge>
+                                </AnimatedContainer>
+                            );
+                        })}
+                    </div>
+                </CardContent>
+            </Card>
+        </AnimatedContainer>
     );
 }

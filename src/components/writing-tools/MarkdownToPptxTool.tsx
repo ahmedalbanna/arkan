@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { AnimatedContainer } from '@/components/ui/animation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -261,130 +262,149 @@ This slide demonstrates how a very long paragraph will gracefully break across m
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Markdown to PowerPoint Converter</CardTitle>
-        <CardDescription className="[&>code]:font-mono [&>code]:font-bold [&>code]:bg-gray-200 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded">
-          Easily convert your markdown documents into styled .pptx presentations. Use `---`, a top-level heading (`#`), or <code className="whitespace-nowrap">&lt;!-- slide-break --&gt;</code> to separate slides.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="markdown-input">Markdown Content</Label>
-            <Textarea
-              id="markdown-input"
-              {...form.register('markdown')}
-              placeholder="Enter your markdown here..."
-              className="min-h-[300px] font-mono"
-              disabled={isConverting}
-            />
-            {form.formState.errors.markdown && (
-              <p className="text-sm text-destructive">{form.formState.errors.markdown.message}</p>
+    <AnimatedContainer animation="fade-in-up" delay={200}>
+      <Card className="shadow-soft hover:shadow-glow transition-all duration-200">
+        <CardHeader className="bg-gradient-to-r from-primary/5 to-blue-500/5">
+          <CardTitle className="font-headline">Markdown to PowerPoint Converter</CardTitle>
+          <CardDescription className="[&>code]:font-mono [&>code]:font-bold [&>code]:bg-gray-200 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded">
+            Easily convert your markdown documents into styled .pptx presentations. Use `---`, a top-level heading (`#`), or <code className="whitespace-nowrap">&lt;!-- slide-break --&gt;</code> to separate slides.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <AnimatedContainer animation="fade-in-up" delay={300}>
+              <div className="space-y-2">
+                <Label htmlFor="markdown-input" className="font-headline">Markdown Content</Label>
+                <Textarea
+                  id="markdown-input"
+                  {...form.register('markdown')}
+                  placeholder="Enter your markdown here..."
+                  className="min-h-[300px] font-mono hover:shadow-soft transition-all duration-200"
+                  disabled={isConverting}
+                />
+                {form.formState.errors.markdown && (
+                  <p className="text-sm text-destructive">{form.formState.errors.markdown.message}</p>
+                )}
+              </div>
+            </AnimatedContainer>
+
+            <AnimatedContainer animation="fade-in-up" delay={400}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fileName-input" className="font-headline">File Name</Label>
+                  <Input
+                    id="fileName-input"
+                    {...form.register('fileName')}
+                    placeholder="e.g., my-presentation"
+                    disabled={isConverting}
+                    className="hover:shadow-soft transition-all duration-200"
+                  />
+                  {form.formState.errors.fileName && (
+                    <p className="text-sm text-destructive">{form.formState.errors.fileName.message}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="template-select" className="font-headline">Presentation Template</Label>
+                  <Select
+                    onValueChange={(value: 'modern' | 'dark' | 'professional') => form.setValue('template', value)}
+                    defaultValue={form.getValues('template')}
+                    disabled={isConverting || useCustomTheme}
+                  >
+                    <SelectTrigger id="template-select" className="hover:shadow-soft transition-all duration-200">
+                      <SelectValue placeholder="Select a template" />
+                    </SelectTrigger>
+                    <SelectContent className="backdrop-blur-md bg-gradient-to-r from-background/90 to-primary/5 border shadow-soft">
+                      {Object.keys(templates).map((key) => (
+                        <SelectItem key={key} value={key} className="hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10">
+                          {templates[key as keyof typeof templates].name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </AnimatedContainer>
+
+            <AnimatedContainer animation="fade-in-up" delay={500}>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Controller
+                    name="isRtl"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id="isRtl"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isConverting}
+                        className="hover:shadow-soft transition-all duration-200"
+                      />
+                    )}
+                  />
+                  <Label htmlFor="isRtl" className="cursor-pointer font-headline">Enable Right-to-Left (RTL) text direction (for Arabic, Hebrew, etc.)</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Controller
+                    name="includeToc"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id="includeToc"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isConverting}
+                        className="hover:shadow-soft transition-all duration-200"
+                      />
+                    )}
+                  />
+                  <Label htmlFor="includeToc" className="cursor-pointer font-headline">Include Table of Contents slide</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Controller
+                    name="useCustomTheme"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id="useCustomTheme"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isConverting}
+                        className="hover:shadow-soft transition-all duration-200"
+                      />
+                    )}
+                  />
+                  <Label htmlFor="useCustomTheme" className="cursor-pointer font-headline">Use Custom Theme (JSON)</Label>
+                </div>
+              </div>
+            </AnimatedContainer>
+
+            {useCustomTheme && (
+              <AnimatedContainer animation="fade-in-up" delay={600}>
+                <div className="space-y-2">
+                  <Label htmlFor="customThemeJson" className="font-headline">Custom Theme JSON</Label>
+                  <Textarea id="customThemeJson" {...form.register('customThemeJson')} placeholder="Paste your PptxStyleOptions JSON here..." className="min-h-[150px] font-mono hover:shadow-soft transition-all duration-200" disabled={isConverting || isExportingPdf} />
+                  {form.formState.errors.customThemeJson && <p className="text-sm text-destructive">{form.formState.errors.customThemeJson.message}</p>}
+                </div>
+              </AnimatedContainer>
             )}
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="fileName-input">File Name</Label>
-              <Input
-                id="fileName-input"
-                {...form.register('fileName')}
-                placeholder="e.g., my-presentation"
-                disabled={isConverting}
-              />
-              {form.formState.errors.fileName && (
-                <p className="text-sm text-destructive">{form.formState.errors.fileName.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="template-select">Presentation Template</Label>
-              <Select
-                onValueChange={(value: 'modern' | 'dark' | 'professional') => form.setValue('template', value)}
-                defaultValue={form.getValues('template')}
-                disabled={isConverting || useCustomTheme}
-              >
-                <SelectTrigger id="template-select">
-                  <SelectValue placeholder="Select a template" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.keys(templates).map((key) => (
-                    <SelectItem value={key} key={key}>
-                      {templates[key as keyof typeof templates].name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Controller
-              name="isRtl"
-              control={form.control}
-              render={({ field }) => (
-                <Checkbox
-                  id="isRtl"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={isConverting}
-                />
-              )}
-            />
-            <Label htmlFor="isRtl" className="cursor-pointer">Enable Right-to-Left (RTL) text direction (for Arabic, Hebrew, etc.)</Label>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Controller
-              name="includeToc"
-              control={form.control}
-              render={({ field }) => (
-                <Checkbox
-                  id="includeToc"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={isConverting}
-                />
-              )}
-            />
-            <Label htmlFor="includeToc" className="cursor-pointer">Include Table of Contents slide</Label>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Controller
-              name="useCustomTheme"
-              control={form.control}
-              render={({ field }) => (
-                <Checkbox
-                  id="useCustomTheme"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={isConverting}
-                />
-              )}
-            />
-            <Label htmlFor="useCustomTheme" className="cursor-pointer">Use Custom Theme (JSON)</Label>
-          </div>
-
-          {useCustomTheme &&
-            <div className="space-y-2">
-              <Label htmlFor="customThemeJson">Custom Theme JSON</Label>
-              <Textarea id="customThemeJson" {...form.register('customThemeJson')} placeholder="Paste your PptxStyleOptions JSON here..." className="min-h-[150px] font-mono" disabled={isConverting || isExportingPdf} />
-              {form.formState.errors.customThemeJson && <p className="text-sm text-destructive">{form.formState.errors.customThemeJson.message}</p>}
-            </div>}
-
-          <div className="flex flex-col md:flex-row gap-4">
-            <Button type="submit" disabled={isConverting || isExportingPdf} className="w-full">
-              {isConverting ? <LoaderCircle className="me-2 h-4 w-4 animate-spin" /> : <Presentation className="me-2 h-4 w-4" />}
-              {isConverting ? 'Converting...' : 'Convert and Download .pptx'}
-            </Button>
-            <Button type="button" onClick={handleExportPdf} disabled={isConverting || isExportingPdf} className="w-full" variant="secondary">
-              {isExportingPdf ? <LoaderCircle className="me-2 h-4 w-4 animate-spin" /> : <FileIcon className="me-2 h-4 w-4" />}
-              {isExportingPdf ? 'Exporting...' : 'Export as PDF'}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+            <AnimatedContainer animation="fade-in-up" delay={700}>
+              <div className="flex flex-col md:flex-row gap-4">
+                <Button type="submit" disabled={isConverting || isExportingPdf} className="w-full hover:shadow-glow transition-all duration-200" variant="gradient">
+                  {isConverting ? <LoaderCircle className="me-2 h-4 w-4 animate-spin" /> : <Presentation className="me-2 h-4 w-4" />}
+                  {isConverting ? 'Converting...' : 'Convert and Download .pptx'}
+                </Button>
+                <Button type="button" onClick={handleExportPdf} disabled={isConverting || isExportingPdf} className="w-full hover:shadow-soft transition-all duration-200" variant="secondary">
+                  {isExportingPdf ? <LoaderCircle className="me-2 h-4 w-4 animate-spin" /> : <FileIcon className="me-2 h-4 w-4" />}
+                  {isExportingPdf ? 'Exporting...' : 'Export as PDF'}
+                </Button>
+              </div>
+            </AnimatedContainer>
+          </form>
+        </CardContent>
+      </Card>
+    </AnimatedContainer>
   );
 }

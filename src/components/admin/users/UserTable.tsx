@@ -1,6 +1,7 @@
 
 'use client';
 
+import { AnimatedContainer } from '@/components/ui/animation';
 import {
   Table,
   TableBody,
@@ -21,30 +22,36 @@ export function UserTable({ users }: UserTableProps) {
   const { t } = useLocalization();
 
   return (
-    <div className="border rounded-lg">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t('manageUsers.tableHeadName')}</TableHead>
-            <TableHead>{t('manageUsers.tableHeadEmail')}</TableHead>
-            <TableHead>{t('manageUsers.tableHeadRole')}</TableHead>
-            <TableHead>{t('manageUsers.tableHeadCredits')}</TableHead>
-            <TableHead>{t('manageUsers.tableHeadJoined')}</TableHead>
-            <TableHead className="text-right">{t('manageUsers.tableHeadActions')}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users?.length > 0 ? (
-            users.map((user) => <UserTableRow key={user.id} user={user} />)
-          ) : (
-            <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
-                {t('manageUsers.noUsersFound')}
-              </TableCell>
+    <AnimatedContainer animation="fade-in-up" delay={200}>
+      <div className="border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-gradient-to-r from-primary/5 to-blue-500/5">
+              <TableHead className="font-headline">{t('manageUsers.tableHeadName')}</TableHead>
+              <TableHead className="font-headline">{t('manageUsers.tableHeadEmail')}</TableHead>
+              <TableHead className="font-headline">{t('manageUsers.tableHeadRole')}</TableHead>
+              <TableHead className="font-headline">{t('manageUsers.tableHeadCredits')}</TableHead>
+              <TableHead className="font-headline">{t('manageUsers.tableHeadJoined')}</TableHead>
+              <TableHead className="text-right font-headline">{t('manageUsers.tableHeadActions')}</TableHead>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+          </TableHeader>
+          <TableBody>
+            {users?.length > 0 ? (
+              users.map((user, index) => (
+                <AnimatedContainer key={user.id} animation="fade-in-up" delay={100 + (index * 100)}>
+                  <UserTableRow user={user} />
+                </AnimatedContainer>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="h-24 text-center">
+                  {t('manageUsers.noUsersFound')}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </AnimatedContainer>
   );
 }

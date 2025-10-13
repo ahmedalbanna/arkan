@@ -18,6 +18,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { AnimatedContainer } from '@/components/ui/animation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -179,166 +180,182 @@ export default function EditUserForm({ user }: { user: User }) {
             <Form {...form}>
                 <form action={updateFormAction}>
                     <input type="hidden" name="userId" value={user.id} />
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-headline text-2xl">{t('editUser.cardTitle')}</CardTitle>
-                            <CardDescription>
-                                {isAdmin ? "As an admin, you can modify all user fields." : "You can update your personal information here."}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="p-6 grid gap-6">
-                            <div className="flex flex-col items-center gap-4">
-                                <Avatar className="h-32 w-32 border-4 border-primary/20">
-                                    <AvatarImage src={previewImageUrl || undefined} alt={user.name} />
-                                    <AvatarFallback className="text-4xl">{user.getInitials()}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex gap-2">
-                                    <Button asChild variant="outline">
-                                        <Label htmlFor="profile-picture-upload">
-                                            <Camera className="me-2 h-4 w-4" />
-                                            Change Picture
-                                        </Label>
-                                    </Button>
-                                    <Input id="profile-picture-upload" type="file" className="hidden" onChange={handleFileChange} accept="image/png, image/jpeg, image/webp" />
-                                    <Button onClick={handleUploadImage} disabled={!profileImageFile || uploadMutation.isPending}>
-                                        {uploadMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Upload className="me-2 h-4 w-4" />}
-                                        Upload
-                                    </Button>
-                                </div>
-                            </div>
+                    <AnimatedContainer animation="fade-in-up">
+                        <Card className="backdrop-blur-md bg-gradient-to-br from-background/70 to-primary/5 border border-primary/10 shadow-soft hover:shadow-glow">
+                            <CardHeader className="rounded-t-lg bg-gradient-to-r from-background/60 to-primary/5">
+                                <CardTitle className="font-headline text-2xl">{t('editUser.cardTitle')}</CardTitle>
+                                <CardDescription>
+                                    {isAdmin ? "As an admin, you can modify all user fields." : "You can update your personal information here."}
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="p-6 grid gap-6">
+                                <AnimatedContainer animation="fade-in-up" delay={100}>
+                                    <div className="flex flex-col items-center gap-4">
+                                        <Avatar className="h-32 w-32 border-4 border-primary/20 shadow-soft">
+                                            <AvatarImage src={previewImageUrl || undefined} alt={user.name} />
+                                            <AvatarFallback className="text-4xl">{user.getInitials()}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex gap-2">
+                                            <Button asChild variant="outline" className="hover:shadow-soft">
+                                                <Label htmlFor="profile-picture-upload">
+                                                    <Camera className="me-2 h-4 w-4" />
+                                                    Change Picture
+                                                </Label>
+                                            </Button>
+                                            <Input id="profile-picture-upload" type="file" className="hidden" onChange={handleFileChange} accept="image/png, image/jpeg, image/webp" />
+                                            <Button onClick={handleUploadImage} disabled={!profileImageFile || uploadMutation.isPending} variant="gradient" className="hover:shadow-glow">
+                                                {uploadMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Upload className="me-2 h-4 w-4" />}
+                                                Upload
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </AnimatedContainer>
 
-                            <FormField
-                                control={form.control}
-                                name="name"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('editUser.nameLabel')}</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} disabled={isPending} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="bio"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('editUser.bioLabel')}</FormLabel>
-                                        <FormControl>
-                                            <Textarea {...field} disabled={isPending} rows={4} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            {isAdmin && (
-                                <>
+                                <AnimatedContainer animation="fade-in-up" delay={200}>
                                     <FormField
                                         control={form.control}
-                                        name="email"
+                                        name="name"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>{t('editUser.emailLabel')}</FormLabel>
+                                                <FormLabel>{t('editUser.nameLabel')}</FormLabel>
                                                 <FormControl>
-                                                    <Input type="email" {...field} disabled={isPending} />
+                                                    <Input {...field} disabled={isPending} className="hover:shadow-soft" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
+                                </AnimatedContainer>
+                                <AnimatedContainer animation="fade-in-up" delay={300}>
                                     <FormField
                                         control={form.control}
-                                        name="credits"
+                                        name="bio"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>{t('editUser.creditsLabel')}</FormLabel>
+                                                <FormLabel>{t('editUser.bioLabel')}</FormLabel>
                                                 <FormControl>
-                                                    <Input type="number" {...field} disabled={isPending} />
+                                                    <Textarea {...field} disabled={isPending} rows={4} className="hover:shadow-soft" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
-                                    <FormField
-                                        control={form.control}
-                                        name="role"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Role</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value} name={field.name} disabled={isPending}>
-                                                    <FormControl>
-                                                        <SelectTrigger><SelectValue placeholder="Select a role" /></SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value="user">User</SelectItem>
-                                                        <SelectItem value="admin">Admin</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </>
-                            )}
-                        </CardContent>
-                        <CardFooter className="justify-between">
-                            <Button type="submit" disabled={isPending} className="font-headline">
-                                <Save className="me-2 h-4 w-4" />
-                                {t('editUser.saveButton')}
-                            </Button>
-                            {isAdmin && (
-                                <Button asChild variant="outline">
-                                    <Link href="/admin/manage-users">
-                                        <ArrowLeft className="me-2 h-4 w-4" />
-                                        Back to Manage Users
-                                    </Link>
+                                </AnimatedContainer>
+
+                                {isAdmin && (
+                                    <>
+                                        <AnimatedContainer animation="fade-in-up" delay={400}>
+                                            <FormField
+                                                control={form.control}
+                                                name="email"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>{t('editUser.emailLabel')}</FormLabel>
+                                                        <FormControl>
+                                                            <Input type="email" {...field} disabled={isPending} className="hover:shadow-soft" />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </AnimatedContainer>
+                                        <AnimatedContainer animation="fade-in-up" delay={500}>
+                                            <FormField
+                                                control={form.control}
+                                                name="credits"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>{t('editUser.creditsLabel')}</FormLabel>
+                                                        <FormControl>
+                                                            <Input type="number" {...field} disabled={isPending} className="hover:shadow-soft" />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </AnimatedContainer>
+                                        <AnimatedContainer animation="fade-in-up" delay={600}>
+                                            <FormField
+                                                control={form.control}
+                                                name="role"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Role</FormLabel>
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value} name={field.name} disabled={isPending}>
+                                                            <FormControl>
+                                                                <SelectTrigger className="hover:shadow-soft"><SelectValue placeholder="Select a role" /></SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent className="backdrop-blur-md bg-gradient-to-r from-background/90 to-primary/5 border border-primary/10 shadow-soft">
+                                                                <SelectItem value="user">User</SelectItem>
+                                                                <SelectItem value="admin">Admin</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </AnimatedContainer>
+                                    </>
+                                )}
+                            </CardContent>
+                            <CardFooter className="justify-between">
+                                <Button type="submit" disabled={isPending} className="font-headline" variant="gradient" className="hover:shadow-glow">
+                                    <Save className="me-2 h-4 w-4" />
+                                    {t('editUser.saveButton')}
                                 </Button>
-                            )}
-                        </CardFooter>
-                    </Card>
+                                {isAdmin && (
+                                    <Button asChild variant="outline" className="hover:shadow-soft">
+                                        <Link href="/admin/manage-users">
+                                            <ArrowLeft className="me-2 h-4 w-4" />
+                                            Back to Manage Users
+                                        </Link>
+                                    </Button>
+                                )}
+                            </CardFooter>
+                        </Card>
+                    </AnimatedContainer>
                 </form>
             </Form>
 
             {isAdmin && (
-                <div className="mt-8 pt-6 border-t border-destructive/20">
-                    <h3 className="text-lg font-semibold text-destructive">{t('editUser.dangerZoneTitle')}</h3>
-                    <p className="text-sm text-muted-foreground mt-1 mb-4">
-                        {t('editUser.dangerZoneDescription')}
-                    </p>
-                    <div className="flex gap-2">
-                        <Button variant="outline" onClick={onPasswordReset} disabled={isPending}>
-                            {passwordResetMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <MailQuestion className="me-2 h-4 w-4" />}
-                            Send Password Reset
-                        </Button>
-                        {!isSelf && (
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button variant="destructive" type="button" disabled={isPending}>
-                                        <Trash2 className="me-2 h-4 w-4" />
-                                        {t('editUser.deleteUserButton')}
-                                    </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>{t('editUser.deleteDialogTitle')}</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            {t('editUser.deleteDialogDescription')}
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction onClick={onDelete} disabled={deleteUserMutation.isPending}>
-                                            {deleteUserMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : t('editUser.deleteConfirmButton')}
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        )}
+                <AnimatedContainer animation="fade-in-up" delay={700}>
+                    <div className="mt-8 pt-6 border-t border-destructive/20">
+                        <h3 className="text-lg font-semibold text-destructive">{t('editUser.dangerZoneTitle')}</h3>
+                        <p className="text-sm text-muted-foreground mt-1 mb-4">
+                            {t('editUser.dangerZoneDescription')}
+                        </p>
+                        <div className="flex gap-2">
+                            <Button variant="outline" onClick={onPasswordReset} disabled={isPending} className="hover:shadow-soft">
+                                {passwordResetMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <MailQuestion className="me-2 h-4 w-4" />}
+                                Send Password Reset
+                            </Button>
+                            {!isSelf && (
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="destructive" type="button" disabled={isPending} className="hover:shadow-soft">
+                                            <Trash2 className="me-2 h-4 w-4" />
+                                            {t('editUser.deleteUserButton')}
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="backdrop-blur-md bg-gradient-to-br from-background/90 to-primary/5 border border-primary/10 shadow-soft">
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle className="font-headline">{t('editUser.deleteDialogTitle')}</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                {t('editUser.deleteDialogDescription')}
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel className="hover:shadow-soft">Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={onDelete} disabled={deleteUserMutation.isPending}>
+                                                {deleteUserMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : t('editUser.deleteConfirmButton')}
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            )}
+                        </div>
                     </div>
-                </div>
+                </AnimatedContainer>
             )}
         </>
     );

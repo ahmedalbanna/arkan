@@ -1,6 +1,7 @@
 
 'use client';
 
+import { AnimatedContainer } from '@/components/ui/animation';
 import { Button } from '@/components/ui/button';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useExport, useGenerationUIStore } from '@/hooks';
@@ -34,24 +35,35 @@ export const PresentationActions = ({ isGenerating, onTranslateAll, isTranslatin
 
   return (
     <div className="flex items-center gap-2">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleTranslate}
-        disabled={isBusy || !slides || slides.length === 0}
-      >
-        {isTranslating ? (
-          <Loader2 className="me-2 h-4 w-4 animate-spin" />
-        ) : (
-          <Languages className="me-2 h-4 w-4" />
-        )}
-        {locale === 'en' ? t('builder.presentationGenerator.translateButton.ar') : t('builder.presentationGenerator.translateButton.en')}
-      </Button>
+      <AnimatedContainer animation="fade-in-up" delay={100}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleTranslate}
+          disabled={isBusy || !slides || slides.length === 0}
+          className="hover:shadow-soft"
+        >
+          {isTranslating ? (
+            <Loader2 className="me-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Languages className="me-2 h-4 w-4" />
+          )}
+          {locale === 'en' ? t('builder.presentationGenerator.translateButton.ar') : t('builder.presentationGenerator.translateButton.en')}
+        </Button>
+      </AnimatedContainer>
 
-      <Button variant="outline" size="sm" disabled={isBusy || !slides} onClick={handleExport}>
-        {isExporting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Download className="me-2 h-4 w-4" />}
-        {t('builder.presentationGenerator.exportButton')}
-      </Button>
+      <AnimatedContainer animation="fade-in-up" delay={200}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={isBusy || !slides}
+          onClick={handleExport}
+          className="hover:shadow-soft"
+        >
+          {isExporting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Download className="me-2 h-4 w-4" />}
+          {t('builder.presentationGenerator.exportButton')}
+        </Button>
+      </AnimatedContainer>
     </div>
   );
 };

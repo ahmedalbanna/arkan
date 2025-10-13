@@ -1,12 +1,13 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { AnimatedContainer } from '@/components/ui/animation';
 import { Card, CardContent } from '@/components/ui/card';
-import { UploadCloud, Loader2 } from 'lucide-react';
-import { toast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
+import { toast } from '@/hooks';
+import { Loader2, UploadCloud } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
 
 interface FileUploadZoneProps {
     onFileAdded: (fileName: string, content: string) => void;
@@ -58,21 +59,37 @@ export const FileUploadZone = ({ onFileAdded }: FileUploadZoneProps) => {
     });
 
     return (
-        <Card
-            {...getRootProps()}
-            className={`border-2 border-dashed rounded-lg text-center cursor-pointer ${isDragActive ? 'border-primary' : 'border-border'}`}
-        >
-            <CardContent className="p-6">
-                <input {...getInputProps()} />
-                {isLoading ? (
-                     <Loader2 className="mx-auto h-8 w-8 text-muted-foreground animate-spin" />
-                ) : (
-                    <UploadCloud className="mx-auto h-8 w-8 text-muted-foreground" />
-                )}
-                <p className="mt-2 text-sm text-muted-foreground">
-                    {isLoading ? t('builder.academicSolver.toasts.processingFile') : (isDragActive ? t('builder.academicSolver.toasts.dropHere') : t('builder.academicSolver.uploaders.dropzoneHint'))}
-                </p>
-            </CardContent>
-        </Card>
+        <AnimatedContainer animation="fade-in-up" delay={200}>
+            <Card
+                {...getRootProps()}
+                className={`border-2 border-dashed rounded-lg text-center cursor-pointer backdrop-blur-sm shadow-soft hover:shadow-glow transition-all duration-200 ${
+                    isDragActive
+                        ? 'border-primary bg-gradient-to-r from-primary/10 to-blue-500/10'
+                        : 'border-border bg-gradient-to-r from-background/50 to-primary/5'
+                }`}
+            >
+                <CardContent className="p-6">
+                    <input {...getInputProps()} />
+                    {isLoading ? (
+                        <AnimatedContainer animation="fade-in-up" delay={300}>
+                            <div className="p-4 rounded-full bg-gradient-to-br from-primary to-primary-600 mb-4 shadow-soft mx-auto w-fit">
+                                <Loader2 className="h-8 w-8 text-white animate-spin" />
+                            </div>
+                        </AnimatedContainer>
+                    ) : (
+                        <AnimatedContainer animation="fade-in-up" delay={300}>
+                            <div className="p-4 rounded-full bg-gradient-to-br from-muted to-muted-foreground mb-4 shadow-soft mx-auto w-fit">
+                                <UploadCloud className="h-8 w-8 text-white" />
+                            </div>
+                        </AnimatedContainer>
+                    )}
+                    <AnimatedContainer animation="fade-in-up" delay={400}>
+                        <p className="text-sm text-muted-foreground">
+                            {isLoading ? t('builder.academicSolver.toasts.processingFile') : (isDragActive ? t('builder.academicSolver.toasts.dropHere') : t('builder.academicSolver.uploaders.dropzoneHint'))}
+                        </p>
+                    </AnimatedContainer>
+                </CardContent>
+            </Card>
+        </AnimatedContainer>
     );
 };

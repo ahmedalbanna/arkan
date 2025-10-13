@@ -179,6 +179,11 @@ type SectionName = keyof NonNullable<ProjectState['sections']>;
 
 export class Project implements SavedProject {
   private _id: string;
+  private _type: string;
+  private _title: string;
+  private _description: string;
+  private _status: string;
+  private _tags: string[];
   private _userId: string;
   private _createdAt: string;
   private _updatedAt: string;
@@ -198,11 +203,18 @@ export class Project implements SavedProject {
   private _academicSolver: AcademicSolverState;
   private _codebase?: any;
   private _externalContext: { fileName: string; content: string; type: ContextFileType; }[];
+  private _teamMembers: string[];
   private _teamId?: string | null;
   private _projectPlan: ProjectPlan | null;
 
+
   constructor(props: ProjectProperties) {
     this._id = props.id;
+    this._title = props.title;
+    this._type = props.type;
+    this._description = props.description;
+    this._status = props.status;
+    this._tags = props.tags;
     this._userId = props.userId;
     this._createdAt = props.createdAt;
     this._updatedAt = props.updatedAt;
@@ -232,12 +244,21 @@ export class Project implements SavedProject {
     };
     this._codebase = props.codebase;
     this._externalContext = props.externalContext || [];
+    this._teamMembers = props.teamMembers;
     this._teamId = props.teamId;
     this._projectPlan = props.projectPlan;
   }
 
   // --- Public Getters ---
   get id() { return this._id; }
+  get title() { return this._title; }
+  set title(value: string) { this._title = value; }
+  get type() { return this._type; }
+  set type(value: string) { this._type = value; }
+  get description() { return this._description; }
+  set description(value: string) { this._description = value; }
+  get status() { return this._status; }
+  set status(value: string) { this._status = value; }
   get userId() { return this._userId; }
   get createdAt() { return this._createdAt; }
   get updatedAt() { return this._updatedAt; }
@@ -276,6 +297,13 @@ export class Project implements SavedProject {
 
     return {
       id: this._id,
+      title: this._title,
+      type: this._type,
+      description: this._description,
+      status: this._status,
+      tags: this._tags,
+      teamMembers: this._teamMembers,
+      teamId: this._teamId,
       userId: this._userId,
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,

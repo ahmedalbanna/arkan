@@ -1,26 +1,28 @@
 
 'use client';
 
-import { useForm, useFieldArray } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import type { AppSettings, BankAccount } from '@/lib/types';
+import type { AppSettings } from '@/lib/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-import { Settings, Loader2, Save, Banknote, PlusCircle, Trash2, Globe, AlertTriangle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AnimatedContainer } from '@/components/ui/animation';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
+import { AlertTriangle, Banknote, DollarSign, Loader2, PlusCircle, Save, Settings, Shield, Trash2 } from 'lucide-react';
 import React from 'react';
-import { Separator } from '@/components/ui/separator';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Label } from '@/components/ui/label';
 
 // --- Zod Schema for Validation ---
 const bankAccountSchema = z.object({
@@ -148,107 +150,188 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-12">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary flex items-center justify-center gap-4">
-          <Settings className="w-10 h-10" />
-          {t('header.adminSettings')}
-        </h1>
-        <p className="text-lg text-muted-foreground mt-2">
-          {t('adminSettings.pageSubtitle')}
-        </p>
-      </div>
+    <div className="relative min-h-screen w-full overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5"></div>
+      <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float pointer-events-none"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-float pointer-events-none" style={{ animationDelay: '2s' }}></div>
 
-       {!settings || settings.bankAccounts.length === 0 ? (
-            <Alert variant="destructive" className="mb-6">
+      <div className="relative z-10 container mx-auto max-w-2xl px-4 py-12">
+        <AnimatedContainer animation="fade-in-down" delay={200}>
+          <div className="text-center mb-12">
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-primary to-primary-600 shadow-glow">
+                <Settings className="w-12 h-12 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl md:text-5xl font-headline font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+                  {t('header.adminSettings')}
+                </h1>
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    <Shield className="h-3 w-3" />
+                    System Configuration
+                  </Badge>
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Settings className="h-3 w-3" />
+                    Admin Control
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              {t('adminSettings.pageSubtitle')}
+            </p>
+          </div>
+        </AnimatedContainer>
+
+        <AnimatedContainer animation="fade-in-up" delay={400}>
+          <div className="space-y-8">
+            {!settings || settings.bankAccounts.length === 0 ? (
+              <Alert variant="destructive" className="mb-6">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
-                    No settings found in the database. Please run the seed script to populate default settings, or configure and save them below.
+                  No settings found in the database. Please run the seed script to populate default settings, or configure and save them below.
                 </AlertDescription>
-            </Alert>
-        ) : null}
+              </Alert>
+            ) : null}
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('adminSettings.defaultSettingsTitle')}</CardTitle>
-                    <CardDescription>
-                        {t('adminSettings.defaultSettingsDesc')}
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <Card variant="glass" className="backdrop-blur-md shadow-soft">
+                  <CardHeader className="bg-gradient-to-r from-primary/5 to-blue-500/5">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-primary-600">
+                        <Settings className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="font-headline">{t('adminSettings.defaultSettingsTitle')}</CardTitle>
+                        <CardDescription className="mt-1">
+                          {t('adminSettings.defaultSettingsDesc')}
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
                     <FormField
-                        control={form.control}
-                        name="newUserCredits"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('adminSettings.newUserCreditsLabel')}</FormLabel>
-                                <FormControl>
-                                    <Input type="number" {...field} disabled={mutation.isPending} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
+                      control={form.control}
+                      name="newUserCredits"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 font-semibold">
+                            <DollarSign className="h-4 w-4 text-primary" />
+                            {t('adminSettings.newUserCreditsLabel')}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              disabled={mutation.isPending}
+                              className="hover:shadow-soft transition-all duration-200"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Banknote className="w-6 h-6"/> {t('adminSettings.bankPaymentTitle')}</CardTitle>
-                    <CardDescription>
-                        {t('adminSettings.bankPaymentDesc')}
-                    </CardDescription>
-                </CardHeader>
-                 <CardContent className="space-y-6">
+                <Card variant="glass" className="backdrop-blur-md shadow-soft">
+                  <CardHeader className="bg-gradient-to-r from-primary/5 to-blue-500/5">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-primary-600">
+                        <Banknote className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="font-headline">{t('adminSettings.bankPaymentTitle')}</CardTitle>
+                        <CardDescription className="mt-1">
+                          {t('adminSettings.bankPaymentDesc')}
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
                     {fields.map((field, index) => (
-                        <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
-                             <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => remove(index)}>
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                            <FormField
-                                control={form.control}
-                                name={`bankAccounts.${index}.bankName`}
-                                render={({ field }) => (
-                                    <FormItem><FormLabel>Bank Name</FormLabel><FormControl><Input {...field} placeholder="e.g., Al-Amal Microfinance Bank" /></FormControl><FormMessage /></FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name={`bankAccounts.${index}.accountHolder`}
-                                render={({ field }) => (
-                                    <FormItem><FormLabel>Account Holder Name</FormLabel><FormControl><Input {...field} placeholder="e.g., Arkan Platform LLC" /></FormControl><FormMessage /></FormItem>
-                                )}
-                            />
-                            <div className="space-y-3 pt-2">
-                                <Label>IBANs per Currency</Label>
-                                 <FormField control={form.control} name={`bankAccounts.${index}.currencies.SAR.iban`} render={({ field }) => (
-                                    <FormItem className="flex items-center gap-2"><FormLabel className="w-12">SAR</FormLabel><FormControl><Input {...field} placeholder="Saudi Riyal IBAN" /></FormControl><FormMessage /></FormItem>
-                                )} />
-                                <FormField control={form.control} name={`bankAccounts.${index}.currencies.USD.iban`} render={({ field }) => (
-                                    <FormItem className="flex items-center gap-2"><FormLabel className="w-12">USD</FormLabel><FormControl><Input {...field} placeholder="US Dollar IBAN" /></FormControl><FormMessage /></FormItem>
-                                )} />
-                                 <FormField control={form.control} name={`bankAccounts.${index}.currencies.YER.iban`} render={({ field }) => (
-                                    <FormItem className="flex items-center gap-2"><FormLabel className="w-12">YER</FormLabel><FormControl><Input {...field} placeholder="Yemeni Rial IBAN/Account No." /></FormControl><FormMessage /></FormItem>
-                                )} />
-                            </div>
+                      <div key={field.id} className="p-4 border rounded-lg space-y-4 relative bg-gradient-to-r from-background/50 to-primary/5">
+                        <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6 hover:shadow-glow transition-all duration-200" onClick={() => remove(index)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <FormField
+                          control={form.control}
+                          name={`bankAccounts.${index}.bankName`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Bank Name</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="e.g., Al-Amal Microfinance Bank" className="hover:shadow-soft transition-all duration-200" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`bankAccounts.${index}.accountHolder`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Account Holder Name</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="e.g., Arkan Platform LLC" className="hover:shadow-soft transition-all duration-200" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="space-y-3 pt-2">
+                          <Label>IBANs per Currency</Label>
+                          <FormField control={form.control} name={`bankAccounts.${index}.currencies.SAR.iban`} render={({ field }) => (
+                            <FormItem className="flex items-center gap-2">
+                              <FormLabel className="w-12">SAR</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="Saudi Riyal IBAN" className="hover:shadow-soft transition-all duration-200" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )} />
+                          <FormField control={form.control} name={`bankAccounts.${index}.currencies.USD.iban`} render={({ field }) => (
+                            <FormItem className="flex items-center gap-2">
+                              <FormLabel className="w-12">USD</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="US Dollar IBAN" className="hover:shadow-soft transition-all duration-200" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )} />
+                          <FormField control={form.control} name={`bankAccounts.${index}.currencies.YER.iban`} render={({ field }) => (
+                            <FormItem className="flex items-center gap-2">
+                              <FormLabel className="w-12">YER</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="Yemeni Rial IBAN/Account No." className="hover:shadow-soft transition-all duration-200" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )} />
                         </div>
+                      </div>
                     ))}
-                    <Button type="button" variant="outline" onClick={addNewAccount}>
-                        <PlusCircle className="me-2 h-4 w-4" /> Add Another Bank Account
+                    <Button type="button" variant="outline" onClick={addNewAccount} className="hover:shadow-soft transition-all duration-200">
+                      <PlusCircle className="me-2 h-4 w-4" /> Add Another Bank Account
                     </Button>
-                 </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
 
-            <div className="flex justify-end">
-                <Button type="submit" disabled={mutation.isPending}>
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={mutation.isPending} variant="gradient" className="hover:shadow-glow transition-all duration-200">
                     {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                     {t('adminSettings.saveButton')}
-                </Button>
-            </div>
-        </form>
-      </Form>
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </div>
+        </AnimatedContainer>
+      </div>
     </div>
   );
 }

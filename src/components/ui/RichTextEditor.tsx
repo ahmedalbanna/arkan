@@ -2,11 +2,14 @@
 
 'use client';
 
+import { AnimatedContainer } from '@/components/ui/animation';
+import { Button } from '@/components/ui/button';
 import { useDebounce } from '@/hooks';
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import TextAlign from '@tiptap/extension-text-align';
 import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import { AlignLeft, AlignRight, Bold, Italic, List, ListOrdered, Type } from 'lucide-react';
 import { marked } from 'marked';
 import React, { useEffect, useState } from 'react';
 import { SectionToolbar } from '../section/SectionToolbar';
@@ -41,34 +44,91 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
   };
 
   return (
-    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full shadow-lg flex items-center p-2 gap-2">
-      <div className="flex items-center gap-2">
-        <select
-          value={getCurrentHeadingLevel()}
-          onChange={handleHeadingChange}
-          aria-label="Select heading level"
-          className="bg-white hover:bg-gray-200 border-none rounded-full p-2 text-sm focus:ring-0 focus:outline-none"
-        >
-          <option value="p">Paragraph</option>
-          <option value="h1">Heading 1</option>
-          <option value="h2">Heading 2</option>
-          <option value="h3">Heading 3</option>
-          <option value="h4">Heading 4</option>
-          <option value="h5">Heading 5</option>
-          <option value="h6">Heading 6</option>
-        </select>
-        <button onClick={() => editor.chain().focus().toggleBold().run()} disabled={!editor.can().chain().focus().toggleBold().run()} className={`p-2 rounded-full ${editor.isActive('bold') ? 'bg-black text-white' : 'bg-white hover:bg-gray-200'}`}>B</button>
-        <button onClick={() => editor.chain().focus().toggleItalic().run()} disabled={!editor.can().chain().focus().toggleItalic().run()} className={`p-2 rounded-full ${editor.isActive('italic') ? 'bg-black text-white' : 'bg-white hover:bg-gray-200'}`}>I</button>
-        <button onClick={() => editor.chain().focus().toggleStrike().run()} disabled={!editor.can().chain().focus().toggleStrike().run()} className={`p-2 rounded-full ${editor.isActive('strike') ? 'bg-black text-white' : 'bg-white hover:bg-gray-200'}`}>S</button>
-        <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={`p-2 rounded-full ${editor.isActive('bulletList') ? 'bg-black text-white' : 'bg-white hover:bg-gray-200'}`}>•</button>
-        <button onClick={() => editor.chain().focus().toggleOrderedList().run()} className={`p-2 rounded-full ${editor.isActive('orderedList') ? 'bg-black text-white' : 'bg-white hover:bg-gray-200'}`}>1.</button>
+    <AnimatedContainer animation="fade-in-up" delay={200}>
+      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-background/90 to-primary/5 backdrop-blur-md border border-primary/20 rounded-full shadow-soft hover:shadow-glow flex items-center p-2 gap-2 transition-all duration-200">
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Type className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <select
+              value={getCurrentHeadingLevel()}
+              onChange={handleHeadingChange}
+              aria-label="Select heading level"
+              className="bg-gradient-to-r from-background/80 to-primary/5 hover:from-background hover:to-primary/10 border-none rounded-full pl-8 pr-4 py-2 text-sm focus:ring-0 focus:outline-none transition-all duration-200 shadow-soft"
+            >
+              <option value="p">Paragraph</option>
+              <option value="h1">Heading 1</option>
+              <option value="h2">Heading 2</option>
+              <option value="h3">Heading 3</option>
+              <option value="h4">Heading 4</option>
+              <option value="h5">Heading 5</option>
+              <option value="h6">Heading 6</option>
+            </select>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            disabled={!editor.can().chain().focus().toggleBold().run()}
+            className={`rounded-full transition-all duration-200 ${editor.isActive('bold') ? 'bg-gradient-to-r from-primary to-primary-600 text-white shadow-soft' : 'hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft'}`}
+          >
+            <Bold className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            disabled={!editor.can().chain().focus().toggleItalic().run()}
+            className={`rounded-full transition-all duration-200 ${editor.isActive('italic') ? 'bg-gradient-to-r from-primary to-primary-600 text-white shadow-soft' : 'hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft'}`}
+          >
+            <Italic className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => editor.chain().focus().toggleStrike().run()}
+            disabled={!editor.can().chain().focus().toggleStrike().run()}
+            className={`rounded-full transition-all duration-200 ${editor.isActive('strike') ? 'bg-gradient-to-r from-primary to-primary-600 text-white shadow-soft' : 'hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft'}`}
+          >
+            S
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            className={`rounded-full transition-all duration-200 ${editor.isActive('bulletList') ? 'bg-gradient-to-r from-primary to-primary-600 text-white shadow-soft' : 'hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft'}`}
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            className={`rounded-full transition-all duration-200 ${editor.isActive('orderedList') ? 'bg-gradient-to-r from-primary to-primary-600 text-white shadow-soft' : 'hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft'}`}
+          >
+            <ListOrdered className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="h-6 w-px bg-gradient-to-b from-muted to-primary/20"></div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => { editor.chain().focus().setTextAlign('left').run(); setDirection('ltr'); }}
+            className={`rounded-full transition-all duration-200 ${editor.isActive({ textAlign: 'left' }) ? 'bg-gradient-to-r from-primary to-primary-600 text-white shadow-soft' : 'hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft'}`}
+          >
+            <AlignLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => { editor.chain().focus().setTextAlign('right').run(); setDirection('rtl'); }}
+            className={`rounded-full transition-all duration-200 ${editor.isActive({ textAlign: 'right' }) ? 'bg-gradient-to-r from-primary to-primary-600 text-white shadow-soft' : 'hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft'}`}
+          >
+            <AlignRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
-      <div className="h-6 w-px bg-gray-300"></div> {/* Separator */}
-      <div className="flex items-center gap-2">
-        <button onClick={() => { editor.chain().focus().setTextAlign('left').run(); setDirection('ltr'); }} className={`p-2 rounded-full ${editor.isActive({ textAlign: 'left' }) ? 'bg-black text-white' : 'bg-white hover:bg-gray-200'}`}>LTR</button>
-        <button onClick={() => { editor.chain().focus().setTextAlign('right').run(); setDirection('rtl'); }} className={`p-2 rounded-full ${editor.isActive({ textAlign: 'right' }) ? 'bg-black text-white' : 'bg-white hover:bg-gray-200'}`}>RTL</button>
-      </div>
-    </div>
+    </AnimatedContainer>
   );
 };
 
@@ -154,22 +214,26 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
 
   return (
-    <div dir={direction}>
-      {editor && (
-        <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
-          <SectionToolbar
-            isProcessingAi={isProcessingAi}
-            onAiAction={handleAiActionWrapper}
-            onReadAloud={handleReadAloudWrapper}
-            isReadingAloud={isReadingAloud}
-          />
-        </BubbleMenu>
-      )}
-      <MenuBar editor={editor} setDirection={setDirection} />
-      <div className="rounded-b-lg p-2 min-h-[200px] relative">
-        <EditorContent editor={editor} />
+    <AnimatedContainer animation="fade-in-up" delay={200}>
+      <div dir={direction} className="relative">
+        {editor && (
+          <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
+            <SectionToolbar
+              isProcessingAi={isProcessingAi}
+              onAiAction={handleAiActionWrapper}
+              onReadAloud={handleReadAloudWrapper}
+              isReadingAloud={isReadingAloud}
+            />
+          </BubbleMenu>
+        )}
+        <MenuBar editor={editor} setDirection={setDirection} />
+        <AnimatedContainer animation="fade-in-up" delay={300}>
+          <div className="rounded-lg border bg-gradient-to-r from-background/50 to-primary/5 backdrop-blur-sm shadow-soft hover:shadow-glow p-4 min-h-[200px] relative transition-all duration-200">
+            <EditorContent editor={editor} />
+          </div>
+        </AnimatedContainer>
       </div>
-    </div>
+    </AnimatedContainer>
   );
 };
 

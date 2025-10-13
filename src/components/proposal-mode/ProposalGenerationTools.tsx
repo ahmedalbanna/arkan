@@ -27,7 +27,8 @@ function GenerateButton({ isGenerating, generationMode }: GenerateButtonProps) {
             type="button"
             onClick={handleGenerateClick}
             disabled={isGenerating || !canGenerate || !hasCredits || generationMutation.isPending}
-            className="font-headline w-full"
+            variant="gradient"
+            className="font-headline w-full hover:shadow-glow transition-all duration-200"
             title={!hasCredits ? t('builder.toasts.insufficientCredits') : t('builder.proposalGenerator.generateButton')}
         >
             {isGenerating || generationMutation.isPending ? (
@@ -136,16 +137,16 @@ export const ProposalGenerationTools = ({
     } = useProposalGenerationToolsLogic();
 
     return (
-        <Card className={cn("flex flex-col h-full", isDisabled && 'opacity-50 pointer-events-none')}>
-            <CardHeader>
+        <Card className={cn("flex flex-col h-full backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200", isDisabled && 'opacity-50 pointer-events-none')}>
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-blue-500/5">
                 <CardTitle className="font-headline">{t('builder.proposalGenerator.toolsTitle')}</CardTitle>
                 <CardDescription>{t('builder.proposalGenerator.toolsDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow overflow-y-auto pr-2 space-y-4">
                 <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'simple' | 'advanced')} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="simple">Simple</TabsTrigger>
-                        <TabsTrigger value="advanced">Advanced</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-background/50 to-primary/5">
+                        <TabsTrigger value="simple" className="hover:shadow-soft transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-600 data-[state=active]:text-white">Simple</TabsTrigger>
+                        <TabsTrigger value="advanced" className="hover:shadow-soft transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-600 data-[state=active]:text-white">Advanced</TabsTrigger>
                     </TabsList>
                     <TabsContent value="simple" className="pt-4">
                         <div>

@@ -47,7 +47,7 @@ export function GenerateAgentView() {
     const [includeJsonOutput, setIncludeJsonOutput] = useState(false);
     const [contextFiles, setContextFiles] = useState<UploadedFile[]>([]);
     const [generatedData, setGeneratedData] = useState<GeneratedAgentData | null>(null);
-    const [selectedCategory, setSelectedCategory] = useState<AgentCategory>('ContentGeneration');
+    const [selectedCategory, setSelectedCategory] = useState<AgentCategory>('content-generation');
     const createAgentMutation = useCreateAgent();
 
     const generateMutation = useGenerateAgentConfig();

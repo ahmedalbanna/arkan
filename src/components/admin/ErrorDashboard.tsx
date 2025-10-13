@@ -4,6 +4,7 @@
  */
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AnimatedContainer } from '@/components/ui/animation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -101,248 +102,272 @@ export function ErrorDashboard() {
     return (
         <div className="space-y-6">
             {/* العنوان والإجراءات */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold">لوحة تحكم الأخطاء</h1>
-                    <p className="text-muted-foreground">مراقبة شاملة للأخطاء وإحصائيات النظام</p>
+            <AnimatedContainer animation="fade-in-up">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold font-headline">لوحة تحكم الأخطاء</h1>
+                        <p className="text-muted-foreground">مراقبة شاملة للأخطاء وإحصائيات النظام</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Button onClick={loadData} variant="outline" size="sm" className="hover:shadow-soft">
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            تحديث
+                        </Button>
+                        <Button onClick={exportData} variant="outline" size="sm" className="hover:shadow-soft">
+                            <Download className="h-4 w-4 mr-2" />
+                            تصدير
+                        </Button>
+                        <Button onClick={cleanupData} variant="outline" size="sm" className="hover:shadow-soft">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            تنظيف
+                        </Button>
+                    </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                    <Button onClick={loadData} variant="outline" size="sm">
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        تحديث
-                    </Button>
-                    <Button onClick={exportData} variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        تصدير
-                    </Button>
-                    <Button onClick={cleanupData} variant="outline" size="sm">
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        تنظيف
-                    </Button>
-                </div>
-            </div>
+            </AnimatedContainer>
 
             {/* التنبيهات النشطة */}
             {alerts.filter(alert => alert.isActive && alert.lastTriggered).length > 0 && (
-                <Alert className="border-red-200 bg-red-50">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertTitle>تنبيهات نشطة</AlertTitle>
-                    <AlertDescription>
-                        {alerts.filter(alert => alert.isActive && alert.lastTriggered).length} تنبيه نشط
-                    </AlertDescription>
-                </Alert>
+                <AnimatedContainer animation="fade-in-up" delay={100}>
+                    <Alert className="border-red-200 bg-red-50 backdrop-blur-md bg-gradient-to-r from-red-50 to-red-100 border-red-200 shadow-soft">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertTitle>تنبيهات نشطة</AlertTitle>
+                        <AlertDescription>
+                            {alerts.filter(alert => alert.isActive && alert.lastTriggered).length} تنبيه نشط
+                        </AlertDescription>
+                    </Alert>
+                </AnimatedContainer>
             )}
 
             {/* البطاقات الرئيسية */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">إجمالي الأخطاء</CardTitle>
-                        <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{metrics?.totalErrors || 0}</div>
-                        <p className="text-xs text-muted-foreground">
-                            آخر 24 ساعة
-                        </p>
-                    </CardContent>
-                </Card>
+                <AnimatedContainer animation="fade-in-up" delay={200}>
+                    <Card className="backdrop-blur-md bg-gradient-to-br from-background/70 to-primary/5 border border-primary/10 shadow-soft hover:shadow-glow">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 rounded-t-lg bg-gradient-to-r from-background/60 to-primary/5">
+                            <CardTitle className="text-sm font-medium font-headline">إجمالي الأخطاء</CardTitle>
+                            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{metrics?.totalErrors || 0}</div>
+                            <p className="text-xs text-muted-foreground">
+                                آخر 24 ساعة
+                            </p>
+                        </CardContent>
+                    </Card>
+                </AnimatedContainer>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">الأخطاء الحرجة</CardTitle>
-                        <Shield className="h-4 w-4 text-red-500" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-red-600">
-                            {metrics?.errorsBySeverity?.critical || 0}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            تتطلب انتباه فوري
-                        </p>
-                    </CardContent>
-                </Card>
+                <AnimatedContainer animation="fade-in-up" delay={300}>
+                    <Card className="backdrop-blur-md bg-gradient-to-br from-background/70 to-primary/5 border border-primary/10 shadow-soft hover:shadow-glow">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 rounded-t-lg bg-gradient-to-r from-background/60 to-primary/5">
+                            <CardTitle className="text-sm font-medium font-headline">الأخطاء الحرجة</CardTitle>
+                            <Shield className="h-4 w-4 text-red-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-red-600">
+                                {metrics?.errorsBySeverity?.critical || 0}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                تتطلب انتباه فوري
+                            </p>
+                        </CardContent>
+                    </Card>
+                </AnimatedContainer>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">معدل النجاح</CardTitle>
-                        <Activity className="h-4 w-4 text-green-500" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-green-600">
-                            {metrics?.retrySuccessRate || 0}%
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            إعادة المحاولة الناجحة
-                        </p>
-                    </CardContent>
-                </Card>
+                <AnimatedContainer animation="fade-in-up" delay={400}>
+                    <Card className="backdrop-blur-md bg-gradient-to-br from-background/70 to-primary/5 border border-primary/10 shadow-soft hover:shadow-glow">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 rounded-t-lg bg-gradient-to-r from-background/60 to-primary/5">
+                            <CardTitle className="text-sm font-medium font-headline">معدل النجاح</CardTitle>
+                            <Activity className="h-4 w-4 text-green-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-green-600">
+                                {metrics?.retrySuccessRate || 0}%
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                إعادة المحاولة الناجحة
+                            </p>
+                        </CardContent>
+                    </Card>
+                </AnimatedContainer>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">الاستخدام الاحتياطي</CardTitle>
-                        <Zap className="h-4 w-4 text-blue-500" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-blue-600">
-                            {metrics?.fallbackUsageRate || 0}%
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            استخدام الحلول الاحتياطية
-                        </p>
-                    </CardContent>
-                </Card>
+                <AnimatedContainer animation="fade-in-up" delay={500}>
+                    <Card className="backdrop-blur-md bg-gradient-to-br from-background/70 to-primary/5 border border-primary/10 shadow-soft hover:shadow-glow">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 rounded-t-lg bg-gradient-to-r from-background/60 to-primary/5">
+                            <CardTitle className="text-sm font-medium font-headline">الاستخدام الاحتياطي</CardTitle>
+                            <Zap className="h-4 w-4 text-blue-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-blue-600">
+                                {metrics?.fallbackUsageRate || 0}%
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                استخدام الحلول الاحتياطية
+                            </p>
+                        </CardContent>
+                    </Card>
+                </AnimatedContainer>
             </div>
 
             {/* التبويبات */}
-            <Tabs defaultValue="overview" className="space-y-4">
-                <TabsList>
-                    <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
-                    <TabsTrigger value="trends">الاتجاهات</TabsTrigger>
-                    <TabsTrigger value="alerts">التنبيهات</TabsTrigger>
-                    <TabsTrigger value="history">التاريخ</TabsTrigger>
-                </TabsList>
+            <AnimatedContainer animation="fade-in-up" delay={600}>
+                <Tabs defaultValue="overview" className="space-y-4">
+                    <TabsList className="backdrop-blur-md bg-gradient-to-r from-background/50 to-primary/5 border border-primary/10 shadow-soft">
+                        <TabsTrigger value="overview" className="hover:shadow-soft">نظرة عامة</TabsTrigger>
+                        <TabsTrigger value="trends" className="hover:shadow-soft">الاتجاهات</TabsTrigger>
+                        <TabsTrigger value="alerts" className="hover:shadow-soft">التنبيهات</TabsTrigger>
+                        <TabsTrigger value="history" className="hover:shadow-soft">التاريخ</TabsTrigger>
+                    </TabsList>
 
-                <TabsContent value="overview" className="space-y-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        {/* الأخطاء حسب الفئة */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>الأخطاء حسب الفئة</CardTitle>
-                                <CardDescription>توزيع الأخطاء حسب نوعها</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-3">
-                                    {Object.entries(metrics?.errorsByCategory || {}).map(([category, count]) => (
-                                        <div key={category} className="flex items-center justify-between">
-                                            <div className="flex items-center space-x-2">
-                                                {getCategoryIcon(category as ErrorCategory)}
-                                                <span className="text-sm font-medium">{category}</span>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <span className="text-sm text-muted-foreground">{count as number}</span>
-                                                <Progress
-                                                    value={(count as number) / (metrics?.totalErrors || 1) * 100}
-                                                    className="w-20 h-2"
-                                                />
-                                            </div>
+                    <TabsContent value="overview" className="space-y-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            {/* الأخطاء حسب الفئة */}
+                            <AnimatedContainer animation="fade-in-up" delay={700}>
+                                <Card className="backdrop-blur-md bg-gradient-to-br from-background/70 to-primary/5 border border-primary/10 shadow-soft hover:shadow-glow">
+                                    <CardHeader className="rounded-t-lg bg-gradient-to-r from-background/60 to-primary/5">
+                                        <CardTitle className="font-headline">الأخطاء حسب الفئة</CardTitle>
+                                        <CardDescription>توزيع الأخطاء حسب نوعها</CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-3">
+                                            {Object.entries(metrics?.errorsByCategory || {}).map(([category, count]) => (
+                                                <div key={category} className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2">
+                                                        {getCategoryIcon(category as ErrorCategory)}
+                                                        <span className="text-sm font-medium">{category}</span>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="text-sm text-muted-foreground">{count as number}</span>
+                                                        <Progress
+                                                            value={(count as number) / (metrics?.totalErrors || 1) * 100}
+                                                            className="w-20 h-2"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
+                                    </CardContent>
+                                </Card>
+                            </AnimatedContainer>
 
-                        {/* الأخطاء حسب الشدة */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>الأخطاء حسب الشدة</CardTitle>
-                                <CardDescription>توزيع الأخطاء حسب مستوى الخطورة</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-3">
-                                    {Object.entries(metrics?.errorsBySeverity || {}).map(([severity, count]) => (
-                                        <div key={severity} className="flex items-center justify-between">
-                                            <Badge className={getSeverityColor(severity as ErrorSeverity)}>
-                                                {severity}
-                                            </Badge>
-                                            <div className="flex items-center space-x-2">
-                                                <span className="text-sm text-muted-foreground">{count as number}</span>
-                                                <Progress
-                                                    value={(count as number) / (metrics?.totalErrors || 1) * 100}
-                                                    className="w-20 h-2"
-                                                />
-                                            </div>
+                            {/* الأخطاء حسب الشدة */}
+                            <AnimatedContainer animation="fade-in-up" delay={800}>
+                                <Card className="backdrop-blur-md bg-gradient-to-br from-background/70 to-primary/5 border border-primary/10 shadow-soft hover:shadow-glow">
+                                    <CardHeader className="rounded-t-lg bg-gradient-to-r from-background/60 to-primary/5">
+                                        <CardTitle className="font-headline">الأخطاء حسب الشدة</CardTitle>
+                                        <CardDescription>توزيع الأخطاء حسب مستوى الخطورة</CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-3">
+                                            {Object.entries(metrics?.errorsBySeverity || {}).map(([severity, count]) => (
+                                                <div key={severity} className="flex items-center justify-between">
+                                                    <Badge className={getSeverityColor(severity as ErrorSeverity)}>
+                                                        {severity}
+                                                    </Badge>
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="text-sm text-muted-foreground">{count as number}</span>
+                                                        <Progress
+                                                            value={(count as number) / (metrics?.totalErrors || 1) * 100}
+                                                            className="w-20 h-2"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </TabsContent>
+                                    </CardContent>
+                                </Card>
+                            </AnimatedContainer>
+                        </div>
+                    </TabsContent>
 
-                <TabsContent value="trends" className="space-y-4">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>اتجاهات الأخطاء</CardTitle>
-                            <CardDescription>تطور الأخطاء عبر الوقت</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-center py-8 text-muted-foreground">
-                                <TrendingUp className="h-12 w-12 mx-auto mb-4" />
-                                <p>مخطط الاتجاهات قيد التطوير</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
-                <TabsContent value="alerts" className="space-y-4">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>التنبيهات</CardTitle>
-                            <CardDescription>إدارة تنبيهات الأخطاء</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-3">
-                                {alerts.map((alert) => (
-                                    <div key={alert.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                        <div className="flex items-center space-x-3">
-                                            <Badge variant={alert.isActive ? 'default' : 'secondary'}>
-                                                {alert.isActive ? 'نشط' : 'غير نشط'}
-                                            </Badge>
-                                            <div>
-                                                <p className="font-medium">{alert.condition}</p>
-                                                <p className="text-sm text-muted-foreground">{alert.description}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <span className="text-sm text-muted-foreground">
-                                                {alert.count} مرة
-                                            </span>
-                                            {alert.lastTriggered && (
-                                                <span className="text-xs text-muted-foreground">
-                                                    {new Date(alert.lastTriggered).toLocaleString('ar-SA')}
-                                                </span>
-                                            )}
-                                        </div>
+                    <TabsContent value="trends" className="space-y-4">
+                        <AnimatedContainer animation="fade-in-up" delay={700}>
+                            <Card className="backdrop-blur-md bg-gradient-to-br from-background/70 to-primary/5 border border-primary/10 shadow-soft hover:shadow-glow">
+                                <CardHeader className="rounded-t-lg bg-gradient-to-r from-background/60 to-primary/5">
+                                    <CardTitle className="font-headline">اتجاهات الأخطاء</CardTitle>
+                                    <CardDescription>تطور الأخطاء عبر الوقت</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-center py-8 text-muted-foreground">
+                                        <TrendingUp className="h-12 w-12 mx-auto mb-4" />
+                                        <p>مخطط الاتجاهات قيد التطوير</p>
                                     </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
+                                </CardContent>
+                            </Card>
+                        </AnimatedContainer>
+                    </TabsContent>
 
-                <TabsContent value="history" className="space-y-4">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>الأخطاء الأكثر شيوعاً</CardTitle>
-                            <CardDescription>قائمة بأكثر الأخطاء تكراراً</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-3">
-                                {errorHistory.map((error, index) => (
-                                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                                        <div className="flex items-center space-x-3">
-                                            <Badge variant="outline">#{index + 1}</Badge>
-                                            <div>
-                                                <p className="font-medium">{error.code}</p>
-                                                <p className="text-sm text-muted-foreground">{error.category}</p>
+                    <TabsContent value="alerts" className="space-y-4">
+                        <AnimatedContainer animation="fade-in-up" delay={700}>
+                            <Card className="backdrop-blur-md bg-gradient-to-br from-background/70 to-primary/5 border border-primary/10 shadow-soft hover:shadow-glow">
+                                <CardHeader className="rounded-t-lg bg-gradient-to-r from-background/60 to-primary/5">
+                                    <CardTitle className="font-headline">التنبيهات</CardTitle>
+                                    <CardDescription>إدارة تنبيهات الأخطاء</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-3">
+                                        {alerts.map((alert) => (
+                                            <div key={alert.id} className="flex items-center justify-between p-3 border rounded-lg backdrop-blur-sm bg-gradient-to-r from-background/50 to-primary/5 hover:shadow-soft">
+                                                <div className="flex items-center space-x-3">
+                                                    <Badge variant={alert.isActive ? 'default' : 'secondary'}>
+                                                        {alert.isActive ? 'نشط' : 'غير نشط'}
+                                                    </Badge>
+                                                    <div>
+                                                        <p className="font-medium">{alert.condition}</p>
+                                                        <p className="text-sm text-muted-foreground">{alert.description}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <span className="text-sm text-muted-foreground">
+                                                        {alert.count} مرة
+                                                    </span>
+                                                    {alert.lastTriggered && (
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {new Date(alert.lastTriggered).toLocaleString('ar-SA')}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <Badge className={getSeverityColor(error.severity)}>
-                                                {error.severity}
-                                            </Badge>
-                                            <span className="text-sm text-muted-foreground">
-                                                {error.count} مرة
-                                            </span>
-                                        </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
+                                </CardContent>
+                            </Card>
+                        </AnimatedContainer>
+                    </TabsContent>
+
+                    <TabsContent value="history" className="space-y-4">
+                        <AnimatedContainer animation="fade-in-up" delay={700}>
+                            <Card className="backdrop-blur-md bg-gradient-to-br from-background/70 to-primary/5 border border-primary/10 shadow-soft hover:shadow-glow">
+                                <CardHeader className="rounded-t-lg bg-gradient-to-r from-background/60 to-primary/5">
+                                    <CardTitle className="font-headline">الأخطاء الأكثر شيوعاً</CardTitle>
+                                    <CardDescription>قائمة بأكثر الأخطاء تكراراً</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-3">
+                                        {errorHistory.map((error, index) => (
+                                            <div key={index} className="flex items-center justify-between p-3 border rounded-lg backdrop-blur-sm bg-gradient-to-r from-background/50 to-primary/5 hover:shadow-soft">
+                                                <div className="flex items-center space-x-3">
+                                                    <Badge variant="outline">#{index + 1}</Badge>
+                                                    <div>
+                                                        <p className="font-medium">{error.code}</p>
+                                                        <p className="text-sm text-muted-foreground">{error.category}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <Badge className={getSeverityColor(error.severity)}>
+                                                        {error.severity}
+                                                    </Badge>
+                                                    <span className="text-sm text-muted-foreground">
+                                                        {error.count} مرة
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </AnimatedContainer>
+                    </TabsContent>
+                </Tabs>
+            </AnimatedContainer>
         </div>
     );
 }

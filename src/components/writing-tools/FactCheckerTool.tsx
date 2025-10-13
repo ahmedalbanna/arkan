@@ -2,6 +2,7 @@
 'use client';
 
 import type { ClaimStatus, FactCheckOutput } from '@/ai/schemas';
+import { AnimatedContainer } from '@/components/ui/animation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,108 +44,124 @@ export function FactCheckerTool() {
   } = useFactCheckerLogic();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t('writingTools.factChecker.cardTitle')}</CardTitle>
-        <CardDescription>{t('writingTools.factChecker.cardDescription')}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <Tabs defaultValue="paste">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="paste">{t('writingTools.factChecker.pasteTab')}</TabsTrigger>
-              <TabsTrigger value="upload">{t('writingTools.factChecker.uploadTab')}</TabsTrigger>
-            </TabsList>
-            <TabsContent value="paste" className="pt-4">
-              <Textarea
-                {...form.register('text')}
-                rows={12}
-                placeholder={t('writingTools.factChecker.placeholder')}
-                className="resize-none"
-                disabled={mutation.isPending || isUploading}
-              />
-            </TabsContent>
-            <TabsContent value="upload" className="pt-4">
-              <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer ${isDragActive ? 'border-primary' : ''}`}>
-                <input {...getInputProps()} />
-                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
-                {isUploading ? (
-                  <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.factChecker.processingFile')}</p>
-                ) : (
-                  <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.factChecker.dropzoneHint')}</p>
-                )}
-                <p className="text-xs text-muted-foreground">{t('writingTools.factChecker.supportedFiles')}</p>
+    <AnimatedContainer animation="fade-in-up" delay={200}>
+      <Card className="shadow-soft hover:shadow-glow transition-all duration-200">
+        <CardHeader className="bg-gradient-to-r from-primary/5 to-blue-500/5">
+          <CardTitle className="font-headline">{t('writingTools.factChecker.cardTitle')}</CardTitle>
+          <CardDescription>{t('writingTools.factChecker.cardDescription')}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <AnimatedContainer animation="fade-in-up" delay={300}>
+              <Tabs defaultValue="paste">
+                <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-background/50 to-primary/5">
+                  <TabsTrigger value="paste" className="hover:shadow-soft transition-all duration-200">{t('writingTools.factChecker.pasteTab')}</TabsTrigger>
+                  <TabsTrigger value="upload" className="hover:shadow-soft transition-all duration-200">{t('writingTools.factChecker.uploadTab')}</TabsTrigger>
+                </TabsList>
+                <TabsContent value="paste" className="pt-4">
+                  <Textarea
+                    {...form.register('text')}
+                    rows={12}
+                    placeholder={t('writingTools.factChecker.placeholder')}
+                    className="resize-none hover:shadow-soft transition-all duration-200"
+                    disabled={mutation.isPending || isUploading}
+                  />
+                </TabsContent>
+                <TabsContent value="upload" className="pt-4">
+                  <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all duration-200 ${isDragActive ? 'border-primary bg-gradient-to-r from-primary/10 to-blue-500/10' : 'border-border bg-gradient-to-r from-background/50 to-primary/5'} hover:shadow-soft`}>
+                    <input {...getInputProps()} />
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-primary-600 shadow-soft mx-auto w-fit mb-4">
+                      <UploadCloud className="h-12 w-12 text-white" />
+                    </div>
+                    {isUploading ? (
+                      <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.factChecker.processingFile')}</p>
+                    ) : (
+                      <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.factChecker.dropzoneHint')}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">{t('writingTools.factChecker.supportedFiles')}</p>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </AnimatedContainer>
+            {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}
+
+            <AnimatedContainer animation="fade-in-up" delay={400}>
+              <Button type="submit" disabled={mutation.isPending || isUploading} className="w-full hover:shadow-glow transition-all duration-200" variant="gradient">
+                {mutation.isPending || isUploading ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
+                {t('writingTools.factChecker.checkButton')}
+              </Button>
+            </AnimatedContainer>
+          </form>
+
+          {mutation.isPending && (
+            <AnimatedContainer animation="fade-in-up" delay={500}>
+              <div className="pt-6 border-t border-gradient-to-r from-primary/20 to-blue-500/20">
+                <div className="flex justify-center items-center text-sm text-muted-foreground mb-2">
+                  <div className="p-1 rounded-lg bg-gradient-to-br from-primary to-primary-600 shadow-soft mr-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-white" />
+                  </div>
+                  {t('writingTools.factChecker.analyzing')}
+                </div>
               </div>
-            </TabsContent>
-          </Tabs>
-          {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}
+            </AnimatedContainer>
+          )}
 
-          <Button type="submit" disabled={mutation.isPending || isUploading} className="w-full">
-            {mutation.isPending || isUploading ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-            {t('writingTools.factChecker.checkButton')}
-          </Button>
-        </form>
-
-        {mutation.isPending && (
-          <div className="pt-6 border-t">
-            <div className="flex justify-center items-center text-sm text-muted-foreground mb-2">
-              <Loader2 className="me-2 h-4 w-4 animate-spin" />
-              {t('writingTools.factChecker.analyzing')}
-            </div>
-          </div>
-        )}
-
-        {results && (
-          <div className="space-y-4 pt-6 border-t">
-            <h3 className="font-semibold text-lg">{t('writingTools.factChecker.reportTitle')}</h3>
-            <Card className="bg-muted/50">
-              <CardContent className="p-4 flex items-center justify-center text-center gap-4">
-                <div className={`text-6xl font-bold ${getScoreColor(results.originalityScore)}`}>
-                  {results.originalityScore}%
+          {results && (
+            <AnimatedContainer animation="fade-in-up" delay={600}>
+              <div className="space-y-4 pt-6 border-t border-gradient-to-r from-primary/20 to-blue-500/20">
+                <h3 className="font-semibold text-lg font-headline">{t('writingTools.factChecker.reportTitle')}</h3>
+                <Card className="bg-gradient-to-r from-muted/30 to-primary/5 backdrop-blur-sm shadow-soft hover:shadow-glow transition-all duration-200">
+                  <CardContent className="p-4 flex items-center justify-center text-center gap-4">
+                    <div className={`text-6xl font-bold ${getScoreColor(results.originalityScore)}`}>
+                      {results.originalityScore}%
+                    </div>
+                    <div>
+                      <p className="font-semibold">{t('writingTools.factChecker.originalityScore')}</p>
+                      <p className="text-xs text-muted-foreground">{t('writingTools.factChecker.originalityScoreDesc')}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <div className="space-y-2">
+                  <h4 className="font-semibold font-headline">{t('writingTools.factChecker.matchesTitle')}</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {t('writingTools.factChecker.matchesDescription')}
+                  </p>
+                  {results.claims.length > 0 ? (
+                    <div className="space-y-4">
+                      {results.claims.map((claim: FactCheckOutput['claims'][0], index: number) => {
+                        const { icon: Icon, color, badgeVariant } = getStatusInfo(claim.status);
+                        return (
+                          <AnimatedContainer key={index} animation="fade-in-up" delay={700 + index * 100}>
+                            <div className="border p-4 rounded-lg space-y-2 bg-gradient-to-r from-background/50 to-primary/5 backdrop-blur-sm shadow-soft hover:shadow-glow transition-all duration-200">
+                              <div className="flex justify-between items-start">
+                                <p className="font-medium italic">"{claim.statement}"</p>
+                                <Badge variant={badgeVariant} className="flex-shrink-0 ml-4 shadow-soft">
+                                  <Icon className={`mr-1 h-3.5 w-3.5 ${color}`} />
+                                  {claim.status}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground">{claim.explanation}</p>
+                              <p className="text-xs text-muted-foreground">{t('writingTools.factChecker.sourceLabel')}
+                                <Link href={`https://${claim.source}`} target="_blank" className="hover:underline text-primary">
+                                  {claim.source} <ExternalLink className="inline h-3 w-3" />
+                                </Link>
+                              </p>
+                            </div>
+                          </AnimatedContainer>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center text-muted-foreground py-8 border-dashed border-2 rounded-lg bg-gradient-to-r from-background/50 to-primary/5 backdrop-blur-sm shadow-soft">
+                      <p>{t('writingTools.factChecker.noClaims')}</p>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <p className="font-semibold">{t('writingTools.factChecker.originalityScore')}</p>
-                  <p className="text-xs text-muted-foreground">{t('writingTools.factChecker.originalityScoreDesc')}</p>
-                </div>
-              </CardContent>
-            </Card>
-            <div className="space-y-2">
-              <h4 className="font-semibold">{t('writingTools.factChecker.matchesTitle')}</h4>
-              <p className="text-sm text-muted-foreground">
-                {t('writingTools.factChecker.matchesDescription')}
-              </p>
-              {results.claims.length > 0 ? (
-                <div className="space-y-4">
-                  {results.claims.map((claim: FactCheckOutput['claims'][0], index: number) => {
-                    const { icon: Icon, color, badgeVariant } = getStatusInfo(claim.status);
-                    return (
-                      <div key={index} className="border p-4 rounded-lg space-y-2">
-                        <div className="flex justify-between items-start">
-                          <p className="font-medium italic">"{claim.statement}"</p>
-                          <Badge variant={badgeVariant} className="flex-shrink-0 ml-4">
-                            <Icon className={`mr-1 h-3.5 w-3.5 ${color}`} />
-                            {claim.status}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{claim.explanation}</p>
-                        <p className="text-xs text-muted-foreground">{t('writingTools.factChecker.sourceLabel')}
-                          <Link href={`https://${claim.source}`} target="_blank" className="hover:underline text-primary">
-                            {claim.source} <ExternalLink className="inline h-3 w-3" />
-                          </Link>
-                        </p>
-                      </div>
-                    )
-                  })}
-                </div>
-              ) : (
-                <div className="text-center text-muted-foreground py-8 border-dashed border-2 rounded-lg">
-                  <p>{t('writingTools.factChecker.noClaims')}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              </div>
+            </AnimatedContainer>
+          )}
+        </CardContent>
+      </Card>
+    </AnimatedContainer>
   );
 }

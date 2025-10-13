@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatedContainer } from '@/components/ui/animation';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -15,13 +16,15 @@ export function OrganizedContextDisplay({ organizedContext, itemKey }: Organized
 
     if (!organizedContext) {
         return (
-            <Card className="border-dashed">
-                <CardContent className="p-4">
-                    <div className="text-center text-sm text-muted-foreground">
-                        {t('builder.reportGenerator.noContextOrganized')}
-                    </div>
-                </CardContent>
-            </Card>
+            <AnimatedContainer animation="fade-in-up" delay={200}>
+                <Card variant="glass" className="border-dashed backdrop-blur-md shadow-soft">
+                    <CardContent className="p-4">
+                        <div className="text-center text-sm text-muted-foreground">
+                            {t('builder.reportGenerator.noContextOrganized')}
+                        </div>
+                    </CardContent>
+                </Card>
+            </AnimatedContainer>
         );
     }
 
@@ -88,50 +91,60 @@ export function OrganizedContextDisplay({ organizedContext, itemKey }: Organized
     }
 
     return (
-        <Card>
-            <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Brain className="h-4 w-4" />
-                    {t('builder.reportGenerator.organizedContext')}
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-                <div className="space-y-3">
-                    {contextItems.map((item, index) => {
-                        const Icon = item.icon;
-                        return (
-                            <div key={index} className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <Icon className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-sm font-medium">{item.label}</span>
-                                </div>
-                                <Badge
-                                    variant="secondary"
-                                    className={`${item.color} border-0`}
-                                >
-                                    {item.count}
-                                </Badge>
-                            </div>
-                        );
-                    })}
-
-                    {/* إحصائيات السياق */}
-                    {organizedContext.statistics && (
-                        <div className="pt-3 border-t">
-                            <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                                <div>إجمالي العناصر: {organizedContext.statistics.totalItems}</div>
-                                <div>متوسط الصلة: {organizedContext.statistics.averageRelevance}</div>
-                                <div className="col-span-2">
-                                    التوزيع: {Object.entries(organizedContext.statistics.byType)
-                                        .filter(([_, count]) => count > 0)
-                                        .map(([type, count]) => `${type}: ${count}`)
-                                        .join(', ')}
-                                </div>
-                            </div>
+        <AnimatedContainer animation="fade-in-up" delay={200}>
+            <Card variant="glass" className="backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200">
+                <CardHeader className="pb-3 bg-gradient-to-r from-primary/5 to-blue-500/5">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2 font-headline">
+                        <div className="p-1 rounded-lg bg-gradient-to-br from-primary to-primary-600">
+                            <Brain className="h-4 w-4 text-white" />
                         </div>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
+                        {t('builder.reportGenerator.organizedContext')}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                    <div className="space-y-3">
+                        {contextItems.map((item, index) => {
+                            const Icon = item.icon;
+                            return (
+                                <AnimatedContainer key={index} animation="fade-in-up" delay={100 + (index * 100)}>
+                                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-blue-500/5 transition-all duration-200">
+                                        <div className="flex items-center gap-2">
+                                            <div className="p-1 rounded-md bg-gradient-to-br from-muted to-muted/80">
+                                                <Icon className="h-4 w-4 text-muted-foreground" />
+                                            </div>
+                                            <span className="text-sm font-medium">{item.label}</span>
+                                        </div>
+                                        <Badge
+                                            variant="secondary"
+                                            className={`${item.color} border-0 shadow-soft`}
+                                        >
+                                            {item.count}
+                                        </Badge>
+                                    </div>
+                                </AnimatedContainer>
+                            );
+                        })}
+
+                        {/* إحصائيات السياق */}
+                        {organizedContext.statistics && (
+                            <AnimatedContainer animation="fade-in-up" delay={300}>
+                                <div className="pt-3 border-t">
+                                    <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                                        <div>إجمالي العناصر: {organizedContext.statistics.totalItems}</div>
+                                        <div>متوسط الصلة: {organizedContext.statistics.averageRelevance}</div>
+                                        <div className="col-span-2">
+                                            التوزيع: {Object.entries(organizedContext.statistics.byType)
+                                                .filter(([_, count]) => count > 0)
+                                                .map(([type, count]) => `${type}: ${count}`)
+                                                .join(', ')}
+                                        </div>
+                                    </div>
+                                </div>
+                            </AnimatedContainer>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
+        </AnimatedContainer>
     );
 }

@@ -1,6 +1,7 @@
 
 'use client';
 
+import { AnimatedContainer, StaggeredAnimation } from '@/components/ui/animation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -20,32 +21,36 @@ import app from '@/lib/core/firebase/client-init';
 import { cn } from '@/lib/utils';
 import { initiateSupportChat } from '@/services';
 import { getDatabase, off, onValue, push, ref, serverTimestamp } from 'firebase/database';
-import { Bot, ChevronDown, LifeBuoy, Loader2, Send, User, X } from 'lucide-react';
+import { Bot, ChevronDown, LifeBuoy, Loader2, MessageSquare, Send, Sparkles, User, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 
 function Message({ role, content }: { role: 'user' | 'assistant', content: string }) {
     const isUser = role === 'user';
     const Icon = isUser ? User : Bot;
-    const bubbleClasses = isUser ? 'bg-primary text-primary-foreground' : 'bg-muted';
+    const bubbleClasses = isUser
+        ? 'bg-gradient-to-br from-primary to-primary-600 text-primary-foreground'
+        : 'bg-gradient-to-br from-muted to-muted/80 border border-border/50';
     const justifyClass = isUser ? 'justify-end' : 'justify-start';
 
     return (
-        <div className={cn("flex items-start gap-3", justifyClass)}>
-            {!isUser && (
-                <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
-                    <Icon className="h-5 w-5" />
+        <AnimatedContainer animation="fade-in-up" delay={100}>
+            <div className={cn("flex items-start gap-3 group", justifyClass)}>
+                {!isUser && (
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-soft">
+                        <Icon className="h-4 w-4 text-white" />
+                    </div>
+                )}
+                <div className={cn("p-3 rounded-2xl max-w-xs shadow-soft transition-all duration-200 group-hover:shadow-medium", bubbleClasses)}>
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{content}</p>
                 </div>
-            )}
-            <div className={cn("p-3 rounded-lg max-w-lg", bubbleClasses)}>
-                <p className="text-sm whitespace-pre-wrap">{content}</p>
+                {isUser && (
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-secondary to-secondary-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-soft">
+                        <Icon className="h-4 w-4 text-white" />
+                    </div>
+                )}
             </div>
-            {isUser && (
-                <div className="h-8 w-8 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shrink-0">
-                    <Icon className="h-5 w-5" />
-                </div>
-            )}
-        </div>
+        </AnimatedContainer>
     )
 }
 
@@ -174,109 +179,161 @@ export default function SupportChatWidget() {
     return (
         <>
             {!isChatOpen && (
-                <Button
-                    onClick={handleToggleChat}
-                    className="fixed bottom-8 right-8 rounded-full h-16 w-16 shadow-lg z-50"
-                >
-                    <LifeBuoy className="h-8 w-8" />
-                    {totalUnreadCount > 0 && (
-                        <Badge variant="destructive" className="absolute -top-1 -right-1 h-6 w-6 justify-center p-0">{totalUnreadCount}</Badge>
-                    )}
-                </Button>
+                <AnimatedContainer animation="bounce-in" delay={200}>
+                    <Button
+                        onClick={handleToggleChat}
+                        className="fixed bottom-8 right-8 rounded-full h-16 w-16 shadow-glow hover:shadow-glow-lg transition-all duration-200 hover:scale-105 z-50 bg-gradient-to-br from-primary to-primary-600"
+                    >
+                        <LifeBuoy className="h-8 w-8" />
+                        {totalUnreadCount > 0 && (
+                            <Badge variant="destructive" className="absolute -top-1 -right-1 h-6 w-6 justify-center p-0 animate-pulse">
+                                {totalUnreadCount}
+                            </Badge>
+                        )}
+                    </Button>
+                </AnimatedContainer>
             )}
 
             {isChatOpen && (
-                <Card className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 w-[calc(100vw-2rem)] h-[calc(100vh-8rem)] sm:w-[400px] sm:h-[600px] shadow-lg z-50 flex flex-col">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div className="flex items-center gap-1">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="flex items-start gap-2 h-auto flex-col p-1 text-left">
-                                        <div className="flex items-center gap-2">
-                                            <Bot />
-                                            <h2 className="text-lg font-semibold">{selectedChat?.title || 'Support Chat'}</h2>
-                                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                                        </div>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    <DropdownMenuLabel>Support Chats</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    {chats.filter(c => c.isSupportChat).map(chat => (
-                                        <DropdownMenuItem key={chat.id} onSelect={() => setSelectedChatId(chat.id)}>
-                                            {chat.title}
-                                        </DropdownMenuItem>
-                                    ))}
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onSelect={handleNewSupportChat}>
-                                        New Support Chat
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-
-                        <Button variant="ghost" size="icon" onClick={closeChat}>
-                            <X className="h-4 w-4" />
-                        </Button>
-                    </CardHeader>
-
-                    {!selectedChat ? (
-                        <div className="flex h-full flex-col items-center justify-center bg-background p-8">
-                            <div className="text-center">
-                                <h2 className="text-2xl font-semibold">Welcome to Support</h2>
-                                <p className="mt-2 text-muted-foreground max-w-sm">
-                                    Start a new conversation to get help from our admin team.
-                                </p>
-                                <Button onClick={handleNewSupportChat} className="mt-4">
-                                    Start New Chat
-                                </Button>
-                            </div>
-                        </div>
-                    ) : (
-                        <>
-                            <CardContent className="flex-grow overflow-hidden">
-                                <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
-                                    <div className="space-y-4">
-                                        {messages.map((message, index) => (
-                                            <Message key={index} role={message.senderId === firebaseUser?.uid ? 'user' : 'assistant'} content={message.content} />
-                                        ))}
-                                        {isLoading && (
-                                            <div className="flex items-start gap-3 justify-start">
-                                                <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
-                                                    <Bot className="h-5 w-5" />
+                <AnimatedContainer animation="fade-in-up" delay={200}>
+                    <Card variant="glass" className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 w-[calc(100vw-2rem)] h-[calc(100vh-8rem)] sm:w-[400px] sm:h-[600px] shadow-glow z-50 flex flex-col backdrop-blur-md">
+                        <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-primary/5 to-blue-500/5 border-b">
+                            <div className="flex items-center gap-1">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" className="flex items-start gap-2 h-auto flex-col p-1 text-left hover:bg-primary/5 transition-colors">
+                                            <div className="flex items-center gap-2">
+                                                <div className="p-1 rounded-lg bg-gradient-to-br from-primary to-primary-600">
+                                                    <Bot className="h-4 w-4 text-white" />
                                                 </div>
-                                                <div className="p-3 rounded-lg bg-muted">
-                                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                                </div>
+                                                <h2 className="text-lg font-headline font-semibold">{selectedChat?.title || 'Support Chat'}</h2>
+                                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
                                             </div>
-                                        )}
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className="w-56">
+                                        <DropdownMenuLabel className="flex items-center gap-2">
+                                            <MessageSquare className="h-4 w-4" />
+                                            Support Chats
+                                        </DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        {chats.filter(c => c.isSupportChat).map(chat => (
+                                            <DropdownMenuItem
+                                                key={chat.id}
+                                                onSelect={() => setSelectedChatId(chat.id)}
+                                                className="hover:bg-primary/5 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                                                    {chat.title}
+                                                </div>
+                                            </DropdownMenuItem>
+                                        ))}
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            onSelect={handleNewSupportChat}
+                                            className="hover:bg-primary/5 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <Sparkles className="h-4 w-4 text-primary" />
+                                                New Support Chat
+                                            </div>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+
+                            <Button variant="ghost" size="icon" onClick={closeChat} className="hover:bg-destructive/10 hover:text-destructive transition-colors">
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </CardHeader>
+
+                        {!selectedChat ? (
+                            <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-background to-primary/5 p-8">
+                                <AnimatedContainer animation="fade-in-up" delay={400}>
+                                    <div className="text-center">
+                                        <div className="p-4 rounded-full bg-gradient-to-br from-primary to-primary-600 shadow-glow mx-auto mb-4 w-fit">
+                                            <LifeBuoy className="h-12 w-12 text-white" />
+                                        </div>
+                                        <h2 className="text-2xl font-headline font-semibold mb-2">Welcome to Support</h2>
+                                        <p className="text-muted-foreground max-w-sm mb-4">
+                                            Start a new conversation to get help from our admin team.
+                                        </p>
+                                        <Button
+                                            onClick={handleNewSupportChat}
+                                            variant="gradient"
+                                            className="hover:shadow-glow transition-all duration-200"
+                                        >
+                                            <Sparkles className="h-4 w-4 mr-2" />
+                                            Start New Chat
+                                        </Button>
                                     </div>
-                                </ScrollArea>
-                            </CardContent>
-                            <CardFooter>
-                                <form onSubmit={handleSendMessage} className="flex w-full items-center gap-2">
-                                    <Textarea
-                                        value={input}
-                                        onChange={(e) => setInput(e.target.value)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter' && !e.shiftKey) {
-                                                e.preventDefault();
-                                                handleSendMessage(e);
-                                            }
-                                        }}
-                                        placeholder="Type your message..."
-                                        className="min-h-0"
-                                        rows={1}
-                                        disabled={isLoading}
-                                    />
-                                    <Button type="submit" size="icon" disabled={!input.trim() || isLoading}>
-                                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                                    </Button>
-                                </form>
-                            </CardFooter>
-                        </>
-                    )}
-                </Card>
+                                </AnimatedContainer>
+                            </div>
+                        ) : (
+                            <>
+                                <CardContent className="flex-grow overflow-hidden bg-gradient-to-b from-background to-primary/5">
+                                    <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
+                                        <div className="space-y-4">
+                                            <StaggeredAnimation animation="fade-in-up" staggerDelay={100}>
+                                                {messages.map((message, index) => (
+                                                    <Message
+                                                        key={index}
+                                                        role={message.senderId === firebaseUser?.uid ? 'user' : 'assistant'}
+                                                        content={message.content}
+                                                    />
+                                                ))}
+                                            </StaggeredAnimation>
+                                            {isLoading && (
+                                                <AnimatedContainer animation="fade-in-up" delay={200}>
+                                                    <div className="flex items-start gap-3 justify-start">
+                                                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary-600 flex items-center justify-center shrink-0 shadow-soft">
+                                                            <Bot className="h-4 w-4 text-white" />
+                                                        </div>
+                                                        <div className="p-3 rounded-2xl bg-gradient-to-br from-muted to-muted/80 border border-border/50 shadow-soft">
+                                                            <div className="flex items-center gap-2">
+                                                                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                                                                <span className="text-sm text-muted-foreground">Support is typing...</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </AnimatedContainer>
+                                            )}
+                                        </div>
+                                    </ScrollArea>
+                                </CardContent>
+                                <CardFooter className="bg-gradient-to-r from-background to-primary/5 border-t">
+                                    <AnimatedContainer animation="fade-in-up" delay={400}>
+                                        <form onSubmit={handleSendMessage} className="flex w-full items-center gap-2">
+                                            <Textarea
+                                                value={input}
+                                                onChange={(e) => setInput(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                                        e.preventDefault();
+                                                        handleSendMessage(e);
+                                                    }
+                                                }}
+                                                placeholder="Type your message..."
+                                                className="min-h-0 rounded-2xl border border-input bg-background/50 backdrop-blur-sm shadow-soft focus:shadow-medium transition-all duration-200"
+                                                rows={1}
+                                                disabled={isLoading}
+                                            />
+                                            <Button
+                                                type="submit"
+                                                size="icon"
+                                                disabled={!input.trim() || isLoading}
+                                                className="rounded-full bg-gradient-to-br from-primary to-primary-600 hover:shadow-glow transition-all duration-200"
+                                            >
+                                                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                            </Button>
+                                        </form>
+                                    </AnimatedContainer>
+                                </CardFooter>
+                            </>
+                        )}
+                    </Card>
+                </AnimatedContainer>
             )}
         </>
     );

@@ -6,6 +6,7 @@ import { useState, type ComponentPropsWithoutRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { AnimatedContainer } from '@/components/ui/animation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -78,131 +79,149 @@ export function MarkdownToWordTool() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Markdown to Word Converter</CardTitle>
-        <CardDescription>Easily convert your markdown documents into styled .docx files, with support for different page orientations.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="markdown-input">Markdown Content</Label>
-            <Textarea
-              id="markdown-input"
-              {...form.register('markdown')}
-              placeholder="Enter your markdown here..."
-              className="min-h-[300px] font-mono"
-              disabled={isConverting}
-            />
-            {form.formState.errors.markdown && (
-              <p className="text-sm text-destructive">{form.formState.errors.markdown.message}</p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="fileName-input">File Name</Label>
-              <Input
-                id="fileName-input"
-                {...form.register('fileName')}
-                placeholder="e.g., my-report"
-                disabled={isConverting}
-              />
-              {form.formState.errors.fileName && (
-                <p className="text-sm text-destructive">{form.formState.errors.fileName.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="template-select">Document Template</Label>
-              <Select
-                onValueChange={(value: DocxTemplateKey) => form.setValue('template', value as any)}
-                defaultValue={form.getValues('template')}
-                disabled={isConverting}
-              >
-                <SelectTrigger id="template-select">
-                  <SelectValue placeholder="Select a template" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.keys(templates).map((key) => (
-                    <SelectItem key={key} value={key}>
-                      {key.charAt(0).toUpperCase() + key.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-4 pt-2">
-            <div className="flex items-center space-x-2">
-              <Controller
-                name="addCoverPage"
-                control={form.control}
-                render={({ field }) => (
-                  <Checkbox
-                    id="addCoverPage"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    disabled={isConverting}
-                  />
+    <AnimatedContainer animation="fade-in-up" delay={200}>
+      <Card className="shadow-soft hover:shadow-glow transition-all duration-200">
+        <CardHeader className="bg-gradient-to-r from-primary/5 to-blue-500/5">
+          <CardTitle className="font-headline">Markdown to Word Converter</CardTitle>
+          <CardDescription>Easily convert your markdown documents into styled .docx files, with support for different page orientations.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <AnimatedContainer animation="fade-in-up" delay={300}>
+              <div className="space-y-2">
+                <Label htmlFor="markdown-input" className="font-headline">Markdown Content</Label>
+                <Textarea
+                  id="markdown-input"
+                  {...form.register('markdown')}
+                  placeholder="Enter your markdown here..."
+                  className="min-h-[300px] font-mono hover:shadow-soft transition-all duration-200"
+                  disabled={isConverting}
+                />
+                {form.formState.errors.markdown && (
+                  <p className="text-sm text-destructive">{form.formState.errors.markdown.message}</p>
                 )}
-              />
-              <Label htmlFor="addCoverPage" className="cursor-pointer">
-                Add a cover page
-              </Label>
-            </div>
-            {addCoverPage && (
-              <div className="space-y-2 pl-6 border-s-2 ms-3">
-                <Label htmlFor="cover-page-markdown-input">Cover Page Markdown</Label>
-                <Textarea id="cover-page-markdown-input" {...form.register('coverPageMarkdown')} placeholder="Enter markdown for your cover page..." className="min-h-[150px] font-mono" disabled={isConverting} />
               </div>
-            )}
-          </div>
+            </AnimatedContainer>
 
-          <div className="flex items-center space-x-2 pt-2">
-            <Controller
-              name="pageNumbers"
-              control={form.control}
-              render={({ field }) => (
-                <Checkbox
-                  id="pageNumbers"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={isConverting}
+            <AnimatedContainer animation="fade-in-up" delay={400}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fileName-input" className="font-headline">File Name</Label>
+                  <Input
+                    id="fileName-input"
+                    {...form.register('fileName')}
+                    placeholder="e.g., my-report"
+                    disabled={isConverting}
+                    className="hover:shadow-soft transition-all duration-200"
+                  />
+                  {form.formState.errors.fileName && (
+                    <p className="text-sm text-destructive">{form.formState.errors.fileName.message}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="template-select" className="font-headline">Document Template</Label>
+                  <Select
+                    onValueChange={(value: DocxTemplateKey) => form.setValue('template', value as any)}
+                    defaultValue={form.getValues('template')}
+                    disabled={isConverting}
+                  >
+                    <SelectTrigger id="template-select" className="hover:shadow-soft transition-all duration-200">
+                      <SelectValue placeholder="Select a template" />
+                    </SelectTrigger>
+                    <SelectContent className="backdrop-blur-md bg-gradient-to-r from-background/90 to-primary/5 border shadow-soft">
+                      {Object.keys(templates).map((key) => (
+                        <SelectItem key={key} value={key} className="hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10">
+                          {key.charAt(0).toUpperCase() + key.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </AnimatedContainer>
+
+            <AnimatedContainer animation="fade-in-up" delay={500}>
+              <div className="space-y-4 pt-2">
+                <div className="flex items-center space-x-2">
+                  <Controller
+                    name="addCoverPage"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id="addCoverPage"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isConverting}
+                        className="hover:shadow-soft transition-all duration-200"
+                      />
+                    )}
+                  />
+                  <Label htmlFor="addCoverPage" className="cursor-pointer font-headline">
+                    Add a cover page
+                  </Label>
+                </div>
+                {addCoverPage && (
+                  <div className="space-y-2 pl-6 border-s-2 ms-3">
+                    <Label htmlFor="cover-page-markdown-input" className="font-headline">Cover Page Markdown</Label>
+                    <Textarea id="cover-page-markdown-input" {...form.register('coverPageMarkdown')} placeholder="Enter markdown for your cover page..." className="min-h-[150px] font-mono hover:shadow-soft transition-all duration-200" disabled={isConverting} />
+                  </div>
+                )}
+              </div>
+            </AnimatedContainer>
+
+            <AnimatedContainer animation="fade-in-up" delay={600}>
+              <div className="flex items-center space-x-2 pt-2">
+                <Controller
+                  name="pageNumbers"
+                  control={form.control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="pageNumbers"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={isConverting}
+                      className="hover:shadow-soft transition-all duration-200"
+                    />
+                  )}
                 />
-              )}
-            />
-            <Label htmlFor="pageNumbers" className="cursor-pointer">
-              Add page numbers to footer
-            </Label>
-          </div>
+                <Label htmlFor="pageNumbers" className="cursor-pointer font-headline">
+                  Add page numbers to footer
+                </Label>
+              </div>
+            </AnimatedContainer>
 
-          <div className="flex items-center space-x-2 pt-2">
-            <Controller
-              name="isRtl"
-              control={form.control}
-              render={({ field }) => (
-                <Checkbox
-                  id="isRtl"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={isConverting}
+            <AnimatedContainer animation="fade-in-up" delay={700}>
+              <div className="flex items-center space-x-2 pt-2">
+                <Controller
+                  name="isRtl"
+                  control={form.control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="isRtl"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={isConverting}
+                      className="hover:shadow-soft transition-all duration-200"
+                    />
+                  )}
                 />
-              )}
-            />
-            <Label htmlFor="isRtl" className="cursor-pointer">Enable Right-to-Left (RTL) text direction (for Arabic, Hebrew, etc.)</Label>
-          </div>
+                <Label htmlFor="isRtl" className="cursor-pointer font-headline">Enable Right-to-Left (RTL) text direction (for Arabic, Hebrew, etc.)</Label>
+              </div>
+            </AnimatedContainer>
 
-          <Button type="submit" disabled={isConverting} className="w-full">
-            {isConverting ? (
-              <Loader2 className="me-2 h-4 w-4 animate-spin" />
-            ) : (
-              <FileWord className="me-2 h-4 w-4" />
-            )}
-            {isConverting ? 'Converting...' : 'Convert and Download .docx'}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+            <AnimatedContainer animation="fade-in-up" delay={800}>
+              <Button type="submit" disabled={isConverting} className="w-full hover:shadow-glow transition-all duration-200" variant="gradient">
+                {isConverting ? (
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <FileWord className="me-2 h-4 w-4" />
+                )}
+                {isConverting ? 'Converting...' : 'Convert and Download .docx'}
+              </Button>
+            </AnimatedContainer>
+          </form>
+        </CardContent>
+      </Card>
+    </AnimatedContainer>
   );
 }

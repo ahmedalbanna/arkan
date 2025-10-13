@@ -126,7 +126,7 @@ export function Header() {
           asChild
           variant={pathname.startsWith(link.href) && link.href !== '/' || pathname === '/' && link.href === '/' ? 'secondary' : 'ghost'}
           className={cn(
-            'font-headline',
+            'font-headline transition-all duration-200 hover:shadow-soft hover:scale-105',
             isMobile && 'w-full justify-start text-lg py-6'
           )}
           onClick={isMobile ? handleLinkClick : undefined}
@@ -147,7 +147,7 @@ export function Header() {
   const hasNoCredits = userProfile && userProfile.credits === 0;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 shadow-soft">
       <div className="flex h-16 items-center px-4 justify-between">
         <div className="flex items-center gap-2">
           <div className="md:hidden">
@@ -212,8 +212,8 @@ export function Header() {
                       variant="outline"
                       asChild
                       className={cn(
-                        'flex items-center gap-2 text-sm font-semibold text-primary',
-                        hasNoCredits && 'border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive animate-pulse'
+                        'flex items-center gap-2 text-sm font-semibold text-primary transition-all duration-200 hover:shadow-glow hover:scale-105',
+                        hasNoCredits && 'border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive animate-pulse-glow'
                       )}
                     >
                       <Link href="/pricing">
@@ -232,7 +232,7 @@ export function Header() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" aria-label="Toggle user menu">
+                  <Button variant="ghost" size="icon" aria-label="Toggle user menu" className="hover:shadow-soft hover:scale-105 transition-all duration-200">
                     <User className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -297,10 +297,10 @@ export function Header() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative">
+                  <Button variant="ghost" size="icon" className="relative hover:shadow-soft hover:scale-105 transition-all duration-200">
                     <Bell className="h-5 w-5" />
                     {unreadCount > 0 && (
-                      <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0">{unreadCount}</Badge>
+                      <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0 animate-bounce-in">{unreadCount}</Badge>
                     )}
                   </Button>
                 </DropdownMenuTrigger>

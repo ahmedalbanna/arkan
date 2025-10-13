@@ -1,6 +1,7 @@
 'use client';
 
 import { type CreateLectureUnitInput, type CreateLectureUnitOutput } from '@/ai/schemas/flows';
+import { AnimatedContainer } from '@/components/ui/animation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -111,104 +112,130 @@ export default function LectureGeneratorPage() {
     };
 
     return (
-        <div className="container mx-auto p-4 md:p-8">
-            <h1 className="text-3xl font-bold mb-2">Lecture Generator</h1>
-            <p className="text-muted-foreground mb-6">Design a complete lecture unit, from theory to practice.</p>
+        <div className="relative min-h-screen">
+            {/* Background Effects */}
+            <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5 rounded-lg opacity-50 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl animate-float pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500/10 rounded-full blur-xl animate-float pointer-events-none" style={{ animationDelay: '2s' }}></div>
+            <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-purple-500/10 rounded-full blur-lg animate-float pointer-events-none" style={{ animationDelay: '4s' }}></div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Lecture Details</CardTitle>
-                        <CardDescription>Provide the core information for your lecture.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="lectureTopic">Lecture Topic</Label>
-                                <Input
-                                    id="lectureTopic"
-                                    name="lectureTopic"
-                                    placeholder="e.g., Introduction to Quantum Computing"
-                                    value={formData.lectureTopic}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="subTopics">Table of Contents (one per line)</Label>
-                                <Textarea
-                                    id="subTopics"
-                                    name="subTopics"
-                                    placeholder="e.g., What is a Qubit?\nSuperposition\nEntanglement"
-                                    value={subTopicsStr}
-                                    onChange={(e) => setSubTopicsStr(e.target.value)}
-                                    required
-                                    rows={5}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="professorNotes">Professor's Notes (Optional)</Label>
-                                <Textarea
-                                    id="professorNotes"
-                                    name="professorNotes"
-                                    placeholder="Paste your raw notes, key points, or existing materials here. The AI will structure and expand on them."
-                                    value={formData.professorNotes || ''}
-                                    onChange={handleInputChange}
-                                    rows={8}
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="sessionDuration">Practical Session Duration (minutes)</Label>
-                                    <Input
-                                        id="sessionDuration"
-                                        name="sessionDuration"
-                                        type="number"
-                                        value={formData.sessionDuration}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="numActivities">Number of Practical Activities</Label>
-                                    <Input
-                                        id="numActivities"
-                                        name="numActivities"
-                                        type="number"
-                                        value={formData.numActivities}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <Button type="submit" disabled={isLoading} className="w-full">
-                                {isLoading ? 'Generating...' : 'Generate Lecture Unit (5 Credits)'}
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
+            <div className="relative z-10 container mx-auto p-4 md:p-8">
+                <AnimatedContainer animation="fade-in-up" delay={200}>
+                    <div className="text-center mb-8">
+                        <h1 className="text-3xl font-bold mb-2 font-headline">Lecture Generator</h1>
+                        <p className="text-muted-foreground">Design a complete lecture unit, from theory to practice.</p>
+                    </div>
+                </AnimatedContainer>
 
-                <div className="space-y-8">
-                    {isLoading && (
-                        <Card>
-                            <CardContent className="p-6 flex flex-col items-center justify-center h-64">
-                                <p>Generating your lecture... please wait.</p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <AnimatedContainer animation="fade-in-up" delay={300}>
+                        <Card className="shadow-soft hover:shadow-glow transition-all duration-200">
+                            <CardHeader className="bg-gradient-to-r from-primary/5 to-blue-500/5">
+                                <CardTitle className="font-headline">Lecture Details</CardTitle>
+                                <CardDescription>Provide the core information for your lecture.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <form onSubmit={handleSubmit} className="space-y-6">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="lectureTopic" className="font-headline">Lecture Topic</Label>
+                                        <Input
+                                            id="lectureTopic"
+                                            name="lectureTopic"
+                                            placeholder="e.g., Introduction to Quantum Computing"
+                                            value={formData.lectureTopic}
+                                            onChange={handleInputChange}
+                                            required
+                                            className="hover:shadow-soft transition-all duration-200"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="subTopics" className="font-headline">Table of Contents (one per line)</Label>
+                                        <Textarea
+                                            id="subTopics"
+                                            name="subTopics"
+                                            placeholder="e.g., What is a Qubit?\nSuperposition\nEntanglement"
+                                            value={subTopicsStr}
+                                            onChange={(e) => setSubTopicsStr(e.target.value)}
+                                            required
+                                            rows={5}
+                                            className="hover:shadow-soft transition-all duration-200"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="professorNotes" className="font-headline">Professor's Notes (Optional)</Label>
+                                        <Textarea
+                                            id="professorNotes"
+                                            name="professorNotes"
+                                            placeholder="Paste your raw notes, key points, or existing materials here. The AI will structure and expand on them."
+                                            value={formData.professorNotes || ''}
+                                            onChange={handleInputChange}
+                                            rows={8}
+                                            className="hover:shadow-soft transition-all duration-200"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="sessionDuration" className="font-headline">Practical Session Duration (minutes)</Label>
+                                            <Input
+                                                id="sessionDuration"
+                                                name="sessionDuration"
+                                                type="number"
+                                                value={formData.sessionDuration}
+                                                onChange={handleInputChange}
+                                                required
+                                                className="hover:shadow-soft transition-all duration-200"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="numActivities" className="font-headline">Number of Practical Activities</Label>
+                                            <Input
+                                                id="numActivities"
+                                                name="numActivities"
+                                                type="number"
+                                                value={formData.numActivities}
+                                                onChange={handleInputChange}
+                                                required
+                                                className="hover:shadow-soft transition-all duration-200"
+                                            />
+                                        </div>
+                                    </div>
+                                    <Button type="submit" disabled={isLoading} className="w-full hover:shadow-glow transition-all duration-200" variant="gradient">
+                                        {isLoading ? 'Generating...' : 'Generate Lecture Unit (5 Credits)'}
+                                    </Button>
+                                </form>
                             </CardContent>
                         </Card>
-                    )}
-                    {result && (
-                        <>
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Generated Theoretical Lecture</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <MarkdownPreview content={result.theoreticalLecture.lectureContent} />
-                                </CardContent>
-                            </Card>
-                            <SessionPlanDisplay data={result.practicalSession} />
-                        </>
-                    )}
+                    </AnimatedContainer>
+
+                    <div className="space-y-8">
+                        {isLoading && (
+                            <AnimatedContainer animation="fade-in-up" delay={400}>
+                                <Card className="shadow-soft hover:shadow-glow transition-all duration-200">
+                                    <CardContent className="p-6 flex flex-col items-center justify-center h-64">
+                                        <p>Generating your lecture... please wait.</p>
+                                    </CardContent>
+                                </Card>
+                            </AnimatedContainer>
+                        )}
+                        {result && (
+                            <>
+                                <AnimatedContainer animation="fade-in-up" delay={500}>
+                                    <Card className="shadow-soft hover:shadow-glow transition-all duration-200">
+                                        <CardHeader className="bg-gradient-to-r from-primary/5 to-blue-500/5">
+                                            <CardTitle className="font-headline">Generated Theoretical Lecture</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <MarkdownPreview content={result.theoreticalLecture.lectureContent} />
+                                        </CardContent>
+                                    </Card>
+                                </AnimatedContainer>
+                                <AnimatedContainer animation="fade-in-up" delay={600}>
+                                    <SessionPlanDisplay data={result.practicalSession} />
+                                </AnimatedContainer>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

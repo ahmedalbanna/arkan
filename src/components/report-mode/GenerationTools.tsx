@@ -4,6 +4,8 @@
 import { SectionName } from '@/ai/schemas';
 import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
 import { Accordion } from '@/components/ui/accordion';
+import { AnimatedContainer } from '@/components/ui/animation';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingIndicator, SectionLoadingCard } from '@/components/ui/loading-indicators';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -13,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { PanelLeftClose } from 'lucide-react';
+import { PanelLeftClose, Settings } from 'lucide-react';
 import { Button } from '../ui/button';
 
 interface SortableSectionItemProps {
@@ -51,30 +53,34 @@ function SortableSectionItem({ id, agent, generationState, onRetry, ...props }: 
     // إذا كان هناك حالة توليد محسنة، استخدم مكون التحميل الجديد
     if (generationState && (generationState.isLoading || generationState.isSuccess || generationState.isError)) {
         return (
-            <div ref={setNodeRef} style={style} {...attributes}>
-                <SectionLoadingCard
-                    sectionName={agent.name}
-                    state={generationState}
-                    onRetry={onRetry}
-                    className="mb-2"
-                />
-            </div>
+            <AnimatedContainer animation="fade-in-up" delay={100}>
+                <div ref={setNodeRef} style={style} {...attributes}>
+                    <SectionLoadingCard
+                        sectionName={agent.name}
+                        state={generationState}
+                        onRetry={onRetry}
+                        className="mb-2"
+                    />
+                </div>
+            </AnimatedContainer>
         );
     }
 
     // استخدام المكون الأصلي للحالات العادية
     return (
-        <div ref={setNodeRef} style={style} {...attributes}>
-            <SectionAccordionItem
-                itemKey={id as SectionName}
-                agent={agent}
-                onGenerate={props.onGenerate}
-                isGenerating={props.isGenerating}
-                isAnythingGenerating={props.isAnythingGenerating}
-                hasCredits={props.hasCredits}
-                handleProps={listeners}
-            />
-        </div>
+        <AnimatedContainer animation="fade-in-up" delay={100}>
+            <div ref={setNodeRef} style={style} {...attributes}>
+                <SectionAccordionItem
+                    itemKey={id as SectionName}
+                    agent={agent}
+                    onGenerate={props.onGenerate}
+                    isGenerating={props.isGenerating}
+                    isAnythingGenerating={props.isAnythingGenerating}
+                    hasCredits={props.hasCredits}
+                    handleProps={listeners}
+                />
+            </div>
+        </AnimatedContainer>
     );
 }
 
@@ -140,70 +146,84 @@ export const GenerationTools = ({
     };
 
     return (
-        <Card className={cn("flex flex-col h-full", (isDisabled) && 'opacity-50 pointer-events-none')}>
-            <CardHeader>
-                <div className="flex justify-between items-center">
-                    <div>
-                        <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
-                        <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
-
-                        {/* مؤشر حالة التوليد */}
-                        {isAnythingGenerating && (
-                            <div className="mt-2">
-                                <LoadingIndicator
-                                    state={{
-                                        isLoading: true,
-                                        message: `Generating ${activeMutationKey || 'section'}...`,
-                                        progress: generationStats.completed > 0 ?
-                                            (generationStats.completed / generationStats.total) * 100 : 0
-                                    }}
-                                    size="sm"
-                                    showProgress={true}
-                                />
+        <AnimatedContainer animation="fade-in-up" delay={200}>
+            <Card variant="glass" className={cn("flex flex-col h-full backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200", (isDisabled) && 'opacity-50 pointer-events-none')}>
+                <CardHeader className="bg-gradient-to-r from-primary/5 to-blue-500/5">
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-primary-600">
+                                <Settings className="h-5 w-5 text-white" />
                             </div>
-                        )}
+                            <div>
+                                <CardTitle className="text-lg font-headline font-semibold">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
+                                <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
+
+                                {/* مؤشر حالة التوليد */}
+                                {isAnythingGenerating && (
+                                    <div className="mt-2">
+                                        <LoadingIndicator
+                                            state={{
+                                                isLoading: true,
+                                                message: `Generating ${activeMutationKey || 'section'}...`,
+                                                progress: generationStats.completed > 0 ?
+                                                    (generationStats.completed / generationStats.total) * 100 : 0
+                                            }}
+                                            size="sm"
+                                            showProgress={true}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {generationStats.total > 0 && (
+                                <Badge variant="secondary" className="shadow-soft">
+                                    {generationStats.completed}/{generationStats.total} Complete
+                                </Badge>
+                            )}
+                            <Button variant="ghost" size="icon" className="hidden lg:inline-flex hover:shadow-soft transition-all duration-200" onClick={onCollapseToggle}>
+                                <PanelLeftClose className="h-5 w-5" />
+                            </Button>
+                        </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
-                        <PanelLeftClose className="h-5 w-5" />
-                    </Button>
-                </div>
-            </CardHeader>
-            <CardContent className="flex-grow overflow-y-auto pr-2">
-                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                    <SortableContext items={orderedSections.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                        <Accordion type="multiple" className="w-full space-y-1">
-                            {orderedSections.map((section) => {
-                                const agent = agents?.find(a => a.id === section.agentId);
-                                if (!agent) return null;
+                </CardHeader>
+                <CardContent className="flex-grow overflow-y-auto pr-2">
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                        <SortableContext items={orderedSections.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                            <Accordion type="multiple" className="w-full space-y-1">
+                                {orderedSections.map((section, index) => {
+                                    const agent = agents?.find(a => a.id === section.agentId);
+                                    if (!agent) return null;
 
-                                const isGeneratingThis = isAnythingGenerating && activeMutationKey === section.id;
-                                const sectionState = generationStates[section.id] || {
-                                    isLoading: isGeneratingThis,
-                                    isSuccess: false,
-                                    isError: false,
-                                    progress: isGeneratingThis ? 50 : undefined,
-                                    message: isGeneratingThis ? 'Generating...' : undefined
-                                };
+                                    const isGeneratingThis = isAnythingGenerating && activeMutationKey === section.id;
+                                    const sectionState = generationStates[section.id] || {
+                                        isLoading: isGeneratingThis,
+                                        isSuccess: false,
+                                        isError: false,
+                                        progress: isGeneratingThis ? 50 : undefined,
+                                        message: isGeneratingThis ? 'Generating...' : undefined
+                                    };
 
-                                return (
-                                    <SortableSectionItem
-                                        key={section.id}
-                                        id={section.id}
-                                        agent={agent}
-                                        onGenerate={() => onGenerateSection(section.id as SectionName)}
-                                        isGenerating={isGeneratingThis}
-                                        isAnythingGenerating={isAnythingGenerating}
-                                        hasCredits={!!hasCreditsForSingleSection}
-                                        // إضافة حالة التوليد المحسنة
-                                        generationState={sectionState}
-                                        onRetry={onRetrySection ? () => onRetrySection(section.id) : undefined}
-                                    />
-                                );
-                            })}
-                        </Accordion>
-                    </SortableContext>
-                </DndContext>
-            </CardContent>
-        </Card>
+                                    return (
+                                        <SortableSectionItem
+                                            key={section.id}
+                                            id={section.id}
+                                            agent={agent}
+                                            onGenerate={() => onGenerateSection(section.id as SectionName)}
+                                            isGenerating={isGeneratingThis}
+                                            isAnythingGenerating={isAnythingGenerating}
+                                            hasCredits={!!hasCreditsForSingleSection}
+                                            // إضافة حالة التوليد المحسنة
+                                            generationState={sectionState}
+                                            onRetry={onRetrySection ? () => onRetrySection(section.id) : undefined}
+                                        />
+                                    );
+                                })}
+                            </Accordion>
+                        </SortableContext>
+                    </DndContext>
+                </CardContent>
+            </Card>
+        </AnimatedContainer>
     );
 };

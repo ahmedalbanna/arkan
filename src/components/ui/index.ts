@@ -32,6 +32,52 @@ export { Toast, Toaster } from './toast';
 export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip';
 export { useToast } from './use-toast';
 
+// Enhanced Components
+export { CountBadge, EnhancedBadge, NotificationBadge, StatusBadge } from './enhanced-badge';
+export { DotsLoading, FullPageLoading, LoadingSpinner, PulseLoading, ShimmerLoading, SkeletonLoading } from './enhanced-loading';
+export { ConfirmationModal, EnhancedModal } from './enhanced-modal';
+export { CircularProgress, EnhancedProgress } from './enhanced-progress';
+export { EnhancedTooltip, MultiLineTooltip } from './enhanced-tooltip';
+
+// Animation Components
+export {
+    AnimatedContainer,
+    CounterAnimation,
+    ParallaxAnimation,
+    StaggeredAnimation,
+    TypingAnimation,
+    useAnimation
+} from './animation';
+
+// Generator Components
+export {
+    GeneratorActions, GeneratorEmptyState, GeneratorHeader, GeneratorInputSection, GeneratorLoadingState, GeneratorOutputSection, GeneratorStats, GeneratorStatus
+} from './generator-components';
+
+// Chat Components
+export { ChatEmptyState } from '../chat/ChatEmptyState';
+export { ChatHeader } from '../chat/ChatHeader';
+export { ChatInput } from '../chat/ChatInput';
+export { ChatMessage } from '../chat/ChatMessage';
+export { ChatTypingIndicator } from '../chat/ChatTypingIndicator';
+
+// Pricing Components
+export { PricingCalculator } from '../price/PricingCalculator';
+export { PricingComparison } from '../price/PricingComparison';
+export { PricingFAQ } from '../price/PricingFAQ';
+export { PricingTestimonial } from '../price/PricingTestimonial';
+
+
+// Mobile-Optimized Components
+export {
+    MobileButton,
+    MobileCard, MobileContainer,
+    MobileGrid, MobileInput,
+    MobileModal,
+    MobileNavigation,
+    MobileTab
+} from './mobile-optimized';
+
 // Performance Components
 export { BundleAnalyzer } from './BundleAnalyzer';
 export { BundleOptimizationDashboard } from './BundleOptimizationDashboard';
@@ -54,3 +100,4 @@ export type { BundleMetrics, OptimizationAction } from './BundleOptimizationDash
 export type { PerformanceMetrics } from './PerformanceMonitor';
 export type { PerformanceOptimizationDashboardProps } from './PerformanceOptimizationDashboard';
 export type { OptimizedListProps, VirtualScrollContainerProps } from './VirtualScrollContainer';
+

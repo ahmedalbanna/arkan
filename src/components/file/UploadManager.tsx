@@ -3,9 +3,10 @@
 'use client';
 
 import { PdfPreview } from '@/components/file/PdfPreview';
+import { AnimatedContainer } from '@/components/ui/animation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -17,7 +18,7 @@ import { markdownComponents } from '@/lib/markdown-styles';
 import { ContextFileType } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { processFileApi } from '@/services';
-import { FileText, ImageIcon, Loader2, PanelLeftClose, UploadCloud, Wand2, X } from 'lucide-react';
+import { FileText, ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
 import Image from 'next/image';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -84,7 +85,7 @@ function FileDropzone() {
                 toast({ title: t('builder.files.toasts.fileAdded'), description: t('builder.files.toasts.fileAddedDesc').replace('{fileName}', file.name) });
                 refetchUser();
             } catch (error: any) {
-                 toast({ title: t('builder.files.toasts.uploadFailed'), description: error.message, variant: "destructive" });
+                toast({ title: t('builder.files.toasts.uploadFailed'), description: error.message, variant: "destructive" });
             }
         }
         setIsLoading(false);
@@ -135,7 +136,7 @@ function FileDropzone() {
 export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
     const { t } = useLocalization();
     const { project, updateProject } = useBuilderStore();
-    
+
     const externalContext = project?.externalContext || [];
 
     const removeExternalContext = (index: number) => {
@@ -149,45 +150,67 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
     const fileTypes: ContextFileType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
 
     return (
-        <Card className="h-full flex flex-col">
-            <CardHeader>
-                <div className="flex justify-between items-center">
-                    <CardTitle>{t('builder.files.fileManagerTitle')}</CardTitle>
-                    <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
-                        <PanelLeftClose className="h-5 w-5" />
-                    </Button>
-                </div>
-                <CardDescription>
-                    {t('builder.files.fileManagerDesc')}
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow flex flex-col gap-4">
+        <div className="space-y-4">
+            <AnimatedContainer animation="fade-in-up" delay={200}>
                 <Tabs defaultValue="upload" className="w-full">
+
                     <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="upload">{t('builder.files.uploadFilesTab')}</TabsTrigger>
-                        <TabsTrigger value="text">{t('builder.files.pasteTextTab')}</TabsTrigger>
+                        <TabsTrigger
+                            value="upload"
+                            className="transition-all duration-200 hover:shadow-soft hover:scale-105 data-[state=active]:shadow-glow"
+                        >
+                            <UploadCloud className="h-4 w-4 mr-2" />
+                            <span className="hidden sm:inline">{t('builder.files.uploadFilesTab')}</span>
+                            <span className="sm:hidden">Upload</span>
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="text"
+                            className="transition-all duration-200 hover:shadow-soft hover:scale-105 data-[state=active]:shadow-glow"
+                        >
+                            <FileText className="h-4 w-4 mr-2" />
+                            <span className="hidden sm:inline">{t('builder.files.pasteTextTab')}</span>
+                            <span className="sm:hidden">Text</span>
+                        </TabsTrigger>
                     </TabsList>
+
+
                     <TabsContent value="upload" className="mt-4">
-                        <FileDropzone />
+                        <AnimatedContainer animation="fade-in-up" delay={400}>
+                            <FileDropzone />
+                        </AnimatedContainer>
                     </TabsContent>
                     <TabsContent value="text" className="mt-4">
-                        <PasteTextUploader />
+                        <AnimatedContainer animation="fade-in-up" delay={400}>
+                            <PasteTextUploader />
+                        </AnimatedContainer>
                     </TabsContent>
                 </Tabs>
-
-                {externalContext && externalContext.length > 0 && (
-                    <div className="space-y-2 flex-grow flex flex-col min-h-0">
-                        <h3 className="text-sm font-medium text-muted-foreground">{t('builder.files.toasts.uploadedContext')}</h3>
-                        <ScrollArea className="flex-grow border rounded-lg">
+            </AnimatedContainer>
+            {externalContext && externalContext.length > 0 && (
+                <AnimatedContainer animation="fade-in-up" delay={600}>
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                            <div className="p-1 rounded bg-primary/10">
+                                <FileText className="h-4 w-4 text-primary" />
+                            </div>
+                            <h3 className="text-sm font-medium text-muted-foreground">
+                                {t('builder.files.toasts.uploadedContext')} ({externalContext.length})
+                            </h3>
+                        </div>
+                        <ScrollArea className="border rounded-lg">
                             <ul className="space-y-1 list-none p-2">
                                 {externalContext.map((item, index) => {
                                     return (
-                                        <li key={index} className="flex items-center justify-between p-2 rounded-md hover:bg-muted">
-                                            <div className="flex items-center gap-2 truncate ">
-                                                <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                                <span className="truncate font-medium text-sm" style={{ maxWidth: '200px' }}>{item.fileName}</span>
+                                        <li key={index} className="flex items-center justify-between p-3 rounded-md hover:bg-muted/50 transition-colors group">
+                                            <div className="flex items-center gap-3 truncate">
+                                                <div className="p-1 rounded bg-muted/50 group-hover:bg-primary/10 transition-colors">
+                                                    <FileText className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                </div>
+                                                <span className="truncate font-medium text-sm" style={{ maxWidth: '200px' }}>
+                                                    {item.fileName}
+                                                </span>
                                             </div>
-                                            <div className="flex items-center gap-1">
+                                            <div className="flex items-center gap-2">
                                                 <Select value={item.type} onValueChange={(value: ContextFileType) => updateExternalContextType(index, value)}>
                                                     <SelectTrigger className={cn("text-xs h-7 w-auto p-0 border-0 bg-transparent focus:ring-0", {
                                                         'text-blue-800 dark:text-blue-200': item.type === 'context',
@@ -215,7 +238,14 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
                                                     </SelectContent>
                                                 </Select>
                                                 <ViewContextDialog item={item} />
-                                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeExternalContext(index)}><X className="h-4 w-4 text-destructive" /></Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-6 w-6 hover:bg-destructive/10 hover:text-destructive transition-colors"
+                                                    onClick={() => removeExternalContext(index)}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
                                             </div>
                                         </li>
                                     )
@@ -223,8 +253,9 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
                             </ul>
                         </ScrollArea>
                     </div>
-                )}
-            </CardContent>
-        </Card>
+                </AnimatedContainer>
+            )}
+
+        </div>
     );
 }

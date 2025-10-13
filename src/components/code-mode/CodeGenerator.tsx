@@ -4,6 +4,7 @@
 
 import type { Codebase, GenerateCodeOutput } from '@/ai/schemas';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { AnimatedContainer } from '@/components/ui/animation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -102,21 +103,21 @@ function FileTreeView({ codebase }: { codebase: Codebase }) {
   };
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
+    <Card variant="glass" className="h-full flex flex-col backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200">
+      <CardHeader className="bg-gradient-to-r from-primary/5 to-emerald-500/5">
         <div className="flex justify-between items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
           <div>
             <CardTitle className="font-headline text-2xl text-primary">{t('builder.codeGenerator.codebaseGenerator.fileTreeView.title')}</CardTitle>
             <CardDescription>{t('builder.codeGenerator.codebaseGenerator.fileTreeView.description')}</CardDescription>
           </div>
-          <Button onClick={handleDownload} disabled={isZipping}>
+          <Button onClick={handleDownload} disabled={isZipping} className="hover:shadow-glow transition-all duration-200" variant="gradient">
             {isZipping ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Download className="me-2 h-4 w-4" />}
             {t('builder.codeGenerator.codebaseGenerator.fileTreeView.downloadButton')}
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-grow overflow-hidden">
-        <ScrollArea className="h-full border rounded-md p-4">
+      <CardContent className="flex-grow overflow-hidden p-4 sm:p-6">
+        <ScrollArea className="h-full border rounded-md bg-gradient-to-r from-background/50 to-primary/5 backdrop-blur-sm shadow-soft p-4">
           <Tree data={fileTree} />
         </ScrollArea>
       </CardContent>
@@ -171,8 +172,7 @@ function CodeDisplay({ code, language }: { code: string; language: string; }) {
 
   return (
     <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-
-      <ScrollArea className="h-full max-h-96 w-full rounded-md border">
+      <ScrollArea className="h-full max-h-96 w-full rounded-md border bg-gradient-to-r from-background/50 to-primary/5 backdrop-blur-sm shadow-soft">
         <pre className="p-4 text-sm">
           <code>{code}</code>
         </pre>
@@ -180,7 +180,7 @@ function CodeDisplay({ code, language }: { code: string; language: string; }) {
       <Button
         variant="ghost"
         size="icon"
-        className="absolute top-2 right-2 h-7 w-7"
+        className="absolute top-2 right-2 h-7 w-7 hover:shadow-soft transition-all duration-200"
         onClick={handleCopy}
       >
         {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
@@ -331,107 +331,116 @@ function ComponentGenerator() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
         {/* Left Column */}
         <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-headline">{t('builder.codeGenerator.componentGenerator.toolsTitle')}</CardTitle>
-              <CardDescription>{t('builder.codeGenerator.componentGenerator.toolsDesc')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                name="prompt"
-                placeholder={t('builder.codeGenerator.componentGenerator.promptPlaceholder')}
-                rows={8}
-                required
-                value={prompt}
-                onChange={(e) => updateProject(p => p.setCodeGeneratorPrompt(e.target.value))}
-                disabled={mutation.isPending}
-              />
-              {mutation.isError && (
-                <p className="text-sm font-medium text-destructive mt-2">{mutation.error.message}</p>
-              )}
-            </CardContent>
-            <CardFooter>
-              <Button type="submit" disabled={mutation.isPending} className="font-headline w-full">
-                {mutation.isPending ? (
-                  <>
-                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                    {t('builder.codeGenerator.componentGenerator.generateButtonLoading')}
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="me-2 h-4 w-4" />
-                    {t('builder.codeGenerator.componentGenerator.generateButton')}
-                  </>
+          <AnimatedContainer animation="fade-in-up" delay={200}>
+            <Card variant="glass" className="backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200">
+              <CardHeader className="bg-gradient-to-r from-blue-500/10 to-blue-600/10">
+                <CardTitle className="font-headline">{t('builder.codeGenerator.componentGenerator.toolsTitle')}</CardTitle>
+                <CardDescription>{t('builder.codeGenerator.componentGenerator.toolsDesc')}</CardDescription>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6">
+                <Textarea
+                  name="prompt"
+                  placeholder={t('builder.codeGenerator.componentGenerator.promptPlaceholder')}
+                  rows={8}
+                  required
+                  value={prompt}
+                  onChange={(e) => updateProject(p => p.setCodeGeneratorPrompt(e.target.value))}
+                  disabled={mutation.isPending}
+                  className="hover:shadow-soft transition-all duration-200"
+                />
+                {mutation.isError && (
+                  <p className="text-sm font-medium text-destructive mt-2">{mutation.error.message}</p>
                 )}
-              </Button>
-            </CardFooter>
-          </Card>
+              </CardContent>
+              <CardFooter className="bg-gradient-to-r from-muted/30 to-primary/5">
+                <Button type="submit" disabled={mutation.isPending} className="font-headline w-full hover:shadow-glow transition-all duration-200" variant="gradient">
+                  {mutation.isPending ? (
+                    <>
+                      <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                      {t('builder.codeGenerator.componentGenerator.generateButtonLoading')}
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="me-2 h-4 w-4" />
+                      {t('builder.codeGenerator.componentGenerator.generateButton')}
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+          </AnimatedContainer>
         </div>
 
         {/* Center Column */}
         <div className="lg:col-span-5 lg:overflow-y-auto lg:pr-2">
-          <Card className="h-full">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="font-headline flex items-center gap-2">
-                  <Tv className="w-6 h-6" />
-                  {t('builder.codeGenerator.componentGenerator.livePreview')}
-                </CardTitle>
-                {srcDoc && (
-                  <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" onClick={takeScreenshot} disabled={isCapturing} title={t('builder.codeGenerator.componentGenerator.tooltips.screenshot')}>
-                      {isCapturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => setIsExpanded(true)} title={t('builder.codeGenerator.componentGenerator.tooltips.expand')}>
-                      <Expand className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              {renderPreview(false)}
-            </CardContent>
-          </Card>
+          <AnimatedContainer animation="fade-in-up" delay={300}>
+            <Card variant="glass" className="h-full backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-purple-500/5">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="font-headline flex items-center gap-2">
+                    <div className="p-1 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 shadow-soft">
+                      <Tv className="w-5 h-5 text-white" />
+                    </div>
+                    {t('builder.codeGenerator.componentGenerator.livePreview')}
+                  </CardTitle>
+                  {srcDoc && (
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" onClick={takeScreenshot} disabled={isCapturing} title={t('builder.codeGenerator.componentGenerator.tooltips.screenshot')} className="hover:shadow-soft transition-all duration-200">
+                        {isCapturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => setIsExpanded(true)} title={t('builder.codeGenerator.componentGenerator.tooltips.expand')} className="hover:shadow-soft transition-all duration-200">
+                        <Expand className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6">
+                {renderPreview(false)}
+              </CardContent>
+            </Card>
+          </AnimatedContainer>
         </div>
 
         {/* Right Column */}
         <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
           {(html || css || javascript) && (
-            <Card>
-              <CardHeader className="flex-row items-center justify-between">
-                <CardTitle className="font-headline">{t('builder.codeGenerator.componentGenerator.generatedCode')}</CardTitle>
-                <Button variant="outline" size="sm" onClick={downloadZip} disabled={isDownloading}>
-                  {isDownloading ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Download className="me-2 h-4 w-4" />}
-                  {t('builder.codeGenerator.componentGenerator.downloadZip')}
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="html" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="html">HTML</TabsTrigger>
-                    <TabsTrigger value="css">CSS</TabsTrigger>
-                    <TabsTrigger value="javascript">JS</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="html" className="mt-4">
-                    <CodeDisplay code={html || ''} language="html" />
-                  </TabsContent>
-                  <TabsContent value="css" className="mt-4">
-                    <CodeDisplay code={css || ''} language="css" />
-                  </TabsContent>
-                  <TabsContent value="javascript" className="mt-4">
-                    <CodeDisplay code={javascript || t('builder.codeGenerator.componentGenerator.noJs')} language="javascript" />
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
+            <AnimatedContainer animation="fade-in-up" delay={400}>
+              <Card variant="glass" className="backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200">
+                <CardHeader className="flex-row items-center justify-between bg-gradient-to-r from-primary/5 to-blue-500/5">
+                  <CardTitle className="font-headline">{t('builder.codeGenerator.componentGenerator.generatedCode')}</CardTitle>
+                  <Button variant="outline" size="sm" onClick={downloadZip} disabled={isDownloading} className="hover:shadow-soft transition-all duration-200">
+                    {isDownloading ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Download className="me-2 h-4 w-4" />}
+                    {t('builder.codeGenerator.componentGenerator.downloadZip')}
+                  </Button>
+                </CardHeader>
+                <CardContent className="p-4 sm:p-6">
+                  <Tabs defaultValue="html" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3 bg-gradient-to-r from-background/50 to-primary/5">
+                      <TabsTrigger value="html" className="hover:shadow-soft transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-600 data-[state=active]:text-white">HTML</TabsTrigger>
+                      <TabsTrigger value="css" className="hover:shadow-soft transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-600 data-[state=active]:text-white">CSS</TabsTrigger>
+                      <TabsTrigger value="javascript" className="hover:shadow-soft transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-600 data-[state=active]:text-white">JS</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="html" className="mt-4">
+                      <CodeDisplay code={html || ''} language="html" />
+                    </TabsContent>
+                    <TabsContent value="css" className="mt-4">
+                      <CodeDisplay code={css || ''} language="css" />
+                    </TabsContent>
+                    <TabsContent value="javascript" className="mt-4">
+                      <CodeDisplay code={javascript || t('builder.codeGenerator.componentGenerator.noJs')} language="javascript" />
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              </Card>
+            </AnimatedContainer>
           )}
         </div>
 
         <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
-          <DialogContent className="max-w-full w-full h-full flex flex-col p-4">
-            <DialogHeader className="flex-row items-center justify-between border-b pb-2">
-              <DialogTitle>{t('builder.codeGenerator.componentGenerator.expandedTitle')}</DialogTitle>
+          <DialogContent className="max-w-full w-full h-full flex flex-col p-4 backdrop-blur-md">
+            <DialogHeader className="flex-row items-center justify-between border-b pb-2 bg-gradient-to-r from-primary/5 to-blue-500/5">
+              <DialogTitle className="font-headline">{t('builder.codeGenerator.componentGenerator.expandedTitle')}</DialogTitle>
             </DialogHeader>
             <div className="flex-grow min-h-0">
               {renderPreview(true)}
@@ -483,40 +492,52 @@ function FullCodebaseGenerator() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('builder.codeGenerator.codebaseGenerator.cardTitle')}</CardTitle>
-            <CardDescription>{t('builder.codeGenerator.codebaseGenerator.cardDescription')}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={handleGenerate} disabled={!proposal || mutation.isPending} className="w-full">
-              {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-              {t('builder.codeGenerator.codebaseGenerator.generateButton')}
-            </Button>
-          </CardContent>
-        </Card>
+        <AnimatedContainer animation="fade-in-up" delay={200}>
+          <Card variant="glass" className="backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200">
+            <CardHeader className="bg-gradient-to-r from-emerald-500/10 to-emerald-600/10">
+              <CardTitle className="font-headline">{t('builder.codeGenerator.codebaseGenerator.cardTitle')}</CardTitle>
+              <CardDescription>{t('builder.codeGenerator.codebaseGenerator.cardDescription')}</CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6">
+              <Button onClick={handleGenerate} disabled={!proposal || mutation.isPending} className="w-full hover:shadow-glow transition-all duration-200" variant="gradient">
+                {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
+                {t('builder.codeGenerator.codebaseGenerator.generateButton')}
+              </Button>
+            </CardContent>
+          </Card>
+        </AnimatedContainer>
       </div>
       <div className="lg:col-span-9 lg:overflow-y-auto lg:pr-2">
         {mutation.isPending && (
-          <Card className="flex items-center justify-center h-full min-h-[400px]">
-            <div className="text-center text-muted-foreground p-8">
-              <Loader2 className="w-16 h-16 mx-auto mb-4 animate-spin" />
-              <h3 className="text-lg font-semibold">{t('builder.codeGenerator.codebaseGenerator.generatingStateTitle')}</h3>
-              <p>{t('builder.codeGenerator.codebaseGenerator.generatingStateDesc')}</p>
-            </div>
-          </Card>
-        )}
-        {!mutation.isPending && codebase ? (
-          <FileTreeView codebase={codebase} />
-        ) : (
-          !mutation.isPending && (
-            <Card className="flex items-center justify-center h-full min-h-[400px]">
+          <AnimatedContainer animation="fade-in-up" delay={300}>
+            <Card variant="glass" className="flex items-center justify-center h-full min-h-[400px] backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200">
               <div className="text-center text-muted-foreground p-8">
-                <Package className="w-16 h-16 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold">{t('builder.codeGenerator.codebaseGenerator.emptyStateTitle')}</h3>
-                <p>{t('builder.codeGenerator.codebaseGenerator.emptyStateDesc')}</p>
+                <div className="p-4 rounded-full bg-gradient-to-br from-primary to-primary-600 mb-4 shadow-soft">
+                  <Loader2 className="w-16 h-16 mx-auto animate-spin text-white" />
+                </div>
+                <h3 className="text-lg font-semibold font-headline">{t('builder.codeGenerator.codebaseGenerator.generatingStateTitle')}</h3>
+                <p>{t('builder.codeGenerator.codebaseGenerator.generatingStateDesc')}</p>
               </div>
             </Card>
+          </AnimatedContainer>
+        )}
+        {!mutation.isPending && codebase ? (
+          <AnimatedContainer animation="fade-in-up" delay={400}>
+            <FileTreeView codebase={codebase} />
+          </AnimatedContainer>
+        ) : (
+          !mutation.isPending && (
+            <AnimatedContainer animation="fade-in-up" delay={300}>
+              <Card variant="glass" className="flex items-center justify-center h-full min-h-[400px] backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200">
+                <div className="text-center text-muted-foreground p-8">
+                  <div className="p-4 rounded-full bg-gradient-to-br from-muted to-muted-foreground mb-4 shadow-soft">
+                    <Package className="w-16 h-16 mx-auto text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold font-headline">{t('builder.codeGenerator.codebaseGenerator.emptyStateTitle')}</h3>
+                  <p>{t('builder.codeGenerator.codebaseGenerator.emptyStateDesc')}</p>
+                </div>
+              </Card>
+            </AnimatedContainer>
           )
         )}
       </div>
@@ -528,17 +549,49 @@ function FullCodebaseGenerator() {
 export default function CodeGenerator() {
   const { t } = useLocalization();
   return (
-    <Tabs defaultValue="component" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="component" className="gap-2"><Code className="h-4 w-4" /> {t('builder.codeGenerator.tabs.component')}</TabsTrigger>
-        <TabsTrigger value="codebase" className="gap-2"><Package className="h-4 w-4" /> {t('builder.codeGenerator.tabs.codebase')}</TabsTrigger>
-      </TabsList>
-      <TabsContent value="component" className="mt-4">
-        <ComponentGenerator />
-      </TabsContent>
-      <TabsContent value="codebase" className="mt-4">
-        <FullCodebaseGenerator />
-      </TabsContent>
-    </Tabs>
+    <div className="relative h-full">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5 rounded-lg opacity-50 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl animate-float pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500/10 rounded-full blur-xl animate-float pointer-events-none" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-purple-500/10 rounded-full blur-lg animate-float pointer-events-none" style={{ animationDelay: '4s' }}></div>
+
+      <div className="relative z-10">
+        <Tabs defaultValue="component" className="w-full">
+          <AnimatedContainer animation="fade-in-up" delay={200}>
+            <TabsList className="grid w-full grid-cols-2 mb-6 bg-gradient-to-r from-background/50 to-primary/5 backdrop-blur-md shadow-soft">
+              <TabsTrigger
+                value="component"
+                className="gap-2 transition-all duration-200 hover:shadow-soft hover:scale-105 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-600 data-[state=active]:text-white data-[state=active]:shadow-glow"
+              >
+                <Code className="h-4 w-4" />
+                <span className="hidden sm:inline">{t('builder.codeGenerator.tabs.component')}</span>
+                <span className="sm:hidden">Component</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="codebase"
+                className="gap-2 transition-all duration-200 hover:shadow-soft hover:scale-105 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-600 data-[state=active]:text-white data-[state=active]:shadow-glow"
+              >
+                <Package className="h-4 w-4" />
+                <span className="hidden sm:inline">{t('builder.codeGenerator.tabs.codebase')}</span>
+                <span className="sm:hidden">Codebase</span>
+              </TabsTrigger>
+            </TabsList>
+          </AnimatedContainer>
+
+          <TabsContent value="component" className="mt-4">
+            <AnimatedContainer animation="fade-in-up" delay={400}>
+              <ComponentGenerator />
+            </AnimatedContainer>
+          </TabsContent>
+          <TabsContent value="codebase" className="mt-4">
+            <AnimatedContainer animation="fade-in-up" delay={400}>
+              <FullCodebaseGenerator />
+            </AnimatedContainer>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
   );
 }
