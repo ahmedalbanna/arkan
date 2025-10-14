@@ -1,11 +1,10 @@
 /**
- * API Route لدعوات الفرق - النسخة الجديدة الموحدة
+ * API Route لدعوات الفرق - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لدعوات الفرق
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { getUserProfile } from '@/lib/db/queries';
 import { adminDb } from '@/lib/firebase/server-init';
 import { TeamProperties } from '@/lib/models/team';
@@ -32,37 +31,32 @@ async function verifyTeamOwner(requesterId: string, teamId: string) {
     return team;
 }
 
-/**
- * معالج دعوة عضو للفريق
- */
-class InviteTeamMemberHandler extends ComplexApiHandler<z.infer<typeof inviteMemberSchema>, TeamMember> {
-    protected inputSchema = inviteMemberSchema;
-    protected requiresAdmin = false;
-    protected creditCost = 1;
-    protected async processRequest(data: z.infer<typeof inviteMemberSchema>, context: any) {
-        const { params, user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { request, params, user } = context;
         const teamId = params.id;
-        const { email } = data;
+        const { email } = await request.json();
 
         await verifyTeamOwner(user.id, teamId);
 
         // Find user by email
         const userQuery = await adminDb.collection('users').where('email', '==', email).limit(1).get();
         if (userQuery.empty) {
-            throw new Error('User with this email not found.');
+            return ApiResponse.notFound('User with this email not found');
         }
+        
         const userDoc = userQuery.docs[0];
         const userId = userDoc.id;
         const userProfile = await getUserProfile(userId);
 
         if (!userProfile) {
-            throw new Error('User profile not found.');
+            return ApiResponse.notFound('User profile not found');
         }
 
         // Check if user is already a member
         const memberDoc = await adminDb.collection('teams').doc(teamId).collection('members').doc(userId).get();
         if (memberDoc.exists) {
-            throw new Error('User is already a member of this team.');
+            return ApiResponse.badRequest('User is already a member of this team');
         }
 
         // Add user to the team with denormalized data
@@ -82,15 +76,9 @@ class InviteTeamMemberHandler extends ComplexApiHandler<z.infer<typeof inviteMem
             teams: FieldValue.arrayUnion(teamId)
         });
 
-        return newMember;
+        return ApiResponse.success(newMember);
+    } catch (error) {
+        console.error('Error inviting team member:', error);
+        return ApiResponse.error('Failed to invite team member', 500);
     }
-}
-
-// إنشاء المعالج
-const inviteTeamMemberHandler = new InviteTeamMemberHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    inviteTeamMemberHandler,
-    { logging: true }
-);
+}, { validateBody: inviteMemberSchema, requireAuth: true });
