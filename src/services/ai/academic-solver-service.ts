@@ -28,7 +28,9 @@ export async function analyzeApi(variables: AnalyzeVariables): Promise<AnalyzedD
         body: JSON.stringify({ markdown, documentType }),
     });
     if (!response.ok) throw new Error((await response.json()).message || 'Analysis failed.');
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 export async function solveApi(variables: SolveVariables): Promise<SolvedDocument> {
@@ -39,5 +41,7 @@ export async function solveApi(variables: SolveVariables): Promise<SolvedDocumen
         body: JSON.stringify({ analyzedDocument, contextMarkdown }),
     });
     if (!response.ok) throw new Error((await response.json()).message || 'Solving failed.');
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

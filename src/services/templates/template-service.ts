@@ -13,7 +13,9 @@ import type { DocxTemplateProperties, PptxTemplateProperties, ReportTemplateProp
 export async function fetchDocxTemplatesApi(): Promise<Record<string, DocxTemplateProperties>> {
     const response = await fetch('/api/admin/templates/docx');
     if (!response.ok) throw new Error('Failed to fetch DOCX templates');
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 export async function updateDocxTemplateApi(variables: { key: string, styles: any }, token: string) {
     const response = await fetch(`/api/admin/templates/docx/${variables.key}`, {
@@ -22,14 +24,18 @@ export async function updateDocxTemplateApi(variables: { key: string, styles: an
         body: JSON.stringify({ styles: variables.styles }),
     });
     if (!response.ok) throw new Error((await response.json()).message || 'Failed to update DOCX template');
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 // === PPTX ===
 export async function fetchPptxTemplatesApi(): Promise<Record<string, PptxTemplateProperties>> {
     const response = await fetch('/api/admin/templates/pptx');
     if (!response.ok) throw new Error('Failed to fetch PPTX templates');
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 export async function updatePptxTemplateApi(variables: { key: string, styles: any }, token: string) {
     const response = await fetch(`/api/admin/templates/pptx/${variables.key}`, {
@@ -38,7 +44,9 @@ export async function updatePptxTemplateApi(variables: { key: string, styles: an
         body: JSON.stringify({ styles: variables.styles }),
     });
     if (!response.ok) throw new Error((await response.json()).message || 'Failed to update PPTX template');
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 export async function deletePptxTemplateApi(templateId: string, token: string) {
     const response = await fetch(`/api/admin/templates/pptx/${templateId}`, {
@@ -46,7 +54,9 @@ export async function deletePptxTemplateApi(templateId: string, token: string) {
         headers: { 'Authorization': `Bearer ${token}` },
     });
     if (!response.ok) throw new Error((await response.json()).message || 'Failed to delete PPTX template');
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 export async function uploadPptxTemplateFileApi(templateId: string, file: File, token: string) {
     const formData = new FormData();
@@ -57,7 +67,9 @@ export async function uploadPptxTemplateFileApi(templateId: string, file: File, 
         body: formData,
     });
     if (!response.ok) throw new Error((await response.json()).message || 'Failed to upload PPTX template file');
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 
@@ -65,7 +77,9 @@ export async function uploadPptxTemplateFileApi(templateId: string, file: File, 
 export async function fetchProposalTemplatesApi(): Promise<ProposalTemplateProperties[]> {
     const response = await fetch('/api/templates/proposal');
     if (!response.ok) throw new Error('Failed to fetch proposal templates');
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 export async function updateProposalTemplateApi(templateId: string, data: Partial<ProposalTemplateProperties>, token: string) {
     // This needs a specific API endpoint, assuming it exists at:
@@ -75,7 +89,9 @@ export async function updateProposalTemplateApi(templateId: string, data: Partia
         body: JSON.stringify(data),
     });
     if (!response.ok) throw new Error((await response.json()).message || 'Failed to update proposal template');
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 
@@ -83,7 +99,9 @@ export async function updateProposalTemplateApi(templateId: string, data: Partia
 export async function fetchReportTemplatesApi(): Promise<ReportTemplateProperties[]> {
     const response = await fetch('/api/templates/report');
     if (!response.ok) throw new Error('Failed to fetch report templates');
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 export async function updateReportTemplateApi(templateId: string, data: Partial<ReportTemplateProperties>, token: string) {
     const response = await fetch(`/api/admin/templates/report/${templateId}`, {
@@ -92,7 +110,9 @@ export async function updateReportTemplateApi(templateId: string, data: Partial<
         body: JSON.stringify(data),
     });
     if (!response.ok) throw new Error((await response.json()).message || 'Failed to update report template');
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 
@@ -100,7 +120,9 @@ export async function updateReportTemplateApi(templateId: string, data: Partial<
 export async function fetchPresentationTemplatesApi(): Promise<any[]> {
     const response = await fetch('/api/templates/presentation');
     if (!response.ok) throw new Error('Failed to fetch presentation templates');
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 export async function updatePresentationTemplateApi(templateId: string, data: Partial<any>, token: string) {
     const response = await fetch(`/api/admin/templates/presentation/${templateId}`, {
@@ -109,7 +131,9 @@ export async function updatePresentationTemplateApi(templateId: string, data: Pa
         body: JSON.stringify(data),
     });
     if (!response.ok) throw new Error((await response.json()).message || 'Failed to update presentation template');
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 export async function createGenerativeTemplate(templateType: string, id: string, data: any, token: string) {
     const response = await fetch(`/api/admin/templates/${templateType}`, {
@@ -118,7 +142,9 @@ export async function createGenerativeTemplate(templateType: string, id: string,
         body: JSON.stringify({ id, ...data }),
     });
     if (!response.ok) throw new Error((await response.json()).message || `Failed to create ${templateType} template`);
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 // === Image Refresh ===
@@ -132,5 +158,7 @@ export async function refreshTemplateImage(variables: { templateType: string, te
         const error = await response.json();
         throw new Error(error.message || 'Failed to refresh template image');
     }
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

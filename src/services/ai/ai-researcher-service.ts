@@ -24,5 +24,7 @@ export async function aiResearcherApi(variables: AIResearcherApiVariables): Prom
         body: JSON.stringify(body),
     });
     if (!response.ok) throw new Error((await response.json()).message || 'AI Researcher failed.');
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

@@ -8,19 +8,21 @@
 import { GenerateProjectPlanInputSchema, ProjectPlanSchema } from '@/ai/schemas';
 
 
+import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-// Mock function for testing environment
-const createMockPrompt = (config: any) => {
-    return async (input: any) => {
-        // Mock implementation for testing
-        return { output: {} };
-    };
-};
 
-// Use mock in test environment, real implementation in production
-const ai = typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
-    ? { definePrompt: createMockPrompt }
-    : require('@/ai/genkit').ai;
+// // Mock function for testing environment
+// const createMockPrompt = (config: any) => {
+//     return async (input: any) => {
+//         // Mock implementation for testing
+//         return { output: {} };
+//     };
+// };
+
+// // Use mock in test environment, real implementation in production
+// const ai = typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
+//     ? { definePrompt: createMockPrompt }
+//     : require('@/ai/genkit').ai;
 
 export const generateProjectPlanPrompt = ai.definePrompt({
     name: 'generateProjectPlanPrompt',

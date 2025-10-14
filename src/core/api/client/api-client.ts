@@ -1,8 +1,8 @@
 /**
- * العميل الرئيسي للـ API
+ * العميل الرئيسي للـ API - النسخة المحدثة
  *
  * هذا الملف يحتوي على العميل الرئيسي الموحد
- * مع جميع الخدمات المتاحة
+ * مع جميع الخدمات المتاحة مع إصلاح مشكلة استخراج البيانات
  */
 
 'use client';
@@ -220,7 +220,7 @@ export class ApiClient extends BaseApiClient {
      */
     async login(credentials: AuthRequest): Promise<AuthResponse> {
         const response = await this.post<AuthResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials);
-        return response.data;
+        return BaseApiClient.extractData<AuthResponse>(response);
     }
 
     /**
@@ -235,7 +235,7 @@ export class ApiClient extends BaseApiClient {
      */
     async refreshToken(): Promise<AuthResponse> {
         const response = await this.post<AuthResponse>(API_ENDPOINTS.AUTH.REFRESH);
-        return response.data;
+        return BaseApiClient.extractData<AuthResponse>(response);
     }
 
     /**
@@ -260,7 +260,7 @@ export class ApiClient extends BaseApiClient {
     async getUserProfile(userId?: string): Promise<UserProfile> {
         const url = userId ? API_ENDPOINTS.USERS.PROFILE.replace(':id', userId) : API_ENDPOINTS.USERS.PROFILE;
         const response = await this.get<UserProfile>(url);
-        return response.data;
+        return BaseApiClient.extractData<UserProfile>(response);
     }
 
     /**
@@ -268,7 +268,7 @@ export class ApiClient extends BaseApiClient {
      */
     async updateUserProfile(userId: string, data: Partial<UserProfile>): Promise<UserProfile> {
         const response = await this.put<UserProfile>(`${API_ENDPOINTS.USERS.PROFILE}/${userId}`, data);
-        return response.data;
+        return BaseApiClient.extractData<UserProfile>(response);
     }
 
     /**
@@ -276,7 +276,7 @@ export class ApiClient extends BaseApiClient {
      */
     async getUserCredits(): Promise<{ credits: number }> {
         const response = await this.get<{ credits: number }>(API_ENDPOINTS.USERS.CREDITS);
-        return response.data;
+        return BaseApiClient.extractData<{ credits: number }>(response);
     }
 
     /**
@@ -286,7 +286,7 @@ export class ApiClient extends BaseApiClient {
         const response = await this.get<TypedSearchResponse<TransactionData>>(
             `${API_ENDPOINTS.USERS.TRANSACTIONS}?page=${page}&limit=${limit}`
         );
-        return response.data;
+        return BaseApiClient.extractData<TypedSearchResponse<TransactionData>>(response);
     }
 
     // ==================== أدوات الكتابة ====================
@@ -299,7 +299,7 @@ export class ApiClient extends BaseApiClient {
             text,
             mode,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ result: string }>(response);
     }
 
     /**
@@ -310,7 +310,7 @@ export class ApiClient extends BaseApiClient {
             text,
             length,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ result: string }>(response);
     }
 
     /**
@@ -320,7 +320,7 @@ export class ApiClient extends BaseApiClient {
         const response = await this.post<{ result: string; errors: GrammarError[] }>(API_ENDPOINTS.WRITING_TOOLS.GRAMMAR_CHECK, {
             text,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ result: string; errors: GrammarError[] }>(response);
     }
 
     /**
@@ -330,7 +330,7 @@ export class ApiClient extends BaseApiClient {
         const response = await this.post<{ result: string }>(API_ENDPOINTS.WRITING_TOOLS.HUMANIZE, {
             text,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ result: string }>(response);
     }
 
     /**
@@ -340,7 +340,7 @@ export class ApiClient extends BaseApiClient {
         const response = await this.post<{ isAI: boolean; confidence: number }>(API_ENDPOINTS.WRITING_TOOLS.DETECT_AI, {
             text,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ isAI: boolean; confidence: number }>(response);
     }
 
     /**
@@ -350,7 +350,7 @@ export class ApiClient extends BaseApiClient {
         const response = await this.post<{ result: string; sources: FactSource[] }>(API_ENDPOINTS.WRITING_TOOLS.FACT_CHECK, {
             text,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ result: string; sources: FactSource[] }>(response);
     }
 
     /**
@@ -360,7 +360,7 @@ export class ApiClient extends BaseApiClient {
         const response = await this.post<{ result: string; similarity: number }>(API_ENDPOINTS.WRITING_TOOLS.PLAGIARISM_CHECK, {
             text,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ result: string; similarity: number }>(response);
     }
 
     /**
@@ -370,7 +370,7 @@ export class ApiClient extends BaseApiClient {
         const response = await this.post<{ result: string; sources: ResearchSource[] }>(API_ENDPOINTS.WRITING_TOOLS.AI_RESEARCHER, {
             topic,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ result: string; sources: ResearchSource[] }>(response);
     }
 
     /**
@@ -380,7 +380,7 @@ export class ApiClient extends BaseApiClient {
         const response = await this.post<{ result: string }>(API_ENDPOINTS.WRITING_TOOLS.TOPIC_EXPLAINER, {
             topic,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ result: string }>(response);
     }
 
     /**
@@ -391,7 +391,7 @@ export class ApiClient extends BaseApiClient {
             text,
             style,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ result: string }>(response);
     }
 
     /**
@@ -402,7 +402,7 @@ export class ApiClient extends BaseApiClient {
             text,
             ratio,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ result: string }>(response);
     }
 
     /**
@@ -413,7 +413,7 @@ export class ApiClient extends BaseApiClient {
             prompt,
             type,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ result: string }>(response);
     }
 
     /**
@@ -424,7 +424,7 @@ export class ApiClient extends BaseApiClient {
             topic,
             count,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ ideas: string[] }>(response);
     }
 
     /**
@@ -436,7 +436,7 @@ export class ApiClient extends BaseApiClient {
             numQuestions,
             questionType,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ quiz: QuizQuestion[] }>(response);
     }
 
     /**
@@ -447,7 +447,7 @@ export class ApiClient extends BaseApiClient {
             sourceText,
             style,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ citation: string }>(response);
     }
 
     /**
@@ -458,7 +458,7 @@ export class ApiClient extends BaseApiClient {
             text,
             operation,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ result: string }>(response);
     }
 
     // ==================== العروض التقديمية ====================
@@ -471,7 +471,7 @@ export class ApiClient extends BaseApiClient {
             topic,
             slides,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ outline: PresentationOutline[] }>(response);
     }
 
     /**
@@ -482,7 +482,7 @@ export class ApiClient extends BaseApiClient {
             outline,
             style,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ slides: PresentationSlide[] }>(response);
     }
 
     /**
@@ -493,7 +493,7 @@ export class ApiClient extends BaseApiClient {
             description,
             type,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ diagram: string }>(response);
     }
 
     // ==================== المشاريع ====================
@@ -503,7 +503,7 @@ export class ApiClient extends BaseApiClient {
      */
     async createProject(data: ProjectData): Promise<{ project: ProjectData }> {
         const response = await this.post<{ project: ProjectData }>(API_ENDPOINTS.PROJECTS.CREATE, data);
-        return response.data;
+        return BaseApiClient.extractData<{ project: ProjectData }>(response);
     }
 
     /**
@@ -513,7 +513,7 @@ export class ApiClient extends BaseApiClient {
         const response = await this.get<TypedSearchResponse<ProjectData>>(
             `${API_ENDPOINTS.PROJECTS.LIST}?page=${page}&limit=${limit}`
         );
-        return response.data;
+        return BaseApiClient.extractData<TypedSearchResponse<ProjectData>>(response);
     }
 
     /**
@@ -521,7 +521,7 @@ export class ApiClient extends BaseApiClient {
      */
     async getProject(projectId: string): Promise<{ project: ProjectData }> {
         const response = await this.get<{ project: ProjectData }>(API_ENDPOINTS.PROJECTS.GET(projectId));
-        return response.data;
+        return BaseApiClient.extractData<{ project: ProjectData }>(response);
     }
 
     /**
@@ -529,7 +529,7 @@ export class ApiClient extends BaseApiClient {
      */
     async updateProject(projectId: string, data: Partial<ProjectData>): Promise<{ project: ProjectData }> {
         const response = await this.put<{ project: ProjectData }>(API_ENDPOINTS.PROJECTS.UPDATE(projectId), data);
-        return response.data;
+        return BaseApiClient.extractData<{ project: ProjectData }>(response);
     }
 
     /**
@@ -544,7 +544,7 @@ export class ApiClient extends BaseApiClient {
      */
     async generateProposal(data: ProposalData): Promise<{ proposal: ProposalData }> {
         const response = await this.post<{ proposal: ProposalData }>(API_ENDPOINTS.PROJECTS.GENERATE_PROPOSAL, data);
-        return response.data;
+        return BaseApiClient.extractData<{ proposal: ProposalData }>(response);
     }
 
     /**
@@ -555,7 +555,7 @@ export class ApiClient extends BaseApiClient {
             projectId,
             type,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ report: ReportData }>(response);
     }
 
     /**
@@ -565,7 +565,7 @@ export class ApiClient extends BaseApiClient {
         const response = await this.post<{ plan: PlanData }>(API_ENDPOINTS.PROJECTS.GENERATE_PLAN, {
             projectId,
         });
-        return response.data;
+        return BaseApiClient.extractData<{ plan: PlanData }>(response);
     }
 
     // ==================== الفريق ====================
@@ -575,7 +575,7 @@ export class ApiClient extends BaseApiClient {
      */
     async getTeams(): Promise<{ teams: TeamData[] }> {
         const response = await this.get<{ teams: TeamData[] }>(API_ENDPOINTS.TEAM.LIST);
-        return response.data;
+        return BaseApiClient.extractData<{ teams: TeamData[] }>(response);
     }
 
     /**
@@ -583,7 +583,7 @@ export class ApiClient extends BaseApiClient {
      */
     async createTeam(data: TeamData): Promise<{ team: TeamData }> {
         const response = await this.post<{ team: TeamData }>(API_ENDPOINTS.TEAM.CREATE, data);
-        return response.data;
+        return BaseApiClient.extractData<{ team: TeamData }>(response);
     }
 
     /**
@@ -591,7 +591,7 @@ export class ApiClient extends BaseApiClient {
      */
     async getTeam(teamId: string): Promise<{ team: TeamData }> {
         const response = await this.get<{ team: TeamData }>(API_ENDPOINTS.TEAM.GET(teamId));
-        return response.data;
+        return BaseApiClient.extractData<{ team: TeamData }>(response);
     }
 
     /**
@@ -599,7 +599,7 @@ export class ApiClient extends BaseApiClient {
      */
     async updateTeam(teamId: string, data: Partial<TeamData>): Promise<{ team: TeamData }> {
         const response = await this.put<{ team: TeamData }>(API_ENDPOINTS.TEAM.UPDATE(teamId), data);
-        return response.data;
+        return BaseApiClient.extractData<{ team: TeamData }>(response);
     }
 
     /**
@@ -614,7 +614,7 @@ export class ApiClient extends BaseApiClient {
      */
     async getTeamMembers(teamId: string): Promise<{ members: TeamMemberData[] }> {
         const response = await this.get<{ members: TeamMemberData[] }>(API_ENDPOINTS.TEAM.MEMBERS(teamId));
-        return response.data;
+        return BaseApiClient.extractData<{ members: TeamMemberData[] }>(response);
     }
 
     // ==================== الوكلاء ====================
@@ -624,7 +624,7 @@ export class ApiClient extends BaseApiClient {
      */
     async getAgents(): Promise<{ agents: AgentData[] }> {
         const response = await this.get<{ agents: AgentData[] }>(API_ENDPOINTS.AGENTS.LIST);
-        return response.data;
+        return BaseApiClient.extractData<{ agents: AgentData[] }>(response);
     }
 
     /**
@@ -632,7 +632,7 @@ export class ApiClient extends BaseApiClient {
      */
     async createAgent(data: AgentData): Promise<{ agent: AgentData }> {
         const response = await this.post<{ agent: AgentData }>(API_ENDPOINTS.AGENTS.CREATE, data);
-        return response.data;
+        return BaseApiClient.extractData<{ agent: AgentData }>(response);
     }
 
     /**
@@ -640,7 +640,7 @@ export class ApiClient extends BaseApiClient {
      */
     async getAgent(agentId: string): Promise<{ agent: AgentData }> {
         const response = await this.get<{ agent: AgentData }>(API_ENDPOINTS.AGENTS.GET(agentId));
-        return response.data;
+        return BaseApiClient.extractData<{ agent: AgentData }>(response);
     }
 
     /**
@@ -648,7 +648,7 @@ export class ApiClient extends BaseApiClient {
      */
     async updateAgent(agentId: string, data: Partial<AgentData>): Promise<{ agent: AgentData }> {
         const response = await this.put<{ agent: AgentData }>(API_ENDPOINTS.AGENTS.UPDATE(agentId), data);
-        return response.data;
+        return BaseApiClient.extractData<{ agent: AgentData }>(response);
     }
 
     /**
@@ -663,7 +663,7 @@ export class ApiClient extends BaseApiClient {
      */
     async getAgentCategories(): Promise<{ categories: AgentCategoryData[] }> {
         const response = await this.get<{ categories: AgentCategoryData[] }>(API_ENDPOINTS.AGENTS.CATEGORIES);
-        return response.data;
+        return BaseApiClient.extractData<{ categories: AgentCategoryData[] }>(response);
     }
 
     // ==================== التصدير ====================
@@ -677,7 +677,7 @@ export class ApiClient extends BaseApiClient {
             format: 'docx',
             options,
         });
-        return response.data;
+        return BaseApiClient.extractData<ExportResponse>(response);
     }
 
     /**
@@ -689,7 +689,7 @@ export class ApiClient extends BaseApiClient {
             format: 'pptx',
             options,
         });
-        return response.data;
+        return BaseApiClient.extractData<ExportResponse>(response);
     }
 
     /**
@@ -701,7 +701,7 @@ export class ApiClient extends BaseApiClient {
             format: 'pdf',
             options,
         });
-        return response.data;
+        return BaseApiClient.extractData<ExportResponse>(response);
     }
 
     /**
@@ -712,7 +712,7 @@ export class ApiClient extends BaseApiClient {
             data,
             options,
         });
-        return response.data;
+        return BaseApiClient.extractData<ExportResponse>(response);
     }
 
     // ==================== الملفات ====================
@@ -727,7 +727,7 @@ export class ApiClient extends BaseApiClient {
             file,
             onProgress
         );
-        return response.data;
+        return BaseApiClient.extractData<FileUploadResponse>(response);
     }
 
     /**
@@ -751,7 +751,7 @@ export class ApiClient extends BaseApiClient {
      */
     async getPublicSettings(): Promise<{ settings: PublicSettings }> {
         const response = await this.get<{ settings: PublicSettings }>(API_ENDPOINTS.SETTINGS.PUBLIC);
-        return response.data;
+        return BaseApiClient.extractData<{ settings: PublicSettings }>(response);
     }
 
     /**
@@ -759,7 +759,7 @@ export class ApiClient extends BaseApiClient {
      */
     async getFeatures(): Promise<{ features: FeatureData[] }> {
         const response = await this.get<{ features: FeatureData[] }>(API_ENDPOINTS.SETTINGS.FEATURES);
-        return response.data;
+        return BaseApiClient.extractData<{ features: FeatureData[] }>(response);
     }
 
     // ==================== طرق HTTP إضافية ====================
@@ -777,7 +777,7 @@ export class ApiClient extends BaseApiClient {
         } = {}
     ): Promise<TOutput> {
         const response = await this.put<TOutput>(endpoint, data, options);
-        return response.data;
+        return BaseApiClient.extractData<TOutput>(response);
     }
 
     /**
@@ -812,25 +812,29 @@ export class ApiClient extends BaseApiClient {
             timeout,
         };
 
+        let response: any;
+
         switch (method) {
             case 'GET':
-                const getResponse = await this.get<TOutput>(endpoint, requestOptions);
-                return getResponse.data;
+                response = await this.get<TOutput>(endpoint, requestOptions);
+                break;
             case 'POST':
-                const postResponse = await this.post<TOutput>(endpoint, data!, requestOptions);
-                return postResponse.data;
+                response = await this.post<TOutput>(endpoint, data!, requestOptions);
+                break;
             case 'PUT':
-                const putResponse = await this.put<TOutput>(endpoint, data!, requestOptions);
-                return putResponse.data;
+                response = await this.put<TOutput>(endpoint, data!, requestOptions);
+                break;
             case 'DELETE':
-                const deleteResponse = await this.delete<TOutput>(endpoint, requestOptions);
-                return deleteResponse.data;
+                response = await this.delete<TOutput>(endpoint, requestOptions);
+                break;
             case 'PATCH':
-                const patchResponse = await this.patch<any>(endpoint, data!, requestOptions);
-                return patchResponse.data as TOutput;
+                response = await this.patch<any>(endpoint, data!, requestOptions);
+                break;
             default:
                 throw new Error(`Unsupported HTTP method: ${method}`);
         }
+
+        return BaseApiClient.extractData<TOutput>(response);
     }
 
 }

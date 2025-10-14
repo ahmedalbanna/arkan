@@ -423,8 +423,12 @@ export abstract class CreditBasedApiHandler<TInput = unknown, TOutput = unknown>
      * خصم الائتمانات
      */
     private async deductCredits(userId: string, amount: number): Promise<void> {
-        // يمكن استيراد خدمة الائتمانات هنا
-        // await deductCredit(userId, amount);
-        console.log(`Deducting ${amount} credits from user ${userId}`);
+        try {
+            const { deductCredit } = await import('@/services/payment/credit-service');
+            await deductCredit(userId, amount);
+        } catch (error) {
+            console.error(`Failed to deduct ${amount} credits from user ${userId}:`, error);
+            throw error;
+        }
     }
 }

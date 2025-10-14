@@ -4,11 +4,11 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لأدوات الكتابة
  */
 
-import { createApiResponseEnhanced, handleApiErrorEnhanced } from '@/core/api';
+import { handleApiErrorEnhanced } from '@/core/api';
 import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
 import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import type { ApiHandlerContext } from '@/core/types/api-types';
-import { deductCredit, logGeneration } from '@/services';
+import { logGeneration } from '@/services';
 import { z } from 'zod';
 
 // استيراد جميع الـ flows والـ schemas
@@ -68,23 +68,16 @@ class WritingToolHandler extends CreditBasedApiHandler<any, any> {
 
     async handle(context: ApiHandlerContext): Promise<Response> {
         try {
-            // التحقق من صحة البيانات
-            const validatedData = await this.validateInput(context.request);
-
             // تحديد تكلفة الائتمانات بناءً على الأداة
             const toolName = context.params?.tool as ToolName;
             const config = toolConfig[toolName];
             const creditCost = config?.creditCost || this.creditCost;
 
-            // خصم الائتمانات
-            if (creditCost > 0 && context.user) {
-                await deductCredit(context.user.id, creditCost);
-            }
+            // تحديث تكلفة الائتمانات للـ handler
+            this.creditCost = creditCost;
 
-            // معالجة الطلب
-            const result = await this.processRequest(validatedData, context);
-
-            return createApiResponseEnhanced(result, 200);
+            // استخدام الـ parent handle method الذي يتعامل مع الخصم تلقائياً
+            return await super.handle(context);
         } catch (error) {
             return handleApiErrorEnhanced(error);
         }

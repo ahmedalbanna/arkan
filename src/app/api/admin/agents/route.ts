@@ -4,10 +4,10 @@
  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإدارة الوكلاء
  */
 
-import { AgentPromptSchema } from '@/ai/schemas';
 import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
 import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { adminDb } from '@/lib/firebase/server-init';
+import { AgentPromptSchema } from '@/lib/template-schemas';
 import { z } from 'zod';
 
 // Schema لإنشاء وكيل جديد

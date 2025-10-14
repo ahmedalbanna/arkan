@@ -24,5 +24,7 @@ export async function topicExplainerApi(variables: TopicExplainerApiVariables): 
         body: JSON.stringify(body),
     });
     if (!response.ok) throw new Error((await response.json()).message || 'Topic Explainer failed.');
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

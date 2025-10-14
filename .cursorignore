@@ -81,7 +81,7 @@ Thumbs.db
 /generate_doxygen_docs.sh
 /graph.gv
 /dependencygraph.svg
-
+/reports/
 # Generated Files
 /tsconfig.tsbuildinfo
 /next-env.d.ts
@@ -195,3 +195,4 @@ Thumbs.db
 /public/
 /src/do
 /src/components/maintaince/
+/src/components/

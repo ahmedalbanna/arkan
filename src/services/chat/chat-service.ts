@@ -33,7 +33,9 @@ export async function createConversationApi(data: CreateConversationData, token:
         const error = await response.json();
         throw new Error(error.message || 'Failed to create conversation');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 export async function initiateSupportChat(token: string): Promise<RawChatSession> {
@@ -50,7 +52,9 @@ export async function initiateSupportChat(token: string): Promise<RawChatSession
         const error = await response.json();
         throw new Error(error.message || 'Failed to initiate support chat');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 export async function deleteConversationApi(chatId: string, token: string): Promise<{ message: string }> {
@@ -66,7 +70,9 @@ export async function deleteConversationApi(chatId: string, token: string): Prom
         const error = await response.json();
         throw new Error(error.message || 'Failed to delete conversation');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 interface AgentChatApiVariables {
@@ -93,5 +99,7 @@ export async function agentChatApi(variables: AgentChatApiVariables) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to get response from agent.');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

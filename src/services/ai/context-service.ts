@@ -25,5 +25,7 @@ export async function analyzeContextApi(variables: AnalyzeContextVariables): Pro
         const error = await response.json();
         throw new Error(error.message || 'Analysis failed.');
     }
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

@@ -5,7 +5,7 @@
  */
 
 import { apiClient } from '@/core/api/client/api-client';
-import { AdminService, ComplexService, SimpleService } from '@/core/api/client/base-client';
+import { AdminService, BaseApiClient, ComplexService, SimpleService } from '@/core/api/client/base-client';
 import { UserSchemas } from '@/core/validation/api-validators';
 import type { UserProfile } from '@/lib/types';
 
@@ -60,7 +60,7 @@ export class UserListService extends SimpleService<UserListResponse> {
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<UserListResponse>(response);
     }
 }
 
@@ -88,7 +88,7 @@ export class UpdateUserService extends AdminService<UpdateUserData, UserProfile>
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<UserProfile>(response);
     }
 }
 
@@ -108,7 +108,7 @@ export class DeleteUserService extends AdminService<{}, { message: string }> {
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<{ message: string }>(response);
     }
 }
 
@@ -126,7 +126,7 @@ export class GetUserService extends SimpleService<UserProfile> {
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<UserProfile>(response);
     }
 }
 
@@ -139,7 +139,7 @@ export class GetAdminsService extends SimpleService<UserProfile[]> {
 
     async call(): Promise<UserProfile[]> {
         const response = await this.client.get<UserProfile[]>(this.endpoint);
-        return response.data;
+        return BaseApiClient.extractData<UserProfile[]>(response);
     }
 }
 
@@ -159,7 +159,7 @@ export class SendPasswordResetService extends ComplexService<{}, { message: stri
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<{ message: string }>(response);
     }
 }
 
@@ -197,7 +197,7 @@ export async function fetchUsersApi(
             'Authorization': `Bearer ${token}`,
         }
     });
-    return response.data;
+    return BaseApiClient.extractData<UserListResponse>(response);
 }
 
 /**
@@ -212,7 +212,7 @@ export async function createUserApi(
             'Authorization': `Bearer ${token}`,
         }
     });
-    return response.data;
+    return BaseApiClient.extractData<UserProfile>(response);
 }
 
 /**
@@ -229,7 +229,7 @@ export async function updateUserApi(
             'Authorization': `Bearer ${token}`,
         }
     });
-    return response.data;
+    return BaseApiClient.extractData<UserProfile>(response);
 }
 
 /**
@@ -245,7 +245,7 @@ export async function deleteUserApi(
             'Authorization': `Bearer ${token}`,
         }
     });
-    return response.data;
+    return BaseApiClient.extractData<{ message: string }>(response);
 }
 
 /**
@@ -261,7 +261,7 @@ export async function fetchUserProfileApi(
             'Authorization': `Bearer ${token}`,
         }
     });
-    return response.data;
+    return BaseApiClient.extractData<UserProfile>(response);
 }
 
 /**
@@ -269,7 +269,7 @@ export async function fetchUserProfileApi(
  */
 export async function fetchAdminsApi(): Promise<UserProfile[]> {
     const response = await apiClient.get<UserProfile[]>('/api/admins');
-    return response.data;
+        return BaseApiClient.extractData<UserProfile[]>(response);
 }
 
 /**
@@ -285,5 +285,5 @@ export async function sendPasswordResetEmailApi(
             'Authorization': `Bearer ${token}`,
         }
     });
-    return response.data;
+    return BaseApiClient.extractData<{ message: string }>(response);
 }

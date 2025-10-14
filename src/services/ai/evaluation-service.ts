@@ -31,5 +31,7 @@ export async function evaluateReportApi(variables: EvaluateReportApiVariables): 
         const error = await response.json();
         throw new Error(error.message || 'Failed to evaluate report');
     }
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

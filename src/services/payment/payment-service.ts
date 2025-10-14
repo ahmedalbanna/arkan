@@ -19,5 +19,7 @@ export async function submitPaymentProof({ formData, token }: { formData: FormDa
         const error = await response.json();
         throw new Error(error.message || 'Failed to submit request.');
     }
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

@@ -34,5 +34,7 @@ export async function plagiarismCheckApi(variables: PlagiarismCheckApiVariables)
         throw new Error(error.message || 'Failed to check for plagiarism.');
     }
 
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

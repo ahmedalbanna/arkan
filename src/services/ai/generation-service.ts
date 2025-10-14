@@ -54,7 +54,9 @@ export async function generateCodeApi(variables: { prompt: string; token: string
         const error = await response.json();
         throw new Error(error.message || 'Failed to generate code');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 export async function generateCodebaseApi(variables: { proposal: any; token: string }) {
@@ -70,7 +72,9 @@ export async function generateCodebaseApi(variables: { proposal: any; token: str
         const error = await response.json();
         throw new Error(error.message || 'Failed to generate codebase');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 export async function generateTextApi(variables: { prompt: string; token: string }) {
@@ -86,5 +90,7 @@ export async function generateTextApi(variables: { prompt: string; token: string
         const error = await response.json();
         throw new Error(error.message || 'Failed to generate text');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

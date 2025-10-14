@@ -26,7 +26,9 @@ export async function generatePresentationApi(variables: { body: any, token: str
         const error = await response.json();
         throw new Error(error.message || 'Failed to generate presentation');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 /**
@@ -45,5 +47,7 @@ export async function generatePresentationOutlineApi(variables: GeneratePresenta
         const error = await response.json();
         throw new Error(error.message || 'Failed to generate presentation outline');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

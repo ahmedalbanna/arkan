@@ -50,7 +50,9 @@ export async function translateProposalApi(variables: { proposal: AnyProjectProp
         const error = await response.json();
         throw new Error(error.message || 'Failed to translate proposal');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 
@@ -72,5 +74,7 @@ export async function translatePresentationApi(variables: { presentation: Presen
         const error = await response.json();
         throw new Error(error.message || 'Failed to translate presentation');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

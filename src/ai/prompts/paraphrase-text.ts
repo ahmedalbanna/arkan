@@ -5,20 +5,20 @@
  */
 
 
+import { ai } from '@/ai/genkit';
 import { ParaphraseInputSchema, ParaphraseOutputSchema, type ParaphraseMode } from '@/ai/schemas';
+// // Mock function for testing environment
+// const createMockPrompt = (config: any) => {
+//     return async (input: any) => {
+//         // Mock implementation for testing
+//         return { output: {} };
+//     };
+// };
 
-// Mock function for testing environment
-const createMockPrompt = (config: any) => {
-    return async (input: any) => {
-        // Mock implementation for testing
-        return { output: {} };
-    };
-};
-
-// Use mock in test environment, real implementation in production
-const ai = typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
-    ? { definePrompt: createMockPrompt }
-    : require('@/ai/genkit').ai;
+// // Use mock in test environment, real implementation in production
+// const ai = typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
+//     ? { definePrompt: createMockPrompt }
+//     : require('@/ai/genkit').ai;
 
 const styleDescriptions: Record<ParaphraseMode, string> = {
     standard: "Provide a balanced rewrite that improves clarity while retaining the original meaning.",

@@ -10,5 +10,7 @@ export async function fetchPublicSettings() {
     if (!response.ok) {
         throw new Error('Failed to fetch payment details');
     }
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

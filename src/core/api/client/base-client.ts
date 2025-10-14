@@ -151,16 +151,16 @@ export class BaseApiClient {
         response: Response,
         options: HttpRequestOptions
     ): Promise<HttpResponse<T>> {
-        const data = await response.json().catch(() => ({}));
+        const rawData = await response.json().catch(() => ({}));
 
         if (!response.ok) {
             const error: HttpError = {
-                message: data.message || response.statusText,
+                message: rawData.message || response.statusText,
                 status: response.status,
-                code: data.code,
-                details: data.details,
+                code: rawData.code,
+                details: rawData.details,
                 response: {
-                    data,
+                    data: rawData,
                     status: response.status,
                     statusText: response.statusText,
                     headers: this.responseHeadersToObject(response.headers),
@@ -168,6 +168,16 @@ export class BaseApiClient {
                 },
             };
             throw error;
+        }
+
+        // استخراج البيانات من التنسيق الموحد للـ API
+        let data: T;
+        if (rawData.success !== undefined && rawData.data !== undefined) {
+            // تنسيق API الجديد: { success: true, data: actualData }
+            data = rawData.data;
+        } else {
+            // تنسيق قديم أو مباشر
+            data = rawData;
         }
 
         return {
@@ -413,7 +423,7 @@ export class BaseApiClient {
                 },
             });
 
-            const blob = new Blob([response.data]);
+            const blob = new Blob([BaseApiClient.extractData(response)]);
             const downloadUrl = window.URL.createObjectURL(blob);
 
             const link = document.createElement('a');
@@ -473,6 +483,22 @@ export class BaseApiClient {
         const validatedData = this.validateInput(data, schema);
         return this.post<TOutput>(endpoint, validatedData, options);
     }
+
+    /**
+     * استخراج البيانات من استجابة API
+     * هذه الدالة تساعد في استخراج البيانات من التنسيق الموحد للـ API
+     */
+    static extractData<T>(response: HttpResponse<any>): T {
+        const rawData = response.data;
+
+        // إذا كان التنسيق الجديد { success: true, data: actualData }
+        if (rawData.success !== undefined && rawData.data !== undefined) {
+            return rawData.data;
+        }
+
+        // إذا كان التنسيق القديم أو المباشر
+        return rawData;
+    }
 }
 
 /**
@@ -495,7 +521,7 @@ export abstract class SimpleService<TOutput = unknown> {
             }
 
             const response = await this.client.get<TOutput>(this.endpoint, options);
-            return response.data;
+            return BaseApiClient.extractData<TOutput>(response);
         } catch (error) {
             if (error instanceof Error) {
                 throw error;
@@ -564,7 +590,7 @@ export abstract class ComplexService<TInput = unknown, TOutput = unknown> {
                     throw new Error(`Unsupported method: ${this.method}`);
             }
 
-            return response.data;
+            return BaseApiClient.extractData<TOutput>(response);
         } catch (error) {
             if (error instanceof Error) {
                 throw error;

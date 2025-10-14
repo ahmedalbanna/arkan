@@ -117,7 +117,9 @@ export async function createAgentApi(data: CreateAgentVariables, token: string):
         // Throwing it allows useMutation's onError to catch it.
         throw error;
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 

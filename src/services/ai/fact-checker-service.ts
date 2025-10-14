@@ -34,5 +34,7 @@ export async function factCheckApi(variables: FactCheckApiVariables): Promise<Fa
         throw new Error(error.message || 'Failed to fact-check text.');
     }
 
-    return response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

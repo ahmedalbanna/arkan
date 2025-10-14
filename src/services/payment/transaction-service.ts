@@ -39,7 +39,9 @@ export async function getTransactions(params: FetchTransactionsParams): Promise<
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch transactions');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 
@@ -59,7 +61,9 @@ export async function verifyPayment(variables: VerifyPaymentVariables, token: st
         const error = await response.json();
         throw new Error(error.message || 'Failed to verify payment');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 interface FetchReportParams {
@@ -83,7 +87,9 @@ export async function fetchTransactionsForReport(params: FetchReportParams): Pro
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch transaction report data');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 
@@ -101,5 +107,7 @@ export async function fetchUserTransactions(token: string): Promise<TransactionP
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch payment history');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

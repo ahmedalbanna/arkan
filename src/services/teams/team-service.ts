@@ -5,7 +5,7 @@
  */
 
 import { apiClient } from '@/core/api/client/api-client';
-import { ComplexService, SimpleService } from '@/core/api/client/base-client';
+import { BaseApiClient, ComplexService, SimpleService } from '@/core/api/client/base-client';
 import { TeamSchemas } from '@/core/validation/api-validators';
 import type { TeamProperties, TeamWithMembers } from '@/lib/models/team';
 
@@ -37,7 +37,7 @@ export class TeamListService extends SimpleService<TeamWithMembers[]> {
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<TeamWithMembers[]>(response);
     }
 }
 
@@ -55,7 +55,7 @@ export class GetTeamService extends SimpleService<TeamWithMembers> {
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<TeamWithMembers>(response);
     }
 }
 
@@ -85,7 +85,7 @@ export class UpdateTeamService extends ComplexService<UpdateTeamData, TeamProper
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<TeamProperties>(response);
     }
 }
 
@@ -105,7 +105,7 @@ export class DeleteTeamService extends ComplexService<{}, { message: string }> {
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<{ message: string }>(response);
     }
 }
 
@@ -125,7 +125,7 @@ export class InviteMemberService extends ComplexService<InviteMemberData, { mess
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<{ message: string }>(response);
     }
 }
 
@@ -145,7 +145,7 @@ export class RemoveMemberService extends ComplexService<{}, { message: string }>
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<{ message: string }>(response);
     }
 }
 
@@ -165,7 +165,7 @@ export class UpdateMemberRoleService extends ComplexService<{ role: 'member' | '
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<{ message: string }>(response);
     }
 }
 

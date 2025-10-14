@@ -24,7 +24,9 @@ export async function generateDiagramApi(body: any, token: string): Promise<Gene
         const error = await response.json();
         throw new Error(error.message || 'Failed to generate diagram');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 /**
@@ -46,7 +48,9 @@ export async function updateDiagramApi(plantUmlCode: string, token: string): Pro
         const error = await response.json();
         throw new Error(error.message || 'Failed to update diagram');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 
@@ -66,5 +70,7 @@ export async function explainDiagramApi(body: { imageDataUri: string, prompt: st
         const error = await response.json();
         throw new Error(error.message || 'Failed to explain diagram');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

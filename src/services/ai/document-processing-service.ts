@@ -23,5 +23,7 @@ export async function processFileApi(formData: FormData, token: string): Promise
         const error = await response.json();
         throw new Error(error.message || 'Failed to process file.');
     }
-    return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }

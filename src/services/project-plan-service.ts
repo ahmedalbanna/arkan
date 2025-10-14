@@ -28,7 +28,9 @@ export async function generateProjectPlanApi(variables: GeneratePlanVariables): 
     const error = await response.json();
     throw new Error(error.message || 'Failed to generate project plan');
   }
-  return await response.json();
+    const result = await response.json();
+    // Extract data from enhanced API response structure
+    return result.data || result;
 }
 
 export async function summarizeProposalForPlanApi(proposal: any, token: string): Promise<any> {

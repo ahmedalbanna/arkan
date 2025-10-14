@@ -5,7 +5,7 @@
  */
 
 import { apiClient } from '@/core/api/client/api-client';
-import { ComplexService, SimpleService } from '@/core/api/client/base-client';
+import { BaseApiClient, ComplexService, SimpleService } from '@/core/api/client/base-client';
 import { ProjectSchemas } from '@/core/validation/api-validators';
 import type { ProjectState, SavedProject } from '@/lib/models/project';
 
@@ -44,7 +44,7 @@ export class ProjectListService extends SimpleService<SavedProject[]> {
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<SavedProject[]>(response);
     }
 }
 
@@ -62,7 +62,7 @@ export class GetProjectService extends SimpleService<SavedProject> {
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<SavedProject>(response);
     }
 }
 
@@ -92,7 +92,7 @@ export class UpdateProjectService extends ComplexService<ProjectState, SavedProj
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<SavedProject>(response);
     }
 }
 
@@ -112,7 +112,7 @@ export class DeleteProjectService extends ComplexService<{}, { message: string }
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<{ message: string }>(response);
     }
 }
 
@@ -132,7 +132,7 @@ export class AddContextService extends ComplexService<AddContextData, { message:
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<{ message: string }>(response);
     }
 }
 

@@ -6,7 +6,7 @@
 
 import type { SignupCredentials } from "@/components/auth/SignupForm";
 import { apiClient } from '@/core/api/client/api-client';
-import { ComplexService, SimpleService } from '@/core/api/client/base-client';
+import { BaseApiClient, ComplexService, SimpleService } from '@/core/api/client/base-client';
 import { AuthSchemas } from '@/core/validation/api-validators';
 
 export interface LoginCredentials {
@@ -72,7 +72,7 @@ export class LogoutService extends SimpleService<{ message: string }> {
                 'Authorization': `Bearer ${token}`,
             }
         });
-        return response.data;
+        return BaseApiClient.extractData<{ message: string }>(response);
     }
 }
 
