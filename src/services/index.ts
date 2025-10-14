@@ -84,6 +84,7 @@ export const serviceSignupUser = async (credentials: any) => {
     return Promise.resolve();
 };
 export const subscribeToUserProfile = async (userId: string, callback: (user: any) => void) => {
+
     // مؤقت - يحتاج تنفيذ منفصل مع Firebase Realtime Database
     console.log('Subscribing to user profile:', userId);
     // محاكاة callback

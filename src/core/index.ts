@@ -95,7 +95,7 @@ import { MemoryManager } from './utils/memory-manager';
 
 // تهيئة إدارة الذاكرة
 MemoryManager.initialize({
-    maxCacheSize: 100 * 1024 * 1024, // 50MB
+    maxCacheSize: 50 * 1024 * 1024, // 50MB
     maxEntries: 1000,
     cleanupInterval: 30000, // 30 seconds
     warningThreshold: 0.7, // 70%

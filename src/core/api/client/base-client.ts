@@ -582,6 +582,7 @@ export abstract class CreditBasedService<TInput = unknown, TOutput = unknown> ex
 
     async call(data: TInput, token?: string): Promise<TOutput> {
         // يمكن إضافة منطق التحقق من الائتمانات هنا
+
         console.log(`This operation costs ${this.creditCost} credits`);
         return super.call(data, token);
     }

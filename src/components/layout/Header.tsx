@@ -144,7 +144,7 @@ export function Header() {
 
   const showSkeleton = !isClient || isLoadingAuth;
 
-  const hasNoCredits = userProfile && userProfile.credits === 0;
+  const hasNoCredits = userProfile && (userProfile.credits ?? 0) === 0;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 shadow-soft">
@@ -218,7 +218,7 @@ export function Header() {
                     >
                       <Link href="/pricing">
                         <Gem className="h-4 w-4" />
-                        <span>{userProfile.credits} {isClient && t('header.credits')}</span>
+                        <span>{userProfile.credits ?? 0} {isClient && t('header.credits')}</span>
                       </Link>
                     </Button>
                   </TooltipTrigger>

@@ -183,7 +183,21 @@ export async function fetchUsersApi(
     token: string,
     params: UserListParams = {}
 ): Promise<UserListResponse> {
-    return userService.list.call(token, params);
+    const searchParams = new URLSearchParams();
+
+    if (params.page) searchParams.append('page', params.page.toString());
+    if (params.limit) searchParams.append('limit', params.limit.toString());
+    if (params.search) searchParams.append('search', params.search);
+    if (params.sortBy) searchParams.append('sortBy', params.sortBy);
+    if (params.sortOrder) searchParams.append('sortOrder', params.sortOrder);
+
+    const endpoint = `/api/admin/users?${searchParams.toString()}`;
+    const response = await apiClient.get<UserListResponse>(endpoint, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        }
+    });
+    return response.data;
 }
 
 /**
@@ -193,7 +207,12 @@ export async function createUserApi(
     data: CreateUserData,
     token: string
 ): Promise<UserProfile> {
-    return userService.create.call(data, token);
+    const response = await apiClient.post<UserProfile>('/api/admin/users', data, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        }
+    });
+    return response.data;
 }
 
 /**
@@ -204,7 +223,13 @@ export async function updateUserApi(
     data: UpdateUserData,
     token: string
 ): Promise<UserProfile> {
-    return userService.update.call(data, token, userId);
+    const endpoint = `/api/admin/users/${userId}`;
+    const response = await apiClient.put<UserProfile>(endpoint, data, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        }
+    });
+    return response.data;
 }
 
 /**
@@ -214,7 +239,13 @@ export async function deleteUserApi(
     userId: string,
     token: string
 ): Promise<{ message: string }> {
-    return userService.delete.call({}, token, userId);
+    const endpoint = `/api/admin/users/${userId}`;
+    const response = await apiClient.delete<{ message: string }>(endpoint, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        }
+    });
+    return response.data;
 }
 
 /**
@@ -224,14 +255,21 @@ export async function fetchUserProfileApi(
     userId: string,
     token: string
 ): Promise<UserProfile> {
-    return userService.get.call(token, userId);
+    const endpoint = `/api/users/${userId}`;
+    const response = await apiClient.get<UserProfile>(endpoint, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        }
+    });
+    return response.data;
 }
 
 /**
  * دالة الحصول على قائمة المدراء
  */
 export async function fetchAdminsApi(): Promise<UserProfile[]> {
-    return userService.getAdmins.call();
+    const response = await apiClient.get<UserProfile[]>('/api/admins');
+    return response.data;
 }
 
 /**
@@ -241,5 +279,11 @@ export async function sendPasswordResetEmailApi(
     userId: string,
     token: string
 ): Promise<{ message: string }> {
-    return userService.sendPasswordReset.call({}, token, userId);
+    const endpoint = `/api/users/${userId}/reset-password`;
+    const response = await apiClient.post<{ message: string }>(endpoint, {}, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        }
+    });
+    return response.data;
 }
