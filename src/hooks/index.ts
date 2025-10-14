@@ -1,8 +1,11 @@
 // فهرس شامل لجميع الـ Hooks في المشروع
 // منظم حسب الفئات والوظائف
 
-// ===== النظام الأساسي - Core System =====
-export * from '../core';
+// ===== النظام الجديد - New System =====
+export * from './use-ai-tools-new';
+export * from './use-analytics-new';
+export * from './use-user-management-new';
+export * from './use-user-new';
 
 // ===== Enhanced Hooks - النظام المحسن =====
 export * from './use-export-enhanced';

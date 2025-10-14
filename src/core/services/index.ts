@@ -17,6 +17,9 @@ export * from './payment-service';
 export * from './project-service';
 export * from './team-service';
 
+// طبقة التوافق للانتقال التدريجي
+export * from './compatibility-layer';
+
 // إعادة تصدير الخدمات الرئيسية للسهولة
 export { adminService, adminUtils } from './admin-service';
 export { aiService, aiUtils } from './ai-service';
