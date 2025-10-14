@@ -1,19 +1,15 @@
 /**
- * API Route لقوالب PPTX - النسخة الجديدة الموحدة
+ * API Route لقوالب PPTX - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لقوالب PPTX مع Lazy Seeding
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 
-/**
- * معالج جلب قوالب PPTX مع Lazy Seeding
- */
-class GetPptxTemplatesHandler extends SimpleApiHandler<{ [key: string]: any }> {
-    protected async processRequest() {
+export const GET = createApiHandler(async (context) => {
+    try {
         const stylesCollection = adminDb.collection('templates').doc('pptx').collection('styles');
         let snapshot = await stylesCollection.get();
 
@@ -34,15 +30,9 @@ class GetPptxTemplatesHandler extends SimpleApiHandler<{ [key: string]: any }> {
             templates[doc.id] = doc.data();
         });
 
-        return templates;
+        return ApiResponse.success(templates);
+    } catch (error) {
+        console.error('Error fetching PPTX templates:', error);
+        return ApiResponse.error('Failed to fetch PPTX templates', 500);
     }
-}
-
-// إنشاء المعالج
-const getPptxTemplatesHandler = new GetPptxTemplatesHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    getPptxTemplatesHandler,
-    { requireAuth: false, logging: true } // Public endpoint for fetching templates
-);
+}, { requireAuth: false });

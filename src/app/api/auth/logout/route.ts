@@ -1,19 +1,13 @@
 /**
- * API Route لتسجيل الخروج - النسخة الجديدة الموحدة
+ * API Route لتسجيل الخروج - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتسجيل الخروج
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { createApiResponseEnhanced } from '@/core/api';
-import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
-import { ApiHandlerContext } from '@/core/types/api-types';
+import { ApiResponse, createApiHandler } from '@/core/api';
 
-/**
- * معالج تسجيل الخروج
- */
-class LogoutHandler extends SimpleApiHandler<{ message: string }> {
-    protected async processRequest(context: ApiHandlerContext) {
+export const POST = createApiHandler(async (context) => {
+    try {
         // إعداد خيارات الكوكيز لحذف الجلسة
         const options = {
             name: '__session',
@@ -23,21 +17,12 @@ class LogoutHandler extends SimpleApiHandler<{ message: string }> {
         };
 
         // إنشاء الاستجابة مع حذف الكوكي
-        const response = createApiResponseEnhanced({ message: "Logout successful" }, 200);
+        const response = ApiResponse.success({ message: "Logout successful" });
         response.cookies.set(options);
 
-        return { message: "Logout successful" };
+        return response;
+    } catch (error) {
+        console.error('Logout error:', error);
+        return ApiResponse.error('Logout failed', 500);
     }
-}
-
-// إنشاء المعالج
-const logoutHandler = new LogoutHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    logoutHandler,
-    {
-        requireAuth: true,
-        logging: true
-    }
-);
+}, { requireAuth: true });

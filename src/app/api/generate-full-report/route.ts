@@ -1,6 +1,11 @@
-// This file is no longer needed and can be deleted.
-import { createApiResponseEnhanced } from '@/core/api';
+/**
+ * API Route لتوليد التقرير الكامل (مهمل) - النسخة المبسطة
+ *
+ * يستخدم النظام الجديد المبسط للـ API
+ */
 
-export async function POST() {
-    return createApiResponseEnhanced({ message: "This feature has been deprecated." }, 410);
-}
+import { ApiResponse, createApiHandler } from '@/core/api';
+
+export const POST = createApiHandler(async (context) => {
+    return ApiResponse.error("This feature has been deprecated.", 410);
+});

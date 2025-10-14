@@ -1,21 +1,14 @@
 /**
- * API Route للوكلاء - النسخة الجديدة الموحدة
+ * API Route للوكلاء - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للوكلاء
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 
-/**
- * معالج قائمة الوكلاء
- */
-class AgentsListHandler extends SimpleApiHandler<Array<{
-    id: string;
-    [key: string]: any;
-}>> {
-    protected async processRequest(context: any) {
+export const GET = createApiHandler(async (context) => {
+    try {
         const snapshot = await adminDb.collection('agents')
             .where('isEnabled', '==', true)
             .orderBy('name')
@@ -26,17 +19,9 @@ class AgentsListHandler extends SimpleApiHandler<Array<{
             ...doc.data()
         }));
 
-        return agents;
+        return ApiResponse.success(agents);
+    } catch (error) {
+        console.error('Error fetching agents:', error);
+        return ApiResponse.error('Failed to fetch agents', 500);
     }
-}
-
-// إنشاء المعالج
-const agentsListHandler = new AgentsListHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    agentsListHandler,
-    {
-        logging: true
-    }
-);
+});

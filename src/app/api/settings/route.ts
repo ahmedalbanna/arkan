@@ -1,18 +1,14 @@
 /**
- * API Route للإعدادات - النسخة الجديدة الموحدة
+ * API Route للإعدادات - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للإعدادات
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 
-/**
- * معالج الإعدادات
- */
-class SettingsHandler extends SimpleApiHandler<any> {
-    protected async processRequest(context: any) {
+export const GET = createApiHandler(async (context) => {
+    try {
         const settingsRef = adminDb.collection('settings').doc('defaults');
         const doc = await settingsRef.get();
 
@@ -25,21 +21,12 @@ class SettingsHandler extends SimpleApiHandler<any> {
                 iban: 'SA03 8000 0000 6080 1016 7519',
             };
             await settingsRef.set(defaultSettings);
-            return defaultSettings;
+            return ApiResponse.success(defaultSettings);
         }
 
-        return doc.data();
+        return ApiResponse.success(doc.data());
+    } catch (error) {
+        console.error('Error fetching settings:', error);
+        return ApiResponse.error('Failed to fetch settings', 500);
     }
-}
-
-// إنشاء المعالج
-const settingsHandler = new SettingsHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    settingsHandler,
-    {
-        requireAuth: false, // هذا الـ endpoint عام ولا يتطلب مصادقة
-        logging: true
-    }
-);
+}, { requireAuth: false });

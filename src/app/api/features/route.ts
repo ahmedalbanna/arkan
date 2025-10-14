@@ -1,19 +1,15 @@
 /**
- * API Route للميزات - النسخة الجديدة الموحدة
+ * API Route للميزات - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للميزات
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { defaultFeatures } from '@/lib/features';
 import { adminDb } from '@/lib/firebase/server-init';
 
-/**
- * معالج قائمة الميزات
- */
-class FeaturesListHandler extends SimpleApiHandler<any[]> {
-    protected async processRequest(context: any) {
+export const GET = createApiHandler(async (context) => {
+    try {
         const featuresCollection = adminDb.collection('features');
         let snapshot = await featuresCollection.get();
 
@@ -29,18 +25,9 @@ class FeaturesListHandler extends SimpleApiHandler<any[]> {
         }
 
         const features = snapshot.docs.map(doc => doc.data());
-        return features;
+        return ApiResponse.success(features);
+    } catch (error) {
+        console.error('Error fetching features:', error);
+        return ApiResponse.error('Failed to fetch features', 500);
     }
-}
-
-// إنشاء المعالج
-const featuresListHandler = new FeaturesListHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    featuresListHandler,
-    {
-        requireAuth: false, // هذا الـ endpoint عام ولا يتطلب مصادقة
-        logging: true
-    }
-);
+}, { requireAuth: false });

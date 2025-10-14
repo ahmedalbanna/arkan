@@ -1,12 +1,10 @@
 /**
- * API Route للتحويل - النسخة الجديدة الموحدة
+ * API Route للتحويل - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للتحويل
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-// import { translateText } from '@/ai/flows/translate-text';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -16,21 +14,10 @@ const translateSchema = z.object({
     targetLang: z.string().min(2),
 });
 
-/**
- * معالج التحويل
- */
-class TranslateHandler extends CreditBasedApiHandler<{
-    text: string;
-    targetLang: string;
-}, {
-    translatedText: string;
-}> {
-    protected inputSchema = translateSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-    protected async processRequest(data: any, context: any) {
-        const { text, targetLang } = data;
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const { text, targetLang } = await request.json();
 
         const agentInput = { text, targetLang };
         // const result = await translateText(agentInput);
@@ -42,25 +29,17 @@ class TranslateHandler extends CreditBasedApiHandler<{
             userId: user.id,
             input: agentInput,
             output: result,
-            creditCost: this.creditCost
+            creditCost: 1
         });
 
         // تنظيف النص المترجم
         const cleanedTranslatedText = result.translatedText.replace(/---.*?---/g, '');
 
-        return {
+        return ApiResponse.success({
             translatedText: cleanedTranslatedText
-        };
+        });
+    } catch (error) {
+        console.error('Translate error:', error);
+        return ApiResponse.error('Failed to translate text', 500);
     }
-}
-
-// إنشاء المعالج
-const translateHandler = new TranslateHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    translateHandler,
-    {
-        logging: true
-    }
-);
+}, { validateBody: translateSchema, requireAuth: true });

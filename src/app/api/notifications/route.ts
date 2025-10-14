@@ -1,21 +1,14 @@
 /**
- * API Route للإشعارات - النسخة الجديدة الموحدة
+ * API Route للإشعارات - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للإشعارات
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 
-/**
- * معالج قائمة الإشعارات
- */
-class NotificationsListHandler extends SimpleApiHandler<Array<{
-    id: string;
-    [key: string]: any;
-}>> {
-    protected async processRequest(context: any) {
+export const GET = createApiHandler(async (context) => {
+    try {
         const { user } = context;
 
         // هذا استعلام Firestore. التطبيق يستخدم الآن RTDB للإشعارات.
@@ -32,17 +25,9 @@ class NotificationsListHandler extends SimpleApiHandler<Array<{
             ...doc.data()
         }));
 
-        return notifications;
+        return ApiResponse.success(notifications);
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        return ApiResponse.error('Failed to fetch notifications', 500);
     }
-}
-
-// إنشاء المعالج
-const notificationsListHandler = new NotificationsListHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    notificationsListHandler,
-    {
-        logging: true
-    }
-);
+}, { requireAuth: true });

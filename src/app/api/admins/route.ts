@@ -1,32 +1,22 @@
 /**
- * API Route لقائمة المدراء - النسخة الجديدة الموحدة
+ * API Route لقائمة المدراء - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لقائمة المدراء
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 
-/**
- * معالج جلب قائمة المدراء
- */
-class GetAdminsHandler extends SimpleApiHandler<any[]> {
-    protected async processRequest() {
+export const GET = createApiHandler(async (context) => {
+    try {
         const adminsSnapshot = await adminDb.collection('users').where('role', '==', 'admin').get();
         if (adminsSnapshot.empty) {
-            return [];
+            return ApiResponse.success([]);
         }
         const admins = adminsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        return admins;
+        return ApiResponse.success(admins);
+    } catch (error) {
+        console.error('Error fetching admins:', error);
+        return ApiResponse.error('Failed to fetch admins', 500);
     }
-}
-
-// إنشاء المعالج
-const getAdminsHandler = new GetAdminsHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    getAdminsHandler,
-    { logging: true }
-);
+}, { requireAuth: true });

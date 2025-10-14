@@ -1,200 +1,60 @@
 /**
- * API Middleware الموحد
+ * API Middleware المبسط
  *
- * هذا الملف يحتوي على جميع middleware المستخدمة في نظام API الموحد
+ * يحتوي على الوظائف الأساسية فقط
  */
 
-import { withEnhancedAuth } from '@/core/api';
-import { deductCredit } from '@/services';
+import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import type {
-    ApiHandlerContext,
-    ApiLogEntry,
-    ApiMiddlewareOptions,
-    TypedApiHandler
-} from '../../types/api-types';
+
+// أنواع البيانات الأساسية
+export interface ApiMiddlewareOptions {
+    requireAuth?: boolean;
+    requireAdmin?: boolean;
+    logging?: boolean;
+}
+
+export interface TypedApiHandler {
+    handle(context: any): Promise<Response>;
+}
 
 /**
- * Middleware الرئيسي لجميع API endpoints
+ * Middleware الرئيسي المبسط
  */
 export const withApiMiddleware = (
     handler: TypedApiHandler,
     options: ApiMiddlewareOptions = {}
 ) => {
-    return withEnhancedAuth(async (context: ApiHandlerContext): Promise<NextResponse | Response> => {
-        const startTime = Date.now();
-        const requestId = generateRequestId();
-
+    return async (request: NextRequest, context: { params: { [key: string]: string } }) => {
         try {
-            // Rate Limiting
-            if (options.rateLimit && context.user) {
-                await checkRateLimit(context.user.id, options.rateLimit);
-            }
-
-            // Credit Deduction
-            if (options.creditCost && options.creditCost > 0 && context.user) {
-                await deductCredit(context.user.id, options.creditCost);
-            }
-
-            // Logging
+            // تسجيل الطلب إذا كان مطلوباً
             if (options.logging) {
-                await logApiCall({
-                    requestId,
-                    userId: context.user?.id || 'anonymous',
-                    endpoint: context.request.url,
-                    method: context.request.method,
-                    timestamp: new Date().toISOString(),
-                    duration: 0, // سيتم تحديثه لاحقاً
-                    statusCode: 200
-                });
+                console.log(`API Request: ${request.method} ${request.url}`);
             }
 
-            // تنفيذ المعالج
-            const response = await handler.handle(context);
+            // تنفيذ الـ handler
+            const response = await handler.handle({
+                request,
+                params: context.params,
+            });
 
-            // تحديث مدة التنفيذ
-            const duration = Date.now() - startTime;
-            if (options.logging) {
-                await updateApiLog(requestId, { duration, statusCode: response.status });
-            }
-
-            return response as unknown as NextResponse;
+            return response;
         } catch (error) {
-            // تسجيل الخطأ
-            const duration = Date.now() - startTime;
-            if (options.logging) {
-                await logApiCall({
-                    requestId,
-                    userId: context.user?.id || 'anonymous',
-                    endpoint: context.request.url,
-                    method: context.request.method,
-                    timestamp: new Date().toISOString(),
-                    duration,
-                    statusCode: 500,
-                    error: error instanceof Error ? error.message : 'Unknown error'
-                });
-            }
-
-            throw error;
+            console.error('API Middleware Error:', error);
+            return NextResponse.json(
+                { success: false, error: 'Internal server error' },
+                { status: 500 }
+            );
         }
-    }, {
-        requireAuth: options.requireAuth ?? true,
-        requireAdmin: options.requireAdmin ?? false
-    });
+    };
 };
 
-/**
- * Middleware للتحقق من Rate Limiting
- */
-async function checkRateLimit(
-    userId: string,
-    rateLimit: { windowMs: number; maxRequests: number }
-): Promise<void> {
-    // يمكن تنفيذ نظام Rate Limiting هنا
-    // حالياً نتركه فارغاً للتنفيذ لاحقاً
-    console.log(`Checking rate limit for user ${userId}`, rateLimit);
-}
+// دوال مساعدة للاستخدام السريع
+export const withAuth = (handler: TypedApiHandler) =>
+    withApiMiddleware(handler, { requireAuth: true });
 
-/**
- * Middleware لتسجيل استدعاءات API
- */
-async function logApiCall(logEntry: ApiLogEntry): Promise<void> {
-    // يمكن إضافة نظام تسجيل متقدم هنا
-    console.log('API Call Logged:', logEntry);
-}
+export const withAdmin = (handler: TypedApiHandler) =>
+    withApiMiddleware(handler, { requireAdmin: true });
 
-/**
- * تحديث سجل API
- */
-async function updateApiLog(requestId: string, updates: Partial<ApiLogEntry>): Promise<void> {
-    console.log(`Updating API log for ${requestId}:`, updates);
-}
-
-/**
- * توليد معرف فريد للطلب
- */
-function generateRequestId(): string {
-    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
-
-/**
- * Middleware للتحقق من الصلاحيات
- */
-export const withPermissionCheck = (
-    handler: TypedApiHandler,
-    permission: string
-) => {
-    return withApiMiddleware(handler, {
-        logging: true
-    });
-};
-
-/**
- * Middleware للعمليات التي تتطلب ائتمانات
- */
-export const withCreditDeduction = (
-    handler: TypedApiHandler,
-    creditCost: number
-) => {
-    return withApiMiddleware(handler, {
-        creditCost,
-        logging: true
-    });
-};
-
-/**
- * Middleware للعمليات الإدارية
- */
-export const withAdminAccess = (
-    handler: TypedApiHandler
-) => {
-    return withApiMiddleware(handler, {
-        requireAdmin: true,
-        logging: true
-    });
-};
-
-/**
- * Middleware للعمليات العامة (بدون مصادقة)
- */
-export const withPublicAccess = (
-    handler: TypedApiHandler
-) => {
-    return withApiMiddleware(handler, {
-        requireAuth: false,
-        logging: true
-    });
-};
-
-/**
- * Middleware للعمليات المحدودة
- */
-export const withRateLimit = (
-    handler: TypedApiHandler,
-    rateLimit: { windowMs: number; maxRequests: number }
-) => {
-    return withApiMiddleware(handler, {
-        rateLimit,
-        logging: true
-    });
-};
-
-/**
- * Middleware مركب للعمليات المعقدة
- */
-export const withFullMiddleware = (
-    handler: TypedApiHandler,
-    options: {
-        creditCost?: number;
-        requireAdmin?: boolean;
-        rateLimit?: { windowMs: number; maxRequests: number };
-        logging?: boolean;
-    }
-) => {
-    return withApiMiddleware(handler, {
-        creditCost: options.creditCost,
-        requireAdmin: options.requireAdmin,
-        rateLimit: options.rateLimit,
-        logging: options.logging ?? true
-    });
-};
+export const withLogging = (handler: TypedApiHandler) =>
+    withApiMiddleware(handler, { logging: true });

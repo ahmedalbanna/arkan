@@ -1,12 +1,11 @@
 /**
- * API Route لتوليد الصور - النسخة الجديدة الموحدة
+ * API Route لتوليد الصور - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد الصور
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
 import { generateImage } from '@/ai/flows/unified';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -15,40 +14,25 @@ const generateImageSchema = z.object({
     prompt: z.string().min(3, "Prompt must be at least 3 characters long."),
 });
 
-/**
- * معالج توليد الصور
- */
-class GenerateImageHandler extends CreditBasedApiHandler<{
-    prompt: string;
-}, any> {
-    protected inputSchema = generateImageSchema;
-    protected creditCost = 5; // توليد الصور مكلف
-    protected requiresAdmin = false;
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const { prompt } = await request.json();
 
-        const result = await generateImage(data as any);
+        const result = await generateImage({ prompt } as any);
 
         // تسجيل العملية
         await logGeneration({
             agentId: 'generate-image',
             userId: user.id,
-            input: data,
+            input: { prompt },
             output: { imageUrl: `data:image/...;base64,...[TRUNCATED]` },
-            creditCost: this.creditCost
+            creditCost: 5 // توليد الصور مكلف
         });
 
-        return result;
+        return ApiResponse.success(result);
+    } catch (error) {
+        console.error('Generate image error:', error);
+        return ApiResponse.error('Failed to generate image', 500);
     }
-}
-
-// إنشاء المعالج
-const generateImageHandler = new GenerateImageHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    generateImageHandler,
-    {
-        logging: true
-    }
-);
+}, { validateBody: generateImageSchema, requireAuth: true });

@@ -1,30 +1,18 @@
 /**
- * نظام API الموحد
+ * نظام API المبسط والموحد
  *
- * هذا الملف يحتوي على جميع مكونات نظام API الموحد
- * بما في ذلك العميل والـ middleware والمعالجات
+ * يحتوي على جميع الوظائف الأساسية المطلوبة لـ API
+ * بدون التعقيدات غير الضرورية
  */
 
-// API Client
+// النظام المبسط الجديد
+export * from './simple-api';
+
+// العميل الأساسي (للعمليات المعقدة)
 export * from './client';
 
-// Middleware
-export * from './middleware';
-
-// Handlers
-export * from './handlers';
-
-// Enhanced API Utils (new system)
+// النظام القديم (للتوافق مع الكود الموجود)
 export {
     createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth
 } from './enhanced-api-utils';
-
-// Types
-export type { ApiClientConfig, HttpError, HttpHeaders, HttpMethod, HttpRequestOptions, HttpResponse } from '../types/api';
-export type { ApiHandler, ApiHandlerOptions } from './handlers/base-handler';
-export type { AuthContext, AuthMiddlewareOptions } from './middleware/auth-middleware';
-export type { CorsOptions } from './middleware/cors-middleware';
-export type { LoggingOptions } from './middleware/logging-middleware';
-export type { RateLimitOptions } from './middleware/rate-limit-middleware';
-export type { ValidatedApiHandler, ValidationMiddlewareOptions } from './middleware/validation-middleware';
 
