@@ -1,11 +1,10 @@
 /**
- * API Route للمعاملات - النسخة الجديدة الموحدة
+ * API Route للمعاملات - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للمعاملات
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { getTransactionsByDateRange, getTransactionsByStatus } from '@/lib/db/queries';
 import { z } from 'zod';
 
@@ -18,20 +17,14 @@ const getTransactionsSchema = z.object({
     endDate: z.string().datetime().optional(),
 });
 
-/**
- * معالج جلب المعاملات
- */
-class GetTransactionsHandler extends SimpleApiHandler<any> {
-    protected inputSchema = getTransactionsSchema;
-    protected requiresAdmin = true;
-
-    protected async processRequest(context: any) {
+export const GET = createApiHandler(async (context) => {
+    try {
         const { request } = context;
         const { searchParams } = new URL(request.url);
         const queryValidation = getTransactionsSchema.safeParse(Object.fromEntries(searchParams));
 
         if (!queryValidation.success) {
-            throw new Error(queryValidation.error.message);
+            return ApiResponse.badRequest(`Validation error: ${queryValidation.error.errors.map(e => e.message).join(', ')}`);
         }
 
         const { limit, lastVisibleId, status, startDate, endDate } = queryValidation.data;
@@ -39,7 +32,7 @@ class GetTransactionsHandler extends SimpleApiHandler<any> {
         // Handle report generation request
         if (startDate && endDate) {
             const transactions = await getTransactionsByDateRange(startDate, endDate);
-            return transactions;
+            return ApiResponse.success(transactions);
         }
 
         // Handle status-based fetching for the console
@@ -49,18 +42,12 @@ class GetTransactionsHandler extends SimpleApiHandler<any> {
                 limit: limit!,
                 lastVisibleId
             });
-            return { transactions, hasNextPage, lastVisibleId: newLastVisibleId };
+            return ApiResponse.success({ transactions, hasNextPage, lastVisibleId: newLastVisibleId });
         }
 
-        throw new Error('Missing required parameters. Provide either status or both startDate and endDate.');
+        return ApiResponse.badRequest('Missing required parameters. Provide either status or both startDate and endDate.');
+    } catch (error) {
+        console.error('Error fetching transactions:', error);
+        return ApiResponse.error('Failed to fetch transactions', 500);
     }
-}
-
-// إنشاء المعالج
-const getTransactionsHandler = new GetTransactionsHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    getTransactionsHandler,
-    { requireAdmin: true, logging: true }
-);
+}, { requireAdmin: true });

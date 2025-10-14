@@ -1,12 +1,11 @@
 /**
- * API Route لمعالجة الملفات - النسخة الجديدة الموحدة
+ * API Route لمعالجة الملفات - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لمعالجة الملفات
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
 import { imageToText, rewriteDocumentToMarkdown } from '@/ai/flows/unified';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -24,29 +23,18 @@ const SUPPORTED_MIME_TYPES = [
     'text/markdown',
 ];
 
-/**
- * معالج معالجة الملفات
- */
-class ProcessFileHandler extends CreditBasedApiHandler<{
-    file: File;
-}, {
-    markdown: string;
-}> {
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-    protected inputSchema = processFileSchema;
-    protected async processRequest(data: {
-        file: File;
-    }, context: any) {
-        const { user } = context;
-        const file = data.file;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const formData = await request.formData();
+        const file = formData.get('file') as File;
 
         if (!file) {
-            throw new Error('No file uploaded.');
+            return ApiResponse.badRequest('No file uploaded');
         }
 
         if (!SUPPORTED_MIME_TYPES.includes(file.type)) {
-            throw new Error(`Invalid file type. Supported types are: ${SUPPORTED_MIME_TYPES.join(', ')}`);
+            return ApiResponse.badRequest(`Invalid file type. Supported types are: ${SUPPORTED_MIME_TYPES.join(', ')}`);
         }
 
         const fileArrayBuffer = await file.arrayBuffer();
@@ -78,20 +66,12 @@ class ProcessFileHandler extends CreditBasedApiHandler<{
             userId: user.id,
             input: { fileName: file.name, fileType: file.type }, // لا نسجل الـ data URI كاملاً
             output: { markdownLength: markdownContent.length },
-            creditCost: this.creditCost
+            creditCost: 1
         });
 
-        return { markdown: markdownContent };
+        return ApiResponse.success({ markdown: markdownContent });
+    } catch (error) {
+        console.error('Process file error:', error);
+        return ApiResponse.error('Failed to process file', 500);
     }
-}
-
-// إنشاء المعالج
-const processFileHandler = new ProcessFileHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    processFileHandler,
-    {
-        logging: true
-    }
-);
+}, { requireAuth: true });

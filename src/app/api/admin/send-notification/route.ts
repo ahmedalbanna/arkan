@@ -1,11 +1,10 @@
 /**
- * API Route لإرسال الإشعارات - النسخة الجديدة الموحدة
+ * API Route لإرسال الإشعارات - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإرسال الإشعارات
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import admin from 'firebase-admin';
 import { z } from 'zod';
@@ -18,23 +17,15 @@ const sendNotificationSchema = z.object({
     link: z.string().url().optional(),
 });
 
-/**
- * معالج إرسال الإشعارات
- */
-class SendNotificationHandler extends ComplexApiHandler<z.infer<typeof sendNotificationSchema>, {
-    messageId: string;
-}> {
-    protected inputSchema = sendNotificationSchema;
-    protected requiresAdmin = true;
-    protected creditCost = 1;
-
-    protected async processRequest(data: z.infer<typeof sendNotificationSchema>) {
-        const { userId, title, body: notificationBody, link } = data;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { request } = context;
+        const { userId, title, body: notificationBody, link } = await request.json();
 
         // Get the user's device token from Firestore
         const tokenDoc = await adminDb.collection('deviceTokens').doc(userId).get();
         if (!tokenDoc.exists) {
-            throw new Error('User device token not found. They may not have granted notification permissions.');
+            return ApiResponse.notFound('User device token not found. They may not have granted notification permissions.');
         }
 
         const { token } = tokenDoc.data() as { token: string };
@@ -54,15 +45,9 @@ class SendNotificationHandler extends ComplexApiHandler<z.infer<typeof sendNotif
 
         const response = await admin.messaging().send(message);
 
-        return { messageId: response };
+        return ApiResponse.success({ messageId: response });
+    } catch (error) {
+        console.error('Error sending notification:', error);
+        return ApiResponse.error('Failed to send notification', 500);
     }
-}
-
-// إنشاء المعالج
-const sendNotificationHandler = new SendNotificationHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    sendNotificationHandler,
-    { requireAdmin: true, logging: true }
-);
+}, { validateBody: sendNotificationSchema, requireAdmin: true });

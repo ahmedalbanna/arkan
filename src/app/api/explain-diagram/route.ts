@@ -1,13 +1,12 @@
 /**
- * API Route لشرح المخططات - النسخة الجديدة الموحدة
+ * API Route لشرح المخططات - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لشرح المخططات
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
 import { ai } from '@/ai/genkit';
 import { ImageToTextInputSchema, ImageToTextOutputSchema } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -37,20 +36,10 @@ const explainDiagramPrompt = ai.definePrompt({
     }
 });
 
-/**
- * معالج شرح المخططات
- */
-class ExplainDiagramHandler extends CreditBasedApiHandler<{
-    imageDataUri: string;
-    prompt: string;
-}, {
-    explanation: string;
-}> {
-    protected inputSchema = explainDiagramSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const data = await request.json();
 
         const agentInput = data;
         const result = await explainDiagramPrompt(agentInput);
@@ -61,21 +50,13 @@ class ExplainDiagramHandler extends CreditBasedApiHandler<{
             userId: user.id,
             input: { prompt: agentInput.prompt },
             output: { explanationLength: result?.output?.text?.length ?? 0 },
-            creditCost: this.creditCost,
+            creditCost: 1,
         });
 
         // النتيجة من definePrompt لها شكل مختلف
-        return { explanation: result?.output?.text || '' };
+        return ApiResponse.success({ explanation: result?.output?.text || '' });
+    } catch (error) {
+        console.error('Explain diagram error:', error);
+        return ApiResponse.error('Failed to explain diagram', 500);
     }
-}
-
-// إنشاء المعالج
-const explainDiagramHandler = new ExplainDiagramHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    explainDiagramHandler,
-    {
-        logging: true
-    }
-);
+}, { validateBody: explainDiagramSchema, requireAuth: true });

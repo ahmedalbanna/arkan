@@ -1,33 +1,27 @@
 /**
- * API Route لترجمة النصوص - النسخة الجديدة الموحدة
+ * API Route لترجمة النصوص - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لترجمة النصوص
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-// import { translateText } from '@/ai/flows/translate-text';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
-export const ApiTranslateTextSchema = z.object({
+// Schema لترجمة النصوص
+const translateTextSchema = z.object({
     text: z.string(),
     targetLang: z.string(),
 });
 
-/**
- * معالج ترجمة النصوص
- */
-class TranslateTextHandler extends CreditBasedApiHandler<z.infer<typeof ApiTranslateTextSchema>, { translatedText: string }> {
-    protected inputSchema = ApiTranslateTextSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-    protected async processRequest(data: z.infer<typeof ApiTranslateTextSchema>, context: any) {
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const { text, targetLang } = await request.json();
 
-        const agentInput = data;
+        const agentInput = { text, targetLang };
         // const result = await translateText(agentInput);
-        const result = { translatedText: `Translated: ${agentInput.text}` };
+        const result = { translatedText: `Translated: ${text}` };
 
         // تسجيل العملية
         await logGeneration({
@@ -35,19 +29,13 @@ class TranslateTextHandler extends CreditBasedApiHandler<z.infer<typeof ApiTrans
             userId: user.id,
             input: agentInput,
             output: result,
-            creditCost: this.creditCost,
+            creditCost: 1,
         });
 
         const cleanedTranslatedText = result.translatedText.replace(/---.*?---/g, '');
-        return { translatedText: cleanedTranslatedText };
+        return ApiResponse.success({ translatedText: cleanedTranslatedText });
+    } catch (error) {
+        console.error('Translate text error:', error);
+        return ApiResponse.error('Failed to translate text', 500);
     }
-}
-
-// إنشاء المعالج
-const translateTextHandler = new TranslateTextHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    translateTextHandler,
-    { logging: true }
-);
+}, { validateBody: translateTextSchema, requireAuth: true });

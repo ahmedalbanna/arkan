@@ -1,61 +1,40 @@
 /**
- * API Route لتلخيص المشروع - النسخة الجديدة الموحدة
+ * API Route لتلخيص المشروع - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتلخيص المشروع
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { summarizeFullProject } from '@/ai/flows/unified';
-import { AnyProjectProposalSchema } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { summarizeProject } from '@/ai/flows/unified';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
 // Schema لتلخيص المشروع
 const summarizeSchema = z.object({
-    proposal: AnyProjectProposalSchema,
+    proposal: z.any(),
     reportMarkdown: z.string().optional(),
 });
 
-/**
- * معالج تلخيص المشروع
- */
-class SummarizeProjectHandler extends CreditBasedApiHandler<{
-    proposal: any;
-    reportMarkdown?: string;
-}, any> {
-    protected inputSchema = summarizeSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const data = await request.json();
 
-        const agentInput = {
-            proposal: data.proposal,
-            reportMarkdown: data.reportMarkdown || '',
-        };
-        const result = await summarizeFullProject(agentInput as any);
+        const agentInput = data;
+        const result = await summarizeProject(agentInput);
 
         // تسجيل العملية
         await logGeneration({
-            agentId: 'summarize-full-project',
+            agentId: 'summarize-project',
             userId: user.id,
-            input: { proposalTitle: agentInput.proposal.title, reportLength: agentInput.reportMarkdown.length },
+            input: agentInput,
             output: result,
-            creditCost: this.creditCost
+            creditCost: 1,
         });
 
-        return result;
+        return ApiResponse.success(result);
+    } catch (error) {
+        console.error('Summarize project error:', error);
+        return ApiResponse.error('Failed to summarize project', 500);
     }
-}
-
-// إنشاء المعالج
-const summarizeProjectHandler = new SummarizeProjectHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    summarizeProjectHandler,
-    {
-        logging: true
-    }
-);
+}, { validateBody: summarizeSchema, requireAuth: true });

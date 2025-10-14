@@ -1,14 +1,12 @@
 /**
- * API Route لإدارة المستخدمين - النسخة الجديدة الموحدة
+ * API Route لإدارة المستخدمين - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإدارة المستخدمين
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { UserSchemas } from '@/core/validation/api-validators';
 import { createUser, getPaginatedUsers } from '@/lib/db/queries';
-import type { UserProfile } from '@/lib/types';
 import { z } from 'zod';
 
 // Schema لاستعلام قائمة المستخدمين
@@ -17,60 +15,35 @@ const userListQuerySchema = z.object({
     lastVisibleId: z.string().optional(),
 });
 
-/**
- * معالج قائمة المستخدمين (GET)
- */
-class AdminUserListHandler extends SimpleApiHandler<{
-    users: UserProfile[];
-    hasNextPage: boolean;
-    lastVisibleId: string | null;
-}> {
-    protected async processRequest(context: any) {
-        const { searchParams } = new URL(context.request.url);
+export const GET = createApiHandler(async (context) => {
+    try {
+        const { request } = context;
+        const { searchParams } = new URL(request.url);
         const queryValidation = userListQuerySchema.safeParse(Object.fromEntries(searchParams));
 
         if (!queryValidation.success) {
-            throw new Error(`Validation error: ${queryValidation.error.errors.map(e => e.message).join(', ')}`);
+            return ApiResponse.badRequest(`Validation error: ${queryValidation.error.errors.map(e => e.message).join(', ')}`);
         }
 
         const { limit, lastVisibleId } = queryValidation.data;
         const results = await getPaginatedUsers({ limit, lastVisibleId });
 
-        return results;
+        return ApiResponse.success(results);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        return ApiResponse.error('Failed to fetch users', 500);
     }
-}
+}, { requireAdmin: true });
 
-/**
- * معالج إنشاء المستخدم (POST)
- */
-class AdminCreateUserHandler extends ComplexApiHandler<{
-    name: string;
-    email: string;
-    password: string;
-    role: 'user' | 'admin';
-    credits: number;
-}, UserProfile> {
-    protected inputSchema = UserSchemas.createUser;
-    protected requiresAdmin = true;
-    protected creditCost = 1;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { request } = context;
+        const data = await request.json();
 
-    protected async processRequest(data: any, context: any) {
         const newUser = await createUser(data);
-        return newUser as unknown as UserProfile;
+        return ApiResponse.created(newUser);
+    } catch (error) {
+        console.error('Error creating user:', error);
+        return ApiResponse.error('Failed to create user', 500);
     }
-}
-
-// إنشاء المعالجات
-const adminUserListHandler = new AdminUserListHandler();
-const adminCreateUserHandler = new AdminCreateUserHandler();
-
-// تصدير الـ handlers مع middleware
-export const GET = withApiMiddleware(
-    adminUserListHandler,
-    { requireAdmin: true, logging: true }
-);
-
-export const POST = withApiMiddleware(
-    adminCreateUserHandler,
-    { requireAdmin: true, logging: true }
-);
+}, { validateBody: UserSchemas.createUser, requireAdmin: true });

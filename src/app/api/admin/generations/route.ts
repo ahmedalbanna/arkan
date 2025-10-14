@@ -1,11 +1,10 @@
 /**
- * API Route لسجل التوليدات - النسخة الجديدة الموحدة
+ * API Route لسجل التوليدات - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لسجل التوليدات
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { getUserProfile } from '@/lib/db/queries';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
@@ -18,20 +17,14 @@ const getLogsQuerySchema = z.object({
     lastVisibleId: z.string().optional(),
 });
 
-/**
- * معالج جلب سجل التوليدات
- */
-class GetGenerationsLogHandler extends SimpleApiHandler<any> {
-    protected inputSchema = getLogsQuerySchema;
-    protected requiresAdmin = true;
-
-    protected async processRequest(context: any) {
+export const GET = createApiHandler(async (context) => {
+    try {
         const { request } = context;
         const { searchParams } = new URL(request.url);
         const queryValidation = getLogsQuerySchema.safeParse(Object.fromEntries(searchParams));
 
         if (!queryValidation.success) {
-            throw new Error(queryValidation.error.message);
+            return ApiResponse.badRequest(`Validation error: ${queryValidation.error.errors.map(e => e.message).join(', ')}`);
         }
 
         const { limit, agentId, userId, lastVisibleId } = queryValidation.data;
@@ -69,19 +62,13 @@ class GetGenerationsLogHandler extends SimpleApiHandler<any> {
         const logs = await Promise.all(logsPromises);
         const hasNextPage = snapshot.docs.length > limit;
 
-        return {
+        return ApiResponse.success({
             logs,
             hasNextPage,
             lastVisibleId: hasNextPage && logs.length > 0 ? logs[logs.length - 1].id : null,
-        };
+        });
+    } catch (error) {
+        console.error('Error fetching generations log:', error);
+        return ApiResponse.error('Failed to fetch generations log', 500);
     }
-}
-
-// إنشاء المعالج
-const getGenerationsLogHandler = new GetGenerationsLogHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    getGenerationsLogHandler,
-    { requireAdmin: true, logging: true }
-);
+}, { requireAdmin: true });

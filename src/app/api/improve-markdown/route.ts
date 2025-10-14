@@ -1,12 +1,11 @@
 /**
- * API Route لتحسين Markdown - النسخة الجديدة الموحدة
+ * API Route لتحسين Markdown - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتحسين Markdown
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
 import { improveReportMarkdown } from '@/ai/flows/unified';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -16,20 +15,11 @@ const improveMarkdownSchema = z.object({
     userPrompt: z.string().min(10, 'Instructions for the AI must be at least 10 characters.'),
 });
 
-/**
- * معالج تحسين Markdown
- */
-class ImproveMarkdownHandler extends CreditBasedApiHandler<{
-    markdownContent: string;
-    userPrompt: string;
-}, any> {
-    protected inputSchema = improveMarkdownSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const { markdownContent, userPrompt } = await request.json();
 
-        const { markdownContent, userPrompt } = data;
         const result = await improveReportMarkdown({ markdownContent, userPrompt });
 
         // تسجيل العملية
@@ -38,20 +28,12 @@ class ImproveMarkdownHandler extends CreditBasedApiHandler<{
             userId: user.id,
             input: { markdownLength: markdownContent.length, prompt: userPrompt },
             output: { improvedMarkdownLength: result.improvedMarkdown.length },
-            creditCost: this.creditCost
+            creditCost: 1
         });
 
-        return result;
+        return ApiResponse.success(result);
+    } catch (error) {
+        console.error('Improve markdown error:', error);
+        return ApiResponse.error('Failed to improve markdown', 500);
     }
-}
-
-// إنشاء المعالج
-const improveMarkdownHandler = new ImproveMarkdownHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    improveMarkdownHandler,
-    {
-        logging: true
-    }
-);
+}, { validateBody: improveMarkdownSchema, requireAuth: true });

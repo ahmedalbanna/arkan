@@ -1,11 +1,10 @@
 /**
- * API Route لإدارة الوكلاء - النسخة الجديدة الموحدة
+ * API Route لإدارة الوكلاء - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإدارة الوكلاء
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import { AgentPromptSchema } from '@/lib/template-schemas';
 import { z } from 'zod';
@@ -25,33 +24,17 @@ const CreateAgentSchema = z.object({
     icon: z.string().optional(),
 });
 
-/**
- * معالج إنشاء وكيل جديد
- */
-class CreateAgentHandler extends ComplexApiHandler<{
-    id: string;
-    name: string;
-    description: string;
-    category: string;
-    pageUrl: string;
-    prompt: string | any;
-    icon?: string;
-}, {
-    id: string;
-    [key: string]: any;
-}> {
-    protected inputSchema = CreateAgentSchema;
-    protected requiresAdmin = true;
-    protected creditCost = 1;
-
-    protected async processRequest(data: any, context: any) {
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { request } = context;
+        const data = await request.json();
         const { id, ...agentData } = data;
 
         const agentRef = adminDb.collection('agents').doc(id);
         const doc = await agentRef.get();
 
         if (doc.exists) {
-            throw new Error('An agent with this ID already exists.');
+            return ApiResponse.badRequest('An agent with this ID already exists.');
         }
 
         await agentRef.set({
@@ -61,21 +44,12 @@ class CreateAgentHandler extends ComplexApiHandler<{
         });
 
         const newAgent = await agentRef.get();
-        return {
+        return ApiResponse.created({
             id: newAgent.id,
             ...newAgent.data()
-        };
+        });
+    } catch (error) {
+        console.error('Error creating agent:', error);
+        return ApiResponse.error('Failed to create agent', 500);
     }
-}
-
-// إنشاء المعالج
-const createAgentHandler = new CreateAgentHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    createAgentHandler,
-    {
-        requireAdmin: true,
-        logging: true
-    }
-);
+}, { validateBody: CreateAgentSchema, requireAdmin: true });

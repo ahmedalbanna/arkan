@@ -1,11 +1,10 @@
 /**
- * API Route لإدارة الأقسام - النسخة الجديدة الموحدة
+ * API Route لإدارة الأقسام - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإدارة الأقسام
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
@@ -18,44 +17,28 @@ const SectionSchema = z.object({
     type: z.enum(['report', 'diagram', 'presentation']),
 });
 
-/**
- * معالج جلب جميع الأقسام
- */
-class GetSectionsHandler extends SimpleApiHandler<any[]> {
-    protected async processRequest() {
+export const GET = createApiHandler(async (context) => {
+    try {
         const snapshot = await adminDb.collection('sections').orderBy('title').get();
         const sections = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        return sections;
+        return ApiResponse.success(sections);
+    } catch (error) {
+        console.error('Error fetching sections:', error);
+        return ApiResponse.error('Failed to fetch sections', 500);
     }
-}
+}, { requireAuth: false });
 
-/**
- * معالج إنشاء قسم جديد
- */
-class CreateSectionHandler extends ComplexApiHandler<z.infer<typeof SectionSchema>, any> {
-    protected inputSchema = SectionSchema;
-    protected requiresAdmin = true;
-    protected creditCost = 1;
-
-    protected async processRequest(data: z.infer<typeof SectionSchema>) {
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { request } = context;
+        const data = await request.json();
         const { id, ...sectionData } = data;
+
         const docRef = adminDb.collection('sections').doc(id);
         await docRef.set(sectionData);
-        return { id, ...sectionData };
+        return ApiResponse.created({ id, ...sectionData });
+    } catch (error) {
+        console.error('Error creating section:', error);
+        return ApiResponse.error('Failed to create section', 500);
     }
-}
-
-// إنشاء المعالجات
-const getSectionsHandler = new GetSectionsHandler();
-const createSectionHandler = new CreateSectionHandler();
-
-// تصدير الـ handlers مع middleware
-export const GET = withApiMiddleware(
-    getSectionsHandler,
-    { logging: true }
-);
-
-export const POST = withApiMiddleware(
-    createSectionHandler,
-    { requireAdmin: true, logging: true }
-);
+}, { validateBody: SectionSchema, requireAdmin: true });

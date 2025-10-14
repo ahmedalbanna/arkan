@@ -1,11 +1,10 @@
 /**
- * API Route لإعادة تعيين كلمة المرور العامة - النسخة الجديدة الموحدة
+ * API Route لإعادة تعيين كلمة المرور العامة - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإعادة تعيين كلمة المرور العامة
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { resetUserPassword } from '@/lib/db/queries';
 import { generateRandomPassword } from '@/lib/utils';
 import { z } from 'zod';
@@ -15,26 +14,17 @@ const resetPasswordSchema = z.object({
     id: z.string().uuid(),
 });
 
-/**
- * معالج إعادة تعيين كلمة المرور العامة
- */
-class ResetPasswordHandler extends ComplexApiHandler<z.infer<typeof resetPasswordSchema>, { message: string }> {
-    protected inputSchema = resetPasswordSchema;
-    protected requiresAdmin = true;
-    protected creditCost = 1;
-    protected async processRequest(data: z.infer<typeof resetPasswordSchema>) {
-        const { id } = data;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { request } = context;
+        const { id } = await request.json();
+
         const newPassword = generateRandomPassword(8); // Generate a new random password
         await resetUserPassword(id, newPassword); // Pass the generated password
-        return { message: 'User password reset successfully.' };
+
+        return ApiResponse.success({ message: 'User password reset successfully.' });
+    } catch (error) {
+        console.error('Error resetting password:', error);
+        return ApiResponse.error('Failed to reset password', 500);
     }
-}
-
-// إنشاء المعالج
-const resetPasswordHandler = new ResetPasswordHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    resetPasswordHandler,
-    { requireAdmin: true, logging: true }
-);
+}, { validateBody: resetPasswordSchema, requireAdmin: true });

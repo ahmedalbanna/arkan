@@ -24,4 +24,4 @@ export const GET = createApiHandler(async (context) => {
         console.error('Error fetching agents:', error);
         return ApiResponse.error('Failed to fetch agents', 500);
     }
-});
+}, { requireAuth: false });

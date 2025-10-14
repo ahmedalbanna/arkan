@@ -1,11 +1,10 @@
 /**
- * API Route لتقرير المعاملات - النسخة الجديدة الموحدة
+ * API Route لتقرير المعاملات - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتقرير المعاملات
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { getTransactionsByDateRange } from '@/lib/db/queries';
 import { z } from 'zod';
 
@@ -15,30 +14,21 @@ const getReportSchema = z.object({
     endDate: z.string().datetime(),
 });
 
-/**
- * معالج تقرير المعاملات
- */
-class TransactionReportHandler extends SimpleApiHandler<any[]> {
-    protected async processRequest(context: any) {
-        const { searchParams } = new URL(context.request.url);
+export const GET = createApiHandler(async (context) => {
+    try {
+        const { request } = context;
+        const { searchParams } = new URL(request.url);
         const queryValidation = getReportSchema.safeParse(Object.fromEntries(searchParams));
 
         if (!queryValidation.success) {
-            throw new Error(`Validation error: ${queryValidation.error.errors.map(e => e.message).join(', ')}`);
+            return ApiResponse.badRequest(`Validation error: ${queryValidation.error.errors.map(e => e.message).join(', ')}`);
         }
 
         const { startDate, endDate } = queryValidation.data;
         const transactions = await getTransactionsByDateRange(startDate, endDate);
-
-        return transactions;
+        return ApiResponse.success(transactions);
+    } catch (error) {
+        console.error('Error fetching transactions report:', error);
+        return ApiResponse.error('Failed to fetch transactions report', 500);
     }
-}
-
-// إنشاء المعالج
-const transactionReportHandler = new TransactionReportHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    transactionReportHandler,
-    { requireAdmin: true, logging: true }
-);
+}, { requireAdmin: true });

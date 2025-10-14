@@ -1,32 +1,26 @@
 /**
- * API Route لترجمة العروض التقديمية - النسخة الجديدة الموحدة
+ * API Route لترجمة العروض التقديمية - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لترجمة العروض التقديمية
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-// import { translatePresentation } from '@/ai/flows/translate-presentation';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { PresentationHistoryEntrySchema } from '@/ai/schemas/flows';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
-export const ApiTranslatePresentationSchema = z.object({
+// Schema لترجمة العروض التقديمية
+const translatePresentationSchema = z.object({
     presentation: PresentationHistoryEntrySchema,
     targetLang: z.string(),
 });
 
-/**
- * معالج ترجمة العروض التقديمية
- */
-class TranslatePresentationHandler extends CreditBasedApiHandler<z.infer<typeof ApiTranslatePresentationSchema>, any> {
-    protected inputSchema = ApiTranslatePresentationSchema;
-    protected creditCost = 2;
-    protected requiresAdmin = false;
-    protected async processRequest(data: z.infer<typeof ApiTranslatePresentationSchema>, context: any) {
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const { presentation, targetLang } = await request.json();
 
-        const agentInput = data;
+        const agentInput = { presentation, targetLang };
         // const result = await translatePresentation(agentInput);
         const result = { id: "temp-translated-presentation", title: "Translated Presentation" };
 
@@ -36,18 +30,12 @@ class TranslatePresentationHandler extends CreditBasedApiHandler<z.infer<typeof 
             userId: user.id,
             input: { ...agentInput, presentation: `Presentation ID: ${agentInput.presentation.id}` },
             output: { ...result, presentation: `Presentation ID: ${result.id}` },
-            creditCost: this.creditCost,
+            creditCost: 2,
         });
 
-        return result;
+        return ApiResponse.success(result);
+    } catch (error) {
+        console.error('Translate presentation error:', error);
+        return ApiResponse.error('Failed to translate presentation', 500);
     }
-}
-
-// إنشاء المعالج
-const translatePresentationHandler = new TranslatePresentationHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    translatePresentationHandler,
-    { logging: true }
-);
+}, { validateBody: translatePresentationSchema, requireAuth: true });

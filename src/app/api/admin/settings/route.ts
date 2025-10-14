@@ -1,11 +1,10 @@
 /**
- * API Route لإعدادات النظام - النسخة الجديدة الموحدة
+ * API Route لإعدادات النظام - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإعدادات النظام
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
@@ -26,9 +25,7 @@ const settingsSchema = z.object({
     bankAccounts: z.array(bankAccountSchema).optional(),
 });
 
-/**
- * دالة مساعدة لجلب الإعدادات
- */
+// دالة مساعدة لجلب الإعدادات
 async function getSettings() {
     const settingsRef = adminDb.collection('settings').doc('defaults');
     const doc = await settingsRef.get();
@@ -43,42 +40,27 @@ async function getSettings() {
     return doc.data();
 }
 
-/**
- * معالج جلب الإعدادات
- */
-class GetSettingsHandler extends SimpleApiHandler<any> {
-    protected async processRequest() {
+export const GET = createApiHandler(async () => {
+    try {
         const settings = await getSettings();
-        return settings;
+        return ApiResponse.success(settings);
+    } catch (error) {
+        console.error('Get settings error:', error);
+        return ApiResponse.error('Failed to get settings', 500);
     }
-}
+}, { requireAuth: false });
 
-/**
- * معالج تحديث الإعدادات
- */
-class UpdateSettingsHandler extends ComplexApiHandler<z.infer<typeof settingsSchema>, any> {
-    protected inputSchema = settingsSchema;
-    protected requiresAdmin = true;
-    protected creditCost = 1;
+export const PUT = createApiHandler(async (context) => {
+    try {
+        const { request } = context;
+        const data = await request.json();
 
-    protected async processRequest(data: z.infer<typeof settingsSchema>) {
         const settingsRef = adminDb.collection('settings').doc('defaults');
         await settingsRef.set(data, { merge: true });
-        return data;
+
+        return ApiResponse.success(data);
+    } catch (error) {
+        console.error('Update settings error:', error);
+        return ApiResponse.error('Failed to update settings', 500);
     }
-}
-
-// إنشاء المعالجات
-const getSettingsHandler = new GetSettingsHandler();
-const updateSettingsHandler = new UpdateSettingsHandler();
-
-// تصدير الـ handlers مع middleware
-export const GET = withApiMiddleware(
-    getSettingsHandler,
-    { requireAuth: false, logging: true } // Public endpoint for fetching settings
-);
-
-export const PUT = withApiMiddleware(
-    updateSettingsHandler,
-    { requireAdmin: true, logging: true }
-);
+}, { validateBody: settingsSchema, requireAdmin: true });

@@ -1,32 +1,38 @@
+/**
+ * API Route لرفع قوالب PPTX - النسخة المبسطة
+ *
+ * يستخدم النظام الجديد المبسط للـ API
+ */
 
-'use server';
-
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/core/api';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import { getStorage } from 'firebase-admin/storage';
-export const POST = withEnhancedAuth(async ({ request, params, user }) => {
-    const templateId = params.key;
-    if (!templateId) {
-        return handleApiErrorEnhanced({ message: 'Template ID is required.' }, '400');
-    }
 
+export const POST = createApiHandler(async (context) => {
     try {
+        const { params, request } = context;
+        const templateId = params.key;
+
+        if (!templateId) {
+            return ApiResponse.badRequest('Template ID is required.');
+        }
+
         const formData = await request.formData();
         const file = formData.get('file') as File | null;
 
         if (!file) {
-            return handleApiErrorEnhanced({ message: 'No file uploaded.' }, '400');
+            return ApiResponse.badRequest('No file uploaded.');
         }
 
         const allowedTypes = ['application/vnd.openxmlformats-officedocument.presentationml.presentation'];
         if (!allowedTypes.includes(file.type)) {
-            return handleApiErrorEnhanced({ message: 'Invalid file type. Only .pptx files are allowed.' }, '400');
+            return ApiResponse.badRequest('Invalid file type. Only .pptx files are allowed.');
         }
 
         const storage = getStorage();
         const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
         if (!bucketName) {
-            throw new Error("Firebase Storage bucket name not configured.");
+            return ApiResponse.error("Firebase Storage bucket name not configured.", 500);
         }
         const bucket = storage.bucket(bucketName);
         const fileName = `pptx_templates/${templateId}/${file.name}`;
@@ -49,10 +55,9 @@ export const POST = withEnhancedAuth(async ({ request, params, user }) => {
         });
 
         const updatedDoc = await templateRef.get();
-
-        return createApiResponseEnhanced({ ...updatedDoc.data() }, 200);
-
+        return ApiResponse.success({ ...updatedDoc.data() });
     } catch (error) {
-        return handleApiErrorEnhanced(error);
+        console.error('Error uploading PPTX template:', error);
+        return ApiResponse.error('Failed to upload PPTX template', 500);
     }
 }, { requireAdmin: true });

@@ -1,11 +1,10 @@
 /**
- * API Route لإدارة المستخدمين الفردية - النسخة الجديدة الموحدة
+ * API Route لإدارة المستخدمين الفردية - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإدارة المستخدمين الفردية
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { deleteUser, getUserProfile } from "@/lib/db/queries";
 import { adminDb } from '@/lib/firebase/server-init';
 import { revalidatePath } from "next/cache";
@@ -21,49 +20,44 @@ const updateUserSchema = z.object({
     hasCompletedOnboarding: z.boolean().optional(),
 });
 
-/**
- * معالج جلب مستخدم واحد
- */
-class GetUserHandler extends SimpleApiHandler<any> {
-    protected async processRequest(context: any) {
+export const GET = createApiHandler(async (context) => {
+    try {
         const { params, user: requester } = context;
         const targetUserId = params.id;
 
         // Authorization check: either admin or self
         if (requester.role !== 'admin' && requester.id !== targetUserId) {
-            throw new Error("Forbidden");
+            return ApiResponse.forbidden("Access denied");
         }
 
         const user = await getUserProfile(targetUserId);
         if (!user) {
-            throw new Error("User not found.");
+            return ApiResponse.notFound("User not found");
         }
-        return user;
+
+        return ApiResponse.success(user);
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        return ApiResponse.error('Failed to fetch user', 500);
     }
-}
+}, { requireAuth: true });
 
-/**
- * معالج تحديث مستخدم
- */
-class UpdateUserHandler extends ComplexApiHandler<z.infer<typeof updateUserSchema>, any> {
-    protected inputSchema = updateUserSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = true;
-
-    protected async processRequest(data: z.infer<typeof updateUserSchema>, context: any) {
-        const { params, user: requester } = context;
+export const PUT = createApiHandler(async (context) => {
+    try {
+        const { params, user: requester, request } = context;
         const userId = params.id;
+        const data = await request.json();
 
         // An admin can update any field. A regular user can only update their own name/bio.
         if (requester.role !== 'admin') {
             if (userId !== requester.id) {
-                throw new Error("Forbidden");
+                return ApiResponse.forbidden("Access denied");
             }
             // If not admin, only allow name and bio updates
             const { name, bio, hasCompletedOnboarding } = data;
             const validation = updateUserSchema.safeParse({ name, bio, hasCompletedOnboarding });
             if (!validation.success) {
-                throw new Error(validation.error.message);
+                return ApiResponse.badRequest(`Validation error: ${validation.error.errors.map(e => e.message).join(', ')}`);
             }
             const updateData = { ...validation.data, updatedAt: new Date().toISOString() };
             await adminDb.collection("users").doc(userId).update(updateData);
@@ -76,47 +70,28 @@ class UpdateUserHandler extends ComplexApiHandler<z.infer<typeof updateUserSchem
         revalidatePath('/admin/manage-users');
 
         const updatedUser = await getUserProfile(userId);
-        return updatedUser;
+        return ApiResponse.success(updatedUser);
+    } catch (error) {
+        console.error('Error updating user:', error);
+        return ApiResponse.error('Failed to update user', 500);
     }
-}
+}, { validateBody: updateUserSchema, requireAuth: true });
 
-/**
- * معالج حذف مستخدم
- */
-class DeleteUserHandler extends SimpleApiHandler<{ message: string }> {
-    protected requiresAdmin = true;
-
-    protected async processRequest(context: any) {
+export const DELETE = createApiHandler(async (context) => {
+    try {
         const { params } = context;
         const targetUserId = params.id;
 
         if (!targetUserId) {
-            throw new Error("User ID is required");
+            return ApiResponse.badRequest("User ID is required");
         }
 
         await deleteUser(targetUserId);
         revalidatePath("/admin/manage-users");
-        return { message: `User ${targetUserId} deleted successfully` };
+
+        return ApiResponse.success({ message: `User ${targetUserId} deleted successfully` });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        return ApiResponse.error('Failed to delete user', 500);
     }
-}
-
-// إنشاء المعالجات
-const getUserHandler = new GetUserHandler();
-const updateUserHandler = new UpdateUserHandler();
-const deleteUserHandler = new DeleteUserHandler();
-
-// تصدير الـ handlers مع middleware
-export const GET = withApiMiddleware(
-    getUserHandler,
-    { logging: true }
-);
-
-export const PUT = withApiMiddleware(
-    updateUserHandler,
-    { logging: true }
-);
-
-export const DELETE = withApiMiddleware(
-    deleteUserHandler,
-    { requireAdmin: true, logging: true }
-);
+}, { requireAdmin: true });

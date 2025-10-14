@@ -1,24 +1,18 @@
 /**
- * API Route لتوليد المحاضرات - النسخة الجديدة الموحدة
+ * API Route لتوليد المحاضرات - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد المحاضرات
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
 import { createLectureUnit } from '@/ai/flows/unified';
 import { CreateLectureUnitInputSchema } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 
-/**
- * معالج توليد المحاضرات
- */
-class LectureGeneratorHandler extends CreditBasedApiHandler<any, any> {
-    protected inputSchema = CreateLectureUnitInputSchema;
-    protected creditCost = 5; // مهمة معقدة ومكلفة
-    protected requiresAdmin = false;
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const data = await request.json();
 
         const agentInput = data;
         const result = await createLectureUnit(agentInput as any);
@@ -32,20 +26,12 @@ class LectureGeneratorHandler extends CreditBasedApiHandler<any, any> {
                 lectureChars: result.theoreticalLecture.lectureContent.length,
                 sessionActivities: result.practicalSession.activities.length,
             },
-            creditCost: this.creditCost,
+            creditCost: 5, // مهمة معقدة ومكلفة
         });
 
-        return result;
+        return ApiResponse.success(result);
+    } catch (error) {
+        console.error('Lecture generator error:', error);
+        return ApiResponse.error('Failed to generate lecture', 500);
     }
-}
-
-// إنشاء المعالج
-const lectureGeneratorHandler = new LectureGeneratorHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    lectureGeneratorHandler,
-    {
-        logging: true
-    }
-);
+}, { validateBody: CreateLectureUnitInputSchema, requireAuth: true });

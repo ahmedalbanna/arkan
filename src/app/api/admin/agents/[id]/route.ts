@@ -1,81 +1,83 @@
+/**
+ * API Route لإدارة الوكلاء الفردية - النسخة المبسطة
+ *
+ * يستخدم النظام الجديد المبسط للـ API
+ */
 
-
-// src/app/api/agents/[id]/route.ts
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/core/api';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import { AgentPromptSchema } from '@/lib/template-schemas';
 import { z } from 'zod';
 
-export const ApiUpdateAgentSchema = z.object({
+// Schema لتحديث الوكيل
+const updateAgentSchema = z.object({
     name: z.string().min(1, "Name is required").optional(),
     prompt: z.union([z.string().min(10), AgentPromptSchema]).optional(),
     isEnabled: z.boolean().optional(),
     category: z.string().optional(),
 });
 
-// GET /api/agents/[id]
-export const GET = withEnhancedAuth(async ({ params }) => {
+export const GET = createApiHandler(async (context) => {
     try {
+        const { params } = context;
         const { id: agentId } = params;
+
         const agentDoc = await adminDb.collection("agents").doc(agentId).get();
         if (!agentDoc.exists) {
-            return handleApiErrorEnhanced({ message: 'Agent not found.' }, '404');
+            return ApiResponse.notFound('Agent not found.');
         }
 
         const data = agentDoc.data();
-
-        return createApiResponseEnhanced({ ...data, id: agentDoc.id }, 200);
+        return ApiResponse.success({ ...data, id: agentDoc.id });
     } catch (error) {
-        return handleApiErrorEnhanced(error);
+        console.error('Error fetching agent:', error);
+        return ApiResponse.error('Failed to fetch agent', 500);
     }
 }, { requireAdmin: true });
 
-
-// PUT /api/agents/[id]
-export const PUT = withEnhancedAuth(async ({ request, params }) => {
+export const PUT = createApiHandler(async (context) => {
     try {
+        const { params, request } = context;
         const agentId = params.id;
+        const data = await request.json();
+
         const agentRef = adminDb.collection('agents').doc(agentId);
         const agentDoc = await agentRef.get();
         if (!agentDoc.exists) {
-            return handleApiErrorEnhanced({ message: 'Agent not found.' }, '404');
+            return ApiResponse.notFound('Agent not found.');
         }
 
-        const body = await request.json();
-        const validation = ApiUpdateAgentSchema.safeParse(body);
-        if (!validation.success) {
-            return handleApiErrorEnhanced(validation.error);
-        }
-
-        const updateData: any = { ...validation.data };
-
+        const updateData: any = { ...data };
         await agentRef.update(updateData);
         const updatedDoc = await agentRef.get();
 
-        return createApiResponseEnhanced({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
+        return ApiResponse.success({ id: updatedDoc.id, ...updatedDoc.data() });
     } catch (error) {
-        return handleApiErrorEnhanced(error);
+        console.error('Error updating agent:', error);
+        return ApiResponse.error('Failed to update agent', 500);
     }
-}, { requireAdmin: true });
+}, { validateBody: updateAgentSchema, requireAdmin: true });
 
-// DELETE /api/agents/[id]
-export const DELETE = withEnhancedAuth(async ({ params }) => {
+export const DELETE = createApiHandler(async (context) => {
     try {
+        const { params } = context;
         const agentId = params.id;
+
         const agentRef = adminDb.collection('agents').doc(agentId);
         const doc = await agentRef.get();
         if (!doc.exists) {
-            return handleApiErrorEnhanced({ message: 'Agent not found.' }, '404');
+            return ApiResponse.notFound('Agent not found.');
         }
 
         // Prevent deletion of default agents
         if (doc.data()?.isDefault) {
-            return handleApiErrorEnhanced({ message: 'Default agents cannot be deleted.' }, '403');
+            return ApiResponse.forbidden('Default agents cannot be deleted.');
         }
 
         await agentRef.delete();
-        return createApiResponseEnhanced({ message: `Agent '${agentId}' deleted successfully.` }, 200);
+        return ApiResponse.success({ message: `Agent '${agentId}' deleted successfully.` });
     } catch (error) {
-        return handleApiErrorEnhanced(error);
+        console.error('Error deleting agent:', error);
+        return ApiResponse.error('Failed to delete agent', 500);
     }
 }, { requireAdmin: true });

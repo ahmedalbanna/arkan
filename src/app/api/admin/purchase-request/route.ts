@@ -1,11 +1,10 @@
 /**
- * API Route لطلبات الشراء - النسخة الجديدة الموحدة
+ * API Route لطلبات الشراء - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لطلبات الشراء
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { createTransaction } from '@/lib/db/queries';
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import { getStorage } from 'firebase-admin/storage';
@@ -22,26 +21,24 @@ const purchaseRequestSchema = z.object({
     userEmail: z.string().optional(),
 });
 
-/**
- * معالج طلبات الشراء
- */
-class PurchaseRequestHandler extends ComplexApiHandler<z.infer<typeof purchaseRequestSchema>, {
-    message: string;
-    transactionId: string;
-}> {
-    protected inputSchema = purchaseRequestSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = true;
-    protected async processRequest(data: z.infer<typeof purchaseRequestSchema>, context: any) {
+export const POST = createApiHandler(async (context) => {
+    try {
         const { request } = context;
         const formData = await request.formData();
         const file = formData.get('file') as File | null;
 
         if (!file) {
-            throw new Error('Missing payment proof file.');
+            return ApiResponse.badRequest('Missing payment proof file.');
         }
 
-        const { userId, planId, planName, credits, price, userName, userEmail } = data;
+        // Parse form data for other fields
+        const userId = formData.get('userId') as string;
+        const planId = formData.get('planId') as string;
+        const planName = formData.get('planName') as string;
+        const credits = parseInt(formData.get('credits') as string);
+        const price = parseFloat(formData.get('price') as string);
+        const userName = formData.get('userName') as string;
+        const userEmail = formData.get('userEmail') as string;
 
         const storage = getStorage();
         const bucket = storage.bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'arkan-docudec.appspot.com');
@@ -92,15 +89,9 @@ class PurchaseRequestHandler extends ComplexApiHandler<z.infer<typeof purchaseRe
             await Promise.all(notificationPromises);
         }
 
-        return { message: 'Request submitted successfully for review.', transactionId };
+        return ApiResponse.success({ message: 'Request submitted successfully for review.', transactionId });
+    } catch (error) {
+        console.error('Error processing purchase request:', error);
+        return ApiResponse.error('Failed to process purchase request', 500);
     }
-}
-
-// إنشاء المعالج
-const purchaseRequestHandler = new PurchaseRequestHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    purchaseRequestHandler,
-    { logging: true }
-);
+}, { requireAuth: false });

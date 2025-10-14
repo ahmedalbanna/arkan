@@ -11,31 +11,23 @@ import { z } from 'zod';
 
 // Schema للتلخيص
 const summarizeSchema = z.object({
-    text: z.string().min(1, 'Text is required'),
-    maxLength: z.number().optional(),
-    style: z.enum(['concise', 'detailed', 'bullet-points']).optional(),
+    text: z.string().min(50, 'Text must be at least 50 characters long.'),
+    maxLength: z.coerce.number().int().min(50).max(2000).default(500),
 });
 
 export const POST = createApiHandler(async (context) => {
     try {
         const { user, request } = context;
-        const body = await request.json();
-        const { text, maxLength, style } = body;
+        const { text, maxLength } = await request.json();
 
-        const agentInput = {
-            text,
-            maxLength: maxLength || 200,
-            style: style || 'concise',
-            length: 'medium',
-        };
-
-        const result = await summarizeText(agentInput as any);
+        const agentInput = { text, maxLength };
+        const result = await summarizeText(agentInput);
 
         // تسجيل العملية
         await logGeneration({
             agentId: 'summarize-text',
             userId: user.id,
-            input: { textLength: text.length, style: agentInput.style, length: agentInput.length },
+            input: { textLength: text.length, maxLength },
             output: { summaryLength: result.summary.length },
             creditCost: 1,
         });

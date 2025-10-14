@@ -1,11 +1,10 @@
 /**
- * API Route للمحادثات - النسخة الجديدة الموحدة
+ * API Route للمحادثات - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للمحادثات
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
@@ -21,21 +20,15 @@ const createConversationSchema = z.object({
     }).optional(), // معلومات الوكيل للمحادثات مع الوكلاء
 });
 
-/**
- * معالج قائمة المحادثات (GET)
- */
-class ConversationsListHandler extends SimpleApiHandler<Array<{
-    id: string;
-    [key: string]: any;
-}>> {
-    protected async processRequest(context: any) {
+export const GET = createApiHandler(async (context) => {
+    try {
         const { user } = context;
 
         const userConversationsRef = adminRealtimeDb.ref(`userConversations/${user.id}`);
         const snapshot = await userConversationsRef.get();
 
         if (!snapshot.exists()) {
-            return [];
+            return ApiResponse.success([]);
         }
 
         const conversationIds = Object.keys(snapshot.val());
@@ -60,42 +53,23 @@ class ConversationsListHandler extends SimpleApiHandler<Array<{
         });
 
         const conversations = (await Promise.all(conversationPromises)).filter(c => c !== null);
-        return conversations;
+        return ApiResponse.success(conversations);
+    } catch (error) {
+        console.error('Error fetching conversations:', error);
+        return ApiResponse.error('Failed to fetch conversations', 500);
     }
-}
+}, { requireAuth: true });
 
-/**
- * معالج إنشاء محادثة جديدة (POST)
- */
-class CreateConversationHandler extends ComplexApiHandler<{
-    participantIds: string[];
-    participantNames: Record<string, string>;
-    title?: string;
-    isSupportChat?: boolean;
-    agent?: { id: string; name: string };
-}, {
-    id: string;
-    participantIds: string[];
-    participantNames: Record<string, string>;
-    createdAt: string;
-    lastMessage: string;
-    lastMessageTimestamp: string;
-    title: string;
-    isSupportChat: boolean;
-    agent: any;
-}> {
-    protected inputSchema = createConversationSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-    protected async processRequest(data: any, context: any) {
-        const { participantIds, participantNames, title, isSupportChat, agent } = data;
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const { participantIds, participantNames, title, isSupportChat, agent } = await request.json();
 
         const newConversationRef = adminRealtimeDb.ref('conversations').push();
         const conversationId = newConversationRef.key;
 
         if (!conversationId) {
-            throw new Error("Failed to generate a unique conversation ID.");
+            return ApiResponse.error("Failed to generate a unique conversation ID.", 500);
         }
 
         const now = new Date().toISOString();
@@ -120,25 +94,9 @@ class CreateConversationHandler extends ComplexApiHandler<{
 
         await adminRealtimeDb.ref().update(updates);
 
-        return conversationData;
+        return ApiResponse.created(conversationData);
+    } catch (error) {
+        console.error('Error creating conversation:', error);
+        return ApiResponse.error('Failed to create conversation', 500);
     }
-}
-
-// إنشاء المعالجات
-const conversationsListHandler = new ConversationsListHandler();
-const createConversationHandler = new CreateConversationHandler();
-
-// تصدير الـ handlers مع middleware
-export const GET = withApiMiddleware(
-    conversationsListHandler,
-    {
-        logging: true
-    }
-);
-
-export const POST = withApiMiddleware(
-    createConversationHandler,
-    {
-        logging: true
-    }
-);
+}, { validateBody: createConversationSchema, requireAuth: true });

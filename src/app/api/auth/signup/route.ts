@@ -1,11 +1,10 @@
 /**
- * API Route للتسجيل - النسخة الجديدة الموحدة
+ * API Route للتسجيل - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للتسجيل
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { getUserProfile } from '@/lib/db/queries';
 import { adminAuth, adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import type { UserRole } from '@/lib/models/user';
@@ -29,222 +28,140 @@ const providerSignupSchema = z.object({
 // Schema موحد للتسجيل
 const unifiedSignupSchema = z.union([signupSchema, providerSignupSchema]);
 
-/**
- * معالج التسجيل العادي
- */
-class RegularSignupHandler extends ComplexApiHandler<{
-    email: string;
-    password: string;
-    name: string;
-}, { user: { uid: string; email: string } }> {
-    protected inputSchema = signupSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-    protected processRequest = async (
-        data: { email: string; password: string; name: string },
-        context: any
-    ): Promise<{ user: { uid: string; email: string } }> => {
-        const { email, password, name } = data;
-        const defaultCredits = await this.getNewUserCredits();
-
-        const userRecord = await adminAuth.createUser({ email, password, displayName: name });
-
-        const newUserProfile = {
-            name,
-            email,
-            phoneNumber: '',
-            credits: defaultCredits,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            bio: '',
-            profilePictureUrl: '',
-            role: 'user' as UserRole,
-            hasCompletedOnboarding: false,
-        };
-
-        await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);
-        await this.notifyAdminsOfNewUser({
-            name: newUserProfile.name ?? '',
-            email: newUserProfile.email ?? ''
-        });
-
-        return { user: { uid: userRecord.uid, email: userRecord.email ?? '' } };
-    }
-
-    private async getNewUserCredits(): Promise<number> {
-        try {
-            const settingsDoc = await adminDb.collection('settings').doc('defaults').get();
-            if (settingsDoc.exists) {
-                return settingsDoc.data()?.newUserCredits || 10;
-            }
-            return 10;
-        } catch (error) {
-            console.error("Could not fetch default settings, falling back to 10 credits.", error);
-            return 10;
+// دالة مساعدة للحصول على ائتمانات المستخدم الجديد
+async function getNewUserCredits(): Promise<number> {
+    try {
+        const settingsDoc = await adminDb.collection('settings').doc('defaults').get();
+        if (settingsDoc.exists) {
+            return settingsDoc.data()?.newUserCredits || 10;
         }
-    }
-
-    private async notifyAdminsOfNewUser(user: { name?: string | null, email?: string | null }) {
-        const adminsSnapshot = await adminDb.collection('users').where('role', '==', 'admin').get();
-        if (adminsSnapshot.empty) return;
-
-        const rtdb = adminRealtimeDb;
-        const notificationPayload = {
-            title: "New User Signed Up",
-            description: `A new user, ${user.name || user.email}, has joined the platform.`,
-            icon: "user-plus",
-            isRead: false,
-            createdAt: new Date().toISOString(),
-            link: '/admin/manage-users'
-        };
-
-        const notificationPromises = adminsSnapshot.docs.map(adminDoc => {
-            const adminId = adminDoc.id;
-            const notificationRef = rtdb.ref(`notifications/${adminId}`).push();
-            return notificationRef.set(notificationPayload);
-        });
-
-        await Promise.all(notificationPromises);
+        return 10;
+    } catch (error) {
+        console.error("Could not fetch default settings, falling back to 10 credits.", error);
+        return 10;
     }
 }
 
-/**
- * معالج التسجيل عبر مزود خارجي
- */
-class ProviderSignupHandler extends ComplexApiHandler<{
-    uid: string;
-    email?: string | null;
-    name?: string | null;
-    phoneNumber?: string | null;
-}, { message: string; user: any }> {
-    protected inputSchema = providerSignupSchema;
-    protected requiresAuth = false;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
+// دالة مساعدة لإشعار المدراء بمستخدم جديد
+async function notifyAdminsOfNewUser(user: { name?: string | null, email?: string | null }) {
+    const adminsSnapshot = await adminDb.collection('users').where('role', '==', 'admin').get();
+    if (adminsSnapshot.empty) return;
 
-    protected async processRequest(data: any, context: any): Promise<{ message: string; user: any } | { user: { uid: string; email: string | undefined; }; message: string; }> {
-        const { uid, email, name, phoneNumber } = data;
-        const defaultCredits = await this.getNewUserCredits();
+    const rtdb = adminRealtimeDb;
+    const notificationPayload = {
+        title: "New User Signed Up",
+        description: `A new user, ${user.name || user.email}, has joined the platform.`,
+        icon: "user-plus",
+        isRead: false,
+        createdAt: new Date().toISOString(),
+        link: '/admin/manage-users'
+    };
 
+    const notificationPromises = adminsSnapshot.docs.map(adminDoc => {
+        const adminId = adminDoc.id;
+        const notificationRef = rtdb.ref(`notifications/${adminId}`).push();
+        return notificationRef.set(notificationPayload);
+    });
 
-        // التحقق من وجود المستخدم أولاً
-        const existingProfile = await getUserProfile(uid);
-        if (existingProfile) {
-            return {
-                message: "User profile already exists.",
-                user: existingProfile
-            };
-        }
-
-        // محاولة إنشاء المستخدم مع معالجة خطأ الإيميل المكرر
-        let userRecord;
-        try {
-            userRecord = await adminAuth.createUser({ email, displayName: name });
-        } catch (error: any) {
-            if (error.code === 'auth/email-already-exists') {
-                // إذا كان الإيميل موجود، نحاول الحصول على المستخدم الموجود
-                try {
-                    userRecord = await adminAuth.getUserByEmail(email);
-                } catch (getUserError) {
-                    throw new Error('An account with this email address already exists.');
-                }
-            } else {
-                throw error;
-            }
-        }
-
-        const newUserProfile = {
-            name,
-            email,
-            phoneNumber: '',
-            credits: defaultCredits,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            bio: '',
-            profilePictureUrl: '',
-            role: 'user' as UserRole,
-            hasCompletedOnboarding: false,
-        };
-
-        await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);
-        await this.notifyAdminsOfNewUser({
-            name: newUserProfile.name ?? '',
-            email: newUserProfile.email ?? ''
-        });
-
-        return { user: { uid: userRecord.uid, email: userRecord.email }, message: "User profile created successfully" };
-    }
-
-    private async getNewUserCredits(): Promise<number> {
-        try {
-            const settingsDoc = await adminDb.collection('settings').doc('defaults').get();
-            if (settingsDoc.exists) {
-                return settingsDoc.data()?.newUserCredits || 10;
-            }
-            return 10;
-        } catch (error) {
-            console.error("Could not fetch default settings, falling back to 10 credits.", error);
-            return 10;
-        }
-    }
-
-    private async notifyAdminsOfNewUser(user: { name?: string | null, email?: string | null }) {
-        const adminsSnapshot = await adminDb.collection('users').where('role', '==', 'admin').get();
-        if (adminsSnapshot.empty) return;
-
-        const rtdb = adminRealtimeDb;
-        const notificationPayload = {
-            title: "New User Signed Up",
-            description: `A new user, ${user.name || user.email}, has joined the platform.`,
-            icon: "user-plus",
-            isRead: false,
-            createdAt: new Date().toISOString(),
-            link: '/admin/manage-users'
-        };
-
-        const notificationPromises = adminsSnapshot.docs.map(adminDoc => {
-            const adminId = adminDoc.id;
-            const notificationRef = rtdb.ref(`notifications/${adminId}`).push();
-            return notificationRef.set(notificationPayload);
-        });
-
-        await Promise.all(notificationPromises);
-    }
+    await Promise.all(notificationPromises);
 }
 
-// Duplicate class removed - already defined above
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { request } = context;
+        const data = await request.json();
 
-/**
- * معالج موحد للتسجيل
- */
-class UnifiedSignupHandler extends ComplexApiHandler<any, any> {
-    protected inputSchema = unifiedSignupSchema;
-    protected requiresAuth = false;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-
-    protected async processRequest(data: any, context: any): Promise<{ user: { uid: string; email: string } }> {
         // تحديد نوع التسجيل بناءً على وجود uid
         if (data.uid) {
-            const providerHandler = new ProviderSignupHandler();
-            return await providerHandler['processRequest'](data, context) as { user: { uid: string; email: string } };
+            // تسجيل عبر مزود خارجي
+            const { uid, email, name, phoneNumber } = data;
+            const defaultCredits = await getNewUserCredits();
+
+            // التحقق من وجود المستخدم أولاً
+            const existingProfile = await getUserProfile(uid);
+            if (existingProfile) {
+                return ApiResponse.success({
+                    message: "User profile already exists.",
+                    user: existingProfile
+                });
+            }
+
+            // محاولة إنشاء المستخدم مع معالجة خطأ الإيميل المكرر
+            let userRecord;
+            try {
+                userRecord = await adminAuth.createUser({ email, displayName: name });
+            } catch (error: any) {
+                if (error.code === 'auth/email-already-exists') {
+                    // إذا كان الإيميل موجود، نحاول الحصول على المستخدم الموجود
+                    try {
+                        userRecord = await adminAuth.getUserByEmail(email);
+                    } catch (getUserError) {
+                        return ApiResponse.badRequest('An account with this email address already exists.');
+                    }
+                } else {
+                    throw error;
+                }
+            }
+
+            const newUserProfile = {
+                name,
+                email,
+                phoneNumber: '',
+                credits: defaultCredits,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                bio: '',
+                profilePictureUrl: '',
+                role: 'user' as UserRole,
+                hasCompletedOnboarding: false,
+            };
+
+            await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);
+            await notifyAdminsOfNewUser({
+                name: newUserProfile.name ?? '',
+                email: newUserProfile.email ?? ''
+            });
+
+            return ApiResponse.created({
+                user: { uid: userRecord.uid, email: userRecord.email },
+                message: "User profile created successfully"
+            });
         } else {
-            const regularHandler = new RegularSignupHandler();
-            return await regularHandler['processRequest'](data, context) as { user: { uid: string; email: string } };
+            // تسجيل عادي
+            const { email, password, name } = data;
+            const defaultCredits = await getNewUserCredits();
+
+            const userRecord = await adminAuth.createUser({
+                email,
+                password,
+                displayName: name
+            });
+
+            const newUserProfile = {
+                name,
+                email,
+                phoneNumber: '',
+                credits: defaultCredits,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                bio: '',
+                profilePictureUrl: '',
+                role: 'user' as UserRole,
+                hasCompletedOnboarding: false,
+            };
+
+            await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);
+            await notifyAdminsOfNewUser({
+                name: newUserProfile.name ?? '',
+                email: newUserProfile.email ?? ''
+            });
+
+            return ApiResponse.created({
+                user: { uid: userRecord.uid, email: userRecord.email ?? '' }
+            });
         }
+    } catch (error) {
+        console.error('Signup error:', error);
+        return ApiResponse.error('Failed to create user', 500);
     }
-}
-
-// إنشاء المعالجات
-const regularSignupHandler = new RegularSignupHandler();
-const providerSignupHandler = new ProviderSignupHandler();
-const unifiedSignupHandler = new UnifiedSignupHandler();
-
-// تصدير الـ handlers مع middleware
-export const POST = withApiMiddleware(
-    unifiedSignupHandler,
-    {
-        requireAuth: false,
-        logging: true
-    }
-);
+}, { validateBody: unifiedSignupSchema, requireAuth: false });

@@ -1,12 +1,11 @@
 /**
- * API Route لمحادثة الوكلاء - النسخة الجديدة الموحدة
+ * API Route لمحادثة الوكلاء - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لمحادثة الوكلاء
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
 // import { agentChat } from '@/ai/flows/agent-chat';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { RealtimeDatabase } from '@/lib/firebase/client-init';
 import { logGeneration } from '@/services';
 import { push, ref, serverTimestamp, update } from 'firebase/database';
@@ -27,22 +26,11 @@ interface FirebaseMessage {
     timestamp: object; // serverTimestamp() يعيد object
 }
 
-/**
- * معالج محادثة الوكلاء
- */
-class AgentChatHandler extends CreditBasedApiHandler<{
-    agentId: string;
-    message: string;
-    conversationId: string;
-}, {
-    response: string;
-}> {
-    protected inputSchema = chatSchema;
-    protected creditCost = 1; // سيتم تحديده ديناميكياً
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const { agentId, message, conversationId } = await request.json();
 
-    protected async processRequest(data: any, context: any) {
-        const { agentId, message, conversationId } = data;
-        const { user } = context;
         const isAgentChat = agentId !== 'user-chat';
 
         // Using RealtimeDatabase from client-init
@@ -63,7 +51,6 @@ class AgentChatHandler extends CreditBasedApiHandler<{
         if (isAgentChat) {
             // إذا كانت محادثة مع وكيل، خصم ائتمان واستدعاء AI flow
             creditCost = 1;
-            this.creditCost = creditCost;
 
             const agentInput = { agentId, message };
             // result = await agentChat(agentInput);
@@ -86,9 +73,6 @@ class AgentChatHandler extends CreditBasedApiHandler<{
                 output: result,
                 creditCost: creditCost,
             });
-        } else {
-            // للمحادثات العادية، لا توجد تكلفة ائتمانات
-            this.creditCost = 0;
         }
 
         // تحديث آخر رسالة في المحادثة للترتيب
@@ -102,17 +86,9 @@ class AgentChatHandler extends CreditBasedApiHandler<{
             });
         }
 
-        return result;
+        return ApiResponse.success(result);
+    } catch (error) {
+        console.error('Agent chat error:', error);
+        return ApiResponse.error('Failed to process agent chat', 500);
     }
-}
-
-// إنشاء المعالج
-const agentChatHandler = new AgentChatHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    agentChatHandler,
-    {
-        logging: true
-    }
-);
+}, { validateBody: chatSchema, requireAuth: true });

@@ -1,36 +1,20 @@
 /**
- * API Route لإحصائيات المستخدم - النسخة الجديدة الموحدة
+ * API Route لإحصائيات المستخدم - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإحصائيات المستخدم
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { getUserProfile } from '@/lib/db/queries';
 import { adminDb } from '@/lib/firebase/server-init';
 
-/**
- * معالج إحصائيات المستخدم
- */
-class UserStatsHandler extends SimpleApiHandler<{
-    totalGenerations: number;
-    creditsUsed: number;
-    agentUsageChartData: Array<{
-        name: string;
-        agentId: string;
-        count: number;
-    }>;
-    recentActivity: Array<{
-        id: string;
-        [key: string]: any;
-    }>;
-}> {
-    protected async processRequest(context: any) {
+export const GET = createApiHandler(async (context) => {
+    try {
         const { user } = context;
 
         const userProfile = await getUserProfile(user.id);
         if (!userProfile) {
-            throw new Error('User profile not found.');
+            return ApiResponse.notFound('User profile not found');
         }
 
         const generationsSnapshot = await adminDb.collection('agent_generations')
@@ -64,22 +48,16 @@ class UserStatsHandler extends SimpleApiHandler<{
             ...doc.data()
         }));
 
-        return {
+        const stats = {
             totalGenerations,
             creditsUsed,
             agentUsageChartData,
             recentActivity,
         };
-    }
-}
 
-// إنشاء المعالج
-const userStatsHandler = new UserStatsHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    userStatsHandler,
-    {
-        logging: true
+        return ApiResponse.success(stats);
+    } catch (error) {
+        console.error('Error fetching user stats:', error);
+        return ApiResponse.error('Failed to fetch user stats', 500);
     }
-);
+}, { requireAuth: true });

@@ -1,67 +1,70 @@
+/**
+ * API Route لتحديث وحذف قوالب DOCX - النسخة المبسطة
+ *
+ * يستخدم النظام الجديد المبسط للـ API
+ */
 
-import { createApiResponseEnhanced, handleApiErrorEnhanced, withEnhancedAuth } from '@/core/api';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
+
+// Schema لتحديث قالب DOCX
 const updateDocxTemplateSchema = z.object({
     styles: z.object({}).passthrough(),
 });
 
-export const PUT = withEnhancedAuth(async ({ request, params }) => {
+export const PUT = createApiHandler(async (context) => {
     try {
+        const { params, request } = context;
         const key = params.key;
+
         if (!key) {
-            return handleApiErrorEnhanced({ message: 'Template key is required.' }, '400');
+            return ApiResponse.badRequest('Template key is required.');
         }
 
         const templateRef = adminDb.collection('templates').doc('docx').collection('styles').doc(key);
         const templateDoc = await templateRef.get();
 
         if (!templateDoc.exists) {
-            return handleApiErrorEnhanced({ message: 'DOCX template not found.' }, '404');
+            return ApiResponse.notFound('DOCX template not found.');
         }
 
-        const body = await request.json();
-        const validation = updateDocxTemplateSchema.safeParse(body);
-
-        if (!validation.success) {
-            return handleApiErrorEnhanced(validation.error);
-        }
-
-        await templateRef.update({ styles: validation.data.styles, updatedAt: new Date().toISOString() });
+        const data = await request.json();
+        await templateRef.update({ styles: data.styles, updatedAt: new Date().toISOString() });
         const updatedDoc = await templateRef.get();
 
-        return createApiResponseEnhanced(updatedDoc.data(), 200);
-
+        return ApiResponse.success(updatedDoc.data());
     } catch (error) {
-        return handleApiErrorEnhanced(error);
+        console.error('Error updating DOCX template:', error);
+        return ApiResponse.error('Failed to update DOCX template', 500);
     }
-}, { requireAdmin: true });
+}, { validateBody: updateDocxTemplateSchema, requireAdmin: true });
 
-
-export const DELETE = withEnhancedAuth(async ({ params }) => {
+export const DELETE = createApiHandler(async (context) => {
     try {
+        const { params } = context;
         const key = params.key;
+
         if (!key) {
-            return handleApiErrorEnhanced({ message: 'Template key is required.' }, '400');
+            return ApiResponse.badRequest('Template key is required.');
         }
 
         // Prevent deletion of default templates
         if (['modern', 'classic', 'academic'].includes(key)) {
-            return handleApiErrorEnhanced({ message: 'Default templates cannot be deleted.' }, '403');
+            return ApiResponse.forbidden('Default templates cannot be deleted.');
         }
 
         const templateRef = adminDb.collection('templates').doc('docx').collection('styles').doc(key);
         const templateDoc = await templateRef.get();
 
         if (!templateDoc.exists) {
-            return handleApiErrorEnhanced({ message: 'DOCX template not found.' }, '404');
+            return ApiResponse.notFound('DOCX template not found.');
         }
 
         await templateRef.delete();
-
-        return createApiResponseEnhanced({ message: `Template "${key}" deleted successfully.` }, 200);
-
+        return ApiResponse.success({ message: `Template "${key}" deleted successfully.` });
     } catch (error) {
-        return handleApiErrorEnhanced(error);
+        console.error('Error deleting DOCX template:', error);
+        return ApiResponse.error('Failed to delete DOCX template', 500);
     }
 }, { requireAdmin: true });

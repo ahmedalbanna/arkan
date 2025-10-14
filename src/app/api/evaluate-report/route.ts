@@ -1,13 +1,12 @@
 /**
- * API Route لتقييم التقارير - النسخة الجديدة الموحدة
+ * API Route لتقييم التقارير - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتقييم التقارير
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
 import { evaluateReport } from '@/ai/flows/unified';
 import { DiagramTypeSchema, ProjectProposalSchema, SectionNameSchema } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -19,21 +18,10 @@ const evaluateReportSchema = z.object({
     acceptanceCriteria: z.array(z.string()).optional().nullable(),
 });
 
-/**
- * معالج تقييم التقارير
- */
-class EvaluateReportHandler extends CreditBasedApiHandler<{
-    proposal?: any;
-    reportSections: Record<string, string>;
-    diagrams?: Record<string, string> | null;
-    acceptanceCriteria?: string[] | null;
-}, any> {
-    protected inputSchema = evaluateReportSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const data = await request.json();
 
         const agentInput = data;
         const result = await evaluateReport(agentInput);
@@ -44,20 +32,12 @@ class EvaluateReportHandler extends CreditBasedApiHandler<{
             userId: user.id,
             input: agentInput,
             output: result,
-            creditCost: this.creditCost,
+            creditCost: 1,
         });
 
-        return result;
+        return ApiResponse.success(result);
+    } catch (error) {
+        console.error('Evaluate report error:', error);
+        return ApiResponse.error('Failed to evaluate report', 500);
     }
-}
-
-// إنشاء المعالج
-const evaluateReportHandler = new EvaluateReportHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    evaluateReportHandler,
-    {
-        logging: true
-    }
-);
+}, { validateBody: evaluateReportSchema, requireAuth: true });

@@ -13,15 +13,10 @@ export const GET = createApiHandler(async (context) => {
         const doc = await settingsRef.get();
 
         if (!doc.exists) {
-            // إذا لم تكن الإعدادات موجودة، قم بإنشائها بالقيم الافتراضية
-            const defaultSettings = {
+            return ApiResponse.success({
                 newUserCredits: 10,
-                bankName: 'Arkan National Bank',
-                accountHolder: 'Arkan Professional Platform',
-                iban: 'SA03 8000 0000 6080 1016 7519',
-            };
-            await settingsRef.set(defaultSettings);
-            return ApiResponse.success(defaultSettings);
+                bankAccounts: []
+            });
         }
 
         return ApiResponse.success(doc.data());

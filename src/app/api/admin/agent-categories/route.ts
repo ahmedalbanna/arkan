@@ -1,11 +1,10 @@
 /**
- * API Route لإدارة فئات الوكلاء - النسخة الجديدة الموحدة
+ * API Route لإدارة فئات الوكلاء - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإدارة فئات الوكلاء
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
@@ -15,54 +14,35 @@ const createCategorySchema = z.object({
     name: z.string().min(1, "Name is required"),
 });
 
-/**
- * معالج جلب فئات الوكلاء
- */
-class GetAgentCategoriesHandler extends SimpleApiHandler<any[]> {
-    protected requiresAdmin = true;
-
-    protected async processRequest() {
+export const GET = createApiHandler(async (context) => {
+    try {
         const snapshot = await adminDb.collection('agent_categories').orderBy('name').get();
         const categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        return categories;
+        return ApiResponse.success(categories);
+    } catch (error) {
+        console.error('Error fetching agent categories:', error);
+        return ApiResponse.error('Failed to fetch agent categories', 500);
     }
-}
+}, { requireAdmin: true });
 
-/**
- * معالج إنشاء فئة وكيل جديدة
- */
-class CreateAgentCategoryHandler extends ComplexApiHandler<z.infer<typeof createCategorySchema>, any> {
-    protected inputSchema = createCategorySchema;
-    protected requiresAdmin = true;
-    protected creditCost = 1;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { request } = context;
+        const { id, name } = await request.json();
 
-    protected async processRequest(data: z.infer<typeof createCategorySchema>) {
-        const { id, name } = data;
         const categoryRef = adminDb.collection('agent_categories').doc(id);
         const doc = await categoryRef.get();
 
         if (doc.exists) {
-            throw new Error('A category with this ID already exists.');
+            return ApiResponse.badRequest('A category with this ID already exists.');
         }
 
         const newCategory = { name };
         await categoryRef.set(newCategory);
 
-        return { id, ...newCategory };
+        return ApiResponse.created({ id, ...newCategory });
+    } catch (error) {
+        console.error('Error creating agent category:', error);
+        return ApiResponse.error('Failed to create agent category', 500);
     }
-}
-
-// إنشاء المعالجات
-const getAgentCategoriesHandler = new GetAgentCategoriesHandler();
-const createAgentCategoryHandler = new CreateAgentCategoryHandler();
-
-// تصدير الـ handlers مع middleware
-export const GET = withApiMiddleware(
-    getAgentCategoriesHandler,
-    { requireAdmin: true, logging: true }
-);
-
-export const POST = withApiMiddleware(
-    createAgentCategoryHandler,
-    { requireAdmin: true, logging: true }
-);
+}, { validateBody: createCategorySchema, requireAdmin: true });

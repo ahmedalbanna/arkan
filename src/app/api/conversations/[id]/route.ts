@@ -1,37 +1,33 @@
 /**
- * API Route لحذف المحادثات - النسخة الجديدة الموحدة
+ * API Route لحذف المحادثات - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لحذف المحادثات
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminRealtimeDb } from '@/lib/firebase/server-init';
 
-/**
- * معالج حذف المحادثة
- */
-class DeleteConversationHandler extends SimpleApiHandler<{ message: string }> {
-    protected async processRequest(context: any) {
+export const DELETE = createApiHandler(async (context) => {
+    try {
         const { params, user } = context;
         const conversationId = params.id;
 
         if (!conversationId) {
-            throw new Error('Conversation ID is required.');
+            return ApiResponse.badRequest('Conversation ID is required.');
         }
 
         const convoRef = adminRealtimeDb.ref(`conversations/${conversationId}`);
         const convoSnapshot = await convoRef.get();
 
         if (!convoSnapshot.exists()) {
-            throw new Error('Conversation not found.');
+            return ApiResponse.notFound('Conversation not found.');
         }
 
         const conversation = convoSnapshot.val();
 
         // Authorization: Check if the user is a participant
         if (!conversation.participantIds.includes(user.id)) {
-            throw new Error('Forbidden');
+            return ApiResponse.forbidden('Access denied');
         }
 
         const updates: { [key: string]: null } = {};
@@ -43,15 +39,9 @@ class DeleteConversationHandler extends SimpleApiHandler<{ message: string }> {
 
         await adminRealtimeDb.ref().update(updates);
 
-        return { message: 'Conversation deleted successfully' };
+        return ApiResponse.success({ message: 'Conversation deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting conversation:', error);
+        return ApiResponse.error('Failed to delete conversation', 500);
     }
-}
-
-// إنشاء المعالج
-const deleteConversationHandler = new DeleteConversationHandler();
-
-// تصدير الـ handler مع middleware
-export const DELETE = withApiMiddleware(
-    deleteConversationHandler,
-    { logging: true }
-);
+}, { requireAuth: true });

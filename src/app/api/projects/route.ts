@@ -1,21 +1,16 @@
 /**
- * API Route للمشاريع - النسخة الجديدة الموحدة
+ * API Route للمشاريع - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للمشاريع
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { handleApiErrorEnhanced } from '@/core/api';
-import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { ProjectSchemas } from '@/core/validation/api-validators';
 import { adminDb } from '@/lib/firebase/server-init';
 import type { SavedProject } from '@/lib/models/project';
 
-/**
- * معالج قائمة المشاريع (GET)
- */
-class ProjectListHandler extends SimpleApiHandler<SavedProject[]> {
-    protected async processRequest(context: any): Promise<SavedProject[]> {
+export const GET = createApiHandler(async (context) => {
+    try {
         const { user } = context;
 
         // جلب المشاريع الشخصية
@@ -51,25 +46,17 @@ class ProjectListHandler extends SimpleApiHandler<SavedProject[]> {
         const projects = Array.from(projectsMap.values())
             .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
-        return projects as SavedProject[];
+        return ApiResponse.success(projects as SavedProject[]);
+    } catch (error) {
+        console.error('Error fetching projects:', error);
+        return ApiResponse.error('Failed to fetch projects', 500);
     }
-}
+}, { requireAuth: true });
 
-/**
- * معالج إنشاء المشروع (POST)
- */
-class CreateProjectHandler extends ComplexApiHandler<{
-    title: string;
-    description?: string;
-    type: 'proposal' | 'report' | 'presentation' | 'academic';
-    language: 'ar' | 'en';
-    teamId?: string;
-}, SavedProject> {
-    protected inputSchema = ProjectSchemas.createProject;
-    protected requiresAdmin = false;
-    protected creditCost = 1;
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const data = await request.json();
 
         const projectData = {
             ...data,
@@ -87,41 +74,36 @@ class CreateProjectHandler extends ComplexApiHandler<{
             id: docRef.id,
             ...projectData,
         } as SavedProject;
-        return result;
-    }
-}
 
-/**
- * معالج تحديث المشروع (PUT)
- */
-class UpdateProjectHandler extends ComplexApiHandler<{
-    title?: string;
-    description?: string;
-    status?: 'active' | 'inactive' | 'pending';
-}, SavedProject> {
-    protected inputSchema = ProjectSchemas.updateProject;
-    protected requiresAdmin = false;
-    protected creditCost = 1;
-    protected async processRequest(data: any, context: any): Promise<SavedProject> {
-        const { params, user } = context;
+        return ApiResponse.created(result);
+    } catch (error) {
+        console.error('Error creating project:', error);
+        return ApiResponse.error('Failed to create project', 500);
+    }
+}, { validateBody: ProjectSchemas.createProject, requireAuth: true });
+
+export const PUT = createApiHandler(async (context) => {
+    try {
+        const { params, user, request } = context;
         const projectId = params?.id;
+        const data = await request.json();
 
         if (!projectId) {
-            return handleApiErrorEnhanced({ message: 'Project ID is required' }, '400');
+            return ApiResponse.badRequest('Project ID is required');
         }
 
         // التحقق من أن المستخدم يملك المشروع أو عضو في الفريق
         const projectDoc = await adminDb.collection('projects').doc(projectId).get();
 
         if (!projectDoc.exists) {
-            return handleApiErrorEnhanced({ message: 'Project not found' }, '404');
+            return ApiResponse.notFound('Project not found');
         }
 
         const projectData = projectDoc.data();
 
         if (projectData?.userId !== user.id &&
             (!projectData?.teamId || !user.teams?.includes(projectData.teamId))) {
-            return handleApiErrorEnhanced({ message: 'Access denied' }, '403');
+            return ApiResponse.forbidden('Access denied');
         }
 
         const updateData = {
@@ -131,81 +113,72 @@ class UpdateProjectHandler extends ComplexApiHandler<{
 
         await adminDb.collection('projects').doc(projectId).update(updateData);
 
-        return {
+        const result = {
             id: projectId,
             ...projectData,
             ...updateData,
         } as SavedProject;
-    }
-}
 
-/**
- * معالج حذف المشروع (DELETE)
- */
-class DeleteProjectHandler extends ComplexApiHandler<{}, { message: string }> {
-    protected inputSchema = ProjectSchemas.deleteProject;
-    protected requiresAdmin = false;
-    protected creditCost = 1;
-    protected async processRequest(data: any, context: any): Promise<{ message: string }> {
+        return ApiResponse.success(result);
+    } catch (error) {
+        console.error('Error updating project:', error);
+        return ApiResponse.error('Failed to update project', 500);
+    }
+}, { validateBody: ProjectSchemas.updateProject, requireAuth: true });
+
+export const DELETE = createApiHandler(async (context) => {
+    try {
         const { params, user } = context;
         const projectId = params?.id;
 
         if (!projectId) {
-            return handleApiErrorEnhanced({ message: 'Project ID is required' }, '400');
+            return ApiResponse.badRequest('Project ID is required');
         }
 
         // التحقق من أن المستخدم يملك المشروع
         const projectDoc = await adminDb.collection('projects').doc(projectId).get();
 
         if (!projectDoc.exists) {
-            return handleApiErrorEnhanced({ message: 'Project not found' }, '404');
+            return ApiResponse.notFound('Project not found');
         }
 
         const projectData = projectDoc.data();
 
         if (projectData?.userId !== user.id) {
-            return handleApiErrorEnhanced({ message: 'Access denied' }, '403');
+            return ApiResponse.forbidden('Access denied');
         }
 
         await adminDb.collection('projects').doc(projectId).delete();
 
-        return { message: 'Project deleted successfully' } as { message: string };
+        return ApiResponse.success({ message: 'Project deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting project:', error);
+        return ApiResponse.error('Failed to delete project', 500);
     }
-}
+}, { requireAuth: true });
 
-/**
- * معالج إضافة سياق للمشروع (PATCH)
- */
-class AddContextHandler extends ComplexApiHandler<{
-    type: 'file' | 'text' | 'url';
-    content: string;
-    fileName?: string;
-    fileType?: 'pdf' | 'docx' | 'txt' | 'md';
-    fileSize?: number;
-}, { message: string }> {
-    protected inputSchema = ProjectSchemas.addContext;
-    protected requiresAdmin = false;
-    protected creditCost = 1;
-    protected async processRequest(data: any, context: any): Promise<{ message: string }> {
-        const { params, user } = context;
+export const PATCH = createApiHandler(async (context) => {
+    try {
+        const { params, user, request } = context;
         const projectId = params?.id;
+        const data = await request.json();
 
         if (!projectId) {
-            return handleApiErrorEnhanced({ message: 'Project ID is required' }, '400');
+            return ApiResponse.badRequest('Project ID is required');
         }
 
         // التحقق من أن المستخدم يملك المشروع أو عضو في الفريق
         const projectDoc = await adminDb.collection('projects').doc(projectId).get();
 
         if (!projectDoc.exists) {
-            return handleApiErrorEnhanced({ message: 'Project not found' }, '404');
+            return ApiResponse.notFound('Project not found');
         }
 
         const projectData = projectDoc.data();
 
         if (projectData?.userId !== user.id &&
             (!projectData?.teamId || !user.teams?.includes(projectData.teamId))) {
-            return handleApiErrorEnhanced({ message: 'Access denied' }, '403');
+            return ApiResponse.forbidden('Access denied');
         }
 
         const contextItem = {
@@ -223,39 +196,9 @@ class AddContextHandler extends ComplexApiHandler<{
             updatedAt: new Date().toISOString(),
         });
 
-        return { message: 'Context added successfully' } as { message: string };
+        return ApiResponse.success({ message: 'Context added successfully' });
+    } catch (error) {
+        console.error('Error adding context:', error);
+        return ApiResponse.error('Failed to add context', 500);
     }
-}
-
-// إنشاء المعالجات
-const projectListHandler = new ProjectListHandler();
-const createProjectHandler = new CreateProjectHandler();
-const updateProjectHandler = new UpdateProjectHandler();
-const deleteProjectHandler = new DeleteProjectHandler();
-const addContextHandler = new AddContextHandler();
-
-// تصدير الـ handlers مع middleware
-export const GET = withApiMiddleware(
-    projectListHandler,
-    { logging: true }
-);
-
-export const POST = withApiMiddleware(
-    createProjectHandler,
-    { logging: true }
-);
-
-export const PUT = withApiMiddleware(
-    updateProjectHandler,
-    { logging: true }
-);
-
-export const DELETE = withApiMiddleware(
-    deleteProjectHandler,
-    { logging: true }
-);
-
-export const PATCH = withApiMiddleware(
-    addContextHandler,
-    { logging: true }
-);
+}, { validateBody: ProjectSchemas.addContext, requireAuth: true });

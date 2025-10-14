@@ -1,11 +1,10 @@
 /**
- * API Route لتحديد الإشعارات كمقروءة - النسخة الجديدة الموحدة
+ * API Route لتحديد الإشعارات كمقروءة - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتحديد الإشعارات كمقروءة
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminRealtimeDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
@@ -14,16 +13,10 @@ const markAsReadSchema = z.object({
     notificationIds: z.array(z.string()).min(1),
 });
 
-/**
- * معالج تحديد الإشعارات كمقروءة
- */
-class MarkAsReadHandler extends ComplexApiHandler<z.infer<typeof markAsReadSchema>, { message: string }> {
-    protected inputSchema = markAsReadSchema;
-    protected requiresAdmin = false;
-    protected creditCost = 1;
-    protected async processRequest(data: z.infer<typeof markAsReadSchema>, context: any) {
-        const { user } = context;
-        const { notificationIds } = data;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const { notificationIds } = await request.json();
 
         // Use the Admin SDK to interact with the Realtime Database
         const updates: { [key: string]: any } = {};
@@ -33,15 +26,9 @@ class MarkAsReadHandler extends ComplexApiHandler<z.infer<typeof markAsReadSchem
 
         await adminRealtimeDb.ref().update(updates);
 
-        return { message: 'Notifications marked as read.' };
+        return ApiResponse.success({ message: 'Notifications marked as read.' });
+    } catch (error) {
+        console.error('Error marking notifications as read:', error);
+        return ApiResponse.error('Failed to mark notifications as read', 500);
     }
-}
-
-// إنشاء المعالج
-const markAsReadHandler = new MarkAsReadHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    markAsReadHandler,
-    { logging: true }
-);
+}, { validateBody: markAsReadSchema, requireAuth: true });

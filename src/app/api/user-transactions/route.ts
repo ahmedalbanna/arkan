@@ -1,32 +1,30 @@
 /**
- * API Route لمعاملات المستخدم - النسخة الجديدة الموحدة
+ * API Route لمعاملات المستخدم - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لمعاملات المستخدم
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
-import { getTransactionsByUserId } from '@/lib/db/queries';
+import { ApiResponse, createApiHandler } from '@/core/api';
+import { adminDb } from '@/lib/firebase/server-init';
 
-/**
- * معالج معاملات المستخدم
- */
-class UserTransactionsHandler extends SimpleApiHandler<any[]> {
-    protected async processRequest(context: any) {
+export const GET = createApiHandler(async (context) => {
+    try {
         const { user } = context;
 
-        const transactions = await getTransactionsByUserId(user.id);
-        return transactions;
-    }
-}
+        const transactionsSnapshot = await adminDb.collection('transactions')
+            .where('userId', '==', user.id)
+            .orderBy('createdAt', 'desc')
+            .limit(20)
+            .get();
 
-// إنشاء المعالج
-const userTransactionsHandler = new UserTransactionsHandler();
+        const transactions = transactionsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
 
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    userTransactionsHandler,
-    {
-        logging: true
+        return ApiResponse.success(transactions);
+    } catch (error) {
+        console.error('Error fetching user transactions:', error);
+        return ApiResponse.error('Failed to fetch user transactions', 500);
     }
-);
+}, { requireAuth: true });

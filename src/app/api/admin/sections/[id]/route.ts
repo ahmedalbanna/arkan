@@ -1,11 +1,10 @@
 /**
- * API Route لتحديث وحذف الأقسام - النسخة الجديدة الموحدة
+ * API Route لتحديث وحذف الأقسام - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتحديث وحذف الأقسام
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
@@ -17,59 +16,39 @@ const SectionUpdateSchema = z.object({
     type: z.enum(['report', 'diagram', 'presentation']).optional(),
 });
 
-/**
- * معالج تحديث قسم
- */
-class UpdateSectionHandler extends ComplexApiHandler<z.infer<typeof SectionUpdateSchema>, any> {
-    protected inputSchema = SectionUpdateSchema;
-    protected requiresAdmin = true;
-    protected creditCost = 1;
-
-    protected async processRequest(data: z.infer<typeof SectionUpdateSchema>, context: any) {
-        const { params } = context;
+export const PUT = createApiHandler(async (context) => {
+    try {
+        const { params, request } = context;
         const sectionId = params.id;
+        const data = await request.json();
 
         if (!sectionId) {
-            throw new Error('Section ID is required');
+            return ApiResponse.badRequest('Section ID is required');
         }
 
         const docRef = adminDb.collection('sections').doc(sectionId);
         await docRef.update(data);
         const updatedDoc = await docRef.get();
-        return { id: updatedDoc.id, ...updatedDoc.data() };
+        return ApiResponse.success({ id: updatedDoc.id, ...updatedDoc.data() });
+    } catch (error) {
+        console.error('Error updating section:', error);
+        return ApiResponse.error('Failed to update section', 500);
     }
-}
+}, { validateBody: SectionUpdateSchema, requireAdmin: true });
 
-/**
- * معالج حذف قسم
- */
-class DeleteSectionHandler extends SimpleApiHandler<{ message: string }> {
-    protected requiresAdmin = true;
-
-    protected async processRequest(context: any) {
+export const DELETE = createApiHandler(async (context) => {
+    try {
         const { params } = context;
         const sectionId = params.id;
 
         if (!sectionId) {
-            throw new Error('Section ID is required');
+            return ApiResponse.badRequest('Section ID is required');
         }
 
         await adminDb.collection('sections').doc(sectionId).delete();
-        return { message: 'Section deleted successfully' };
+        return ApiResponse.success({ message: 'Section deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting section:', error);
+        return ApiResponse.error('Failed to delete section', 500);
     }
-}
-
-// إنشاء المعالجات
-const updateSectionHandler = new UpdateSectionHandler();
-const deleteSectionHandler = new DeleteSectionHandler();
-
-// تصدير الـ handlers مع middleware
-export const PUT = withApiMiddleware(
-    updateSectionHandler,
-    { requireAdmin: true, logging: true }
-);
-
-export const DELETE = withApiMiddleware(
-    deleteSectionHandler,
-    { requireAdmin: true, logging: true }
-);
+}, { requireAdmin: true });

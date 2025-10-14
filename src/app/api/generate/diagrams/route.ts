@@ -1,13 +1,12 @@
 /**
- * API Route لتوليد المخططات - النسخة الجديدة الموحدة
+ * API Route لتوليد المخططات - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد المخططات
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
 import { generateDiagram } from '@/ai/flows/unified';
 import { DiagramTypeSchema, ExternalContextSchema, ProjectPlanSchema, ProjectProposalSchema, SectionNameSchema } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 import { deflateSync } from 'zlib';
 import { z } from 'zod';
@@ -66,23 +65,18 @@ async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
     return `/api/proxy-image?url=${encodeURIComponent(plantUmlUrl)}`;
 }
 
-/**
- * معالج توليد المخططات
- */
-class GenerateDiagramHandler extends CreditBasedApiHandler<any, any> {
-    protected inputSchema = unifiedDiagramSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const data = await request.json();
 
         // التحقق من نوع الطلب
         if (data.intent === 'update_diagram') {
             const imageUrl = await getPlantUmlImageUrl(data.plantUmlCode);
-            return {
+            return ApiResponse.success({
                 plantUmlCode: data.plantUmlCode,
                 imageUrl
-            };
+            });
         }
 
         // توليد مخطط جديد
@@ -102,20 +96,12 @@ class GenerateDiagramHandler extends CreditBasedApiHandler<any, any> {
             userId: user.id,
             input: agentInput,
             output: finalOutput,
-            creditCost: this.creditCost,
+            creditCost: 1,
         });
 
-        return finalOutput;
+        return ApiResponse.success(finalOutput);
+    } catch (error) {
+        console.error('Generate diagram error:', error);
+        return ApiResponse.error('Failed to generate diagram', 500);
     }
-}
-
-// إنشاء المعالج
-const generateDiagramHandler = new GenerateDiagramHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    generateDiagramHandler,
-    {
-        logging: true
-    }
-);
+}, { validateBody: unifiedDiagramSchema, requireAuth: true });

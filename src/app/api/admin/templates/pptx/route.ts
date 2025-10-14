@@ -1,11 +1,10 @@
 /**
- * API Route لقوالب PPTX - النسخة الجديدة الموحدة
+ * API Route لقوالب PPTX - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لقوالب PPTX
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { createGenerativeTemplate } from '@/lib/db/queries';
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
@@ -20,11 +19,8 @@ const createPptxTemplateSchema = z.object({
     description: z.string().min(1, "Description is required"),
 });
 
-/**
- * معالج قائمة قوالب PPTX (GET)
- */
-class PptxTemplatesListHandler extends SimpleApiHandler<{ [key: string]: any }> {
-    protected async processRequest(context: any) {
+export const GET = createApiHandler(async (context) => {
+    try {
         const stylesCollection = adminDb.collection('templates').doc('pptx').collection('styles');
         let snapshot = await stylesCollection.get();
 
@@ -49,24 +45,17 @@ class PptxTemplatesListHandler extends SimpleApiHandler<{ [key: string]: any }> 
             templates[doc.id] = doc.data();
         });
 
-        return templates;
+        return ApiResponse.success(templates);
+    } catch (error) {
+        console.error('Error fetching PPTX templates:', error);
+        return ApiResponse.error('Failed to fetch PPTX templates', 500);
     }
-}
+}, { requireAuth: false });
 
-/**
- * معالج إنشاء قالب PPTX جديد (POST)
- */
-class CreatePptxTemplateHandler extends ComplexApiHandler<{
-    id: string;
-    name: string;
-    description: string;
-}, any> {
-    protected inputSchema = createPptxTemplateSchema;
-    protected requiresAdmin = true;
-    protected creditCost = 1;
-
-    protected async processRequest(data: any, context: any) {
-        const { id, name, description } = data;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { request } = context;
+        const { id, name, description } = await request.json();
 
         // إنشاء قالب جديد بناءً على القالب الافتراضي 'modern'
         const newTemplateData = {
@@ -78,27 +67,9 @@ class CreatePptxTemplateHandler extends ComplexApiHandler<{
         };
 
         const newTemplate = await createGenerativeTemplate('pptx', id, newTemplateData);
-        return newTemplate;
+        return ApiResponse.created(newTemplate);
+    } catch (error) {
+        console.error('Error creating PPTX template:', error);
+        return ApiResponse.error('Failed to create PPTX template', 500);
     }
-}
-
-// إنشاء المعالجات
-const pptxTemplatesListHandler = new PptxTemplatesListHandler();
-const createPptxTemplateHandler = new CreatePptxTemplateHandler();
-
-// تصدير الـ handlers مع middleware
-export const GET = withApiMiddleware(
-    pptxTemplatesListHandler,
-    {
-        requireAuth: false, // هذا الـ endpoint عام ولا يتطلب مصادقة
-        logging: true
-    }
-);
-
-export const POST = withApiMiddleware(
-    createPptxTemplateHandler,
-    {
-        requireAdmin: true,
-        logging: true
-    }
-);
+}, { validateBody: createPptxTemplateSchema, requireAdmin: true });

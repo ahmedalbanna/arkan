@@ -1,12 +1,11 @@
 /**
- * API Route لتوليد مخطط المشروع - النسخة الجديدة الموحدة
+ * API Route لتوليد مخطط المشروع - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد مخطط المشروع
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
 import { generateProjectPlan } from '@/ai/flows/unified';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -17,19 +16,10 @@ const planSchema = z.object({
     numPhases: z.coerce.number().int().optional(),
 });
 
-/**
- * معالج توليد مخطط المشروع
- */
-class GenerateProjectPlanHandler extends CreditBasedApiHandler<{
-    projectDescription: string;
-    keyDeliverables: string;
-    numPhases?: number;
-}, any> {
-    protected inputSchema = planSchema;
-    protected creditCost = 2; // مهمة معقدة
-    protected requiresAdmin = false;
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const data = await request.json();
 
         const agentInput = data;
         const result = await generateProjectPlan(agentInput);
@@ -40,20 +30,12 @@ class GenerateProjectPlanHandler extends CreditBasedApiHandler<{
             userId: user.id,
             input: agentInput,
             output: { phaseCount: result.phases.length }, // تسجيل الحد الأدنى من المخرجات
-            creditCost: this.creditCost,
+            creditCost: 2, // مهمة معقدة
         });
 
-        return result;
+        return ApiResponse.success(result);
+    } catch (error) {
+        console.error('Generate project plan error:', error);
+        return ApiResponse.error('Failed to generate project plan', 500);
     }
-}
-
-// إنشاء المعالج
-const generateProjectPlanHandler = new GenerateProjectPlanHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    generateProjectPlanHandler,
-    {
-        logging: true
-    }
-);
+}, { validateBody: planSchema, requireAuth: true });

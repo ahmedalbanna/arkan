@@ -1,13 +1,10 @@
 /**
- * API Route لأدوات الكتابة - النسخة الجديدة الموحدة
+ * API Route لأدوات الكتابة - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لأدوات الكتابة
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { handleApiErrorEnhanced } from '@/core/api';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
-import type { ApiHandlerContext } from '@/core/types/api-types';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
@@ -58,38 +55,15 @@ const toolConfig = {
 
 type ToolName = keyof typeof toolConfig;
 
-/**
- * معالج أدوات الكتابة الموحد
- */
-class WritingToolHandler extends CreditBasedApiHandler<any, any> {
-    protected creditCost = 1; // التكلفة الافتراضية
-    protected requiresAdmin = false;
-    protected inputSchema = z.any(); // Allow any input - tool-specific validation happens in processRequest
-
-    async handle(context: ApiHandlerContext): Promise<Response> {
-        try {
-            // تحديد تكلفة الائتمانات بناءً على الأداة
-            const toolName = context.params?.tool as ToolName;
-            const config = toolConfig[toolName];
-            const creditCost = config?.creditCost || this.creditCost;
-
-            // تحديث تكلفة الائتمانات للـ handler
-            this.creditCost = creditCost;
-
-            // استخدام الـ parent handle method الذي يتعامل مع الخصم تلقائياً
-            return await super.handle(context);
-        } catch (error) {
-            return handleApiErrorEnhanced(error);
-        }
-    }
-
-    protected async processRequest(data: any, context: any): Promise<any> {
-        const { params, user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { params, user, request } = context;
         const toolName = params.tool as ToolName;
+        const data = await request.json();
 
         const config = toolConfig[toolName];
         if (!config) {
-            throw new Error(`Invalid tool: ${toolName}`);
+            return ApiResponse.badRequest(`Invalid tool: ${toolName}`);
         }
 
         const { flow, schema, creditCost } = config;
@@ -97,7 +71,7 @@ class WritingToolHandler extends CreditBasedApiHandler<any, any> {
         // التحقق من صحة البيانات باستخدام schema المحدد
         const validation = schema.safeParse(data);
         if (!validation.success) {
-            throw new Error(`Validation error: ${validation.error.errors.map(e => e.message).join(', ')}`);
+            return ApiResponse.badRequest(`Validation error: ${validation.error.errors.map(e => e.message).join(', ')}`);
         }
 
         // تنفيذ الـ flow
@@ -112,17 +86,9 @@ class WritingToolHandler extends CreditBasedApiHandler<any, any> {
             creditCost: creditCost,
         });
 
-        return result;
+        return ApiResponse.success(result);
+    } catch (error) {
+        console.error('Writing tool error:', error);
+        return ApiResponse.error('Failed to execute writing tool', 500);
     }
-}
-
-// إنشاء المعالج
-const writingToolHandler = new WritingToolHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    writingToolHandler,
-    {
-        logging: true
-    }
-);
+}, { requireAuth: true });

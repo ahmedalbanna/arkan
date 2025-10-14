@@ -1,25 +1,18 @@
 /**
- * API Route لمعالجة النصوص - النسخة الجديدة الموحدة
+ * API Route لمعالجة النصوص - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لمعالجة النصوص
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
 import { manipulateText } from '@/ai/flows/unified';
 import { ManipulateTextInputSchema } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 
-/**
- * معالج معالجة النصوص
- */
-class ManipulateTextHandler extends CreditBasedApiHandler<any, any> {
-    protected inputSchema = ManipulateTextInputSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const data = await request.json();
 
         const agentInput = data;
         const result = await manipulateText(agentInput);
@@ -30,20 +23,12 @@ class ManipulateTextHandler extends CreditBasedApiHandler<any, any> {
             userId: user.id,
             input: agentInput,
             output: result,
-            creditCost: this.creditCost,
+            creditCost: 1,
         });
 
-        return result;
+        return ApiResponse.success(result);
+    } catch (error) {
+        console.error('Manipulate text error:', error);
+        return ApiResponse.error('Failed to manipulate text', 500);
     }
-}
-
-// إنشاء المعالج
-const manipulateTextHandler = new ManipulateTextHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    manipulateTextHandler,
-    {
-        logging: true
-    }
-);
+}, { validateBody: ManipulateTextInputSchema, requireAuth: true });

@@ -1,35 +1,25 @@
 /**
- * API Route لتحليل المشاكل الأكاديمية - النسخة الجديدة الموحدة
+ * API Route لتحليل المشاكل الأكاديمية - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتحليل المشاكل الأكاديمية
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
 import { analyzeAcademicDocument } from '@/ai/flows/unified';
 import { AcademicDocumentTypeSchema } from '@/ai/schemas/enums';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
-export const ApiAnalyzeSchema = z.object({
+// Schema لتحليل المشاكل الأكاديمية
+const analyzeSchema = z.object({
     documentType: AcademicDocumentTypeSchema,
     markdown: z.string().min(20, 'Markdown content is too short.'),
 });
 
-/**
- * معالج تحليل المشاكل الأكاديمية
- */
-class AnalyzeAcademicHandler extends CreditBasedApiHandler<{
-    documentType: string;
-    markdown: string;
-}, any> {
-    protected inputSchema = ApiAnalyzeSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-
-    protected async processRequest(data: any, context: any) {
-        const { documentType, markdown } = data;
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const { documentType, markdown } = await request.json();
 
         const agentInput = {
             documentType,
@@ -45,20 +35,12 @@ class AnalyzeAcademicHandler extends CreditBasedApiHandler<{
             userId: user.id,
             input: agentInput,
             output: result,
-            creditCost: this.creditCost,
+            creditCost: 1,
         });
 
-        return result;
+        return ApiResponse.success(result);
+    } catch (error) {
+        console.error('Analyze academic error:', error);
+        return ApiResponse.error('Failed to analyze academic document', 500);
     }
-}
-
-// إنشاء المعالج
-const analyzeAcademicHandler = new AnalyzeAcademicHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    analyzeAcademicHandler,
-    {
-        logging: true
-    }
-);
+}, { validateBody: analyzeSchema, requireAuth: true });

@@ -1,5 +1,5 @@
 /**
- * API Route للتحويل - النسخة المبسطة
+ * API Route للترجمة - النسخة المبسطة
  *
  * يستخدم النظام الجديد المبسط للـ API
  */
@@ -8,7 +8,7 @@ import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
-// Schema للتحويل
+// Schema للترجمة
 const translateSchema = z.object({
     text: z.string().min(1),
     targetLang: z.string().min(2),

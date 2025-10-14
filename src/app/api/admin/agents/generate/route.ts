@@ -1,12 +1,11 @@
 /**
- * API Route لتوليد إعدادات الوكلاء - النسخة الجديدة الموحدة
+ * API Route لتوليد إعدادات الوكلاء - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد إعدادات الوكلاء
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
 import { generateAgentConfig } from '@/ai/flows/unified';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { z } from 'zod';
 
 // Schema لتوليد إعدادات الوكيل
@@ -20,24 +19,10 @@ const generateSchema = z.object({
     })).optional(),
 });
 
-/**
- * معالج توليد إعدادات الوكلاء
- */
-class GenerateAgentConfigHandler extends CreditBasedApiHandler<{
-    prompt: string;
-    includeJsonOutput?: boolean;
-    contextFiles?: Array<{
-        name: string;
-        type: string;
-        content: string;
-    }>;
-}, any> {
-    protected inputSchema = generateSchema;
-    protected creditCost = 2; // توليد الوكيل مهمة أكثر تعقيداً
-    protected requiresAdmin = true;
-
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const data = await request.json();
 
         const result = await generateAgentConfig({
             prompt: data.prompt,
@@ -45,18 +30,9 @@ class GenerateAgentConfigHandler extends CreditBasedApiHandler<{
             contextFiles: data.contextFiles,
         });
 
-        return result;
+        return ApiResponse.success(result);
+    } catch (error) {
+        console.error('Generate agent config error:', error);
+        return ApiResponse.error('Failed to generate agent config', 500);
     }
-}
-
-// إنشاء المعالج
-const generateAgentConfigHandler = new GenerateAgentConfigHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    generateAgentConfigHandler,
-    {
-        requireAdmin: true,
-        logging: true
-    }
-);
+}, { validateBody: generateSchema, requireAdmin: true });

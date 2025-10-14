@@ -1,19 +1,15 @@
 /**
- * API Route لقوالب المقترحات - النسخة الجديدة الموحدة
+ * API Route لقوالب المقترحات - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لقوالب المقترحات مع Lazy Seeding
+ * يستخدم النظام الجديد المبسط للـ API مع Lazy Seeding
  */
 
-import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { PROPOSAL_TEMPLATES as defaultTemplates } from '@/lib/db/seed-data/proposal-templates';
 import { adminDb } from '@/lib/firebase/server-init';
 
-/**
- * معالج جلب قوالب المقترحات مع Lazy Seeding
- */
-class GetProposalTemplatesHandler extends SimpleApiHandler<any[]> {
-    protected async processRequest() {
+export const GET = createApiHandler(async () => {
+    try {
         const collectionRef = adminDb.collection('templates').doc('proposal').collection('items');
         let snapshot = await collectionRef.get();
 
@@ -28,15 +24,9 @@ class GetProposalTemplatesHandler extends SimpleApiHandler<any[]> {
         }
 
         const templates = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        return templates;
+        return ApiResponse.success(templates);
+    } catch (error) {
+        console.error('Error fetching proposal templates:', error);
+        return ApiResponse.error('Failed to fetch proposal templates', 500);
     }
-}
-
-// إنشاء المعالج
-const getProposalTemplatesHandler = new GetProposalTemplatesHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    getProposalTemplatesHandler,
-    { requireAuth: false, logging: true } // Public endpoint for fetching templates
-);
+}, { requireAuth: false });

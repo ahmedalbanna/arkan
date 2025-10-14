@@ -1,56 +1,39 @@
 /**
- * API Route لتوليد التقارير - النسخة المحسنة بالقوالب الذكية
+ * API Route لتوليد التقارير - النسخة المبسطة
  *
- * هذا الملف يستخدم النظام المحسن بالقوالب الذكية المتخصصة لكل قسم
+ * يستخدم النظام الجديد المبسط للـ API
  */
-
 
 import { generateReportSection } from '@/ai/flows/unified';
 import { GenerateSectionInputSchema } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 
-/**
- * معالج توليد التقارير المحسن بالقوالب الذكية
- */
-class GenerateReportHandler extends CreditBasedApiHandler<any, any> {
-    protected inputSchema = GenerateSectionInputSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const data = await request.json();
 
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
-        const agentInput = data;
-
-        console.log(`🚀 بدء توليد قسم "${agentInput.sectionToGenerate}" باستخدام القوالب الذكية`);
+        console.log(`🚀 بدء توليد قسم "${data.sectionToGenerate}" باستخدام القوالب الذكية`);
 
         // استخدام النظام المحسن بالقوالب الذكية
-        const result = await generateReportSection(agentInput);
+        const result = await generateReportSection(data);
 
         const transformedOutput = { [result.sectionName]: result.content };
 
         // تسجيل العملية مع معلومات إضافية عن القالب المستخدم
         await logGeneration({
-            agentId: `smart-template-${agentInput.sectionToGenerate}`,
+            agentId: `smart-template-${data.sectionToGenerate}`,
             userId: user.id,
-            input: agentInput,
+            input: data,
             output: transformedOutput,
-            creditCost: this.creditCost
+            creditCost: 1
         });
 
-        console.log(`✅ تم توليد قسم "${agentInput.sectionToGenerate}" بنجاح باستخدام القالب الذكي`);
-        return transformedOutput;
+        console.log(`✅ تم توليد قسم "${data.sectionToGenerate}" بنجاح باستخدام القالب الذكي`);
+        return ApiResponse.success(transformedOutput);
+    } catch (error) {
+        console.error('Generate report error:', error);
+        return ApiResponse.error('Failed to generate report', 500);
     }
-}
-
-// إنشاء المعالج
-const generateReportHandler = new GenerateReportHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    generateReportHandler,
-    {
-        logging: true
-    }
-);
+}, { validateBody: GenerateSectionInputSchema, requireAuth: true });

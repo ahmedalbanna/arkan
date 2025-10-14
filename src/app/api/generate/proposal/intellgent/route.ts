@@ -1,25 +1,18 @@
 /**
- * API Route لتوليد المقترحات - النسخة الجديدة الموحدة
+ * API Route لتوليد المقترحات الذكي - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد المقترحات
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
 import { generateProposal } from '@/ai/flows/unified';
 import { GenerateProposalInputSchema, type GenerateProposalInput } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 
-/**
- * معالج توليد المقترحات
- */
-class GenerateProposalHandler extends CreditBasedApiHandler<GenerateProposalInput, any> {
-    protected inputSchema = GenerateProposalInputSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-    protected async processRequest(data: any, context: any) {
-        const { projectIdea, guidelines, externalContext, advancedFields } = data;
-        const { user } = context;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const { projectIdea, guidelines, externalContext, advancedFields } = await request.json();
 
         const agentInput: GenerateProposalInput = {
             projectIdea,
@@ -33,7 +26,7 @@ class GenerateProposalHandler extends CreditBasedApiHandler<GenerateProposalInpu
 
         // تسجيل العملية
         await logGeneration({
-            agentId: 'generate-proposal',
+            agentId: 'generate-proposal-intelligent',
             userId: user.id,
             input: {
                 projectIdea,
@@ -42,20 +35,12 @@ class GenerateProposalHandler extends CreditBasedApiHandler<GenerateProposalInpu
                 usedAdvancedMode: !!advancedFields,
             },
             output: { resultLength: JSON.stringify(result).length },
-            creditCost: this.creditCost,
+            creditCost: 1,
         });
 
-        return result;
+        return ApiResponse.success(result);
+    } catch (error) {
+        console.error('Generate intelligent proposal error:', error);
+        return ApiResponse.error('Failed to generate intelligent proposal', 500);
     }
-}
-
-// إنشاء المعالج
-const generateProposalHandler = new GenerateProposalHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    generateProposalHandler,
-    {
-        logging: true
-    }
-);
+}, { validateBody: GenerateProposalInputSchema, requireAuth: true });

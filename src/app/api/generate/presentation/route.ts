@@ -1,17 +1,17 @@
 /**
- * API Route لتوليد العروض التقديمية - النسخة الجديدة الموحدة
+ * API Route لتوليد العروض التقديمية - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد العروض التقديمية
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
 import { generatePresentation } from '@/ai/flows/unified';
 import { ProjectPlanSchema, ProjectProposalSchema } from '@/ai/schemas/project';
-import { CreditBasedApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { logGeneration } from '@/services';
 import { z } from 'zod';
 
-export const ApiGeneratePresentationSchema = z.object({
+// Schema لتوليد العروض التقديمية
+const generatePresentationSchema = z.object({
     proposal: z.lazy(() => ProjectProposalSchema).nullable().optional(),
     projectPlan: z.lazy(() => ProjectPlanSchema).nullable().optional(),
     sourceDocuments: z.array(z.object({
@@ -19,15 +19,11 @@ export const ApiGeneratePresentationSchema = z.object({
         content: z.string(),
     })).min(1, "At least one source document is required."),
 });
-/**
- * معالج توليد العروض التقديمية
- */
-class GeneratePresentationHandler extends CreditBasedApiHandler<any, any> {
-    protected inputSchema = ApiGeneratePresentationSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
+
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const data = await request.json();
 
         const agentInput = data;
         const result = await generatePresentation(agentInput);
@@ -43,20 +39,12 @@ class GeneratePresentationHandler extends CreditBasedApiHandler<any, any> {
             output: {
                 slideCount: result.slides.length
             },
-            creditCost: this.creditCost,
+            creditCost: 1,
         });
 
-        return result;
+        return ApiResponse.success(result);
+    } catch (error) {
+        console.error('Generate presentation error:', error);
+        return ApiResponse.error('Failed to generate presentation', 500);
     }
-}
-
-// إنشاء المعالج
-const generatePresentationHandler = new GeneratePresentationHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    generatePresentationHandler,
-    {
-        logging: true
-    }
-);
+}, { validateBody: generatePresentationSchema, requireAuth: true });

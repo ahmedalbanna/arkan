@@ -1,11 +1,10 @@
 /**
- * API Route لمسح الإشعارات - النسخة الجديدة الموحدة
+ * API Route لمسح الإشعارات - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لمسح الإشعارات
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { ComplexApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminRealtimeDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
@@ -14,16 +13,10 @@ const clearSchema = z.object({
     notificationIds: z.array(z.string()).min(1, "At least one notification ID is required."),
 });
 
-/**
- * معالج مسح الإشعارات
- */
-class ClearNotificationsHandler extends ComplexApiHandler<z.infer<typeof clearSchema>, { message: string }> {
-    protected inputSchema = clearSchema;
-    protected requiresAdmin = false;
-    protected creditCost = 1;
-    protected async processRequest(data: z.infer<typeof clearSchema>, context: any) {
-        const { user } = context;
-        const { notificationIds } = data;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { user, request } = context;
+        const { notificationIds } = await request.json();
 
         const updates: { [key: string]: null } = {};
         notificationIds.forEach(id => {
@@ -32,15 +25,9 @@ class ClearNotificationsHandler extends ComplexApiHandler<z.infer<typeof clearSc
 
         await adminRealtimeDb.ref().update(updates);
 
-        return { message: 'Notifications cleared.' };
+        return ApiResponse.success({ message: 'Notifications cleared.' });
+    } catch (error) {
+        console.error('Error clearing notifications:', error);
+        return ApiResponse.error('Failed to clear notifications', 500);
     }
-}
-
-// إنشاء المعالج
-const clearNotificationsHandler = new ClearNotificationsHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    clearNotificationsHandler,
-    { logging: true }
-);
+}, { validateBody: clearSchema, requireAuth: true });

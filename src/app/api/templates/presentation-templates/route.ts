@@ -1,19 +1,15 @@
 /**
- * API Route لقوالب العروض التقديمية - النسخة الجديدة الموحدة
+ * API Route لقوالب العروض التقديمية - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لقوالب العروض التقديمية مع Lazy Seeding
+ * يستخدم النظام الجديد المبسط للـ API مع Lazy Seeding
  */
 
-import { SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { PRESENTATION_GENERATION_TEMPLATES as defaultTemplates } from '@/lib/db/seed-data/presentation-templates';
 import { adminDb } from '@/lib/firebase/server-init';
 
-/**
- * معالج جلب قوالب العروض التقديمية مع Lazy Seeding
- */
-class GetPresentationTemplatesHandler extends SimpleApiHandler<any[]> {
-    protected async processRequest() {
+export const GET = createApiHandler(async () => {
+    try {
         const collectionRef = adminDb.collection('templates').doc('presentation').collection('items');
         let snapshot = await collectionRef.get();
 
@@ -28,15 +24,9 @@ class GetPresentationTemplatesHandler extends SimpleApiHandler<any[]> {
         }
 
         const templates = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        return templates;
+        return ApiResponse.success(templates);
+    } catch (error) {
+        console.error('Error fetching presentation templates:', error);
+        return ApiResponse.error('Failed to fetch presentation templates', 500);
     }
-}
-
-// إنشاء المعالج
-const getPresentationTemplatesHandler = new GetPresentationTemplatesHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    getPresentationTemplatesHandler,
-    { requireAuth: false, logging: true } // Public endpoint for fetching templates
-);
+}, { requireAuth: false });

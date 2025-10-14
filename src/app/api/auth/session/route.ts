@@ -1,12 +1,10 @@
 /**
- * API Route للجلسة - النسخة الجديدة الموحدة
+ * API Route للجلسة - النسخة المبسطة
  *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإدارة الجلسات
+ * يستخدم النظام الجديد المبسط للـ API
  */
 
-import { createApiResponseEnhanced } from '@/core/api';
-import { ComplexApiHandler, SimpleApiHandler } from '@/core/api/handlers/base-handler';
-import { withApiMiddleware } from '@/core/api/middleware/api-middleware';
+import { ApiResponse, createApiHandler } from '@/core/api';
 import { adminAuth } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
@@ -15,23 +13,10 @@ const createSessionSchema = z.object({
     idToken: z.string().min(1, 'ID token is required'),
 });
 
-/**
- * معالج إنشاء الجلسة (POST)
- */
-class CreateSessionHandler extends ComplexApiHandler<{
-    idToken: string;
-}, {
-    status: string;
-    expiresIn: number;
-    timestamp: string;
-}> {
-    protected inputSchema = createSessionSchema;
-    protected requiresAuth = false;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-
-    protected async processRequest(data: any, context: any) {
-        const { idToken } = data;
+export const POST = createApiHandler(async (context) => {
+    try {
+        const { request } = context;
+        const { idToken } = await request.json();
 
         // إنشاء كوكي الجلسة
         const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 أيام
@@ -49,51 +34,34 @@ class CreateSessionHandler extends ComplexApiHandler<{
         };
 
         // تعيين الكوكي في الاستجابة
-        const response = createApiResponseEnhanced(
-            {
-                status: 'success',
-                expiresIn: expiresIn,
-                timestamp: new Date().toISOString()
-            },
-            200
-        );
-
-        response.cookies.set(cookieOptions);
-
-        return {
+        const response = ApiResponse.success({
             status: 'success',
             expiresIn: expiresIn,
             timestamp: new Date().toISOString()
-        };
-    }
-}
+        });
 
-/**
- * معالج الحصول على معلومات الجلسة (GET)
- */
-class GetSessionHandler extends SimpleApiHandler<{
-    authenticated: boolean;
-    user?: {
-        id: string;
-        email: string;
-        name: string;
-        role: string;
-    };
-    message?: string;
-    timestamp: string;
-}> {
-    protected async processRequest(context: any) {
+        response.cookies.set(cookieOptions);
+
+        return response;
+    } catch (error) {
+        console.error('Create session error:', error);
+        return ApiResponse.error('Failed to create session', 500);
+    }
+}, { validateBody: createSessionSchema, requireAuth: false });
+
+export const GET = createApiHandler(async (context) => {
+    try {
         const { user } = context;
 
         if (!user) {
-            return {
+            return ApiResponse.success({
                 authenticated: false,
                 message: 'No active session',
                 timestamp: new Date().toISOString()
-            };
+            });
         }
 
-        return {
+        return ApiResponse.success({
             authenticated: true,
             user: {
                 id: user.id,
@@ -102,28 +70,21 @@ class GetSessionHandler extends SimpleApiHandler<{
                 role: user.role
             },
             timestamp: new Date().toISOString()
-        };
+        });
+    } catch (error) {
+        console.error('Get session error:', error);
+        return ApiResponse.error('Failed to get session', 500);
     }
-}
+}, { requireAuth: false });
 
-/**
- * معالج حذف الجلسة (DELETE)
- */
-class DeleteSessionHandler extends SimpleApiHandler<{
-    status: string;
-    message: string;
-    timestamp: string;
-}> {
-    protected async processRequest(context: any) {
+export const DELETE = createApiHandler(async (context) => {
+    try {
         // إنشاء الاستجابة مع حذف الكوكي
-        const response = createApiResponseEnhanced(
-            {
-                status: 'success',
-                message: 'Session deleted successfully',
-                timestamp: new Date().toISOString()
-            },
-            200
-        );
+        const response = ApiResponse.success({
+            status: 'success',
+            message: 'Session deleted successfully',
+            timestamp: new Date().toISOString()
+        });
 
         // حذف الكوكي
         response.cookies.set({
@@ -135,44 +96,9 @@ class DeleteSessionHandler extends SimpleApiHandler<{
             path: '/',
         });
 
-        return {
-            status: 'success',
-            message: 'Session deleted successfully',
-            timestamp: new Date().toISOString()
-        };
+        return response;
+    } catch (error) {
+        console.error('Delete session error:', error);
+        return ApiResponse.error('Failed to delete session', 500);
     }
-}
-
-// إنشاء المعالجات
-const createSessionHandler = new CreateSessionHandler();
-const getSessionHandler = new GetSessionHandler();
-const deleteSessionHandler = new DeleteSessionHandler();
-
-// تصدير الـ handlers مع middleware
-export const POST = withApiMiddleware(
-    createSessionHandler,
-    {
-        requireAuth: false,
-        logging: true,
-        rateLimit: {
-            windowMs: 60000, // دقيقة واحدة
-            maxRequests: 10
-        }
-    }
-);
-
-export const GET = withApiMiddleware(
-    getSessionHandler,
-    {
-        requireAuth: false,
-        logging: true
-    }
-);
-
-export const DELETE = withApiMiddleware(
-    deleteSessionHandler,
-    {
-        requireAuth: false,
-        logging: true
-    }
-);
+}, { requireAuth: false });
