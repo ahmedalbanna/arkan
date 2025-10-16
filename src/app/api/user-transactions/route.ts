@@ -1,32 +1,13 @@
-/**
- * API Route لمعاملات المستخدم - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لمعاملات المستخدم
- */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+// src/app/api/user-transactions/route.ts
 import { getTransactionsByUserId } from '@/lib/db/queries';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
-/**
- * معالج معاملات المستخدم
- */
-class UserTransactionsHandler extends SimpleApiHandler<any[]> {
-    protected async processRequest(context: any) {
-        const { user } = context;
-
+export const GET = withAuth(async ({ user }) => {
+    try {
         const transactions = await getTransactionsByUserId(user.id);
-        return transactions;
+        return createApiResponse(transactions, 200);
+    } catch (error) {
+        return handleApiError(error);
     }
-}
-
-// إنشاء المعالج
-const userTransactionsHandler = new UserTransactionsHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    userTransactionsHandler.handle.bind(userTransactionsHandler),
-    {
-        logging: true
-    }
-);
+});

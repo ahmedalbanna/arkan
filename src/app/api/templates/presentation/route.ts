@@ -1,48 +1,27 @@
-/**
- * API Route لقوالب PPTX - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لقوالب PPTX مع Lazy Seeding
- */
-
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+// src/app/api/templates/presentation/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
-import { templates as defaultTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
+import { PRESENTATION_GENERATION_TEMPLATES as defaultTemplates } from '@/lib/db/seed-data/presentation-templates';
+import { createApiResponse, handleApiError } from '@/lib/api-utils';
 
-/**
- * معالج جلب قوالب PPTX مع Lazy Seeding
- */
-class GetPptxTemplatesHandler extends SimpleApiHandler<{ [key: string]: any }> {
-    protected async processRequest() {
-        const stylesCollection = adminDb.collection('templates').doc('pptx').collection('styles');
-        let snapshot = await stylesCollection.get();
+// This is a public endpoint
+export async function GET() {
+    try {
+        const collectionRef = adminDb.collection('templates').doc('presentation').collection('items');
+        let snapshot = await collectionRef.get();
 
-        // Lazy seeding: If no templates exist, populate them from the default config.
         if (snapshot.empty) {
             const batch = adminDb.batch();
-            (Object.keys(defaultTemplates) as PptxTemplateKey[]).forEach(key => {
-                const template = defaultTemplates[key];
-                const docRef = stylesCollection.doc(key);
-                batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
+            defaultTemplates.forEach(template => {
+                const docRef = collectionRef.doc(template.id);
+                batch.set(docRef, template);
             });
             await batch.commit();
-            snapshot = await stylesCollection.get(); // Re-fetch after seeding
+            snapshot = await collectionRef.get();
         }
 
-        const templates: { [key: string]: any } = {};
-        snapshot.docs.forEach((doc) => {
-            templates[doc.id] = doc.data();
-        });
-
-        return templates;
+        const templates = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        return createApiResponse(templates, 200);
+    } catch (error) {
+        return handleApiError(error);
     }
 }
-
-// إنشاء المعالج
-const getPptxTemplatesHandler = new GetPptxTemplatesHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    getPptxTemplatesHandler.handle.bind(getPptxTemplatesHandler),
-    { requireAuth: false, logging: true } // Public endpoint for fetching templates
-);

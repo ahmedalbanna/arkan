@@ -1,53 +1,38 @@
-/**
- * API Route لترجمة النصوص - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لترجمة النصوص
- */
 
-// import { translateText } from '@/ai/flows/translate-text';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { logGeneration } from '@/services';
+'use server';
+
 import { z } from 'zod';
+import { translateText } from '@/ai/flows/translate-text';
+import { deductCredit } from '@/services/credit-service';
+import { logGeneration } from '@/services/generation-service';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { ApiTranslateTextSchema } from '@/ai/schemas';
 
-export const ApiTranslateTextSchema = z.object({
-    text: z.string(),
-    targetLang: z.string(),
-});
-
-/**
- * معالج ترجمة النصوص
- */
-class TranslateTextHandler extends CreditBasedApiHandler<z.infer<typeof ApiTranslateTextSchema>, { translatedText: string }> {
-    protected inputSchema = ApiTranslateTextSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-    protected async processRequest(data: z.infer<typeof ApiTranslateTextSchema>, context: any) {
-        const { user } = context;
-
-        const agentInput = data;
-        // const result = await translateText(agentInput);
-        const result = { translatedText: `Translated: ${agentInput.text}` };
-
-        // تسجيل العملية
-        await logGeneration({
-            agentId: 'translate-text',
-            userId: user.id,
-            input: agentInput,
-            output: result,
-            creditCost: this.creditCost,
-        });
-
-        const cleanedTranslatedText = result.translatedText.replace(/---.*?---/g, '');
-        return { translatedText: cleanedTranslatedText };
+export const POST = withAuth(async ({ request, user }) => {
+  try {
+    const body = await request.json();
+    const validation = ApiTranslateTextSchema.safeParse(body);
+    if (!validation.success) {
+      return handleApiError(validation.error);
     }
-}
 
-// إنشاء المعالج
-const translateTextHandler = new TranslateTextHandler();
+    const agentInput = validation.data;
+    const result = await translateText(agentInput);
 
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    translateTextHandler.handle.bind(translateTextHandler),
-    { logging: true }
-);
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
+
+    await logGeneration({
+        agentId: 'translate-text',
+        userId: user.id,
+        input: agentInput,
+        output: result,
+        creditCost: creditCost,
+    });
+
+    const cleanedTranslatedText = result.translatedText.replace(/---.*?---/g, '');
+    return createApiResponse({ translatedText: cleanedTranslatedText }, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
+});

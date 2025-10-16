@@ -1,55 +1,39 @@
-// /**
-//  * API Route للتحويل إلى كلام - النسخة الجديدة الموحدة
-//  *
-//  * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للتحويل إلى كلام
-//  */
 
-// import { textToSpeech } from '@/ai/flows/unified';
-// import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-// import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-// import { logGeneration } from '@/services';
-// import { z } from 'zod';
+'use server';
 
-// // Schema للتحويل إلى كلام
-// const ttsSchema = z.object({
-//     text: z.string().min(1, 'Text content is required.'),
-// });
+import { z } from 'zod';
+import { deductCredit } from '@/services/credit-service';
+import { textToSpeech } from '@/ai/flows/text-to-speech';
+import { logGeneration } from '@/services/generation-service';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
-// /**
-//  * معالج التحويل إلى كلام
-//  */
-// class TextToSpeechHandler extends CreditBasedApiHandler<{
-//     text: string;
-// }, any> {
-//     protected inputSchema = ttsSchema;
-//     protected creditCost = 1;
-//     protected requiresAdmin = false;
-//     protected async processRequest(data: any, context: any) {
-//         const { text } = data;
-//         const { user } = context;
+const ttsSchema = z.object({
+  text: z.string().min(1, 'Text content is required.'),
+});
 
-//         const result = await textToSpeech({ text } as any);
+export const POST = withAuth(async ({ request, user }) => {
+  try {
+    const body = await request.json();
+    const validation = ttsSchema.safeParse(body);
+    if (!validation.success) {
+      return handleApiError(validation.error);
+    }
 
-//         // تسجيل العملية
-//         await logGeneration({
-//             agentId: 'text-to-speech',
-//             userId: user.id,
-//             input: { textLength: text.length },
-//             output: { audioGenerated: true },
-//             creditCost: this.creditCost,
-//         });
+    const result = await textToSpeech({text: validation.data.text});
 
-//         return result;
-//     }
-// }
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
 
-// // إنشاء المعالج
-// const textToSpeechHandler = new TextToSpeechHandler();
+    await logGeneration({
+        agentId: 'text-to-speech',
+        userId: user.id,
+        input: { textLength: validation.data.text.length },
+        output: { audioGenerated: true },
+        creditCost: creditCost,
+    });
 
-// // تصدير الـ handler مع middleware
-// export const POST = withApiMiddleware(
-//     textToSpeechHandler.handle.bind(textToSpeechHandler),
-//     {
-//         logging: true
-//     }
-// );
+    return createApiResponse(result, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
+});

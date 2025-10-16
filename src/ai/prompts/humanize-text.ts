@@ -1,26 +1,9 @@
 'use server';
 
-/**
- * @fileOverview Text humanization prompt definitions
- */
-
-
+import { ai } from '@/ai/genkit';
 import { HumanizeTextInputSchema, HumanizeTextOutputSchema } from '@/ai/schemas';
 
-// Mock function for testing environment
-const createMockPrompt = (config: any) => {
-    return async (input: any) => {
-        // Mock implementation for testing
-        return { output: {} };
-    };
-};
-
-// Use mock in test environment, real implementation in production
-const ai = typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
-    ? { definePrompt: createMockPrompt }
-    : require('@/ai/genkit').ai;
-
-export const humanizePrompt = ai.definePrompt({
+export const humanizeTextPrompt = ai.definePrompt({
     name: 'humanizeTextPrompt',
     input: { schema: HumanizeTextInputSchema },
     output: { schema: HumanizeTextOutputSchema },
@@ -40,8 +23,10 @@ Rewrite the provided text to maximize its 'human' score by focusing on these pri
 - **Final Check for AI Fingerprints:** Before concluding, review your rewritten text. Ask yourself: Does the informality feel forced? Are the analogies natural? Does it still sound a bit too perfect or uniform? Does it repeat the same concepts with similar phrasing? Are the section openings too predictable? Does it rely too heavily on bulleted lists for structure? If so, make one or two final tweaks to add a human touch of imperfection and variation.
 
 **Original AI Text:**
----
 {{{text}}}
----
-`,
+
+**Your Humanized Version (Return ONLY the rewritten text):**`,
+    config: {
+        temperature: 0.95, // Even higher temperature for maximum creativity and variation
+    }
 });

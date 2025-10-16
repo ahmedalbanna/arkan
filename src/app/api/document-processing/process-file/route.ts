@@ -1,19 +1,11 @@
-/**
- * API Route لمعالجة الملفات - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لمعالجة الملفات
- */
 
-import { imageToText, rewriteDocumentToMarkdown } from '@/ai/flows/unified';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { logGeneration } from '@/services';
-import { z } from 'zod';
+'use server';
 
-// Schema لمعالجة الملفات
-const processFileSchema = z.object({
-    file: z.instanceof(File),
-});
+import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
+import { deductCredit } from '@/services/credit-service';
+import { logGeneration } from '@/services/generation-service';
+import { imageToText } from '@/ai/flows/image-to-text';
+import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
 
 const SUPPORTED_MIME_TYPES = [
     'application/pdf',
@@ -24,30 +16,21 @@ const SUPPORTED_MIME_TYPES = [
     'text/markdown',
 ];
 
-/**
- * معالج معالجة الملفات
- */
-class ProcessFileHandler extends CreditBasedApiHandler<{
-    file: File;
-}, {
-    markdown: string;
-}> {
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-    protected inputSchema = processFileSchema;
-    protected async processRequest(data: {
-        file: File;
-    }, context: any) {
-        const { user } = context;
-        const file = data.file;
+export const POST = withAuth(async ({ request, user }) => {
+    try {
+        const formData = await request.formData();
+        const file = formData.get('file') as File;
 
         if (!file) {
-            throw new Error('No file uploaded.');
+            return handleApiError({ message: 'No file uploaded.' }, 400);
         }
 
         if (!SUPPORTED_MIME_TYPES.includes(file.type)) {
-            throw new Error(`Invalid file type. Supported types are: ${SUPPORTED_MIME_TYPES.join(', ')}`);
+            return handleApiError({ message: `Invalid file type. Supported types are: ${SUPPORTED_MIME_TYPES.join(', ')}` }, 400);
         }
+
+        // Standard credit deduction for processing
+        await deductCredit(user.id, 1);
 
         const fileArrayBuffer = await file.arrayBuffer();
         const base64 = Buffer.from(fileArrayBuffer).toString('base64');
@@ -66,32 +49,23 @@ class ProcessFileHandler extends CreditBasedApiHandler<{
             result = await imageToText({ imageDataUri: dataUri });
             markdownContent = 'text' in result ? result.text : '';
         } else {
-            // للملفات النصية أو Markdown، نقوم بفك تشفيرها فقط
+            // For plain text or markdown, we just decode it.
             agentId = 'text-file-to-markdown';
             markdownContent = Buffer.from(await file.arrayBuffer()).toString('utf-8');
             result = { markdown: markdownContent };
         }
 
-        // تسجيل العملية
         await logGeneration({
             agentId,
             userId: user.id,
-            input: { fileName: file.name, fileType: file.type }, // لا نسجل الـ data URI كاملاً
+            input: { fileName: file.name, fileType: file.type }, // Don't log the full data URI
             output: { markdownLength: markdownContent.length },
-            creditCost: this.creditCost
+            creditCost: 1
         });
 
-        return { markdown: markdownContent };
-    }
-}
+        return createApiResponse({ markdown: markdownContent }, 200);
 
-// إنشاء المعالج
-const processFileHandler = new ProcessFileHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    processFileHandler.handle.bind(processFileHandler),
-    {
-        logging: true
+    } catch (error) {
+        return handleApiError(error);
     }
-);
+});

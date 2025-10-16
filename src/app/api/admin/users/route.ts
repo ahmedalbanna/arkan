@@ -1,76 +1,49 @@
-/**
- * API Route لإدارة المستخدمين - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإدارة المستخدمين
- */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { UserSchemas } from '@/app/api/shared/validators/api-validators';
-import { createUser, getPaginatedUsers } from '@/lib/db/queries';
-import type { UserProfile } from '@/lib/types';
+import { getPaginatedUsers, createUser } from '@/lib/db/queries';
 import { z } from 'zod';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
-// Schema لاستعلام قائمة المستخدمين
 const userListQuerySchema = z.object({
-    limit: z.coerce.number().int().min(1).max(50).default(10),
-    lastVisibleId: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+  lastVisibleId: z.string().optional(),
 });
 
-/**
- * معالج قائمة المستخدمين (GET)
- */
-class AdminUserListHandler extends SimpleApiHandler<{
-    users: UserProfile[];
-    hasNextPage: boolean;
-    lastVisibleId: string | null;
-}> {
-    protected async processRequest(context: any) {
-        const { searchParams } = new URL(context.request.url);
-        const queryValidation = userListQuerySchema.safeParse(Object.fromEntries(searchParams));
+export const GET = withAuth(async ({ request }) => {
+  try {
+    const { searchParams } = new URL(request.url);
+    const queryValidation = userListQuerySchema.safeParse(Object.fromEntries(searchParams));
 
-        if (!queryValidation.success) {
-            throw new Error(`Validation error: ${queryValidation.error.errors.map(e => e.message).join(', ')}`);
-        }
-
-        const { limit, lastVisibleId } = queryValidation.data;
-        const results = await getPaginatedUsers({ limit, lastVisibleId });
-
-        return results;
+    if (!queryValidation.success) {
+      return handleApiError(queryValidation.error);
     }
-}
 
-/**
- * معالج إنشاء المستخدم (POST)
- */
-class AdminCreateUserHandler extends ComplexApiHandler<{
-    name: string;
-    email: string;
-    password: string;
-    role: 'user' | 'admin';
-    credits: number;
-}, UserProfile> {
-    protected inputSchema = UserSchemas.createUser;
-    protected requiresAdmin = true;
-    protected creditCost = 1;
+    const { limit, lastVisibleId } = queryValidation.data;
+    const results = await getPaginatedUsers({ limit, lastVisibleId });
+    return createApiResponse(results, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}, { requireAdmin: true });
 
-    protected async processRequest(data: any, context: any) {
-        const newUser = await createUser(data);
-        return newUser as unknown as UserProfile;
+
+const createUserSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
+  role: z.enum(['user', 'admin']).default('user'),
+  credits: z.coerce.number().int().min(0).default(10),
+});
+
+export const POST = withAuth(async ({ request }) => {
+  try {
+    const body = await request.json();
+    const validation = createUserSchema.safeParse(body);
+    if (!validation.success) {
+      return handleApiError(validation.error);
     }
-}
-
-// إنشاء المعالجات
-const adminUserListHandler = new AdminUserListHandler();
-const adminCreateUserHandler = new AdminCreateUserHandler();
-
-// تصدير الـ handlers مع middleware
-export const GET = withApiMiddleware(
-    adminUserListHandler.handle.bind(adminUserListHandler),
-    { requireAdmin: true, logging: true }
-);
-
-export const POST = withApiMiddleware(
-    adminCreateUserHandler.handle.bind(adminCreateUserHandler),
-    { requireAdmin: true, logging: true }
-);
+    const newUser = await createUser(validation.data);
+    return createApiResponse(newUser, 201);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}, { requireAdmin: true });

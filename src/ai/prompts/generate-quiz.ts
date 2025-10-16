@@ -1,45 +1,29 @@
+// src/ai/prompts/generate-quiz.ts
 'use server';
 
-/**
- * @fileOverview Quiz generation prompt definitions
- */
-
+import { ai } from '@/ai/genkit';
 import { GenerateQuizInputSchema, GenerateQuizOutputSchema } from '@/ai/schemas';
-
-// Mock function for testing environment
-const createMockPrompt = (config: any) => {
-    return async (input: any) => {
-        // Mock implementation for testing
-        return { output: {} };
-    };
-};
-
-// Use mock in test environment, real implementation in production
-const ai = typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
-    ? { definePrompt: createMockPrompt }
-    : require('@/ai/genkit').ai;
 
 export const multipleChoiceQuizPrompt = ai.definePrompt({
     name: 'multipleChoiceQuizPrompt',
     input: { schema: GenerateQuizInputSchema },
     output: { schema: GenerateQuizOutputSchema },
     model: 'googleai/gemini-2.0-flash',
-    prompt: `You are an expert educator and quiz creator. Your task is to generate a multiple-choice quiz based on the provided text.
+    prompt: `You are an expert educator and quiz creator. Your task is to generate a multiple choice quiz based on the provided text.
 
 **Instructions:**
 1.  Read the source text carefully to understand its key concepts and facts.
-2.  Generate exactly {{{numQuestions}}} unique multiple-choice questions.
+2.  Generate exactly {{{numQuestions}}} unique multiple choice questions.
 3.  Ensure the questions cover different aspects of the text.
-4.  For each question, provide 4 distinct options.
-5.  One option must be the correct answer.
-6.  The correct answer must be one of the provided options.
+4.  Create 4 options for each question (A, B, C, D).
+5.  Only one option should be correct (the 'answer' field).
+6.  The other 3 options should be plausible but incorrect.
 7.  The output for each question must match the 'MultipleChoiceQuestionSchema'.
 
 **Source Text:**
 ---
 {{{text}}}
----
-`,
+---`,
 });
 
 export const trueFalseQuizPrompt = ai.definePrompt({
@@ -61,8 +45,7 @@ export const trueFalseQuizPrompt = ai.definePrompt({
 **Source Text:**
 ---
 {{{text}}}
----
-`,
+---`,
 });
 
 export const directQuestionQuizPrompt = ai.definePrompt({
@@ -83,6 +66,5 @@ export const directQuestionQuizPrompt = ai.definePrompt({
 **Source Text:**
 ---
 {{{text}}}
----
-`,
+---`,
 });

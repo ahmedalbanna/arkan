@@ -1,24 +1,8 @@
+// src/ai/prompts/generate-presentation.ts
 'use server';
 
-/**
- * @fileOverview Presentation generation prompt definitions
- */
-
-
+import { ai } from '@/ai/genkit';
 import { GeneratePresentationInputSchema, GeneratePresentationOutputSchema } from '@/ai/schemas';
-
-// Mock function for testing environment
-const createMockPrompt = (config: any) => {
-    return async (input: any) => {
-        // Mock implementation for testing
-        return { output: {} };
-    };
-};
-
-// Use mock in test environment, real implementation in production
-const ai = typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
-    ? { definePrompt: createMockPrompt }
-    : require('@/ai/genkit').ai;
 
 export const generatePresentationPrompt = ai.definePrompt({
     name: 'generatePresentationPrompt',
@@ -83,7 +67,10 @@ File: {{this.fileName}}
 ---
 {{/each}}
 {{/if}}
-`,
+
+--- END CONTEXT ---
+
+Create a presentation that effectively communicates the project's value, approach, and outcomes.`,
     config: {
         temperature: 0.7,
         maxOutputTokens: 8192,

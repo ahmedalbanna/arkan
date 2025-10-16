@@ -1,40 +1,33 @@
-/**
- * API Route لإعادة تعيين كلمة المرور العامة - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإعادة تعيين كلمة المرور العامة
- */
+'use server';
 
-import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { resetUserPassword } from '@/lib/db/queries';
-import { generateRandomPassword } from '@/lib/utils';
 import { z } from 'zod';
+import { resetUserPassword } from '@/lib/db/queries';
+import { generateRandomPassword } from '@/lib/utils'; // Assuming a utility for password generation
+import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
+import { NextRequest } from 'next/server';
 
-// Schema لإعادة تعيين كلمة المرور
 const resetPasswordSchema = z.object({
-    id: z.string().uuid(),
+  id: z.string().uuid(),
 });
 
-/**
- * معالج إعادة تعيين كلمة المرور العامة
- */
-class ResetPasswordHandler extends ComplexApiHandler<z.infer<typeof resetPasswordSchema>, { message: string }> {
-    protected inputSchema = resetPasswordSchema;
-    protected requiresAdmin = true;
-    protected creditCost = 1;
-    protected async processRequest(data: z.infer<typeof resetPasswordSchema>) {
-        const { id } = data;
-        const newPassword = generateRandomPassword(8); // Generate a new random password
-        await resetUserPassword(id, newPassword); // Pass the generated password
-        return { message: 'User password reset successfully.' };
+
+export const POST = withAuth(async ({ user, request }: { user: any, request: NextRequest }) => {
+  try {
+    // Note: The user ID from the URL parameter is not used here,
+    // as the schema only validates the ID in the request body.
+    // You might want to adjust the schema or logic if you need to
+    // ensure the body ID matches the URL ID.
+    const body = await request.json();
+    const validation = resetPasswordSchema.safeParse(body);
+    if (!validation.success) {
+      return handleApiError(validation.error);
     }
-}
 
-// إنشاء المعالج
-const resetPasswordHandler = new ResetPasswordHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    resetPasswordHandler.handle.bind(resetPasswordHandler),
-    { requireAdmin: true, logging: true }
-);
+    const { id } = validation.data;
+    const newPassword = generateRandomPassword(8); // Generate a new random password
+ await resetUserPassword(id, newPassword); // Pass the generated password
+    return createApiResponse({ message: 'User password reset successfully.' }, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}, { requireAdmin: true });

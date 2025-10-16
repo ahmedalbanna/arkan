@@ -1,21 +1,21 @@
 // src/lib/word-converter/ast-converter.ts
 
-import { getProxiedImageBuffer } from '@/lib/utils';
 import {
-  AlignmentType,
-  ImageRun,
-  IRunOptions,
   Paragraph,
+  AlignmentType,
+  TextRun,
   SimpleField,
   Table,
-  TableCell,
   TableRow,
-  TextRun,
+  TableCell,
+  ImageRun,
   WidthType,
+  IRunOptions,
 } from 'docx';
-import { List, Root, RootContent } from 'mdast';
+import { Root, List, RootContent } from 'mdast';
+import { getProxiedImageBuffer } from '@/lib/utils';
+import { DocxObject, ConversionOptions } from './types';
 import { transformInlines } from './inline-converter';
-import { ConversionOptions, DocxObject } from './types';
 
 export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, number>, options: ConversionOptions): Promise<DocxObject[]> {
   const docxObjects: DocxObject[] = [];
@@ -23,8 +23,8 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
 
   const defaultFontName = isRtl ? fonts.rtl : fonts.default;
   const baseRunOptions: IRunOptions = {};
-  if (isRtl) (baseRunOptions as any).rightToLeft = true;
-  if (defaultFontName) (baseRunOptions as any).font = { name: defaultFontName };
+  if (isRtl) baseRunOptions.rightToLeft = true;
+  if (defaultFontName) baseRunOptions.font = { name: defaultFontName };
 
   const baseParagraphOptions = {
     bidirectional: isRtl,
@@ -178,7 +178,7 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
         const textRuns = codeLines.map((line, index) => {
           const textRun = new TextRun({
             text: line,
-            font: { name: codeFont } as any, // 9pt font for code
+            font: { name: codeFont, size: 18 }, // 9pt font for code
           });
           return index < codeLines.length - 1 ? [textRun, new TextRun({ break: 1 })] : [textRun];
         }).flat();

@@ -1,49 +1,37 @@
-/**
- * API Route لمعالجة النصوص - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لمعالجة النصوص
- */
 
-import { manipulateText } from '@/ai/flows/unified';
+'use server';
+
+import { z } from 'zod';
+import { manipulateText } from '@/ai/flows/manipulate-text';
+import { deductCredit } from '@/services/credit-service';
 import { ManipulateTextInputSchema } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { logGeneration } from '@/services';
+import { logGeneration } from '@/services/generation-service';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
-/**
- * معالج معالجة النصوص
- */
-class ManipulateTextHandler extends CreditBasedApiHandler<any, any> {
-    protected inputSchema = ManipulateTextInputSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
-
-        const agentInput = data;
-        const result = await manipulateText(agentInput);
-
-        // تسجيل العملية
-        await logGeneration({
-            agentId: 'manipulate-text',
-            userId: user.id,
-            input: agentInput,
-            output: result,
-            creditCost: this.creditCost,
-        });
-
-        return result;
+export const POST = withAuth(async ({ request, user }) => {
+  try {
+    const body = await request.json();
+    const validation = ManipulateTextInputSchema.safeParse(body);
+    if (!validation.success) {
+      return handleApiError(validation.error);
     }
-}
 
-// إنشاء المعالج
-const manipulateTextHandler = new ManipulateTextHandler();
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
 
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    manipulateTextHandler.handle.bind(manipulateTextHandler),
-    {
-        logging: true
-    }
-);
+    const agentInput = validation.data;
+    const result = await manipulateText(agentInput);
+
+    await logGeneration({
+        agentId: 'manipulate-text',
+        userId: user.id,
+        input: agentInput,
+        output: result,
+        creditCost: creditCost,
+    });
+
+    return createApiResponse(result, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
+});

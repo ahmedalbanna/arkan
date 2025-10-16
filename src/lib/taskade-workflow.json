@@ -1,0 +1,20 @@
+
+{
+    "webhookUrl": "https://www.taskade.com/webhooks/flow/01K32B4BQ9JF4R5EP3PK1GDG5S/sync",
+    "authToken": "Bearer tskdp_pJ56NamHnj8yn8Y3dNTTXMwrrB7ksoGWbC",
+    "schemas": {
+        "input": {
+            "jobId": "string",
+            "inputContent": "string",
+            "callbackUrl": "string",
+            "apiToken": "string"
+        },
+        "output": {
+            "jobId": "string",
+            "status": "string ('completed' or 'failed')",
+            "result": "any",
+            "error": "string (optional)",
+            "apiToken": "string"
+        }
+    }
+}

@@ -1,34 +1,26 @@
-/**
- * API Route لإعدادات النظام - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإعدادات النظام
- */
 
-import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { adminDb } from '@/lib/firebase/server-init';
+'use server';
+
 import { z } from 'zod';
+import { adminDb } from '@/lib/firebase/server-init';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
-// Schema لحساب البنك
 const bankAccountSchema = z.object({
-    bankName: z.string().min(1, 'Bank name is required.'),
-    accountHolder: z.string().min(1, 'Account holder name is required.'),
-    currencies: z.object({
-        YER: z.object({ iban: z.string().optional() }).optional(),
-        SAR: z.object({ iban: z.string().optional() }).optional(),
-        USD: z.object({ iban: z.string().optional() }).optional(),
-    }),
+  bankName: z.string().min(1, 'Bank name is required.'),
+  accountHolder: z.string().min(1, 'Account holder name is required.'),
+  currencies: z.object({
+    YER: z.object({ iban: z.string().optional() }).optional(),
+    SAR: z.object({ iban: z.string().optional() }).optional(),
+    USD: z.object({ iban: z.string().optional() }).optional(),
+  }),
 });
 
-// Schema للإعدادات
 const settingsSchema = z.object({
-    newUserCredits: z.coerce.number().int().min(0),
-    bankAccounts: z.array(bankAccountSchema).optional(),
+  newUserCredits: z.coerce.number().int().min(0),
+  bankAccounts: z.array(bankAccountSchema).optional(),
 });
 
-/**
- * دالة مساعدة لجلب الإعدادات
- */
+
 async function getSettings() {
     const settingsRef = adminDb.collection('settings').doc('defaults');
     const doc = await settingsRef.get();
@@ -43,42 +35,30 @@ async function getSettings() {
     return doc.data();
 }
 
-/**
- * معالج جلب الإعدادات
- */
-class GetSettingsHandler extends SimpleApiHandler<any> {
-    protected async processRequest() {
+// GET /api/settings - This endpoint is public to allow fetching bank details
+export async function GET() {
+    try {
         const settings = await getSettings();
-        return settings;
+        return createApiResponse(settings, 200);
+    } catch (error) {
+        return handleApiError(error);
     }
 }
 
-/**
- * معالج تحديث الإعدادات
- */
-class UpdateSettingsHandler extends ComplexApiHandler<z.infer<typeof settingsSchema>, any> {
-    protected inputSchema = settingsSchema;
-    protected requiresAdmin = true;
-    protected creditCost = 1;
+// PUT /api/settings - This endpoint remains admin-only
+export const PUT = withAuth(async ({ request }) => {
+    try {
+        const body = await request.json();
+        const validation = settingsSchema.safeParse(body);
+        if (!validation.success) {
+            return handleApiError(validation.error);
+        }
 
-    protected async processRequest(data: z.infer<typeof settingsSchema>) {
         const settingsRef = adminDb.collection('settings').doc('defaults');
-        await settingsRef.set(data, { merge: true });
-        return data;
+        await settingsRef.set(validation.data, { merge: true });
+
+        return createApiResponse(validation.data, 200);
+    } catch (error) {
+        return handleApiError(error);
     }
-}
-
-// إنشاء المعالجات
-const getSettingsHandler = new GetSettingsHandler();
-const updateSettingsHandler = new UpdateSettingsHandler();
-
-// تصدير الـ handlers مع middleware
-export const GET = withApiMiddleware(
-    getSettingsHandler.handle.bind(getSettingsHandler),
-    { requireAuth: false, logging: true } // Public endpoint for fetching settings
-);
-
-export const PUT = withApiMiddleware(
-    updateSettingsHandler.handle.bind(updateSettingsHandler),
-    { requireAdmin: true, logging: true }
-);
+}, { requireAdmin: true });

@@ -1,47 +1,26 @@
-/**
- * API Route لتقارير المعاملات - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتقارير المعاملات
- */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
 import { getTransactionsByDateRange } from '@/lib/db/queries';
 import { z } from 'zod';
+import { handleApiError, withAuth, createApiResponse } from '@/lib/api-utils';
 
-// Schema لتقرير المعاملات
 const getReportSchema = z.object({
-    startDate: z.string().datetime(),
-    endDate: z.string().datetime(),
+  startDate: z.string().datetime(),
+  endDate: z.string().datetime(),
 });
 
-/**
- * معالج تقرير المعاملات
- */
-class GetTransactionsReportHandler extends SimpleApiHandler<any[]> {
-    protected inputSchema = getReportSchema;
-    protected requiresAdmin = true;
+export const GET = withAuth(async ({ request }) => {
+  try {
+    const { searchParams } = new URL(request.url);
+    const queryValidation = getReportSchema.safeParse(Object.fromEntries(searchParams));
 
-    protected async processRequest(context: any) {
-        const { request } = context;
-        const { searchParams } = new URL(request.url);
-        const queryValidation = getReportSchema.safeParse(Object.fromEntries(searchParams));
-
-        if (!queryValidation.success) {
-            throw new Error(queryValidation.error.message);
-        }
-
-        const { startDate, endDate } = queryValidation.data;
-        const transactions = await getTransactionsByDateRange(startDate, endDate);
-        return transactions;
+    if (!queryValidation.success) {
+      return handleApiError(queryValidation.error);
     }
-}
 
-// إنشاء المعالج
-const getTransactionsReportHandler = new GetTransactionsReportHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    getTransactionsReportHandler.handle.bind(getTransactionsReportHandler),
-    { requireAdmin: true, logging: true }
-);
+    const { startDate, endDate } = queryValidation.data;
+    const transactions = await getTransactionsByDateRange(startDate, endDate);
+    return createApiResponse(transactions, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}, { requireAdmin: true });

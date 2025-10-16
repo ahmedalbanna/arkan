@@ -6,24 +6,10 @@ import { defaultModel } from '@/ai/config/models';
 import { AdaptiveModelSelector } from '@/ai/core/adaptive-model-selector';
 import { ContextAnalyzer } from '@/ai/core/context-analyzer';
 import { IntelligentPromptBuilder } from '@/ai/core/intelligent-prompt-builder';
-
+import { ai } from '@/ai/genkit';
 import { GenerateProposalInputSchema, ProjectProposalSchema } from '@/ai/schemas';
-
-import { zodToJsonSchema } from 'zod-to-json-schema';
-
 import { z } from 'zod';
-// Mock function for testing environment
-const createMockPrompt = (config: any) => {
-  return async (input: any) => {
-    // Mock implementation for testing
-    return { output: {} };
-  };
-};
-
-// Use mock in test environment, real implementation in production
-const ai = typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
-  ? { definePrompt: createMockPrompt }
-  : require('@/ai/genkit').ai;
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 const jsonSchema = zodToJsonSchema(ProjectProposalSchema, "ProjectProposal");
 const schemaString = JSON.stringify(jsonSchema, null, 2);
@@ -34,7 +20,7 @@ export const generateProposalPrompt = ai.definePrompt(
     input: { schema: GenerateProposalInputSchema },
     output: { schema: z.any() },
     model: defaultModel || 'googleai/gemini-2.0-flash',
-    system: async (input: any) => {
+    system: async (input) => {
       // محاولة استخدام النظام الذكي المحسن
       try {
         // تحليل السياق الذكي
@@ -88,7 +74,6 @@ ${promptTemplate.constraints}
 **تنسيق المخرجات:**
 ${promptTemplate.outputFormat}
 
-
 ---
 ملاحظة هامة:
 - يجب أن يكون الإخراج النهائي عبارة عن كائن JSON صالح فقط، بدون أي نص إضافي أو شرح أو تعليقات أو رموز برمجية أو علامات HTML أو Markdown.
@@ -114,10 +99,7 @@ ${promptTemplate.outputFormat}
    - **المخاطر**: التحديات المحتملة وكيفية التعامل معها
 3. **إنتاج جميع الأقسام**: املأ **كل حقل** في مخطط JSON بمحتوى مكتوب جيداً ومهني.
 
---- مخطط المخرجات ---
-يجب أن تكون استجابتك بالكامل عبارة عن كائن JSON صالح واحد يلتزم بهذا المخطط:
-${schemaString}
----
+
 ملاحظة هامة:
 - يجب أن يكون الإخراج النهائي عبارة عن كائن JSON صالح فقط، بدون أي نص إضافي أو شرح أو تعليقات أو رموز برمجية أو علامات HTML أو Markdown.
 - إذا لم تتمكن من توليد كائن JSON صالح لأي سبب، أعد محاولة التوليد أو أعد صياغة الحقول بحيث تكون جميع القيم نصية وصالحة لـ JSON.

@@ -8,60 +8,9 @@ import {
     ContextAnalyzer,
     IntelligentPromptBuilder
 } from '@/ai/core';
-
+import { ai } from '@/ai/genkit';
 import type { SectionName } from '@/ai/schemas/enums';
-
-
-import { z } from 'zod';
-// Mock function for testing environment
-const createMockPrompt = (config: any) => {
-    return async (input: any) => {
-        // Mock implementation for testing
-        return { output: {} };
-    };
-};
-
-// Use mock in test environment, real implementation in production
-const ai = typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
-    ? { definePrompt: createMockPrompt }
-    : require('@/ai/genkit').ai;
-
-/**
- * Factory pattern لإنشاء قوالب الأقسام مع تقليل التكرار
- */
-class SectionPromptFactory {
-    private static baseTemplate = {
-        commonInstructions: [
-            'استخدم لغة واضحة ومهنية',
-            'تأكد من صحة المعلومات',
-            'اربط المحتوى بأهداف المشروع',
-            'اتبع المعايير الأكاديمية'
-        ],
-        commonQualityFocus: ['clarity', 'completeness', 'relevance']
-    };
-
-    static createTemplate(sectionType: SectionName, config: {
-        title: string;
-        description: string;
-        systemPrompt: string;
-        userPrompt: string;
-        qualityFocus: string[];
-        specificInstructions: string[];
-    }) {
-        return {
-            systemPrompt: `${config.systemPrompt}
-
-**المبادئ العامة:**
-${this.baseTemplate.commonInstructions.map(instruction => `- ${instruction}`).join('\n')}`,
-            userPrompt: `${config.userPrompt}
-
-**التعليمات المحددة:**
-${config.specificInstructions.map(instruction => `- ${instruction}`).join('\n')}`,
-            qualityFocus: [...this.baseTemplate.commonQualityFocus, ...config.qualityFocus],
-            specificInstructions: [...this.baseTemplate.commonInstructions, ...config.specificInstructions]
-        };
-    }
-}
+import { z } from 'genkit';
 
 // مخطط عام لمدخلات الـ prompts المتخصصة
 const SectionPromptInputSchema = z.object({
@@ -74,7 +23,7 @@ const SectionPromptInputSchema = z.object({
 });
 
 /**
- * قوالب الـ prompts المتخصصة لكل قسم (محسنة لتقليل التكرار)
+ * قوالب الـ prompts المتخصصة لكل قسم
  */
 export const SECTION_PROMPT_TEMPLATES: Partial<Record<SectionName, {
     systemPrompt: string;
@@ -116,9 +65,7 @@ export const SECTION_PROMPT_TEMPLATES: Partial<Record<SectionName, {
     },
 
     // شكر وتقدير
-    'acknowledgment': SectionPromptFactory.createTemplate('acknowledgment', {
-        title: 'شكر وتقدير',
-        description: 'صفحة شكر مهنية لجميع المساهمين',
+    'acknowledgment': {
         systemPrompt: `أنت خبير في كتابة صفحات الشكر والتقدير في التقارير الأكاديمية والمهنية. مهمتك كتابة شكر مناسب ومهني.
 
 **عناصر الشكر المثالي:**
@@ -133,18 +80,21 @@ export const SECTION_PROMPT_TEMPLATES: Partial<Record<SectionName, {
 2. الزملاء والفريق
 3. المؤسسات والجهات الداعمة
 4. الأهل والأصدقاء`,
+
         userPrompt: `اكتب صفحة شكر وتقدير مناسبة للتقرير. يجب أن تشمل:
 - شكر المشرفين والأساتذة
 - تقدير الزملاء والفريق
 - شكر المؤسسات الداعمة
 - استخدام لغة مهنية ومعبرة`,
-        qualityFocus: ['appropriateness', 'professionalism'],
+
+        qualityFocus: ['appropriateness', 'completeness', 'professionalism'],
         specificInstructions: [
+            'استخدم لغة مهنية ومحترمة',
             'اشكر جميع المساهمين المناسبين',
             'حافظ على الإيجاز والوضوح',
             'تجنب المبالغة في التعبير'
         ]
-    }),
+    },
 
     // المقدمة
     'introduction': {
@@ -465,9 +415,7 @@ export const SECTION_PROMPT_TEMPLATES: Partial<Record<SectionName, {
     },
 
     // المراجع
-    'references': SectionPromptFactory.createTemplate('references', {
-        title: 'المراجع',
-        description: 'قائمة مراجع دقيقة ومكتملة',
+    'references': {
         systemPrompt: `أنت خبير في إعداد قوائم المراجع والمصادر الأكاديمية. مهمتك إعداد قائمة مراجع دقيقة ومكتملة.
 
 **معايير المراجع المثالية:**
@@ -484,25 +432,25 @@ export const SECTION_PROMPT_TEMPLATES: Partial<Record<SectionName, {
 4. التقارير والوثائق
 5. المؤتمرات والندوات
 6. المصادر الرقمية`,
+
         userPrompt: `أعد قائمة مراجع شاملة ودقيقة تشمل:
 - جميع المصادر المستخدمة في التقرير
 - معلومات كاملة لكل مرجع
 - اتباع نمط استشهاد موحد
 - ترتيب أبجدي أو زمني مناسب
 - تنوع في أنواع المصادر`,
-        qualityFocus: ['accuracy', 'formatting', 'consistency'],
+
+        qualityFocus: ['accuracy', 'completeness', 'formatting', 'consistency'],
         specificInstructions: [
             'تأكد من دقة جميع المعلومات',
             'اتبع نمط استشهاد موحد',
             'رتب المراجع بشكل منطقي',
             'تأكد من اكتمال المعلومات المطلوبة'
         ]
-    }),
+    },
 
     // الملاحق
-    'appendices': SectionPromptFactory.createTemplate('appendices', {
-        title: 'الملاحق',
-        description: 'ملاحق منظمة للمواد الداعمة',
+    'appendices': {
         systemPrompt: `أنت خبير في إعداد ملاحق التقارير التقنية والأكاديمية. مهمتك تنظيم المواد الداعمة بشكل مفيد ومنظم.
 
 **عناصر الملاحق المثالية:**
@@ -519,20 +467,22 @@ export const SECTION_PROMPT_TEMPLATES: Partial<Record<SectionName, {
 4. الوثائق والنماذج
 5. البيانات الخام
 6. المواد المرجعية`,
+
         userPrompt: `أعد ملاحق شاملة ومنظمة تشمل:
 - المواد الداعمة للتقرير
 - تنظيم واضح ومنطقي
 - فهرسة وترقيم مناسب
 - ربط واضح بالمحتوى الرئيسي
 - سهولة الوصول والمراجعة`,
-        qualityFocus: ['relevance', 'organization', 'accessibility'],
+
+        qualityFocus: ['relevance', 'organization', 'completeness', 'accessibility'],
         specificInstructions: [
             'نظم المواد بشكل منطقي',
             'أضف فهرسة وترقيم واضح',
             'تأكد من صلة المواد بالتقرير',
             'اجعل الوصول للمعلومات سهلاً'
         ]
-    })
+    }
 };
 
 /**
@@ -552,7 +502,7 @@ export async function createIntelligentSectionPrompt(
     // تحليل السياق للقسم المحدد
     const contextAnalysis = await ContextAnalyzer.analyzeContext({
         userInput: `Generate ${sectionType} section`,
-        externalContext: input.contextData ? [input.contextData] : [],
+        externalContext: input.contextData || [],
         guidelines: input.guidelines || []
     });
 
@@ -607,19 +557,19 @@ ${intelligentPrompt.constraints}`;
 /**
  * إنشاء prompt محسن لقسم محدد مع السياق الكامل
  */
-export const generateReportSectionPrompt = ai.definePrompt({
+export const createSectionPrompt = ai.definePrompt({
     name: 'createSectionPrompt',
     input: { schema: SectionPromptInputSchema },
     output: { schema: z.string() },
     model: 'googleai/gemini-2.0-flash',
-    system: async (input: any) => {
+    system: async (input) => {
         const intelligentPrompt = await createIntelligentSectionPrompt(
             input.sectionType as SectionName,
             input
         );
         return intelligentPrompt.systemPrompt;
     },
-    prompt: async (input: any) => {
+    prompt: async (input) => {
         const intelligentPrompt = await createIntelligentSectionPrompt(
             input.sectionType as SectionName,
             input

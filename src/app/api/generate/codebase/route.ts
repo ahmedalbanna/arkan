@@ -1,56 +1,41 @@
-/**
-* API Route لتوليد الكودبيس - النسخة الجديدة الموحدة
-*
-* هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد الكودبيس
-*/
 
-import { generateCodebase } from '@/ai/flows/unified';
-import { ProjectProposalSchema } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { logGeneration } from '@/services';
+'use server';
+
 import { z } from 'zod';
+import { deductCredit } from '@/services/credit-service';
+import { logGeneration } from '@/services/generation-service';
+import { generateCodebase } from '@/ai/flows/generate-codebase';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { ProjectProposalSchema } from '@/ai/schemas';
 
-// Schema لتوليد الكودبيس
 const codebaseSchema = z.object({
-    proposal: ProjectProposalSchema,
+  proposal: ProjectProposalSchema,
 });
 
-/**
- * معالج توليد الكودبيس
- */
-class GenerateCodebaseHandler extends CreditBasedApiHandler<{
-    proposal: any;
-}, any> {
-    protected inputSchema = codebaseSchema;
-    protected creditCost = 5; // مهمة معقدة ومكلفة
-    protected requiresAdmin = false;
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
-
-        const agentInput = { proposal: data.proposal };
-        const result = await generateCodebase(agentInput);
-
-        // تسجيل العملية
-        await logGeneration({
-            agentId: 'generate-codebase',
-            userId: user.id,
-            input: { proposalTitle: data.proposal.title },
-            output: { fileCount: result.files.length },
-            creditCost: this.creditCost,
-        });
-
-        return result;
+export const POST = withAuth(async ({ request, user }) => {
+  try {
+    const body = await request.json();
+    const validation = codebaseSchema.safeParse(body);
+    if (!validation.success) {
+      return handleApiError(validation.error);
     }
-}
 
-// إنشاء المعالج
-const generateCodebaseHandler = new GenerateCodebaseHandler();
+    const agentInput = { proposal: validation.data.proposal };
+    const result = await generateCodebase(agentInput);
 
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    generateCodebaseHandler.handle.bind(generateCodebaseHandler),
-    {
-        logging: true
-    }
-);
+    const creditCost = 5;
+    await deductCredit(user.id, creditCost);
+
+    await logGeneration({
+      agentId: 'generate-codebase',
+      userId: user.id,
+      input: { proposalTitle: validation.data.proposal.title },
+      output: { fileCount: result.files.length },
+      creditCost: creditCost,
+    });
+
+    return createApiResponse(result, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
+});

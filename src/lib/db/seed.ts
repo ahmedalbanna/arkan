@@ -1,13 +1,13 @@
 
 // src/lib/db/seed.ts
 //require('dotenv').config({ path: require('path').resolve(process.cwd(), '.env') });
-import { defaultAgentCategories } from '@/lib/agent-categories';
-import { AGENTS as defaultAgents } from '@/lib/agents-template';
-import { defaultBankAccounts } from '@/lib/bank-accounts';
-import { templates as defaultDocxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
-import { defaultFeatures } from '@/lib/features';
 import { adminDb } from '@/lib/firebase/server-init';
+import { AGENTS as defaultAgents } from '@/lib/agents-template';
+import { defaultFeatures } from '@/lib/features';
+import { defaultAgentCategories } from '@/lib/agent-categories';
+import { templates as defaultDocxTemplates, type DocxTemplateKey  } from '@/lib/docx-styles';
 import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
+import { defaultBankAccounts } from '@/lib/bank-accounts';
 
 async function seed() {
     console.log("Starting Firestore seeding process...");
@@ -36,7 +36,7 @@ async function seed() {
         console.log("Preparing to seed Agents...");
         const agentsCollection = adminDb.collection('agents');
         defaultAgents.forEach(agent => {
-            const { icon, ...agentData } = agent as any;
+            const { icon, ...agentData } = agent;
             const docRef = agentsCollection.doc(agent.id);
             batch.set(docRef, agentData);
         });
@@ -86,4 +86,4 @@ seed().then(() => {
     process.exit(0);
 });
 
-
+    

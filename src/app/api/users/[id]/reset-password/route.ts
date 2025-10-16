@@ -1,30 +1,19 @@
-/**
- * API Route لإعادة تعيين كلمة المرور للمستخدم - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لإعادة تعيين كلمة المرور للمستخدم
- */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+'use server';
+
 import { getUserProfile } from '@/lib/db/queries';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
-/**
- * معالج إعادة تعيين كلمة المرور للمستخدم
- */
-class ResetUserPasswordHandler extends SimpleApiHandler<{ message: string }> {
-    protected requiresAdmin = true;
-
-    protected async processRequest(context: any) {
-        const { params } = context;
+export const POST = withAuth(async ({ params }) => {
+    try {
         const { id: userId } = params;
-
         if (!userId) {
-            throw new Error('User ID is required.');
+            return handleApiError({ message: 'User ID is required.' }, 400);
         }
 
         const user = await getUserProfile(userId);
         if (!user || !user.email) {
-            throw new Error('User not found or has no email.');
+            return handleApiError({ message: 'User not found or has no email.' }, 404);
         }
 
         // This is a placeholder for sending a reset email.
@@ -34,15 +23,9 @@ class ResetUserPasswordHandler extends SimpleApiHandler<{ message: string }> {
         // For this demo, we'll just simulate success.
         console.log(`Password reset email would be sent to ${user.email}`);
 
-        return { message: `A password reset email has been sent to ${user.email}.` };
+        return createApiResponse({ message: `A password reset email has been sent to ${user.email}.` }, 200);
+
+    } catch (error: any) {
+        return handleApiError(error);
     }
-}
-
-// إنشاء المعالج
-const resetUserPasswordHandler = new ResetUserPasswordHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    resetUserPasswordHandler.handle.bind(resetUserPasswordHandler),
-    { requireAdmin: true, logging: true }
-);
+}, { requireAdmin: true });

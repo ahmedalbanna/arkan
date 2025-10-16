@@ -1,28 +1,23 @@
-/**
- * API Route لدعوات الفرق العامة - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لدعوات الفرق العامة
- */
 
-import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { getUserProfile } from '@/lib/db/queries';
+// src/app/api/teams/[id]/invitations/route.ts
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { adminAuth, adminDb } from '@/lib/firebase/server-init';
 import { TeamProperties } from '@/lib/models/team';
 import { TeamMember } from '@/lib/models/user';
+import { getUserProfile } from '@/lib/db/queries';
 import { FieldValue } from 'firebase-admin/firestore';
-import { z } from 'zod';
 
-// Schema لدعوة عضو
 const inviteMemberSchema = z.object({
-    email: z.string().email("Invalid email address"),
+  email: z.string().email("Invalid email address"),
 });
 
 // Helper to verify if the requester is the owner of the team
 async function verifyTeamOwner(request: Request, teamId: string) {
+
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
-        throw new Error('Unauthorized');
+        return { authorized: false, message: 'Unauthorized' };
     }
     const token = authorization.substring(7);
     const decodedToken = await adminAuth.verifyIdToken(token, true);
@@ -30,51 +25,51 @@ async function verifyTeamOwner(request: Request, teamId: string) {
 
     const teamDoc = await adminDb.collection('teams').doc(teamId).get();
     if (!teamDoc.exists) {
-        throw new Error('Team not found');
+        return { authorized: false, message: 'Team not found' };
     }
     const team = teamDoc.data() as TeamProperties;
 
     if (team.ownerId !== requesterId) {
-        throw new Error('Forbidden: Only the team owner can invite members');
+        return { authorized: false, message: 'Forbidden: Only the team owner can invite members' };
     }
 
     return { authorized: true, requesterId };
 }
 
-/**
- * معالج دعوة عضو للفريق العام
- */
-class InviteTeamMemberGeneralHandler extends ComplexApiHandler<z.infer<typeof inviteMemberSchema>, TeamMember> {
-    protected inputSchema = inviteMemberSchema;
-    protected requiresAdmin = false;
-    protected creditCost = 1;
-    protected async processRequest(data: z.infer<typeof inviteMemberSchema>, context: any) {
-        const { request, params } = context;
-        const teamId = params.id;
-        const { email } = data;
-
+export async function POST(request: Request, { params }: { params: { id: string } }) {
+    const teamId = params.id;
+    try {
         const ownerCheck = await verifyTeamOwner(request, teamId);
         if (!ownerCheck.authorized) {
-            throw new Error('Unauthorized');
+            return NextResponse.json({ message: ownerCheck.message }, { status: ownerCheck.message === 'Forbidden' ? 403 : 401 });
         }
+
+        const body = await request.json();
+        const validation = inviteMemberSchema.safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+        }
+
+        const { email } = validation.data;
 
         // Find user by email
         const userQuery = await adminDb.collection('users').where('email', '==', email).limit(1).get();
         if (userQuery.empty) {
-            throw new Error('User with this email not found.');
+            return NextResponse.json({ message: 'User with this email not found.' }, { status: 404 });
         }
         const userDoc = userQuery.docs[0];
         const userId = userDoc.id;
         const userProfile = await getUserProfile(userId);
 
         if (!userProfile) {
-            throw new Error('User profile not found.');
+            return NextResponse.json({ message: 'User profile not found.' }, { status: 404 });
         }
+
 
         // Check if user is already a member
         const memberDoc = await adminDb.collection('teams').doc(teamId).collection('members').doc(userId).get();
         if (memberDoc.exists) {
-            throw new Error('User is already a member of this team.');
+            return NextResponse.json({ message: 'User is already a member of this team.' }, { status: 409 });
         }
 
         // Add user to the team with denormalized data
@@ -94,15 +89,13 @@ class InviteTeamMemberGeneralHandler extends ComplexApiHandler<z.infer<typeof in
             teams: FieldValue.arrayUnion(teamId)
         });
 
-        return newMember;
+        return NextResponse.json(newMember, { status: 201 });
+
+    } catch (error) {
+        console.error(`Error inviting member to team ${teamId}:`, error);
+        if (error instanceof Error && error.message.includes('token')) {
+            return NextResponse.json({ message: 'Authentication failed.' }, { status: 401 });
+        }
+        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
     }
 }
-
-// إنشاء المعالج وتصديره
-const inviteTeamMemberGeneralHandler = new InviteTeamMemberGeneralHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    inviteTeamMemberGeneralHandler.handle.bind(inviteTeamMemberGeneralHandler),
-    { logging: true }
-);

@@ -1,23 +1,16 @@
-/**
- * API Route للميزات - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد للميزات
- */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { defaultFeatures } from '@/lib/features';
+// src/app/api/features/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
+import { defaultFeatures } from '@/lib/features';
+import { createApiResponse, handleApiError } from '@/lib/api-utils';
 
-/**
- * معالج قائمة الميزات
- */
-class FeaturesListHandler extends SimpleApiHandler<any[]> {
-    protected async processRequest(context: any) {
+// This is a public endpoint that does not require authentication
+export async function GET() {
+    try {
         const featuresCollection = adminDb.collection('features');
         let snapshot = await featuresCollection.get();
 
-        // Lazy seeding: إذا لم تكن هناك ميزات موجودة، قم بملءها من الإعداد الافتراضي
+        // Lazy seeding: If no features exist, populate from default config.
         if (snapshot.empty) {
             const batch = adminDb.batch();
             defaultFeatures.forEach(feature => {
@@ -25,22 +18,13 @@ class FeaturesListHandler extends SimpleApiHandler<any[]> {
                 batch.set(docRef, feature);
             });
             await batch.commit();
-            snapshot = await featuresCollection.get(); // إعادة جلب بعد البذر
+            snapshot = await featuresCollection.get(); // Re-fetch after seeding
         }
 
         const features = snapshot.docs.map(doc => doc.data());
-        return features;
+
+        return createApiResponse(features, 200);
+    } catch (error) {
+        return handleApiError(error);
     }
 }
-
-// إنشاء المعالج
-const featuresListHandler = new FeaturesListHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    featuresListHandler.handle.bind(featuresListHandler),
-    {
-        requireAuth: false, // هذا الـ endpoint عام ولا يتطلب مصادقة
-        logging: true
-    }
-);

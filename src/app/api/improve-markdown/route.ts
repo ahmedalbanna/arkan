@@ -1,57 +1,42 @@
-/**
- * API Route لتحسين Markdown - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتحسين Markdown
- */
 
-import { improveReportMarkdown } from '@/ai/flows/unified';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { logGeneration } from '@/services';
+'use server';
+
 import { z } from 'zod';
+import { improveReportMarkdown } from '@/ai/flows/improve-report-markdown';
+import { deductCredit } from '@/services/credit-service';
+import { logGeneration } from '@/services/generation-service';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
-// Schema لتحسين Markdown
 const improveMarkdownSchema = z.object({
-    markdownContent: z.string().min(20, 'Markdown content is too short.'),
-    userPrompt: z.string().min(10, 'Instructions for the AI must be at least 10 characters.'),
+  markdownContent: z.string().min(20, 'Markdown content is too short.'),
+  userPrompt: z.string().min(10, 'Instructions for the AI must be at least 10 characters.'),
 });
 
-/**
- * معالج تحسين Markdown
- */
-class ImproveMarkdownHandler extends CreditBasedApiHandler<{
-    markdownContent: string;
-    userPrompt: string;
-}, any> {
-    protected inputSchema = improveMarkdownSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
-
-        const { markdownContent, userPrompt } = data;
-        const result = await improveReportMarkdown({ markdownContent, userPrompt });
-
-        // تسجيل العملية
-        await logGeneration({
-            agentId: 'improve-report-markdown',
-            userId: user.id,
-            input: { markdownLength: markdownContent.length, prompt: userPrompt },
-            output: { improvedMarkdownLength: result.improvedMarkdown.length },
-            creditCost: this.creditCost
-        });
-
-        return result;
+export const POST = withAuth(async ({ request, user }) => {
+  try {
+    const body = await request.json();
+    const validation = improveMarkdownSchema.safeParse(body);
+    if (!validation.success) {
+      return handleApiError(validation.error);
     }
-}
 
-// إنشاء المعالج
-const improveMarkdownHandler = new ImproveMarkdownHandler();
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
 
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    improveMarkdownHandler.handle.bind(improveMarkdownHandler),
-    {
-        logging: true
-    }
-);
+    const { markdownContent, userPrompt } = validation.data;
+    const result = await improveReportMarkdown({ markdownContent, userPrompt });
+
+    await logGeneration({
+        agentId: 'improve-report-markdown',
+        userId: user.id,
+        input: { markdownLength: markdownContent.length, prompt: userPrompt },
+        output: { improvedMarkdownLength: result.improvedMarkdown.length },
+        creditCost: creditCost
+    });
+
+    return createApiResponse(result, 200);
+
+  } catch (error) {
+    return handleApiError(error);
+  }
+});

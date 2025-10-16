@@ -1,43 +1,27 @@
-/**
- * API Route لرفع صورة الملف الشخصي للمستخدم - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لرفع صورة الملف الشخصي للمستخدم
- */
 
-import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { adminDb } from '@/lib/firebase/server-init';
 import { getStorage } from 'firebase-admin/storage';
-import { z } from 'zod';
+import { adminDb } from '@/lib/firebase/server-init';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
-/**
- * معالج رفع صورة الملف الشخصي للمستخدم
- */
-class UploadUserProfilePictureHandler extends ComplexApiHandler<any, { profilePictureUrl: string }> {
-    protected creditCost = 1;
-    protected requiresAdmin = true;
-    protected inputSchema = z.object({
-        file: z.any(),
-    });
-    protected async processRequest(data: any, context: any): Promise<{ profilePictureUrl: string }> {
-        const { request, params, user } = context;
-        const { id: targetUserId } = params;
+export const POST = withAuth(async ({ request, params, user }) => {
+    const { id: targetUserId } = params;
 
-        // Check if the user is an admin or is updating their own profile
-        if (user.role !== 'admin' && user.id !== targetUserId) {
-            throw new Error('Forbidden');
-        }
+    // Check if the user is an admin or is updating their own profile
+    if (user.role !== 'admin' && user.id !== targetUserId) {
+        return handleApiError({ message: 'Forbidden' }, 403);
+    }
 
+    try {
         const formData = await request.formData();
         const file = formData.get('file') as File | null;
 
         if (!file) {
-            throw new Error('No file uploaded.');
+            return handleApiError({ message: 'No file uploaded.' }, 400);
         }
 
         const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
         if (!allowedTypes.includes(file.type)) {
-            throw new Error('Invalid file type. Only JPG, PNG, and WebP are allowed.');
+            return handleApiError({ message: 'Invalid file type. Only JPG, PNG, and WebP are allowed.' }, 400);
         }
 
         const storage = getStorage();
@@ -63,15 +47,9 @@ class UploadUserProfilePictureHandler extends ComplexApiHandler<any, { profilePi
             updatedAt: new Date().toISOString(),
         });
 
-        return { profilePictureUrl: publicUrl };
+        return createApiResponse({ profilePictureUrl: publicUrl }, 200);
+
+    } catch (error) {
+        return handleApiError(error);
     }
-}
-
-// إنشاء المعالج
-const uploadUserProfilePictureHandler = new UploadUserProfilePictureHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    uploadUserProfilePictureHandler.handle.bind(uploadUserProfilePictureHandler),
-    { logging: true }
-);
+});

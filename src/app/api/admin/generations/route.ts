@@ -1,37 +1,25 @@
-/**
- * API Route لسجل التوليدات - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لسجل التوليدات
- */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { getUserProfile } from '@/lib/db/queries';
-import { adminDb } from '@/lib/firebase/server-init';
+'use server';
+
 import { z } from 'zod';
+import { adminDb } from '@/lib/firebase/server-init';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { getUserProfile } from '@/lib/db/queries';
 
-// Schema لاستعلام السجلات
 const getLogsQuerySchema = z.object({
-    limit: z.coerce.number().int().min(1).max(50).default(15),
-    agentId: z.string().optional(),
-    userId: z.string().optional(),
-    lastVisibleId: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(15),
+  agentId: z.string().optional(),
+  userId: z.string().optional(),
+  lastVisibleId: z.string().optional(),
 });
 
-/**
- * معالج جلب سجل التوليدات
- */
-class GetGenerationsLogHandler extends SimpleApiHandler<any> {
-    protected inputSchema = getLogsQuerySchema;
-    protected requiresAdmin = true;
-
-    protected async processRequest(context: any) {
-        const { request } = context;
+export const GET = withAuth(async ({ request }) => {
+    try {
         const { searchParams } = new URL(request.url);
         const queryValidation = getLogsQuerySchema.safeParse(Object.fromEntries(searchParams));
 
         if (!queryValidation.success) {
-            throw new Error(queryValidation.error.message);
+            return handleApiError(queryValidation.error);
         }
 
         const { limit, agentId, userId, lastVisibleId } = queryValidation.data;
@@ -69,19 +57,13 @@ class GetGenerationsLogHandler extends SimpleApiHandler<any> {
         const logs = await Promise.all(logsPromises);
         const hasNextPage = snapshot.docs.length > limit;
 
-        return {
+        return createApiResponse({
             logs,
             hasNextPage,
             lastVisibleId: hasNextPage && logs.length > 0 ? logs[logs.length - 1].id : null,
-        };
+        }, 200);
+
+    } catch (error) {
+        return handleApiError(error);
     }
-}
-
-// إنشاء المعالج
-const getGenerationsLogHandler = new GetGenerationsLogHandler();
-
-// تصدير الـ handler مع middleware
-export const GET = withApiMiddleware(
-    getGenerationsLogHandler.handle.bind(getGenerationsLogHandler),
-    { requireAdmin: true, logging: true }
-);
+}, { requireAdmin: true });

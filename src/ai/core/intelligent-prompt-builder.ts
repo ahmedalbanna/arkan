@@ -155,9 +155,12 @@ export class IntelligentPromptBuilder {
                 // تحديد طول المحتوى المعروض حسب الصلة
                 const relevance = contextAnalysis.availableContext.files.find(f => f.name === file.fileName)?.relevance || 0.5;
                 const maxLength = relevance > 0.8 ? 2000 : relevance > 0.5 ? 1000 : 500;
-                const content = file.content.length > maxLength ?
-                    file.content.substring(0, maxLength) + '...' :
-                    file.content;
+
+                // التأكد من وجود المحتوى وعدم كون الأخطاء
+                const fileContent = file.content || '';
+                const content = fileContent.length > maxLength ?
+                    fileContent.substring(0, maxLength) + '...' :
+                    fileContent;
                 contextSection += `${content}\n---\n\n`;
             });
         }

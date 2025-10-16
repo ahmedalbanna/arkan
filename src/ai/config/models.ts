@@ -1,17 +1,16 @@
 // src/ai/config/models.ts
-// تعطيل Genkit في العميل لتجنب Node.js APIs
-// import { gemini20Flash, gemini15Pro } from '@genkit-ai/googleai';
+import { gemini20Flash, gemini15Pro } from '@genkit-ai/googleai';
 
 /**
  * The default model for most general-purpose tasks.
  * It's fast and cost-effective.
  */
-export const defaultModel = 'googleai/gemini-2.0-flash';
+export const defaultModel = gemini20Flash;
 
 /**
  * A more powerful model for complex reasoning, analysis, and creative tasks.
  */
-export const proModel = 'googleai/gemini-2.0-flash';
+export const proModel = gemini15Pro;
 
 /**
  * A model specifically for image generation.

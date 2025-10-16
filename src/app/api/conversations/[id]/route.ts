@@ -1,37 +1,28 @@
-/**
- * API Route لحذف المحادثات - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لحذف المحادثات
- */
 
-import { SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+'use server';
+
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { adminRealtimeDb } from '@/lib/firebase/server-init';
 
-/**
- * معالج حذف المحادثة
- */
-class DeleteConversationHandler extends SimpleApiHandler<{ message: string }> {
-    protected async processRequest(context: any) {
-        const { params, user } = context;
+export const DELETE = withAuth(async ({ user, params }) => {
+    try {
         const conversationId = params.id;
-
         if (!conversationId) {
-            throw new Error('Conversation ID is required.');
+            return handleApiError({ message: 'Conversation ID is required.' }, 400);
         }
 
         const convoRef = adminRealtimeDb.ref(`conversations/${conversationId}`);
         const convoSnapshot = await convoRef.get();
 
         if (!convoSnapshot.exists()) {
-            throw new Error('Conversation not found.');
+             return handleApiError({ message: 'Conversation not found.' }, 404);
         }
 
         const conversation = convoSnapshot.val();
 
         // Authorization: Check if the user is a participant
         if (!conversation.participantIds.includes(user.id)) {
-            throw new Error('Forbidden');
+            return handleApiError({ message: 'Forbidden' }, 403);
         }
 
         const updates: { [key: string]: null } = {};
@@ -43,15 +34,9 @@ class DeleteConversationHandler extends SimpleApiHandler<{ message: string }> {
 
         await adminRealtimeDb.ref().update(updates);
 
-        return { message: 'Conversation deleted successfully' };
+        return createApiResponse({ message: 'Conversation deleted successfully' }, 200);
+
+    } catch (error) {
+        return handleApiError(error);
     }
-}
-
-// إنشاء المعالج
-const deleteConversationHandler = new DeleteConversationHandler();
-
-// تصدير الـ handler مع middleware
-export const DELETE = withApiMiddleware(
-    deleteConversationHandler.handle.bind(deleteConversationHandler),
-    { logging: true }
-);
+});

@@ -4,8 +4,6 @@
  */
 
 import { z } from 'zod';
-import { ContextItem, ContextOrganizer, OrganizedContext } from './context-organizer';
-
 
 export interface ContextAnalysisResult {
     // تحليل نوع المحتوى المطلوب
@@ -24,12 +22,11 @@ export interface ContextAnalysisResult {
     // المتطلبات المحددة
     specificRequirements: string[];
 
-    // السياق الخارجي المتاح (منظم حسب المعرفة)
+    // السياق الخارجي المتاح
     availableContext: {
         files: Array<{ name: string; type: string; relevance: number }>;
         previousSections: string[];
         guidelines: string[];
-        organizedContext?: OrganizedContext; // السياقات المنظمة حسب المعرفة
     };
 
     // التوصيات للنموذج
@@ -42,7 +39,7 @@ export interface ContextAnalysisResult {
 
 export class ContextAnalyzer {
     /**
-     * تحليل شامل للسياق والمتطلبات مع تنظيم السياقات حسب المعرفة
+     * تحليل شامل للسياق والمتطلبات
      */
     static async analyzeContext(input: {
         userInput: string;
@@ -50,7 +47,6 @@ export class ContextAnalyzer {
         externalContext?: Array<{ fileName: string; content: string; type: string }>;
         guidelines?: string[];
         previousOutput?: string;
-        targetSection?: string;
     }): Promise<ContextAnalysisResult> {
 
         // تحليل نوع المحتوى من النص
@@ -68,31 +64,8 @@ export class ContextAnalyzer {
         // استخراج المتطلبات المحددة
         const specificRequirements = this.extractRequirements(input.userInput, input.guidelines);
 
-        // تحليل السياق المتاح مع التنظيم الذكي
+        // تحليل السياق المتاح
         const availableContext = this.analyzeAvailableContext(input.externalContext, input.guidelines);
-
-        // تنظيم السياقات حسب المعرفة والأهمية
-        let organizedContext: OrganizedContext | undefined;
-        if (input.externalContext && input.externalContext.length > 0) {
-            const contextItems: ContextItem[] = input.externalContext.map(ctx => ({
-                fileName: ctx.fileName,
-                content: ctx.content,
-                type: ctx.type as any, // سيتم التحقق من الصحة في ContextOrganizer
-                metadata: {
-                    wordCount: ctx.content.length,
-                    language: this.detectLanguage(ctx.content)
-                }
-            }));
-
-            organizedContext = ContextOrganizer.organizeContexts(
-                contextItems,
-                input.targetSection,
-                specificRequirements
-            );
-
-            // تحديث availableContext لتشمل السياقات المنظمة
-            availableContext.organizedContext = organizedContext;
-        }
 
         // توصية النموذج المناسب
         const modelRecommendation = this.recommendModel(contentType, complexityLevel, targetAudience);
@@ -107,11 +80,6 @@ export class ContextAnalyzer {
             availableContext,
             modelRecommendation
         };
-    }
-
-    private static detectLanguage(content: string): 'ar' | 'en' {
-        const arabicRegex = /[\u0600-\u06FF]/;
-        return arabicRegex.test(content) ? 'ar' : 'en';
     }
 
     private static detectContentType(input: string): ContextAnalysisResult['contentType'] {
@@ -241,8 +209,7 @@ export class ContextAnalyzer {
         return {
             files,
             previousSections: [], // سيتم تحديثها حسب السياق
-            guidelines: guidelines || [],
-            organizedContext: undefined as OrganizedContext | undefined
+            guidelines: guidelines || []
         };
     }
 
@@ -252,11 +219,8 @@ export class ContextAnalyzer {
 
         if (type === 'context') relevance += 0.3;
         if (type === 'example') relevance += 0.2;
-        if (type === 'questions') relevance += 0.2;
-        if (type === 'textbook') relevance += 0.2;
-        if (type === 'guidelines') relevance += 0.2;
 
-        // التحقق من وجود المحتوى قبل حساب الطول
+        // التأكد من أن content عبارة عن نص وله طول أكبر من 1000
         if (content && typeof content === 'string' && content.length > 1000) {
             relevance += 0.1;
         }

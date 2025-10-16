@@ -1,63 +1,44 @@
-/**
- * API Route لتقييم التقارير - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتقييم التقارير
- */
 
-import { evaluateReport } from '@/ai/flows/unified';
-import { DiagramTypeSchema, ProjectProposalSchema, SectionNameSchema } from '@/ai/schemas';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { logGeneration } from '@/services';
+'use server';
+
 import { z } from 'zod';
+import { evaluateReport } from '@/ai/flows/evaluate-report';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
+import { deductCredit } from '@/services/credit-service';
+import { logGeneration } from '@/services/generation-service';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
-// Schema لتقييم التقارير
 const evaluateReportSchema = z.object({
-    proposal: ProjectProposalSchema.optional().nullable(),
-    reportSections: z.record(SectionNameSchema, z.string()),
-    diagrams: z.record(DiagramTypeSchema, z.string()).optional().nullable(),
-    acceptanceCriteria: z.array(z.string()).optional().nullable(),
+  proposal: ProjectProposalSchema.optional().nullable(),
+  reportSections: z.record(SectionNameSchema, z.string()),
+  diagrams: z.record(DiagramTypeSchema, z.string()).optional().nullable(),
+  acceptanceCriteria: z.array(z.string()).optional().nullable(),
 });
 
-/**
- * معالج تقييم التقارير
- */
-class EvaluateReportHandler extends CreditBasedApiHandler<{
-    proposal?: any;
-    reportSections: Record<string, string>;
-    diagrams?: Record<string, string> | null;
-    acceptanceCriteria?: string[] | null;
-}, any> {
-    protected inputSchema = evaluateReportSchema;
-    protected creditCost = 1;
-    protected requiresAdmin = false;
-
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
-
-        const agentInput = data;
-        const result = await evaluateReport(agentInput);
-
-        // تسجيل العملية
-        await logGeneration({
-            agentId: 'evaluate-report',
-            userId: user.id,
-            input: agentInput,
-            output: result,
-            creditCost: this.creditCost,
-        });
-
-        return result;
+export const POST = withAuth(async ({ request, user }) => {
+  try {
+    const body = await request.json();
+    const validation = evaluateReportSchema.safeParse(body);
+    if (!validation.success) {
+      return handleApiError(validation.error);
     }
-}
 
-// إنشاء المعالج
-const evaluateReportHandler = new EvaluateReportHandler();
+    const agentInput = validation.data;
+    const result = await evaluateReport(agentInput);
 
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    evaluateReportHandler.handle.bind(evaluateReportHandler),
-    {
-        logging: true
-    }
-);
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
+
+    await logGeneration({
+        agentId: 'evaluate-report',
+        userId: user.id,
+        input: agentInput,
+        output: result,
+        creditCost: creditCost,
+    });
+
+    return createApiResponse(result, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
+});

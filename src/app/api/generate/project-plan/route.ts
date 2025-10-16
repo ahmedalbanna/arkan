@@ -1,59 +1,43 @@
-/**
- * API Route لتوليد مخطط المشروع - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتوليد مخطط المشروع
- */
 
-import { generateProjectPlan } from '@/ai/flows/unified';
-import { CreditBasedApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { logGeneration } from '@/services';
+'use server';
+
 import { z } from 'zod';
+import { deductCredit } from '@/services/credit-service';
+import { logGeneration } from '@/services/generation-service';
+import { generateProjectPlan } from '@/ai/flows/generate-project-plan';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
-// Schema لتوليد مخطط المشروع
 const planSchema = z.object({
-    projectDescription: z.string().min(10, "Project description must be at least 10 characters long."),
-    keyDeliverables: z.string().min(10, "Please list at least one key deliverable."),
-    numPhases: z.coerce.number().int().optional(),
+  projectDescription: z.string().min(10, "Project description must be at least 10 characters long."),
+  keyDeliverables: z.string().min(10, "Please list at least one key deliverable."),
+  numPhases: z.coerce.number().int().optional(),
 });
 
-/**
- * معالج توليد مخطط المشروع
- */
-class GenerateProjectPlanHandler extends CreditBasedApiHandler<{
-    projectDescription: string;
-    keyDeliverables: string;
-    numPhases?: number;
-}, any> {
-    protected inputSchema = planSchema;
-    protected creditCost = 2; // مهمة معقدة
-    protected requiresAdmin = false;
-    protected async processRequest(data: any, context: any) {
-        const { user } = context;
-
-        const agentInput = data;
-        const result = await generateProjectPlan(agentInput);
-
-        // تسجيل العملية
-        await logGeneration({
-            agentId: 'generate-project-plan',
-            userId: user.id,
-            input: agentInput,
-            output: { phaseCount: result.phases.length }, // تسجيل الحد الأدنى من المخرجات
-            creditCost: this.creditCost,
-        });
-
-        return result;
+export const POST = withAuth(async ({ request, user }) => {
+  try {
+    const body = await request.json();
+    const validation = planSchema.safeParse(body);
+    if (!validation.success) {
+      return handleApiError(validation.error);
     }
-}
 
-// إنشاء المعالج
-const generateProjectPlanHandler = new GenerateProjectPlanHandler();
+    const agentInput = validation.data;
+    const result = await generateProjectPlan(agentInput);
 
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    generateProjectPlanHandler.handle.bind(generateProjectPlanHandler),
-    {
-        logging: true
-    }
-);
+    const creditCost = 2;
+    await deductCredit(user.id, creditCost);
+
+    await logGeneration({
+        agentId: `generate-project-plan`,
+        userId: user.id,
+        input: agentInput,
+        output: { phaseCount: result.phases.length }, // Log minimal output
+        creditCost: creditCost,
+    });
+
+    return createApiResponse(result, 200);
+
+  } catch (error) {
+    return handleApiError(error);
+  }
+});

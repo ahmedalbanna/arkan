@@ -1,75 +1,46 @@
-/**
- * API Route لتحديث وحذف الأقسام - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لتحديث وحذف الأقسام
- */
-
-import { ComplexApiHandler, SimpleApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
+// C:\Users\ahmed\source\repos\arkan\src\app\api\admin\sections\[id]\route.ts
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 
-// Schema لتحديث الأقسام
 const SectionUpdateSchema = z.object({
-    title: z.string().min(1).optional(),
-    icon: z.string().min(1).optional(),
-    agentId: z.string().min(1).optional(),
-    type: z.enum(['report', 'diagram', 'presentation']).optional(),
+  title: z.string().min(1).optional(),
+  icon: z.string().min(1).optional(),
+  agentId: z.string().min(1).optional(),
+  type: z.enum(['report', 'diagram', 'presentation']).optional(),
 });
 
-/**
- * معالج تحديث قسم
- */
-class UpdateSectionHandler extends ComplexApiHandler<z.infer<typeof SectionUpdateSchema>, any> {
-    protected inputSchema = SectionUpdateSchema;
-    protected requiresAdmin = true;
-    protected creditCost = 1;
-
-    protected async processRequest(data: z.infer<typeof SectionUpdateSchema>, context: any) {
-        const { params } = context;
-        const sectionId = params.id;
-
-        if (!sectionId) {
-            throw new Error('Section ID is required');
-        }
-
-        const docRef = adminDb.collection('sections').doc(sectionId);
-        await docRef.update(data);
-        const updatedDoc = await docRef.get();
-        return { id: updatedDoc.id, ...updatedDoc.data() };
+// PUT to update a section (Admin only)
+export const PUT = withAuth(async ({ request, params }) => {
+  try {
+    const sectionId = params.id;
+    if (!sectionId) {
+      return handleApiError({ message: 'Section ID is required' }, 400);
     }
-}
-
-/**
- * معالج حذف قسم
- */
-class DeleteSectionHandler extends SimpleApiHandler<{ message: string }> {
-    protected requiresAdmin = true;
-
-    protected async processRequest(context: any) {
-        const { params } = context;
-        const sectionId = params.id;
-
-        if (!sectionId) {
-            throw new Error('Section ID is required');
-        }
-
-        await adminDb.collection('sections').doc(sectionId).delete();
-        return { message: 'Section deleted successfully' };
+    const body = await request.json();
+    const validation = SectionUpdateSchema.safeParse(body);
+    if (!validation.success) {
+      return handleApiError(validation.error);
     }
-}
+    const docRef = adminDb.collection('sections').doc(sectionId);
+    await docRef.update(validation.data);
+    const updatedDoc = await docRef.get();
+    return createApiResponse({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}, { requireAdmin: true });
 
-// إنشاء المعالجات
-const updateSectionHandler = new UpdateSectionHandler();
-const deleteSectionHandler = new DeleteSectionHandler();
-
-// تصدير الـ handlers مع middleware
-export const PUT = withApiMiddleware(
-    updateSectionHandler.handle.bind(updateSectionHandler),
-    { requireAdmin: true, logging: true }
-);
-
-export const DELETE = withApiMiddleware(
-    deleteSectionHandler.handle.bind(deleteSectionHandler),
-    { requireAdmin: true, logging: true }
-);
+// DELETE a section (Admin only)
+export const DELETE = withAuth(async ({ params }) => {
+  try {
+    const sectionId = params.id;
+    if (!sectionId) {
+      return handleApiError({ message: 'Section ID is required' }, 400);
+    }
+    await adminDb.collection('sections').doc(sectionId).delete();
+    return createApiResponse({ message: 'Section deleted successfully' }, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}, { requireAdmin: true });

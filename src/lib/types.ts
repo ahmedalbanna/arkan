@@ -8,7 +8,7 @@ export type { DiagramProperties } from '@/lib/models/diagram';
 export type { DocxTemplate, DocxTemplateProperties } from '@/lib/models/docxTemplate';
 export type { GeneratableDocumentProperties, GenerationStatus } from '@/lib/models/generatableDocument';
 export type { PptxTemplate, PptxTemplateProperties } from '@/lib/models/pptxTemplate';
-export type { AcademicSolverStage, AcademicSolverState, ContextFileType, FullReportModeConfig, GeneratedProposalSection, LinkedAsset, PostProcessingStep, PostProcessingStepResult, ProjectProperties, ProjectState, ProposalVersionHistory, ReportSectionConfig, SavedProject, SavedProposalState } from '@/lib/models/project';
+export type { ContextFileType, FullReportModeConfig, GeneratedProposalSection, LinkedAsset, PostProcessingStep, PostProcessingStepResult, ProjectProperties, ProjectState, ProposalVersionHistory, ReportSectionConfig, SavedProject, SavedProposalState, AcademicSolverState, AcademicSolverStage } from '@/lib/models/project';
 export type { ReportTemplateProperties } from '@/lib/models/reportTemplate';
 export type { Section, SectionProperties, SectionType } from '@/lib/models/section';
 export type { Team, TeamProperties, TeamWithMembers } from '@/lib/models/team';
@@ -18,9 +18,10 @@ export type { TeamMember, UserProfile, UserProperties, UserRole } from '@/lib/mo
 // AI Schema re-exports - still useful to have a central point for these
 export type {
   AnyProjectProposal, DiagramType, ManipulateTextInput,
-  ManipulateTextOutput, PresentationHistoryEntry, ProjectProposal, SectionName
+  ManipulateTextOutput, PresentationHistoryEntry, ProjectPlan, ProjectProposal, SectionName
 } from '@/ai/schemas';
 
+// Re-export from template-schemas
 // Re-export from template-schemas
 
 // Specific, non-model types can still live here
@@ -46,7 +47,7 @@ export interface HeaderFooterContent {
 
 export interface ConversionOptions {
   styles?: import('docx').IStylesOptions;
-  customStyles?: Record<string, unknown>;
+  customStyles?: any;
   paper?: {
     size?: { width: number; height: number };
     margins?: { top: number; right: number; bottom: number; left: number };
@@ -63,20 +64,11 @@ export interface ConversionOptions {
 }
 
 export interface PptxStyleOptions {
-  theme?: string;
-  colors?: Record<string, string>;
-  fonts?: Record<string, string>;
-  layouts?: Record<string, unknown>;
-  animations?: Record<string, unknown>;
+  [key: string]: any; // Placeholder for now, will refine if needed
 }
 
 export interface DocxStyleOptions {
-  fonts?: Record<string, string>;
-  colors?: Record<string, string>;
-  spacing?: Record<string, number>;
-  margins?: Record<string, number>;
-  headers?: Record<string, unknown>;
-  footers?: Record<string, unknown>;
+  [key: string]: any; // Placeholder for now, will refine if needed
 }
 
 // Misc types from various hooks/services
@@ -86,7 +78,6 @@ export type { CreateAgentVariables, Feature, UpdateAgentVariables, UpdateFeature
 export type { HistoryEntry } from '@/hooks/use-history';
 export type { Notification } from '@/hooks/use-notifications';
 export type { DiffPart } from '@/lib/diff';
-export type { ProjectPlan } from '@/lib/models/plan';
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -126,3 +117,4 @@ export interface VerifyPaymentVariables {
 
 export type TransactionStatus = 'pending' | 'verified' | 'rejected';
 
+    

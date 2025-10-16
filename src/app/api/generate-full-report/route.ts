@@ -1,6 +1,6 @@
 // This file is no longer needed and can be deleted.
-import { createApiResponseEnhanced } from '@/lib/core/api';
+import { createApiResponse } from '@/lib/api-utils';
 
 export async function POST() {
-    return createApiResponseEnhanced({ message: "This feature has been deprecated." }, 410);
+    return createApiResponse({ message: "This feature has been deprecated." }, 410);
 }

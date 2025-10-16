@@ -308,13 +308,13 @@ export class AdaptiveModelSelector {
         let selectedModelId: string;
         switch (model.id) {
             case 'gemini-1.5-pro':
-                selectedModelId = proModel;
+                selectedModelId = proModel.name;
                 break;
             case 'gemini-2.0-flash-preview-image-generation':
                 selectedModelId = imageGenerationModel;
                 break;
             default:
-                selectedModelId = defaultModel;
+                selectedModelId = defaultModel.name;
         }
 
         return {
@@ -462,7 +462,7 @@ export class AdaptiveModelSelector {
      */
     static getDefaultConfig(): ModelConfig {
         return {
-            modelId: defaultModel,
+            modelId: defaultModel.name,
             temperature: 0.7,
             maxOutputTokens: 8192,
             topP: 0.9,

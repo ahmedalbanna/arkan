@@ -1,68 +1,62 @@
-/**
- * API Route لدعوات الفرق - النسخة الجديدة الموحدة
- *
- * هذا الملف يوضح كيفية استخدام النظام الجديد الموحد لدعوات الفرق
- */
 
-import { ComplexApiHandler } from '@/app/api/shared/handlers/base-handler';
-import { withApiMiddleware } from '@/app/api/shared/middleware/api-middleware';
-import { getUserProfile } from '@/lib/db/queries';
+
+// src/app/api/teams/[id]/invitations/route.ts
+import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
 import { TeamProperties } from '@/lib/models/team';
 import { TeamMember } from '@/lib/models/user';
+import { getUserProfile } from '@/lib/db/queries';
 import { FieldValue } from 'firebase-admin/firestore';
-import { z } from 'zod';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
-// Schema لدعوة عضو
 const inviteMemberSchema = z.object({
-    email: z.string().email("Invalid email address"),
+  email: z.string().email("Invalid email address"),
 });
 
 // Helper to verify if the requester is the owner of the team
 async function verifyTeamOwner(requesterId: string, teamId: string) {
     const teamDoc = await adminDb.collection('teams').doc(teamId).get();
     if (!teamDoc.exists) {
-        throw new Error('Team not found');
+        throw { status: 404, message: 'Team not found' };
     }
     const team = teamDoc.data() as TeamProperties;
 
     if (team.ownerId !== requesterId) {
-        throw new Error('Forbidden: Only the team owner can invite members');
+        throw { status: 403, message: 'Forbidden: Only the team owner can invite members' };
     }
     return team;
 }
 
-/**
- * معالج دعوة عضو للفريق
- */
-class InviteTeamMemberHandler extends ComplexApiHandler<z.infer<typeof inviteMemberSchema>, TeamMember> {
-    protected inputSchema = inviteMemberSchema;
-    protected requiresAdmin = false;
-    protected creditCost = 1;
-    protected async processRequest(data: z.infer<typeof inviteMemberSchema>, context: any) {
-        const { params, user } = context;
-        const teamId = params.id;
-        const { email } = data;
-
+export const POST = withAuth(async ({ request, params, user }) => {
+    const teamId = params.id;
+    try {
         await verifyTeamOwner(user.id, teamId);
+
+        const body = await request.json();
+        const validation = inviteMemberSchema.safeParse(body);
+        if (!validation.success) {
+            return handleApiError(validation.error);
+        }
+
+        const { email } = validation.data;
 
         // Find user by email
         const userQuery = await adminDb.collection('users').where('email', '==', email).limit(1).get();
         if (userQuery.empty) {
-            throw new Error('User with this email not found.');
+            return handleApiError({ message: 'User with this email not found.' }, 404);
         }
         const userDoc = userQuery.docs[0];
         const userId = userDoc.id;
         const userProfile = await getUserProfile(userId);
 
         if (!userProfile) {
-            throw new Error('User profile not found.');
+            return handleApiError({ message: 'User profile not found.' }, 404);
         }
 
         // Check if user is already a member
         const memberDoc = await adminDb.collection('teams').doc(teamId).collection('members').doc(userId).get();
         if (memberDoc.exists) {
-            throw new Error('User is already a member of this team.');
+            return handleApiError({ message: 'User is already a member of this team.' }, 409);
         }
 
         // Add user to the team with denormalized data
@@ -82,15 +76,9 @@ class InviteTeamMemberHandler extends ComplexApiHandler<z.infer<typeof inviteMem
             teams: FieldValue.arrayUnion(teamId)
         });
 
-        return newMember;
+        return createApiResponse(newMember, 201);
+
+    } catch (error) {
+        return handleApiError(error);
     }
-}
-
-// إنشاء المعالج
-const inviteTeamMemberHandler = new InviteTeamMemberHandler();
-
-// تصدير الـ handler مع middleware
-export const POST = withApiMiddleware(
-    inviteTeamMemberHandler.handle.bind(inviteTeamMemberHandler),
-    { logging: true }
-);
+});
