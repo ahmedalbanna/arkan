@@ -61,6 +61,17 @@ const nextConfig: NextConfig = {
       };
     }
 
+    // إصلاح مشكلة handlebars مع webpack
+    config.module.rules.push({
+      test: /\.handlebars$/,
+      use: 'handlebars-loader'
+    });
+
+    // تجاهل تحذيرات require.extensions
+    config.ignoreWarnings = [
+      /require\.extensions is not supported by webpack/,
+    ];
+
     // تحسين Bundle Size
     config.optimization = {
       ...config.optimization,
@@ -94,7 +105,7 @@ const nextConfig: NextConfig = {
   // تحسينات إضافية لـ Bundle Size
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    optimizeCss: true,
+    optimizeCss: false, // تعطيل مؤقتاً لتجنب مشاكل critters
     optimizeServerReact: true,
   },
 
