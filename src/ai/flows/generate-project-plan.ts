@@ -9,6 +9,7 @@
 import { ai } from '@/ai/genkit';
 import { GenerateProjectPlanInputSchema, ProjectPlanSchema, type GenerateProjectPlanInput } from '@/ai/schemas';
 import { z } from 'zod';
+import { generateProjectPlanPrompt } from '../prompts/generate-project-plan';
 
 
 const generateProjectPlanFlow = ai.defineFlow({
@@ -20,7 +21,7 @@ const generateProjectPlanFlow = ai.defineFlow({
   const maxPhases = input.numPhases ? input.numPhases + 2 : 6;
   const phaseRangeText = `between ${minPhases} and ${maxPhases}`;
 
-  const { output } = await planPrompt({ ...input, phaseRangeText });
+  const { output } = await generateProjectPlanPrompt({ ...input, phaseRangeText });
   if (!output) {
     throw new Error("Project plan generation failed.");
   }

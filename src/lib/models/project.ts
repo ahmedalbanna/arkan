@@ -1,10 +1,32 @@
 
 
-import type { AnyProjectProposal, DiagramType, PresentationHistoryEntry, ProjectPlan, ProjectTask } from '@/ai/schemas';
-import { Diagram, type DiagramProperties } from './diagram';
 
-// --- Types moved from types.ts ---
+import type { PresentationHistoryEntry } from '@/ai/schemas';
+import { Diagram, type DiagramProperties, type DiagramType } from './diagram';
+import type { ProjectPlan, ProjectTask } from './plan';
+import { ProjectProposalData } from './proposal';
 
+// =============================================================================
+// CORE TYPE DEFINITIONS
+// =============================================================================
+
+/**
+ * Supported file types for external context
+ */
+export type ContextFileType = 'context' | 'example' | 'question' | 'textbook' | 'guidelines';
+
+/**
+ * Academic solver processing stages
+ */
+export type AcademicSolverStage = 'idle' | 'analyzing' | 'readyToSolve' | 'solving' | 'solved';
+
+// =============================================================================
+// REPORT CONFIGURATION INTERFACES
+// =============================================================================
+
+/**
+ * Configuration for Full Report Mode generation
+ */
 export interface FullReportModeConfig {
   mode: "Full Report Mode";
   reportTitle?: string;
@@ -36,6 +58,9 @@ export interface FullReportModeConfig {
   postProcessing?: PostProcessingStep[];
 }
 
+/**
+ * Configuration for individual report sections
+ */
 export interface ReportSectionConfig {
   sectionName: string;
   agentId: string;
@@ -51,6 +76,9 @@ export interface ReportSectionConfig {
   dependencies?: string[];
 }
 
+/**
+ * Post-processing step configuration
+ */
 export interface PostProcessingStep {
   type: string;
   agentId?: string;
@@ -59,11 +87,22 @@ export interface PostProcessingStep {
   template?: string;
 }
 
+// =============================================================================
+// PROPOSAL GENERATION INTERFACES
+// =============================================================================
+
+/**
+ * Linked asset reference for proposals
+ */
 export interface LinkedAsset {
   type: string;
   assetId: string;
   description?: string;
 }
+
+/**
+ * Generated proposal section with metadata
+ */
 export interface GeneratedProposalSection {
   sectionName: string;
   generatedContent: string;
@@ -84,6 +123,9 @@ export interface GeneratedProposalSection {
   linkedAssets?: LinkedAsset[];
 }
 
+/**
+ * Post-processing step execution result
+ */
 export interface PostProcessingStepResult {
   type: string;
   status: string;
@@ -92,6 +134,9 @@ export interface PostProcessingStepResult {
   timestamp?: string;
 }
 
+/**
+ * Version history entry for proposals
+ */
 export interface ProposalVersionHistory {
   version: string;
   timestamp: string;
@@ -99,6 +144,9 @@ export interface ProposalVersionHistory {
   changes?: string[];
 }
 
+/**
+ * Complete saved proposal state with all metadata
+ */
 export interface SavedProposalState {
   proposalTitle?: string;
   language?: string;
@@ -121,10 +169,13 @@ export interface SavedProposalState {
   updatedAt?: string;
 }
 
-export type ContextFileType = 'context' | 'example' | 'question' | 'textbook' | 'guidelines';
+// =============================================================================
+// ACADEMIC SOLVER INTERFACES
+// =============================================================================
 
-export type AcademicSolverStage = 'idle' | 'analyzing' | 'readyToSolve' | 'solving' | 'solved';
-
+/**
+ * Academic solver state management
+ */
 export interface AcademicSolverState {
   stage: AcademicSolverStage;
   documentType: import('@/ai/schemas').AcademicDocumentType | null;
@@ -134,76 +185,139 @@ export interface AcademicSolverState {
   externalContext: { fileName: string; content: string; type: 'context' }[];
 }
 
+// =============================================================================
+// MAIN PROJECT INTERFACES
+// =============================================================================
 
-// --- Main Project State Interfaces ---
-
+/**
+ * Core project state interface
+ */
 export interface ProjectState {
+  // Basic project information
   name?: string | undefined;
   projectIdea?: string | undefined;
-  proposal: AnyProjectProposal | null;
+
+  // Proposal and report generation
+  proposal: ProjectProposalData | null;
   reportConfig?: FullReportModeConfig | null;
   generatedProposalState?: SavedProposalState | null;
+
+  // Content sections
   sections?: Partial<Record<import('@/ai/schemas').SectionName, string>>;
   translatedSections?: Partial<Record<import('@/ai/schemas').SectionName, string>>;
   evaluation?: import("@/ai/schemas").EvaluateReportOutput | null | undefined;
+
+  // Visual content
   diagrams?: Partial<Record<DiagramType, DiagramProperties>>;
   presentation?: {
     history: PresentationHistoryEntry[];
   } | undefined;
-  codeGenerator?: any; // Consider defining a specific type for this
+
+  // Code generation
+  codeGenerator?: any; // TODO: Define specific type
+  codebase?: any; // TODO: Define specific type
+
+  // Academic features
   academicSolver?: AcademicSolverState;
-  codebase?: any;
+
+  // External resources
   externalContext?: {
     fileName: string;
     content: string;
     type: ContextFileType;
   }[] | undefined;
+
+  // Team collaboration
   teamId?: string | null | undefined;
+
+  // Project planning
   projectPlan: ProjectPlan | null;
 }
+
+/**
+ * Saved project with persistence metadata
+ */
 export interface SavedProject extends ProjectState {
   id: string;
+  title: string;
+  type: string;
+  description: string;
+  status: string;
+  tags: string[];
+  teamMembers: string[];
   userId: string;
   createdAt: string;
   updatedAt: string;
 }
 
-// --- End of moved types ---
-
-
+/**
+ * Project properties type alias for constructor
+ */
 export type ProjectProperties = SavedProject;
+
+// =============================================================================
+// PROJECT CLASS IMPLEMENTATION
+// =============================================================================
 
 type SectionName = keyof NonNullable<ProjectState['sections']>;
 
+/**
+ * Project model class with encapsulated business logic
+ * Follows the Model-Driven Architecture pattern
+ */
 export class Project implements SavedProject {
+  // Core project metadata
   private _id: string;
+  private _type: string;
+  private _title: string;
+  private _description: string;
+  private _status: string;
+  private _tags: string[];
   private _userId: string;
   private _createdAt: string;
   private _updatedAt: string;
   public hasUnsavedChanges?: boolean;
 
+  // Project content state
   private _name?: string;
   private _projectIdea?: string;
-  private _proposal: AnyProjectProposal | null;
-  private _reportConfig?: import('@/lib/models/project').FullReportModeConfig | null;
-  private _generatedProposalState?: import('@/lib/models/project').SavedProposalState | null;
+  private _proposal: ProjectProposalData | null;
+  private _reportConfig?: FullReportModeConfig | null;
+  private _generatedProposalState?: SavedProposalState | null;
   private _sections?: ProjectState['sections'];
   private _translatedSections?: ProjectState['translatedSections'];
   private _evaluation?: import('@/ai/schemas').EvaluateReportOutput | null;
+
+  // Visual and interactive content
   private _diagrams: Partial<Record<DiagramType, Diagram>>;
   private _presentation?: { history: PresentationHistoryEntry[]; };
-  private _codeGenerator?: any; // Consider defining a specific type for this
+  private _codeGenerator?: any; // TODO: Define specific type
+  private _codebase?: any; // TODO: Define specific type
+
+  // Academic and external resources
   private _academicSolver: AcademicSolverState;
-  private _codebase?: any;
   private _externalContext: { fileName: string; content: string; type: ContextFileType; }[];
+
+  // Team and collaboration
+  private _teamMembers: string[];
   private _teamId?: string | null;
+
+  // Project planning
   private _projectPlan: ProjectPlan | null;
 
   constructor(props: ProjectProperties) {
+    // Initialize core metadata
     this._id = props.id;
+    this._title = props.title;
+    this._type = props.type;
+    this._description = props.description;
+    this._status = props.status;
+    this._tags = props.tags;
     this._userId = props.userId;
     this._createdAt = props.createdAt;
     this._updatedAt = props.updatedAt;
+
+    // Initialize project content
     this._name = props.name;
     this._projectIdea = props.projectIdea;
     this._proposal = props.proposal;
@@ -212,14 +326,21 @@ export class Project implements SavedProject {
     this._sections = props.sections ?? {};
     this._translatedSections = props.translatedSections ?? {};
     this._evaluation = props.evaluation;
+
+    // Initialize diagrams with proper model instances
     this._diagrams = {};
     if (props.diagrams) {
       for (const key in props.diagrams) {
         this._diagrams[key as DiagramType] = new Diagram(props.diagrams[key as DiagramType] as DiagramProperties);
       }
     }
+
+    // Initialize presentation and code generation
     this._presentation = props.presentation ?? { history: [] };
     this._codeGenerator = props.codeGenerator;
+    this._codebase = props.codebase;
+
+    // Initialize academic solver with defaults
     this._academicSolver = props.academicSolver ?? {
       stage: "idle",
       documentType: null,
@@ -228,19 +349,39 @@ export class Project implements SavedProject {
       questionDocuments: [],
       externalContext: [],
     };
-    this._codebase = props.codebase;
+
+    // Initialize external resources and team
     this._externalContext = props.externalContext || [];
+    this._teamMembers = props.teamMembers || [];
     this._teamId = props.teamId;
     this._projectPlan = props.projectPlan;
   }
 
-  // --- Public Getters ---
+  // =============================================================================
+  // PUBLIC GETTERS AND SETTERS
+  // =============================================================================
+
+  // Core metadata getters
   get id() { return this._id; }
+  get title() { return this._title; }
+  set title(value: string) { this._title = value; }
+  get type() { return this._type; }
+  set type(value: string) { this._type = value; }
+  get description() { return this._description; }
+  set description(value: string) { this._description = value; }
+  get status() { return this._status; }
+  set status(value: string) { this._status = value; }
+  get tags() { return this._tags; }
+  set tags(value: string[]) { this._tags = value; }
   get userId() { return this._userId; }
   get createdAt() { return this._createdAt; }
   get updatedAt() { return this._updatedAt; }
+
+  // Project content getters
   get name() { return this._name; }
+  set name(value: string | undefined) { this._name = value; }
   get projectIdea() { return this._projectIdea; }
+  set projectIdea(value: string | undefined) { this._projectIdea = value; }
   get proposal() { return this._proposal; }
   get reportConfig() { return this._reportConfig; }
   get generatedProposalState() { return this._generatedProposalState; }
@@ -249,18 +390,29 @@ export class Project implements SavedProject {
   set translatedSections(value) { this._translatedSections = value; }
   get evaluation() { return this._evaluation; }
   set evaluation(value) { this._evaluation = value; }
+
+  // Visual and interactive content getters
   get diagrams() { return this._diagrams; }
   get presentation() { return this._presentation; }
   get codeGenerator() { return this._codeGenerator; }
-  get academicSolver() { return this._academicSolver; }
   get codebase() { return this._codebase; }
+
+  // Academic and external resources getters
+  get academicSolver() { return this._academicSolver; }
   get externalContext() { return this._externalContext; }
+
+  // Team and collaboration getters
+  get teamMembers() { return this._teamMembers; }
+  set teamMembers(value: string[]) { this._teamMembers = value; }
   get teamId() { return this._teamId; }
+  set teamId(value: string | null | undefined) { this._teamId = value; }
+
+  // Project planning getters
   get projectPlan() { return this._projectPlan; }
 
-  // --- Public Setters ---
-  set name(value: string | undefined) { this._name = value; }
-  set projectIdea(value: string | undefined) { this._projectIdea = value; }
+  // =============================================================================
+  // SERIALIZATION METHODS
+  // =============================================================================
 
   /**
    * Converts the Project instance to a plain JSON object for serialization.
@@ -274,6 +426,12 @@ export class Project implements SavedProject {
 
     return {
       id: this._id,
+      title: this._title,
+      type: this._type,
+      description: this._description,
+      status: this._status,
+      tags: this._tags,
+      teamMembers: this._teamMembers,
       userId: this._userId,
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,
@@ -300,7 +458,13 @@ export class Project implements SavedProject {
     return this.toJSON();
   }
 
+  // =============================================================================
+  // SESSION MANAGEMENT
+  // =============================================================================
 
+  /**
+   * Resets the project to a clean state for a new session
+   */
   public newSession(): void {
     this._name = undefined;
     this._projectIdea = undefined;
@@ -326,7 +490,7 @@ export class Project implements SavedProject {
   }
 
   // --- Proposal Methods ---
-  public setProposal(proposal: AnyProjectProposal | null): void {
+  public setProposal(proposal: ProjectProposalData | null): void {
     this._proposal = proposal;
     if (proposal?.title) {
       this._name = String(proposal.title);

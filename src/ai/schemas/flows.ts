@@ -153,6 +153,7 @@ export const GenerateAgentConfigInputSchema = z.object({
         content: z.string(), // data URI
     })).optional().describe("An array of contextual documents (text, images) to inform the agent's creation."),
 });
+export type GenerateAgentConfigInput = z.infer<typeof GenerateAgentConfigInputSchema>;
 
 export const GenerateAgentConfigOutputSchema = z.object({
     name: z.string().describe("A short, descriptive name for the new agent."),
@@ -206,6 +207,7 @@ export const GenerateCodebaseInputSchema = z.object({
     proposal: ProjectProposalSchema.describe('The project proposal to base the codebase on.'),
 });
 
+export type GenerateCodebaseInput = z.infer<typeof GenerateCodebaseInputSchema>;
 // generate-diagrams.ts
 export const GenerateDiagramInputSchema = z.object({
     proposal: ProjectProposalSchema.optional().nullable(),
@@ -348,15 +350,15 @@ const AdvancedProposalFieldsSchema = z.object({
 export type AdvancedProposalFields = z.infer<typeof AdvancedProposalFieldsSchema>;
 
 export const GenerateProposalInputSchema = z.object({
-  projectIdea: z.string(),
-  guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
-  externalContext: z.array(z.object({
-    fileName: z.string(),
-    content: z.string(),
-    type: ExternalContextTypeSchema,
-  })).optional().describe("An array of external documents (text or data URIs) provided by the user."),
-  advancedFields: AdvancedProposalFieldsSchema.optional().describe('Optional structured data for a detailed proposal.'),
-  jsonStructure: z.any().optional(),
+    projectIdea: z.string(),
+    guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
+    externalContext: z.array(z.object({
+        fileName: z.string(),
+        content: z.string(),
+        type: ExternalContextTypeSchema,
+    })).optional().describe("An array of external documents (text or data URIs) provided by the user."),
+    advancedFields: AdvancedProposalFieldsSchema.optional().describe('Optional structured data for a detailed proposal.'),
+    jsonStructure: z.any().optional(),
 });
 export type GenerateProposalInput = z.infer<typeof GenerateProposalInputSchema>;
 
@@ -796,4 +798,15 @@ export const EvaluateReportOutputSchema = z.object({
 });
 export type EvaluateReportOutput = z.infer<typeof EvaluateReportOutputSchema>;
 
-    
+export const proposalSections = z.enum([
+    'executive_summary', 'problem_statement', 'objectives', 'scope',
+    'methodology', 'timeline', 'budget', 'team', 'deliverables',
+    'risk_assessment', 'success_criteria', 'conclusion', 'appendices'
+]);
+export type ProposalSection = z.infer<typeof proposalSections>;
+export const GenerateProposalOutputSchema = z.object({
+    title: z.string().describe("The title of the proposal."),
+    category: z.string().describe("The category of the proposal."),
+    sections: z.record(proposalSections, z.string()).describe("A map of the proposal's sections data."),
+}).passthrough();
+export type GenerateProposalOutput = z.infer<typeof GenerateProposalOutputSchema>;

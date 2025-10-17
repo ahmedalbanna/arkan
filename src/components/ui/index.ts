@@ -24,17 +24,15 @@ export { Separator } from './separator';
 export { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from './sheet';
 export { Skeleton } from './skeleton';
 export { Slider } from './slider';
-export { Spinner } from './spinner';
 export { Switch } from './switch';
 export { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs';
 export { Textarea } from './textarea';
-export { Toast, Toaster } from './toast';
+export { Toast } from './toast';
 export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip';
-export { useToast } from './use-toast';
 
 // Enhanced Components
 export { CountBadge, EnhancedBadge, NotificationBadge, StatusBadge } from './enhanced-badge';
-export { DotsLoading, FullPageLoading, LoadingSpinner, PulseLoading, ShimmerLoading, SkeletonLoading } from './enhanced-loading';
+export { DotsLoading, FullPageLoading, PulseLoading, ShimmerLoading, SkeletonLoading } from './enhanced-loading';
 export { ConfirmationModal, EnhancedModal } from './enhanced-modal';
 export { CircularProgress, EnhancedProgress } from './enhanced-progress';
 export { EnhancedTooltip, MultiLineTooltip } from './enhanced-tooltip';
@@ -78,26 +76,6 @@ export {
     MobileTab
 } from './mobile-optimized';
 
-// Performance Components
-export { BundleAnalyzer } from './BundleAnalyzer';
-export { BundleOptimizationDashboard } from './BundleOptimizationDashboard';
-export { PerformanceMonitor } from './PerformanceMonitor';
-export { PerformanceOptimizationDashboard } from './PerformanceOptimizationDashboard';
-export { OptimizedList, VirtualScrollContainer } from './VirtualScrollContainer';
 
-// Loading Components
-export { LoadingOverlay } from './LoadingOverlay';
-export { LoadingProgress } from './LoadingProgress';
-export { LoadingProvider } from './LoadingProvider';
-export { LoadingPulse } from './LoadingPulse';
-export { LoadingSkeleton } from './LoadingSkeleton';
-export { LoadingSpinner } from './LoadingSpinner';
 export { LoadingWrapper, QuickLoadingWrap } from './LoadingWrapper';
-
-// Types
-export type { BundleAnalysis } from './BundleAnalyzer';
-export type { BundleMetrics, OptimizationAction } from './BundleOptimizationDashboard';
-export type { PerformanceMetrics } from './PerformanceMonitor';
-export type { PerformanceOptimizationDashboardProps } from './PerformanceOptimizationDashboard';
-export type { OptimizedListProps, VirtualScrollContainerProps } from './VirtualScrollContainer';
 

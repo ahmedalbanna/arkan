@@ -9,13 +9,14 @@
 import { ai } from '@/ai/genkit';
 import { CodebaseSchema, GenerateCodebaseInputSchema, type Codebase } from '@/ai/schemas';
 import { z } from 'zod';
+import { generateCodebasePrompt } from '../prompts/generate-codebase';
 
 const generateCodebaseFlow = ai.defineFlow({
     name: 'generateCodebaseFlow',
     inputSchema: GenerateCodebaseInputSchema,
     outputSchema: CodebaseSchema,
 }, async (input) => {
-    const { output } = await codebasePrompt(input);
+    const { output } = await generateCodebasePrompt(input);
     if (!output) {
         throw new Error("Codebase generation failed.");
     }

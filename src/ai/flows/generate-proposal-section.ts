@@ -17,12 +17,10 @@ import {
     generateProposalSectionPrompt,
     ProposalSectionPromptInputSchema
 } from '@/ai/prompts/proposal-section-generator';
-import {
-    type ProposalSectionType,
-    PROPOSAL_SECTION_TYPES
-} from '@/services/intelligent-proposal-service';
 import { z } from 'zod';
 
+const PROPOSAL_SECTION_TYPES = {}
+type ProposalSectionType = {}
 // استخدام Schema من الـ prompt الجديد
 const ProposalSectionInputSchema = ProposalSectionPromptInputSchema;
 

@@ -23,6 +23,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useLogout } from '@/hooks';
 import { cn } from '@/lib/utils';
 import {
+    BookTypeIcon,
     Bot,
     ChevronDown,
     CreditCard,
@@ -53,6 +54,7 @@ const navConfig: NavLink[] = [
     { href: '/admin/manage-users', labelKey: 'header.manageUsers', icon: Users },
     { href: '/admin/manage-payments', labelKey: 'header.managePayments', icon: CreditCard },
     { href: '/admin/manage-agents', labelKey: 'header.agentManager', icon: Bot },
+    { href: '/admin/manage-sections', labelKey: 'header.manageSections', icon: BookTypeIcon },
     { href: '/admin/manage-features', labelKey: 'header.manageFeatures', icon: SlidersHorizontal },
     { href: '/admin/manage-generations', labelKey: 'header.activityHistory', icon: History },
     { href: '/admin/automations/builder', labelKey: 'header.automations', icon: Workflow },
@@ -103,8 +105,8 @@ function NavContent({ isMobile = false, closeSheet }: { isMobile?: boolean, clos
                 onClick={() => isMobile && closeSheet && closeSheet()}
                 className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground transition-all hover:text-sidebar-primary hover:shadow-soft hover:scale-105 group",
-                    pathname.startsWith(link.href) && link.href !=='/' && "bg-sidebar-accent text-sidebar-primary shadow-glow",
-                    pathname ==='/' && link.href ==='/' && "bg-sidebar-accent text-sidebar-primary shadow-glow"
+                    pathname.startsWith(link.href) && link.href !== '/' && "bg-sidebar-accent text-sidebar-primary shadow-glow",
+                    pathname === '/' && link.href === '/' && "bg-sidebar-accent text-sidebar-primary shadow-glow"
                 )}
             >
                 <link.icon className="h-4 w-4 group-hover:scale-110 transition-transform" />
@@ -191,7 +193,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                                 </Button>
                             </SheetTrigger>
                             <SheetContent side="left" className="flex flex-col backdrop-blur-md">
-                               <NavContent isMobile={true} closeSheet={() => setIsSheetOpen(false)} />
+                                <NavContent isMobile={true} closeSheet={() => setIsSheetOpen(false)} />
                             </SheetContent>
                         </Sheet>
                     </AnimatedContainer>
@@ -232,7 +234,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                                     <Link href="/generate">Go to Builder</Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => logoutMutation.mutate('')} className="hover:bg-destructive/10 hover:text-destructive">
+                                <DropdownMenuItem onClick={() => logoutMutation.mutate()} className="hover:bg-destructive/10 hover:text-destructive">
                                     Logout
                                 </DropdownMenuItem>
                             </DropdownMenuContent>

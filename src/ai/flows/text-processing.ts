@@ -9,14 +9,14 @@ import { ai } from '@/ai/genkit';
 import { createGenkitFlow, FlowCategory } from './registry';
 
 // استيراد المحفزات
-import { aiProofreadPrompt } from '@/ai/prompts/ai-proofread-document';
-import { detectAIPrompt } from '@/ai/prompts/detect-ai-content';
+import { aiProofreadDocumentPrompt } from '@/ai/prompts/ai-proofread-document';
+import { detectAiContentPrompt } from '@/ai/prompts/detect-ai-content';
 import { grammarCheckPrompt } from '@/ai/prompts/grammar-checker';
-import { humanizePrompt } from '@/ai/prompts/humanize-text';
+import { humanizeTextPrompt } from '@/ai/prompts/humanize-text';
 import { manipulateTextPrompt } from '@/ai/prompts/manipulate-text';
-import { paraphrasePrompt } from '@/ai/prompts/paraphrase-text';
+import { paraphraseTextPrompt } from '@/ai/prompts/paraphrase-text';
 import { plagiarismCheckPrompt } from '@/ai/prompts/plagiarism-check';
-import { summarizePrompt } from '@/ai/prompts/summarize-text';
+import { summarizeTextPrompt } from '@/ai/prompts/summarize-text';
 
 // استيراد المخططات
 import {
@@ -78,7 +78,7 @@ createGenkitFlow(
     ParaphraseInputSchema,
     ParaphraseOutputSchema,
     async (input: ParaphraseInput) => {
-        const { output } = await paraphrasePrompt(input);
+        const { output } = await paraphraseTextPrompt(input);
         if (!output) {
             throw new Error('Paraphrase failed');
         }
@@ -94,7 +94,7 @@ createGenkitFlow(
     HumanizeTextInputSchema,
     HumanizeTextOutputSchema,
     async (input: HumanizeTextInput) => {
-        const { output } = await humanizePrompt(input);
+        const { output } = await humanizeTextPrompt(input);
         if (!output) {
             throw new Error('Humanize text failed');
         }
@@ -110,7 +110,7 @@ createGenkitFlow(
     SummarizeInputSchema,
     SummarizeOutputSchema,
     async (input: SummarizeInput) => {
-        const { output } = await summarizePrompt(input);
+        const { output } = await summarizeTextPrompt(input);
         if (!output) {
             throw new Error('Summarize text failed');
         }
@@ -158,7 +158,7 @@ createGenkitFlow(
     DetectAIInputSchema,
     DetectAIOutputSchema,
     async (input: DetectAIInput) => {
-        const { output } = await detectAIPrompt(input);
+        const { output } = await detectAiContentPrompt(input);
         if (!output) {
             throw new Error('AI content detection failed');
         }
@@ -174,7 +174,7 @@ createGenkitFlow(
     AiProofreadDocumentInputSchema,
     AiProofreadDocumentOutputSchema,
     async (input: AiProofreadDocumentInput) => {
-        const { output } = await aiProofreadPrompt(input);
+        const { output } = await aiProofreadDocumentPrompt(input);
         if (!output) {
             throw new Error('AI proofreading failed');
         }
@@ -210,7 +210,7 @@ export async function paraphraseText(input: ParaphraseInput): Promise<Paraphrase
         inputSchema: ParaphraseInputSchema,
         outputSchema: ParaphraseOutputSchema
     }, async (input) => {
-        const { output } = await paraphrasePrompt(input);
+        const { output } = await paraphraseTextPrompt(input);
         if (!output) throw new Error('Paraphrase failed');
         return output;
     })(validation.data);
@@ -226,7 +226,7 @@ export async function humanizeText(input: HumanizeTextInput): Promise<HumanizeTe
         inputSchema: HumanizeTextInputSchema,
         outputSchema: HumanizeTextOutputSchema
     }, async (input) => {
-        const { output } = await humanizePrompt(input);
+        const { output } = await humanizeTextPrompt(input);
         if (!output) throw new Error('Humanize text failed');
         return output;
     })(validation.data);
@@ -242,7 +242,7 @@ export async function summarizeText(input: SummarizeInput): Promise<SummarizeOut
         inputSchema: SummarizeInputSchema,
         outputSchema: SummarizeOutputSchema
     }, async (input) => {
-        const { output } = await summarizePrompt(input);
+        const { output } = await summarizeTextPrompt(input);
         if (!output) throw new Error('Summarize text failed');
         return output;
     })(validation.data);
@@ -290,7 +290,7 @@ export async function detectAiContent(input: DetectAIInput): Promise<DetectAIOut
         inputSchema: DetectAIInputSchema,
         outputSchema: DetectAIOutputSchema
     }, async (input) => {
-        const { output } = await detectAIPrompt(input);
+        const { output } = await detectAiContentPrompt(input);
         if (!output) throw new Error('AI content detection failed');
         return output;
     })(validation.data);
@@ -306,7 +306,7 @@ export async function aiProofreadDocument(input: AiProofreadDocumentInput): Prom
         inputSchema: AiProofreadDocumentInputSchema,
         outputSchema: AiProofreadDocumentOutputSchema
     }, async (input) => {
-        const { output } = await aiProofreadPrompt(input);
+        const { output } = await aiProofreadDocumentPrompt(input);
         if (!output) throw new Error('AI proofreading failed');
         return output;
     })(validation.data);

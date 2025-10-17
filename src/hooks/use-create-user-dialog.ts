@@ -2,8 +2,8 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks';
-import { userKeys } from '@/lib/core/query-keys';
-import { createUserApi } from '@/services';
+import { userKeys } from '@/lib/query-keys';
+import { createUserService } from '@/services';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -40,7 +40,7 @@ export function useCreateUserDialog() {
   const mutation = useMutation({
     mutationFn: (data: CreateUserFormValues) => {
       if (!firebaseUser) throw new Error("Not authenticated");
-      return firebaseUser.getIdToken().then(token => createUserApi(data, token));
+      return firebaseUser.getIdToken().then(token => createUserService(data, token));
     },
     onSuccess: (data) => {
       toast({

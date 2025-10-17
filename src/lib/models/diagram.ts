@@ -3,21 +3,27 @@
  * This is the plain object representation of a diagram's data.
  */
 export interface DiagramProperties {
+    type: DiagramType;
     plantUmlCode: string;
     imageUrl: string;
     explanation?: string;
 }
 
+export type DiagramType = 'class' | 'sequence' | 'useCase' | 'activity' | 'component' | 'deployment' |
+'state' | 'object' | 'communication' | 'interaction' | 'timing' |
+'flowchart' | 'mindmap' | 'gantt' | 'network' | 'er' | 'wireframe';
 /**
  * Represents a single diagram within a project.
  * It encapsulates the data and logic for a diagram generated from PlantUML.
  */
 export class Diagram {
+    public type: DiagramType;
     public plantUmlCode: string;
     public imageUrl: string;
     public explanation?: string;
 
     constructor(props: DiagramProperties) {
+        this.type = props.type;
         this.plantUmlCode = props.plantUmlCode;
         this.imageUrl = props.imageUrl;
         this.explanation = props.explanation;
@@ -46,6 +52,7 @@ export class Diagram {
      */
     public toStateObject(): DiagramProperties {
         return {
+            type: this.type,
             plantUmlCode: this.plantUmlCode,
             imageUrl: this.imageUrl,
             explanation: this.explanation,

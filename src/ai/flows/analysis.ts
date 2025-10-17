@@ -10,7 +10,7 @@ import { createGenkitFlow, FlowCategory } from './registry';
 
 // استيراد المحفزات
 import { aiResearcherPrompt } from '@/ai/prompts/ai-researcher';
-import { analysisPrompt } from '@/ai/prompts/analyze-context';
+import { analyzeContextPrompt } from '@/ai/prompts/analyze-context';
 import { evaluateReportPrompt } from '@/ai/prompts/evaluate-report';
 import { factCheckPrompt } from '@/ai/prompts/fact-checker';
 import { imageToTextPrompt } from '@/ai/prompts/image-to-text';
@@ -52,7 +52,7 @@ createGenkitFlow(
         const textFiles = contextFiles.filter(f => !f.content.startsWith('data:'));
         const mediaFiles = contextFiles.filter(f => f.content.startsWith('data:'));
 
-        const { output } = await analysisPrompt({ prompt, textFiles, mediaFiles });
+        const { output } = await analyzeContextPrompt({ prompt, textFiles, mediaFiles });
         if (!output) {
             throw new Error('Context analysis failed to produce an output.');
         }
@@ -140,7 +140,7 @@ export async function analyzeContext(input: AnalyzeContextInput): Promise<Analyz
         const textFiles = contextFiles.filter(f => !f.content.startsWith('data:'));
         const mediaFiles = contextFiles.filter(f => f.content.startsWith('data:'));
 
-        const { output } = await analysisPrompt({ prompt, textFiles, mediaFiles });
+        const { output } = await analyzeContextPrompt({ prompt, textFiles, mediaFiles });
         if (!output) throw new Error('Context analysis failed to produce an output.');
         return output;
     })(validation.data);

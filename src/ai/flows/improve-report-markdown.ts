@@ -7,6 +7,7 @@
 
 import { ai } from '@/ai/genkit';
 import { ImproveMarkdownInputSchema, ImproveMarkdownOutputSchema, type ImproveMarkdownInput, type ImproveMarkdownOutput } from '@/ai/schemas';
+import { improveMarkdownPrompt } from '../prompts/improve-report-markdown';
 
 const improveReportMarkdownFlow = ai.defineFlow({
   name: 'improveReportMarkdownFlow',

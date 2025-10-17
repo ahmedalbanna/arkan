@@ -95,47 +95,6 @@ Arkan is a comprehensive AI-powered professional writing and document generation
 - Validate all AI inputs and outputs
 - Provide meaningful error messages to users
 
-## Project-Specific Patterns
-
-### 1. Feature Flag System
-```typescript
-// Use feature flags for gradual rollouts
-const isFeatureEnabled = (feature: string) => {
-  return features[feature]?.isEnabled ?? false;
-};
-```
-
-### 2. Error Handling
-```typescript
-// Use centralized error handling
-import { ErrorHandler } from '@/core';
-
-try {
-  await riskyOperation();
-} catch (error) {
-  ErrorHandler.handle(error, 'operationName');
-}
-```
-
-### 3. Form Management
-```typescript
-// Use the form handler hook for consistency
-const formHandler = useFormHandler({
-  schema: validationSchema,
-  onSubmit: handleSubmit,
-  defaultValues: initialValues,
-});
-```
-
-### 4. File Upload
-```typescript
-// Use the file upload hook for consistency
-const fileUpload = useFileUpload({
-  acceptedTypes: ['pdf', 'docx', 'txt'],
-  maxSize: 10 * 1024 * 1024, // 10MB
-  onSuccess: handleFileSuccess,
-});
-```
 
 ## Known Challenges
 

@@ -3,7 +3,7 @@
  * تحتوي على قوالب محددة مسبقاً لكل نوع من أقسام المقترح
  */
 
-import { type ProposalSectionType } from '@/services/intelligent-proposal-service';
+type ProposalSectionType = {}
 
 export interface ProposalTemplate {
     id: string;

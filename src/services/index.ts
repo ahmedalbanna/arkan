@@ -1,9 +1,9 @@
 
 
 export * from './academic-solver-service';
-export * from './ai-detector-service';
-export * from './agent-service';
 export * from './admin-service';
+export * from './agent-service';
+export * from './ai-detector-service';
 export * from './analytics-service';
 export * from './chat-service';
 export * from './context-service';
@@ -26,10 +26,12 @@ export * from './settings-service';
 export * from './taskade-service';
 export * from './team-service';
 
+export * from './ai-researcher-service';
+export * from './template-service';
 export * from './text-to-speech-service';
 export * from './topic-explainer-service';
 export * from './transaction-service';
 export * from './translation-service';
 export * from './user-service';
 export * from './writing-tools-service';
-export * from './ai-researcher-service';
+

@@ -1,5 +1,6 @@
-import { cn } from "@/lib/utils"
-import * as React from "react"
+"use client";
+import { cn } from "@/lib/utils";
+import * as React from "react";
 
 // Animation Hook
 export function useAnimation() {
@@ -316,5 +317,5 @@ export {
     AnimatedContainer, CounterAnimation,
     ParallaxAnimation, StaggeredAnimation,
     TypingAnimation
-}
+};
 

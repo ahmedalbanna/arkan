@@ -9,7 +9,8 @@ import { templateKeys } from '@/lib/core/query-keys';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import type { PptxTemplate } from '@/lib/models/pptxTemplate';
 import type { PptxStyleOptions, PptxTemplateKey } from '@/lib/types';
-import { deletePptxTemplateApi, fetchPptxTemplatesApi, updatePptxTemplateApi, uploadPptxTemplateFileApi } from '@/services';
+import { fetchPptxTemplatesApi, updatePptxTemplateApi, uploadPptxTemplateFileApi } from '@/services/template-service';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import set from 'lodash.set';
 import { useState } from 'react';
