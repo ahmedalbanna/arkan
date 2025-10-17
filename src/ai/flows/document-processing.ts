@@ -5,16 +5,15 @@
 
 'use server';
 
+import { createGenkitFlow, FlowCategory } from '@/ai/flows/registry';
 import { ai } from '@/ai/genkit';
-import { createGenkitFlow, FlowCategory } from './registry';
 
 // استيراد المحفزات
 import { generatePresentationPrompt } from '@/ai/prompts/generate-presentation';
 import { generatePresentationOutlinePrompt } from '@/ai/prompts/generate-presentation-outline';
 import { generateProjectPlanPrompt } from '@/ai/prompts/generate-project-plan';
 import { generateProposalPrompt } from '@/ai/prompts/generate-proposal';
-import { improveMarkdownPrompt } from '@/ai/prompts/improve-report-markdown';
-import { rewriteDocumentPrompt } from '@/ai/prompts/rewrite-document-to-markdown';
+import { improveReportMarkdownPrompt } from '@/ai/prompts/improve-report-markdown';
 import { rewriteToMarkdownPrompt } from '@/ai/prompts/rewrite-to-markdown';
 import { summarizeDocumentPrompt } from '@/ai/prompts/summarize-document';
 import { fullReportSummaryPrompt, summarizeProjectPrompt } from '@/ai/prompts/summarize-project';
@@ -76,6 +75,7 @@ import {
     type WriteDocumentOutput
 } from '@/ai/schemas';
 import { z } from 'zod';
+import { rewriteDocumentToMarkdownPrompt } from '../prompts/rewrite-document-to-markdown';
 
 // ===== كتابة المستندات =====
 createGenkitFlow(
@@ -195,7 +195,7 @@ createGenkitFlow(
     RewriteDocumentInputSchema,
     RewriteDocumentOutputSchema,
     async (input: RewriteDocumentInput) => {
-        const { output } = await rewriteDocumentPrompt(input);
+        const { output } = await rewriteDocumentToMarkdownPrompt(input);
         if (!output) {
             throw new Error("Document rewrite failed.");
         }
@@ -227,7 +227,7 @@ createGenkitFlow(
     ImproveMarkdownInputSchema,
     ImproveMarkdownOutputSchema,
     async (input: ImproveMarkdownInput) => {
-        const { output } = await improveMarkdownPrompt(input);
+        const { output } = await improveReportMarkdownPrompt(input);
         if (!output) {
             throw new Error("Markdown improvement failed.");
         }
@@ -395,7 +395,7 @@ export async function rewriteDocumentToMarkdown(input: RewriteDocumentInput): Pr
         inputSchema: RewriteDocumentInputSchema,
         outputSchema: RewriteDocumentOutputSchema
     }, async (input) => {
-        const { output } = await rewriteDocumentPrompt(input);
+        const { output } = await rewriteDocumentToMarkdownPrompt(input);
         if (!output) throw new Error("Document rewrite failed.");
         return output;
     })(validation.data);
@@ -427,7 +427,7 @@ export async function improveReportMarkdown(input: ImproveMarkdownInput): Promis
         inputSchema: ImproveMarkdownInputSchema,
         outputSchema: ImproveMarkdownOutputSchema
     }, async (input) => {
-        const { output } = await improveMarkdownPrompt(input);
+        const { output } = await improveReportMarkdownPrompt(input);
         if (!output) throw new Error("Markdown improvement failed.");
         return output;
     })(validation.data);

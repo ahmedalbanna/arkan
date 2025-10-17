@@ -12,15 +12,16 @@ import { IterativeImprovementEngine } from '@/ai/core/iterative-improvement-engi
 import { OutputQualityValidator } from '@/ai/core/output-quality-validator';
 import { ai } from '@/ai/genkit';
 import { generateProposalPrompt } from '@/ai/prompts/generate-proposal';
-import { GenerateProposalInputSchema, GenerateProposalOutput, GenerateProposalOutputSchema } from '@/ai/schemas';
+import { AnyProjectProposal, GenerateProposalInputSchema } from '@/ai/schemas';
+import { z } from 'genkit';
 
 export const generateProposal = ai.defineFlow(
   {
     name: 'generateProposalFlow',
     inputSchema: GenerateProposalInputSchema,
-    outputSchema: GenerateProposalOutputSchema,
+    outputSchema: z.any(),
   },
-  async (input): Promise<GenerateProposalOutput> => {
+  async (input): Promise<AnyProjectProposal> => {
     const { projectIdea, guidelines, externalContext, advancedFields, jsonStructure } = input;
 
     try {

@@ -5,8 +5,8 @@
 
 'use server';
 
+import { createGenkitFlow, FlowCategory } from '@/ai/flows/registry';
 import { ai } from '@/ai/genkit';
-import { createGenkitFlow, FlowCategory } from './registry';
 
 // استيراد المحفزات
 import { aiResearcherPrompt } from '@/ai/prompts/ai-researcher';

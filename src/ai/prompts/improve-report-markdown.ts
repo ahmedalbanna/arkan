@@ -3,7 +3,7 @@
 import { ai } from '@/ai/genkit';
 import { ImproveMarkdownInputSchema, ImproveMarkdownOutputSchema } from '@/ai/schemas';
 
-export const improveMarkdownPrompt = ai.definePrompt({
+export const improveReportMarkdownPrompt = ai.definePrompt({
     name: 'improveReportMarkdownPrompt',
     input: { schema: ImproveMarkdownInputSchema },
     output: { schema: ImproveMarkdownOutputSchema },

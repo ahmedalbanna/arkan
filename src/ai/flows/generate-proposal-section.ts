@@ -19,8 +19,7 @@ import {
 } from '@/ai/prompts/proposal-section-generator';
 import { z } from 'zod';
 
-const PROPOSAL_SECTION_TYPES = {}
-type ProposalSectionType = {}
+const PROPOSAL_SECTION_TYPES: Record<string, { title: string }> = {};
 // استخدام Schema من الـ prompt الجديد
 const ProposalSectionInputSchema = ProposalSectionPromptInputSchema;
 
@@ -390,7 +389,7 @@ export const generateProposalSection = ai.defineFlow(
 
             // 4. إعداد النتيجة النهائية
             const executionTime = Date.now() - startTime;
-            const sectionInfo = PROPOSAL_SECTION_TYPES[input.type as ProposalSectionType];
+            const sectionInfo = PROPOSAL_SECTION_TYPES[input.type as keyof typeof PROPOSAL_SECTION_TYPES];
 
             // حساب المعلومات الإضافية
             const wordCount = finalOutput.content.split(/\s+/).length;

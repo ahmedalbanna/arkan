@@ -169,7 +169,133 @@ const diagramSpecificInstructions: Record<z.infer<typeof DiagramTypeSchema>, str
   User ||--|{ Post
   @enduml
   \`\`\`
-`
+`,
+  gantt: `
+### Gantt Chart Instructions
+- **Tasks**: Define tasks using \`task "TaskName" { ... }\`.
+- **Dependencies**: Use \`taskA --> taskB\` for dependencies.
+- **Time Constraints**: Use \`startDate\` and \`endDate\` for time constraints.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  gantt
+  @enduml
+  \`\`\`
+`,
+  mindmap: `
+### Mind Map Instructions
+- **Nodes**: Define nodes using \`node "NodeName" { ... }\`.
+- **Relationships**: Use \`nodeA --> nodeB\` for relationships.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  mindmap
+  @enduml
+  \`\`\`
+`,
+  network: `
+### Network Diagram Instructions
+- **Nodes**: Define nodes using \`node "NodeName" { ... }\`.
+- **Relationships**: Use \`nodeA --> nodeB\` for relationships.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  network
+  @enduml
+  \`\`\`
+`,
+  state: `
+### State Diagram Instructions
+- **States**: Define states using \`state "StateName" { ... }\`.
+- **Transitions**: Use \`stateA --> stateB\` for transitions.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  state
+  @enduml
+  \`\`\`
+`,
+  object: `
+### Object Diagram Instructions
+- **Objects**: Define objects using \`object "ObjectName" { ... }\`.
+- **Attributes**: Inside the object, define attributes. Mark primary keys with \`* \` or \`PK \`.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  object
+  @enduml
+  \`\`\`
+`,
+  communication: `
+### Communication Diagram Instructions
+- **Participants**: Define participants using \`actor\`, \`participant\`, \`boundary\`, \`control\`, \`entity\`, or \`database\`.
+- **Messages**: Use arrows for messages: \`->\` for synchronous, \`->>\` for asynchronous, \`-->\` for return messages.
+- **Activation/Deactivation**: Use \`activate\` and \`deactivate\` to show when a participant is active.
+- **Control Flow**: Use \`alt/else\` for alternatives and \`loop\` for repetitions.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  communication
+  @enduml
+  \`\`\`
+`,
+  interaction: `
+### Interaction Diagram Instructions
+- **Participants**: Define participants using \`actor\`, \`participant\`, \`boundary\`, \`control\`, \`entity\`, or \`database\`.
+- **Messages**: Use arrows for messages: \`->\` for synchronous, \`->>\` for asynchronous, \`-->\` for return messages.
+- **Activation/Deactivation**: Use \`activate\` and \`deactivate\` to show when a participant is active.
+- **Control Flow**: Use \`alt/else\` for alternatives and \`loop\` for repetitions.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  interaction
+  @enduml
+  \`\`\`
+`,
+  timing: `
+### Timing Diagram Instructions
+- **Events**: Define events using \`event "EventName" { ... }\`.
+- **Relationships**: Use \`eventA --> eventB\` for relationships.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  timing
+  @enduml
+  \`\`\`
+`,
+  flowchart: `
+### Flowchart Instructions
+- **Nodes**: Define nodes using \`node "NodeName" { ... }\`.
+- **Relationships**: Use \`nodeA --> nodeB\` for relationships.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  flowchart
+  @enduml
+  \`\`\`
+`,
+  wireframe: `
+### Wireframe Instructions
+- **Components**: Define components using \`[ComponentName]\`.
+- **Relationships**: Use \`[Client] ..> [Service]\` for relationships.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  wireframe
+  @enduml
+  \`\`\`
+`,
+  deployment: `
+### Deployment Diagram Instructions
+- **Nodes**: Define nodes using \`node "NodeName" { ... }\`.
+- **Relationships**: Use \`nodeA --> nodeB\` for relationships.
+- **Example**:
+  \`\`\`plantuml
+  @startuml
+  deployment
+  @enduml
+  \`\`\`
+`,
 };
 
 
@@ -184,7 +310,7 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
 
   // Combine base prompt with diagram-specific instructions into the system prompt
   const systemPrompt = `${agentPrompt.base}
-${diagramSpecificInstructions[input.diagramToGenerate]}
+${diagramSpecificInstructions[input.diagramToGenerate as z.infer<typeof DiagramTypeSchema>]}
 
 --- AVAILABLE CONTEXT FROM PROJECT ---
 You have access to the following documents. Review them and use the most relevant information to generate the diagram code that fulfills the user's request. Your output MUST be a JSON object containing two keys: 'plantUmlCode' and 'explanation'.`;

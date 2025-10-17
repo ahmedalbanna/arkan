@@ -7,7 +7,26 @@ export const DiagramTypeSchema = z.enum([
     'activity',
     'component',
     'archimate',
-    'er'
+    'er',
+    'gantt',
+    'mindmap',
+    'network',
+    'wireframe',
+    'er',
+    'activity',
+    'component',
+    'deployment',
+    'state',
+    'object',
+    'communication',
+    'interaction',
+    'timing',
+    'flowchart',
+    'mindmap',
+    'network',
+    'wireframe',
+    'er',
+    'activity',
 ]);
 export type DiagramType = z.infer<typeof DiagramTypeSchema>;
 
@@ -51,3 +70,8 @@ export const SummarizeLengthSchema = z.enum(['short', 'medium', 'long']);
 export type SummarizeLength = z.infer<typeof SummarizeLengthSchema>;
 
 export const ExternalContextTypeSchema = z.enum(['context', 'example', 'question', 'textbook', 'guidelines']);
+
+export const ProposalSectionTypeSchema = z.enum(['executive_summary', 'problem_statement', 'objectives', 'scope',
+    'methodology', 'timeline', 'budget', 'team', 'deliverables',
+    'risk_assessment', 'success_criteria', 'conclusion', 'appendices']);
+export type ProposalSectionType = z.infer<typeof ProposalSectionTypeSchema>;

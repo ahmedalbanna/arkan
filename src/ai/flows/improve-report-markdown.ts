@@ -7,14 +7,14 @@
 
 import { ai } from '@/ai/genkit';
 import { ImproveMarkdownInputSchema, ImproveMarkdownOutputSchema, type ImproveMarkdownInput, type ImproveMarkdownOutput } from '@/ai/schemas';
-import { improveMarkdownPrompt } from '../prompts/improve-report-markdown';
+import { improveReportMarkdownPrompt } from '../prompts/improve-report-markdown';
 
 const improveReportMarkdownFlow = ai.defineFlow({
   name: 'improveReportMarkdownFlow',
   inputSchema: ImproveMarkdownInputSchema,
   outputSchema: ImproveMarkdownOutputSchema
 }, async (input) => {
-  const { output } = await improveMarkdownPrompt(input);
+  const { output } = await improveReportMarkdownPrompt(input);
   if (!output) {
     throw new Error('Failed to improve markdown.');
   }

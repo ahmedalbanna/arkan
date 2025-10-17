@@ -20,11 +20,7 @@ export * from '../error-handling';
 // Server-side Firebase
 export * from '../firebase/server-init';
 
-// API (Server-side)
-// export * from '../api';
 
-// Auth (Server-side)
-export * from '../auth';
 
 // Integration (Server-side)
 export * from '../integration';

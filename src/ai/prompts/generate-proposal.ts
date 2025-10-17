@@ -7,9 +7,9 @@ import { AdaptiveModelSelector } from '@/ai/core/adaptive-model-selector';
 import { ContextAnalyzer } from '@/ai/core/context-analyzer';
 import { IntelligentPromptBuilder } from '@/ai/core/intelligent-prompt-builder';
 import { ai } from '@/ai/genkit';
-import { GenerateProposalInputSchema, GenerateProposalOutputSchema, ProjectProposalSchema } from '@/ai/schemas';
+import { GenerateProposalInputSchema, ProjectProposalSchema } from '@/ai/schemas';
+import { z } from 'genkit';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-
 const jsonSchema = zodToJsonSchema(ProjectProposalSchema, "ProjectProposal");
 const schemaString = JSON.stringify(jsonSchema, null, 2);
 
@@ -17,7 +17,7 @@ export const generateProposalPrompt = ai.definePrompt(
   {
     name: 'generateProposalPrompt',
     input: { schema: GenerateProposalInputSchema },
-    output: { schema: GenerateProposalOutputSchema },
+    output: { schema: z.any() },
     model: defaultModel || 'googleai/gemini-2.0-flash',
     system: async (input) => {
       // محاولة استخدام النظام الذكي المحسن
