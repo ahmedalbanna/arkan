@@ -91,7 +91,7 @@ export function useProposalModeGeneratorLogic() {
     // استخدام النظام الجديد من src/core
     const proposalTool = createProposalToolHook({
         toolName: 'proposal-generator',
-        apiEndpoint: '/api/proposals/generate',
+        apiEndpoint: '/api/generate/proposals',
         schema: ProjectProposalSchema,
         defaultValues: { title: '', category: 'business' },
         proposalType: 'business',
@@ -150,37 +150,21 @@ export function useProposalModeGeneratorLogic() {
         translateMutation.mutate({ proposal: project.proposal as ProjectProposal, targetLang, token });
     };
 
-    const totalPages = useMemo(() => {
-        if (!proposal) return 0;
-        return Object.keys(proposal).filter(k => k !== 'title' && k !== 'category').length + 1;
-    }, [proposal]);
+
 
     const markdownContent = useMemo(() => {
         if (!proposal) return '';
         return proposalToMarkdown(proposal);
     }, [proposal]);
 
-    const [currentPage, setCurrentPage] = useState(0);
-    const [zoom, setZoom] = useState(1);
+
     const isMobile = useIsMobile();
-    const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
     useEffect(() => {
-        setCurrentPage(0);
         setTranslatedProposal(null);
     }, [project?.proposal]);
 
-    const handleNextPage = () => {
-        if (currentPage < totalPages - 1) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
 
-    const handlePrevPage = () => {
-        if (currentPage > 0) {
-            setCurrentPage(currentPage - 1);
-        }
-    };
 
     const handleProposalUpdate = (key: string, value: string) => {
         updateProject(p => {
@@ -221,19 +205,11 @@ export function useProposalModeGeneratorLogic() {
     return {
         t,
         locale,
-        isPanelCollapsed,
-        setIsPanelCollapsed,
         proposal,
         generationMutation,
         translateMutation,
         handleTranslateProposal,
-        totalPages,
-        currentPage,
-        zoom,
-        setZoom,
         isMobile,
-        handleNextPage,
-        handlePrevPage,
         markdownContent,
         handleProposalUpdate,
         // from useProposalActionsLogic

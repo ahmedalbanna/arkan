@@ -803,10 +803,10 @@ export const proposalSections = z.enum([
     'methodology', 'timeline', 'budget', 'team', 'deliverables',
     'risk_assessment', 'success_criteria', 'conclusion', 'appendices'
 ]);
+export const SectionSchema = z.object({
+    sectionName: proposalSections.describe("The name of the section that was generated. This must match the 'sectionToGenerate' from the input."),
+    content: z.string().describe("The generated markdown content for the specified section."),
+});
 export type ProposalSection = z.infer<typeof proposalSections>;
-export const GenerateProposalOutputSchema = z.object({
-    title: z.string().describe("The title of the proposal."),
-    category: z.string().describe("The category of the proposal."),
-    sections: z.record(proposalSections, z.string()).describe("A map of the proposal's sections data."),
-}).passthrough();
+export const GenerateProposalOutputSchema = z.string().describe("The generated markdown content for the proposal.");
 export type GenerateProposalOutput = z.infer<typeof GenerateProposalOutputSchema>;

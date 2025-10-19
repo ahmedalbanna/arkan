@@ -6,16 +6,13 @@ import { getAuthenticatedToken } from '@/lib/authUtils';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from './use-toast';
-
 import { GenerateProposalInput } from '@/ai/schemas';
 import { generateProposalApi } from '@/services';
-import { useQueryClient } from '@tanstack/react-query';
 import { useBuilderStore } from './useBuilderStore';
 
 
 export function useGenerateProposal() {
     const { firebaseUser, refetchUser } = useAuth();
-    const queryClient = useQueryClient();
     const { updateProject } = useBuilderStore(); // Get the central updater function
 
     return useMutation<any, Error, GenerateProposalInput>({

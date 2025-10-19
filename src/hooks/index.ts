@@ -97,7 +97,7 @@ export * from './use-docx-styles';
 export * from './use-guideline-editor';
 export * from './use-presentation-generation';
 export * from './use-project-card-logic';
-export * from './use-proposal-actions-logic';
+
 export * from './use-task-card-logic';
 export * from './use-team-card-logic';
 export * from './use-translation-view-logic';
@@ -146,7 +146,6 @@ export * from './use-presentation-generation';
 // Note: This is already exported from core, so it's commented out to avoid duplication
 // export * from './use-presentation-template-manager';
 export * from './use-project-plan';
-export * from './use-proposal-actions-logic';
 export * from './use-proposal-generation';
 export * from './use-sections';
 export * from './use-team-card-logic';

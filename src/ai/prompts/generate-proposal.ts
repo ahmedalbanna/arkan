@@ -2,16 +2,18 @@
 // src/ai/prompts/generate-proposal.ts
 'use server';
 
+/**
+ * @fileOverview نظام المطالبة المحسن لتوليد المقترحات
+ * يستخدم النظام الذكي الجديد في بناء المطالبات
+ */
+
 import { defaultModel } from '@/ai/config/models';
-import { AdaptiveModelSelector } from '@/ai/core/adaptive-model-selector';
 import { ContextAnalyzer } from '@/ai/core/context-analyzer';
+import { AdaptiveModelSelector } from '@/ai/core/adaptive-model-selector';
 import { IntelligentPromptBuilder } from '@/ai/core/intelligent-prompt-builder';
 import { ai } from '@/ai/genkit';
-import { GenerateProposalInputSchema, ProjectProposalSchema } from '@/ai/schemas';
+import { GenerateProposalInputSchema } from '@/ai/schemas';
 import { z } from 'genkit';
-import { zodToJsonSchema } from 'zod-to-json-schema';
-const jsonSchema = zodToJsonSchema(ProjectProposalSchema, "ProjectProposal");
-const schemaString = JSON.stringify(jsonSchema, null, 2);
 
 export const generateProposalPrompt = ai.definePrompt(
   {
@@ -20,7 +22,6 @@ export const generateProposalPrompt = ai.definePrompt(
     output: { schema: z.any() },
     model: defaultModel || 'googleai/gemini-2.0-flash',
     system: async (input) => {
-      // محاولة استخدام النظام الذكي المحسن
       try {
         // تحليل السياق الذكي
         const contextAnalysis = await ContextAnalyzer.analyzeContext({
@@ -35,7 +36,7 @@ export const generateProposalPrompt = ai.definePrompt(
           'generation'
         );
 
-        // بناء prompt ذكي
+        // بناء المطالبة الذكية
         const promptTemplate = IntelligentPromptBuilder.buildPrompt({
           taskType: 'generation',
           domain: 'project-proposals',
@@ -61,16 +62,12 @@ export const generateProposalPrompt = ai.definePrompt(
    - **المخاطر**: التحديات المحتملة وكيفية التعامل معها
 3. **إنتاج جميع الأقسام**: املأ **كل حقل** في مخطط JSON بمحتوى مكتوب جيداً ومهني.
 
-**السياق المتاح:**
 ${promptTemplate.context}
 
-**التعليمات المفصلة:**
 ${promptTemplate.instructions}
 
-**القيود والمحددات:**
 ${promptTemplate.constraints}
 
-**تنسيق المخرجات:**
 ${promptTemplate.outputFormat}
 
 ---
@@ -80,10 +77,10 @@ ${promptTemplate.outputFormat}
 - لا تضع أي نص خارج كائن JSON النهائي.
 `;
 
-      } catch (enhancedError) {
-        console.warn('⚠️ فشل النظام المحسن في الـ prompt، استخدام النظام الأساسي:', enhancedError);
+      } catch (error) {
+        console.warn('⚠️ فشل النظام المحسن، استخدام النظام الأساسي:', error);
 
-        // النظام الأساسي
+        // النظام الأساسي المبسط
         return `أنت خبير في إدارة المشاريع والكتابة التقنية. مهمتك هي إنتاج مقترح مشروع شامل ومهني بناءً على الفكرة والسياق المقدم.
 
 **عملية التفكير المطلوبة:**
@@ -98,7 +95,7 @@ ${promptTemplate.outputFormat}
    - **المخاطر**: التحديات المحتملة وكيفية التعامل معها
 3. **إنتاج جميع الأقسام**: املأ **كل حقل** في مخطط JSON بمحتوى مكتوب جيداً ومهني.
 
-
+---
 ملاحظة هامة:
 - يجب أن يكون الإخراج النهائي عبارة عن كائن JSON صالح فقط، بدون أي نص إضافي أو شرح أو تعليقات أو رموز برمجية أو علامات HTML أو Markdown.
 - إذا لم تتمكن من توليد كائن JSON صالح لأي سبب، أعد محاولة التوليد أو أعد صياغة الحقول بحيث تكون جميع القيم نصية وصالحة لـ JSON.
@@ -106,43 +103,10 @@ ${promptTemplate.outputFormat}
 `;
       }
     },
-    prompt: `
-{{#if advancedFields}}
---- DETAILED PROJECT REQUIREMENTS ---
-The user has provided the following structured details for the project. Use this as the primary source of information to construct the full proposal object.
-- **Project Title**: '''{{advancedFields.projectTitle}}'''
-- **Project Objective**: '''{{advancedFields.projectObjective}}'''
-- **Expected Outcomes**: '''{{advancedFields.expectedOutcomes}}'''
-- **Methodology**: '''{{advancedFields.methodology}}'''
-- **Timeline**: '''{{advancedFields.timeline}}'''
-- **Knowledge & Context**: '''{{advancedFields.knowledge}}'''
-{{else}}
---- Main Input: Project Idea ---
-{{{projectIdea}}}
-{{/if}}
-
-{{#if guidelines}}
---- Guidelines ---
-{{#each guidelines}}
-- {{{this}}}
-{{/each}}
-{{/if}}
-
-{{#if externalContext}}
---- IMPORTANT EXTERNAL CONTEXT ---
-Analyze the following files as a primary source of truth and context.
-{{#each externalContext}}
---- File: {{this.fileName}} (Type: {{this.type}}) ---
-{{#if this.content}}
-{{media url=this.content}}
-{{/if}}
----
-{{/each}}
-{{/if}}
-`,
+    prompt: `بناءً على المعلومات المقدمة، قم بتوليد مقترح مشروع شامل ومهني.`,
     config: {
       temperature: 0.7,
-      maxOutputTokens: 8192,
+      maxOutputTokens: 4096,
     },
   },
 );

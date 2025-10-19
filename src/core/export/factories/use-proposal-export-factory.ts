@@ -66,45 +66,15 @@ export function createProposalExportHook(config: ProposalExportConfig = {}) {
             proposal: ProjectProposal,
             options: Partial<ExportOptions> = {}
         ): Promise<ExportResult> => {
-            try {
-                await exportProposalAsPdf(proposal);
-                return {
-                    success: true,
-                    fileName: `${proposal.title.replace(/\s+/g, '_')}_proposal.pdf`,
-                    metadata: {
-                        fileSize: 1024 * 1024,
-                        pages: 10
-                    }
-                };
-            } catch (error) {
-                return {
-                    success: false,
-                    error: error instanceof Error ? error.message : 'Failed to export PDF'
-                };
-            }
-        }, []);
+            return exportProposal(proposal, 'pdf', options);
+        }, [exportProposal]);
 
         const exportProposalAsDocx = useCallback(async (
             proposal: ProjectProposal,
             options: Partial<ExportOptions> = {}
         ): Promise<ExportResult> => {
-            try {
-                await exportProposalAsDocx(proposal);
-                return {
-                    success: true,
-                    fileName: `${proposal.title.replace(/\s+/g, '_')}_proposal.docx`,
-                    metadata: {
-                        fileSize: 1024 * 1024,
-                        pages: 10
-                    }
-                };
-            } catch (error) {
-                return {
-                    success: false,
-                    error: error instanceof Error ? error.message : 'Failed to export DOCX'
-                };
-            }
-        }, []);
+            return exportProposal(proposal, 'docx', options);
+        }, [exportProposal]);
 
         const getSupportedFormats = useCallback((): ExportFormat[] => {
             return ['pdf', 'docx', 'html'];

@@ -71,7 +71,7 @@ export async function exportProposalAsPdf(proposal: ProjectProposal) {
 export async function exportProposalAsDocx(proposal: ProjectProposal) {
     const styles = defaultStyles;
 
-    const { title, category, ...restOfProposal } = proposal;
+    const { title = 'Untitled Proposal', category = 'General', ...restOfProposal } = proposal;
 
     const docxContent = await renderDocxValue(restOfProposal, 1);
 

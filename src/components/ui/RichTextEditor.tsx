@@ -172,7 +172,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     },
     editorProps: {
       attributes: {
-        class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif prose-p:text-[12px] prose-headings:text-[16px] prose-h1:text-[16px] prose-h2:text-[16px] prose-h3:text-[16px] prose-h4:text-[16px] prose-h5:text-[16px] prose-h6:text-[16px] prose-a:text-primary hover:prose-a:text-primary/90',
+        class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif prose-p:text-[14px] prose-headings:text-[28px] prose-h1:text-[28px] prose-h2:text-[18px] prose-h3:text-[16px] prose-h4:text-[16px] prose-h5:text-[16px] prose-h6:text-[16px] prose-a:text-primary hover:prose-a:text-primary/90',
       },
     },
   });
@@ -228,9 +228,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         )}
         <MenuBar editor={editor} setDirection={setDirection} />
         <AnimatedContainer animation="fade-in-up" delay={300}>
-          <div className="rounded-lg border bg-gradient-to-r from-background/50 to-primary/5 backdrop-blur-sm shadow-soft hover:shadow-glow p-4 min-h-[200px] relative transition-all duration-200">
+
             <EditorContent editor={editor} />
-          </div>
+
         </AnimatedContainer>
       </div>
     </AnimatedContainer>

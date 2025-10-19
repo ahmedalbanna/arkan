@@ -44,7 +44,7 @@ export const POST = withAuth(async ({ request, user }) => {
         externalContextFileCount: externalContext?.length || 0,
         usedAdvancedMode: !!advancedFields,
       },
-      output: { resultLength: JSON.stringify(result).length },
+      output: { result },
       creditCost: creditCost,
     });
 

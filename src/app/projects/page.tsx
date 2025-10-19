@@ -45,8 +45,12 @@ export default function MyProjectsPage() {
         if (!projects) return [];
 
         let filtered = projects.filter(project => {
-            const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                project.description?.toLowerCase().includes(searchQuery.toLowerCase());
+            const title = typeof project.title === 'string' ? project.title : '';
+            const description = typeof project.description === 'string' ? project.description : '';
+            const search = searchQuery ? searchQuery.toLowerCase() : '';
+            const matchesSearch =
+                title.toLowerCase().includes(search) ||
+                description.toLowerCase().includes(search);
             const matchesType = selectedType === 'all' || project.type === selectedType;
             return matchesSearch && matchesType;
         });
@@ -56,7 +60,7 @@ export default function MyProjectsPage() {
 
             switch (sortBy) {
                 case 'name':
-                    comparison = a.title.localeCompare(b.title);
+                    comparison = (a.proposal?.title ?? '').localeCompare(b.proposal?.title ?? '');
                     break;
                 case 'createdAt':
                     comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
@@ -139,7 +143,7 @@ export default function MyProjectsPage() {
                                         <SelectItem value="all">All Types</SelectItem>
                                         {projectTypes.map(type => (
                                             <SelectItem key={type} value={type}>
-                                                {type.charAt(0).toUpperCase() + type.slice(1)}
+                                                {typeof type === "string" ? type.charAt(0).toUpperCase() + type.slice(1) : ""}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>

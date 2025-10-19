@@ -58,7 +58,7 @@ export const Section = ({ sectionKey, title, content, onUpdate }: SectionProps) 
 
                 <AnimatedContainer animation="fade-in-up" delay={400}>
                     <div className="group relative space-y-4">
-                        <div className="rounded-lg border bg-gradient-to-r from-background/50 to-primary/5 backdrop-blur-sm shadow-soft hover:shadow-glow transition-all duration-200">
+                        <div className=" transition-all duration-200">
                             <RichTextEditor
                                 content={content}
                                 onChange={(newMarkdown) => onUpdate(sectionKey, newMarkdown)}

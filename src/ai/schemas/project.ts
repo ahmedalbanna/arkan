@@ -26,5 +26,23 @@ export const ProjectProposalSchema = z.object({
     category: z.string().describe(
         "A relevant category for the project (e.g., 'Software Development', 'UI/UX Design', 'AI', 'Student Training')."
     ),
-}).passthrough();
+    executiveSummary: z.string().describe(
+        "A brief, high-level overview of the entire proposal, targeting stakeholders who may not read the full document."
+    ),
+    problemStatement: z.string().describe(
+        "Clearly define the problem or opportunity the project addresses. Explain the pain points and why a solution is necessary now."
+    ),
+    proposedSolution: z.object({
+        overview: z.string().describe("Describe the proposed solution in detail. What will be built or implemented?"),
+        technicalApproach: z.string().describe("Explain the technologies, architecture, and methodologies that will be used."),
+        keyFeatures: z.string().describe("List the main features and functionalities of the solution."),
+    }).describe("The core of the proposal, detailing the solution."),
+    projectPlan: z.object({
+        timeline: z.string().describe("A detailed timeline with major phases, milestones, and estimated durations. A week-by-week or bi-weekly breakdown is ideal."),
+        keyDeliverables: z.string().describe("A list of all tangible outputs the client will receive (e.g., design mockups, functional prototype, final report)."),
+    }).describe("How the project will be executed and managed."),
+    budgetBreakdown: z.string().describe(
+        "Provide a detailed breakdown of all costs, including labor, software, and other expenses. Be transparent about the pricing. Display as Table Markdown."
+    ),
+});
 export type ProjectProposal = z.infer<typeof ProjectProposalSchema>;
