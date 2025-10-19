@@ -36,6 +36,14 @@ export {
     type ValidationResult
 };
 
+// تصدير المكونات المتخصصة للمقترحات
+export * from './proposal-context-analyzer';
+export * from './proposal-prompt-builder';
+export * from './proposal-quality-validator';
+export * from './proposal-analyzer';
+export * from './proposal-enhancer';
+export * from './proposal-reporter';
+
 /**
  * واجهة موحدة للنظام الذكي
  */
