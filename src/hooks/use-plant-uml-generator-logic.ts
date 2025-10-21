@@ -2,9 +2,11 @@
 'use client';
 
 import { DiagramTypeSchema } from '@/ai/schemas';
-import { createDiagramToolHook } from '@/core';
+import { useToast, useWritingTool } from '@/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
 import pako from 'pako';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 // Helper to encode the deflated PlantUML code for the PlantUML server
@@ -24,70 +26,52 @@ function encode64(data: Uint8Array) {
     r += B64_MAP.charAt(ch1);
     r += B64_MAP.charAt(ch2);
     if (i + 1 < data.length) r += B64_MAP.charAt(ch3);
-    if (i + 2 < data.length) r += B64_MAP.charAt(ch4);
+    if (i + 2 < data.length) out += B64_MAP.charAt(ch4);
   }
   return r;
 }
 
-// مخطط التحقق من البيانات
-const plantUmlSchema = z.object({
+
+const formSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters long.'),
   diagramType: DiagramTypeSchema,
 });
 
-// القيم الافتراضية
-const defaultValues = {
-  description: '',
-  diagramType: 'useCase' as const,
-};
+type FormValues = z.infer<typeof formSchema>;
 
-/**
- * Hook محسن لمولد PlantUML
- * يستخدم النظام الجديد لتقليل التكرار وتحسين الأداء
- */
 export function usePlantUmlGeneratorLogic() {
-  const diagramTool = createDiagramToolHook({
-    toolName: 'plantuml-generator',
-    apiEndpoint: 'generate-plantuml',
-    schema: plantUmlSchema,
-    defaultValues,
-    successMessage: 'PlantUML diagram generated successfully!',
-    errorMessage: 'Failed to generate PlantUML diagram',
-    enableFileUpload: false, // هذا الأداة لا تدعم رفع الملفات
-    diagramType: 'uml',
-    customFeatures: {
-      formatOutput: (data: any) => {
-        if (data.plantUmlCode) {
-          return {
-            plantUmlCode: data.plantUmlCode,
-            metadata: {
-              diagramType: data.diagramType || 'useCase',
-              complexity: data.complexity || 'medium',
-              nodeCount: data.nodeCount || 0,
-              edgeCount: data.edgeCount || 0,
-            }
-          };
-        }
-        return data;
-      },
-      validateInput: (data: any) => {
-        return data.description?.length >= 10 &&
-          ['useCase', 'class', 'sequence', 'activity', 'component'].includes(data.diagramType);
-      },
-      getProgressSteps: () => [
-        'Analyzing description',
-        'Determining diagram type',
-        'Generating PlantUML code',
-        'Validating syntax',
-        'Finalizing diagram'
-      ]
+  const { toast } = useToast();
+  const [generatedCode, setGeneratedCode] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
+
+  const mutation = useWritingTool('/api/writing-tools/generate-plantuml', {
+    onSuccess: (data: any) => {
+      setGeneratedCode(data.plantUmlCode);
+      toast({ title: 'Diagram generated successfully!' });
+    },
+    onError: (error) => {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     }
-  })();
+  });
 
-  // الحصول على الكود المُولد
-  const generatedCode = diagramTool.mutation.data?.plantUmlCode || '';
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { description: '', diagramType: 'useCase' },
+  });
 
-  // إنشاء رابط الصورة
+  const onSubmit = (data: FormValues) => {
+    mutation.mutate(data);
+  };
+
+  const handleCopy = () => {
+    if (!generatedCode) return;
+    navigator.clipboard.writeText(generatedCode).then(() => {
+      setIsCopied(true);
+      toast({ title: 'Copied to clipboard!' });
+      setTimeout(() => setIsCopied(false), 2000);
+    });
+  };
+
   const imageUrl = useMemo(() => {
     if (!generatedCode) return '';
     try {
@@ -101,38 +85,13 @@ export function usePlantUmlGeneratorLogic() {
     }
   }, [generatedCode]);
 
-  // معالج النسخ المخصص
-  const handleCopy = () => {
-    if (!generatedCode) return;
-    diagramTool.copyToClipboard(generatedCode);
-  };
-
   return {
-    // النموذج والحالة
-    form: diagramTool.form,
-    isProcessing: diagramTool.isProcessing,
-
-    // النصوص والمحتوى
-    originalText: diagramTool.originalText,
-    processedText: diagramTool.processedText,
-    diagramContent: diagramTool.diagramContent,
-
-    // النسخ
-    isCopied: diagramTool.isCopied,
-    handleCopy,
-
-    // المعالجة
-    onSubmit: diagramTool.handleSubmit,
-    reset: diagramTool.reset,
-
-    // النتائج والوظائف المساعدة
+    form,
+    mutation,
+    onSubmit,
     generatedCode,
+    isCopied,
+    handleCopy,
     imageUrl,
-    formatOutput: diagramTool.formatOutput,
-    validateInput: diagramTool.validateInput,
-    getProgressSteps: diagramTool.getProgressSteps,
-
-    // الطفرة (للتوافق مع الكود الموجود)
-    mutation: diagramTool.mutation,
   };
 }

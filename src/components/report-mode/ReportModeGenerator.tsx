@@ -40,6 +40,7 @@ function ReportSkeleton() {
 }
 
 export default function ReportModeGenerator() {
+
     const {
         locale,
         isPanelCollapsed,
@@ -99,7 +100,7 @@ export default function ReportModeGenerator() {
                                 agents={agents}
                             />
                         </AnimatedContainer>
-                        </div>
+                    </div>
 
 
 
@@ -112,7 +113,7 @@ export default function ReportModeGenerator() {
                                 />
                             </Suspense>
                         </AnimatedContainer>
-                        </div>
+                    </div>
 
                 </div>
             </AnimatedContainer>

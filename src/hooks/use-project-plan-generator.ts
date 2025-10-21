@@ -2,87 +2,23 @@
 import type { ProjectProposal } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { createProjectPlanToolHook } from '@/core';
 import { useBuilderStore, useToast } from '@/hooks';
 import { useGenerateProjectPlan } from '@/hooks/use-project-plan';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { summarizeProjectApi } from '@/services';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { z } from 'zod';
 
-// مخطط التحقق من البيانات
-const projectPlanSchema = z.object({
-    projectDescription: z.string().min(10, 'Please provide a detailed project description.'),
-    keyDeliverables: z.string().min(5, 'Please specify at least one key deliverable.'),
-});
-
-// القيم الافتراضية
-const defaultValues = {
-    projectDescription: '',
-    keyDeliverables: '',
-};
-
-/**
- * Hook محسن لمولد خطط المشاريع
- * يستخدم النظام الجديد لتقليل التكرار وتحسين الأداء
- */
 export function useProjectPlanGenerator() {
     const { toast } = useToast();
     const { t } = useLocalization();
     const { firebaseUser, userProfile } = useAuth();
     const { project } = useBuilderStore();
-    const proposal = project?.proposal as ProjectProposal | null;
+    const proposal = project?.proposal as ProjectProposal | null; // Cast for easier use
     const projectIdea = project?.projectIdea;
 
     const [description, setDescription] = useState('');
     const [deliverables, setDeliverables] = useState('');
-
-    const projectPlanTool = createProjectPlanToolHook({
-        toolName: 'project-plan-generator',
-        apiEndpoint: '/api/generate-project-plan',
-        schema: projectPlanSchema,
-        defaultValues,
-        successMessage: t('projectPlan.generator.successToast') || 'Project plan generated successfully!',
-        errorMessage: t('projectPlan.generator.errorToast') || 'Failed to generate project plan',
-        enableFileUpload: false,
-        planType: 'business',
-        customFeatures: {
-            formatOutput: (data: any) => {
-                if (data.projectPlan) {
-                    return {
-                        projectPlan: data.projectPlan,
-                        metadata: {
-                            phases: data.projectPlan.phases?.length || 0,
-                            deliverables: data.projectPlan.deliverables?.length || 0,
-                            estimatedDuration: data.projectPlan.estimatedDuration || 'Unknown',
-                            complexity: data.projectPlan.complexity || 'medium',
-                        }
-                    };
-                }
-                return data;
-            },
-            validateInput: (data: any) => {
-                return data.projectDescription?.length >= 10 &&
-                    data.keyDeliverables?.length >= 5;
-            },
-            getPlanSections: () => [
-                'Project Overview',
-                'Objectives & Goals',
-                'Timeline & Milestones',
-                'Resource Requirements',
-                'Risk Assessment',
-                'Budget Planning',
-                'Success Metrics'
-            ],
-            getTimeline: (data: any) => {
-                return data.projectPlan?.timeline || [];
-            },
-            getMilestones: (data: any) => {
-                return data.projectPlan?.milestones || [];
-            }
-        }
-    })();
 
     const planGenerationMutation = useGenerateProjectPlan();
 
@@ -101,6 +37,7 @@ export function useProjectPlanGenerator() {
         mutationFn: async () => {
             if (!proposal) throw new Error("A proposal is required to generate suggestions.");
             const token = await getAuthenticatedToken(firebaseUser);
+            // The API expects `body` and `token` properties.
             return summarizeProjectApi({ body: { proposal, reportMarkdown: '' }, token });
         },
         onSuccess: (data: any) => {
@@ -133,44 +70,14 @@ export function useProjectPlanGenerator() {
 
     const handleGetSuggestion = () => {
         suggestionMutation.mutate();
-    };
+    }
 
     const creditCost = 2;
     const isProcessing = planGenerationMutation.isPending || suggestionMutation.isPending;
     const canGenerate = (!!description.trim() && !!deliverables.trim()) && !isProcessing && (userProfile?.credits ?? 0) >= creditCost;
 
     return {
-        // الترجمة
         t,
-
-        // النموذج والحالة
-        form: projectPlanTool.form,
-        isProcessing: projectPlanTool.isProcessing || isProcessing,
-
-        // النصوص والمحتوى
-        originalText: projectPlanTool.originalText,
-        processedText: projectPlanTool.processedText,
-        generatedPlan: projectPlanTool.generatedPlan,
-
-        // النسخ
-        isCopied: projectPlanTool.isCopied,
-        handleCopy: projectPlanTool.copyToClipboard,
-
-        // المعالجة
-        onSubmit: projectPlanTool.handleSubmit,
-        reset: projectPlanTool.reset,
-
-        // النتائج والوظائف المساعدة
-        formatOutput: projectPlanTool.formatOutput,
-        validateInput: projectPlanTool.validateInput,
-        getPlanSections: projectPlanTool.getPlanSections,
-        getTimeline: projectPlanTool.getTimeline,
-        getMilestones: projectPlanTool.getMilestones,
-
-        // الطفرة (للتوافق مع الكود الموجود)
-        mutation: projectPlanTool.mutation,
-
-        // الوظائف المخصصة للمشاريع
         description,
         setDescription,
         deliverables,
@@ -178,8 +85,9 @@ export function useProjectPlanGenerator() {
         handleGeneratePlan,
         handleGetSuggestion,
         planGenerationMutation,
+        isProcessing,
         canGenerate,
         creditCost,
-        proposal,
+        proposal, // Pass proposal through for disabled state check
     };
 }

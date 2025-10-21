@@ -2,120 +2,65 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { createContentGeneratorHook } from '@/core';
+import { toast, useWritingTool } from '@/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-// مخطط التحقق من البيانات
-const documentWriterSchema = z.object({
+const formSchema = z.object({
   topic: z.string().min(5, 'Please enter a topic with at least 5 characters.'),
   documentType: z.string().min(1, 'Please select a document type.'),
   knowledge: z.string().optional(),
   tableOfContents: z.string().optional(),
 });
 
-// القيم الافتراضية
-const defaultValues = {
-  topic: '',
-  documentType: 'essay',
-  knowledge: '',
-  tableOfContents: '',
-};
+type FormValues = z.infer<typeof formSchema>;
 
-/**
- * Hook محسن لكاتب المستندات
- * يستخدم النظام الجديد لتقليل التكرار وتحسين الأداء
- */
 export function useDocumentWriterLogic() {
   const { t } = useLocalization();
+  const [isCopied, setIsCopied] = useState(false);
+  const [generatedContent, setGeneratedContent] = useState('');
 
-  const contentGenerator = createContentGeneratorHook({
-    toolName: 'write-document',
-    apiEndpoint: 'write-document',
-    schema: documentWriterSchema,
-    defaultValues,
-    successMessage: t('writingTools.documentWriter.successToast') || 'Document generated successfully!',
-    errorMessage: t('writingTools.documentWriter.errorToast') || 'Failed to generate document',
-    enableFileUpload: false, // هذا الأداة لا تدعم رفع الملفات
-    outputFormat: 'markdown',
-    customFeatures: {
-      formatOutput: (data: any) => {
-        if (data.documentContent) {
-          return {
-            documentContent: data.documentContent,
-            metadata: {
-              topic: data.topic,
-              documentType: data.documentType,
-              wordCount: data.documentContent.split(' ').length,
-              sectionCount: data.documentContent.split('#').length - 1,
-              estimatedReadingTime: Math.ceil(data.documentContent.split(' ').length / 200), // تقدير دقيقة واحدة لكل 200 كلمة
-            }
-          };
-        }
-        return data;
-      },
-      validateInput: (data: any) => {
-        return data.topic?.length >= 5 &&
-          data.documentType?.length > 0 &&
-          ['essay', 'report', 'article', 'blog', 'research'].includes(data.documentType);
-      },
-      getProgressSteps: () => [
-        'Analyzing topic and requirements',
-        'Researching content',
-        'Structuring document',
-        'Writing content',
-        'Reviewing and editing',
-        'Finalizing document'
-      ]
+  const mutation = useWritingTool('/api/writing-tools/write-document', {
+    onSuccess: (data: any) => {
+      setGeneratedContent(data.documentContent);
+      toast({ title: 'Document generated successfully!' });
+    },
+    onError: (error) => {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     }
-  })();
+  });
 
-  // معالج الإرسال المخصص للمستندات
-  const handleSubmit = (data: any) => {
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { topic: '', documentType: 'essay', knowledge: '', tableOfContents: '' },
+  });
+
+  const onSubmit = (data: FormValues) => {
     const submissionData = {
       ...data,
-      tableOfContents: data.tableOfContents ?
-        data.tableOfContents.split('\n').filter((line: string) => line.trim() !== '') :
-        undefined,
+      tableOfContents: data.tableOfContents ? data.tableOfContents.split('\n').filter(line => line.trim() !== '') : undefined,
     };
-    contentGenerator.onSubmit(submissionData);
+    mutation.mutate(submissionData);
   };
 
-  // الحصول على المحتوى المُولد
-  const generatedContent = contentGenerator.mutation.data?.documentContent || '';
-
-  // معالج النسخ المخصص
   const handleCopy = () => {
     if (!generatedContent) return;
-    contentGenerator.handleCopy(generatedContent);
+    navigator.clipboard.writeText(generatedContent).then(() => {
+      setIsCopied(true);
+      toast({ title: 'Copied to clipboard!' });
+      setTimeout(() => setIsCopied(false), 2000);
+    });
   };
 
   return {
-    // الترجمة
     t,
-
-    // النموذج والحالة
-    form: contentGenerator.form,
-    isProcessing: contentGenerator.isProcessing,
-
-    // النصوص والمحتوى
-    originalText: contentGenerator.originalText,
-    processedText: contentGenerator.processedText,
+    form,
+    mutation,
+    onSubmit,
     generatedContent,
-
-    // النسخ
-    isCopied: contentGenerator.isCopied,
+    isCopied,
     handleCopy,
-
-    // المعالجة
-    onSubmit: handleSubmit,
-    reset: contentGenerator.reset,
-
-    // النتائج والوظائف المساعدة
-    formatOutput: contentGenerator.formatOutput,
-    validateInput: contentGenerator.validateInput,
-    getProgressSteps: contentGenerator.getProgressSteps,
-
-    // الطفرة (للتوافق مع الكود الموجود)
-    mutation: contentGenerator.mutation,
   };
 }

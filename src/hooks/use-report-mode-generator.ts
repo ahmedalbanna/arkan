@@ -4,7 +4,6 @@
 import type { SectionName } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { createReportToolHook } from '@/core';
 import { toast, useBuilderStore, useGenerateReportSection, useTranslate } from '@/hooks';
 import { AgentCategory } from '@/lib/models/agent';
 import { Project } from '@/lib/models/project';
@@ -22,43 +21,8 @@ export const useReportModeGenerator = () => {
     const [isTranslatingAll, setIsTranslatingAll] = useState(false);
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     const [orderedSections, setOrderedSections] = useState<Section[]>([]);
-
     const { exportReportDocx, isExporting } = useExport();
     const { agents, isLoaded: agentsLoaded } = useAgents();
-
-    // استخدام النظام الجديد من src/core
-    const reportTool = createReportToolHook({
-        toolName: 'report-generator',
-        apiEndpoint: '/api/reports/generate',
-        schema: require('zod').z.object({
-            title: require('zod').z.string().min(5),
-            sections: require('zod').z.array(require('zod').z.string()),
-            data: require('zod').z.string().min(20)
-        }),
-        defaultValues: { title: '', sections: [], data: '' },
-        reportType: 'analytical',
-        successMessage: t('reportGenerator.success') || 'Report generated successfully!',
-        errorMessage: t('reportGenerator.error') || 'Failed to generate report',
-        customFeatures: {
-            getReportSections: () => ['introduction', 'analysis', 'conclusion', 'recommendations'],
-            validateReportStructure: (data: any) => {
-                return data && data.sections && data.sections.length > 0 && data.content && data.content.length > 100;
-            },
-            formatReportOutput: (data: any) => {
-                return {
-                    title: data.title || 'Untitled Report',
-                    sections: data.sections || [],
-                    content: data.content || '',
-                    metadata: {
-                        type: 'analytical',
-                        createdAt: new Date().toISOString(),
-                        wordCount: data.content?.length || 0,
-                        pageCount: Math.ceil((data.content?.length || 0) / 500)
-                    }
-                };
-            }
-        }
-    })();
 
     const reportAgents = useMemo(() => {
         if (!agents) return [];
@@ -132,7 +96,7 @@ export const useReportModeGenerator = () => {
     const { initializeDependentStates } = useGenerationUIStore();
 
     const reportGenerationMutation = useGenerateReportSection();
-    const isAnythingGenerating = reportGenerationMutation.mutation.isPending;
+    const isAnythingGenerating = reportGenerationMutation.isPending;
 
     const onGenerateSection = async (section: SectionName) => {
         if (!project) return;
@@ -148,7 +112,7 @@ export const useReportModeGenerator = () => {
         };
 
         setActiveMutationKey(section);
-        reportGenerationMutation.mutation.mutate({ body });
+        reportGenerationMutation.mutate({ body });
     };
 
     const hasCreditsForSingleSection = useMemo(() => Boolean(userProfile && (userProfile.credits ?? 0) >= 1), [userProfile]);
@@ -194,18 +158,5 @@ export const useReportModeGenerator = () => {
         agents: reportAgents,
         agentsLoaded,
         project,
-
-        // النظام الجديد من src/core
-        reportTool,
-        reportToolProcessing: reportTool.isProcessing,
-        reportToolProcessedText: reportTool.processedText,
-        reportToolContent: reportTool.reportContent,
-        reportToolCopied: reportTool.isCopied,
-        reportToolHandleCopy: reportTool.handleCopy,
-        reportToolOnSubmit: reportTool.onSubmit,
-        reportToolReset: reportTool.reset,
-        reportToolGetSections: reportTool.getReportSections,
-        reportToolValidateStructure: reportTool.validateReportStructure,
-        reportToolFormatOutput: reportTool.formatReportOutput,
     };
 };

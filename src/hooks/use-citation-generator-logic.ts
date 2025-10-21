@@ -1,60 +1,61 @@
 
 'use client';
 
-import { createContentGeneratorHook } from '@/core';
+import type { GenerateCitationOutput } from '@/ai/schemas';
+import { useToast, useWritingTool } from '@/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-// مخطط التحقق من البيانات
 const citationGeneratorSchema = z.object({
   sourceText: z.string().min(10, 'Please enter at least 10 characters of source material.'),
   style: z.enum(['apa', 'mla', 'chicago', 'ieee']),
 });
 
-// القيم الافتراضية
-const defaultValues = {
-  sourceText: '',
-  style: 'apa' as const,
-};
+type CitationFormValues = z.infer<typeof citationGeneratorSchema>;
 
-/**
- * Hook محسن لمولد المراجع
- * يستخدم النظام الجديد لتقليل التكرار وتحسين الأداء
- */
-export const useCitationGeneratorLogic = createContentGeneratorHook({
-  toolName: 'citation-generator',
-  apiEndpoint: 'citation-generator',
-  schema: citationGeneratorSchema,
-  defaultValues,
-  successMessage: 'Citations generated successfully!',
-  errorMessage: 'Failed to generate citations',
-  enableFileUpload: true,
-  acceptedFileTypes: ['application/pdf', 'text/plain', 'text/markdown'],
-  outputFormat: 'json',
-  customFeatures: {
-    formatOutput: (data: any) => {
-      if (data.citations) {
-        return {
-          citations: data.citations,
-          metadata: {
-            citationCount: data.citations.length,
-            style: data.style || 'apa',
-            sources: data.sources || [],
-            confidence: data.confidence || 0.8,
-          }
-        };
+export function useCitationGeneratorLogic() {
+  const [isCopied, setIsCopied] = useState(false);
+  const { toast } = useToast();
+
+  const mutation = useWritingTool('/api/writing-tools/citation-generator', {
+    onError: (error) => {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    }
+  });
+
+  const form = useForm<CitationFormValues>({
+    resolver: zodResolver(citationGeneratorSchema),
+    defaultValues: { sourceText: '', style: 'apa' },
+  });
+
+  const onSubmit = (data: CitationFormValues) => {
+    mutation.mutate(data, {
+      onSuccess: () => {
+        toast({ title: 'Citation generated successfully!' });
       }
-      return data;
-    },
-    validateInput: (data: any) => {
-      return data.sourceText?.length >= 10 &&
-        ['apa', 'mla', 'chicago', 'ieee'].includes(data.style);
-    },
-    getProgressSteps: () => [
-      'Analyzing source text',
-      'Extracting bibliographic information',
-      'Formatting citations',
-      'Validating citation style',
-      'Finalizing output'
-    ]
-  }
-});
+    });
+  };
+
+  const results = mutation.data as GenerateCitationOutput | undefined;
+  const generatedCitations = results?.citations || [];
+
+  const handleCopy = () => {
+    if (generatedCitations.length === 0) return;
+    navigator.clipboard.writeText(generatedCitations.join('\n\n')).then(() => {
+      setIsCopied(true);
+      toast({ title: 'Copied to clipboard!' });
+      setTimeout(() => setIsCopied(false), 2000);
+    });
+  };
+
+  return {
+    form,
+    mutation,
+    onSubmit,
+    generatedCitations,
+    isCopied,
+    handleCopy,
+  };
+}

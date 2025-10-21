@@ -2,7 +2,6 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { createWritingToolHook } from '@/core';
 import { useToast, useWritingTool } from '@/hooks';
 import type { DiffPart } from '@/lib/diff';
 import { computeDiff } from '@/lib/diff';
@@ -32,23 +31,10 @@ export function useTextStylistLogic() {
   const [activeView, setActiveView] = useState<'side-by-side' | 'diff'>('side-by-side');
   const { toast } = useToast();
 
-  // استخدام النظام الجديد من src/core
-  const textStylistTool = createWritingToolHook({
-    toolName: 'text-stylist',
-    apiEndpoint: 'text-stylist',
-    schema: formSchema,
-    defaultValues: { text: '', style: 'None' },
-    successMessage: t('writingTools.textStylist.successToast') || 'Text styled successfully!',
-    errorMessage: t('writingTools.textStylist.errorToast') || 'Failed to style text',
-    enableFileUpload: true,
-    acceptedFileTypes: ['application/pdf', 'text/plain', 'text/markdown'],
-    customFeatures: ['rewrite', 'summarize', 'diff']
-  })();
-
   // الطفرات
   const rewriteMutation = useWritingTool('rewrite-text');
   const summarizeMutation = useWritingTool('summarize-with-ratio');
-  const isProcessing = rewriteMutation.isPending || summarizeMutation.isPending || textStylistTool.isProcessing;
+  const isProcessing = rewriteMutation.isPending || summarizeMutation.isPending;
 
   // النموذج
   const form = useForm<FormValues>({
@@ -143,14 +129,5 @@ export function useTextStylistLogic() {
     // الطفرات (للتوافق مع الكود الموجود)
     rewriteMutation,
     summarizeMutation,
-
-    // النظام الجديد من src/core
-    textStylistTool,
-    isProcessing: textStylistTool.isProcessing,
-    processedText: textStylistTool.processedText,
-    isCopied: textStylistTool.isCopied,
-    handleCopy: textStylistTool.handleCopy,
-    onSubmit: textStylistTool.onSubmit,
-    reset: textStylistTool.reset,
   };
 }

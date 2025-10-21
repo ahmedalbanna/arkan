@@ -1,10 +1,9 @@
 
 'use client';
 
-import { ProjectProposalSchema, type AnyProjectProposal, type ProjectProposal } from '@/ai/schemas';
+import { type AnyProjectProposal, type ProjectProposal } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { createProposalToolHook } from '@/core';
 import { toast, useBuilderStore, useExport, useGenerateProposal } from '@/hooks';
 import { formatKeyToTitle } from '@/lib/proposal-utils';
 import { summarizeProjectApi, translateProposalApi } from '@/services';
@@ -88,35 +87,6 @@ export function useProposalModeGeneratorLogic() {
 
     const proposal = translatedProposal || project?.proposal as ProjectProposal | null;
 
-    // استخدام النظام الجديد من src/core
-    const proposalTool = createProposalToolHook({
-        toolName: 'proposal-generator',
-        apiEndpoint: '/api/generate/proposals',
-        schema: ProjectProposalSchema,
-        defaultValues: { title: '', category: 'business' },
-        proposalType: 'business',
-        successMessage: t('proposalGenerator.success') || 'Proposal generated successfully!',
-        errorMessage: t('proposalGenerator.error') || 'Failed to generate proposal',
-        customFeatures: {
-            getProposalSections: () => ['introduction', 'objectives', 'methodology', 'budget', 'timeline', 'conclusion'],
-            validateProposalStructure: (data: any) => {
-                return data && data.title && data.title.length > 0 && Object.keys(data).length > 2;
-            },
-            formatProposalOutput: (data: any) => {
-                return {
-                    title: data.title || 'Untitled Proposal',
-                    sections: Object.keys(data).filter(key => key !== 'title' && key !== 'category'),
-                    content: data,
-                    metadata: {
-                        type: data.category || 'business',
-                        createdAt: new Date().toISOString(),
-                        wordCount: JSON.stringify(data).length
-                    }
-                };
-            }
-        }
-    })();
-
     const translateMutation = useMutation({
         mutationFn: async (variables: { proposal: ProjectProposal, targetLang: 'en' | 'ar', token: string }) => {
             const result = await translateProposalApi(variables);
@@ -150,21 +120,37 @@ export function useProposalModeGeneratorLogic() {
         translateMutation.mutate({ proposal: project.proposal as ProjectProposal, targetLang, token });
     };
 
-
+    const totalPages = useMemo(() => {
+        if (!proposal) return 0;
+        return Object.keys(proposal).filter(k => k !== 'title' && k !== 'category').length + 1;
+    }, [proposal]);
 
     const markdownContent = useMemo(() => {
         if (!proposal) return '';
         return proposalToMarkdown(proposal);
     }, [proposal]);
 
-
+    const [currentPage, setCurrentPage] = useState(0);
+    const [zoom, setZoom] = useState(1);
     const isMobile = useIsMobile();
+    const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
     useEffect(() => {
+        setCurrentPage(0);
         setTranslatedProposal(null);
     }, [project?.proposal]);
 
+    const handleNextPage = () => {
+        if (currentPage < totalPages - 1) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
 
+    const handlePrevPage = () => {
+        if (currentPage > 0) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
 
     const handleProposalUpdate = (key: string, value: string) => {
         updateProject(p => {
@@ -205,11 +191,19 @@ export function useProposalModeGeneratorLogic() {
     return {
         t,
         locale,
+        isPanelCollapsed,
+        setIsPanelCollapsed,
         proposal,
         generationMutation,
         translateMutation,
         handleTranslateProposal,
+        totalPages,
+        currentPage,
+        zoom,
+        setZoom,
         isMobile,
+        handleNextPage,
+        handlePrevPage,
         markdownContent,
         handleProposalUpdate,
         // from useProposalActionsLogic
@@ -217,18 +211,5 @@ export function useProposalModeGeneratorLogic() {
         summarizeMutation,
         handleExport,
         handleSummarizeProject,
-
-        // النظام الجديد من src/core
-        proposalTool,
-        isProcessing: proposalTool.isProcessing,
-        processedText: proposalTool.processedText,
-        proposalContent: proposalTool.proposalContent,
-        isCopied: proposalTool.isCopied,
-        handleCopy: proposalTool.handleCopy,
-        onSubmit: proposalTool.onSubmit,
-        reset: proposalTool.reset,
-        getProposalSections: proposalTool.getProposalSections,
-        validateProposalStructure: proposalTool.validateProposalStructure,
-        formatProposalOutput: proposalTool.formatProposalOutput,
     };
 }

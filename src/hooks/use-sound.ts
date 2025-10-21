@@ -3,7 +3,6 @@
 
 "use client";
 
-import { createUIHook } from '@/core';
 import { useCallback, useEffect } from "react";
 
 // This hook encapsulates the logic for playing UI sounds.
@@ -41,95 +40,4 @@ export function useSound() {
   }, []);
 
   return { playSound };
-}
-
-/**
- * Hook محسن للأصوات مع ميزات متقدمة
- * يستخدم النظام الجديد لتقليل التكرار وتحسين الأداء
- */
-export function useAdvancedSound() {
-  const uiHook = createUIHook({
-    initialState: {
-      isEnabled: true,
-      volume: 0.5,
-      currentSound: null,
-      soundHistory: [],
-      isPlaying: false,
-    },
-    customLogic: (state: any, setState: any, toast: any) => {
-      const handlePlaySound = (sound: "success" | "error" | "notification" | "click") => {
-        if (!state.isEnabled) return;
-
-        setState((prev: any) => ({
-          ...prev,
-          currentSound: sound,
-          isPlaying: true,
-          soundHistory: [...prev.soundHistory.slice(-9), { sound, timestamp: Date.now() }]
-        }));
-
-        // Play the sound
-        if (ion && typeof ion.play === "function") {
-          let soundName = "button_tiny";
-          if (sound === "success") soundName = "button_tiny";
-          else if (sound === "error") soundName = "button_unpress";
-          else if (sound === "notification") soundName = "button_tiny";
-          else if (sound === "click") soundName = "button_tiny";
-
-          ion.play(soundName);
-        }
-
-        // Reset playing state after a short delay
-        setTimeout(() => {
-          setState((prev: any) => ({ ...prev, isPlaying: false }));
-        }, 100);
-      };
-
-      const handleToggleSound = () => {
-        setState((prev: any) => ({ ...prev, isEnabled: !prev.isEnabled }));
-        toast({
-          title: state.isEnabled ? 'Sound disabled' : 'Sound enabled',
-          description: state.isEnabled ? 'UI sounds are now disabled' : 'UI sounds are now enabled'
-        });
-      };
-
-      const handleSetVolume = (volume: number) => {
-        setState((prev: any) => ({ ...prev, volume: Math.max(0, Math.min(1, volume)) }));
-        if (ion && typeof ion.volume === "function") {
-          ion.volume(volume);
-        }
-      };
-
-      const handleClearHistory = () => {
-        setState((prev: any) => ({ ...prev, soundHistory: [] }));
-      };
-
-      const handlePlayHistory = (index: number) => {
-        const soundEntry = state.soundHistory[index];
-        if (soundEntry) {
-          handlePlaySound(soundEntry.sound);
-        }
-      };
-
-      return {
-        handlePlaySound,
-        handleToggleSound,
-        handleSetVolume,
-        handleClearHistory,
-        handlePlayHistory,
-        isEnabled: state.isEnabled,
-        volume: state.volume,
-        currentSound: state.currentSound,
-        soundHistory: state.soundHistory,
-        isPlaying: state.isPlaying,
-      };
-    }
-  })();
-
-  return {
-    // الوظائف الأساسية
-    playSound: uiHook.handlePlaySound || (() => { }),
-
-    // الوظائف الجديدة من UI Hook
-    ...uiHook,
-  };
 }

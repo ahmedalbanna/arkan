@@ -1,26 +1,24 @@
 
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
 import type { AIResearcherOutput } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { createSpecializedToolHook } from '@/core';
-import { useProjects } from '@/hooks';
+import { toast, useProjects, useToast, useWritingTool } from '@/hooks';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { addContextToProjectApi } from '@/services';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRef, useState } from 'react';
-import { z } from 'zod';
 
-// مخطط التحقق من البيانات
 const researcherSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic to research.'),
 });
 
-// القيم الافتراضية
-const defaultValues = {
-  topic: '',
-};
+type ResearcherFormValues = z.infer<typeof researcherSchema>;
 
 // Helper function to format the research output as Markdown
 export const formatResearchToMarkdown = (data: AIResearcherOutput, title: string): string => {
@@ -37,100 +35,51 @@ export const formatResearchToMarkdown = (data: AIResearcherOutput, title: string
   return markdown;
 };
 
-/**
- * Hook محسن لباحث الذكاء الاصطناعي
- * يستخدم النظام الجديد لتقليل التكرار وتحسين الأداء
- */
 export function useAIResearcherLogic() {
   const { t } = useLocalization();
+  const { toast } = useToast();
   const reportRef = useRef<HTMLDivElement>(null);
+  const [isCopied, setIsCopied] = useState(false);
   const [isAddToProjectOpen, setIsAddToProjectOpen] = useState(false);
 
-  const specializedTool = createSpecializedToolHook({
-    toolName: 'ai-researcher',
-    apiEndpoint: 'ai-researcher',
-    schema: researcherSchema,
-    defaultValues,
-    successMessage: t('writingTools.aiResearcher.toastResearchSuccess') || 'Research completed successfully!',
-    errorMessage: t('writingTools.aiResearcher.toastResearchFailed') || 'Research failed',
-    enableFileUpload: false, // هذا الأداة لا تدعم رفع الملفات
-    toolCategory: 'research',
-    customFeatures: {
-      formatOutput: (data: any) => {
-        if (data.summary && data.keyPoints && data.sources) {
-          return {
-            summary: data.summary,
-            keyPoints: data.keyPoints,
-            sources: data.sources,
-            metadata: {
-              topic: data.topic,
-              researchDepth: data.depth || 'medium',
-              sourceCount: data.sources.length,
-              keyPointCount: data.keyPoints.length,
-              confidence: data.confidence || 0.8,
-            }
-          };
-        }
-        return data;
-      },
-      validateInput: (data: any) => {
-        return data.topic?.length >= 3;
-      },
-      getProgressSteps: () => [
-        'Analyzing research topic',
-        'Gathering information',
-        'Processing data',
-        'Generating summary',
-        'Extracting key points',
-        'Collecting sources',
-        'Finalizing research report'
-      ]
+  const mutation = useWritingTool('ai-researcher', {
+    onError: (error) => {
+      toast({ title: t('writingTools.aiResearcher.toastResearchFailed'), description: error.message, variant: 'destructive' });
     }
-  })();
+  });
 
-  // الحصول على النتائج من الطفرة
-  const results = specializedTool.mutation.data as AIResearcherOutput | undefined;
-  const markdownResult = results ? formatResearchToMarkdown(results, specializedTool.form.getValues('topic')) : '';
+  const form = useForm<ResearcherFormValues>({
+    resolver: zodResolver(researcherSchema),
+    defaultValues: { topic: '' },
+  });
 
-  // معالج النسخ المخصص للبحث
+  const onSubmit = (data: ResearcherFormValues) => {
+    mutation.mutate({ topic: data.topic });
+  };
+
+  const results = mutation.data as AIResearcherOutput | undefined;
+  const markdownResult = results ? formatResearchToMarkdown(results, form.getValues('topic')) : '';
+
   const handleCopyToClipboard = () => {
     if (!markdownResult) return;
-    specializedTool.copyToClipboard(markdownResult);
+    navigator.clipboard.writeText(markdownResult);
+    toast({ title: t('writingTools.aiResearcher.toastCopied') });
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
   return {
-    // الترجمة
     t,
-
-    // النموذج والحالة
-    form: specializedTool.form,
-    isProcessing: specializedTool.isProcessing,
-
-    // النصوص والمحتوى
-    originalText: specializedTool.originalText,
-    processedText: specializedTool.processedText,
-    toolResult: specializedTool.toolResult,
-
-    // النسخ
-    isCopied: specializedTool.isCopied,
-    handleCopyToClipboard,
-
-    // المعالجة
-    onSubmit: specializedTool.handleSubmit,
-    reset: specializedTool.reset,
-
-    // النتائج والوظائف المساعدة
+    form,
+    mutation,
+    onSubmit,
     results,
     markdownResult,
     reportRef,
+    isCopied,
     isAddToProjectOpen,
     setIsAddToProjectOpen,
-    formatOutput: specializedTool.formatOutput,
-    validateInput: specializedTool.validateInput,
-    getProgressSteps: specializedTool.getProgressSteps,
-
-    // الطفرة (للتوافق مع الكود الموجود)
-    mutation: specializedTool.mutation,
+    handleCopyToClipboard,
   };
 }
 
