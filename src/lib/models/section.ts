@@ -6,6 +6,9 @@ export interface SectionProperties {
     title: string;
     agentId: string;
     type: SectionType;
+    prompt?: string;
+    guidelines?: string[];
+    instruction?: string;
 }
 
 export class Section {

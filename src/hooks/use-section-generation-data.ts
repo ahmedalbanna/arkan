@@ -132,7 +132,11 @@ export function useSectionGenerationData(itemKey: string) {
 
         // إعدادات التوليد المحسنة
         const generationSettings = {
-            instructionText:,
+            style: {
+                formality: controls.formality,
+                tone: controls.tone,
+                wordCount: controls.wordCount ? parseInt(controls.wordCount) : undefined
+            },
             guidelines: {
                 default: guidelines?.checked || [],
                 custom: guidelines?.custom || [],
@@ -175,6 +179,36 @@ export function useSectionGenerationData(itemKey: string) {
     const prepareApiData = useCallback((additionalData: any = {}) => {
         const generationData = getGenerationData();
 
+        const generateStyleInstructionText = (style: {
+            formality: number;
+            tone: string;
+            wordCount?: number;
+        }): string => {
+            const instructions: string[] = [];
+            let formalityDesc = "balanced";
+            if (style.formality < 33) {
+                formalityDesc = "informal";
+            } else if (style.formality > 66) {
+                formalityDesc = "very formal";
+            }
+            instructions.push(`- The writing style should be ${formalityDesc}.`);
+
+            if (style.tone && style.tone !== "none") {
+                instructions.push(`- Adopt a ${style.tone} tone.`);
+            }
+            if (style.wordCount) {
+                instructions.push(`- The response should be approximately ${style.wordCount} words long.`);
+            }
+            return instructions.join('\n');
+        };
+
+        const styleInstructionText = generateStyleInstructionText(generationData.generationSettings.style);
+
+        const combinedOneTimeInstructions = [
+            generationData.oneTimeInstruction || '',
+            styleInstructionText
+        ].filter(Boolean).join('\n\n');
+
         return {
             // البيانات الأساسية
             sectionToGenerate: itemKey,
@@ -205,7 +239,7 @@ export function useSectionGenerationData(itemKey: string) {
 
             // الإرشادات والتعليمات
             guidelines: generationData.guidelines?.custom || [],
-            oneTimeInstructions: generationData.oneTimeInstruction || '',
+            oneTimeInstruction: combinedOneTimeInstructions,
             selectedGuidelines: generationData.guidelines?.checked || [],
 
             // معلومات إضافية

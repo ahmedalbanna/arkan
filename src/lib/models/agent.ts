@@ -58,7 +58,7 @@ export interface AgentProperties {
   prompt: AgentPrompt | string;
   toolIds?: string[];
   knowledge?: AgentKnowledgeSource[];
-  introduction?: string;
+  instruction?: string;
   placeholder?: string;
   conversationStarters?: { value: string }[];
   tone?: string;
@@ -77,7 +77,7 @@ export class Agent {
   public prompt: AgentPrompt | string;
   public toolIds?: string[];
   public knowledge?: AgentKnowledgeSource[];
-  public introduction?: string;
+  public instruction?: string;
   public placeholder?: string;
   public conversationStarters?: { value: string }[];
   public tone?: string;
@@ -95,7 +95,7 @@ export class Agent {
     this.prompt = props.prompt;
     this.toolIds = props.toolIds;
     this.knowledge = props.knowledge;
-    this.introduction = props.introduction;
+    this.instruction = props.instruction;
     this.placeholder = props.placeholder;
     this.conversationStarters = props.conversationStarters;
     this.tone = props.tone;

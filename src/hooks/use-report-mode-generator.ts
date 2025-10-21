@@ -9,6 +9,7 @@ import { AgentCategory } from '@/lib/models/agent';
 import { Project } from '@/lib/models/project';
 import { Section } from '@/lib/models/section';
 import { useEffect, useMemo, useState } from 'react';
+import { useSectionGenerationData } from './use-section-generation-data';
 
 
 export const useReportModeGenerator = () => {
@@ -27,6 +28,7 @@ export const useReportModeGenerator = () => {
     }, [agents]);
 
     const sections = project?.sections || {};
+
 
     const generatedSections = useMemo(
         () => (orderedSections || []).filter(section => sections[section.id as SectionName]),
@@ -91,12 +93,17 @@ export const useReportModeGenerator = () => {
     const { userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = useState<string | null>(null);
     const { initializeDependentStates } = useGenerationUIStore();
-
+    const { controlState } = useGenerationUIStore();
+    const { guidelineState } = useGenerationUIStore();
+    const { oneTimeInstructions } = useGenerationUIStore();
     const reportGenerationMutation = useGenerateReportSection();
     const isAnythingGenerating = reportGenerationMutation.isPending;
+    // ملاحظة: هذا النمط لاستدعاء الهوك قد يسبب مشاكل. يجب استدعاء الهوكات في المستوى الأعلى للمكون.
+
 
     const onGenerateSection = async (section: SectionName) => {
         if (!project) return;
+
 
         const body = {
             proposal: project.proposal,
@@ -106,6 +113,9 @@ export const useReportModeGenerator = () => {
             otherDiagrams: Object.fromEntries(Object.entries(project.diagrams || {}).map(([key, value]) => [key, value?.plantUmlCode])),
             exampleFiles: project.externalContext?.filter((c: any) => c.type === 'example'),
             contextFiles: project.externalContext?.filter((c: any) => c.type === 'context'),
+            instructionText: oneTimeInstructions[section],
+            controls: controlState[section],
+            guidelines: guidelineState[section],
         };
 
         setActiveMutationKey(section);

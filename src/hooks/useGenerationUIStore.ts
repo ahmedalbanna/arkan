@@ -79,17 +79,6 @@ const defaultControlState: ControlState = {
   tone: 'professional',
   wordCount: '',
 };
-// Helper function to generate instruction text from control state
-const generateInstructionText = (controls: any): string => {
-  let instructions = [];
-  let formalityDesc = "balanced";
-  if (controls.formality < 33) formalityDesc = "informal";
-  else if (controls.formality > 66) formalityDesc = "very formal";
-  instructions.push(`- The writing style should be ${formalityDesc}.`);
-  if (controls.tone && controls.tone !== "none") instructions.push(`- Adopt a ${controls.tone} tone.`);
-  if (controls.wordCount) instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
-  return instructions.join('\n');
-};
 
 const initialAdvancedFields: AdvancedProposalFields = {
   projectTitle: '', projectObjective: '', expectedOutcomes: '', stakeholders: '',
