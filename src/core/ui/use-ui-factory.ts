@@ -6,9 +6,10 @@
 import { useCallback, useState } from 'react';
 import { useToast } from '../../hooks/use-toast';
 
-export interface UIConfig {
+export interface UIConfig<T = any, K = any> {
     componentName: string;
-    initialState?: any;
+    initialState?: T;
+    customLogic?: (state: T, setState: React.Dispatch<React.SetStateAction<T>>, toast: any) => K;
     customFeatures?: {
         getValidationRules?: () => any;
         getUIStates?: () => string[];
@@ -21,21 +22,21 @@ export interface UIConfig {
  * @param config إعدادات المكون
  * @returns Hook جاهز للاستخدام
  */
-export function createUIHook(config: UIConfig) {
+export function createUIHook<T, K>(config: UIConfig<T, K>) {
     return function useUILogic() {
-        const [state, setState] = useState(config.initialState || {});
+        const [state, setState] = useState<T>(config.initialState || ({} as T));
         const [isLoading, setIsLoading] = useState(false);
         const [error, setError] = useState<string | null>(null);
         const { toast } = useToast();
 
         // تحديث الحالة
-        const updateState = useCallback((updates: any) => {
-            setState(prev => ({ ...prev, ...updates }));
+        const updateState = useCallback((updates: Partial<T>) => {
+            setState((prev: T) => ({ ...prev, ...updates }));
         }, []);
 
         // إعادة تعيين الحالة
         const resetState = useCallback(() => {
-            setState(config.initialState || {});
+            setState(config.initialState || ({} as T));
             setError(null);
         }, [config.initialState]);
 
@@ -70,6 +71,8 @@ export function createUIHook(config: UIConfig) {
             setIsLoading(false);
         }, []);
 
+        const customLogicResult = config.customLogic ? config.customLogic(state, setState, toast) : ({} as K);
+
         return {
             // الحالة
             state,
@@ -84,6 +87,8 @@ export function createUIHook(config: UIConfig) {
             startLoading,
             stopLoading,
 
+            ...customLogicResult,
+
             // الميزات المخصصة
             getValidationRules: config.customFeatures?.getValidationRules,
             getUIStates: config.customFeatures?.getUIStates,
@@ -92,14 +97,15 @@ export function createUIHook(config: UIConfig) {
     };
 }
 
+
 /**
  * Hook Factory لـ UI Hooks المتقدمة
  * @param config إعدادات المكون
  * @param advancedFeatures ميزات متقدمة
  * @returns Hook جاهز للاستخدام مع ميزات متقدمة
  */
-export function createAdvancedUIHook(
-    config: UIConfig,
+export function createAdvancedUIHook<T, K>(
+    config: UIConfig<T, K>,
     advancedFeatures?: {
         getAnimationStates?: () => string[];
         getResponsiveBreakpoints?: () => any;
@@ -131,7 +137,7 @@ export function createAdvancedUIHook(
  * @param config إعدادات المكون
  * @returns Hook جاهز للاستخدام
  */
-export function createInteractiveUIHook(config: UIConfig) {
+export function createInteractiveUIHook<T, K>(config: UIConfig<T, K>) {
     return function useInteractiveUILogic() {
         const baseHook = createUIHook(config)();
         const [interactions, setInteractions] = useState<any[]>([]);

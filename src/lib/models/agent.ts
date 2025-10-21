@@ -26,10 +26,13 @@ export interface AgentCategoryDetails {
 export interface AgentGuideline {
   text: string;
   isDefault: boolean;
+  id?: string; // Optional to avoid breaking other parts
+  title?: string;
+  content?: string;
 }
 
 export interface AgentKnowledgeSource {
-  name: string;
+  name:string;
   type: 'file' | 'text' | 'web';
   content: string; // content, data URI, or URL
 }
