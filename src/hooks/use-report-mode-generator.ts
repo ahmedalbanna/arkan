@@ -4,14 +4,11 @@
 import type { SectionName } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { toast, useBuilderStore, useGenerateReportSection, useTranslate } from '@/hooks';
+import { toast, useAgents, useBuilderStore, useExport, useGenerateReportSection, useGenerationUIStore, useTranslate } from '@/hooks';
 import { AgentCategory } from '@/lib/models/agent';
 import { Project } from '@/lib/models/project';
 import { Section } from '@/lib/models/section';
 import { useEffect, useMemo, useState } from 'react';
-import { useAgents } from './use-agents';
-import { useExport } from './use-export';
-import { useGenerationUIStore } from './useGenerationUIStore';
 
 
 export const useReportModeGenerator = () => {

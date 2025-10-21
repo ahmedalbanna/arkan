@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { useTextProcessor } from '../writing-tools/use-text-processor';
+import { useTextProcessor } from '../../../hooks/base/use-text-processor';
 
 export interface ReportConfig {
     toolName: string;

@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { useTextProcessor } from './use-text-processor';
+import { useTextProcessor } from '../../../hooks/base/use-text-processor';
 
 export interface WritingToolConfig {
     toolName: string;

@@ -6,10 +6,10 @@
 import { useToast, useWritingTool } from '@/hooks';
 import { useState } from 'react';
 import { z } from 'zod';
-import { useCopyToast } from '../base/use-copy-toast';
-import { useFileUpload } from '../base/use-file-upload';
-import { useFormHandler } from '../base/use-form-handler';
-import { useProcessingState } from '../base/use-processing-state';
+import { useCopyToast } from './use-copy-toast';
+import { useFileUpload } from './use-file-upload';
+import { useFormHandler } from './use-form-handler';
+import { useProcessingState } from './use-processing-state';
 
 export interface TextProcessorOptions {
     toolName: string;

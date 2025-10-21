@@ -2,12 +2,11 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useSaveProject, useToast, useUpdateProject } from '@/hooks';
+import { useBuilderStore, useExport, useSaveProject, useToast, useUpdateProject } from '@/hooks';
 import { Project } from '@/lib/models/project';
 import type { SavedProject } from '@/lib/types';
 import { saveAs } from 'file-saver';
 import React, { useRef, useState } from 'react';
-import { useExportEnhanced } from './use-export-enhanced';
 
 
 function hasAnyContent(project: Project | null): boolean {
@@ -33,134 +32,30 @@ export function useSessionActions() {
     const [isSavePromptOpen, setIsSavePromptOpen] = useState(false);
     const [projectName, setProjectName] = useState('');
 
-    // Subscribe to the project and hasUnsavedChanges states directly
-    const project = useBuilderStore(state => state.project);
-    const hasUnsavedChanges = useBuilderStore(state => state.hasUnsavedChanges);
-    const { loadProject, newSession, updateProject } = useBuilderStore();
-
+    const { project, loadProject, newSession, updateProject, setHasUnsavedChanges } = useBuilderStore();
     const saveProjectMutation = useSaveProject();
     const updateProjectMutation = useUpdateProject();
 
-    // --- Start of Export Logic Integration (Enhanced) ---
-    const {
-        exportProposal,
-        exportReport,
-        exportPresentation,
-        exportAcademicSolution,
-        isExporting,
-        isProposalExporting,
-        isReportExporting,
-        isPresentationExporting,
-        isAcademicExporting
-    } = useExportEnhanced();
+    // --- Start of Export Logic Integration ---
+    const { exportProposal, exportReportDocx, exportPresentationPptx, isExporting } = useExport();
 
-    const handleExportProposal = async (format: 'docx' | 'pdf' | 'html') => {
+    const handleExportProposal = async (format: 'docx' | 'pdf') => {
         if (project && project.proposal) {
-            // إنشاء مقترح مع الحقول المطلوبة
-            const proposalData = {
-                title: (project.proposal as any)?.title || project.name || 'Untitled Proposal',
-                category: (project.proposal as any)?.category || 'General',
-                ...project.proposal
-            };
-
-            const result = await exportProposal(proposalData, format, {
-                includeImages: true,
-                templateId: 'modern-proposal-template',
-                customStyles: {
-                    title: { fontSize: 24, fontWeight: 'bold' },
-                    body: { fontSize: 12, lineHeight: 1.5 }
-                }
-            });
-
-            if (result.success) {
-                toast({
-                    title: t('export.success') || 'Export Successful',
-                    description: `${format.toUpperCase()} file exported successfully`,
-                });
-            }
+            await exportProposal(format, project);
         }
     }
 
     const handleExportReport = async (sectionsToInclude: string[]) => {
         if (!project || !hasAnyContent(project)) return;
-
-        const reportData = {
-            sections: project.sections || {},
-            diagrams: project.diagrams || {},
-            title: project.name || 'Untitled Report',
-            translatedTitles: {},
-            sectionsToInclude
-        };
-
-        const result = await exportReport(reportData, 'docx', {
-            includeImages: true,
-            includeDiagrams: true,
-            templateId: 'professional-report-template',
-            customStyles: {
-                title: { fontSize: 20, fontWeight: 'bold' },
-                body: { fontSize: 12, lineHeight: 1.4 }
-            }
-        });
-
-        if (result.success) {
-            toast({
-                title: t('export.success') || 'Export Successful',
-                description: 'Report exported successfully',
-            });
-        }
+        await exportReportDocx(project, {}, sectionsToInclude);
     };
 
     const handleExportPresentation = async () => {
         if (!project || !project.presentation?.history.length) return;
         const latestPresentation = project.presentation.history[0];
-
-        const result = await exportPresentation(
-            latestPresentation.slides || [],
-            latestPresentation.name || 'Untitled Presentation',
-            'pptx',
-            {
-                includeImages: true,
-                templateId: 'corporate-presentation-template',
-                customStyles: {
-                    titleSlide: { backgroundColor: '#f7fafc' },
-                    contentSlide: { backgroundColor: '#ffffff' }
-                }
-            }
-        );
-
-        if (result.success) {
-            toast({
-                title: t('export.success') || 'Export Successful',
-                description: 'Presentation exported successfully',
-            });
-        }
+        await exportPresentationPptx(project, latestPresentation.id);
     }
-
-    const handleExportAcademicSolution = async () => {
-        if (!project || !project.academicSolver?.analyzedDocument || !project.academicSolver?.solvedDocument) return;
-
-        const result = await exportAcademicSolution(
-            project.academicSolver.analyzedDocument,
-            project.academicSolver.solvedDocument,
-            'docx',
-            {
-                includeImages: true,
-                templateId: 'academic-solution-template',
-                customStyles: {
-                    title: { fontSize: 22, fontWeight: 'bold' },
-                    body: { fontSize: 12, lineHeight: 1.6 }
-                }
-            }
-        );
-
-        if (result.success) {
-            toast({
-                title: t('export.success') || 'Export Successful',
-                description: 'Academic solution exported successfully',
-            });
-        }
-    }
-    // --- End of Export Logic Integration (Enhanced) ---
+    // --- End of Export Logic Integration ---
 
     const isSaving = saveProjectMutation.isPending || updateProjectMutation.isPending;
 
@@ -217,18 +112,12 @@ export function useSessionActions() {
         const projectToSave = useBuilderStore.getState().project!;
         const projectData = projectToSave.toStateObject();
         const finalName = projectToSave.name || 'Untitled Project';
+        const saveData = { ...projectData, name: finalName };
+
 
         if (projectToSave.id && !projectToSave.id.startsWith('temp-')) {
-            updateProjectMutation.mutate({ projectId: projectToSave.id, data: projectData });
+            updateProjectMutation.mutate({ projectId: projectToSave.id, data: saveData });
         } else {
-            // إنشاء بيانات الحفظ مع الحقول المطلوبة
-            const saveData = {
-                name: finalName,
-                type: 'proposal' as const, // نوع افتراضي
-                language: 'ar' as const, // لغة افتراضية
-                description: projectToSave.projectIdea || '',
-                teamId: projectToSave.teamId ?? undefined
-            };
             saveProjectMutation.mutate(saveData);
         }
     }
@@ -258,16 +147,10 @@ export function useSessionActions() {
 
     const handleSaveAsCloud = () => {
         if (!project) return;
+        const projectData = project.toJSON();
         const finalSaveAsName = saveAsName.trim() || project.name || (project.proposal as any)?.title || 'Untitled Project';
 
-        // إنشاء بيانات الحفظ مع الحقول المطلوبة
-        const saveData = {
-            name: String(finalSaveAsName),
-            type: 'proposal' as const, // نوع افتراضي
-            language: 'ar' as const, // لغة افتراضية
-            description: project.projectIdea || '',
-            teamId: project.teamId ?? undefined
-        };
+        const saveData = { ...projectData, name: String(finalSaveAsName), id: '' };
 
         saveProjectMutation.mutate(saveData, {
             onSuccess: (newProjectData) => {
@@ -313,6 +196,5 @@ export function useSessionActions() {
         handleExportProposal,
         handleExportReport,
         handleExportPresentation,
-        hasUnsavedChanges, // Expose the reactive state
     };
 }
