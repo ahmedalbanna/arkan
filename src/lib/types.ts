@@ -3,7 +3,8 @@
 // It helps to have a single point of import for many parts of the app,
 // but the source of truth for each type is now its respective model file.
 
-export type { AgentCategory, AgentCategoryDetails, AgentGuideline, AgentKnowledgeSource, AgentPrompt, AgentProperties } from '@/lib/models/agent';
+export { AgentCategory } from '@/lib/models/agent';
+export type { AgentCategoryDetails, AgentGuideline, AgentKnowledgeSource, AgentPrompt, AgentProperties } from '@/lib/models/agent';
 export type { DiagramProperties } from '@/lib/models/diagram';
 export type { DocxTemplate, DocxTemplateProperties } from '@/lib/models/docxTemplate';
 export type { GeneratableDocumentProperties, GenerationStatus } from '@/lib/models/generatableDocument';

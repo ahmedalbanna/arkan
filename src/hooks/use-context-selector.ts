@@ -1,12 +1,9 @@
-
 'use client';
-
 import { type DiagramType, type SectionName } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useSections } from '@/hooks';
 import { useMemo } from 'react';
 import { useGenerationUIStore } from './useGenerationUIStore';
-
 const emptySelection = { sections: {}, diagrams: {}, externalContext: [], proposal: false, projectPlan: false };
 
 export const useContextSelector = (itemKey: string) => {
@@ -21,7 +18,6 @@ export const useContextSelector = (itemKey: string) => {
     const allSections = project?.sections || {};
     const allDiagrams = project?.diagrams || {};
     const externalContext = project?.externalContext || [];
-
     const reportSections = useMemo(() => {
         if (!sectionConfigs) return {};
         return sectionConfigs.filter(s => s.type === 'report').reduce((acc, sec) => {

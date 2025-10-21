@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useCreateAgent, useGenerateAgentConfig } from '@/hooks';
-import { type AgentCategory, type AgentPrompt } from '@/lib/types';
+import { AgentCategory, type AgentPrompt } from '@/lib/types';
 import { ArrowLeft, Bot, Braces, BrainCircuit, Check, Copy, Flame, Loader2, PlusCircle, RotateCcw, SendHorizonal, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
@@ -47,7 +47,7 @@ export function GenerateAgentView() {
     const [includeJsonOutput, setIncludeJsonOutput] = useState(false);
     const [contextFiles, setContextFiles] = useState<UploadedFile[]>([]);
     const [generatedData, setGeneratedData] = useState<GeneratedAgentData | null>(null);
-    const [selectedCategory, setSelectedCategory] = useState<AgentCategory>('content-generation');
+    const [selectedCategory, setSelectedCategory] = useState<AgentCategory>(AgentCategory.ContentGeneration);
     const createAgentMutation = useCreateAgent();
 
     const generateMutation = useGenerateAgentConfig();

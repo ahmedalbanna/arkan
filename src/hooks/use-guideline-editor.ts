@@ -13,6 +13,19 @@ import type { AgentGuideline, AgentPrompt } from '@/lib/models/agent';
  * @param agentId - The ID of the agent whose guidelines are being edited.
  * @returns An object containing state and handlers for the GuidelineEditor component.
  */
+
+
+type GuidelineEditorState = {
+    itemKey: string;
+    agentId: string;
+    isEditing: boolean;
+    isExpanded: boolean;
+    hasChanges: boolean;
+    validationErrors: string[];
+    searchQuery: string;
+    selectedGuidelines: string[];
+};
+
 export const useGuidelineEditor = (itemKey: string, agentId: string) => {
     const { t } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
@@ -28,64 +41,8 @@ export const useGuidelineEditor = (itemKey: string, agentId: string) => {
         setOneTimeInstruction,
     } = useGenerationUIStore();
 
-    // agent is now an instance of our Agent class
-    const agent = agents.find(a => a.id === agentId);
-    // Access prompt directly from the Agent instance
-    const promptConfig = agent?.prompt as AgentPrompt | undefined;
-    const hasGuidelines = !!promptConfig?.guidelines && promptConfig.guidelines.length > 0;
-    const currentGuidelineState = guidelineState[itemKey];
-    const oneTimeInstruction = oneTimeInstructions[itemKey];
-
-    return {
-        t,
-        agentsLoaded,
-        agent,
-        promptConfig,
-        hasGuidelines,
-        currentGuidelineState,
-        customGuidelineInput,
-        oneTimeInstruction,
-        handleGuidelineToggle,
-        setCustomGuidelineInputForItem,
-        handleAddCustomGuidelineForItem,
-        handleRemoveCustomGuidelineForItem,
-        setOneTimeInstruction,
-    };
-};
-
-/**
- * Hook محسن لمحرر الإرشادات مع ميزات متقدمة
- * يستخدم النظام الجديد لتقليل التكرار وتحسين الأداء
- */
-
-type AdvancedGuidelineEditorState = {
-    itemKey: string;
-    agentId: string;
-    isEditing: boolean;
-    isExpanded: boolean;
-    hasChanges: boolean;
-    validationErrors: string[];
-    searchQuery: string;
-    selectedGuidelines: string[];
-};
-
-export const useAdvancedGuidelineEditor = (itemKey: string, agentId: string) => {
-    const { t } = useLocalization();
-    const { agents, isLoaded: agentsLoaded } = useAgents();
-
-    const {
-        guidelineState,
-        customGuidelineInput,
-        oneTimeInstructions,
-        handleGuidelineToggle,
-        setCustomGuidelineInputForItem,
-        handleAddCustomGuidelineForItem,
-        handleRemoveCustomGuidelineForItem,
-        setOneTimeInstruction,
-    } = useGenerationUIStore();
-
-    const uiHook = createUIHook<AdvancedGuidelineEditorState, any>({
-        componentName: 'advanced-guideline-editor',
+    const uiHook = createUIHook<GuidelineEditorState, any>({
+        componentName: 'guideline-editor',
         initialState: {
             itemKey,
             agentId,
@@ -143,10 +100,10 @@ export const useAdvancedGuidelineEditor = (itemKey: string, agentId: string) => 
             const handleBulkToggle = (itemKey: string, guidelines: AgentGuideline[]) => {
                 const allSelected = guidelines.every((g, index) => guidelineState[itemKey]?.checked[index]);
                 guidelines.forEach((g, index) => {
-                  handleGuidelineToggle(itemKey, index, !allSelected);
+                    handleGuidelineToggle(itemKey, index, !allSelected);
                 });
                 toast({ title: 'Guidelines toggled successfully!' });
-              };
+            };
 
             const handleValidateGuidelines = () => {
                 const errors: string[] = [];
@@ -235,5 +192,6 @@ export const useAdvancedGuidelineEditor = (itemKey: string, agentId: string) => 
         setCustomGuidelineInputForItem,
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
+        uiHook
     }
 }

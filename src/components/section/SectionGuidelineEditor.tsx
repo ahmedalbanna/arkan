@@ -10,7 +10,6 @@ import { useGuidelineEditor } from '@/hooks/use-guideline-editor';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { Plus, Trash2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { Textarea } from '../ui/textarea';
 
 interface GuidelineEditorProps {
     itemKey: string;
@@ -32,7 +31,8 @@ export function GuidelineEditor({ itemKey, agentId, isAdmin }: GuidelineEditorPr
         setCustomGuidelineInputForItem,
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
-        setOneTimeInstruction,
+        uiHook
+
     } = useGuidelineEditor(itemKey, agentId);
 
     if (!agentsLoaded) {
@@ -55,19 +55,7 @@ export function GuidelineEditor({ itemKey, agentId, isAdmin }: GuidelineEditorPr
                     </div>
                 </AnimatedContainer>
 
-                <AnimatedContainer animation="fade-in-up" delay={400}>
-                    <div className="space-y-2">
-                        <Label htmlFor={`one-time-instructions-${itemKey}`} className="text-xs font-semibold text-muted-foreground font-headline">Instructions for this generation</Label>
-                        <Textarea
-                            id={`one-time-instructions-${itemKey}`}
-                            placeholder="e.g., 'Focus on the financial benefits' or 'Keep the tone very formal.'"
-                            value={oneTimeInstruction || ''}
-                            onChange={(e) => setOneTimeInstruction(itemKey, e.target.value)}
-                            rows={3}
-                            className="hover:shadow-soft transition-all duration-200 resize-none"
-                        />
-                    </div>
-                </AnimatedContainer>
+
 
                 {hasGuidelines && (
                     <AnimatedContainer animation="fade-in-up" delay={500}>
