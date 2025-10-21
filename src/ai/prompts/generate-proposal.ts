@@ -1,28 +1,40 @@
-
 // src/ai/prompts/generate-proposal.ts
 'use server';
 
-/**
- * @fileOverview نظام المطالبة المحسن لتوليد المقترحات
- * يستخدم النظام الذكي الجديد في بناء المطالبات
- */
-
 import { defaultModel } from '@/ai/config/models';
-import { ContextAnalyzer } from '@/ai/core/context-analyzer';
 import { AdaptiveModelSelector } from '@/ai/core/adaptive-model-selector';
+import { ContextAnalyzer } from '@/ai/core/context-analyzer';
 import { IntelligentPromptBuilder } from '@/ai/core/intelligent-prompt-builder';
 import { ai } from '@/ai/genkit';
-import { GenerateProposalInputSchema } from '@/ai/schemas';
+import { GenerateProposalInputSchema, ProjectProposalSchema } from '@/ai/schemas';
 import { z } from 'genkit';
+
+const basicSystemPrompt = `أنت خبير في إدارة المشاريع والكتابة التقنية. مهمتك هي إنتاج مقترح مشروع شامل ومهني بناءً على الفكرة والسياق المقدم.
+
+**عملية التفكير المطلوبة:**
+1. **تحليل الفكرة الأساسية**: حلل فكرة المشروع بعمق لفهم الغرض والنطاق الأساسي.
+2. **الاستنتاج والتوسع**: حتى لو قدم المستخدم فكرة بسيطة، استخدم خبرتك لاستنتاج وتطوير جميع مكونات المقترح المهني.
+3. **إنتاج جميع الأقسام**: املأ **كل حقل** في مخطط JSON بمحتوى مكتوب جيداً ومهني.
+
+ملاحظة هامة:
+- يجب أن يكون الإخراج النهائي عبارة عن كائن JSON صالح فقط، بدون أي نص إضافي أو شرح أو تعليقات.
+- لا تضع أي نص خارج كائن JSON النهائي.
+`;
 
 export const generateProposalPrompt = ai.definePrompt(
   {
     name: 'generateProposalPrompt',
-    input: { schema: GenerateProposalInputSchema },
+    input: { schema: GenerateProposalInputSchema.extend({ useEnhancedSystem: z.boolean().optional().default(true) }) },
     output: { schema: z.any() },
     model: defaultModel || 'googleai/gemini-2.0-flash',
     system: async (input) => {
+      if (!input.useEnhancedSystem) {
+        return basicSystemPrompt;
+      }
+
+      // محاولة استخدام النظام الذكي المحسن
       try {
+        console.log("🧠 بناء prompt ذكي...");
         // تحليل السياق الذكي
         const contextAnalysis = await ContextAnalyzer.analyzeContext({
           userInput: input.projectIdea || '',
@@ -30,13 +42,7 @@ export const generateProposalPrompt = ai.definePrompt(
           guidelines: input.guidelines,
         });
 
-        // اختيار النموذج المناسب
-        const modelConfig = AdaptiveModelSelector.selectOptimalModel(
-          contextAnalysis,
-          'generation'
-        );
-
-        // بناء المطالبة الذكية
+        // بناء prompt ذكي
         const promptTemplate = IntelligentPromptBuilder.buildPrompt({
           taskType: 'generation',
           domain: 'project-proposals',
@@ -52,66 +58,68 @@ export const generateProposalPrompt = ai.definePrompt(
 
 **عملية التفكير المطلوبة:**
 1. **تحليل الفكرة الأساسية**: حلل فكرة المشروع بعمق لفهم الغرض والنطاق الأساسي.
-2. **الاستنتاج والتوسع**: حتى لو قدم المستخدم فكرة بسيطة، استخدم خبرتك لاستنتاج وتطوير جميع مكونات المقترح المهني:
-   - **الهدف**: ما هو الهدف الأساسي؟
-   - **النطاق**: ما هو داخل وخارج النطاق؟
-   - **المنهجية**: ما النهج المناسب (مثل Agile، Waterfall)؟
-   - **الجدول الزمني**: جدول زمني واقعي ومرحلي
-   - **الميزانية**: ميزانية معقولة ومفصلة
-   - **أصحاب المصلحة**: الأدوار المحتملة المشاركة
-   - **المخاطر**: التحديات المحتملة وكيفية التعامل معها
+2. **الاستنتاج والتوسع**: حتى لو قدم المستخدم فكرة بسيطة، استخدم خبرتك لاستنتاج وتطوير جميع مكونات المقترح المهني.
 3. **إنتاج جميع الأقسام**: املأ **كل حقل** في مخطط JSON بمحتوى مكتوب جيداً ومهني.
 
+**السياق المتاح:**
 ${promptTemplate.context}
 
+**التعليمات المفصلة:**
 ${promptTemplate.instructions}
 
+**القيود والمحددات:**
 ${promptTemplate.constraints}
 
+**تنسيق المخرجات:**
 ${promptTemplate.outputFormat}
 
 ---
 ملاحظة هامة:
-- يجب أن يكون الإخراج النهائي عبارة عن كائن JSON صالح فقط، بدون أي نص إضافي أو شرح أو تعليقات أو رموز برمجية أو علامات HTML أو Markdown.
-- إذا لم تتمكن من توليد كائن JSON صالح لأي سبب، أعد محاولة التوليد أو أعد صياغة الحقول بحيث تكون جميع القيم نصية وصالحة لـ JSON.
+- يجب أن يكون الإخراج النهائي عبارة عن كائن JSON صالح فقط، بدون أي نص إضافي أو شرح.
 - لا تضع أي نص خارج كائن JSON النهائي.
 `;
-
-      } catch (error) {
-        console.warn('⚠️ فشل النظام المحسن، استخدام النظام الأساسي:', error);
-
-        // النظام الأساسي المبسط
-        return `أنت خبير في إدارة المشاريع والكتابة التقنية. مهمتك هي إنتاج مقترح مشروع شامل ومهني بناءً على الفكرة والسياق المقدم.
-
-**عملية التفكير المطلوبة:**
-1. **تحليل الفكرة الأساسية**: حلل فكرة المشروع بعمق لفهم الغرض والنطاق الأساسي.
-2. **الاستنتاج والتوسع**: حتى لو قدم المستخدم فكرة بسيطة، استخدم خبرتك لاستنتاج وتطوير جميع مكونات المقترح المهني:
-   - **الهدف**: ما هو الهدف الأساسي؟
-   - **النطاق**: ما هو داخل وخارج النطاق؟
-   - **المنهجية**: ما النهج المناسب (مثل Agile، Waterfall)؟
-   - **الجدول الزمني**: جدول زمني واقعي ومرحلي
-   - **الميزانية**: ميزانية معقولة ومفصلة
-   - **أصحاب المصلحة**: الأدوار المحتملة المشاركة
-   - **المخاطر**: التحديات المحتملة وكيفية التعامل معها
-3. **إنتاج جميع الأقسام**: املأ **كل حقل** في مخطط JSON بمحتوى مكتوب جيداً ومهني.
-
----
-ملاحظة هامة:
-- يجب أن يكون الإخراج النهائي عبارة عن كائن JSON صالح فقط، بدون أي نص إضافي أو شرح أو تعليقات أو رموز برمجية أو علامات HTML أو Markdown.
-- إذا لم تتمكن من توليد كائن JSON صالح لأي سبب، أعد محاولة التوليد أو أعد صياغة الحقول بحيث تكون جميع القيم نصية وصالحة لـ JSON.
-- لا تضع أي نص خارج كائن JSON النهائي.
-`;
+      } catch (enhancedError) {
+        console.warn('⚠️ فشل بناء الـ prompt الذكي، استخدام النظام الأساسي:', enhancedError);
+        return basicSystemPrompt;
       }
     },
-    prompt: `بناءً على المعلومات المقدمة، قم بتوليد مقترح مشروع شامل ومهني.`,
+    prompt: `
+{{#if advancedFields}}
+--- DETAILED PROJECT REQUIREMENTS ---
+The user has provided the following structured details for the project. Use this as the primary source of information to construct the full proposal object.
+- **Project Title**: '''{{advancedFields.projectTitle}}'''
+- **Project Objective**: '''{{advancedFields.projectObjective}}'''
+- **Expected Outcomes**: '''{{advancedFields.expectedOutcomes}}'''
+- **Methodology**: '''{{advancedFields.methodology}}'''
+- **Timeline**: '''{{advancedFields.timeline}}'''
+- **Knowledge & Context**: '''{{advancedFields.knowledge}}'''
+{{else}}
+--- Main Input: Project Idea ---
+{{{projectIdea}}}
+{{/if}}
+
+{{#if guidelines}}
+--- Guidelines ---
+{{#each guidelines}}
+- {{{this}}}
+{{/each}}
+{{/if}}
+
+{{#if externalContext}}
+--- IMPORTANT EXTERNAL CONTEXT ---
+Analyze the following files as a primary source of truth and context.
+{{#each externalContext}}
+--- File: {{this.fileName}} (Type: {{this.type}}) ---
+{{#if this.content}}
+{{media url=this.content}}
+{{/if}}
+---
+{{/each}}
+{{/if}}
+`,
     config: {
       temperature: 0.7,
-      maxOutputTokens: 4096,
+      maxOutputTokens: 8192,
     },
   },
 );
-
-
-
-
-
