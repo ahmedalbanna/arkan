@@ -33,6 +33,17 @@ export function useSectionGenerationData(itemKey: string) {
      */
     const getGenerationData = useCallback(() => {
         // إعدادات التوليد
+        // Helper function to generate instruction text from control state
+        // const generateInstructionText = (controls: any): string => {
+        //     let instructions = [];
+        //     let formalityDesc = "balanced";
+        //     if (controls.formality < 33) formalityDesc = "informal";
+        //     else if (controls.formality > 66) formalityDesc = "very formal";
+        //     instructions.push(`- The writing style should be ${formalityDesc}.`);
+        //     if (controls.tone && controls.tone !== "none") instructions.push(`- Adopt a ${controls.tone} tone.`);
+        //     if (controls.wordCount) instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
+        //     return instructions.join('\n');
+        // };
         const controls = controlState[itemKey] || {
             formality: 50,
             tone: 'professional' as const,
@@ -121,11 +132,7 @@ export function useSectionGenerationData(itemKey: string) {
 
         // إعدادات التوليد المحسنة
         const generationSettings = {
-            style: {
-                formality: controls.formality,
-                tone: controls.tone,
-                wordCount: controls.wordCount ? parseInt(controls.wordCount) : undefined
-            },
+            instructionText:,
             guidelines: {
                 default: guidelines?.checked || [],
                 custom: guidelines?.custom || [],
