@@ -13,8 +13,28 @@ export function useProposalGenerationToolsLogic() {
     const { t } = useLocalization();
     const [activeTab, setActiveTab] = useState<'simple' | 'advanced'>('simple');
 
-    const { project, updateProject } = useBuilderStore();
-    const projectIdea = project?.projectIdea;
+    const project = useBuilderStore(p => p.project);
+    const updateProject = useBuilderStore(p => p.updateProject);
+
+    // Handle case where project is not yet loaded.
+    if (!project) {
+        return {
+            t,
+            isProjectLoaded: false,
+            activeTab, setActiveTab,
+            projectIdea: '', setProjectIdea: () => {},
+            customGuidelines: [], addCustomGuideline: () => {}, removeCustomGuideline: () => {}, customGuidelineInput: '', setCustomGuidelineInput: () => {},
+            advancedFields: {},
+            handleFieldChange: () => {},
+            generationMutation: { isPending: false, mutate: () => {} },
+            handleGenerateClick: () => {},
+            canGenerate: false, hasCredits: false,
+            suggestIdeaMutation: { isPending: false, mutate: () => {} },
+            handleSuggestIdea: () => {}
+        };
+    }
+
+    const { projectIdea, contextManager } = project;
     const setProjectIdea = (idea: string) => updateProject(p => { p.projectIdea = idea; });
 
     const {
@@ -27,7 +47,6 @@ export function useProposalGenerationToolsLogic() {
         setAdvancedField,
     } = useGenerationUIStore();
 
-    const { externalContext } = project ?? {};
     const generationMutation = useGenerateProposal();
 
     const suggestIdeaMutation = useWritingTool('generate-text', {
@@ -51,12 +70,13 @@ export function useProposalGenerationToolsLogic() {
 
     const handleGenerateClick = () => {
         const guidelines = guidelineState['proposal']?.custom || [];
+        const contextMarkdown = contextManager.getAllFilesAsMarkdown();
 
         const payload = activeTab === 'simple'
-            ? { projectIdea: projectIdea || '', guidelines, externalContext }
-            : { projectIdea: '', guidelines, externalContext, advancedFields: advancedProposalFields };
+            ? { projectIdea: projectIdea || '', guidelines, contextMarkdown }
+            : { projectIdea: '', guidelines, contextMarkdown, advancedFields: advancedProposalFields };
 
-        generationMutation.mutate(payload as any);
+        generationMutation.mutate(payload);
     };
 
     const handleSuggestIdea = () => {
@@ -68,6 +88,7 @@ export function useProposalGenerationToolsLogic() {
 
     return {
         t,
+        isProjectLoaded: true,
         activeTab,
         setActiveTab,
         projectIdea,

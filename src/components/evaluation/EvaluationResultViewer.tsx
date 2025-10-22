@@ -67,7 +67,7 @@ export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerPro
                                                         size="sm"
                                                         variant="secondary"
                                                         onClick={() => handleFixWithAi(item.sectionKey!, item.solution!)}
-                                                        disabled={generationMutation.mutation.isPending && generationMutation.mutation.variables?.body.sectionToGenerate === item.sectionKey}
+                                                        disabled={generationMutation.isPending && generationMutation.variables?.body.sectionToGenerate === item.sectionKey}
                                                         className="hover:shadow-soft transition-all duration-200"
                                                     >
                                                         <Wand2 className="me-2 h-4 w-4" />

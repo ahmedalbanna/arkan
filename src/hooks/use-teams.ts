@@ -9,7 +9,7 @@ import {
     createTeam as createTeamApi,
     inviteMember as inviteMemberApi
 } from '@/services';
-import { useMutation, useQuery, useQueryClient, useQueryClient as useTanstackQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient as useTanstackQueryClient } from '@tanstack/react-query';
 // Import our new class
 import app from '@/lib/core/firebase/client-init';
 import { Team, type TeamProperties, TeamWithMembers } from '@/lib/models/team';
@@ -62,8 +62,7 @@ export function useTeams() {
     }, [firebaseUser, queryClient, queryKey]);
 
     // The component will use the data from the cache, which is kept up-to-date
-    return useQuery<Team[]>({
-        queryKey: queryKey,
+    return useQuery<Team[]>({queryKey, 
         queryFn: async () => {
             // Initial fetch can still happen here if needed, but listener will keep it fresh
             const existingData = queryClient.getQueryData<Team[]>(queryKey);
@@ -76,17 +75,15 @@ export function useTeams() {
 
 
 export function useCreateTeam() {
-    const queryClient = useQueryClient();
+    const queryClient = useTanstackQueryClient();
     const { firebaseUser } = useAuth();
 
     return useMutation<TeamProperties, Error, { name: string }>({
-        mutationFn: async (variables) => {
+        mutationFn: async ({ name }) => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return createTeamApi(variables, token);
+            return createTeamApi({ name, token });
         },
         onSuccess: () => {
-            // Invalidation might not be strictly necessary with the real-time listener,
-            // but it's good practice to ensure immediate consistency.
             queryClient.invalidateQueries({ queryKey: teamKeys.lists() });
         },
         onError: (error) => {
@@ -96,17 +93,16 @@ export function useCreateTeam() {
 }
 
 export function useInviteMember() {
-    const queryClient = useQueryClient();
+    const queryClient = useTanstackQueryClient();
     const { firebaseUser } = useAuth();
 
     return useMutation<any, Error, { teamId: string, email: string }>({
-        mutationFn: async (variables) => {
+        mutationFn: async ({ teamId, email }) => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return inviteMemberApi(variables, token);
+            return inviteMemberApi({ teamId, email, token });
         },
-        onSuccess: () => {
-            // Invalidation will trigger a refetch, but the real-time listener will also update.
-            queryClient.invalidateQueries({ queryKey: teamKeys.lists() });
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: teamKeys.members(variables.teamId) });
         },
         onError: (error) => {
             handleErrorUtility(error, "Failed to invite member");

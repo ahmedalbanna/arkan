@@ -7,7 +7,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useLocalization } from '@/context/LocalizationContext';
-import type { ExternalContext } from '@/hooks';
+import type { ContextFileData } from '@/lib/models/context-manager';
 import { Loader2, PanelLeftOpen, Sparkles } from 'lucide-react';
 import { AcademicUploaders } from './AcademicUploaders';
 
@@ -18,10 +18,10 @@ interface ControlPanelProps {
     isProcessing: boolean;
     addQuestionDocument: (fileName: string, content: string) => void;
     removeQuestionDocument: (index: number) => void;
-    questionDocuments: ExternalContext[];
+    questionDocuments: ContextFileData[];
     addExternalContext: (fileName: string, content: string) => void;
     removeExternalContext: (index: number) => void;
-    externalContext: ExternalContext[];
+    externalContext: ContextFileData[];
     handleAnalyze: () => void;
     canAnalyze: boolean;
     isAnalyzing: boolean;

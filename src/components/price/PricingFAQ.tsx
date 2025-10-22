@@ -3,6 +3,7 @@
 import { AnimatedContainer, StaggeredAnimation } from '@/components/ui/animation';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 import { Clock, CreditCard, HelpCircle, Shield, Sparkles, Zap } from 'lucide-react';
 
 interface FAQItem {

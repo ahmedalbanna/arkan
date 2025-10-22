@@ -33,33 +33,33 @@ export const getFeedbackStatusInfo = (status: "Acceptable" | "Weak" | "Not Prese
 
 export const useEvaluationResultViewer = () => {
   const { t } = useLocalization();
-  const { project, setProject } = useBuilderStore();
+  const project = useBuilderStore(s => s.project);
+  const updateProject = useBuilderStore(s => s.updateProject);
   const generationMutation = useGenerateReportSection();
 
-  const evaluation = project?.evaluation;
-  const sections = project?.sections || {};
-  const proposal = project?.proposal;
-  const projectPlan = project?.projectPlan;
+  // The `evaluation` property is temporarily dynamic. It should be formally added to the Project model.
+  const evaluation = (project as any)?.evaluation as EvaluateReportOutput | undefined;
 
   const setEvaluation = (newEvaluation: EvaluateReportOutput | null) => {
-    if (!project) return;
-    project.evaluation = newEvaluation;
-    setProject(project);
+    updateProject(p => {
+      (p as any).evaluation = newEvaluation;
+    });
   };
 
   const handleFixWithAi = (sectionKey: SectionName, suggestion: string) => {
     if (!project) return;
-    const sectionContent = sections[sectionKey];
-    if (!sectionContent) {
+
+    const section = project.sections.getSection(sectionKey);
+    if (!section?.hasContent()) {
       console.error(`Cannot fix: Section content for '${sectionKey}' not found.`);
       return;
     }
 
     const body = {
-      proposal: proposal,
-      projectPlan: projectPlan,
+      proposal: project.proposal?.toJSON(),
+      projectPlan: project.projectPlan,
       sectionToGenerate: sectionKey,
-      otherSections: sections,
+      otherSections: project.sections.toJSON(), // Pass serializable data
       guidelines: [suggestion],
     };
 

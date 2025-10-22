@@ -34,13 +34,14 @@ export function InviteMemberForm({ teamId }: { teamId: string }) {
     });
 
     const mutation = useMutation({
-        mutationFn: async (data: InviteMemberData) => {
+        mutationFn: async (data: InviteFormValues) => {
             const token = await firebaseUser?.getIdToken();
-            if (!token) throw new Error('No token available');
-            return inviteMember(teamId, data, token);
+            if (!token) throw new Error('Authentication token is not available.');
+            return inviteMember({ teamId, email: data.email, token });
         },
         onSuccess: (data, variables) => {
-            queryClient.invalidateQueries({ queryKey: teamKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: teamKeys.members(teamId) });
+            queryClient.invalidateQueries({ queryKey: teamKeys.lists() }); // Also invalidate the general list if needed
             toast({
                 title: t('team.inviteSuccessTitle'),
                 description: t('team.inviteSuccessDescription').replace('{email}', variables.email),
@@ -56,10 +57,8 @@ export function InviteMemberForm({ teamId }: { teamId: string }) {
         },
     });
 
-    const onSubmit = async (data: InviteFormValues) => {
-        if (!firebaseUser) return;
-        const token = await firebaseUser.getIdToken();
-        mutation.mutate({ teamId, email: data.email, token });
+    const onSubmit = (data: InviteFormValues) => {
+        mutation.mutate(data);
     };
 
     return (

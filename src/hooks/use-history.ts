@@ -1,68 +1,71 @@
 
-// code explantion in docs/hooks/use-history.md
+import { useBuilderStore } from '@/hooks';
+import { produce } from 'immer';
+import { useCallback, useEffect, useState } from 'react';
+import { shallow } from 'zustand/shallow';
 
-"use client";
+import { type ProjectProperties } from '@/lib/models/project';
 
-import type { AnyProjectProposal } from "@/ai/schemas";
-import type { ProjectState } from '@/lib/models/project'; // Import from model
-import { useCallback, useEffect, useState } from "react";
+// A custom hook to manage undo/redo functionality for the project state.
+export const useHistory = () => {
+    const { project, loadProject, setHasUnsavedChanges } = useBuilderStore(
+        (state) => ({ 
+            project: state.project,
+            loadProject: state.loadProject, 
+            setHasUnsavedChanges: state.setHasUnsavedChanges 
+        }),
+        shallow
+    );
 
+    // State to hold the history of project states.
+    const [history, setHistory] = useState<ProjectProperties[]>([]);
+    // State to track the current position in the history.
+    const [current, setCurrent] = useState(-1);
 
-export interface HistoryEntry {
-  id: string;
-  createdAt: string;
-  type: 'proposal' | 'diagram' | 'section' | 'project' | 'presentation'; // Added 'project' and 'presentation'
-  title: string; // e.g., "Project Proposal" or "Use Case Diagram"
-  data: ProjectState | any; // More specific types
-  projectIdea?: string;
-  proposal?: AnyProjectProposal | null; // The proposal at the time of generation
-}
+    // Add the current project state to history whenever it changes.
+    useEffect(() => {
+        if (project) {
+            const currentState = project.toJSON();
+            // Prevent adding duplicate states to the history.
+            if (current >= 0 && JSON.stringify(history[current]) === JSON.stringify(currentState)) {
+                return;
+            }
+            // Add new state and update the current position.
+            setHistory(produce(draft => {
+                draft.splice(current + 1);
+                draft.push(currentState);
+            }));
+            setCurrent(prev => prev + 1);
+        }
+    }, [project]);
 
-const HISTORY_KEY = "arkan-generation-history";
+    // Function to travel to a specific point in history.
+    const go = useCallback((index: number) => {
+        if (index >= 0 && index < history.length) {
+            loadProject(history[index]);
+            setCurrent(index);
+            setHasUnsavedChanges(true); // Changing history means there are unsaved changes.
+        }
+    }, [history, loadProject, setHasUnsavedChanges]);
 
-export function useHistory() {
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+    // Function to go to the next state in history (redo).
+    const next = useCallback(() => {
+        go(current + 1);
+    }, [current, go]);
 
-  useEffect(() => {
-    try {
-      const storedHistory = localStorage.getItem(HISTORY_KEY);
-      if (storedHistory) {
-        setHistory(JSON.parse(storedHistory));
-      }
-    } catch (error) {
-      console.error("Failed to load history from localStorage", error);
-      setHistory([]);
-    }
-    setIsLoaded(true);
-  }, []);
+    // Function to go to the previous state in history (undo).
+    const back = useCallback(() => {
+        go(current - 1);
+    }, [current, go]);
 
-  const addHistoryEntry = useCallback((entry: Omit<HistoryEntry, 'id' | 'createdAt'>) => {
-    const newEntry: HistoryEntry = {
-      ...entry,
-      id: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
+    return {
+        history,
+        current,
+        // Boolean flags to determine if undo/redo is possible.
+        canUndo: current > 0,
+        canRedo: current < history.length - 1,
+        go,
+        next,
+        back,
     };
-
-    setHistory((prevHistory) => {
-      const updatedHistory = [newEntry, ...prevHistory];
-      try {
-        localStorage.setItem(HISTORY_KEY, JSON.stringify(updatedHistory));
-      } catch (error) {
-        console.error("Failed to save history to localStorage", error);
-      }
-      return updatedHistory;
-    });
-  }, []);
-
-  const clearHistory = useCallback(() => {
-    setHistory([]);
-    try {
-      localStorage.removeItem(HISTORY_KEY);
-    } catch (error) {
-      console.error("Failed to clear history from localStorage", error);
-    }
-  }, []);
-
-  return { history, addHistoryEntry, isLoaded, clearHistory };
-}
+};

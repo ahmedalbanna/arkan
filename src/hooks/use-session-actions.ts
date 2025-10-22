@@ -2,26 +2,14 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useExport, useSaveProject, useToast, useUpdateProject } from '@/hooks';
+import { useBuilderStore, useExport, useSaveProject, useUpdateProject } from '@/hooks';
 import { Project } from '@/lib/models/project';
-import type { SavedProject } from '@/lib/types';
 import { saveAs } from 'file-saver';
 import React, { useRef, useState } from 'react';
+import { useToast } from './use-toast';
 
+import type { SavedProject } from '@/lib/types';
 
-function hasAnyContent(project: Project | null): boolean {
-    if (!project) return false;
-    if (project.projectIdea?.trim()) return true;
-    if (project.proposal) return true;
-    if (Object.values(project.sections || {}).some(s => !!s)) return true;
-    if (Object.values(project.diagrams || {}).some(d => !!d)) return true;
-    if (project.presentation?.history && project.presentation.history.length > 0) return true;
-    if (project.codeGenerator?.html) return true;
-    if (project.projectPlan) return true;
-    if (project.codebase) return true;
-    if (project.academicSolver?.analyzedDocument) return true;
-    return false;
-}
 
 export function useSessionActions() {
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -32,11 +20,10 @@ export function useSessionActions() {
     const [isSavePromptOpen, setIsSavePromptOpen] = useState(false);
     const [projectName, setProjectName] = useState('');
 
-    const { project, loadProject, newSession, updateProject, setHasUnsavedChanges } = useBuilderStore();
+    const { project, loadProject, newSession, setHasUnsavedChanges } = useBuilderStore();
     const saveProjectMutation = useSaveProject();
     const updateProjectMutation = useUpdateProject();
 
-    // --- Start of Export Logic Integration ---
     const { exportProposal, exportReportDocx, exportPresentationPptx, isExporting } = useExport();
 
     const handleExportProposal = async (format: 'docx' | 'pdf') => {
@@ -46,7 +33,7 @@ export function useSessionActions() {
     }
 
     const handleExportReport = async (sectionsToInclude: string[]) => {
-        if (!project || !hasAnyContent(project)) return;
+        if (!project || !project.hasAnyContent()) return;
         await exportReportDocx(project, {}, sectionsToInclude);
     };
 
@@ -55,12 +42,30 @@ export function useSessionActions() {
         const latestPresentation = project.presentation.history[0];
         await exportPresentationPptx(project, latestPresentation.id);
     }
-    // --- End of Export Logic Integration ---
 
     const isSaving = saveProjectMutation.isPending || updateProjectMutation.isPending;
 
+    const handleNewSession = () => {
+        // This directly creates a new project in the database and loads it on success.
+        saveProjectMutation.mutate({ name: 'Untitled Project' }, {
+            onSuccess: (savedProject) => {
+                loadProject(savedProject);
+                toast({
+                    title: "New Project Created",
+                    description: "You can start working on your new project.",
+                });
+            },
+            onError: (error) => {
+                toast({
+                    title: "Error Creating Project",
+                    description: error.message || "Could not create a new project in the database.",
+                    variant: "destructive",
+                });
+            }
+        });
+    };
+
     const handleUploadClick = () => {
-        newSession();
         fileInputRef.current?.click();
     };
 
@@ -72,11 +77,11 @@ export function useSessionActions() {
         reader.onload = (e) => {
             try {
                 const content = e.target?.result as string;
-                const decodedJson = decodeURIComponent(escape(atob(content)));
-                const parsedState = JSON.parse(decodedJson);
-                // Here, you would ideally validate the parsedState against a Zod schema
-                // before loading it into the store to ensure data integrity.
-                loadProject(parsedState as SavedProject);
+                const projectInstance = Project.fromArkanFile(content);
+                // Here you might want to save this project to the DB or just load it locally
+                // For now, let's just load it into the store
+                loadProject(projectInstance.toJSON() as SavedProject);
+                toast({ title: t('builder.toasts.loadSuccessTitle'), description: t('builder.toasts.loadSuccessDesc') });
             } catch (error) {
                 console.error('Failed to load project file:', error);
                 toast({ title: t('builder.toasts.loadFailedTitle'), description: t('builder.toasts.loadFailedDesc'), variant: 'destructive' });
@@ -84,60 +89,47 @@ export function useSessionActions() {
         };
         reader.readAsText(file);
 
+        // Reset file input to allow re-uploading the same file
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
     };
 
     const handleSaveProjectFile = (name?: string) => {
-        if (!project || !hasAnyContent(project)) return;
-        const finalName = name?.trim() || project.name || (project.proposal as any)?.title || 'arkan_project';
-        const jsonString = JSON.stringify(project.toJSON());
-        const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
-        const blob = new Blob([encodedData], { type: 'text/plain;charset=utf-8' });
-        saveAs(blob, `${finalName}.arkan`);
+        if (!project || !project.hasAnyContent()) return;
+        if (name) {
+            project.name = name.trim();
+        }
+        const { fileName, blob } = project.toArkanFileBlob();
+        saveAs(blob, fileName);
     }
 
-    const performSave = (name?: string) => {
-        if (!project || !hasAnyContent(project)) {
-            toast({ title: t("projects.cannotSaveToastTitle"), description: t("projects.cannotSaveToastDesc"), variant: 'destructive' });
+    const performSave = () => {
+        if (!project?.id) {
+            toast({ title: "Cannot Save", description: "Project has no valid ID.", variant: 'destructive' });
             return;
         }
 
-        if (name) {
-            updateProject(p => { p.name = name; });
-        }
+        const projectData = project.toJSON();
 
-        // It's crucial to get the latest state right before mutation
-        const projectToSave = useBuilderStore.getState().project!;
-        const projectData = projectToSave.toStateObject();
-        const finalName = projectToSave.name || 'Untitled Project';
-        const saveData = { ...projectData, name: finalName };
-
-
-        if (projectToSave.id && !projectToSave.id.startsWith('temp-')) {
-            updateProjectMutation.mutate({ projectId: projectToSave.id, data: saveData });
-        } else {
-            saveProjectMutation.mutate(saveData);
-        }
-    }
-
-    const handleSave = () => {
-        if (!project) return;
-
-        if (project.id && !project.id.startsWith('temp-')) {
-            performSave();
-        } else if (hasAnyContent(project)) {
-            setProjectName(project.name || '');
-            setIsSavePromptOpen(true);
-        } else {
-            toast({ title: t("projects.cannotSaveToastTitle"), description: t("projects.cannotSaveToastDesc"), variant: 'destructive' });
-        }
+        updateProjectMutation.mutate({ 
+            projectId: project.id,
+            data: projectData 
+        }, {
+            onSuccess: () => {
+                setHasUnsavedChanges(false);
+                toast({
+                    title: t('projects.projectSaved'),
+                    description: t('projects.projectSavedDesc', { name: project.name })
+                });
+            }
+        });
     }
 
     const handleSaveFromPrompt = () => {
-        if (projectName.trim()) {
-            performSave(projectName);
+        if (projectName.trim() && project) {
+            project.name = projectName.trim();
+            performSave();
             setIsSavePromptOpen(false);
             setProjectName('');
         } else {
@@ -147,13 +139,13 @@ export function useSessionActions() {
 
     const handleSaveAsCloud = () => {
         if (!project) return;
-        const projectData = project.toJSON();
-        const finalSaveAsName = saveAsName.trim() || project.name || (project.proposal as any)?.title || 'Untitled Project';
 
-        const saveData = { ...projectData, name: String(finalSaveAsName), id: '' };
+        const newName = saveAsName.trim() || project.name || 'Untitled Project';
+        const projectData = { ...project.toJSON(), name: newName, id: undefined }; // Create as a new project
 
-        saveProjectMutation.mutate(saveData, {
+        saveProjectMutation.mutate(projectData, {
             onSuccess: (newProjectData) => {
+                loadProject(newProjectData); // Load the newly created project
                 toast({
                     title: t("projects.projectSavedAsToastTitle"),
                     description: t("projects.projectSavedAsToastDesc", { name: newProjectData.name }),
@@ -165,7 +157,7 @@ export function useSessionActions() {
     }
 
     const handleDownloadAs = () => {
-        const finalSaveAsName = saveAsName.trim() || project?.name || (project?.proposal as any)?.title || 'Untitled Project';
+        const finalSaveAsName = saveAsName.trim() || project?.name || 'Untitled Project';
         handleSaveProjectFile(finalSaveAsName);
         setIsSaveAsOpen(false);
         setSaveAsName('');
@@ -183,15 +175,15 @@ export function useSessionActions() {
         setSaveAsName,
         project,
         isSaving,
+        handleNewSession,
         handleUploadClick,
         onFileChange,
-        handleSave,
+        handleSave: performSave,
         handleSaveFromPrompt,
         handleSaveAsCloud,
         handleDownloadAs,
-        hasContent: hasAnyContent(project),
+        hasContent: project?.hasAnyContent(),
         t,
-        // New exports for export functionality
         isExporting,
         handleExportProposal,
         handleExportReport,

@@ -5,14 +5,13 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { handleErrorUtility } from '@/lib/errorUtils';
-import type { PptxTemplate } from '@/lib/models/pptxTemplate';
+import { PptxTemplate, type PptxTemplateProperties } from '@/lib/models/pptxTemplate';
 import { templateKeys } from '@/lib/query-keys';
 import type { PptxStyleOptions, PptxTemplateKey } from '@/lib/types';
 import { deletePptxTemplateApi, fetchPptxTemplatesApi, updatePptxTemplateApi, uploadPptxTemplateFileApi } from '@/services/template-service';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import set from 'lodash.set';
 import { useState } from 'react';
-
 
 export function usePptxStyles() {
     const { firebaseUser } = useAuth();
@@ -21,7 +20,14 @@ export function usePptxStyles() {
 
     const { data: templates, isFetched: isLoaded } = useQuery<Record<PptxTemplateKey, PptxTemplate>>({
         queryKey: templateKeys.pptx(),
-        queryFn: () => fetchPptxTemplatesApi(),
+        queryFn: async () => {
+            const rawTemplates = await fetchPptxTemplatesApi();
+            const templateInstances: Record<PptxTemplateKey, PptxTemplate> = {};
+            for (const key in rawTemplates) {
+                templateInstances[key as PptxTemplateKey] = new PptxTemplate(rawTemplates[key as PptxTemplateKey]);
+            }
+            return templateInstances;
+        },
         staleTime: 1000 * 60 * 5, // 5 minutes
         meta: {
             onError: (error: Error) => handleErrorUtility(error, "Failed to fetch PPTX templates"),
@@ -33,10 +39,10 @@ export function usePptxStyles() {
             const token = await getAuthenticatedToken(firebaseUser);
             return updatePptxTemplateApi(variables, token);
         },
-        onSuccess: (data, variables) => {
+        onSuccess: (data: PptxTemplateProperties, variables) => {
             queryClient.setQueryData(templateKeys.pptx(), (old: Record<string, PptxTemplate> | undefined) => {
                 if (!old) return {};
-                return { ...old, [variables.key]: data };
+                return { ...old, [variables.key]: new PptxTemplate(data) };
             });
             toast({ title: "Template Saved", description: "Your style changes have been saved." });
         },
@@ -60,19 +66,11 @@ export function usePptxStyles() {
     });
 
     const updateStyle = (key: PptxTemplateKey, path: string, value: any) => {
-        if (!templates) return;
-        const currentTemplate = templates[key];
-        const newStyles = { ...currentTemplate.styles };
-        set(newStyles, path, value);
-        queryClient.setQueryData(templateKeys.pptx(), (old: Record<string, PptxTemplate> | undefined) => {
+        queryClient.setQueryData<Record<PptxTemplateKey, PptxTemplate>>(templateKeys.pptx(), (old) => {
             if (!old) return {};
-            return {
-                ...old,
-                [key]: {
-                    ...old[key],
-                    styles: newStyles,
-                },
-            };
+            const newTemplate = old[key].clone();
+            set(newTemplate.styles, path, value);
+            return { ...old, [key]: newTemplate };
         });
     };
 
@@ -81,7 +79,6 @@ export function usePptxStyles() {
         const stylesToSave = templates[key].styles;
         updateMutation.mutate({ key, styles: stylesToSave });
     };
-
 
     return {
         templates: templates || {},
@@ -94,7 +91,6 @@ export function usePptxStyles() {
         uploadTemplateFile,
     };
 }
-
 
 export function useDeletePptxTemplate() {
     const queryClient = useQueryClient();

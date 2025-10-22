@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { PdfPreview } from '@/components/file/PdfPreview';
@@ -15,7 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useToast } from '@/hooks';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { ContextFileType } from '@/lib/types';
+import { type ContextFileType } from '@/lib/models/context-file';
 import { cn } from '@/lib/utils';
 import { processFileApi } from '@/services';
 import { FileText, ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
@@ -80,8 +79,12 @@ function FileDropzone() {
                 const token = await firebaseUser.getIdToken();
                 const formData = new FormData();
                 formData.append('file', file);
-                const result = await processFileApi(formData, token);
-                updateProject(p => p.addExternalContext(file.name.replace(/\.[^/.]+$/, ".md"), result.markdown, 'context'));
+                const result = await processFileApi({ file: formData }, token);
+                // Updated to use the new ContextManager
+                updateProject(p => {
+                    const markdownFileName = file.name.replace(/\.[^/.]+$/, ".md");
+                    p.contextManager.add(markdownFileName, result.markdown, 'context');
+                });
                 toast({ title: t('builder.files.toasts.fileAdded'), description: t('builder.files.toasts.fileAddedDesc').replace('{fileName}', file.name) });
                 refetchUser();
             } catch (error: any) {
@@ -137,14 +140,15 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
     const { t } = useLocalization();
     const { project, updateProject } = useBuilderStore();
 
-    const externalContext = project?.externalContext || [];
+    // Updated to use the new ContextManager
+    const externalContext = project ? project.contextManager.getAll() : [];
 
-    const removeExternalContext = (index: number) => {
-        updateProject(p => { p.removeExternalContext(index); });
+    const handleRemoveContext = (index: number) => {
+        updateProject(p => { p.contextManager.remove(index); });
     };
 
-    const updateExternalContextType = (index: number, type: ContextFileType) => {
-        updateProject(p => { p.updateExternalContextType(index, type); });
+    const handleUpdateContextType = (index: number, type: ContextFileType) => {
+        updateProject(p => { p.contextManager.updateType(index, type); });
     };
 
     const fileTypes: ContextFileType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
@@ -211,7 +215,7 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <Select value={item.type} onValueChange={(value: ContextFileType) => updateExternalContextType(index, value)}>
+                                                <Select value={item.type} onValueChange={(value: ContextFileType) => handleUpdateContextType(index, value)}>
                                                     <SelectTrigger className={cn("text-xs h-7 w-auto p-0 border-0 bg-transparent focus:ring-0", {
                                                         'text-blue-800 dark:text-blue-200': item.type === 'context',
                                                         'text-green-800 dark:text-green-200': item.type === 'example',
@@ -242,7 +246,7 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-6 w-6 hover:bg-destructive/10 hover:text-destructive transition-colors"
-                                                    onClick={() => removeExternalContext(index)}
+                                                    onClick={() => handleRemoveContext(index)}
                                                 >
                                                     <X className="h-4 w-4" />
                                                 </Button>

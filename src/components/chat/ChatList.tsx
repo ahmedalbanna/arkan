@@ -151,13 +151,8 @@ function LiveChatListItem({ chat, isSelected, onSelect }: { chat: Chat, isSelect
             {chat.lastMessageTimestamp && (
                 <div className="flex flex-col items-end gap-1 self-start shrink-0">
                     <p className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(chat.lastMessageDate, { addSuffix: true })}
+                        {formatDistanceToNow(new Date(chat.lastMessageTimestamp), { addSuffix: true })}
                     </p>
-                    {chat.unreadCount && chat.unreadCount > 0 && (
-                        <Badge variant="destructive" className="h-5 w-5 justify-center p-0 text-xs">
-                            {chat.unreadCount}
-                        </Badge>
-                    )}
                 </div>
             )}
         </button>

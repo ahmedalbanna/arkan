@@ -1,103 +1,101 @@
 
-"use client";
+import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
+import { Project, ProjectProperties } from '@/lib/models/project';
+import type { SavedProject } from '@/lib/types';
 
-import { toast } from "@/hooks";
-import { Project, type ProjectProperties } from "@/lib/models/project";
-import type { ContextFileType, SavedProject } from "@/lib/types";
-import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
+// =============================================================================
+// STATE & ACTIONS
+// =============================================================================
 
-// The new state is dramatically simplified
-export interface BuilderState {
-  project: Project | null;
-  hasUnsavedChanges: boolean;
+export type BuilderTab = 'idea' | 'proposal' | 'report' | 'diagram' | 'plan' | 'presentation' | 'code' | 'solver';
+
+interface BuilderState {
+    project: Project | null;
+    activeTab: BuilderTab;
+    hasUnsavedChanges: boolean;
 }
 
 interface BuilderActions {
-  newSession: () => void;
-  loadProject: (savedProject: SavedProject) => void;
-  setProject: (project: Project) => void; // To update the project instance
-  updateProject: (updater: (project: Project) => void) => void;
-  setHasUnsavedChanges: (status: boolean) => void;
-  // Add new actions for direct manipulation, which will call the updater
-  addExternalContext: (fileName: string, content: string, type: ContextFileType) => void;
-  replaceExternalContext: (index: number, newItem: { fileName: string, content: string, type: ContextFileType }) => void;
+    setActiveTab: (tab: BuilderTab) => void;
+    setHasUnsavedChanges: (hasChanges: boolean) => void;
+    /**
+     * Loads a project from raw properties, creating a new Project instance.
+     * This is the primary way to get a project into the store.
+     */
+    loadProject: (props: SavedProject) => void;
+    /**
+     * Creates a new, empty project session, replacing the current one.
+     * Instantiates a new Project with default values.
+     */
+    newSession: (defaultProps: Partial<ProjectProperties>) => void;
+    /**
+     * Provides a safe way to update the current project instance.
+     * The function receives a mutable clone of the project to apply changes to.
+     */
+    updateProject: (updater: (project: Project) => void) => void;
+    reset: () => void;
 }
 
+// =============================================================================
+// STORE IMPLEMENTATION
+// =============================================================================
+
 const initialState: BuilderState = {
-  project: null,
-  hasUnsavedChanges: false,
+    project: null,
+    activeTab: 'idea',
+    hasUnsavedChanges: false,
 };
 
 export const useBuilderStore = create<BuilderState & BuilderActions>()(
-  persist(
-    (set, get) => ({
-      ...initialState,
+    // We pass `get` to be able to access the state outside of a producer.
+    immer((set, get) => ({
+        ...initialState,
 
-      newSession: () => {
-        set({ project: new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as ProjectProperties), hasUnsavedChanges: false });
-        toast({
-          title: "New Session Started",
-          description: "All project content has been cleared.",
-        });
-      },
+        setActiveTab: (tab) => set((state) => {
+            state.activeTab = tab;
+        }),
 
-      loadProject: (savedProject) => {
-        const project = new Project(savedProject as ProjectProperties);
-        set({
-          project: project,
-          hasUnsavedChanges: false,
-        });
-        toast({
-          title: "Project Loaded",
-          description: `Successfully loaded "${project.name || "project"}".`,
-        });
-      },
+        setHasUnsavedChanges: (hasChanges) => set((state) => {
+            state.hasUnsavedChanges = hasChanges;
+        }),
 
-      setProject: (project) => {
-        set({ project, hasUnsavedChanges: true });
-      },
+        loadProject: (props) => set((state) => {
+            state.project = new Project(props);
+            state.hasUnsavedChanges = false; // Loading a project is a clean state
+        }),
 
-      updateProject: (updater) => {
-        const currentProject = get().project ?? new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as ProjectProperties);
-        updater(currentProject);
-        // Create a new instance and set unsaved changes to true
-        set({ project: new Project(currentProject.toJSON() as ProjectProperties), hasUnsavedChanges: true });
-      },
+        newSession: (defaultProps) => set((state) => {
+            state.project = new Project(defaultProps);
+            state.hasUnsavedChanges = true; // A new project is inherently an unsaved change
+            state.activeTab = 'idea';
+        }),
 
-      addExternalContext: (fileName: string, content: string, type: ContextFileType) => {
-        get().updateProject(p => p.addExternalContext(fileName, content, type));
-      },
+        /**
+         * This implementation avoids the pitfalls of using Immer with class instances.
+         * 1. It uses `get()` to retrieve the original, non-drafted `Project` instance.
+         * 2. It creates a deep clone of the project by serializing and deserializing it.
+         * 3. It runs the user-provided `updater` function on this safe, mutable clone.
+         * 4. It then uses `set` to place the newly updated clone back into the state, 
+         *    triggering a re-render while maintaining immutability.
+         */
+        updateProject: (updater) => {
+            const currentProject = get().project;
+            if (currentProject) {
+                // Create a deep clone to mutate safely.
+                const projectClone = new Project(currentProject.toJSON());
+                
+                // Apply the updates to the clone.
+                updater(projectClone);
 
-      replaceExternalContext: (index: number, newItem: { fileName: string, content: string, type: ContextFileType }) => {
-        get().updateProject(p => {
-          if (p.externalContext) {
-            p.externalContext[index] = newItem;
-          }
-        });
-      },
+                // Set the new state with the updated clone.
+                set({
+                    project: projectClone,
+                    hasUnsavedChanges: true,
+                });
+            }
+        },
 
-      setHasUnsavedChanges: (status) => set({ hasUnsavedChanges: status }),
-    }),
-    {
-      name: "arkan-builder-state-v3",
-      storage: createJSONStorage(() => localStorage),
-
-      partialize: (state) => ({
-        project: state.project?.toJSON(),
-      }),
-
-      merge: (persistedState: any, currentState) => {
-        if (persistedState?.project) {
-          const project = new Project(persistedState.project as ProjectProperties);
-          return {
-            ...currentState,
-            project,
-            hasUnsavedChanges: false,
-          };
-        }
-        return currentState;
-      },
-    }
-  )
+        reset: () => set(initialState),
+    }))
 );

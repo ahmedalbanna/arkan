@@ -15,7 +15,6 @@ import { Loader2, PlusCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-
 const createTeamSchema = z.object({
     name: z.string().min(3, 'Team name must be at least 3 characters long.'),
 });
@@ -36,10 +35,10 @@ export function CreateTeamForm() {
     });
 
     const mutation = useMutation({
-        mutationFn: async (data: CreateTeamData) => {
+        mutationFn: async (data: CreateTeamFormValues) => {
             const token = await firebaseUser?.getIdToken();
-            if (!token) throw new Error('No token available');
-            return createTeam(data, token);
+            if (!token) throw new Error('Authentication token is not available.');
+            return createTeam({ name: data.name, token });
         },
         onSuccess: () => {
             toast({
@@ -58,10 +57,8 @@ export function CreateTeamForm() {
         },
     });
 
-    const onSubmit = async (data: CreateTeamFormValues) => {
-        if (!firebaseUser) return;
-        const token = await firebaseUser.getIdToken();
-        mutation.mutate({ name: data.name, token });
+    const onSubmit = (data: CreateTeamFormValues) => {
+        mutation.mutate(data);
     };
 
     return (

@@ -41,7 +41,7 @@ export function ContextViewer({ itemKey }: ContextViewerProps) {
                                 <AccordionItem value="proposal" className="bg-gradient-to-r from-muted/50 to-primary/5 rounded-lg border hover:shadow-soft transition-all duration-200">
                                     <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">Project Proposal</AccordionTrigger>
                                     <AccordionContent className="p-4 pt-0 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
-                                        <ReactMarkdown components={markdownComponents}>{String(proposal.objective)}</ReactMarkdown>
+                                        <ReactMarkdown components={markdownComponents}>{proposal.toString()}</ReactMarkdown>
                                     </AccordionContent>
                                 </AccordionItem>
                             </AnimatedContainer>
@@ -56,29 +56,29 @@ export function ContextViewer({ itemKey }: ContextViewerProps) {
                                 </AccordionItem>
                             </AnimatedContainer>
                         )}
-                        {selectedSections.map(({ key, content }: { key: any; content: any }, index) => (
+                        {selectedSections.map(({ key, content }, index) => (
                             <AnimatedContainer key={`section-${key}`} animation="fade-in-up" delay={500 + (index * 100)}>
                                 <AccordionItem value={`section-${key}`} className="bg-gradient-to-r from-muted/50 to-primary/5 rounded-lg border hover:shadow-soft transition-all duration-200">
-                                    <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">{t(reportSections[key].title)}</AccordionTrigger>
+                                    <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">{t(reportSections[key as SectionName]?.title || key)}</AccordionTrigger>
                                     <AccordionContent className="p-4 pt-0 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
                                         <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>
                                     </AccordionContent>
                                 </AccordionItem>
                             </AnimatedContainer>
                         ))}
-                        {selectedDiagrams.map(({ key, content }: { key: any; content: any }, index) => (
+                        {selectedDiagrams.map(({ key, content }, index) => (
                             <AnimatedContainer key={`diagram-${key}`} animation="fade-in-up" delay={600 + (index * 100)}>
                                 <AccordionItem value={`diagram-${key}`} className="bg-gradient-to-r from-muted/50 to-primary/5 rounded-lg border hover:shadow-soft transition-all duration-200">
-                                    <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">{t(diagramSections[key].title)}</AccordionTrigger>
+                                    <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">{t(diagramSections[key]?.title || key)}</AccordionTrigger>
                                     <AccordionContent className="p-4 pt-0 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
                                         <pre><code>{content}</code></pre>
                                     </AccordionContent>
                                 </AccordionItem>
                             </AnimatedContainer>
                         ))}
-                        {selectedExternalContext.map((item: any, index) => (
-                            <AnimatedContainer key={`external-${item.index}`} animation="fade-in-up" delay={700 + (index * 100)}>
-                                <AccordionItem value={`external-${item.index}`} className="bg-gradient-to-r from-muted/50 to-primary/5 rounded-lg border hover:shadow-soft transition-all duration-200">
+                        {selectedExternalContext.map((item, index) => (
+                            <AnimatedContainer key={`external-${index}`} animation="fade-in-up" delay={700 + (index * 100)}>
+                                <AccordionItem value={`external-${index}`} className="bg-gradient-to-r from-muted/50 to-primary/5 rounded-lg border hover:shadow-soft transition-all duration-200">
                                     <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">{item.fileName}</AccordionTrigger>
                                     <AccordionContent className="p-4 pt-0 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
                                         <ReactMarkdown components={markdownComponents}>{item.content}</ReactMarkdown>

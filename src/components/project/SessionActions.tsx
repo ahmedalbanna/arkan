@@ -26,7 +26,6 @@ import { useSessionActions } from '@/hooks';
 import { Cloud, Download, FileJson, Loader2, Save, Trash2, Upload } from 'lucide-react';
 import { ReportExportDialog } from './ExportDialogs';
 
-
 export const SessionActions = () => {
     const {
         fileInputRef,
@@ -40,6 +39,7 @@ export const SessionActions = () => {
         setSaveAsName,
         project,
         isSaving,
+        handleNewSession,
         handleUploadClick,
         onFileChange,
         handleSave,
@@ -48,11 +48,10 @@ export const SessionActions = () => {
         handleDownloadAs,
         hasContent,
         t,
-        // Export related items
         isExporting,
         handleExportReport,
         handleExportPresentation,
-        handleExportProposal, // New handler
+        handleExportProposal,
     } = useSessionActions();
 
     const isBusy = isSaving || isExporting;
@@ -195,7 +194,7 @@ export const SessionActions = () => {
                         <Button
                             variant="destructive"
                             size="icon"
-                            onClick={() => project?.newSession()}
+                            onClick={handleNewSession}
                             className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <Trash2 className="h-4 w-4" />
@@ -210,4 +209,3 @@ export const SessionActions = () => {
         </TooltipProvider>
     );
 };
-

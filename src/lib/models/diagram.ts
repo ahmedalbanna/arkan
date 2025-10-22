@@ -1,3 +1,4 @@
+
 /**
  * The properties required to create a new Diagram instance.
  * This is the plain object representation of a diagram's data.
@@ -11,7 +12,8 @@ export interface DiagramProperties {
 
 export type DiagramType = 'class' | 'sequence' | 'useCase' | 'activity' | 'component' | 'deployment' |
 'state' | 'object' | 'communication' | 'interaction' | 'timing' |
-'flowchart' | 'mindmap' | 'gantt' | 'network' | 'er' | 'wireframe';
+'flowchart' | 'mindmap' | 'gantt' | 'network' | 'er' | 'wireframe' | 'archimate'; // Added 'archimate'
+
 /**
  * Represents a single diagram within a project.
  * It encapsulates the data and logic for a diagram generated from PlantUML.

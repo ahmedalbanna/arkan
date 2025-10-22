@@ -1,303 +1,147 @@
-'use client';
 
+'use client';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, PlusCircle, Save, Trash2 } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useLocalization } from '@/context/LocalizationContext';
-import { toast, usePresentationTemplateManager, useSections } from '@/hooks';
-import { PresentationTemplate } from '@/lib/models/presentationTemplate';
-import { useMemo, useState } from 'react';
+import { usePresentationTemplateManager } from '@/hooks/use-presentation-template-manager';
+import { PptxTemplate } from '@/lib/models/pptxTemplate';
+import { Loader2, RefreshCw, Trash2, Upload } from 'lucide-react';
 
+function StyleEditor({ templateKey, styles, handleStyleChange, handleSave, isSaving }: {
+    templateKey: string;
+    styles: any;
+    handleStyleChange: (templateKey: string, path: string, value: any) => void;
+    handleSave: (templateKey: string) => void;
+    isSaving: boolean;
+}) {
+    const renderStyleInput = (path: string, value: any) => {
+        const currentPath = `${path}`;
+        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+            return (
+                <div key={path} className="pl-4 border-l">
+                    <p className="font-semibold capitalize text-sm">{path.split('.').pop()}</p>
+                    {Object.entries(value).map(([key, val]) => renderStyleInput(`${path}.${key}`, val))}
+                </div>
+            );
+        }
 
-const presentationTemplateSchema = z.object({
-    id: z.string(),
-    name: z.string().min(1, "Name is required"),
-    description: z.string().min(1, "Description is required"),
-    primaryAgentId: z.string().default('generate-presentation'),
-    relevantReportSectionIds: z.array(z.string()).optional(),
-});
+        let inputType = 'text';
+        if (typeof value === 'number') inputType = 'number';
+        if (typeof value === 'boolean') inputType = 'checkbox';
 
-type PresentationFormValues = z.infer<typeof presentationTemplateSchema>;
-
-const createPresentationTemplateSchema = presentationTemplateSchema.omit({ id: true }).extend({
-    id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID can only contain lowercase letters, numbers, and hyphens."),
-});
-type CreatePresentationFormValues = z.infer<typeof createPresentationTemplateSchema>;
-
-
-
-function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: PresentationTemplate, onSave: (data: PresentationFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
-    const { t } = useLocalization();
-    const { data: sections } = useSections();
-    const reportSections = useMemo(() => (sections || []).filter(s => s.type === 'report'), [sections]);
-    const form = useForm<PresentationFormValues>({
-        resolver: zodResolver(presentationTemplateSchema),
-        defaultValues: {
-            ...template,
-            relevantReportSectionIds: template.relevantReportSectionIds || [],
-        },
-    });
-
-    const isDefaultTemplate = template.isDefault;
+        return (
+            <div key={path} className="flex items-center gap-2 mb-2">
+                <label htmlFor={currentPath} className="text-sm min-w-[120px] truncate">{path.split('.').pop()}</label>
+                <Input
+                    id={currentPath}
+                    type={inputType}
+                    checked={typeof value === 'boolean' ? value : undefined}
+                    value={typeof value !== 'boolean' ? String(value) : undefined}
+                    onChange={(e) => {
+                        const targetValue = inputType === 'checkbox' ? e.target.checked : inputType === 'number' ? parseFloat(e.target.value) : e.target.value;
+                        handleStyleChange(templateKey, currentPath, targetValue);
+                    }}
+                    className="h-8"
+                />
+            </div>
+        );
+    };
 
     return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSave)} className="space-y-4">
-                <FormField control={form.control} name="name" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Template Name</FormLabel>
-                        <FormControl><Input {...field} disabled={isSaving || isDeleting} /></FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )} />
-                <FormField control={form.control} name="description" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl><Textarea {...field} disabled={isSaving || isDeleting} rows={2} /></FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )} />
-                <FormField
-                    control={form.control}
-                    name="relevantReportSectionIds"
-                    render={() => (
-                        <FormItem>
-                            <div className="mb-4">
-                                <FormLabel className="text-base">Relevant Report Sections</FormLabel>
-                                <p className="text-sm text-muted-foreground">Select which report sections are most relevant for this presentation type.</p>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                {reportSections.map((section) => (
-                                    <FormField
-                                        key={section.id}
-                                        control={form.control}
-                                        name="relevantReportSectionIds"
-                                        render={({ field }) => {
-                                            return (
-                                                <FormItem
-                                                    key={section.id}
-                                                    className="flex flex-row items-start space-x-3 space-y-0"
-                                                >
-                                                    <FormControl>
-                                                        <Checkbox
-                                                            checked={field.value?.includes(section.id)}
-                                                            onCheckedChange={(checked) => {
-                                                                return checked
-                                                                    ? field.onChange([...(field.value || []), section.id])
-                                                                    : field.onChange(field.value?.filter((value) => value !== section.id));
-                                                            }}
-                                                        />
-                                                    </FormControl>
-                                                    <FormLabel className="font-normal">{section.title}</FormLabel>
-                                                </FormItem>
-                                            );
-                                        }}
-                                    />
-                                ))}
-                            </div>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <div className="flex justify-end gap-2">
-                    {!isDefaultTemplate && (
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="destructive" type="button" disabled={isSaving || isDeleting}>
-                                    {isDeleting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Trash2 className="me-2 h-4 w-4" />}
-                                    Delete
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>This action cannot be undone. This will permanently delete the &quot;{template.name}&quot; template.</AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    )}
-                    <Button type="submit" disabled={isSaving || isDeleting}>
-                        {isSaving ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="me-2 h-4 w-4" />}
-                        Save Changes
-                    </Button>
-                </div>
-            </form>
-        </Form>
+        <div className="space-y-4">
+            {Object.entries(styles).map(([key, value]) => renderStyleInput(key, value))}
+            <div className="flex justify-end">
+                <Button onClick={() => handleSave(templateKey)} disabled={isSaving}>
+                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Save Styles
+                </Button>
+            </div>
+        </div>
     );
 }
 
-function CreatePresentationTemplateDialog() {
-    const { t } = useLocalization();
-    const [isOpen, setIsOpen] = useState(false);
-    const templateManager = usePresentationTemplateManager();
-    const { data: sections } = useSections();
-    const reportSections = useMemo(() => (sections || []).filter(s => s.type === 'report'), [sections]);
-    const form = useForm<CreatePresentationFormValues>({
-        resolver: zodResolver(createPresentationTemplateSchema),
-        defaultValues: {
-            id: '',
-            name: '',
-            description: '',
-            relevantReportSectionIds: [],
-        },
-    });
-
-
-    const handleSave = (data: CreatePresentationFormValues) => {
-        templateManager.createTemplate(data, {
-            onSuccess: () => {
-                toast({ title: 'Success', description: 'New presentation template created.' });
-                setIsOpen(false);
-                form.reset();
-            },
-            onError: (error: any) => {
-                // Error handling is now in the hook
-            }
-        });
-    };
-
-    return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                <Button size="sm"><PlusCircle className="me-2 h-4 w-4" />Create New</Button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Create Presentation Template</DialogTitle>
-                    <DialogDescription>
-                        Define a new template for generating presentations.
-                    </DialogDescription>
-                </DialogHeader>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
-                        <FormField control={form.control} name="id" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Template ID</FormLabel>
-                                <FormControl><Input {...field} placeholder="e.g., weekly-update" disabled={templateManager.isSaving} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
-                        <FormField control={form.control} name="name" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Template Name</FormLabel>
-                                <FormControl><Input {...field} placeholder="e.g., Weekly Update" disabled={templateManager.isSaving} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
-                        <FormField control={form.control} name="description" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Description</FormLabel>
-                                <FormControl><Textarea {...field} disabled={templateManager.isSaving} rows={2} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
-                        <FormField
-                            control={form.control}
-                            name="relevantReportSectionIds"
-                            render={() => (
-                                <FormItem>
-                                    <FormLabel className="text-base">Relevant Report Sections</FormLabel>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        {reportSections.map((section) => (
-                                            <FormField key={section.id} control={form.control} name="relevantReportSectionIds"
-                                                render={({ field }) => (
-                                                    <FormItem key={section.id} className="flex flex-row items-start space-x-3 space-y-0">
-                                                        <FormControl>
-                                                            <Checkbox
-                                                                checked={field.value?.includes(section.id)}
-                                                                onCheckedChange={(checked) => (
-                                                                    checked
-                                                                        ? field.onChange([...(field.value || []), section.id])
-                                                                        : field.onChange(field.value?.filter((value) => value !== section.id))
-                                                                )}
-                                                            />
-                                                        </FormControl>
-                                                        <FormLabel className="font-normal">{section.title}</FormLabel>
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        ))}
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <DialogFooter>
-                            <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
-                            <Button type="submit" disabled={templateManager.isSaving}>
-                                {templateManager.isSaving ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="me-2 h-4 w-4" />}
-                                Create
-                            </Button>
-                        </DialogFooter>
-                    </form>
-                </Form>
-            </DialogContent>
-        </Dialog>
-    )
-}
-
-
 export function PresentationTemplateManager() {
-    const { t } = useLocalization();
-    const templateManager = usePresentationTemplateManager();
-    const { templates, isLoading, isError } = templateManager;
+    const {
+        templates,
+        isLoaded,
+        isSaving,
+        deleteMutation,
+        refreshImageMutation,
+        uploadTemplateFile,
+        handleStyleChange,
+        handleSave,
+        handleDelete,
+        handleRefreshImage,
+        handleFileChange,
+    } = usePresentationTemplateManager();
 
-    const handleSave = (data: PresentationFormValues) => {
-        templateManager.updateTemplate(data.id, data);
-    };
-
-    const handleDelete = (templateId: string) => {
-        templateManager.deleteTemplate(templateId);
-    };
-
-    if (isLoading) return <Skeleton className="h-48 w-full" />
-    if (isError) return <div>Error loading templates.</div>;
+    if (!isLoaded) return <Skeleton className="h-48 w-full" />
 
     return (
         <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                    <CardTitle>Presentation Generation Templates</CardTitle>
-                    <CardDescription>
-                        Configure the content structure for different types of presentations.
-                    </CardDescription>
-                </div>
-                <CreatePresentationTemplateDialog />
+            <CardHeader>
+                <CardTitle>Presentation Style Templates</CardTitle>
+                <CardDescription>Customize the visual styles for different presentation templates.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Accordion type="single" collapsible className="w-full">
-                    {templates?.map((template: PresentationTemplate) => {
+                    {Object.values(templates).map((template: PptxTemplate) => {
+                        const templateKey = template.id;
+                        const isDeleting = deleteMutation.isPending && deleteMutation.variables === templateKey;
+                        const isRefreshing = refreshImageMutation.isPending && refreshImageMutation.variables?.templateId === templateKey;
+                        const isUploading = uploadTemplateFile.isPending && uploadTemplateFile.variables?.templateId === templateKey;
+
                         return (
-                            <AccordionItem value={template.id} key={template.id}>
+                            <AccordionItem value={templateKey} key={templateKey}>
                                 <AccordionTrigger>{template.name}</AccordionTrigger>
-                                <AccordionContent className="p-4 bg-muted/50 rounded-b-md">
-                                    <PresentationTemplateForm
-                                        template={template}
-                                        onSave={handleSave}
-                                        isSaving={templateManager.isSaving && templateManager.activeTemplateKey === template.id}
-                                        onDelete={() => handleDelete(template.id)}
-                                        isDeleting={templateManager.isDeleting && templateManager.activeTemplateKey === template.id}
-                                    />
+                                <AccordionContent className="p-4 bg-muted/50 rounded-b-md space-y-6">
+                                    <div>
+                                        <h4 className="font-semibold mb-2">Template Actions</h4>
+                                        <div className="flex gap-2 flex-wrap">
+                                            <Button size="sm" variant="destructive" onClick={() => handleDelete(templateKey)} disabled={isDeleting}>
+                                                {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />} Delete Template
+                                            </Button>
+                                            <div className="flex items-center gap-2">
+                                                <Input
+                                                    id={`file-upload-${templateKey}`}
+                                                    type="file"
+                                                    className="hidden"
+                                                    onChange={(e) => handleFileChange(e, templateKey)}
+                                                    accept=".pptx"
+                                                />
+                                                <label htmlFor={`file-upload-${templateKey}`} className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 px-3 cursor-pointer">
+                                                    {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />} Upload .pptx
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h4 className="font-semibold mb-2">Preview Image</h4>
+                                        <div className="flex items-center gap-2">
+                                            <img src={template.imageUrl} alt={`${template.name} preview`} className="w-48 h-auto rounded border" />
+                                            <Button size="sm" onClick={() => handleRefreshImage(templateKey, 'A slide for a presentation about business analytics')} disabled={isRefreshing}>
+                                                {isRefreshing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />} Refresh Image
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h4 className="font-semibold mb-2">Style Editor</h4>
+                                        <StyleEditor
+                                            templateKey={templateKey}
+                                            styles={template.styles}
+                                            handleStyleChange={handleStyleChange}
+                                            handleSave={handleSave}
+                                            isSaving={isSaving}
+                                        />
+                                    </div>
                                 </AccordionContent>
                             </AccordionItem>
-                        )
+                        );
                     })}
                 </Accordion>
             </CardContent>

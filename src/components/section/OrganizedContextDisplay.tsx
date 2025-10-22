@@ -6,8 +6,30 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLocalization } from '@/context/LocalizationContext';
 import { BookMarked, BookOpen, Brain, FileText, Lightbulb, Settings } from 'lucide-react';
 
+interface ContextItem {
+    type: string;
+    icon: React.ElementType;
+    label: string;
+    count: number;
+    color: string;
+    priority: string;
+}
+
+interface OrganizedContext {
+    guidelines: any[];
+    foundational: any[];
+    conceptual: any[];
+    procedural: any[];
+    reference: any[];
+    statistics?: {
+        totalItems: number;
+        averageRelevance: number;
+        byType: Record<string, number>;
+    };
+}
+
 interface OrganizedContextDisplayProps {
-    organizedContext: any;
+    organizedContext: OrganizedContext | null;
     itemKey: string;
 }
 
@@ -28,10 +50,9 @@ export function OrganizedContextDisplay({ organizedContext, itemKey }: Organized
         );
     }
 
-    const contextItems = [];
+    const contextItems: ContextItem[] = [];
 
-    // الإرشادات والتوجيهات
-    if (organizedContext.guidelines.length > 0) {
+    if (organizedContext.guidelines?.length > 0) {
         contextItems.push({
             type: 'guidelines',
             icon: FileText,
@@ -42,8 +63,7 @@ export function OrganizedContextDisplay({ organizedContext, itemKey }: Organized
         });
     }
 
-    // المعرفة الأساسية
-    if (organizedContext.foundational.length > 0) {
+    if (organizedContext.foundational?.length > 0) {
         contextItems.push({
             type: 'foundational',
             icon: BookOpen,
@@ -54,8 +74,7 @@ export function OrganizedContextDisplay({ organizedContext, itemKey }: Organized
         });
     }
 
-    // المعرفة المفاهيمية
-    if (organizedContext.conceptual.length > 0) {
+    if (organizedContext.conceptual?.length > 0) {
         contextItems.push({
             type: 'conceptual',
             icon: Lightbulb,
@@ -66,8 +85,7 @@ export function OrganizedContextDisplay({ organizedContext, itemKey }: Organized
         });
     }
 
-    // المعرفة الإجرائية
-    if (organizedContext.procedural.length > 0) {
+    if (organizedContext.procedural?.length > 0) {
         contextItems.push({
             type: 'procedural',
             icon: Settings,
@@ -78,8 +96,7 @@ export function OrganizedContextDisplay({ organizedContext, itemKey }: Organized
         });
     }
 
-    // المراجع الإضافية
-    if (organizedContext.reference.length > 0) {
+    if (organizedContext.reference?.length > 0) {
         contextItems.push({
             type: 'reference',
             icon: BookMarked,
@@ -125,17 +142,16 @@ export function OrganizedContextDisplay({ organizedContext, itemKey }: Organized
                             );
                         })}
 
-                        {/* إحصائيات السياق */}
                         {organizedContext.statistics && (
                             <AnimatedContainer animation="fade-in-up" delay={300}>
                                 <div className="pt-3 border-t">
                                     <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                                         <div>إجمالي العناصر: {organizedContext.statistics.totalItems}</div>
-                                        <div>متوسط الصلة: {organizedContext.statistics.averageRelevance}</div>
+                                        <div>متوسط الصلة: {organizedContext.statistics.averageRelevance.toFixed(2)}</div>
                                         <div className="col-span-2">
                                             التوزيع: {Object.entries(organizedContext.statistics.byType)
-                                                .filter(([_, count]) => count > 0)
-                                                .map(([type, count]) => `${type}: ${count}`)
+                                                .filter(([_, count]) => (count as number) > 0)
+                                                .map(([type, count]) => `${type}: ${count as number}`)
                                                 .join(', ')}
                                         </div>
                                     </div>

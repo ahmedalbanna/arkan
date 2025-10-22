@@ -2,12 +2,13 @@
 'use server';
 
 import { z } from 'zod';
-import { generateReportSection, GenerateSectionInputSchema } from '@/ai/flows/generate-report-section';
+import { GenerateSectionInputSchema } from '@/ai/schemas';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service'; // Assuming this is server-side
 import { adminDb } from '@/lib/firebase/server-init'; // Assuming you have a server-side Firebase Admin SDK init
 import type { SectionName } from '@/ai/schemas';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { generateReportSection } from '@/ai/flows/generate-report-section';
 
 
 export const POST = withAuth(async ({ request, user }) => {

@@ -1,13 +1,11 @@
 
-// code explantion in docs/hooks/use-projects.md
-
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import { handleErrorUtility } from "@/lib/errorUtils";
-import { Project, type ProjectProperties } from "@/lib/models/project"; // NEW: Import our class
+import { Project, type ProjectProperties } from "@/lib/models/project";
 import { projectKeys } from "@/lib/query-keys";
 import {
   createProject,
@@ -15,7 +13,6 @@ import {
   fetchProject as fetchProjectApi,
   fetchProjects as fetchProjectsApi,
   updateProject,
-  type ProjectState,
   type SavedProject,
 } from "@/services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -24,10 +21,10 @@ import { useBuilderStore } from "./useBuilderStore";
 // Define types for mutation variables
 interface UpdateProjectVariables {
   projectId: string;
-  data: ProjectState;
+  data: ProjectProperties;
 }
 
-type SaveProjectVariables = ProjectState & { name: string };
+type SaveProjectVariables = ProjectProperties & { name: string };
 
 /**
  * Fetches a list of projects.
@@ -40,7 +37,7 @@ export function useProjects() {
     queryKey: projectKeys.lists(),
     queryFn: async (): Promise<SavedProject[]> => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return fetchProjectsApi(token);
+      return fetchProjectsApi({ token });
     },
     enabled: !!firebaseUser,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -49,7 +46,6 @@ export function useProjects() {
         handleErrorUtility(error, "Failed to fetch projects");
       },
     },
-    // NEW: Transform the raw data into an array of Project instances
     select: (data: SavedProject[]): Project[] => {
       if (!data) return [];
       return data.map(p => new Project(p as ProjectProperties));
@@ -58,7 +54,6 @@ export function useProjects() {
 
   return {
     ...queryInfo,
-    // The `data` property from queryInfo is now `Project[] | undefined`
     projects: queryInfo.data,
   }
 }
@@ -73,7 +68,7 @@ export function useProject(projectId: string) {
     queryKey: projectKeys.detail(projectId),
     queryFn: async (): Promise<SavedProject> => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return fetchProjectApi(projectId, token);
+      return fetchProjectApi({ projectId, token });
     },
     enabled: !!firebaseUser && !!projectId,
     meta: {
@@ -81,7 +76,6 @@ export function useProject(projectId: string) {
         handleErrorUtility(error, "Failed to fetch project");
       },
     },
-    // NEW: Transform the raw data into a Project instance
     select: (data: SavedProject): Project | undefined => {
       if (!data) return undefined;
       return new Project(data as ProjectProperties);
@@ -92,18 +86,16 @@ export function useProject(projectId: string) {
 export function useSaveProject() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
-  const { setProject, setHasUnsavedChanges } = useBuilderStore(); // Use setProject from the store
+  const { setProject, setHasUnsavedChanges } = useBuilderStore();
 
   return useMutation<SavedProject, Error, SaveProjectVariables>({
     mutationFn: async (data) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return createProject(data, token);
+      return createProject({ ...data, token });
     },
     onSuccess: (newProjectData) => {
       const newProject = new Project(newProjectData as ProjectProperties);
-      // Invalidate the list of projects
       queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
-      // Set the newly created project as the active one in the builder store
       setProject(newProject);
       setHasUnsavedChanges(false);
       toast({
@@ -125,25 +117,15 @@ export function useUpdateProject() {
   return useMutation<SavedProject, Error, UpdateProjectVariables>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return updateProject(variables.projectId, variables.data, token);
+      return updateProject({ projectId: variables.projectId, data: variables.data, token });
     },
     onSuccess: (updatedProjectData) => {
       const updatedProject = new Project(updatedProjectData as ProjectProperties);
-
-      // Invalidate the main project list
       queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
-
-      // Update the specific project's query data in the cache
       queryClient.setQueryData(projectKeys.detail(updatedProject.id), updatedProjectData);
-
-      // Update the active project in the builder store
       setProject(updatedProject);
       setHasUnsavedChanges(false);
-
-      toast({
-        title: "Project Updated",
-        description: `Your changes to "${updatedProject.name}" have been saved.`,
-      });
+      // No toast for autosave to prevent noise.
     },
     onError: (error: Error) => {
       handleErrorUtility(error, "Save Failed");
@@ -158,7 +140,7 @@ export function useDeleteProject() {
   return useMutation<void, Error, string>({
     mutationFn: async (projectId) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      await deleteProject(projectId, token);
+      await deleteProject({ projectId, token });
     },
     onSuccess: (_, projectId) => {
       queryClient.invalidateQueries({ queryKey: projectKeys.lists() });

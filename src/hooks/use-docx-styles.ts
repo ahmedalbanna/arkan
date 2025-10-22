@@ -5,7 +5,8 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { handleErrorUtility } from '@/lib/errorUtils';
-import type { DocxTemplateKey, Template } from '@/lib/types';
+import { DocxTemplate } from '@/lib/models/docxTemplate'; // Corrected import
+import type { DocxTemplateKey } from '@/lib/types';
 import { fetchDocxTemplatesApi, updateDocxTemplateApi } from '@/services/template-service';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import set from 'lodash.set';
@@ -21,26 +22,24 @@ export function useDocxStyles() {
     const queryClient = useQueryClient();
     const [activeTemplateKey, setActiveTemplateKey] = useState<DocxTemplateKey | null>(null);
 
-    // Fetching data
-    const { data: templates, isFetched: isLoaded } = useQuery<Record<DocxTemplateKey, Template>>({
+    const { data: templates, isFetched: isLoaded } = useQuery<Record<DocxTemplateKey, DocxTemplate>>({
         queryKey: [DOCX_TEMPLATES_QUERY_KEY],
-        queryFn: () => fetchDocxTemplatesApi(),
+        queryFn: fetchDocxTemplatesApi, // API returns DocxTemplate instances
         staleTime: 1000 * 60 * 5, // 5 minutes
         meta: {
             onError: (error: Error) => handleErrorUtility(error, "Failed to fetch DOCX templates"),
         },
     });
 
-    // Mutation for updating styles
     const updateMutation = useMutation({
         mutationFn: async (variables: { key: DocxTemplateKey, styles: any }) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return updateDocxTemplateApi(variables, token);
         },
         onSuccess: (data, variables) => {
-            queryClient.setQueryData([DOCX_TEMPLATES_QUERY_KEY], (old: Record<string, any> | undefined) => {
+            queryClient.setQueryData([DOCX_TEMPLATES_QUERY_KEY], (old: Record<string, DocxTemplate> | undefined) => {
                 if (!old) return {};
-                return { ...old, [variables.key]: data };
+                return { ...old, [variables.key]: new DocxTemplate(data) }; // Ensure new data is a class instance
             });
             toast({ title: "Template Saved", description: "Your style changes have been saved." });
         },
@@ -49,30 +48,26 @@ export function useDocxStyles() {
         }
     });
 
-    // Client-side style update function
     const updateStyle = (path: string, value: any) => {
         if (!templates || !activeTemplateKey) return;
         const currentTemplate = templates[activeTemplateKey];
-        const newStyles = { ...currentTemplate.styles }; // Create a shallow copy
-        set(newStyles, path, value); // Use lodash.set to update nested property
+        const newStyles = { ...currentTemplate.styles };
+        set(newStyles, path, value); 
 
-        // Update the cache in React Query
-        queryClient.setQueryData([DOCX_TEMPLATES_QUERY_KEY], (old: Record<string, any> | undefined) => {
+        queryClient.setQueryData<Record<string, DocxTemplate>>([DOCX_TEMPLATES_QUERY_KEY], (old) => {
             if (!old) return {};
+            const updatedTemplate = old[activeTemplateKey].clone(); // Use clone method
+            updatedTemplate.styles = newStyles;
             return {
                 ...old,
-                [activeTemplateKey]: {
-                    ...old[activeTemplateKey],
-                    styles: newStyles,
-                },
+                [activeTemplateKey]: updatedTemplate,
             };
         });
     };
 
-    // Save changes to the backend
     const saveChanges = (key: DocxTemplateKey) => {
         if (!templates || !templates[key]) return;
-        const stylesToSave = templates[key].styles;
+        const stylesToSave = templates[key].styles; // Correctly access styles
         updateMutation.mutate({ key, styles: stylesToSave });
     };
 
@@ -87,12 +82,9 @@ export function useDocxStyles() {
     };
 }
 
-
 export function useDeleteDocxTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
-    // In a real app, you would have a deleteDocxTemplateApi service function.
-    // For now, we'll assume it exists and would be called here.
 
     return useMutation<any, Error, string>({
         mutationFn: async (templateId: string) => {
