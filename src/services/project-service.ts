@@ -1,105 +1,111 @@
 
-
-
-
 'use client';
-import type { AnyProjectProposal, ProjectPlan, ExternalContext } from "@/ai/schemas";
-import { app } from '@/lib';
-import { getFirestore, collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
-import type { ProjectState, SavedProject } from "@/lib/models/project"; // Import from model
 
+import { Project, type ProjectProperties } from "@/lib/models/project";
+import { authenticatedFetch } from "@/lib/api-client";
+import { ProjectStateSchema } from "@/ai/schemas/state"; // Import the schema for validation
 
-// This represents the full state of a project that can be saved or loaded.
-// It is a combination of states from various Zustand stores.
-export type { ProjectState, SavedProject };
+// Re-exporting for clarity. SavedProject is likely the raw properties.
+export type { ProjectProperties as SavedProject };
 
+/**
+ * Sanitizes project data before sending it to the API to ensure it conforms to the backend schema.
+ * This prevents validation errors for fields that might be null in the frontend state
+ * but are expected as objects or are structured differently in the backend.
+ */
+function sanitizeProjectData(data: Partial<ProjectProperties>): Partial<ProjectProperties> {
+    // Create a deep copy to avoid mutating the original state object.
+    const sanitizedData = JSON.parse(JSON.stringify(data));
 
-// Fetch all projects for the current user
-export async function fetchProjects(token: string): Promise<SavedProject[]> {
-    if (!token) throw new Error("User not authenticated");
-    const response = await fetch('/api/projects', {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!response.ok) {
-        throw new Error('Failed to fetch projects');
+    // 1. Sanitize `codeGenerator`
+    // The backend expects an object, but the frontend state can be null.
+    if (sanitizedData.codeGenerator === null) {
+        delete sanitizedData.codeGenerator;
     }
-    return await response.json();
+
+    // 2. Sanitize `diagrams`
+    // The backend expects a record, but the frontend might have an empty object or invalid structure.
+    // If it's an empty object, it's safer to remove it and let the backend handle the default.
+    if (sanitizedData.diagrams && Object.keys(sanitizedData.diagrams).length === 0) {
+        delete sanitizedData.diagrams;
+    }
+    
+    // 3. Sanitize `academicSolver`
+    // Ensure it is not null if it is expected to be an object
+    if (sanitizedData.academicSolver === null) {
+        delete sanitizedData.academicSolver;
+    }
+
+    // 4. Sanitize `proposal`
+    // If the proposal is null, it should be stripped.
+    if (sanitizedData.proposal === null) {
+        delete sanitizedData.proposal;
+    }
+    
+    return sanitizedData;
 }
 
-// Fetch a single project by its ID
-export async function fetchProject(projectId: string, token: string): Promise<SavedProject> {
-    if (!token) throw new Error("User not authenticated");
-    const response = await fetch(`/api/projects/${projectId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!response.ok) {
-        if(response.status === 404) throw new Error("Project not found.");
-        throw new Error('Failed to fetch project');
+/**
+ * Fetches all projects for the current user and returns them as Project instances.
+ */
+export async function fetchProjectsApi(): Promise<Project[]> {
+    const projectsData = await authenticatedFetch<ProjectProperties[]>('/api/projects');
+    if (!Array.isArray(projectsData)) {
+        console.error("fetchProjectsApi did not return an array:", projectsData);
+        return [];
     }
-    return await response.json();
+    return projectsData.map(data => new Project(data));
 }
 
-// Create a new project
-export async function createProject(data: ProjectState, token: string): Promise<SavedProject> {
-    if (!token) throw new Error("User not authenticated");
-    const response = await fetch('/api/projects', {
+/**
+ * Fetches a single project by its ID and returns it as a Project instance.
+ */
+export async function fetchProjectApi(projectId: string): Promise<Project> {
+    const projectData = await authenticatedFetch<ProjectProperties>(`/api/projects/${projectId}`);
+    return new Project(projectData);
+}
+
+/**
+ * Creates a new project and returns it as a Project instance.
+ * It sanitizes the data before sending it to the API.
+ */
+export async function createProjectApi(data: Partial<ProjectProperties>): Promise<Project> {
+    const sanitizedData = sanitizeProjectData(data);
+    const newProjectData = await authenticatedFetch<ProjectProperties>('/api/projects', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data),
+        body: JSON.stringify(sanitizedData),
     });
-    if (!response.ok) {
-        throw new Error('Failed to save project');
-    }
-    return await response.json();
+    return new Project(newProjectData);
 }
 
-// Update an existing project
-export async function updateProject(projectId: string, data: ProjectState, token: string): Promise<SavedProject> {
-    if (!token) throw new Error("User not authenticated");
-    const response = await fetch(`/api/projects/${projectId}`, {
+/**
+ * Updates an existing project and returns it as a Project instance.
+ * The data passed can be a partial object. It sanitizes the data before sending.
+ */
+export async function updateProjectApi(projectId: string, data: Partial<ProjectProperties>): Promise<Project> {
+    const sanitizedData = sanitizeProjectData(data);
+    const updatedProjectData = await authenticatedFetch<ProjectProperties>(`/api/projects/${projectId}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data),
+        body: JSON.stringify(sanitizedData),
     });
-    if (!response.ok) {
-        throw new Error('Failed to update project');
-    }
-    return await response.json();
+    return new Project(updatedProjectData);
 }
 
-// Delete a project
-export async function deleteProject(projectId: string, token: string): Promise<{ message: string }> {
-    if (!token) throw new Error("User not authenticated");
-    const response = await fetch(`/api/projects/${projectId}`, {
+/**
+ * Deletes a project.
+ */
+export async function deleteProjectApi(projectId: string): Promise<{ message: string }> {
+    return authenticatedFetch(`/api/projects/${projectId}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
     });
-    if (!response.ok) {
-        throw new Error('Failed to delete project');
-    }
-    return await response.json();
 }
 
-// Add a context file to a project
-export async function addContextToProjectApi({ projectId, contextFile, token }: { projectId: string, contextFile: any, token: string }): Promise<{ message: string }> {
-    if (!token) throw new Error("User not authenticated");
-    const response = await fetch(`/api/projects/${projectId}`, {
+/**
+ * Adds a context file to a project.
+ */
+export async function addContextToProjectApi({ projectId, contextFile }: { projectId: string, contextFile: any }): Promise<{ message: string }> {
+    return authenticatedFetch(`/api/projects/${projectId}`, {
         method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify(contextFile),
     });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to add context to project');
-    }
-    return await response.json();
 }

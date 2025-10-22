@@ -1,57 +1,121 @@
 
 /**
- * Interface for the raw data of a project proposal.
+ * @fileoverview Defines the data model for a Project Proposal, handling both AI-generated data
+ * and structured data for robust instantiation and serialization.
  */
+
+// =============================================================================
+// INTERFACES
+// =============================================================================
+
+export interface RawProjectProposalData {
+  projectTitle?: string;
+  projectSummary?: string;
+  projectGoals?: string[] | string;
+  projectObjectives?: string[] | string;
+  projectScope?: string;
+  projectDeliverables?: string[] | string;
+  projectTimeline?: string[] | string;
+  projectBudget?: string;
+  projectTeam?: string[] | string;
+  [key: string]: any; 
+}
+
 export interface ProjectProposalData {
   title: string;
   category: string;
   sections: Record<string, string>;
 }
 
-/**
- * The ProjectProposal class encapsulates the data and business logic for a single project proposal.
- */
+// =============================================================================
+// CLASS DEFINITION
+// =============================================================================
+
 export class ProjectProposal implements ProjectProposalData {
   public title: string;
   public category: string;
   public sections: Record<string, string>;
 
+  constructor(data: RawProjectProposalData | ProjectProposalData) {
+    if (data && 'sections' in data && 'title' in data) {
+      const structuredData = data as ProjectProposalData;
+      this.title = structuredData.title || 'Untitled Proposal';
+      this.category = structuredData.category || 'General';
+      this.sections = structuredData.sections || {};
+    } else {
+      const rawData = data as RawProjectProposalData;
+      this.title = rawData.projectTitle || 'Untitled Proposal';
+      this.category = rawData.category || 'General';
+      this.sections = {};
+
+      // Securely map raw AI fields to the structured `sections` format.
+      this.addSection('Project Summary', rawData.projectSummary);
+      this.addSection('Project Justification', rawData.projectJustification);
+      this.addSectionFromList('Project Goals', rawData.projectGoals);
+      this.addSectionFromList('Project Objectives', rawData.projectObjectives);
+      this.addSection('Project Scope', rawData.projectScope);
+      this.addSectionFromList('Project Deliverables', rawData.projectDeliverables);
+      this.addSectionFromList('Project Timeline', rawData.projectTimeline);
+      this.addSection('Project Budget', rawData.projectBudget);
+      this.addSectionFromList('Project Team', rawData.projectTeam);
+      this.addSection('Risk Management', rawData.riskManagement);
+      this.addSectionFromList('Success Criteria', rawData.successCriteria);
+      this.addSectionFromList('Technical Specifications', rawData.technicalSpecifications);
+      this.addSectionFromList('Appendix', rawData.appendix);
+    }
+  }
+
+  // =============================================================================
+  // ROBUST HELPER METHODS
+  // =============================================================================
+
   /**
-   * @param data The raw data for the proposal.
+   * Securely adds a section, ensuring content is a valid, non-empty string.
    */
-  constructor(data: ProjectProposalData) {
-    this.title = data.title || 'Untitled Proposal';
-    this.category = data.category || 'General';
-    this.sections = data.sections || {};
+  private addSection(title: string, content: any): void {
+    if (typeof content === 'string' && content.trim() !== '') {
+      this.sections[title] = content;
+    }
+    // Ignores content that is not a string (null, undefined, object, etc.)
   }
 
   /**
-   * Updates the content of a specific section.
-   * @param name The name of the section to update.
-   * @param content The new content for the section.
+   * Securely adds a section from content that could be a string or an array of strings.
+   * It validates the type of content before processing to prevent runtime errors.
    */
+  private addSectionFromList(title: string, content: any): void {
+    if (!content) return;
+
+    if (Array.isArray(content)) {
+      // Filter out non-string items to be safe
+      const validItems = content.filter(item => typeof item === 'string' && item.trim() !== '');
+      if (validItems.length > 0) {
+        this.sections[title] = validItems.map(item => `- ${item}`).join('\n');
+      }
+    } else if (typeof content === 'string' && content.trim() !== '') {
+      this.sections[title] = content;
+    }
+    // Ignores content that is not a string or a valid array.
+  }
+
+  // =============================================================================
+  // PUBLIC API
+  // =============================================================================
+
   public updateSection(name: string, content: string): void {
     this.sections[name] = content;
   }
 
-  /**
-   * Retrieves the content of a specific section.
-   * @param name The name of the section.
-   * @returns The content of the section or undefined if not found.
-   */
   public getSection(name: string): string | undefined {
     return this.sections[name];
   }
 
-  /**
-   * Converts the proposal into a Markdown formatted string.
-   * @returns A string representing the proposal in Markdown.
-   */
   public toMarkdown(): string {
     let markdown = `# ${this.title}\n\n`;
     markdown += `**Category:** ${this.category}\n\n`;
 
     for (const sectionTitle in this.sections) {
+      markdown += '---\n\n';
       markdown += `## ${sectionTitle}\n\n`;
       markdown += `${this.sections[sectionTitle]}\n\n`;
     }
@@ -59,10 +123,6 @@ export class ProjectProposal implements ProjectProposalData {
     return markdown.trim();
   }
 
-  /**
-   * Serializes the class instance into a plain data object for storage or transfer.
-   * @returns A plain object representing the proposal's data.
-   */
   public toJSON(): ProjectProposalData {
     return {
       title: this.title,

@@ -64,6 +64,7 @@ interface GenerationUIActions {
   setCustomGuidelineInputForItem: (itemKey: string, value: string) => void;
   handleAddCustomGuidelineForItem: (itemKey: string) => void;
   handleRemoveCustomGuidelineForItem: (itemKey: string, index: number) => void;
+  setGuidelineState: (newState: Record<string, GuidelineState>) => void; // Added this line
   setOneTimeInstruction: (itemKey: string, value: string) => void;
   toggleContextSelection: (itemKey: string, type: 'sections' | 'diagrams' | 'externalContext' | 'proposal' | 'projectPlan', contextKey: string | number | null, isSelected: boolean) => void;
   setSelectedReportTemplateId: (id: string) => void;
@@ -160,6 +161,8 @@ export const useGenerationUIStore = create<GenerationUIState & GenerationUIActio
       if (newGuidelines[itemKey]) newGuidelines[itemKey].custom.splice(index, 1);
       return { guidelineState: newGuidelines };
     }),
+
+    setGuidelineState: (newState) => set({ guidelineState: newState }), // Added this line
 
     setOneTimeInstruction: (itemKey, value) => set(state => ({ oneTimeInstructions: { ...state.oneTimeInstructions, [itemKey]: value } })),
 

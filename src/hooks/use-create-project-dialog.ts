@@ -25,7 +25,7 @@ export function useCreateProjectDialog() {
     }
 
     const handleCreateNewProject = () => {
-        newSession();
+        newSession({}); // Pass an empty object to satisfy the constructor
         setName('');
         setDescription('');
         setIsOpen(true);

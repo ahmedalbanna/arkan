@@ -12,15 +12,25 @@ export class DiagramManager {
 
     /**
      * @param data The initial raw data for the diagrams, mapping diagram types to their properties.
+     *             This constructor is defensive to handle malformed data from older project versions.
      */
-    constructor(data?: DiagramsData | null) {
+    constructor(data?: any | null) { // Use `any` to gracefully handle legacy formats
         this.diagrams = {};
-        if (data) {
-            for (const key in data) {
-                const type = key as DiagramType;
-                const diagramData = data[type];
-                if (diagramData) {
-                    this.diagrams[type] = new Diagram(diagramData);
+
+        // Defensively find the actual map of diagrams.
+        // It could be the `data` object itself, or nested inside `data.diagrams` in legacy formats.
+        const dataToProcess = (data && data.diagrams && typeof data.diagrams === 'object') ? data.diagrams : data;
+
+        if (dataToProcess && typeof dataToProcess === 'object') {
+            for (const key in dataToProcess) {
+                if (Object.prototype.hasOwnProperty.call(dataToProcess, key)) {
+                    const type = key as DiagramType;
+                    const diagramData = dataToProcess[type];
+                    
+                    // Create a diagram instance only if the data is a valid-looking object with content.
+                    if (diagramData && typeof diagramData === 'object' && Object.keys(diagramData).length > 0) {
+                        this.diagrams[type] = new Diagram(diagramData);
+                    }
                 }
             }
         }
@@ -61,7 +71,10 @@ export class DiagramManager {
         const plainData: DiagramsData = {};
         for (const key in this.diagrams) {
             const type = key as DiagramType;
-            plainData[type] = this.diagrams[type]?.toStateObject();
+            const diagramState = this.diagrams[type]?.toStateObject();
+            if (diagramState) {
+               plainData[type] = diagramState;
+            }
         }
         return plainData;
     }

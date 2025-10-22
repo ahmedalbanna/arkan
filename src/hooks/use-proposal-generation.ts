@@ -9,6 +9,7 @@ import { toast } from './use-toast';
 import { GenerateProposalInput } from '@/ai/schemas';
 import { generateProposalApi } from '@/services';
 import { useBuilderStore } from './useBuilderStore';
+import { ProjectProposal } from '@/lib/models/proposal';
 
 
 export function useGenerateProposal() {
@@ -37,7 +38,8 @@ export function useGenerateProposal() {
         onSuccess: (data) => {
             // Use the updater function to call the model's method
             updateProject(p => {
-                p.setProposal(data);
+                // The `proposal` property expects an instance of ProjectProposal.
+                p.proposal = new ProjectProposal(data); 
             });
 
             refetchUser(); // To update credits

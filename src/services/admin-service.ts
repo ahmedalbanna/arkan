@@ -1,6 +1,8 @@
 
 'use client';
 
+import { authenticatedFetch } from "@/lib/api-client";
+
 export interface DashboardStats {
     totalUsers: number;
     totalGenerations: number;
@@ -17,15 +19,10 @@ export interface DashboardStats {
     }[];
 }
 
-export async function fetchDashboardStats(token: string): Promise<DashboardStats> {
-    const response = await fetch('/api/admin/dashboard-stats', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch dashboard stats');
-    }
-    return await response.json();
+/**
+ * Fetches the main statistics for the admin dashboard.
+ * Relies on the centralized authenticatedFetch for authorization.
+ */
+export async function fetchDashboardStatsApi(): Promise<DashboardStats> {
+    return authenticatedFetch('/api/admin/dashboard-stats');
 }

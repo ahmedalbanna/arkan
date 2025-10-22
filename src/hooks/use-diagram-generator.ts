@@ -19,6 +19,7 @@ export const useDiagramGenerator = () => {
         if (!project) return;
         
         updateProject(p => {
+            if (!p) return; // Defensive check
             // Find the diagram key associated with the given plantUmlCode.
             const diagramKey = (Object.keys(diagrams) as DiagramType[]).find(key => 
                 diagrams[key]?.plantUmlCode === plantUmlCode
@@ -60,6 +61,7 @@ export const useDiagramGenerator = () => {
 
     const handleDiagramCodeUpdate = (key: DiagramType, code: string) => {
         updateProject(p => {
+            if (!p) return; // Defensive check
             const existingDiagram = p.diagrams.getDiagram(key);
             if (existingDiagram) {
                 const currentState = existingDiagram.toStateObject();
@@ -71,6 +73,7 @@ export const useDiagramGenerator = () => {
 
     const setDiagramExplanation = (key: DiagramType, explanation: string) => {
         updateProject(p => {
+            if (!p) return; // Defensive check
             const existingDiagram = p.diagrams.getDiagram(key);
             if (existingDiagram) {
                 const currentState = existingDiagram.toStateObject();

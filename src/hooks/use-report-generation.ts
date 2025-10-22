@@ -6,7 +6,6 @@
 import { SectionName } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { Project } from '@/lib/models/project';
 import { generateReportSectionApi } from '@/services';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from './use-toast';
@@ -14,7 +13,7 @@ import { useBuilderStore } from './useBuilderStore';
 
 export function useGenerateReportSection() {
   const { firebaseUser, refetchUser } = useAuth();
-  const { project, setProject } = useBuilderStore(); // Get project and setProject from the main store
+  const { updateProject } = useBuilderStore(); // Use the central updater function
 
   return useMutation({
     mutationFn: async (variables: { body: any }) => {
@@ -22,16 +21,18 @@ export function useGenerateReportSection() {
       return generateReportSectionApi(variables.body, token);
     },
     onSuccess: (data, variables) => {
-      if (!project) return;
 
       const sectionKey = variables.body.sectionToGenerate as SectionName;
       const content = Object.values(data)[0] as string;
 
-      // Use the Project model's method to update the content
-      project.updateSectionContent(sectionKey, content);
-
-      // Set the updated project instance back into the store
-      setProject(new Project(project.toStateObject()));
+      // Use the safe updater to modify the project state
+      updateProject(project => {
+        // Defensive check: Only update if the project exists.
+        if (project) {
+          // Access the SectionManager and call its method
+          project.sections.updateSection(sectionKey, content);
+        }
+      });
 
       refetchUser(); // To update credits
     },

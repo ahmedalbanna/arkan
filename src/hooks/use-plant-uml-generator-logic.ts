@@ -4,9 +4,9 @@
 import { type DiagramType } from "@/ai/schemas";
 import { useAuth } from "@/context/AuthContext";
 import { useBuilderStore } from "@/hooks/useBuilderStore";
-import { useGenerateDiagram, useUpdateDiagram } from "@/hooks/use-diagram-generation";
+import { useGenerateDiagram, useUpdateDiagram } from "@/hooks";
 import { getAuthenticatedToken } from "@/lib/authUtils";
-import { generatePlantUmlImageApi } from "@/services/plant-uml-service";
+
 import { useMutation } from "@tanstack/react-query";
 
 // This hook encapsulates the logic for the Plant UML generator.
@@ -63,3 +63,7 @@ export function usePlantUmlGeneratorLogic(diagramType: DiagramType) {
         getImageUrlMutation,
     };
 }
+function generatePlantUmlImageApi(arg0: { plantUmlCode: string; token: string; }) {
+    throw new Error("Function not implemented.");
+}
+

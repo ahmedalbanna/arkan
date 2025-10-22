@@ -9,6 +9,11 @@ import { subscribeToUserProfile, fetchUserProfileApi } from '@/services';
 import type { UserProfile } from '@/lib/types';
 import { userKeys } from '@/lib/query-keys';
 import { getAuthenticatedToken } from '@/lib/authUtils';
+import { initializeAgentListener } from '@/hooks/useAgentStore';
+
+// Initialize the agent data listener as soon as the app loads.
+// This setup ensures that agent data fetching is tied to the auth state.
+initializeAgentListener();
 
 interface AuthContextType {
   firebaseUser: FirebaseUser | null;

@@ -8,11 +8,10 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import type { AIResearcherOutput } from '@/ai/schemas';
-import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useProjects, useToast, useWritingTool } from '@/hooks';
-import { getAuthenticatedToken } from '@/lib/authUtils';
 import { addContextToProjectApi } from '@/services';
+import { projectKeys } from '@/lib/query-keys';
 
 const researcherSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic to research.'),
@@ -84,15 +83,16 @@ export function useAIResearcherLogic() {
 }
 
 export function useAddToProjectDialogLogic(researchMarkdown: string, researchTitle: string, onOpenChange: (open: boolean) => void) {
-  const { projects, isLoading, isError } = useProjects();
-  const { firebaseUser } = useAuth();
+  const { data: projects, isLoading, isError } = useProjects(); // Changed to use data from useProjects
   const queryClient = useQueryClient();
   const { t } = useLocalization();
+  const { toast } = useToast();
 
-  const mutation = useMutation({
+  const mutation = useMutation<any, Error, { projectId: string; contextFile: any; }>({ // Added explicit types
     mutationFn: addContextToProjectApi,
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['projects', variables.projectId] });
+      // Invalidate specific project query to refresh its context
+      queryClient.invalidateQueries({ queryKey: projectKeys.detail(variables.projectId) });
       toast({
         title: t('writingTools.aiResearcher.toastContextAddedTitle'),
         description: t('writingTools.aiResearcher.toastContextAddedDesc').replace('{researchTitle}', researchTitle)
@@ -104,10 +104,10 @@ export function useAddToProjectDialogLogic(researchMarkdown: string, researchTit
     }
   });
 
-  const handleSelectProject = async (projectId: string) => {
-    const token = await getAuthenticatedToken(firebaseUser);
+  const handleSelectProject = (projectId: string) => {
     const fileName = `${researchTitle.slice(0, 30).replace(/\s+/g, '_')}_research.md`;
-    mutation.mutate({ projectId, contextFile: { fileName, content: researchMarkdown, type: 'context' }, token });
+    // No longer need to manually handle the token
+    mutation.mutate({ projectId, contextFile: { fileName, content: researchMarkdown, type: 'context' } });
   };
 
   return {

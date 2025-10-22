@@ -3,10 +3,10 @@
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useDeleteProject } from '@/hooks';
-import type { Project } from '@/lib/models/project'; // Import the Project class
+import type { Project } from '@/lib/models/project';
 import { useRouter } from 'next/navigation';
 
-export function useProjectCardLogic(project: Project) { // Changed type to Project
+export function useProjectCardLogic(project: Project) {
     const router = useRouter();
     const { t } = useLocalization();
     const { loadProject } = useBuilderStore();
@@ -14,8 +14,9 @@ export function useProjectCardLogic(project: Project) { // Changed type to Proje
     const deleteProjectMutation = useDeleteProject();
 
     const handleLoadProject = () => {
-        // The store's loadProject action expects a plain object
-        loadProject(project.toStateObject());
+        // The store's loadProject action expects the raw project properties.
+        // The .toJSON() method serializes the Project instance into the correct format.
+        loadProject(project.toJSON());
         router.push('/generate');
     };
 
