@@ -8,9 +8,8 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useGenerateProposal, useGenerationUIStore, type AdvancedProposalFields } from '@/hooks';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from './use-toast';
-import { useFlow } from './use-writing-tools'; // Renamed from useWritingTool for clarity
+import { useFlow } from './use-writing-tools';
 
-// A list of all advanced field keys, used for checking completion status.
 const advancedFieldKeys: (keyof AdvancedProposalFields)[] = [
     'projectTitle', 'projectObjective', 'expectedOutcomes', 'stakeholders',
     'projectContext', 'risksAndChallenges', 'projectRationale', 'additionalContext',
@@ -18,9 +17,6 @@ const advancedFieldKeys: (keyof AdvancedProposalFields)[] = [
 ];
 
 export function useProposalGenerationToolsLogic() {
-    // =============================================================================
-    // HOOKS (MUST BE CALLED UNCONDITIONALLY)
-    // =============================================================================
     const { t } = useLocalization();
     const [activeTab, setActiveTab] = useState<'simple' | 'advanced'>('simple');
     const project = useBuilderStore(p => p.project);
@@ -33,19 +29,14 @@ export function useProposalGenerationToolsLogic() {
         onSuccess: (data) => {
             if (project) {
                 updateProject(p => {
-                    // Update all fields from the AI response
                     p.projectIdea = data.projectIdea;
                     p.advancedProposalFields = data.advancedFields;
                     p.hasUnsavedChanges = true;
                 });
-
-                // Also update the UI store to match
                 const store = useGenerationUIStore.getState();
-                store.setAdvancedField('projectTitle', data.advancedFields.projectTitle);
                 Object.entries(data.advancedFields).forEach(([key, value]) => {
                     store.setAdvancedField(key as keyof AdvancedProposalFields, value || '');
                 });
-
                 toast({ title: "Proposal Fields Completed", description: "The AI has filled in the missing fields for you." });
             }
         },
@@ -67,20 +58,14 @@ export function useProposalGenerationToolsLogic() {
         }
     }, [project?.id]);
 
-    // =============================================================================
-    // LOADING STATE
-    // =============================================================================
     if (!project) {
-        return { t, isProjectLoaded: false, activeTab, setActiveTab, projectIdea: '', setProjectIdea: () => {}, customGuidelines: [], addCustomGuideline: () => {}, removeCustomGuideline: () => {}, customGuidelineInput: '', setCustomGuidelineInput: () => {}, advancedFields: {}, handleFieldChange: () => {}, generationMutation: { isPending: false, mutate: () => {} }, handleGenerateClick: () => {}, canGenerate: false, hasCredits: false, suggestIdeaMutation: { isPending: false, mutate: () => {} }, handleSuggestIdea: () => {}, isSuggestionDisabled: true };
+        return { t, isProjectLoaded: false, activeTab, setActiveTab, projectIdea: '', setProjectIdea: () => {}, customGuidelines: [], addCustomGuideline: () => {}, removeCustomGuideline: () => {}, customGuidelineInput: '', setCustomGuidelineInput: () => {}, advancedFields: {}, handleFieldChange: () => {}, generationMutation: { isPending: false, mutate: () => {} }, handleGenerateClick: () => {}, canGenerate: false, hasCredits: false, suggestIdeaMutation: { isPending: false, mutate: () => {} }, handleSuggestIdea: () => {}, isSuggestionDisabled: true, suggestionButtonText: "Suggest Idea" };
     }
 
-    // =============================================================================
-    // PROJECT-DEPENDENT LOGIC
-    // =============================================================================
     const { projectIdea, contextManager, advancedProposalFields } = project;
     const hasCredits = (userProfile?.credits ?? 0) >= 1;
 
-    const setProjectIdea = (idea: string) => updateProject(p => { p.projectIdea = idea; });
+    const setProjectIdea = (idea: string) => updateProject(p => { p.projectIdea = idea; p.hasUnsavedChanges = true; });
 
     const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -111,32 +96,32 @@ export function useProposalGenerationToolsLogic() {
     };
 
     const handleSuggestIdea = () => {
-        const currentState = {
-            projectIdea: project.projectIdea || '',
-            advancedFields: project.advancedProposalFields || {},
-        };
+        const currentState = { projectIdea: project.projectIdea || '', advancedFields: project.advancedProposalFields || {} };
         suggestIdeaMutation.mutate(currentState);
     };
 
     const isSuggestionDisabled = useMemo(() => {
         const isIdeaEmpty = !project.projectIdea?.trim();
-        const areAllAdvancedFieldsFilled = advancedFieldKeys.every(
-            key => project.advancedProposalFields && project.advancedProposalFields[key]?.trim()
-        );
+        const areAllAdvancedFieldsFilled = advancedFieldKeys.every(key => project.advancedProposalFields && project.advancedProposalFields[key]?.trim());
         return !isIdeaEmpty && areAllAdvancedFieldsFilled;
     }, [project.projectIdea, project.advancedProposalFields]);
 
-    const canGenerate = (activeTab === 'simple' && !!projectIdea) || (activeTab === 'advanced' && !!uiStore.advancedProposalFields?.projectTitle && !!uiStore.advancedProposalFields?.projectObjective);
+    const suggestionButtonText = useMemo(() => {
+        const isIdeaEmpty = !project.projectIdea?.trim();
+        const areSomeAdvancedFieldsFilled = advancedFieldKeys.some(key => project.advancedProposalFields && project.advancedProposalFields[key]?.trim());
+        if (!isIdeaEmpty) return "أكمل بذكاء";
+        if (isIdeaEmpty && areSomeAdvancedFieldsFilled) return "المساعدة في فكرة المقترح";
+        return "اقتراح فكرة";
+    }, [project.projectIdea, project.advancedProposalFields]);
+
+    const canGenerate = useMemo(() => (activeTab === 'simple' && !!projectIdea) || (activeTab === 'advanced' && !!uiStore.advancedProposalFields?.projectTitle && !!uiStore.advancedProposalFields?.projectObjective), [activeTab, projectIdea, uiStore.advancedProposalFields]);
 
     return {
-        t, isProjectLoaded: true, activeTab, setActiveTab,
-        projectIdea, setProjectIdea,
+        t, isProjectLoaded: true, activeTab, setActiveTab, projectIdea, setProjectIdea,
         customGuidelines: uiStore.guidelineState['proposal']?.custom || [],
         addCustomGuideline: handleAddGuideline, removeCustomGuideline: handleRemoveGuideline,
-        customGuidelineInput: uiStore.customGuidelineInput['proposal'] || '',
-        setCustomGuidelineInput: handleGuidelineInputChange,
-        advancedFields: uiStore.advancedProposalFields,
-        handleFieldChange, generationMutation, handleGenerateClick, canGenerate, hasCredits,
-        suggestIdeaMutation, handleSuggestIdea, isSuggestionDisabled,
+        customGuidelineInput: uiStore.customGuidelineInput['proposal'] || '', setCustomGuidelineInput: handleGuidelineInputChange,
+        advancedFields: uiStore.advancedProposalFields, handleFieldChange, generationMutation, handleGenerateClick, canGenerate, hasCredits,
+        suggestIdeaMutation, handleSuggestIdea, isSuggestionDisabled, suggestionButtonText,
     };
 }
