@@ -1,6 +1,6 @@
 
 import { generate } from '@genkit-ai/ai';
-import { defineFlow } from '@genkit-ai/flow';
+import { ai } from '@/ai/genkit';
 import { gemini20Flash } from '@genkit-ai/googleai';
 import { proposalCompletionInputSchema, proposalCompletionOutputSchema } from '../schemas/proposal-completion';
 
@@ -26,14 +26,14 @@ Here is the current state of the proposal:
 Provide the completed proposal based on these instructions.
 `;
 
-export const completeProposalFieldsFlow = defineFlow(
+export const completeProposalFieldsFlow = ai.defineFlow(
   {
     name: 'completeProposalFieldsFlow',
     inputSchema: proposalCompletionInputSchema,
     outputSchema: proposalCompletionOutputSchema,
   },
   async (input) => {
-    const response = await generate({
+    const response = await ai.generate({
       model: gemini20Flash,
       prompt: PROMPT.replace('{input_json}', JSON.stringify(input, null, 2)),
       config: {
