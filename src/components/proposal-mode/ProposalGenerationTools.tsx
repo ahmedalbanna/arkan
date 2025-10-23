@@ -13,7 +13,6 @@ import { useProposalGenerationToolsLogic } from '@/hooks/use-proposal-generation
 import { cn } from '@/lib/utils';
 import { Lightbulb, Loader2, Plus, SlidersHorizontal, Sparkles, Trash2 } from 'lucide-react';
 
-// ... (GenerateButton and other components remain the same)
 interface GenerateButtonProps {
     isGenerating: boolean;
     generationMode: 'simple' | 'advanced';
@@ -46,35 +45,38 @@ function GenerateButton({ isGenerating, generationMode }: GenerateButtonProps) {
     );
 }
 
+interface ProposalGenerationToolsProps {
+    isDisabled: boolean;
+}
+
 const AdvancedFieldsForm = () => {
     const { advancedFields, handleFieldChange } = useProposalGenerationToolsLogic();
 
     return (
         <div className="space-y-4">
-            {/* ... (form fields) ... */}
             <div className="space-y-1">
                 <Label htmlFor="projectTitle">Project Title</Label>
-                <Input id="projectTitle" name="projectTitle" value={advancedFields.projectTitle || ''} onChange={handleFieldChange} placeholder="Enter the project title..." />
+                <Input id="projectTitle" name="projectTitle" value={advancedFields.projectTitle} onChange={handleFieldChange} placeholder="Enter the project title..." />
                 <p className="text-xs text-muted-foreground">A clear, concise title that captures the essence of your project.</p>
             </div>
             <div className="space-y-1">
                 <Label htmlFor="projectObjective">Project Objective</Label>
-                <Textarea id="projectObjective" name="projectObjective" value={advancedFields.projectObjective || ''} onChange={handleFieldChange} rows={3} placeholder="Describe the main objective of the project..." />
+                <Textarea id="projectObjective" name="projectObjective" value={advancedFields.projectObjective} onChange={handleFieldChange} rows={3} placeholder="Describe the main objective of the project..." />
                 <p className="text-xs text-muted-foreground">What is the primary goal this project aims to achieve?</p>
             </div>
             <div className="space-y-1">
                 <Label htmlFor="expectedOutcomes">Expected Outcomes</Label>
-                <Textarea id="expectedOutcomes" name="expectedOutcomes" value={advancedFields.expectedOutcomes || ''} onChange={handleFieldChange} rows={3} placeholder="List the expected outcomes and deliverables..." />
+                <Textarea id="expectedOutcomes" name="expectedOutcomes" value={advancedFields.expectedOutcomes} onChange={handleFieldChange} rows={3} placeholder="List the expected outcomes and deliverables..." />
                 <p className="text-xs text-muted-foreground">What specific results and deliverables do you expect from this project?</p>
             </div>
             <div className="space-y-1">
                 <Label htmlFor="timeline">Timeline</Label>
-                <Input id="timeline" name="timeline" value={advancedFields.timeline || ''} onChange={handleFieldChange} placeholder="e.g., 6 months, Q4 2024" />
+                <Input id="timeline" name="timeline" value={advancedFields.timeline} onChange={handleFieldChange} placeholder="e.g., 6 months, Q4 2024" />
                 <p className="text-xs text-muted-foreground">What is the estimated duration of the project?</p>
             </div>
             <div className="space-y-1">
                 <Label htmlFor="methodology">Methodology</Label>
-                <Input id="methodology" name="methodology" value={advancedFields.methodology || ''} onChange={handleFieldChange} placeholder="e.g., Agile, Waterfall, Scrum" />
+                <Input id="methodology" name="methodology" value={advancedFields.methodology} onChange={handleFieldChange} placeholder="e.g., Agile, Waterfall, Scrum" />
                 <p className="text-xs text-muted-foreground">What approach or process will be followed for this project?</p>
             </div>
             <div className="space-y-1">
@@ -86,10 +88,36 @@ const AdvancedFieldsForm = () => {
     )
 }
 
+const ToolsSkeleton = () => (
+    <Card className="flex flex-col h-full">
+        <CardHeader>
+            <div className="flex justify-between items-center">
+                <div>
+                    <Skeleton className="h-6 w-48 mb-2" />
+                    <Skeleton className="h-4 w-64" />
+                </div>
+            </div>
+        </CardHeader>
+        <CardContent className="flex-grow space-y-6">
+            {/* Tabs skeleton */}
+            <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-24 w-full" />
+            </div>
+            {/* Accordion skeleton */}
+            <div className="space-y-2">
+                <Skeleton className="h-12 w-full" />
+            </div>
+        </CardContent>
+        <CardFooter>
+            <Skeleton className="h-10 w-full" />
+        </CardFooter>
+    </Card>
+);
 
 export const ProposalGenerationTools = ({
     isDisabled,
-}: { isDisabled: boolean }) => {
+}: ProposalGenerationToolsProps) => {
 
     const {
         t,
@@ -105,15 +133,8 @@ export const ProposalGenerationTools = ({
         generationMutation,
         suggestIdeaMutation,
         handleSuggestIdea,
-        isSuggestionDisabled,
-        suggestionButtonText, // <-- Get the new props
     } = useProposalGenerationToolsLogic();
 
-    // Skeleton UI for loading state
-    if (!projectIdea && !isDisabled && !useProposalGenerationToolsLogic().isProjectLoaded) {
-        return <ToolsSkeleton />;
-    }
-    
     return (
         <Card className={cn("flex flex-col h-full backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200", isDisabled && 'opacity-50 pointer-events-none')}>
             <CardHeader className="bg-gradient-to-r from-primary/5 to-blue-500/5">
@@ -130,19 +151,9 @@ export const ProposalGenerationTools = ({
                         <div>
                             <div className="flex justify-between items-center mb-1">
                                 <Label htmlFor="project-idea">{t('builder.proposalGenerator.mainSubjectLabel')}</Label>
-                                {/* --- UPDATED BUTTON --- */}
-                                <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    onClick={handleSuggestIdea} 
-                                    disabled={isSuggestionDisabled || suggestIdeaMutation.isPending}
-                                    title={isSuggestionDisabled ? "All fields are already filled." : "Use AI to complete the fields"}
-                                >
-                                    {suggestIdeaMutation.isPending ? 
-                                        <Loader2 className="me-2 h-4 w-4 animate-spin" /> : 
-                                        <Lightbulb className="me-2 h-4 w-4" />
-                                    }
-                                    {suggestIdeaMutation.isPending ? t('builder.common.loading') : suggestionButtonText}
+                                <Button variant="ghost" size="sm" onClick={handleSuggestIdea} disabled={suggestIdeaMutation.isPending}>
+                                    {suggestIdeaMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Lightbulb className="me-2 h-4 w-4" />}
+                                    Suggest Idea
                                 </Button>
                             </div>
                             <Textarea
@@ -167,7 +178,29 @@ export const ProposalGenerationTools = ({
                     <AccordionItem value="item-1">
                         <AccordionTrigger className="font-semibold text-base"><SlidersHorizontal className="me-2 h-4 w-4" />{t('builder.proposalGenerator.generationSettings')}</AccordionTrigger>
                         <AccordionContent className="pt-4 space-y-4">
-                            {/* ... (guidelines form) ... */}
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.proposalGenerator.customGuidelinesLabel')}</Label>
+                                {customGuidelines.map((custom, index) => (
+                                    <div key={index} className="flex items-center gap-2 text-sm">
+                                        <span>- {custom}</span>
+                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => removeCustomGuideline(index)} disabled={generationMutation.isPending}>
+                                            <Trash2 className="h-3 w-3 text-destructive" />
+                                        </Button>
+                                    </div>
+                                ))}
+                                <div className="flex gap-2">
+                                    <Input
+                                        placeholder={t('builder.proposalGenerator.addGuidelinePlaceholder')}
+                                        value={customGuidelineInput}
+                                        onChange={(e) => setCustomGuidelineInput(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddGuideline())}
+                                        disabled={generationMutation.isPending}
+                                    />
+                                    <Button type="button" variant="secondary" onClick={handleAddGuideline} disabled={generationMutation.isPending}>
+                                        <Plus className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
@@ -178,28 +211,3 @@ export const ProposalGenerationTools = ({
         </Card>
     );
 };
-
-const ToolsSkeleton = () => (
-    <Card className="flex flex-col h-full">
-        <CardHeader>
-            <div className="flex justify-between items-center">
-                <div>
-                    <Skeleton className="h-6 w-48 mb-2" />
-                    <Skeleton className="h-4 w-64" />
-                </div>
-            </div>
-        </CardHeader>
-        <CardContent className="flex-grow space-y-6">
-            <div className="space-y-2">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-24 w-full" />
-            </div>
-            <div className="space-y-2">
-                <Skeleton className="h-12 w-full" />
-            </div>
-        </CardContent>
-        <CardFooter>
-            <Skeleton className="h-10 w-full" />
-        </CardFooter>
-    </Card>
-);

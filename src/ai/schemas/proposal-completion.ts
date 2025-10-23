@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-import { advancedProposalFieldsSchema } from './project';
+import { advancedProposalFieldsSchema } from './project-schema'; // Corrected import path
 
 /**
  * Defines the input schema for the proposal completion AI flow.

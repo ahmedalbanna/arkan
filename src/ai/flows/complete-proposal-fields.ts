@@ -1,7 +1,5 @@
 
-import { generate } from '@genkit-ai/ai';
-import { ai } from '@/ai/genkit';
-import { gemini20Flash } from '@genkit-ai/googleai';
+import { ai } from '@/ai/genkit'; // Correct: Use the central AI object
 import { proposalCompletionInputSchema, proposalCompletionOutputSchema } from '../schemas/proposal-completion';
 
 const PROMPT = `
@@ -26,6 +24,7 @@ Here is the current state of the proposal:
 Provide the completed proposal based on these instructions.
 `;
 
+// Correct pattern: Use ai.defineFlow
 export const completeProposalFieldsFlow = ai.defineFlow(
   {
     name: 'completeProposalFieldsFlow',
@@ -33,8 +32,9 @@ export const completeProposalFieldsFlow = ai.defineFlow(
     outputSchema: proposalCompletionOutputSchema,
   },
   async (input) => {
-    const response = await ai.generate({
-      model: gemini20Flash,
+    // Correct pattern: Use ai.generate
+    const llmResponse = await ai.generate({
+      model: 'gemini-pro', // Let the AI core handle the specific model object
       prompt: PROMPT.replace('{input_json}', JSON.stringify(input, null, 2)),
       config: {
         temperature: 0.7,
@@ -45,6 +45,12 @@ export const completeProposalFieldsFlow = ai.defineFlow(
       },
     });
 
-    return response.output();
+    const result = llmResponse.output;
+
+    if (!result) {
+        throw new Error("AI failed to return a valid output.");
+    }
+
+    return result;
   }
 );

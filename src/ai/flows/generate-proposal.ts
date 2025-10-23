@@ -34,35 +34,31 @@ export const generateProposal = ai.defineFlow(
     outputSchema: z.any(),
   },
   async (input): Promise<AnyProjectProposal> => {
-    const { projectIdea, externalContext, guidelines } = input;
-    let initialOutput: AnyProjectProposal;
-
     try {
       // 1. التوليد الأولي باستخدام النظام المحسن
       console.log('🚀 بدء التوليد الأولي بالنظام المحسن...');
-      const { output } = await generateProposalPrompt({ 
+      const { output: initialOutput } = await generateProposalPrompt({ 
         ...input, 
         useEnhancedSystem: true // تفعيل النظام المحسن في الـ prompt
       });
 
-      if (!output) {
+      if (!initialOutput) {
         throw new Error("فشل التوليد الأولي في إنتاج مخرجات.");
       }
-      initialOutput = output;
       console.log('✅ نجح التوليد الأولي.');
 
       // 2. تحليل السياق وتقييم الجودة
       console.log('📊 تحليل السياق لتقييم الجودة...');
       const contextAnalysis = await ContextAnalyzer.analyzeContext({
-        userInput: projectIdea || '',
-        externalContext,
-        guidelines,
+        userInput: input.projectIdea || '',
+        externalContext: input.externalContext,
+        guidelines: input.guidelines,
       });
 
       console.log('🔍 تقييم جودة المخرجات الأولية...');
       const validation = await OutputQualityValidator.validateOutput(
         JSON.stringify(initialOutput),
-        projectIdea || '',
+        input.projectIdea || '',
         contextAnalysis
       );
       console.log(`📈 نقاط الجودة الأولية: ${validation.metrics.overall}/100`);
@@ -71,10 +67,10 @@ export const generateProposal = ai.defineFlow(
       if (validation.needsImprovement && validation.metrics.overall < 85) {
         console.log('🔄 بدء التحسين التكراري...');
         const improvementSession = await IterativeImprovementEngine.runImprovementSession(
-          projectIdea || '',
+          input.projectIdea || '',
           'generation',
           'project-proposals',
-          externalContext,
+          input.externalContext,
           {
             maxIterations: 2,
             qualityThreshold: 85,
@@ -89,7 +85,7 @@ export const generateProposal = ai.defineFlow(
           try {
             const improvedOutput = JSON.parse(bestResult.output);
             console.log('🎉 تم اعتماد المخرجات المحسنة.');
-            return improvedOutput;
+            return improvedOutput; // <- إرجاع النتيجة المحسنة فورًا
           } catch (parseError) {
             console.warn('⚠️ فشل في تحليل المخرجات المحسنة، سيتم استخدام النتيجة الأولية.');
           }
@@ -100,6 +96,9 @@ export const generateProposal = ai.defineFlow(
         console.log('✅ جودة المخرجات مقبولة، لا حاجة للتحسين.');
       }
 
+      // 🏆 القيمة المرجعة الافتراضية هي النتيجة الأولية
+      // سيتم الوصول إلى هنا إذا لم تكن هناك حاجة للتحسين، أو إذا فشل التحسين
+      console.log('↪️ إرجاع النتيجة الأولية.');
       return initialOutput;
 
     } catch (error) {
