@@ -48,6 +48,8 @@ export function useTaskCardLogic({ phaseIndex, taskIndex, fieldName }: UseTaskCa
 
   return {
     ...sectionLogic,
+    // Provide a default fallback for ttsMutation to prevent crash
+    ttsMutation: sectionLogic.ttsMutation || { isPending: false },
     projectPlan: project?.projectPlan,
   };
 }
