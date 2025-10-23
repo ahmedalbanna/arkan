@@ -27,12 +27,10 @@ export function GuidelineEditor({ itemKey, agentId, isAdmin }: GuidelineEditorPr
         hasGuidelines,
         currentGuidelineState,
         customGuidelineInput,
-        oneTimeInstruction,
         handleGuidelineToggle,
         setCustomGuidelineInputForItem,
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
-        setOneTimeInstruction,
     } = useGuidelineEditor(itemKey, agentId);
 
     if (!agentsLoaded) {
@@ -51,18 +49,6 @@ export function GuidelineEditor({ itemKey, agentId, isAdmin }: GuidelineEditorPr
                     <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
                 </div>
             </div>
-            
-            <div className="space-y-2">
-                <Label htmlFor={`one-time-instructions-${itemKey}`} className="text-xs font-semibold text-muted-foreground">Instructions for this generation</Label>
-                <Textarea
-                    id={`one-time-instructions-${itemKey}`}
-                    placeholder="e.g., 'Focus on the financial benefits' or 'Keep the tone very formal.'"
-                    value={oneTimeInstruction || ''}
-                    onChange={(e) => setOneTimeInstruction(itemKey, e.target.value)}
-                    rows={3}
-                />
-            </div>
-
 
             {hasGuidelines && (
                 <div className="space-y-2">

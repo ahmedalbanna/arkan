@@ -1,14 +1,19 @@
-
 'use client';
 
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { type SectionName as SectionNameType, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, GripVertical } from 'lucide-react';
+import { Loader2, Sparkles, GripVertical, SlidersHorizontal, StickyNote, Link as LinkIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSectionAccordionItemLogic } from '@/hooks';
 import type { Agent } from '@/lib/models/agent';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { SectionGenerationControls } from './SectionGenerationControls';
+import { GuidelineEditor } from './SectionGuidelineEditor';
+import { useAuth } from '@/context/AuthContext';
+import { ContextSelector } from './SectionContextSelector';
+
 
 export const SectionAccordionItem = ({
     itemKey,
@@ -31,7 +36,9 @@ export const SectionAccordionItem = ({
         t,
         title,
         disabledReason,
-    } = useSectionAccordionItemLogic(agent); // Pass the full agent object
+    } = useSectionAccordionItemLogic(agent);
+
+    const { userProfile } = useAuth();
 
     const canGenerate = hasCredits && !isAnythingGenerating;
 
@@ -75,8 +82,25 @@ export const SectionAccordionItem = ({
                     </TooltipProvider>
                 </div>
             </div>
-            <AccordionContent className="p-4 border-t text-xs text-muted-foreground">
-                {t('builder.reportGenerator.autoContextNote')}
+            <AccordionContent>
+                <div className="border-t px-4 pt-4">
+                     <Tabs defaultValue="controls" className="w-full">
+                        <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="controls"><SlidersHorizontal className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_controls')}</TabsTrigger>
+                            <TabsTrigger value="prompt"><StickyNote className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_prompt')}</TabsTrigger>
+                            <TabsTrigger value="context"><LinkIcon className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="controls" className="py-4">
+                            <SectionGenerationControls sectionKey={itemKey as SectionNameType} />
+                        </TabsContent>
+                        <TabsContent value="prompt" className="py-4">
+                            <GuidelineEditor itemKey={itemKey} agentId={agent.id} isAdmin={userProfile?.role === 'admin'}/>
+                        </TabsContent>
+                         <TabsContent value="context" className="py-4">
+                            <ContextSelector itemKey={itemKey} />
+                        </TabsContent>
+                    </Tabs>
+                </div>
             </AccordionContent>
         </AccordionItem>
     );

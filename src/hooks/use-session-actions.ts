@@ -3,36 +3,10 @@
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useSaveProject, useToast, useUpdateProject, useExport } from '@/hooks';
-import { Project } from '@/lib/models/project';
-import type { SavedProject } from '@/lib/types';
+import { Project, type ProjectProperties, type SavedProject } from '@/lib/models/project';
+import { useAuth } from '@/context/AuthContext';
 import { saveAs } from 'file-saver';
-import { useRef, useState, useEffect } from 'react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Download, Trash2, Save, FileJson, Upload, Cloud, Share2 } from 'lucide-react';
-import React from 'react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Loader2 } from 'lucide-react';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
-import { ReportExportDialog } from '../project/ExportDialogs';
-
+import { useRef, useState } from 'react';
 
 function hasAnyContent(project: Project | null): boolean {
     if (!project) return false;
@@ -57,7 +31,6 @@ export function useSessionActions() {
     const [isSavePromptOpen, setIsSavePromptOpen] = useState(false);
     const [projectName, setProjectName] = useState('');
 
-    // Subscribe to the project and hasUnsavedChanges states directly
     const project = useBuilderStore(state => state.project);
     const hasUnsavedChanges = useBuilderStore(state => state.hasUnsavedChanges);
     const { loadProject, newSession, updateProject } = useBuilderStore();
@@ -65,26 +38,8 @@ export function useSessionActions() {
     const saveProjectMutation = useSaveProject();
     const updateProjectMutation = useUpdateProject();
 
-    // --- Start of Export Logic Integration ---
     const { exportProposal, exportReportDocx, exportPresentationPptx, isExporting } = useExport();
-
-    const handleExportProposal = async (format: 'docx' | 'pdf') => {
-        if (project && project.proposal) {
-            await exportProposal(format, project);
-        }
-    }
-
-    const handleExportReport = async (sectionsToInclude: string[]) => {
-        if (!project || !hasAnyContent(project)) return;
-         await exportReportDocx(project, {}, sectionsToInclude);
-    };
-
-    const handleExportPresentation = async () => {
-        if (!project || !project.presentation?.history.length) return;
-        const latestPresentation = project.presentation.history[0];
-        await exportPresentationPptx(project, latestPresentation.id);
-    }
-    // --- End of Export Logic Integration ---
+    const { firebaseUser } = useAuth();
 
     const isSaving = saveProjectMutation.isPending || updateProjectMutation.isPending;
 
@@ -103,8 +58,6 @@ export function useSessionActions() {
                 const content = e.target?.result as string;
                 const decodedJson = decodeURIComponent(escape(atob(content)));
                 const parsedState = JSON.parse(decodedJson);
-                // Here, you would ideally validate the parsedState against a Zod schema
-                // before loading it into the store to ensure data integrity.
                 loadProject(parsedState as SavedProject);
             } catch (error) {
                 console.error('Failed to load project file:', error);
@@ -137,7 +90,6 @@ export function useSessionActions() {
             updateProject(p => { p.name = name; });
         }
 
-        // It's crucial to get the latest state right before mutation
         const projectToSave = useBuilderStore.getState().project!;
         const projectData = projectToSave.toStateObject();
         const finalName = projectToSave.name || 'Untitled Project';
@@ -200,6 +152,23 @@ export function useSessionActions() {
         setSaveAsName('');
     }
 
+    const handleExportProposal = async (format: 'docx' | 'pdf') => {
+        if (project && project.proposal) {
+            await exportProposal(format, project);
+        }
+    }
+
+    const handleExportReport = async (sectionsToInclude: string[]) => {
+        if (!project || !hasAnyContent(project)) return;
+         await exportReportDocx(project, {}, sectionsToInclude);
+    };
+
+    const handleExportPresentation = async () => {
+        if (!project || !project.presentation?.history.length) return;
+        const latestPresentation = project.presentation.history[0];
+        await exportPresentationPptx(project, latestPresentation.id);
+    }
+
     return {
         fileInputRef,
         isSaveAsOpen,
@@ -220,11 +189,10 @@ export function useSessionActions() {
         handleDownloadAs,
         hasContent: hasAnyContent(project),
         t,
-        // New exports for export functionality
         isExporting,
         handleExportProposal,
         handleExportReport,
         handleExportPresentation,
-        hasUnsavedChanges, // Expose the reactive state
+        hasUnsavedChanges,
     };
 }

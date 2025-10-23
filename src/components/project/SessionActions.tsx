@@ -55,6 +55,7 @@ export const SessionActions = () => {
         handleExportReport,
         handleExportPresentation,
         handleExportProposal, // New handler
+        hasUnsavedChanges,
     } = useSessionActions();
 
     const isBusy = isSaving || isExporting;
@@ -91,7 +92,7 @@ export const SessionActions = () => {
                     variant="default"
                     size="icon"
                     onClick={handleSave}
-                    disabled={!project?.hasUnsavedChanges || isBusy}
+                    disabled={!hasUnsavedChanges || isBusy}
                     className="h-8 w-8 md:w-auto md:px-3"
                 >
                     {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}

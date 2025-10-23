@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useAgents, useUpdateAgent, useAgentCategories } from '@/hooks';
@@ -15,8 +14,8 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useState, useMemo } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { CreateAgentDialog } from '@/components/admin/users/CreateAgentDialog';
-import { CreateCategoryDialog } from '@/components/admin/users/CreateCategoryDialog';
 import { Input } from '@/components/ui/input';
+import { CategoryManagerDialog } from '@/components/admin/agent-editor/CategoryManagerDialog';
 
 function AgentSkeleton() {
   return (
@@ -136,7 +135,9 @@ export default function AgentManager() {
                     {t('agentManager.newAgentAiButton')}
                 </Link>
             </Button>
-            <CreateCategoryDialog />
+            <CategoryManagerDialog>
+                <Button size="sm" variant="outline"><Pencil className="me-2 h-4 w-4" />Manage Categories</Button>
+            </CategoryManagerDialog>
             <CreateAgentDialog />
         </div>
       </div>

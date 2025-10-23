@@ -1,7 +1,5 @@
 
-// code explantion in docs/hooks/use-projects.md
-
-"use client";
+'use client';
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks";

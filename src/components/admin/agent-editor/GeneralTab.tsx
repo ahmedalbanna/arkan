@@ -1,29 +1,32 @@
 
-
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { CardTitle } from '@/components/ui/card';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 import { AgentEditorFormValues } from '@/lib/agent-editor-schema';
 import { type AgentCategoryDetails as AgentCategory, type AgentPrompt } from '@/lib/types';
-import { MessageSquare, Plus, X } from 'lucide-react';
+import { MessageSquare, Plus, X, Pencil, Copy, Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
+import { toast } from '@/hooks';
 
 interface GeneralTabProps {
+  agentId: string;
   isComplexPrompt: boolean;
   isPending: boolean;
   categories: AgentCategory[];
 }
 
-export default function GeneralTab({ isComplexPrompt, isPending, categories }: GeneralTabProps) {
+export default function GeneralTab({ agentId, isComplexPrompt, isPending, categories }: GeneralTabProps) {
   const { control, watch } = useFormContext<AgentEditorFormValues>();
   const { t } = useLocalization();
+  const [isCopied, setIsCopied] = useState(false);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -43,9 +46,26 @@ export default function GeneralTab({ isComplexPrompt, isPending, categories }: G
     }
   }, [promptValue, isComplexPrompt]);
 
+  const handleCopyId = () => {
+    navigator.clipboard.writeText(agentId);
+    setIsCopied(true);
+    toast({ title: "Agent ID Copied!"});
+    setTimeout(() => setIsCopied(false), 2000);
+  }
+
   return (
     <div className='space-y-6'>
       <CardTitle>{t('agentEditor.generalTitle')}</CardTitle>
+
+      <div className="space-y-2">
+        <Label htmlFor="agent-id">{t('agentEditor.idLabel')}</Label>
+        <div className="flex items-center gap-2">
+            <Input id="agent-id" value={agentId} readOnly disabled className="font-mono" />
+            <Button type="button" variant="ghost" size="icon" onClick={handleCopyId}>
+                {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+            </Button>
+        </div>
+      </div>
 
       <FormField
         control={control}

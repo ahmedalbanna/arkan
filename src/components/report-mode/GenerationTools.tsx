@@ -5,6 +5,7 @@ import React from 'react';
 import { Accordion } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { type SectionName as SectionNameType } from '@/ai/schemas';
 import { PanelLeftClose } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useUpdateAgent } from '@/hooks';
@@ -7,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useAgentCategories } from './use-agents';
 
 interface UseAgentEditorProps {
     agentId: string;
@@ -17,6 +19,7 @@ export function useAgentEditor({ agentId, initialData }: UseAgentEditorProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const updateAgentMutation = useUpdateAgent();
+    const { data: categories, isLoading: categoriesLoading } = useAgentCategories();
 
     const form = useForm<AgentEditorFormValues>({
         resolver: zodResolver(agentEditorSchema),
@@ -63,5 +66,7 @@ export function useAgentEditor({ agentId, initialData }: UseAgentEditorProps) {
         isPending: updateAgentMutation.isPending,
         handleSubmit,
         router,
+        categories,
+        categoriesLoading
     };
 }

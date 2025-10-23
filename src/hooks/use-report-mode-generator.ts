@@ -14,7 +14,8 @@ import { AgentCategory } from '@/lib/models/agent';
 import { Section } from '@/lib/models/section';
 import { useAuth } from '@/context/AuthContext';
 import { useGenerationUIStore } from './useGenerationUIStore';
-
+import { getSelectedGuidelines } from '@/lib/guideline-utils';
+import { useSections } from './use-sections';
 
 export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: { orderedSections: Section[], setOrderedSections: (sections: Section[]) => void; }) => {
     const { t, locale } = useLocalization();
@@ -26,6 +27,9 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     const { exportReportDocx, isExporting } = useExport();
     const { agents, isLoaded: agentsLoaded } = useAgents();
 
+    // Use the new useSections hook to get section configurations
+    const { data: sectionConfigs, isLoaded: sectionsLoaded } = useSections();
+    
     const reportAgents = useMemo(() => {
         if (!agents) return [];
         return agents.filter(a => a.category === AgentCategory.ReportGeneration);
@@ -40,7 +44,9 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
 
     const handleSectionUpdate = (key: SectionName, value: string) => {
         if (!project) return;
-        setProject(new Project({ ...project.toStateObject(), sections: { ...project.sections, [key]: value } }));
+        project.updateSectionContent(key, value);
+        // Create a new Project instance to trigger a re-render in components that use the project object.
+        setProject(new Project(project.toStateObject()));
     };
 
     const handleTranslateAll = async (targetLang: 'en' | 'ar') => {
@@ -95,13 +101,14 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     // --- Start of logic from use-report-generation-logic ---
     const { userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = useState<string | null>(null);
-    const { initializeDependentStates } = useGenerationUIStore();
+    const { initializeDependentStates,guidelineState, controlState } = useGenerationUIStore();
 
     const reportGenerationMutation = useGenerateReportSection();
     const isAnythingGenerating = reportGenerationMutation.isPending;
 
     const onGenerateSection = async (section: SectionName) => {
         if (!project) return;
+        const agent = agents.find(a => a.id === sectionConfigs?.find(s => s.id === section)?.agentId);
         
         const body = {
             proposal: project.proposal,
@@ -111,6 +118,8 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
             otherDiagrams: Object.fromEntries(Object.entries(project.diagrams || {}).map(([key, value]) => [key, value?.plantUmlCode])),
             exampleFiles: project.externalContext?.filter((c: any) => c.type === 'example'),
             contextFiles: project.externalContext?.filter((c: any) => c.type === 'context'),
+            guidelines: getSelectedGuidelines(agent, guidelineState[section]),
+            instructionText: `Tone: ${controlState[section]?.tone}. Formality: ${controlState[section]?.formality / 100}. Word Count: approx ${controlState[section]?.wordCount || 300}`,
         };
 
         setActiveMutationKey(section);

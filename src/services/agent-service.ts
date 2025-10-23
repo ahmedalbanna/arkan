@@ -44,6 +44,31 @@ export async function createAgentCategoryApi(data: { id: string; name: string },
     return response.json();
 }
 
+export async function updateAgentCategoryApi(data: { id: string; name: string }, token: string): Promise<AgentCategoryDetails> {
+    const response = await fetch(`/api/admin/agent-categories/${data.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ name: data.name }),
+    });
+     if (!response.ok) {
+        const error = await response.json();
+        throw error;
+    }
+    return response.json();
+}
+
+export async function deleteAgentCategoryApi(id: string, token: string): Promise<{ message: string }> {
+     const response = await fetch(`/api/admin/agent-categories/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+    });
+     if (!response.ok) {
+        const error = await response.json();
+        throw error;
+    }
+    return response.json();
+}
+
 
 /**
  * Fetches the configuration for a single agent by its ID.

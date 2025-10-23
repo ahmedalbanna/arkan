@@ -6,6 +6,7 @@ export * from './use-agent-editor';
 export * from './use-agents';
 export * from './use-analytics';
 export * from './use-chat';
+export * from './use-context-selector'; // Add new hook
 export * from './use-create-agent-dialog';
 export * from './use-create-category-dialog';
 export * from './use-create-project-dialog';
@@ -20,7 +21,7 @@ export * from './use-evaluation-result-viewer';
 export * from './use-evaluation-tools';
 export * from './use-export';
 export * from './use-features';
-export * from './use-guideline-editor'; // Export new hook
+export * from './use-guideline-editor'; 
 export * from './use-mobile';
 export * from './use-new-chat-dialog';
 export * from './use-notifications';
@@ -37,7 +38,7 @@ export * from './use-task-card-logic';
 
 export * from './use-report-generation';
 export * from './use-report-mode-generator';
-export * from './use-section-accordion-item-logic'; // Export new hook
+export * from './use-section-accordion-item-logic'; 
 export * from './use-section-logic';
 export * from './use-sections';
 export * from './use-session-actions';

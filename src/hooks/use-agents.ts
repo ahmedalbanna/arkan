@@ -17,6 +17,8 @@ import {
   generateAgentConfigApi,
   fetchAgentCategoriesApi,
   createAgentCategoryApi,
+  updateAgentCategoryApi,
+  deleteAgentCategoryApi,
 } from "@/services";
 import { type AgentEditorFormValues } from "@/lib/agent-editor-schema";
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
@@ -72,6 +74,52 @@ export function useCreateAgentCategory() {
     },
   });
 }
+
+/**
+ * Custom mutation hook to update an agent category.
+ */
+export function useUpdateAgentCategory() {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+
+    return useMutation<AgentCategoryDetails, Error, { id: string; name: string }>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return updateAgentCategoryApi(variables, token);
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+            toast({ title: "Category Updated", description: `Category "${data.name}" has been saved.`});
+        },
+        onError: (error) => {
+            handleErrorUtility(error, "Failed to update category");
+        }
+    });
+}
+
+/**
+ * Custom mutation hook to delete an agent category.
+ */
+export function useDeleteAgentCategory() {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+
+    return useMutation<{message: string}, Error, string>({
+        mutationFn: async (id) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return deleteAgentCategoryApi(id, token);
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+            toast({ title: "Category Deleted", description: data.message });
+        },
+        onError: (error) => {
+            handleErrorUtility(error, "Failed to delete category");
+        }
+    });
+}
+
+
 
 /**
  * Custom hook to get the list of all AI agents from the central store.

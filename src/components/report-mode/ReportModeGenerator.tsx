@@ -7,7 +7,7 @@ import { Skeleton } from '../ui/skeleton';
 import { GenerationTools } from './GenerationTools';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
-import { PanelLeftClose, PanelRightOpen } from 'lucide-react';
+import { PanelRightOpen } from 'lucide-react';
 import { ReportResults } from './ReportResults';
 import type { Section } from '@/lib/models/section';
 

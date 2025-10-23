@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState } from 'react';
@@ -25,7 +24,6 @@ import { type AgentEditorFormValues } from '@/lib/agent-editor-schema';
 interface AgentEditorProps {
   agentId: string;
   initialData: Agent;
-  categories: AgentCategory[];
   allAgents: Agent[];
 }
 
@@ -44,11 +42,11 @@ const NavItem = ({ icon: Icon, label, isActive, onClick }: { icon: React.Element
   </Button>
 );
 
-export default function AgentEditor({ agentId, initialData, categories, allAgents }: AgentEditorProps) {
+export default function AgentEditor({ agentId, initialData, allAgents }: AgentEditorProps) {
   const { t } = useLocalization();
   const [activeTab, setActiveTab] = useState('general');
 
-  const { form, handleSubmit, isComplexPrompt, isPending, router } = useAgentEditor({
+  const { form, handleSubmit, isComplexPrompt, isPending, router, categories } = useAgentEditor({
     agentId,
     initialData,
   });
@@ -68,7 +66,7 @@ export default function AgentEditor({ agentId, initialData, categories, allAgent
   const renderContent = () => {
     switch (activeTab) {
       case 'general':
-        return <GeneralTab isComplexPrompt={isComplexPrompt} isPending={isPending} categories={categories} />;
+        return <GeneralTab agentId={agentId} isComplexPrompt={isComplexPrompt} isPending={isPending} categories={categories || []} />;
       case 'guidelines':
         return <GuidelinesTab isComplexPrompt={isComplexPrompt} />;
       case 'output':
@@ -119,3 +117,5 @@ export default function AgentEditor({ agentId, initialData, categories, allAgent
     </FormProvider>
   );
 }
+
+    

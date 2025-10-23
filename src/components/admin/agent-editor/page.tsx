@@ -2,10 +2,9 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAgent, useAgentCategories, useAgents } from '@/hooks';
+import { useAgent, useAgents } from '@/hooks';
 import { AlertCircle, Bot, Loader2 } from 'lucide-react';
 import React, { Suspense, lazy } from 'react';
-import { type Agent as AgentModel } from '@/lib/models/agent';
 
 const AgentEditor = lazy(() => import('@/components/admin/agent-editor/AgentEditor'));
 
@@ -24,12 +23,11 @@ export default function EditAgentPage({ params }: { params: { id: string } }) {
 
   // Fetch the agent data using the hook
   const { data: agent, isLoading: agentLoading, isError: agentError } = useAgent(params.id);
-  const { data: categories, isLoading: categoriesLoading, isError: categoriesError } = useAgentCategories();
   const { agents: allAgents, isLoaded: agentsLoaded, isError: agentsError } = useAgents();
 
 
-  const isLoading = agentLoading || categoriesLoading || !agentsLoaded;
-  const isError = agentError || categoriesError || agentsError;
+  const isLoading = agentLoading || !agentsLoaded;
+  const isError = agentError || agentsError;
 
   if (isLoading) {
     return <AgentEditorSkeleton />;
@@ -53,7 +51,7 @@ export default function EditAgentPage({ params }: { params: { id: string } }) {
         </h1>
       </div>
       <Suspense fallback={<AgentEditorSkeleton />}>
-        <AgentEditor agentId={params.id} initialData={agent} categories={categories || []} allAgents={allAgents || []} />
+        <AgentEditor agentId={params.id} initialData={agent} allAgents={allAgents || []} />
       </Suspense>
     </div>
   );

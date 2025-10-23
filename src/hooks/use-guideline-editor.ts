@@ -21,12 +21,10 @@ export const useGuidelineEditor = (itemKey: string, agentId: string) => {
     const {
         guidelineState,
         customGuidelineInput,
-        oneTimeInstructions,
         handleGuidelineToggle,
         setCustomGuidelineInputForItem,
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
-        setOneTimeInstruction,
     } = useGenerationUIStore();
 
     // agent is now an instance of our Agent class
@@ -35,7 +33,6 @@ export const useGuidelineEditor = (itemKey: string, agentId: string) => {
     const promptConfig = agent?.prompt as AgentPrompt | undefined;
     const hasGuidelines = !!promptConfig?.guidelines && promptConfig.guidelines.length > 0;
     const currentGuidelineState = guidelineState[itemKey];
-    const oneTimeInstruction = oneTimeInstructions[itemKey];
 
     return {
         t,
@@ -45,11 +42,9 @@ export const useGuidelineEditor = (itemKey: string, agentId: string) => {
         hasGuidelines,
         currentGuidelineState,
         customGuidelineInput,
-        oneTimeInstruction,
         handleGuidelineToggle,
         setCustomGuidelineInputForItem,
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
-        setOneTimeInstruction,
     };
 };

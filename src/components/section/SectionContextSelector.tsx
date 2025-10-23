@@ -18,12 +18,12 @@ export function ContextSelector({ itemKey }: ContextSelectorProps) {
         t,
         proposal,
         projectPlan,
+        reportSections, // Use all possible sections
+        diagramSections, // Use all possible diagrams
         toggleContextSelection,
-        reportSections,
-        diagramSections,
         currentSelection,
-        generatedSections,
-        generatedDiagrams,
+        sections: generatedSectionsContent, // Content of generated sections
+        diagrams: generatedDiagramsContent, // Content of generated diagrams
         externalContext,
     } = useContextSelector(itemKey);
 
@@ -45,41 +45,43 @@ export function ContextSelector({ itemKey }: ContextSelectorProps) {
                         <Label htmlFor={`context-plan-${itemKey}`} className="text-sm font-normal"><div className="flex items-center gap-2"><GanttChartSquare className="h-4 w-4" /> Project Plan</div></Label>
                     </div>
 
-                    {/* Generated Sections */}
-                    {generatedSections.map(contextKey => (
-                        <div key={`ctx-s-${itemKey}-${contextKey}`} className="flex items-center space-x-2">
+                    {/* Report Sections */}
+                    {reportSections.map(section => (
+                        <div key={`ctx-s-${itemKey}-${section.id}`} className="flex items-center space-x-2">
                             <Checkbox
-                                id={`context-section-${itemKey}-${contextKey}`}
-                                checked={!!currentSelection.sections[contextKey]}
-                                onCheckedChange={(checked) => toggleContextSelection(itemKey, 'sections', contextKey, !!checked)}
+                                id={`context-section-${itemKey}-${section.id}`}
+                                checked={!!currentSelection.sections[section.id]}
+                                onCheckedChange={(checked) => toggleContextSelection(itemKey, 'sections', section.id, !!checked)}
+                                disabled={!generatedSectionsContent[section.id]}
                             />
-                            <Label htmlFor={`context-section-${itemKey}-${contextKey}`} className="text-sm font-normal">
+                            <Label htmlFor={`context-section-${itemKey}-${section.id}`} className={cn("text-sm font-normal", !generatedSectionsContent[section.id] && "text-muted-foreground/50")}>
                                 <div className="flex items-center gap-2">
                                     <BookCheck className="h-4 w-4" />
-                                    {t(reportSections[contextKey]?.title || contextKey)}
+                                    {section.title}
                                 </div>
                             </Label>
                         </div>
                     ))}
-                    {generatedSections.length === 0 && (
+                    {reportSections.length === 0 && (
                         <p className="text-xs text-muted-foreground pl-4">{t('builder.reportGenerator.noOtherSections')}</p>
                     )}
                 </div>
 
-                {generatedDiagrams.length > 0 && (
+                {diagramSections.length > 0 && (
                     <div className="space-y-2 pt-2 border-t">
                         <Label className="font-semibold">{t('builder.reportGenerator.context_diagrams')}</Label>
-                        {generatedDiagrams.map(contextKey => (
-                            <div key={`ctx-d-${itemKey}-${contextKey}`} className="flex items-center space-x-2">
+                        {diagramSections.map(section => (
+                            <div key={`ctx-d-${itemKey}-${section.id}`} className="flex items-center space-x-2">
                                 <Checkbox
-                                    id={`context-diagram-${itemKey}-${contextKey}`}
-                                    checked={!!currentSelection.diagrams[contextKey]}
-                                    onCheckedChange={(checked) => toggleContextSelection(itemKey, 'diagrams', contextKey, !!checked)}
+                                    id={`context-diagram-${itemKey}-${section.id}`}
+                                    checked={!!currentSelection.diagrams[section.id]}
+                                    onCheckedChange={(checked) => toggleContextSelection(itemKey, 'diagrams', section.id, !!checked)}
+                                    disabled={!generatedDiagramsContent[section.id]}
                                 />
-                                <Label htmlFor={`context-diagram-${itemKey}-${contextKey}`} className="text-sm font-normal">
+                                <Label htmlFor={`context-diagram-${itemKey}-${section.id}`} className={cn("text-sm font-normal", !generatedDiagramsContent[section.id] && "text-muted-foreground/50")}>
                                     <div className="flex items-center gap-2">
                                         <GitGraph className="h-4 w-4" />
-                                        {t(diagramSections[contextKey]?.title || contextKey)}
+                                        {section.title}
                                     </div>
                                 </Label>
                             </div>

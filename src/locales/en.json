@@ -38,7 +38,8 @@
     "automations": "Automations",
     "templates": "Templates",
     "generationTemplates": "Generation Templates",
-    "promptTemplates": "Prompt Templates"
+    "promptTemplates": "Prompt Templates",
+    "manageSections": "Manage Sections"
   },
   "writingTools": {
     "pageTitle": "AI Writing Tools",
@@ -1286,8 +1287,7 @@
         "translateAllStartedDesc": "Translating all sections. This may take a moment...",
         "translateAllSuccess": "Translation Complete",
         "translateAllSuccessDesc": "All sections have been successfully translated."
-      },
-      "autoContextNote": "The AI will automatically review all available project data (proposal, sections, diagrams) and use the most relevant information to generate this section."
+      }
     },
     "diagramGenerator": {
       "noProposal": "No Proposal Loaded",
@@ -1339,8 +1339,7 @@
         "explanationFailed": "Explanation Failed",
         "explaining": "The AI is analyzing the diagram...",
         "explanationPlaceholder": "Click the \"Explain\" button again to generate an explanation."
-      },
-      "autoContextNote": "The AI will automatically review all available project data and use the most relevant information to generate this diagram."
+      }
     },
     "codeGenerator": {
       "tabs": {
@@ -1577,9 +1576,7 @@
         "uploadedContext": "Uploaded Context",
         "noContext": "No context files uploaded yet.",
         "missingInfoToastTitle": "Missing Information",
-        "missingInfoToastDesc": "Please provide both content and a name for the context.",
-        "uploadFailed": "Upload Failed",
-        "analyzingInProgress": "Analyzing {type}..."
+        "missingInfoToastDesc": "Please provide both content and a name for the context."
       },
       "questionsDocument": "Questions Document",
       "contextSyllabus": "Context/Syllabus Document (Optional)",

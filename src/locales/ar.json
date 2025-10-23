@@ -38,7 +38,8 @@
     "automations": "الأتمتة",
     "templates": "القوالب",
     "generationTemplates": "قوالب الإنشاء",
-    "promptTemplates": "قوالب الأوامر"
+    "promptTemplates": "قوالب الأوامر",
+    "manageSections": "إدارة الأقسام"
   },
   "writingTools": {
     "pageTitle": "أدوات الكتابة بالذكاء الاصطناعي",
@@ -1575,9 +1576,7 @@
         "uploadedContext": "السياق الذي تم تحميله",
         "noContext": "لم يتم تحميل أي ملفات سياق بعد.",
         "missingInfoToastTitle": "معلومات ناقصة",
-        "missingInfoToastDesc": "يرجى تقديم كل من المحتوى والاسم للسياق.",
-        "uploadFailed": "فشل التحميل",
-        "analyzingInProgress": "جارٍ تحليل {type}..."
+        "missingInfoToastDesc": "يرجى تقديم كل من المحتوى والاسم للسياق."
       },
       "questionsDocument": "مستند الأسئلة",
       "contextSyllabus": "مستند السياق / المنهج (اختياري)",

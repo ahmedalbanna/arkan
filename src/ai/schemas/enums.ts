@@ -26,7 +26,8 @@ export const SectionNameSchema = z.enum([
     'technicalExperience',
     'recommendations',
     'references',
-    'appendices'
+    'appendices',
+    'proposal'
 ]);
 export type SectionName = z.infer<typeof SectionNameSchema>;
 

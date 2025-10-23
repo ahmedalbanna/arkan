@@ -26,6 +26,7 @@ import { Section, type SectionProperties } from '@/lib/models/section';
 const SectionSchema = z.object({
   id: z.string().min(3, 'ID must be at least 3 characters').regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'ID must be lowercase and kebab-case.'),
   title: z.string().min(1, 'Title is required'),
+  icon: z.string().min(1, 'Icon name (e.g., FileText) is required.'),
   agentId: z.string().min(1, 'Agent is required'),
   type: z.enum(['report', 'diagram', 'presentation']),
 });
@@ -48,11 +49,13 @@ export function SectionFormDialog({ sectionToEdit, children }: SectionFormDialog
     defaultValues: sectionToEdit ? {
         id: sectionToEdit.id,
         title: sectionToEdit.title,
+        icon: (sectionToEdit as any).icon || '', // Ensure icon is part of default values
         agentId: sectionToEdit.agentId,
         type: sectionToEdit.type,
     } : {
       id: '',
       title: '',
+      icon: '',
       agentId: '',
       type: 'report',
     },
@@ -92,6 +95,11 @@ export function SectionFormDialog({ sectionToEdit, children }: SectionFormDialog
             <Input id="title" {...form.register('title')} className="col-span-3" />
             {form.formState.errors.title && <p className="col-span-4 text-sm text-destructive text-right">{form.formState.errors.title.message}</p>}
           </div>
+           <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="icon" className="text-right">Icon</Label>
+            <Input id="icon" {...form.register('icon')} placeholder="e.g., FileText" className="col-span-3" />
+            {form.formState.errors.icon && <p className="col-span-4 text-sm text-destructive text-right">{form.formState.errors.icon.message}</p>}
+          </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="agentId" className="text-right">Agent</Label>
             <Select onValueChange={(value) => form.setValue('agentId', value)} defaultValue={form.getValues('agentId')}>
@@ -121,6 +129,7 @@ export function SectionFormDialog({ sectionToEdit, children }: SectionFormDialog
             {form.formState.errors.type && <p className="col-span-4 text-sm text-destructive text-right">{form.formState.errors.type.message}</p>}
           </div>
           <DialogFooter>
+             <Button type="button" variant="secondary" onClick={() => setIsOpen(false)}>Cancel</Button>
             <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
               {createMutation.isPending || updateMutation.isPending ? 'Saving...' : (sectionToEdit ? 'Save Changes' : 'Create')}
             </Button>
