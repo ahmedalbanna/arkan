@@ -42,14 +42,27 @@ export const useDiagramGenerator = () => {
 
     const diagramAgents = useMemo(() => {
         if (!agents) return {};
-        return agents
+    
+        const agentsMap = new Map<DiagramType, Agent>();
+    
+        agents
             .filter(a => a.category === AgentCategory.DiagramGeneration)
-            .reduce((acc, agent) => {
-                // Extract the diagram type from the agent ID (e.g., 'generate-use-case-diagram' -> 'use-case')
-                const type = agent.id.replace('generate-', '').replace('-diagram', '') as DiagramType;
-                acc[type] = agent;
-                return acc;
-            }, {} as Record<DiagramType, Agent>);
+            .forEach(agent => {
+                if (!agent || !agent.id) return; // Defensive check
+    
+                // Extract the diagram type from the agent ID, making it robust
+                const type = agent.id
+                    .replace(/^generate-/, '')
+                    .replace(/-diagram$/, '') as DiagramType;
+    
+                // Ensure we only add one agent per unique diagram type
+                if (!agentsMap.has(type)) {
+                    agentsMap.set(type, agent);
+                }
+            });
+    
+        // Convert the Map back to an object to maintain the original data structure
+        return Object.fromEntries(agentsMap.entries());
     }, [agents]);
 
     const handleUpdateDiagramSvg = (plantUmlCode: string) => {

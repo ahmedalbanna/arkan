@@ -112,6 +112,7 @@ export const useGenerationUIStore = create<GenerationUIState & GenerationUIActio
       const newControlState: Record<string, ControlState> = {};
 
       agents.forEach(agent => {
+        if (!agent || typeof agent.id !== 'string') return; // Defensive check
         const prompt = agent.prompt as AgentPrompt;
         const itemKey = agent.id.replace('generate-', '').replace('-section', '').replace('-diagram', '');
         newGuidelineState[itemKey] = {
@@ -121,6 +122,7 @@ export const useGenerationUIStore = create<GenerationUIState & GenerationUIActio
       });
 
       sections.forEach(section => {
+        if (!section || typeof section.id !== 'string') return; // Defensive check
         newControlState[section.id] = { ...defaultControlState };
       });
 

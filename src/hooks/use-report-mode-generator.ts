@@ -30,7 +30,7 @@ export const useReportModeGenerator = () => {
     const sectionsManager = project?.sections;
 
     const generatedSections = useMemo(
-        () => (orderedSections || []).filter(section => sectionsManager?.getSection(section.id as SectionName)?.hasContent()),
+        () => (orderedSections || []).filter(section => sectionsManager?.getSection(section.id as SectionName)?.hasContent),
         [sectionsManager, orderedSections]
     );
 
@@ -48,7 +48,7 @@ export const useReportModeGenerator = () => {
         });
 
         const sectionKeys = (Object.keys(project.sections.toJSON()) as SectionName[])
-            .filter(key => project.sections.getSection(key)?.hasContent());
+            .filter(key => project.sections.getSection(key)?.hasContent);
 
         const translationPromises = sectionKeys.map(key => {
             const content = project.sections.getSection(key)!.content;
@@ -81,7 +81,9 @@ export const useReportModeGenerator = () => {
         if (!project || generatedSections.length === 0) return;
 
         const translatedTitles = reportAgents?.reduce((acc, agent) => {
-            acc[agent.id as SectionName] = agent.name;
+            if (agent && agent.id) {
+              acc[agent.id as SectionName] = agent.name;
+            }
             return acc;
         }, {} as { [key in SectionName]?: string }) || {};
 
@@ -121,20 +123,38 @@ export const useReportModeGenerator = () => {
     const hasCreditsForSingleSection = useMemo(() => Boolean(userProfile && (userProfile.credits ?? 0) >= 1), [userProfile]);
 
     useEffect(() => {
-        if (agentsLoaded && agents.length > 0 && orderedSections.length > 0) {
-            initializeDependentStates(agents.map(a => a.id), orderedSections.map(s => s.id));
+        if (agentsLoaded && reportAgents.length > 0 && orderedSections.length > 0) {
+            initializeDependentStates(reportAgents, orderedSections);
         }
-    }, [agentsLoaded, agents, orderedSections, initializeDependentStates]);
+    }, [agentsLoaded, reportAgents, orderedSections, initializeDependentStates]);
 
     useEffect(() => {
         if (!orderedSections.length && agentsLoaded) {
-            const initialOrder = reportAgents.map(a => new Section({
-                id: a.id.replace('generate-', '').replace('-section', ''),
-                title: a.name,
-                agentId: a.id,
-                type: 'report',
-                content: ''
-            })).sort((a, b) => a.title.localeCompare(b.title));
+            const sectionsMap = new Map<string, Section>();
+            
+            reportAgents.forEach(agent => {
+                if (!agent || !agent.id) return;
+                // Use a more consistent and robust way to generate the section ID
+                const sectionId = agent.id
+                    .replace(/^generate-/, '')
+                    .replace(/-section$/, '')
+                    .replace(/-diagram$/, '');
+    
+                // Ensure we only add one section per unique ID, preventing key duplication
+                if (!sectionsMap.has(sectionId)) {
+                    sectionsMap.set(sectionId, new Section({
+                        id: sectionId,
+                        title: agent.name,
+                        agentId: agent.id,
+                        type: 'report',
+                        content: ''
+                    }));
+                }
+            });
+    
+            const initialOrder = Array.from(sectionsMap.values())
+                .sort((a, b) => a.title.localeCompare(b.title));
+    
             setOrderedSections(initialOrder);
         }
     }, [orderedSections.length, setOrderedSections, reportAgents, agentsLoaded]);
