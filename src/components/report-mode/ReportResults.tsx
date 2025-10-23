@@ -82,20 +82,20 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     }
 
     // Get the content for the current section using the SectionManager.
-    const sectionContent = currentSectionKey && project?.sections
+    const sectionObject = currentSectionKey && project?.sections
       ? project.sections.getSection(currentSectionKey)
-      : '';
+      : null;
 
     return (
       <AnimatedContainer animation="fade-in-up" delay={300}>
         <div className="h-full p-4 gap-4 rounded-lg flex flex-col mt-4">
           <ScrollArea className="flex-grow">
-            {currentSectionKey && (
+            {currentSectionKey && sectionObject && (
               <A4Page key={currentSectionKey}>
                 <Section
                   sectionKey={currentSectionKey}
                   title={getSectionTitle(currentSectionKey)}
-                  content={sectionContent} // Pass the clean content
+                  content={sectionObject} // Pass the full section object
                   onUpdate={handleSectionUpdate} // Pass the updated handler
                 />
               </A4Page>

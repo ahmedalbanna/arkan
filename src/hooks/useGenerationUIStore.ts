@@ -169,17 +169,33 @@ export const useGenerationUIStore = create<GenerationUIState & GenerationUIActio
     setOneTimeInstruction: (itemKey, value) => set(state => ({ oneTimeInstructions: { ...state.oneTimeInstructions, [itemKey]: value } })),
 
     toggleContextSelection: (itemKey, type, contextKey, isSelected) => set(state => {
-      const newSelection = JSON.parse(JSON.stringify(state.contextSelection[itemKey] || { ...emptySelection, proposal: true, projectPlan: true }));
+      const currentItemSelection = state.contextSelection[itemKey] || 
+                                   { ...emptySelection, proposal: true, projectPlan: true };
+  
+      const newItemSelection = {
+          ...currentItemSelection,
+          sections: { ...currentItemSelection.sections },
+          diagrams: { ...currentItemSelection.diagrams },
+          externalContext: [...(currentItemSelection.externalContext || [])],
+      };
+  
       if (type === 'proposal' || type === 'projectPlan') {
-        newSelection[type] = isSelected;
+          newItemSelection[type] = isSelected;
+      } else if (type === 'sections' && typeof contextKey === 'string') {
+          newItemSelection.sections[contextKey] = isSelected;
+      } else if (type === 'diagrams' && typeof contextKey === 'string') {
+          newItemSelection.diagrams[contextKey] = isSelected;
       } else if (type === 'externalContext' && typeof contextKey === 'number') {
-        if (!Array.isArray(newSelection.externalContext)) newSelection.externalContext = [];
-        newSelection.externalContext[contextKey] = isSelected;
-      } else if (contextKey) {
-        newSelection[type][contextKey as string] = isSelected;
+          newItemSelection.externalContext[contextKey] = isSelected;
       }
-      return { contextSelection: { ...state.contextSelection, [itemKey]: newSelection } };
-    }),
+  
+      return {
+          contextSelection: {
+              ...state.contextSelection,
+              [itemKey]: newItemSelection,
+          },
+      };
+  }),
 
     setSelectedReportTemplateId: (id) => set({ selectedReportTemplateId: id }),
 

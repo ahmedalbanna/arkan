@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { SectionName } from '@/ai/schemas';
@@ -91,34 +90,11 @@ export const useReportModeGenerator = () => {
     };
 
     const { userProfile } = useAuth();
-    const [activeMutationKey, setActiveMutationKey] = useState<string | null>(null);
-    const { initializeDependentStates, controlState, guidelineState, oneTimeInstructions } = useGenerationUIStore();
+    // The reportGenerationMutation is the single source of truth for the generation state.
+    // It will be passed down to child components to trigger generation.
     const reportGenerationMutation = useGenerateReportSection();
     const isAnythingGenerating = reportGenerationMutation.isPending;
-
-    const onGenerateSection = async (section: SectionName) => {
-        if (!project) return;
-
-        const otherDiagramsJSON = project.diagrams.toJSON();
-
-        const body = {
-            proposal: project.proposal?.toJSON(),
-            projectPlan: project.projectPlan?.toJSON(),
-            sectionToGenerate: section,
-            otherSections: project.sections.toJSON(),
-            otherDiagrams: Object.fromEntries(
-                Object.entries(otherDiagramsJSON).map(([key, value]) => [key, value.code])
-            ),
-            exampleFiles: project.contextManager.getFiles().filter((c) => c.type === 'example'),
-            contextFiles: project.contextManager.getFiles().filter((c) => c.type === 'context'),
-            instructionText: oneTimeInstructions[section],
-            controls: controlState[section],
-            guidelines: guidelineState[section],
-        };
-
-        setActiveMutationKey(section);
-        reportGenerationMutation.mutate({ body });
-    };
+    const { initializeDependentStates } = useGenerationUIStore();
 
     const hasCreditsForSingleSection = useMemo(() => Boolean(userProfile && (userProfile.credits ?? 0) >= 1), [userProfile]);
 
@@ -174,8 +150,7 @@ export const useReportModeGenerator = () => {
         orderedSections,
         setOrderedSections,
         isAnythingGenerating,
-        activeMutationKey,
-        onGenerateSection,
+        reportGenerationMutation, // Expose the mutation object directly
         hasCreditsForSingleSection,
         agents: reportAgents,
         agentsLoaded,

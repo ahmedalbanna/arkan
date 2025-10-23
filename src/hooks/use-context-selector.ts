@@ -68,28 +68,45 @@ export const useContextSelector = (itemKey: string) => {
     }, [sectionConfigs]);
 
     // Get available (generated) sections and diagrams from their managers
-    const generatedSections = useMemo(() => 
-        (Object.keys(sectionManager.toJSON()) as SectionName[]).filter(key => sectionManager.getSection(key)?.hasContent())
-    , [sectionManager]);
+    const generatedSections = useMemo(() => {
+        const sectionsData = sectionManager.toJSON();
+        const sectionKeys = Object.keys(sectionsData.sections || {}) as SectionName[];
+        return sectionKeys.filter(key => sectionManager.getSection(key)?.hasContent);
+    }, [sectionManager]);
 
-    const generatedDiagrams = useMemo(() => 
-        (Object.keys(diagramManager.toJSON()) as DiagramType[]).filter(key => diagramManager.getDiagram(key)?.hasContent())
-    , [diagramManager]);
+    const generatedDiagrams = useMemo(() => {
+        const diagramsData = diagramManager.toJSON();
+        const diagramKeys = Object.keys(diagramsData.diagrams || {}) as DiagramType[];
+        return diagramKeys.filter(key => diagramManager.getDiagram(key)?.hasContent);
+    }, [diagramManager]);
+
 
     // The selection state for the current item, defaulting to empty.
     const currentSelection: SelectionState = contextSelection[itemKey] || emptySelection;
 
-    // Filter the selected items based on the current selection state.
+    // Safely filter and map selected items to prevent crashes.
     const selectedSections = useMemo(() =>
-        (Object.keys(currentSelection.sections) as SectionName[])
-            .filter(key => currentSelection.sections[key] && sectionManager.getSection(key)?.hasContent())
-            .map(key => ({ key, content: sectionManager.getSection(key)!.content }))
+        (Object.keys(currentSelection.sections) as SectionName[]).flatMap(key => {
+            if (currentSelection.sections[key]) {
+                const section = sectionManager.getSection(key);
+                if (section?.hasContent) {
+                    return [{ key, content: section.content }];
+                }
+            }
+            return [];
+        })
     , [currentSelection.sections, sectionManager]);
 
     const selectedDiagrams = useMemo(() =>
-        (Object.keys(currentSelection.diagrams) as DiagramType[])
-            .filter(key => currentSelection.diagrams[key] && diagramManager.getDiagram(key)?.hasContent())
-            .map(key => ({ key, content: diagramManager.getDiagram(key)!.plantUmlCode }))
+        (Object.keys(currentSelection.diagrams) as DiagramType[]).flatMap(key => {
+            if (currentSelection.diagrams[key]) {
+                const diagram = diagramManager.getDiagram(key);
+                if (diagram?.hasContent) {
+                    return [{ key, content: diagram.plantUmlCode }];
+                }
+            }
+            return [];
+        })
     , [currentSelection.diagrams, diagramManager]);
     
     const selectedExternalContext = useMemo(() =>
@@ -100,13 +117,13 @@ export const useContextSelector = (itemKey: string) => {
 
     // Determine if any context is selected.
     const hasContext = useMemo(() =>
-        (currentSelection.proposal && !!proposal?.hasContent()) ||
-        (currentSelection.projectPlan && !!projectPlan) ||
-        selectedSections.length > 0 ||
-        selectedDiagrams.length > 0 ||
-        selectedExternalContext.length > 0,
-        [currentSelection, proposal, projectPlan, selectedSections, selectedDiagrams, selectedExternalContext]
-    );
+    (currentSelection.proposal && !!proposal?.hasContent) ||
+    (currentSelection.projectPlan && !!projectPlan?.hasContent) ||
+    selectedSections.length > 0 ||
+    selectedDiagrams.length > 0 ||
+    selectedExternalContext.length > 0,
+    [currentSelection, proposal, projectPlan, selectedSections, selectedDiagrams, selectedExternalContext]
+);
 
     return {
         t,

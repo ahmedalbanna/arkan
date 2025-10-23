@@ -1,4 +1,3 @@
-
 'use client';
 
 import { type DiagramType, type SectionName as SectionNameType } from '@/ai/schemas';
@@ -20,23 +19,24 @@ import { SectionGenerationControls } from './SectionGenerationControls';
 import { SectionGenerationControlsSummary } from './SectionGenerationControlsSummary';
 import { GuidelineEditor } from './SectionGuidelineEditor';
 import { GuidelinesSummary } from './SectionGuidelinesSummary';
+import { useMutation } from '@tanstack/react-query';
 
 export const SectionAccordionItem = ({
     itemKey,
     agent,
-    onGenerate,
     isGenerating,
     isAnythingGenerating,
     hasCredits,
     handleProps,
+    reportGenerationMutation,
 }: {
     itemKey: SectionNameType | DiagramType,
     agent: Agent,
-    onGenerate: () => void,
     isGenerating: boolean,
     isAnythingGenerating: boolean,
     hasCredits: boolean,
     handleProps?: any,
+    reportGenerationMutation: ReturnType<typeof useMutation>,
 }) => {
     const {
         t,
@@ -44,17 +44,13 @@ export const SectionAccordionItem = ({
         disabledReason,
     } = useSectionAccordionItemLogic(agent);
 
-    // استخدام hook تحديد السياق
-    const {
-        hasContext,
-        currentSelection,
-        selectedSections,
-        selectedDiagrams,
-        selectedExternalContext,
-    } = useContextSelector(itemKey);
+    const { hasContext } = useContextSelector(itemKey);
+    const { prepareApiData, organizedContext, contextStatistics } = useSectionGenerationData(itemKey);
 
-    // استخدام hook البيانات الجديد للسياق المنظم
-    const { organizedContext, contextStatistics } = useSectionGenerationData(itemKey);
+    const handleGenerate = () => {
+        const body = prepareApiData();
+        reportGenerationMutation.mutate({ body, section: itemKey });
+    };
 
     const canGenerate = hasCredits && !isAnythingGenerating;
 
@@ -71,7 +67,6 @@ export const SectionAccordionItem = ({
                         <div className="flex items-center gap-2">
                             {isGenerating && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
                             <span className="font-headline">{title}</span>
-                            {/* مؤشر السياق المحدد مع إحصائيات السياق المنظم */}
                             {hasContext && (
                                 <div className="flex items-center gap-1">
                                     <div className="w-2 h-2 bg-gradient-to-r from-green-500 to-green-600 rounded-full shadow-soft" title="Context selected" />
@@ -92,7 +87,7 @@ export const SectionAccordionItem = ({
                                         <Button
                                             type="button"
                                             size="sm"
-                                            onClick={onGenerate}
+                                            onClick={handleGenerate}
                                             disabled={!canGenerate}
                                             variant={canGenerate ? "gradient" : "secondary"}
                                             className="font-headline hover:shadow-glow transition-all duration-200"

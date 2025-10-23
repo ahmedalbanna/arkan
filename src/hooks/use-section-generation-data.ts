@@ -32,105 +32,87 @@ export function useSectionGenerationData(itemKey: string) {
      * جمع البيانات المطلوبة للتوليد مع تنظيم السياقات حسب المعرفة
      */
     const getGenerationData = useCallback(() => {
-        // إعدادات التوليد
-        // Helper function to generate instruction text from control state
-        // const generateInstructionText = (controls: any): string => {
-        //     let instructions = [];
-        //     let formalityDesc = "balanced";
-        //     if (controls.formality < 33) formalityDesc = "informal";
-        //     else if (controls.formality > 66) formalityDesc = "very formal";
-        //     instructions.push(`- The writing style should be ${formalityDesc}.`);
-        //     if (controls.tone && controls.tone !== "none") instructions.push(`- Adopt a ${controls.tone} tone.`);
-        //     if (controls.wordCount) instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
-        //     return instructions.join('\n');
-        // };
         const controls = controlState[itemKey] || {
             formality: 50,
             tone: 'professional' as const,
             wordCount: ''
         };
 
-        // الإرشادات والتعليمات
         const guidelines = guidelineState[itemKey];
         const oneTimeInstruction = oneTimeInstructions[itemKey];
 
-        // تجميع جميع السياقات المحددة
         const allContexts: ContextItem[] = [];
 
-        // إضافة السياق الخارجي المحدد
-        selectedExternalContext.forEach(item => {
+        (selectedExternalContext || []).forEach(item => {
+            const content = item.content || '';
             allContexts.push({
                 fileName: item.fileName,
-                content: item.content,
-                type: item.type as any, // سيتم التحقق من الصحة في ContextOrganizer
+                content: content,
+                type: item.type as any,
                 metadata: {
-                    wordCount: item.content.length,
-                    language: item.content.match(/[\u0600-\u06FF]/) ? 'ar' : 'en'
+                    wordCount: content.length,
+                    language: content.match(/[\u0600-\u06FF]/) ? 'ar' : 'en'
                 }
             });
         });
 
-        // إضافة الأقسام المحددة كسياق
-        selectedSections.forEach(({ key, content }) => {
+        (selectedSections || []).forEach(({ key, content }) => {
+            const safeContent = content || '';
             allContexts.push({
                 fileName: `section-${key}`,
-                content: content,
+                content: safeContent,
                 type: 'context',
                 metadata: {
-                    wordCount: content.length,
-                    language: content.match(/[\u0600-\u06FF]/) ? 'ar' : 'en'
+                    wordCount: safeContent.length,
+                    language: safeContent.match(/[\u0600-\u06FF]/) ? 'ar' : 'en'
                 }
             });
         });
 
-        // إضافة الرسوم البيانية المحددة كسياق
-        selectedDiagrams.forEach(({ key, content }) => {
+        (selectedDiagrams || []).forEach(({ key, content }) => {
+            const safeContent = content || '';
             allContexts.push({
                 fileName: `diagram-${key}`,
-                content: content,
+                content: safeContent,
                 type: 'context',
                 metadata: {
-                    wordCount: content.length,
-                    language: content.match(/[\u0600-\u06FF]/) ? 'ar' : 'en'
+                    wordCount: safeContent.length,
+                    language: safeContent.match(/[\u0600-\u06FF]/) ? 'ar' : 'en'
                 }
             });
         });
 
-        // تنظيم السياقات حسب المعرفة والأهمية
         const organizedContext = allContexts.length > 0
             ? ContextOrganizer.organizeContexts(
                 allContexts,
-                itemKey, // القسم المستهدف
+                itemKey,
                 [
                     ...(guidelines?.custom || []),
                     ...(oneTimeInstruction ? [oneTimeInstruction] : [])
-                ] // المتطلبات المحددة
+                ]
             )
             : null;
 
-        // إنشاء مطالبة منظمة من السياقات
         const organizedPrompt = organizedContext ? createOrganizedPrompt(organizedContext) : '';
 
-        // السياق المحدد (للتوافق مع النظام القديم)
         const contextData = {
             proposal: currentSelection.proposal ? proposal : null,
             projectPlan: currentSelection.projectPlan ? projectPlan : null,
-            sections: selectedSections.reduce((acc, { key, content }) => {
-                acc[key] = content;
+            sections: (selectedSections || []).reduce((acc, { key, content }) => {
+                acc[key] = content || '';
                 return acc;
             }, {} as Record<string, string>),
-            diagrams: selectedDiagrams.reduce((acc, { key, content }) => {
-                acc[key] = content;
+            diagrams: (selectedDiagrams || []).reduce((acc, { key, content }) => {
+                acc[key] = content || '';
                 return acc;
             }, {} as Record<string, string>),
-            externalContext: selectedExternalContext.map(item => ({
+            externalContext: (selectedExternalContext || []).map(item => ({
                 fileName: item.fileName,
-                content: item.content,
+                content: item.content || '',
                 type: item.type
             }))
         };
 
-        // إعدادات التوليد المحسنة
         const generationSettings = {
             style: {
                 formality: controls.formality,
@@ -144,8 +126,8 @@ export function useSectionGenerationData(itemKey: string) {
             },
             context: contextData,
             hasContext,
-            organizedContext, // السياقات المنظمة حسب المعرفة
-            organizedPrompt // المطالبة المنظمة
+            organizedContext,
+            organizedPrompt
         };
 
         return {
@@ -173,9 +155,6 @@ export function useSectionGenerationData(itemKey: string) {
         hasContext
     ]);
 
-    /**
-     * تحضير البيانات للـ API مع السياقات المنظمة
-     */
     const prepareApiData = useCallback((additionalData: any = {}) => {
         const generationData = getGenerationData();
 
@@ -204,75 +183,61 @@ export function useSectionGenerationData(itemKey: string) {
 
         const styleInstructionText = generateStyleInstructionText(generationData.generationSettings.style);
 
-        const combinedOneTimeInstructions = [
+        const instructionText = [
             generationData.oneTimeInstruction || '',
             styleInstructionText
         ].filter(Boolean).join('\n\n');
 
+        const flatOtherSections = (selectedSections || []).reduce((acc, { key, content }) => {
+            acc[key] = content || '';
+            return acc;
+        }, {} as Record<string, string>);
+
+        const flatOtherDiagrams = (selectedDiagrams || []).reduce((acc, { key, content }) => {
+            acc[key] = content || '';
+            return acc;
+        }, {} as Record<string, string>);
+
+        const externalContext = generationData.contextData.externalContext || [];
+        const contextFiles = externalContext
+            .filter(item => item.type === 'context' || item.type === 'textbook' || item.type === 'question')
+            .map(({ fileName, content }) => ({ fileName, content }));
+
+        const exampleFiles = externalContext
+            .filter(item => item.type === 'example')
+            .map(({ fileName, content }) => ({ fileName, content }));
+            
+        const guidelines = [
+            ...(generationData.guidelines?.checked || []),
+            ...(generationData.guidelines?.custom || [])
+        ];
+
         return {
-            // البيانات الأساسية
             sectionToGenerate: itemKey,
             ...additionalData,
-
-            // السياق المحدد (للتوافق مع النظام القديم)
             proposal: generationData.contextData.proposal,
             projectPlan: generationData.contextData.projectPlan,
-            otherSections: generationData.contextData.sections,
-            otherDiagrams: generationData.contextData.diagrams,
-            externalContext: generationData.contextData.externalContext,
-
-            // السياقات المنظمة حسب المعرفة (النظام الجديد)
-            organizedContext: generationData.organizedContext ? {
-                guidelines: generationData.organizedContext.guidelines,
-                foundational: generationData.organizedContext.foundational,
-                conceptual: generationData.organizedContext.conceptual,
-                procedural: generationData.organizedContext.procedural,
-                reference: generationData.organizedContext.reference,
-                statistics: generationData.organizedContext.statistics
-            } : null,
-
-            // المطالبة المنظمة
-            organizedPrompt: generationData.organizedPrompt,
-
-            // إعدادات التوليد
-            style: generationData.generationSettings.style,
-
-            // الإرشادات والتعليمات
-            guidelines: generationData.guidelines?.custom || [],
-            oneTimeInstruction: combinedOneTimeInstructions,
-            selectedGuidelines: generationData.guidelines?.checked || [],
-
-            // معلومات إضافية
-            hasContext: generationData.hasContext,
-            generationMetadata: {
-                formality: generationData.controls.formality,
-                tone: generationData.controls.tone,
-                wordCount: generationData.controls.wordCount,
-                timestamp: new Date().toISOString(),
-                organizedContextCount: generationData.organizedContext?.statistics.totalItems || 0
-            }
+            otherSections: flatOtherSections,
+            otherDiagrams: flatOtherDiagrams,
+            contextFiles: contextFiles,
+            exampleFiles: exampleFiles,
+            guidelines: guidelines,
+            instructionText: instructionText, // Renamed from oneTimeInstruction
         };
-    }, [itemKey, getGenerationData]);
+    }, [itemKey, getGenerationData, selectedSections, selectedDiagrams]);
 
-    /**
-     * التحقق من صحة البيانات
-     */
     const validateData = useCallback(() => {
         const generationData = getGenerationData();
-
         const errors: string[] = [];
 
-        // التحقق من وجود السياق
         if (!generationData.hasContext) {
             errors.push('No context selected for generation');
         }
 
-        // التحقق من إعدادات التوليد
         if (generationData.controls.formality < 0 || generationData.controls.formality > 100) {
             errors.push('Formality must be between 0 and 100');
         }
 
-        // التحقق من عدد الكلمات
         if (generationData.controls.wordCount &&
             (isNaN(parseInt(generationData.controls.wordCount)) || parseInt(generationData.controls.wordCount) < 0)) {
             errors.push('Word count must be a positive number');
@@ -292,7 +257,6 @@ export function useSectionGenerationData(itemKey: string) {
         controls: controlState[itemKey],
         guidelines: guidelineState[itemKey],
         oneTimeInstruction: oneTimeInstructions[itemKey],
-        // البيانات الجديدة للسياقات المنظمة
         organizedContext: getGenerationData().organizedContext,
         organizedPrompt: getGenerationData().organizedPrompt,
         contextStatistics: getGenerationData().organizedContext?.statistics

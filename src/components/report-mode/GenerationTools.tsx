@@ -1,4 +1,3 @@
-
 'use client';
 
 import { SectionName } from '@/ai/schemas';
@@ -15,6 +14,7 @@ import { cn } from '@/lib/utils';
 import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useMutation } from '@tanstack/react-query';
 import { PanelLeftClose, Settings } from 'lucide-react';
 import { Button } from '../ui/button';
 
@@ -24,8 +24,8 @@ interface SortableSectionItemProps {
     isGenerating: boolean;
     isAnythingGenerating: boolean;
     hasCredits: boolean;
-    onGenerate: () => void;
-    // إضافة خصائص جديدة للتحسين
+    reportGenerationMutation: ReturnType<typeof useMutation>;
+    handleProps: any;
     generationState?: {
         isLoading: boolean;
         isSuccess?: boolean;
@@ -36,7 +36,7 @@ interface SortableSectionItemProps {
     onRetry?: () => void;
 }
 
-function SortableSectionItem({ id, agent, generationState, onRetry, ...props }: SortableSectionItemProps) {
+function SortableSectionItem({ id, agent, generationState, onRetry, handleProps, ...props }: SortableSectionItemProps) {
     const {
         attributes,
         listeners,
@@ -50,7 +50,6 @@ function SortableSectionItem({ id, agent, generationState, onRetry, ...props }: 
         transition,
     };
 
-    // إذا كان هناك حالة توليد محسنة، استخدم مكون التحميل الجديد
     if (generationState && (generationState.isLoading || generationState.isSuccess || generationState.isError)) {
         return (
             <AnimatedContainer animation="fade-in-up" delay={100}>
@@ -66,17 +65,16 @@ function SortableSectionItem({ id, agent, generationState, onRetry, ...props }: 
         );
     }
 
-    // استخدام المكون الأصلي للحالات العادية
     return (
         <AnimatedContainer animation="fade-in-up" delay={100}>
             <div ref={setNodeRef} style={style} {...attributes}>
                 <SectionAccordionItem
                     itemKey={id as SectionName}
                     agent={agent}
-                    onGenerate={props.onGenerate}
                     isGenerating={props.isGenerating}
                     isAnythingGenerating={props.isAnythingGenerating}
                     hasCredits={props.hasCredits}
+                    reportGenerationMutation={props.reportGenerationMutation}
                     handleProps={listeners}
                 />
             </div>
@@ -90,10 +88,9 @@ interface GenerationToolsProps {
     setOrderedSections: (sections: Section[]) => void;
     isAnythingGenerating: boolean;
     activeMutationKey: string | null;
-    onGenerateSection: (sectionId: SectionName) => void;
+    reportGenerationMutation: ReturnType<typeof useMutation>;
     hasCreditsForSingleSection: boolean;
     agents: Agent[];
-    // إضافة خصائص جديدة للتحسين
     generationStates?: Record<string, {
         isLoading: boolean;
         isSuccess?: boolean;
@@ -110,7 +107,7 @@ export const GenerationTools = ({
     setOrderedSections,
     isAnythingGenerating,
     activeMutationKey,
-    onGenerateSection,
+    reportGenerationMutation,
     hasCreditsForSingleSection,
     agents,
     generationStates = {},
@@ -137,7 +134,6 @@ export const GenerationTools = ({
 
     const isDisabled = isAnythingGenerating;
 
-    // حساب إحصائيات التوليد
     const generationStats = {
         total: orderedSections.length,
         completed: Object.values(generationStates).filter(state => state.isSuccess).length,
@@ -158,7 +154,6 @@ export const GenerationTools = ({
                                 <CardTitle className="text-lg font-headline font-semibold">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
                                 <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
 
-                                {/* مؤشر حالة التوليد */}
                                 {isAnythingGenerating && (
                                     <div className="mt-2">
                                         <LoadingIndicator
@@ -209,11 +204,11 @@ export const GenerationTools = ({
                                             key={section.id}
                                             id={section.id}
                                             agent={agent}
-                                            onGenerate={() => onGenerateSection(section.id as SectionName)}
                                             isGenerating={isGeneratingThis}
                                             isAnythingGenerating={isAnythingGenerating}
                                             hasCredits={!!hasCreditsForSingleSection}
-                                            // إضافة حالة التوليد المحسنة
+                                            reportGenerationMutation={reportGenerationMutation}
+                                            handleProps={{}}
                                             generationState={sectionState}
                                             onRetry={onRetrySection ? () => onRetrySection(section.id) : undefined}
                                         />

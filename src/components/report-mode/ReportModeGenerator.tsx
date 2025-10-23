@@ -1,4 +1,3 @@
-
 'use client';
 
 import { AnimatedContainer } from '@/components/ui/animation';
@@ -47,14 +46,17 @@ export default function ReportModeGenerator() {
         setIsPanelCollapsed,
         generatedSections,
         isAnythingGenerating,
-        activeMutationKey,
-        onGenerateSection,
+        reportGenerationMutation,
         hasCreditsForSingleSection,
         agents,
         agentsLoaded,
         orderedSections,
         setOrderedSections
     } = useReportModeGenerator();
+
+    const activeMutationKey = reportGenerationMutation.isPending
+        ? (reportGenerationMutation.variables as any)?.section
+        : null;
 
     if (!agentsLoaded) {
         return <ReportSkeleton />;
@@ -95,7 +97,7 @@ export default function ReportModeGenerator() {
                                 setOrderedSections={setOrderedSections}
                                 isAnythingGenerating={isAnythingGenerating}
                                 activeMutationKey={activeMutationKey}
-                                onGenerateSection={onGenerateSection}
+                                reportGenerationMutation={reportGenerationMutation}
                                 hasCreditsForSingleSection={hasCreditsForSingleSection}
                                 agents={agents}
                             />

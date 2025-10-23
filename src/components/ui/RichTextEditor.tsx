@@ -4,14 +4,13 @@
 
 import { AnimatedContainer } from '@/components/ui/animation';
 import { Button } from '@/components/ui/button';
-import { useDebounce } from '@/hooks';
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import TextAlign from '@tiptap/extension-text-align';
 import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { AlignLeft, AlignRight, Bold, Italic, List, ListOrdered, Type } from 'lucide-react';
 import { marked } from 'marked';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { SectionToolbar } from '../section/SectionToolbar';
 
 interface MenuBarProps {
@@ -134,7 +133,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
 
 
 interface RichTextEditorProps {
-  content: string | any; // Expecting Markdown content, but handling other types
+  content: string; // Expecting Markdown content
   onChange: (markdown: string) => void;
   onAiAction: (action: string, payload?: any) => void;
   onReadAloud: (text: string) => void;
@@ -151,8 +150,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   isReadingAloud,
 }) => {
   const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr');
-  const [isUpdatingFromProp, setIsUpdatingFromProp] = useState(false);
-  const debouncedContent = useDebounce(content, 1000); // Debounce content prop
+  const isUpdatingRef = useRef(false);
 
   const editor = useEditor({
     extensions: [
@@ -162,9 +160,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         element: document.querySelector('.menu') as HTMLElement,
       }),
     ],
-    content: '',
+    content: '', // Start empty, will be populated by useEffect
     onUpdate: ({ editor }) => {
-      if (isUpdatingFromProp) return; // Prevent loop
+      if (isUpdatingRef.current) return; // Prevent loop if update is from prop change
       const html = editor.getHTML();
       // A proper HTML to Markdown converter should be used here.
       // For this example, we'll just pass the HTML. A library like `turndown` is recommended.
@@ -188,29 +186,24 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     if (!editor) return;
     const { from, to } = editor.state.selection;
     const selectedText = editor.state.doc.textBetween(from, to);
-    const contentString = typeof content === 'string' ? content : '';
-    onReadAloud(selectedText || contentString);
+    onReadAloud(selectedText || content);
   }
 
-  // Effect to update editor content when debounced prop changes
+  // Effect to update editor content when the `content` prop changes.
   useEffect(() => {
-    if (editor && debouncedContent !== undefined) {
-      const currentHtml = editor.getHTML();
+    if (editor && content !== undefined) {
+        // Convert the incoming Markdown to HTML
+        const newHtml = marked.parse(content || '') as string;
+        const currentHtml = editor.getHTML();
 
-      // التأكد من أن المحتوى string قبل تمريره إلى marked
-      const contentString = typeof debouncedContent === 'string'
-        ? debouncedContent
-        : JSON.stringify(debouncedContent) || '';
-
-      const newHtml = marked.parse(contentString) as string;
-
-      if (currentHtml !== newHtml) {
-        setIsUpdatingFromProp(true);
-        editor.commands.setContent(newHtml, false); // `false` means don't trigger update event
-        setTimeout(() => setIsUpdatingFromProp(false), 100); // Release the lock shortly after
-      }
+        // Only update if the content has actually changed, to avoid unnecessary re-renders and cursor jumps.
+        if (currentHtml !== newHtml) {
+            isUpdatingRef.current = true; // Set a flag to prevent onUpdate loop
+            editor.commands.setContent(newHtml, false); // `false` to not trigger the onUpdate handler
+            isUpdatingRef.current = false; // Release the flag
+        }
     }
-  }, [debouncedContent, editor]);
+  }, [content, editor]);
 
 
   return (

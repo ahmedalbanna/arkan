@@ -18,11 +18,13 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card
 interface SectionProps {
     sectionKey: SectionName;
     title: string;
-    content: string | any; // The markdown content of the section, handling various types
+    content: { content: string }; // Expecting the section object with a content property
     onUpdate: (key: SectionName, value: string) => void;
 }
 
 export const Section = ({ sectionKey, title, content, onUpdate }: SectionProps) => {
+    const sectionContent = content?.content || '';
+
     const {
         aiSuggestion,
         diff,
@@ -35,7 +37,7 @@ export const Section = ({ sectionKey, title, content, onUpdate }: SectionProps) 
         isReadingAloud,
         words,
         chars
-    } = useSectionLogic(sectionKey, content, onUpdate);
+    } = useSectionLogic(sectionKey, sectionContent, onUpdate);
 
     return (
         <AnimatedContainer animation="fade-in-up" delay={200}>
@@ -60,7 +62,7 @@ export const Section = ({ sectionKey, title, content, onUpdate }: SectionProps) 
                     <div className="group relative space-y-4">
                         <div className=" transition-all duration-200">
                             <RichTextEditor
-                                content={content}
+                                content={sectionContent} // Pass the markdown string
                                 onChange={(newMarkdown) => onUpdate(sectionKey, newMarkdown)}
                                 onAiAction={handleAiAction}
                                 onReadAloud={handleReadAloud}
