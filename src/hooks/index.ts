@@ -80,9 +80,6 @@ export * from './use-proposal-mode-generator-logic';
 
 // ===== Report Tools Logic Hooks =====
 export * from './use-report-generation';
-export * from './use-report-generation-logic';
-// Note: This is already exported from core, so it's commented out to avoid duplication
-// export * from './use-report-mode-generator';
 export * from './use-report-results';
 
 // ===== Diagram Tools Logic Hooks =====

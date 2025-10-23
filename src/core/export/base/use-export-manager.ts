@@ -35,6 +35,33 @@ export function useExportManager(options: ExportManagerOptions = {}): ExportMana
     const [progress, setProgress] = useState<ExportProgress | null>(null);
     const [abortController, setAbortController] = useState<AbortController | null>(null);
 
+    const getSupportedFormats = useCallback((contentType: ContentType): ExportFormat[] => {
+        const formatMap: Record<ContentType, ExportFormat[]> = {
+            'proposal': ['pdf', 'docx', 'html'],
+            'report': ['pdf', 'docx', 'html'],
+            'presentation': ['pptx', 'pdf', 'html'],
+            'diagram': ['pdf', 'png', 'svg'],
+            'academic-solution': ['pdf', 'docx', 'html'],
+            'project-plan': ['pdf', 'docx', 'html'],
+            'document': ['pdf', 'docx', 'html', 'markdown'],
+        };
+
+        return formatMap[contentType] || ['pdf'];
+    }, []);
+
+    const validateOptions = useCallback((options: ExportOptions): boolean => {
+        if (!options.format || !options.contentType) {
+            return false;
+        }
+
+        const supportedFormats = getSupportedFormats(options.contentType);
+        if (!supportedFormats.includes(options.format)) {
+            return false;
+        }
+
+        return true;
+    }, [getSupportedFormats]);
+
     const updateProgress = useCallback((stage: ExportProgress['stage'], progressValue: number, message: string) => {
         const newProgress: ExportProgress = {
             stage,
@@ -113,7 +140,7 @@ export function useExportManager(options: ExportManagerOptions = {}): ExportMana
             setProgress(null);
             setAbortController(null);
         }
-    }, [isExporting, toast, t, options, updateProgress]);
+    }, [isExporting, toast, t, options, updateProgress, validateOptions]);
 
     const cancelExport = useCallback(() => {
         if (abortController) {
@@ -128,33 +155,6 @@ export function useExportManager(options: ExportManagerOptions = {}): ExportMana
             });
         }
     }, [abortController, toast, t]);
-
-    const getSupportedFormats = useCallback((contentType: ContentType): ExportFormat[] => {
-        const formatMap: Record<ContentType, ExportFormat[]> = {
-            'proposal': ['pdf', 'docx', 'html'],
-            'report': ['pdf', 'docx', 'html'],
-            'presentation': ['pptx', 'pdf', 'html'],
-            'diagram': ['pdf', 'png', 'svg'],
-            'academic-solution': ['pdf', 'docx', 'html'],
-            'project-plan': ['pdf', 'docx', 'html'],
-            'document': ['pdf', 'docx', 'html', 'markdown'],
-        };
-
-        return formatMap[contentType] || ['pdf'];
-    }, []);
-
-    const validateOptions = useCallback((options: ExportOptions): boolean => {
-        if (!options.format || !options.contentType) {
-            return false;
-        }
-
-        const supportedFormats = getSupportedFormats(options.contentType);
-        if (!supportedFormats.includes(options.format)) {
-            return false;
-        }
-
-        return true;
-    }, [getSupportedFormats]);
 
     return {
         isExporting,

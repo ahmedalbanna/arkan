@@ -19,7 +19,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { BookCheck, Clock, FilePlus2, FileText, FolderKanban, GanttChartSquare, GitGraph, Laptop, Presentation, Sparkles, Zap } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 
 // Enhanced loading skeleton with better UX
 const LoadingSkeleton = () => (
@@ -128,10 +128,6 @@ const FileManager = createOptimizedDynamicComponent(
   { preload: true }
 );
 
-const IntelligentReportGenerator = createOptimizedDynamicComponent(
-  () => import('@/components/report-mode/ReportModeGenerator').then(mod => ({ preload: true }))
-);
-
 
 async function markOnboardingComplete(userId: string, token: string) {
   const response = await fetch(`/api/users/${userId}`, {
@@ -160,27 +156,22 @@ function GeneratePageContent() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasLoadedProject, setHasLoadedProject] = useState(false);
 
-  // Memoize feature checking function to prevent recalculation
-  const isFeatureEnabled = useMemo(() => {
-    return (featureId: string) => {
-      if (!featuresLoaded) return false;
-      const feature = features.find(f => f.id === featureId);
-      return feature?.isEnabled;
-    };
+  const isFeatureEnabled = useCallback((featureId: string) => {
+    if (!featuresLoaded) return false;
+    const feature = features.find(f => f.id === featureId);
+    return feature?.isEnabled;
   }, [features, featuresLoaded]);
 
   useEffect(() => {
-    // Show the onboarding guide if the user profile is loaded and the flag is false
     if (userProfile && !userProfile.hasCompletedOnboarding) {
       setShowOnboarding(true);
     }
   }, [userProfile]);
 
-  // Effect to load project data into the store once it's fetched
   useEffect(() => {
     if (isSuccess && projectData && !hasLoadedProject) {
       loadProject(projectData);
-      setHasLoadedProject(true); // Mark as loaded to prevent re-loading
+      setHasLoadedProject(true);
     }
   }, [isSuccess, projectData, loadProject, hasLoadedProject]);
 
@@ -192,7 +183,6 @@ function GeneratePageContent() {
       return markOnboardingComplete(firebaseUser.uid, token);
     },
     onSuccess: () => {
-      // Invalidate user query to refetch the updated profile
       queryClient.invalidateQueries({ queryKey: ['user', firebaseUser?.uid] });
       refetchUser();
     },
@@ -210,10 +200,9 @@ function GeneratePageContent() {
   };
 
 
-  // Memoize enabled tabs to prevent unnecessary recalculations
   const enabledTabs = useMemo(() => {
     const tabs = [
-      { id: 'files', enabled: true }, // Files tab is always enabled
+      { id: 'files', enabled: true },
       { id: 'proposal', enabled: isFeatureEnabled('proposal') },
       { id: 'plan', enabled: isFeatureEnabled('plan') },
       { id: 'report', enabled: isFeatureEnabled('report') },
@@ -224,15 +213,14 @@ function GeneratePageContent() {
     ].filter(tab => tab.enabled).map(tab => tab.id);
 
     return tabs;
-  }, [features, featuresLoaded]); // Only recalculate when features change
+  }, [isFeatureEnabled]);
 
 
-  // If the current active tab is no longer enabled, switch to the first available one
   useEffect(() => {
     if (!enabledTabs.includes(activeTab) && enabledTabs.length > 0) {
       setActiveTab(enabledTabs[0]);
     } else if (enabledTabs.length === 0) {
-      setActiveTab(''); // No tabs are active
+      setActiveTab('');
     }
   }, [features, activeTab, enabledTabs]);
 
@@ -240,12 +228,10 @@ function GeneratePageContent() {
     <div className="relative flex-grow flex flex-col bg-gradient-to-br from-background via-background to-primary/5 min-h-screen">
       <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
 
-      {/* Background Effects */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none"></div>
       <div className="absolute top-0 right-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float pointer-events-none"></div>
 
       <div className="flex-grow flex flex-col mx-auto px-2 sm:px-4 py-4 sm:py-8 w-full relative z-10">
-        {/* Enhanced Header */}
         <AnimatedContainer animation="fade-in-down" delay={0}>
           <MobileCard className="p-4 sm:p-6 mb-4 sm:mb-6 backdrop-blur-md">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
@@ -281,7 +267,6 @@ function GeneratePageContent() {
               </div>
             </div>
 
-            {/* Project Progress */}
             {projectData && (
               <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border/50">
                 <div className="flex items-center justify-between mb-3">
@@ -402,7 +387,6 @@ function GeneratePageContent() {
               </AnimatedContainer>
 
               <div className="w-full flex-grow mt-4 sm:mt-6 relative">
-                {/* Render only the active tab to improve performance */}
                 <ErrorBoundary>
                   <div className="h-full">
                     {activeTab === 'files' && (

@@ -4,6 +4,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { handleErrorUtility } from '@/lib/errorUtils';
+import { sectionKeys } from '@/lib/query-keys';
 import {
   createSection as createSectionApi,
   deleteSection as deleteSectionApi,
@@ -13,32 +14,31 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from './use-toast';
 
-import { sectionKeys } from '@/lib/core/query-keys';
-import { Section, type SectionData } from '@/lib/models/section'; // CORRECTED: Import SectionData
+import { Section, type SectionData } from '@/lib/models/section'; 
 
 /**
- * Fetches dynamic sections.
- * Returns instances of the Section CLASS.
+ * Fetches dynamic sections and returns them as Section instances.
  */
 export function useSections() {
   const { firebaseUser } = useAuth();
-  return useQuery<Section[]>({ // Return type is now Section[]
+  return useQuery<Section[], Error>({ 
     queryKey: sectionKeys.lists(),
     queryFn: async () => {
       const token = await getAuthenticatedToken(firebaseUser);
       const data = await fetchSectionsApi(token);
-      // Transform plain objects to class instances using the correct type
-      return data.map(s => new Section(s as SectionData)); // CORRECTED: Use SectionData
+      return data.map(s => new Section(s as SectionData));
     },
     enabled: !!firebaseUser,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
 
+/**
+ * Creates a new section.
+ */
 export function useCreateSection() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
-  // Mutation still works with the plain SectionData object for the API
   return useMutation<SectionData, Error, Omit<SectionData, 'id'> & { id: string }>({
     mutationFn: async (data) => {
       const token = await getAuthenticatedToken(firebaseUser);
@@ -52,6 +52,9 @@ export function useCreateSection() {
   });
 }
 
+/**
+ * Updates an existing section.
+ */
 export function useUpdateSection() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
@@ -68,6 +71,9 @@ export function useUpdateSection() {
   });
 }
 
+/**
+ * Deletes a section.
+ */
 export function useDeleteSection() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();

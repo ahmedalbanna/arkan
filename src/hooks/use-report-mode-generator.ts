@@ -1,30 +1,27 @@
+
 'use client';
 
 import type { SectionName } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import {
-    toast, useAgents, useBuilderStore, useExport, useGenerateReportSection, useGenerationUIStore, useTranslate
+    toast, useAgents, useBuilderStore, useExport, useGenerationUIStore, useReportGeneration, useTranslate
 } from '@/hooks';
 import { AgentCategory } from '@/lib/models/agent';
-import { ProjectReport } from '@/lib/models/project-report'; // Updated import
 import type { Section } from '@/lib/models/section';
 import { useEffect, useMemo, useState } from 'react';
 
 export const useReportModeGenerator = () => {
     const { t, locale } = useLocalization();
     const { project, updateProject } = useBuilderStore();
-    
-    // The report model is now correctly typed as ProjectReport
     const report = useMemo(() => project?.report, [project]);
-    
+
     const translateMutation = useTranslate();
     const [isTranslatingAll, setIsTranslatingAll] = useState(false);
     const [translatedSections, setTranslatedSections] = useState<Record<string, string>>({});
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
-    
+
     const [orderedSections, setOrderedSections] = useState<Section[]>(report?.getOrderedSections() || []);
-    
     const { exportReportDocx, isExporting } = useExport();
     const { agents, isLoaded: agentsLoaded } = useAgents();
 
@@ -33,63 +30,73 @@ export const useReportModeGenerator = () => {
         return agents.filter(a => a.category === AgentCategory.ReportGeneration);
     }, [agents]);
 
-    // Sync local UI state when the canonical report changes.
     useEffect(() => {
         setOrderedSections(report?.getOrderedSections() || []);
     }, [report]);
 
     const generatedSections = useMemo(
-        () => (report?.getOrderedSections() || []).filter(section => section.hasContent),
+        () => (report?.getOrderedSections() || []).filter(section => section.hasContent()),
         [report]
     );
 
-    const handleSectionUpdate = (key: SectionName, value: string) => {
-        updateProject(p => p.report.sectionsManager.updateSection(key, value));
+    const handleSectionUpdate = (key: SectionName, content: string) => {
+        updateProject(p => {
+            p.report.sectionsManager.updateSection(key, { content });
+            p.setUnsavedChanges(true);
+        });
     };
 
     const handleSetOrderedSections = (newOrderedSections: Section[]) => {
-        setOrderedSections(newOrderedSections); // Update local UI immediately
-        updateProject(p => p.report.setSectionOrder(newOrderedSections.map(s => s.id)));
+        setOrderedSections(newOrderedSections);
+        updateProject(p => {
+            p.report.setSectionOrder(newOrderedSections.map(s => s.id));
+            p.setUnsavedChanges(true);
+        });
     }
 
     const handleTranslateAll = async (targetLang: 'en' | 'ar') => {
         if (!report) return;
-
         setIsTranslatingAll(true);
-        toast({ /* ... */ });
+        toast({ title: 'Translating All Sections', description: 'This may take a moment...' });
 
-        const sectionsToTranslate = report.getOrderedSections().filter(s => s.hasContent);
-        const translationPromises = sectionsToTranslate.map(section => 
+        const sectionsToTranslate = report.getOrderedSections().filter(s => s.hasContent());
+        const promises = sectionsToTranslate.map(section => 
             translateMutation.mutateAsync({ text: section.content!, targetLang })
                 .then(result => ({ key: section.id, content: result.translatedText }))
-                .catch(error => ({ key: section.id, error }))
         );
 
-        const results = await Promise.all(translationPromises);
-        // ... (rest of the logic is the same)
+        const results = await Promise.all(promises);
+        
+        const newTranslations: Record<string, string> = {};
+        results.forEach(result => {
+            newTranslations[result.key] = result.content;
+        });
+        
+        setTranslatedSections(newTranslations);
+        setIsTranslatingAll(false);
+        toast({ title: 'Translation Complete', description: 'All sections have been translated.' });
     };
 
     const handleExportReportDOCX = async (sectionsToInclude: SectionName[]) => {
         if (!project || !report || generatedSections.length === 0) return;
-
-        const translatedTitles = { /* ... */ };
-        await exportReportDocx(project, translatedTitles, sectionsToInclude);
+        await exportReportDocx(project, sectionsToInclude);
     };
 
     const { userProfile } = useAuth();
-    const reportGenerationMutation = useGenerateReportSection();
-    const { initializeDependentStates } = useGenerationUIStore();
-
-    const hasCreditsForSingleSection = useMemo(() => Boolean(userProfile && (userProfile.credits ?? 0) >= 1), [userProfile]);
+    const reportGenerationMutation = useReportGeneration();
+    const { initializeDependentStates, getDependentStates } = useGenerationUIStore();
 
     useEffect(() => {
         if (agentsLoaded && reportAgents.length > 0) {
             const currentSections = report?.getOrderedSections();
             if (currentSections && currentSections.length > 0) {
-                 initializeDependentStates(reportAgents, currentSections);
+                const generationStates = getDependentStates(currentSections.map(s => s.id));
+                if (Object.keys(generationStates).length === 0) {
+                     initializeDependentStates(reportAgents, currentSections);
+                }
             }
         }
-    }, [agentsLoaded, reportAgents, report, initializeDependentStates]);
+    }, [agentsLoaded, reportAgents, report, initializeDependentStates, getDependentStates]);
 
     return {
         t,
@@ -105,13 +112,13 @@ export const useReportModeGenerator = () => {
         sections: report?.sectionsManager.toJSON() || {},
         orderedSections,
         setOrderedSections: handleSetOrderedSections,
-        isAnythingGenerating: reportGenerationMutation.isPending,
+        isAnythingGenerating: reportGenerationMutation.isLoading,
         reportGenerationMutation,
-        hasCreditsForSingleSection,
+        hasCreditsForSingleSection: Boolean(userProfile && (userProfile.credits ?? 0) >= 1),
         agents: reportAgents,
         agentsLoaded,
         project,
-        report, // The type is now correctly inferred as ProjectReport | undefined
+        report,
         translatedSections,
     };
 };

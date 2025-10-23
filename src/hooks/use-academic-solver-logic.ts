@@ -19,39 +19,45 @@ export function useAcademicSolverLogic() {
     const { toast } = useToast();
     const { firebaseUser, userProfile } = useAuth();
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
-
-    // Get the project and updater function from the global store.
-    const project = useBuilderStore(s => s.project);
-    const updateProject = useBuilderStore(s => s.updateProject);
-
-    // If the project doesn't exist yet (e.g., loading), we can't proceed.
-    // We return a fallback state to prevent the UI from crashing.
-    if (!project) {
-        // This fallback provides a non-null, dummy manager and default values 
-        // to ensure the consuming components don't crash during initial load.
-        return {
-            t, locale, isPanelCollapsed, setIsPanelCollapsed, isProjectLoaded: false,
-            academicSolver: new AcademicSolverManager(), // A temporary, empty manager
-            stage: 'idle', documentType: null, analyzedDocument: null, solvedDocument: null,
-            questionDocuments: [], externalContext: [],
-            setDocumentType: () => {}, addQuestionDocument: () => {}, removeQuestionDocument: () => {},
-            addExternalContext: () => {}, removeExternalContext: () => {}, resetCurrent: () => {},
-            currentPage: 0, analyzeMutation: { isPending: true }, solveMutation: { isPending: true }, handleAnalyze: () => {}, handleSolve: () => {}, handleExportDocx: () => {},
-            isProcessing: true, canAnalyze: false, canSolve: false, totalPages: 1, handleNextPage: () => {}, handlePrevPage: () => {}
-        };
-    }
-
-    // Now that we know the project exists, we can safely access its properties.
-    const academicSolver = project.academicSolver;
-
+    
+    // Hooks are now at the top level
     const [currentPage, setCurrentPage] = useState(0);
     const analyzeMutation = useAnalyzeAcademicDocument();
     const solveMutation = useSolveAcademicDocument();
 
-    // Reset pagination when the underlying documents change.
+    const project = useBuilderStore(s => s.project);
+    const updateProject = useBuilderStore(s => s.updateProject);
+    const academicSolver = project?.academicSolver;
+
+    // Reset pagination when the underlying documents change
     useEffect(() => {
         setCurrentPage(0);
-    }, [academicSolver.analyzedDocument, academicSolver.solvedDocument]);
+    }, [academicSolver?.analyzedDocument, academicSolver?.solvedDocument]);
+
+    if (!project || !academicSolver) {
+        return {
+            t, locale, isPanelCollapsed, setIsPanelCollapsed, isProjectLoaded: false,
+            academicSolver: new AcademicSolverManager(),
+            stage: 'idle', documentType: null, analyzedDocument: null, solvedDocument: null,
+            questionDocuments: [], externalContext: [],
+            setDocumentType: () => {},
+            addQuestionDocument: () => {},
+            removeQuestionDocument: () => {},
+            addExternalContext: () => {},
+            removeExternalContext: () => {},
+            resetCurrent: () => {},
+            currentPage: 0, analyzeMutation, solveMutation,
+            handleAnalyze: () => {},
+            handleSolve: () => {},
+            handleExportDocx: () => {},
+            isProcessing: true,
+            canAnalyze: false,
+            canSolve: false,
+            totalPages: 1,
+            handleNextPage: () => {},
+            handlePrevPage: () => {}
+        };
+    }
 
     const creditCostAnalyze = 1;
     const creditCostSolve = academicSolver.analyzedDocument?.documentType === 'exam' ? 3 : 2;
@@ -62,7 +68,11 @@ export function useAcademicSolverLogic() {
             return;
         }
 
-        updateProject(p => { p.academicSolver.setStage('analyzing'); });
+        updateProject(p => { 
+            if (!p) return null;
+            p.academicSolver.setStage('analyzing'); 
+            return p;
+        });
 
         const combinedQuestionContent = academicSolver.questionDocuments
             .map(doc => `--- Content from: ${doc.fileName} ---\n${doc.content}`)
@@ -70,11 +80,19 @@ export function useAcademicSolverLogic() {
 
         analyzeMutation.mutate({ markdown: combinedQuestionContent, documentType: academicSolver.documentType }, {
             onSuccess: (data) => {
-                updateProject(p => { p.academicSolver.setAnalyzedDocument(data); });
+                updateProject(p => { 
+                    if (!p) return null;
+                    p.academicSolver.setAnalyzedDocument(data); 
+                    return p;
+                });
                 toast({ title: t('builder.academicSolver.toasts.analysisSuccess') });
             },
             onError: (error: any) => {
-                updateProject(p => { p.academicSolver.setStage('idle'); });
+                updateProject(p => { 
+                    if (!p) return null;
+                    p.academicSolver.setStage('idle'); 
+                    return p;
+                });
                 toast({ title: t('builder.toasts.errorTitle'), description: error.message, variant: 'destructive' });
             }
         });
@@ -85,7 +103,11 @@ export function useAcademicSolverLogic() {
             toast({ title: t('builder.academicSolver.toasts.analysisMissing'), variant: 'destructive' });
             return;
         }
-        updateProject(p => { p.academicSolver.setStage('solving'); });
+        updateProject(p => { 
+            if (!p) return null;
+            p.academicSolver.setStage('solving'); 
+            return p;
+        });
 
         const contextMarkdown = academicSolver.externalContext.length > 0
             ? academicSolver.externalContext
@@ -95,11 +117,19 @@ export function useAcademicSolverLogic() {
 
         solveMutation.mutate({ analyzedDocument: academicSolver.analyzedDocument, contextMarkdown }, {
             onSuccess: (data) => {
-                updateProject(p => { p.academicSolver.setSolvedDocument(data); });
+                updateProject(p => { 
+                    if (!p) return null;
+                    p.academicSolver.setSolvedDocument(data); 
+                    return p;
+                });
                 toast({ title: t('builder.academicSolver.toasts.solvingSuccess') });
             },
             onError: (error: any) => {
-                updateProject(p => { p.academicSolver.setStage('readyToSolve'); });
+                updateProject(p => { 
+                    if (!p) return null;
+                    p.academicSolver.setStage('readyToSolve');
+                    return p;
+                });
                 toast({ title: t('builder.toasts.errorTitle'), description: error.message, variant: 'destructive' });
             }
         });
@@ -124,12 +154,12 @@ export function useAcademicSolverLogic() {
         t, locale, isPanelCollapsed, setIsPanelCollapsed, isProjectLoaded: true, academicSolver,
         stage: academicSolver.stage, documentType: academicSolver.documentType, analyzedDocument: academicSolver.analyzedDocument,
         solvedDocument: academicSolver.solvedDocument, questionDocuments: academicSolver.questionDocuments, externalContext: academicSolver.externalContext,
-        setDocumentType: (newType: AcademicDocumentType | null) => updateProject(p => { p.academicSolver.setDocumentType(newType); }),
-        addQuestionDocument: (fileName: string, content: string) => updateProject(p => { p.academicSolver.addQuestionDocument(fileName, content); }),
-        removeQuestionDocument: (index: number) => updateProject(p => { p.academicSolver.removeQuestionDocument(index); }),
-        addExternalContext: (fileName: string, content: string) => updateProject(p => { p.academicSolver.addExternalContext(fileName, content); }),
-        removeExternalContext: (index: number) => updateProject(p => { p.academicSolver.removeExternalContext(index); }),
-        resetCurrent: () => updateProject(p => { p.academicSolver.reset(); }),
+        setDocumentType: (newType: AcademicDocumentType | null) => updateProject(p => { if (p) p.academicSolver.setDocumentType(newType); return p; }),
+        addQuestionDocument: (fileName: string, content: string) => updateProject(p => { if (p) p.academicSolver.addQuestionDocument(fileName, content); return p; }),
+        removeQuestionDocument: (index: number) => updateProject(p => { if (p) p.academicSolver.removeQuestionDocument(index); return p; }),
+        addExternalContext: (fileName: string, content: string) => updateProject(p => { if (p) p.academicSolver.addExternalContext(fileName, content); return p; }),
+        removeExternalContext: (index: number) => updateProject(p => { if (p) p.academicSolver.removeExternalContext(index); return p; }),
+        resetCurrent: () => updateProject(p => { if (p) p.academicSolver.reset(); return p; }),
         currentPage, analyzeMutation, solveMutation, handleAnalyze, handleSolve, handleExportDocx, isProcessing, canAnalyze, canSolve,
         totalPages, handleNextPage, handlePrevPage,
     };

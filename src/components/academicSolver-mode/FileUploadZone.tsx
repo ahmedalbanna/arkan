@@ -43,7 +43,7 @@ export const FileUploadZone = ({ onFileAdded }: FileUploadZoneProps) => {
             }
         }
         setIsLoading(false);
-    }, [onFileAdded, toast, t]);
+    }, [onFileAdded, t]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,

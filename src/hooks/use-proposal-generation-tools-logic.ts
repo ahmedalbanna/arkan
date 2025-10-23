@@ -1,10 +1,10 @@
 
 'use client';
 
-import type { AdvancedProposalFields, GuidelineState } from '@/ai/schemas';
+import type { AdvancedProposalFields } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useGenerateProposal, useGenerationUIStore } from '@/hooks';
+import { useBuilderStore, useGenerateProposal, useGenerationUIStore, type GuidelineState } from '@/hooks';
 import { useEffect, useState } from 'react';
 import { toast } from './use-toast';
 import { useWritingTool } from './use-writing-tools';
@@ -35,7 +35,6 @@ export function useProposalGenerationToolsLogic() {
 
     // Sync project data to UI store on mount. This hook is called unconditionally.
     useEffect(() => {
-        // Guard inside the effect to prevent running logic if the project isn't ready.
         if (!project) return;
 
         const store = useGenerationUIStore.getState();
@@ -48,11 +47,8 @@ export function useProposalGenerationToolsLogic() {
             store.setGuidelineState(project.guidelineState);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [project?.id]); // Depend on the stable project ID.
+    }, [project?.id]);
 
-    // =============================================================================
-    // LOADING STATE (Early return if project is not loaded)
-    // =============================================================================
     if (!project) {
         return {
             t,
@@ -70,10 +66,7 @@ export function useProposalGenerationToolsLogic() {
         };
     }
 
-    // =============================================================================
-    // PROJECT-DEPENDENT LOGIC
-    // =============================================================================
-    const { projectIdea, contextManager } = project;
+    const { projectIdea } = project;
     const hasCredits = (userProfile?.credits ?? 0) >= 1;
 
     const setProjectIdea = (idea: string) => updateProject(p => { p.projectIdea = idea; });
@@ -82,46 +75,47 @@ export function useProposalGenerationToolsLogic() {
         const { name, value } = e.target;
         const fieldName = name as keyof AdvancedProposalFields;
         
-        uiStore.setAdvancedField(fieldName, value); // Update UI immediately
+        uiStore.setAdvancedField(fieldName, value);
         updateProject(p => {
-            p.advancedProposalFields = { ...p.advancedProposalFields, [fieldName]: value };
-            p.hasUnsavedChanges = true;
+            if (!p.advancedProposalFields) p.advancedProposalFields = {};
+            p.advancedProposalFields[fieldName] = value;
+            p.setUnsavedChanges(true);
         });
     };
 
     const handleAddGuideline = () => {
-        uiStore.handleAddCustomGuidelineForItem('proposal');
-        updateProject(p => { p.guidelineState = useGenerationUIStore.getState().guidelineState; p.hasUnsavedChanges = true; });
+        const newGuideline = uiStore.customGuidelineInput['proposal'];
+        if (!newGuideline?.trim()) return;
+        updateProject(p => {
+            if (!p.guidelineState) p.guidelineState = { 'proposal': { checked: {}, custom: [] } };
+            if (!p.guidelineState['proposal']) p.guidelineState['proposal'] = { checked: {}, custom: [] };
+            p.guidelineState['proposal'].custom.push(newGuideline);
+            p.setUnsavedChanges(true);
+        });
+        uiStore.setCustomGuidelineInputForItem('proposal', '');
     };
 
     const handleRemoveGuideline = (index: number) => {
-        uiStore.handleRemoveCustomGuidelineForItem('proposal', index);
-        updateProject(p => { p.guidelineState = useGenerationUIStore.getState().guidelineState; p.hasUnsavedChanges = true; });
+        updateProject(p => {
+            if (p.guidelineState?.['proposal']) {
+                p.guidelineState['proposal'].custom.splice(index, 1);
+                p.setUnsavedChanges(true);
+            }
+        });
     };
 
     const handleGuidelineInputChange = (value: string) => {
         uiStore.setCustomGuidelineInputForItem('proposal', value);
-        updateProject(p => { p.guidelineState = useGenerationUIStore.getState().guidelineState; p.hasUnsavedChanges = true; });
     };
 
     const handleGenerateClick = () => {
-        const contextFiles = contextManager.getAll();
-        const contextMarkdown = contextFiles.map(file => 
-`---
-File: ${file.fileName}
-Type: ${file.type}
----
-
-${file.content}`
-        ).join('\n\n');
-
+        const contextMarkdown = project.report.contextManager.toMarkdown();
         const payload = {
             projectIdea: activeTab === 'simple' ? (projectIdea || '') : '',
-            guidelines: uiStore.guidelineState['proposal']?.custom || [],
+            guidelines: project.guidelineState?.['proposal']?.custom || [],
             contextMarkdown,
-            advancedFields: uiStore.advancedProposalFields,
+            advancedFields: project.advancedProposalFields || {},
         };
-
         generationMutation.mutate(payload as any);
     };
 
@@ -130,7 +124,7 @@ ${file.content}`
     };
 
     const canGenerate = (activeTab === 'simple' && !!projectIdea) ||
-        (activeTab === 'advanced' && !!uiStore.advancedProposalFields?.projectTitle && !!uiStore.advancedProposalFields?.projectObjective);
+        (activeTab === 'advanced' && !!project.advancedProposalFields?.projectTitle && !!project.advancedProposalFields?.projectObjective);
 
     return {
         t,
@@ -139,12 +133,12 @@ ${file.content}`
         setActiveTab,
         projectIdea,
         setProjectIdea,
-        customGuidelines: uiStore.guidelineState['proposal']?.custom || [],
+        customGuidelines: project.guidelineState?.['proposal']?.custom || [],
         addCustomGuideline: handleAddGuideline,
         removeCustomGuideline: handleRemoveGuideline,
         customGuidelineInput: uiStore.customGuidelineInput['proposal'] || '',
         setCustomGuidelineInput: handleGuidelineInputChange,
-        advancedFields: uiStore.advancedProposalFields,
+        advancedFields: project.advancedProposalFields || {},
         handleFieldChange,
         generationMutation,
         handleGenerateClick,

@@ -8,6 +8,7 @@ export function useAnimation() {
     const [hasAnimated, setHasAnimated] = React.useState(false)
     const elementRef = React.useRef<HTMLElement | null>(null)
     React.useEffect(() => {
+        const currentElement = elementRef.current;
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting && !hasAnimated) {
@@ -21,13 +22,13 @@ export function useAnimation() {
             }
         )
 
-        if (elementRef.current) {
-            observer.observe(elementRef.current)
+        if (currentElement) {
+            observer.observe(currentElement)
         }
 
         return () => {
-            if (elementRef.current) {
-                observer.unobserve(elementRef.current)
+            if (currentElement) {
+                observer.unobserve(currentElement)
             }
         }
     }, [hasAnimated])
@@ -300,7 +301,7 @@ const ParallaxAnimation = React.forwardRef<HTMLDivElement, ParallaxAnimationProp
                         }
                     }
                     if (elementRef.current !== node) {
-                        elementRef
+                        elementRef.current = node;
                     }
                 }}
                 className={className}
@@ -318,4 +319,3 @@ export {
     ParallaxAnimation, StaggeredAnimation,
     TypingAnimation
 };
-

@@ -4,12 +4,7 @@
  */
 
 import { Loader2 } from 'lucide-react';
-import React, { ComponentType, lazy, Suspense } from 'react';
-
-interface LazyComponentProps {
-    fallback?: React.ReactNode;
-    delay?: number;
-}
+import React, { ComponentType, lazy, Suspense, useEffect, useState, useRef, useCallback } from 'react';
 
 interface LazyComponentOptions {
     fallback?: React.ReactNode;
@@ -36,7 +31,7 @@ export function createLazyComponent<T extends ComponentType<any>>(
     importFunc: () => Promise<{ default: T }>,
     options: LazyComponentOptions = {}
 ): React.FC<React.ComponentProps<T>> {
-    const { fallback = <DefaultFallback />, delay = 0, ssr = false } = options;
+    const { fallback = <DefaultFallback />, delay = 0 } = options;
 
     const LazyComponent = lazy(() => {
         if (delay > 0) {
@@ -55,8 +50,7 @@ export function createLazyComponent<T extends ComponentType<any>>(
         </Suspense>
     );
 
-    // إضافة اسم للمكون للتتبع
-    WrappedComponent.displayName = `LazyComponent(${LazyComponent.displayName || 'Unknown'})`;
+    WrappedComponent.displayName = `LazyComponent(${(LazyComponent as any).displayName || 'Unknown'})`;
 
     return WrappedComponent;
 }
@@ -69,9 +63,9 @@ export const LazyComponent: React.FC<{
     fallback?: React.ReactNode;
     delay?: number;
 }> = ({ children, fallback = <DefaultFallback />, delay = 0 }) => {
-    const [isLoaded, setIsLoaded] = React.useState(false);
+    const [isLoaded, setIsLoaded] = useState(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (delay > 0) {
             const timer = setTimeout(() => {
                 setIsLoaded(true);
@@ -97,11 +91,13 @@ export function useLazyComponent<T>(
     options: { delay?: number; dependencies?: any[] } = {}
 ) {
     const { delay = 0, dependencies = [] } = options;
-    const [Component, setComponent] = React.useState<T | null>(null);
-    const [isLoading, setIsLoading] = React.useState(false);
-    const [error, setError] = React.useState<Error | null>(null);
+    const [Component, setComponent] = useState<T | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<Error | null>(null);
 
-    React.useEffect(() => {
+    const stableImportFunc = useCallback(importFunc, dependencies);
+
+    useEffect(() => {
         let isMounted = true;
 
         const loadComponent = async () => {
@@ -114,7 +110,7 @@ export function useLazyComponent<T>(
                 }
 
                 if (isMounted) {
-                    const component = await importFunc();
+                    const component = await stableImportFunc();
                     setComponent(component);
                 }
             } catch (err) {
@@ -133,7 +129,7 @@ export function useLazyComponent<T>(
         return () => {
             isMounted = false;
         };
-    }, dependencies);
+    }, [delay, stableImportFunc]);
 
     return { Component, isLoading, error };
 }
@@ -152,10 +148,10 @@ export const IntersectionLazyComponent: React.FC<{
     rootMargin = '50px',
     threshold = 0.1
 }) => {
-        const [isVisible, setIsVisible] = React.useState(false);
-        const ref = React.useRef<HTMLDivElement>(null);
+        const [isVisible, setIsVisible] = useState(false);
+        const ref = useRef<HTMLDivElement>(null);
 
-        React.useEffect(() => {
+        useEffect(() => {
             const observer = new IntersectionObserver(
                 ([entry]) => {
                     if (entry.isIntersecting) {
@@ -166,11 +162,16 @@ export const IntersectionLazyComponent: React.FC<{
                 { rootMargin, threshold }
             );
 
-            if (ref.current) {
-                observer.observe(ref.current);
+            const currentRef = ref.current;
+            if (currentRef) {
+                observer.observe(currentRef);
             }
 
-            return () => observer.disconnect();
+            return () => {
+                if (currentRef) {
+                    observer.unobserve(currentRef);
+                }
+            };
         }, [rootMargin, threshold]);
 
         return (

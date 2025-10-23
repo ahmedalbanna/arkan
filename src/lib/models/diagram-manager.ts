@@ -1,6 +1,10 @@
 
 import { Diagram, type DiagramProperties, type DiagramType } from './diagram';
 
+// Re-exporting the core types for consumers of the DiagramManager
+export type { DiagramProperties, DiagramType };
+export type DiagramsData = Record<string, DiagramProperties>;
+
 /**
  * The DiagramManager class encapsulates the collection of diagrams within a project.
  * It is responsible for creating, updating, and serializing Diagram instances.
@@ -31,12 +35,24 @@ export class DiagramManager {
     }
 
     /**
-     * Creates or updates a diagram.
+     * Creates or updates a diagram with partial data.
+     * It merges the new data with existing data if any.
      * @param type The type of the diagram.
-     * @param data The properties for the diagram.
+     * @param data The partial properties for the diagram.
      */
-    public updateDiagram(type: DiagramType, data: DiagramProperties): void {
-        this.diagrams[type] = new Diagram(data);
+    public updateDiagram(type: DiagramType, data: Partial<DiagramProperties>): void {
+        const existingDiagram = this.diagrams[type];
+        
+        // Start with defaults for required properties to satisfy DiagramProperties for a new diagram.
+        const mergedProps: DiagramProperties = {
+            plantUmlCode: '',
+            imageUrl: '',
+            ...(existingDiagram ? existingDiagram.toStateObject() : {}),
+            ...data,
+            type: type, // Always enforce the correct type.
+        };
+
+        this.diagrams[type] = new Diagram(mergedProps);
     }
 
     /**

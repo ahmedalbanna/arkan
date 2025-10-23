@@ -58,11 +58,14 @@ export function useGenerateDiagram() {
       const diagramKey = variables.diagramToGenerate as DiagramType;
 
       updateProject(p => {
-        p.setDiagram(diagramKey, {
+        // CORRECTED: Use the robust updateDiagram method on the diagramsManager
+        p.report.diagramsManager.updateDiagram(diagramKey, {
           plantUmlCode: data.plantUmlCode,
           imageUrl: data.imageUrl,
-          explanation: data.explanation
+          explanation: data.explanation,
+          type: diagramKey,
         });
+        p.setUnsavedChanges(true);
       });
 
       refetchUser();

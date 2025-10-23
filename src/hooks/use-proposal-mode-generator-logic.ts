@@ -24,7 +24,7 @@ export function useProposalModeGeneratorLogic() {
         mutationFn: async (variables: { proposal: ProjectProposal, targetLang: 'en' | 'ar', token: string }) => {
             const result = await translateProposalApi({
                 ...variables,
-                proposal: variables.proposal.toJSON(), // Correctly serialize the proposal object
+                proposal: variables.proposal.toJSON() as any,
             });
             return result as ProjectProposalData;
         },
@@ -69,6 +69,7 @@ export function useProposalModeGeneratorLogic() {
     const handleProposalUpdate = (key: string, value: string) => {
         updateProject(p => {
             p.proposal?.updateSection(key, value);
+            p.setUnsavedChanges(true);
         });
     }
 
@@ -115,7 +116,8 @@ export function useProposalModeGeneratorLogic() {
 
     const handleSummarizeProject = async () => {
         if (!project || !project.proposal || !firebaseUser) return;
-        const reportMarkdown = project.sections.getAllSectionsAsMarkdown();
+        // CORRECTED: Access the section manager from the report object
+        const reportMarkdown = project.report.sectionsManager.toMarkdown();
         const token = await firebaseUser.getIdToken();
         summarizeMutation.mutate({ body: { proposal: project.proposal.toJSON(), reportMarkdown }, token });
     }

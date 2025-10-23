@@ -1,12 +1,10 @@
 
 import {
-    AnyProjectProposalSchema,
     DEFAULT_REPORT_SECTION_IDS,
-    ProjectPlanSchema,
     SectionName
 } from '@/ai/schemas';
 import { ContextManager, ContextFileData } from './context-manager';
-import { DiagramManager, DiagramProperties } from './diagram-manager';
+import { DiagramManager, DiagramsData } from './diagram-manager';
 import { ProjectPlan, ProjectPlanData } from './project-plan';
 import { ProjectProposal, ProjectProposalData } from './project-proposal';
 import { Section, SectionData } from './section';
@@ -16,7 +14,7 @@ export interface SavedReport {
     id: string;
     title: string;
     sections: Record<string, SectionData>;
-    diagrams: Record<string, DiagramProperties>;
+    diagrams: DiagramsData;
     contextFiles: ContextFileData[];
     proposal: ProjectProposalData | null;
     projectPlan: ProjectPlanData | null;
@@ -45,14 +43,13 @@ export class ProjectReport {
         if (isNewReport) {
             initialSections = {};
             DEFAULT_REPORT_SECTION_IDS.forEach(id => {
-                const newSectionData: SectionData = {
+                initialSections[id] = {
                     id,
                     agentId: id,
                     title: id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, ' $1'),
                     type: 'report',
                     content: ''
                 };
-                initialSections[id] = newSectionData;
             });
             initialOrder = DEFAULT_REPORT_SECTION_IDS;
         }
@@ -61,11 +58,8 @@ export class ProjectReport {
         this.diagramsManager = new DiagramManager(data.diagrams || {});
         this.contextManager = new ContextManager(data.contextFiles || []);
 
-        // CORRECTED: Use the constructor directly, which handles both raw and structured data.
-        this.proposal = data.proposal ? new ProjectProposal(data.proposal as any) : null;
-        this.projectPlan = data.projectPlan ? new ProjectPlan(data.projectPlan as any) : null;
-
-        // CORRECTED: Use the locally available `initialSections` to avoid accessing a private property.
+        this.proposal = data.proposal ? new ProjectProposal(data.proposal) : null;
+        this.projectPlan = data.projectPlan ? new ProjectPlan(data.projectPlan) : null;
         this.orderedSectionIds = initialOrder.length > 0 ? initialOrder : Object.keys(initialSections);
     }
 

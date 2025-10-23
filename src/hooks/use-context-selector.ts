@@ -4,51 +4,30 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useSections } from '@/hooks';
 import { useMemo } from 'react';
 import { useGenerationUIStore } from './useGenerationUIStore';
-import { type ContextFileData } from '@/lib/models/context-manager';
 
-// Define a more specific type for the selection state
 interface SelectionState {
     proposal: boolean;
     projectPlan: boolean;
-    sections: Record<string, boolean>; // Use string for broader compatibility
+    sections: Record<string, boolean>;
     diagrams: Record<string, boolean>;
-    externalContext: Record<number, boolean>; // Use a map for sparse selections
+    externalContext: Record<number, boolean>;
 }
 
-// Define an empty selection structure for initialization, now with a proper type.
 const emptySelection: SelectionState = { sections: {}, diagrams: {}, externalContext: {}, proposal: false, projectPlan: false };
 
 export const useContextSelector = (itemKey: string) => {
     const { t } = useLocalization();
-    const project = useBuilderStore(s => s.project); // Select project from store
+    const project = useBuilderStore(s => s.project);
     const { toggleContextSelection, contextSelection } = useGenerationUIStore();
     const { data: sectionConfigs } = useSections();
 
-    // If project is not loaded, return a fallback state to prevent crashes.
-    if (!project) {
-        return {
-            t,
-            proposal: null,
-            projectPlan: null,
-            toggleContextSelection: () => {},
-            reportSections: {} as Record<string, any>,
-            diagramSections: {} as Record<string, any>,
-            currentSelection: emptySelection,
-            generatedSections: [],
-            generatedDiagrams: [],
-            externalContext: [],
-            selectedSections: [],
-            selectedDiagrams: [],
-            selectedExternalContext: [],
-            hasContext: false,
-            isProjectLoaded: false,
-        };
-    }
-
-    const { proposal, projectPlan, report } = project;
-    const { sectionsManager, diagramsManager, contextManager } = report;
-    // CORRECTED: Use the public getAll() method instead of the private files property
-    const externalContextFiles = contextManager.getAll();
+    const proposal = project?.proposal;
+    const projectPlan = project?.projectPlan;
+    const report = project?.report;
+    const sectionsManager = report?.sectionsManager;
+    const diagramsManager = report?.diagramsManager;
+    const contextManager = report?.contextManager;
+    const externalContextFiles = contextManager?.getAll() || [];
 
     const reportSections = useMemo(() => {
         if (!sectionConfigs) return {};
@@ -67,46 +46,46 @@ export const useContextSelector = (itemKey: string) => {
     }, [sectionConfigs]);
 
     const generatedSections = useMemo(() => {
+        if (!report?.orderedSectionIds || !sectionsManager) return [];
         return (report.orderedSectionIds || [])
             .map(key => sectionsManager.getSection(key as SectionName))
-            // CORRECTED: Call hasContent as a method
             .filter(section => section && section.hasContent())
             .map(section => section!.id as SectionName);
-    }, [report.orderedSectionIds, sectionsManager]);
+    }, [report?.orderedSectionIds, sectionsManager]);
 
     const generatedDiagrams = useMemo(() => {
+        if (!diagramsManager) return [];
         const diagramsData = diagramsManager.toJSON();
-        // TODO: This will be fixed when Diagram model is updated
         return (Object.keys(diagramsData.diagrams || {}) as DiagramType[]).filter(key => diagramsManager.getDiagram(key)?.hasContent());
     }, [diagramsManager]);
 
     const currentSelection: SelectionState = contextSelection[itemKey] || emptySelection;
 
-    const selectedSections = useMemo(() =>
-        (Object.keys(currentSelection.sections) as SectionName[]).flatMap(key => {
+    const selectedSections = useMemo(() => {
+        if (!sectionsManager) return [];
+        return (Object.keys(currentSelection.sections) as SectionName[]).flatMap(key => {
             if (currentSelection.sections[key]) {
                 const section = sectionsManager.getSection(key);
-                // CORRECTED: Call hasContent as a method
                 if (section?.hasContent()) {
                     return [{ key, content: section.content }];
                 }
             }
             return [];
-        })
-    , [currentSelection.sections, sectionsManager]);
+        });
+    }, [currentSelection.sections, sectionsManager]);
 
-    const selectedDiagrams = useMemo(() =>
-        (Object.keys(currentSelection.diagrams) as DiagramType[]).flatMap(key => {
+    const selectedDiagrams = useMemo(() => {
+        if (!diagramsManager) return [];
+        return (Object.keys(currentSelection.diagrams) as DiagramType[]).flatMap(key => {
             if (currentSelection.diagrams[key]) {
                 const diagram = diagramsManager.getDiagram(key);
-                // TODO: This will be fixed when Diagram model is updated
                 if (diagram?.hasContent()) {
                     return [{ key, content: diagram.plantUmlCode }];
                 }
             }
             return [];
-        })
-    , [currentSelection.diagrams, diagramsManager]);
+        });
+    }, [currentSelection.diagrams, diagramsManager]);
     
     const selectedExternalContext = useMemo(() =>
         externalContextFiles
@@ -115,14 +94,32 @@ export const useContextSelector = (itemKey: string) => {
     , [externalContextFiles, currentSelection.externalContext]);
 
     const hasContext = useMemo(() =>
-        // TODO: This will be fixed when Proposal/Plan models are updated
         (currentSelection.proposal && (proposal?.hasContent() ?? false)) ||
         (currentSelection.projectPlan && (projectPlan?.hasContent() ?? false)) ||
-        selectedSections.length > 0 ||
-        selectedDiagrams.length > 0 ||
+        (selectedSections?.length || 0) > 0 ||
+        (selectedDiagrams?.length || 0) > 0 ||
         selectedExternalContext.length > 0,
-    [currentSelection, proposal, projectPlan, selectedSections, selectedDiagrams, selectedExternalContext]
-);
+    [currentSelection, proposal, projectPlan, selectedSections, selectedDiagrams, selectedExternalContext]);
+
+    if (!project) {
+        return {
+            t,
+            proposal: null,
+            projectPlan: null,
+            toggleContextSelection: () => {},
+            reportSections: {},
+            diagramSections: {},
+            currentSelection: emptySelection,
+            generatedSections: [],
+            generatedDiagrams: [],
+            externalContext: [],
+            selectedSections: [],
+            selectedDiagrams: [],
+            selectedExternalContext: [],
+            hasContext: false,
+            isProjectLoaded: false,
+        };
+    }
 
     return {
         t,
@@ -135,10 +132,10 @@ export const useContextSelector = (itemKey: string) => {
         generatedSections,
         generatedDiagrams,
         externalContext: externalContextFiles,
-        selectedSections,
-        selectedDiagrams,
+        selectedSections: selectedSections || [],
+        selectedDiagrams: selectedDiagrams || [],
         selectedExternalContext,
-        hasContext,
+        hasContext: hasContext || false,
         isProjectLoaded: true,
     };
 };

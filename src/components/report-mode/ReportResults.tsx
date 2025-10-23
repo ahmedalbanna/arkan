@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAgents, useBuilderStore } from '@/hooks';
 import { AgentCategory } from '@/lib/models/agent';
+import type { Project } from '@/lib/models/project';
 import { BarChart3, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { Section as SectionView } from '../section/SectionView';
@@ -21,8 +22,7 @@ interface ReportResultsProps {
 
 export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
   const { t } = useLocalization();
-  // CORRECTED: The store update function expects a function to modify the state.
-  const { project, setProject } = useBuilderStore();
+  const { project, updateProject } = useBuilderStore(); // Removed setProject
   const { agents } = useAgents();
 
   const reportAgents = useMemo(() => {
@@ -39,23 +39,22 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     return reportAgents?.find(a => a.id.includes(sectionKey))?.name || sectionKey;
   }, [reportAgents]);
 
-  // CORRECTED: This now correctly updates the project state immutably.
   const handleSectionUpdate = (key: SectionName, value: string) => {
     if (!project) return;
-    
-    // By calling setProject with a function, we ensure that we are modifying the latest state.
-    // Zustand will handle the re-rendering process correctly.
-    setProject(currentProject => {
+
+    // Create a new function for the update to ensure immutability
+    const updater = (currentProject: Project | null): Project | null => {
+        if (!currentProject) return null;
+
         const section = currentProject.report.sectionsManager.getSection(key);
         if (section) {
-            section.updateContent(value); // This mutates the section object within the draft state.
+            section.updateContent(value); 
             currentProject.setUnsavedChanges(true);
         }
-        // No need to return anything as we are mutating the draft (if immer is used)
-        // or we have mutated the object that is held in state.
-        // We just need to trigger the update.
-        return currentProject;
-    });
+        return currentProject; // Return the modified project
+    };
+
+    updateProject(updater);
   };
 
   React.useEffect(() => {
@@ -90,7 +89,6 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
       );
     }
 
-    // CORRECTED: getSection now returns a full Section instance.
     const sectionObject = currentSectionKey
       ? project.report.sectionsManager.getSection(currentSectionKey)
       : null;
@@ -104,8 +102,7 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
                 <SectionView
                   sectionKey={currentSectionKey}
                   title={getSectionTitle(currentSectionKey)}
-                  // CORRECTED: Access the 'content' property from the Section instance.
-                  content={sectionObject.content}
+                  content={{ content: sectionObject.content }} // Pass content as an object
                   onUpdate={handleSectionUpdate}
                 />
               </A4Page>

@@ -78,5 +78,3 @@ export {
     deleteObject, getDownloadURL, ref,
     uploadBytes
 } from 'firebase/storage';
-
-export default {};

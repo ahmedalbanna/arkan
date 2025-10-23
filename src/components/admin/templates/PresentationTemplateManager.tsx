@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { usePresentationTemplateManager } from '@/hooks/use-presentation-template-manager';
 import { PptxTemplate } from '@/lib/models/pptxTemplate';
 import { Loader2, RefreshCw, Trash2, Upload } from 'lucide-react';
+import Image from 'next/image';
 
 function StyleEditor({ templateKey, styles, handleStyleChange, handleSave, isSaving }: {
     templateKey: string;
@@ -122,7 +123,7 @@ export function PresentationTemplateManager() {
                                     <div>
                                         <h4 className="font-semibold mb-2">Preview Image</h4>
                                         <div className="flex items-center gap-2">
-                                            <img src={template.imageUrl} alt={`${template.name} preview`} className="w-48 h-auto rounded border" />
+                                            <Image src={template.imageUrl} alt={`${template.name} preview`} width={192} height={108} className="w-48 h-auto rounded border" />
                                             <Button size="sm" onClick={() => handleRefreshImage(templateKey, 'A slide for a presentation about business analytics')} disabled={isRefreshing}>
                                                 {isRefreshing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />} Refresh Image
                                             </Button>
