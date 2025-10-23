@@ -406,7 +406,7 @@ export type GenerateQuizOutput = z.infer<typeof GenerateQuizOutputSchema>;
 export const AnyProjectProposalSchema = z.object({}).passthrough();
 export type AnyProjectProposal = z.infer<typeof AnyProjectProposalSchema>;
 
-export const GenerateSectionInputSchema = z.object({
+export const ReportGenerateSectionInputSchema = z.object({
     proposal: AnyProjectProposalSchema.optional().nullable(),
     projectPlan: ProjectPlanSchema.optional().nullable(),
     sectionToGenerate: SectionNameSchema,
@@ -426,13 +426,13 @@ export const GenerateSectionInputSchema = z.object({
 });
 
 
-export type GenerateSectionInput = z.infer<typeof GenerateSectionInputSchema>;
+export type ReportGenerateSectionInput = z.infer<typeof ReportGenerateSectionInputSchema>;
 
-export const GenerateSectionOutputSchema = z.object({
+export const ReportGenerateSectionOutputSchema = z.object({
     sectionName: SectionNameSchema.describe("The name of the section that was generated. This must match the 'sectionToGenerate' from the input."),
     content: z.string().describe("The generated markdown content for the specified section."),
 });
-export type GenerateSectionOutput = z.infer<typeof GenerateSectionOutputSchema>;
+export type ReportGenerateSectionOutput = z.infer<typeof ReportGenerateSectionOutputSchema>;
 
 // generate-text.ts
 export const GenerateTextInputSchema = z.object({

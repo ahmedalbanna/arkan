@@ -80,10 +80,9 @@ function FileDropzone() {
                 const formData = new FormData();
                 formData.append('file', file);
                 const result = await processFileApi({ file: formData }, token);
-                // Updated to use the new ContextManager
                 updateProject(p => {
                     const markdownFileName = file.name.replace(/\.[^/.]+$/, ".md");
-                    p.contextManager.add(markdownFileName, result.markdown, 'context');
+                    p.report.contextManager.add(markdownFileName, result.markdown, 'context');
                 });
                 toast({ title: t('builder.files.toasts.fileAdded'), description: t('builder.files.toasts.fileAddedDesc').replace('{fileName}', file.name) });
                 refetchUser();
@@ -112,7 +111,7 @@ function FileDropzone() {
     return (
         <Card
             {...getRootProps()}
-            className={`border-2 border-dashed ${isDragActive ? 'border-primary bg-accent' : 'border-border'
+            className={`border-2 border-dashed ${isDragActive ? 'border-primary bg-accent' : 'border-border'}
                 } hover:border-primary/80 transition-colors cursor-pointer`}
         >
             <CardContent className="flex flex-col items-center justify-center p-6 text-center">
@@ -140,15 +139,14 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
     const { t } = useLocalization();
     const { project, updateProject } = useBuilderStore();
 
-    // Updated to use the new ContextManager
-    const externalContext = project ? project.contextManager.getAll() : [];
+    const externalContext = project?.report?.contextManager?.getAll() || [];
 
     const handleRemoveContext = (index: number) => {
-        updateProject(p => { p.contextManager.remove(index); });
+        updateProject(p => { p.report.contextManager.remove(index); });
     };
 
     const handleUpdateContextType = (index: number, type: ContextFileType) => {
-        updateProject(p => { p.contextManager.updateType(index, type); });
+        updateProject(p => { p.report.contextManager.updateType(index, type); });
     };
 
     const fileTypes: ContextFileType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];

@@ -17,19 +17,19 @@ import {
 } from '@/ai/core';
 import { ai } from '@/ai/genkit';
 import { createIntelligentSectionPrompt, getSectionQualityRequirements } from '@/ai/prompts/section-specific-prompts';
-import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/ai/schemas';
+import { ReportGenerateSectionInputSchema, ReportGenerateSectionOutputSchema, type ReportGenerateSectionInput, type ReportGenerateSectionOutput } from '@/ai/schemas';
 import type { SectionName } from '@/ai/schemas/enums';
 import { z } from 'genkit';
 
 // Define a specific schema for the prompt's input variables for better type safety and clarity.
-const ReportSectionPromptInputSchema = GenerateSectionInputSchema.and(
+const ReportSectionPromptInputSchema = ReportGenerateSectionInputSchema.and(
   z.object({
     stringifiedProposal: z.string(),
     stringifiedPlan: z.string(),
   })
 );
 
-export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
+export async function generateReportSection(input: ReportGenerateSectionInput): Promise<ReportGenerateSectionOutput> {
   const { sectionToGenerate } = input;
 
   // بدء مراقبة الأداء
@@ -177,7 +177,7 @@ ${promptTemplate.constraints}`;
     const reportSectionPrompt = ai.definePrompt({
       name: 'generateReportSectionPrompt',
       input: { schema: ReportSectionPromptInputSchema },
-      output: { schema: GenerateSectionOutputSchema },
+      output: { schema: ReportGenerateSectionOutputSchema },
       model: modelConfig.modelId,
       system: enhancedSystemPrompt,
       prompt: `
@@ -319,7 +319,7 @@ You are also an expert analyst. Before you begin writing, you must first review 
       const fallbackPrompt = ai.definePrompt({
         name: 'generateReportSectionFallbackPrompt',
         input: { schema: ReportSectionPromptInputSchema },
-        output: { schema: GenerateSectionOutputSchema },
+        output: { schema: ReportGenerateSectionOutputSchema },
         model: intelligentPrompt.modelConfig.modelId || 'googleai/gemini-2.0-flash',
         system: systemPrompt,
         prompt: `

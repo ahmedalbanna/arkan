@@ -37,7 +37,7 @@ It gathers:
 
 ### 3. Assembling the API Payload
 
-All the gathered data is assembled into a single `body` object that conforms to the `GenerateSectionInputSchema`. This object is a comprehensive package containing everything the backend AI service needs.
+All the gathered data is assembled into a single `body` object that conforms to the `ReportGenerateSectionInputSchema`. This object is a comprehensive package containing everything the backend AI service needs.
 
 ```typescript
 // src/components/report-generator/ReportGenerationTools.tsx
@@ -77,7 +77,7 @@ The backend API endpoint `/api/generate/report` receives the payload and perform
 1.  Constructs a single, large prompt for the generative AI model. This prompt includes the agent's base instructions, all selected context, and the user's specific guidelines.
 2.  Sends the comprehensive prompt to the AI model.
 3.  Receives the generated content for the requested section.
-4.  Formats the AI's response into the `GenerateSectionOutputSchema` format (`{ sectionName, content }`) and returns it to the client.
+4.  Formats the AI's response into the `ReportGenerateSectionOutputSchema` format (`{ sectionName, content }`) and returns it to the client.
 
 ### 6. Updating the UI
 

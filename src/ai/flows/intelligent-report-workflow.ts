@@ -8,7 +8,7 @@ import {
     PerformanceMonitor
 } from '@/ai/core';
 import { ai } from '@/ai/genkit';
-import { type GenerateSectionInput } from '@/ai/schemas';
+import { type ReportGenerateSectionInput } from '@/ai/schemas';
 import type { SectionName } from '@/ai/schemas/enums';
 import { z } from 'genkit';
 import { generateReportSection } from './generate-report-section';
@@ -427,7 +427,7 @@ async function generateSectionIntelligently(
     }
 
     // إعداد مدخلات التوليد
-    const sectionInput: GenerateSectionInput = {
+    const sectionInput: ReportGenerateSectionInput = {
         sectionToGenerate: section,
         proposal: input.proposal,
         projectPlan: input.projectPlan,

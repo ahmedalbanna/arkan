@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { AdvancedProposalFields } from '@/ai/schemas';
@@ -10,9 +9,6 @@ import { toast } from './use-toast';
 import { useWritingTool } from './use-writing-tools';
 
 export function useProposalGenerationToolsLogic() {
-    // =============================================================================
-    // HOOKS (MUST BE CALLED UNCONDITIONALLY)
-    // =============================================================================
     const { t } = useLocalization();
     const [activeTab, setActiveTab] = useState<'simple' | 'advanced'>('simple');
     const project = useBuilderStore(p => p.project);
@@ -33,7 +29,6 @@ export function useProposalGenerationToolsLogic() {
         }
     });
 
-    // Sync project data to UI store on mount. This hook is called unconditionally.
     useEffect(() => {
         if (!project) return;
 
@@ -44,7 +39,7 @@ export function useProposalGenerationToolsLogic() {
             });
         }
         if (project.guidelineState) {
-            store.setGuidelineState(project.guidelineState);
+            store.setGuidelineState({ proposal: project.guidelineState.proposal });
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [project?.id]);
@@ -77,7 +72,7 @@ export function useProposalGenerationToolsLogic() {
         
         uiStore.setAdvancedField(fieldName, value);
         updateProject(p => {
-            if (!p.advancedProposalFields) p.advancedProposalFields = {};
+            if (!p.advancedProposalFields) p.advancedProposalFields = {} as AdvancedProposalFields;
             p.advancedProposalFields[fieldName] = value;
             p.setUnsavedChanges(true);
         });
@@ -87,9 +82,9 @@ export function useProposalGenerationToolsLogic() {
         const newGuideline = uiStore.customGuidelineInput['proposal'];
         if (!newGuideline?.trim()) return;
         updateProject(p => {
-            if (!p.guidelineState) p.guidelineState = { 'proposal': { checked: {}, custom: [] } };
-            if (!p.guidelineState['proposal']) p.guidelineState['proposal'] = { checked: {}, custom: [] };
-            p.guidelineState['proposal'].custom.push(newGuideline);
+            if (!p.guidelineState) p.guidelineState = { proposal: { checked: {}, custom: [] } };
+            if (!p.guidelineState.proposal) p.guidelineState.proposal = { checked: {}, custom: [] };
+            p.guidelineState.proposal.custom.push(newGuideline);
             p.setUnsavedChanges(true);
         });
         uiStore.setCustomGuidelineInputForItem('proposal', '');
@@ -97,8 +92,8 @@ export function useProposalGenerationToolsLogic() {
 
     const handleRemoveGuideline = (index: number) => {
         updateProject(p => {
-            if (p.guidelineState?.['proposal']) {
-                p.guidelineState['proposal'].custom.splice(index, 1);
+            if (p.guidelineState?.proposal) {
+                p.guidelineState.proposal.custom.splice(index, 1);
                 p.setUnsavedChanges(true);
             }
         });
@@ -109,10 +104,10 @@ export function useProposalGenerationToolsLogic() {
     };
 
     const handleGenerateClick = () => {
-        const contextMarkdown = project.report.contextManager.toMarkdown();
+        const contextMarkdown = project.report.contextManager ? JSON.stringify(project.report.contextManager.contexts) : "";
         const payload = {
             projectIdea: activeTab === 'simple' ? (projectIdea || '') : '',
-            guidelines: project.guidelineState?.['proposal']?.custom || [],
+            guidelines: project.guidelineState?.proposal?.custom || [],
             contextMarkdown,
             advancedFields: project.advancedProposalFields || {},
         };
@@ -133,7 +128,7 @@ export function useProposalGenerationToolsLogic() {
         setActiveTab,
         projectIdea,
         setProjectIdea,
-        customGuidelines: project.guidelineState?.['proposal']?.custom || [],
+        customGuidelines: project.guidelineState?.proposal?.custom || [],
         addCustomGuideline: handleAddGuideline,
         removeCustomGuideline: handleRemoveGuideline,
         customGuidelineInput: uiStore.customGuidelineInput['proposal'] || '',

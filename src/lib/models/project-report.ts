@@ -37,21 +37,34 @@ export class ProjectReport {
 
         const isNewReport = !data.sections || Object.keys(data.sections).length === 0;
 
-        let initialSections: Record<string, SectionData> = data.sections || {};
+        let initialSections: Record<string, Section> = {};
         let initialOrder: string[] = data.orderedSectionIds || [];
 
         if (isNewReport) {
-            initialSections = {};
             DEFAULT_REPORT_SECTION_IDS.forEach(id => {
-                initialSections[id] = {
+                initialSections[id] = new Section({
                     id,
-                    agentId: id,
+                    agentId: `generate-${id}-section`,
                     title: id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, ' $1'),
                     type: 'report',
                     content: ''
-                };
+                });
             });
             initialOrder = DEFAULT_REPORT_SECTION_IDS;
+        } else if (data.sections) {
+            // Re-hydrate Section instances from plain data
+            for (const key in data.sections) {
+                const sectionData = data.sections[key];
+                
+                // CRITICAL FIX: Only load sections that are explicitly of type 'report'
+                if (sectionData.type === 'report') {
+                    // Ensure agentId is correctly formatted for older data if necessary
+                    if (!sectionData.agentId || !sectionData.agentId.startsWith('generate-')) {
+                        sectionData.agentId = `generate-${sectionData.id}-section`;
+                    }
+                    initialSections[key] = new Section(sectionData);
+                }
+            }
         }
 
         this.sectionsManager = new SectionManager(initialSections);
@@ -60,7 +73,13 @@ export class ProjectReport {
 
         this.proposal = data.proposal ? new ProjectProposal(data.proposal) : null;
         this.projectPlan = data.projectPlan ? new ProjectPlan(data.projectPlan) : null;
-        this.orderedSectionIds = initialOrder.length > 0 ? initialOrder : Object.keys(initialSections);
+        
+        // CRITICAL FIX: Ensure the final order only contains IDs of sections that were actually loaded.
+        if (initialOrder.length > 0) {
+            this.orderedSectionIds = initialOrder.filter(id => initialSections[id] !== undefined);
+        } else {
+            this.orderedSectionIds = Object.keys(initialSections);
+        }
     }
 
     getOrderedSections(): Section[] {

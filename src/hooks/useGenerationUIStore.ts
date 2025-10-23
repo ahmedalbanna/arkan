@@ -57,6 +57,7 @@ interface GenerationUIState {
 
 interface GenerationUIActions {
   initializeDependentStates: (agents: Agent[], sections: Section[]) => void;
+  getDependentStates: (itemKeys: string[]) => Record<string, boolean>;
   newSession: () => void;
   // Report Store Actions
   handleControlChange: (section: string, control: keyof ControlState, value: any) => void;
@@ -127,6 +128,18 @@ export const useGenerationUIStore = create<GenerationUIState & GenerationUIActio
       });
 
       set({ guidelineState: newGuidelineState, controlState: newControlState });
+    },
+
+    getDependentStates: (itemKeys) => {
+        const { guidelineState, controlState } = get();
+        const states: Record<string, boolean> = {};
+        if (!itemKeys) return states;
+        itemKeys.forEach(key => {
+            if (guidelineState[key] || controlState[key]) {
+                states[key] = true;
+            }
+        });
+        return states;
     },
 
     newSession: () => set(initialState),

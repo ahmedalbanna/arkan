@@ -5,7 +5,7 @@ import type { SectionName } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import {
-    toast, useAgents, useBuilderStore, useExport, useGenerationUIStore, useReportGeneration, useTranslate
+    toast, useAgents, useBuilderStore, useExport, useGenerationUIStore, useGenerateReportSection, useTranslate
 } from '@/hooks';
 import { AgentCategory } from '@/lib/models/agent';
 import type { Section } from '@/lib/models/section';
@@ -35,13 +35,18 @@ export const useReportModeGenerator = () => {
     }, [report]);
 
     const generatedSections = useMemo(
-        () => (report?.getOrderedSections() || []).filter(section => section.hasContent()),
+        () => (report?.getOrderedSections() || []).filter(section => {
+            if (section && typeof section.hasContent === 'function') {
+                return section.hasContent(); // Corrected: Call the function
+            }
+            return !!(section as any)?.content;
+        }),
         [report]
     );
 
     const handleSectionUpdate = (key: SectionName, content: string) => {
         updateProject(p => {
-            p.report.sectionsManager.updateSection(key, { content });
+            p.report.sectionsManager.updateSection(key, content);
             p.setUnsavedChanges(true);
         });
     };
@@ -59,19 +64,25 @@ export const useReportModeGenerator = () => {
         setIsTranslatingAll(true);
         toast({ title: 'Translating All Sections', description: 'This may take a moment...' });
 
-        const sectionsToTranslate = report.getOrderedSections().filter(s => s.hasContent());
-        const promises = sectionsToTranslate.map(section => 
+        const sectionsToTranslate = report.getOrderedSections().filter(s => {
+            if (s && typeof s.hasContent === 'function') {
+                return s.hasContent(); // Corrected: Call the function
+            }
+            return !!(s as any)?.content;
+        });
+
+        const promises = sectionsToTranslate.map(section =>
             translateMutation.mutateAsync({ text: section.content!, targetLang })
                 .then(result => ({ key: section.id, content: result.translatedText }))
         );
 
         const results = await Promise.all(promises);
-        
+
         const newTranslations: Record<string, string> = {};
         results.forEach(result => {
             newTranslations[result.key] = result.content;
         });
-        
+
         setTranslatedSections(newTranslations);
         setIsTranslatingAll(false);
         toast({ title: 'Translation Complete', description: 'All sections have been translated.' });
@@ -83,7 +94,7 @@ export const useReportModeGenerator = () => {
     };
 
     const { userProfile } = useAuth();
-    const reportGenerationMutation = useReportGeneration();
+    const reportGenerationMutation = useGenerateReportSection();
     const { initializeDependentStates, getDependentStates } = useGenerationUIStore();
 
     useEffect(() => {
@@ -92,7 +103,7 @@ export const useReportModeGenerator = () => {
             if (currentSections && currentSections.length > 0) {
                 const generationStates = getDependentStates(currentSections.map(s => s.id));
                 if (Object.keys(generationStates).length === 0) {
-                     initializeDependentStates(reportAgents, currentSections);
+                    initializeDependentStates(reportAgents, currentSections);
                 }
             }
         }
@@ -112,7 +123,7 @@ export const useReportModeGenerator = () => {
         sections: report?.sectionsManager.toJSON() || {},
         orderedSections,
         setOrderedSections: handleSetOrderedSections,
-        isAnythingGenerating: reportGenerationMutation.isLoading,
+        isAnythingGenerating: reportGenerationMutation.isPending,
         reportGenerationMutation,
         hasCreditsForSingleSection: Boolean(userProfile && (userProfile.credits ?? 0) >= 1),
         agents: reportAgents,

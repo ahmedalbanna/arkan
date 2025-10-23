@@ -49,7 +49,7 @@ export const useContextSelector = (itemKey: string) => {
         if (!report?.orderedSectionIds || !sectionsManager) return [];
         return (report.orderedSectionIds || [])
             .map(key => sectionsManager.getSection(key as SectionName))
-            .filter(section => section && section.hasContent())
+            .filter(section => section && section.hasContent)
             .map(section => section!.id as SectionName);
     }, [report?.orderedSectionIds, sectionsManager]);
 

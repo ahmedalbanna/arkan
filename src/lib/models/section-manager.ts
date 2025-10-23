@@ -8,17 +8,21 @@ import { SectionName } from '@/ai/schemas';
  */
 export class SectionManager {
     // Storing Section instances directly.
-    private sections: Record<string, Section>;
+    private sections: Record<string, Section | SectionData>;
 
     /**
      * @param data The initial raw data for the sections, as a record of SectionData.
      */
-    constructor(data?: Record<string, SectionData> | null) {
+    constructor(data?: Record<string, SectionData | Section> | null) {
         this.sections = {};
         if (data) {
             for (const key in data) {
-                // Create a new Section instance for each data entry.
-                this.sections[key] = new Section(data[key]);
+                const sectionData = data[key];
+                if (sectionData instanceof Section) {
+                    this.sections[key] = sectionData;
+                } else {
+                    this.sections[key] = new Section(sectionData as SectionData);
+                }
             }
         }
     }
@@ -29,7 +33,17 @@ export class SectionManager {
      * @returns The Section instance or undefined if not found.
      */
     public getSection(name: SectionName): Section | undefined {
-        return this.sections[name];
+        const section = this.sections[name];
+        if (section instanceof Section) {
+            return section;
+        }
+        // If it's not an instance, re-hydrate it before returning
+        if (section) {
+            const newSection = new Section(section as SectionData);
+            this.sections[name] = newSection;
+            return newSection;
+        }
+        return undefined;
     }
 
     /**
@@ -50,7 +64,7 @@ export class SectionManager {
      */
     public toMarkdown(): string {
         return Object.values(this.sections)
-            .map(section => section.content)
+            .map(section => (section as Section).content)
             .filter(Boolean)
             .join('\n\n---\n\n');
     }
@@ -60,7 +74,7 @@ export class SectionManager {
      * @returns True if any section has content, false otherwise.
      */
     public hasContent(): boolean {
-        return Object.values(this.sections).some(section => section.hasContent());
+        return Object.values(this.sections).some(section => (section as Section).hasContent ? (section as Section).hasContent : !!(section as SectionData).content);
     }
 
     /**
@@ -71,7 +85,13 @@ export class SectionManager {
     public toJSON(): Record<string, SectionData> {
         const data: Record<string, SectionData> = {};
         for (const key in this.sections) {
-            data[key] = this.sections[key].toStateObject();
+            const section = this.sections[key];
+            if ('toStateObject' in section && typeof section.toStateObject === 'function') {
+                data[key] = section.toStateObject();
+            } else {
+                // If it's a plain object, just use it as is.
+                data[key] = section as SectionData;
+            }
         }
         return data;
     }

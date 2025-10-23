@@ -1,7 +1,6 @@
-
 'use client';
 
-import { SectionName } from '@/ai/schemas';
+import { ReportGenerateSectionOutput, SectionName } from '@/ai/schemas';
 import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
 import { Accordion } from '@/components/ui/accordion';
 import { AnimatedContainer } from '@/components/ui/animation';
@@ -9,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingIndicator, SectionLoadingCard } from '@/components/ui/loading-indicators';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useReportModeGenerator } from '@/hooks'; // Corrected import
 import { Agent } from '@/lib/models/agent';
 import { Section } from '@/lib/models/section';
 import { cn } from '@/lib/utils';
@@ -17,17 +17,16 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, v
 import { CSS } from '@dnd-kit/utilities';
 import { UseMutationResult } from '@tanstack/react-query';
 import { PanelLeftClose, Settings } from 'lucide-react';
-import { ReportSectionGenerationOutput } from '../../app/api/agents/sections/route';
 import { Button } from '../ui/button';
 
+// SortableSectionItem remains unchanged
 interface SortableSectionItemProps {
     section: Section;
     agent: Agent;
     isGenerating: boolean;
     isAnythingGenerating: boolean;
     hasCredits: boolean;
-    // CORRECTED: Use the specific mutation result type
-    reportGenerationMutation: UseMutationResult<ReportSectionGenerationOutput, Error, { body: any }, unknown>;
+    reportGenerationMutation: UseMutationResult<ReportGenerateSectionOutput, Error, { body: any }, unknown>;
     generationState?: {
         isLoading: boolean;
         isSuccess?: boolean;
@@ -39,29 +38,15 @@ interface SortableSectionItemProps {
 }
 
 function SortableSectionItem({ section, agent, generationState, onRetry, ...props }: SortableSectionItemProps) {
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-    } = useSortable({ id: section.id });
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: section.id });
+    const style = { transform: CSS.Transform.toString(transform), transition };
 
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-    };
-
+    // The logic for displaying SectionLoadingCard or SectionAccordionItem remains the same
     if (generationState && (generationState.isLoading || generationState.isSuccess || generationState.isError)) {
         return (
             <AnimatedContainer animation="fade-in-up" delay={100}>
                 <div ref={setNodeRef} style={style} {...attributes}>
-                    <SectionLoadingCard
-                        sectionName={agent.name}
-                        state={generationState}
-                        onRetry={onRetry}
-                        className="mb-2"
-                    />
+                    <SectionLoadingCard sectionName={agent.name} state={generationState} onRetry={onRetry} className="mb-2" />
                 </div>
             </AnimatedContainer>
         );
@@ -84,45 +69,36 @@ function SortableSectionItem({ section, agent, generationState, onRetry, ...prop
     );
 }
 
+// Simplified props
 interface GenerationToolsProps {
     onCollapseToggle: () => void;
-    orderedSections: Section[];
-    setOrderedSections: (sections: Section[]) => void;
-    isAnythingGenerating: boolean;
-    activeMutationKey: string | null;
-    // CORRECTED: Use the specific mutation result type
-    reportGenerationMutation: UseMutationResult<ReportSectionGenerationOutput, Error, { body: any }, unknown>;
-    hasCreditsForSingleSection: boolean;
-    agents: Agent[];
-    generationStates?: Record<string, {
-        isLoading: boolean;
-        isSuccess?: boolean;
-        isError?: boolean;
-        progress?: number;
-        message?: string;
-    }>;
-    onRetrySection?: (sectionId: string) => void;
 }
 
-export const GenerationTools = ({
-    onCollapseToggle,
-    orderedSections,
-    setOrderedSections,
-    isAnythingGenerating,
-    activeMutationKey,
-    reportGenerationMutation,
-    hasCreditsForSingleSection,
-    agents,
-    generationStates = {},
-    onRetrySection,
-}: GenerationToolsProps) => {
+export const GenerationTools = ({ onCollapseToggle }: GenerationToolsProps) => {
     const { t } = useLocalization();
+
+    // Fetching all data and logic directly from the hook
+    const {
+        orderedSections,
+        setOrderedSections,
+        isAnythingGenerating,
+        reportGenerationMutation,
+        hasCreditsForSingleSection,
+        agents,
+        agentsLoaded
+    } = useReportModeGenerator();
+
+    // Placeholder for states not yet in the hook - can be moved later
+    const activeMutationKey: string | null = reportGenerationMutation.variables?.body.sectionId || null;
+    const generationStates: Record<string, any> = {}; // This would need a more complex state management in the hook
+    const onRetrySection = (sectionId: string) => {
+        console.log('Retrying section:', sectionId);
+        // In a real implementation, you would get the agentId and call the mutation again
+    };
 
     const sensors = useSensors(
         useSensor(PointerSensor),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
     const handleDragEnd = (event: DragEndEvent) => {
@@ -130,8 +106,7 @@ export const GenerationTools = ({
         if (over && active.id !== over.id) {
             const oldIndex = orderedSections.findIndex(s => s.id === active.id);
             const newIndex = orderedSections.findIndex(s => s.id === over.id);
-            const newOrder = arrayMove(orderedSections, oldIndex, newIndex);
-            setOrderedSections(newOrder);
+            setOrderedSections(arrayMove(orderedSections, oldIndex, newIndex));
         }
     };
 
@@ -144,27 +119,27 @@ export const GenerationTools = ({
         generating: Object.values(generationStates).filter(state => state.isLoading).length,
     };
 
+    if (!agentsLoaded) {
+        return <div>Loading Generation Tools...</div>; // Or a skeleton loader
+    }
+
     return (
         <AnimatedContainer animation="fade-in-up" delay={200}>
-            <Card variant="glass" className={cn("flex flex-col h-full backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200", (isDisabled) && 'opacity-50 pointer-events-none')}>
+            <Card variant="glass" className={cn("flex flex-col h-full backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-200", isDisabled && 'opacity-50 pointer-events-none')}>
                 <CardHeader className="bg-gradient-to-r from-primary/5 to-blue-500/5">
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-primary-600">
-                                <Settings className="h-5 w-5 text-white" />
-                            </div>
+                            <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-primary-600"><Settings className="h-5 w-5 text-white" /></div>
                             <div>
                                 <CardTitle className="text-lg font-headline font-semibold">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
                                 <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
-
                                 {isAnythingGenerating && (
                                     <div className="mt-2">
                                         <LoadingIndicator
                                             state={{
                                                 isLoading: true,
                                                 message: `Generating ${activeMutationKey || 'section'}...`,
-                                                progress: generationStats.completed > 0 ?
-                                                    (generationStats.completed / generationStats.total) * 100 : 0
+                                                progress: generationStats.completed > 0 ? (generationStats.completed / generationStats.total) * 100 : 0
                                             }}
                                             size="sm"
                                             showProgress={true}
@@ -174,14 +149,8 @@ export const GenerationTools = ({
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            {generationStats.total > 0 && (
-                                <Badge variant="secondary" className="shadow-soft">
-                                    {generationStats.completed}/{generationStats.total} Complete
-                                </Badge>
-                            )}
-                            <Button variant="ghost" size="icon" className="hidden lg:inline-flex hover:shadow-soft transition-all duration-200" onClick={onCollapseToggle}>
-                                <PanelLeftClose className="h-5 w-5" />
-                            </Button>
+                            {generationStats.total > 0 && <Badge variant="secondary" className="shadow-soft">{generationStats.completed}/{generationStats.total} Complete</Badge>}
+                            <Button variant="ghost" size="icon" className="hidden lg:inline-flex hover:shadow-soft transition-all duration-200" onClick={onCollapseToggle}><PanelLeftClose className="h-5 w-5" /></Button>
                         </div>
                     </div>
                 </CardHeader>
@@ -191,16 +160,13 @@ export const GenerationTools = ({
                             <Accordion type="multiple" className="w-full space-y-1">
                                 {orderedSections.map((section) => {
                                     const agent = agents?.find(a => a.id === section.agentId);
-                                    if (!agent) return null;
+                                    if (!agent) {
+                                        console.warn(`Agent with ID '${section.agentId}' not found for section '${section.id}'.`);
+                                        return null;
+                                    }
 
                                     const isGeneratingThis = isAnythingGenerating && activeMutationKey === section.id;
-                                    const sectionState = generationStates[section.id] || {
-                                        isLoading: isGeneratingThis,
-                                        isSuccess: false,
-                                        isError: false,
-                                        progress: isGeneratingThis ? 50 : undefined,
-                                        message: isGeneratingThis ? 'Generating...' : undefined
-                                    };
+                                    const sectionState = generationStates[section.id] || { isLoading: isGeneratingThis };
 
                                     return (
                                         <SortableSectionItem
