@@ -1,7 +1,7 @@
 
 'use client';
 
-import { type ProjectProposalData, ProjectProposal } from '@/lib/models/proposal';
+import { type ProjectProposalData, ProjectProposal } from '@/lib/models/project-proposal';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useBuilderStore, useExport } from '@/hooks';

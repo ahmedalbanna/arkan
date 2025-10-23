@@ -48,7 +48,6 @@ const initialState: BuilderState = {
 };
 
 export const useBuilderStore = create<BuilderState & BuilderActions>()(
-    // We pass `get` to be able to access the state outside of a producer.
     immer((set, get) => ({
         ...initialState,
 

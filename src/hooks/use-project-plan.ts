@@ -4,7 +4,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { handleErrorUtility } from '@/lib/errorUtils';
-import type { ProjectPlan } from '@/lib/models/plan';
+import type { ProjectPlan } from '@/lib/models/project-plan';
 import { generateProjectPlanApi } from '@/services';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from './use-toast';

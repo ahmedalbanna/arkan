@@ -2,11 +2,10 @@
 import type { AdvancedProposalFields, PresentationHistoryEntry } from '@/ai/schemas';
 import type { GuidelineState } from '@/hooks';
 import { AcademicSolverManager, type AcademicSolverData } from './academic-solver-manager';
-import { ContextManager, type ContextFileData } from './context-manager';
-import { DiagramManager, type DiagramsData } from './diagram-manager';
-import type { ProjectPlan } from './plan';
-import { ProjectProposal, type ProjectProposalData } from './proposal';
-import { SectionManager, type SectionsData } from './section-manager';
+import { ProjectPlan } from './project-plan';
+import { ProjectProposal, type ProjectProposalData } from './project-proposal';
+import { Report } from './project-report'; // Import the new Report class
+import { SavedReport } from '../types';
 
 // =============================================================================
 // MAIN PROJECT INTERFACE (RAW DATA)
@@ -25,11 +24,9 @@ export interface ProjectProperties {
     advancedProposalFields?: Partial<AdvancedProposalFields> | null;
     guidelineState?: GuidelineState | null;
 
-    // Raw data for composed managers
+    // Raw data for composed models
     proposal?: ProjectProposalData | null;
-    sections?: SectionsData | null;
-    diagrams?: DiagramsData | null;
-    externalContext?: ContextFileData[] | null;
+    report?: SavedReport | null; // This will hold the serialized report data
     academicSolver?: AcademicSolverData | null;
 
     // Other properties
@@ -45,7 +42,7 @@ export interface ProjectProperties {
 // PROJECT CLASS IMPLEMENTATION
 // =============================================================================
 
-export class Project implements Omit<ProjectProperties, 'proposal' | 'diagrams' | 'sections' | 'externalContext' | 'academicSolver'> {
+export class Project implements Omit<ProjectProperties, 'proposal' | 'report' | 'academicSolver'> {
     public id: string;
     public userId: string;
     public name: string | null;
@@ -56,9 +53,7 @@ export class Project implements Omit<ProjectProperties, 'proposal' | 'diagrams' 
 
     // Composed Class Instances
     public proposal: ProjectProposal | null;
-    public sections: SectionManager;
-    public diagrams: DiagramManager;
-    public contextManager: ContextManager;
+    public report: Report; // The report is now a first-class citizen
     public academicSolver: AcademicSolverManager;
 
     // Other properties
@@ -84,9 +79,12 @@ export class Project implements Omit<ProjectProperties, 'proposal' | 'diagrams' 
 
         // Instantiate composed models from raw data
         this.proposal = props.proposal ? new ProjectProposal(props.proposal) : null;
-        this.sections = new SectionManager(props.sections);
-        this.diagrams = new DiagramManager(props.diagrams);
-        this.contextManager = new ContextManager(props.externalContext);
+        // The Report class is now responsible for its own constituent parts.
+        this.report = new Report({
+            id: `rep_${this.id}`,
+            title: `${this.name} Report`,
+            ...(props.report || {}),
+        });
         this.academicSolver = new AcademicSolverManager(props.academicSolver);
 
         // Other properties
@@ -100,9 +98,6 @@ export class Project implements Omit<ProjectProperties, 'proposal' | 'diagrams' 
         this.hasUnsavedChanges = props.hasUnsavedChanges || false;
     }
 
-    /**
-     * Serializes the entire project state into a plain JSON object.
-     */
     public toJSON(): ProjectProperties {
         return {
             id: this.id,
@@ -118,9 +113,7 @@ export class Project implements Omit<ProjectProperties, 'proposal' | 'diagrams' 
 
             // Serialize composed models back to plain objects
             proposal: this.proposal ? this.proposal.toJSON() : null,
-            sections: this.sections.toJSON(),
-            diagrams: this.diagrams.toJSON(),
-            externalContext: this.contextManager.toJSON(),
+            report: this.report.toJSON(), // Delegate serialization to the Report class
             academicSolver: this.academicSolver.toJSON(),
 
             projectPlan: this.projectPlan,
@@ -131,11 +124,6 @@ export class Project implements Omit<ProjectProperties, 'proposal' | 'diagrams' 
         };
     }
 
-    /**
-     * Checks if the project has any user-generated or AI-generated content.
-     * This is useful for determining if a project is worth saving or displaying.
-     * @returns True if any part of the project has meaningful content, false otherwise.
-     */
     public hasAnyContent(): boolean {
         const hasAdvancedFields = this.advancedProposalFields && Object.keys(this.advancedProposalFields).length > 0;
         const hasCustomGuidelines = this.guidelineState && Object.values(this.guidelineState).some(item => item.custom.length > 0);
@@ -144,9 +132,7 @@ export class Project implements Omit<ProjectProperties, 'proposal' | 'diagrams' 
                hasAdvancedFields ||
                hasCustomGuidelines ||
                !!this.proposal ||
-               this.sections.hasContent() ||
-               this.diagrams.hasContent() ||
-               this.contextManager.hasContent() ||
+               this.report.hasContent() || // Delegate content check to the Report class
                this.academicSolver.hasContent() ||
                (!!this.presentation?.history && this.presentation.history.length > 0) ||
                !!this.codeGenerator?.html ||
@@ -159,29 +145,19 @@ export class Project implements Omit<ProjectProperties, 'proposal' | 'diagrams' 
     // STATIC METHODS FOR FILE CONVERSION
     // =============================================================================
 
-    /**
-     * Creates a Project instance from a JSON string (typically from a .arkan file).
-     * @param json The JSON string to parse.
-     * @returns A new Project instance.
-     */
     public static fromArkanFile(json: string): Project {
         const properties: ProjectProperties = JSON.parse(json);
         return new Project(properties);
     }
 
-    /**
-     * Converts the current project state into a file Blob and suggests a filename.
-     * @returns An object containing the suggested `fileName` and the `blob` data.
-     */
     public toArkanFileBlob(): { fileName: string; blob: Blob } {
         const json = JSON.stringify(this.toJSON(), null, 2);
         const blob = new Blob([json], { type: 'application/json' });
 
-        // Sanitize the project name to create a valid filename.
         const safeName = (this.name || 'Untitled Project')
-            .replace(/[^a-z0-9_-\s]/gi, '_') // Replace invalid characters with underscore
+            .replace(/[^a-z0-9_-\s]/gi, '_')
             .trim()
-            .replace(/\s+/g, '-'); // Replace spaces with dashes
+            .replace(/\s+/g, '-');
 
         const fileName = `${safeName}.arkan`;
 

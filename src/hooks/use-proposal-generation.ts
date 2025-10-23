@@ -9,7 +9,7 @@ import { toast } from './use-toast';
 import { GenerateProposalInput } from '@/ai/schemas';
 import { generateProposalApi } from '@/services';
 import { useBuilderStore } from './useBuilderStore';
-import { ProjectProposal } from '@/lib/models/proposal';
+import { ProjectProposal } from '@/lib/models/project-proposal';
 
 
 export function useGenerateProposal() {

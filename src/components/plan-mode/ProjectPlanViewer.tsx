@@ -7,7 +7,7 @@ import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocalization } from '@/context/LocalizationContext';
-import type { ProjectPlan } from '@/lib/models/plan';
+import type { ProjectPlan } from '@/lib/models/project-plan';
 import { ChevronLeft, ChevronRight, Kanban, List } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import A4Page from '../shared/A4Page';

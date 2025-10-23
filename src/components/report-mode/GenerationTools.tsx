@@ -11,7 +11,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { Agent } from '@/lib/models/agent';
 import { Section } from '@/lib/models/section';
 import { cn } from '@/lib/utils';
-import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useMutation } from '@tanstack/react-query';
@@ -19,13 +19,12 @@ import { PanelLeftClose, Settings } from 'lucide-react';
 import { Button } from '../ui/button';
 
 interface SortableSectionItemProps {
-    id: string;
+    section: Section;
     agent: Agent;
     isGenerating: boolean;
     isAnythingGenerating: boolean;
     hasCredits: boolean;
     reportGenerationMutation: ReturnType<typeof useMutation>;
-    handleProps: any;
     generationState?: {
         isLoading: boolean;
         isSuccess?: boolean;
@@ -36,14 +35,14 @@ interface SortableSectionItemProps {
     onRetry?: () => void;
 }
 
-function SortableSectionItem({ id, agent, generationState, onRetry, handleProps, ...props }: SortableSectionItemProps) {
+function SortableSectionItem({ section, agent, generationState, onRetry, ...props }: SortableSectionItemProps) {
     const {
         attributes,
         listeners,
         setNodeRef,
         transform,
         transition,
-    } = useSortable({ id: id });
+    } = useSortable({ id: section.id });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -69,7 +68,7 @@ function SortableSectionItem({ id, agent, generationState, onRetry, handleProps,
         <AnimatedContainer animation="fade-in-up" delay={100}>
             <div ref={setNodeRef} style={style} {...attributes}>
                 <SectionAccordionItem
-                    itemKey={id as SectionName}
+                    itemKey={section.id as SectionName}
                     agent={agent}
                     isGenerating={props.isGenerating}
                     isAnythingGenerating={props.isAnythingGenerating}
@@ -122,15 +121,15 @@ export const GenerationTools = ({
         })
     );
 
-    const handleDragEnd = (event: any) => {
+    const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
-        if (active.id !== over.id) {
+        if (over && active.id !== over.id) {
             const oldIndex = orderedSections.findIndex(s => s.id === active.id);
             const newIndex = orderedSections.findIndex(s => s.id === over.id);
-            setOrderedSections(arrayMove(orderedSections, oldIndex, newIndex));
+            const newOrder = arrayMove(orderedSections, oldIndex, newIndex);
+            setOrderedSections(newOrder);
         }
     };
-
 
     const isDisabled = isAnythingGenerating;
 
@@ -186,7 +185,7 @@ export const GenerationTools = ({
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                         <SortableContext items={orderedSections.map(s => s.id)} strategy={verticalListSortingStrategy}>
                             <Accordion type="multiple" className="w-full space-y-1">
-                                {orderedSections.map((section, index) => {
+                                {orderedSections.map((section) => {
                                     const agent = agents?.find(a => a.id === section.agentId);
                                     if (!agent) return null;
 
@@ -202,13 +201,12 @@ export const GenerationTools = ({
                                     return (
                                         <SortableSectionItem
                                             key={section.id}
-                                            id={section.id}
+                                            section={section}
                                             agent={agent}
                                             isGenerating={isGeneratingThis}
                                             isAnythingGenerating={isAnythingGenerating}
                                             hasCredits={!!hasCreditsForSingleSection}
                                             reportGenerationMutation={reportGenerationMutation}
-                                            handleProps={{}}
                                             generationState={sectionState}
                                             onRetry={onRetrySection ? () => onRetrySection(section.id) : undefined}
                                         />

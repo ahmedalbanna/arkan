@@ -2,7 +2,7 @@
  * Export Factory للمقترحات
  */
 
-import type { ProjectProposal } from '@/lib/models/proposal';
+import type { ProjectProposal } from '@/lib/models/project-proposal';
 import { useCallback } from 'react';
 import { useExportManager } from '../base/use-export-manager';
 import type { ExportFormat, ExportOptions, ExportResult } from '../types/export-types';
