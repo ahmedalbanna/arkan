@@ -4,6 +4,7 @@ import { ContextItem, ContextOrganizer, createOrganizedPrompt } from '@/ai/core/
 import { useBuilderStore } from '@/hooks';
 import { useContextSelector } from '@/hooks/use-context-selector';
 import { useGenerationUIStore } from '@/hooks/useGenerationUIStore';
+import { ContextFileData } from '@/lib/models/context-manager';
 import { useCallback } from 'react';
 
 /**
@@ -43,7 +44,8 @@ export function useSectionGenerationData(itemKey: string) {
 
         const allContexts: ContextItem[] = [];
 
-        (selectedExternalContext || []).forEach(item => {
+        // CORRECTED: Added explicit types for item
+        (selectedExternalContext || []).forEach((item: ContextFileData) => {
             const content = item.content || '';
             allContexts.push({
                 fileName: item.fileName,
@@ -56,7 +58,8 @@ export function useSectionGenerationData(itemKey: string) {
             });
         });
 
-        (selectedSections || []).forEach(({ key, content }) => {
+        // CORRECTED: Added explicit types for key and content
+        (selectedSections || []).forEach(({ key, content }: { key: string, content: string }) => {
             const safeContent = content || '';
             allContexts.push({
                 fileName: `section-${key}`,
@@ -69,7 +72,8 @@ export function useSectionGenerationData(itemKey: string) {
             });
         });
 
-        (selectedDiagrams || []).forEach(({ key, content }) => {
+        // CORRECTED: Added explicit types for key and content
+        (selectedDiagrams || []).forEach(({ key, content }: { key: string, content: string }) => {
             const safeContent = content || '';
             allContexts.push({
                 fileName: `diagram-${key}`,
@@ -106,7 +110,8 @@ export function useSectionGenerationData(itemKey: string) {
                 acc[key] = content || '';
                 return acc;
             }, {} as Record<string, string>),
-            externalContext: (selectedExternalContext || []).map(item => ({
+            // CORRECTED: Added explicit type for item
+            externalContext: (selectedExternalContext || []).map((item: ContextFileData) => ({
                 fileName: item.fileName,
                 content: item.content || '',
                 type: item.type
@@ -199,13 +204,15 @@ export function useSectionGenerationData(itemKey: string) {
         }, {} as Record<string, string>);
 
         const externalContext = generationData.contextData.externalContext || [];
+        // CORRECTED: Added explicit types for item, fileName, and content
         const contextFiles = externalContext
-            .filter(item => item.type === 'context' || item.type === 'textbook' || item.type === 'question')
-            .map(({ fileName, content }) => ({ fileName, content }));
+            .filter((item: any) => item.type === 'context' || item.type === 'textbook' || item.type === 'question')
+            .map(({ fileName, content }: { fileName: string, content: string }) => ({ fileName, content }));
 
+        // CORRECTED: Added explicit types for item, fileName, and content
         const exampleFiles = externalContext
-            .filter(item => item.type === 'example')
-            .map(({ fileName, content }) => ({ fileName, content }));
+            .filter((item: any) => item.type === 'example')
+            .map(({ fileName, content }: { fileName: string, content: string }) => ({ fileName, content }));
             
         const guidelines = [
             ...(generationData.guidelines?.checked || []),

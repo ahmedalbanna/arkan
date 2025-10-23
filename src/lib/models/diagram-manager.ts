@@ -1,37 +1,22 @@
 
 import { Diagram, type DiagramProperties, type DiagramType } from './diagram';
 
-export type DiagramsData = Partial<Record<DiagramType, DiagramProperties>>;
-
 /**
  * The DiagramManager class encapsulates the collection of diagrams within a project.
  * It is responsible for creating, updating, and serializing Diagram instances.
  */
 export class DiagramManager {
-    private diagrams: Partial<Record<DiagramType, Diagram>>;
+    private diagrams: Record<string, Diagram>;
 
     /**
      * @param data The initial raw data for the diagrams, mapping diagram types to their properties.
-     *             This constructor is defensive to handle malformed data from older project versions.
      */
-    constructor(data?: any | null) { // Use `any` to gracefully handle legacy formats
+    constructor(data?: Record<string, DiagramProperties> | null) {
         this.diagrams = {};
-
-        // Defensively find the actual map of diagrams.
-        // It could be the `data` object itself, or nested inside `data.diagrams` in legacy formats.
-        const dataToProcess = (data && data.diagrams && typeof data.diagrams === 'object') ? data.diagrams : data;
-
-        if (dataToProcess && typeof dataToProcess === 'object') {
-            for (const key in dataToProcess) {
-                if (Object.prototype.hasOwnProperty.call(dataToProcess, key)) {
-                    const type = key as DiagramType;
-                    const diagramData = dataToProcess[type];
-                    
-                    // Create a diagram instance only if the data is a valid-looking object with content.
-                    if (diagramData && typeof diagramData === 'object' && Object.keys(diagramData).length > 0) {
-                        this.diagrams[type] = new Diagram(diagramData);
-                    }
-                }
+        if (data) {
+            for (const key in data) {
+                // Create a new Diagram instance for each data entry.
+                this.diagrams[key] = new Diagram(data[key]);
             }
         }
     }
@@ -59,23 +44,18 @@ export class DiagramManager {
      * @returns True if there is at least one diagram, false otherwise.
      */
     public hasContent(): boolean {
-        return Object.keys(this.diagrams).length > 0;
+        return Object.values(this.diagrams).some(diagram => diagram.hasContent());
     }
 
     /**
      * Serializes the entire collection of diagrams into a plain data object.
-     * This is used for saving the project state.
      * @returns A plain object mapping diagram types to their raw properties.
      */
-    public toJSON(): DiagramsData {
-        const plainData: DiagramsData = {};
+    public toJSON(): Record<string, DiagramProperties> {
+        const data: Record<string, DiagramProperties> = {};
         for (const key in this.diagrams) {
-            const type = key as DiagramType;
-            const diagramState = this.diagrams[type]?.toStateObject();
-            if (diagramState) {
-               plainData[type] = diagramState;
-            }
+            data[key] = this.diagrams[key].toStateObject();
         }
-        return plainData;
+        return data;
     }
 }

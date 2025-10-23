@@ -1,25 +1,29 @@
 
 import {
-    type SectionName,
-    ProjectPlanSchema,
     AnyProjectProposalSchema,
+    DEFAULT_REPORT_SECTION_IDS,
+    ProjectPlanSchema,
+    SectionName
 } from '@/ai/schemas';
-import { ContextManager } from './context-manager';
-import { DiagramManager } from './diagram-manager';
-import { Section } from './section';
+import { ContextManager, ContextFileData } from './context-manager';
+import { DiagramManager, DiagramProperties } from './diagram-manager';
+import { ProjectPlan, ProjectPlanData } from './project-plan';
+import { ProjectProposal, ProjectProposalData } from './project-proposal';
+import { Section, SectionData } from './section';
 import { SectionManager } from './section-manager';
-import type { ProjectProposal } from './project-proposal';
-import type { ProjectPlan } from './project-plan';
-import { SavedReport } from '../types';
 
-/**
- * @class Report
- * @description A class representing the entire report document. It acts as a central
- * manager for all its constituent parts, including sections, diagrams, and context.
- * This provides a unified and explicit model for the report, ensuring consistency
- * and simplifying interactions throughout the application.
- */
-export class Report {
+export interface SavedReport {
+    id: string;
+    title: string;
+    sections: Record<string, SectionData>;
+    diagrams: Record<string, DiagramProperties>;
+    contextFiles: ContextFileData[];
+    proposal: ProjectProposalData | null;
+    projectPlan: ProjectPlanData | null;
+    orderedSectionIds: string[];
+}
+
+export class ProjectReport {
     id: string;
     title: string;
     sectionsManager: SectionManager;
@@ -32,38 +36,56 @@ export class Report {
     constructor(data: Partial<SavedReport> & { id: string; title: string }) {
         this.id = data.id;
         this.title = data.title;
-        
-        this.sectionsManager = new SectionManager(data.sections || {});
+
+        const isNewReport = !data.sections || Object.keys(data.sections).length === 0;
+
+        let initialSections: Record<string, SectionData> = data.sections || {};
+        let initialOrder: string[] = data.orderedSectionIds || [];
+
+        if (isNewReport) {
+            initialSections = {};
+            DEFAULT_REPORT_SECTION_IDS.forEach(id => {
+                const newSectionData: SectionData = {
+                    id,
+                    agentId: id,
+                    title: id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, ' $1'),
+                    type: 'report',
+                    content: ''
+                };
+                initialSections[id] = newSectionData;
+            });
+            initialOrder = DEFAULT_REPORT_SECTION_IDS;
+        }
+
+        this.sectionsManager = new SectionManager(initialSections);
         this.diagramsManager = new DiagramManager(data.diagrams || {});
         this.contextManager = new ContextManager(data.contextFiles || []);
-        
-        this.proposal = data.proposal ? AnyProjectProposalSchema.parse(data.proposal) as ProjectProposal : null;
-        this.projectPlan = data.projectPlan ? ProjectPlanSchema.parse(data.projectPlan) as ProjectPlan : null;
 
-        this.orderedSectionIds = data.orderedSectionIds || Object.keys(this.sectionsManager.toJSON());
+        // CORRECTED: Use the constructor directly, which handles both raw and structured data.
+        this.proposal = data.proposal ? new ProjectProposal(data.proposal as any) : null;
+        this.projectPlan = data.projectPlan ? new ProjectPlan(data.projectPlan as any) : null;
+
+        // CORRECTED: Use the locally available `initialSections` to avoid accessing a private property.
+        this.orderedSectionIds = initialOrder.length > 0 ? initialOrder : Object.keys(initialSections);
     }
 
     getOrderedSections(): Section[] {
         return this.orderedSectionIds
             .map(id => this.sectionsManager.getSection(id as SectionName))
-            .filter((s): s is Section => s !== null);
+            .filter((s): s is Section => s !== null && s !== undefined);
     }
 
     setSectionOrder(newOrder: string[]): void {
         this.orderedSectionIds = newOrder;
     }
 
-    /**
-     * @description Checks if the report has any meaningful content.
-     * @returns {boolean} True if any part of the report has content.
-     */
     public hasContent(): boolean {
         return (
             this.sectionsManager.hasContent() ||
             this.diagramsManager.hasContent() ||
             this.contextManager.hasContent() ||
-            !!this.proposal ||
-            !!this.projectPlan
+            (this.proposal?.hasContent() ?? false) ||
+            (this.projectPlan?.hasContent() ?? false)
         );
     }
 
@@ -74,13 +96,13 @@ export class Report {
             sections: this.sectionsManager.toJSON(),
             diagrams: this.diagramsManager.toJSON(),
             contextFiles: this.contextManager.toJSON(),
-            proposal: this.proposal,
-            projectPlan: this.projectPlan,
+            proposal: this.proposal ? this.proposal.toJSON() : null,
+            projectPlan: this.projectPlan ? this.projectPlan.toJSON() : null,
             orderedSectionIds: this.orderedSectionIds,
         };
     }
 
-    static fromJSON(data: SavedReport): Report {
-        return new Report(data);
+    static fromJSON(data: SavedReport): ProjectReport {
+        return new ProjectReport(data);
     }
 }

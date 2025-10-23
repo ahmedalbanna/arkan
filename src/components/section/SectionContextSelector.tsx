@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useContextSelector } from '@/hooks';
+import { ContextFileData } from '@/lib/models/context-manager'; // IMPORT THE TYPE
 import { cn } from '@/lib/utils';
 import { BookCheck, FileSpreadsheet, FileText, GanttChartSquare, GitGraph } from 'lucide-react';
 
@@ -18,7 +19,6 @@ interface ContextSelectorProps {
 export function ContextSelector({ itemKey }: ContextSelectorProps) {
     const { t } = useLocalization();
 
-    // استخدام hook تحديد السياق الحقيقي
     const {
         proposal,
         projectPlan,
@@ -140,7 +140,8 @@ export function ContextSelector({ itemKey }: ContextSelectorProps) {
                         <AnimatedContainer animation="fade-in-up" delay={800}>
                             <div className="space-y-2 pt-2 border-t">
                                 <Label className="font-semibold font-headline">{t('builder.reportGenerator.externalContext')}</Label>
-                                {externalContext.map((item, index) => (
+                                {/* CORRECTED: Add explicit types for item and index */}
+                                {externalContext.map((item: ContextFileData, index: number) => (
                                     <AnimatedContainer key={index} animation="fade-in-up" delay={900 + (index * 100)}>
                                         <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-blue-500/5 transition-all duration-200">
                                             <Checkbox

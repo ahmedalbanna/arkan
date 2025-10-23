@@ -66,6 +66,17 @@ export class ProjectProposal implements ProjectProposalData {
   }
 
   // =============================================================================
+  // STATIC FACTORY
+  // =============================================================================
+
+  /**
+   * Creates a ProjectProposal instance from structured, validated data.
+   */
+  public static fromJSON(data: ProjectProposalData): ProjectProposal {
+    return new ProjectProposal(data);
+  }
+  
+  // =============================================================================
   // ROBUST HELPER METHODS
   // =============================================================================
 
@@ -76,18 +87,15 @@ export class ProjectProposal implements ProjectProposalData {
     if (typeof content === 'string' && content.trim() !== '') {
       this.sections[title] = content;
     }
-    // Ignores content that is not a string (null, undefined, object, etc.)
   }
 
   /**
    * Securely adds a section from content that could be a string or an array of strings.
-   * It validates the type of content before processing to prevent runtime errors.
    */
   private addSectionFromList(title: string, content: any): void {
     if (!content) return;
 
     if (Array.isArray(content)) {
-      // Filter out non-string items to be safe
       const validItems = content.filter(item => typeof item === 'string' && item.trim() !== '');
       if (validItems.length > 0) {
         this.sections[title] = validItems.map(item => `- ${item}`).join('\n');
@@ -95,7 +103,6 @@ export class ProjectProposal implements ProjectProposalData {
     } else if (typeof content === 'string' && content.trim() !== '') {
       this.sections[title] = content;
     }
-    // Ignores content that is not a string or a valid array.
   }
 
   // =============================================================================
@@ -121,6 +128,10 @@ export class ProjectProposal implements ProjectProposalData {
     }
 
     return markdown.trim();
+  }
+
+  public hasContent(): boolean {
+      return Object.values(this.sections).some(content => content && content.trim().length > 0);
   }
 
   public toJSON(): ProjectProposalData {

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { SectionName } from '@/ai/schemas';
@@ -11,11 +12,12 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { Agent } from '@/lib/models/agent';
 import { Section } from '@/lib/models/section';
 import { cn } from '@/lib/utils';
-import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { closestCenter, DndContext, DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useMutation } from '@tanstack/react-query';
+import { UseMutationResult } from '@tanstack/react-query';
 import { PanelLeftClose, Settings } from 'lucide-react';
+import { ReportSectionGenerationOutput } from '../../app/api/agents/sections/route';
 import { Button } from '../ui/button';
 
 interface SortableSectionItemProps {
@@ -24,7 +26,8 @@ interface SortableSectionItemProps {
     isGenerating: boolean;
     isAnythingGenerating: boolean;
     hasCredits: boolean;
-    reportGenerationMutation: ReturnType<typeof useMutation>;
+    // CORRECTED: Use the specific mutation result type
+    reportGenerationMutation: UseMutationResult<ReportSectionGenerationOutput, Error, { body: any }, unknown>;
     generationState?: {
         isLoading: boolean;
         isSuccess?: boolean;
@@ -87,7 +90,8 @@ interface GenerationToolsProps {
     setOrderedSections: (sections: Section[]) => void;
     isAnythingGenerating: boolean;
     activeMutationKey: string | null;
-    reportGenerationMutation: ReturnType<typeof useMutation>;
+    // CORRECTED: Use the specific mutation result type
+    reportGenerationMutation: UseMutationResult<ReportSectionGenerationOutput, Error, { body: any }, unknown>;
     hasCreditsForSingleSection: boolean;
     agents: Agent[];
     generationStates?: Record<string, {

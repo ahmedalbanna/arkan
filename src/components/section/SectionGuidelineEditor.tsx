@@ -31,7 +31,6 @@ export function GuidelineEditor({ itemKey, agentId, isAdmin }: GuidelineEditorPr
         setCustomGuidelineInputForItem,
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
-        uiHook
 
     } = useGuidelineEditor(itemKey, agentId);
 

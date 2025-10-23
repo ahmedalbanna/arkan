@@ -12,11 +12,11 @@ interface SelectionState {
     projectPlan: boolean;
     sections: Record<string, boolean>; // Use string for broader compatibility
     diagrams: Record<string, boolean>;
-    externalContext: number[];
+    externalContext: Record<number, boolean>; // Use a map for sparse selections
 }
 
 // Define an empty selection structure for initialization, now with a proper type.
-const emptySelection: SelectionState = { sections: {}, diagrams: {}, externalContext: [], proposal: false, projectPlan: false };
+const emptySelection: SelectionState = { sections: {}, diagrams: {}, externalContext: {}, proposal: false, projectPlan: false };
 
 export const useContextSelector = (itemKey: string) => {
     const { t } = useLocalization();
@@ -31,7 +31,6 @@ export const useContextSelector = (itemKey: string) => {
             proposal: null,
             projectPlan: null,
             toggleContextSelection: () => {},
-            // Ensure these are correctly typed, even when empty
             reportSections: {} as Record<string, any>,
             diagramSections: {} as Record<string, any>,
             currentSelection: emptySelection,
@@ -46,82 +45,82 @@ export const useContextSelector = (itemKey: string) => {
         };
     }
 
-    // Access data via managers from the project instance
-    const { proposal, projectPlan, sections: sectionManager, diagrams: diagramManager, contextManager } = project;
-    const externalContextFiles = contextManager.files;
+    const { proposal, projectPlan, report } = project;
+    const { sectionsManager, diagramsManager, contextManager } = report;
+    // CORRECTED: Use the public getAll() method instead of the private files property
+    const externalContextFiles = contextManager.getAll();
 
-    // Memoize UI-related data derived from section configurations
     const reportSections = useMemo(() => {
-        if (!sectionConfigs) return {} as Record<string, any>;
+        if (!sectionConfigs) return {};
         return sectionConfigs.filter(s => s.type === 'report').reduce((acc, sec) => {
             acc[sec.id as SectionName] = sec;
             return acc;
-        }, {} as Record<string, any>); // Use a correctly typed initial value
+        }, {} as Record<string, any>);
     }, [sectionConfigs]);
 
     const diagramSections = useMemo(() => {
-        if (!sectionConfigs) return {} as Record<string, any>;
+        if (!sectionConfigs) return {};
         return sectionConfigs.filter(s => s.type === 'diagram').reduce((acc, sec) => {
             acc[sec.id as DiagramType] = sec;
             return acc;
-        }, {} as Record<string, any>); // Use a correctly typed initial value
+        }, {} as Record<string, any>);
     }, [sectionConfigs]);
 
-    // Get available (generated) sections and diagrams from their managers
     const generatedSections = useMemo(() => {
-        const sectionsData = sectionManager.toJSON();
-        const sectionKeys = Object.keys(sectionsData.sections || {}) as SectionName[];
-        return sectionKeys.filter(key => sectionManager.getSection(key)?.hasContent);
-    }, [sectionManager]);
+        return (report.orderedSectionIds || [])
+            .map(key => sectionsManager.getSection(key as SectionName))
+            // CORRECTED: Call hasContent as a method
+            .filter(section => section && section.hasContent())
+            .map(section => section!.id as SectionName);
+    }, [report.orderedSectionIds, sectionsManager]);
 
     const generatedDiagrams = useMemo(() => {
-        const diagramsData = diagramManager.toJSON();
-        const diagramKeys = Object.keys(diagramsData.diagrams || {}) as DiagramType[];
-        return diagramKeys.filter(key => diagramManager.getDiagram(key)?.hasContent);
-    }, [diagramManager]);
+        const diagramsData = diagramsManager.toJSON();
+        // TODO: This will be fixed when Diagram model is updated
+        return (Object.keys(diagramsData.diagrams || {}) as DiagramType[]).filter(key => diagramsManager.getDiagram(key)?.hasContent());
+    }, [diagramsManager]);
 
-
-    // The selection state for the current item, defaulting to empty.
     const currentSelection: SelectionState = contextSelection[itemKey] || emptySelection;
 
-    // Safely filter and map selected items to prevent crashes.
     const selectedSections = useMemo(() =>
         (Object.keys(currentSelection.sections) as SectionName[]).flatMap(key => {
             if (currentSelection.sections[key]) {
-                const section = sectionManager.getSection(key);
-                if (section?.hasContent) {
+                const section = sectionsManager.getSection(key);
+                // CORRECTED: Call hasContent as a method
+                if (section?.hasContent()) {
                     return [{ key, content: section.content }];
                 }
             }
             return [];
         })
-    , [currentSelection.sections, sectionManager]);
+    , [currentSelection.sections, sectionsManager]);
 
     const selectedDiagrams = useMemo(() =>
         (Object.keys(currentSelection.diagrams) as DiagramType[]).flatMap(key => {
             if (currentSelection.diagrams[key]) {
-                const diagram = diagramManager.getDiagram(key);
-                if (diagram?.hasContent) {
+                const diagram = diagramsManager.getDiagram(key);
+                // TODO: This will be fixed when Diagram model is updated
+                if (diagram?.hasContent()) {
                     return [{ key, content: diagram.plantUmlCode }];
                 }
             }
             return [];
         })
-    , [currentSelection.diagrams, diagramManager]);
+    , [currentSelection.diagrams, diagramsManager]);
     
     const selectedExternalContext = useMemo(() =>
         externalContextFiles
-            .map((item, index) => ({ ...item, index })) // Attach index for selection tracking
-            .filter((item: ContextFileData & { index: number }) => currentSelection.externalContext[item.index])
+            .map((item, index) => ({ ...item, index }))
+            .filter((item) => !!currentSelection.externalContext[item.index])
     , [externalContextFiles, currentSelection.externalContext]);
 
-    // Determine if any context is selected.
     const hasContext = useMemo(() =>
-    (currentSelection.proposal && !!proposal?.hasContent) ||
-    (currentSelection.projectPlan && !!projectPlan?.hasContent) ||
-    selectedSections.length > 0 ||
-    selectedDiagrams.length > 0 ||
-    selectedExternalContext.length > 0,
+        // TODO: This will be fixed when Proposal/Plan models are updated
+        (currentSelection.proposal && (proposal?.hasContent() ?? false)) ||
+        (currentSelection.projectPlan && (projectPlan?.hasContent() ?? false)) ||
+        selectedSections.length > 0 ||
+        selectedDiagrams.length > 0 ||
+        selectedExternalContext.length > 0,
     [currentSelection, proposal, projectPlan, selectedSections, selectedDiagrams, selectedExternalContext]
 );
 

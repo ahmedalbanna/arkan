@@ -32,6 +32,14 @@ export class Diagram {
     }
 
     /**
+     * Checks if the diagram has any content.
+     * @returns True if the PlantUML code is not empty, false otherwise.
+     */
+    public hasContent(): boolean {
+        return this.plantUmlCode.trim().length > 0;
+    }
+
+    /**
      * Updates the PlantUML code for the diagram.
      * @param newCode The new PlantUML code.
      */

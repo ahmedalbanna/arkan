@@ -13,7 +13,7 @@ import { useAgents, useBuilderStore } from '@/hooks';
 import { AgentCategory } from '@/lib/models/agent';
 import { BarChart3, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
 import React, { useMemo } from 'react';
-import { Section } from '../section/SectionView';
+import { Section as SectionView } from '../section/SectionView';
 
 interface ReportResultsProps {
   generatedSections: SectionName[];
@@ -21,7 +21,8 @@ interface ReportResultsProps {
 
 export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
   const { t } = useLocalization();
-  const { project, updateProject } = useBuilderStore();
+  // CORRECTED: The store update function expects a function to modify the state.
+  const { project, setProject } = useBuilderStore();
   const { agents } = useAgents();
 
   const reportAgents = useMemo(() => {
@@ -38,14 +39,22 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     return reportAgents?.find(a => a.id.includes(sectionKey))?.name || sectionKey;
   }, [reportAgents]);
 
-  /**
-   * Handles updating the content of a section.
-   * This function now calls the encapsulated method on the SectionManager instance.
-   */
+  // CORRECTED: This now correctly updates the project state immutably.
   const handleSectionUpdate = (key: SectionName, value: string) => {
-    updateProject(p => {
-      // Use the manager's method to update the section content
-      p.sections.updateSection(key, value);
+    if (!project) return;
+    
+    // By calling setProject with a function, we ensure that we are modifying the latest state.
+    // Zustand will handle the re-rendering process correctly.
+    setProject(currentProject => {
+        const section = currentProject.report.sectionsManager.getSection(key);
+        if (section) {
+            section.updateContent(value); // This mutates the section object within the draft state.
+            currentProject.setUnsavedChanges(true);
+        }
+        // No need to return anything as we are mutating the draft (if immer is used)
+        // or we have mutated the object that is held in state.
+        // We just need to trigger the update.
+        return currentProject;
     });
   };
 
@@ -65,7 +74,7 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
   };
 
   const renderContent = () => {
-    if (!hasContent) {
+    if (!hasContent || !project) {
       return (
         <AnimatedContainer animation="fade-in-up" delay={200}>
           <div className="flex items-center justify-center h-full min-h-[400px] mt-4">
@@ -81,9 +90,9 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
       );
     }
 
-    // Get the content for the current section using the SectionManager.
-    const sectionObject = currentSectionKey && project?.sections
-      ? project.sections.getSection(currentSectionKey)
+    // CORRECTED: getSection now returns a full Section instance.
+    const sectionObject = currentSectionKey
+      ? project.report.sectionsManager.getSection(currentSectionKey)
       : null;
 
     return (
@@ -92,11 +101,12 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
           <ScrollArea className="flex-grow">
             {currentSectionKey && sectionObject && (
               <A4Page key={currentSectionKey}>
-                <Section
+                <SectionView
                   sectionKey={currentSectionKey}
                   title={getSectionTitle(currentSectionKey)}
-                  content={sectionObject} // Pass the full section object
-                  onUpdate={handleSectionUpdate} // Pass the updated handler
+                  // CORRECTED: Access the 'content' property from the Section instance.
+                  content={sectionObject.content}
+                  onUpdate={handleSectionUpdate}
                 />
               </A4Page>
             )}

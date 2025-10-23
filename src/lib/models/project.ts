@@ -2,10 +2,9 @@
 import type { AdvancedProposalFields, PresentationHistoryEntry } from '@/ai/schemas';
 import type { GuidelineState } from '@/hooks';
 import { AcademicSolverManager, type AcademicSolverData } from './academic-solver-manager';
-import { ProjectPlan } from './project-plan';
-import { ProjectProposal, type ProjectProposalData } from './project-proposal';
-import { Report } from './project-report'; // Import the new Report class
-import { SavedReport } from '../types';
+import { ProjectPlan, ProjectPlanData } from './project-plan';
+import { ProjectProposal, ProjectProposalData } from './project-proposal';
+import { ProjectReport, SavedReport } from './project-report';
 
 // =============================================================================
 // MAIN PROJECT INTERFACE (RAW DATA)
@@ -26,11 +25,11 @@ export interface ProjectProperties {
 
     // Raw data for composed models
     proposal?: ProjectProposalData | null;
-    report?: SavedReport | null; // This will hold the serialized report data
+    report?: SavedReport | null;
     academicSolver?: AcademicSolverData | null;
+    projectPlan?: ProjectPlanData | null;
 
     // Other properties
-    projectPlan?: ProjectPlan | null;
     presentation?: { history: PresentationHistoryEntry[] } | null;
     codeGenerator?: any | null;
     codebase?: any | null;
@@ -42,25 +41,25 @@ export interface ProjectProperties {
 // PROJECT CLASS IMPLEMENTATION
 // =============================================================================
 
-export class Project implements Omit<ProjectProperties, 'proposal' | 'report' | 'academicSolver'> {
+export class Project implements Omit<ProjectProperties, 'proposal' | 'report' | 'academicSolver' | 'projectPlan'> {
     public id: string;
     public userId: string;
-    public name: string | null;
+    public name: string;
     public description: string | null;
-    public createdAt: string | null;
-    public updatedAt: string | null;
-    public tags: string[] | null;
+    public createdAt: string;
+    public updatedAt: string;
+    public tags: string[];
 
     // Composed Class Instances
     public proposal: ProjectProposal | null;
-    public report: Report; // The report is now a first-class citizen
+    public report: ProjectReport;
     public academicSolver: AcademicSolverManager;
+    public projectPlan: ProjectPlan | null;
 
     // Other properties
     public projectIdea: string | null;
     public advancedProposalFields: Partial<AdvancedProposalFields> | null;
     public guidelineState: GuidelineState | null;
-    public projectPlan: ProjectPlan | null;
     public presentation: { history: PresentationHistoryEntry[] } | null;
     public codeGenerator: any | null;
     public codebase: any | null;
@@ -68,7 +67,6 @@ export class Project implements Omit<ProjectProperties, 'proposal' | 'report' | 
     public hasUnsavedChanges: boolean;
 
     constructor(props: Partial<ProjectProperties>) {
-        // Core Metadata
         this.id = props.id || `proj_${Date.now()}`;
         this.userId = props.userId || 'anonymous';
         this.name = props.name || 'Untitled Project';
@@ -77,27 +75,35 @@ export class Project implements Omit<ProjectProperties, 'proposal' | 'report' | 
         this.updatedAt = props.updatedAt || new Date().toISOString();
         this.tags = props.tags || [];
 
-        // Instantiate composed models from raw data
         this.proposal = props.proposal ? new ProjectProposal(props.proposal) : null;
-        // The Report class is now responsible for its own constituent parts.
-        this.report = new Report({
+        this.projectPlan = props.projectPlan ? new ProjectPlan(props.projectPlan) : null;
+        
+        this.report = new ProjectReport({
             id: `rep_${this.id}`,
             title: `${this.name} Report`,
             ...(props.report || {}),
         });
+        
         this.academicSolver = new AcademicSolverManager(props.academicSolver);
 
-        // Other properties
         this.projectIdea = props.projectIdea || null;
         this.advancedProposalFields = props.advancedProposalFields || null;
         this.guidelineState = props.guidelineState || null;
-        this.projectPlan = props.projectPlan || null;
         this.presentation = props.presentation || { history: [] };
         this.codeGenerator = props.codeGenerator || null;
         this.codebase = props.codebase || null;
         this.hasUnsavedChanges = props.hasUnsavedChanges || false;
     }
 
+    public setUnsavedChanges(status: boolean): void {
+        this.hasUnsavedChanges = status;
+    }
+
+    /**
+     * Serializes the entire project state to a plain object for storage.
+     * This is the counterpart to the constructor.
+     * @returns A plain object representing the project's complete state.
+     */
     public toJSON(): ProjectProperties {
         return {
             id: this.id,
@@ -110,18 +116,23 @@ export class Project implements Omit<ProjectProperties, 'proposal' | 'report' | 
             projectIdea: this.projectIdea,
             advancedProposalFields: this.advancedProposalFields,
             guidelineState: this.guidelineState,
-
-            // Serialize composed models back to plain objects
             proposal: this.proposal ? this.proposal.toJSON() : null,
-            report: this.report.toJSON(), // Delegate serialization to the Report class
+            report: this.report.toJSON(),
             academicSolver: this.academicSolver.toJSON(),
-
-            projectPlan: this.projectPlan,
+            projectPlan: this.projectPlan ? this.projectPlan.toJSON() : null,
             presentation: this.presentation,
             codeGenerator: this.codeGenerator,
             codebase: this.codebase,
             hasUnsavedChanges: this.hasUnsavedChanges,
         };
+    }
+
+    /**
+     * Alias for toJSON() to be used by state management tools that expect this method name.
+     * @returns A plain object representing the project's complete state.
+     */
+    public toStateObject(): ProjectProperties {
+        return this.toJSON();
     }
 
     public hasAnyContent(): boolean {
@@ -131,15 +142,14 @@ export class Project implements Omit<ProjectProperties, 'proposal' | 'report' | 
         return !!this.projectIdea?.trim() ||
                hasAdvancedFields ||
                hasCustomGuidelines ||
-               !!this.proposal ||
-               this.report.hasContent() || // Delegate content check to the Report class
+               (this.proposal?.hasContent() ?? false) ||
+               this.report.hasContent() ||
                this.academicSolver.hasContent() ||
+               (this.projectPlan?.hasContent() ?? false) ||
                (!!this.presentation?.history && this.presentation.history.length > 0) ||
                !!this.codeGenerator?.html ||
-               !!this.projectPlan ||
                !!this.codebase;
     }
-
 
     // =============================================================================
     // STATIC METHODS FOR FILE CONVERSION

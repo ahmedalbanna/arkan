@@ -7,15 +7,15 @@ import {
     toast, useAgents, useBuilderStore, useExport, useGenerateReportSection, useGenerationUIStore, useTranslate
 } from '@/hooks';
 import { AgentCategory } from '@/lib/models/agent';
-import { Report } from '@/lib/models/project-report';
+import { ProjectReport } from '@/lib/models/project-report'; // Updated import
 import type { Section } from '@/lib/models/section';
 import { useEffect, useMemo, useState } from 'react';
 
 export const useReportModeGenerator = () => {
     const { t, locale } = useLocalization();
-    // The top-level project is the source of truth.
     const { project, updateProject } = useBuilderStore();
-    // The report model is accessed from the project.
+    
+    // The report model is now correctly typed as ProjectReport
     const report = useMemo(() => project?.report, [project]);
     
     const translateMutation = useTranslate();
@@ -43,7 +43,6 @@ export const useReportModeGenerator = () => {
         [report]
     );
 
-    // Updates are now performed on the project, which contains the report.
     const handleSectionUpdate = (key: SectionName, value: string) => {
         updateProject(p => p.report.sectionsManager.updateSection(key, value));
     };
@@ -74,7 +73,6 @@ export const useReportModeGenerator = () => {
         if (!project || !report || generatedSections.length === 0) return;
 
         const translatedTitles = { /* ... */ };
-        // The export function now expects the whole project.
         await exportReportDocx(project, translatedTitles, sectionsToInclude);
     };
 
@@ -112,8 +110,8 @@ export const useReportModeGenerator = () => {
         hasCreditsForSingleSection,
         agents: reportAgents,
         agentsLoaded,
-        project, // Expose the whole project
-        report,  // Expose the report model directly
+        project,
+        report, // The type is now correctly inferred as ProjectReport | undefined
         translatedSections,
     };
 };

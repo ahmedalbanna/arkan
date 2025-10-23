@@ -14,7 +14,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from './use-toast';
 
 import { sectionKeys } from '@/lib/core/query-keys';
-import { Section, type SectionProperties } from '@/lib/models/section'; // NEW: Import our class
+import { Section, type SectionData } from '@/lib/models/section'; // CORRECTED: Import SectionData
 
 /**
  * Fetches dynamic sections.
@@ -27,8 +27,8 @@ export function useSections() {
     queryFn: async () => {
       const token = await getAuthenticatedToken(firebaseUser);
       const data = await fetchSectionsApi(token);
-      // Transform plain objects to class instances
-      return data.map(s => new Section(s as SectionProperties));
+      // Transform plain objects to class instances using the correct type
+      return data.map(s => new Section(s as SectionData)); // CORRECTED: Use SectionData
     },
     enabled: !!firebaseUser,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -38,8 +38,8 @@ export function useSections() {
 export function useCreateSection() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
-  // Mutation still works with the plain SectionProperties object for the API
-  return useMutation<SectionProperties, Error, Omit<SectionProperties, 'id'> & { id: string }>({
+  // Mutation still works with the plain SectionData object for the API
+  return useMutation<SectionData, Error, Omit<SectionData, 'id'> & { id: string }>({
     mutationFn: async (data) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return createSectionApi(data, token);
@@ -55,7 +55,7 @@ export function useCreateSection() {
 export function useUpdateSection() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
-  return useMutation<SectionProperties, Error, { sectionId: string; data: Partial<SectionProperties> }>({
+  return useMutation<SectionData, Error, { sectionId: string; data: Partial<SectionData> }>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return updateSectionApi(variables.sectionId, variables.data, token);
