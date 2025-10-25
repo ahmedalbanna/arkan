@@ -1,8 +1,8 @@
 
+
 import { z } from 'zod';
 import { AcademicDocumentTypeSchema, DiagramTypeSchema, SectionNameSchema } from './enums';
 import { AnalyzedDocumentSchema, PresentationSlideSchema, SolvedDocumentSchema } from './flows';
-import { ProjectPlanSchema } from './project';
 
 const academicSolverContextFileSchema = z.object({
     fileName: z.string(),
@@ -155,7 +155,6 @@ export const ProjectStateSchema = z.object({
     codeGenerator: z.object({ prompt: z.string(), html: z.string(), css: z.string(), javascript: z.string(), codebase: z.object({ files: z.array(z.object({ path: z.string(), content: z.string() })) }).nullable() }).optional(),
     externalContext: z.array(academicSolverContextFileSchema).nullable().optional(),
     teamId: z.string().nullable().optional(), // Add teamId to associate project with a team
-    projectPlan: z.lazy(() => ProjectPlanSchema).nullable().optional(),
     academicSolver: z.object({
         stage: z.enum(["idle", "parsing", "analyzing", "readyToSolve", "solving", "solved"]),
         documentType: AcademicDocumentTypeSchema.nullable(),

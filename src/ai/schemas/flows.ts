@@ -12,7 +12,7 @@ import {
     SectionNameSchema,
     SummarizeLengthSchema
 } from './enums';
-import { ProjectPlanSchema, ProjectProposalSchema } from './project';
+import { ProjectProposalSchema } from './project';
 import { AgentPromptSchema } from './template-schemas';
 
 // academic-solver.ts
@@ -203,14 +203,13 @@ export const CodebaseSchema = z.object({
 });
 export type Codebase = z.infer<typeof CodebaseSchema>;
 
+// This input schema is now deprecated as the feature is removed.
 export const GenerateCodebaseInputSchema = z.object({
     proposal: ProjectProposalSchema.describe('The project proposal to base the codebase on.'),
 });
 
 // generate-diagrams.ts
 export const GenerateDiagramInputSchema = z.object({
-    proposal: ProjectProposalSchema.optional().nullable(),
-    projectPlan: ProjectPlanSchema.optional().nullable().describe("The detailed project plan with phases and tasks."),
     diagramToGenerate: DiagramTypeSchema.describe("The type of diagram to generate."),
     otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context."),
     otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context."),
@@ -311,8 +310,6 @@ export const PresentationSlideSchema = z.object({
 export type PresentationSlide = z.infer<typeof PresentationSlideSchema>;
 
 export const GeneratePresentationInputSchema = z.object({
-    proposal: ProjectProposalSchema.optional().nullable(),
-    projectPlan: ProjectPlanSchema.optional().nullable(),
     otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context."),
     otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context."),
     externalContext: z.array(z.object({
@@ -328,14 +325,7 @@ export const GeneratePresentationOutputSchema = z.object({
 export type GeneratePresentationOutput = z.infer<typeof GeneratePresentationOutputSchema>;
 
 
-// generate-project-plan.ts
-export const GenerateProjectPlanInputSchema = z.object({
-    projectDescription: z.string().describe("A description of the project idea, objectives, and goals."),
-    keyDeliverables: z.string().describe("A summary of the key features and deliverables for the project."),
-    numPhases: z.number().int().min(2).max(10).describe("The desired number of phases for the project plan.").optional(),
-});
-export type GenerateProjectPlanInput = z.infer<typeof GenerateProjectPlanInputSchema>;
-
+// generate-project-plan.ts is now deprecated.
 
 // generate-proposal.ts
 const AdvancedProposalFieldsSchema = z.object({
@@ -573,22 +563,12 @@ export const RewriteToMarkdownOutputSchema = z.object({
 export type RewriteToMarkdownOutput = z.infer<typeof RewriteToMarkdownOutputSchema>;
 
 
-// select-proposal-template.ts
-export const SelectProposalTemplateInputSchema = z.object({
-    projectIdea: z.string().describe('A short description of the project idea.'),
-});
-
-export const SelectProposalTemplateOutputSchema = z.object({
-    templateId: z.enum(['default-software', 'agile-project', 'student-training-plan']).describe('The ID of the most appropriate proposal template.'),
-});
-
-
 // summarize-document.ts
 export const SummarizeDocumentInputSchema = z.object({
     documentDataUri: z
         .string()
         .describe(
-            'A document, as a data URI that must include a MIME type and use Base64 encoding. Expected format: \'data:<mimetype>;base64,<encoded_data>\'.' // Explicitly using backticks here, because VS Code interprets " as a special character within a string.'
+            'A document, as a data URI that must include a MIME type and use Base64 encoding. Expected format: \'data:<mimetype>;base64,<encoded_data>\'.'
         ),
 });
 export type SummarizeDocumentInput = z.infer<typeof SummarizeDocumentInputSchema>;
@@ -615,6 +595,7 @@ export const SummarizeProjectOutputSchema = z.object({
 });
 export type SummarizeProjectOutput = z.infer<typeof SummarizeProjectOutputSchema>;
 
+// This is now deprecated as the feature is removed.
 export const SummarizeFullProjectInputSchema = z.object({
     proposal: AnyProjectProposalSchema.describe("The full JSON of the project proposal."),
     reportMarkdown: z.string().describe("The concatenated markdown content of all generated report sections.")
@@ -692,12 +673,7 @@ export const TranslatePresentationInputSchema = z.object({
 export type TranslatePresentationInput = z.infer<typeof TranslatePresentationInputSchema>;
 
 
-// translate-proposal.ts
-export const TranslateProposalInputSchema = z.object({
-    proposal: ProjectProposalSchema.describe('The project proposal object to be translated.'),
-    targetLang: z.string().describe('The target language (e.g., "English", "Arabic").'),
-});
-export type TranslateProposalInput = z.infer<typeof TranslateProposalInputSchema>;
+// translate-proposal.ts is now deprecated.
 
 // translate-text.ts
 export const TranslateTextInputSchema = z.object({
@@ -735,9 +711,8 @@ export const ExternalContextSchema = z.object({
 });
 export type ExternalContext = z.infer<typeof ExternalContextSchema>;
 
+// This is deprecated as the feature is removed.
 export const EvaluateContextInputSchema = z.object({
-    proposal: ProjectProposalSchema.optional().nullable().describe("The original project proposal."),
-    projectPlan: ProjectPlanSchema.optional().nullable().describe("The detailed project plan with phases and tasks."),
     existingSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections."),
     existingDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams."),
     sectionsToGenerate: z.array(SectionNameSchema).describe("A list of the target sections that need to be generated."),
@@ -767,7 +742,6 @@ export type EvaluateContextOutput = z.infer<typeof EvaluateContextOutputSchema>;
 
 // evaluate-report.ts
 export const EvaluateReportInputSchema = z.object({
-    proposal: ProjectProposalSchema.describe("The original project proposal.").optional().nullable(),
     reportSections: z.record(SectionNameSchema, z.string()).describe("A map of all generated report sections."),
     diagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of all generated PlantUML diagrams.").nullable(),
     acceptanceCriteria: z.array(z.string()).describe("A list of acceptance criteria to evaluate the report against.").nullable().optional(),

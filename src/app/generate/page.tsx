@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import OnboardingGuide from '@/components/auth/OnboardingGuide';
@@ -11,7 +9,7 @@ import { useBuilderStore, useFeatures, useProject } from '@/hooks';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
-import { BookCheck, FilePlus2, FileText, FolderKanban, GanttChartSquare, GitGraph, Laptop, Presentation } from 'lucide-react';
+import { BookCheck, FileText, FolderKanban, GitGraph, Laptop, Presentation } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
@@ -29,10 +27,6 @@ const SessionActions = dynamic(() => import('@/components/project/SessionActions
 });
 
 
-const ProposalModeGenerator = dynamic(() => import('@/components/proposal-mode/ProposalModeGenerator').then(mod => mod.ProposalModeGenerator), {
-  ssr: false,
-  loading: () => <LoadingSkeleton />,
-});
 const ReportGenerator = dynamic(() => import('@/components/report-mode/ReportModeGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
@@ -46,10 +40,6 @@ const CodeGenerator = dynamic(() => import('@/components/code-mode/CodeGenerator
   loading: () => <LoadingSkeleton />,
 });
 const PresentationGenerator = dynamic(() => import('@/components/presentation-mode/PresentationGenerator'), {
-  ssr: false,
-  loading: () => <LoadingSkeleton />,
-});
-const ProjectPlanGenerator = dynamic(() => import('@/components/plan-mode/ProjectPlanGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
@@ -79,7 +69,7 @@ async function markOnboardingComplete(userId: string, token: string) {
 }
 
 function GeneratePageContent() {
-  const [activeTab, setActiveTab] = useState("proposal");
+  const [activeTab, setActiveTab] = useState("files");
   const { project, loadProject } = useBuilderStore();
   const { t, locale } = useLocalization();
   const { firebaseUser, userProfile, refetchUser } = useAuth();
@@ -138,8 +128,6 @@ function GeneratePageContent() {
 
   const enabledTabs = [
     { id: 'files', enabled: true }, // Files tab is always enabled
-    { id: 'proposal', enabled: isFeatureEnabled('proposal') },
-    { id: 'plan', enabled: isFeatureEnabled('plan') },
     { id: 'report', enabled: isFeatureEnabled('report') },
     { id: 'diagram', enabled: isFeatureEnabled('diagram') },
     { id: 'code', enabled: isFeatureEnabled('code') },
@@ -184,20 +172,10 @@ function GeneratePageContent() {
             <LoadingSkeleton />
           ) : (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
-              <TabsList className="grid w-full h-auto grid-cols-2 sm:grid-cols-4 lg:grid-cols-8">
+              <TabsList className="grid w-full h-auto grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
                 <TabsTrigger value="files" className="gap-2">
                   <FolderKanban className="h-4 w-4" /> {t('builder.tabs.files')}
                 </TabsTrigger>
-                {isFeatureEnabled('proposal') && (
-                  <TabsTrigger value="proposal" className="gap-2">
-                    <FilePlus2 className="h-4 w-4" /> {t('builder.tabs.proposal')}
-                  </TabsTrigger>
-                )}
-                {isFeatureEnabled('plan') && (
-                  <TabsTrigger value="plan" className="gap-2">
-                    <GanttChartSquare className="h-4 w-4" /> {t('builder.tabs.plan')}
-                  </TabsTrigger>
-                )}
                 {isFeatureEnabled('report') && (
                   <TabsTrigger value="report" className="gap-2">
                     <FileText className="h-4 w-4" /> {t('builder.tabs.document')}
@@ -228,12 +206,6 @@ function GeneratePageContent() {
               <div className="w-full flex-grow mt-4">
                 <TabsContent value="files" className="h-full animate-fade-in">
                   {activeTab === 'files' && <FileManager />}
-                </TabsContent>
-                <TabsContent value="proposal" className="h-full animate-fade-in">
-                  {activeTab === 'proposal' && <ProposalModeGenerator />}
-                </TabsContent>
-                <TabsContent value="plan" className="h-full animate-fade-in">
-                  {activeTab === 'plan' && <ProjectPlanGenerator />}
                 </TabsContent>
                 <TabsContent value="report" className="h-full animate-fade-in">
                   {activeTab === 'report' && <ReportGenerator />}

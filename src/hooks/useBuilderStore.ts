@@ -1,4 +1,3 @@
-
 "use client";
 
 import { create } from "zustand";
@@ -89,6 +88,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
 
       merge: (persistedState: any, currentState) => {
         if (persistedState?.project) {
+          // Remove proposal and projectPlan from persisted state before creating new Project
+          delete persistedState.project.proposal;
+          delete persistedState.project.projectPlan;
           const project = new Project(persistedState.project as ProjectProperties);
           return {
             ...currentState,

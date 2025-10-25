@@ -1,7 +1,7 @@
 
 
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema, ProjectPlanSchema, AcademicDocumentTypeSchema, AnalyzedDocumentSchema, SolvedDocumentSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema, AcademicDocumentTypeSchema, AnalyzedDocumentSchema, SolvedDocumentSchema } from '@/ai/schemas';
 
 const ReportSectionConfigSchema = z.object({
   sectionName: z.string(),
@@ -154,7 +154,6 @@ export const ProjectStateSchema = z.object({
         type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
     })).nullable().optional(),
     teamId: z.string().nullable().optional(), // Add teamId to associate project with a team
-    projectPlan: z.lazy(() => ProjectPlanSchema).nullable().optional(),
     academicSolver: z.object({
         stage: z.enum(["idle", "parsing", "analyzing", "readyToSolve", "solving", "solved"]),
         documentType: AcademicDocumentTypeSchema.nullable(),

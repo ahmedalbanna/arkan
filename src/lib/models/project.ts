@@ -1,6 +1,4 @@
-
-
-import type { AnyProjectProposal, DiagramType, PresentationHistoryEntry, ProjectPlan, ProjectTask } from '@/ai/schemas';
+import type { AnyProjectProposal, DiagramType, PresentationHistoryEntry } from '@/ai/schemas';
 import { Diagram, type DiagramProperties } from './diagram';
 
 // --- Types moved from types.ts ---
@@ -140,7 +138,6 @@ export interface AcademicSolverState {
 export interface ProjectState {
   name?: string | undefined;
   projectIdea?: string | undefined;
-  proposal: AnyProjectProposal | null;
   reportConfig?: FullReportModeConfig | null;
   generatedProposalState?: SavedProposalState | null;
   sections?: Partial<Record<import('@/ai/schemas').SectionName, string>>;
@@ -159,7 +156,6 @@ export interface ProjectState {
     type: ContextFileType;
   }[] | undefined;
   teamId?: string | null | undefined;
-  projectPlan: ProjectPlan | null;
 }
 export interface SavedProject extends ProjectState {
   id: string;
@@ -184,7 +180,6 @@ export class Project implements SavedProject {
 
   private _name?: string;
   private _projectIdea?: string;
-  private _proposal: AnyProjectProposal | null;
   private _reportConfig?: import('@/lib/models/project').FullReportModeConfig | null;
   private _generatedProposalState?: import('@/lib/models/project').SavedProposalState | null;
   private _sections?: ProjectState['sections'];
@@ -197,7 +192,6 @@ export class Project implements SavedProject {
   private _codebase?: any;
   private _externalContext: { fileName: string; content: string; type: ContextFileType; }[];
   private _teamId?: string | null;
-  private _projectPlan: ProjectPlan | null;
 
   constructor(props: ProjectProperties) {
     this._id = props.id;
@@ -206,7 +200,6 @@ export class Project implements SavedProject {
     this._updatedAt = props.updatedAt;
     this._name = props.name;
     this._projectIdea = props.projectIdea;
-    this._proposal = props.proposal;
     this._reportConfig = props.reportConfig;
     this._generatedProposalState = props.generatedProposalState;
     this._sections = props.sections ?? {};
@@ -231,7 +224,6 @@ export class Project implements SavedProject {
     this._codebase = props.codebase;
     this._externalContext = props.externalContext || [];
     this._teamId = props.teamId;
-    this._projectPlan = props.projectPlan;
   }
 
   // --- Public Getters ---
@@ -241,7 +233,8 @@ export class Project implements SavedProject {
   get updatedAt() { return this._updatedAt; }
   get name() { return this._name; }
   get projectIdea() { return this._projectIdea; }
-  get proposal() { return this._proposal; }
+  get proposal() { return null; } // Deprecated
+  get projectPlan() { return null; } // Deprecated
   get reportConfig() { return this._reportConfig; }
   get generatedProposalState() { return this._generatedProposalState; }
   get sections() { return this._sections; }
@@ -256,8 +249,7 @@ export class Project implements SavedProject {
   get codebase() { return this._codebase; }
   get externalContext() { return this._externalContext; }
   get teamId() { return this._teamId; }
-  get projectPlan() { return this._projectPlan; }
-
+  
   // --- Public Setters ---
   set name(value: string | undefined) { this._name = value; }
   set projectIdea(value: string | undefined) { this._projectIdea = value; }
@@ -279,7 +271,6 @@ export class Project implements SavedProject {
       updatedAt: this._updatedAt,
       name: this._name,
       projectIdea: this._projectIdea,
-      proposal: this._proposal,
       reportConfig: this._reportConfig,
       generatedProposalState: this._generatedProposalState,
       sections: this._sections,
@@ -292,7 +283,6 @@ export class Project implements SavedProject {
       codebase: this._codebase,
       externalContext: this._externalContext,
       teamId: this._teamId,
-      projectPlan: this._projectPlan,
     };
   }
 
@@ -304,7 +294,6 @@ export class Project implements SavedProject {
   public newSession(): void {
     this._name = undefined;
     this._projectIdea = undefined;
-    this._proposal = null;
     this._sections = {};
     this._translatedSections = {};
     this._evaluation = null;
@@ -321,18 +310,8 @@ export class Project implements SavedProject {
     };
     this._codebase = undefined;
     this._externalContext = [];
-    this._projectPlan = null;
     this.hasUnsavedChanges = false;
   }
-
-  // --- Proposal Methods ---
-  public setProposal(proposal: AnyProjectProposal | null): void {
-    this._proposal = proposal;
-    if (proposal?.title) {
-      this._name = String(proposal.title);
-    }
-  }
-
 
   // --- Section Methods ---
   public getSectionContent(sectionName: SectionName): string | undefined {
@@ -386,17 +365,6 @@ export class Project implements SavedProject {
 
     newSlides[slideIndex] = slideToUpdate;
     this._presentation.history[entryIndex] = { ...entry, slides: newSlides };
-  }
-
-  // --- Project Plan Methods ---
-  public setProjectPlan(plan: ProjectPlan | null): void {
-    this._projectPlan = plan;
-  }
-
-  public updateTaskStatus(phaseIndex: number, taskIndex: number, newStatus: ProjectTask['status']): void {
-    if (this._projectPlan?.phases?.[phaseIndex]?.tasks?.[taskIndex]) {
-      this._projectPlan.phases[phaseIndex].tasks[taskIndex].status = newStatus;
-    }
   }
 
   // --- Code Generator Methods ---
