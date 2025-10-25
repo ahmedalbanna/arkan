@@ -17,8 +17,6 @@ export const useContextSelector = (itemKey: string) => {
     
     // --- Start of Fix ---
     // All hooks are now called unconditionally at the top.
-    const proposal = project?.proposal;
-    const projectPlan = project?.projectPlan;
     const sections = project?.sections || {};
     const diagrams = project?.diagrams || {};
     const externalContext = project?.externalContext || [];
@@ -31,11 +29,9 @@ export const useContextSelector = (itemKey: string) => {
     if (!sectionConfigs || !agent) {
         return {
             t,
-            proposal: null,
-            projectPlan: null,
             reportSections: [],
             diagramSections: [],
-            currentSelection: { proposal: false, projectPlan: false, sections: {}, diagrams: {}, externalContext: [] },
+            currentSelection: { sections: {}, diagrams: {}, externalContext: [] },
             toggleContextSelection: () => {},
             selectedSections: [],
             selectedDiagrams: [],
@@ -49,8 +45,6 @@ export const useContextSelector = (itemKey: string) => {
     // --- End of Fix ---
 
     const currentSelection = contextSelection[itemKey] || {
-        proposal: false,
-        projectPlan: false,
         sections: {},
         diagrams: {},
         externalContext: []
@@ -58,10 +52,11 @@ export const useContextSelector = (itemKey: string) => {
 
     const toggleContextSelection = (
         key: string,
-        type: 'proposal' | 'projectPlan' | 'sections' | 'diagrams' | 'externalContext',
+        type: 'sections' | 'diagrams' | 'externalContext',
         subKey: string | number | null,
         checked: boolean
     ) => {
+        // Since we removed proposal and project plan, we can simplify this call.
         toggleStoreContext(key, type, subKey, checked);
     };
 
@@ -77,22 +72,20 @@ export const useContextSelector = (itemKey: string) => {
         .map((isSelected, index) => isSelected ? { ...externalContext[index], index } : null)
         .filter((item): item is { fileName: string; content: string; type: "context" | "example" | "question" | "textbook" | "guidelines"; index: number; } => item !== null);
 
-    const hasContext = !!currentSelection.proposal || !!currentSelection.projectPlan || selectedSections.length > 0 || selectedDiagrams.length > 0 || selectedExternalContext.length > 0;
+    const hasContext = selectedSections.length > 0 || selectedDiagrams.length > 0 || selectedExternalContext.length > 0;
 
     return {
         t,
-        proposal,
-        projectPlan,
-        reportSections, // Now this contains ALL possible report sections
-        diagramSections, // Now this contains ALL possible diagram sections
+        reportSections,
+        diagramSections,
         currentSelection,
         toggleContextSelection,
         selectedSections,
         selectedDiagrams,
         selectedExternalContext,
         hasContext,
-        sections, // The content of generated sections
-        diagrams, // The content of generated diagrams
+        sections,
+        diagrams,
         externalContext,
     };
 };

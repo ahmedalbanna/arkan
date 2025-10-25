@@ -4,7 +4,7 @@
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileSpreadsheet, GanttChartSquare, BookCheck, GitGraph, FileText } from 'lucide-react';
+import { BookCheck, GitGraph, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useContextSelector } from '@/hooks';
@@ -16,14 +16,12 @@ interface ContextSelectorProps {
 export function ContextSelector({ itemKey }: ContextSelectorProps) {
     const {
         t,
-        proposal,
-        projectPlan,
-        reportSections, // Use all possible sections
-        diagramSections, // Use all possible diagrams
+        reportSections,
+        diagramSections,
         toggleContextSelection,
         currentSelection,
-        sections: generatedSectionsContent, // Content of generated sections
-        diagrams: generatedDiagramsContent, // Content of generated diagrams
+        sections: generatedSectionsContent,
+        diagrams: generatedDiagramsContent,
         externalContext,
     } = useContextSelector(itemKey);
 
@@ -32,18 +30,6 @@ export function ContextSelector({ itemKey }: ContextSelectorProps) {
             <div className="space-y-4 pr-4">
                 <div className="space-y-2">
                     <Label className="font-semibold">{t('builder.reportGenerator.ContextualSections')}</Label>
-
-                    {/* Project Proposal */}
-                    <div className="flex items-center space-x-2">
-                        <Checkbox id={`context-proposal-${itemKey}`} checked={!!currentSelection.proposal} onCheckedChange={(checked) => toggleContextSelection(itemKey, 'proposal', null, !!checked)} disabled={!proposal} />
-                        <Label htmlFor={`context-proposal-${itemKey}`} className="text-sm font-normal"><div className="flex items-center gap-2"><FileSpreadsheet className="h-4 w-4" /> Project Proposal</div></Label>
-                    </div>
-
-                    {/* Project Plan */}
-                    <div className="flex items-center space-x-2">
-                        <Checkbox id={`context-plan-${itemKey}`} checked={!!currentSelection.projectPlan} onCheckedChange={(checked) => toggleContextSelection(itemKey, 'projectPlan', null, !!checked)} disabled={!projectPlan} />
-                        <Label htmlFor={`context-plan-${itemKey}`} className="text-sm font-normal"><div className="flex items-center gap-2"><GanttChartSquare className="h-4 w-4" /> Project Plan</div></Label>
-                    </div>
 
                     {/* Report Sections */}
                     {reportSections.map(section => (

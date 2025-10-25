@@ -23,8 +23,6 @@ interface ContextSelectionValue {
   sections: Record<string, boolean>;
   diagrams: Record<string, boolean>;
   externalContext: boolean[];
-  proposal: boolean;
-  projectPlan: boolean;
 }
 
 export interface AdvancedProposalFields {
@@ -64,7 +62,7 @@ interface GenerationUIActions {
   handleAddCustomGuidelineForItem: (itemKey: string) => void;
   handleRemoveCustomGuidelineForItem: (itemKey: string, index: number) => void;
   setSelectedReportTemplateId: (id: string) => void;
-  toggleContextSelection: (itemKey: string, type: 'proposal' | 'projectPlan' | 'sections' | 'diagrams' | 'externalContext', subKey: string | number | null, checked: boolean) => void;
+  toggleContextSelection: (itemKey: string, type: 'sections' | 'diagrams' | 'externalContext', subKey: string | number | null, checked: boolean) => void;
   // Presentation Store Actions
   setActivePresentationId: (id: string | null) => void;
   // Proposal Store Actions
@@ -90,8 +88,6 @@ const defaultGuidelineState: GuidelineState = {
 }
 
 const defaultContextSelection: ContextSelectionValue = {
-    proposal: false,
-    projectPlan: false,
     sections: {},
     diagrams: {},
     externalContext: [],
@@ -193,7 +189,8 @@ export const useGenerationUIStore = create<GenerationUIState & GenerationUIActio
          newSelection[subKey as number] = checked;
          updatedSelectionPart = { ...currentItemSelection, [type]: newSelection };
       } else {
-        updatedSelectionPart = { ...currentItemSelection, [type]: checked };
+        // This case is no longer needed after removing proposal/plan
+        updatedSelectionPart = { ...currentItemSelection };
       }
       
       newContextSelection[itemKey] = updatedSelectionPart;
