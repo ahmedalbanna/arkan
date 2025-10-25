@@ -10,6 +10,10 @@ import { useDebounce } from '@/hooks';
 import { SectionToolbar } from '../section/SectionToolbar';
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import TextAlign from '@tiptap/extension-text-align';
+import { Bold, Italic, Strikethrough, List, ListOrdered, ChevronDown } from 'lucide-react';
+import { Button } from './button';
+import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -21,8 +25,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
     return null;
   }
 
-  const handleHeadingChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const handleHeadingChange = (value: string) => {
     if (value === 'p') {
       editor.chain().focus().setParagraph().run();
       return;
@@ -41,32 +44,39 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
   };
 
   return (
-    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full shadow-lg flex items-center p-2 gap-2">
-      <div className="flex items-center gap-2">
-        <select
-          value={getCurrentHeadingLevel()}
-          onChange={handleHeadingChange}
-          aria-label="Select heading level"
-          className="bg-white hover:bg-gray-200 border-none rounded-full p-2 text-sm focus:ring-0 focus:outline-none"
-        >
-          <option value="p">Paragraph</option>
-          <option value="h1">Heading 1</option>
-          <option value="h2">Heading 2</option>
-          <option value="h3">Heading 3</option>
-          <option value="h4">Heading 4</option>
-          <option value="h5">Heading 5</option>
-          <option value="h6">Heading 6</option>
-        </select>
-        <button onClick={() => editor.chain().focus().toggleBold().run()} disabled={!editor.can().chain().focus().toggleBold().run()} className={`p-2 rounded-full ${editor.isActive('bold') ? 'bg-black text-white' : 'bg-white hover:bg-gray-200'}`}>B</button>
-        <button onClick={() => editor.chain().focus().toggleItalic().run()} disabled={!editor.can().chain().focus().toggleItalic().run()} className={`p-2 rounded-full ${editor.isActive('italic') ? 'bg-black text-white' : 'bg-white hover:bg-gray-200'}`}>I</button>
-        <button onClick={() => editor.chain().focus().toggleStrike().run()} disabled={!editor.can().chain().focus().toggleStrike().run()} className={`p-2 rounded-full ${editor.isActive('strike') ? 'bg-black text-white' : 'bg-white hover:bg-gray-200'}`}>S</button>
-        <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={`p-2 rounded-full ${editor.isActive('bulletList') ? 'bg-black text-white' : 'bg-white hover:bg-gray-200'}`}>•</button>
-        <button onClick={() => editor.chain().focus().toggleOrderedList().run()} className={`p-2 rounded-full ${editor.isActive('orderedList') ? 'bg-black text-white' : 'bg-white hover:bg-gray-200'}`}>1.</button>
+    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-background/80 backdrop-blur-sm border rounded-full shadow-lg flex items-center p-1 gap-1">
+      <div className="flex items-center gap-1">
+        <Select value={getCurrentHeadingLevel()} onValueChange={handleHeadingChange}>
+            <SelectTrigger aria-label="Select heading level" className="h-9 w-32 border-none bg-transparent focus:ring-0 focus:ring-offset-0">
+                <SelectValue placeholder="Paragraph"/>
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="p">Paragraph</SelectItem>
+                <SelectItem value="h1">Heading 1</SelectItem>
+                <SelectItem value="h2">Heading 2</SelectItem>
+                <SelectItem value="h3">Heading 3</SelectItem>
+            </SelectContent>
+        </Select>
+        <Button onClick={() => editor.chain().focus().toggleBold().run()} variant={editor.isActive('bold') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
+            <Bold className="h-4 w-4"/>
+        </Button>
+        <Button onClick={() => editor.chain().focus().toggleItalic().run()} variant={editor.isActive('italic') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
+            <Italic className="h-4 w-4"/>
+        </Button>
+         <Button onClick={() => editor.chain().focus().toggleStrike().run()} variant={editor.isActive('strike') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
+            <Strikethrough className="h-4 w-4"/>
+        </Button>
+        <Button onClick={() => editor.chain().focus().toggleBulletList().run()} variant={editor.isActive('bulletList') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
+            <List className="h-4 w-4"/>
+        </Button>
+        <Button onClick={() => editor.chain().focus().toggleOrderedList().run()} variant={editor.isActive('orderedList') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
+            <ListOrdered className="h-4 w-4"/>
+        </Button>
       </div>
-      <div className="h-6 w-px bg-gray-300"></div> {/* Separator */}
-      <div className="flex items-center gap-2">
-        <button onClick={() => { editor.chain().focus().setTextAlign('left').run(); setDirection('ltr'); }} className={`p-2 rounded-full ${editor.isActive({ textAlign: 'left' }) ? 'bg-black text-white' : 'bg-white hover:bg-gray-200'}`}>LTR</button>
-        <button onClick={() => { editor.chain().focus().setTextAlign('right').run(); setDirection('rtl'); }} className={`p-2 rounded-full ${editor.isActive({ textAlign: 'right' }) ? 'bg-black text-white' : 'bg-white hover:bg-gray-200'}`}>RTL</button>
+      <div className="h-6 w-px bg-border"></div>
+      <div className="flex items-center gap-1">
+        <Button onClick={() => { editor.chain().focus().setTextAlign('left').run(); setDirection('ltr'); }} variant={editor.isActive({ textAlign: 'left' }) ? 'secondary' : 'ghost'} className="h-9 rounded-full">LTR</Button>
+        <Button onClick={() => { editor.chain().focus().setTextAlign('right').run(); setDirection('rtl'); }} variant={editor.isActive({ textAlign: 'right' }) ? 'secondary' : 'ghost'} className="h-9 rounded-full">RTL</Button>
       </div>
     </div>
   );
