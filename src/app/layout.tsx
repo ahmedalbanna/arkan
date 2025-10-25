@@ -1,6 +1,5 @@
 
 
-import SupportChatWidget from '@/components/chat/SupportChatWidget';
 import FirebaseMessagingProvider from '@/components/FirebaseMessagingProvider';
 import LanguageDirectionManager from '@/components/LanguageDirectionManager';
 import { Header } from '@/components/layout/Header';
@@ -151,7 +150,6 @@ export default async function RootLayout({
                   <LanguageDirectionManager>
                     <Header />
                     <main className="flex-grow">{children}</main>
-                    <SupportChatWidget />
                     <Toaster />
                   </LanguageDirectionManager>
                 </FirebaseMessagingProvider>

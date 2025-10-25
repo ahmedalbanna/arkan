@@ -3,7 +3,6 @@ export * from './use-admin-dashboard';
 export * from './use-agent-editor';
 export * from './use-agents';
 export * from './use-analytics';
-export * from './use-chat';
 export * from './use-context-selector'; // Add new hook
 export * from './use-create-agent-dialog';
 export * from './use-create-category-dialog';
@@ -21,7 +20,6 @@ export * from './use-export';
 export * from './use-features';
 export * from './use-guideline-editor'; 
 export * from './use-mobile';
-export * from './use-new-chat-dialog';
 export * from './use-notifications';
 export * from './use-payment';
 
@@ -66,6 +64,4 @@ export * from './use-session-plan-generator-logic';
 // Store hooks
 export * from './useAgentStore';
 export * from './useBuilderStore';
-export * from './useChatInterface';
-export * from './useChatStore';
 export * from './useGenerationUIStore';

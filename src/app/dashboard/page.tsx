@@ -9,8 +9,6 @@ import { RecentActivity } from '@/components/admin/dashboard/RecentActivity';
 import { AlertCircle, Bot, History, AreaChart, TrendingDown, Gem, MessageSquare, Loader2 } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { createConversationApi } from '@/services';
-import { useChatStore } from '@/hooks';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/hooks';
 import { useState } from 'react';
@@ -50,44 +48,7 @@ export default function UserDashboardPage() {
     const { userProfile, firebaseUser } = useAuth();
     const { data: stats, isLoading, isError, error } = useUserStats();
     const router = useRouter();
-    const { createConversation, openChat } = useChatStore();
     const [isCreatingChat, setIsCreatingChat] = useState(false);
-
-    const handleStartChatWithAdmins = async () => {
-        if (!firebaseUser || !userProfile) return;
-        setIsCreatingChat(true);
-        try {
-            const token = await firebaseUser.getIdToken();
-            const response = await fetch('/api/admins');
-            if (!response.ok) throw new Error('Could not fetch admins.');
-            const admins: UserProfile[] = await response.json();
-
-            if (admins.length === 0) {
-                toast({ title: 'No Admins Available', description: 'There are no administrators available to chat with at the moment.', variant: 'destructive' });
-                return;
-            }
-
-            const adminIds = admins.map(admin => admin.id);
-            const adminNames = admins.reduce((acc, admin) => ({...acc, [admin.id]: admin.name }), {});
-
-            const conversation = await createConversationApi({
-                participantIds: [firebaseUser.uid, ...adminIds],
-                participantNames: {
-                    [firebaseUser.uid]: userProfile.name,
-                    ...adminNames
-                },
-                title: `Support Chat with ${userProfile.name}`
-            }, token);
-            createConversation(conversation);
-            openChat();
-
-        } catch (error: any) {
-            toast({ title: t('userDashboard.startChatError'), description: error.message, variant: "destructive" });
-        } finally {
-            setIsCreatingChat(false);
-        }
-    }
-
 
     return (
         <div className="container mx-auto max-w-7xl px-4 py-12">
@@ -101,10 +62,6 @@ export default function UserDashboardPage() {
                         {t('userDashboard.pageSubtitle', { name: userProfile?.name })}
                     </p>
                 </div>
-                <Button onClick={handleStartChatWithAdmins} disabled={isCreatingChat}>
-                    {isCreatingChat ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <MessageSquare className="me-2 h-4 w-4" />}
-                    {t('userDashboard.contactAdmin')}
-                </Button>
             </div>
 
             {isLoading && <DashboardSkeleton />}
@@ -125,7 +82,7 @@ export default function UserDashboardPage() {
                     </div>
 
                     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-7">
-                        <AgentUsageChart data={stats.agentUsageChartData} /> {/* Assuming agentUsageChartData is correctly typed */}
+                        <AgentUsageChart data={stats.agentUsageChartData} />
                         <RecentActivity data={stats.recentActivity} />
                     </div>
                 </div>

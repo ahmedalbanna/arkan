@@ -4,7 +4,6 @@ export * from './ai-detector-service';
 export * from './agent-service';
 export * from './admin-service';
 export * from './analytics-service';
-export * from './chat-service';
 export * from './context-service';
 export * from './diagram-service';
 export * from './document-processing-service';

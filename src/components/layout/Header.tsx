@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import Link from 'next/link';
@@ -20,9 +19,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import type { Notification, UserProfile } from '@/lib/types';
-import { useChatStore } from '@/hooks';
 import { toast } from '@/hooks';
-import { initiateSupportChat } from '@/services';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Label } from '@/components/ui/label';
@@ -52,11 +49,10 @@ export function Header() {
   const [isClient, setIsClient] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   
-  const notifications = useChatStore(state => state.notifications); // Get notifications from the store
+  const notifications: Notification[] = []; // Placeholder as chat store is removed
 
   const markAsReadMutation = useMarkNotificationsAsRead();
   const clearAllMutation = useClearAllNotifications();
-  const { createConversation, openChat } = useChatStore();
   const isMobile = useIsMobile();
 
 

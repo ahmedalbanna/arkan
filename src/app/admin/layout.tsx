@@ -52,7 +52,6 @@ interface NavLink {
 
 const navConfig: NavLink[] = [
     { href: '/admin/dashboard', labelKey: 'adminDashboard.pageTitle', icon: LayoutDashboard },
-    { href: '/admin/chats', labelKey: 'header.chats', icon: MessageSquare },
     { href: '/admin/manage-users', labelKey: 'header.manageUsers', icon: Users },
     { href: '/admin/manage-payments', labelKey: 'header.managePayments', icon: CreditCard },
     { href: '/admin/manage-agents', labelKey: 'header.agentManager', icon: Bot },
