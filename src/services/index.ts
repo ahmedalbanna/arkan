@@ -15,15 +15,11 @@ export * from './generation-log-service';
 export * from './generation-service';
 export * from './payment-service';
 export * from './plagiarism-checker-service';
-export * from './presentation-service';
-export * from './project-plan-service';
 export * from './project-service';
-export * from './proposal-service';
 export * from './report-service';
 export * from './section-service';
 export * from './settings-service';
-export * from './taskade-service';
-export * from './team-service';
+
 
 export * from './text-to-speech-service';
 export * from './topic-explainer-service';

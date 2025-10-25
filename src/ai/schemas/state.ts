@@ -1,7 +1,7 @@
 
 
 import { z } from 'zod';
-import { DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema } from './enums';
+import { DiagramTypeSchema, SectionNameSchema } from './enums';
 
 const ReportSectionConfigSchema = z.object({
     sectionName: z.string(),
@@ -143,7 +143,6 @@ export const ProjectStateSchema = z.object({
         imageUrl: z.string(),
         explanation: z.string().optional(),
     })).optional(),
-    presentation: z.object({ history: z.array(z.object({ id: z.string(), name: z.string(), slides: z.array(PresentationSlideSchema) })) }).optional(),
     externalContext: z.array(z.any()).nullable().optional(),
     teamId: z.string().nullable().optional(), // Add teamId to associate project with a team
 });

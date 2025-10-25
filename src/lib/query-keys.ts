@@ -38,13 +38,6 @@ export const featureKeys = {
   detail: (featureId: string) => [...featureKeys.details(), featureId] as const,
 };
 
-export const teamKeys = {
-    all: ['teams'] as const,
-    lists: () => [...teamKeys.all, 'list'] as const,
-    details: () => [...teamKeys.all, 'detail'] as const,
-    detail: (teamId: string) => [...teamKeys.details(), teamId] as const,
-}
-
 export const transactionKeys = {
     all: ['transactions'] as const,
     lists: () => [...transactionKeys.all, 'list'] as const,

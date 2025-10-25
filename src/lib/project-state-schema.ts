@@ -1,7 +1,7 @@
 
 
 import { z } from 'zod';
-import { DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema, AcademicDocumentTypeSchema, AnalyzedDocumentSchema, SolvedDocumentSchema } from '@/ai/schemas';
+import { DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
 
 const ReportSectionConfigSchema = z.object({
   sectionName: z.string(),
@@ -145,19 +145,9 @@ export const ProjectStateSchema = z.object({
         imageUrl: z.string(),
         explanation: z.string().optional(),
     })).optional(),
-    presentation: z.object({ history: z.array(z.object({ id: z.string(), name: z.string(), slides: z.array(PresentationSlideSchema) })) }).optional(),
-    academicSolver: z.object({
-        stage: z.enum(["idle", "parsing", "analyzing", "readyToSolve", "solving", "solved"]),
-        documentType: AcademicDocumentTypeSchema.nullable(),
-        analyzedDocument: AnalyzedDocumentSchema.nullable(),
-        solvedDocument: SolvedDocumentSchema.nullable(),
-        questionDocuments: z.array(z.object({ fileName: z.string(), content: z.string() })),
-        externalContext: z.array(z.object({ fileName: z.string(), content: z.string() })),
-    }).optional(),
     externalContext: z.array(z.object({
         fileName: z.string(),
         content: z.string(),
         type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
     })).nullable().optional(),
-    teamId: z.string().nullable().optional(), // Add teamId to associate project with a team
 });

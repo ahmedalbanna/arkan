@@ -246,7 +246,6 @@ export function Header() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild><Link href={`/profile/${firebaseUser.uid}`}><UserCog className="me-2 h-4 w-4" />{t('header.profile')}</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild><Link href="/dashboard"><AreaChart className="me-2 h-4 w-4" />{t('header.myDashboard')}</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link href="/team/manage"><Users className="me-2 h-4 w-4" />{t('header.manageTeam')}</Link></DropdownMenuItem>
                    <DropdownMenuSub>
                         <DropdownMenuSubTrigger>
                             <Wrench className="me-2 h-4 w-4" />

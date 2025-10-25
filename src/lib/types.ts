@@ -4,7 +4,6 @@ export * from './models/chat';
 export * from './models/diagram';
 export * from './models/project';
 export * from './models/section';
-export * from './models/team';
 export * from './models/transaction';
 export * from './models/user';
 export * from './models/template';
@@ -16,7 +15,7 @@ export * from './word-converter/types';
 export interface HistoryEntry {
   id: string;
   createdAt: string;
-  type: 'proposal' | 'diagram' | 'section' | 'project' | 'presentation'; // Added 'project' and 'presentation'
+  type: 'section' | 'project' | 'diagram';
   title: string; // e.g., "Project Proposal" or "Use Case Diagram"
   data: any;
 }

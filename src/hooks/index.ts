@@ -1,6 +1,4 @@
 
-export * from './use-academic-solver';
-export * from './use-academic-solver-logic';
 export * from './use-admin-dashboard';
 export * from './use-agent-editor';
 export * from './use-agents';
@@ -26,8 +24,7 @@ export * from './use-mobile';
 export * from './use-new-chat-dialog';
 export * from './use-notifications';
 export * from './use-payment';
-export * from './use-presentation-generation';
-export * from './use-presentation-generator-logic';
+
 export * from './use-projects';
 export * from './use-report-generation';
 export * from './use-report-mode-generator';
@@ -36,8 +33,6 @@ export * from './use-section-logic';
 export * from './use-sections';
 export * from './use-session-actions';
 export * from './use-sound';
-export * from './use-taskade';
-export * from './use-teams';
 export * from './use-text-to-speech';
 export * from './use-toast';
 export * from './use-transactions';
