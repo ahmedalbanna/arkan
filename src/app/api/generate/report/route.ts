@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { z } from 'zod';
@@ -23,28 +24,15 @@ export const POST = withAuth(async ({ request, user }) => {
     await deductCredit(user.id, creditCost);
 
     const agentInput = validation.data;
-
-    // Fetch section info dynamically from Firestore
-    const sectionDocRef = adminDb.collection('sections').doc(agentInput.sectionToGenerate);
-    const sectionDoc = await sectionDocRef.get();
-
-    if (!sectionDoc.exists) {
-        return handleApiError({ message: 'Section not found in database.' }, 404);
-    }
-
-    const agentInfo = sectionDoc.data() as { agentId: string; title: string }; // Assuming these fields exist
-    // const agentInfo = reportSections[agentInput.sectionToGenerate]; // Old static reference
-
-    if (!agentInfo) {
-        return handleApiError({ message: 'Unknown section requested.' }, 400);
-    }
-
+    
+    // The AI flow is now called directly with all necessary data from the client.
+    // No need to fetch agent or section info from Firestore here.
     const result = await generateReportSection(agentInput);
 
     const transformedOutput = { [result.sectionName]: result.content };
 
     await logGeneration({
-        agentId: agentInfo.agentId,
+        agentId: agentInput.agentId,
         userId: user.id,
         input: agentInput,
         output: transformedOutput,

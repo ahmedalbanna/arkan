@@ -13,6 +13,7 @@ import {
     SummarizeLengthSchema
 } from './enums';
 import { ProjectPlanSchema, ProjectProposalSchema } from './project';
+import { AgentPromptSchema } from './template-schemas';
 
 // academic-solver.ts
 export const AnalyzedDocumentSchema = z.object({
@@ -418,6 +419,9 @@ export const GenerateSectionInputSchema = z.object({
     contextFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional().describe("An array of context documents to be used for factual information."),
     guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
     instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
+    agentId: z.string().optional(),
+    agentPrompt: z.any().optional(), // Can be string or AgentPrompt
+    model: z.string().optional(),
 }).refine(data => data.proposal || data.projectPlan || (data.contextFiles && data.contextFiles.length > 0) || (data.otherSections && Object.keys(data.otherSections).length > 0) || (data.otherDiagrams && Object.keys(data.otherDiagrams).length > 0) || (data.exampleFiles && data.exampleFiles.length > 0), {
     message: "A proposal, project plan, or external context is required to generate a report section.",
     path: ["proposal"], // You can associate the error with a specific path

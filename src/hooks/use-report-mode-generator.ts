@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
@@ -101,29 +102,42 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     // --- Start of logic from use-report-generation-logic ---
     const { userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = useState<string | null>(null);
-    const { initializeDependentStates,guidelineState, controlState } = useGenerationUIStore();
+    const { initializeDependentStates,guidelineState, controlState, contextSelection } = useGenerationUIStore();
 
     const reportGenerationMutation = useGenerateReportSection();
     const isAnythingGenerating = reportGenerationMutation.isPending;
 
-    const onGenerateSection = async (section: SectionName) => {
+    const onGenerateSection = async (sectionId: SectionName) => {
         if (!project) return;
-        const agent = agents.find(a => a.id === sectionConfigs?.find(s => s.id === section)?.agentId);
+        const sectionConfig = sectionConfigs?.find(s => s.id === sectionId);
+        const agent = agents.find(a => a.id === sectionConfig?.agentId);
         
+        if (!agent) {
+            toast({ title: "Error", description: `Configuration for agent ${sectionConfig?.agentId} not found.`, variant: "destructive" });
+            return;
+        }
+
+        const selectedContext = contextSelection[sectionId] || {};
+
         const body = {
-            proposal: project.proposal,
-            projectPlan: project.projectPlan,
-            sectionToGenerate: section,
-            otherSections: project.sections,
-            otherDiagrams: Object.fromEntries(Object.entries(project.diagrams || {}).map(([key, value]) => [key, value?.plantUmlCode])),
-            exampleFiles: project.externalContext?.filter((c: any) => c.type === 'example'),
-            contextFiles: project.externalContext?.filter((c: any) => c.type === 'context'),
-            guidelines: getSelectedGuidelines(agent, guidelineState[section]),
-            instructionText: `Tone: ${controlState[section]?.tone}. Formality: ${controlState[section]?.formality / 100}. Word Count: approx ${controlState[section]?.wordCount || 300}`,
-            prompt: agent?.prompt
+            proposal: selectedContext.proposal ? project.proposal : null,
+            projectPlan: selectedContext.projectPlan ? project.projectPlan : null,
+            sectionToGenerate: sectionId,
+            agentId: agent.id, // Pass agentId
+            agentPrompt: agent.prompt, // Pass the full prompt object
+            model: agent.model, // Pass the model
+            otherSections: Object.keys(selectedContext.sections || {})
+                .filter(key => selectedContext.sections[key])
+                .reduce((obj, key) => ({ ...obj, [key]: project.sections?.[key as SectionName] }), {}),
+            otherDiagrams: Object.keys(selectedContext.diagrams || {})
+                .filter(key => selectedContext.diagrams[key])
+                .reduce((obj, key) => ({ ...obj, [key]: project.diagrams?.[key as DiagramType]?.plantUmlCode }), {}),
+            externalContext: (project.externalContext || []).filter((_, index) => selectedContext.externalContext?.[index]),
+            guidelines: getSelectedGuidelines(agent, guidelineState[sectionId]),
+            instructionText: `Tone: ${controlState[sectionId]?.tone}. Formality: ${controlState[sectionId]?.formality / 100}. Word Count: approx ${controlState[sectionId]?.wordCount || 300}`,
         };
 
-        setActiveMutationKey(section);
+        setActiveMutationKey(sectionId);
         reportGenerationMutation.mutate({ body });
     };
 
@@ -136,16 +150,13 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     }, [agentsLoaded, agents, orderedSections, initializeDependentStates]);
 
     useEffect(() => {
-        if (!orderedSections.length && agentsLoaded) {
-            const initialOrder = reportAgents.map(a => new Section({
-                id: a.id.replace('generate-', '').replace('-section', ''),
-                title: a.name,
-                agentId: a.id,
-                type: 'report',
-            })).sort((a, b) => a.title.localeCompare(b.title));
+        if (!orderedSections.length && agentsLoaded && sectionConfigs) {
+            const initialOrder = sectionConfigs
+                .filter(s => s.type === 'report')
+                .map(s => new Section(s));
             setOrderedSections(initialOrder);
         }
-    }, [orderedSections.length, setOrderedSections, reportAgents, agentsLoaded]);
+    }, [orderedSections.length, setOrderedSections, agents, agentsLoaded, sectionConfigs]);
     // --- End of logic from use-report-generation-logic ---
 
 

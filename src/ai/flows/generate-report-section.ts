@@ -9,29 +9,19 @@
 
 import { ai } from '@/ai/genkit';
 import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/ai/schemas';
-import { getAgent } from '@/lib/db/queries';
-import type { AgentPrompt } from '@/lib/types';
+import { AgentPrompt } from '@/lib/models/agent';
 import { z } from 'genkit';
 
 // Define a specific schema for the prompt's input variables for better type safety and clarity.
-const ReportSectionPromptInputSchema = GenerateSectionInputSchema.and(
-  z.object({
-    stringifiedProposal: z.string(),
-    stringifiedPlan: z.string(),
-  })
-);
+const ReportSectionPromptInputSchema = GenerateSectionInputSchema.extend({
+  stringifiedProposal: z.string(),
+  stringifiedPlan: z.string(),
+  agentPrompt: z.any(), // The full agent prompt object
+});
 
 export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
-  const { sectionToGenerate } = input;
-  const agentId = `generate-${sectionToGenerate}-section`;
 
-  const agent = await getAgent(agentId);
-  if (!agent) {
-    console.error(`Agent configuration not found for ID: '${agentId}'`);
-    throw new Error(`Configuration for the report section '${sectionToGenerate}' is missing or invalid.`);
-  }
-
-  const agentPrompt = agent.prompt as AgentPrompt;
+  const agentPrompt = input.agentPrompt as AgentPrompt;
   const systemPrompt = `${agentPrompt.base}
 
 You are also an expert analyst. Before you begin writing, you must first review all the provided context sections (proposal, project plan, other report sections, diagrams, etc.). From this context, intelligently identify and synthesize only the most relevant information needed to create the requested report section. Do not simply list information; integrate it into a well-written, coherent narrative.`;
@@ -40,7 +30,7 @@ You are also an expert analyst. Before you begin writing, you must first review 
     name: 'generateReportSectionPrompt', // Static name
     input: { schema: ReportSectionPromptInputSchema },
     output: { schema: GenerateSectionOutputSchema },
-    model: agent.model || 'googleai/gemini-2.0-flash',
+    model: input.model || 'googleai/gemini-2.0-flash',
     system: systemPrompt,
     prompt: `
 CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
@@ -123,13 +113,14 @@ File: {{this.fileName}}
     ...input,
     stringifiedProposal: input.proposal ? JSON.stringify(input.proposal, null, 2) : '',
     stringifiedPlan: input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '',
+    agentPrompt: agentPrompt,
   };
 
   const { output } = await reportSectionPrompt(promptVariables);
 
   if (!output) {
-    console.error(`AI failed to generate content for section: ${sectionToGenerate}`);
-    throw new Error(`The AI failed to generate a response for the '${sectionToGenerate}' section. Please try again.`);
+    console.error(`AI failed to generate content for section: ${input.sectionToGenerate}`);
+    throw new Error(`The AI failed to generate a response for the '${input.sectionToGenerate}' section. Please try again.`);
   }
 
   return output;
