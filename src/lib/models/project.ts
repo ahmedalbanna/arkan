@@ -121,17 +121,6 @@ export interface SavedProposalState {
 
 export type ContextFileType = 'context' | 'example' | 'question' | 'textbook' | 'guidelines';
 
-export type AcademicSolverStage = 'idle' | 'analyzing' | 'readyToSolve' | 'solving' | 'solved';
-
-export interface AcademicSolverState {
-  stage: AcademicSolverStage;
-  documentType: import('@/ai/schemas').AcademicDocumentType | null;
-  analyzedDocument: import('@/ai/schemas').AnalyzedDocument | null;
-  solvedDocument: import('@/ai/schemas').SolvedDocument | null;
-  questionDocuments: { fileName: string; content: string; type: 'question' }[];
-  externalContext: { fileName: string; content: string; type: 'context' }[];
-}
-
 
 // --- Main Project State Interfaces ---
 
@@ -144,7 +133,6 @@ export interface ProjectState {
   translatedSections?: Partial<Record<import('@/ai/schemas').SectionName, string>>;
   evaluation?: import("@/ai/schemas").EvaluateReportOutput | null | undefined;
   diagrams?: Partial<Record<DiagramType, DiagramProperties>>;
-  academicSolver?: AcademicSolverState;
   externalContext?: {
     fileName: string;
     content: string;
@@ -181,7 +169,6 @@ export class Project implements SavedProject {
   private _translatedSections?: ProjectState['translatedSections'];
   private _evaluation?: import('@/ai/schemas').EvaluateReportOutput | null;
   private _diagrams: Partial<Record<DiagramType, Diagram>>;
-  private _academicSolver: AcademicSolverState;
   private _externalContext: { fileName: string; content: string; type: ContextFileType; }[];
   private _teamId?: string | null;
 
@@ -203,14 +190,6 @@ export class Project implements SavedProject {
         this._diagrams[key as DiagramType] = new Diagram(props.diagrams[key as DiagramType] as DiagramProperties);
       }
     }
-    this._academicSolver = props.academicSolver ?? {
-      stage: "idle",
-      documentType: null,
-      analyzedDocument: null,
-      solvedDocument: null,
-      questionDocuments: [],
-      externalContext: [],
-    };
     this._externalContext = props.externalContext || [];
     this._teamId = props.teamId;
   }
@@ -232,7 +211,6 @@ export class Project implements SavedProject {
   get evaluation() { return this._evaluation; }
   set evaluation(value) { this._evaluation = value; }
   get diagrams() { return this._diagrams; }
-  get academicSolver() { return this._academicSolver; }
   get externalContext() { return this._externalContext; }
   get teamId() { return this._teamId; }
   
@@ -263,7 +241,6 @@ export class Project implements SavedProject {
       translatedSections: this._translatedSections,
       evaluation: this._evaluation,
       diagrams: plainDiagrams,
-      academicSolver: this._academicSolver,
       externalContext: this._externalContext,
       teamId: this._teamId,
     };
@@ -281,14 +258,6 @@ export class Project implements SavedProject {
     this._translatedSections = {};
     this._evaluation = null;
     this._diagrams = {};
-    this._academicSolver = {
-      stage: "idle",
-      documentType: null,
-      analyzedDocument: null,
-      solvedDocument: null,
-      questionDocuments: [],
-      externalContext: [],
-    };
     this._externalContext = [];
     this.hasUnsavedChanges = false;
   }
@@ -336,73 +305,5 @@ export class Project implements SavedProject {
     if (!this._externalContext || !this._externalContext[index]) return this;
     this._externalContext[index].type = type;
     return this;
-  }
-
-  // --- Academic Solver Methods ---
-  public setAcademicSolverStage(stage: AcademicSolverStage): void {
-    if (!this._academicSolver) this.initializeAcademicSolver();
-    this._academicSolver.stage = stage;
-  }
-
-  public setAcademicSolverDocumentType(type: import('@/ai/schemas').AcademicDocumentType | null): void {
-    if (!this._academicSolver) this.initializeAcademicSolver();
-    this._academicSolver.documentType = type;
-  }
-
-  public setAcademicSolverAnalyzedDocument(document: import('@/ai/schemas').AnalyzedDocument | null): void {
-    if (!this._academicSolver) this.initializeAcademicSolver();
-    this._academicSolver.analyzedDocument = document;
-    this._academicSolver.solvedDocument = null; // Reset solved document on new analysis
-    this._academicSolver.stage = document ? "readyToSolve" : "idle";
-  }
-
-  public setAcademicSolverSolvedDocument(solution: import('@/ai/schemas').SolvedDocument | null): void {
-    if (!this._academicSolver) this.initializeAcademicSolver();
-    this._academicSolver.solvedDocument = solution;
-    this._academicSolver.stage = solution ? "solved" : "readyToSolve";
-  }
-
-  public addAcademicSolverQuestionDocument(fileName: string, content: string): void {
-    if (!this._academicSolver) this.initializeAcademicSolver();
-    this._academicSolver.questionDocuments.push({ fileName, content, type: 'question' });
-    this._academicSolver.analyzedDocument = null; // Reset analysis on new question
-    this._academicSolver.solvedDocument = null;
-  }
-
-  public removeAcademicSolverQuestionDocument(index: number): void {
-    if (!this._academicSolver?.questionDocuments) return;
-    this._academicSolver.questionDocuments.splice(index, 1);
-  }
-
-  public addAcademicSolverExternalContext(fileName: string, content: string): void {
-    if (!this._academicSolver) this.initializeAcademicSolver();
-    this._academicSolver.externalContext.push({ fileName, content, type: 'context' });
-  }
-
-  public removeAcademicSolverExternalContext(index: number): void {
-    if (!this._academicSolver?.externalContext) return;
-    this._academicSolver.externalContext.splice(index, 1);
-  }
-
-  public resetAcademicSolver(): void {
-    this._academicSolver = {
-      stage: "idle",
-      documentType: null,
-      analyzedDocument: null,
-      solvedDocument: null,
-      questionDocuments: [],
-      externalContext: [],
-    };
-  }
-
-  private initializeAcademicSolver(): void {
-    this._academicSolver = {
-      stage: "idle",
-      documentType: null,
-      analyzedDocument: null,
-      solvedDocument: null,
-      questionDocuments: [],
-      externalContext: [],
-    };
   }
 }

@@ -31,9 +31,6 @@ export const SectionNameSchema = z.enum([
 ]);
 export type SectionName = z.infer<typeof SectionNameSchema>;
 
-export const AcademicDocumentTypeSchema = z.enum(['exam', 'homework']);
-export type AcademicDocumentType = z.infer<typeof AcademicDocumentTypeSchema>;
-
 export const ClaimStatusSchema = z.enum(['Verified', 'False', 'Inconclusive']);
 export type ClaimStatus = z.infer<typeof ClaimStatusSchema>;
 

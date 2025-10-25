@@ -1,20 +1,9 @@
 
 
 import { z } from 'zod';
-import { AcademicDocumentTypeSchema } from './enums';
-import { AnalyzedDocumentSchema, PresentationHistoryEntrySchema } from './flows';
+import { PresentationHistoryEntrySchema } from './flows';
 import { AgentPromptSchema } from './template-schemas';
 
-
-export const ApiAnalyzeSchema = z.object({
-    documentType: AcademicDocumentTypeSchema,
-    markdown: z.string().min(20, 'Markdown content is too short.'),
-});
-
-export const ApiSolveSchema = z.object({
-    analyzedDocument: AnalyzedDocumentSchema,
-    contextMarkdown: z.string().optional(),
-});
 
 export const ApiUpdateAgentSchema = z.object({
     name: z.string().min(1, "Name is required").optional(),

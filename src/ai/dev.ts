@@ -13,7 +13,6 @@ import '@/ai/flows/translate-text.ts';
 import '@/ai/flows/rewrite-document-to-markdown.ts';
 import '@/ai/flows/generate-image.ts';
 import '@/ai/flows/image-to-text.ts';
-import '@/ai/flows/academic-solver.ts';
 import '@/ai/flows/text-to-speech.ts';
 import '@/ai/flows/analyze-context.ts'; // Add new flow
 import '@/ai/flows/analyzeAndReport.ts';

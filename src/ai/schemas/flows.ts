@@ -2,7 +2,6 @@
 
 import { z } from 'zod';
 import {
-    AcademicDocumentTypeSchema,
     CitationStyleSchema,
     ClaimStatusSchema,
     DiagramTypeSchema,
@@ -13,39 +12,6 @@ import {
     SummarizeLengthSchema
 } from './enums';
 import { AgentPromptSchema } from './template-schemas';
-
-// academic-solver.ts
-export const AnalyzedDocumentSchema = z.object({
-    documentType: AcademicDocumentTypeSchema.describe('The type of document, either "exam" or "homework".'),
-    subject: z.string().describe('The main subject of the document (e.g., "Physics", "History", "Algebra").'),
-    title: z.string().describe('A concise title for the assignment (e.g., "Quantum Mechanics Final", "World War II Worksheet").'),
-    structuredContent: z.string().describe('The original content, restructured and cleaned up in Markdown format for clarity and better processing.'),
-    language: z.string().describe("The language of the document (e.g., 'English', 'Spanish', 'Arabic')."),
-});
-export type AnalyzedDocument = z.infer<typeof AnalyzedDocumentSchema>;
-
-export const QuestionAnswerPairSchema = z.object({
-    question: z.string().describe("The original question from the document."),
-    solution: z.string().describe("A detailed, well-structured solution to the question, formatted in Markdown."),
-});
-
-export const SolvedDocumentSchema = z.object({
-    solutions: z.array(QuestionAnswerPairSchema).describe("An array of question and solution pairs."),
-});
-export type SolvedDocument = z.infer<typeof SolvedDocumentSchema>;
-
-export const AnalyzeDocumentInputSchema = z.object({
-    documentType: AcademicDocumentTypeSchema,
-    markdownContent: z.string().min(10, 'Markdown content is too short.'),
-});
-export type AnalyzeDocumentInput = z.infer<typeof AnalyzeDocumentInputSchema>;
-
-
-export const SolveDocumentInputSchema = z.object({
-    analyzedDocument: AnalyzedDocumentSchema,
-    contextMarkdown: z.string().optional().describe("Additional context from a syllabus or textbook to help answer the questions accurately."),
-});
-export type SolveDocumentInput = z.infer<typeof SolveDocumentInputSchema>;
 
 // agent-chat.ts
 export const AgentChatInputSchema = z.object({

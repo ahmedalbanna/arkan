@@ -1,14 +1,7 @@
 
 
 import { z } from 'zod';
-import { AcademicDocumentTypeSchema, DiagramTypeSchema, SectionNameSchema } from './enums';
-import { AnalyzedDocumentSchema, PresentationSlideSchema, SolvedDocumentSchema } from './flows';
-
-const academicSolverContextFileSchema = z.object({
-    fileName: z.string(),
-    content: z.string(),
-    type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
-});
+import { DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema } from './enums';
 
 const ReportSectionConfigSchema = z.object({
     sectionName: z.string(),
@@ -132,7 +125,6 @@ export const ProjectStateSchema = z.object({
     currentProjectId: z.string().nullable().optional(),
     name: z.string().optional(),
     projectIdea: z.string().optional(),
-    proposal: z.any().nullable(),
     reportConfig: FullReportModeConfigSchema.nullable().optional(),
     generatedProposalState: SavedProposalStateSchema.nullable().optional(),
     sections: z.record(SectionNameSchema, z.string()).optional(),
@@ -152,15 +144,6 @@ export const ProjectStateSchema = z.object({
         explanation: z.string().optional(),
     })).optional(),
     presentation: z.object({ history: z.array(z.object({ id: z.string(), name: z.string(), slides: z.array(PresentationSlideSchema) })) }).optional(),
-    codeGenerator: z.object({ prompt: z.string(), html: z.string(), css: z.string(), javascript: z.string(), codebase: z.object({ files: z.array(z.object({ path: z.string(), content: z.string() })) }).nullable() }).optional(),
-    externalContext: z.array(academicSolverContextFileSchema).nullable().optional(),
+    externalContext: z.array(z.any()).nullable().optional(),
     teamId: z.string().nullable().optional(), // Add teamId to associate project with a team
-    academicSolver: z.object({
-        stage: z.enum(["idle", "parsing", "analyzing", "readyToSolve", "solving", "solved"]),
-        documentType: AcademicDocumentTypeSchema.nullable(),
-        analyzedDocument: AnalyzedDocumentSchema.nullable(),
-        solvedDocument: SolvedDocumentSchema.nullable(),
-        questionDocuments: z.array(academicSolverContextFileSchema),
-        externalContext: z.array(academicSolverContextFileSchema),
-    }).optional(),
 });

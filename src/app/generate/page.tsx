@@ -9,13 +9,13 @@ import { useBuilderStore, useFeatures, useProject } from '@/hooks';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
-import { BookCheck, FileText, FolderKanban, GitGraph } from 'lucide-react';
+import { FileText, FolderKanban, GitGraph } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
 
 const LoadingSkeleton = () => (
-  <div className="space-y-4">
+  <div class="space-y-4">
     <Skeleton className="h-12 w-full" />
     <Skeleton className="h-[calc(100vh-300px)] w-full" />
   </div>
@@ -32,10 +32,6 @@ const ReportGenerator = dynamic(() => import('@/components/report-mode/ReportMod
   loading: () => <LoadingSkeleton />,
 });
 const DiagramGenerator = dynamic(() => import('@/components/diagram-mode/DiagramGenerator'), {
-  ssr: false,
-  loading: () => <LoadingSkeleton />,
-});
-const AcademicSolver = dynamic(() => import('@/components/academicSolver-mode/AcademicSolver'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
@@ -122,7 +118,6 @@ function GeneratePageContent() {
     { id: 'files', enabled: true }, // Files tab is always enabled
     { id: 'report', enabled: isFeatureEnabled('report') },
     { id: 'diagram', enabled: isFeatureEnabled('diagram') },
-    { id: 'academic', enabled: isFeatureEnabled('academic') },
   ].filter(tab => tab.enabled).map(tab => tab.id);
 
 
@@ -162,7 +157,7 @@ function GeneratePageContent() {
             <LoadingSkeleton />
           ) : (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
-              <TabsList className="grid w-full h-auto grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
+              <TabsList className="grid w-full h-auto grid-cols-2 sm:grid-cols-2 lg:grid-cols-3">
                 <TabsTrigger value="files" className="gap-2">
                   <FolderKanban className="h-4 w-4" /> {t('builder.tabs.files')}
                 </TabsTrigger>
@@ -176,11 +171,6 @@ function GeneratePageContent() {
                     <GitGraph className="h-4 w-4" /> {t('builder.tabs.diagram')}
                   </TabsTrigger>
                 )}
-                {isFeatureEnabled('academic') && (
-                  <TabsTrigger value="academic" className="gap-2">
-                    <BookCheck className="h-4 w-4" /> {t('header.academicSolver')}
-                  </TabsTrigger>
-                )}
               </TabsList>
 
               <div className="w-full flex-grow mt-4">
@@ -192,9 +182,6 @@ function GeneratePageContent() {
                 </TabsContent>
                 <TabsContent value="diagram" className="h-full animate-fade-in">
                   {activeTab === 'diagram' && <DiagramGenerator />}
-                </TabsContent>
-                <TabsContent value="academic" className="h-full animate-fade-in">
-                  {activeTab === 'academic' && <AcademicSolver />}
                 </TabsContent>
               </div>
             </Tabs>

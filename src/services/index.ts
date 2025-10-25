@@ -1,6 +1,5 @@
 
 
-export * from './academic-solver-service';
 export * from './ai-detector-service';
 export * from './agent-service';
 export * from './admin-service';
