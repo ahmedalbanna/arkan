@@ -3,7 +3,6 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
-import { userKeys } from "@/lib/query-keys";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import { toast } from "./use-toast";
@@ -15,7 +14,6 @@ import {
 } from "@/services";
 import { useBuilderStore } from "./useBuilderStore";
 import { type DiagramType } from "@/ai/schemas";
-import { Project } from "@/lib/models/project";
 
 interface ExplainDiagramVariables extends ImageToTextInput {
     prompt: string;

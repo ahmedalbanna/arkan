@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -10,12 +11,6 @@ import { useAuth } from '@/context/AuthContext';
 import { useEvaluateReport } from '@/hooks';
 import { processFileApi } from '@/services';
 import type { AnyProjectProposal } from '@/ai/schemas';
-
-// This schema is used to validate the proposal data before sending it to the API.
-const ProposalPayloadSchema = z.custom<AnyProjectProposal>((val) => typeof val === 'object', {
-    message: 'Proposal must be an object'
-});
-
 
 export const useEvaluationTools = () => {
     const { project } = useBuilderStore();
@@ -78,21 +73,12 @@ export const useEvaluationTools = () => {
             return;
         }
 
-        try {
-            const safeProposal = ProposalPayloadSchema.parse(project?.proposal || {});
-            const body = {
-                proposal: safeProposal,
-                reportSections: project?.sections || {},
-                diagrams: Object.fromEntries(Object.entries(project?.diagrams || {}).map(([key, value]) => [key, (value as any).plantUmlCode])),
-                acceptanceCriteria: criteria.split('\n').filter(c => c.trim()),
-            };
-            mutation.mutate(body as any);
-        } catch (error) {
-            if (error instanceof z.ZodError) {
-                console.error("Proposal data validation failed:", error.flatten());
-                toast({ title: "Invalid Data", description: "The proposal data is not in the correct format.", variant: 'destructive' });
-            }
-        }
+        const body = {
+            reportSections: project?.sections || {},
+            diagrams: Object.fromEntries(Object.entries(project?.diagrams || {}).map(([key, value]) => [key, (value as any).plantUmlCode])),
+            acceptanceCriteria: criteria.split('\n').filter(c => c.trim()),
+        };
+        mutation.mutate(body as any);
     };
 
     return {

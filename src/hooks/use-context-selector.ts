@@ -2,12 +2,9 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useGenerationUIStore, useBuilderStore, useAgents } from '@/hooks'; // Changed
+import { useGenerationUIStore, useBuilderStore, useAgents, useSections } from '@/hooks';
 import { useMemo } from 'react';
-import { SectionName, DiagramType } from '@/ai/schemas';
-import type { AgentPrompt } from '@/lib/models/agent';
-import { Agent, AgentCategory } from '@/lib/models/agent';
-import { useSections } from './use-sections';
+import { DiagramType, SectionName } from '@/ai/schemas';
 
 export const useContextSelector = (itemKey: string) => {
     const { t } = useLocalization();
@@ -15,34 +12,12 @@ export const useContextSelector = (itemKey: string) => {
     const { contextSelection, toggleContextSelection: toggleStoreContext } = useGenerationUIStore();
     const { data: sectionConfigs } = useSections();
     
-    // --- Start of Fix ---
-    // All hooks are now called unconditionally at the top.
     const sections = project?.sections || {};
     const diagrams = project?.diagrams || {};
     const externalContext = project?.externalContext || [];
     
-    const agent = useMemo(() => sectionConfigs?.find(s => s.id === itemKey), [sectionConfigs, itemKey]);
     const reportSections = useMemo(() => sectionConfigs?.filter(s => s.type === 'report') || [], [sectionConfigs]);
     const diagramSections = useMemo(() => sectionConfigs?.filter(s => s.type === 'diagram') || [], [sectionConfigs]);
-
-    // This logic now runs after all hooks have been called.
-    if (!sectionConfigs || !agent) {
-        return {
-            t,
-            reportSections: [],
-            diagramSections: [],
-            currentSelection: { sections: {}, diagrams: {}, externalContext: [] },
-            toggleContextSelection: () => {},
-            selectedSections: [],
-            selectedDiagrams: [],
-            selectedExternalContext: [],
-            hasContext: false,
-            sections: {},
-            diagrams: {},
-            externalContext: [],
-        };
-    }
-    // --- End of Fix ---
 
     const currentSelection = contextSelection[itemKey] || {
         sections: {},
@@ -53,10 +28,9 @@ export const useContextSelector = (itemKey: string) => {
     const toggleContextSelection = (
         key: string,
         type: 'sections' | 'diagrams' | 'externalContext',
-        subKey: string | number | null,
+        subKey: string | number,
         checked: boolean
     ) => {
-        // Since we removed proposal and project plan, we can simplify this call.
         toggleStoreContext(key, type, subKey, checked);
     };
 

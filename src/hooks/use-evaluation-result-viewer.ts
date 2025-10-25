@@ -1,8 +1,9 @@
+
 'use client';
 
 import React from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useGenerateReportSection } from '@/hooks';
+import { useGenerateReportSection } from '@/hooks/use-report-generation';
 import { useBuilderStore } from '@/hooks';
 import { SectionName, EvaluateReportOutput } from '@/ai/schemas';
 import { CheckCircle, Frown, Meh, Smile, AlertTriangle, XCircle } from 'lucide-react';
@@ -34,36 +35,24 @@ export const getFeedbackStatusInfo = (status: "Acceptable" | "Weak" | "Not Prese
 
 export const useEvaluationResultViewer = () => {
     const { t } = useLocalization();
-    const { project, setProject } = useBuilderStore();
+    const { project, updateProject } = useBuilderStore();
     const generationMutation = useGenerateReportSection();
 
     const evaluation = project?.evaluation;
     const sections = project?.sections || {};
-    const proposal = project?.proposal;
-    const projectPlan = project?.projectPlan;
 
     const setEvaluation = (newEvaluation: EvaluateReportOutput | null) => {
-        if (!project) return;
-        project.evaluation = newEvaluation;
-        setProject(project);
+        updateProject(p => {
+            p.evaluation = newEvaluation;
+        });
     };
 
     const handleFixWithAi = (sectionKey: SectionName, suggestion: string) => {
-        if (!project) return;
-        const sectionContent = sections[sectionKey];
-        if (!sectionContent) {
-            console.error(`Cannot fix: Section content for '${sectionKey}' not found.`);
-            return;
-        }
-
         const body = {
-            proposal: proposal,
-            projectPlan: projectPlan,
             sectionToGenerate: sectionKey,
             otherSections: sections,
             guidelines: [suggestion], 
         };
-
         generationMutation.mutate({ body });
     };
 

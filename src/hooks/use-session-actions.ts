@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
@@ -14,7 +13,6 @@ function hasAnyContent(project: Project | null): boolean {
     if (project.projectIdea?.trim()) return true;
     if (Object.values(project.sections || {}).some(s => !!s)) return true;
     if (Object.values(project.diagrams || {}).some(d => !!d)) return true;
-    if (project.academicSolver?.analyzedDocument) return true;
     return false;
 }
 

@@ -3,7 +3,7 @@ export * from './use-admin-dashboard';
 export * from './use-agent-editor';
 export * from './use-agents';
 export * from './use-analytics';
-export * from './use-context-selector'; // Add new hook
+export * from './use-context-selector';
 export * from './use-create-agent-dialog';
 export * from './use-create-category-dialog';
 export * from './use-create-project-dialog';
@@ -18,15 +18,14 @@ export * from './use-evaluation-result-viewer';
 export * from './use-evaluation-tools';
 export * from './use-export';
 export * from './use-features';
-export * from './use-guideline-editor'; 
+export * from './use-guideline-editor';
 export * from './use-mobile';
 export * from './use-notifications';
 export * from './use-payment';
-
 export * from './use-projects';
 export * from './use-report-generation';
 export * from './use-report-mode-generator';
-export * from './use-section-accordion-item-logic'; 
+export * from './use-section-accordion-item-logic';
 export * from './use-section-logic';
 export * from './use-sections';
 export * from './use-session-actions';

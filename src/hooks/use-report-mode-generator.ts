@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
@@ -28,7 +27,6 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     const { exportReportDocx, isExporting } = useExport();
     const { agents, isLoaded: agentsLoaded } = useAgents();
 
-    // Use the new useSections hook to get section configurations
     const { data: sectionConfigs, isLoaded: sectionsLoaded } = useSections();
     
     const reportAgents = useMemo(() => {
@@ -46,7 +44,6 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     const handleSectionUpdate = (key: SectionName, value: string) => {
         if (!project) return;
         project.updateSectionContent(key, value);
-        // Create a new Project instance to trigger a re-render in components that use the project object.
         setProject(new Project(project.toStateObject()));
     };
 
@@ -70,16 +67,17 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
 
         const results = await Promise.all(translationPromises);
 
-        const translatedMap: { [key in SectionName]?: string } = {};
-        results.forEach(result => {
-            if ('content' in result) {
-                translatedMap[result.key as SectionName] = result.content;
-            } else {
-                console.error(`Failed to translate section ${result.key}:`, result.error);
-            }
+        updateProject(p => {
+            const translatedMap: { [key in SectionName]?: string } = {};
+            results.forEach(result => {
+                if ('content' in result) {
+                    translatedMap[result.key as SectionName] = result.content;
+                } else {
+                    console.error(`Failed to translate section ${result.key}:`, result.error);
+                }
+            });
+            p.translatedSections = { ...p.translatedSections, ...translatedMap };
         });
-
-        setProject(new Project({ ...project.toJSON(), translatedSections: { ...project.translatedSections, ...translatedMap } }));
 
         setIsTranslatingAll(false);
         toast({
@@ -92,14 +90,13 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         if (!project || generatedSections.length === 0) return;
 
         const translatedTitles = reportAgents?.reduce((acc, agent) => {
-            acc[agent.id as SectionName] = agent.name; // Use agent name directly
+            acc[agent.id as SectionName] = agent.name;
             return acc;
         }, {} as { [key in SectionName]?: string }) || {};
 
         await exportReportDocx(project, translatedTitles, sectionsToInclude);
     };
 
-    // --- Start of logic from use-report-generation-logic ---
     const { userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = useState<string | null>(null);
     const { initializeDependentStates,guidelineState, controlState, contextSelection } = useGenerationUIStore();
@@ -118,18 +115,10 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         }
 
         const selectedContext = contextSelection[sectionId] || {};
-
-        // Combine all textual context into otherSections
+        
         const otherSectionsPayload = Object.keys(selectedContext.sections || {})
             .filter(key => selectedContext.sections[key])
             .reduce((obj, key) => ({ ...obj, [key]: project.sections?.[key as SectionName] }), {});
-
-        if (selectedContext.proposal && project.proposal) {
-            otherSectionsPayload['proposal'] = JSON.stringify(project.proposal);
-        }
-        if (selectedContext.projectPlan && project.projectPlan) {
-            otherSectionsPayload['projectPlan'] = JSON.stringify(project.projectPlan);
-        }
 
         const body = {
             sectionToGenerate: sectionId,
@@ -165,7 +154,6 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
             setOrderedSections(initialOrder);
         }
     }, [orderedSections.length, setOrderedSections, agents, agentsLoaded, sectionConfigs]);
-    // --- End of logic from use-report-generation-logic ---
 
 
     return {

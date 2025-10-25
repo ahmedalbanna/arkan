@@ -1,5 +1,4 @@
 
-
 import { z } from 'zod';
 import { DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
 
@@ -121,9 +120,6 @@ const SavedProposalStateSchema = z.object({
     updatedAt: z.string().optional(),
 });
 
-
-// This schema is defined in a separate, server-only file to prevent circular dependencies
-// that can occur when client and server modules import from the same files (e.g., types.ts and schemas.ts).
 export const ProjectStateSchema = z.object({
     name: z.string().optional(),
     projectIdea: z.string().optional(),
@@ -150,4 +146,5 @@ export const ProjectStateSchema = z.object({
         content: z.string(),
         type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
     })).nullable().optional(),
+    teamId: z.string().nullable().optional(), // teamId is now optional
 });

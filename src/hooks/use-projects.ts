@@ -17,9 +17,8 @@ import { useBuilderStore } from "./useBuilderStore";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import { type ProjectState } from "@/services";
-import { Project, type ProjectProperties } from "@/lib/models/project"; // NEW: Import our class
+import { Project, type ProjectProperties } from "@/lib/models/project";
 
-// Define types for mutation variables
 interface UpdateProjectVariables {
   projectId: string;
   data: ProjectState;
@@ -47,7 +46,6 @@ export function useProjects() {
         handleErrorUtility(error, "Failed to fetch projects");
       },
     },
-    // NEW: Transform the raw data into an array of Project instances
     select: (data: SavedProject[]): Project[] => {
       if (!data) return [];
       return data.map(p => new Project(p as ProjectProperties));
@@ -56,7 +54,6 @@ export function useProjects() {
 
   return {
     ...queryInfo,
-    // The `data` property from queryInfo is now `Project[] | undefined`
     projects: queryInfo.data,
   }
 }
@@ -79,7 +76,6 @@ export function useProject(projectId: string) {
         handleErrorUtility(error, "Failed to fetch project");
       },
     },
-    // NEW: Transform the raw data into a Project instance
     select: (data: SavedProject): Project | undefined => {
       if (!data) return undefined;
       return new Project(data as ProjectProperties);
@@ -90,7 +86,7 @@ export function useProject(projectId: string) {
 export function useSaveProject() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
-  const { setProject, setHasUnsavedChanges } = useBuilderStore(); // Use setProject from the store
+  const { setProject, setHasUnsavedChanges } = useBuilderStore();
 
   return useMutation<SavedProject, Error, SaveProjectVariables>({
     mutationFn: async (data) => {
@@ -99,9 +95,7 @@ export function useSaveProject() {
     },
     onSuccess: (newProjectData) => {
       const newProject = new Project(newProjectData as ProjectProperties);
-      // Invalidate the list of projects
       queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
-      // Set the newly created project as the active one in the builder store
       setProject(newProject);
       setHasUnsavedChanges(false);
       toast({
@@ -128,13 +122,10 @@ export function useUpdateProject() {
     onSuccess: (updatedProjectData) => {
       const updatedProject = new Project(updatedProjectData as ProjectProperties);
       
-      // Invalidate the main project list
       queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
 
-      // Update the specific project's query data in the cache
       queryClient.setQueryData(projectKeys.detail(updatedProject.id), updatedProjectData);
       
-      // Update the active project in the builder store
       setProject(updatedProject);
       setHasUnsavedChanges(false);
 
