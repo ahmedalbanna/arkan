@@ -12,10 +12,6 @@ import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateS
 import { AgentPrompt } from '@/lib/models/agent';
 import { z } from 'genkit';
 
-// Define a specific schema for the prompt's input variables for better type safety and clarity.
-const ReportSectionPromptInputSchema = GenerateSectionInputSchema.extend({
-  agentPrompt: z.any(), // The full agent prompt object
-});
 
 export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
 
@@ -26,7 +22,7 @@ You are also an expert analyst. Before you begin writing, you must first review 
 
   const reportSectionPrompt = ai.definePrompt({
     name: 'generateReportSectionPrompt', // Static name
-    input: { schema: ReportSectionPromptInputSchema },
+    input: { schema: GenerateSectionInputSchema },
     output: { schema: GenerateSectionOutputSchema },
     model: input.model || 'googleai/gemini-2.0-flash',
     system: systemPrompt,
