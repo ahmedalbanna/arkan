@@ -1,22 +1,59 @@
 
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { handleErrorUtility } from '@/lib/errorUtils';
+import { onValue, ref } from 'firebase/database';
+import { useAuth } from '@/context/AuthContext';
+import { RealtimeDatabase } from '@/lib/firebase/client-init';
 
-// Note: The `useNotifications` hook which used `onValue` is now integrated into `useChatStore`.
-// This file is kept for the mutation hooks which are still relevant.
 
 export interface Notification {
   id: string;
   title: string;
   description: string;
-  icon: 'credit-card' | 'bot' | 'file-text' | 'user-plus';
+  icon: 'credit-card' | 'bot' | 'file-text' | 'user-plus' | string;
   isRead: boolean;
   createdAt: string;
   link?: string;
 }
+
+/**
+ * Subscribes to and manages real-time notifications for the current user.
+ * @returns An object containing the list of notifications.
+ */
+export function useNotifications() {
+  const { firebaseUser } = useAuth();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  useEffect(() => {
+    if (!firebaseUser) {
+      setNotifications([]);
+      return;
+    }
+
+    const notificationsRef = ref(RealtimeDatabase, `notifications/${firebaseUser.uid}`);
+    const unsubscribe = onValue(notificationsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const notificationsList = Object.keys(data)
+          .map(key => ({ id: key, ...data[key] }))
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        setNotifications(notificationsList);
+      } else {
+        setNotifications([]);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [firebaseUser]);
+
+  return { notifications };
+}
+
+
 async function markNotificationsAsReadApi(notificationIds: string[], token: string): Promise<any> {
     const response = await fetch('/api/notifications/mark-as-read', {
         method: 'POST',
@@ -53,16 +90,12 @@ async function clearNotificationsApi(notificationIds: string[], token: string): 
  * Custom mutation hook to mark notifications as read in the Realtime Database.
  */
 export function useMarkNotificationsAsRead() {
+    const { firebaseUser } = useAuth();
     // This hook doesn't need to invalidate queries anymore because the real-time listener will handle UI updates.
     return useMutation<any, Error, string[]>({
         mutationFn: async (notificationIds) => {
             if (notificationIds.length === 0) return;
-            // The token is now fetched within the component/action that calls the mutation
-            // This is a placeholder for where the auth logic would be.
-            const { getAuth } = await import('firebase/auth');
-            const auth = getAuth();
-            const user = auth.currentUser;
-            const token = await getAuthenticatedToken(user);
+            const token = await getAuthenticatedToken(firebaseUser);
             return markNotificationsAsReadApi(notificationIds, token);
         },
         onError: (error) => {
@@ -76,14 +109,12 @@ export function useMarkNotificationsAsRead() {
  * Custom mutation hook to clear a specific list of notifications for the current user.
  */
 export function useClearAllNotifications() {
+    const { firebaseUser } = useAuth();
      // This hook doesn't need to invalidate queries anymore because the real-time listener will handle UI updates.
     return useMutation<any, Error, string[]>({
         mutationFn: async (notificationIds) => {
             if (notificationIds.length === 0) return;
-             const { getAuth } = await import('firebase/auth');
-            const auth = getAuth();
-            const user = auth.currentUser;
-            const token = await getAuthenticatedToken(user);
+            const token = await getAuthenticatedToken(firebaseUser);
             return clearNotificationsApi(notificationIds, token);
         },
         onError: (error) => {

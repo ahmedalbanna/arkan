@@ -11,7 +11,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@/context/AuthContext';
-import { useLogout, useMarkNotificationsAsRead, useClearAllNotifications } from '@/hooks';
+import { useLogout, useMarkNotificationsAsRead, useClearAllNotifications, useNotifications } from '@/hooks';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from '@/components/ui/dropdown-menu';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -49,7 +49,7 @@ export function Header() {
   const [isClient, setIsClient] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   
-  const notifications: Notification[] = []; // Placeholder as chat store is removed
+  const { notifications } = useNotifications();
 
   const markAsReadMutation = useMarkNotificationsAsRead();
   const clearAllMutation = useClearAllNotifications();
