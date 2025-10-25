@@ -3,7 +3,7 @@
 
 import { Agent } from '@/hooks';
 import type { GuidelineState } from '@/hooks';
-import { AgentPrompt } from './types';
+import { AgentPrompt } from '@/lib/models/agent';
 
 /**
  * Extracts the selected default and custom guidelines for a given agent based on the UI state.

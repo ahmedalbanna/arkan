@@ -120,6 +120,7 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
             contextFiles: project.externalContext?.filter((c: any) => c.type === 'context'),
             guidelines: getSelectedGuidelines(agent, guidelineState[section]),
             instructionText: `Tone: ${controlState[section]?.tone}. Formality: ${controlState[section]?.formality / 100}. Word Count: approx ${controlState[section]?.wordCount || 300}`,
+            prompt: agent?.prompt
         };
 
         setActiveMutationKey(section);
