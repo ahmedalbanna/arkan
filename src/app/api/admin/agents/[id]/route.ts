@@ -1,16 +1,14 @@
 
+'use server';
 
-// src/app/api/agents/[id]/route.ts
-import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { ApiUpdateAgentSchema } from '@/ai/schemas';
+import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
+import { adminDb } from '@/lib/firebase/server-init';
 
-
-// GET /api/agents/[id]
+// GET /api/admin/agents/[id]
 export const GET = withAuth(async ({ params }) => {
     try {
-        const {id:agentId} = params;
+        const { id: agentId } = params;
         const agentDoc = await adminDb.collection("agents").doc(agentId).get();
         if (!agentDoc.exists) {
             return handleApiError({ message: 'Agent not found.' }, 404);
@@ -25,7 +23,7 @@ export const GET = withAuth(async ({ params }) => {
 }, { requireAdmin: true });
 
 
-// PUT /api/agents/[id]
+// PUT /api/admin/agents/[id]
 export const PUT = withAuth(async ({ request, params }) => {
     try {
         const agentId = params.id;
@@ -41,7 +39,7 @@ export const PUT = withAuth(async ({ request, params }) => {
             return handleApiError(validation.error);
         }
 
-        const updateData: any = { ...validation.data };
+        const updateData: any = { ...validation.data, updatedAt: new Date().toISOString() };
 
         await agentRef.update(updateData);
         const updatedDoc = await agentRef.get();
@@ -52,7 +50,7 @@ export const PUT = withAuth(async ({ request, params }) => {
     }
 }, { requireAdmin: true });
 
-// DELETE /api/agents/[id]
+// DELETE /api/admin/agents/[id]
 export const DELETE = withAuth(async ({ params }) => {
     try {
         const agentId = params.id;

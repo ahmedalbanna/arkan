@@ -7,12 +7,9 @@ import { withAuth, handleApiError, createApiResponse } from "@/lib/api-utils";
 
 
 // GET a single user profile.
-// This route is now protected by the verifyAccess logic within withAuth,
-// but for simplicity, we'll keep the direct GET like this.
-// A more robust implementation might move the ownership check into withAuth itself.
-export const GET = withAuth(async ({ params, user: requester, token }) => {
+export const GET = withAuth(async ({ params, user: requester }) => {
     try {
-        const {id:targetUserId} = await params;
+        const targetUserId = params.id;
 
         // Authorization check: either admin or self
         if (requester.role !== 'admin' && requester.id !== targetUserId) {
@@ -49,7 +46,7 @@ const userUpdateSchema = z.object({
 // PUT (update) a user profile
 export const PUT = withAuth(async ({ request, params, user: requester }) => {
     try {
-        const { id: userId } = params;
+        const userId = params.id;
         const body = await request.json();
         let validation;
 
@@ -85,7 +82,7 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
 
 export const DELETE = withAuth(async ({ params }) => {
     try {
-        const { id: targetUserId } = params;
+        const targetUserId = params.id;
         if (!targetUserId) {
             return handleApiError({ message: "User ID is required" }, 400);
         }
