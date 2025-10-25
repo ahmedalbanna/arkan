@@ -12,13 +12,8 @@ import { useRef, useState } from 'react';
 function hasAnyContent(project: Project | null): boolean {
     if (!project) return false;
     if (project.projectIdea?.trim()) return true;
-    if (project.proposal) return true;
     if (Object.values(project.sections || {}).some(s => !!s)) return true;
     if (Object.values(project.diagrams || {}).some(d => !!d)) return true;
-    if (project.presentation?.history && project.presentation.history.length > 0) return true;
-    if (project.codeGenerator?.html) return true;
-    if (project.projectPlan) return true;
-    if (project.codebase) return true;
     if (project.academicSolver?.analyzedDocument) return true;
     return false;
 }
@@ -39,7 +34,7 @@ export function useSessionActions() {
     const saveProjectMutation = useSaveProject();
     const updateProjectMutation = useUpdateProject();
 
-    const { exportProposal, exportReportDocx, exportPresentationPptx, isExporting } = useExport();
+    const { exportReportDocx, isExporting } = useExport();
     const { firebaseUser } = useAuth();
 
     const isSaving = saveProjectMutation.isPending || updateProjectMutation.isPending;
@@ -74,7 +69,7 @@ export function useSessionActions() {
 
     const handleSaveProjectFile = (name?: string) => {
         if (!project || !hasAnyContent(project)) return;
-        const finalName = name?.trim() || project.name || (project.proposal as any)?.title || 'arkan_project';
+        const finalName = name?.trim() || project.name || 'arkan_project';
         const jsonString = JSON.stringify(project.toJSON());
         const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
         const blob = new Blob([encodedData], { type: 'text/plain;charset=utf-8' });
@@ -130,7 +125,7 @@ export function useSessionActions() {
     const handleSaveAsCloud = () => {
         if (!project) return;
         const projectData = project.toJSON();
-        const finalSaveAsName = saveAsName.trim() || project.name || (project.proposal as any)?.title || 'Untitled Project';
+        const finalSaveAsName = saveAsName.trim() || project.name || 'Untitled Project';
 
         const saveData = { ...projectData, name: String(finalSaveAsName), id: '' };
 
@@ -147,28 +142,16 @@ export function useSessionActions() {
     }
 
     const handleDownloadAs = () => {
-        const finalSaveAsName = saveAsName.trim() || project?.name || (project?.proposal as any)?.title || 'Untitled Project';
+        const finalSaveAsName = saveAsName.trim() || project?.name || 'Untitled Project';
         handleSaveProjectFile(finalSaveAsName);
         setIsSaveAsOpen(false);
         setSaveAsName('');
-    }
-
-    const handleExportProposal = async (format: 'docx' | 'pdf') => {
-        if (project && project.proposal) {
-            await exportProposal(format, project);
-        }
     }
 
     const handleExportReport = async (sectionsToInclude: string[]) => {
         if (!project || !hasAnyContent(project)) return;
          await exportReportDocx(project, {}, sectionsToInclude);
     };
-
-    const handleExportPresentation = async () => {
-        if (!project || !project.presentation?.history.length) return;
-        const latestPresentation = project.presentation.history[0];
-        await exportPresentationPptx(project, latestPresentation.id);
-    }
 
     return {
         fileInputRef,
@@ -191,9 +174,7 @@ export function useSessionActions() {
         hasContent: hasAnyContent(project),
         t,
         isExporting,
-        handleExportProposal,
         handleExportReport,
-        handleExportPresentation,
         hasUnsavedChanges,
     };
 }

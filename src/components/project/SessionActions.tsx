@@ -25,7 +25,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useSessionActions } from '@/hooks';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { ReportExportDialog } from './ExportDialogs';
 
 
@@ -50,11 +50,8 @@ export const SessionActions = () => {
         handleDownloadAs,
         hasContent,
         t,
-        // Export related items
         isExporting,
         handleExportReport,
-        handleExportPresentation,
-        handleExportProposal, // New handler
         hasUnsavedChanges,
     } = useSessionActions();
 
@@ -141,7 +138,7 @@ export const SessionActions = () => {
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="save-as-name" className="text-right">{t('projects.nameLabel')}</Label>
-                                <Input id="save-as-name" defaultValue={project?.name || (project?.proposal as any)?.title} onChange={(e) => setSaveAsName(e.target.value)} className="col-span-3" />
+                                <Input id="save-as-name" defaultValue={project?.name} onChange={(e) => setSaveAsName(e.target.value)} className="col-span-3" />
                             </div>
                         </div>
                         <DialogFooter>
@@ -168,28 +165,11 @@ export const SessionActions = () => {
                     <DropdownMenuContent align="end" className="w-64">
                          <DropdownMenuLabel>Export Options</DropdownMenuLabel>
                          <DropdownMenuSeparator />
-                         <DropdownMenuSub>
-                            <DropdownMenuSubTrigger disabled={isBusy || !project?.proposal}>Proposal</DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent>
-                                <DropdownMenuItem onSelect={() => handleExportProposal('docx')}>as DOCX</DropdownMenuItem>
-                                <DropdownMenuItem onSelect={() => handleExportProposal('pdf')}>as PDF</DropdownMenuItem>
-                            </DropdownMenuSubContent>
-                         </DropdownMenuSub>
-                         <DropdownMenuSeparator />
                         <ReportExportDialog
                             isExporting={isExporting}
                             onExport={handleExportReport}
                             disabled={isBusy || !project?.sections || Object.keys(project.sections).length === 0}
                         />
-                         <DropdownMenuItem
-                            onSelect={() => handleExportPresentation()}
-                            disabled={isBusy || !project?.presentation?.history.length}
-                         >
-                            <div className="flex flex-col w-full">
-                                <span>Export Presentation as PPTX</span>
-                                <span className="text-xs text-muted-foreground">Requires generated presentation slides</span>
-                            </div>
-                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
 

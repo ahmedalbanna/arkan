@@ -144,9 +144,6 @@ export interface ProjectState {
   translatedSections?: Partial<Record<import('@/ai/schemas').SectionName, string>>;
   evaluation?: import("@/ai/schemas").EvaluateReportOutput | null | undefined;
   diagrams?: Partial<Record<DiagramType, DiagramProperties>>;
-  presentation?: {
-    history: PresentationHistoryEntry[];
-  } | undefined;
   academicSolver?: AcademicSolverState;
   externalContext?: {
     fileName: string;
@@ -184,7 +181,6 @@ export class Project implements SavedProject {
   private _translatedSections?: ProjectState['translatedSections'];
   private _evaluation?: import('@/ai/schemas').EvaluateReportOutput | null;
   private _diagrams: Partial<Record<DiagramType, Diagram>>;
-  private _presentation?: { history: PresentationHistoryEntry[]; };
   private _academicSolver: AcademicSolverState;
   private _externalContext: { fileName: string; content: string; type: ContextFileType; }[];
   private _teamId?: string | null;
@@ -207,7 +203,6 @@ export class Project implements SavedProject {
         this._diagrams[key as DiagramType] = new Diagram(props.diagrams[key as DiagramType] as DiagramProperties);
       }
     }
-    this._presentation = props.presentation ?? { history: [] };
     this._academicSolver = props.academicSolver ?? {
       stage: "idle",
       documentType: null,
@@ -237,7 +232,6 @@ export class Project implements SavedProject {
   get evaluation() { return this._evaluation; }
   set evaluation(value) { this._evaluation = value; }
   get diagrams() { return this._diagrams; }
-  get presentation() { return this._presentation; }
   get academicSolver() { return this._academicSolver; }
   get externalContext() { return this._externalContext; }
   get teamId() { return this._teamId; }
@@ -269,7 +263,6 @@ export class Project implements SavedProject {
       translatedSections: this._translatedSections,
       evaluation: this._evaluation,
       diagrams: plainDiagrams,
-      presentation: this._presentation,
       academicSolver: this._academicSolver,
       externalContext: this._externalContext,
       teamId: this._teamId,
@@ -288,7 +281,6 @@ export class Project implements SavedProject {
     this._translatedSections = {};
     this._evaluation = null;
     this._diagrams = {};
-    this._presentation = { history: [] };
     this._academicSolver = {
       stage: "idle",
       documentType: null,
@@ -323,36 +315,6 @@ export class Project implements SavedProject {
   public updateDiagramCode(key: DiagramType, code: string): void {
     if (!this._diagrams?.[key]) return;
     this._diagrams[key]!.updateCode(code);
-  }
-
-  // --- Presentation Methods ---
-  public addPresentationToHistory(entry: PresentationHistoryEntry): void {
-    if (!this._presentation) {
-      this._presentation = { history: [] };
-    }
-    this._presentation.history = [entry, ...this._presentation.history];
-  }
-
-  public updatePresentationSlide(activeId: string, slideIndex: number, field: "title" | "content", value: string, contentIndex?: number): void {
-    if (!this._presentation) return;
-
-    const entryIndex = this._presentation.history.findIndex(e => e.id === activeId);
-    if (entryIndex === -1) return;
-
-    const entry = this._presentation.history[entryIndex];
-    const newSlides = [...entry.slides];
-    const slideToUpdate = { ...newSlides[slideIndex] };
-
-    if (field === "title") {
-      slideToUpdate.title = value;
-    } else if (field === "content" && contentIndex !== undefined && Array.isArray(slideToUpdate.content)) {
-      const newContent = [...slideToUpdate.content];
-      newContent[contentIndex] = value;
-      slideToUpdate.content = newContent;
-    }
-
-    newSlides[slideIndex] = slideToUpdate;
-    this._presentation.history[entryIndex] = { ...entry, slides: newSlides };
   }
 
   // --- External Context Methods ---
