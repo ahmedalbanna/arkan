@@ -41,7 +41,7 @@ function AgentCard({ agent }: { agent: Agent }) {
   return (
     <Card className="p-4 flex items-center gap-4">
         <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
-        <Bot className="w-8 h-8 text-primary shrink-0" />
+        
         <div className="flex-grow">
             <p className="font-semibold">{name}</p>
             <p className="text-sm text-muted-foreground">{description}</p>

@@ -46,7 +46,7 @@ export default function EditAgentPage({ params }: { params: { id: string } }) {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-semibold flex items-center gap-2">
-            <Bot className="h-6 w-6" />
+            
             {t('agentEditor.pageTitle')}
         </h1>
       </div>

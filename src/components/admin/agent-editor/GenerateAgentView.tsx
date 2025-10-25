@@ -145,7 +145,7 @@ export function GenerateAgentView() {
         <div className="w-full max-w-4xl">
             <div className="text-center mb-8">
                 <h1 className="text-4xl font-bold flex items-center justify-center gap-3">
-                    {t('agentGenerator.title')} <Bot className="h-10 w-10" />
+                    {t('agentGenerator.title')}
                 </h1>
             </div>
             <div className="relative">
@@ -210,7 +210,7 @@ export function GenerateAgentView() {
     const renderGeneratingView = () => (
         <div className="w-full max-w-3xl text-center">
             <h1 className="text-4xl font-bold flex items-center justify-center gap-3 mb-2">
-                {t('agentGenerator.title')} <Bot className="h-10 w-10" />
+                {t('agentGenerator.title')}
             </h1>
             <p className="text-muted-foreground mb-8">{t('agentGenerator.generatingSubtitle')}</p>
             <Loader2 className="h-16 w-16 mx-auto animate-spin" />
@@ -225,7 +225,7 @@ export function GenerateAgentView() {
             </Button>
             <div className="text-center mb-8">
                 <h1 className="text-4xl font-bold flex items-center justify-center gap-3">
-                    {t('agentGenerator.reviewTitle')} <Bot className="h-10 w-10" />
+                    {t('agentGenerator.reviewTitle')}
                 </h1>
             </div>
             <div className="space-y-6">
