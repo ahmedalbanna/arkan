@@ -1,19 +1,32 @@
-
-
 'use client';
 
 import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { marked } from 'marked';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDebounce } from '@/hooks';
 import { SectionToolbar } from '../section/SectionToolbar';
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import TextAlign from '@tiptap/extension-text-align';
-import { Bold, Italic, Strikethrough, List, ListOrdered, ChevronDown } from 'lucide-react';
+import { Bold, Italic, Strikethrough, List, ListOrdered, Quote, ImageIcon, Table as TableIcon, Sigma, Upload, Download } from 'lucide-react';
 import { Button } from './button';
-import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
+import TurndownService from 'turndown';
+import { gfm } from 'turndown-plugin-gfm';
+import Image from '@tiptap/extension-image';
+import Dropcursor from '@tiptap/extension-dropcursor';
+import Table from '@tiptap/extension-table';
+import TableRow from '@tiptap/extension-table-row';
+import TableHeader from '@tiptap/extension-table-header';
+import TableCell from '@tiptap/extension-table-cell';
+import Katex from 'tiptap-katex';
+import 'katex/dist/katex.min.css';
+import mammoth from 'mammoth';
+import FileHandler from '@tiptap/extension-file-handler';
+
+// Initialize Turndown service with GFM for tables
+const turndownService = new TurndownService({ headingStyle: 'atx' });
+turndownService.use(gfm);
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -24,6 +37,85 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
   if (!editor) {
     return null;
   }
+
+  const addImage = () => {
+    const url = window.prompt('Enter image URL');
+    if (url) {
+      editor.chain().focus().setImage({ src: url }).run();
+    }
+  };
+
+  const addTable = () => {
+    editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+  };
+
+  const addMath = () => {
+    const formula = window.prompt('Enter LaTeX formula');
+    if (formula) {
+        editor.chain().focus().insertContent(`<katex-component content="${formula}"></katex-component>`).run()
+    }
+  }
+
+  const handleExport = async () => {
+    if (!editor) return;
+
+    const format = window.prompt("Export as: 'md' or 'docx'", 'md');
+
+    if (format === 'md') {
+        const markdown = turndownService.turndown(editor.getHTML());
+        const blob = new Blob([markdown], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'document.md';
+        a.click();
+        URL.revokeObjectURL(url);
+    } else if (format === 'docx') {
+        const html = editor.getHTML();
+        try {
+            const response = await fetch('/api/export-docx', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ html }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to export as DOCX');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'document.docx';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) { 
+            console.error(error);
+            window.alert('Error exporting .docx file.');
+        }
+
+    } else if (format) {
+        window.alert("Unsupported format. Please choose 'md' or 'docx'.");
+    }
+  };
+
+  const handleImport = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.md,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file && editor) {
+        handleFile(file, editor);
+      }
+    };
+    input.click();
+  };
 
   const handleHeadingChange = (value: string) => {
     if (value === 'p') {
@@ -46,6 +138,13 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
   return (
     <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-background/80 backdrop-blur-sm border rounded-full shadow-lg flex items-center p-1 gap-1">
       <div className="flex items-center gap-1">
+        <Button onClick={handleImport} size="icon" className="h-9 w-9 rounded-full">
+            <Upload className="h-4 w-4"/>
+        </Button>
+        <Button onClick={handleExport} size="icon" className="h-9 w-9 rounded-full">
+            <Download className="h-4 w-4"/>
+        </Button>
+        <div className="h-6 w-px bg-border"></div>
         <Select value={getCurrentHeadingLevel()} onValueChange={handleHeadingChange}>
             <SelectTrigger aria-label="Select heading level" className="h-9 w-32 border-none bg-transparent focus:ring-0 focus:ring-offset-0">
                 <SelectValue placeholder="Paragraph"/>
@@ -72,6 +171,18 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
         <Button onClick={() => editor.chain().focus().toggleOrderedList().run()} variant={editor.isActive('orderedList') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
             <ListOrdered className="h-4 w-4"/>
         </Button>
+        <Button onClick={() => editor.chain().focus().toggleBlockquote().run()} variant={editor.isActive('blockquote') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
+            <Quote className="h-4 w-4"/>
+        </Button>
+        <Button onClick={addImage} size="icon" className="h-9 w-9 rounded-full">
+            <ImageIcon className="h-4 w-4"/>
+        </Button>
+        <Button onClick={addTable} size="icon" className="h-9 w-9 rounded-full">
+            <TableIcon className="h-4 w-4"/>
+        </Button>
+        <Button onClick={addMath} size="icon" className="h-9 w-9 rounded-full">
+            <Sigma className="h-4 w-4"/>
+        </Button>
       </div>
       <div className="h-6 w-px bg-border"></div>
       <div className="flex items-center gap-1">
@@ -82,6 +193,40 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
   );
 };
 
+const handleFile = (file: File, editor: Editor) => {
+  const reader = new FileReader();
+  const fileExtension = file.name.split('.').pop()?.toLowerCase();
+
+  if (file.type.startsWith('image/')) {
+    reader.onload = (event) => {
+      const imageUrl = event.target?.result as string;
+      editor.chain().focus().setImage({ src: imageUrl }).run();
+    };
+    reader.readAsDataURL(file);
+  } else if (fileExtension === 'md') {
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      const html = marked.parse(content) as string;
+      editor.chain().focus().setContent(html).run();
+    };
+    reader.readAsText(file);
+  } else if (fileExtension === 'docx') {
+    reader.onload = (event) => {
+      const arrayBuffer = event.target?.result as ArrayBuffer;
+      mammoth.convertToHtml({ arrayBuffer: arrayBuffer })
+        .then((result) => {
+          editor.chain().focus().setContent(result.value).run();
+        })
+        .catch((error) => {
+          console.error(error);
+          window.alert('Error converting .docx file.');
+        });
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    window.alert('Unsupported file type for drag and drop.');
+  }
+}
 
 interface RichTextEditorProps {
   content: string; // Expecting Markdown content
@@ -106,23 +251,41 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        table: false,
+      }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       BubbleMenuExtension.configure({
         element: document.querySelector('.menu') as HTMLElement,
+      }),
+      Image,
+      Dropcursor,
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      Katex.configure({}),
+      FileHandler.configure({
+        onDrop: (currentEditor, files, pos) => {
+            files.forEach(file => handleFile(file, currentEditor));
+            return true;
+        },
+        onPaste: (currentEditor, files) => {
+            files.forEach(file => handleFile(file, currentEditor));
+            return true;
+        }
       }),
     ],
     content: '',
     onUpdate: ({ editor }) => {
       if (isUpdatingFromProp) return; // Prevent loop
       const html = editor.getHTML();
-      // A proper HTML to Markdown converter should be used here.
-      // For this example, we'll just pass the HTML. A library like `turndown` is recommended.
-      onChange(html);
+      const markdown = turndownService.turndown(html);
+      onChange(markdown);
     },
     editorProps: {
       attributes: {
-        class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif prose-p:text-[12px] prose-headings:text-[16px] prose-h1:text-[16px] prose-h2:text-[16px] prose-h3:text-[16px] prose-h4:text-[16px] prose-h5:text-[16px] prose-h6:text-[16px] prose-a:text-primary hover:prose-a:text-primary/90',
+        class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif prose-p:text-[12px] prose-headings:text-[16px] prose-h1:text-[16px] prose-h2:text-[16px] prose-h3:text-[16px] prose-h4:text-[16px] prose-h5:text-[16px] prose-h6:text-[16px] prose-a:text-primary hover:prose-a:text-primary/90 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2',
       },
     },
   });
@@ -141,16 +304,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     onReadAloud(selectedText || content);
   }
 
-  // Effect to update editor content when debounced prop changes
   useEffect(() => {
     if (editor && debouncedContent !== undefined) {
-      const currentHtml = editor.getHTML();
-      const newHtml = marked.parse(debouncedContent) as string;
-
-      if (currentHtml !== newHtml) {
+      const currentMarkdown = turndownService.turndown(editor.getHTML());
+      if (currentMarkdown !== debouncedContent) {
+        const newHtml = marked.parse(debouncedContent) as string;
         setIsUpdatingFromProp(true);
-        editor.commands.setContent(newHtml, false); // `false` means don't trigger update event
-        setTimeout(() => setIsUpdatingFromProp(false), 100); // Release the lock shortly after
+        editor.commands.setContent(newHtml, false);
+        setTimeout(() => setIsUpdatingFromProp(false), 100);
       }
     }
   }, [debouncedContent, editor]);
@@ -159,13 +320,25 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   return (
     <div dir={direction}>
       {editor && (
-        <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
-          <SectionToolbar
-            isProcessingAi={isProcessingAi}
-            onAiAction={handleAiActionWrapper}
-            onReadAloud={handleReadAloudWrapper}
-            isReadingAloud={isReadingAloud}
-          />
+        <BubbleMenu editor={editor} tippyOptions={{ duration: 100, placement: 'top' }}>
+            { editor.isActive('table') ? (
+                <div className="bg-background p-1 rounded-lg shadow-lg border flex gap-1">
+                    <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addColumnBefore().run()}>Add Col Before</Button>
+                    <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addColumnAfter().run()}>Add Col After</Button>
+                    <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().deleteColumn().run()}>Delete Col</Button>
+                    <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addRowBefore().run()}>Add Row Before</Button>
+                    <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addRowAfter().run()}>Add Row After</Button>
+                    <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().deleteRow().run()}>Delete Row</Button>
+                    <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().deleteTable().run()}>Delete Table</Button>
+                </div>
+            ) : (
+                <SectionToolbar
+                    isProcessingAi={isProcessingAi}
+                    onAiAction={handleAiActionWrapper}
+                    onReadAloud={handleReadAloudWrapper}
+                    isReadingAloud={isReadingAloud}
+                />
+            )}
         </BubbleMenu>
       )}
       <MenuBar editor={editor} setDirection={setDirection} />
