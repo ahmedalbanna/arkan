@@ -19,7 +19,7 @@ import { useSections } from './use-sections';
 
 export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: { orderedSections: Section[], setOrderedSections: (sections: Section[]) => void; }) => {
     const { t, locale } = useLocalization();
-    const { project, setProject } = useBuilderStore();
+    const { project, updateProject } = useBuilderStore();
     const translateMutation = useTranslate();
     const [isTranslatingAll, setIsTranslatingAll] = useState(false);
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
@@ -44,7 +44,8 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     const handleSectionUpdate = (key: SectionName, value: string) => {
         if (!project) return;
         project.updateSectionContent(key, value);
-        setProject(new Project(project.toStateObject()));
+        // Create a new Project instance to trigger a re-render in components that use the project object.
+        updateProject(p => { /* empty updater, just to trigger change */ });
     };
 
     const handleTranslateAll = async (targetLang: 'en' | 'ar') => {
@@ -115,6 +116,11 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         }
 
         const selectedContext = contextSelection[sectionId] || {};
+        const controls = controlState[sectionId] || {};
+        const outputStyles = Object.entries(controls.outputStyle || {})
+            .filter(([, checked]) => checked)
+            .map(([style]) => style)
+            .join(', ');
         
         const otherSectionsPayload = Object.keys(selectedContext.sections || {})
             .filter(key => selectedContext.sections[key])
@@ -131,7 +137,7 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
                 .reduce((obj, key) => ({ ...obj, [key]: project.diagrams?.[key as DiagramType]?.plantUmlCode }), {}),
             externalContext: (project.externalContext || []).filter((_, index) => selectedContext.externalContext?.[index]),
             guidelines: getSelectedGuidelines(agent, guidelineState[sectionId]),
-            instructionText: `Tone: ${controlState[sectionId]?.tone}. Formality: ${controlState[sectionId]?.formality / 100}. Word Count: approx ${controlState[sectionId]?.wordCount || 300}`,
+            instructionText: `Tone: ${controls.tone}. Formality: ${controls.formality / 100}. Complexity: ${controls.complexity / 100}. Word Count: approx ${controls.wordCount || 300}. Output Format: ${outputStyles || 'paragraph'}.`,
         };
 
         setActiveMutationKey(sectionId);
@@ -161,15 +167,7 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         locale,
         isPanelCollapsed,
         setIsPanelCollapsed,
-        handleSectionUpdate,
-        handleTranslateAll,
-        isTranslatingAll,
         generatedSections,
-        isExporting,
-        handleExportReportDOCX,
-        sections,
-        orderedSections,
-        setOrderedSections,
         isAnythingGenerating,
         activeMutationKey,
         onGenerateSection,

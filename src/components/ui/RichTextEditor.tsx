@@ -1,14 +1,15 @@
+
 'use client';
 
 import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { marked } from 'marked';
 import React, { useEffect, useState } from 'react';
-import { useDebounce } from '@/hooks';
+import { useDebounce, useToast } from '@/hooks';
 import { SectionToolbar } from '../section/SectionToolbar';
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import TextAlign from '@tiptap/extension-text-align';
-import { Bold, Italic, Strikethrough, List, ListOrdered, Quote, ImageIcon, Table as TableIcon, Sigma, Upload, Download } from 'lucide-react';
+import { Bold, Italic, Strikethrough, List, ListOrdered, Quote, ImageIcon, Table as TableIcon, Sigma, Upload, Download, Trash2, Languages, Palette, PenSquare, BrainCircuit, Workflow, Wrench, LifeBuoy, MoreVertical, Brush } from 'lucide-react';
 import { Button } from './button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 import TurndownService from 'turndown';
@@ -23,6 +24,9 @@ import Katex from 'tiptap-katex';
 import 'katex/dist/katex.min.css';
 import mammoth from 'mammoth';
 import FileHandler from '@tiptap/extension-file-handler';
+import { uploadProjectFile } from '@/services/project-service';
+import { useAuth } from '@/context/AuthContext';
+
 
 // Initialize Turndown service with GFM for tables
 const turndownService = new TurndownService({ headingStyle: 'atx' });
@@ -94,7 +98,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
-        } catch (error) { 
+        } catch (error) {
             console.error(error);
             window.alert('Error exporting .docx file.');
         }
@@ -235,6 +239,7 @@ interface RichTextEditorProps {
   onReadAloud: (text: string) => void;
   isProcessingAi: boolean;
   isReadingAloud: boolean;
+  onClearContent: () => void;
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
@@ -244,10 +249,30 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   onReadAloud,
   isProcessingAi,
   isReadingAloud,
+  onClearContent,
 }) => {
   const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr');
   const [isUpdatingFromProp, setIsUpdatingFromProp] = useState(false);
   const debouncedContent = useDebounce(content, 1000); // Debounce content prop
+  const { firebaseUser } = useAuth();
+  const { toast } = useToast();
+
+  const handleImagePaste = async (editor: Editor, file: File) => {
+    if (!firebaseUser) {
+      toast({ title: 'Authentication required', description: 'You must be logged in to upload images.', variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Uploading Image...', description: 'Your image is being uploaded to storage.' });
+    try {
+      const token = await firebaseUser.getIdToken();
+      const { publicUrl } = await uploadProjectFile({ file, token });
+      editor.chain().focus().setImage({ src: publicUrl }).run();
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      toast({ title: 'Upload Failed', description: 'Could not upload your image.', variant: 'destructive' });
+    }
+  };
+
 
   const editor = useEditor({
     extensions: [
@@ -270,9 +295,18 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             files.forEach(file => handleFile(file, currentEditor));
             return true;
         },
-        onPaste: (currentEditor, files) => {
-            files.forEach(file => handleFile(file, currentEditor));
-            return true;
+        onPaste: (currentEditor, files, htmlContent) => {
+          if (htmlContent) {
+            return false; // Let the default paste handler deal with HTML
+          }
+          files.forEach(file => {
+             if (file.type.startsWith('image/')) {
+               handleImagePaste(currentEditor, file);
+             } else {
+               handleFile(file, currentEditor)
+             }
+          });
+          return true;
         }
       }),
     ],
@@ -337,6 +371,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                     onAiAction={handleAiActionWrapper}
                     onReadAloud={handleReadAloudWrapper}
                     isReadingAloud={isReadingAloud}
+                    onClearContent={onClearContent}
                 />
             )}
         </BubbleMenu>

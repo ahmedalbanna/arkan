@@ -15,6 +15,8 @@ import { ArrowLeft, Bot, Braces, BrainCircuit, Check, Copy, Flame, Loader2, Plus
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
 
 const suggestionChips = [
     { label: 'agentGenerator.chips.taskManager', icon: Check },
@@ -143,60 +145,63 @@ export function GenerateAgentView() {
 
     const renderPromptingView = () => (
         <div className="w-full max-w-4xl">
-            <div className="text-center mb-8">
-                <h1 className="text-4xl font-bold flex items-center justify-center gap-3">
-                    {t('agentGenerator.title')}
-                </h1>
-            </div>
-            <div className="relative">
-                <div className="glowing-border p-0.5 rounded-2xl">
+             <Card>
+                <CardHeader className="text-center">
+                    <CardTitle className="text-3xl font-bold flex items-center justify-center gap-3">
+                        <Bot className="w-8 h-8"/>
+                        {t('agentGenerator.title')}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                     <Textarea
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
                         placeholder={t('agentGenerator.placeholder')}
-                        className="bg-black/80 border-none rounded-2xl min-h-[150px] text-lg text-white placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 p-6 pr-20"
+                        className="min-h-[150px] text-lg focus-visible:ring-1 focus-visible:ring-offset-0 p-6"
                     />
-                </div>
-                <Button variant="ghost" size="icon" className="absolute bottom-4 right-4 h-12 w-12 text-white hover:bg-white/20 rounded-full" onClick={handleGenerate}>
-                    <SendHorizonal className="h-6 w-6" />
-                </Button>
-                <div className="absolute bottom-4 left-4 flex items-center gap-4">
-                    <div {...getRootProps()} className="cursor-pointer">
-                        <input {...getInputProps()} />
-                        <Button variant="outline" className="bg-white/5 border-white/20 hover:bg-white/10 text-white text-xs h-8">
-                            <BrainCircuit className="me-2 h-4 w-4" />
-                            {t('agentGenerator.addKnowledge')}
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div {...getRootProps()} className="cursor-pointer">
+                                <input {...getInputProps()} />
+                                <Button variant="outline" type="button">
+                                    <BrainCircuit className="me-2 h-4 w-4" />
+                                    {t('agentGenerator.addKnowledge')}
+                                </Button>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <Switch id="json-output" checked={includeJsonOutput} onCheckedChange={setIncludeJsonOutput} />
+                                <Label htmlFor="json-output" className="text-xs flex items-center gap-1"><Braces className="h-4 w-4" /> {t('agentGenerator.jsonOutput')}</Label>
+                            </div>
+                        </div>
+                         <Button variant="default" size="lg" onClick={handleGenerate}>
+                            <SendHorizonal className="h-5 w-5" />
                         </Button>
                     </div>
-                    <div className="flex items-center space-x-2">
-                        <Switch id="json-output" checked={includeJsonOutput} onCheckedChange={setIncludeJsonOutput} />
-                        <Label htmlFor="json-output" className="text-white text-xs flex items-center gap-1"><Braces className="h-4 w-4" /> {t('agentGenerator.jsonOutput')}</Label>
-                    </div>
-                </div>
-            </div>
-            {contextFiles.length > 0 && (
-                <div className="mt-4 p-4 bg-white/5 rounded-lg border border-white/10">
-                    <h4 className="text-sm font-semibold mb-2">{t('agentGenerator.contextFiles')} ({contextFiles.length})</h4>
-                    <ScrollArea className="h-24">
-                        <div className="space-y-1">
-                            {contextFiles.map((file, index) => (
-                                <div key={index} className="flex items-center justify-between p-1 text-xs bg-white/10 rounded">
-                                    <span className="truncate">{file.name}</span>
-                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => removeFile(index)}>
-                                        <XCircle className="h-3 w-3" />
-                                    </Button>
+
+                     {contextFiles.length > 0 && (
+                        <div className="mt-4 p-4 bg-muted rounded-lg border">
+                            <h4 className="text-sm font-semibold mb-2">{t('agentGenerator.contextFiles')} ({contextFiles.length})</h4>
+                            <ScrollArea className="h-24">
+                                <div className="space-y-1">
+                                    {contextFiles.map((file, index) => (
+                                        <div key={index} className="flex items-center justify-between p-1 text-xs bg-background rounded">
+                                            <span className="truncate">{file.name}</span>
+                                            <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => removeFile(index)}>
+                                                <XCircle className="h-3 w-3" />
+                                            </Button>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
+                            </ScrollArea>
                         </div>
-                    </ScrollArea>
-                </div>
-            )}
+                    )}
+                </CardContent>
+             </Card>
             <div className="mt-6 flex flex-wrap justify-center gap-2">
                 {suggestionChips.map(({ label, icon: Icon }) => (
                     <Button
                         key={label}
                         variant="secondary"
-                        className="bg-white/10 text-white hover:bg-white/20 rounded-full"
                         onClick={() => setPrompt(prev => prev ? `${prev}\n- ${t(label)}` : t(label))}
                     >
                         <Icon className="me-2 h-4 w-4" />
@@ -213,13 +218,13 @@ export function GenerateAgentView() {
                 {t('agentGenerator.title')}
             </h1>
             <p className="text-muted-foreground mb-8">{t('agentGenerator.generatingSubtitle')}</p>
-            <Loader2 className="h-16 w-16 mx-auto animate-spin" />
+            <Loader2 className="h-16 w-16 mx-auto animate-spin text-primary" />
         </div>
     );
 
     const renderReviewView = () => (
         <div className="w-full max-w-3xl">
-            <Button variant="ghost" onClick={() => setStep('prompting')} className="absolute top-8 left-8 text-white hover:bg-white/10">
+            <Button variant="ghost" onClick={() => setStep('prompting')} className="absolute top-8 left-8">
                 <ArrowLeft className="me-2 h-4 w-4" />
                 {t('agentGenerator.backToPrompt')}
             </Button>
@@ -228,29 +233,32 @@ export function GenerateAgentView() {
                     {t('agentGenerator.reviewTitle')}
                 </h1>
             </div>
-            <div className="space-y-6">
-                <div className="glowing-border p-4 rounded-xl text-left">
-                    <p>{prompt}</p>
-                </div>
-                <div className="flex justify-center">
-                    <div {...getRootProps()} className="cursor-pointer">
-                        <input {...getInputProps()} />
-                        <Button variant="outline" className="bg-white/5 border-white/20 hover:bg-white/10 text-white">
-                            <PlusCircle className="me-2 h-4 w-4" />
-                            {t('agentGenerator.addKnowledge')}
-                        </Button>
+            <Card className="space-y-6">
+                <CardHeader>
+                    <CardTitle>Original Prompt</CardTitle>
+                    <CardDescription className="border p-4 rounded-md text-foreground">
+                        {prompt}
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     <div className="flex justify-center">
+                        <div {...getRootProps()} className="cursor-pointer">
+                            <input {...getInputProps()} />
+                            <Button variant="outline" type="button">
+                                <PlusCircle className="me-2 h-4 w-4" />
+                                {t('agentGenerator.addKnowledge')}
+                            </Button>
+                        </div>
                     </div>
-                </div>
-                <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label htmlFor="agent-name" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.name')}</Label>
-                            <Input id="agent-name" value={generatedData?.name || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, name: e.target.value } : null)} className="bg-white/5 border-white/20 h-12" />
+                            <Input id="agent-name" value={generatedData?.name || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, name: e.target.value } : null)} className="h-12" />
                         </div>
                         <div>
                             <Label htmlFor="agent-category" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.category')}</Label>
                             <Select value={selectedCategory} onValueChange={(val) => setSelectedCategory(val as AgentCategory)}>
-                                <SelectTrigger id="agent-category" className="bg-white/5 border-white/20 h-12"><SelectValue placeholder={selectedCategory} /></SelectTrigger>
+                                <SelectTrigger id="agent-category" className="h-12"><SelectValue placeholder={selectedCategory} /></SelectTrigger>
                                 <SelectContent>
                                     {Object.values(AgentCategory).map(cat => <SelectItem key={cat} value={cat}>{cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</SelectItem>)}
                                 </SelectContent>
@@ -259,18 +267,18 @@ export function GenerateAgentView() {
                     </div>
                     <div>
                         <Label htmlFor="agent-description" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.description')}</Label>
-                        <Textarea id="agent-description" value={generatedData?.description || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, description: e.target.value } : null)} className="bg-white/5 border-white/20 min-h-[70px]" />
+                        <Textarea id="agent-description" value={generatedData?.description || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, description: e.target.value } : null)} className="min-h-[70px]" />
                     </div>
                     <div>
                         <Label htmlFor="agent-instructions" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.instructions')}</Label>
-                        <Textarea id="agent-instructions" value={generatedData?.instructions || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, instructions: e.target.value } : null)} className="bg-white/5 border-white/20 min-h-[100px]" />
+                        <Textarea id="agent-instructions" value={generatedData?.instructions || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, instructions: e.target.value } : null)} className="min-h-[100px]" />
                     </div>
                     <div>
                         <Label htmlFor="agent-guidelines" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.guidelines')}</Label>
-                        <Textarea id="agent-guidelines" value={generatedData?.guidelines || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, guidelines: e.target.value } : null)} className="bg-white/5 border-white/20 min-h-[100px]" />
+                        <Textarea id="agent-guidelines" value={generatedData?.guidelines || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, guidelines: e.target.value } : null)} className="min-h-[100px]" />
                     </div>
-                </div>
-                <div className="flex justify-center gap-4">
+                </CardContent>
+                <CardFooter className="flex justify-center gap-4">
                     <Button variant="secondary" onClick={handleAccept} disabled={createAgentMutation.isPending}>
                         {createAgentMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                         <span className="ml-2">{t('agentGenerator.review.acceptButton')}</span>
@@ -279,16 +287,18 @@ export function GenerateAgentView() {
                         {generateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
                         <span className="ml-2">{t('agentGenerator.review.regenerateButton')}</span>
                     </Button>
-                </div>
-            </div>
+                </CardFooter>
+            </Card>
         </div>
     );
 
     return (
-        <div className="h-screen w-full flex flex-col items-center justify-center p-4 text-white ai-gradient-background">
+        <div className="h-screen w-full flex flex-col items-center justify-center p-4 bg-background text-foreground">
             {step === 'prompting' && renderPromptingView()}
             {(step === 'generating' || generateMutation.isPending) && renderGeneratingView()}
             {step === 'reviewing' && !generateMutation.isPending && renderReviewView()}
         </div>
     );
 }
+
+    

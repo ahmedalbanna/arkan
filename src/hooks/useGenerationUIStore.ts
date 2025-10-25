@@ -17,6 +17,12 @@ export interface ControlState {
   formality: number;
   tone: 'professional' | 'academic' | 'casual' | 'persuasive' | 'none';
   wordCount: string;
+  complexity: number;
+  outputStyle: {
+    heading: boolean;
+    paragraph: boolean;
+    list: boolean;
+  };
 }
 
 interface ContextSelectionValue {
@@ -73,7 +79,13 @@ interface GenerationUIActions {
 const defaultControlState: ControlState = {
   formality: 50,
   tone: 'professional',
-  wordCount: '',
+  wordCount: '300',
+  complexity: 50,
+  outputStyle: {
+    heading: false,
+    paragraph: true,
+    list: false,
+  },
 };
 
 const initialAdvancedFields: AdvancedProposalFields = {

@@ -16,6 +16,7 @@ import { Root, List, RootContent } from 'mdast';
 import { getProxiedImageBuffer } from '@/lib/utils';
 import { DocxObject, ConversionOptions } from './types';
 import { transformInlines } from './inline-converter';
+import { Packer } from 'docx';
 
 export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, number>, options: ConversionOptions): Promise<DocxObject[]> {
   const docxObjects: DocxObject[] = [];
@@ -93,11 +94,29 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
         if (imageNode) {
           try {
             const proxiedImage = await getProxiedImageBuffer(imageNode.url);
+            let imageChildren;
+            if (proxiedImage) {
+                // Get image dimensions to calculate aspect ratio
+                const tempImage = new Image();
+                tempImage.src = `data:${proxiedImage.contentType};base64,${btoa(String.fromCharCode(...new Uint8Array(proxiedImage.buffer)))}`;
+                await new Promise(resolve => { tempImage.onload = resolve; });
+
+                const aspectRatio = tempImage.width / tempImage.height;
+                const docxWidth = 550; // Max width in DXA/20
+                imageChildren = [new ImageRun({
+                    data: proxiedImage.buffer,
+                    transformation: {
+                        width: docxWidth,
+                        height: docxWidth / aspectRatio,
+                    }
+                })];
+            } else {
+                 imageChildren = [new TextRun(`[Image failed to load: ${imageNode.alt}]`)];
+            }
+
             const imageParagraph = new Paragraph({
               ...(customStyles.imageParagraph || { alignment: AlignmentType.CENTER }),
-              children: proxiedImage
-                ? [new ImageRun({ data: proxiedImage.buffer, transformation: { width: 550, height: 400 } })]
-                : [new TextRun(`[Image failed to load: ${imageNode.alt}]`)],
+              children: imageChildren,
             });
             docxObjects.push(imageParagraph);
 

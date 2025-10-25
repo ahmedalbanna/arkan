@@ -11,17 +11,14 @@ import {
   SpellCheck,
   UserCheck,
   Volume2,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
+  DropdownMenuContent,
 } from '../ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -32,6 +29,7 @@ interface SectionToolbarProps {
   isReadingAloud: boolean;
   onAiAction: (action: string, payload?: any) => void;
   onReadAloud: () => void;
+  onClearContent: () => void;
 }
 
 export function SectionToolbar({
@@ -39,6 +37,7 @@ export function SectionToolbar({
   isReadingAloud,
   onAiAction,
   onReadAloud,
+  onClearContent,
 }: SectionToolbarProps) {
     const { t } = useLocalization();
     const isBusy = isProcessingAi || isReadingAloud;
@@ -120,6 +119,15 @@ export function SectionToolbar({
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent><p>{t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
+                </Tooltip>
+                
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="rounded-full text-destructive" onClick={onClearContent} disabled={isBusy}>
+                           <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>Clear Content</p></TooltipContent>
                 </Tooltip>
             </TooltipProvider>
         </div>

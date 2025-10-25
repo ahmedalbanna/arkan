@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -8,6 +9,7 @@ import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { SectionName as SectionNameType } from '@/ai/schemas';
+import { Checkbox } from '../ui/checkbox';
 
 export const SectionGenerationControls = ({ sectionKey }: { sectionKey: SectionNameType }) => {
     const { t } = useLocalization();
@@ -16,6 +18,14 @@ export const SectionGenerationControls = ({ sectionKey }: { sectionKey: SectionN
 
     if (!controls) {
         return null;
+    }
+
+    const handleOutputStyleChange = (style: 'heading' | 'paragraph' | 'list', checked: boolean) => {
+        const newOutputStyle = {
+            ...controls.outputStyle,
+            [style]: checked
+        };
+        handleControlChange(sectionKey, 'outputStyle', newOutputStyle);
     }
 
     return (
@@ -29,6 +39,15 @@ export const SectionGenerationControls = ({ sectionKey }: { sectionKey: SectionN
                     <span>{t('builder.reportGenerator.tool_formality_formal')}</span>
                 </div>
             </div>
+             <div className="space-y-3">
+                <Label htmlFor={`complexity-${sectionKey}`}>Complexity</Label>
+                <Slider id={`complexity-${sectionKey}`} value={[controls.complexity]} onValueChange={(val) => handleControlChange(sectionKey, 'complexity', val[0])} max={100} step={1} />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Simple</span>
+                    <span>Balanced</span>
+                    <span>Technical</span>
+                </div>
+            </div>
             <div className="space-y-2">
                 <Label htmlFor={`tone-${sectionKey}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
                 <Select value={controls.tone} onValueChange={(val) => handleControlChange(sectionKey, 'tone', val)}>
@@ -40,6 +59,23 @@ export const SectionGenerationControls = ({ sectionKey }: { sectionKey: SectionN
                         <SelectItem value="persuasive">{t('builder.reportGenerator.tool_tone_persuasive')}</SelectItem>
                     </SelectContent>
                 </Select>
+            </div>
+            <div className="space-y-2">
+                <Label>Output Format</Label>
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        <Checkbox id={`output-heading-${sectionKey}`} checked={controls.outputStyle.heading} onCheckedChange={(checked) => handleOutputStyleChange('heading', !!checked)} />
+                        <Label htmlFor={`output-heading-${sectionKey}`}>Heading</Label>
+                    </div>
+                     <div className="flex items-center gap-2">
+                        <Checkbox id={`output-paragraph-${sectionKey}`} checked={controls.outputStyle.paragraph} onCheckedChange={(checked) => handleOutputStyleChange('paragraph', !!checked)} />
+                        <Label htmlFor={`output-paragraph-${sectionKey}`}>Paragraph</Label>
+                    </div>
+                     <div className="flex items-center gap-2">
+                        <Checkbox id={`output-list-${sectionKey}`} checked={controls.outputStyle.list} onCheckedChange={(checked) => handleOutputStyleChange('list', !!checked)} />
+                        <Label htmlFor={`output-list-${sectionKey}`}>List</Label>
+                    </div>
+                </div>
             </div>
             <div className="space-y-2">
                 <Label htmlFor={`wordCount-${sectionKey}`}>{t('builder.reportGenerator.tool_word_count_label')}</Label>

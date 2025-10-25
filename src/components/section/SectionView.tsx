@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import type { SectionName } from '@/ai/schemas';
@@ -34,7 +33,8 @@ export const Section = ({ sectionKey, title, content, onUpdate }: SectionProps) 
         isProcessingAi,
         isReadingAloud,
         words,
-        chars
+        chars,
+        handleClearContent,
     } = useSectionLogic(sectionKey, content, onUpdate);
 
     return (
@@ -59,6 +59,7 @@ export const Section = ({ sectionKey, title, content, onUpdate }: SectionProps) 
                     onReadAloud={handleReadAloud}
                     isProcessingAi={isProcessingAi}
                     isReadingAloud={isReadingAloud}
+                    onClearContent={handleClearContent}
                 />
 
                 {aiSuggestion && (

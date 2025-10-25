@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -70,8 +69,10 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
     const grammarMutation = useWritingTool('grammar-checker', { onSuccess: handleSuccess, onError: handleError });
     const humanizeMutation = useWritingTool('humanize-text', { onSuccess: handleSuccess, onError: handleError });
     const rewriteMutation = useWritingTool('rewrite-text', { onSuccess: handleSuccess, onError: handleError });
+    const ttsMutation = useWritingTool('text-to-speech');
 
-    const isProcessingAi = summarizeMutation.isPending || expandMutation.isPending || grammarMutation.isPending || humanizeMutation.isPending || rewriteMutation.isPending;
+
+    const isProcessingAi = summarizeMutation.isPending || expandMutation.isPending || grammarMutation.isPending || humanizeMutation.isPending || rewriteMutation.isPending || ttsMutation.isPending;
 
     useEffect(() => {
         // When content is updated from outside (e.g. accepting a suggestion), clear old suggestions
@@ -126,16 +127,27 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
             setIsReading(false);
             return;
         }
-
-        const utterance = new SpeechSynthesisUtterance(textToRead);
-        utterance.onstart = () => setIsReading(true);
-        utterance.onend = () => setIsReading(false);
-        utterance.onerror = () => {
-            setIsReading(false);
-            toast({ title: 'Speech Error', description: 'Could not read the text aloud.', variant: 'destructive' });
-        };
-        window.speechSynthesis.speak(utterance);
+        setIsReading(true);
+        ttsMutation.mutate({ text: textToRead }, {
+            onSuccess: (data: any) => {
+                const audio = new Audio(data.audioDataUri);
+                audio.play();
+                audio.onended = () => setIsReading(false);
+            },
+            onError: (error: any) => {
+                setIsReading(false);
+                toast({ title: 'Speech Error', description: error.message || 'Could not read the text aloud.', variant: 'destructive' });
+            }
+        });
     };
+
+    const handleClearContent = () => {
+        toast({
+            title: "Content Cleared",
+            description: "The content of this section has been cleared.",
+        });
+        onUpdate(sectionKey, '');
+    }
 
     const handleAcceptSuggestion = () => {
         if (aiSuggestion !== null) {
@@ -158,7 +170,7 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
         diff,
         t,
         isProcessingAi,
-        isReadingAloud: isReading,
+        isReadingAloud: isReading || ttsMutation.isPending,
         handleAiAction,
         handleReadAloud,
         handleAcceptSuggestion,
@@ -166,5 +178,6 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
         words,
         chars,
         processedContent,
+        handleClearContent
     };
 };

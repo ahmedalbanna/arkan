@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -6,11 +5,10 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, StickyNote } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { useGuidelineEditor } from '@/hooks/use-guideline-editor';
-import { Textarea } from '../ui/textarea';
 
 interface GuidelineEditorProps {
     itemKey: string;
@@ -70,16 +68,24 @@ export function GuidelineEditor({ itemKey, agentId, isAdmin }: GuidelineEditorPr
                 </div>
             )}
 
-            <div className="space-y-2">
+            <div className="space-y-3">
                 <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.customGuidelines')}</Label>
-                {currentGuidelineState?.custom.map((custom, index) => (
-                    <div key={index} className="flex items-center gap-2 text-sm">
-                        <span>- {custom}</span>
-                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuidelineForItem(itemKey, index)}>
-                            <Trash2 className="h-3 w-3 text-destructive" />
-                        </Button>
-                    </div>
-                ))}
+                <div className="space-y-2 rounded-md border p-3">
+                    {currentGuidelineState?.custom.map((custom, index) => (
+                        <div key={index} className="flex items-center justify-between text-sm bg-background p-2 rounded-md">
+                            <div className="flex items-center gap-2">
+                                <StickyNote className="h-4 w-4 text-muted-foreground" />
+                                <span>{custom}</span>
+                            </div>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveCustomGuidelineForItem(itemKey, index)}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                        </div>
+                    ))}
+                    {currentGuidelineState?.custom.length === 0 && (
+                        <p className="text-xs text-muted-foreground text-center py-2">No custom guidelines added yet.</p>
+                    )}
+                </div>
                 <div className="flex gap-2">
                     <Input
                         placeholder={t('builder.reportGenerator.addGuidelinePlaceholder')}

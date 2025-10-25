@@ -6,8 +6,8 @@ import { toast } from "@/hooks";
 import { projectKeys } from "@/lib/query-keys";
 import { useAuth } from "@/context/AuthContext";
 import {
-  fetchProjects as fetchProjectsApi,
-  fetchProject as fetchProjectApi,
+  fetchProjectsApi,
+  fetchProjectApi,
   createProject,
   deleteProject,
   updateProject,

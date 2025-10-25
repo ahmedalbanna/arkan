@@ -11,24 +11,7 @@ export const DiagramTypeSchema = z.enum([
 ]);
 export type DiagramType = z.infer<typeof DiagramTypeSchema>;
 
-export const SectionNameSchema = z.enum([
-    'introduction',
-    'literatureReview',
-    'systemAnalysis',
-    'designStrategy',
-    'systemDesign',
-    'systemProgramming',
-    'systemTesting',
-    'conclusion',
-    'abstract',
-    'acknowledgment',
-    'trainingProgram',
-    'technicalExperience',
-    'recommendations',
-    'references',
-    'appendices',
-    'proposal'
-]);
+export const SectionNameSchema = z.string().min(1).max(100);
 export type SectionName = z.infer<typeof SectionNameSchema>;
 
 export const ClaimStatusSchema = z.enum(['Verified', 'False', 'Inconclusive']);

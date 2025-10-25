@@ -1,3 +1,4 @@
+
 "use client";
 
 import { create } from "zustand";
@@ -58,10 +59,12 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       },
 
       updateProject: (updater) => {
-        const currentProject = get().project ?? new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as ProjectProperties);
-        updater(currentProject);
-        // Create a new instance and set unsaved changes to true
-        set({ project: new Project(currentProject.toJSON() as ProjectProperties), hasUnsavedChanges: true });
+        set((state) => {
+            const currentProject = state.project ?? new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as ProjectProperties);
+            const newProject = new Project(currentProject.toJSON() as ProjectProperties);
+            updater(newProject);
+            return { project: newProject, hasUnsavedChanges: true };
+        });
       },
 
       addExternalContext: (fileName: string, content: string, type: ContextFileType) => {
