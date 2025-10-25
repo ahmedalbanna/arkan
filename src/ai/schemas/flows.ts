@@ -1,5 +1,4 @@
 
-
 import { z } from 'zod';
 import {
     CitationStyleSchema,
@@ -11,20 +10,6 @@ import {
     SectionNameSchema,
     SummarizeLengthSchema
 } from './enums';
-import { AgentPromptSchema } from './template-schemas';
-
-// agent-chat.ts
-export const AgentChatInputSchema = z.object({
-    agentId: z.string().describe("The ID of the agent to chat with."),
-    message: z.string().describe("The user's message to the agent."),
-});
-export type AgentChatInput = z.infer<typeof AgentChatInputSchema>;
-
-export const AgentChatOutputSchema = z.object({
-    response: z.string().describe("The agent's text response."),
-});
-export type AgentChatOutput = z.infer<typeof AgentChatOutputSchema>;
-
 
 // ai-proofread-document.ts
 export const AiProofreadDocumentInputSchema = z.object({
@@ -206,60 +191,6 @@ export const IdeaGenerationOutputSchema = z.object({
 });
 export type IdeaGenerationOutput = z.infer<typeof IdeaGenerationOutputSchema>;
 
-
-// generate-presentation-outline.ts
-export const GeneratePresentationOutlineInputSchema = z.object({
-    prompt: z.string().describe('The topic or prompt for the presentation.'),
-    documentation: z.string().optional().describe('Optional documentation or context to base the outline on.'),
-});
-export type GeneratePresentationOutlineInput = z.infer<typeof GeneratePresentationOutlineInputSchema>;
-
-type OutlineItem = {
-    title: string;
-    content: string;
-    children?: OutlineItem[];
-}
-
-export const OutlineItemSchema: z.ZodSchema<OutlineItem> = z.object({
-    title: z.string().describe('The title of the slide or section.'),
-    content: z.string().describe('A brief description of the content for this item.'),
-    children: z.array(z.lazy(() => OutlineItemSchema)).optional().describe('Sub-items for this outline entry.'),
-});
-
-export const GeneratePresentationOutlineOutputSchema = z.object({
-    cover: z.object({
-        title: z.string(),
-    }),
-    outline: z.array(OutlineItemSchema),
-});
-export type GeneratePresentationOutlineOutput = z.infer<typeof GeneratePresentationOutlineOutputSchema>;
-
-
-// generate-presentation.ts
-export const PresentationSlideSchema = z.object({
-    title: z.string().describe('The title for this presentation slide.'),
-    content: z.array(z.string()).describe('A list of bullet points for the main content of the slide. Each string is one bullet point.'),
-    speakerNotes: z.string().describe('Detailed speaker notes for the presenter to elaborate on the slide content.'),
-    layout: z.enum(['title_and_content', 'title_only', 'section_header', 'image_with_caption']).optional().describe("The suggested layout for the slide."),
-});
-export type PresentationSlide = z.infer<typeof PresentationSlideSchema>;
-
-export const GeneratePresentationInputSchema = z.object({
-    otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context."),
-    otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context."),
-    externalContext: z.array(z.object({
-        fileName: z.string(),
-        content: z.string(),
-    })).optional().describe("An array of external documents (text or data URIs) provided by the user."),
-});
-export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
-
-export const GeneratePresentationOutputSchema = z.object({
-    slides: z.array(PresentationSlideSchema),
-});
-export type GeneratePresentationOutput = z.infer<typeof GeneratePresentationOutputSchema>;
-
-
 // generate-quiz.ts
 const MultipleChoiceQuestionSchema = z.object({
     type: z.enum(['multiple-choice']),
@@ -300,9 +231,6 @@ export const GenerateQuizOutputSchema = z.object({
 export type GenerateQuizOutput = z.infer<typeof GenerateQuizOutputSchema>;
 
 // generate-report-section.ts
-export const AnyProjectProposalSchema = z.object({}).passthrough();
-export type AnyProjectProposal = z.infer<typeof AnyProjectProposalSchema>;
-
 export const GenerateSectionInputSchema = z.object({
     sectionToGenerate: SectionNameSchema,
     otherSections: z.record(z.string(), z.string()).optional().describe("A map of previously generated text sections and other textual context (like the proposal or plan). The key is the item's name and the value is the markdown/JSON content."),
@@ -491,7 +419,6 @@ export const SummarizeProjectInputSchema = z.object({
     projectDescription: z
         .string()
         .describe('The detailed description of the project that needs to be summarized.'),
-    prompt: z.string().describe('The prompt to use for generating the summary.')
 });
 export type SummarizeProjectInput = z.infer<typeof SummarizeProjectInputSchema>;
 
@@ -553,21 +480,6 @@ export const TopicExplainerOutputSchema = z.object({
 });
 export type TopicExplainerOutput = z.infer<typeof TopicExplainerOutputSchema>;
 
-// translate-presentation.ts
-export const PresentationHistoryEntrySchema = z.object({
-    id: z.string(),
-    name: z.string(),
-    slides: z.array(PresentationSlideSchema),
-});
-export type PresentationHistoryEntry = z.infer<typeof PresentationHistoryEntrySchema>;
-
-export const TranslatePresentationInputSchema = z.object({
-    presentation: PresentationHistoryEntrySchema.describe('The presentation object to be translated.'),
-    targetLang: z.string().describe('The target language (e.g., "English", "Arabic").'),
-});
-export type TranslatePresentationInput = z.infer<typeof TranslatePresentationInputSchema>;
-
-
 // translate-text.ts
 export const TranslateTextInputSchema = z.object({
     text: z.string().describe('The text to be translated.'),
@@ -596,38 +508,11 @@ export const WriteDocumentOutputSchema = z.object({
 });
 export type WriteDocumentOutput = z.infer<typeof WriteDocumentOutputSchema>;
 
-// evaluate-and-select-context.ts
-export const ExternalContextSchema = z.object({
-    fileName: z.string(),
-    content: z.string(),
-    type: ExternalContextTypeSchema
-});
-export type ExternalContext = z.infer<typeof ExternalContextSchema>;
-
-export const SectionGenerationConfigSchema = z.object({
-    section: SectionNameSchema.describe("The target section to generate."),
-    context: z.object({
-        sections: z.array(SectionNameSchema).optional().describe("The keys of existing sections that are most relevant as context."),
-        diagrams: z.array(DiagramTypeSchema).optional().describe("The keys of existing diagrams that are most relevant as context."),
-    }).describe("The recommended context to use for generating this section."),
-    guidelines: z.array(z.string()).describe("A list of the most relevant guidelines to follow. Can include existing guidelines or new ones."),
-    instructions: z.object({
-        tone: z.enum(['professional', 'academic', 'casual', 'persuasive', 'none']).describe("The recommended tone for the section."),
-        formality: z.enum(['informal', 'balanced', 'very formal']).describe("The recommended formality level."),
-    }).describe("Recommended instructions for tone and formality."),
-});
-
-export const EvaluateContextOutputSchema = z.object({
-    configs: z.array(SectionGenerationConfigSchema).describe("An array of optimized configurations for each section to be generated."),
-});
-export type EvaluateContextOutput = z.infer<typeof EvaluateContextOutputSchema>;
-
-
 // evaluate-report.ts
 export const EvaluateReportInputSchema = z.object({
-    reportSections: z.record(SectionNameSchema, z.string()).describe("A map of all generated report sections."),
-    diagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of all generated PlantUML diagrams.").nullable(),
-    acceptanceCriteria: z.array(z.string()).describe("A list of acceptance criteria to evaluate the report against.").nullable().optional(),
+  reportSections: z.record(SectionNameSchema, z.string()).describe("A map of all generated report sections."),
+  diagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of all generated PlantUML diagrams.").nullable(),
+  acceptanceCriteria: z.array(z.string()).describe("A list of acceptance criteria to evaluate the report against.").nullable().optional(),
 });
 export type EvaluateReportInput = z.infer<typeof EvaluateReportInputSchema>;
 

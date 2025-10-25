@@ -1,35 +1,15 @@
 
-
 import { z } from 'zod';
-import { PresentationHistoryEntrySchema } from './flows';
 import { AgentPromptSchema } from './template-schemas';
 
-
 export const ApiUpdateAgentSchema = z.object({
-    name: z.string().min(1, "Name is required").optional(),
-    prompt: z.union([z.string().min(10), AgentPromptSchema]).optional(),
-    isEnabled: z.boolean().optional(),
-    category: z.string().optional(),
-});
-
-export const ApiTranslatePresentationSchema = z.object({
-    presentation: PresentationHistoryEntrySchema,
-    targetLang: z.string(),
-});
-
-export const ApiTranslateProposalSchema = z.object({
-    proposal: z.any(), // Changed from ProjectProposalSchema
-    targetLang: z.string(),
+  name: z.string().min(1, 'Name is required').optional(),
+  prompt: z.union([z.string().min(10), AgentPromptSchema]).optional(),
+  isEnabled: z.boolean().optional(),
+  category: z.string().optional(),
 });
 
 export const ApiTranslateTextSchema = z.object({
-    text: z.string(),
-    targetLang: z.string(),
-});
-
-export const ApiGeneratePresentationSchema = z.object({
-    sourceDocuments: z.array(z.object({
-        fileName: z.string(),
-        content: z.string(),
-    })).min(1, "At least one source document is required."),
+  text: z.string(),
+  targetLang: z.string(),
 });

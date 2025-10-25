@@ -1,49 +1,32 @@
-
 'use server';
 
 /**
- * @fileOverview An AI agent for generating presentation outlines.
- *
- * - generatePresentationOutline - A function that handles the presentation outline generation process.
- * - GeneratePresentationOutlineInput - The input type for the generatePresentationOutline function.
- * - GeneratePresentationOutlineOutput - The return type for the generatePresentationOutline function.
+ * @fileOverview This flow is deprecated and will be removed.
+ * Its functionality is now part of the individual writing tools.
  */
 
-import { ai } from '@/ai/genkit';
-import { GeneratePresentationOutlineInputSchema, GeneratePresentationOutlineOutputSchema, type GeneratePresentationOutlineInput, type GeneratePresentationOutlineOutput } from '@/ai/schemas';
+import { z } from 'zod';
 
+// Define schemas to avoid breaking imports, but mark as deprecated.
+/** @deprecated */
+export const GeneratePresentationOutlineInputSchema = z.object({
+  prompt: z.string().optional(),
+  documentation: z.string().optional(),
+});
+export type GeneratePresentationOutlineInput = z.infer<typeof GeneratePresentationOutlineInputSchema>;
+
+/** @deprecated */
+export const GeneratePresentationOutlineOutputSchema = z.object({
+  cover: z.object({
+    title: z.string(),
+  }),
+  outline: z.array(z.any()),
+});
+export type GeneratePresentationOutlineOutput = z.infer<typeof GeneratePresentationOutlineOutputSchema>;
+
+/** @deprecated */
 export async function generatePresentationOutline(
   input: GeneratePresentationOutlineInput
 ): Promise<GeneratePresentationOutlineOutput> {
-  return generatePresentationOutlineFlow(input);
+  throw new Error('This function is deprecated and should not be used.');
 }
-
-const prompt = ai.definePrompt({
-  name: 'generatePresentationOutlinePrompt',
-  input: { schema: GeneratePresentationOutlineInputSchema },
-  output: { schema: GeneratePresentationOutlineOutputSchema },
-  model: 'googleai/gemini-2.0-flash',
-  prompt: `You are an expert at creating presentation outlines. Based on the following topic and any provided documentation, generate a structured outline for a presentation. The outline should have a cover slide and a series of main points, each with potential sub-points including a title and content for each point.
-
-Topic: {{{prompt}}}
-
-{{#if documentation}}
---- DOCUMENTATION ---
-Use the following documentation as the primary source of information for the outline.
-{{{documentation}}}
--------------------
-{{/if}}
-`,
-});
-
-const generatePresentationOutlineFlow = ai.defineFlow(
-  {
-    name: 'generatePresentationOutlineFlow',
-    inputSchema: GeneratePresentationOutlineInputSchema,
-    outputSchema: GeneratePresentationOutlineOutputSchema,
-  },
-  async (input) => {
-    const { output } = await prompt(input);
-    return output!;
-  }
-);

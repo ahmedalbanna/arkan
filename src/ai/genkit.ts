@@ -7,5 +7,4 @@ import { genkit } from 'genkit';
 const GOOGLE_API_KEY = "AIzaSyA50lI7eBJIQOmmfugv2180BXiB-Ih2nxg"
 export const ai = genkit({
   plugins: [googleAI({ apiKey: GOOGLE_API_KEY })],
-  promptDir: './src/ai/prompts',
 });
