@@ -9,7 +9,7 @@ import { useBuilderStore, useFeatures, useProject } from '@/hooks';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
-import { BookCheck, FileText, FolderKanban, GitGraph, Laptop, Presentation } from 'lucide-react';
+import { BookCheck, FileText, FolderKanban, GitGraph, Presentation } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
@@ -32,10 +32,6 @@ const ReportGenerator = dynamic(() => import('@/components/report-mode/ReportMod
   loading: () => <LoadingSkeleton />,
 });
 const DiagramGenerator = dynamic(() => import('@/components/diagram-mode/DiagramGenerator'), {
-  ssr: false,
-  loading: () => <LoadingSkeleton />,
-});
-const CodeGenerator = dynamic(() => import('@/components/code-mode/CodeGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
@@ -130,7 +126,6 @@ function GeneratePageContent() {
     { id: 'files', enabled: true }, // Files tab is always enabled
     { id: 'report', enabled: isFeatureEnabled('report') },
     { id: 'diagram', enabled: isFeatureEnabled('diagram') },
-    { id: 'code', enabled: isFeatureEnabled('code') },
     { id: 'presentation', enabled: isFeatureEnabled('presentation') },
     { id: 'academic', enabled: isFeatureEnabled('academic') },
   ].filter(tab => tab.enabled).map(tab => tab.id);
@@ -172,7 +167,7 @@ function GeneratePageContent() {
             <LoadingSkeleton />
           ) : (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
-              <TabsList className="grid w-full h-auto grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+              <TabsList className="grid w-full h-auto grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
                 <TabsTrigger value="files" className="gap-2">
                   <FolderKanban className="h-4 w-4" /> {t('builder.tabs.files')}
                 </TabsTrigger>
@@ -184,11 +179,6 @@ function GeneratePageContent() {
                 {isFeatureEnabled('diagram') && (
                   <TabsTrigger value="diagram" className="gap-2">
                     <GitGraph className="h-4 w-4" /> {t('builder.tabs.diagram')}
-                  </TabsTrigger>
-                )}
-                {isFeatureEnabled('code') && (
-                  <TabsTrigger value="code" className="gap-2">
-                    <Laptop className="h-4 w-4" /> {t('builder.tabs.code')}
                   </TabsTrigger>
                 )}
                 {isFeatureEnabled('presentation') && (
@@ -212,9 +202,6 @@ function GeneratePageContent() {
                 </TabsContent>
                 <TabsContent value="diagram" className="h-full animate-fade-in">
                   {activeTab === 'diagram' && <DiagramGenerator />}
-                </TabsContent>
-                <TabsContent value="code" className="h-full animate-fade-in">
-                  {activeTab === 'code' && <CodeGenerator />}
                 </TabsContent>
                 <TabsContent value="presentation" className="h-full animate-fade-in">
                   {activeTab === 'presentation' && <PresentationGenerator />}

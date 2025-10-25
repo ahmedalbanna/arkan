@@ -1,7 +1,7 @@
 
 
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema, AcademicDocumentTypeSchema, AnalyzedDocumentSchema, SolvedDocumentSchema } from '@/ai/schemas';
+import { DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema, AcademicDocumentTypeSchema, AnalyzedDocumentSchema, SolvedDocumentSchema } from '@/ai/schemas';
 
 const ReportSectionConfigSchema = z.object({
   sectionName: z.string(),
@@ -127,7 +127,6 @@ const SavedProposalStateSchema = z.object({
 export const ProjectStateSchema = z.object({
     name: z.string().optional(),
     projectIdea: z.string().optional(),
-    proposal: z.lazy(() => ProjectProposalSchema).nullable(),
     reportConfig: FullReportModeConfigSchema.nullable().optional(),
     generatedProposalState: SavedProposalStateSchema.nullable().optional(),
     sections: z.record(SectionNameSchema, z.string()).optional(),
@@ -147,13 +146,6 @@ export const ProjectStateSchema = z.object({
         explanation: z.string().optional(),
     })).optional(),
     presentation: z.object({ history: z.array(z.object({ id: z.string(), name: z.string(), slides: z.array(PresentationSlideSchema) })) }).optional(),
-    codeGenerator: z.object({ prompt: z.string(), html: z.string(), css: z.string(), javascript: z.string(), codebase: z.object({ files: z.array(z.object({ path: z.string(), content: z.string() })) }).nullable() }).optional(),
-    externalContext: z.array(z.object({
-        fileName: z.string(),
-        content: z.string(),
-        type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
-    })).nullable().optional(),
-    teamId: z.string().nullable().optional(), // Add teamId to associate project with a team
     academicSolver: z.object({
         stage: z.enum(["idle", "parsing", "analyzing", "readyToSolve", "solving", "solved"]),
         documentType: AcademicDocumentTypeSchema.nullable(),
@@ -162,4 +154,10 @@ export const ProjectStateSchema = z.object({
         questionDocuments: z.array(z.object({ fileName: z.string(), content: z.string() })),
         externalContext: z.array(z.object({ fileName: z.string(), content: z.string() })),
     }).optional(),
+    externalContext: z.array(z.object({
+        fileName: z.string(),
+        content: z.string(),
+        type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
+    })).nullable().optional(),
+    teamId: z.string().nullable().optional(), // Add teamId to associate project with a team
 });

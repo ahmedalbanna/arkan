@@ -8,7 +8,6 @@ import '@/ai/flows/generate-report-section.ts'; // Replaces all individual secti
 import '@/ai/flows/generate-diagrams.ts';
 import '@/ai/flows/manipulate-text.ts';
 import '@/ai/flows/generate-presentation.ts';
-import '@/ai/flows/generate-code.ts';
 import '@/ai/flows/rewrite-to-markdown.ts';
 import '@/ai/flows/evaluate-report.ts';
 import '@/ai/flows/translate-text.ts';
@@ -16,7 +15,6 @@ import '@/ai/flows/rewrite-document-to-markdown.ts';
 import '@/ai/flows/generate-image.ts';
 import '@/ai/flows/translate-presentation.ts';
 import '@/ai/flows/image-to-text.ts';
-import '@/ai/flows/generate-codebase.ts';
 import '@/ai/flows/academic-solver.ts';
 import '@/ai/flows/text-to-speech.ts';
 import '@/ai/flows/analyze-context.ts'; // Add new flow

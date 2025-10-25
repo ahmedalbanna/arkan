@@ -1,6 +1,4 @@
-// This file is obsolete and can be safely deleted.
-// All types have been moved to the `src/lib/models` directory
-// and are re-exported from `src/index.ts` for convenience.
+
 export * from './models/agent';
 export * from './models/chat';
 export * from './models/diagram';
@@ -13,3 +11,40 @@ export * from './models/template';
 export * from './models/docxTemplate';
 export * from './models/pptxTemplate';
 export * from './models/reportTemplate';
+export * from './word-converter/types';
+
+export interface HistoryEntry {
+  id: string;
+  createdAt: string;
+  type: 'proposal' | 'diagram' | 'section' | 'project' | 'presentation'; // Added 'project' and 'presentation'
+  title: string; // e.g., "Project Proposal" or "Use Case Diagram"
+  data: any;
+}
+
+
+export interface Notification {
+  id: string;
+  title: string;
+  description: string;
+  icon: 'credit-card' | 'bot' | 'file-text' | 'user-plus' | string; // Allow for more icons
+  isRead: boolean;
+  createdAt: string;
+  link?: string;
+}
+
+export interface PricingPlan {
+    id: string;
+    name: string;
+    price: number;
+    credits: number;
+    features: string[];
+    isPopular?: boolean;
+}
+
+export type TTSInput = {
+    text: string;
+}
+
+export type TTSOutput = {
+    audioDataUri: string;
+}

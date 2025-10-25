@@ -3,7 +3,6 @@
 import { z } from 'zod';
 import { AcademicDocumentTypeSchema } from './enums';
 import { AnalyzedDocumentSchema, PresentationHistoryEntrySchema } from './flows';
-import { ProjectProposalSchema } from './project';
 import { AgentPromptSchema } from './template-schemas';
 
 
@@ -30,7 +29,7 @@ export const ApiTranslatePresentationSchema = z.object({
 });
 
 export const ApiTranslateProposalSchema = z.object({
-    proposal: ProjectProposalSchema,
+    proposal: z.any(), // Changed from ProjectProposalSchema
     targetLang: z.string(),
 });
 
@@ -40,7 +39,6 @@ export const ApiTranslateTextSchema = z.object({
 });
 
 export const ApiGeneratePresentationSchema = z.object({
-    proposal: z.lazy(() => ProjectProposalSchema).nullable().optional(),
     sourceDocuments: z.array(z.object({
         fileName: z.string(),
         content: z.string(),

@@ -14,7 +14,6 @@ export const ProjectPhaseSchema = z.object({
 });
 export type ProjectPhase = z.infer<typeof ProjectPhaseSchema>;
 
-// This schema is deprecated but kept for compatibility with old data.
 export const ProjectProposalSchema = z.object({
     title: z.string().describe(
         "A clear and descriptive title for the project. This should be engaging and summarize the project's core purpose."

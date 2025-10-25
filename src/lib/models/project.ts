@@ -147,9 +147,7 @@ export interface ProjectState {
   presentation?: {
     history: PresentationHistoryEntry[];
   } | undefined;
-  codeGenerator?: any; // Consider defining a specific type for this
   academicSolver?: AcademicSolverState;
-  codebase?: any;
   externalContext?: {
     fileName: string;
     content: string;
@@ -187,9 +185,7 @@ export class Project implements SavedProject {
   private _evaluation?: import('@/ai/schemas').EvaluateReportOutput | null;
   private _diagrams: Partial<Record<DiagramType, Diagram>>;
   private _presentation?: { history: PresentationHistoryEntry[]; };
-  private _codeGenerator?: any; // Consider defining a specific type for this
   private _academicSolver: AcademicSolverState;
-  private _codebase?: any;
   private _externalContext: { fileName: string; content: string; type: ContextFileType; }[];
   private _teamId?: string | null;
 
@@ -212,7 +208,6 @@ export class Project implements SavedProject {
       }
     }
     this._presentation = props.presentation ?? { history: [] };
-    this._codeGenerator = props.codeGenerator;
     this._academicSolver = props.academicSolver ?? {
       stage: "idle",
       documentType: null,
@@ -221,7 +216,6 @@ export class Project implements SavedProject {
       questionDocuments: [],
       externalContext: [],
     };
-    this._codebase = props.codebase;
     this._externalContext = props.externalContext || [];
     this._teamId = props.teamId;
   }
@@ -244,9 +238,7 @@ export class Project implements SavedProject {
   set evaluation(value) { this._evaluation = value; }
   get diagrams() { return this._diagrams; }
   get presentation() { return this._presentation; }
-  get codeGenerator() { return this._codeGenerator; }
   get academicSolver() { return this._academicSolver; }
-  get codebase() { return this._codebase; }
   get externalContext() { return this._externalContext; }
   get teamId() { return this._teamId; }
   
@@ -278,9 +270,7 @@ export class Project implements SavedProject {
       evaluation: this._evaluation,
       diagrams: plainDiagrams,
       presentation: this._presentation,
-      codeGenerator: this._codeGenerator,
       academicSolver: this._academicSolver,
-      codebase: this._codebase,
       externalContext: this._externalContext,
       teamId: this._teamId,
     };
@@ -299,7 +289,6 @@ export class Project implements SavedProject {
     this._evaluation = null;
     this._diagrams = {};
     this._presentation = { history: [] };
-    this._codeGenerator = undefined;
     this._academicSolver = {
       stage: "idle",
       documentType: null,
@@ -308,7 +297,6 @@ export class Project implements SavedProject {
       questionDocuments: [],
       externalContext: [],
     };
-    this._codebase = undefined;
     this._externalContext = [];
     this.hasUnsavedChanges = false;
   }
@@ -365,30 +353,6 @@ export class Project implements SavedProject {
 
     newSlides[slideIndex] = slideToUpdate;
     this._presentation.history[entryIndex] = { ...entry, slides: newSlides };
-  }
-
-  // --- Code Generator Methods ---
-  public setCodeGeneratorPrompt(prompt: string): void {
-    if (!this._codeGenerator) {
-      this._codeGenerator = { prompt: '', html: '', css: '', javascript: '', codebase: null };
-    }
-    this._codeGenerator.prompt = prompt;
-  }
-
-  public setGeneratedCode(code: { html: string; css: string; javascript?: string }): void {
-    if (!this._codeGenerator) {
-      this._codeGenerator = { prompt: '', html: '', css: '', javascript: '', codebase: null };
-    }
-    this._codeGenerator.html = code.html;
-    this._codeGenerator.css = code.css;
-    this._codeGenerator.javascript = code.javascript || '';
-  }
-
-  public setCodebase(codebase: import('@/ai/schemas').Codebase | null): void {
-    if (!this._codeGenerator) {
-      this._codeGenerator = { prompt: '', html: '', css: '', javascript: '', codebase: null };
-    }
-    this._codeGenerator.codebase = codebase;
   }
 
   // --- External Context Methods ---
