@@ -1,6 +1,5 @@
 
 export * from './models/agent';
-export * from './models/chat';
 export * from './models/diagram';
 export * from './models/project';
 export * from './models/section';

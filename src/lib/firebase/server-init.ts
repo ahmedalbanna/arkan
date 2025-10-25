@@ -1,6 +1,5 @@
 // src/lib/firebase/server-init.ts
 import admin from 'firebase-admin';
-import { cert } from 'firebase-admin/app';
 
 // This file should be imported only on the server-side.
 // It initializes the Firebase Admin SDK.
@@ -21,7 +20,7 @@ if (!admin.apps.length) {
       // Fallback for local development
       const serviceAccount = require('../../../docudec-firebase-adminsdk-2maa7-d07a19d3fc.json');
       admin.initializeApp({
-        credential: cert(serviceAccount),
+        credential: admin.credential.cert(serviceAccount),
         databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || "https://docudec-default-rtdb.asia-southeast1.firebasedatabase.app",
         storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
       });
