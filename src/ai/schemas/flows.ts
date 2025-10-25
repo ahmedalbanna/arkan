@@ -406,15 +406,10 @@ export const AnyProjectProposalSchema = z.object({}).passthrough();
 export type AnyProjectProposal = z.infer<typeof AnyProjectProposalSchema>;
 
 export const GenerateSectionInputSchema = z.object({
-    proposal: AnyProjectProposalSchema.optional().nullable(),
-    projectPlan: ProjectPlanSchema.optional().nullable(),
+    // proposal and projectPlan are no longer top-level, they will be inside otherSections
     sectionToGenerate: SectionNameSchema,
-    otherSections: z.object({}).passthrough().refine(obj => {
-        return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);
-    }, "All keys must be a valid SectionName").optional().describe("A map of previously generated text sections to provide context. The key is the section name and the value is the markdown content."),
-    otherDiagrams: z.object({}).passthrough().refine(obj => {
-        return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
-    }, "All keys must be a valid DiagramType").optional().describe("A map of previously generated PlantUML diagrams to provide context. The key is the diagram type and the value is the PlantUML code."),
+    otherSections: z.record(z.string(), z.string()).optional().describe("A map of previously generated text sections and other textual context (like the proposal or plan). The key is the item's name and the value is the markdown/JSON content."),
+    otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context. The key is the diagram type and the value is the PlantUML code."),
     exampleFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional().describe("An array of example documents to be used for style, tone, and structure."),
     contextFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional().describe("An array of context documents to be used for factual information."),
     guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
@@ -422,9 +417,9 @@ export const GenerateSectionInputSchema = z.object({
     agentId: z.string().optional(),
     agentPrompt: z.any().optional(), // Can be string or AgentPrompt
     model: z.string().optional(),
-}).refine(data => data.proposal || data.projectPlan || (data.contextFiles && data.contextFiles.length > 0) || (data.otherSections && Object.keys(data.otherSections).length > 0) || (data.otherDiagrams && Object.keys(data.otherDiagrams).length > 0) || (data.exampleFiles && data.exampleFiles.length > 0), {
-    message: "A proposal, project plan, or external context is required to generate a report section.",
-    path: ["proposal"], // You can associate the error with a specific path
+}).refine(data => (data.otherSections && Object.keys(data.otherSections).length > 0) || (data.contextFiles && data.contextFiles.length > 0) || (data.exampleFiles && data.exampleFiles.length > 0), {
+    message: "Some context (like a proposal, other sections, or context files) is required to generate a report section.",
+    path: ["otherSections"], // Associate error with a path
 });
 
 

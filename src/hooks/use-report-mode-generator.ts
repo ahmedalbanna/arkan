@@ -6,7 +6,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTranslate, useGenerateReportSection } from '@/hooks';
 import { toast } from '@/hooks';
-import type { SectionName } from '@/ai/schemas';
+import type { SectionName, DiagramType } from '@/ai/schemas';
 import { useBuilderStore } from '@/hooks';
 import { Project } from '@/lib/models/project';
 import { useExport } from './use-export';
@@ -119,16 +119,24 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
 
         const selectedContext = contextSelection[sectionId] || {};
 
+        // Combine all textual context into otherSections
+        const otherSectionsPayload = Object.keys(selectedContext.sections || {})
+            .filter(key => selectedContext.sections[key])
+            .reduce((obj, key) => ({ ...obj, [key]: project.sections?.[key as SectionName] }), {});
+
+        if (selectedContext.proposal && project.proposal) {
+            otherSectionsPayload['proposal'] = JSON.stringify(project.proposal);
+        }
+        if (selectedContext.projectPlan && project.projectPlan) {
+            otherSectionsPayload['projectPlan'] = JSON.stringify(project.projectPlan);
+        }
+
         const body = {
-            proposal: selectedContext.proposal ? project.proposal : null,
-            projectPlan: selectedContext.projectPlan ? project.projectPlan : null,
             sectionToGenerate: sectionId,
-            agentId: agent.id, // Pass agentId
-            agentPrompt: agent.prompt, // Pass the full prompt object
-            model: agent.model, // Pass the model
-            otherSections: Object.keys(selectedContext.sections || {})
-                .filter(key => selectedContext.sections[key])
-                .reduce((obj, key) => ({ ...obj, [key]: project.sections?.[key as SectionName] }), {}),
+            agentId: agent.id,
+            agentPrompt: agent.prompt,
+            model: agent.model,
+            otherSections: otherSectionsPayload,
             otherDiagrams: Object.keys(selectedContext.diagrams || {})
                 .filter(key => selectedContext.diagrams[key])
                 .reduce((obj, key) => ({ ...obj, [key]: project.diagrams?.[key as DiagramType]?.plantUmlCode }), {}),

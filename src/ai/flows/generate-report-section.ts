@@ -14,8 +14,6 @@ import { z } from 'genkit';
 
 // Define a specific schema for the prompt's input variables for better type safety and clarity.
 const ReportSectionPromptInputSchema = GenerateSectionInputSchema.extend({
-  stringifiedProposal: z.string(),
-  stringifiedPlan: z.string(),
   agentPrompt: z.any(), // The full agent prompt object
 });
 
@@ -50,26 +48,10 @@ CRITICAL: Your final output must be a JSON object where the 'sectionName' field 
 --- AVAILABLE CONTEXT FROM PROJECT ---
 You have access to the following documents. Review them and use the most relevant information to generate the requested section.
 
-{{#if proposal}}
---- Main Input: Project Proposal ---
-\`\`\`json
-{{{stringifiedProposal}}}
-\`\`\`
-{{else}}
-(No project proposal is being used for this generation. Rely on other provided context.)
-{{/if}}
-
-{{#if projectPlan}}
---- Main Input: Project Plan ---
-\`\`\`json
-{{{stringifiedPlan}}}
-\`\`\`
-{{/if}}
-
 {{#if otherSections}}
---- Other Report Sections ---
+--- Other Report Sections & Context ---
 {{#each otherSections}}
---- Section: {{@key}} ---
+--- Context Item: {{@key}} ---
 {{{this}}}
 ---
 {{/each}}
@@ -111,8 +93,6 @@ File: {{this.fileName}}
 
   const promptVariables = {
     ...input,
-    stringifiedProposal: input.proposal ? JSON.stringify(input.proposal, null, 2) : '',
-    stringifiedPlan: input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '',
     agentPrompt: agentPrompt,
   };
 
