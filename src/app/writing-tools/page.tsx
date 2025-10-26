@@ -35,6 +35,8 @@ export default function WritingToolsPage() {
     { name: 'Session Plan Generator', icon: BrainCircuit, href: '/writing-tools/session-plan' },
     { name: 'Lecture Generator', icon: BrainCircuit, href: '/writing-tools/lecture-generator' },
     { name: 'Markdown Editor', icon: PencilRuler, href: '/writing-tools/markdown-editor' },
+    {name: 'markdown to docx', icon: PencilRuler, href: '/writing-tools/markdown-to-docx'},
+    {name: 'pptx convert', icon: PencilRuler, href: '/writing-tools/pptx-convert'}
   ];
 
   return (
