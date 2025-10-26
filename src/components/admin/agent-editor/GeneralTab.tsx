@@ -14,7 +14,7 @@ import { type AgentCategoryDetails as AgentCategory, type AgentPrompt } from '@/
 import { MessageSquare, Plus, X, Pencil, Copy, Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import { toast } from '@/hooks';
+import { toast, useDebounce } from '@/hooks';
 
 interface GeneralTabProps {
   agentId: string;
@@ -23,8 +23,34 @@ interface GeneralTabProps {
   categories: AgentCategory[];
 }
 
+// New DebouncedTextarea component
+function DebouncedTextarea({ value, onChange, ...props }: React.ComponentProps<typeof Textarea> & { value: string; onChange: (value: string) => void }) {
+  const [localValue, setLocalValue] = useState(value);
+  const debouncedValue = useDebounce(localValue, 500);
+
+  useEffect(() => {
+    onChange(debouncedValue);
+  }, [debouncedValue, onChange]);
+
+  useEffect(() => {
+    // Update local state if the parent value changes from an external source (like a reset)
+    if (value !== localValue) {
+      setLocalValue(value);
+    }
+  }, [value]);
+
+  return (
+    <Textarea
+      value={localValue}
+      onChange={(e) => setLocalValue(e.target.value)}
+      {...props}
+    />
+  );
+}
+
+
 export default function GeneralTab({ agentId, isComplexPrompt, isPending, categories }: GeneralTabProps) {
-  const { control, watch } = useFormContext<AgentEditorFormValues>();
+  const { control, watch, getValues, setValue } = useFormContext<AgentEditorFormValues>();
   const { t } = useLocalization();
   const [isCopied, setIsCopied] = useState(false);
 
@@ -35,16 +61,7 @@ export default function GeneralTab({ agentId, isComplexPrompt, isPending, catego
 
   const promptValue = watch('prompt');
   const introductionValue = watch('introduction');
-  const [promptLength, setPromptLength] = useState(0);
   const introLength = introductionValue?.length || 0;
-
-  useEffect(() => {
-    if (isComplexPrompt) {
-      setPromptLength(((promptValue || { base: '' }) as AgentPrompt).base.length);
-    } else {
-      setPromptLength((promptValue as string)?.length || 0);
-    }
-  }, [promptValue, isComplexPrompt]);
 
   const handleCopyId = () => {
     navigator.clipboard.writeText(agentId);
@@ -106,7 +123,12 @@ export default function GeneralTab({ agentId, isComplexPrompt, isPending, catego
             <FormItem>
               <FormLabel>{t('agentEditor.promptLabel')}</FormLabel>
               <FormControl>
-                <Textarea {...field} rows={8} className="font-mono text-sm" disabled={isPending} />
+                <DebouncedTextarea 
+                  {...field} 
+                  rows={8} 
+                  className="font-mono text-sm" 
+                  disabled={isPending}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -119,7 +141,16 @@ export default function GeneralTab({ agentId, isComplexPrompt, isPending, catego
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t('agentEditor.promptLabel')}</FormLabel>
-              <FormControl><Textarea {...field} value={field.value as string} rows={8} className="font-mono text-sm" disabled={isPending} /></FormControl>
+              <FormControl>
+                <DebouncedTextarea 
+                  {...field} 
+                  value={field.value as string} 
+                  onChange={(val) => setValue('prompt', val)}
+                  rows={8} 
+                  className="font-mono text-sm" 
+                  disabled={isPending} 
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
