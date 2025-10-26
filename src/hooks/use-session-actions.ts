@@ -27,7 +27,7 @@ export function useSessionActions() {
 
     const project = useBuilderStore(state => state.project);
     const hasUnsavedChanges = useBuilderStore(state => state.hasUnsavedChanges);
-    const { loadProject, newSession, updateProject, setProject } = useBuilderStore();
+    const { loadProject, newSession, updateProject } = useBuilderStore();
     
     const saveProjectMutation = useSaveProject();
     const updateProjectMutation = useUpdateProject();
@@ -129,7 +129,9 @@ export function useSessionActions() {
 
         saveProjectMutation.mutate(saveData, {
             onSuccess: (newProjectData) => {
-                setProject(new Project(newProjectData as ProjectProperties));
+                updateProject(p => {
+                    Object.assign(p, newProjectData);
+                });
                 toast({
                     title: t("projects.projectSavedAsToastTitle"),
                     description: t("projects.projectSavedAsToastDesc", { name: newProjectData.name }),

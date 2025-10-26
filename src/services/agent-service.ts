@@ -8,6 +8,24 @@ import type { AgentProperties, AgentCategoryDetails } from '@/lib/models/agent';
 
 
 /**
+ * Fetches the list of all agent configurations from the API.
+ * This is now used by the `useAgents` hook.
+ * @param token The user's authentication token.
+ * @returns A promise that resolves to an array of AgentProperties.
+ */
+export async function fetchAgentsApi(token: string): Promise<AgentProperties[]> {
+    const response = await fetch('/api/agents', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch agents');
+    }
+    return response.json();
+}
+
+
+/**
  * Fetches the full list of agent categories from the API.
  * Requires admin authentication.
  * @param token The admin user's authentication token.

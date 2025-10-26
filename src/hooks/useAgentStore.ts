@@ -1,7 +1,8 @@
 
 import { create } from 'zustand';
-import { db } from '@/lib/firebase/client-init';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { fetchAgentsApi } from '@/services'; // NEW: Import the API service
+import { getAuthenticatedToken } from '@/lib/authUtils'; // NEW: Import auth util
+import { auth } from '@/lib/firebase/client-init'; // NEW: Import Firebase auth
 import type { AgentProperties } from '@/lib/models/agent';
 
 export interface AgentWithComponent extends AgentProperties {
@@ -13,54 +14,36 @@ interface AgentState {
   isLoaded: boolean;
   isLoading: boolean;
   error: string | null;
-  fetchAgents: () => void;
+  fetchAgents: () => Promise<void>; // Make it async
 }
-
-let unsubscribe: (() => void) | null = null;
 
 export const useAgentStore = create<AgentState>((set, get) => ({
   agents: {},
   isLoaded: false,
   isLoading: false,
   error: null,
-  fetchAgents: () => {
-    const { isLoading, isLoaded } = get();
-    // Prevent re-fetching if already loading.
-    // Allow re-fetching if already loaded to get fresh data.
-    if (isLoading) return;
+  fetchAgents: async () => {
+    if (get().isLoading) return;
 
     set({ isLoading: true, error: null });
 
-    // If a listener is already active, unsubscribe first.
-    if (unsubscribe) {
-      unsubscribe();
-    }
-
     try {
-      const agentsCollectionRef = collection(db, 'agents');
-      const q = query(agentsCollectionRef, where("isEnabled", "==", true));
+      const user = auth.currentUser;
+      const token = await getAuthenticatedToken(user);
+      const fetchedAgents = await fetchAgentsApi(token);
 
-      unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const fetchedAgents: Record<string, AgentWithComponent> = {};
-        querySnapshot.forEach((doc) => {
-          const data = doc.data() as Omit<AgentWithComponent, 'id'>;
-          const agent: AgentWithComponent = {
-            id: doc.id,
-            ...data,
-          };
-          fetchedAgents[doc.id] = agent;
-        });
-        set({ agents: fetchedAgents, isLoaded: true, isLoading: false });
-      }, (error) => {
-        console.error("Error fetching agents with real-time listener:", error);
-        set({ isLoaded: false, isLoading: false, error: error.message });
-      });
+      const agentMap = fetchedAgents.reduce((acc, agent) => {
+        acc[agent.id] = agent as AgentWithComponent;
+        return acc;
+      }, {} as Record<string, AgentWithComponent>);
+
+      set({ agents: agentMap, isLoaded: true, isLoading: false });
     } catch (e: any) {
-      console.error("Error setting up agent listener:", e);
+      console.error("Error fetching agents:", e);
       set({ isLoaded: false, isLoading: false, error: e.message });
     }
   },
 }));
 
-// Automatically fetch agents when the store is initialized
+// Automatically fetch agents when the store is initialized for the first time.
 useAgentStore.getState().fetchAgents();

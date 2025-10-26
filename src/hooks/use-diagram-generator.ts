@@ -3,15 +3,16 @@
 
 import { type DiagramType, DiagramTypeSchema } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAgentStore, useBuilderStore, useAgents, useUpdateDiagram } from '@/hooks';
-import { useMemo } from 'react';
+import { useBuilderStore, useAgents, useUpdateDiagram } from '@/hooks';
+import { useMemo, useState } from 'react';
 import { Agent, AgentCategory } from '@/lib/models/agent';
-import { GitGraph } from 'lucide-react';
+
 
 export const useDiagramGenerator = () => {
     const { t, locale } = useLocalization();
     const { project, updateProject } = useBuilderStore();
     const { agents } = useAgents();
+    const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
     const diagrams = project?.diagrams || {};
 
@@ -58,12 +59,14 @@ export const useDiagramGenerator = () => {
     return {
         t,
         locale,
-        diagramSections,
+        isPanelCollapsed,
+        setIsPanelCollapsed,
         diagrams,
-        handleDiagramCodeUpdate,
-        setDiagramExplanation,
+        diagramSections,
         mutation,
         handleUpdateDiagram,
         generatedDiagrams,
+        handleDiagramCodeUpdate,
+        setDiagramExplanation,
     };
 };

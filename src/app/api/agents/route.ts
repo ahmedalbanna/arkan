@@ -1,11 +1,11 @@
+
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-import { adminDb } from '@/lib/firebase/server-init';
+import { getEnabledAgents } from '@/lib/data/agents';
 
 // GET all enabled agents
 export const GET = withAuth(async ({ user }) => {
   try {
-    const snapshot = await adminDb.collection('agents').where('isEnabled', '==', true).orderBy('name').get();
-    const agents = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const agents = await getEnabledAgents();
     return createApiResponse(agents, 200);
   } catch (error) {
     return handleApiError(error);

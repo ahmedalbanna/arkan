@@ -23,7 +23,7 @@ const verifyProjectOwner = async (requesterId: string, projectId: string) => {
 // GET a single project
 export const GET = withAuth(async ({ params, user }) => {
     try {
-        const projectId = params.id;
+        const projectId = await params.id;
         const project = await verifyProjectOwner(user.id, projectId);
         return createApiResponse({ id: projectId, ...project }, 200);
     } catch (error) {

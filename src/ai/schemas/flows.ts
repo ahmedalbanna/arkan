@@ -1,4 +1,5 @@
 
+
 import { z } from 'zod';
 import {
     CitationStyleSchema,
@@ -51,7 +52,7 @@ export const AnalyzeContextInputSchema = z.object({
     contextFiles: z.array(z.object({
         fileName: z.string(),
         content: z.string(),
-        type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
+        type: ExternalContextTypeSchema,
     })).describe("An array of context files (text, images, PDFs as data URIs) to be analyzed."),
 });
 export type AnalyzeContextInput = z.infer<typeof AnalyzeContextInputSchema>;
@@ -136,6 +137,7 @@ export const GenerateDiagramInputSchema = z.object({
     externalContext: z.array(z.object({
         fileName: z.string(),
         content: z.string(),
+        type: ExternalContextTypeSchema,
     })).optional().describe("An array of external documents (text or data URIs) provided by the user."),
     guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
     instructionText: z.string().optional().describe("Additional instructions for generation (e.g., tone, formality)."),
@@ -235,14 +237,17 @@ export const GenerateSectionInputSchema = z.object({
     sectionToGenerate: SectionNameSchema,
     otherSections: z.record(z.string(), z.string()).optional().describe("A map of previously generated text sections and other textual context (like the proposal or plan). The key is the item's name and the value is the markdown/JSON content."),
     otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context. The key is the diagram type and the value is the PlantUML code."),
-    exampleFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional().describe("An array of example documents to be used for style, tone, and structure."),
-    contextFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional().describe("An array of context documents to be used for factual information."),
+    externalContext: z.array(z.object({
+        fileName: z.string(),
+        content: z.string(),
+        type: ExternalContextTypeSchema,
+    })).optional().describe("An array of external documents to be used for style, tone, and structure."),
     guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
     instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
     agentId: z.string().optional(),
     agentPrompt: z.any().optional(), // Can be string or AgentPrompt
     model: z.string().optional(),
-}).refine(data => (data.otherSections && Object.keys(data.otherSections).length > 0) || (data.contextFiles && data.contextFiles.length > 0) || (data.exampleFiles && data.exampleFiles.length > 0), {
+}).refine(data => (data.otherSections && Object.keys(data.otherSections).length > 0) || (data.externalContext && data.externalContext.length > 0), {
     message: "Some context (like a proposal, other sections, or context files) is required to generate a report section.",
     path: ["otherSections"], // Associate error with a path
 });

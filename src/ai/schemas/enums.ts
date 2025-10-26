@@ -34,3 +34,4 @@ export const SummarizeLengthSchema = z.enum(['short', 'medium', 'long']);
 export type SummarizeLength = z.infer<typeof SummarizeLengthSchema>;
 
 export const ExternalContextTypeSchema = z.enum(['context', 'example', 'question', 'textbook', 'guidelines']);
+export type ExternalContextType = z.infer<typeof ExternalContextTypeSchema>;

@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -6,7 +7,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { type GenerateDiagramInput, type GenerateDiagramOutput, DiagramTypeSchema, GenerateDiagramOutputSchema } from '@/ai/schemas';
+import { type GenerateDiagramInput, type GenerateDiagramOutput, DiagramTypeSchema, GenerateDiagramOutputSchema, AnyProjectProposal, ProjectPlan } from '@/ai/schemas';
 import { getAgent } from '@/lib/db/queries';
 import type { AgentPrompt } from '@/lib/types';
 import { z } from 'genkit';
@@ -173,7 +174,14 @@ const diagramSpecificInstructions: Record<z.infer<typeof DiagramTypeSchema>, str
 };
 
 
-export async function generateDiagram(input: GenerateDiagramInput): Promise<GenerateDiagramOutput> {
+// Extend the schema for the prompt to include proposal and project plan
+const DiagramPromptInputSchema = GenerateDiagramInputSchema.extend({
+  proposal: z.any().optional(),
+  projectPlan: z.any().optional(),
+});
+
+
+export async function generateDiagram(input: z.infer<typeof DiagramPromptInputSchema>): Promise<GenerateDiagramOutput> {
   const agentId = `generate-${input.diagramToGenerate}-diagram`;
   const agent = await getAgent(agentId);
   if (!agent) {

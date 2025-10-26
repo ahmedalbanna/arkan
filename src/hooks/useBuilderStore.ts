@@ -21,7 +21,8 @@ interface BuilderActions {
   setHasUnsavedChanges: (status: boolean) => void;
   // Add new actions for direct manipulation, which will call the updater
   addExternalContext: (fileName: string, content: string, type: ContextFileType) => void;
-  replaceExternalContext: (index: number, newItem: { fileName: string, content: string, type: ContextFileType }) => void;
+  removeExternalContext: (index: number) => void;
+  updateExternalContextType: (index: number, type: ContextFileType) => void;
 }
 
 const initialState: BuilderState = {
@@ -61,44 +62,46 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       updateProject: (updater) => {
         set((state) => {
             const currentProject = state.project ?? new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as ProjectProperties);
+            // Create a new instance from the current one's state to ensure React detects the change
             const newProject = new Project(currentProject.toJSON() as ProjectProperties);
-            updater(newProject);
+            updater(newProject); // Apply mutations to the new instance
             return { project: newProject, hasUnsavedChanges: true };
         });
       },
 
-      addExternalContext: (fileName: string, content: string, type: ContextFileType) => {
+ setHasUnsavedChanges: (status) => {
+ set({ hasUnsavedChanges: status });
+ },
+      
+      addExternalContext: (fileName, content, type) => {
         get().updateProject(p => p.addExternalContext(fileName, content, type));
       },
 
-      replaceExternalContext: (index: number, newItem: { fileName: string, content: string, type: ContextFileType }) => {
-        get().updateProject(p => {
-            if (p.externalContext) {
-                p.externalContext[index] = newItem;
-            }
-        });
+      removeExternalContext: (index: number) => {
+        get().updateProject(p => p.removeExternalContext(index));
       },
 
-      setHasUnsavedChanges: (status) => set({ hasUnsavedChanges: status }),
+      updateExternalContextType: (index: number, type: ContextFileType) => {
+        get().updateProject(p => p.updateExternalContextType(index, type));
+      }
     }),
     {
-      name: "arkan-builder-state-v3",
+      name: "arkan-builder-state-v3", // Version bump to prevent conflicts with old structure
       storage: createJSONStorage(() => localStorage),
 
+      // We only need to persist the project object itself
       partialize: (state) => ({
         project: state.project?.toJSON(),
       }),
 
+      // On rehydration, create a new Project instance from the persisted plain object
       merge: (persistedState: any, currentState) => {
         if (persistedState?.project) {
-          // Remove proposal and projectPlan from persisted state before creating new Project
-          delete persistedState.project.proposal;
-          delete persistedState.project.projectPlan;
           const project = new Project(persistedState.project as ProjectProperties);
           return {
             ...currentState,
             project,
-            hasUnsavedChanges: false,
+            hasUnsavedChanges: false, // Reset on load
           };
         }
         return currentState;

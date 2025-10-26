@@ -19,6 +19,7 @@ import {
   createAgentCategoryApi,
   updateAgentCategoryApi,
   deleteAgentCategoryApi,
+  fetchAgentsApi,
 } from "@/services";
 import { type AgentEditorFormValues } from "@/lib/agent-editor-schema";
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
@@ -122,18 +123,33 @@ export function useDeleteAgentCategory() {
 
 
 /**
- * Custom hook to get the list of all AI agents from the central store.
- * Returns an array of Agent CLASS INSTANCES.
+ * Fetches a list of all agents.
+ * Returns instances of the Agent CLASS.
  */
 export function useAgents() {
-  const { agents, isLoaded, error } = useAgentStore();
+  const { firebaseUser } = useAuth();
 
-  const agentList = useMemo(() =>
-    Object.values(agents).map(a => new Agent(a as AgentProperties)),
-    [agents]
-  );
+  const queryInfo = useQuery<Agent[]>({
+    queryKey: agentKeys.lists(),
+    queryFn: async (): Promise<Agent[]> => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      const data = await fetchAgentsApi(token);
+      return data.map(a => new Agent(a as AgentProperties));
+    },
+    enabled: !!firebaseUser,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    meta: {
+      onError: (error: Error) => {
+        handleErrorUtility(error, "Failed to fetch agents");
+      },
+    },
+  });
 
-  return { agents: agentList, isLoaded, isError: !!error };
+  return {
+    agents: queryInfo.data || [],
+    isLoaded: !queryInfo.isLoading,
+    isError: queryInfo.isError,
+  }
 }
 
 /**
@@ -168,20 +184,19 @@ export function useAgent(agentId: string) {
 export function useUpdateAgent() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
-  const { fetchAgents } = useAgentStore.getState();
 
   return useMutation<AgentProperties, Error, UpdateAgentVariables>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return updateAgentApi(variables, token);
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: agentKeys.detail(variables.agentId) });
       toast({
         title: "Agent Updated",
         description: `Agent "${data.name}" has been successfully updated.`,
       });
-      // Instead of invalidating, trigger a refetch of the store.
-      fetchAgents();
     },
     onError: (error) => {
       handleErrorUtility(error, "Update Agent Failed");
@@ -194,8 +209,8 @@ export function useUpdateAgent() {
  * @returns The result of the useMutation hook.
  */
 export function useCreateAgent() {
+    const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
-    const { fetchAgents } = useAgentStore.getState();
 
     return useMutation<AgentProperties, Error, CreateAgentVariables>({
         mutationFn: async (variables) => {
@@ -203,9 +218,8 @@ export function useCreateAgent() {
             return createAgentApi(variables, token);
         },
         onSuccess: (newAgent) => {
+            queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
             toast({ title: 'Success', description: 'New AI agent created.' });
-            // Trigger a refetch of the store data.
-            fetchAgents();
         },
         onError: (error, newAgent, context) => {
              handleErrorUtility(error, "Create Agent Failed");
@@ -219,8 +233,8 @@ export function useCreateAgent() {
  * @returns The result of the useMutation hook.
  */
 export function useDeleteAgent() {
+    const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
-    const { fetchAgents } = useAgentStore.getState();
 
     return useMutation<any, Error, string>({
         mutationFn: async (agentId: string) => {
@@ -228,8 +242,8 @@ export function useDeleteAgent() {
             return deleteAgentApi(agentId, token);
         },
         onSuccess: (data, agentId) => {
+            queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
             toast({ title: 'Agent Deleted', description: `Agent "${agentId}" was successfully deleted.` });
-            fetchAgents(); // Refetch the store data
         },
         onError: (error: Error) => {
             handleErrorUtility(error, "Delete Failed");

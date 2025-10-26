@@ -1,41 +1,43 @@
 
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import DiagramViewer from './DiagramViewer';
-import { GitGraph } from 'lucide-react';
-import { DiagramGenerationTools } from './DiagramGenerationTools';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Accordion } from '@/components/ui/accordion';
-import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
-import { useDiagramGenerator } from '@/hooks';
-import { useState } from 'react';
+import { useDiagramGenerator } from '@/hooks/use-diagram-generator';
 import { cn } from '@/lib/utils';
+import { GitGraph, PanelRightOpen } from 'lucide-react';
+import DiagramViewer from './DiagramViewer';
+import { DiagramGenerationTools } from './DiagramGenerationTools';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Button } from '../ui/button';
-import { PanelRightOpen } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Skeleton } from '../ui/skeleton';
 
 function DiagramSkeleton() {
   return (
-    <div className="space-y-4 p-4">
-      <Skeleton className="aspect-video w-full" />
-      <Skeleton className="h-24 w-full" />
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start">
+        <div className="lg:col-span-4">
+            <Skeleton className="h-[calc(100vh-200px)]" />
+        </div>
+        <div className="lg:col-span-8">
+            <Skeleton className="h-[calc(100vh-200px)]" />
+        </div>
     </div>
-  )
+  );
 }
 
 export default function DiagramGenerator() {
-    const {
+    const { 
         t,
         locale,
-        diagramSections,
+        isPanelCollapsed,
+        setIsPanelCollapsed,
         diagrams,
-        handleDiagramCodeUpdate,
-        setDiagramExplanation,
+        diagramSections,
         mutation,
         handleUpdateDiagram,
         generatedDiagrams,
-    } = useDiagramGenerator();
-    const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
+        handleDiagramCodeUpdate,
+        setDiagramExplanation,
+     } = useDiagramGenerator();
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>

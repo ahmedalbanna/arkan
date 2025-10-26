@@ -34,7 +34,6 @@ import { IdeaGenerationInputSchema } from '@/ai/schemas';
 import { writeDocument } from '@/ai/flows/write-document';
 import { WriteDocumentInputSchema } from '@/ai/schemas';
 import { generatePresentationOutline } from '@/ai/flows/generate-presentation-outline';
-import { GeneratePresentationOutlineInputSchema } from '@/ai/schemas';
 import { generatePlantUML } from '@/ai/flows/generate-plantuml';
 import { GeneratePlantUMLInputSchema } from '@/ai/schemas';
 import { rewriteText, summarizeTextWithRatio } from '@/ai/flows/text-stylist';
@@ -57,7 +56,6 @@ const toolConfig = {
   'topic-explainer': { flow: topicExplainer, schema: TopicExplainerInputSchema, creditCost: 1 },
   'generate-ideas': { flow: generateIdeas, schema: IdeaGenerationInputSchema, creditCost: 1 },
   'write-document': { flow: writeDocument, schema: WriteDocumentInputSchema, creditCost: 3 },
-  'presentation-outline': { flow: generatePresentationOutline, schema: GeneratePresentationOutlineInputSchema, creditCost: 1 },
   'generate-plantuml': { flow: generatePlantUML, schema: GeneratePlantUMLInputSchema, creditCost: 1 },
   'rewrite-text': { flow: rewriteText, schema: RewriteTextInputSchema, creditCost: 1 },
   'summarize-with-ratio': { flow: summarizeTextWithRatio, schema: SummarizeTextWithRatioInputSchema, creditCost: 1 },

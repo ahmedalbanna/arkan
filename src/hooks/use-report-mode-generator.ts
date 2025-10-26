@@ -5,7 +5,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTranslate, useGenerateReportSection } from '@/hooks';
 import { toast } from '@/hooks';
-import type { SectionName, DiagramType } from '@/ai/schemas';
+import type { SectionName, DiagramType, AgentPrompt } from '@/ai/schemas';
 import { useBuilderStore } from '@/hooks';
 import { Project } from '@/lib/models/project';
 import { useExport } from './use-export';
@@ -42,10 +42,9 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
     );
 
     const handleSectionUpdate = (key: SectionName, value: string) => {
-        if (!project) return;
-        project.updateSectionContent(key, value);
-        // Create a new Project instance to trigger a re-render in components that use the project object.
-        updateProject(p => { /* empty updater, just to trigger change */ });
+        updateProject(p => {
+            p.updateSectionContent(key, value);
+        });
     };
 
     const handleTranslateAll = async (targetLang: 'en' | 'ar') => {
@@ -125,11 +124,14 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         const otherSectionsPayload = Object.keys(selectedContext.sections || {})
             .filter(key => selectedContext.sections[key])
             .reduce((obj, key) => ({ ...obj, [key]: project.sections?.[key as SectionName] }), {});
+        
+        // Ensure the prompt is a plain object before sending
+        const plainPrompt = typeof agent.prompt === 'object' ? { ...agent.prompt } : agent.prompt;
 
         const body = {
             sectionToGenerate: sectionId,
             agentId: agent.id,
-            agentPrompt: agent.prompt,
+            agentPrompt: plainPrompt,
             model: agent.model,
             otherSections: otherSectionsPayload,
             otherDiagrams: Object.keys(selectedContext.diagrams || {})
@@ -173,7 +175,6 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         onGenerateSection,
         hasCreditsForSingleSection,
         agents: reportAgents,
-        agentsLoaded,
-        project,
+        agentsLoaded
     };
 };

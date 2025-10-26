@@ -62,21 +62,10 @@ You have access to the following documents. Review them and use the most relevan
 {{/each}}
 {{/if}}
 
-{{#if exampleFiles}}
---- IMPORTANT EXAMPLES (STYLE REFERENCE) ---
-You MUST heavily reference the following content for style, tone, and structure.
-{{#each exampleFiles}}
-File: {{this.fileName}}
-{{{this.content}}}
----
-{{/each}}
-{{/if}}
-
-{{#if contextFiles}}
---- FACTUAL CONTEXT ---
-Use the following content for information and data.
-{{#each contextFiles}}
-File: {{this.fileName}}
+{{#if externalContext}}
+--- Additional Context Files ---
+{{#each externalContext}}
+--- File: {{this.fileName}} (Type: {{this.type}}) ---
 {{{this.content}}}
 ---
 {{/each}}

@@ -10,13 +10,12 @@ import {
   fetchProjectApi,
   createProject,
   deleteProject,
-  updateProject,
-  type SavedProject,
+  updateProject as updateProjectApi,
 } from "@/services";
 import { useBuilderStore } from "./useBuilderStore";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
-import { type ProjectState } from "@/services";
+import { type ProjectState, type SavedProject } from "@/lib/models/project";
 import { Project, type ProjectProperties } from "@/lib/models/project";
 
 interface UpdateProjectVariables {
@@ -33,7 +32,7 @@ type SaveProjectVariables = ProjectState & { name: string };
 export function useProjects() {
   const { firebaseUser } = useAuth();
 
-  const queryInfo = useQuery({
+  const queryInfo = useQuery<SavedProject[], Error, Project[]>({
     queryKey: projectKeys.lists(),
     queryFn: async (): Promise<SavedProject[]> => {
       const token = await getAuthenticatedToken(firebaseUser);
@@ -64,7 +63,7 @@ export function useProjects() {
  */
 export function useProject(projectId: string) {
   const { firebaseUser } = useAuth();
-  return useQuery({
+  return useQuery<SavedProject, Error, Project | undefined>({
     queryKey: projectKeys.detail(projectId),
     queryFn: async (): Promise<SavedProject> => {
       const token = await getAuthenticatedToken(firebaseUser);
@@ -117,14 +116,13 @@ export function useUpdateProject() {
   return useMutation<SavedProject, Error, UpdateProjectVariables>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return updateProject(variables.projectId, variables.data, token);
+      return updateProjectApi(variables.projectId, variables.data, token);
     },
     onSuccess: (updatedProjectData) => {
       const updatedProject = new Project(updatedProjectData as ProjectProperties);
       
       queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
-
-      queryClient.setQueryData(projectKeys.detail(updatedProject.id), updatedProjectData);
+      queryClient.setQueryData(projectKeys.detail(updatedProject.id), updatedProject);
       
       setProject(updatedProject);
       setHasUnsavedChanges(false);
