@@ -197,3 +197,24 @@ export async function generateAgentConfigApi(variables: { prompt: string, includ
     }
     return response.json();
 }
+
+
+/**
+ * Imports a list of agents into the database via the API.
+ * Requires admin authentication.
+ * @param agents An array of AgentProperties to import.
+ * @param token The admin user's authentication token.
+ * @returns A promise that resolves to a summary of the import.
+ */
+export async function importAgentsApi(agents: AgentProperties[], token: string): Promise<{ count: number }> {
+    const response = await fetch('/api/admin/agents/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ agents }),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to import agents');
+    }
+    return await response.json();
+}

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useAgents, useUpdateAgent, useAgentCategories, useDeleteAgent } from '@/hooks';
+import { useAgents, useUpdateAgent, useAgentCategories, useDeleteAgent, useImportAgents } from '@/hooks';
 import { type Agent } from '@/lib/models/agent';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -9,10 +9,10 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Pencil, Loader2, AlertCircle, PlusCircle, GripVertical, Search, Bot, Trash2, Download } from 'lucide-react';
+import { ExternalLink, Pencil, Loader2, AlertCircle, PlusCircle, GripVertical, Search, Bot, Trash2, Download, Upload } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { CreateAgentDialog } from '@/components/admin/users/CreateAgentDialog';
 import { Input } from '@/components/ui/input';
@@ -104,6 +104,8 @@ export default function AgentManager() {
   const { data: categories, isLoading: categoriesLoading } = useAgentCategories();
   const [searchTerm, setSearchTerm] = useState('');
   const { t } = useLocalization();
+  const importAgentsMutation = useImportAgents();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const groupedAgents = useMemo(() => {
     if (!agents || !categories) return {};
@@ -138,13 +140,41 @@ export default function AgentManager() {
           toast({ title: 'No Agents to Export', description: 'There are no agents available to export.', variant: 'destructive' });
           return;
       }
-      // Convert agent class instances to plain objects for serialization
       const plainAgents = agents.map(agent => agent.toJSON());
       const jsonString = JSON.stringify(plainAgents, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
       saveAs(blob, 'arkan_agents_export.json');
       toast({ title: 'Export Successful', description: 'All agent configurations have been downloaded.' });
   }
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const content = e.target?.result as string;
+            const parsedAgents = JSON.parse(content);
+            // Add basic validation here if needed
+            if (Array.isArray(parsedAgents)) {
+                importAgentsMutation.mutate(parsedAgents);
+            } else {
+                 toast({ title: 'Invalid File', description: 'The JSON file should contain an array of agents.', variant: 'destructive'});
+            }
+        } catch (error) {
+            toast({ title: 'Import Failed', description: 'Could not parse the JSON file.', variant: 'destructive'});
+        }
+    };
+    reader.readAsText(file);
+    if (fileInputRef.current) {
+        fileInputRef.current.value = ''; // Reset input
+    }
+  };
 
   if (!isLoaded || categoriesLoading) {
     return (
@@ -176,6 +206,11 @@ export default function AgentManager() {
             />
         </div>
         <div className="flex items-center gap-2">
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".json" className="hidden" />
+             <Button size="sm" variant="outline" onClick={handleImportClick} disabled={importAgentsMutation.isPending}>
+                {importAgentsMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Upload className="me-2 h-4 w-4" />}
+                Import
+            </Button>
             <Button size="sm" variant="outline" onClick={handleExport}>
                 <Download className="me-2 h-4 w-4" />
                 Export All

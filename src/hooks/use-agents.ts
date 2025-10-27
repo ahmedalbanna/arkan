@@ -20,6 +20,7 @@ import {
   updateAgentCategoryApi,
   deleteAgentCategoryApi,
   fetchAgentsApi,
+  importAgentsApi,
 } from "@/services";
 import { type AgentEditorFormValues } from "@/lib/agent-editor-schema";
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
@@ -260,4 +261,23 @@ export function useGenerateAgentConfig() {
             return generateAgentConfigApi(variables, token);
         }
     })
+}
+
+export function useImportAgents() {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+
+    return useMutation({
+        mutationFn: async (agents: AgentProperties[]) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return importAgentsApi(agents, token);
+        },
+        onSuccess: (data: { count: number }) => {
+            queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
+            toast({ title: "Import Successful", description: `${data.count} agents were successfully imported or updated.` });
+        },
+        onError: (error: Error) => {
+            handleErrorUtility(error, "Import Failed");
+        }
+    });
 }
