@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Pencil, Loader2, AlertCircle, PlusCircle, GripVertical, Search, Bot, Trash2 } from 'lucide-react';
+import { ExternalLink, Pencil, Loader2, AlertCircle, PlusCircle, GripVertical, Search, Bot, Trash2, Download } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useState, useMemo } from 'react';
@@ -18,6 +18,8 @@ import { CreateAgentDialog } from '@/components/admin/users/CreateAgentDialog';
 import { Input } from '@/components/ui/input';
 import { CategoryManagerDialog } from '@/components/admin/agent-editor/CategoryManagerDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { saveAs } from 'file-saver';
+import { toast } from '@/hooks';
 
 
 function AgentSkeleton() {
@@ -131,6 +133,18 @@ export default function AgentManager() {
 
   const sortedCategories = Object.keys(groupedAgents).sort();
 
+  const handleExport = () => {
+      if (!agents || agents.length === 0) {
+          toast({ title: 'No Agents to Export', description: 'There are no agents available to export.', variant: 'destructive' });
+          return;
+      }
+      // Convert agent class instances to plain objects for serialization
+      const plainAgents = agents.map(agent => agent.toJSON());
+      const jsonString = JSON.stringify(plainAgents, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      saveAs(blob, 'arkan_agents_export.json');
+      toast({ title: 'Export Successful', description: 'All agent configurations have been downloaded.' });
+  }
 
   if (!isLoaded || categoriesLoading) {
     return (
@@ -162,6 +176,10 @@ export default function AgentManager() {
             />
         </div>
         <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={handleExport}>
+                <Download className="me-2 h-4 w-4" />
+                Export All
+            </Button>
             <Button asChild size="sm">
                 <Link href="/admin/manage-agents/new">
                     <Bot className="me-2 h-4 w-4" />

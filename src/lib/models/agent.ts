@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from 'lucide-react';
 
 // --- Types moved from types.ts ---
@@ -99,6 +100,27 @@ export class Agent {
     this.language = props.language;
     this.model = props.model;
     this.isDefault = props.isDefault;
+  }
+
+  public toJSON(): AgentProperties {
+    return {
+      id: this.id,
+      name: this.name,
+      description: this.description,
+      category: this.category,
+      pageUrl: this.pageUrl,
+      isEnabled: this.isEnabled,
+      prompt: this.prompt,
+      toolIds: this.toolIds,
+      knowledge: this.knowledge,
+      introduction: this.introduction,
+      placeholder: this.placeholder,
+      conversationStarters: this.conversationStarters,
+      tone: this.tone,
+      language: this.language,
+      model: this.model,
+      isDefault: this.isDefault,
+    };
   }
 
   /**
