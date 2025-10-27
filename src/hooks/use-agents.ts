@@ -148,8 +148,10 @@ export function useAgents() {
 
   return {
     agents: queryInfo.data || [],
-    isLoaded: !queryInfo.isLoading,
+    isLoaded: !queryInfo.isLoading && !queryInfo.isFetching,
     isError: queryInfo.isError,
+    refetch: queryInfo.refetch,
+    isRefetching: queryInfo.isFetching && !queryInfo.isLoading,
   }
 }
 

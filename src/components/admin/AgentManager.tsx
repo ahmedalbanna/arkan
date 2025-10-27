@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Pencil, Loader2, AlertCircle, PlusCircle, GripVertical, Search, Bot, Trash2, Download, Upload } from 'lucide-react';
+import { ExternalLink, Pencil, Loader2, AlertCircle, PlusCircle, GripVertical, Search, Bot, Trash2, Download, Upload, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useState, useMemo, useRef } from 'react';
@@ -20,6 +20,7 @@ import { CategoryManagerDialog } from '@/components/admin/agent-editor/CategoryM
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { saveAs } from 'file-saver';
 import { toast } from '@/hooks';
+import { cn } from '@/lib/utils';
 
 
 function AgentSkeleton() {
@@ -100,7 +101,7 @@ function AgentCard({ agent }: { agent: Agent }) {
 }
 
 export default function AgentManager() {
-  const { agents, isLoaded, isError } = useAgents();
+  const { agents, isLoaded, isError, refetch, isRefetching } = useAgents();
   const { data: categories, isLoading: categoriesLoading } = useAgentCategories();
   const [searchTerm, setSearchTerm] = useState('');
   const { t } = useLocalization();
@@ -206,6 +207,10 @@ export default function AgentManager() {
             />
         </div>
         <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={() => refetch()} disabled={isRefetching}>
+                <RefreshCw className={cn("me-2 h-4 w-4", isRefetching && "animate-spin")} />
+                Refresh
+            </Button>
             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".json" className="hidden" />
              <Button size="sm" variant="outline" onClick={handleImportClick} disabled={importAgentsMutation.isPending}>
                 {importAgentsMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Upload className="me-2 h-4 w-4" />}
