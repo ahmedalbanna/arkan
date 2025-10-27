@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useAgents, useUpdateAgent, useAgentCategories } from '@/hooks';
+import { useAgents, useUpdateAgent, useAgentCategories, useDeleteAgent } from '@/hooks';
 import { type Agent } from '@/lib/models/agent';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -8,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Pencil, Loader2, AlertCircle, PlusCircle, GripVertical, Search, Bot } from 'lucide-react';
+import { ExternalLink, Pencil, Loader2, AlertCircle, PlusCircle, GripVertical, Search, Bot, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useState, useMemo } from 'react';
@@ -16,6 +17,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { CreateAgentDialog } from '@/components/admin/users/CreateAgentDialog';
 import { Input } from '@/components/ui/input';
 import { CategoryManagerDialog } from '@/components/admin/agent-editor/CategoryManagerDialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 
 function AgentSkeleton() {
   return (
@@ -29,12 +32,17 @@ function AgentSkeleton() {
 
 
 function AgentCard({ agent }: { agent: Agent }) {
-  const { id, name, description, isEnabled } = agent;
+  const { id, name, description, isEnabled, isDefault } = agent;
   const updateAgentMutation = useUpdateAgent();
+  const deleteAgentMutation = useDeleteAgent();
   const { t } = useLocalization();
 
   const handleToggle = (checked: boolean) => {
     updateAgentMutation.mutate({ agentId: id, payload: { isEnabled: checked } });
+  }
+
+  const handleDelete = () => {
+    deleteAgentMutation.mutate(id);
   }
 
 
@@ -46,7 +54,7 @@ function AgentCard({ agent }: { agent: Agent }) {
             <p className="font-semibold">{name}</p>
             <p className="text-sm text-muted-foreground">{description}</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
              <Switch
                 checked={isEnabled}
                 onCheckedChange={handleToggle}
@@ -59,6 +67,31 @@ function AgentCard({ agent }: { agent: Agent }) {
                 {t('agentManager.configureButton')}
               </Link>
             </Button>
+            {!isDefault && (
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="icon" disabled={deleteAgentMutation.isPending && deleteAgentMutation.variables === id}>
+                             {deleteAgentMutation.isPending && deleteAgentMutation.variables === id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <Trash2 className="h-4 w-4" />
+                            )}
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the "{name}" agent.
+                        </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            )}
         </div>
     </Card>
   );
