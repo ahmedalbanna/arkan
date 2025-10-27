@@ -2,7 +2,7 @@
 'use client';
 
 import { useAgents, useUpdateAgent, useAgentCategories, useDeleteAgent, useImportAgents } from '@/hooks';
-import { type Agent } from '@/lib/models/agent';
+import type { Agent } from '@/lib/models/agent';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { ExternalLink, Pencil, Loader2, AlertCircle, PlusCircle, GripVertical, Search, Bot, Trash2, Download, Upload, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { CreateAgentDialog } from '@/components/admin/users/CreateAgentDialog';
 import { Input } from '@/components/ui/input';
@@ -107,6 +107,7 @@ export default function AgentManager() {
   const { t } = useLocalization();
   const importAgentsMutation = useImportAgents();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeCategories, setActiveCategories] = useState<string[]>([]);
 
   const groupedAgents = useMemo(() => {
     if (!agents || !categories) return {};
@@ -134,7 +135,14 @@ export default function AgentManager() {
     }, {} as Record<string, Agent[]>);
   }, [agents, searchTerm, categories]);
 
-  const sortedCategories = Object.keys(groupedAgents).sort();
+  const sortedCategories = useMemo(() => Object.keys(groupedAgents).sort(), [groupedAgents]);
+  
+  useEffect(() => {
+    if (sortedCategories.length > 0) {
+      setActiveCategories(sortedCategories);
+    }
+  }, [sortedCategories]);
+
 
   const handleExport = () => {
       if (!agents || agents.length === 0) {
@@ -232,22 +240,20 @@ export default function AgentManager() {
             <CreateAgentDialog />
         </div>
       </div>
-       <Accordion type="multiple" className="w-full space-y-4" defaultValue={sortedCategories}>
+       <Accordion type="multiple" className="w-full space-y-4" value={activeCategories} onValueChange={setActiveCategories}>
             {sortedCategories.map(category => (
-                groupedAgents[category].length > 0 && (
-                    <AccordionItem value={category} key={category} className="border rounded-lg bg-card">
-                        <AccordionTrigger className="font-headline text-lg p-4 hover:no-underline">
-                            <div className="flex items-center gap-2">
-                               {category} <Badge variant="secondary">{groupedAgents[category].length}</Badge>
-                            </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="p-4 pt-0 space-y-2">
-                            {groupedAgents[category].map(agent => (
-                               <AgentCard key={agent.id} agent={agent} />
-                            ))}
-                        </AccordionContent>
-                    </AccordionItem>
-                )
+                <AccordionItem value={category} key={category} className="border rounded-lg bg-card">
+                    <AccordionTrigger className="font-headline text-lg p-4 hover:no-underline">
+                        <div className="flex items-center gap-2">
+                           {category} <Badge variant="secondary">{groupedAgents[category].length}</Badge>
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="p-4 pt-0 space-y-2">
+                        {groupedAgents[category].map(agent => (
+                           <AgentCard key={agent.id} agent={agent} />
+                        ))}
+                    </AccordionContent>
+                </AccordionItem>
             ))}
        </Accordion>
     </div>
