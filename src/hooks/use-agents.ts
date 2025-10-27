@@ -233,24 +233,42 @@ export function useCreateAgent() {
 
 /**
  * Custom mutation hook to delete an agent.
+ * Implements an optimistic update for a faster UI response.
  * @returns The result of the useMutation hook.
  */
 export function useDeleteAgent() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
 
-    return useMutation<any, Error, string>({
+    return useMutation<any, Error, string, { previousAgents?: Agent[] }>({
         mutationFn: async (agentId: string) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return deleteAgentApi(agentId, token);
         },
+        onMutate: async (agentIdToDelete) => {
+            await queryClient.cancelQueries({ queryKey: agentKeys.lists() });
+            const previousAgents = queryClient.getQueryData<Agent[]>(agentKeys.lists());
+            
+            if (previousAgents) {
+                queryClient.setQueryData<Agent[]>(
+                    agentKeys.lists(),
+                    old => (old || []).filter(agent => agent.id !== agentIdToDelete)
+                );
+            }
+            return { previousAgents };
+        },
         onSuccess: (data, agentId) => {
-            queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
             toast({ title: 'Agent Deleted', description: `Agent "${agentId}" was successfully deleted.` });
         },
-        onError: (error: Error) => {
-            handleErrorUtility(error, "Delete Failed");
-        }
+        onError: (err, agentId, context) => {
+            if (context?.previousAgents) {
+                queryClient.setQueryData(agentKeys.lists(), context.previousAgents);
+            }
+            handleErrorUtility(err, "Delete Failed");
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
+        },
     });
 }
 
