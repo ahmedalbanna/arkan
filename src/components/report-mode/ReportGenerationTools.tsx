@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -8,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { type SectionName as SectionNameType } from '@/ai/schemas';
 import { PanelLeftClose } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
+import { SectionAccordionItem } from './SectionAccordionItem';
 import { Button } from '../ui/button';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';

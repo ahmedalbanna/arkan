@@ -39,6 +39,7 @@ export * from './use-upload-project-logic';
 export * from './use-user';
 export * from './use-user-management-console';
 export * from './use-writing-tools';
+export * from './use-report-paginator';
 
 // Logic Hooks for Writing Tools
 export * from './use-ai-detector-logic';

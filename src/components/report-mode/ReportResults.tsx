@@ -1,9 +1,8 @@
-
 'use client';
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Section } from '../section/SectionView';
+import { SectionView } from './SectionView';
 import type { SectionName } from '@/ai/schemas';
 import { FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,6 +13,7 @@ import { useLocalization } from '@/context/LocalizationContext'; // Changed impo
 import { useAgents } from '@/hooks'; // Changed import
 import { AgentCategory } from '@/lib/models/agent'; // Changed import
 import { useMemo } from 'react'; // Changed import
+import { useReportPaginator } from '@/hooks/use-report-paginator';
 
 interface ReportResultsProps {
   generatedSections: SectionName[];
@@ -29,14 +29,14 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     return agents.filter(a => a.category === AgentCategory.ReportGeneration);
   }, [agents]);
 
-  const [currentPage, setCurrentPage] = React.useState(0);
-  const totalPages = generatedSections.length;
-  const hasContent = totalPages > 0;
-  const currentSectionKey = hasContent ? generatedSections[currentPage] : undefined;
-
-  const getSectionTitle = React.useCallback((sectionKey: SectionName) => {
-    return reportAgents?.find(a => a.id.includes(sectionKey))?.name || sectionKey;
-  }, [reportAgents]);
+  const {
+    currentPage,
+    totalPages,
+    currentSectionKey,
+    getSectionTitle,
+    handleNextPage,
+    handlePrevPage
+  } = useReportPaginator(generatedSections, reportAgents);
 
   const handleSectionUpdate = (key: SectionName, value: string) => {
     updateProject(p => {
@@ -44,23 +44,8 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     });
   };
 
-  React.useEffect(() => {
-    if (currentPage >= totalPages && totalPages > 0) {
-      setCurrentPage(totalPages - 1);
-    } else if (totalPages === 0) {
-      setCurrentPage(0);
-    }
-  }, [totalPages, currentPage]);
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages - 1) setCurrentPage(currentPage + 1);
-  };
-  const handlePrevPage = () => {
-    if (currentPage > 0) setCurrentPage(currentPage - 1);
-  };
-
   const renderContent = () => {
-    if (!hasContent) {
+    if (totalPages === 0) {
         return (
             <div className="flex items-center justify-center h-full min-h-[400px] mt-4">
                 <div className="text-center text-muted-foreground p-8">
@@ -76,7 +61,7 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
             <ScrollArea className="flex-grow">
                 {currentSectionKey && (
                     <A4Page key={currentSectionKey}>
-                        <Section
+                        <SectionView
                             sectionKey={currentSectionKey}
                             title={getSectionTitle(currentSectionKey)}
                             content={project?.sections?.[currentSectionKey]!}

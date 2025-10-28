@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
@@ -20,13 +19,9 @@ import { useSections } from './use-sections';
 export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: { orderedSections: Section[], setOrderedSections: (sections: Section[]) => void; }) => {
     const { t, locale } = useLocalization();
     const { project, updateProject } = useBuilderStore();
-    const translateMutation = useTranslate();
-    const [isTranslatingAll, setIsTranslatingAll] = useState(false);
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     
-    const { exportReportDocx, isExporting } = useExport();
     const { agents, isLoaded: agentsLoaded } = useAgents();
-
     const { data: sectionConfigs, isLoaded: sectionsLoaded } = useSections();
     
     const reportAgents = useMemo(() => {
@@ -40,62 +35,6 @@ export const useReportModeGenerator = ({ orderedSections, setOrderedSections }: 
         () => (orderedSections || []).filter(section => sections[section.id as SectionName]),
         [sections, orderedSections]
     );
-
-    const handleSectionUpdate = (key: SectionName, value: string) => {
-        updateProject(p => {
-            p.updateSectionContent(key, value);
-        });
-    };
-
-    const handleTranslateAll = async (targetLang: 'en' | 'ar') => {
-        if (!project?.sections) return;
-
-        setIsTranslatingAll(true);
-        toast({
-            title: t('builder.reportGenerator.toasts.translateAllStarted'),
-            description: t('builder.reportGenerator.toasts.translateAllStartedDesc'),
-        });
-
-        const sectionKeys = Object.keys(project.sections).filter(key => project.sections![key as SectionName]) as SectionName[];
-
-        const translationPromises = sectionKeys.map(key => {
-            const content = project.sections![key]!;
-            return translateMutation.mutateAsync({ text: content, targetLang })
-                .then(result => ({ key, content: result.translatedText }))
-                .catch(error => ({ key, error }));
-        });
-
-        const results = await Promise.all(translationPromises);
-
-        updateProject(p => {
-            const translatedMap: { [key in SectionName]?: string } = {};
-            results.forEach(result => {
-                if ('content' in result) {
-                    translatedMap[result.key as SectionName] = result.content;
-                } else {
-                    console.error(`Failed to translate section ${result.key}:`, result.error);
-                }
-            });
-            p.translatedSections = { ...p.translatedSections, ...translatedMap };
-        });
-
-        setIsTranslatingAll(false);
-        toast({
-            title: t('builder.reportGenerator.toasts.translateAllSuccess'),
-            description: t('builder.reportGenerator.toasts.translateAllSuccessDesc'),
-        });
-    };
-
-    const handleExportReportDOCX = async (sectionsToInclude: SectionName[]) => {
-        if (!project || generatedSections.length === 0) return;
-
-        const translatedTitles = reportAgents?.reduce((acc, agent) => {
-            acc[agent.id as SectionName] = agent.name;
-            return acc;
-        }, {} as { [key in SectionName]?: string }) || {};
-
-        await exportReportDocx(project, translatedTitles, sectionsToInclude);
-    };
 
     const { userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = useState<string | null>(null);

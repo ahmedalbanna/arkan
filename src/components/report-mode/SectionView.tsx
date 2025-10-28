@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { SectionName } from '@/ai/schemas';
@@ -13,6 +12,7 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
+import { useReportModeGenerator } from '@/hooks/useReportModeGenerator';
 
 interface SectionProps {
     sectionKey: SectionName;
@@ -21,7 +21,7 @@ interface SectionProps {
     onUpdate: (key: SectionName, value: string) => void;
 }
 
-export const Section = ({ sectionKey, title, content, onUpdate }: SectionProps) => {
+export const SectionView = ({ sectionKey, title, content, onUpdate }: SectionProps) => {
     const {
         aiSuggestion,
         diff,
