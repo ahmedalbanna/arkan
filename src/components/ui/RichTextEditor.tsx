@@ -6,11 +6,9 @@ import StarterKit from '@tiptap/starter-kit';
 import { marked } from 'marked';
 import React, { useEffect, useState } from 'react';
 import { useDebounce, useToast } from '@/hooks';
-import { SectionToolbar } from '../section/SectionToolbar';
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import TextAlign from '@tiptap/extension-text-align';
-import { Bold, Italic, Strikethrough, List, ListOrdered, Quote, ImageIcon, Table as TableIcon, Sigma, Upload, Download, Trash2, Languages, Palette, PenSquare, BrainCircuit, Workflow, Wrench, LifeBuoy, MoreVertical, Brush } from 'lucide-react';
-import { Button } from './button';
+import { Bold, Italic, Strikethrough, List, ListOrdered, Quote, ImageIcon, Table as TableIcon, Sigma, Upload, Download, Palette, PenSquare, BrainCircuit, Workflow, Wrench, LifeBuoy, MoreVertical } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
@@ -26,6 +24,142 @@ import mammoth from 'mammoth';
 import FileHandler from '@tiptap/extension-file-handler';
 import { uploadProjectFile } from '@/services/project-service';
 import { useAuth } from '@/context/AuthContext';
+
+
+'use client';
+
+import {
+  BookText,
+  Brush,
+  GitCommitVertical,
+  Languages,
+  Loader2,
+  Maximize,
+  SpellCheck,
+  UserCheck,
+  Volume2,
+  Trash2,
+} from 'lucide-react';
+import { Button } from '../ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+} from '../ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { useLocalization } from '@/context/LocalizationContext';
+import { Separator } from '../ui/separator';
+
+interface SectionToolbarProps {
+  isProcessingAi: boolean;
+  isReadingAloud: boolean;
+  onAiAction: (action: string, payload?: any) => void;
+  onReadAloud: () => void;
+  onClearContent: () => void;
+}
+
+export function SectionToolbar({
+  isProcessingAi,
+  isReadingAloud,
+  onAiAction,
+  onReadAloud,
+  onClearContent,
+}: SectionToolbarProps) {
+    const { t } = useLocalization();
+    const isBusy = isProcessingAi || isReadingAloud;
+
+    const rewriteStyles = [
+        { label: t('writingTools.textStylist.styles.formal'), style: 'Formal' },
+        { label: t('writingTools.textStylist.styles.friendly'), style: 'Friendly' },
+        { label: t('writingTools.textStylist.styles.simple'), style: 'Simple' },
+        { label: t('writingTools.textStylist.styles.creative'), style: 'Creative' },
+        { label: t('writingTools.textStylist.styles.professional'), style: 'Professional' },
+        { label: t('writingTools.textStylist.styles.academic'), style: 'Academic' },
+    ];
+
+    return (
+        <div className="flex items-center gap-1 rounded-full border bg-background p-1 shadow-lg">
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('summarize')} disabled={isBusy} >
+                            <BookText className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>{t('builder.Section.aiActions.summarize')}</p></TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('expand')} disabled={isBusy} >
+                            <Maximize className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>{t('builder.Section.aiActions.expand')}</p></TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('grammar')} disabled={isBusy}>
+                            <SpellCheck className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>{t('builder.Section.aiActions.checkGrammar')}</p></TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('humanize')} disabled={isBusy}>
+                            <UserCheck className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>{t('builder.Section.aiActions.humanize')}</p></TooltipContent>
+                </Tooltip>
+
+                 <DropdownMenu>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="rounded-full" disabled={isBusy}>
+                                    <Brush className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent><p>{t('builder.Section.aiActions.rewrite')}</p></TooltipContent>
+                    </Tooltip>
+                    <DropdownMenuContent>
+                         {rewriteStyles.map(({ label, style }) => (
+                            <DropdownMenuItem key={style} onClick={() => onAiAction('rewrite', { style })}>
+                                {label}
+                            </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
+                <Separator orientation="vertical" className="h-6 mx-1" />
+
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="rounded-full" onClick={onReadAloud} disabled={isBusy}>
+                            {isReadingAloud ? <Loader2 className="h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4" />}
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>{t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
+                </Tooltip>
+                
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="rounded-full text-destructive" onClick={onClearContent} disabled={isBusy}>
+                           <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>Clear Content</p></TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        </div>
+    )
+}
 
 
 // Initialize Turndown service with GFM for tables

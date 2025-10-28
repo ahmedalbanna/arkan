@@ -111,7 +111,7 @@ async function handleAuthRedirects(pathname: string) {
 
   // If user is authenticated and tries to access an auth page, redirect them
   if (isAuthenticated && AUTH_PATHS.includes(pathname)) {
-    redirect('/generate');
+    redirect('/builder');
   }
 
   // If user is not authenticated and tries to access a protected page, redirect them

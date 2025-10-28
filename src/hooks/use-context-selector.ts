@@ -2,7 +2,10 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useGenerationUIStore, useBuilderStore, useAgents, useSections } from '@/hooks';
+import { useGenerationUIStore } from '@/hooks/core/useGenerationUIStore';
+import { useBuilderStore } from '@/hooks/core/useBuilderStore';
+import { useAgents } from '@/hooks/data/useAgents';
+import { useSections } from '@/hooks/data/useSections';
 import { useMemo } from 'react';
 import { SectionName } from '@/ai/schemas';
 

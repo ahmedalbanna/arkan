@@ -16,11 +16,9 @@ export function ContextSelector({ itemKey }: ContextSelectorProps) {
     const {
         t,
         reportSections,
-        diagramSections,
         toggleContextSelection,
         currentSelection,
         sections: generatedSectionsContent,
-        diagrams: generatedDiagramsContent,
         externalContext,
     } = useContextSelector(itemKey);
 
@@ -52,27 +50,7 @@ export function ContextSelector({ itemKey }: ContextSelectorProps) {
                     )}
                 </div>
 
-                {diagramSections.length > 0 && (
-                    <div className="space-y-2 pt-2 border-t">
-                        <Label className="font-semibold">{t('builder.reportGenerator.context_diagrams')}</Label>
-                        {diagramSections.map(section => (
-                            <div key={`ctx-d-${itemKey}-${section.id}`} className="flex items-center space-x-2">
-                                <Checkbox
-                                    id={`context-diagram-${itemKey}-${section.id}`}
-                                    checked={!!currentSelection.diagrams[section.id]}
-                                    onCheckedChange={(checked) => toggleContextSelection(itemKey, 'diagrams', section.id, !!checked)}
-                                    disabled={!generatedDiagramsContent[section.id]}
-                                />
-                                <Label htmlFor={`context-diagram-${itemKey}-${section.id}`} className={cn("text-sm font-normal", !generatedDiagramsContent[section.id] && "text-muted-foreground/50")}>
-                                    <div className="flex items-center gap-2">
-                                        <GitGraph className="h-4 w-4" />
-                                        {section.title}
-                                    </div>
-                                </Label>
-                            </div>
-                        ))}
-                    </div>
-                )}
+         
 
                 {externalContext && externalContext.length > 0 && (
                     <div className="space-y-2 pt-2 border-t">
