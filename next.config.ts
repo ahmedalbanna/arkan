@@ -2,9 +2,9 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  reactStrictMode: true, // Enable React strict mode for better development experience
+  reactStrictMode: false, // Enable React strict mode for better development experience
   output: 'standalone',
-
+  swcMinify: true,
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -33,7 +33,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  allowedDevOrigins: ["http://localhost:9002"],
   async rewrites() {
     return [
       {

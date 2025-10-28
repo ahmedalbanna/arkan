@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react';
 
 
 const LoadingSkeleton = () => (
-  <div class="space-y-4">
+  <div className="space-y-4">
     <Skeleton className="h-12 w-full" />
     <Skeleton className="h-[calc(100vh-300px)] w-full" />
   </div>

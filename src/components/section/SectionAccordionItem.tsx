@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { type SectionName as SectionNameType, type DiagramType } from '@/ai/schemas';
 import { Loader2, Sparkles, GripVertical, SlidersHorizontal, StickyNote, Link as LinkIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -14,7 +14,7 @@ import { SectionGenerationControls } from './SectionGenerationControls';
 import { GuidelineEditor } from './SectionGuidelineEditor';
 import { useAuth } from '@/context/AuthContext';
 import { ContextSelector } from './SectionContextSelector';
-
+import { cn } from '@/lib/utils';
 
 export const SectionAccordionItem = ({
     itemKey,
@@ -43,6 +43,13 @@ export const SectionAccordionItem = ({
 
     const canGenerate = hasCredits && !isAnythingGenerating;
 
+    const handleGenerateClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (canGenerate) {
+            onGenerate();
+        }
+    };
+
     return (
         <AccordionItem value={itemKey} key={itemKey} className="bg-background border rounded-lg">
             <AccordionTrigger className="flex items-center w-full px-4 py-2 text-sm font-medium hover:no-underline rounded-t-lg">
@@ -59,16 +66,16 @@ export const SectionAccordionItem = ({
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <div className="w-full" onClick={(e) => { e.stopPropagation(); onGenerate(); }}>
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        disabled={!canGenerate}
-                                        className="font-headline"
-                                    >
-                                        {isGenerating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-                                        {t('builder.reportGenerator.generateButton')}
-                                    </Button>
+                                <div
+                                    onClick={handleGenerateClick}
+                                    className={cn(
+                                        buttonVariants({ size: 'sm' }),
+                                        'font-headline flex items-center',
+                                        !canGenerate ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                                    )}
+                                >
+                                    {isGenerating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
+                                    {t('builder.reportGenerator.generateButton')}
                                 </div>
                             </TooltipTrigger>
                             {disabledReason && (

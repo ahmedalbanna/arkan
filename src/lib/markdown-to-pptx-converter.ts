@@ -145,7 +145,7 @@ export async function convertMarkdownToPdf(
 
         const slideHtml = unified().use(rehypeStringify).stringify(file);
 
-        slidesHtml += `<div class="pdf-slide">${slideHtml}</div>`;
+        slidesHtml += `<div className="pdf-slide">${slideHtml}</div>`;
     }
 
     // Basic styling to make it look like slides
