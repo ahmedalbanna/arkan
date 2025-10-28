@@ -5,7 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BookCheck, GitGraph, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/cn';
 import { useContextSelector } from '@/hooks';
 
 interface ContextSelectorProps {

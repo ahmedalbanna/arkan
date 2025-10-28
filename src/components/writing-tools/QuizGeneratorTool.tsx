@@ -17,7 +17,7 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { useQuizGeneratorLogic } from '@/hooks';
+import { useQuizGeneratorLogic } from '@/hooks/writing-tools/use-quiz-generator-logic';
 
 export function QuizGeneratorTool() {
   const { t } = useLocalization();

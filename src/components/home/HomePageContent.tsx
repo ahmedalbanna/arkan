@@ -6,7 +6,7 @@ import { ArrowRight, BrainCircuit, FileSpreadsheet, Presentation } from 'lucide-
 import Link from 'next/link';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/cn';
 import { useAuth } from '@/context/AuthContext';
 
 // The 'featuredProjects' prop is no longer used but kept to avoid breaking changes if the page is rendered from different places.

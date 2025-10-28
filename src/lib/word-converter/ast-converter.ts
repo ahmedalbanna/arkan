@@ -13,7 +13,7 @@ import {
   IRunOptions,
 } from 'docx';
 import { Root, List, RootContent } from 'mdast';
-import { getProxiedImageBuffer } from '@/lib/utils';
+import { getProxiedImageBuffer } from '@/lib/utils/ProxiedImage';
 import { DocxObject, ConversionOptions } from './types';
 import { transformInlines } from './inline-converter';
 import { Packer } from 'docx';

@@ -12,7 +12,7 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import { Root } from 'mdast';
-import { processPlantUml } from '@/lib/utils';
+import { processPlantUml } from '@/lib/utils/processPlantUml';
 import { ConversionOptions, DocxObject } from './word-converter/types';
 import { processFootnotes } from './word-converter/node-handlers';
 import { convertAstToDocxObjects } from './word-converter/ast-converter';

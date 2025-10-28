@@ -7,12 +7,12 @@ import rehypeSanitize from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
 import { type Root as MdastRoot, type ListItem } from 'mdast';
 import { templates } from '@/lib/pptx-styles'; // Keep for default styles
-import { processPlantUml, arrayBufferToBase64, getProxiedImageBuffer } from '@/lib/utils';
 import type { PptxStyleOptions } from '@/lib/types';
 import { exportComponentAsPDF } from './pdf-exporter';
 import { DEFAULT_FONT, DEFAULT_CODE_FONT, layout } from './pptx-convert/constants';
 import { getNodeText, splitAstIntoSlides } from './pptx-convert/ast-utils';
 import { createSlidesWithContent, type FontOptions } from './pptx-convert/slide-layout-engine';
+import { processPlantUml } from './utils/processPlantUml';
 
 export interface PptxConversionOptions {
     styles?: PptxStyleOptions;

@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useProjectCardLogic } from '@/hooks';
 import type { Project } from '@/lib/models'; // Import the Project class
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/cn';
 import { formatDistanceToNow } from 'date-fns';
 import { FileText, Loader2, Trash2 } from 'lucide-react';
 

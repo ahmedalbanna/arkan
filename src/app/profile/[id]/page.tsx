@@ -14,7 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-const EditUserForm = lazy(() => import('@/components/admin/EditUserForm'));
+
 
 function ProfileSkeleton() {
     return (

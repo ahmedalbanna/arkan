@@ -8,8 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-styles';
-import { useHumanizerLogic } from '@/hooks';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { useHumanizerLogic } from '@/hooks/writing-tools/use-humanizer-logic';
 
 export function HumanizerTool() {
   const {

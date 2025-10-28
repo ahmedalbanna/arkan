@@ -7,10 +7,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Sparkles, Copy, Check, ArrowRight, UploadCloud } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-styles';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { Tabs, TabsTrigger, TabsList, TabsContent } from '@/components/ui/tabs';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useGrammarCheckerLogic } from '@/hooks';
+import { useGrammarCheckerLogic } from '@/hooks/writing-tools/use-grammar-checker-logic';
 
 export function GrammarCheckerTool() {
   const { t } = useLocalization();

@@ -5,7 +5,7 @@ import { useReportModeGenerator } from '@/hooks';
 import { lazy, Suspense, useState } from 'react';
 import { Skeleton } from '../ui/skeleton';
 import { GenerationTools } from './ReportGenerationTools';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/cn';
 import { Button } from '../ui/button';
 import { PanelRightOpen } from 'lucide-react';
 import { ReportResults } from './ReportResults';

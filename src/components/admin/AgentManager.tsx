@@ -20,7 +20,7 @@ import { CategoryManagerDialog } from '@/components/admin/agent-editor/CategoryM
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { saveAs } from 'file-saver';
 import { toast } from '@/hooks';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/cn';
 
 
 function AgentSkeleton() {

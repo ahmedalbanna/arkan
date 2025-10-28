@@ -8,7 +8,7 @@ import {
   IRunOptions,
 } from 'docx';
 import { PhrasingContent } from 'mdast';
-import { getProxiedImageBuffer } from '@/lib/utils';
+import { getProxiedImageBuffer } from '@/lib/utils/ProxiedImage';
 import { ConversionOptions } from './types';
 
 export async function transformInlines(

@@ -10,7 +10,7 @@ import { Loader2, Sparkles, Brain } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Textarea } from '@/components/ui/textarea';
-import { useIdeaGeneratorLogic } from '@/hooks';
+import { useIdeaGeneratorLogic } from '@/hooks/writing-tools/use-idea-generator-logic';
 
 export function IdeaGeneratorTool() {
   const {

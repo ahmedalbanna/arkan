@@ -3,7 +3,7 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/cn';
 
 interface MarkdownViewerProps {
   content: string;

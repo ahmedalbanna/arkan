@@ -17,7 +17,6 @@ export default function WritingToolsPage() {
   const tools = [
     { name: t('writingTools.cards.textStylist'), icon: PenSquare, href: '/writing-tools/text-stylist' },
     { name: t('writingTools.cards.documentWriter'), icon: FileEdit, href: '/writing-tools/document-writer' },
-    { name: t('writingTools.cards.presentationOutline'), icon: Presentation, href: '/writing-tools/presentation-outline' },
     { name: t('writingTools.cards.plagiarismChecker'), icon: CopyCheck, href: '/writing-tools/plagiarism-checker' },
     { name: t('writingTools.cards.aiHumanizer'), icon: UserCheck, href: '/writing-tools/humanizer' },
     { name: t('writingTools.cards.aiDetector'), icon: Fingerprint, href: '/writing-tools/ai-detector' },

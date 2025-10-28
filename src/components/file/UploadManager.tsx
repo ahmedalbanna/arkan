@@ -15,7 +15,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useToast } from '@/hooks';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { ContextFileType } from '@/lib/types';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/cn';
 import { processFileApi } from '@/services';
 import { FileText, ImageIcon, Loader2, PanelLeftClose, UploadCloud, Wand2, X } from 'lucide-react';
 import Image from 'next/image';

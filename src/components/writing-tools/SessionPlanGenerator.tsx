@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useSessionPlanGeneratorLogic } from '@/hooks/use-session-plan-generator-logic';
+import { useSessionPlanGeneratorLogic } from '@/hooks/writing-tools/use-session-plan-generator-logic';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';

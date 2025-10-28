@@ -1,6 +1,6 @@
 
 
-import FirebaseMessagingProvider from '@/components/FirebaseMessagingProvider';
+import FirebaseMessagingProvider from '@/components/firebase/FirebaseMessagingProvider';
 import LanguageDirectionManager from '@/components/shared/LanguageDirectionManager';
 import { Header } from '@/components/shared/Header';
 import QueryProvider from '@/components/shared/QueryProvider';
@@ -8,7 +8,7 @@ import { ThemeProvider } from '@/components/shared/ThemeProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/context/AuthContext';
 import { LocalizationProvider } from '@/context/LocalizationContext';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/cn';
 import type { Metadata } from 'next';
 import { redirect } from 'next/dist/client/components/navigation';
 import localFont from 'next/font/local';

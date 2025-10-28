@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { DiagramTypeSchema } from '@/ai/schemas';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import Image from 'next/image';
-import { usePlantUmlGeneratorLogic } from '@/hooks';
+import { usePlantUmlGeneratorLogic } from '@/hooks/writing-tools/use-plant-uml-generator-logic';
 
 const diagramTypes = DiagramTypeSchema.options.map(value => {
     let label = '';

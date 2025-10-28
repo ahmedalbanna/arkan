@@ -10,7 +10,7 @@ import Link from 'next/link';
 import type { PlagiarismCheckOutput } from '@/ai/schemas';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useLocalization } from '@/context/LocalizationContext';
-import { usePlagiarismCheckerLogic } from '@/hooks';
+import { usePlagiarismCheckerLogic } from '@/hooks/writing-tools/use-plagiarism-checker-logic';
 
 export function PlagiarismCheckerTool() {
   const { t } = useLocalization();

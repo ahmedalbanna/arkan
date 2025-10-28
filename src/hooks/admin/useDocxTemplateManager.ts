@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useDeleteDocxTemplate, useDocxStyles } from '@/hooks/data/use-templates';
 import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import type { DocxTemplateKey } from '@/lib/types';
-import { refreshTemplateImage } from '@/services/template-service';
+import { refreshTemplateImage } from '@/services/api/templateService';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useToast } from '../util/use-toast';

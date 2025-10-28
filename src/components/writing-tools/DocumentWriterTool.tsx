@@ -9,10 +9,10 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-styles';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useDocumentWriterLogic } from '@/hooks';
+import { useDocumentWriterLogic } from '@/hooks/writing-tools/use-document-writer-logic';
 
 export function DocumentWriterTool() {
   const {

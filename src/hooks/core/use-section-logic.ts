@@ -4,7 +4,7 @@
 import { useState, useMemo } from 'react';
 import { useWritingTool, useTextToSpeech, useToast } from '@/hooks';
 import type { SectionName } from '@/ai/schemas';
-import { computeDiff, type DiffPart } from '@/lib/diff';
+import { computeDiff, type DiffPart } from '@/lib/utils/diff';
 import { useLocalization } from '@/context/LocalizationContext';
 
 export const useSectionLogic = (sectionKey: SectionName, content: string, onUpdate: (key: SectionName, value: string) => void) => {

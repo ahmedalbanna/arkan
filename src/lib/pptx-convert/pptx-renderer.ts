@@ -10,10 +10,11 @@ import type {
     Table,
 } from 'mdast';
 
-import { getProxiedImageBuffer, arrayBufferToBase64 } from '@/lib/utils';
+import { arrayBufferToBase64 } from '@/lib/utils/arrayBufferToBase64';
 import type { PptxStyleOptions } from '@/lib/types';
 import { layout, DEFAULT_CODE_FONT } from './constants';
 import type { FontOptions } from './slide-layout-engine';
+import { getProxiedImageBuffer } from '../utils/ProxiedImage';
 
 /**
  * Transforms inline markdown content (strong, emphasis, links, etc.) into an array of PptxGenJS TextProps runs.

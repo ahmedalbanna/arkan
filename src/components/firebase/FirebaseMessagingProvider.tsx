@@ -6,7 +6,7 @@ import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { useAuth } from '@/context/AuthContext';
 import { app } from '@/lib/firebase/client-init';
 import { useToast } from '@/hooks';
-import { saveDeviceToken } from '@/services';
+import { saveDeviceToken } from '@/services/api/deviceTokenService';
 
 export default function FirebaseMessagingProvider({ children }: { children: React.ReactNode }) {
     const { firebaseUser } = useAuth();

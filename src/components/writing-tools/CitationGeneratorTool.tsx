@@ -11,8 +11,8 @@ import { Loader2, Sparkles, Copy, Check } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-styles';
-import { useCitationGeneratorLogic } from '@/hooks';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { useCitationGeneratorLogic } from '@/hooks/writing-tools/use-citation-generator-logic';
 
 export function CitationGeneratorTool() {
   const { t } = useLocalization();

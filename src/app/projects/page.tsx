@@ -9,7 +9,7 @@ import { ProjectCard } from '@/components/project/ProjectCard';
 import { Button } from '@/components/ui/button';
 import { CreateProjectDialog } from '@/components/project/CreateProjectDialog';
 import { UploadProjectButton } from '@/components/project/UploadProjectButton';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/cn';
 import { useLocalization } from '@/context/LocalizationContext';
 
 function ProjectsPageSkeleton() {

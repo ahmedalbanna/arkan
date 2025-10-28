@@ -9,12 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { markdownComponents } from '@/lib/markdown-styles';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { exportComponentAsPDF } from '@/lib/pdf-exporter';
 import { AlertCircle, CheckCircle, Copy, FileDown, FileText, Loader2, PlusCircle, Sparkles } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import ReactMarkdown from 'react-markdown';
-import { useAIResearcherLogic, useAddToProjectDialogLogic } from '@/hooks/use-ai-researcher-logic';
+import { useAIResearcherLogic, useAddToProjectDialogLogic } from '@/hooks/writing-tools/use-ai-researcher-logic';
 
 function AddToProjectDialog({ researchMarkdown, researchTitle, onOpenChange }: { researchMarkdown: string; researchTitle: string; onOpenChange: (open: boolean) => void; }) {
   const {

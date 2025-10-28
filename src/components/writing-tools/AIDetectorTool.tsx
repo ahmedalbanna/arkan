@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useAIDetectorLogic } from '@/hooks/use-ai-detector-logic';
+import { useAIDetectorLogic } from '@/hooks/writing-tools/use-ai-detector-logic';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';

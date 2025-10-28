@@ -2,8 +2,8 @@
 
 import { z } from 'zod';
 import { resetUserPassword } from '@/lib/db/queries';
-import { generateRandomPassword } from '@/lib/utils'; // Assuming a utility for password generation
-import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
+import { generateRandomPassword } from '@/lib/utils/randomPassword'; // Assuming a utility for password generation
+import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { NextRequest } from 'next/server';
 
 const resetPasswordSchema = z.object({

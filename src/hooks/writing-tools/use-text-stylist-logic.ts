@@ -6,8 +6,8 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
-import type { DiffPart } from '@/lib/diff';
-import { computeDiff } from '@/lib/diff';
+import type { DiffPart } from '@/lib/utils/diff';
+import { computeDiff } from '@/lib/utils/diff';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const formSchema = z.object({

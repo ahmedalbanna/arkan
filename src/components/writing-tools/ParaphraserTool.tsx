@@ -10,9 +10,9 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check, UploadCloud } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-styles';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { useParaphraserLogic } from '@/hooks';
+import { useParaphraserLogic } from '@/hooks/writing-tools/use-paraphraser-logic';
 
 export function ParaphraserTool() {
   const {

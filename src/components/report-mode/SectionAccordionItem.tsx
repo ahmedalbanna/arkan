@@ -14,7 +14,7 @@ import { SectionGenerationControls } from './SectionGenerationControls';
 import { GuidelineEditor } from './SectionGuidelineEditor';
 import { useAuth } from '@/context/AuthContext';
 import { ContextSelector } from './SectionContextSelector';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/cn';
 
 export const SectionAccordionItem = ({
     itemKey,

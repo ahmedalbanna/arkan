@@ -10,7 +10,7 @@ import Link from 'next/link';
 import type { ClaimStatus, FactCheckOutput } from '@/ai/schemas';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useFactCheckerLogic } from '@/hooks';
+import { useFactCheckerLogic } from '@/hooks/writing-tools/use-fact-checker-logic';
 
 function getStatusInfo(status: ClaimStatus) {
   switch (status) {

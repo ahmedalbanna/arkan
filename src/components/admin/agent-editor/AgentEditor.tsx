@@ -9,7 +9,7 @@ import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, Bot, BookOpen, Wrench, MessageSquare, ListChecks, Link as LinkIcon, BotMessageSquare, PencilRuler } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { FormProvider } from 'react-hook-form';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/cn';
 import KnowledgeTab from './KnowledgeTab';
 import ToolsTab from './ToolsTab';
 import GuidelinesTab from './GuidelinesTab';

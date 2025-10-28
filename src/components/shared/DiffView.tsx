@@ -1,7 +1,7 @@
 
 'use client';
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/cn";
 import type { DiffPart } from "@/lib/utils/diff";
 
 export const DiffView = ({ diff }: { diff: DiffPart[] }) => {
