@@ -35,6 +35,7 @@ export * from './data/use-payment';
 export * from './data/use-projects';
 export * from './data/use-sections';
 export * from './data/use-teams';
+export * from './data/use-templates';
 export * from './data/use-transactions';
 export * from './data/use-users';
 

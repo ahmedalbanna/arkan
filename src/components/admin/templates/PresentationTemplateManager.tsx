@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useCreatePresentationTemplate, useDeletePresentationTemplate, usePresentationTemplates, useUpdatePresentationTemplate } from '@/hooks';
+import { useCreatePresentationTemplate, useDeletePresentationTemplate, usePresentationTemplates, useUpdatePresentationTemplate } from '@/hooks/data/use-templates';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';

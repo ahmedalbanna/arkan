@@ -4,7 +4,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchFeaturesApi, updateFeatureApi } from '@/services/feature-service';
 import { Feature } from '@/lib/features';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/util/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { featureKeys } from '@/lib/query-keys';

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useCreateReportTemplate, useDeleteReportTemplate, useReportTemplates, useUpdateReportTemplate } from '@/hooks';
+import { useCreateReportTemplate, useDeleteReportTemplate, useReportTemplates, useUpdateReportTemplate } from '@/hooks/data/use-templates';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';

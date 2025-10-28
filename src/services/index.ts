@@ -17,6 +17,7 @@ export * from './project-service';
 export * from './report-service';
 export * from './section-service';
 export * from './settings-service';
+export * from './template-service';
 export * from './text-to-speech-service';
 export * from './topic-explainer-service';
 export * from './transaction-service';

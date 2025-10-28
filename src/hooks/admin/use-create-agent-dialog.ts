@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useCreateAgent, useAgentCategories } from '@/hooks/data/use-agents';
+import { useCreateAgent, useAgentCategories } from '@/hooks/data/useAgents';
 import { AgentPromptSchema } from '@/ai/schemas';
 
 const CreateAgentSchema = z.object({

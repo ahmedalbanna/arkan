@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useCreateAgentCategory } from '@/hooks/data/use-agents';
+import { useCreateAgentCategory } from '@/hooks/data/useAgents';
 import { toast } from '@/hooks/util/use-toast';
 
 const categorySchema = z.object({

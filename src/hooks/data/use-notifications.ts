@@ -7,7 +7,7 @@ import { getFirebaseClientDb } from '@/lib/api-utils';
 import { ref, onValue, off } from 'firebase/database';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Notification } from '@/lib/types';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/util/use-toast';
 import { notificationKeys } from '@/lib/query-keys';
 
 /**
@@ -132,4 +132,3 @@ export function useClearAllNotifications() {
         },
     });
 }
-
