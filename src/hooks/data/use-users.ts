@@ -14,7 +14,7 @@ import { userKeys } from '@/lib/query-keys';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
-import { getAuthenticatedToken } from '@/lib/authUtils';
+import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 
 
 // ============================================================================

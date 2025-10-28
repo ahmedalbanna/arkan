@@ -9,7 +9,7 @@ export * from './admin/use-user-management-console';
 // export * from './admin/useDocxTemplateManager';
 
 // Auth Hooks
-// export * from './auth/use-auth-mutations';
+export * from './auth/use-auth-mutations';
 
 // Core Builder Hooks
 export * from './core/useAutosave';
