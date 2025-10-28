@@ -9,12 +9,12 @@ import {
   fetchUsersApi,
   sendPasswordResetEmailApi,
   updateUser as updateUserApi,
-} from '@/services/user-service';
-import type { UserProfile } from '@/lib/models/user';
+} from '@/services';
+import type { UserProfile } from '@/lib/models';
 import { userKeys } from '@/lib/query-keys';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { useAuth } from '@/context/AuthContext';
-import { toast } from '../util/use-toast';
+import { toast } from '@/hooks';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 
 

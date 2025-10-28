@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { SectionName } from '@/ai/schemas';
@@ -9,7 +10,7 @@ import { Button } from '../ui/button';
 import { Wand2, ThumbsDown, Check } from 'lucide-react';
 import { DiffView } from '../shared/DiffView';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-styles';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import { useReportModeGenerator } from '@/hooks/useReportModeGenerator';

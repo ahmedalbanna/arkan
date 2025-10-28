@@ -1,12 +1,11 @@
 
-
 'use client';
 
 import { exportReportAsDocx as exportReportUtil } from '@/lib/docx-exporter';
 import { useState } from 'react';
 import { toast } from './use-toast';
 
-import { Project } from '@/lib/models/project';
+import { Project } from '@/lib/models';
 
 export function useExport() {
     const [isExporting, setIsExporting] = useState(false);

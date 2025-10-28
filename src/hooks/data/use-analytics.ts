@@ -3,7 +3,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { analyticsKeys } from '@/lib/query-keys';
-import { fetchUserStats } from '@/services/analytics-service';
+import { fetchUserStats } from '@/services';
 import { useAuth } from '@/context/AuthContext';
 
 export function useUserStats() {

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useCreatePresentationTemplate, useDeletePresentationTemplate, usePresentationTemplates, useUpdatePresentationTemplate } from '@/hooks/data/use-templates';
+import { useCreatePresentationTemplate, useDeletePresentationTemplate, usePresentationTemplates, useUpdatePresentationTemplate } from '@/hooks';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useSections } from '@/hooks';
-import { PresentationTemplate } from '@/lib/models/presentationTemplate';
+import { PresentationTemplate } from '@/lib/models';
 import { useMemo, useState } from 'react';
 
 

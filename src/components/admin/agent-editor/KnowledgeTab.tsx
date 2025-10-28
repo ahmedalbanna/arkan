@@ -23,7 +23,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { useToast } from '@/hooks';
-import { AgentEditorFormValues } from '@/lib/agent-editor-schema';
+import { AgentEditorFormValues } from '@/lib/schemas/agent-editor-schema';
 import type { AgentKnowledgeSource } from '@/lib/types';
 
 

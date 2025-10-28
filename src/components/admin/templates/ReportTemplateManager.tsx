@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useCreateReportTemplate, useDeleteReportTemplate, useReportTemplates, useUpdateReportTemplate } from '@/hooks/data/use-templates';
+import { useCreateReportTemplate, useDeleteReportTemplate, useReportTemplates, useUpdateReportTemplate } from '@/hooks';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { toast } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ReportTemplate } from '@/lib/models/reportTemplate';
+import { ReportTemplate } from '@/lib/models';
 import { useDebounce } from '@/hooks';
 
 const reportTemplateSchema = z.object({

@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
-import { AgentEditorFormValues } from '@/lib/agent-editor-schema';
+import { AgentEditorFormValues } from '@/lib/schemas/agent-editor-schema';
 import { type AgentCategoryDetails as AgentCategory, type AgentPrompt } from '@/lib/types';
 import { MessageSquare, Plus, X, Pencil, Copy, Check } from 'lucide-react';
 import { useEffect, useState } from 'react';

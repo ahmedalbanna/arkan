@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useReportModeGenerator } from '@/hooks';
@@ -8,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { PanelRightOpen } from 'lucide-react';
 import { ReportResults } from './ReportResults';
-import type { Section } from '@/lib/models/section';
+import type { Section } from '@/lib/models';
 
 function ReportSkeleton() {
     return (

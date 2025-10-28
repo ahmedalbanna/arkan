@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Agent } from '@/lib/models/agent';
+import type { Agent } from '@/lib/models';
 import type { AgentCategoryDetails as AgentCategory } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
@@ -18,7 +18,7 @@ import ContextTab from './ContextTab';
 import GeneralTab from './GeneralTab';
 import OutputTab from './OutputTab';
 import { useAgentEditor } from '@/hooks/admin/use-agent-editor';
-import { type AgentEditorFormValues } from '@/lib/agent-editor-schema';
+import { type AgentEditorFormValues } from '@/lib/schemas/agent-editor-schema';
 
 
 interface AgentEditorProps {

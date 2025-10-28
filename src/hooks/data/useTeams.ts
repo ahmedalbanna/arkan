@@ -3,7 +3,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/util/use-toast';
 import { fetchUserTeams, createTeam, inviteMember } from '@/services/team-service';
 import type { TeamWithMembers } from '@/lib/types';
 import { TeamProperties } from '@/lib/models/team';

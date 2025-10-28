@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -13,8 +14,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { useProjectCardLogic } from '@/hooks/use-project-card-logic';
-import type { Project } from '@/lib/models/project'; // Import the Project class
+import { useProjectCardLogic } from '@/hooks';
+import type { Project } from '@/lib/models'; // Import the Project class
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { FileText, Loader2, Trash2 } from 'lucide-react';
@@ -68,7 +69,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
             </CardHeader>
             <CardContent className="flex-grow">
                 <p className="text-sm text-muted-foreground line-clamp-3">
-                    {project.proposal?.executiveSummary as string || project.projectIdea || t('projects.noDescription')}
+                    {project.generatedProposalState?.proposalTitle as string || project.projectIdea || t('projects.noDescription')}
                 </p>
             </CardContent>
             <CardFooter>

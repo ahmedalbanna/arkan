@@ -12,7 +12,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@/context/AuthContext';
 import { useLogout } from '@/hooks/auth/use-auth-mutations';
-import { useMarkNotificationsAsRead, useClearAllNotifications, useNotifications } from '@/hooks/data/use-notifications';
+import { useMarkNotificationsAsRead, useClearAllNotifications, useNotifications } from '@/hooks';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from '@/components/ui/dropdown-menu';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,9 +20,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import type { Notification, UserProfile } from '@/lib/types';
-import { toast } from '@/hooks/util/use-toast';
+import { toast } from '@/hooks';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { useMobile } from '@/hooks/util/use-mobile';
+import { useMobile } from '@/hooks';
 import { Label } from '@/components/ui/label';
 
 

@@ -2,13 +2,13 @@
 'use client';
 
 import { useUpdateAgent } from '@/hooks/data/useAgents';
-import { agentEditorSchema, type AgentEditorFormValues } from '@/lib/agent-editor-schema';
+import { agentEditorSchema, type AgentEditorFormValues } from '@/lib/schemas/agent-editor-schema';
 import type { Agent, AgentCategoryDetails } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useAgentCategories } from '@/hooks/data/useAgents';
+import { useAgentCategories } from '@/hooks';
 
 interface UseAgentEditorProps {
   agentId: string;

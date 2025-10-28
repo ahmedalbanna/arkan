@@ -25,3 +25,5 @@ export * from './translation-service';
 export * from './user-service';
 export * from './writing-tools-service';
 export * from './ai-researcher-service';
+export * from './team-service';
+export * from './credit-service';

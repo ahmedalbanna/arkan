@@ -2,7 +2,7 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAgent, useAgents } from '@/hooks/data/useAgents';
+import { useAgent, useAgents } from '@/hooks';
 import { AlertCircle, Bot, Loader2 } from 'lucide-react';
 import React, { Suspense, lazy } from 'react';
 

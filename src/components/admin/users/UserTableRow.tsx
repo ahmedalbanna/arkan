@@ -12,11 +12,11 @@ import { useAuth } from "@/context/AuthContext";
 import { userKeys } from "@/lib/query-keys";
 import { fetchUserProfileApi } from "@/services/user-service";
 import { useRouter } from "next/navigation";
-import { useChatStore } from "@/hooks/core/useChatStore";
+import { useChatStore } from "@/hooks";
 import { createConversationApi } from "@/services";
-import { toast } from "@/hooks/util/use-toast";
+import { toast } from "@/hooks";
 import { useLocalization } from "@/context/LocalizationContext";
-import { User } from '@/lib/models/user'; // NEW: Import our class
+import { User } from '@/lib/models'; // NEW: Import our class
 
 interface UserTableRowProps {
     user: User;

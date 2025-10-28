@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useFormContext } from 'react-hook-form';
@@ -12,7 +11,7 @@ import { AlertCircle, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocalization } from '@/context/LocalizationContext';
 import { AgentPrompt } from '@/lib/types';
-import { AgentEditorFormValues } from '@/lib/agent-editor-schema';
+import { AgentEditorFormValues } from '@/lib/schemas/agent-editor-schema';
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 

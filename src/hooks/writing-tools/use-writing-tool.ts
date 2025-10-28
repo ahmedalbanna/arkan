@@ -3,9 +3,9 @@
 
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { writingToolApi } from '@/services/writing-tools-service';
-import { toast } from '@/hooks/util/use-toast';
-import { deductCredit } from '@/services/credit-service';
+import { writingToolApi } from '@/services';
+import { toast } from '@/hooks';
+import { deductCredit } from '@/services';
 import { useQueryClient } from '@tanstack/react-query';
 import { userKeys } from '@/lib/query-keys';
 

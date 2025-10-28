@@ -1,3 +1,4 @@
+
 'use client';
 
 
@@ -6,6 +7,7 @@ import { MarkdownViewer } from "@/components/shared/MarkdownViewer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { markdownComponents } from "@/lib/utils/markdown-styles";
 import { BookOpen, CheckCircle, Clock, FileSignature, FileText, HelpCircle, Lightbulb, List, MessageSquare, Package, Target, Users } from "lucide-react";
 
 interface SessionPlanDisplayProps {

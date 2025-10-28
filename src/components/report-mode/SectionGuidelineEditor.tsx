@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Trash2, StickyNote } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { useGuidelineEditor } from '@/hooks/use-guideline-editor';
+import { useGuidelineEditor } from '@/hooks';
 
 interface GuidelineEditorProps {
     itemKey: string;

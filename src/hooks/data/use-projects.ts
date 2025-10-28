@@ -7,7 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { projectKeys } from '@/lib/query-keys';
 import { fetchProjectsApi, createProject, updateProject, deleteProject, type ProjectState, fetchProjectApi } from '@/services/project-service';
 import { useBuilderStore } from '../core/useBuilderStore';
-import { toast } from '@/hooks';
+import { toast } from '@/hooks/util/use-toast';
 import { Project } from '@/lib/models/project'; // Import the Project class
 
 export function useProjects() {

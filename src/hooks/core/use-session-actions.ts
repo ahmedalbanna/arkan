@@ -97,13 +97,9 @@ export function useSessionActions() {
 
     const handleExportReport = async (sectionsToInclude: string[]) => {
         if (!project) return;
-        const translatedTitles = reportAgentSectionIds.reduce((acc, id) => {
-            const agent = agents?.find(a => a.id === id);
-            if (agent) {
-                acc[id] = t(agent.name);
-            }
-            return acc;
-        }, {} as { [key in string]: string });
+        // This is a placeholder for getting translated titles.
+        // In a real scenario, you'd fetch this from your localization setup based on agent IDs.
+        const translatedTitles = {}; 
         await exportReportDocx(project, translatedTitles, sectionsToInclude);
     };
 

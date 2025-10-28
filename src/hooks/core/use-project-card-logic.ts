@@ -2,10 +2,10 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useDeleteProject } from '../data/use-projects';
+import { useDeleteProject } from '@/hooks';
 import { useBuilderStore } from './useBuilderStore';
 import { useRouter } from 'next/navigation';
-import type { Project } from '@/lib/models/project'; // Import the Project class
+import type { Project } from '@/lib/models'; // Import the Project class
 
 export function useProjectCardLogic(project: Project) {
     const { t } = useLocalization();
