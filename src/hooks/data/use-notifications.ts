@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { getFirebaseClientDb } from '@/lib/api-utils';
+import { rtdb } from '@/lib/firebase/client-init';
 import { ref, onValue, off } from 'firebase/database';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Notification } from '@/lib/types';
@@ -24,8 +24,7 @@ export function useNotifications() {
             return;
         }
 
-        const db = getFirebaseClientDb();
-        const notificationsRef = ref(db, `notifications/${firebaseUser.uid}`);
+        const notificationsRef = ref(rtdb, `notifications/${firebaseUser.uid}`);
 
         const listener = onValue(notificationsRef, (snapshot) => {
             const data = snapshot.val();

@@ -1,14 +1,13 @@
 
 
 import FirebaseMessagingProvider from '@/components/FirebaseMessagingProvider';
-import LanguageDirectionManager from '@/components/LanguageDirectionManager';
-import { Header } from '@/components/layout/Header';
-import QueryProvider from '@/components/QueryProvider';
-import { ThemeProvider } from '@/components/ThemeProvider';
+import LanguageDirectionManager from '@/components/shared/LanguageDirectionManager';
+import { Header } from '@/components/shared/Header';
+import QueryProvider from '@/components/shared/QueryProvider';
+import { ThemeProvider } from '@/components/shared/ThemeProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/context/AuthContext';
 import { LocalizationProvider } from '@/context/LocalizationContext';
-import { adminAuth } from '@/lib/firebase/server-init';
 import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
 import { redirect } from 'next/dist/client/components/navigation';

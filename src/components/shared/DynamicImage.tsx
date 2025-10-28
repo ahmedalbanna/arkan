@@ -17,7 +17,7 @@ interface DynamicImageProps {
 
 const imageQueryFn = async (prompt: string, token: string | null) => {
     if (!prompt || !token) return null;
-    const response = await fetch('/api/generate-image', {
+    const response = await fetch('/api/generate/image', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

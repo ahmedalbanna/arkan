@@ -1,7 +1,7 @@
 
 'use client';
 
-import { PricingCard, PricingPlan } from '@/components/price/PricingCard';
+import { PricingCard, PricingPlan } from '@/components/pricing/PricingCard';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Gem } from 'lucide-react';
 

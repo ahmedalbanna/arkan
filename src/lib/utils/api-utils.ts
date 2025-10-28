@@ -108,33 +108,3 @@ export const handleApiError = (error: any, defaultStatus = 500) => {
 export const createApiResponse = (data: any, status: number) => {
   return NextResponse.json(data, { status });
 };
-
-// --- This part is client-side specific and should not be in api-utils.ts ---
-// Moving it to firebase/client-init.ts is a better pattern, but for now we keep it
-// as the project structure has it this way. If refactoring client/server utils, this would move.
-
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getDatabase } from 'firebase/database';
-
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
-  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-};
-
-function getFirebaseClientApp() {
-  if (!getApps().length) {
-    return initializeApp(firebaseConfig);
-  }
-  return getApp();
-}
-
-export function getFirebaseClientDb() {
-  const app = getFirebaseClientApp();
-  return getDatabase(app);
-}

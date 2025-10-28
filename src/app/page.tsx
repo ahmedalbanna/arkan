@@ -1,20 +1,10 @@
 'use client';
 
-import HomePageContent from '@/components/HomePageContent';
-
-// This is a server-side function that could be used to fetch data
-// In this case, we're not fetching any projects, so we pass an empty array.
-// This structure is kept for potential future use.
-async function getFeaturedProjects() {
-    // Example of how you might fetch data in a real scenario:
-    // const projectsSnapshot = await adminDb.collection('projects').where('isFeatured', '==', true).limit(3).get();
-    // const projects = projectsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    // return projects;
-    return [];
-}
+import HomePageContent from '@/components/home/HomePageContent';
 
 export default function Home() {
-    // Although we're not fetching projects, we keep the prop for structural consistency
+    // This component is now fully client-side.
+    // The featuredProjects data is no longer fetched on the server.
     const featuredProjects = [];
 
     return (

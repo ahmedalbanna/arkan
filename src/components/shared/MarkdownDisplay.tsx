@@ -37,8 +37,7 @@ Paste your **Markdown** text on the left to see the styled output on the right.
 function helloWorld() {
   console.log("Hello, world!");
 }
-\`\`\`
-`);
+\`\`\``);
   const [isExporting, setIsExporting] = useState(false);
   const [userPrompt, setUserPrompt] = useState('');
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
