@@ -14,7 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { fetchTransactionsForReport } from '@/services';
 import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
-import { generateFinancialReportPdf } from '@/lib/pdf-utils';
+import { generateFinancialReportPdf } from '@/lib/utils/pdf-utils';
 
 export function FinancialReportExporter() {
     const [dateRange, setDateRange] = useState<DateRange | undefined>();

@@ -1,7 +1,7 @@
 
 'use server';
 
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { createLectureUnit } from '@/ai/flows/create-lecture-unit';

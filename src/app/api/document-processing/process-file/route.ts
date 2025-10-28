@@ -1,7 +1,7 @@
 
 'use server';
 
-import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
+import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { imageToText } from '@/ai/flows/image-to-text';

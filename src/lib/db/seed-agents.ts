@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { CollectionReference } from 'firebase-admin/firestore';
-import { AGENTS as defaultAgents } from '../agents-template';
+import { AGENTS as defaultAgents } from './seed-data/agents-template';
 import { adminDb } from '../firebase/server-init';
 
 // The AGENTS constant from your original `lib/agents.ts` file will be moved here.

@@ -1,9 +1,4 @@
-export interface Feature {
-    id: string;
-    name: string;
-    description: string;
-    isEnabled: boolean;
-}
+import { Feature } from "../../types";
 
 export const defaultFeatures: Feature[] = [
     { id: 'report', name: 'Report Generator', description: 'Allows users to generate report sections.', isEnabled: true },

@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/accordion";
 import { fetchPublicSettings } from '@/services';
 import { submitPaymentProof } from '@/services';
-import type { PublicSettings } from '@/lib/settings';
+import type { PublicSettings } from '@/lib/types';
 
 const formSchema = z.object({
   file: z

@@ -5,7 +5,7 @@ import { adminDb } from '@/lib/firebase/server-init';
 import { getStorage } from 'firebase-admin/storage';
 import { generateImage } from '@/ai/flows/generate-image';
 import { logGeneration } from '@/services/generation-service';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 
 const refreshImageSchema = z.object({

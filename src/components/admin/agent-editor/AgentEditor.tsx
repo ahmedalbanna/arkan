@@ -2,8 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Agent } from '@/lib/models';
-import type { AgentCategoryDetails as AgentCategory } from '@/lib/types';
+import type { Agent } from '@/lib/models/agent';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, Bot, BookOpen, Wrench, MessageSquare, ListChecks, Link as LinkIcon, BotMessageSquare, PencilRuler } from 'lucide-react';
@@ -11,9 +10,8 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { FormProvider } from 'react-hook-form';
 import { cn } from '@/lib/utils/cn';
 import KnowledgeTab from './KnowledgeTab';
-import ToolsTab from './ToolsTab';
 import GuidelinesTab from './GuidelinesTab';
-import AutomationTab from './AutomationTab';
+
 import ContextTab from './ContextTab';
 import GeneralTab from './GeneralTab';
 import OutputTab from './OutputTab';
@@ -58,9 +56,7 @@ export default function AgentEditor({ agentId, initialData, allAgents }: AgentEd
     { id: 'guidelines', label: t('agentEditor.guidelinesTitle'), icon: ListChecks },
     { id: 'output', label: t('agentEditor.outputTitle'), icon: PencilRuler },
     { id: 'knowledge', label: t('agentEditor.knowledgeTitle'), icon: BookOpen },
-    { id: 'tools', label: t('agentEditor.toolsTitle'), icon: Wrench },
     { id: 'context', label: t('agentEditor.contextTitle'), icon: LinkIcon },
-    { id: 'automation', label: t('agentEditor.automationTitle'), icon: BotMessageSquare },
   ];
 
   const renderContent = () => {
@@ -73,12 +69,8 @@ export default function AgentEditor({ agentId, initialData, allAgents }: AgentEd
         return <OutputTab isComplexPrompt={isComplexPrompt} />;
       case 'knowledge':
         return <KnowledgeTab />;
-      case 'tools':
-        return <ToolsTab />;
       case 'context':
         return <ContextTab allAgents={allAgents} />;
-       case 'automation':
-        return <AutomationTab />;
       default:
         return <div><CardTitle>{navItems.find(n => n.id === activeTab)?.label}</CardTitle><p>Coming soon...</p></div>;
     }

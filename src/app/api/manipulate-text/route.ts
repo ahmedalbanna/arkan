@@ -6,7 +6,7 @@ import { manipulateText } from '@/ai/flows/manipulate-text';
 import { deductCredit } from '@/services/credit-service';
 import { ManipulateTextInputSchema } from '@/ai/schemas';
 import { logGeneration } from '@/services/generation-service';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 export const POST = withAuth(async ({ request, user }) => {
   try {

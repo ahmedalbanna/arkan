@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
-import { Feature } from '@/lib/features';
+import { Feature } from '@/lib/types';
 
 function FeatureSkeleton() {
   return (

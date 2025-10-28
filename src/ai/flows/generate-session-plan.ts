@@ -12,7 +12,7 @@ import {
   type GenerateSessionPlanInput,
   type GenerateSessionPlanOutput,
 } from '@/ai/schemas/lecture-generator';
-import { withRetry } from '@/lib/ai-utils';
+import { withRetry } from '@/lib/utils/ai-utils';
 
 const generateSessionPlanPrompt = ai.definePrompt({
   name: 'generateSessionPlanPrompt',
