@@ -2,7 +2,7 @@
 'use server';
 
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, GenerateDiagramOutputSchema } from '@/ai/schemas';
+import { DiagramTypeSchema, SectionNameSchema, GenerateDiagramOutputSchema } from '@/ai/schemas';
 import { generateDiagram } from '@/ai/flows/generate-diagrams';
 import { deflateSync } from 'zlib';
 import { deductCredit } from '@/services/credit-service';
@@ -11,7 +11,6 @@ import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 // Schema for a new diagram generation request
 const generateDiagramSchema = z.object({
-  proposal: ProjectProposalSchema.optional().nullable(),
   diagramToGenerate: DiagramTypeSchema.describe("The type of diagram to generate."),
   otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context."),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context."),
