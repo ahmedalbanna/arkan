@@ -9,7 +9,7 @@ import { useBuilderStore, useFeatures, useProject } from '@/hooks';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
-import { FileText, FolderKanban, GitGraph } from 'lucide-react';
+import { FileText, FolderKanban } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
@@ -28,10 +28,6 @@ const SessionActions = dynamic(() => import('@/components/project/SessionActions
 
 
 const ReportGenerator = dynamic(() => import('@/components/report-mode/ReportModeGenerator'), {
-  ssr: false,
-  loading: () => <LoadingSkeleton />,
-});
-const DiagramGenerator = dynamic(() => import('@/components/diagram-mode/DiagramGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
@@ -117,7 +113,6 @@ function GeneratePageContent() {
   const enabledTabs = [
     { id: 'files', enabled: true }, // Files tab is always enabled
     { id: 'report', enabled: isFeatureEnabled('report') },
-    { id: 'diagram', enabled: isFeatureEnabled('diagram') },
   ].filter(tab => tab.enabled).map(tab => tab.id);
 
 
@@ -157,18 +152,13 @@ function GeneratePageContent() {
             <LoadingSkeleton />
           ) : (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
-              <TabsList className="grid w-full h-auto grid-cols-2 sm:grid-cols-2 lg:grid-cols-3">
+              <TabsList className="grid w-full h-auto grid-cols-2">
                 <TabsTrigger value="files" className="gap-2">
                   <FolderKanban className="h-4 w-4" /> {t('builder.tabs.files')}
                 </TabsTrigger>
                 {isFeatureEnabled('report') && (
                   <TabsTrigger value="report" className="gap-2">
                     <FileText className="h-4 w-4" /> {t('builder.tabs.document')}
-                  </TabsTrigger>
-                )}
-                {isFeatureEnabled('diagram') && (
-                  <TabsTrigger value="diagram" className="gap-2">
-                    <GitGraph className="h-4 w-4" /> {t('builder.tabs.diagram')}
                   </TabsTrigger>
                 )}
               </TabsList>
@@ -179,9 +169,6 @@ function GeneratePageContent() {
                 </TabsContent>
                 <TabsContent value="report" className="h-full animate-fade-in">
                   {activeTab === 'report' && <ReportGenerator />}
-                </TabsContent>
-                <TabsContent value="diagram" className="h-full animate-fade-in">
-                  {activeTab === 'diagram' && <DiagramGenerator />}
                 </TabsContent>
               </div>
             </Tabs>
