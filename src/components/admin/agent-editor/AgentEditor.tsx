@@ -17,7 +17,7 @@ import AutomationTab from './AutomationTab';
 import ContextTab from './ContextTab';
 import GeneralTab from './GeneralTab';
 import OutputTab from './OutputTab';
-import { useAgentEditor } from '@/hooks';
+import { useAgentEditor } from '@/hooks/admin/use-agent-editor';
 import { type AgentEditorFormValues } from '@/lib/agent-editor-schema';
 
 

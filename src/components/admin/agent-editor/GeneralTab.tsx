@@ -14,7 +14,8 @@ import { type AgentCategoryDetails as AgentCategory, type AgentPrompt } from '@/
 import { MessageSquare, Plus, X, Pencil, Copy, Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import { toast, useDebounce } from '@/hooks';
+import { useToast } from '@/hooks/util/use-toast';
+import { useDebounce } from '@/hooks/util/use-debounce';
 
 interface GeneralTabProps {
   agentId: string;
@@ -62,6 +63,8 @@ export default function GeneralTab({ agentId, isComplexPrompt, isPending, catego
   const promptValue = watch('prompt');
   const introductionValue = watch('introduction');
   const introLength = introductionValue?.length || 0;
+
+  const {toast} = useToast();
 
   const handleCopyId = () => {
     navigator.clipboard.writeText(agentId);

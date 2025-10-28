@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Loader2, PlusCircle } from 'lucide-react';
-import { useCreateCategoryDialog } from '@/hooks';
+import { useCreateCategoryDialog } from '@/hooks/admin/use-create-category-dialog';
 
 export function CreateCategoryDialog() {
     const { isOpen, setIsOpen, form, onSubmit, mutation } = useCreateCategoryDialog();

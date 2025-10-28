@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useCreateReportTemplate, useDeleteReportTemplate, useReportTemplates, useUpdateReportTemplate } from '@/hooks';
@@ -20,7 +21,7 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { toast } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ReportTemplate } from '@/lib/models/reportTemplate';
-import { useDebounce } from '@/hooks/use-debounce';
+import { useDebounce } from '@/hooks';
 
 const reportTemplateSchema = z.object({
     id: z.string(),

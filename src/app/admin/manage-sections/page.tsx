@@ -1,3 +1,4 @@
+
 // C:\Users\ahmed\source\repos\arkan\src\app\admin\manage-sections\page.tsx
 'use client';
 

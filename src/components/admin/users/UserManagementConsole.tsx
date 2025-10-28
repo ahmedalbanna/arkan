@@ -8,7 +8,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { CreateUserDialog } from './CreateUserDialog';
 import { UserTable } from './UserTable';
 import { UserTableSkeleton } from './UserTableSkeleton';
-import { useUserManagementConsole } from '@/hooks';
+import { useUserManagementConsole } from '@/hooks/admin/use-user-management-console';
 import { User } from '@/lib/models/user';
 
 export default function UserManagementConsole() {

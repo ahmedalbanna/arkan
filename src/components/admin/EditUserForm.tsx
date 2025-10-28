@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, use, useActionState, useState } from 'react';
+import { useEffect, useActionState, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { handleUpdateUser, handleDeleteUser } from '@/app/manage-users/actions';
+import { handleUpdateUser } from '@/app/manage-users/actions';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,12 +25,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useToast } from '@/hooks';
+import { useToast } from '@/hooks/util/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
-import { useSendPasswordReset } from '@/hooks';
+import { useSendPasswordReset } from '@/hooks/auth/use-auth-mutations';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { userKeys } from '@/lib/query-keys';
@@ -91,7 +91,7 @@ export default function EditUserForm({ user }: { user: User }) {
 
 
   const [updateState, updateFormAction] = useActionState(handleUpdateUser, { errors: {} });
-  const [deleteState, deleteFormAction] = useActionState(handleDeleteUser, { error: '' });
+  const [deleteState, deleteFormAction] = useActionState(() => {}, { error: '' });
 
   const form = useForm<EditUserFormValues>({
       resolver: zodResolver(editUserSchema),

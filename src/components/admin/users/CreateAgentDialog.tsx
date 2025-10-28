@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, PlusCircle } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useCreateAgentDialog } from '@/hooks';
+import { useCreateAgentDialog } from '@/hooks/admin/use-create-agent-dialog';
 
 export function CreateAgentDialog() {
     const { t } = useLocalization();

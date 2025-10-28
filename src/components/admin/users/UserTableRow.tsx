@@ -10,11 +10,11 @@ import Link from 'next/link';
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { userKeys } from "@/lib/query-keys";
-import { fetchUserProfileApi } from "@/services";
+import { fetchUserProfileApi } from "@/services/user-service";
 import { useRouter } from "next/navigation";
-import { useChatStore } from "@/hooks";
+import { useChatStore } from "@/hooks/core/useChatStore";
 import { createConversationApi } from "@/services";
-import { toast } from "@/hooks";
+import { toast } from "@/hooks/util/use-toast";
 import { useLocalization } from "@/context/LocalizationContext";
 import { User } from '@/lib/models/user'; // NEW: Import our class
 
