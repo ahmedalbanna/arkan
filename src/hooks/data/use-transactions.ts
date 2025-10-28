@@ -4,19 +4,15 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { transactionKeys } from '@/lib/query-keys';
-import { getTransactions, verifyPayment } from '@/services/transaction-service';
+import { getTransactions, verifyPayment } from '@/services/api/transactionService';
 import { toast } from '@/hooks/util/use-toast';
-import { Transaction } from '@/lib/models/transaction';
+import { Transaction, type TransactionProperties } from '@/lib/models';
+import { VerifyPaymentVariables } from '@/lib/types';
+
 
 export type TransactionStatus = 'pending' | 'verified' | 'rejected';
 
-export interface VerifyPaymentVariables {
-  transactionId: string;
-  userId: string;
-  creditsToGrant: number;
-  status: 'verified' | 'rejected';
-  adminNotes?: string;
-}
+export { type VerifyPaymentVariables };
 
 const TRANSACTIONS_PER_PAGE = 6;
 
@@ -60,5 +56,22 @@ export function useVerifyPayment() {
         onError: (error: Error) => {
             toast({ title: 'Verification Failed', description: error.message, variant: 'destructive' });
         }
+    });
+}
+
+export function useUserTransactions() {
+    const { firebaseUser, isLoading: authLoading } = useAuth();
+
+    return useQuery({
+        queryKey: transactionKeys.lists(),
+        queryFn: async () => {
+            if (!firebaseUser) throw new Error("User not authenticated");
+            const token = await firebaseUser.getIdToken();
+            const { fetchUserTransactions } = await import('@/services/api/transactionService');
+            const results = await fetchUserTransactions(token);
+            // Instantiate Transaction objects
+            return results.map((t: TransactionProperties) => new Transaction(t));
+        },
+        enabled: !authLoading && !!firebaseUser,
     });
 }

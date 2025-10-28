@@ -4,12 +4,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createUserService,
-  deleteUser as deleteUserApi,
+  deleteUserApi,
   fetchUserProfileApi,
-  fetchUsersApi,
-  sendPasswordResetEmailApi,
-  updateUser as updateUserApi,
-} from '@/services';
+  updateUserApi,
+  fetchUsersApi
+} from '@/services/api/userService';
 import type { UserProfile } from '@/lib/models';
 import { userKeys } from '@/lib/query-keys';
 import { handleErrorUtility } from '@/lib/errorUtils';
@@ -39,6 +38,23 @@ export function useUserProfile(userId: string) {
     },
     enabled: !!firebaseUser && !!userId,
   });
+}
+
+/**
+ * Fetches a paginated list of all users.
+ * Requires admin privileges.
+ */
+export function useUsers(limit: number, lastVisibleId?: string) {
+    const { firebaseUser } = useAuth();
+    return useQuery({
+        queryKey: userKeys.list(lastVisibleId ? 1 : 0),
+        queryFn: async () => {
+             if (!firebaseUser) throw new Error("User not authenticated");
+            const token = await getAuthenticatedToken(firebaseUser);
+            return fetchUsersApi(limit, lastVisibleId, token);
+        },
+        enabled: !!firebaseUser
+    })
 }
 
 

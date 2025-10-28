@@ -8,7 +8,7 @@ import { auth } from '@/lib/firebase/client-init';
 import { subscribeToUserProfile, fetchUserProfileApi } from '@/services';
 import type { UserProfile } from '@/lib/types';
 import { userKeys } from '@/lib/query-keys';
-import { getAuthenticatedToken } from '@/lib/authUtils';
+import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 
 interface AuthContextType {
   firebaseUser: FirebaseUser | null;

@@ -1,11 +1,10 @@
-
 'use client';
 
 import type { AnalyzeContextOutput, ExternalContext } from '@/ai/schemas';
 
 interface AnalyzeContextVariables {
   prompt: string;
-  contextFiles: Omit<ExternalContext, 'content'>[]; // Content is handled on the server
+  contextFiles: Omit<ExternalContext, 'content' | 'type'> & { type: string, content: string }[];
   token: string;
 }
 

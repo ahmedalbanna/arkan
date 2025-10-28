@@ -3,7 +3,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { submitPaymentProof } from '@/services';
+import { submitPaymentProof } from '@/services/api/paymentService';
 import { useToast } from '@/hooks';
 import { transactionKeys } from '@/lib/query-keys';
 

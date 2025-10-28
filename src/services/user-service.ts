@@ -1,17 +1,20 @@
+// src/services/user-service.ts
 'use client';
 
-import type { SignupCredentials } from "@/components/auth/SignupForm";
-import { PricingPlan } from '@/components/price/PricingCard';
-import { app, auth } from '@/lib/firebase/client-init';
-import type { UserProfile } from '@/lib/types';
+import { doc, getFirestore, onSnapshot } from "firebase/firestore";
+import { app } from '@/lib/firebase/client-init';
+import type { UserProfile } from '@/lib/models';
+import type { SignupCredentials } from '@/lib/types';
 import {
   GoogleAuthProvider,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
-  signOut
+  signOut,
 } from "firebase/auth";
-import { doc, getFirestore, onSnapshot, setDoc } from "firebase/firestore";
+import { auth } from '@/lib/firebase/client-init';
+import type { LoginCredentials } from '@/lib/types';
+
 
 export interface UserListResponse {
   users: UserProfile[];
@@ -98,8 +101,72 @@ export async function fetchUserProfileApi(userId: string, token: string): Promis
   return await response.json();
 }
 
+/**
+ * Creates a new user via the admin API.
+ * @param data - The data for the new user, including email, password, name, role, and credits.
+ * @param token - The admin user's authentication token.
+ * @returns A promise that resolves with the newly created user's data.
+ */
+export async function createUserService(data: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt' | 'hasCompletedOnboarding'> & { password?: string }, token: string) {
+  const response = await fetch('/api/admin/users', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to create user.');
+  }
+  return response.json();
+}
 
-export async function loginWithEmail(credentials: { email: string, password: string }) {
+/**
+ * Updates an existing user's profile via the API.
+ * @param userId - The ID of the user to update.
+ * @param data - The partial user profile data to update.
+ * @param token - The authentication token of the user making the request.
+ * @returns A promise that resolves with the updated user profile data.
+ */
+export async function updateUserApi(userId: string, data: Partial<UserProfile>, token: string): Promise<UserProfile> {
+  const response = await fetch(`/api/users/${userId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to update user.');
+  }
+  return response.json();
+}
+
+/**
+ * Deletes a user via the admin API.
+ * @param userId - The ID of the user to delete.
+ * @param token - The admin user's authentication token.
+ * @returns A promise that resolves with a success message.
+ */
+export async function deleteUserApi(userId: string, token: string): Promise<{ message: string }> {
+  const response = await fetch(`/api/users/${userId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to delete user.');
+  }
+  return response.json();
+}
+
+// --- Authentication Functions ---
+
+export async function loginWithEmail(credentials: LoginCredentials) {
   try {
     const userCredential = await signInWithEmailAndPassword(
       auth,
@@ -149,35 +216,15 @@ export async function serviceSignupUser(credentials: SignupCredentials) {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw errorData; // Throw the structured error from the API
-  }
-  return response.json();
-}
-
-export async function createUserService(data: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt' | 'hasCompletedOnboarding'> & { password?: string }, token: string) {
-  const response = await fetch('/api/admin/users', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to create user.');
+    throw errorData;
   }
   return response.json();
 }
 
 
-export async function saveDeviceToken(userId: string, token: string) {
-  if (!userId || !token) return;
-  const db = getFirestore(app);
-  const tokenRef = doc(db, 'deviceTokens', userId);
-  await setDoc(tokenRef, { token, updatedAt: new Date().toISOString() }, { merge: true });
+export async function forgotPasswordService(email: string) {
+  return sendPasswordResetEmail(auth, email);
 }
-
 
 export async function sendPasswordResetEmailApi(userId: string, token: string) {
   const response = await fetch(`/api/users/${userId}/reset-password`, {
@@ -189,31 +236,6 @@ export async function sendPasswordResetEmailApi(userId: string, token: string) {
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || "Failed to send password reset email.");
-  }
-  return response.json();
-}
-
-export async function forgotPasswordService(email: string) {
-  return sendPasswordResetEmail(auth, email);
-}
-
-
-export async function purchaseCreditsApi(
-  plan: PricingPlan,
-  token: string
-): Promise<{ newBalance: number }> {
-  const response = await fetch("/api/purchase", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ planId: plan.id, credits: plan.credits }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Purchase failed.");
   }
   return response.json();
 }

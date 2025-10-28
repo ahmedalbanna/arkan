@@ -1,8 +1,7 @@
-
-
 'use client';
 
-import type { ParaphraseMode, SummarizeLength, CitationStyle } from "@/ai/schemas";
+import type { ParaphraseMode, SummarizeLength, CitationStyle, DiagramTypeSchema } from "@/ai/schemas";
+import { z } from "zod";
 
 // Base types for form data
 export interface ParaphraseTextVariables {
@@ -70,7 +69,7 @@ export interface GeneratePresentationOutlineVariables {
 }
 export interface GeneratePlantUMLVariables {
     description: string;
-    diagramType: 'useCase' | 'class' | 'sequence' | 'activity' | 'component' | 'archimate' | 'er';
+    diagramType: z.infer<typeof DiagramTypeSchema>;
 }
 
 export interface ManipulateTextVariables {

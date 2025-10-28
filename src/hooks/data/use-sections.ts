@@ -7,7 +7,7 @@ import { fetchSections as fetchSectionsApi, createSection as createSectionApi, u
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/util/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/authUtils';
+import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import type { Section, SectionProperties } from '@/lib/models/section';
 
 export function useSections() {

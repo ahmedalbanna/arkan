@@ -1,8 +1,17 @@
+// src/services/payment-service.ts
 
+'use client';
+
+/**
+ * Submits the payment proof form data to the backend API.
+ * @param formData The FormData object containing the file and other details.
+ * @param token The user's authentication token.
+ * @returns A promise that resolves with the server's response.
+ */
 export async function submitPaymentProof({ formData, token }: { formData: FormData, token: string }) {
     if (!token) throw new Error("User not authenticated");
 
-    const response = await fetch('/api/admin/purchase-request', {
+    const response = await fetch('/api/purchase-request', {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${token}`

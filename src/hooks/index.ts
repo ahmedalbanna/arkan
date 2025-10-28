@@ -6,10 +6,10 @@ export * from './admin/use-create-agent-dialog';
 export * from './admin/use-create-category-dialog';
 export * from './admin/use-create-user-dialog';
 export * from './admin/use-user-management-console';
-export * from './admin/useDocxTemplateManager';
+// export * from './admin/useDocxTemplateManager';
 
 // Auth Hooks
-export * from './auth/use-auth-mutations';
+// export * from './auth/use-auth-mutations';
 
 // Core Builder Hooks
 export * from './core/useAutosave';
@@ -34,7 +34,6 @@ export * from './data/use-notifications';
 export * from './data/use-payment';
 export * from './data/use-projects';
 export * from './data/use-sections';
-export * from './data/use-teams';
 export * from './data/use-templates';
 export * from './data/use-transactions';
 export * from './data/use-users';

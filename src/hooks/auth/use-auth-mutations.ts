@@ -10,14 +10,15 @@ import {
   serviceSignupUser,
   forgotPasswordService,
   sendPasswordResetEmailApi
-} from '@/services/user-service';
-import type { LoginCredentials, SignupCredentials } from '@/services/user-service';
+} from '@/services/api/authService';
+import type { LoginCredentials, SignupCredentials } from '@/lib/types';
 import { useToast } from '@/hooks/util/use-toast';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { useAuth } from '@/context/AuthContext';
 import { userKeys } from '@/lib/query-keys';
 import { getAuth, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
 import { app } from '@/lib/firebase/client-init';
+import { useState } from 'react';
 
 
 export function useLogin() {

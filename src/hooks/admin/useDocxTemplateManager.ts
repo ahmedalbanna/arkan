@@ -3,7 +3,7 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useDeleteDocxTemplate, useDocxStyles } from '@/hooks/data/use-templates';
-import { getAuthenticatedToken } from '@/lib/authUtils';
+import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import type { DocxTemplateKey } from '@/lib/types';
 import { refreshTemplateImage } from '@/services/template-service';
 import { useMutation } from '@tanstack/react-query';

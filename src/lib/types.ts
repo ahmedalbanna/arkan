@@ -1,4 +1,5 @@
 
+
 export * from './models/agent';
 export * from './models/diagram';
 export * from './models/project';
@@ -46,3 +47,46 @@ export type TTSInput = {
 export type TTSOutput = {
     audioDataUri: string;
 }
+
+
+// --- From services/user-service ---
+export interface SignupCredentials {
+  email: string;
+  password: string;
+  name: string;
+}
+
+// --- From services/transaction-service ---
+export interface VerifyPaymentVariables {
+  transactionId: string;
+  userId: string;
+  creditsToGrant: number;
+  status: 'verified' | 'rejected';
+  adminNotes?: string;
+}
+
+// --- From services/feature-service ---
+export interface Feature {
+    id: string;
+    name: string;
+    description: string;
+    isEnabled: boolean;
+}
+
+export interface UpdateFeatureVariables {
+    featureId: string;
+    payload: { isEnabled: boolean };
+}
+
+// --- From services/translation-service ---
+export interface TranslateVariables {
+    text: string;
+    targetLang: string;
+}
+
+export interface PresentationHistoryEntry {
+    name: string;
+    timestamp: number;
+    slides: any[]; // Adjust 'any' to a more specific slide type if available
+}
+
