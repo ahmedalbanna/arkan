@@ -117,5 +117,3 @@ export default function AgentEditor({ agentId, initialData, allAgents }: AgentEd
     </FormProvider>
   );
 }
-
-    

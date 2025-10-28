@@ -18,9 +18,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-import { useCreateSection, useUpdateSection } from '@/hooks';
+import { useCreateSection, useUpdateSection } from '@/hooks/data/use-sections';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAgents } from '@/hooks';
+import { useAgents } from '@/hooks/data/useAgents';
 import { Section, type SectionProperties } from '@/lib/models/section';
 
 const SectionSchema = z.object({

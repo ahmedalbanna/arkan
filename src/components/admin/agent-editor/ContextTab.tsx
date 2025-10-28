@@ -82,7 +82,6 @@ export default function ContextTab({ allAgents }: ContextTabProps) {
                                     control={control}
                                     name="prompt.defaultContext"
                                     render={({ field }) => {
-                                        const Icon = agent.iconComponent || AlertCircle;
                                         return (
                                             <FormItem key={agent.id} className="flex flex-row items-start space-x-3 space-y-0">
                                                 <FormControl>
@@ -97,7 +96,7 @@ export default function ContextTab({ allAgents }: ContextTabProps) {
                                                     />
                                                 </FormControl>
                                                 <FormLabel className="font-normal flex items-center gap-2">
-                                                    <Icon className="h-4 w-4" />
+                                                    <Bot className="h-4 w-4" />
                                                     {agent.name}
                                                 </FormLabel>
                                             </FormItem>

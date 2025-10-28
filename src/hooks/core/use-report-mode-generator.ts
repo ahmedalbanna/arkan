@@ -24,7 +24,7 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { data: sectionConfigs, isLoaded: sectionsLoaded } = useSections();
     const { controlState, guidelineState, contextSelection } = useGenerationUIStore();
-    const { userProfile, refetchUser } = useAuth();
+    const { userProfile, refetchUser, firebaseUser } = useAuth();
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     const queryClient = useQueryClient();
 
@@ -44,12 +44,12 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
     const agentMutation = useMutation({
         mutationKey: ['generateReportSection'], // Static key
         mutationFn: async (agentId: string) => {
-            if (!project || !userProfile) throw new Error("Project or user not found.");
+            if (!project || !userProfile || !firebaseUser) throw new Error("Project or user not found.");
 
             const agent = agents.find(a => a.id === agentId);
             if (!agent) throw new Error("Agent not found.");
 
-            const token = await userProfile.getIdToken();
+            const token = await firebaseUser.getIdToken();
             const controls = controlState[agentId];
             const guidelines = getSelectedGuidelines(agent, guidelineState[agentId]);
 
