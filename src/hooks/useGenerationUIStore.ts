@@ -68,7 +68,7 @@ interface GenerationUIActions {
   handleAddCustomGuidelineForItem: (itemKey: string) => void;
   handleRemoveCustomGuidelineForItem: (itemKey: string, index: number) => void;
   setSelectedReportTemplateId: (id: string) => void;
-  toggleContextSelection: (itemKey: string, type: 'sections' | 'diagrams' | 'externalContext', subKey: string | number | null, checked: boolean) => void;
+  toggleContextSelection: (itemKey: string, type: 'sections' | 'externalContext', subKey: string | number | null, checked: boolean) => void;
   // Presentation Store Actions
   setActivePresentationId: (id: string | null) => void;
   // Proposal Store Actions
@@ -187,26 +187,25 @@ export const useGenerationUIStore = create<GenerationUIState & GenerationUIActio
     setSelectedReportTemplateId: (id) => set({ selectedReportTemplateId: id }),
 
     toggleContextSelection: (itemKey, type, subKey, checked) => set(state => {
-      const newContextSelection = { ...state.contextSelection };
-      const currentItemSelection = newContextSelection[itemKey] || { ...defaultContextSelection };
+        const newContextSelection = { ...state.contextSelection };
+        const currentItemSelection = newContextSelection[itemKey] || { ...defaultContextSelection };
 
-      let updatedSelectionPart;
+        let updatedSelectionPart;
 
-      if (type === 'sections' || type === 'diagrams') {
-        const currentSubSelection = currentItemSelection[type] || {};
-        updatedSelectionPart = { ...currentItemSelection, [type]: { ...currentSubSelection, [subKey as string]: checked } };
-      } else if (type === 'externalContext') {
-         const currentSubSelection = currentItemSelection[type] || [];
-         const newSelection = [...currentSubSelection];
-         newSelection[subKey as number] = checked;
-         updatedSelectionPart = { ...currentItemSelection, [type]: newSelection };
-      } else {
-        // This case is no longer needed after removing proposal/plan
-        updatedSelectionPart = { ...currentItemSelection };
-      }
-      
-      newContextSelection[itemKey] = updatedSelectionPart;
-      return { contextSelection: newContextSelection };
+        if (type === 'sections') {
+            const currentSubSelection = currentItemSelection[type] || {};
+            updatedSelectionPart = { ...currentItemSelection, [type]: { ...currentSubSelection, [subKey as string]: checked } };
+        } else if (type === 'externalContext') {
+            const currentSubSelection = currentItemSelection[type] || [];
+            const newSelection = [...currentSubSelection];
+            newSelection[subKey as number] = checked;
+            updatedSelectionPart = { ...currentItemSelection, [type]: newSelection };
+        } else {
+            updatedSelectionPart = { ...currentItemSelection };
+        }
+        
+        newContextSelection[itemKey] = updatedSelectionPart;
+        return { contextSelection: newContextSelection };
     }),
 
     // From usePresentationStore

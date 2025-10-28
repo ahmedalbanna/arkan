@@ -8,7 +8,6 @@ import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { SectionName } from '@/ai/schemas';
 import { useBuilderStore } from './useBuilderStore';
-import { Project } from '@/lib/models/project';
 
 export function useGenerateReportSection() {
   const { firebaseUser, refetchUser } = useAuth();

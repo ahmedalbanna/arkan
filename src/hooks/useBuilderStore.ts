@@ -69,9 +69,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         });
       },
 
- setHasUnsavedChanges: (status) => {
- set({ hasUnsavedChanges: status });
- },
+      setHasUnsavedChanges: (status) => {
+        set({ hasUnsavedChanges: status });
+      },
       
       addExternalContext: (fileName, content, type) => {
         get().updateProject(p => p.addExternalContext(fileName, content, type));

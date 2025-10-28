@@ -21,7 +21,7 @@ export function useExport() {
                 return acc;
             }, {} as { [key in string]?: string }) || project.sections;
 
-            await exportReportUtil(sectionsToExport || {}, project.diagrams || {}, project.name || 'Untitled Report', translatedTitles, sectionsToInclude);
+            await exportReportUtil(sectionsToExport || {}, {}, project.name || 'Untitled Report', translatedTitles, sectionsToInclude);
             toast({ title: 'Export Successful', description: 'Report exported as DOCX.' });
         } catch (error) {
             console.error(error);

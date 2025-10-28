@@ -12,7 +12,6 @@ function hasAnyContent(project: Project | null): boolean {
     if (!project) return false;
     if (project.projectIdea?.trim()) return true;
     if (Object.values(project.sections || {}).some(s => !!s)) return true;
-    if (Object.values(project.diagrams || {}).some(d => !!d)) return true;
     return false;
 }
 
