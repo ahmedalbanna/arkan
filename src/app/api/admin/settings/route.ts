@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 const bankAccountSchema = z.object({
   bankName: z.string().min(1, 'Bank name is required.'),

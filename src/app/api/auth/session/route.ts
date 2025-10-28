@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { adminAuth } from '@/lib/firebase/server-init';
-import { handleApiError } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/utils/api-utils';
 
 export async function POST(request: Request) {
   try {

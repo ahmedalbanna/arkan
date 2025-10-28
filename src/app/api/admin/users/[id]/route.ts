@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getUserProfile, deleteUser } from "@/lib/db/queries";
 import { adminDb } from '@/lib/firebase/server-init';
 import { revalidatePath } from "next/cache";
-import { withAuth, handleApiError, createApiResponse } from "@/lib/api-utils";
+import { withAuth, handleApiError, createApiResponse } from "@/lib/utils/api-utils";
 
 
 // GET a single user profile.

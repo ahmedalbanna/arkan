@@ -22,7 +22,7 @@ import Katex from 'tiptap-katex';
 import 'katex/dist/katex.min.css';
 import mammoth from 'mammoth';
 import FileHandler from '@tiptap/extension-file-handler';
-import { uploadProjectFile } from '@/services/project-service';
+import { uploadProjectFile } from '@/services/api/projectService';
 import { useAuth } from '@/context/AuthContext';
 
 

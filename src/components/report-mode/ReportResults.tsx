@@ -12,7 +12,7 @@ import { useBuilderStore } from '@/hooks'; // Changed import
 import A4Page from '@/components/shared/A4Page';
 import { useLocalization } from '@/context/LocalizationContext'; // Changed import
 import { useAgents } from '@/hooks'; // Changed import
-import { AgentCategory } from '@/lib/models'; // Changed import
+import { AgentCategory } from '@/lib/models/agent'; // Changed import
 import { useMemo } from 'react'; // Changed import
 import { useReportPaginator } from '@/hooks';
 

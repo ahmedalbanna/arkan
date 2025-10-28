@@ -8,7 +8,7 @@ import { getTransactions, verifyPayment } from '@/services/api/transactionServic
 import { toast } from '@/hooks/util/use-toast';
 import { Transaction, type TransactionProperties } from '@/lib/models/transaction';
 import { VerifyPaymentVariables } from '@/lib/types';
-
+import { useQuery } from '@tanstack/react-query';
 
 export type TransactionStatus = 'pending' | 'verified' | 'rejected';
 

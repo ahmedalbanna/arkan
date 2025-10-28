@@ -1,6 +1,6 @@
 
 import { adminDb } from '@/lib/firebase/server-init';
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
+import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
 
 async function getSettings() {
     const settingsRef = adminDb.collection('settings').doc('defaults');

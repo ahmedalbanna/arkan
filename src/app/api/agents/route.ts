@@ -1,5 +1,5 @@
 
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { getEnabledAgents } from '@/lib/data/agents';
 
 // GET all enabled agents

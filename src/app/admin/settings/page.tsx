@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks';
-import { getAuthenticatedToken } from '@/lib/authUtils';
+import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import type { AppSettings, BankAccount } from '@/lib/types';
 
 import { Settings, Loader2, Save, Banknote, PlusCircle, Trash2, Globe, AlertTriangle } from 'lucide-react';

@@ -2,7 +2,7 @@
 import { ProjectStateSchema } from '@/ai/schemas';
 import { revalidatePath } from 'next/cache';
 import { adminDb } from '@/lib/firebase/server-init';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { FieldValue } from 'firebase-admin/firestore';
 import { z } from 'zod';
 

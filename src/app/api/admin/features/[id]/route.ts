@@ -1,7 +1,7 @@
 
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
-import { handleApiError, withAuth, createApiResponse } from '@/lib/api-utils';
+import { handleApiError, withAuth, createApiResponse } from '@/lib/utils/api-utils';
 
 const updateFeatureSchema = z.object({
   isEnabled: z.boolean(),

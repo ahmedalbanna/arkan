@@ -1,5 +1,5 @@
 
-import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
+import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import { FieldValue } from 'firebase-admin/firestore';
 import { z } from 'zod';

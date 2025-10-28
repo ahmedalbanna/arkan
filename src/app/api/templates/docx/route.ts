@@ -1,7 +1,7 @@
 // src/app/api/templates/docx/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type DocxTemplateKey  } from '@/lib/docx-styles';
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
+import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
 
 // This endpoint is public and does not require authentication
 // as all users need to be able to fetch the templates for exporting.

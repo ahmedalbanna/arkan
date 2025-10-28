@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useAdminDashboard } from '@/hooks/use-admin-dashboard';
+import { useAdminDashboard } from '@/hooks/admin/use-admin-dashboard';
 import { AlertCircle, Bot, CreditCard, Users } from 'lucide-react';
 import { StatCard } from './StatCard';
 import { AgentUsageChart } from './AgentUsageChart';

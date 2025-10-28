@@ -10,13 +10,11 @@ import Link from 'next/link';
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { userKeys } from "@/lib/query-keys";
-import { fetchUserProfileApi } from "@/services/user-service";
+import { fetchUserProfileApi } from "@/services/api/userService";
 import { useRouter } from "next/navigation";
-import { useChatStore } from "@/hooks";
-import { createConversationApi } from "@/services";
-import { toast } from "@/hooks";
+import { toast } from "@/hooks/util/use-toast";
 import { useLocalization } from "@/context/LocalizationContext";
-import { User } from '@/lib/models'; // NEW: Import our class
+import { User } from '@/lib/models/user'; // NEW: Import our class
 
 interface UserTableRowProps {
     user: User;
@@ -27,7 +25,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
     const queryClient = useQueryClient();
     const { firebaseUser, userProfile: adminProfile } = useAuth();
     const router = useRouter();
-    const { createConversation } = useChatStore();
+    
 
     // Prefetch user profile on hover for a smoother navigation experience
     const prefetchUser = async (userId: string) => {
@@ -40,24 +38,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         });
     };
 
-    const handleStartChat = async (targetUser: User) => {
-        if (!firebaseUser || !adminProfile) return;
-        try {
-            const token = await firebaseUser.getIdToken();
-            const conversation = await createConversationApi({
-                participantIds: [firebaseUser.uid, targetUser.id],
-                participantNames: {
-                    [firebaseUser.uid]: adminProfile.name || 'Admin',
-                    [targetUser.id]: targetUser.name
-                },
-                title: `Chat with ${targetUser.name}`
-            }, token);
-            createConversation(conversation);
-            router.push('/admin/chats');
-        } catch (error: any) {
-            toast({ title: 'Error', description: `Failed to start chat: ${error.message}`, variant: 'destructive' });
-        }
-    };
+
 
     return (
         <TableRow>
@@ -71,7 +52,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
             <TableCell>{user.credits}</TableCell>
             <TableCell>{user.createdAt ? format(new Date(user.createdAt), 'd MMM yyyy') : 'N/A'}</TableCell>
             <TableCell className="text-right">
-               <Button variant="ghost" size="icon" onClick={() => handleStartChat(user)}>
+               <Button variant="ghost" size="icon">
                   <MessageSquare className="h-4 w-4" />
                   <span className="sr-only">{t('manageUsers.chatWithUserSr')}</span>
                 </Button>

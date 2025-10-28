@@ -1,5 +1,5 @@
 // C:\Users\ahmed\source\repos\arkan\src\app\api\admin\sections\[id]\route.ts
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 

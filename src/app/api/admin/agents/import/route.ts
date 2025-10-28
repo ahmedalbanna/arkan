@@ -1,7 +1,7 @@
 
 'use server';
 
-import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
+import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
 import type { AgentProperties } from '@/lib/models/agent';
 import { z } from 'zod';

@@ -2,7 +2,7 @@
 // src/app/api/features/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
 import { defaultFeatures } from '@/lib/features';
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
+import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
 
 // This is a public endpoint that does not require authentication
 export async function GET() {

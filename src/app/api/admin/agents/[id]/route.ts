@@ -2,7 +2,7 @@
 'use server';
 
 import { ApiUpdateAgentSchema } from '@/ai/schemas';
-import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
+import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
 
 // GET /api/admin/agents/[id]

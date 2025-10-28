@@ -3,7 +3,7 @@ import { getStorage } from 'firebase-admin/storage';
 import { createTransaction } from '@/lib/db/queries';
 import { getDatabase } from 'firebase-admin/database';
 import { adminDb } from '@/lib/firebase/server-init';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 export const config = {
     api: {

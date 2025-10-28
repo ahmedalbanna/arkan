@@ -1,7 +1,7 @@
 
 // src/app/api/user-transactions/route.ts
 import { getTransactionsByUserId } from '@/lib/db/queries';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 export const GET = withAuth(async ({ user }) => {
     try {

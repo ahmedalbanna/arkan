@@ -1,7 +1,7 @@
 // src/app/api/templates/presentation/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
 import { PRESENTATION_GENERATION_TEMPLATES as defaultTemplates } from '@/lib/db/seed-data/presentation-templates';
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
+import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
 
 // This is a public endpoint
 export async function GET() {

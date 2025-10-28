@@ -2,7 +2,7 @@
 import { adminDb } from '@/lib/firebase/server-init';
 import { ProjectStateSchema } from '@/ai/schemas';
 import { revalidatePath } from 'next/cache';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 // GET /api/projects - Fetches all projects for the authenticated user
 export const GET = withAuth(async ({ user }) => {

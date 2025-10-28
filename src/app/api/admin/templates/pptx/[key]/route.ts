@@ -1,7 +1,7 @@
 
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 const updatePptxTemplateSchema = z.object({
   styles: z.object({}).passthrough(),

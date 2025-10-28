@@ -1,7 +1,7 @@
 
 'use server';
 
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { generateAgentConfig } from '@/ai/flows/generate-agent-config';
 import { z } from 'zod';
 import { deductCredit } from '@/services/credit-service';

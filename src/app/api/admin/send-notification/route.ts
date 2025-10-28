@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
 import admin from 'firebase-admin';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { CustomFirebaseError } from '@/lib/firebase/error';
 
 const sendNotificationSchema = z.object({

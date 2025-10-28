@@ -1,7 +1,7 @@
 // src/app/api/templates/docx/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type DocxTemplateKey  } from '@/lib/docx-styles';
-import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
+import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { z } from 'zod';
 import { createGenerativeTemplate } from '@/lib/db/queries';
 

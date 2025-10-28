@@ -1,7 +1,7 @@
 
 'use server';
 
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
+import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
 import { getUserProfile } from '@/lib/db/queries';
 import { adminAuth, adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import type { UserRole } from '@/lib/models/user';

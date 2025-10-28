@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2, StickyNote } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-styles';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { useGuidelineEditor } from '@/hooks';
 
 interface GuidelineEditorProps {

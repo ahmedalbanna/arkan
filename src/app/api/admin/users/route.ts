@@ -1,7 +1,7 @@
 
 import { getPaginatedUsers, createUser } from '@/lib/db/queries';
 import { z } from 'zod';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 const userListQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(10),

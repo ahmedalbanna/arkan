@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useToast } from '@/hooks';
-import { markdownComponents } from '@/lib/markdown-styles';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { ContextFileType } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { processFileApi } from '@/services';

@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { translateText } from '@/ai/flows/translate-text';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { ApiTranslateTextSchema } from '@/ai/schemas';
 
 export const POST = withAuth(async ({ request, user }) => {

@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
-import { withAuth, createApiResponse, handleApiError } from '@/lib/api-utils';
+import { withAuth, createApiResponse, handleApiError } from '@/lib/utils/api-utils';
 import { createGenerativeTemplate } from '@/lib/db/queries';
 
 // This endpoint is public and does not require authentication
