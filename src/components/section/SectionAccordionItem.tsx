@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -44,27 +45,24 @@ export const SectionAccordionItem = ({
 
     return (
         <AccordionItem value={itemKey} key={itemKey} className="bg-background border rounded-lg">
-            <div className="flex items-center" >
-                {handleProps && (
-                    <div {...handleProps} className="p-2 cursor-grab touch-none">
-                        <GripVertical className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                )}
-                <AccordionTrigger className="flex-1 rounded-md px-4 py-2 text-sm font-medium hover:no-underline">
-                    <div className="flex items-center gap-2">
-                        {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}
-                        {title}
-                    </div>
-                </AccordionTrigger>
-                <div className="p-2">
+            <AccordionTrigger className="flex items-center w-full px-4 py-2 text-sm font-medium hover:no-underline rounded-t-lg">
+                 <div className="flex items-center gap-2 flex-1">
+                    {handleProps && (
+                        <div {...handleProps} className="p-1 cursor-grab touch-none -ml-2">
+                            <GripVertical className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                    )}
+                    {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {title}
+                </div>
+                 <div className="p-2">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <div className="w-full">
+                                <div className="w-full" onClick={(e) => { e.stopPropagation(); onGenerate(); }}>
                                     <Button
                                         type="button"
                                         size="sm"
-                                        onClick={onGenerate}
                                         disabled={!canGenerate}
                                         className="font-headline"
                                     >
@@ -81,7 +79,7 @@ export const SectionAccordionItem = ({
                         </Tooltip>
                     </TooltipProvider>
                 </div>
-            </div>
+            </AccordionTrigger>
             <AccordionContent>
                 <div className="border-t px-4 pt-4">
                      <Tabs defaultValue="controls" className="w-full">

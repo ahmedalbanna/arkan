@@ -1488,6 +1488,7 @@
         "translate": "Translate",
         "versionHistory": "Version History",
         "humanize": "Humanize",
+        "generateDiagram": "Generate Diagram",
         "styles": {
           "formal": "Formal",
           "friendly": "Friendly",
