@@ -97,17 +97,7 @@ const AUTH_PATHS = ['/login', '/signup', '/forgot-password'];
 // This function runs on the server for every request
 async function handleAuthRedirects(pathname: string) {
   const sessionCookie = (await cookies()).get('__session')?.value;
-
-  let isAuthenticated = false;
-  if (sessionCookie) {
-    try {
-      await adminAuth.verifySessionCookie(sessionCookie, true);
-      isAuthenticated = true;
-    } catch (error) {
-      // Ignore verification errors, treat as not authenticated
-      isAuthenticated = false;
-    }
-  }
+  let isAuthenticated = !!sessionCookie;
 
   // If user is authenticated and tries to access an auth page, redirect them
   if (isAuthenticated && AUTH_PATHS.includes(pathname)) {
