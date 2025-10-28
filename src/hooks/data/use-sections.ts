@@ -3,7 +3,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { sectionKeys } from '@/lib/query-keys';
-import { fetchSections as fetchSectionsApi, createSection as createSectionApi, updateSection as updateSectionApi, deleteSection as deleteSectionApi } from '@/services/section-service';
+import { fetchSections as fetchSectionsApi, createSection as createSectionApi, updateSection as updateSectionApi, deleteSection as deleteSectionApi } from '@/services/api/sectionService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/util/use-toast';
 import { useAuth } from '@/context/AuthContext';

@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { useWritingTool } from './use-writing-tool';
 import { useToast } from '@/hooks/util/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services/document-processing-service';
+import { processFileApi } from '@/services/api/documentProcessingService';
 import { useDropzone } from 'react-dropzone';
 import { useLocalization } from '@/context/LocalizationContext';
 

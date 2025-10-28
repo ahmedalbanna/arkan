@@ -4,7 +4,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from './use-toast';
-import { textToSpeechApi, type TTSInput, type TTSOutput } from '@/services/text-to-speech-service';
+import { textToSpeechApi, type TTSInput, type TTSOutput } from '@/services/api/textToSpeechService';
 
 export function useTextToSpeech() {
     const { firebaseUser, refetchUser } = useAuth();

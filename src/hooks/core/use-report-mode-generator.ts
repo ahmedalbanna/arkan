@@ -6,7 +6,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useAgents, useGenerationUIStore, useSaveProject } from '@/hooks';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { generateReportSectionApi } from '@/services/report-service';
+import { generateReportSectionApi } from '@/services/api/reportService';
 import { useAuth } from '@/context/AuthContext';
 import { AgentCategory } from '@/lib/models/agent';
 import { Section } from '@/lib/models/section';

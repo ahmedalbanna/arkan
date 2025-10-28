@@ -16,7 +16,7 @@ import {
     deleteAgentApi,
     generateAgentConfigApi,
     importAgentsApi
-} from '@/services/agent-service';
+} from '@/services/api/agentService';
 import { toast } from '@/hooks/util/use-toast';
 import type { Agent, AgentProperties, AgentCategoryDetails, CreateAgentVariables, UpdateAgentVariables, UploadedFile } from '@/lib/types';
 import { GenerateAgentConfigOutput } from '@/ai/schemas';

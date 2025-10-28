@@ -8,7 +8,7 @@ import type { AIResearcherOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMemo, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { addContextToProjectApi } from '@/services/project-service';
+import { addContextToProjectApi } from '@/services/api/projectService';
 import { useAuth } from '@/context/AuthContext';
 import { projectKeys } from '@/lib/query-keys';
 

@@ -2,38 +2,44 @@
 'use client';
 
 import { useEffect, useCallback } from 'react';
-import ion from 'ion-sound';
 
-// Initialize sounds once
-if (typeof window !== 'undefined') {
-    ion({
-        sounds: [
+// Dynamically import ion-sound inside a useEffect to ensure it only runs on the client
+const useSound = () => {
+  useEffect(() => {
+    // This check is belt-and-suspenders, as useEffect only runs on the client.
+    if (typeof window !== 'undefined') {
+      import('ion-sound').then(ion => {
+        ion.default({
+          sounds: [
             { name: "bell_ring", alias: "success" },
             { name: "button_tiny", alias: "error" }
-        ],
-        path: "/sounds/",
-        preload: true,
-        multiplay: true,
-        volume: 0.9
-    });
-}
+          ],
+          path: "/sounds/",
+          preload: true,
+          multiplay: true,
+          volume: 0.9
+        });
+      });
+    }
+  }, []); // Empty dependency array ensures this runs only once on mount
 
-/**
- * A hook to play predefined UI sounds.
- * @returns An object with functions to play 'success' and 'error' sounds.
- */
-export const useSound = () => {
   const playSuccess = useCallback(() => {
     if (typeof window !== 'undefined') {
-        ion.sound.play('success');
+        import('ion-sound').then(ion => {
+            ion.default.sound.play('success');
+        });
     }
   }, []);
 
   const playError = useCallback(() => {
      if (typeof window !== 'undefined') {
-        ion.sound.play('error');
+        import('ion-sound').then(ion => {
+            ion.default.sound.play('error');
+        });
     }
   }, []);
 
   return { playSuccess, playError };
 };
+
+export { useSound };

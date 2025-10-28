@@ -20,6 +20,7 @@ export * from './api/transactionService';
 export * from './api/translationService';
 export * from './api/userService';
 export * from './api/writingToolsService';
+export * from './api/deviceTokenService';
 
 export * from './credit-service';
 export * from './generation-service';

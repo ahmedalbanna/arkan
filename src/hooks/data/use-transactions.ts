@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { transactionKeys } from '@/lib/query-keys';
 import { getTransactions, verifyPayment } from '@/services/api/transactionService';
 import { toast } from '@/hooks/util/use-toast';
-import { Transaction, type TransactionProperties } from '@/lib/models';
+import { Transaction, type TransactionProperties } from '@/lib/models/transaction';
 import { VerifyPaymentVariables } from '@/lib/types';
 
 

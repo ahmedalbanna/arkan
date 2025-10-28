@@ -22,7 +22,7 @@ import {
     createPresentationTemplateApi,
     updatePresentationTemplateApi,
     deletePresentationTemplateApi,
-} from '@/services/template-service';
+} from '@/services/api/templateService';
 import type { DocxTemplateProperties, PptxTemplateProperties, ReportTemplateProperties, PresentationTemplateProperties, CreateReportTemplateData, UpdateReportTemplateData, CreatePresentationTemplateData, UpdatePresentationTemplateData } from '@/lib/types';
 
 
