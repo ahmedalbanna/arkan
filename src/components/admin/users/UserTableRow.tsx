@@ -14,19 +14,21 @@ import { fetchUserProfileApi } from "@/services/api/userService";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/util/use-toast";
 import { useLocalization } from "@/context/LocalizationContext";
-import { User } from '@/lib/models/user'; // NEW: Import our class
+import { User, type UserProperties } from '@/lib/models'; // Import User class and properties
 
 interface UserTableRowProps {
-    user: User;
+    user: UserProperties; // Accept plain object
 }
 
-export function UserTableRow({ user }: UserTableRowProps) {
+export function UserTableRow({ user: userProps }: UserTableRowProps) {
     const { t } = useLocalization();
     const queryClient = useQueryClient();
     const { firebaseUser, userProfile: adminProfile } = useAuth();
     const router = useRouter();
-    
 
+    // Instantiate the User class from the plain object prop
+    const user = new User(userProps);
+    
     // Prefetch user profile on hover for a smoother navigation experience
     const prefetchUser = async (userId: string) => {
         if (!firebaseUser) return;

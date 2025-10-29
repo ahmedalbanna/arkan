@@ -9,7 +9,7 @@ import {
   updateUserApi,
   fetchUsersApi
 } from '@/services/api/userService';
-import type { UserProfile } from '@/lib/models';
+import { User, type UserProfile } from '@/lib/models/user';
 import { userKeys } from '@/lib/query-keys';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
 import { useAuth } from '@/context/AuthContext';
@@ -29,12 +29,14 @@ import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 export function useUserProfile(userId: string) {
   const { firebaseUser } = useAuth();
 
-  return useQuery<UserProfile | null>({
+  return useQuery({
     queryKey: userKeys.profile(userId),
     queryFn: async () => {
       if (!firebaseUser) return null;
       const token = await getAuthenticatedToken(firebaseUser);
-      return fetchUserProfileApi(userId, token);
+      const userProfile = await fetchUserProfileApi(userId, token);
+      // Instantiate the User class to include methods
+      return userProfile ? new User(userProfile) : null;
     },
     enabled: !!firebaseUser && !!userId,
   });
@@ -51,7 +53,12 @@ export function useUsers(limit: number, lastVisibleId?: string) {
         queryFn: async () => {
              if (!firebaseUser) throw new Error("User not authenticated");
             const token = await getAuthenticatedToken(firebaseUser);
-            return fetchUsersApi(limit, lastVisibleId, token);
+            const result = await fetchUsersApi(limit, lastVisibleId, token);
+            // Instantiate User objects
+            return {
+                ...result,
+                users: result.users.map(u => new User(u)),
+            };
         },
         enabled: !!firebaseUser
     })
