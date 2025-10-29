@@ -1,12 +1,12 @@
 'use server';
 import { adminAuth, adminDb } from '@/lib/firebase/server-init';
 import { FieldValue } from 'firebase-admin/firestore';
-import type { UserProfile } from '@/lib/models/user';
-import type { ReportTemplateProperties } from '@/lib/models/reportTemplate';
-import type { DocxTemplateProperties } from '@/lib/models/docxTemplate';
-import type { PptxTemplateProperties } from '@/lib/models/pptxTemplate';
-import { AgentProperties } from '../models/agent';
-import { TransactionProperties } from '../models/transaction';
+import type { UserProfile } from '@/lib/models';
+import type { ReportTemplateProperties } from '@/lib/models';
+import type { DocxTemplateProperties } from '@/lib/models';
+import type { PptxTemplateProperties } from '@/lib/models';
+import { AgentProperties } from '../models';
+import { TransactionProperties } from '../models';
 
 
 // === User Queries ===

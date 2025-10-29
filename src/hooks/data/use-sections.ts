@@ -9,7 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/util/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/utils/authUtils';
-import type { Section, SectionProperties } from '@/lib/models/section';
+import type { Section, SectionProperties } from '@/lib/models';
 
 export function useSections() {
   const { firebaseUser } = useAuth();

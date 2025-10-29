@@ -9,7 +9,7 @@ import {
   updateUserApi,
   fetchUsersApi
 } from '@/services/api/userService';
-import { User, type UserProfile } from '@/lib/models/user';
+import { User, type UserProfile } from '@/lib/models';
 import { userKeys } from '@/lib/query-keys';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
 import { useAuth } from '@/context/AuthContext';

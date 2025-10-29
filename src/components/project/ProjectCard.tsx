@@ -69,7 +69,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
             </CardHeader>
             <CardContent className="flex-grow">
                 <p className="text-sm text-muted-foreground line-clamp-3">
-                    {project.generatedProposalState?.proposalTitle as string || project.projectIdea || t('projects.noDescription')}
+                    {project.projectIdea || t('projects.noDescription')}
                 </p>
             </CardContent>
             <CardFooter>

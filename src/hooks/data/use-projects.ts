@@ -5,10 +5,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { projectKeys } from '@/lib/query-keys';
-import { fetchProjectsApi, createProject, updateProject, deleteProject, type ProjectState, fetchProjectApi } from '@/services/api/projectService';
+import { fetchProjectsApi, createProject, updateProject, deleteProject, type ProjectState, fetchProjectApi, type SavedProject } from '@/services/api/projectService';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { toast } from '@/hooks/util/use-toast';
-import { Project } from '@/lib/models/project'; // Import the Project class
+import { Project } from '@/lib/models'; // Import the Project class
 
 export function useProjects() {
     const { firebaseUser } = useAuth();
