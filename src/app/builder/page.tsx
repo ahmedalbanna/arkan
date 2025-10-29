@@ -12,6 +12,7 @@ import { ar, enUS } from 'date-fns/locale';
 import { FileText, FolderKanban } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
+import { useBuilderPageLogic } from '@/hooks/core/use-builder-page';
 
 
 const LoadingSkeleton = () => (
@@ -53,77 +54,25 @@ async function markOnboardingComplete(userId: string, token: string) {
 }
 
 function GeneratePageContent() {
-  const [activeTab, setActiveTab] = useState("files");
-  const { project, loadProject } = useBuilderStore();
-  const { t, locale } = useLocalization();
-  const { firebaseUser, userProfile, refetchUser } = useAuth();
-  const queryClient = useQueryClient();
-  const { features, isLoaded: featuresLoaded } = useFeatures();
-  const { data: projectData, isSuccess } = useProject(project?.id!);
+  const {
+    activeTab,
+    setActiveTab,
+    showOnboarding,
+    setShowOnboarding,
+    handleOnboardingComplete,
+    t,
+    locale,
+    project,
+    projectData,
+    enabledTabs,
+    featuresLoaded,
+    isFeatureEnabled,
+  } = useBuilderPageLogic();
 
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [hasLoadedProject, setHasLoadedProject] = useState(false);
-
-  useEffect(() => {
-    // Show the onboarding guide if the user profile is loaded and the flag is false
-    if (userProfile && !userProfile.hasCompletedOnboarding) {
-      setShowOnboarding(true);
-    }
-  }, [userProfile]);
-
-  // Effect to load project data into the store once it's fetched
-  useEffect(() => {
-    if (isSuccess && projectData && !hasLoadedProject) {
-      loadProject(projectData);
-      setHasLoadedProject(true); // Mark as loaded to prevent re-loading
-    }
-  }, [isSuccess, projectData, loadProject, hasLoadedProject]);
+  // (All onboarding and project-loading logic now lives in `useBuilderPageLogic`)
 
 
-  const onboardingMutation = useMutation({
-    mutationFn: async () => {
-      if (!firebaseUser) throw new Error("User not authenticated");
-      const token = await firebaseUser.getIdToken();
-      return markOnboardingComplete(firebaseUser.uid, token);
-    },
-    onSuccess: () => {
-      // Invalidate user query to refetch the updated profile
-      queryClient.invalidateQueries({ queryKey: ['user', firebaseUser?.uid] });
-      refetchUser();
-    },
-    onError: (error: Error) => {
-      console.error("Failed to mark onboarding as complete:", error);
-    }
-  });
-
-
-  const handleOnboardingComplete = () => {
-    setShowOnboarding(false);
-    if (userProfile && !userProfile.hasCompletedOnboarding) {
-      onboardingMutation.mutate();
-    }
-  };
-
-  const isFeatureEnabled = (featureId: string) => {
-    if (!featuresLoaded) return false;
-    const feature = features.find(f => f.id === featureId);
-    return feature?.isEnabled;
-  };
-
-  const enabledTabs = [
-    { id: 'files', enabled: true }, // Files tab is always enabled
-    { id: 'report', enabled: isFeatureEnabled('report') },
-  ].filter(tab => tab.enabled).map(tab => tab.id);
-
-
-  // If the current active tab is no longer enabled, switch to the first available one
-  useEffect(() => {
-    if (!enabledTabs.includes(activeTab) && enabledTabs.length > 0) {
-      setActiveTab(enabledTabs[0]);
-    } else if (enabledTabs.length === 0) {
-      setActiveTab(''); // No tabs are active
-    }
-  }, [features, activeTab, enabledTabs]);
+  // hook provides tab enabling and activeTab upkeep
 
   return (
     <div className="relative flex-grow flex flex-col">

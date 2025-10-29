@@ -27,20 +27,18 @@ function ReportSkeleton() {
 export default function ReportModeGenerator() {
     const [orderedSections, setOrderedSections] = useState<Section[]>([]);
     const { updateProject } = useBuilderStore();
-    const { saveProject } = useSaveProject();
 
     // Wrapper that updates local state and persists the order to the project
+    // Persist only locally here; autosave will handle syncing to server.
     const handleSetOrderedSections = (sections: Section[]) => {
         setOrderedSections(sections);
         try {
             const ids = sections.map(s => s.id);
+            // updateProject now writes to localStorage and marks the project dirty
             updateProject(p => p.updateSectionsOrder(ids));
-            // Persist immediately
-            saveProject();
         } catch (e) {
             // swallow; updateProject will no-op if no project
-            // UI already updated locally
-            console.error('Failed to persist sections order', e);
+            console.error('Failed to persist sections order locally', e);
         }
     };
     
@@ -71,6 +69,7 @@ export default function ReportModeGenerator() {
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+            {/* Local cache is saved automatically; no manual button shown */}
             {isPanelCollapsed && (
                 <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-24">
                     <Button

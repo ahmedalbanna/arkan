@@ -45,7 +45,7 @@ export function useProject(projectId: string) {
 export function useSaveProject() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
-    const { loadProject, project } = useBuilderStore();
+    const { loadProject, project, clearLocalCache, mergeLocalOrderInto } = useBuilderStore();
     const router = useRouter();
 
     const createMutation = useMutation({
@@ -54,8 +54,12 @@ export function useSaveProject() {
             return firebaseUser.getIdToken().then(token => createProject(data, token));
         },
         onSuccess: (savedProject) => {
-            toast({ title: 'Project Created', description: `Successfully created "${savedProject.name}".` });
+            toast({ title: 'Project Created', description: `Successfully created "${savedProject.name}."` });
+            // Merge any local sectionsOrder into the savedProject (if server omitted it)
+            try { mergeLocalOrderInto(savedProject); } catch (e) { /* noop */ }
             loadProject(savedProject);
+            // Clear any local cache for this project since server now has the canonical copy
+            try { clearLocalCache(); } catch (e) { /* noop */ }
             queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
             router.push('/builder');
         },
@@ -71,7 +75,11 @@ export function useSaveProject() {
         },
         onSuccess: (savedProject) => {
             toast({ title: 'Project Saved', description: 'Your changes have been saved.' });
+            // Merge any local sectionsOrder into the savedProject (if server omitted it)
+            try { mergeLocalOrderInto(savedProject); } catch (e) { /* noop */ }
             loadProject(savedProject);
+            // Clear local cache as changes are now persisted on server
+            try { clearLocalCache(); } catch (e) { /* noop */ }
             queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
             queryClient.setQueryData(projectKeys.detail(savedProject.id), savedProject);
         },
