@@ -37,11 +37,22 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
             const reportSectionModels = sectionConfigs
                 .filter(s => s.type === 'report')
                 .map(s => new Section(s as SectionProperties));
+            // If the project contains a saved sectionsOrder, apply that order
+            // to the resulting models so the UI reflects the saved ordering.
+            if (project && project.sectionsOrder && project.sectionsOrder.length > 0) {
+                const orderMap = new Map(reportSectionModels.map(r => [r.id, r]));
+                const ordered = project.sectionsOrder
+                    .map(id => orderMap.get(id))
+                    .filter(Boolean) as Section[];
+                // Append any sections missing from the saved order
+                const missing = reportSectionModels.filter(r => !project.sectionsOrder!.includes(r.id));
+                return [...ordered, ...missing];
+            }
 
             return reportSectionModels;
         }
         return null;
-    }, [sectionsLoaded, sectionConfigs, agentsLoaded]);
+    }, [sectionsLoaded, sectionConfigs, agentsLoaded, project]);
 
     useEffect(() => {
         if (initialSetup) {

@@ -17,7 +17,6 @@ export * from './api/settingsService';
 export * from './api/templateService';
 export * from './api/textToSpeechService';
 export * from './api/transactionService';
-export * from './api/translationService';
 export * from './api/userService';
 export * from './api/writingToolsService';
 export * from './api/deviceTokenService';

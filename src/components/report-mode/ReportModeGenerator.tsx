@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useReportModeGenerator } from '@/hooks';
+import { useReportModeGenerator, useBuilderStore, useSaveProject } from '@/hooks';
 import { lazy, Suspense, useState } from 'react';
 import { Skeleton } from '../ui/skeleton';
 import { GenerationTools } from './ReportGenerationTools';
@@ -26,6 +26,23 @@ function ReportSkeleton() {
 
 export default function ReportModeGenerator() {
     const [orderedSections, setOrderedSections] = useState<Section[]>([]);
+    const { updateProject } = useBuilderStore();
+    const { saveProject } = useSaveProject();
+
+    // Wrapper that updates local state and persists the order to the project
+    const handleSetOrderedSections = (sections: Section[]) => {
+        setOrderedSections(sections);
+        try {
+            const ids = sections.map(s => s.id);
+            updateProject(p => p.updateSectionsOrder(ids));
+            // Persist immediately
+            saveProject();
+        } catch (e) {
+            // swallow; updateProject will no-op if no project
+            // UI already updated locally
+            console.error('Failed to persist sections order', e);
+        }
+    };
     
     const {
         locale,
@@ -43,6 +60,14 @@ export default function ReportModeGenerator() {
     if (!agentsLoaded) {
         return <ReportSkeleton />;
     }
+    // Determine which section IDs to show in the results area.
+    // If the panel's orderedSections is populated use that order but only
+    // include sections that actually have generated content. Otherwise
+    // fall back to the generatedSections coming from the hook.
+    const generatedIds = new Set(generatedSections.map(s => s.id));
+    const displayedSectionIds = orderedSections && orderedSections.length > 0
+        ? orderedSections.filter(s => generatedIds.has(s.id)).map(s => s.id)
+        : generatedSections.map(s => s.id);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
@@ -62,7 +87,7 @@ export default function ReportModeGenerator() {
                 <GenerationTools
                     onCollapseToggle={() => setIsPanelCollapsed(true)}
                     orderedSections={orderedSections}
-                    setOrderedSections={setOrderedSections}
+                    setOrderedSections={handleSetOrderedSections}
                     isAnythingGenerating={isAnythingGenerating}
                     activeMutationKey={activeMutationKey}
                     onGenerateSection={onGenerateSection}
@@ -73,7 +98,7 @@ export default function ReportModeGenerator() {
 
             <div className={cn("lg:overflow-y-auto pr-2", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
                 <Suspense fallback={<ReportSkeleton />}>
-                    <ReportResults generatedSections={generatedSections.map(s => s.id)} />
+                    <ReportResults generatedSections={displayedSectionIds} />
                 </Suspense>
             </div>
         </div>

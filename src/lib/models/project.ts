@@ -15,6 +15,8 @@ export interface ProjectState {
 
 
   sections?: Partial<Record<string, string>>;
+  // Order of section ids for display in report mode
+  sectionsOrder?: string[] | undefined;
 
 
 
@@ -45,6 +47,7 @@ export class Project implements SavedProject {
   private _name?: string;
   private _projectIdea?: string;
   private _sections?: ProjectState['sections'];
+  private _sectionsOrder?: string[];
 
 
 
@@ -61,6 +64,7 @@ export class Project implements SavedProject {
 
 
     this._sections = props.sections ?? {};
+    this._sectionsOrder = props.sectionsOrder || [];
 
 
 
@@ -76,6 +80,7 @@ export class Project implements SavedProject {
   get name() { return this._name; }
   get projectIdea() { return this._projectIdea; }
   get sections() { return this._sections; }
+  get sectionsOrder() { return this._sectionsOrder; }
 
 
   get externalContext() { return this._externalContext; }
@@ -84,6 +89,8 @@ export class Project implements SavedProject {
   // --- Public Setters ---
   set name(value: string | undefined) { this._name = value; }
   set projectIdea(value: string | undefined) { this._projectIdea = value; }
+
+  set sectionsOrder(value: string[] | undefined) { this._sectionsOrder = value; }
 
   /**
    * Converts the Project instance to a plain JSON object for serialization.
@@ -99,6 +106,7 @@ export class Project implements SavedProject {
       name: this._name,
       projectIdea: this._projectIdea,
       sections: this._sections,
+      sectionsOrder: this._sectionsOrder,
       externalContext: this._externalContext,
 
     };
@@ -124,6 +132,13 @@ export class Project implements SavedProject {
 
   public updateSectionContent(sectionName: SectionName, newContent: string): void {
     this._sections = { ...this._sections, [sectionName]: newContent };
+  }
+
+  /**
+   * Update the saved order of sections (by id).
+   */
+  public updateSectionsOrder(newOrder: string[]): void {
+    this._sectionsOrder = [...newOrder];
   }
 
 
