@@ -4,7 +4,8 @@ import { AgentPromptSchema } from '@/ai/schemas';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
-import { getEnabledAgents } from '@/services/api/agentService';
+import { getEnabledAgents } from '@/lib/db/queries';
+
 
 // Schema for creating a new agent
 const CreateAgentSchema = z.object({
