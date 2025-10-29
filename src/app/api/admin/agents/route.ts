@@ -1,11 +1,10 @@
-
 'use server';
 
 import { AgentPromptSchema } from '@/ai/schemas';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
-
+import { getEnabledAgents } from '@/services/api/agentService';
 
 // Schema for creating a new agent
 const CreateAgentSchema = z.object({
@@ -44,3 +43,14 @@ export const POST = withAuth(async ({ request }) => {
         return handleApiError(error);
     }
 }, { requireAdmin: true });
+
+
+// GET all enabled agents
+export const GET = withAuth(async ({ user }) => {
+  try {
+    const agents = await getEnabledAgents();
+    return createApiResponse(agents, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
+});

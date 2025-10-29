@@ -7,9 +7,6 @@ import { withAuth, handleApiError, createApiResponse } from "@/lib/utils/api-uti
 
 
 // GET a single user profile.
-// This route is now protected by the verifyAccess logic within withAuth,
-// but for simplicity, we'll keep the direct GET like this.
-// A more robust implementation might move the ownership check into withAuth itself.
 export const GET = withAuth(async ({ params, user: requester, token }) => {
     try {
         const targetUserId = params.id;

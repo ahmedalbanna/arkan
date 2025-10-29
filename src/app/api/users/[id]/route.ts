@@ -1,6 +1,6 @@
 
 import { z } from "zod";
-import { getUserProfile, deleteUser } from "@/lib/db/queries";
+import { getUserProfile } from "@/lib/db/queries";
 import { adminDb } from '@/lib/firebase/server-init';
 import { revalidatePath } from "next/cache";
 import { withAuth, handleApiError, createApiResponse } from "@/lib/utils/api-utils";
@@ -78,18 +78,3 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
         return handleApiError(error);
     }
 });
-
-
-export const DELETE = withAuth(async ({ params }) => {
-    try {
-        const targetUserId = params.id;
-        if (!targetUserId) {
-            return handleApiError({ message: "User ID is required" }, 400);
-        }
-        await deleteUser(targetUserId);
-        revalidatePath("/admin/manage-users");
-        return createApiResponse({ message: `User ${targetUserId} deleted successfully`}, 200);
-    } catch (error) {
-        return handleApiError(error);
-    }
-}, { requireAdmin: true });

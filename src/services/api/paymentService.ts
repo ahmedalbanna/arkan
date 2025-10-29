@@ -10,7 +10,7 @@
 export async function submitPaymentProof({ formData, token }: { formData: FormData, token: string }) {
     if (!token) throw new Error("User not authenticated");
 
-    const response = await fetch('/api/purchase-request', {
+    const response = await fetch('/api/payments/submit', {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${token}`
