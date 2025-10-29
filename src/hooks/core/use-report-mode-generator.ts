@@ -8,10 +8,9 @@ import { useBuilderStore, useAgents, useGenerationUIStore, useSaveProject } from
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import { useAuth } from '@/context/AuthContext';
-import { AgentCategory, Section } from '@/lib/models';
+import { Agent, AgentCategory, Section, SectionProperties } from '@/lib/models';
 import { useSections } from '../data/use-sections';
 import { SectionName } from '@/ai/schemas';
-import type { SectionProperties } from '@/lib/types';
 
 
 interface UseReportModeGeneratorProps {
@@ -32,16 +31,23 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
 
     const { saveProject } = useSaveProject();
 
-    useEffect(() => {
-        if (sectionsLoaded && sectionConfigs) {
+    // Memoize the initialization logic to prevent re-running on every render
+    const initialSetup = useMemo(() => {
+        if (sectionsLoaded && sectionConfigs && agentsLoaded) {
             const reportSectionModels = sectionConfigs
                 .filter(s => s.type === 'report')
                 .map(s => new Section(s as SectionProperties));
 
-            setOrderedSections(reportSectionModels);
+            return reportSectionModels;
+        }
+        return null;
+    }, [sectionsLoaded, sectionConfigs, agentsLoaded]);
 
+    useEffect(() => {
+        if (initialSetup) {
+            setOrderedSections(initialSetup);
             // Initialize UI stores for each section
-            reportSectionModels.forEach(section => {
+            initialSetup.forEach(section => {
                 const agent = agents.find((a: Agent) => a.id === section.agentId);
                 initializeControls(section.id);
                 if (agent && typeof agent.prompt === 'object' && agent.prompt.guidelines) {
@@ -50,7 +56,7 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
                 initializeContext(section.id);
             });
         }
-    }, [sectionsLoaded, sectionConfigs, setOrderedSections, initializeControls, initializeGuidelines, initializeContext, agents]);
+    }, [initialSetup, setOrderedSections, initializeControls, initializeGuidelines, initializeContext, agents]);
 
 
     const reportGenerationAgents = useMemo(() => {
@@ -101,7 +107,7 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
             
 
             const externalContext = (selectedContexts?.externalContext || [])
-                .map((isSelected, index) => isSelected ? project.externalContext?.[index] : null)
+                .map((isSelected, index) => (isSelected && project.externalContext?.[index]) ? project.externalContext[index] : null)
                 .filter(Boolean) as { fileName: string, content: string, type: string }[];
 
 
