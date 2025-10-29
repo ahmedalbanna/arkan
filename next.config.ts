@@ -1,5 +1,5 @@
 
-import type { NextConfig } from 'next';
+import type { NextConfig, SizeLimit } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: false, // Enable React strict mode for better development experience
@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   swcMinify: true,
   typescript: {
     ignoreBuildErrors: true,
+
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -40,6 +41,21 @@ const nextConfig: NextConfig = {
         destination: '/node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs',
       },
     ]
+  },
+  experimental: {
+    turbo: {
+      resolveAlias: {
+        'react': 'react-18',
+        'react-dom': 'react-dom-18',
+      },
+
+    },
+    serverActions: { bodySizeLimit: '10mb' as SizeLimit },
+
+    useCache: true,
+    allowDevelopmentBuild: true,
+
+
   }
 };
 

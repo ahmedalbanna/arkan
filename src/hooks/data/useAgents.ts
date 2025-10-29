@@ -18,7 +18,8 @@ import {
     importAgentsApi
 } from '@/services/api/agentService';
 import { toast } from '@/hooks/util/use-toast';
-import type { Agent, AgentProperties, AgentCategoryDetails, CreateAgentVariables, UpdateAgentVariables, UploadedFile } from '@/lib/types';
+import { Agent } from '@/lib/models/agent';
+import type { AgentProperties, AgentCategoryDetails, CreateAgentVariables, UpdateAgentVariables, UploadedFile } from '@/lib/types';
 import { GenerateAgentConfigOutput } from '@/ai/schemas';
 
 // ============================================================================
@@ -116,12 +117,13 @@ export function useDeleteAgentCategory() {
  */
 export function useAgents() {
     const { firebaseUser } = useAuth();
-    const { data: agents, isPending: isLoading, isError, isFetched: isLoaded, ...rest } = useQuery<Agent[]>({
+    const { data: agents, isLoading, isError, isFetched: isLoaded, ...rest } = useQuery<Agent[]>({
         queryKey: agentKeys.lists(),
         queryFn: async () => {
             if (!firebaseUser) return [];
             const token = await firebaseUser.getIdToken();
-            return fetchAgentsApi(token);
+            const props = await fetchAgentsApi(token);
+            return props.map((p) => new Agent(p));
         },
         enabled: !!firebaseUser,
         staleTime: 1000 * 60 * 5, // 5 minutes
@@ -140,7 +142,8 @@ export function useAgent(agentId: string) {
         queryFn: async () => {
             if (!firebaseUser) return null;
             const token = await firebaseUser.getIdToken();
-            return fetchAgentApi(agentId, token);
+            const props = await fetchAgentApi(agentId, token);
+            return props ? new Agent(props) : null;
         },
         enabled: !!firebaseUser && !!agentId,
     });

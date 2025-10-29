@@ -4,7 +4,6 @@
 import type { SectionName } from '@/ai/schemas';
 import { useSectionLogic } from '@/hooks';
 import React from 'react';
-import RichTextEditor from '../ui/RichTextEditor';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Wand2, ThumbsDown, Check } from 'lucide-react';
@@ -13,8 +12,8 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
-import { useReportModeGenerator } from '@/hooks/useReportModeGenerator';
-
+import dynamic from 'next/dynamic';
+const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), { ssr: false });
 interface SectionProps {
     sectionKey: SectionName;
     title: string;
@@ -41,7 +40,7 @@ export const SectionView = ({ sectionKey, title, content, onUpdate }: SectionPro
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                 <h2 className="font-semibold text-lg md:text-xl text-primary/90 font-headline flex items-center gap-2">
+                <h2 className="font-semibold text-lg md:text-xl text-primary/90 font-headline flex items-center gap-2">
                     {title}
                 </h2>
                 {/* The main toolbar is now handled by the BubbleMenu in the editor */}
@@ -51,7 +50,7 @@ export const SectionView = ({ sectionKey, title, content, onUpdate }: SectionPro
                 <span className="mx-2">|</span>
                 <span>{chars} {t('builder.Section.characters')}</span>
             </div>
-           
+
             <div className="group relative space-y-4 mt-4">
                 <RichTextEditor
                     content={content}

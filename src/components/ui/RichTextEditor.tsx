@@ -26,8 +26,6 @@ import { uploadProjectFile } from '@/services/api/projectService';
 import { useAuth } from '@/context/AuthContext';
 
 
-'use client';
-
 import {
   BookText,
   Brush,
@@ -66,102 +64,100 @@ export function SectionToolbar({
   onReadAloud,
   onClearContent,
 }: SectionToolbarProps) {
-    const { t } = useLocalization();
-    const isBusy = isProcessingAi || isReadingAloud;
+  const { t } = useLocalization();
+  const isBusy = isProcessingAi || isReadingAloud;
 
-    const rewriteStyles = [
-        { label: t('writingTools.textStylist.styles.formal'), style: 'Formal' },
-        { label: t('writingTools.textStylist.styles.friendly'), style: 'Friendly' },
-        { label: t('writingTools.textStylist.styles.simple'), style: 'Simple' },
-        { label: t('writingTools.textStylist.styles.creative'), style: 'Creative' },
-        { label: t('writingTools.textStylist.styles.professional'), style: 'Professional' },
-        { label: t('writingTools.textStylist.styles.academic'), style: 'Academic' },
-    ];
+  const rewriteStyles = [
+    { label: t('writingTools.textStylist.styles.formal'), style: 'Formal' },
+    { label: t('writingTools.textStylist.styles.friendly'), style: 'Friendly' },
+    { label: t('writingTools.textStylist.styles.simple'), style: 'Simple' },
+    { label: t('writingTools.textStylist.styles.creative'), style: 'Creative' },
+    { label: t('writingTools.textStylist.styles.professional'), style: 'Professional' },
+    { label: t('writingTools.textStylist.styles.academic'), style: 'Academic' },
+  ];
 
-    return (
-        <div className="flex items-center gap-1 rounded-full border bg-background p-1 shadow-lg">
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('summarize')} disabled={isBusy} >
-                            <BookText className="h-4 w-4" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent><p>{t('builder.Section.aiActions.summarize')}</p></TooltipContent>
-                </Tooltip>
+  return (
+    <div className="flex items-center gap-1 rounded-full border bg-background p-1 shadow-lg">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('summarize')} disabled={isBusy} >
+              <BookText className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent><p>{t('builder.Section.aiActions.summarize')}</p></TooltipContent>
+        </Tooltip>
 
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('expand')} disabled={isBusy} >
-                            <Maximize className="h-4 w-4" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent><p>{t('builder.Section.aiActions.expand')}</p></TooltipContent>
-                </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('expand')} disabled={isBusy} >
+              <Maximize className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent><p>{t('builder.Section.aiActions.expand')}</p></TooltipContent>
+        </Tooltip>
 
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('grammar')} disabled={isBusy}>
-                            <SpellCheck className="h-4 w-4" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent><p>{t('builder.Section.aiActions.checkGrammar')}</p></TooltipContent>
-                </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('grammar')} disabled={isBusy}>
+              <SpellCheck className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent><p>{t('builder.Section.aiActions.checkGrammar')}</p></TooltipContent>
+        </Tooltip>
 
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('humanize')} disabled={isBusy}>
-                            <UserCheck className="h-4 w-4" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent><p>{t('builder.Section.aiActions.humanize')}</p></TooltipContent>
-                </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('humanize')} disabled={isBusy}>
+              <UserCheck className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent><p>{t('builder.Section.aiActions.humanize')}</p></TooltipContent>
+        </Tooltip>
 
-                 <DropdownMenu>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="rounded-full" disabled={isBusy}>
-                                    <Brush className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                        </TooltipTrigger>
-                        <TooltipContent><p>{t('builder.Section.aiActions.rewrite')}</p></TooltipContent>
-                    </Tooltip>
-                    <DropdownMenuContent>
-                         {rewriteStyles.map(({ label, style }) => (
-                            <DropdownMenuItem key={style} onClick={() => onAiAction('rewrite', { style })}>
-                                {label}
-                            </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuContent>
-                </DropdownMenu>
+        <DropdownMenu>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full" disabled={isBusy}>
+                  <Brush className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent><p>{t('builder.Section.aiActions.rewrite')}</p></TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent>
+            {rewriteStyles.map(({ label, style }) => (
+              <DropdownMenuItem key={style} onClick={() => onAiAction('rewrite', { style })}>
+                {label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-                <Separator orientation="vertical" className="h-6 mx-1" />
+        <Separator orientation="vertical" className="h-6 mx-1" />
 
-                 <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="rounded-full" onClick={onReadAloud} disabled={isBusy}>
-                            {isReadingAloud ? <Loader2 className="h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4" />}
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent><p>{t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
-                </Tooltip>
-                
-                 <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="rounded-full text-destructive" onClick={onClearContent} disabled={isBusy}>
-                           <Trash2 className="h-4 w-4" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent><p>Clear Content</p></TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
-        </div>
-    )
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={onReadAloud} disabled={isBusy}>
+              {isReadingAloud ? <Loader2 className="h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4" />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent><p>{t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full text-destructive" onClick={onClearContent} disabled={isBusy}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent><p>Clear Content</p></TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
+  )
 }
-
-
 // Initialize Turndown service with GFM for tables
 const turndownService = new TurndownService({ headingStyle: 'atx' });
 turndownService.use(gfm);
@@ -190,7 +186,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
   const addMath = () => {
     const formula = window.prompt('Enter LaTeX formula');
     if (formula) {
-        editor.chain().focus().insertContent(`<katex-component content="${formula}"></katex-component>`).run()
+      editor.chain().focus().insertContent(`<katex-component content="${formula}"></katex-component>`).run()
     }
   }
 
@@ -200,45 +196,45 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
     const format = window.prompt("Export as: 'md' or 'docx'", 'md');
 
     if (format === 'md') {
-        const markdown = turndownService.turndown(editor.getHTML());
-        const blob = new Blob([markdown], { type: 'text/markdown' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'document.md';
-        a.click();
-        URL.revokeObjectURL(url);
+      const markdown = turndownService.turndown(editor.getHTML());
+      const blob = new Blob([markdown], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'document.md';
+      a.click();
+      URL.revokeObjectURL(url);
     } else if (format === 'docx') {
-        const html = editor.getHTML();
-        try {
-            const response = await fetch('/api/export-docx', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ html }),
-            });
+      const html = editor.getHTML();
+      try {
+        const response = await fetch('/api/export-docx', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ html }),
+        });
 
-            if (!response.ok) {
-                throw new Error('Failed to export as DOCX');
-            }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'document.docx';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        } catch (error) {
-            console.error(error);
-            window.alert('Error exporting .docx file.');
+        if (!response.ok) {
+          throw new Error('Failed to export as DOCX');
         }
 
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'document.docx';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error(error);
+        window.alert('Error exporting .docx file.');
+      }
+
     } else if (format) {
-        window.alert("Unsupported format. Please choose 'md' or 'docx'.");
+      window.alert("Unsupported format. Please choose 'md' or 'docx'.");
     }
   };
 
@@ -277,49 +273,49 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
     <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-background/80 backdrop-blur-sm border rounded-full shadow-lg flex items-center p-1 gap-1">
       <div className="flex items-center gap-1">
         <Button onClick={handleImport} size="icon" className="h-9 w-9 rounded-full">
-            <Upload className="h-4 w-4"/>
+          <Upload className="h-4 w-4" />
         </Button>
         <Button onClick={handleExport} size="icon" className="h-9 w-9 rounded-full">
-            <Download className="h-4 w-4"/>
+          <Download className="h-4 w-4" />
         </Button>
         <div className="h-6 w-px bg-border"></div>
         <Select value={getCurrentHeadingLevel()} onValueChange={handleHeadingChange}>
-            <SelectTrigger aria-label="Select heading level" className="h-9 w-32 border-none bg-transparent focus:ring-0 focus:ring-offset-0">
-                <SelectValue placeholder="Paragraph"/>
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value="p">Paragraph</SelectItem>
-                <SelectItem value="h1">Heading 1</SelectItem>
-                <SelectItem value="h2">Heading 2</SelectItem>
-                <SelectItem value="h3">Heading 3</SelectItem>
-            </SelectContent>
+          <SelectTrigger aria-label="Select heading level" className="h-9 w-32 border-none bg-transparent focus:ring-0 focus:ring-offset-0">
+            <SelectValue placeholder="Paragraph" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="p">Paragraph</SelectItem>
+            <SelectItem value="h1">Heading 1</SelectItem>
+            <SelectItem value="h2">Heading 2</SelectItem>
+            <SelectItem value="h3">Heading 3</SelectItem>
+          </SelectContent>
         </Select>
         <Button onClick={() => editor.chain().focus().toggleBold().run()} variant={editor.isActive('bold') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
-            <Bold className="h-4 w-4"/>
+          <Bold className="h-4 w-4" />
         </Button>
         <Button onClick={() => editor.chain().focus().toggleItalic().run()} variant={editor.isActive('italic') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
-            <Italic className="h-4 w-4"/>
+          <Italic className="h-4 w-4" />
         </Button>
-         <Button onClick={() => editor.chain().focus().toggleStrike().run()} variant={editor.isActive('strike') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
-            <Strikethrough className="h-4 w-4"/>
+        <Button onClick={() => editor.chain().focus().toggleStrike().run()} variant={editor.isActive('strike') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
+          <Strikethrough className="h-4 w-4" />
         </Button>
         <Button onClick={() => editor.chain().focus().toggleBulletList().run()} variant={editor.isActive('bulletList') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
-            <List className="h-4 w-4"/>
+          <List className="h-4 w-4" />
         </Button>
         <Button onClick={() => editor.chain().focus().toggleOrderedList().run()} variant={editor.isActive('orderedList') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
-            <ListOrdered className="h-4 w-4"/>
+          <ListOrdered className="h-4 w-4" />
         </Button>
         <Button onClick={() => editor.chain().focus().toggleBlockquote().run()} variant={editor.isActive('blockquote') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
-            <Quote className="h-4 w-4"/>
+          <Quote className="h-4 w-4" />
         </Button>
         <Button onClick={addImage} size="icon" className="h-9 w-9 rounded-full">
-            <ImageIcon className="h-4 w-4"/>
+          <ImageIcon className="h-4 w-4" />
         </Button>
         <Button onClick={addTable} size="icon" className="h-9 w-9 rounded-full">
-            <TableIcon className="h-4 w-4"/>
+          <TableIcon className="h-4 w-4" />
         </Button>
         <Button onClick={addMath} size="icon" className="h-9 w-9 rounded-full">
-            <Sigma className="h-4 w-4"/>
+          <Sigma className="h-4 w-4" />
         </Button>
       </div>
       <div className="h-6 w-px bg-border"></div>
@@ -426,19 +422,19 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       Katex.configure({}),
       FileHandler.configure({
         onDrop: (currentEditor, files, pos) => {
-            files.forEach(file => handleFile(file, currentEditor));
-            return true;
+          files.forEach(file => handleFile(file, currentEditor));
+          return true;
         },
         onPaste: (currentEditor, files, htmlContent) => {
           if (htmlContent) {
             return false; // Let the default paste handler deal with HTML
           }
           files.forEach(file => {
-             if (file.type.startsWith('image/')) {
-               handleImagePaste(currentEditor, file);
-             } else {
-               handleFile(file, currentEditor)
-             }
+            if (file.type.startsWith('image/')) {
+              handleImagePaste(currentEditor, file);
+            } else {
+              handleFile(file, currentEditor)
+            }
           });
           return true;
         }
@@ -456,6 +452,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif prose-p:text-[12px] prose-headings:text-[16px] prose-h1:text-[16px] prose-h2:text-[16px] prose-h3:text-[16px] prose-h4:text-[16px] prose-h5:text-[16px] prose-h6:text-[16px] prose-a:text-primary hover:prose-a:text-primary/90 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2',
       },
     },
+    immediatelyRender: false,
   });
 
   const handleAiActionWrapper = (action: string, payload?: any) => {
@@ -464,7 +461,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     const selectedText = editor.state.doc.textBetween(from, to);
     onAiAction(action, { ...payload, selectedText: selectedText || content });
   };
-  
+
   const handleReadAloudWrapper = () => {
     if (!editor) return;
     const { from, to } = editor.state.selection;
@@ -483,31 +480,31 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }
     }
   }, [debouncedContent, editor]);
-  
+
 
   return (
     <div dir={direction}>
       {editor && (
         <BubbleMenu editor={editor} tippyOptions={{ duration: 100, placement: 'top' }}>
-            { editor.isActive('table') ? (
-                <div className="bg-background p-1 rounded-lg shadow-lg border flex gap-1">
-                    <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addColumnBefore().run()}>Add Col Before</Button>
-                    <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addColumnAfter().run()}>Add Col After</Button>
-                    <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().deleteColumn().run()}>Delete Col</Button>
-                    <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addRowBefore().run()}>Add Row Before</Button>
-                    <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addRowAfter().run()}>Add Row After</Button>
-                    <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().deleteRow().run()}>Delete Row</Button>
-                    <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().deleteTable().run()}>Delete Table</Button>
-                </div>
-            ) : (
-                <SectionToolbar
-                    isProcessingAi={isProcessingAi}
-                    onAiAction={handleAiActionWrapper}
-                    onReadAloud={handleReadAloudWrapper}
-                    isReadingAloud={isReadingAloud}
-                    onClearContent={onClearContent}
-                />
-            )}
+          {editor.isActive('table') ? (
+            <div className="bg-background p-1 rounded-lg shadow-lg border flex gap-1">
+              <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addColumnBefore().run()}>Add Col Before</Button>
+              <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addColumnAfter().run()}>Add Col After</Button>
+              <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().deleteColumn().run()}>Delete Col</Button>
+              <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addRowBefore().run()}>Add Row Before</Button>
+              <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addRowAfter().run()}>Add Row After</Button>
+              <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().deleteRow().run()}>Delete Row</Button>
+              <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().deleteTable().run()}>Delete Table</Button>
+            </div>
+          ) : (
+            <SectionToolbar
+              isProcessingAi={isProcessingAi}
+              onAiAction={handleAiActionWrapper}
+              onReadAloud={handleReadAloudWrapper}
+              isReadingAloud={isReadingAloud}
+              onClearContent={onClearContent}
+            />
+          )}
         </BubbleMenu>
       )}
       <MenuBar editor={editor} setDirection={setDirection} />

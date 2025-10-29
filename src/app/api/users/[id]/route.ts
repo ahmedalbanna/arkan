@@ -9,7 +9,7 @@ import { withAuth, handleApiError, createApiResponse } from "@/lib/utils/api-uti
 // GET a single user profile.
 export const GET = withAuth(async ({ params, user: requester }) => {
     try {
-        const targetUserId = params.id;
+        const targetUserId = await params.id;
 
         // Authorization check: either admin or self
         if (requester.role !== 'admin' && requester.id !== targetUserId) {

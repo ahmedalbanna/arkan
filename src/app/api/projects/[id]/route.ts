@@ -34,7 +34,7 @@ export const GET = withAuth(async ({ params, user }) => {
 // PUT (update) a project
 export const PUT = withAuth(async ({ request, params, user }) => {
     try {
-        const projectId = params.id;
+        const projectId = await params.id;
         await verifyProjectOwner(user.id, projectId);
 
         const body = await request.json();
@@ -60,7 +60,7 @@ export const PUT = withAuth(async ({ request, params, user }) => {
 // DELETE a project
 export const DELETE = withAuth(async ({ params, user }) => {
     try {
-        const projectId = params.id;
+        const projectId = await params.id;
         await verifyProjectOwner(user.id, projectId);
         await adminDb.collection("projects").doc(projectId).delete();
         revalidatePath('/projects');

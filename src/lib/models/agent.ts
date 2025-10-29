@@ -40,6 +40,8 @@ export interface AgentPrompt {
   guidelines?: AgentGuideline[];
 }
 
+
+
 // --- End of moved types ---
 
 
