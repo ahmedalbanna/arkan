@@ -8,9 +8,11 @@ import { useBuilderStore, useAgents, useGenerationUIStore, useSaveProject } from
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import { useAuth } from '@/context/AuthContext';
-import { AgentCategory } from '@/lib/models/agent';
-import { Section } from '@/lib/models/section';
+import { AgentCategory, Section } from '@/lib/models';
 import { useSections } from '../data/use-sections';
+import { SectionName } from '@/ai/schemas';
+import type { SectionProperties } from '@/lib/types';
+
 
 interface UseReportModeGeneratorProps {
     orderedSections: Section[];
@@ -22,7 +24,7 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
     const { t, locale } = useLocalization();
     const { project, updateProject } = useBuilderStore();
     const { agents, isLoaded: agentsLoaded } = useAgents();
-    const { data: sectionConfigs, isLoaded: sectionsLoaded } = useSections();
+    const { data: sectionConfigs, isFetched: sectionsLoaded } = useSections();
     const { controlState, guidelineState, contextSelection, initializeControls, initializeGuidelines, initializeContext } = useGenerationUIStore();
     const { userProfile, refetchUser, firebaseUser } = useAuth();
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
@@ -32,11 +34,15 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
 
     useEffect(() => {
         if (sectionsLoaded && sectionConfigs) {
-            const reportSections = sectionConfigs.filter(s => s.type === 'report');
-            setOrderedSections(reportSections);
+            const reportSectionModels = sectionConfigs
+                .filter(s => s.type === 'report')
+                .map(s => new Section(s as SectionProperties));
+
+            setOrderedSections(reportSectionModels);
+
             // Initialize UI stores for each section
-            reportSections.forEach(section => {
-                const agent = agents.find(a => a.id === section.agentId);
+            reportSectionModels.forEach(section => {
+                const agent = agents.find((a: Agent) => a.id === section.agentId);
                 initializeControls(section.id);
                 if (agent && typeof agent.prompt === 'object' && agent.prompt.guidelines) {
                     initializeGuidelines(section.id, agent.prompt.guidelines);
@@ -49,7 +55,7 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
 
     const reportGenerationAgents = useMemo(() => {
         if (!agents) return [];
-        return agents.filter(a => a.category === AgentCategory.ReportGeneration);
+        return agents.filter((a: Agent) => a.category === AgentCategory.ReportGeneration);
     }, [agents]);
 
     const getSelectedGuidelines = (agent: any, guidelineState: any) => {
@@ -75,7 +81,7 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
         mutationFn: async (agentId: string) => {
             if (!project || !userProfile || !firebaseUser) throw new Error("Project or user not found.");
 
-            const agent = agents.find(a => a.id === agentId);
+            const agent = agents.find((a: Agent) => a.id === agentId);
             if (!agent) throw new Error("Agent not found.");
 
             const token = await firebaseUser.getIdToken();
@@ -124,7 +130,7 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
     const isAnythingGenerating = agentMutation.isPending;
     const activeMutationKey = agentMutation.isPending ? agentMutation.variables as string : null;
 
-    const onGenerateSection = (sectionId: keyof typeof project.sections) => {
+    const onGenerateSection = (sectionId: SectionName) => {
         agentMutation.mutate(sectionId as string);
     };
 

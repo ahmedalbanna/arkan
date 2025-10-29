@@ -73,7 +73,7 @@ export default function ReportModeGenerator() {
 
             <div className={cn("lg:overflow-y-auto pr-2", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
                 <Suspense fallback={<ReportSkeleton />}>
-                    <ReportResults generatedSections={generatedSections.map(s => s.id as any)} />
+                    <ReportResults generatedSections={generatedSections.map(s => s.id)} />
                 </Suspense>
             </div>
         </div>
