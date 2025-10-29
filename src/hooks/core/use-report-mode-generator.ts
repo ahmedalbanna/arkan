@@ -63,7 +63,7 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
                     return acc;
                 }, {} as Record<string, string>);
             
-            const otherDiagramsContext = project.diagrams || {};
+            
 
             const externalContext = (selectedContexts?.externalContext || [])
                 .map((isSelected, index) => isSelected ? project.externalContext?.[index] : null)
@@ -77,7 +77,6 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
                 instructionText: `Please use a ${controls.tone} tone and aim for a word count of approximately ${controls.wordCount} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}.`,
                 guidelines: guidelines,
                 otherSections: { ...otherSectionsContext },
-                otherDiagrams: { ...otherDiagramsContext },
                 externalContext: externalContext,
             };
 

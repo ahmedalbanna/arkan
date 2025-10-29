@@ -236,7 +236,6 @@ export type GenerateQuizOutput = z.infer<typeof GenerateQuizOutputSchema>;
 export const GenerateSectionInputSchema = z.object({
     sectionToGenerate: SectionNameSchema,
     otherSections: z.record(z.string(), z.string()).optional().describe("A map of previously generated text sections and other textual context (like the proposal or plan). The key is the item's name and the value is the markdown/JSON content."),
-    otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context. The key is the diagram type and the value is the PlantUML code."),
     externalContext: z.array(z.object({
         fileName: z.string(),
         content: z.string(),
