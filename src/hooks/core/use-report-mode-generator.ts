@@ -23,7 +23,7 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
     const { project, updateProject } = useBuilderStore();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { data: sectionConfigs, isLoaded: sectionsLoaded } = useSections();
-    const { controlState, guidelineState, contextSelection } = useGenerationUIStore();
+    const { controlState, guidelineState, contextSelection, initializeControls, initializeGuidelines, initializeContext } = useGenerationUIStore();
     const { userProfile, refetchUser, firebaseUser } = useAuth();
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     const queryClient = useQueryClient();
@@ -32,14 +32,43 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
 
     useEffect(() => {
         if (sectionsLoaded && sectionConfigs) {
-            setOrderedSections(sectionConfigs.filter(s => s.type === 'report'));
+            const reportSections = sectionConfigs.filter(s => s.type === 'report');
+            setOrderedSections(reportSections);
+            // Initialize UI stores for each section
+            reportSections.forEach(section => {
+                const agent = agents.find(a => a.id === section.agentId);
+                initializeControls(section.id);
+                if (agent && typeof agent.prompt === 'object' && agent.prompt.guidelines) {
+                    initializeGuidelines(section.id, agent.prompt.guidelines);
+                }
+                initializeContext(section.id);
+            });
         }
-    }, [sectionsLoaded, sectionConfigs, setOrderedSections]);
+    }, [sectionsLoaded, sectionConfigs, setOrderedSections, initializeControls, initializeGuidelines, initializeContext, agents]);
+
 
     const reportGenerationAgents = useMemo(() => {
         if (!agents) return [];
         return agents.filter(a => a.category === AgentCategory.ReportGeneration);
     }, [agents]);
+
+    const getSelectedGuidelines = (agent: any, guidelineState: any) => {
+        const selectedGuidelines: string[] = [];
+        const basePrompt = agent.prompt as any;
+
+        if (basePrompt.guidelines) {
+            basePrompt.guidelines.forEach((g: any, index: number) => {
+                if (guidelineState?.checked?.[index]) {
+                    selectedGuidelines.push(g.text);
+                }
+            });
+        }
+        if (guidelineState?.custom) {
+            selectedGuidelines.push(...guidelineState.custom);
+        }
+        return selectedGuidelines;
+    };
+
 
     const agentMutation = useMutation({
         mutationKey: ['generateReportSection'], // Static key
@@ -67,7 +96,8 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
 
             const externalContext = (selectedContexts?.externalContext || [])
                 .map((isSelected, index) => isSelected ? project.externalContext?.[index] : null)
-                .filter(Boolean);
+                .filter(Boolean) as { fileName: string, content: string, type: string }[];
+
 
             const body = {
                 sectionToGenerate: agentId,
