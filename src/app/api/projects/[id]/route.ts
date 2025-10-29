@@ -1,5 +1,5 @@
 
-import { ProjectStateSchema } from '@/ai/schemas';
+import { ProjectStateSchema } from '@/lib/schemas/project-schema';
 import { revalidatePath } from 'next/cache';
 import { adminDb } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';

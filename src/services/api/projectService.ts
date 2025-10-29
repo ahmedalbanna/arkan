@@ -1,8 +1,6 @@
 
 'use client';
-import type { AnyProjectProposal, ProjectPlan, ExternalContext } from "@/ai/schemas";
 import { app } from '@/lib/firebase/client-init';
-import { getFirestore, collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
 import type { ProjectState, SavedProject } from "@/lib/models/project"; // Import from model
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';

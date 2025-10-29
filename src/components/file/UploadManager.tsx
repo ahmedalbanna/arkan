@@ -14,7 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useToast } from '@/hooks';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
-import { ContextFileType } from '@/lib/types';
+import { ExternalContextType } from '@/lib/types';
 import { cn } from '@/lib/utils/cn';
 import { processFileApi } from '@/services';
 import { FileText, ImageIcon, Loader2, PanelLeftClose, UploadCloud, Wand2, X } from 'lucide-react';
@@ -28,7 +28,7 @@ interface UploadManagerProps {
     onCollapseToggle: () => void;
 }
 
-function ViewContextDialog({ item }: { item: { fileName: string, content: string, type: ContextFileType } }) {
+function ViewContextDialog({ item }: { item: { fileName: string, content: string, type: ExternalContextType } }) {
     const isDataUri = item.content.startsWith('data:');
     const isImage = isDataUri && item.content.startsWith('data:image');
     const isPdf = isDataUri && item.content.startsWith('data:application/pdf');
@@ -142,11 +142,11 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
         updateProject(p => { p.removeExternalContext(index); });
     };
 
-    const updateExternalContextType = (index: number, type: ContextFileType) => {
+    const updateExternalContextType = (index: number, type: ExternalContextType) => {
         updateProject(p => { p.updateExternalContextType(index, type); });
     };
 
-    const fileTypes: ContextFileType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
+    const fileTypes: ExternalContextType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
 
     return (
         <Card className="h-full flex flex-col">
@@ -188,7 +188,7 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
                                                 <span className="truncate font-medium text-sm" style={{ maxWidth: '200px' }}>{item.fileName}</span>
                                             </div>
                                             <div className="flex items-center gap-1">
-                                                <Select value={item.type} onValueChange={(value: ContextFileType) => updateExternalContextType(index, value)}>
+                                                <Select value={item.type} onValueChange={(value: ExternalContextType) => updateExternalContextType(index, value)}>
                                                     <SelectTrigger className={cn("text-xs h-7 w-auto p-0 border-0 bg-transparent focus:ring-0", {
                                                         'text-blue-800 dark:text-blue-200': item.type === 'context',
                                                         'text-green-800 dark:text-green-200': item.type === 'example',

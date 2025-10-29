@@ -38,8 +38,6 @@ export interface AgentKnowledgeSource {
 export interface AgentPrompt {
   base: string;
   guidelines?: AgentGuideline[];
-  jsonStructure?: any;
-  defaultContext?: ('proposal' | 'projectPlan' | string)[]; // Array of agent IDs or keywords
 }
 
 // --- End of moved types ---

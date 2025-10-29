@@ -2,11 +2,7 @@
 import { adminAuth, adminDb } from '@/lib/firebase/server-init';
 import { FieldValue } from 'firebase-admin/firestore';
 import type { UserProfile } from '@/lib/models/user';
-import type { TeamProperties } from '@/lib/models/team';
-import type { TeamMember } from '@/lib/models/user';
-import type { ProposalTemplateProperties } from '@/lib/models/proposalTemplate';
 import type { ReportTemplateProperties } from '@/lib/models/reportTemplate';
-import type { PresentationTemplateProperties } from '@/lib/models/presentationTemplate';
 import type { DocxTemplateProperties } from '@/lib/models/docxTemplate';
 import type { PptxTemplateProperties } from '@/lib/models/pptxTemplate';
 import { AgentProperties } from '../models/agent';
@@ -180,66 +176,6 @@ export async function getTransactionsByDateRange(startDate: string, endDate: str
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as TransactionProperties);
 }
 
-// --- Team Queries ---
-
-export async function getUserTeams(userId: string) {
-    const userProfile = await getUserProfile(userId);
-    if (!userProfile?.teams || userProfile.teams.length === 0) {
-        return [];
-    }
-
-    const teamPromises = userProfile.teams.map(async (teamId) => {
-        const teamDoc = await adminDb.collection('teams').doc(teamId).get();
-        if (!teamDoc.exists) return null;
-
-        const teamData = { id: teamDoc.id, ...teamDoc.data() } as TeamProperties;
-
-        const membersSnapshot = await adminDb.collection('teams').doc(teamId).collection('members').get();
-        const members = membersSnapshot.docs.map(doc => doc.data() as TeamMember);
-
-        return { ...teamData, members };
-    });
-
-    const teams = (await Promise.all(teamPromises)).filter(Boolean);
-
-    // Sort teams by most recent activity (if a field for that exists) or creation date
-    teams.sort((a, b) => new Date(b!.createdAt).getTime() - new Date(a!.createdAt).getTime());
-
-    return teams as (TeamProperties & { members: TeamMember[] })[];
-}
-
-
-export async function createTeamForUser(userId: string, teamName: string): Promise<TeamProperties> {
-  const teamRef = adminDb.collection('teams').doc();
-  const userRef = adminDb.collection('users').doc(userId);
-  const userProfile = await getUserProfile(userId);
-  if (!userProfile) throw new Error("User not found.");
-
-  const newTeam: Omit<TeamProperties, 'id' | 'members'> = {
-      name: teamName,
-      ownerId: userId,
-      createdAt: new Date().toISOString(),
-  };
-
-  const newMember: TeamMember = {
-      userId,
-      teamId: teamRef.id,
-      role: 'owner',
-      joinedAt: new Date().toISOString(),
-      name: userProfile.name,
-      email: userProfile.email,
-      profilePictureUrl: userProfile.profilePictureUrl || ''
-  };
-
-  const batch = adminDb.batch();
-  batch.set(teamRef, newTeam);
-  batch.set(teamRef.collection('members').doc(userId), newMember);
-  batch.update(userRef, { teams: FieldValue.arrayUnion(teamRef.id) });
-
-  await batch.commit();
-
-  return { id: teamRef.id, ...newTeam, members: [newMember] };
-}
 
 // --- Agent Queries ---
 export async function getAgent(agentId: string): Promise<AgentProperties | null> {
@@ -262,7 +198,7 @@ export async function getAgent(agentId: string): Promise<AgentProperties | null>
 
 // --- Template Queries ---
 export type TemplateType = 'proposal' | 'report' | 'presentation' | 'docx' | 'pptx';
-export type TemplateData = ProposalTemplateProperties | ReportTemplateProperties | PresentationTemplateProperties | DocxTemplateProperties | PptxTemplateProperties;
+export type TemplateData = ReportTemplateProperties |DocxTemplateProperties | PptxTemplateProperties;
 
 export async function createGenerativeTemplate(templateType: TemplateType, id: string, data: Omit<TemplateData, 'id' | 'createdAt'>): Promise<TemplateData> {
     const collectionName = ['docx', 'pptx'].includes(templateType) ? 'styles' : 'items';
