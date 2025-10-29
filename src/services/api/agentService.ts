@@ -3,7 +3,7 @@
 
 import type { UpdateAgentVariables, CreateAgentVariables, UploadedFile } from '@/lib/types';
 import { GenerateAgentConfigOutput } from '@/ai/schemas';
-import type { AgentProperties, AgentCategoryDetails } from '@/lib/models';
+import type { Agent, AgentProperties, AgentCategoryDetails } from '@/lib/models';
 
 
 /**
@@ -13,7 +13,7 @@ import type { AgentProperties, AgentCategoryDetails } from '@/lib/models';
  * @returns A promise that resolves to an array of AgentProperties.
  */
 export async function fetchAgentsApi(token: string): Promise<AgentProperties[]> {
-    const response = await fetch('/api/agents', {
+    const response = await fetch('/api/admin/agents', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!response.ok) {
