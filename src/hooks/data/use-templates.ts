@@ -23,7 +23,7 @@ import {
     updatePresentationTemplateApi,
     deletePresentationTemplateApi,
 } from '@/services/api/templateService';
-import type { DocxTemplateProperties, PptxTemplateProperties, ReportTemplateProperties, PresentationTemplateProperties, CreateReportTemplateData, UpdateReportTemplateData, CreatePresentationTemplateData, UpdatePresentationTemplateData } from '@/lib/types';
+import type { DocxTemplateProperties, PptxTemplateProperties, ReportTemplateProperties, CreateReportTemplateData, UpdateReportTemplateData, PresentationTemplateProperties, CreatePresentationTemplateData, UpdatePresentationTemplateData } from '@/lib/types';
 
 
 // ============================================================================
@@ -135,7 +135,7 @@ export function useCreatePptxTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
     return useMutation({
-        mutationFn: async (data: { id: string, name: string, description: string }) => {
+        mutationFn: async (data: { id: string; name: string; description: string }) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return createPptxTemplateApi(data, token);
         },

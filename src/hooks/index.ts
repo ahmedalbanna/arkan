@@ -21,7 +21,6 @@ export * from './core/use-guideline-editor';
 export * from './core/use-project-card-logic';
 export * from './core/use-report-mode-generator';
 export * from './core/use-report-paginator';
-export * from './core/useSectionAccordionItemLogic';
 export * from './core/use-section-logic';
 export * from './core/use-session-actions';
 export * from './core/use-upload-project-logic';
