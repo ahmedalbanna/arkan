@@ -4,16 +4,14 @@ import { config } from 'dotenv';
 config();
 
 // Core Builder Flows
-import '@/ai/flows/summarize-project.ts';
+
 import '@/ai/flows/generate-report-section.ts';
 import '@/ai/flows/generate-diagrams.ts';
-import '@/ai/flows/evaluate-report.ts';
 
 // Utility & Tool Flows
 import '@/ai/flows/ai-proofread-document.ts';
 import '@/ai/flows/ai-researcher.ts';
-import '@/ai/flows/analyze-context.ts';
-import '@/ai/flows/detect-ai-content.ts';
+
 import '@/ai/flows/fact-checker.ts';
 import '@/ai/flows/generate-agent-config.ts';
 import '@/ai/flows/generate-citation.ts';

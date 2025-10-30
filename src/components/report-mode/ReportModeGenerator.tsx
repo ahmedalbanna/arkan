@@ -59,13 +59,13 @@ export default function ReportModeGenerator() {
         return <ReportSkeleton />;
     }
     // Determine which section IDs to show in the results area.
-    // If the panel's orderedSections is populated use that order but only
-    // include sections that actually have generated content. Otherwise
-    // fall back to the generatedSections coming from the hook.
-    const generatedIds = new Set(generatedSections.map(s => s.id));
+    // `generatedSections` is an array of SectionName (strings). If the panel's
+    // orderedSections is populated use that order but only include sections that
+    // actually have generated content. Otherwise fall back to the generatedSections.
+    const generatedIds = new Set(generatedSections);
     const displayedSectionIds = orderedSections && orderedSections.length > 0
         ? orderedSections.filter(s => generatedIds.has(s.id)).map(s => s.id)
-        : generatedSections.map(s => s.id);
+        : generatedSections;
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>

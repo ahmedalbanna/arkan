@@ -4,6 +4,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useAgents, useGenerationUIStore, useSaveProject } from '@/hooks';
+import { toast } from '@/hooks/util/use-toast';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { generateReportSectionApi } from '@/services/api/reportService';
@@ -95,17 +96,25 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
 
     const agentMutation = useMutation({
         mutationKey: ['generateReportSection'], // Static key
-        mutationFn: async (agentId: string) => {
+        mutationFn: async (sectionId: string) => {
+            // sectionId is the SectionName (e.g., 'introduction'), not the agent id.
             if (!project || !userProfile || !firebaseUser) throw new Error("Project or user not found.");
 
-            const agent = agents.find((a: Agent) => a.id === agentId);
-            if (!agent) throw new Error("Agent not found.");
+            // Find the Section model from the orderedSections (provided by the hook consumer)
+            const section = orderedSections?.find(s => s.id === sectionId);
+            if (!section) throw new Error("Section not found.");
+
+            // Resolve the agent using the section.agentId
+            const agent = agents.find((a: Agent) => a.id === section.agentId);
+            if (!agent) throw new Error("Agent not found for section.");
 
             const token = await firebaseUser.getIdToken();
-            const controls = controlState[agentId];
-            const guidelines = getSelectedGuidelines(agent, guidelineState[agentId]);
 
-            const selectedContexts = contextSelection[agentId];
+            // Controls, guidelines and context are stored keyed by section id
+            const controls = controlState[sectionId] || { tone: 'neutral', wordCount: 200, complexity: 50 };
+            const guidelines = getSelectedGuidelines(agent, guidelineState[sectionId]);
+
+            const selectedContexts = contextSelection[sectionId];
             const otherSectionsContext = Object.entries(selectedContexts?.sections || {})
                 .filter(([, isSelected]) => isSelected)
                 .reduce((acc, [key]) => {
@@ -114,17 +123,16 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
                     }
                     return acc;
                 }, {} as Record<string, string>);
-            
-            
 
             const externalContext = (selectedContexts?.externalContext || [])
                 .map((isSelected, index) => (isSelected && project.externalContext?.[index]) ? project.externalContext[index] : null)
                 .filter(Boolean) as { fileName: string, content: string, type: string }[];
 
-
             const body = {
-                sectionToGenerate: agentId,
-                agentId: agentId,
+                // The server expects sectionToGenerate to be the SectionName (section.id)
+                sectionToGenerate: section.id,
+                // Provide the agent id separately so the server knows which agent/prompt to use
+                agentId: section.agentId,
                 agentPrompt: agent.prompt,
                 model: agent.model,
                 instructionText: `Please use a ${controls.tone} tone and aim for a word count of approximately ${controls.wordCount} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}.`,
@@ -134,13 +142,24 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
             };
 
             const result = await generateReportSectionApi(body, token);
-            updateProject(p => p.updateSectionContent(agentId as keyof typeof p.sections, result[agentId]));
+
+            // Server returns { [sectionName]: content } so use section.id as the key
+            const content = result?.[section.id] ?? Object.values(result || {})[0] as string | undefined;
+            if (!content) {
+                toast({ title: 'Generation failed', description: `No content returned for section ${section.id}.`, variant: 'destructive' });
+                throw new Error('Empty generation result');
+            }
+
+            updateProject(p => p.updateSectionContent(section.id as keyof typeof p.sections, content));
             refetchUser(); // To update credits in the UI
-            saveProject();
+            // saveProject();
             return result;
         },
         onSuccess: (data, variables) => {
             queryClient.setQueryData(['reportSection', variables], data);
+        },
+        onError: (error: any) => {
+            toast({ title: 'Generation error', description: error?.message || 'Failed to generate section', variant: 'destructive' });
         },
     });
 
@@ -155,7 +174,7 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
 
     const generatedSections = useMemo(() => {
         if (!project || !project.sections) return [];
-        return Object.entries(project.sections).map(([id, content]) => ({ id, content }));
+        return Object.keys(project.sections) as SectionName[];
     }, [project]);
 
 
