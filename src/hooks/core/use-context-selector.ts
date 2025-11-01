@@ -4,10 +4,8 @@
 import { useLocalization } from '@/context/LocalizationContext';
 import { useGenerationUIStore } from '@/hooks/core/useGenerationUIStore';
 import { useBuilderStore } from '@/hooks/core/useBuilderStore';
-import { useAgents } from '@/hooks/data/useAgents';
 import { useSections } from '@/hooks/data/use-sections';
 import { useMemo } from 'react';
-import { SectionName } from '@/ai/schemas';
 
 export function useContextSelector(itemKey: string) {
     const { t } = useLocalization();
@@ -22,8 +20,14 @@ export function useContextSelector(itemKey: string) {
     const currentSelection = contextSelection[itemKey] || { sections: {}, diagrams: {}, externalContext: [] };
     
     const reportSections = useMemo(() => {
-        return (allSections || []).filter(s => s.type === 'report' && s.id !== itemKey);
-    }, [allSections, itemKey]);
+        if (!allSections || !project?.sections) return [];
+        // Filter sections to show only those that have been generated and are not the current section
+        return allSections.filter(s =>
+            s.type === 'report' &&
+            s.id !== itemKey &&
+            Object.keys(project.sections).includes(s.id)
+        );
+    }, [allSections, project?.sections, itemKey]);
 
     return {
         t,
