@@ -1,3 +1,4 @@
+
 'use client';
 
 import OnboardingGuide from '@/components/auth/OnboardingGuide';
@@ -68,8 +69,12 @@ function GeneratePageContent() {
     featuresLoaded,
     isFeatureEnabled,
   } = useBuilderPageLogic();
+  const [isClient, setIsClient] = useState(false);
 
-  // (All onboarding and project-loading logic now lives in `useBuilderPageLogic`)
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
 
 
   // hook provides tab enabling and activeTab upkeep
@@ -80,16 +85,26 @@ function GeneratePageContent() {
       <div className="flex-grow flex flex-col mx-auto px-4 py-8 w-full">
         <div className="flex justify-between items-start mb-4 gap-4 max-w-full">
           <div className="flex-1 space-y-1 overflow-auto">
-            <h1 className="text-xl font-semibold text-foreground truncate" title={project?.name}>
-              {project?.name || t('projects.untitled')}
-            </h1>
-            <p className="text-sm text-muted-foreground truncate" title={project?.projectIdea}>
-              {project?.projectIdea || t('projects.noDescription')}
-            </p>
-            {projectData?.updatedAt && (
-              <p className="text-xs text-muted-foreground">
-                {t('projects.updated', { time: formatDistanceToNow(new Date(projectData.updatedAt), { addSuffix: true, locale: locale === 'ar' ? ar : enUS }) })}
-              </p>
+            {!isClient ? (
+              <>
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-4 w-64" />
+                <Skeleton className="h-3 w-32" />
+              </>
+            ) : (
+              <>
+                <h1 className="text-xl font-semibold text-foreground truncate" title={project?.name}>
+                  {project?.name || t('projects.untitled')}
+                </h1>
+                <p className="text-sm text-muted-foreground truncate" title={project?.projectIdea}>
+                  {project?.projectIdea || t('projects.noDescription')}
+                </p>
+                {projectData?.updatedAt && (
+                  <p className="text-xs text-muted-foreground">
+                    {t('projects.updated', { time: formatDistanceToNow(new Date(projectData.updatedAt), { addSuffix: true, locale: locale === 'ar' ? ar : enUS }) })}
+                  </p>
+                )}
+              </>
             )}
           </div>
           <div className="flex-none">
