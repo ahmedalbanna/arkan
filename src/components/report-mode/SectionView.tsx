@@ -13,15 +13,17 @@ import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import dynamic from 'next/dynamic';
+import { Input } from '../ui/input';
 const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), { ssr: false });
 interface SectionProps {
     sectionKey: SectionName;
     title: string;
     content: string; // The markdown content of the section
     onUpdate: (key: SectionName, value: string) => void;
+    onTitleChange: (key: SectionName, newTitle: string) => void;
 }
 
-export const SectionView = ({ sectionKey, title, content, onUpdate }: SectionProps) => {
+export const SectionView = ({ sectionKey, title, content, onUpdate, onTitleChange }: SectionProps) => {
     const {
         aiSuggestion,
         diff,
@@ -30,7 +32,7 @@ export const SectionView = ({ sectionKey, title, content, onUpdate }: SectionPro
         handleRejectSuggestion,
         handleAiAction,
         handleReadAloud,
-        isProcessingAi,
+        activeAiAction,
         isReadingAloud,
         words,
         chars,
@@ -40,10 +42,11 @@ export const SectionView = ({ sectionKey, title, content, onUpdate }: SectionPro
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <h2 className="font-semibold text-lg md:text-xl text-primary/90 font-headline flex items-center gap-2">
-                    {title}
-                </h2>
-                {/* The main toolbar is now handled by the BubbleMenu in the editor */}
+                <Input 
+                    value={title}
+                    onChange={(e) => onTitleChange(sectionKey, e.target.value)}
+                    className="font-semibold text-lg md:text-xl text-primary/90 font-headline border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                />
             </div>
             <div className="space-y-1 text-xs text-muted-foreground">
                 <span>{words} {t('builder.Section.words')}</span>
@@ -57,7 +60,7 @@ export const SectionView = ({ sectionKey, title, content, onUpdate }: SectionPro
                     onChange={(newMarkdown) => onUpdate(sectionKey, newMarkdown)}
                     onAiAction={handleAiAction}
                     onReadAloud={handleReadAloud}
-                    isProcessingAi={isProcessingAi}
+                    activeAiAction={activeAiAction}
                     isReadingAloud={isReadingAloud}
                     onClearContent={handleClearContent}
                 />

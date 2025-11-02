@@ -1,9 +1,23 @@
 
 import { adminDb } from '@/lib/firebase/server-init';
-import { ProjectStateSchema } from '@/lib/schemas/project-schema';
 import { revalidatePath } from 'next/cache';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
+import { z } from 'zod';
+
+const SectionDataSchema = z.object({
+    title: z.string(),
+    content: z.string(),
+});
+
+export const ProjectStateSchema = z.object({
+    currentProjectId: z.string().nullable().optional(),
+    name: z.string().optional(),
+    projectIdea: z.string().optional(),
+    sections: z.record(z.string(), SectionDataSchema).optional(),
+    sectionsOrder: z.array(z.string()).optional(),
+    externalContext: z.array(z.any()).nullable().optional(),
+});
 // GET /api/projects - Fetches all projects for the authenticated user
 export const GET = withAuth(async ({ user }) => {
     try {

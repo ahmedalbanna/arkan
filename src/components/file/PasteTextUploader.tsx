@@ -15,7 +15,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 export function PasteTextUploader() {
     const { t } = useLocalization();
     const { toast } = useToast();
-    const { addExternalContext } = useBuilderStore();
+    const { updateProject } = useBuilderStore();
     const [text, setText] = useState('');
     const [fileName, setFileName] = useState('');
 
@@ -29,7 +29,14 @@ export function PasteTextUploader() {
             return;
         }
 
-        addExternalContext(`${fileName.trim()}.md`, text, 'context');
+        updateProject(project => {
+            project.addExternalContext({
+                fileName: `${fileName.trim()}.md`,
+                content: text,
+                type: 'context'
+            });
+        });
+        
         toast({
             title: t('builder.files.toasts.contextAddedToastTitle'),
             description: t('builder.files.toasts.contextAddedToastDesc').replace('{fileName}', `${fileName.trim()}.md`),

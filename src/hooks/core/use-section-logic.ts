@@ -11,6 +11,7 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
     const { t } = useLocalization();
     const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const [diff, setDiff] = useState<DiffPart[] | null>(null);
+    const [activeAiAction, setActiveAiAction] = useState<string | null>(null);
     const { toast } = useToast();
 
     const aiActionMutation = useWritingTool('/api/writing-tools/manipulate-text', {
@@ -18,15 +19,18 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
             setAiSuggestion(data.rewrittenText);
             setDiff(computeDiff(content, data.rewrittenText));
             toast({ title: t('builder.Section.aiSuggestion') });
+            setActiveAiAction(null);
         },
         onError: (error) => {
             toast({ title: 'AI Action Failed', description: error.message, variant: 'destructive' });
+            setActiveAiAction(null);
         }
     });
 
     const readAloudMutation = useTextToSpeech();
 
     const handleAiAction = (action: string, payload: any = {}) => {
+        setActiveAiAction(action);
         const command = payload.selectedText ? `${action}: "${payload.selectedText}"` : action;
         aiActionMutation.mutate({
             textToManipulate: content,
@@ -71,7 +75,7 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
         handleRejectSuggestion,
         handleAiAction,
         handleReadAloud,
-        isProcessingAi: aiActionMutation.isPending,
+        activeAiAction,
         isReadingAloud: readAloudMutation.isPending,
         words: wordCount,
         chars: charCount,
