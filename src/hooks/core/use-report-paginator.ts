@@ -11,16 +11,22 @@ export function useReportPaginator(generatedSections: SectionName[], reportAgent
     const [currentPage, setCurrentPage] = useState(0);
 
     const orderedSections = useMemo(() => {
-        // Use the order from the project if available, otherwise just use the list of generated sections
-        const order = project?.sectionsOrder?.filter(id => generatedSections.includes(id as SectionName)) ?? generatedSections;
-        // Add any generated sections that might be missing from the saved order
-        generatedSections.forEach(id => {
-            if (!order.includes(id)) {
-                order.push(id);
+        const generatedIdSet = new Set(generatedSections);
+        const allKnownSectionIds = Object.keys(project?.sections || {});
+
+        const projectOrder = project?.sectionsOrder?.filter(id => allKnownSectionIds.includes(id)) || [];
+
+        const finalOrder = [...projectOrder];
+        allKnownSectionIds.forEach(id => {
+            if (!finalOrder.includes(id)) {
+                finalOrder.push(id);
             }
         });
-        return order;
-    }, [generatedSections, project?.sectionsOrder]);
+        
+        return finalOrder;
+
+    }, [project?.sections, project?.sectionsOrder, generatedSections]);
+
 
     const totalPages = orderedSections.length;
     const currentSectionKey = orderedSections[currentPage];
@@ -28,20 +34,19 @@ export function useReportPaginator(generatedSections: SectionName[], reportAgent
     // If the current page becomes invalid (e.g. sections are removed), reset to the first page.
     useEffect(() => {
         if (currentPage >= totalPages && totalPages > 0) {
+            setCurrentPage(totalPages - 1);
+        } else if (totalPages === 0) {
             setCurrentPage(0);
         }
     }, [currentPage, totalPages]);
 
 
     const getSectionTitle = (key: SectionName) => {
-        // First, check if a title is explicitly set in the project sections
         const customTitle = project?.sections?.[key]?.title;
         if (customTitle && customTitle !== key) {
             return customTitle;
         }
-
-        // If not, fall back to the agent name
-        return reportAgents.find(a => a.id === key)?.name || key.replace(/-/g, ' ');
+        return reportAgents.find(a => a.id === key)?.name || key.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     };
 
     const handleNextPage = () => {
@@ -59,5 +64,6 @@ export function useReportPaginator(generatedSections: SectionName[], reportAgent
         getSectionTitle,
         handleNextPage,
         handlePrevPage,
+        setCurrentPage,
     };
 }

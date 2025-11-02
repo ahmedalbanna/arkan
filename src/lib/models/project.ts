@@ -1,4 +1,5 @@
 
+
 export type ExternalContextType = 'context' | 'example' | 'question' | 'textbook' | 'guidelines';
 
 // define externalContext 
@@ -148,12 +149,13 @@ export class Project implements SavedProject {
     this._sections[sectionName]!.title = newTitle;
   }
   
-  public addCustomSection(): void {
+  public addCustomSection(): string {
     const newSectionId = `custom-section-${Date.now()}`;
     if (!this._sections) this._sections = {};
     this._sections[newSectionId] = { title: 'Untitled Section', content: '' };
     if (!this._sectionsOrder) this._sectionsOrder = [];
     this._sectionsOrder.push(newSectionId);
+    return newSectionId;
   }
 
 

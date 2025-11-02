@@ -1,19 +1,19 @@
 
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SectionView } from './SectionView';
 import type { SectionName } from '@/ai/schemas';
 import { FileText, ChevronLeft, ChevronRight, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useBuilderStore } from '@/hooks'; // Changed import
+import { useBuilderStore } from '@/hooks';
 import A4Page from '@/components/shared/A4Page';
-import { useLocalization } from '@/context/LocalizationContext'; // Changed import
-import { useAgents } from '@/hooks/data/useAgents'; // Changed import
-import { AgentCategory } from '@/lib/models/agent'; // Changed import
-import { useMemo, useEffect } from 'react'; // Changed import
+import { useLocalization } from '@/context/LocalizationContext';
+import { useAgents } from '@/hooks/data/useAgents';
+import { AgentCategory } from '@/lib/models/agent';
+import { useMemo } from 'react';
 import { useReportPaginator } from '@/hooks/core/use-report-paginator';
 
 interface ReportResultsProps {
@@ -36,7 +36,8 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     currentSectionKey,
     getSectionTitle,
     handleNextPage,
-    handlePrevPage
+    handlePrevPage,
+    setCurrentPage, // Import setCurrentPage
   } = useReportPaginator(generatedSections, reportAgents);
 
   const handleSectionUpdate = (key: SectionName, value: string) => {
@@ -52,22 +53,35 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
   };
   
   const handleAddSection = () => {
+    let newSectionId = '';
     updateProject(p => {
-      p.addCustomSection();
+        // addCustomSection now returns the id of the new section
+        newSectionId = p.addCustomSection();
     });
+    // After adding the section, navigate to it
+    if (newSectionId) {
+        const newPageIndex = project?.sectionsOrder?.findIndex(id => id === newSectionId) ?? totalPages;
+        setCurrentPage(newPageIndex);
+    }
   };
 
-  // If there are no sections, create a default one to render the editor.
-  useEffect(() => {
-      if (project && (!project.sections || Object.keys(project.sections).length === 0)) {
-          handleAddSection();
-      }
-  }, [project]);
-
-
   const renderContent = () => {
-    // Always render the editor view, even if totalPages is 0 initially.
-    // The useEffect above ensures at least one section exists to be rendered.
+    if (totalPages === 0) {
+      return (
+        <div className="flex items-center justify-center h-full min-h-[400px]">
+          <div className="text-center text-muted-foreground p-8">
+            <FileText className="w-16 h-16 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold">{t('builder.reportGenerator.selectSectionPrompt')}</h3>
+            <p className="text-sm mt-1">Or create a new blank section to get started.</p>
+             <Button onClick={handleAddSection} className="mt-4">
+                <PlusCircle className="me-2 h-4 w-4" />
+                Create a Section
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
     return (
         <div className="h-full p-4 gap-4 rounded-lg flex flex-col mt-4">
             <ScrollArea className="flex-grow">
