@@ -1,4 +1,3 @@
-
 // Replaced the file with a clean implementation below
 'use client';
 
@@ -20,6 +19,20 @@ interface BuilderState {
   removeLocalCache: (projectId: string) => void;
   mergeLocalOrderInto: (projectData: ProjectProperties) => void;
 }
+
+const createNewTemporaryProject = (): Project => {
+    return new Project({
+        id: '', // No ID for a new, unsaved project
+        userId: '', // Will be assigned on save
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        name: 'Untitled Project',
+        projectIdea: '',
+        sections: {},
+        sectionsOrder: [],
+        externalContext: [],
+    });
+};
 
 const useBuilderStore = create<BuilderState>((set, get) => {
   // Helpers for localStorage keys and operations
@@ -126,7 +139,14 @@ const useBuilderStore = create<BuilderState>((set, get) => {
     },
 
     newSession: () => {
-      set({ project: null });
+        if (typeof window !== 'undefined') {
+            const lastId = localStorage.getItem('arkan_last_project_id');
+            if (lastId) {
+                localStorage.removeItem(storageKey(lastId));
+                localStorage.removeItem('arkan_last_project_id');
+            }
+        }
+        set({ project: createNewTemporaryProject(), isLocalDirty: false });
     },
 
     saveLocalCache: () => {
