@@ -82,7 +82,7 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
                         <SectionView
                             sectionKey={currentSectionKey}
                             title={getSectionTitle(currentSectionKey)}
-                            content={project?.sections?.[currentSectionKey]!}
+                            content={project?.sections?.[currentSectionKey]?.content || ''}
                             onUpdate={handleSectionUpdate}
                             onTitleChange={handleTitleUpdate}
                         />
