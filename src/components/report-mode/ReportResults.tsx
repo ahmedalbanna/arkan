@@ -13,7 +13,7 @@ import A4Page from '@/components/shared/A4Page';
 import { useLocalization } from '@/context/LocalizationContext'; // Changed import
 import { useAgents } from '@/hooks/data/useAgents'; // Changed import
 import { AgentCategory } from '@/lib/models/agent'; // Changed import
-import { useMemo } from 'react'; // Changed import
+import { useMemo, useEffect } from 'react'; // Changed import
 import { useReportPaginator } from '@/hooks/core/use-report-paginator';
 
 interface ReportResultsProps {
@@ -57,27 +57,21 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     });
   };
 
+  // If there are no sections, create a default one to render the editor.
+  useEffect(() => {
+      if (project && (!project.sections || Object.keys(project.sections).length === 0)) {
+          handleAddSection();
+      }
+  }, [project]);
+
 
   const renderContent = () => {
-    if (totalPages === 0) {
-        return (
-            <div className="flex items-center justify-center h-full min-h-[400px] mt-4">
-                <div className="text-center text-muted-foreground p-8 border-2 border-dashed rounded-lg">
-                    <FileText className="w-16 h-16 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold">{t('builder.reportGenerator.emptyStateTitle')}</h3>
-                    <p>{t('builder.reportGenerator.emptyStateDesc')}</p>
-                     <Button onClick={handleAddSection} className="mt-4">
-                        <PlusCircle className="me-2 h-4 w-4" />
-                        Create a Section
-                    </Button>
-                </div>
-            </div>
-        );
-    }
+    // Always render the editor view, even if totalPages is 0 initially.
+    // The useEffect above ensures at least one section exists to be rendered.
     return (
         <div className="h-full p-4 gap-4 rounded-lg flex flex-col mt-4">
             <ScrollArea className="flex-grow">
-                {currentSectionKey && (
+                {currentSectionKey ? (
                     <A4Page key={currentSectionKey}>
                         <SectionView
                             sectionKey={currentSectionKey}
@@ -87,6 +81,13 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
                             onTitleChange={handleTitleUpdate}
                         />
                     </A4Page>
+                ) : (
+                     <div className="flex items-center justify-center h-full min-h-[400px]">
+                        <div className="text-center text-muted-foreground p-8">
+                            <FileText className="w-16 h-16 mx-auto mb-4" />
+                            <h3 className="text-lg font-semibold">{t('builder.reportGenerator.selectSectionPrompt')}</h3>
+                        </div>
+                    </div>
                 )}
             </ScrollArea>
         </div>
@@ -101,6 +102,10 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
                     <CardTitle className="font-headline">{t('builder.reportGenerator.resultsTitle')}</CardTitle>
                     <CardDescription>{t('builder.reportGenerator.resultsDesc')}</CardDescription>
                 </div>
+                 <Button onClick={handleAddSection}>
+                    <PlusCircle className="me-2 h-4 w-4" />
+                    Create a Section
+                </Button>
             </div>
         </CardHeader>
         {totalPages > 1 && (
