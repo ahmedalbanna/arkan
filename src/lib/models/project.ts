@@ -8,13 +8,17 @@ export interface ExternalContext {
   type: ExternalContextType;
 }
 
+export interface SectionData {
+    title: string;
+    content: string;
+}
 
 export interface ProjectState {
   name?: string | undefined;
   projectIdea?: string | undefined;
 
 
-  sections?: Partial<Record<string, string>>;
+  sections?: Partial<Record<string, SectionData>>;
   // Order of section ids for display in report mode
   sectionsOrder?: string[] | undefined;
 
@@ -127,12 +131,31 @@ export class Project implements SavedProject {
 
   // --- Section Methods ---
   public getSectionContent(sectionName: SectionName): string | undefined {
-    return this._sections?.[sectionName];
+    return this._sections?.[sectionName]?.content;
+  }
+  public getSectionTitle(sectionName: SectionName): string | undefined {
+    return this._sections?.[sectionName]?.title;
   }
 
   public updateSectionContent(sectionName: SectionName, newContent: string): void {
-    this._sections = { ...this._sections, [sectionName]: newContent };
+    if (!this._sections) this._sections = {};
+    if (!this._sections[sectionName]) this._sections[sectionName] = { title: sectionName as string, content: '' };
+    this._sections[sectionName]!.content = newContent;
   }
+  public updateSectionTitle(sectionName: SectionName, newTitle: string): void {
+    if (!this._sections) this._sections = {};
+    if (!this._sections[sectionName]) this._sections[sectionName] = { title: '', content: '' };
+    this._sections[sectionName]!.title = newTitle;
+  }
+  
+  public addCustomSection(): void {
+    const newSectionId = `custom-section-${Date.now()}`;
+    if (!this._sections) this._sections = {};
+    this._sections[newSectionId] = { title: 'Untitled Section', content: '' };
+    if (!this._sectionsOrder) this._sectionsOrder = [];
+    this._sectionsOrder.push(newSectionId);
+  }
+
 
   /**
    * Update the saved order of sections (by id).
