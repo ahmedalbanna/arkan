@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { PdfPreview } from '@/components/file/PdfPreview';
@@ -80,7 +79,13 @@ function FileDropzone() {
                 const formData = new FormData();
                 formData.append('file', file);
                 const result = await processFileApi(formData, token);
-                updateProject(p => p.addExternalContext(file.name.replace(/\.[^/.]+$/, ".md"), result.markdown, 'context'));
+                updateProject(p => {
+                    p.addExternalContext({
+                        fileName: file.name.replace(/\.[^/.]+$/, ".md"),
+                        content: result.markdown,
+                        type: 'context'
+                    });
+                });
                 toast({ title: t('builder.files.toasts.fileAdded'), description: t('builder.files.toasts.fileAddedDesc').replace('{fileName}', file.name) });
                 refetchUser();
             } catch (error: any) {
@@ -182,10 +187,10 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
                             <ul className="space-y-1 list-none p-2">
                                 {externalContext.map((item, index) => {
                                     return (
-                                        <li key={index} className="flex items-center justify-between p-2 rounded-md hover:bg-muted">
-                                            <div className="flex items-center gap-2 truncate ">
+                                        <li key={index} className="flex items-center justify-between p-2 rounded-md hover:bg-muted transition-colors">
+                                            <div className="flex items-center gap-2 flex-1 min-w-0">
                                                 <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                                <span className="truncate font-medium text-sm" style={{ maxWidth: '200px' }}>{item.fileName}</span>
+                                                <span className="truncate font-medium text-sm" title={item.fileName}>{item.fileName}</span>
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <Select value={item.type} onValueChange={(value: ExternalContextType) => updateExternalContextType(index, value)}>

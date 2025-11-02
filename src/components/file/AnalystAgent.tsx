@@ -119,7 +119,13 @@ export default function AnalystAgent() {
 
         const fileName = form.getValues('prompt').toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').slice(0, 50) + '.md';
 
-        updateProject(p => p.addExternalContext(fileName, markdownResult, 'context'));
+        updateProject(p => {
+          p.addExternalContext({
+            fileName: fileName,
+            content: markdownResult,
+            type: 'context'
+          });
+        });
         toast({ title: t('builder.files.toasts.analysisSaved'), description: t('builder.files.toasts.analysisSavedDesc').replace('{fileName}', fileName) });
     };
 
@@ -188,7 +194,7 @@ export default function AnalystAgent() {
                                     )}
                                 </div>
                                 <ScrollArea className="flex-grow border rounded-md bg-muted/50 p-4">
-                                     <div className="prose dark:prose-invert max-w-none text-sm">
+                                     <div className="prose dark:prose-invert max-w-none prose-sm">
                                         {isProcessing ? (
                                              <div className="flex items-center justify-center h-full">
                                                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -196,7 +202,7 @@ export default function AnalystAgent() {
                                         ) : markdownResult ? (
                                             <ReactMarkdown components={markdownComponents}>{markdownResult}</ReactMarkdown>
                                         ) : (
-                                            <p className="text-muted-foreground">{t('builder.files.reportPlaceholder')}</p>
+                                            <p className="text-muted-foreground text-center py-10">{t('builder.files.reportPlaceholder')}</p>
                                         )}
                                     </div>
                                 </ScrollArea>
