@@ -128,7 +128,7 @@ function GeneratePageContent() {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
               <TabsList className="grid w-full h-auto grid-cols-2">
                 <TabsTrigger value="files" className="gap-2">
-                  <FolderKanban className="h-4 w-4" /> {t('builder.tabs.files')}
+                  <FolderKanban className="h-4 w-4" /> {t('builder.files.fileManagerTitle')}
                 </TabsTrigger>
                 {isFeatureEnabled('report') && (
                   <TabsTrigger value="report" className="gap-2">
