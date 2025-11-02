@@ -14,6 +14,8 @@ import { FileText, FolderKanban } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { useBuilderPageLogic } from '@/hooks/core/use-builder-page';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 
 const LoadingSkeleton = () => (
@@ -70,6 +72,8 @@ function GeneratePageContent() {
     isFeatureEnabled,
   } = useBuilderPageLogic();
   const [isClient, setIsClient] = useState(false);
+  const { updateProject } = useBuilderStore();
+
 
   useEffect(() => {
     setIsClient(true);
@@ -84,23 +88,29 @@ function GeneratePageContent() {
       <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
       <div className="flex-grow flex flex-col mx-auto px-4 py-8 w-full">
         <div className="flex justify-between items-start mb-4 gap-4 max-w-full">
-          <div className="flex-1 space-y-1 overflow-auto">
+          <div className="flex-1 space-y-2 overflow-auto">
             {!isClient ? (
               <>
-                <Skeleton className="h-6 w-48" />
-                <Skeleton className="h-4 w-64" />
-                <Skeleton className="h-3 w-32" />
+                <Skeleton className="h-8 w-48" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-4 w-32" />
               </>
             ) : (
               <>
-                <h1 className="text-xl font-semibold text-foreground truncate" title={project?.name}>
-                  {project?.name || t('projects.untitled')}
-                </h1>
-                <p className="text-sm text-muted-foreground truncate" title={project?.projectIdea}>
-                  {project?.projectIdea || t('projects.noDescription')}
-                </p>
+                <Input
+                  className="text-xl font-semibold text-foreground border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                  value={project?.name || ''}
+                  onChange={(e) => updateProject(p => { p.name = e.target.value; })}
+                  placeholder={t('projects.untitled')}
+                />
+                 <Textarea
+                  className="text-sm text-muted-foreground border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto resize-none"
+                  value={project?.projectIdea || ''}
+                  onChange={(e) => updateProject(p => { p.projectIdea = e.target.value; })}
+                  placeholder={t('projects.noDescription')}
+                />
                 {projectData?.updatedAt && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground pt-1">
                     {t('projects.updated', { time: formatDistanceToNow(new Date(projectData.updatedAt), { addSuffix: true, locale: locale === 'ar' ? ar : enUS }) })}
                   </p>
                 )}
