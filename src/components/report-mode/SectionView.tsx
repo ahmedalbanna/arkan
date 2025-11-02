@@ -30,7 +30,7 @@ export const SectionView = ({ sectionKey, title, content, onUpdate }: SectionPro
         handleRejectSuggestion,
         handleAiAction,
         handleReadAloud,
-        isProcessingAi,
+        activeAiAction,
         isReadingAloud,
         words,
         chars,
@@ -57,7 +57,7 @@ export const SectionView = ({ sectionKey, title, content, onUpdate }: SectionPro
                     onChange={(newMarkdown) => onUpdate(sectionKey, newMarkdown)}
                     onAiAction={handleAiAction}
                     onReadAloud={handleReadAloud}
-                    isProcessingAi={isProcessingAi}
+                    activeAiAction={activeAiAction}
                     isReadingAloud={isReadingAloud}
                     onClearContent={handleClearContent}
                 />

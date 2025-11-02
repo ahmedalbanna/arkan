@@ -50,7 +50,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { Separator } from '../ui/separator';
 
 interface SectionToolbarProps {
-  isProcessingAi: boolean;
+  activeAiAction: string | null;
   isReadingAloud: boolean;
   onAiAction: (action: string, payload?: any) => void;
   onReadAloud: () => void;
@@ -58,14 +58,14 @@ interface SectionToolbarProps {
 }
 
 export function SectionToolbar({
-  isProcessingAi,
+  activeAiAction,
   isReadingAloud,
   onAiAction,
   onReadAloud,
   onClearContent,
 }: SectionToolbarProps) {
   const { t } = useLocalization();
-  const isBusy = isProcessingAi || isReadingAloud;
+  const isBusy = !!activeAiAction || isReadingAloud;
 
   const rewriteStyles = [
     { label: t('writingTools.textStylist.styles.formal'), style: 'Formal' },
@@ -82,7 +82,7 @@ export function SectionToolbar({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('summarize')} disabled={isBusy} >
-              <BookText className="h-4 w-4" />
+              {activeAiAction === 'summarize' ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookText className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.summarize')}</p></TooltipContent>
@@ -91,7 +91,7 @@ export function SectionToolbar({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('expand')} disabled={isBusy} >
-              <Maximize className="h-4 w-4" />
+              {activeAiAction === 'expand' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Maximize className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.expand')}</p></TooltipContent>
@@ -100,7 +100,7 @@ export function SectionToolbar({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('grammar')} disabled={isBusy}>
-              <SpellCheck className="h-4 w-4" />
+              {activeAiAction === 'grammar' ? <Loader2 className="h-4 w-4 animate-spin" /> : <SpellCheck className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.checkGrammar')}</p></TooltipContent>
@@ -109,7 +109,7 @@ export function SectionToolbar({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('humanize')} disabled={isBusy}>
-              <UserCheck className="h-4 w-4" />
+              {activeAiAction === 'humanize' ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCheck className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.humanize')}</p></TooltipContent>
@@ -120,7 +120,7 @@ export function SectionToolbar({
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full" disabled={isBusy}>
-                  <Brush className="h-4 w-4" />
+                  {activeAiAction === 'rewrite' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brush className="h-4 w-4" />}
                 </Button>
               </DropdownMenuTrigger>
             </TooltipTrigger>
@@ -367,7 +367,7 @@ interface RichTextEditorProps {
   onChange: (markdown: string) => void;
   onAiAction: (action: string, payload?: any) => void;
   onReadAloud: (text: string) => void;
-  isProcessingAi: boolean;
+  activeAiAction: string | null;
   isReadingAloud: boolean;
   onClearContent: () => void;
 }
@@ -377,7 +377,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   onChange,
   onAiAction,
   onReadAloud,
-  isProcessingAi,
+  activeAiAction,
   isReadingAloud,
   onClearContent,
 }) => {
@@ -498,7 +498,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             </div>
           ) : (
             <SectionToolbar
-              isProcessingAi={isProcessingAi}
+              activeAiAction={activeAiAction}
               onAiAction={handleAiActionWrapper}
               onReadAloud={handleReadAloudWrapper}
               isReadingAloud={isReadingAloud}
