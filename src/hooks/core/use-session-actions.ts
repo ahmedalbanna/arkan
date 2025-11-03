@@ -28,7 +28,7 @@ export function useSessionActions() {
                     const projectData = JSON.parse(event.target?.result as string);
                     if (projectData.id && projectData.userId && projectData.createdAt) {
                         loadProject(projectData);
-                         toast({ title: t('builder.toasts.projectLoadedTitle'), description: t('builder.toasts.projectLoadedDesc', { projectName: projectData.name }) });
+                        toast({ title: t('builder.toasts.projectLoadedTitle'), description: t('builder.toasts.projectLoadedDesc', { projectName: projectData.name }) });
                     } else {
                         throw new Error(t('builder.errors.invalidProjectFile'));
                     }
@@ -52,7 +52,7 @@ export function useSessionActions() {
             }
             saveProject();
         } else {
-             toast({ title: t('builder.toasts.cannotSaveToastTitle'), description: t('builder.toasts.cannotSaveToastDesc'), variant: 'destructive' });
+            toast({ title: t('builder.toasts.cannotSaveToastTitle'), description: t('builder.toasts.cannotSaveToastDesc'), variant: 'destructive' });
         }
     };
 
@@ -63,7 +63,7 @@ export function useSessionActions() {
             setIsSavePromptOpen(false);
             setProjectName('');
         } else {
-             toast({ title: t('projects.nameRequiredToastTitle'), description: t('projects.nameRequiredToastDesc'), variant: 'destructive' });
+            toast({ title: t('projects.nameRequiredToastTitle'), description: t('projects.nameRequiredToastDesc'), variant: 'destructive' });
         }
     }
 
@@ -97,10 +97,8 @@ export function useSessionActions() {
 
     const handleExportReport = async (sectionsToInclude: string[]) => {
         if (!project) return;
-        // This is a placeholder for getting translated titles.
-        // In a real scenario, you'd fetch this from your localization setup based on agent IDs.
-        const translatedTitles = {}; 
-        await exportReportDocx(project, translatedTitles, sectionsToInclude);
+
+        await exportReportDocx(project, sectionsToInclude);
     };
 
     return {

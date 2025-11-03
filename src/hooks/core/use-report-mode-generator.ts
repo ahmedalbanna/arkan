@@ -118,8 +118,9 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
             const otherSectionsContext = Object.entries(selectedContexts?.sections || {})
                 .filter(([, isSelected]) => isSelected)
                 .reduce((acc, [key]) => {
-                    if (project.sections && project.sections[key as keyof typeof project.sections]) {
-                        acc[key] = project.sections[key as keyof typeof project.sections]!;
+                    const sectionContent = project.getSectionContent(key as SectionName);
+                    if (sectionContent) {
+                        acc[key] = sectionContent;
                     }
                     return acc;
                 }, {} as Record<string, string>);
