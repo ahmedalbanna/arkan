@@ -36,13 +36,12 @@ export const SectionView = ({ sectionKey, title, content, onUpdate, onTitleChang
         isReadingAloud,
         words,
         chars,
-        handleClearContent,
     } = useSectionLogic(sectionKey, content, onUpdate);
 
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <Input 
+                <Input
                     value={title}
                     onChange={(e) => onTitleChange(sectionKey, e.target.value)}
                     className="font-semibold text-lg md:text-xl text-primary/90 font-headline border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
@@ -62,7 +61,6 @@ export const SectionView = ({ sectionKey, title, content, onUpdate, onTitleChang
                     onReadAloud={handleReadAloud}
                     activeAiAction={activeAiAction}
                     isReadingAloud={isReadingAloud}
-                    onClearContent={handleClearContent}
                 />
 
                 {aiSuggestion && (

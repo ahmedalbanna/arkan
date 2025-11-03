@@ -10,8 +10,8 @@ export interface ExternalContext {
 }
 
 export interface SectionData {
-    title: string;
-    content: string;
+  title: string;
+  content: string;
 }
 
 export interface ProjectState {
@@ -148,7 +148,7 @@ export class Project implements SavedProject {
     if (!this._sections[sectionName]) this._sections[sectionName] = { title: '', content: '' };
     this._sections[sectionName]!.title = newTitle;
   }
-  
+
   public addCustomSection(): string {
     const newSectionId = `custom-section-${Date.now()}`;
     if (!this._sections) this._sections = {};
@@ -158,6 +158,14 @@ export class Project implements SavedProject {
     return newSectionId;
   }
 
+  public removeSection(sectionName: SectionName): void {
+    if (!this._sections) this._sections = {};
+    delete this._sections[sectionName];
+    if (!this._sectionsOrder) this._sectionsOrder = [];
+    this._sectionsOrder = this._sectionsOrder.filter(id => id !== sectionName);
+    this.hasUnsavedChanges = true;
+
+  }
 
   /**
    * Update the saved order of sections (by id).

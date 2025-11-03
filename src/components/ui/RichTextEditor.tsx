@@ -54,7 +54,7 @@ interface SectionToolbarProps {
   isReadingAloud: boolean;
   onAiAction: (action: string, payload?: any) => void;
   onReadAloud: () => void;
-  onClearContent: () => void;
+
 }
 
 export function SectionToolbar({
@@ -62,7 +62,6 @@ export function SectionToolbar({
   isReadingAloud,
   onAiAction,
   onReadAloud,
-  onClearContent,
 }: SectionToolbarProps) {
   const { t } = useLocalization();
   const isBusy = !!activeAiAction || isReadingAloud;
@@ -146,14 +145,7 @@ export function SectionToolbar({
           <TooltipContent><p>{t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
         </Tooltip>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full text-destructive" onClick={onClearContent} disabled={isBusy}>
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent><p>Clear Content</p></TooltipContent>
-        </Tooltip>
+
       </TooltipProvider>
     </div>
   )
@@ -369,7 +361,7 @@ interface RichTextEditorProps {
   onReadAloud: (text: string) => void;
   activeAiAction: string | null;
   isReadingAloud: boolean;
-  onClearContent: () => void;
+
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
@@ -379,7 +371,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   onReadAloud,
   activeAiAction,
   isReadingAloud,
-  onClearContent,
+
 }) => {
   const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr');
   const [isUpdatingFromProp, setIsUpdatingFromProp] = useState(false);
@@ -502,7 +494,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               onAiAction={handleAiActionWrapper}
               onReadAloud={handleReadAloudWrapper}
               isReadingAloud={isReadingAloud}
-              onClearContent={onClearContent}
             />
           )}
         </BubbleMenu>

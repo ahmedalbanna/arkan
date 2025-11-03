@@ -60,9 +60,6 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
         setDiff(null);
     };
 
-    const handleClearContent = () => {
-        onUpdate(sectionKey, '');
-    };
 
     const wordCount = useMemo(() => content?.split(/\s+/).filter(Boolean).length || 0, [content]);
     const charCount = useMemo(() => content?.length || 0, [content]);
@@ -79,6 +76,5 @@ export const useSectionLogic = (sectionKey: SectionName, content: string, onUpda
         isReadingAloud: readAloudMutation.isPending,
         words: wordCount,
         chars: charCount,
-        handleClearContent,
     };
 };
