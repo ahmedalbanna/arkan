@@ -10,18 +10,18 @@ import { Project } from '@/lib/models';
 export function useExport() {
     const [isExporting, setIsExporting] = useState(false);
 
-    const exportReportDocx = async (project: Project, translatedTitles: { [key in string]?: string; }, sectionsToInclude?: string[]) => {
+    const exportReportDocx = async (project: Project, sectionsToInclude?: string[]) => {
         setIsExporting(true);
         try {
             const sectionsToExport = sectionsToInclude?.reduce((acc, key) => {
-                const content = project.getSectionContent(key as any);
-                if (content) {
-                    acc[key as any] = content;
+                const sectionData = project.sections?.[key];
+                if (sectionData) {
+                    acc[key] = sectionData;
                 }
                 return acc;
-            }, {} as { [key in string]?: string }) || project.sections;
+            }, {} as { [key: string]: { title: string; content: string } | undefined }) || project.sections;
 
-            await exportReportUtil(sectionsToExport || {}, project.diagrams || {}, project.name || 'Untitled Report', translatedTitles, sectionsToInclude);
+            await exportReportUtil(sectionsToExport || {}, project.name || 'Untitled Report', sectionsToInclude);
             toast({ title: 'Export Successful', description: 'Report exported as DOCX.' });
         } catch (error) {
             console.error(error);

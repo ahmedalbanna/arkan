@@ -1,8 +1,7 @@
 
-
 'use client';
 
-import { Document, Packer, Paragraph, AlignmentType, Table, TextRun, Header, Footer, PageNumber, SectionType } from 'docx';
+import { Document, Packer, Paragraph, Table } from 'docx';
 import { saveAs } from 'file-saver';
 
 import { templates } from './docx-styles';
@@ -14,7 +13,8 @@ const defaultStyles = templates.modern.styles;
 
 
 export async function exportReportAsDocx(
-    sections: { [key in string]?: string; },
+    sections: { [key: string]: { title: string; content: string } | undefined },
+    projectName: string,
     sectionsToInclude?: string[]
 ) {
     const styles = defaultStyles;
@@ -24,14 +24,14 @@ export async function exportReportAsDocx(
         : Object.keys(sections);
 
     for (const key of sectionOrder) {
-        const content = sections[key];
-        const title = '';
-        if (content) {
+        const sectionData = sections[key];
+        if (sectionData && sectionData.content) {
+            const title = sectionData.title || key.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
             docxObjects.push(new Paragraph({
                 text: title,
                 heading: 'Heading1',
             }));
-            const { docxObjects: sectionDocxObjects } = await createDocxContent(content);
+            const { docxObjects: sectionDocxObjects } = await createDocxContent(sectionData.content);
             docxObjects.push(...sectionDocxObjects.filter((obj): obj is Paragraph | Table => !('_type' in obj)));
             docxObjects.push(new Paragraph({ text: '' })); // Add a spacer
         }
@@ -47,5 +47,5 @@ export async function exportReportAsDocx(
     });
 
     const blob = await Packer.toBlob(doc);
-    saveAs(blob, "project-report.docx");
+    saveAs(blob, `${projectName.replace(/\s+/g, '_')}_report.docx`);
 }

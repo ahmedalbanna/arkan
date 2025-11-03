@@ -97,7 +97,6 @@ export function useSessionActions() {
 
     const handleExportReport = async (sectionsToInclude: string[]) => {
         if (!project) return;
-
         await exportReportDocx(project, sectionsToInclude);
     };
 
