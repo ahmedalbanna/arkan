@@ -5,6 +5,7 @@ import { adminDb } from '@/lib/firebase/server-init';
 import { AGENTS as defaultAgents } from '@/lib/db/seed-data/agents-template';
 import { defaultFeatures } from '@/lib/db/seed-data/features';
 import { defaultAgentCategories } from '@/lib/db/seed-data/agent-categories';
+import { defaultSections } from '@/lib/db/seed-data/sections';
 import { templates as defaultDocxTemplates, type DocxTemplateKey  } from '@/lib/docx-styles';
 import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 import { defaultBankAccounts } from '@/lib/db/seed-data/bank-accounts';
@@ -36,11 +37,21 @@ async function seed() {
         console.log("Preparing to seed Agents...");
         const agentsCollection = adminDb.collection('agents');
         defaultAgents.forEach(agent => {
-            const { icon, ...agentData } = agent;
+            const { ...agentData } = agent;
             const docRef = agentsCollection.doc(agent.id);
             batch.set(docRef, agentData);
         });
         console.log(`${defaultAgents.length} Agents added to batch.`);
+
+        // --- Sections ---
+        console.log("Preparing to seed Sections...");
+        const sectionsCollection = adminDb.collection('sections');
+        defaultSections.forEach(section => {
+            const { icon, ...sectionData } = section;
+            const docRef = sectionsCollection.doc(section.id);
+            batch.set(docRef, { ...sectionData, icon: icon || 'FileText' });
+        });
+        console.log(`${defaultSections.length} Sections added to batch.`);
 
         // --- Features ---
         console.log("Preparing to seed Features...");
@@ -86,4 +97,3 @@ seed().then(() => {
     process.exit(0);
 });
 
-    

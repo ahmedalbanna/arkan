@@ -95,7 +95,7 @@ export interface PresentationHistoryEntry {
 
 // Define types for better type safety
 export interface CurrencyDetails {
-    iban: string;
+    iban?: string;
 }
 
 export interface BankAccount {
@@ -136,7 +136,7 @@ export interface CreateAgentVariables {
 }
 
 export interface UpdateAgentVariables {
-    agent: string;
+    agentId: string;
     payload: {
         name?: string;
         description?: string;
