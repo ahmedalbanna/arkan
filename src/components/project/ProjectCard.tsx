@@ -14,24 +14,23 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { useProjectCardLogic } from '@/hooks';
-import type { Project } from '@/lib/models'; // Import the Project class
+import type { Project } from '@/lib/models';
 import { cn } from '@/lib/utils/cn';
 import { formatDistanceToNow } from 'date-fns';
 import { FileText, Loader2, Trash2 } from 'lucide-react';
+import { useLocalization } from "@/context/LocalizationContext";
+
 
 interface ProjectCardProps {
-    project: Project; // Use the Project class instance
+    project: Project;
+    onLoad: () => void;
+    onDelete: () => void;
+    isDeleting: boolean;
 }
 
-export function ProjectCard({ project }: ProjectCardProps) {
-    const {
-        handleLoadProject,
-        handleDeleteProject,
-        projectTitle,
-        isDeletingThisProject,
-        t
-    } = useProjectCardLogic(project);
+export function ProjectCard({ project, onLoad, onDelete, isDeleting }: ProjectCardProps) {
+    const { t } = useLocalization();
+    const projectTitle = project.name || t('projects.untitled');
 
     return (
         <Card className={cn(
@@ -41,12 +40,12 @@ export function ProjectCard({ project }: ProjectCardProps) {
             <CardHeader>
                 <div className="flex justify-between items-start gap-2">
                     <CardTitle className="font-headline text-lg truncate" title={projectTitle as string}>
-                        {projectTitle as string}
+                        {projectTitle}
                     </CardTitle>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" disabled={isDeletingThisProject}>
-                                {isDeletingThisProject ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 text-destructive" />}
+                            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" disabled={isDeleting}>
+                                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 text-destructive" />}
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -58,7 +57,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>{t('projects.cancelButton')}</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDeleteProject}>{t('projects.deleteButton')}</AlertDialogAction>
+                                <AlertDialogAction onClick={onDelete}>{t('projects.deleteButton')}</AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
@@ -73,7 +72,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                 </p>
             </CardContent>
             <CardFooter>
-                <Button className="w-full" onClick={handleLoadProject}>
+                <Button className="w-full" onClick={onLoad}>
                     <FileText className="me-2 h-4 w-4" />
                     {t('projects.loadProjectButton')}
                 </Button>

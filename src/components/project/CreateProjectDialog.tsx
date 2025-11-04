@@ -17,26 +17,43 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { PlusCircle } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { UploadManager } from '@/components/file/UploadManager';
-import { useCreateProjectDialog } from '@/hooks';
+import { useState } from 'react';
+import { useCreateProject } from '@/hooks';
 
-export function CreateProjectDialog() {
+interface CreateProjectDialogProps {
+  onSuccess?: () => void;
+}
+
+export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
     const { t } = useLocalization();
-    const {
-        isOpen,
-        setIsOpen,
-        name,
-        setName,
-        description,
-        setDescription,
-        handleStartBuilding,
-        handleCreateNewProject,
-    } = useCreateProjectDialog();
+    const [isOpen, setIsOpen] = useState(false);
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
+    
+    const createProjectMutation = useCreateProject({
+        onSuccess: () => {
+            setIsOpen(false);
+            setName('');
+            setDescription('');
+            if (onSuccess) onSuccess();
+        }
+    });
+
+    const handleCreateProject = () => {
+        if (!name && !description) return;
+        
+        const newProjectData = {
+            name: name || t('projects.untitled'),
+            projectIdea: description,
+            // other fields will be set by the server
+        };
+        createProjectMutation.mutate(newProjectData);
+    };
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                 <Button onClick={handleCreateNewProject} className="animate-fade-in-up"  style={{ animationDelay: '0.3s' }}>
+                 <Button className="animate-fade-in-up"  style={{ animationDelay: '0.3s' }}>
                     <PlusCircle className="me-2 h-4 w-4" />
                     {t('projects.createButton')}
                 </Button>
@@ -62,8 +79,8 @@ export function CreateProjectDialog() {
                     <DialogClose asChild>
                         <Button variant="ghost">{t('projects.cancelButton')}</Button>
                     </DialogClose>
-                    <Button onClick={handleStartBuilding} disabled={!name && !description}>
-                        {t('projects.startBuildingButton')}
+                    <Button onClick={handleCreateProject} disabled={(!name && !description) || createProjectMutation.isPending}>
+                        {createProjectMutation.isPending ? 'Creating...' : t('projects.createButton')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

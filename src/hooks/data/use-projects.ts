@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { projectKeys } from '@/lib/query-keys';
-import { fetchProjectsApi, createProject, updateProject, deleteProject, type ProjectState, fetchProjectApi, type SavedProject } from '@/services/api/projectService';
+import { fetchProjectsApi, createProject as createProjectApi, updateProject, deleteProject, type ProjectState, fetchProjectApi, type SavedProject } from '@/services/api/projectService';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { toast } from '@/hooks/util/use-toast';
 import { Project } from '@/lib/models'; // Import the Project class
@@ -45,21 +45,17 @@ export function useProject(projectId: string) {
 export function useSaveProject() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
-    const { loadProject, project, clearLocalCache, mergeLocalOrderInto } = useBuilderStore();
+    const { loadProject, project } = useBuilderStore();
     const router = useRouter();
 
     const createMutation = useMutation({
         mutationFn: (data: ProjectState) => {
             if (!firebaseUser) throw new Error("User not authenticated");
-            return firebaseUser.getIdToken().then(token => createProject(data, token));
+            return firebaseUser.getIdToken().then(token => createProjectApi(data, token));
         },
         onSuccess: (savedProject) => {
             toast({ title: 'Project Created', description: `Successfully created "${savedProject.name}."` });
-            // Merge any local sectionsOrder into the savedProject (if server omitted it)
-            try { mergeLocalOrderInto(savedProject); } catch (e) { /* noop */ }
             loadProject(savedProject);
-            // Clear any local cache for this project since server now has the canonical copy
-            try { clearLocalCache(); } catch (e) { /* noop */ }
             queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
             router.push('/builder');
         },
@@ -75,11 +71,7 @@ export function useSaveProject() {
         },
         onSuccess: (savedProject) => {
             toast({ title: 'Project Saved', description: 'Your changes have been saved.' });
-            // Merge any local sectionsOrder into the savedProject (if server omitted it)
-            try { mergeLocalOrderInto(savedProject); } catch (e) { /* noop */ }
             loadProject(savedProject);
-            // Clear local cache as changes are now persisted on server
-            try { clearLocalCache(); } catch (e) { /* noop */ }
             queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
             queryClient.setQueryData(projectKeys.detail(savedProject.id), savedProject);
         },
@@ -105,6 +97,32 @@ export function useSaveProject() {
         updateMutation,
     }
 }
+
+export function useCreateProject(options?: { onSuccess?: (data: any) => void }) {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+    
+    return useMutation({
+        mutationFn: (data: Partial<ProjectState>) => {
+            if (!firebaseUser) throw new Error("User not authenticated");
+            const completeData = {
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                ...data
+            };
+            return firebaseUser.getIdToken().then(token => createProjectApi(completeData, token));
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
+            toast({ title: 'Project Created', description: `Successfully created "${data.name}".` });
+            if(options?.onSuccess) options.onSuccess(data);
+        },
+        onError: (error) => {
+            toast({ title: 'Error', description: `Failed to create project: ${error.message}`, variant: 'destructive' });
+        }
+    });
+}
+
 
 export function useDeleteProject() {
     const queryClient = useQueryClient();
