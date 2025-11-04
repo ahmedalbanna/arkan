@@ -4,23 +4,27 @@ export type SectionType = 'report' | 'diagram' | 'presentation';
 export interface SectionProperties {
     id: string;
     title: string;
-    agent: Agent;
+    agent?: Agent; // Agent can be optional, especially for user-created sections
     type: SectionType;
     content?: string;
+    agentId?: string; // agentId can be a fallback
 }
 
 export class Section {
     private _id: string;
     private _title: string;
-    private _agent: Agent;
+    private _agent?: Agent; // Agent is now optional
     private _type: SectionType;
     private _content?: string;
+    private _agentId?: string;
+
     constructor(props: SectionProperties) {
         this._id = props.id;
         this._title = props.title;
         this._agent = props.agent;
         this._type = props.type;
         this._content = props.content;
+        this._agentId = props.agentId || props.agent?.id;
     }
 
     get id(): string {
@@ -37,11 +41,16 @@ export class Section {
         this._title = value;
     }
 
-    get agent(): Agent {
+    get agent(): Agent | undefined {
         return this._agent;
     }
-    set agent(value: Agent) {
+    set agent(value: Agent | undefined) {
         this._agent = value;
+        this._agentId = value?.id;
+    }
+    
+    get agentId(): string | undefined {
+        return this._agentId;
     }
 
     get type(): SectionType {
@@ -58,6 +67,7 @@ export class Section {
             id: this._id,
             title: this._title,
             agent: this._agent,
+            agentId: this._agentId,
             type: this._type,
             content: this._content,
         };

@@ -17,16 +17,9 @@ export interface SectionData {
 export interface ProjectState {
   name?: string | undefined;
   projectIdea?: string | undefined;
-
-
   sections?: Partial<Record<string, SectionData>>;
-  // Order of section ids for display in report mode
   sectionsOrder?: string[] | undefined;
-
-
-
   externalContext?: ExternalContext[] | undefined;
-
 }
 export interface SavedProject extends ProjectState {
   id: string;
@@ -34,9 +27,6 @@ export interface SavedProject extends ProjectState {
   createdAt: string;
   updatedAt: string;
 }
-
-
-
 
 export type ProjectProperties = SavedProject;
 
@@ -53,9 +43,6 @@ export class Project implements SavedProject {
   private _projectIdea?: string;
   private _sections?: ProjectState['sections'];
   private _sectionsOrder?: string[];
-
-
-
   private _externalContext: ExternalContext[];
 
 
@@ -66,15 +53,9 @@ export class Project implements SavedProject {
     this._updatedAt = props.updatedAt;
     this._name = props.name;
     this._projectIdea = props.projectIdea;
-
-
     this._sections = props.sections ?? {};
     this._sectionsOrder = props.sectionsOrder || [];
-
-
-
     this._externalContext = props.externalContext || [];
-
   }
 
   // --- Public Getters ---
@@ -86,15 +67,12 @@ export class Project implements SavedProject {
   get projectIdea() { return this._projectIdea; }
   get sections() { return this._sections; }
   get sectionsOrder() { return this._sectionsOrder; }
-
-
   get externalContext() { return this._externalContext; }
 
 
   // --- Public Setters ---
   set name(value: string | undefined) { this._name = value; }
   set projectIdea(value: string | undefined) { this._projectIdea = value; }
-
   set sectionsOrder(value: string[] | undefined) { this._sectionsOrder = value; }
 
   /**
@@ -102,7 +80,6 @@ export class Project implements SavedProject {
    * This method is automatically used by `JSON.stringify`.
    */
   public toJSON(): SavedProject {
-
     return {
       id: this._id,
       userId: this._userId,
@@ -113,7 +90,6 @@ export class Project implements SavedProject {
       sections: this._sections,
       sectionsOrder: this._sectionsOrder,
       externalContext: this._externalContext,
-
     };
   }
 
@@ -159,12 +135,13 @@ export class Project implements SavedProject {
   }
 
   public removeSection(sectionName: SectionName): void {
-    if (!this._sections) this._sections = {};
-    delete this._sections[sectionName];
-    if (!this._sectionsOrder) this._sectionsOrder = [];
-    this._sectionsOrder = this._sectionsOrder.filter(id => id !== sectionName);
+    if (this._sections) {
+        delete this._sections[sectionName];
+    }
+    if (this._sectionsOrder) {
+        this._sectionsOrder = this._sectionsOrder.filter(id => id !== sectionName);
+    }
     this.hasUnsavedChanges = true;
-
   }
 
   /**
