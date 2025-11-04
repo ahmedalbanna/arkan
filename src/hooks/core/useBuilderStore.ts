@@ -12,15 +12,7 @@ interface BuilderState {
 
 const createNewTemporaryProject = (): Project => {
     return new Project({
-        id: '', // No ID for a new, unsaved project
-        userId: '', // Will be assigned on save
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        name: 'Untitled Project',
-        projectIdea: '',
-        sections: [],
-        sectionsOrder: [],
-        externalContext: [],
+        // The new Project() constructor will assign a UUID automatically
     });
 };
 

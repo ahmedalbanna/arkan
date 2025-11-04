@@ -1,6 +1,8 @@
 
+
 import { Section, SectionProperties } from './section';
 import { ExternalContext, ExternalContextType } from './external-context';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface ProjectState {
   name?: string | undefined;
@@ -33,15 +35,14 @@ export class Project implements SavedProject {
   private _externalContext: ExternalContext[];
 
 
-  constructor(props: ProjectProperties) {
-    this._id = props.id;
-    this._userId = props.userId;
-    this._createdAt = props.createdAt;
-    this._updatedAt = props.updatedAt;
+  constructor(props: Partial<ProjectProperties>) {
+    this._id = props.id || uuidv4(); // Use UUID for new projects
+    this._userId = props.userId || '';
+    this._createdAt = props.createdAt || new Date().toISOString();
+    this._updatedAt = props.updatedAt || new Date().toISOString();
     this._name = props.name;
     this._projectIdea = props.projectIdea;
-    // Ensure sections are instantiated as Section objects
-    this._sections = props.sections;
+    this._sections = props.sections || [];
     this._sectionsOrder = props.sectionsOrder || [];
     this._externalContext = props.externalContext || [];
   }
