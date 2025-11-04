@@ -14,7 +14,6 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Section } from '@/lib/models/section';
 import { Agent } from '@/lib/models/agent';
-import { SectionName } from '@/ai/schemas';
 
 interface SortableSectionItemProps {
     id: string;
@@ -33,7 +32,7 @@ function SortableSectionItem({ id, agent, ...props }: SortableSectionItemProps) 
         setNodeRef,
         transform,
         transition,
-    } = useSortable({id: id});
+    } = useSortable({ id: id });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -42,7 +41,7 @@ function SortableSectionItem({ id, agent, ...props }: SortableSectionItemProps) 
 
     return (
         <div ref={setNodeRef} style={style} {...attributes}>
-             <SectionAccordionItem
+            <SectionAccordionItem
                 itemKey={id}
                 agent={agent}
                 onGenerate={props.onGenerate}
@@ -61,7 +60,7 @@ interface GenerationToolsProps {
     setOrderedSections: (sections: Section[]) => void;
     isAnythingGenerating: boolean;
     activeMutationKey: string | null;
-    onGenerateSection: (sectionId: SectionName) => void;
+    onGenerateSection: (sectionId: string) => void;
     hasCreditsForSingleSection: boolean;
     agents: Agent[];
 }
@@ -81,16 +80,16 @@ export const GenerationTools = ({
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
-          coordinateGetter: sortableKeyboardCoordinates,
+            coordinateGetter: sortableKeyboardCoordinates,
         })
     );
 
     const handleDragEnd = (event: any) => {
-        const {active, over} = event;
+        const { active, over } = event;
         if (active.id !== over.id) {
-          const oldIndex = orderedSections.findIndex(s => s.id === active.id);
-          const newIndex = orderedSections.findIndex(s => s.id === over.id);
-          setOrderedSections(arrayMove(orderedSections, oldIndex, newIndex));
+            const oldIndex = orderedSections.findIndex(s => s.id === active.id);
+            const newIndex = orderedSections.findIndex(s => s.id === over.id);
+            setOrderedSections(arrayMove(orderedSections, oldIndex, newIndex));
         }
     };
 
@@ -106,7 +105,7 @@ export const GenerationTools = ({
                         <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
                         <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
                     </div>
-                     <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
+                    <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
                         <PanelLeftClose className="h-5 w-5" />
                     </Button>
                 </div>
@@ -125,7 +124,7 @@ export const GenerationTools = ({
                                         key={section.id}
                                         id={section.id}
                                         agent={agent}
-                                        onGenerate={() => onGenerateSection(section.id as SectionName)}
+                                        onGenerate={() => onGenerateSection(section.id)}
                                         isGenerating={isGeneratingThis}
                                         isAnythingGenerating={isAnythingGenerating}
                                         hasCredits={!!hasCreditsForSingleSection}

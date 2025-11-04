@@ -2,7 +2,6 @@
 'use client';
 
 import { create } from 'zustand';
-import type { SectionName } from '@/ai/schemas';
 
 type OutputStyle = {
   heading: boolean;
@@ -10,10 +9,11 @@ type OutputStyle = {
   list: boolean;
 };
 
+export type Tone = 'professional' | 'academic' | 'casual' | 'persuasive';
 export type GenerationControlState = {
   formality: number;
   complexity: number;
-  tone: 'professional' | 'academic' | 'casual' | 'persuasive';
+  tone: Tone;
   outputStyle: OutputStyle;
   wordCount: string;
 };
@@ -96,12 +96,12 @@ export const useGenerationUIStore = create<GenerationUIState>((set, get) => ({
 
   initializeContext: (key: string) => {
     if (!get().contextSelection[key]) {
-        set(state => ({
-            contextSelection: {
-                ...state.contextSelection,
-                [key]: { sections: {}, diagrams: {}, externalContext: [] }
-            }
-        }));
+      set(state => ({
+        contextSelection: {
+          ...state.contextSelection,
+          [key]: { sections: {}, diagrams: {}, externalContext: [] }
+        }
+      }));
     }
   },
 
@@ -116,74 +116,74 @@ export const useGenerationUIStore = create<GenerationUIState>((set, get) => ({
 
   handleGuidelineToggle: (key, index, checked) => {
     set((state) => {
-        const keyState = state.guidelineState[key] || { checked: {}, custom: [] };
-        return {
-            guidelineState: {
-                ...state.guidelineState,
-                [key]: {
-                    ...keyState,
-                    checked: { ...keyState.checked, [index]: checked }
-                }
-            }
-        };
+      const keyState = state.guidelineState[key] || { checked: {}, custom: [] };
+      return {
+        guidelineState: {
+          ...state.guidelineState,
+          [key]: {
+            ...keyState,
+            checked: { ...keyState.checked, [index]: checked }
+          }
+        }
+      };
     });
   },
 
   addCustomGuideline: (key, guideline) => {
     set(state => {
-        const keyState = state.guidelineState[key] || { checked: {}, custom: [] };
-        return {
-            guidelineState: {
-                ...state.guidelineState,
-                [key]: {
-                    ...keyState,
-                    custom: [...keyState.custom, guideline]
-                }
-            }
+      const keyState = state.guidelineState[key] || { checked: {}, custom: [] };
+      return {
+        guidelineState: {
+          ...state.guidelineState,
+          [key]: {
+            ...keyState,
+            custom: [...keyState.custom, guideline]
+          }
         }
+      }
     });
   },
-  
+
   removeCustomGuideline: (key, index) => {
     set(state => {
-        const keyState = state.guidelineState[key];
-        if (!keyState) return state;
-        const newCustom = [...keyState.custom];
-        newCustom.splice(index, 1);
-        return {
-            guidelineState: {
-                ...state.guidelineState,
-                [key]: { ...keyState, custom: newCustom }
-            }
+      const keyState = state.guidelineState[key];
+      if (!keyState) return state;
+      const newCustom = [...keyState.custom];
+      newCustom.splice(index, 1);
+      return {
+        guidelineState: {
+          ...state.guidelineState,
+          [key]: { ...keyState, custom: newCustom }
         }
+      }
     });
   },
 
   toggleContextSelection: (key, type, subKey, checked) => {
     set(state => {
-        const keySelection = state.contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [] };
-        let newSelectionPart;
+      const keySelection = state.contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [] };
+      let newSelectionPart;
 
-        if (type === 'externalContext') {
-            const newArray = [...keySelection.externalContext];
-            newArray[subKey as number] = checked;
-            newSelectionPart = newArray;
-        } else {
-             newSelectionPart = {
-                ...(keySelection[type] as Record<string, boolean>),
-                [subKey as string]: checked
-            };
-        }
-
-        return {
-            contextSelection: {
-                ...state.contextSelection,
-                [key]: {
-                    ...keySelection,
-                    [type]: newSelectionPart
-                }
-            }
+      if (type === 'externalContext') {
+        const newArray = [...keySelection.externalContext];
+        newArray[subKey as number] = checked;
+        newSelectionPart = newArray;
+      } else {
+        newSelectionPart = {
+          ...(keySelection[type] as Record<string, boolean>),
+          [subKey as string]: checked
         };
+      }
+
+      return {
+        contextSelection: {
+          ...state.contextSelection,
+          [key]: {
+            ...keySelection,
+            [type]: newSelectionPart
+          }
+        }
+      };
     });
   },
 

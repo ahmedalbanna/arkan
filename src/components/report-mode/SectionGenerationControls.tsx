@@ -7,10 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { SectionName as SectionNameType } from '@/ai/schemas';
 import { Checkbox } from '../ui/checkbox';
-
-export const SectionGenerationControls = ({ sectionKey }: { sectionKey: SectionNameType }) => {
+import { type Tone } from '@/hooks/core/useGenerationUIStore';
+export const SectionGenerationControls = ({ sectionKey }: { sectionKey: string }) => {
     const { t } = useLocalization();
     const { controlState, handleControlChange } = useGenerationUIStore();
     const controls = controlState[sectionKey];
@@ -38,7 +37,7 @@ export const SectionGenerationControls = ({ sectionKey }: { sectionKey: SectionN
                     <span>{t('builder.reportGenerator.tool_formality_formal')}</span>
                 </div>
             </div>
-             <div className="space-y-3">
+            <div className="space-y-3">
                 <Label htmlFor={`complexity-${sectionKey}`}>Complexity</Label>
                 <Slider id={`complexity-${sectionKey}`} value={[controls.complexity]} onValueChange={(val) => handleControlChange(sectionKey, 'complexity', val[0])} max={100} step={1} />
                 <div className="flex justify-between text-xs text-muted-foreground">
@@ -49,7 +48,7 @@ export const SectionGenerationControls = ({ sectionKey }: { sectionKey: SectionN
             </div>
             <div className="space-y-2">
                 <Label htmlFor={`tone-${sectionKey}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
-                <Select value={controls.tone} onValueChange={(val) => handleControlChange(sectionKey, 'tone', val)}>
+                <Select value={controls.tone} onValueChange={(val) => handleControlChange(sectionKey, 'tone', val as Tone)}>
                     <SelectTrigger id={`tone-${sectionKey}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
                     <SelectContent>
                         <SelectItem value="professional">{t('builder.reportGenerator.tool_tone_professional')}</SelectItem>
@@ -66,11 +65,11 @@ export const SectionGenerationControls = ({ sectionKey }: { sectionKey: SectionN
                         <Checkbox id={`output-heading-${sectionKey}`} checked={controls.outputStyle.heading} onCheckedChange={(checked) => handleOutputStyleChange('heading', !!checked)} />
                         <Label htmlFor={`output-heading-${sectionKey}`}>Heading</Label>
                     </div>
-                     <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                         <Checkbox id={`output-paragraph-${sectionKey}`} checked={controls.outputStyle.paragraph} onCheckedChange={(checked) => handleOutputStyleChange('paragraph', !!checked)} />
                         <Label htmlFor={`output-paragraph-${sectionKey}`}>Paragraph</Label>
                     </div>
-                     <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                         <Checkbox id={`output-list-${sectionKey}`} checked={controls.outputStyle.list} onCheckedChange={(checked) => handleOutputStyleChange('list', !!checked)} />
                         <Label htmlFor={`output-list-${sectionKey}`}>List</Label>
                     </div>

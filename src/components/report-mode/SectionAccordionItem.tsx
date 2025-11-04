@@ -4,7 +4,6 @@
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { buttonVariants } from '@/components/ui/button';
-import { type SectionName as SectionNameType, type DiagramType } from '@/ai/schemas';
 import { Loader2, Sparkles, GripVertical, SlidersHorizontal, StickyNote, Link as LinkIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSectionAccordionItemLogic } from '@/hooks/core/useSectionAccordionItemLogic';
@@ -25,7 +24,7 @@ export const SectionAccordionItem = ({
     hasCredits,
     handleProps,
 }: {
-    itemKey: SectionNameType | DiagramType,
+    itemKey: string,
     agent: Agent,
     onGenerate: () => void,
     isGenerating: boolean,
@@ -53,7 +52,7 @@ export const SectionAccordionItem = ({
     return (
         <AccordionItem value={itemKey} key={itemKey} className="bg-background border rounded-lg">
             <AccordionTrigger className="flex items-center w-full px-4 py-2 text-sm font-medium hover:no-underline rounded-t-lg">
-                 <div className="flex items-center gap-2 flex-1">
+                <div className="flex items-center gap-2 flex-1">
                     {handleProps && (
                         <div {...handleProps} className="p-1 cursor-grab touch-none -ml-2">
                             <GripVertical className="h-5 w-5 text-muted-foreground" />
@@ -62,7 +61,7 @@ export const SectionAccordionItem = ({
                     {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}
                     {title}
                 </div>
-                 <div className="p-2">
+                <div className="p-2">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -89,19 +88,19 @@ export const SectionAccordionItem = ({
             </AccordionTrigger>
             <AccordionContent>
                 <div className="border-t px-4 pt-4">
-                     <Tabs defaultValue="controls" className="w-full">
+                    <Tabs defaultValue="controls" className="w-full">
                         <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="controls"><SlidersHorizontal className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_controls')}</TabsTrigger>
                             <TabsTrigger value="prompt"><StickyNote className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_prompt')}</TabsTrigger>
                             <TabsTrigger value="context"><LinkIcon className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
                         </TabsList>
                         <TabsContent value="controls" className="py-4">
-                            <SectionGenerationControls sectionKey={itemKey as SectionNameType} />
+                            <SectionGenerationControls sectionKey={itemKey} />
                         </TabsContent>
                         <TabsContent value="prompt" className="py-4">
-                            <GuidelineEditor itemKey={itemKey} agentId={agent.id} isAdmin={userProfile?.role === 'admin'}/>
+                            <GuidelineEditor itemKey={itemKey} agentId={agent.id} isAdmin={userProfile?.role === 'admin'} />
                         </TabsContent>
-                         <TabsContent value="context" className="py-4">
+                        <TabsContent value="context" className="py-4">
                             <ContextSelector itemKey={itemKey} />
                         </TabsContent>
                     </Tabs>
