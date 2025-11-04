@@ -16,20 +16,14 @@ export function useGuidelineEditor(itemKey: string, section: Section) {
     const [customGuidelineInput, setCustomGuidelineInput] = useState<Record<string, string>>({});
 
     const agent = useMemo(() => agents.find(a => a.id === section.agent.id), [agents, section.agent.id]);
-    const promptConfig = useMemo(() => {
-        if (agent && typeof agent.prompt === 'object') {
-            return agent.prompt as AgentPrompt;
-        }
-        return null;
-    }, [agent]);
 
     // Initialize state when agent data is loaded
-    if (agentsLoaded && agent && promptConfig && !guidelineState[itemKey]) {
-        initializeGuidelines(itemKey, promptConfig.guidelines || []);
+    if (agentsLoaded && agent && agent.prompt && !guidelineState[itemKey]) {
+        initializeGuidelines(itemKey, agent.guidelines || []);
     }
 
     const currentGuidelineState = guidelineState[itemKey];
-    const hasGuidelines = !!promptConfig?.guidelines && promptConfig.guidelines.length > 0;
+    const hasGuidelines = !!agent?.guidelines && agent.guidelines.length > 0;
 
     const setCustomGuidelineInputForItem = (key: string, value: string) => {
         setCustomGuidelineInput(prev => ({ ...prev, [key]: value }));
@@ -51,7 +45,6 @@ export function useGuidelineEditor(itemKey: string, section: Section) {
         t,
         agentsLoaded,
         agent,
-        promptConfig,
         hasGuidelines,
         currentGuidelineState,
         customGuidelineInput,

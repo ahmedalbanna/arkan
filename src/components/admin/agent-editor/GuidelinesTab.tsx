@@ -16,16 +16,16 @@ export default function GuidelinesTab({ isComplexPrompt }: { isComplexPrompt: bo
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'prompt.guidelines',
+    name: 'guidelines',
   });
 
   if (!isComplexPrompt) {
     return (
-        <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 border rounded-lg">
-            <AlertCircle className="h-10 w-10 mb-4" />
-            <p className="font-semibold">{t('agentEditor.complexPromptNoteTitle')}</p>
-            <p>{t('agentEditor.complexPromptNoteDesc')}</p>
-        </div>
+      <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 border rounded-lg">
+        <AlertCircle className="h-10 w-10 mb-4" />
+        <p className="font-semibold">{t('agentEditor.complexPromptNoteTitle')}</p>
+        <p>{t('agentEditor.complexPromptNoteDesc')}</p>
+      </div>
     )
   }
 
@@ -40,7 +40,7 @@ export default function GuidelinesTab({ isComplexPrompt }: { isComplexPrompt: bo
         {fields.map((field, index) => (
           <div key={field.id} className="flex items-start gap-2">
             <Textarea
-              {...control.register(`prompt.guidelines.${index}.text`)}
+              {...control.register(`guidelines.${index}.text`)}
               rows={2}
               className="flex-grow"
               placeholder={t('agentEditor.guidelinePlaceholder')}
@@ -57,7 +57,7 @@ export default function GuidelinesTab({ isComplexPrompt }: { isComplexPrompt: bo
         ))}
       </div>
 
-       <Button
+      <Button
         type="button"
         variant="outline"
         onClick={() => append({ text: '', isDefault: false })}

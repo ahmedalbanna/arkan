@@ -86,13 +86,13 @@ export function useAgentEditor({ agent, initialData }: UseAgentEditorProps) {
         return promptFromUrl ? decodeURIComponent(promptFromUrl) : initialData.prompt;
       }
       if (typeof initialData.prompt === 'object') {
-        const newBase = promptFromUrl ? decodeURIComponent(promptFromUrl) : initialData.prompt.base;
-        return { ...initialData.prompt, base: newBase };
+        const newPrompt = promptFromUrl ? decodeURIComponent(promptFromUrl) : initialData.prompt;
+        return { ...initialData, prompt: newPrompt };
       }
       return '';
     };
 
-    form.reset({ ...form.getValues(), prompt: getInitialPrompt() });
+    form.reset({ ...form.getValues() });
   }, [initialData, searchParams, form]);
 
   const handleSubmit = (data: AgentEditorFormValues) => {
@@ -101,7 +101,7 @@ export function useAgentEditor({ agent, initialData }: UseAgentEditorProps) {
 
   return {
     form,
-    isComplexPrompt: typeof form.watch('prompt') === 'object',
+    isComplexPrompt: {},
     isPending: updateAgentMutation.isPending,
     handleSubmit,
     router,

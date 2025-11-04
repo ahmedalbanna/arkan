@@ -23,7 +23,6 @@ export function GuidelineEditor({ itemKey, section, isAdmin }: GuidelineEditorPr
         t,
         agentsLoaded,
         agent,
-        promptConfig,
         hasGuidelines,
         currentGuidelineState,
         customGuidelineInput,
@@ -37,7 +36,7 @@ export function GuidelineEditor({ itemKey, section, isAdmin }: GuidelineEditorPr
         return <div>Loading guidelines...</div>;
     }
 
-    if (!agent || !promptConfig) {
+    if (!agent || !agent.prompt) {
         return <div>Agent configuration not found.</div>;
     }
 
@@ -46,7 +45,7 @@ export function GuidelineEditor({ itemKey, section, isAdmin }: GuidelineEditorPr
             <div className="space-y-2">
                 <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_prompt_label')}</Label>
                 <div className="p-3 rounded-md border bg-muted text-xs">
-                    <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
+                    <ReactMarkdown components={markdownComponents}>{agent.prompt}</ReactMarkdown>
                 </div>
             </div>
 
@@ -54,7 +53,7 @@ export function GuidelineEditor({ itemKey, section, isAdmin }: GuidelineEditorPr
                 <div className="space-y-2">
                     <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.guidelines')}</Label>
                     <div className="space-y-2 p-3 rounded-md border">
-                        {promptConfig.guidelines!.map((guideline, index) => (
+                        {agent.guidelines!.map((guideline, index) => (
                             <div key={index} className="flex items-start gap-2">
                                 <Checkbox
                                     id={`guideline-${itemKey}-${index}`}
@@ -62,7 +61,7 @@ export function GuidelineEditor({ itemKey, section, isAdmin }: GuidelineEditorPr
                                     onCheckedChange={(checked) => handleGuidelineToggle(itemKey, index, !!checked)}
                                 />
                                 <Label htmlFor={`guideline-${itemKey}-${index}`} className="font-normal text-sm flex-1">
-                                    <ReactMarkdown components={markdownComponents}>{guideline.text}</ReactMarkdown>
+                                    <ReactMarkdown components={markdownComponents}>{guideline}</ReactMarkdown>
                                 </Label>
                             </div>
                         ))}

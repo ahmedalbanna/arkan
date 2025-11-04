@@ -15,7 +15,7 @@ import { z } from 'genkit';
 
 export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
 
-  const agentPrompt = input.agentPrompt as AgentPrompt;
+  const agentPrompt = input.agentPrompt;
   const systemPrompt = `${agentPrompt.base}
 
 You are also an expert analyst. Before you begin writing, you must first review all the provided context sections (proposal, project plan, other report sections, diagrams, etc.). From this context, intelligently identify and synthesize only the most relevant information needed to create the requested report section. Do not simply list information; integrate it into a well-written, coherent narrative.`;

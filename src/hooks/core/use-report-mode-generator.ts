@@ -60,8 +60,8 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
             // Initialize UI stores for each section
             initialSetup.forEach(section => {
                 initializeControls(section.id);
-                if (section.agent && typeof section.agent.prompt === 'object' && section.agent.prompt.guidelines) {
-                    initializeGuidelines(section.id, section.agent.prompt.guidelines);
+                if (section.agent && typeof section.agent.prompt === 'object' && section.agent.guidelines) {
+                    initializeGuidelines(section.id, section.agent.guidelines);
                 }
                 initializeContext(section.id);
             });
@@ -70,12 +70,11 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
 
 
 
-    const getSelectedGuidelines = (agent: any, guidelineState: any) => {
+    const getSelectedGuidelines = (agent: Agent, guidelineState: any) => {
         const selectedGuidelines: string[] = [];
-        const basePrompt = agent.prompt as any;
 
-        if (basePrompt.guidelines) {
-            basePrompt.guidelines.forEach((g: any, index: number) => {
+        if (agent.guidelines) {
+            agent.guidelines.forEach((g: any, index: number) => {
                 if (guidelineState?.checked?.[index]) {
                     selectedGuidelines.push(g.text);
                 }

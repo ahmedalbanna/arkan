@@ -46,10 +46,10 @@ export interface AgentProperties {
   id: string;
   name: string;
   description: string;
-  category: AgentCategory | string;
+  category: string;
   pageUrl: string;
   isEnabled: boolean;
-  prompt: AgentPrompt | string;
+  prompt: string;
   toolIds?: string[];
   knowledge?: AgentKnowledgeSource[];
   introduction?: string;
@@ -59,6 +59,7 @@ export interface AgentProperties {
   language?: string;
   model?: string;
   isDefault?: boolean;
+  guidelines?: string[];
 }
 
 export class Agent {
@@ -66,10 +67,10 @@ export class Agent {
   private _id: string;
   private _name: string;
   private _description: string;
-  private _category: AgentCategory | string;
+  private _category: string;
   private _pageUrl: string;
   private _isEnabled: boolean;
-  private _prompt: AgentPrompt | string;
+  private _prompt: string;
   private _toolIds?: string[];
   private _knowledge?: AgentKnowledgeSource[];
   private _introduction?: string;
@@ -79,6 +80,8 @@ export class Agent {
   private _language?: string;
   private _model?: string;
   private _isDefault?: boolean;
+  private _guidelines?: string[]
+
 
   constructor(props: AgentProperties) {
     this._id = props.id;
@@ -97,6 +100,7 @@ export class Agent {
     this._language = props.language;
     this._model = props.model;
     this._isDefault = props.isDefault;
+    this._guidelines = props.guidelines;
   }
 
   // Getters and setters for all attributes
@@ -143,10 +147,10 @@ export class Agent {
     this._isEnabled = value;
   }
 
-  public get prompt(): AgentPrompt | string {
+  public get prompt(): string {
     return this._prompt;
   }
-  public set prompt(value: AgentPrompt | string) {
+  public set prompt(value: string) {
     this._prompt = value;
   }
 
@@ -212,6 +216,12 @@ export class Agent {
   public set isDefault(value: boolean | undefined) {
     this._isDefault = value;
   }
+  public get guidelines(): string[] | undefined {
+    return this._guidelines;
+  }
+  public set guidelines(value: string[]) {
+    this._guidelines = value;
+  }
 
   public toJSON(): AgentProperties {
     return {
@@ -241,7 +251,7 @@ export class Agent {
    * Updates the agent's prompt.
    * @param newPrompt The new prompt.
    */
-  public updatePrompt(newPrompt: AgentPrompt | string): void {
+  public updatePrompt(newPrompt: string): void {
     this.prompt = newPrompt;
     // In a real app, this would trigger a mutation via a hook
   }
@@ -251,7 +261,7 @@ export class Agent {
    * @param context Any relevant context or input for the task.
    */
   public async execute(context: any): Promise<any> {
-    const goal = typeof this.prompt === 'string' ? this.prompt : this.prompt.base;
+    const goal = typeof this.prompt === 'string' ? this.prompt : this.prompt;
     console.log(`Agent ${this.name} is executing its goal: ${goal}`);
     // In a real implementation, this would involve complex logic,
     // possibly calling an AI service with its prompt and the context.

@@ -9,13 +9,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
-import { AgentEditorFormValues } from '@/lib/schemas/agent-editor-schema';
 import { type AgentCategoryDetails as AgentCategory, type AgentPrompt } from '@/lib/types';
 import { MessageSquare, Plus, X, Pencil, Copy, Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { useToast } from '@/hooks/util/use-toast';
 import { useDebounce } from '@/hooks/util/use-debounce';
+import { AgentEditorFormValues } from '@/hooks';
 
 interface GeneralTabProps {
   agentId: string;
@@ -64,12 +64,12 @@ export default function GeneralTab({ agentId, isComplexPrompt, isPending, catego
   const introductionValue = watch('introduction');
   const introLength = introductionValue?.length || 0;
 
-  const {toast} = useToast();
+  const { toast } = useToast();
 
   const handleCopyId = () => {
     navigator.clipboard.writeText(agentId);
     setIsCopied(true);
-    toast({ title: "Agent ID Copied!"});
+    toast({ title: "Agent ID Copied!" });
     setTimeout(() => setIsCopied(false), 2000);
   }
 
@@ -80,10 +80,10 @@ export default function GeneralTab({ agentId, isComplexPrompt, isPending, catego
       <div className="space-y-2">
         <Label htmlFor="agent-id">{t('agentEditor.idLabel')}</Label>
         <div className="flex items-center gap-2">
-            <Input id="agent-id" value={agentId} readOnly disabled className="font-mono" />
-            <Button type="button" variant="ghost" size="icon" onClick={handleCopyId}>
-                {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-            </Button>
+          <Input id="agent-id" value={agentId} readOnly disabled className="font-mono" />
+          <Button type="button" variant="ghost" size="icon" onClick={handleCopyId}>
+            {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+          </Button>
         </div>
       </div>
 
@@ -126,10 +126,10 @@ export default function GeneralTab({ agentId, isComplexPrompt, isPending, catego
             <FormItem>
               <FormLabel>{t('agentEditor.promptLabel')}</FormLabel>
               <FormControl>
-                <DebouncedTextarea 
-                  {...field} 
-                  rows={8} 
-                  className="font-mono text-sm" 
+                <DebouncedTextarea
+                  {...field}
+                  rows={8}
+                  className="font-mono text-sm"
                   disabled={isPending}
                 />
               </FormControl>
@@ -145,13 +145,13 @@ export default function GeneralTab({ agentId, isComplexPrompt, isPending, catego
             <FormItem>
               <FormLabel>{t('agentEditor.promptLabel')}</FormLabel>
               <FormControl>
-                <DebouncedTextarea 
-                  {...field} 
-                  value={field.value as string} 
+                <DebouncedTextarea
+                  {...field}
+                  value={field.value as string}
                   onChange={(val) => setValue('prompt', val)}
-                  rows={8} 
-                  className="font-mono text-sm" 
-                  disabled={isPending} 
+                  rows={8}
+                  className="font-mono text-sm"
+                  disabled={isPending}
                 />
               </FormControl>
               <FormMessage />

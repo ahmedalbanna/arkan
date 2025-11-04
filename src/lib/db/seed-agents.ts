@@ -14,16 +14,10 @@ async function seedAgents() {
 
     console.log('Seeding agents...');
     for (const agent of defaultAgents) {
-        const { icon, ...agentData } = agent as any;
-        if (!icon) {
-            console.warn(`Skipping agent "${agent.id}" due to missing icon.`);
-            continue;
-        }
+        const { ...agentData } = agent as any;
         const docRef = agentsCollection.doc(agent.id);
         batch.set(docRef, {
-            ...agentData,
-            icon: icon, // Store the icon's name as a string
-            isDefault: true,
+            ...agentData
         });
         count++;
     }

@@ -127,31 +127,31 @@ export interface ReportModeGeneratorProps {
 
 // define CreateAgentVariables, UpdateAgentVariables, UploadedFile
 export interface CreateAgentVariables {
-  name: string;
-  description: string;
-  category: string;
-  pageUrl: string;
-  prompt: string;
+    name: string;
+    description: string;
+    category: string;
+    pageUrl: string;
+    prompt: string;
 
 }
 
 export interface UpdateAgentVariables {
-  agentId: string;
-  payload: {
-    name?: string;
-    description?: string;
-    category?: string;
-    pageUrl?: string;
-    prompt?: string;
-    isEnabled?: boolean;
+    agent: string;
+    payload: {
+        name?: string;
+        description?: string;
+        category?: string;
+        pageUrl?: string;
+        prompt?: string;
+        isEnabled?: boolean;
 
-  }
+    }
 }
 
 export interface UploadedFile {
-  id: string;
-  name: string;
-  type: string;
-  content: string;
+    id: string;
+    name: string;
+    type: string;
+    content: string;
 
 }
