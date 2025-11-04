@@ -13,7 +13,7 @@ export function useSectionAccordionItemLogic(section: Section | undefined) {
     let disabledReason = '';
     if (!section) {
         disabledReason = 'Agent configuration not found.';
-    } else if (!section.agentId?.isEnabled) {
+    } else if (!section.agent?.isEnabled) {
         disabledReason = t('builder.reportGenerator.disabledTooltip');
     }
 

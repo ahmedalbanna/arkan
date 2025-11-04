@@ -79,7 +79,7 @@ export function useUpdateAgentCategory() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
         },
-         onError: (error: any) => {
+        onError: (error: any) => {
             toast({ title: 'Update Failed', description: error.message || 'An unknown error occurred.', variant: 'destructive' });
         }
     });
@@ -135,17 +135,17 @@ export function useAgents() {
 /**
  * Fetches the configuration for a single agent.
  */
-export function useAgent(agentId: string) {
+export function useAgent(agent: string) {
     const { firebaseUser } = useAuth();
     return useQuery<Agent | null>({
-        queryKey: agentKeys.detail(agentId),
+        queryKey: agentKeys.detail(agent),
         queryFn: async () => {
             if (!firebaseUser) return null;
             const token = await firebaseUser.getIdToken();
-            const props = await fetchAgentApi(agentId, token);
+            const props = await fetchAgentApi(agent, token);
             return props ? new Agent(props) : null;
         },
-        enabled: !!firebaseUser && !!agentId,
+        enabled: !!firebaseUser && !!agent,
     });
 }
 
@@ -163,7 +163,7 @@ export function useUpdateAgent() {
         },
         onSuccess: (data, variables) => {
             queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
-            queryClient.invalidateQueries({ queryKey: agentKeys.detail(variables.agentId) });
+            queryClient.invalidateQueries({ queryKey: agentKeys.detail(variables.agent) });
             toast({ title: "Agent Updated", description: `Successfully updated "${data.name}".` });
         },
         onError: (error: any) => {
@@ -176,23 +176,23 @@ export function useUpdateAgent() {
  * Mutation hook for creating a new agent.
  */
 export function useCreateAgent(options?: { onSuccess?: (data: AgentProperties) => void }) {
-  const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
-  return useMutation({
-    mutationFn: async (data: CreateAgentVariables) => {
-      if (!firebaseUser) throw new Error("Admin not authenticated");
-      const token = await firebaseUser.getIdToken();
-      return createAgentApi(data, token);
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
-      toast({ title: "Agent Created", description: `Successfully created agent "${data.name}".` });
-      options?.onSuccess?.(data);
-    },
-    onError: (error: any) => {
-      toast({ title: "Creation Failed", description: error.message || 'Could not create agent.', variant: "destructive" });
-    },
-  });
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+    return useMutation({
+        mutationFn: async (data: CreateAgentVariables) => {
+            if (!firebaseUser) throw new Error("Admin not authenticated");
+            const token = await firebaseUser.getIdToken();
+            return createAgentApi(data, token);
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
+            toast({ title: "Agent Created", description: `Successfully created agent "${data.name}".` });
+            options?.onSuccess?.(data);
+        },
+        onError: (error: any) => {
+            toast({ title: "Creation Failed", description: error.message || 'Could not create agent.', variant: "destructive" });
+        },
+    });
 }
 
 /**
@@ -202,15 +202,15 @@ export function useDeleteAgent() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
     return useMutation({
-        mutationFn: async (agentId: string) => {
+        mutationFn: async (agent: string) => {
             if (!firebaseUser) throw new Error("Admin not authenticated");
             const token = await firebaseUser.getIdToken();
-            return deleteAgentApi(agentId, token);
+            return deleteAgentApi(agent, token);
         },
-        onSuccess: (data, agentId) => {
+        onSuccess: (data, agent) => {
             toast({ title: "Agent Deleted", description: `Successfully deleted agent.` });
             queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
-            queryClient.removeQueries({ queryKey: agentKeys.detail(agentId) });
+            queryClient.removeQueries({ queryKey: agentKeys.detail(agent) });
         },
         onError: (error: any) => {
             toast({ title: "Delete Failed", description: error.message, variant: 'destructive' });
@@ -246,7 +246,7 @@ export function useImportAgents() {
             return importAgentsApi(agents, token);
         },
         onSuccess: (data) => {
-            toast({ title: 'Import Successful', description: `Successfully imported ${data.count} agents.`});
+            toast({ title: 'Import Successful', description: `Successfully imported ${data.count} agents.` });
             queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
         },
         onError: (error: any) => {

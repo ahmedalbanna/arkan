@@ -59,10 +59,9 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
             setOrderedSections(initialSetup);
             // Initialize UI stores for each section
             initialSetup.forEach(section => {
-                const agent = agents.find((a: Agent) => a.id === section.agentId);
                 initializeControls(section.id);
-                if (agent && typeof agent.prompt === 'object' && agent.prompt.guidelines) {
-                    initializeGuidelines(section.id, agent.prompt.guidelines);
+                if (section.agent && typeof section.agent.prompt === 'object' && section.agent.prompt.guidelines) {
+                    initializeGuidelines(section.id, section.agent.prompt.guidelines);
                 }
                 initializeContext(section.id);
             });
@@ -99,8 +98,8 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
             const section = orderedSections?.find(s => s.id === sectionId);
             if (!section) throw new Error("Section not found.");
 
-            // Resolve the agent using the section.agentId
-            const agent = agents.find((a: Agent) => a.id === section.agentId);
+            // Resolve the agent using the section.agent.id
+            const agent = agents.find((a: Agent) => a.id === section.agent.id);
             if (!agent) throw new Error("Agent not found for section.");
 
             const token = await firebaseUser.getIdToken();
@@ -128,7 +127,7 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
                 // The server expects sectionToGenerate to be the SectionName (section.id)
                 sectionToGenerate: section.id,
                 // Provide the agent id separately so the server knows which agent/prompt to use
-                agentId: section.agentId,
+                agent: section.agent.id,
                 agentPrompt: agent.prompt,
                 model: agent.model,
                 instructionText: `Please use a ${controls.tone} tone and aim for a word count of approximately ${controls.wordCount} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}.`,

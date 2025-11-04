@@ -243,7 +243,7 @@ export const GenerateSectionInputSchema = z.object({
     })).optional().describe("An array of external documents to be used for style, tone, and structure."),
     guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
     instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
-    agentId: z.string().optional(),
+    agent: z.string().optional(),
     agentPrompt: z.any().optional(), // Can be string or AgentPrompt
     model: z.string().optional(),
 }).refine(data => (data.otherSections && Object.keys(data.otherSections).length > 0) || (data.externalContext && data.externalContext.length > 0), {
@@ -514,9 +514,9 @@ export type WriteDocumentOutput = z.infer<typeof WriteDocumentOutputSchema>;
 
 // evaluate-report.ts
 export const EvaluateReportInputSchema = z.object({
-  reportSections: z.record(SectionNameSchema, z.string()).describe("A map of all generated report sections."),
-  diagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of all generated PlantUML diagrams.").nullable(),
-  acceptanceCriteria: z.array(z.string()).describe("A list of acceptance criteria to evaluate the report against.").nullable().optional(),
+    reportSections: z.record(SectionNameSchema, z.string()).describe("A map of all generated report sections."),
+    diagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of all generated PlantUML diagrams.").nullable(),
+    acceptanceCriteria: z.array(z.string()).describe("A list of acceptance criteria to evaluate the report against.").nullable().optional(),
 });
 export type EvaluateReportInput = z.infer<typeof EvaluateReportInputSchema>;
 

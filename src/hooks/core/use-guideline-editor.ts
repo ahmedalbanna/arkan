@@ -15,7 +15,7 @@ export function useGuidelineEditor(itemKey: string, section: Section) {
 
     const [customGuidelineInput, setCustomGuidelineInput] = useState<Record<string, string>>({});
 
-    const agent = useMemo(() => agents.find(a => a.id === section.agentId), [agents, section.agentId]);
+    const agent = useMemo(() => agents.find(a => a.id === section.agent.id), [agents, section.agent.id]);
     const promptConfig = useMemo(() => {
         if (agent && typeof agent.prompt === 'object') {
             return agent.prompt as AgentPrompt;

@@ -51,11 +51,11 @@ export const agentEditorSchema = z.object({
 export type AgentEditorFormValues = z.infer<typeof agentEditorSchema>;
 
 interface UseAgentEditorProps {
-  agentId: string;
+  agent: string;
   initialData: Agent;
 }
 
-export function useAgentEditor({ agentId, initialData }: UseAgentEditorProps) {
+export function useAgentEditor({ agent, initialData }: UseAgentEditorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const updateAgentMutation = useUpdateAgent();
@@ -96,7 +96,7 @@ export function useAgentEditor({ agentId, initialData }: UseAgentEditorProps) {
   }, [initialData, searchParams, form]);
 
   const handleSubmit = (data: AgentEditorFormValues) => {
-    updateAgentMutation.mutate({ agentId, payload: data });
+    updateAgentMutation.mutate({ agent, payload: data });
   };
 
   return {

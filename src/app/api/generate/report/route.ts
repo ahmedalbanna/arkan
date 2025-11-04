@@ -39,7 +39,7 @@ export const POST = withAuth(async ({ request, user }) => {
     const transformedOutput = { [agentInput.sectionToGenerate]: result.content };
 
     await logGeneration({
-      agentId: agentInput.agentId ?? 'unknown',
+      agentId: agentInput.agent ?? 'unknown',
       userId: user.id,
       input: agentInput,
       output: transformedOutput,

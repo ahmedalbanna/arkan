@@ -4,7 +4,7 @@ export type SectionType = 'report' | 'diagram' | 'presentation';
 export interface SectionProperties {
     id: string;
     title: string;
-    agentId: Agent;
+    agent: Agent;
     type: SectionType;
     content?: string;
 }
@@ -12,13 +12,13 @@ export interface SectionProperties {
 export class Section {
     private _id: string;
     private _title: string;
-    private _agentId: Agent;
+    private _agent: Agent;
     private _type: SectionType;
     private _content?: string;
     constructor(props: SectionProperties) {
         this._id = props.id;
         this._title = props.title;
-        this._agentId = props.agentId;
+        this._agent = props.agent;
         this._type = props.type;
         this._content = props.content;
     }
@@ -37,11 +37,11 @@ export class Section {
         this._title = value;
     }
 
-    get agentId(): Agent {
-        return this._agentId;
+    get agent(): Agent {
+        return this._agent;
     }
-    set agentId(value: Agent) {
-        this._agentId = value;
+    set agent(value: Agent) {
+        this._agent = value;
     }
 
     get type(): SectionType {
@@ -57,7 +57,7 @@ export class Section {
         return {
             id: this._id,
             title: this._title,
-            agentId: this._agentId,
+            agent: this._agent,
             type: this._type,
             content: this._content,
         };
