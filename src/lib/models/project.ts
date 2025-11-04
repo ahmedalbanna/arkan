@@ -41,7 +41,7 @@ export class Project implements SavedProject {
     this._name = props.name;
     this._projectIdea = props.projectIdea;
     // Ensure sections are instantiated as Section objects
-    this._sections = props.sections ? props.sections.map(s => s instanceof Section ? s : new Section(s as SectionProperties)) : [];
+    this._sections = (props.sections || []).map(s => new Section(s));
     this._sectionsOrder = props.sectionsOrder || [];
     this._externalContext = props.externalContext || [];
   }
@@ -76,7 +76,7 @@ export class Project implements SavedProject {
       name: this._name,
       projectIdea: this._projectIdea,
       // Serialize sections by calling their toJSON method
-      sections: this._sections?.map(s => s.toJSON()),
+      sections: this._sections,
       sectionsOrder: this._sectionsOrder,
       externalContext: this._externalContext,
     };
