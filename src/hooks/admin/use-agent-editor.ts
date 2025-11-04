@@ -17,9 +17,9 @@ export const agentKnowledgeSourceSchema = z.object({
 });
 
 export const agentEditorSchema = z.object({
-  name: z.string().min(1, "Name is required").optional(),
+  name: z.string().min(1, "Name is required"),
   category: z.string().optional(),
-  prompt: z.string().min(10, "Prompt must be at least 10 characters").optional(),
+  prompt: z.string().min(10, "Prompt must be at least 10 characters"),
   guidelines: z.array(z.string()).optional(),
   toolIds: z.array(z.string()).optional(),
   knowledge: z.array(agentKnowledgeSourceSchema).optional(),
@@ -42,13 +42,31 @@ interface UseAgentEditorProps {
 
 export function useAgentEditor({ agentId, initialData }: UseAgentEditorProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const updateAgentMutation = useUpdateAgent();
   const { data: categories } = useAgentCategories();
 
+  // The form now uses the simplified schema.
   const form = useForm<AgentEditorFormValues>({
     resolver: zodResolver(agentEditorSchema),
     defaultValues: {
+      name: initialData.name,
+      category: initialData.category,
+      prompt: initialData.prompt, // Prompt is just a string now
+      guidelines: initialData.guidelines || [],
+      toolIds: initialData.toolIds || [],
+      knowledge: initialData.knowledge || [],
+      introduction: initialData.introduction || '',
+      placeholder: initialData.placeholder || 'Ask me anything...',
+      conversationStarters: initialData.conversationStarters?.map(s => (typeof s === 'string' ? { value: s } : s)) || [],
+      tone: initialData.tone || 'Default',
+      language: initialData.language || 'English (US)',
+      model: initialData.model || 'googleai/gemini-2.0-flash',
+    },
+  });
+
+  useEffect(() => {
+    // Reset form with initial data when it changes
+    form.reset({
       name: initialData.name,
       category: initialData.category,
       prompt: initialData.prompt,
@@ -57,38 +75,25 @@ export function useAgentEditor({ agentId, initialData }: UseAgentEditorProps) {
       knowledge: initialData.knowledge || [],
       introduction: initialData.introduction || '',
       placeholder: initialData.placeholder || 'Ask me anything...',
-      conversationStarters: initialData.conversationStarters || [],
-      tone: initialData.tone || 'Default',
-      language: initialData.language || 'English (US)',
-      model: initialData.model || 'googleai/gemini-2.0-flash',
-    },
-  });
-
-  useEffect(() => {
-    const promptFromUrl = searchParams.get('prompt');
-    const decodedPrompt = promptFromUrl ? decodeURIComponent(promptFromUrl) : initialData.prompt;
-
-    form.reset({
-      ...form.getValues(), // Keep other form values
-      name: initialData.name,
-      category: initialData.category,
-      prompt: decodedPrompt,
-      guidelines: initialData.guidelines || [],
-      toolIds: initialData.toolIds || [],
-      knowledge: initialData.knowledge || [],
-      introduction: initialData.introduction || '',
-      placeholder: initialData.placeholder || 'Ask me anything...',
-      conversationStarters: initialData.conversationStarters || [],
+      conversationStarters: initialData.conversationStarters?.map(s => (typeof s === 'string' ? { value: s } : s)) || [],
       tone: initialData.tone || 'Default',
       language: initialData.language || 'English (US)',
       model: initialData.model || 'googleai/gemini-2.0-flash',
     });
-  }, [initialData, searchParams, form]);
+  }, [initialData, form]);
 
   const handleSubmit = (data: AgentEditorFormValues) => {
-    // The agentId is now passed directly in the props
-    updateAgentMutation.mutate({ agentId, payload: data });
+    // The payload now directly matches the form values, which is simpler
+    const payload = {
+      ...data,
+      // Ensure conversationStarters is an array of strings if needed by backend, or adjust backend
+      conversationStarters: data.conversationStarters?.map(cs => cs.value).filter(v => v) || [],
+    };
+    updateAgentMutation.mutate({ agentId, payload });
   };
+
+  // No longer need to differentiate between complex and simple prompts
+  const isComplexPrompt = true;
 
   return {
     form,
@@ -96,5 +101,6 @@ export function useAgentEditor({ agentId, initialData }: UseAgentEditorProps) {
     handleSubmit,
     router,
     categories,
+    isComplexPrompt, // Kept for components that might still reference it, though its logic is removed
   };
 }

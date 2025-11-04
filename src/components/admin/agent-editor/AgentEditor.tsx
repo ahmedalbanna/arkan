@@ -16,7 +16,7 @@ import ContextTab from './ContextTab';
 import GeneralTab from './GeneralTab';
 import OutputTab from './OutputTab';
 import { useAgentEditor } from '@/hooks/admin/use-agent-editor';
-import { type AgentEditorFormValues } from '@/lib/schemas/agent-editor-schema';
+import { type AgentEditorFormValues } from '@/hooks/admin/use-agent-editor';
 
 
 interface AgentEditorProps {
@@ -62,11 +62,11 @@ export default function AgentEditor({ agentId, initialData, allAgents }: AgentEd
   const renderContent = () => {
     switch (activeTab) {
       case 'general':
-        return <GeneralTab agentId={agentId} isComplexPrompt={isComplexPrompt} isPending={isPending} categories={categories || []} />;
+        return <GeneralTab agentId={agentId} isPending={isPending} categories={categories || []} />;
       case 'guidelines':
-        return <GuidelinesTab isComplexPrompt={isComplexPrompt} />;
+        return <GuidelinesTab />;
       case 'output':
-        return <OutputTab isComplexPrompt={isComplexPrompt} />;
+        return <OutputTab />;
       case 'knowledge':
         return <KnowledgeTab />;
       case 'context':

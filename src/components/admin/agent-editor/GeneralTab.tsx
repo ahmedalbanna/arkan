@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,7 @@ import { useEffect, useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { useToast } from '@/hooks/util/use-toast';
 import { useDebounce } from '@/hooks/util/use-debounce';
-import { AgentEditorFormValues } from '@/hooks';
+import { type AgentEditorFormValues } from '@/hooks/admin/use-agent-editor';
 
 interface GeneralTabProps {
   agentId: string;
@@ -24,7 +23,6 @@ interface GeneralTabProps {
   categories: AgentCategoryDetails[];
 }
 
-// New DebouncedTextarea component
 function DebouncedTextarea({ value, onChange, ...props }: React.ComponentProps<typeof Textarea> & { value: string; onChange: (value: string) => void }) {
   const [localValue, setLocalValue] = useState(value);
   const debouncedValue = useDebounce(localValue, 500);
@@ -34,7 +32,6 @@ function DebouncedTextarea({ value, onChange, ...props }: React.ComponentProps<t
   }, [debouncedValue, onChange]);
 
   useEffect(() => {
-    // Update local state if the parent value changes from an external source (like a reset)
     if (value !== localValue) {
       setLocalValue(value);
     }
@@ -126,7 +123,7 @@ export default function GeneralTab({ agentId, isPending, categories }: GeneralTa
             <FormControl>
               <DebouncedTextarea
                 {...field}
-                value={field.value as string}
+                value={field.value}
                 onChange={(val) => setValue('prompt', val)}
                 rows={8}
                 className="font-mono text-sm"

@@ -10,37 +10,19 @@ import { AlertCircle, PlusCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useLocalization } from '@/context/LocalizationContext';
-import { AgentPrompt } from '@/lib/types';
-import { AgentEditorFormValues } from '@/lib/schemas/agent-editor-schema';
+import { AgentEditorFormValues } from '@/hooks/admin/use-agent-editor';
+
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
-interface OutputTabProps {
-  isComplexPrompt: boolean;
-}
-
-export default function OutputTab({ isComplexPrompt }: OutputTabProps) {
+export default function OutputTab() {
   const { resolvedTheme } = useTheme();
   const { watch, setValue } = useFormContext<AgentEditorFormValues>();
   const { t } = useLocalization();
 
-  const promptValue = watch('prompt') as AgentPrompt;
-  const jsonStructure = promptValue?.jsonStructure;
-
-  const handleCreateStructure = () => {
-    // Sets an empty object to start building the structure
-    setValue('prompt.jsonStructure', {}, { shouldDirty: true });
-  }
-
-  if (!isComplexPrompt) {
-    return (
-        <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 border rounded-lg">
-            <AlertCircle className="h-10 w-10 mb-4" />
-            <p className="font-semibold">{t('agentEditor.complexPromptNoteTitle')}</p>
-            <p>{t('agentEditor.complexPromptNoteDesc')}</p>
-        </div>
-    )
-  }
+  // The 'prompt' field no longer contains the jsonStructure.
+  // This tab would need to be re-thought if JSON output configuration is required.
+  // For now, we will show a placeholder.
 
   return (
     <div className="space-y-6">
@@ -49,29 +31,12 @@ export default function OutputTab({ isComplexPrompt }: OutputTabProps) {
         {t('agentEditor.outputDesc')}
       </p>
 
-      <div className="p-4 border rounded-md bg-background min-h-[200px]">
-        {jsonStructure ? (
-          <ReactJson
-            src={jsonStructure}
-            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'}
-            displayDataTypes={false}
-            name={false}
-            quotesOnKeys={false}
-            displayObjectSize={false}
-            onEdit={({ updated_src }) => setValue('prompt.jsonStructure', updated_src, { shouldDirty: true })}
-            onAdd={({ updated_src }) => setValue('prompt.jsonStructure', updated_src, { shouldDirty: true })}
-            onDelete={({ updated_src }) => setValue('prompt.jsonStructure', updated_src, { shouldDirty: true })}
-          />
-        ) : (
-            <div className="text-center text-muted-foreground py-8 flex flex-col items-center justify-center">
-                <p className="mb-4">{t('agentEditor.noJsonDefined')}</p>
-                <Button variant="outline" onClick={handleCreateStructure}>
-                    <PlusCircle className="me-2 h-4 w-4" />
-                    {t('agentEditor.createStructure')}
-                </Button>
-            </div>
-        )}
+      <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 border rounded-lg">
+          <AlertCircle className="h-10 w-10 mb-4" />
+          <p className="font-semibold">JSON Output Configuration Unavailable</p>
+          <p>Defining a structured JSON output is now handled directly within the agent's prompt instructions.</p>
       </div>
+
     </div>
   );
 }

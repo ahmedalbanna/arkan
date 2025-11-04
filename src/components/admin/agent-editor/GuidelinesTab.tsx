@@ -1,12 +1,11 @@
 
-
 'use client';
 
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { CardTitle } from '@/components/ui/card';
-import { AlertCircle, Plus, Trash2 } from 'lucide-react';
-import { AgentEditorFormValues } from '@/lib/schemas/agent-editor-schema';
+import { Plus, Trash2 } from 'lucide-react';
+import { type AgentEditorFormValues } from '@/hooks/admin/use-agent-editor';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 
@@ -50,7 +49,7 @@ export default function GuidelinesTab() {
       <Button
         type="button"
         variant="outline"
-        onClick={() => append('')} // Append an empty string for the new guideline
+        onClick={() => append('')}
         className="w-full justify-start"
       >
         <Plus className="me-2 h-4 w-4" />
