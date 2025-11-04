@@ -59,8 +59,11 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     });
 
     if (newSectionId) {
-        const newPageIndex = project?.sections?.findIndex(s => s.id === newSectionId) ?? totalPages;
-        setCurrentPage(newPageIndex);
+        // After a section is added, the project object in the store updates.
+        // The useReportPaginator hook's useEffect will detect the change in `project.sections`
+        // and we can find the new index and navigate to it.
+        const newIndex = project?.sections?.findIndex(s => s.id === newSectionId) ?? (project?.sections?.length || 1) - 1;
+        setCurrentPage(newIndex);
     }
   };
 

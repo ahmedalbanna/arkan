@@ -14,15 +14,22 @@ export function useReportPaginator(generatedSections: SectionName[], reportAgent
         if (!project || !project.sections) return [];
         const projectSections = project.sections.filter(s => s.content && s.content.trim() !== '');
 
-        if (!project.sectionsOrder || project.sectionsOrder.length === 0) {
-            return projectSections.map(s => s.id);
+        // If a section order is defined, use it. Otherwise, just use the natural order.
+        if (project.sectionsOrder && project.sectionsOrder.length > 0) {
+            const orderSet = new Set(project.sectionsOrder);
+            // Get all sections from the project that are in the defined order
+            const ordered = project.sectionsOrder
+                .map(id => project.sections.find(s => s.id === id))
+                .filter(Boolean) as any[]; // `any` to satisfy TS for now, should be Section[]
+            
+            // Find any sections in the project that are NOT in the sectionsOrder array (e.g., newly created)
+            const unordered = project.sections.filter(s => !orderSet.has(s.id));
+            
+            return [...ordered, ...unordered].map(s => s.id);
         }
 
-        const orderSet = new Set(project.sectionsOrder);
-        const ordered = project.sectionsOrder.map(id => projectSections.find(s => s.id === id)).filter(Boolean);
-        const unordered = projectSections.filter(s => !orderSet.has(s.id));
-        
-        return [...ordered, ...unordered].map(s => s!.id);
+        // Fallback to just the sections present in the project if no order is defined
+        return project.sections.map(s => s.id);
 
     }, [project?.sections, project?.sectionsOrder]);
 
@@ -30,13 +37,12 @@ export function useReportPaginator(generatedSections: SectionName[], reportAgent
     const totalPages = orderedSections.length;
     const currentSectionKey = orderedSections[currentPage];
 
-    useEffect(() => {
-        if (currentPage >= totalPages && totalPages > 0) {
-            setCurrentPage(totalPages - 1);
-        } else if (totalPages === 0) {
-            setCurrentPage(0);
+     useEffect(() => {
+        const total = project?.sections?.length || 0;
+        if (currentPage >= total && total > 0) {
+            setCurrentPage(total - 1);
         }
-    }, [currentPage, totalPages]);
+    }, [project?.sections, currentPage]);
 
 
     const getSectionTitle = (key: SectionName) => {

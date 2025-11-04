@@ -41,7 +41,7 @@ export class Project implements SavedProject {
     this._name = props.name;
     this._projectIdea = props.projectIdea;
     // Ensure sections are instantiated as Section objects
-    this._sections = (props.sections || []).map(s => new Section(s));
+    this._sections = props.sections;
     this._sectionsOrder = props.sectionsOrder || [];
     this._externalContext = props.externalContext || [];
   }
