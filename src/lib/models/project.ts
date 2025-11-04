@@ -1,23 +1,10 @@
-
-
-export type ExternalContextType = 'context' | 'example' | 'question' | 'textbook' | 'guidelines';
-
-// define externalContext 
-export interface ExternalContext {
-  fileName: string;
-  content: string;
-  type: ExternalContextType;
-}
-
-export interface SectionData {
-  title: string;
-  content: string;
-}
+import { Section, SectionProperties } from './section';
+import { ExternalContext, ExternalContextType } from './external-context';
 
 export interface ProjectState {
   name?: string | undefined;
   projectIdea?: string | undefined;
-  sections?: Partial<Record<string, SectionData>>;
+  sections?: Section[];
   sectionsOrder?: string[] | undefined;
   externalContext?: ExternalContext[] | undefined;
 }
@@ -30,7 +17,6 @@ export interface SavedProject extends ProjectState {
 
 export type ProjectProperties = SavedProject;
 
-type SectionName = keyof NonNullable<ProjectState['sections']>;
 
 export class Project implements SavedProject {
   private _id: string;
@@ -41,7 +27,7 @@ export class Project implements SavedProject {
 
   private _name?: string;
   private _projectIdea?: string;
-  private _sections?: ProjectState['sections'];
+  private _sections?: Section[];
   private _sectionsOrder?: string[];
   private _externalContext: ExternalContext[];
 
@@ -53,7 +39,8 @@ export class Project implements SavedProject {
     this._updatedAt = props.updatedAt;
     this._name = props.name;
     this._projectIdea = props.projectIdea;
-    this._sections = props.sections ?? {};
+    // Ensure sections are instantiated as Section objects
+    this._sections = props.sections ? props.sections.map(s => s instanceof Section ? s : new Section(s as SectionProperties)) : [];
     this._sectionsOrder = props.sectionsOrder || [];
     this._externalContext = props.externalContext || [];
   }
@@ -87,7 +74,8 @@ export class Project implements SavedProject {
       updatedAt: this._updatedAt,
       name: this._name,
       projectIdea: this._projectIdea,
-      sections: this._sections,
+      // Serialize sections by calling their toJSON method
+      sections: this._sections?.map(s => s.toJSON()),
       sectionsOrder: this._sectionsOrder,
       externalContext: this._externalContext,
     };
@@ -99,47 +87,63 @@ export class Project implements SavedProject {
 
 
   public newSession(): void {
+    this._id = '';
+    this._userId = '';
     this._name = undefined;
     this._projectIdea = undefined;
-    this._sections = {};
+    this._sections = [];
+    this._sectionsOrder = [];
     this._externalContext = [];
     this.hasUnsavedChanges = false;
   }
 
   // --- Section Methods ---
-  public getSectionContent(sectionName: SectionName): string | undefined {
-    return this._sections?.[sectionName]?.content;
-  }
-  public getSectionTitle(sectionName: SectionName): string | undefined {
-    return this._sections?.[sectionName]?.title;
+  public getSection(sectionId: string): Section | undefined {
+    return this._sections?.find(s => s.id === sectionId);
   }
 
-  public updateSectionContent(sectionName: SectionName, newContent: string): void {
-    if (!this._sections) this._sections = {};
-    if (!this._sections[sectionName]) this._sections[sectionName] = { title: sectionName as string, content: '' };
-    this._sections[sectionName]!.content = newContent;
+  public getSectionContent(sectionId: string): string | undefined {
+    return this.getSection(sectionId)?.content;
   }
-  public updateSectionTitle(sectionName: SectionName, newTitle: string): void {
-    if (!this._sections) this._sections = {};
-    if (!this._sections[sectionName]) this._sections[sectionName] = { title: '', content: '' };
-    this._sections[sectionName]!.title = newTitle;
+
+  public updateSectionContent(sectionId: string, newContent: string): void {
+    const section = this.getSection(sectionId);
+    if (section) {
+      section.content = newContent;
+      this.hasUnsavedChanges = true;
+    }
+  }
+
+  public updateSectionTitle(sectionId: string, newTitle: string): void {
+    const section = this.getSection(sectionId);
+    if (section) {
+      section.title = newTitle;
+      this.hasUnsavedChanges = true;
+    }
   }
 
   public addCustomSection(): string {
     const newSectionId = `custom-section-${Date.now()}`;
-    if (!this._sections) this._sections = {};
-    this._sections[newSectionId] = { title: 'Untitled Section', content: '' };
+    const newSection = new Section({
+      id: newSectionId,
+      title: 'Untitled Section',
+      type: 'report',
+      content: '',
+    });
+    if (!this._sections) this._sections = [];
+    this._sections.push(newSection);
     if (!this._sectionsOrder) this._sectionsOrder = [];
     this._sectionsOrder.push(newSectionId);
+    this.hasUnsavedChanges = true;
     return newSectionId;
   }
 
-  public removeSection(sectionName: SectionName): void {
+  public removeSection(sectionId: string): void {
     if (this._sections) {
-        delete this._sections[sectionName];
+      this._sections = this._sections.filter(s => s.id !== sectionId);
     }
     if (this._sectionsOrder) {
-        this._sectionsOrder = this._sectionsOrder.filter(id => id !== sectionName);
+        this._sectionsOrder = this._sectionsOrder.filter(id => id !== sectionId);
     }
     this.hasUnsavedChanges = true;
   }
@@ -149,28 +153,33 @@ export class Project implements SavedProject {
    */
   public updateSectionsOrder(newOrder: string[]): void {
     this._sectionsOrder = [...newOrder];
+    this.hasUnsavedChanges = true;
   }
 
 
 
   // --- External Context Methods ---
-  public addExternalContext(ExternalContext: ExternalContext): void {
-    this._externalContext = [...(this._externalContext || []), ExternalContext];
+  public addExternalContext(externalContext: ExternalContext): void {
+    this._externalContext = [...(this._externalContext || []), externalContext];
+    this.hasUnsavedChanges = true;
   }
 
   public removeExternalContext(index: number): Project {
     this._externalContext = (this._externalContext || []).filter((_, i) => i !== index);
+    this.hasUnsavedChanges = true;
     return this;
   }
 
   public replaceExternalContext(index: number, newItem: ExternalContext): void {
     if (!this._externalContext || !this._externalContext[index]) return;
     this._externalContext[index] = newItem;
+    this.hasUnsavedChanges = true;
   }
 
   public updateExternalContextType(index: number, type: ExternalContextType): Project {
     if (!this._externalContext || !this._externalContext[index]) return this;
     this._externalContext[index].type = type;
+    this.hasUnsavedChanges = true;
     return this;
   }
 }

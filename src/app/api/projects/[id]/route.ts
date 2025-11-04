@@ -5,17 +5,36 @@ import { adminDb } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { FieldValue } from 'firebase-admin/firestore';
 import { z } from 'zod';
+import { AgentPromptSchema } from '@/ai/schemas';
 
 const SectionDataSchema = z.object({
-    title: z.string(),
-    content: z.string(),
+  id: z.string(),
+  title: z.string(),
+  agentId: z.string().optional(),
+  type: z.enum(['report', 'diagram', 'presentation']),
+  content: z.string().optional(),
+  // Agent is now nested, so we make it optional and passthrough
+  agent: z.object({
+      id: z.string(),
+      name: z.string(),
+      description: z.string(),
+      category: z.string(),
+      pageUrl: z.string(),
+      isEnabled: z.boolean(),
+      prompt: z.union([z.string(), AgentPromptSchema]),
+      guidelines: z.array(z.string()).optional(),
+  }).passthrough().optional(),
 });
 
+
 export const ProjectStateSchema = z.object({
-    currentProjectId: z.string().nullable().optional(),
+    id: z.string().optional(),
+    userId: z.string().optional(),
+    createdAt: z.string().optional(),
+    updatedAt: z.string().optional(),
     name: z.string().optional(),
     projectIdea: z.string().optional(),
-    sections: z.record(z.string(), SectionDataSchema).optional(),
+    sections: z.array(SectionDataSchema).optional(),
     sectionsOrder: z.array(z.string()).optional(),
     externalContext: z.array(z.any()).nullable().optional(),
 });

@@ -8,3 +8,4 @@ export * from './template';
 export * from './docxTemplate';
 export * from './pptxTemplate';
 export * from './reportTemplate';
+export * from './external-context';

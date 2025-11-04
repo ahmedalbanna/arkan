@@ -23,7 +23,7 @@ export class Section {
         this._title = props.title;
         this._agent = props.agent;
         this._type = props.type;
-        this._content = props.content;
+        this._content = props.content ?? '';
         this._agentId = props.agentId || props.agent?.id;
     }
 
@@ -62,17 +62,22 @@ export class Section {
     get content(): string | undefined {
         return this._content;
     }
+    set content(value: string | undefined) {
+        this._content = value;
+    }
 
     public toJSON(): SectionProperties {
         return {
             id: this._id,
             title: this._title,
-            agent: this._agent,
+            // Serialize agent if it exists
+            agent: this._agent?.toJSON(),
             agentId: this._agentId,
             type: this._type,
             content: this._content,
         };
     }
+
     public toStateObject(): SectionProperties {
         return this.toJSON();
     }
