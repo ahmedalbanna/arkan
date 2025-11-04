@@ -5,7 +5,7 @@ import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { marked } from 'marked';
 import React, { useEffect, useState } from 'react';
-import { useDebounce, useToast } from '@/hooks';
+import { useDebounce, useToast, useWritingTool, useTextToSpeech } from '@/hooks';
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import TextAlign from '@tiptap/extension-text-align';
 import { Bold, Italic, Strikethrough, List, ListOrdered, Quote, ImageIcon, Table as TableIcon, Sigma, Upload, Download, Palette, PenSquare, BrainCircuit, Workflow, Wrench, LifeBuoy, MoreVertical } from 'lucide-react';
@@ -50,21 +50,14 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { Separator } from '../ui/separator';
 
 interface SectionToolbarProps {
-  activeAiAction: string | null;
-  isReadingAloud: boolean;
   onAiAction: (action: string, payload?: any) => void;
-  onReadAloud: () => void;
-
+  onReadAloud: (text: string) => void;
+  isProcessing: boolean;
+  activeAction: string | null;
 }
 
-export function SectionToolbar({
-  activeAiAction,
-  isReadingAloud,
-  onAiAction,
-  onReadAloud,
-}: SectionToolbarProps) {
+export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAction }: SectionToolbarProps) {
   const { t } = useLocalization();
-  const isBusy = !!activeAiAction || isReadingAloud;
 
   const rewriteStyles = [
     { label: t('writingTools.textStylist.styles.formal'), style: 'Formal' },
@@ -80,8 +73,8 @@ export function SectionToolbar({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('summarize')} disabled={isBusy} >
-              {activeAiAction === 'summarize' ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookText className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('summarize')} disabled={isProcessing} >
+              {activeAction === 'summarize' ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookText className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.summarize')}</p></TooltipContent>
@@ -89,8 +82,8 @@ export function SectionToolbar({
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('expand')} disabled={isBusy} >
-              {activeAiAction === 'expand' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Maximize className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('expand')} disabled={isProcessing} >
+              {activeAction === 'expand' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Maximize className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.expand')}</p></TooltipContent>
@@ -98,8 +91,8 @@ export function SectionToolbar({
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('grammar')} disabled={isBusy}>
-              {activeAiAction === 'grammar' ? <Loader2 className="h-4 w-4 animate-spin" /> : <SpellCheck className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('grammar')} disabled={isProcessing}>
+              {activeAction === 'grammar' ? <Loader2 className="h-4 w-4 animate-spin" /> : <SpellCheck className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.checkGrammar')}</p></TooltipContent>
@@ -107,8 +100,8 @@ export function SectionToolbar({
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('humanize')} disabled={isBusy}>
-              {activeAiAction === 'humanize' ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCheck className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('humanize')} disabled={isProcessing}>
+              {activeAction === 'humanize' ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCheck className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.humanize')}</p></TooltipContent>
@@ -118,8 +111,8 @@ export function SectionToolbar({
           <Tooltip>
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full" disabled={isBusy}>
-                  {activeAiAction === 'rewrite' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brush className="h-4 w-4" />}
+                <Button variant="ghost" size="icon" className="rounded-full" disabled={isProcessing}>
+                  {activeAction === 'rewrite' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brush className="h-4 w-4" />}
                 </Button>
               </DropdownMenuTrigger>
             </TooltipTrigger>
@@ -138,8 +131,8 @@ export function SectionToolbar({
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full" onClick={onReadAloud} disabled={isBusy}>
-              {isReadingAloud ? <Loader2 className="h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onReadAloud('')} disabled={isProcessing}>
+              {activeAction === 'readAloud' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
@@ -355,29 +348,45 @@ const handleFile = (file: File, editor: Editor) => {
 }
 
 interface RichTextEditorProps {
-  content: string; // Expecting Markdown content
+  content: string;
   onChange: (markdown: string) => void;
-  onAiAction: (action: string, payload?: any) => void;
-  onReadAloud: (text: string) => void;
-  activeAiAction: string | null;
-  isReadingAloud: boolean;
-
+  onAiSuggestion: (suggestion: string) => void;
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
   content,
   onChange,
-  onAiAction,
-  onReadAloud,
-  activeAiAction,
-  isReadingAloud,
-
+  onAiSuggestion,
 }) => {
   const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr');
   const [isUpdatingFromProp, setIsUpdatingFromProp] = useState(false);
-  const debouncedContent = useDebounce(content, 1000); // Debounce content prop
+  const debouncedContent = useDebounce(content, 1000);
   const { firebaseUser } = useAuth();
   const { toast } = useToast();
+  const [activeAiAction, setActiveAiAction] = useState<string | null>(null);
+
+  const aiActionMutation = useWritingTool('/api/writing-tools/manipulate-text', {
+    onSuccess: (data: any) => {
+      onAiSuggestion(data.rewrittenText);
+      toast({ title: "AI Suggestion Ready" });
+      setActiveAiAction(null);
+    },
+    onError: (error) => {
+      toast({ title: 'AI Action Failed', description: error.message, variant: 'destructive' });
+      setActiveAiAction(null);
+    }
+  });
+
+  const readAloudMutation = useTextToSpeech({
+    onSuccess: (data) => {
+        const audio = new Audio(data.audioDataUri);
+        audio.play();
+        setActiveAiAction(null);
+    },
+    onError: () => {
+        setActiveAiAction(null);
+    }
+  });
 
   const handleImagePaste = async (editor: Editor, file: File) => {
     if (!firebaseUser) {
@@ -434,7 +443,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     ],
     content: '',
     onUpdate: ({ editor }) => {
-      if (isUpdatingFromProp) return; // Prevent loop
+      if (isUpdatingFromProp) return;
       const html = editor.getHTML();
       const markdown = turndownService.turndown(html);
       onChange(markdown);
@@ -447,18 +456,36 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     immediatelyRender: false,
   });
 
-  const handleAiActionWrapper = (action: string, payload?: any) => {
+  const handleAiActionWrapper = (action: string, payload: any = {}) => {
     if (!editor) return;
+    setActiveAiAction(action);
     const { from, to } = editor.state.selection;
     const selectedText = editor.state.doc.textBetween(from, to);
-    onAiAction(action, { ...payload, selectedText: selectedText || content });
+    const textToProcess = selectedText || content;
+
+    const commandMap: Record<string, string> = {
+        summarize: `Summarize this text concisely: "${textToProcess}"`,
+        expand: `Expand on this topic, adding more detail and explanation: "${textToProcess}"`,
+        grammar: `Correct any spelling and grammar mistakes in this text: "${textToProcess}"`,
+        humanize: `Rewrite this text to sound more natural and human-like: "${textToProcess}"`,
+        rewrite: `Rewrite this text in a ${payload.style || 'default'} style: "${textToProcess}"`
+    };
+
+    const command = commandMap[action];
+
+    if (command) {
+        aiActionMutation.mutate({ textToManipulate: content, command });
+    } else {
+        setActiveAiAction(null);
+    }
   };
 
   const handleReadAloudWrapper = () => {
     if (!editor) return;
+    setActiveAiAction('readAloud');
     const { from, to } = editor.state.selection;
-    const selectedText = editor.state.doc.textBetween(from, to);
-    onReadAloud(selectedText || content);
+    const textToRead = editor.state.doc.textBetween(from, to) || content;
+    readAloudMutation.mutate({ text: textToRead });
   }
 
   useEffect(() => {
@@ -490,10 +517,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             </div>
           ) : (
             <SectionToolbar
-              activeAiAction={activeAiAction}
               onAiAction={handleAiActionWrapper}
               onReadAloud={handleReadAloudWrapper}
-              isReadingAloud={isReadingAloud}
+              isProcessing={aiActionMutation.isPending || readAloudMutation.isPending}
+              activeAction={activeAiAction}
             />
           )}
         </BubbleMenu>

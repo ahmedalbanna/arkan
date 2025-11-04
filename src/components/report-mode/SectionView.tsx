@@ -10,11 +10,11 @@ import { Wand2, ThumbsDown, Check } from 'lucide-react';
 import { DiffView } from '../shared/DiffView';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
-import { remark } from 'remark';
-import remarkGfm from 'remark-gfm';
 import dynamic from 'next/dynamic';
 import { Input } from '../ui/input';
+
 const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), { ssr: false });
+
 interface SectionProps {
     sectionKey: SectionName;
     title: string;
@@ -28,12 +28,9 @@ export const SectionView = ({ sectionKey, title, content, onUpdate, onTitleChang
         aiSuggestion,
         diff,
         t,
+        handleSuggestion,
         handleAcceptSuggestion,
         handleRejectSuggestion,
-        handleAiAction,
-        handleReadAloud,
-        activeAiAction,
-        isReadingAloud,
         words,
         chars,
     } = useSectionLogic(sectionKey, content, onUpdate);
@@ -57,10 +54,7 @@ export const SectionView = ({ sectionKey, title, content, onUpdate, onTitleChang
                 <RichTextEditor
                     content={content}
                     onChange={(newMarkdown) => onUpdate(sectionKey, newMarkdown)}
-                    onAiAction={handleAiAction}
-                    onReadAloud={handleReadAloud}
-                    activeAiAction={activeAiAction}
-                    isReadingAloud={isReadingAloud}
+                    onAiSuggestion={handleSuggestion}
                 />
 
                 {aiSuggestion && (
@@ -74,7 +68,7 @@ export const SectionView = ({ sectionKey, title, content, onUpdate, onTitleChang
                             {diff ? (
                                 <DiffView diff={diff} />
                             ) : (
-                                <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+                                <ReactMarkdown components={markdownComponents}>
                                     {aiSuggestion}
                                 </ReactMarkdown>
                             )}

@@ -1,8 +1,9 @@
+
 'use client';
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { markdownComponents } from '@/lib/markdown-styles';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { cn } from '@/lib/utils/cn';
 
 interface MarkdownViewerProps {
