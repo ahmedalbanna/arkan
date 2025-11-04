@@ -77,7 +77,7 @@ export class Project implements SavedProject {
       name: this._name,
       projectIdea: this._projectIdea,
       // Serialize sections by calling their toJSON method
-      sections: this._sections,
+      sections: this._sections?.map(s => s.toJSON()),
       sectionsOrder: this._sectionsOrder,
       externalContext: this._externalContext,
     };
@@ -131,6 +131,8 @@ export class Project implements SavedProject {
       title: 'Untitled Section',
       type: 'report',
       content: '',
+      // Assign a default agent ID to satisfy backend validation
+      agentId: 'document-abstract-writer',
     });
     if (!this._sections) this._sections = [];
     this._sections.push(newSection);
