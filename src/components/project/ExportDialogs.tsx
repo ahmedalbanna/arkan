@@ -30,15 +30,14 @@ export function ReportExportDialog({ isExporting, onExport, disabled }: ReportEx
   const [selectedSections, setSelectedSections] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Correctly derive available sections from the current project state.
   const availableSections = useMemo(() => {
     if (!project?.sections) return [];
-    return Object.keys(project.sections)
-      .map(id => ({
-        id,
-        title: project.sections![id]?.title || id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-      }))
-      .filter(section => project.sections![section.id]?.content?.trim()); // Only show sections with content
+    return project.sections
+      .filter(section => section.content && section.content.trim())
+      .map(section => ({
+        id: section.id,
+        title: section.title,
+      }));
   }, [project?.sections]);
 
 

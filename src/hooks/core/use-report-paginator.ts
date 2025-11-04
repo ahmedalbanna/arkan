@@ -11,27 +11,25 @@ export function useReportPaginator(generatedSections: SectionName[], reportAgent
     const [currentPage, setCurrentPage] = useState(0);
 
     const orderedSections = useMemo(() => {
-        const generatedIdSet = new Set(generatedSections);
-        const allKnownSectionIds = Object.keys(project?.sections || {});
+        if (!project || !project.sections) return [];
+        const projectSections = project.sections.filter(s => s.content && s.content.trim() !== '');
 
-        const projectOrder = project?.sectionsOrder?.filter(id => allKnownSectionIds.includes(id)) || [];
+        if (!project.sectionsOrder || project.sectionsOrder.length === 0) {
+            return projectSections.map(s => s.id);
+        }
 
-        const finalOrder = [...projectOrder];
-        allKnownSectionIds.forEach(id => {
-            if (!finalOrder.includes(id)) {
-                finalOrder.push(id);
-            }
-        });
+        const orderSet = new Set(project.sectionsOrder);
+        const ordered = project.sectionsOrder.map(id => projectSections.find(s => s.id === id)).filter(Boolean);
+        const unordered = projectSections.filter(s => !orderSet.has(s.id));
         
-        return finalOrder;
+        return [...ordered, ...unordered].map(s => s!.id);
 
-    }, [project?.sections, project?.sectionsOrder, generatedSections]);
+    }, [project?.sections, project?.sectionsOrder]);
 
 
     const totalPages = orderedSections.length;
     const currentSectionKey = orderedSections[currentPage];
 
-    // If the current page becomes invalid (e.g. sections are removed), reset to the first page.
     useEffect(() => {
         if (currentPage >= totalPages && totalPages > 0) {
             setCurrentPage(totalPages - 1);
@@ -42,9 +40,9 @@ export function useReportPaginator(generatedSections: SectionName[], reportAgent
 
 
     const getSectionTitle = (key: SectionName) => {
-        const customTitle = project?.sections?.[key]?.title;
-        if (customTitle && customTitle !== key) {
-            return customTitle;
+        const section = project?.getSection(key);
+        if (section?.title && section.title !== key) {
+            return section.title;
         }
         return reportAgents.find(a => a.id === key)?.name || key.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     };

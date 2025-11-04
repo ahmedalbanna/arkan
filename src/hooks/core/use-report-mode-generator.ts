@@ -37,12 +37,9 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
              const reportSectionModels = sectionConfigs
                 .filter(s => s.type === 'report')
                 .map(s => {
-                    // Find the full agent object from the agents list
                     const agent = agents.find(a => a.id === (s as any).agentId);
-                    // If agent isn't found, something is wrong, but we can fallback or throw
                     if (!agent) {
                         console.warn(`Agent with ID "${(s as any).agentId}" not found for section "${s.title}". Assigning a default agent.`);
-                        // Fallback to a default agent if necessary
                         return new Section({ ...s, agent: agents.find(a => a.id === 'generate-introduction-section')! });
                     }
                     return new Section({ ...s, agent: agent });
@@ -69,7 +66,6 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
             // Initialize UI stores for each section
             initialSetup.forEach(section => {
                 initializeControls(section.id);
-                // Ensure agent and guidelines exist before initializing
                 if (section.agent && section.agent.guidelines) {
                     initializeGuidelines(section.id, section.agent.guidelines.map(g => ({ text: g, isDefault: true })));
                 }
@@ -86,7 +82,7 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
         if (agent.guidelines) {
             agent.guidelines.forEach((g: any, index: number) => {
                 if (guidelineState?.checked?.[index]) {
-                    selectedGuidelines.push(g.text);
+                    selectedGuidelines.push(g);
                 }
             });
         }
@@ -100,20 +96,16 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
     const agentMutation = useMutation({
         mutationKey: ['generateReportSection'], // Static key
         mutationFn: async (sectionId: string) => {
-            // sectionId is the SectionName (e.g., 'introduction'), not the agent id.
             if (!project || !userProfile || !firebaseUser) throw new Error("Project or user not found.");
 
-            // Find the Section model from the orderedSections (provided by the hook consumer)
             const section = orderedSections?.find(s => s.id === sectionId);
             if (!section) throw new Error("Section not found.");
-
-            // Resolve the agent using the section.agent.id
-            const agent = agents.find((a: Agent) => a.id === section.agent.id);
+            
+            const agent = section.agent;
             if (!agent) throw new Error("Agent not found for section.");
 
             const token = await firebaseUser.getIdToken();
 
-            // Controls, guidelines and context are stored keyed by section id
             const controls = controlState[sectionId] || { tone: 'neutral', wordCount: 200, complexity: 50 };
             const guidelines = getSelectedGuidelines(agent, guidelineState[sectionId]);
 
@@ -133,9 +125,7 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
                 .filter(Boolean) as { fileName: string, content: string, type: string }[];
 
             const body = {
-                // The server expects sectionToGenerate to be the SectionName (section.id)
                 sectionToGenerate: section.id,
-                // Provide the agent id separately so the server knows which agent/prompt to use
                 agent: section.agent.id,
                 agentPrompt: agent.prompt,
                 model: agent.model,
@@ -147,16 +137,14 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
 
             const result = await generateReportSectionApi(body, token);
 
-            // Server returns { [sectionName]: content } so use section.id as the key
             const content = result?.[section.id] ?? Object.values(result || {})[0] as string | undefined;
             if (!content) {
                 toast({ title: 'Generation failed', description: `No content returned for section ${section.id}.`, variant: 'destructive' });
                 throw new Error('Empty generation result');
             }
 
-            updateProject(p => p.updateSectionContent(section.id as keyof typeof p.sections, content));
-            refetchUser(); // To update credits in the UI
-            // saveProject();
+            updateProject(p => p.updateSectionContent(section.id, content));
+            refetchUser();
             return result;
         },
         onSuccess: (data, variables) => {
@@ -178,7 +166,7 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
 
     const generatedSections = useMemo(() => {
         if (!project || !project.sections) return [];
-        return Object.keys(project.sections) as SectionName[];
+        return project.sections.map(s => s.id);
     }, [project]);
 
 

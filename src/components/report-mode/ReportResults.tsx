@@ -37,7 +37,7 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     getSectionTitle,
     handleNextPage,
     handlePrevPage,
-    setCurrentPage, // Import setCurrentPage
+    setCurrentPage,
   } = useReportPaginator(generatedSections, reportAgents);
 
   const handleSectionUpdate = (key: SectionName, value: string) => {
@@ -55,12 +55,11 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
   const handleAddSection = () => {
     let newSectionId = '';
     updateProject(p => {
-        // addCustomSection now returns the id of the new section
         newSectionId = p.addCustomSection();
     });
-    // After adding the section, navigate to it
+
     if (newSectionId) {
-        const newPageIndex = project?.sectionsOrder?.findIndex(id => id === newSectionId) ?? totalPages;
+        const newPageIndex = project?.sections?.findIndex(s => s.id === newSectionId) ?? totalPages;
         setCurrentPage(newPageIndex);
     }
   };
@@ -82,15 +81,17 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
       );
     }
 
+    const currentSection = project?.getSection(currentSectionKey);
+
     return (
         <div className="h-full p-4 gap-4 rounded-lg flex flex-col mt-4">
             <ScrollArea className="flex-grow">
-                {currentSectionKey ? (
+                {currentSectionKey && currentSection ? (
                     <A4Page key={currentSectionKey}>
                         <SectionView
                             sectionKey={currentSectionKey}
                             title={getSectionTitle(currentSectionKey)}
-                            content={project?.sections?.[currentSectionKey]?.content || ''}
+                            content={currentSection.content || ''}
                             onUpdate={handleSectionUpdate}
                             onTitleChange={handleTitleUpdate}
                         />

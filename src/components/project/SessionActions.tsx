@@ -3,7 +3,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Download, Trash2, Save, FileJson, Upload, Cloud, Share2 } from 'lucide-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Tooltip,
   TooltipContent,
@@ -53,7 +53,15 @@ export const SessionActions = () => {
         isExporting,
         handleExportReport,
         hasUnsavedChanges,
+        newSession,
     } = useSessionActions();
+
+    // Effect to synchronize the saveAsName when the project name changes
+    useEffect(() => {
+        if (project?.name) {
+            setSaveAsName(project.name);
+        }
+    }, [project?.name, setSaveAsName]);
 
     const isBusy = isSaving || isExporting;
 
@@ -138,7 +146,7 @@ export const SessionActions = () => {
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="save-as-name" className="text-right">{t('projects.nameLabel')}</Label>
-                                <Input id="save-as-name" defaultValue={project?.name} onChange={(e) => setSaveAsName(e.target.value)} className="col-span-3" />
+                                <Input id="save-as-name" value={saveAsName} onChange={(e) => setSaveAsName(e.target.value)} className="col-span-3" />
                             </div>
                         </div>
                         <DialogFooter>
@@ -168,7 +176,7 @@ export const SessionActions = () => {
                         <ReportExportDialog
                             isExporting={isExporting}
                             onExport={handleExportReport}
-                            disabled={isBusy || !project?.sections || Object.keys(project.sections).length === 0}
+                            disabled={isBusy || !project?.sections || project.sections.length === 0}
                         />
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -178,7 +186,7 @@ export const SessionActions = () => {
                        <Button
                             variant="destructive"
                             size="icon"
-                            onClick={() => project?.newSession()}
+                            onClick={() => newSession()}
                             className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <Trash2 className="h-4 w-4" />
