@@ -24,6 +24,7 @@ export const SectionAccordionItem = ({
     isAnythingGenerating,
     hasCredits,
     handleProps,
+    index,
 }: {
     itemKey: string,
     section: Section,
@@ -32,6 +33,7 @@ export const SectionAccordionItem = ({
     isAnythingGenerating: boolean,
     hasCredits: boolean,
     handleProps?: any,
+    index: number,
 }) => {
     const {
         t,
@@ -54,8 +56,9 @@ export const SectionAccordionItem = ({
             <AccordionTrigger className="flex items-center w-full px-4 py-2 text-sm font-medium hover:no-underline rounded-t-lg">
                 <div className="flex items-center gap-2 flex-1">
                     {handleProps && (
-                        <div {...handleProps} className="p-1 cursor-grab touch-none -ml-2">
-                            <GripVertical className="h-5 w-5 text-muted-foreground" />
+                        <div {...handleProps} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
+                            <span className="text-xs w-4 text-center">{index + 1}</span>
+                            <GripVertical className="h-5 w-5" />
                         </div>
                     )}
                     {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -22,10 +23,11 @@ interface SortableSectionItemProps {
     isAnythingGenerating: boolean;
     hasCredits: boolean;
     onGenerate: () => void;
+    index: number;
 }
 
 
-function SortableSectionItem({ id, section, ...props }: SortableSectionItemProps) {
+function SortableSectionItem({ id, section, index, ...props }: SortableSectionItemProps) {
     const {
         attributes,
         listeners,
@@ -49,6 +51,7 @@ function SortableSectionItem({ id, section, ...props }: SortableSectionItemProps
                 isAnythingGenerating={props.isAnythingGenerating}
                 hasCredits={props.hasCredits}
                 handleProps={listeners}
+                index={index}
             />
         </div>
     );
@@ -113,7 +116,7 @@ export const GenerationTools = ({
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                     <SortableContext items={orderedSections.map(s => s.id)} strategy={verticalListSortingStrategy}>
                         <Accordion type="multiple" className="w-full space-y-1">
-                            {orderedSections.map((section) => {
+                            {orderedSections.map((section, index) => {
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === section.id;
                                 return (
                                     <SortableSectionItem
@@ -124,6 +127,7 @@ export const GenerationTools = ({
                                         isGenerating={isGeneratingThis}
                                         isAnythingGenerating={isAnythingGenerating}
                                         hasCredits={!!hasCreditsForSingleSection}
+                                        index={index}
                                     />
                                 );
                             })}
