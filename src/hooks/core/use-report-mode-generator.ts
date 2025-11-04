@@ -33,18 +33,27 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
 
     // Memoize the initialization logic to prevent re-running on every render
     const initialSetup = useMemo(() => {
-        if (sectionsLoaded && sectionConfigs && agentsLoaded) {
-            const reportSectionModels = sectionConfigs
+        if (sectionsLoaded && sectionConfigs && agentsLoaded && agents.length > 0) {
+             const reportSectionModels = sectionConfigs
                 .filter(s => s.type === 'report')
-                .map(s => new Section(s as SectionProperties));
-            // If the project contains a saved sectionsOrder, apply that order
-            // to the resulting models so the UI reflects the saved ordering.
+                .map(s => {
+                    // Find the full agent object from the agents list
+                    const agent = agents.find(a => a.id === (s as any).agentId);
+                    // If agent isn't found, something is wrong, but we can fallback or throw
+                    if (!agent) {
+                        console.warn(`Agent with ID "${(s as any).agentId}" not found for section "${s.title}". Assigning a default agent.`);
+                        // Fallback to a default agent if necessary
+                        return new Section({ ...s, agent: agents.find(a => a.id === 'generate-introduction-section')! });
+                    }
+                    return new Section({ ...s, agent: agent });
+                });
+
             if (project && project.sectionsOrder && project.sectionsOrder.length > 0) {
                 const orderMap = new Map(reportSectionModels.map(r => [r.id, r]));
                 const ordered = project.sectionsOrder
                     .map(id => orderMap.get(id))
                     .filter(Boolean) as Section[];
-                // Append any sections missing from the saved order
+                
                 const missing = reportSectionModels.filter(r => !project.sectionsOrder!.includes(r.id));
                 return [...ordered, ...missing];
             }
@@ -52,7 +61,7 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
             return reportSectionModels;
         }
         return null;
-    }, [sectionsLoaded, sectionConfigs, agentsLoaded, project]);
+    }, [sectionsLoaded, sectionConfigs, agentsLoaded, project, agents]);
 
     useEffect(() => {
         if (initialSetup) {
@@ -60,13 +69,14 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
             // Initialize UI stores for each section
             initialSetup.forEach(section => {
                 initializeControls(section.id);
-                if (section.agent && typeof section.agent.prompt === 'object' && section.agent.guidelines) {
-                    initializeGuidelines(section.id, section.agent.guidelines);
+                // Ensure agent and guidelines exist before initializing
+                if (section.agent && section.agent.guidelines) {
+                    initializeGuidelines(section.id, section.agent.guidelines.map(g => ({ text: g, isDefault: true })));
                 }
                 initializeContext(section.id);
             });
         }
-    }, [initialSetup, setOrderedSections, initializeControls, initializeGuidelines, initializeContext, agents]);
+    }, [initialSetup, setOrderedSections, initializeControls, initializeGuidelines, initializeContext]);
 
 
 

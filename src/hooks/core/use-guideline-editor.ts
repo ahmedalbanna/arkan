@@ -14,7 +14,12 @@ export function useGuidelineEditor(itemKey: string, section: Section) {
 
     const [customGuidelineInput, setCustomGuidelineInput] = useState<Record<string, string>>({});
 
-    const agent = useMemo(() => agents.find(a => a.id === section.agent.id), [agents, section.agent.id]);
+    // The error was here. section.agent could be undefined if a section was created but no agent was assigned.
+    // We now safely check for section.agent before trying to access its id.
+    const agent = useMemo(() => {
+        if (!section?.agent?.id) return undefined;
+        return agents.find(a => a.id === section.agent.id);
+    }, [agents, section?.agent?.id]);
 
     // Initialize state when agent data is loaded
     if (agentsLoaded && agent && agent.guidelines && !guidelineState[itemKey]) {
