@@ -42,7 +42,8 @@ export class Project implements SavedProject {
     this._updatedAt = props.updatedAt || new Date().toISOString();
     this._name = props.name;
     this._projectIdea = props.projectIdea;
-    this._sections = props.sections || [];
+    // Ensure sections are always instances of the Section class
+    this._sections = props.sections ? props.sections.map(s => s instanceof Section ? s : new Section(s as SectionProperties)) : [];
     this._sectionsOrder = props.sectionsOrder || [];
     this._externalContext = props.externalContext || [];
   }
