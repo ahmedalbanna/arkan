@@ -17,7 +17,7 @@ import { Agent } from '@/lib/models/agent';
 
 interface SortableSectionItemProps {
     id: string;
-    agent: Agent;
+    section: Section;
     isGenerating: boolean;
     isAnythingGenerating: boolean;
     hasCredits: boolean;
@@ -25,7 +25,7 @@ interface SortableSectionItemProps {
 }
 
 
-function SortableSectionItem({ id, agent, ...props }: SortableSectionItemProps) {
+function SortableSectionItem({ id, section, ...props }: SortableSectionItemProps) {
     const {
         attributes,
         listeners,
@@ -43,7 +43,7 @@ function SortableSectionItem({ id, agent, ...props }: SortableSectionItemProps) 
         <div ref={setNodeRef} style={style} {...attributes}>
             <SectionAccordionItem
                 itemKey={id}
-                agent={agent}
+                section={section}
                 onGenerate={props.onGenerate}
                 isGenerating={props.isGenerating}
                 isAnythingGenerating={props.isAnythingGenerating}
@@ -62,7 +62,7 @@ interface GenerationToolsProps {
     activeMutationKey: string | null;
     onGenerateSection: (sectionId: string) => void;
     hasCreditsForSingleSection: boolean;
-    agents: Agent[];
+
 }
 
 export const GenerationTools = ({
@@ -73,7 +73,6 @@ export const GenerationTools = ({
     activeMutationKey,
     onGenerateSection,
     hasCreditsForSingleSection,
-    agents,
 }: GenerationToolsProps) => {
     const { t } = useLocalization();
 
@@ -115,15 +114,12 @@ export const GenerationTools = ({
                     <SortableContext items={orderedSections.map(s => s.id)} strategy={verticalListSortingStrategy}>
                         <Accordion type="multiple" className="w-full space-y-1">
                             {orderedSections.map((section) => {
-                                const agent = agents?.find(a => a.id === section.agentId);
-                                if (!agent) return null;
-
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === section.id;
                                 return (
                                     <SortableSectionItem
                                         key={section.id}
                                         id={section.id}
-                                        agent={agent}
+                                        section={section}
                                         onGenerate={() => onGenerateSection(section.id)}
                                         isGenerating={isGeneratingThis}
                                         isAnythingGenerating={isAnythingGenerating}

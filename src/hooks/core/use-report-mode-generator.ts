@@ -30,7 +30,6 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     const queryClient = useQueryClient();
 
-    const { saveProject } = useSaveProject();
 
     // Memoize the initialization logic to prevent re-running on every render
     const initialSetup = useMemo(() => {
@@ -71,10 +70,6 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
     }, [initialSetup, setOrderedSections, initializeControls, initializeGuidelines, initializeContext, agents]);
 
 
-    const reportGenerationAgents = useMemo(() => {
-        if (!agents) return [];
-        return agents.filter((a: Agent) => a.category === AgentCategory.ReportGeneration);
-    }, [agents]);
 
     const getSelectedGuidelines = (agent: any, guidelineState: any) => {
         const selectedGuidelines: string[] = [];
@@ -189,7 +184,6 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
         activeMutationKey,
         onGenerateSection,
         hasCreditsForSingleSection,
-        agents: reportGenerationAgents,
-        agentsLoaded
+
     };
 }

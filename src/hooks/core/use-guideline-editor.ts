@@ -6,15 +6,16 @@ import { useAgents } from '@/hooks/data/useAgents';
 import { useGenerationUIStore } from './useGenerationUIStore';
 import { useLocalization } from '@/context/LocalizationContext';
 import type { AgentPrompt } from '@/lib/models/agent';
+import { Section } from '@/lib/types';
 
-export function useGuidelineEditor(itemKey: string, agentId: string) {
+export function useGuidelineEditor(itemKey: string, section: Section) {
     const { t } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { guidelineState, handleGuidelineToggle, addCustomGuideline, removeCustomGuideline, initializeGuidelines } = useGenerationUIStore();
 
     const [customGuidelineInput, setCustomGuidelineInput] = useState<Record<string, string>>({});
 
-    const agent = useMemo(() => agents.find(a => a.id === agentId), [agents, agentId]);
+    const agent = useMemo(() => agents.find(a => a.id === section.agentId), [agents, section.agentId]);
     const promptConfig = useMemo(() => {
         if (agent && typeof agent.prompt === 'object') {
             return agent.prompt as AgentPrompt;

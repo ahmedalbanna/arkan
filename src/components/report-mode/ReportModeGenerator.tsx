@@ -41,7 +41,7 @@ export default function ReportModeGenerator() {
             console.error('Failed to persist sections order locally', e);
         }
     };
-    
+
     const {
         locale,
         isPanelCollapsed,
@@ -51,13 +51,9 @@ export default function ReportModeGenerator() {
         activeMutationKey,
         onGenerateSection,
         hasCreditsForSingleSection,
-        agents,
-        agentsLoaded
     } = useReportModeGenerator({ orderedSections, setOrderedSections });
 
-    if (!agentsLoaded) {
-        return <ReportSkeleton />;
-    }
+
     // Determine which section IDs to show in the results area.
     // `generatedSections` is an array of SectionName (strings). If the panel's
     // orderedSections is populated use that order but only include sections that
@@ -82,7 +78,7 @@ export default function ReportModeGenerator() {
                     </Button>
                 </div>
             )}
-             <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
+            <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
                 <GenerationTools
                     onCollapseToggle={() => setIsPanelCollapsed(true)}
                     orderedSections={orderedSections}
@@ -91,7 +87,6 @@ export default function ReportModeGenerator() {
                     activeMutationKey={activeMutationKey}
                     onGenerateSection={onGenerateSection}
                     hasCreditsForSingleSection={hasCreditsForSingleSection}
-                    agents={agents}
                 />
             </div>
 

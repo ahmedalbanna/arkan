@@ -10,14 +10,15 @@ import { Plus, Trash2, StickyNote } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { useGuidelineEditor } from '@/hooks';
+import { Section } from '@/lib/types';
 
 interface GuidelineEditorProps {
     itemKey: string;
-    agentId: string;
+    section: Section;
     isAdmin: boolean | undefined;
 }
 
-export function GuidelineEditor({ itemKey, agentId, isAdmin }: GuidelineEditorProps) {
+export function GuidelineEditor({ itemKey, section, isAdmin }: GuidelineEditorProps) {
     const {
         t,
         agentsLoaded,
@@ -30,7 +31,7 @@ export function GuidelineEditor({ itemKey, agentId, isAdmin }: GuidelineEditorPr
         setCustomGuidelineInputForItem,
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
-    } = useGuidelineEditor(itemKey, agentId);
+    } = useGuidelineEditor(itemKey, section);
 
     if (!agentsLoaded) {
         return <div>Loading guidelines...</div>;

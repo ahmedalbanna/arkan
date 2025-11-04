@@ -4,15 +4,16 @@
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAgents } from '@/hooks/data/useAgents';
 import type { Agent } from '@/lib/models/agent';
+import { Section } from '@/lib/types';
 
-export function useSectionAccordionItemLogic(agent: Agent | undefined) {
+export function useSectionAccordionItemLogic(section: Section | undefined) {
     const { t } = useLocalization();
-    const title = agent?.name || 'Unknown Agent';
+    const title = section?.title || 'Unknown Section';
 
     let disabledReason = '';
-    if (!agent) {
+    if (!section) {
         disabledReason = 'Agent configuration not found.';
-    } else if (!agent.isEnabled) {
+    } else if (!section.agentId?.isEnabled) {
         disabledReason = t('builder.reportGenerator.disabledTooltip');
     }
 

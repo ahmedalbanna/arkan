@@ -7,17 +7,18 @@ import { buttonVariants } from '@/components/ui/button';
 import { Loader2, Sparkles, GripVertical, SlidersHorizontal, StickyNote, Link as LinkIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSectionAccordionItemLogic } from '@/hooks/core/useSectionAccordionItemLogic';
-import type { Agent } from '@/lib/models';
+import type { Agent, Section } from '@/lib/models';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { SectionGenerationControls } from './SectionGenerationControls';
 import { GuidelineEditor } from './SectionGuidelineEditor';
 import { useAuth } from '@/context/AuthContext';
 import { ContextSelector } from './SectionContextSelector';
 import { cn } from '@/lib/utils/cn';
+import { useMemo } from 'react';
 
 export const SectionAccordionItem = ({
     itemKey,
-    agent,
+    section,
     onGenerate,
     isGenerating,
     isAnythingGenerating,
@@ -25,7 +26,7 @@ export const SectionAccordionItem = ({
     handleProps,
 }: {
     itemKey: string,
-    agent: Agent,
+    section: Section,
     onGenerate: () => void,
     isGenerating: boolean,
     isAnythingGenerating: boolean,
@@ -34,9 +35,8 @@ export const SectionAccordionItem = ({
 }) => {
     const {
         t,
-        title,
         disabledReason,
-    } = useSectionAccordionItemLogic(agent);
+    } = useSectionAccordionItemLogic(section);
 
     const { userProfile } = useAuth();
 
@@ -59,7 +59,8 @@ export const SectionAccordionItem = ({
                         </div>
                     )}
                     {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}
-                    {title}
+                    <span className="font-medium">{section.title}</span>
+
                 </div>
                 <div className="p-2">
                     <TooltipProvider>
@@ -98,7 +99,7 @@ export const SectionAccordionItem = ({
                             <SectionGenerationControls sectionKey={itemKey} />
                         </TabsContent>
                         <TabsContent value="prompt" className="py-4">
-                            <GuidelineEditor itemKey={itemKey} agentId={agent.id} isAdmin={userProfile?.role === 'admin'} />
+                            <GuidelineEditor itemKey={itemKey} section={section} isAdmin={userProfile?.role === 'admin'} />
                         </TabsContent>
                         <TabsContent value="context" className="py-4">
                             <ContextSelector itemKey={itemKey} />
