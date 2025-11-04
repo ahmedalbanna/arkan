@@ -7,7 +7,6 @@ import { z } from 'zod';
 const SectionSchema = z.object({
   id: z.string().min(3, 'ID must be at least 3 characters'),
   title: z.string().min(1, 'Title is required'),
-  icon: z.string().min(1, 'Icon is required'),
   agentId: z.string().min(1, 'Agent is required'),
   type: z.enum(['report', 'diagram', 'presentation']),
 });

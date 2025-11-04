@@ -5,7 +5,6 @@ import { z } from 'zod';
 
 const SectionUpdateSchema = z.object({
   title: z.string().min(1).optional(),
-  icon: z.string().min(1).optional(),
   agentId: z.string().min(1).optional(),
   type: z.enum(['report', 'diagram', 'presentation']).optional(),
 });

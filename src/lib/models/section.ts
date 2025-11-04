@@ -8,7 +8,6 @@ export interface SectionProperties {
     type: SectionType;
     content?: string;
     agentId?: string; // agentId can be a fallback
-    icon?: string;
 }
 
 export class Section {
@@ -18,7 +17,6 @@ export class Section {
     private _type: SectionType;
     private _content?: string;
     private _agentId?: string;
-    private _icon?: string;
 
     constructor(props: SectionProperties) {
         this._id = props.id;
@@ -27,7 +25,6 @@ export class Section {
         this._type = props.type;
         this._content = props.content;
         this._agentId = props.agentId || props.agent?.id;
-        this._icon = props.icon;
     }
 
     get id(): string {
@@ -65,9 +62,7 @@ export class Section {
     get content(): string | undefined {
         return this._content;
     }
-     get icon(): string | undefined {
-        return this._icon;
-    }
+
     public toJSON(): SectionProperties {
         return {
             id: this._id,
@@ -76,7 +71,6 @@ export class Section {
             agentId: this._agentId,
             type: this._type,
             content: this._content,
-            icon: this._icon,
         };
     }
     public toStateObject(): SectionProperties {

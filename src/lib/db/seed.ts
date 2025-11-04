@@ -47,9 +47,9 @@ async function seed() {
         console.log("Preparing to seed Sections...");
         const sectionsCollection = adminDb.collection('sections');
         defaultSections.forEach(section => {
-            const { icon, ...sectionData } = section;
+            const { ...sectionData } = section;
             const docRef = sectionsCollection.doc(section.id);
-            batch.set(docRef, { ...sectionData, icon: icon || 'FileText' });
+            batch.set(docRef, { ...sectionData });
         });
         console.log(`${defaultSections.length} Sections added to batch.`);
 
@@ -96,4 +96,3 @@ seed().then(() => {
     console.log("Seeding complete. Exiting.");
     process.exit(0);
 });
-
