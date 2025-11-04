@@ -1,3 +1,4 @@
+
 'use server';
 
 import { AgentPromptSchema } from '@/ai/schemas';
@@ -14,7 +15,8 @@ const CreateAgentSchema = z.object({
     description: z.string().min(1, "Description is required"),
     category: z.string().min(1, "Category is required."),
     pageUrl: z.string().min(1, "Page URL is required").startsWith('/', "URL must start with /"),
-    prompt: z.union([z.string(), AgentPromptSchema]),
+    prompt: z.string(), // Prompt is now a direct string
+    guidelines: z.array(z.string()).optional(), // Guidelines is a flat array of strings
     icon: z.string().optional(),
 });
 

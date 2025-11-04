@@ -2,17 +2,6 @@
 
 import { AgentCategory, AgentProperties } from '@/lib/models/agent';
 
-const diagramBasePrompt = `You are an expert systems analyst specializing in PlantUML. Your task is to generate a complete and valid PlantUML diagram based on the provided project proposal and other context.
-
---- PlantUML Style Guide & Instructions ---
-- Use the '!theme plain' for a modern and readable look.
-- Set 'skinparam linetype ortho' for clean, right-angled connectors.
-- Your entire response MUST be only the PlantUML code.
-- The code must start with '@startuml' and end with '@enduml'.
-- Do not add any conversational text, explanations, or markdown code fences (\`\`\`) around your response.
-`;
-
-
 export const AGENTS: AgentProperties[] = [
   {
     "id": "document-abstract-writer",
@@ -23,24 +12,11 @@ export const AGENTS: AgentProperties[] = [
     "isEnabled": true,
     "prompt": "You are a highly skilled abstract writer for academic and technical documents. Your primary task is to create a clear, concise, and compelling summary of a given document. You will identify the key findings, methodologies, and conclusions, and present them in a way that accurately reflects the document's content and significance. Adhere to established abstract writing conventions and formatting guidelines.",
     "guidelines": [
-
       "Accurately represent the document's main points, including the research question, methodology, key findings, and conclusions.",
-
-
-
       "Maintain a concise and objective tone, avoiding jargon or overly technical language unless necessary.",
-
-
-
       "Adhere to any specified word count or formatting requirements.",
-
-
       "Focus on the document's novelty, significance, and potential impact.",
-
-
       "Ensure the abstract is self-contained and easily understood by readers from various backgrounds.",
-
-
     ],
   },
   {
@@ -181,10 +157,10 @@ export const AGENTS: AgentProperties[] = [
     "isEnabled": true,
     "prompt": "You are an expert technical writer. Based on the provided project proposal and any additional context, write a concise and impactful 'Conclusion' section for the final report.\nSynthesize information from the entire proposal and the provided context to create a powerful conclusion. Use markdown for formatting.\n\nThe conclusion should:",
     "guidelines": [
-      "Summarize Key Points  Summarize the key points of a project by briefly reiterating the problem, the proposed solution, and the main objective of the project. Ensure the summary is concise yet comprehensive, capturing the essence of the project in at least 30 words.",
-      "Reiterate Expected Outcomes  Reiterate the expected outcomes of a project by restating the most important results and the value that the project is expected to deliver upon its completion. Provide insight into the benefits and impact.",
-      "Provide Future Outlook  Provide a future outlook for a project by offering a forward-looking statement. Discuss potential long-term impacts or next steps that might occur after the project's completion. Make it at least 30 words.",
-      "Make Final Statement  Craft a final statement that concludes a project discussion. Ensure the statement is strong and conclusive, reinforcing the project's importance and viability. The statement should be compelling and persuasive.",
+      "**Summarize Key Points**: Summarize the key points of a project by briefly reiterating the problem, the proposed solution, and the main objective of the project. Ensure the summary is concise yet comprehensive, capturing the essence of the project in at least 30 words.",
+      "**Reiterate Expected Outcomes**: Reiterate the expected outcomes of a project by restating the most important results and the value that the project is expected to deliver upon its completion. Provide insight into the benefits and impact.",
+      "**Provide Future Outlook**: Provide a future outlook for a project by offering a forward-looking statement. Discuss potential long-term impacts or next steps that might occur after the project's completion. Make it at least 30 words.",
+      "**Make Final Statement**: Craft a final statement that concludes a project discussion. Ensure the statement is strong and conclusive, reinforcing the project's importance and viability. The statement should be compelling and persuasive.",
     ],
     "tone": "Default",
     "language": "English (US)",
@@ -403,7 +379,7 @@ export const AGENTS: AgentProperties[] = [
       "Identify Key Libraries & Frameworks  List and justify the selection of essential libraries and frameworks that will be utilized in the implementation phase, based on the project type, ensuring they align with project needs.",
       "Describe Environment Setup  Provide a detailed description of the development, staging, and production environments. Include necessary configurations and software requirements for each environment.",
       "Outline System Architecture  Create a Deployment diagram illustrating nodes and their connections, along with a Program Flow Diagram to show object interactions and life cycles within the system.",
-      "Detail System Design  Include a Detailed Component Description using a component diagram, along with Data Flow Diagrams using an activity diagram to explain the flow of data within the system.",
+      "Detail System Design  Include a Detailed Component Description using a component diagram, along with a Data Flow Diagrams using an activity diagram to explain the flow of data within the system.",
       "Specify Version Control  Provide details on the version control system and hosting platform to be used, such as Git and GitHub, to ensure proper code management and collaboration.",
     ],
     "tone": "Default",

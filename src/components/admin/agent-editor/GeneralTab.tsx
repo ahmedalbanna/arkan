@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
-import { type AgentCategoryDetails as AgentCategory, type AgentPrompt } from '@/lib/types';
+import { type AgentCategoryDetails } from '@/lib/types';
 import { MessageSquare, Plus, X, Pencil, Copy, Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
@@ -19,9 +20,8 @@ import { AgentEditorFormValues } from '@/hooks';
 
 interface GeneralTabProps {
   agentId: string;
-  isComplexPrompt: boolean;
   isPending: boolean;
-  categories: AgentCategory[];
+  categories: AgentCategoryDetails[];
 }
 
 // New DebouncedTextarea component
@@ -50,8 +50,8 @@ function DebouncedTextarea({ value, onChange, ...props }: React.ComponentProps<t
 }
 
 
-export default function GeneralTab({ agentId, isComplexPrompt, isPending, categories }: GeneralTabProps) {
-  const { control, watch, getValues, setValue } = useFormContext<AgentEditorFormValues>();
+export default function GeneralTab({ agentId, isPending, categories }: GeneralTabProps) {
+  const { control, watch, setValue } = useFormContext<AgentEditorFormValues>();
   const { t } = useLocalization();
   const [isCopied, setIsCopied] = useState(false);
 
@@ -60,7 +60,6 @@ export default function GeneralTab({ agentId, isComplexPrompt, isPending, catego
     name: "conversationStarters",
   });
 
-  const promptValue = watch('prompt');
   const introductionValue = watch('introduction');
   const introLength = introductionValue?.length || 0;
 
@@ -118,47 +117,26 @@ export default function GeneralTab({ agentId, isComplexPrompt, isPending, catego
         )}
       />
 
-      {isComplexPrompt ? (
-        <FormField
-          control={control}
-          name="prompt.base"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('agentEditor.promptLabel')}</FormLabel>
-              <FormControl>
-                <DebouncedTextarea
-                  {...field}
-                  rows={8}
-                  className="font-mono text-sm"
-                  disabled={isPending}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      ) : (
-        <FormField
-          control={control}
-          name="prompt"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('agentEditor.promptLabel')}</FormLabel>
-              <FormControl>
-                <DebouncedTextarea
-                  {...field}
-                  value={field.value as string}
-                  onChange={(val) => setValue('prompt', val)}
-                  rows={8}
-                  className="font-mono text-sm"
-                  disabled={isPending}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
+      <FormField
+        control={control}
+        name="prompt"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{t('agentEditor.promptLabel')}</FormLabel>
+            <FormControl>
+              <DebouncedTextarea
+                {...field}
+                value={field.value as string}
+                onChange={(val) => setValue('prompt', val)}
+                rows={8}
+                className="font-mono text-sm"
+                disabled={isPending}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       <FormField
         control={control}

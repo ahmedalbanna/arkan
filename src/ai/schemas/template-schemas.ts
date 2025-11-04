@@ -1,4 +1,5 @@
 
+
 import { z } from 'zod';
 
 // Base schema for common template fields
@@ -9,14 +10,10 @@ const BaseTemplateSchema = z.object({
 });
 
 // Agent Prompt schema
-export const AgentPromptSchema = z.object({
-  base: z.string().min(1, "Base prompt is required."),
-  guidelines: z.array(z.object({
-    text: z.string(),
-    isDefault: z.boolean(),
-  })).optional(),
-  jsonStructure: z.any().optional(),
-});
+// This is now simplified as the complex object is no longer used for the prompt itself.
+// However, other schemas might still reference it, so we can keep a simplified version
+// or refactor dependent schemas. For now, we simplify.
+export const AgentPromptSchema = z.string().min(10, "Base prompt is required.");
 
 
 // DOCX Styles

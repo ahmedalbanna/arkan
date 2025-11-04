@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from 'lucide-react';
 
 // --- Types moved from types.ts ---
@@ -23,25 +24,17 @@ export interface AgentCategoryDetails {
   pageUrl: string;
 }
 
-export interface AgentGuideline {
-  text: string;
-  isDefault: boolean;
-}
-
 export interface AgentKnowledgeSource {
   name: string;
   type: 'file' | 'text' | 'web';
   content: string; // content, data URI, or URL
 }
 
-export interface AgentPrompt {
-  base: string;
-  guidelines?: AgentGuideline[];
-}
+// This is no longer a complex object
+export type AgentPrompt = string;
 
 // --- End of moved types ---
 
-// This interface is now compatible with the one in `types.ts`
 export interface AgentProperties {
   id: string;
   name: string;
@@ -49,7 +42,8 @@ export interface AgentProperties {
   category: string;
   pageUrl: string;
   isEnabled: boolean;
-  prompt: string;
+  prompt: AgentPrompt;
+  guidelines?: string[]; // Moved from AgentPrompt to here
   toolIds?: string[];
   knowledge?: AgentKnowledgeSource[];
   introduction?: string;
@@ -59,7 +53,6 @@ export interface AgentProperties {
   language?: string;
   model?: string;
   isDefault?: boolean;
-  guidelines?: string[];
 }
 
 export class Agent {
@@ -70,7 +63,8 @@ export class Agent {
   private _category: string;
   private _pageUrl: string;
   private _isEnabled: boolean;
-  private _prompt: string;
+  private _prompt: AgentPrompt;
+  private _guidelines?: string[];
   private _toolIds?: string[];
   private _knowledge?: AgentKnowledgeSource[];
   private _introduction?: string;
@@ -80,8 +74,6 @@ export class Agent {
   private _language?: string;
   private _model?: string;
   private _isDefault?: boolean;
-  private _guidelines?: string[]
-
 
   constructor(props: AgentProperties) {
     this._id = props.id;
@@ -91,6 +83,7 @@ export class Agent {
     this._pageUrl = props.pageUrl;
     this._isEnabled = props.isEnabled;
     this._prompt = props.prompt;
+    this._guidelines = props.guidelines;
     this._toolIds = props.toolIds;
     this._knowledge = props.knowledge;
     this._introduction = props.introduction;
@@ -100,7 +93,6 @@ export class Agent {
     this._language = props.language;
     this._model = props.model;
     this._isDefault = props.isDefault;
-    this._guidelines = props.guidelines;
   }
 
   // Getters and setters for all attributes
@@ -147,11 +139,18 @@ export class Agent {
     this._isEnabled = value;
   }
 
-  public get prompt(): string {
+  public get prompt(): AgentPrompt {
     return this._prompt;
   }
-  public set prompt(value: string) {
+  public set prompt(value: AgentPrompt) {
     this._prompt = value;
+  }
+
+  public get guidelines(): string[] | undefined {
+    return this._guidelines;
+  }
+  public set guidelines(value: string[] | undefined) {
+    this._guidelines = value;
   }
 
   public get toolIds(): string[] | undefined {
@@ -216,12 +215,6 @@ export class Agent {
   public set isDefault(value: boolean | undefined) {
     this._isDefault = value;
   }
-  public get guidelines(): string[] | undefined {
-    return this._guidelines;
-  }
-  public set guidelines(value: string[]) {
-    this._guidelines = value;
-  }
 
   public toJSON(): AgentProperties {
     return {
@@ -232,6 +225,7 @@ export class Agent {
       pageUrl: this.pageUrl,
       isEnabled: this.isEnabled,
       prompt: this.prompt,
+      guidelines: this.guidelines,
       toolIds: this.toolIds,
       knowledge: this.knowledge,
       introduction: this.introduction,
@@ -261,7 +255,7 @@ export class Agent {
    * @param context Any relevant context or input for the task.
    */
   public async execute(context: any): Promise<any> {
-    const goal = typeof this.prompt === 'string' ? this.prompt : this.prompt;
+    const goal = typeof this.prompt === 'string' ? this.prompt : 'Complex prompt';
     console.log(`Agent ${this.name} is executing its goal: ${goal}`);
     // In a real implementation, this would involve complex logic,
     // possibly calling an AI service with its prompt and the context.

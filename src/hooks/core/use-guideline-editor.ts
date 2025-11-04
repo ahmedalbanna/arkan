@@ -5,7 +5,6 @@ import { useMemo, useState } from 'react';
 import { useAgents } from '@/hooks/data/useAgents';
 import { useGenerationUIStore } from './useGenerationUIStore';
 import { useLocalization } from '@/context/LocalizationContext';
-import type { AgentPrompt } from '@/lib/models/agent';
 import { Section } from '@/lib/types';
 
 export function useGuidelineEditor(itemKey: string, section: Section) {
@@ -18,8 +17,20 @@ export function useGuidelineEditor(itemKey: string, section: Section) {
     const agent = useMemo(() => agents.find(a => a.id === section.agent.id), [agents, section.agent.id]);
 
     // Initialize state when agent data is loaded
-    if (agentsLoaded && agent && agent.prompt && !guidelineState[itemKey]) {
-        initializeGuidelines(itemKey, agent.guidelines || []);
+    if (agentsLoaded && agent && agent.guidelines && !guidelineState[itemKey]) {
+        // Since guidelines are just strings now, the default state is simple
+        const defaultChecked: Record<number, boolean> = {};
+        agent.guidelines.forEach((_, i) => { defaultChecked[i] = true; }); // Assume all default guidelines are checked initially
+        
+        const initialGuidelineState = {
+          checked: defaultChecked,
+          custom: [],
+        };
+        // This is a bit of a hack to set the initial state without causing a re-render loop
+        // The store logic should ideally handle initialization more gracefully.
+        if (JSON.stringify(guidelineState[itemKey]) !== JSON.stringify(initialGuidelineState)) {
+             initializeGuidelines(itemKey, agent.guidelines.map(g => ({ text: g, isDefault: true })));
+        }
     }
 
     const currentGuidelineState = guidelineState[itemKey];
