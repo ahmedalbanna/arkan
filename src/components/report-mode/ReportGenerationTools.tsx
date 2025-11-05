@@ -82,7 +82,8 @@ const SortableChapterItem = ({
                 <AccordionTrigger className="px-4 py-2 hover:no-underline">
                      <div className="flex items-center gap-2 flex-1">
                         {listeners && (
-                            <div {...listeners} className="p-1 cursor-grab touch-none -ml-2 text-muted-foreground">
+                            <div {...listeners} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
+                                <span className="text-xs w-4 text-center">{index + 1}</span>
                                 <GripVertical className="h-5 w-5" />
                             </div>
                         )}
