@@ -4,16 +4,21 @@
 import { useLocalization } from '@/context/LocalizationContext';
 import { useGenerationUIStore } from '@/hooks/core/useGenerationUIStore';
 import { useBuilderStore } from '@/hooks/core/useBuilderStore';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 
 export function useContextSelector(itemKey: string) {
     const { t } = useLocalization();
     const { project } = useBuilderStore();
     const { contextSelection, toggleContextSelection, initializeContext } = useGenerationUIStore();
 
-    if (!contextSelection[itemKey]) {
-        initializeContext(itemKey);
-    }
+    // The state initialization now happens inside a useEffect hook
+    // to prevent updating state during the render cycle.
+    useEffect(() => {
+        if (!contextSelection[itemKey]) {
+            initializeContext(itemKey);
+        }
+    }, [itemKey, contextSelection, initializeContext]);
+
 
     const currentSelection = contextSelection[itemKey] || { sections: {}, diagrams: {}, externalContext: [] };
 
