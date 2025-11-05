@@ -100,6 +100,30 @@ export class Project implements SavedProject {
     this.hasUnsavedChanges = false;
   }
 
+  // --- Chapter Methods ---
+  public addChapter(title?: string): string {
+    if (!this._chapters) this._chapters = [];
+    const chapterTitle = title || 'Untitled Chapter';
+    let baseId = chapterTitle.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+    if (!baseId) baseId = 'chapter';
+    
+    let newChapterId = baseId;
+    let counter = 1;
+    while(this._chapters.some(c => c.id === newChapterId)) {
+        newChapterId = `${baseId}-${counter}`;
+        counter++;
+    }
+
+    const newChapter = new Chapter({ id: newChapterId, title: chapterTitle, sections: [] });
+    this._chapters.push(newChapter);
+    this.hasUnsavedChanges = true;
+    return newChapterId;
+  }
+
+  public getChapter(chapterId: string): Chapter | undefined {
+      return this._chapters?.find(c => c.id === chapterId);
+  }
+
   // --- Section Methods ---
   public getSection(sectionId: string): Section | undefined {
     return this.sections?.find(s => s.id === sectionId);
@@ -125,18 +149,19 @@ export class Project implements SavedProject {
     }
   }
 
-  public addCustomSection(id?: string, title?: string): string {
-    const sectionTitle = title || 'Untitled Section';
-    
-    // Generate a unique, URL-friendly ID from the title
-    let baseId = id || sectionTitle.toLowerCase().trim()
-      .replace(/[^\w\s-]/g, '') // remove non-word characters
-      .replace(/\s+/g, '-')    // replace spaces with hyphens
-      .replace(/-+/g, '-');   // replace multiple hyphens with a single one
+  public addSectionToChapter(chapterId: string, title?: string): string | null {
+    const chapter = this.getChapter(chapterId);
+    if (!chapter) return null;
 
+    const sectionTitle = title || 'Untitled Section';
+    let baseId = sectionTitle.toLowerCase().trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-');
+    if (!baseId) baseId = 'section';
+      
     let newSectionId = baseId;
     let counter = 1;
-    // Ensure the ID is unique within the project
     while(this.sections?.some(s => s.id === newSectionId)) {
         newSectionId = `${baseId}-${counter}`;
         counter++;
@@ -151,20 +176,12 @@ export class Project implements SavedProject {
       guidelines: [],
       model: 'googleai/gemini-1.5-flash-preview-0514'
     });
-
-    if (!this._chapters) this._chapters = [];
     
-    let defaultChapter = this._chapters.find(c => c.title === 'Main');
-    if (!defaultChapter) {
-        defaultChapter = new Chapter({ id: 'main', title: 'Main', sections: [] });
-        this._chapters.push(defaultChapter);
-    }
-    
-    defaultChapter.addSection(newSection);
-    
+    chapter.addSection(newSection);
     this.hasUnsavedChanges = true;
     return newSectionId;
   }
+
 
   public removeSection(sectionId: string): void {
     this._chapters?.forEach(chapter => {
@@ -173,15 +190,13 @@ export class Project implements SavedProject {
     this.hasUnsavedChanges = true;
   }
 
-  public updateSectionsOrder(newOrder: string[]): void {
-    const allSections = this.sections;
-    const newOrderedSections = newOrder.map(id => allSections.find(s => s.id === id)).filter((s): s is Section => !!s);
+  public updateSectionsOrder(chapterId: string, newOrder: string[]): void {
+    const chapter = this.getChapter(chapterId);
+    if (!chapter) return;
     
-    // For simplicity, this example assumes one chapter. A multi-chapter implementation would need more complex logic here.
-    if (this._chapters && this._chapters.length > 0) {
-        this._chapters[0].sections = newOrderedSections;
-        this.hasUnsavedChanges = true;
-    }
+    const newOrderedSections = newOrder.map(id => chapter.sections.find(s => s.id === id)).filter((s): s is Section => !!s);
+    chapter.sections = newOrderedSections;
+    this.hasUnsavedChanges = true;
   }
 
 
