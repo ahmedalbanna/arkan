@@ -44,14 +44,6 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     });
   };
 
-   const handleChapterTitleUpdate = (chapterId: string, newTitle: string) => {
-    updateProject(p => {
-      const chapter = p.getChapter(chapterId);
-      if (chapter) {
-        chapter.title = newTitle;
-      }
-    });
-  };
   
   const handleAddSection = () => {
     let newSectionId = '';
@@ -67,7 +59,7 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
   };
 
   const renderContent = () => {
-    if (totalPages === 0) {
+    if (totalPages === 0 || !currentItem) {
       return (
         <div className="flex items-center justify-center h-full min-h-[400px]">
           <div className="text-center text-muted-foreground p-8">
@@ -83,32 +75,8 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
       );
     }
 
-    if (!currentItem) {
-      return (
-        <div className="flex items-center justify-center h-full min-h-[400px]">
-          <div className="text-center text-muted-foreground p-8">
-            <FileText className="w-16 h-16 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold">{t('builder.reportGenerator.selectSectionPrompt')}</h3>
-          </div>
-        </div>
-      );
-    }
-
-    if (currentItem.type === 'chapter') {
-        return (
-             <A4Page key={currentItem.id} className="flex flex-col items-center justify-center text-center">
-                <Input
-                    value={currentItem.title}
-                    onChange={(e) => handleChapterTitleUpdate(currentItem.id, e.target.value)}
-                    className="font-bold text-3xl md:text-4xl text-primary font-headline border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-center"
-                />
-            </A4Page>
-        )
-    }
-
-    // It's a section
     const currentSection = project?.getSection(currentItem.id);
-    const chapter = project?.getChapter(currentItem.chapterId);
+    const chapter = project?.chapters?.find(c => c.sections.some(s => s.id === currentItem.id));
 
     return (
         <div className="h-full p-4 gap-4 rounded-lg flex flex-col mt-4">
