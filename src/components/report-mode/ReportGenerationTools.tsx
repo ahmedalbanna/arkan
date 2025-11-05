@@ -216,11 +216,11 @@ export const GenerationTools = ({
         let currentChapterId: string | null = null;
 
         lines.forEach(line => {
-            const chapterMatch = line.match(/^\d+\.\s+(.+)/);
+            const chapterMatch = line.match(/^(\d+)\.?\s+(.+)/);
             const sectionMatch = line.match(/^\d+\.\d+\.?\s*(.*)/);
 
             if (chapterMatch && !sectionMatch) { // It's a chapter, not a subsection
-                const chapterTitle = chapterMatch[1].trim();
+                const chapterTitle = chapterMatch[2].trim();
                 if (chapterTitle) {
                     currentChapterId = p.addChapter(chapterTitle);
                     chaptersCreated++;
@@ -315,7 +315,7 @@ export const GenerationTools = ({
                   rows={5}
              />
              <Button onClick={handleCreateFromToc} size="sm" className="w-full">
-                  <ListPlus className="me-2 h-4 w-4" /> Create Chapters & Sections
+                  <ListPlus className="me-2 h-4 w-4" /> Create Chapters &amp; Sections
              </Button>
           </div>
 
