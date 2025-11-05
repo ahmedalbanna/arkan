@@ -1,140 +1,86 @@
 
 'use client';
 
-import React from 'react';
-import { Accordion } from '@/components/ui/accordion';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils/cn';
-import { PanelLeftClose } from 'lucide-react';
+import { PanelLeftClose, ListPlus } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { SectionAccordionItem } from './SectionAccordionItem';
 import { Button } from '../ui/button';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { Section } from '@/lib/models/section';
-import { Agent } from '@/lib/models/agent';
-
-interface SortableSectionItemProps {
-    id: string;
-    section: Section;
-    isGenerating: boolean;
-    isAnythingGenerating: boolean;
-    hasCredits: boolean;
-    onGenerate: () => void;
-    index: number;
-}
-
-
-function SortableSectionItem({ id, section, index, ...props }: SortableSectionItemProps) {
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-    } = useSortable({ id: id });
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-    };
-
-    return (
-        <div ref={setNodeRef} style={style} {...attributes}>
-            <SectionAccordionItem
-                itemKey={id}
-                section={section}
-                onGenerate={props.onGenerate}
-                isGenerating={props.isGenerating}
-                isAnythingGenerating={props.isAnythingGenerating}
-                hasCredits={props.hasCredits}
-                handleProps={listeners}
-                index={index}
-            />
-        </div>
-    );
-}
+import { useBuilderStore } from '@/hooks';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import { toast } from '@/hooks';
 
 interface GenerationToolsProps {
-    onCollapseToggle: () => void;
-    orderedSections: Section[];
-    setOrderedSections: (sections: Section[]) => void;
-    isAnythingGenerating: boolean;
-    activeMutationKey: string | null;
-    onGenerateSection: (sectionId: string) => void;
-    hasCreditsForSingleSection: boolean;
-
+  onCollapseToggle: () => void;
 }
 
 export const GenerationTools = ({
-    onCollapseToggle,
-    orderedSections,
-    setOrderedSections,
-    isAnythingGenerating,
-    activeMutationKey,
-    onGenerateSection,
-    hasCreditsForSingleSection,
+  onCollapseToggle,
 }: GenerationToolsProps) => {
-    const { t } = useLocalization();
+  const { t } = useLocalization();
+  const { project, updateProject } = useBuilderStore();
+  const [tocText, setTocText] = useState('');
 
-    const sensors = useSensors(
-        useSensor(PointerSensor),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
-    );
+  const handleCreateSections = () => {
+    if (!tocText.trim()) {
+        toast({
+            title: "Table of Contents is empty",
+            description: "Please paste the section titles into the text area.",
+            variant: "destructive",
+        });
+        return;
+    }
 
-    const handleDragEnd = (event: any) => {
-        const { active, over } = event;
-        if (active.id !== over.id) {
-            const oldIndex = orderedSections.findIndex(s => s.id === active.id);
-            const newIndex = orderedSections.findIndex(s => s.id === over.id);
-            setOrderedSections(arrayMove(orderedSections, oldIndex, newIndex));
-        }
-    };
+    const sectionTitles = tocText.split('\n').map(title => title.trim()).filter(title => title);
 
+    updateProject(p => {
+        sectionTitles.forEach(title => {
+            const id = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+            // Check if section with this ID already exists to avoid duplicates
+            if (!p.sections?.some(s => s.id === id)) {
+                 p.addCustomSection(id, title);
+            }
+        });
+    });
 
-    const isDisabled = isAnythingGenerating;
+    toast({
+        title: "Sections Created",
+        description: `${sectionTitles.length} sections have been added to your project.`,
+    });
+    setTocText('');
+  };
 
-
-    return (
-        <Card className={cn("flex flex-col h-full", (isDisabled) && 'opacity-50 pointer-events-none')}>
-            <CardHeader>
-                <div className="flex justify-between items-center">
-                    <div>
-                        <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
-                        <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
-                    </div>
-                    <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
-                        <PanelLeftClose className="h-5 w-5" />
-                    </Button>
-                </div>
-            </CardHeader>
-            <CardContent className="flex-grow overflow-y-auto pr-2">
-                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                    <SortableContext items={orderedSections.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                        <Accordion type="multiple" className="w-full space-y-1">
-                            {orderedSections.map((section, index) => {
-                                const isGeneratingThis = isAnythingGenerating && activeMutationKey === section.id;
-                                return (
-                                    <SortableSectionItem
-                                        key={section.id}
-                                        id={section.id}
-                                        section={section}
-                                        onGenerate={() => onGenerateSection(section.id)}
-                                        isGenerating={isGeneratingThis}
-                                        isAnythingGenerating={isAnythingGenerating}
-                                        hasCredits={!!hasCreditsForSingleSection}
-                                        index={index}
-                                    />
-                                );
-                            })}
-                        </Accordion>
-                    </SortableContext>
-                </DndContext>
-            </CardContent>
-        </Card>
-    );
+  return (
+    <Card className={cn("flex flex-col h-full")}>
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
+            <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
+          </div>
+          <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
+            <PanelLeftClose className="h-5 w-5" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="flex-grow flex flex-col gap-4">
+          <div className="space-y-2 flex-grow flex flex-col">
+              <Label htmlFor="toc-input">Table of Contents</Label>
+              <Textarea
+                id="toc-input"
+                value={tocText}
+                onChange={(e) => setTocText(e.target.value)}
+                placeholder={"Introduction\nSystem Analysis\nSystem Design\nConclusion..."}
+                className="flex-grow resize-none"
+              />
+          </div>
+          <Button onClick={handleCreateSections} className="w-full">
+            <ListPlus className="me-2 h-4 w-4" />
+            Create Sections from ToC
+          </Button>
+      </CardContent>
+    </Card>
+  );
 };

@@ -124,11 +124,11 @@ export class Project implements SavedProject {
     }
   }
 
-  public addCustomSection(): string {
-    const newSectionId = `custom-section-${Date.now()}`;
+  public addCustomSection(id?: string, title?: string): string {
+    const newSectionId = id || `custom-section-${Date.now()}`;
     const newSection = new Section({
       id: newSectionId,
-      title: 'Untitled Section',
+      title: title || 'Untitled Section',
       type: 'report',
       content: '',
       prompt: 'You are a helpful assistant. Write a section based on the user\'s instructions.',
