@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { Loader2, Sparkles, GripVertical, SlidersHorizontal, StickyNote, Link as LinkIcon } from 'lucide-react';
+import { Loader2, Sparkles, GripVertical, SlidersHorizontal, StickyNote, Link as LinkIcon, Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSectionAccordionItemLogic } from '@/hooks/core/useSectionAccordionItemLogic';
 import type { Section } from '@/lib/models';
@@ -17,6 +17,8 @@ import { Form } from '../ui/form';
 import { useForm } from 'react-hook-form';
 import { Input } from '../ui/input';
 import { useBuilderStore } from '@/hooks';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 
 export const SectionAccordionItem = ({
     itemKey,
@@ -28,6 +30,7 @@ export const SectionAccordionItem = ({
     handleProps,
     index,
     chapterIndex,
+    onDelete,
 }: {
     itemKey: string,
     section: Section,
@@ -38,6 +41,7 @@ export const SectionAccordionItem = ({
     handleProps?: any,
     index: number,
     chapterIndex: number,
+    onDelete: () => void;
 }) => {
     const { t } = useSectionAccordionItemLogic(section);
     const { updateProject } = useBuilderStore();
@@ -102,6 +106,25 @@ export const SectionAccordionItem = ({
                         </span>
                     )}
                 </div>
+                 <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 mr-2" onClick={e => e.stopPropagation()}>
+                            <Trash2 className="h-4 w-4 text-destructive/70" />
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Section?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Are you sure you want to delete the section "{section.title}"? This cannot be undone.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={onDelete} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </AccordionTrigger>
             <AccordionContent>
                 <div className="border-t px-4 pt-4">

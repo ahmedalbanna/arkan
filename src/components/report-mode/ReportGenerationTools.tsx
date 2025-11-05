@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils/cn';
-import { PanelLeftClose, ListPlus, BookCopy, PlusCircle, GripVertical } from 'lucide-react';
+import { PanelLeftClose, ListPlus, BookCopy, PlusCircle, GripVertical, Trash2 } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Button } from '../ui/button';
 import { useBuilderStore } from '@/hooks';
@@ -21,6 +21,8 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Loader2 } from 'lucide-react';
 import { Input } from '../ui/input';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 
 interface GenerationToolsProps {
   onCollapseToggle: () => void;
@@ -34,11 +36,13 @@ const SortableSectionItem = ({
   section,
   index,
   chapterIndex,
+  onDelete,
   ...props
 }: {
   section: Section;
   index: number;
   chapterIndex: number;
+  onDelete: () => void;
   [key: string]: any; // To pass through other props
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -59,6 +63,7 @@ const SortableSectionItem = ({
         handleProps={{ ...listeners }}
         chapterIndex={chapterIndex}
         index={index}
+        onDelete={onDelete}
         {...props}
       />
     </div>
@@ -69,11 +74,15 @@ const SortableChapterItem = ({
     chapter,
     index,
     onAddSection,
+    onDeleteSection,
+    onDeleteChapter,
     ...props
 }: {
     chapter: Chapter;
     index: number;
     onAddSection: (chapterId: string) => void;
+    onDeleteSection: (chapterId: string, sectionId: string) => void;
+    onDeleteChapter: (chapterId: string) => void;
     [key: string]: any;
 }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
@@ -140,6 +149,25 @@ const SortableChapterItem = ({
                             </span>
                         )}
                      </div>
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 mr-2" onClick={e => e.stopPropagation()}>
+                                <Trash2 className="h-4 w-4 text-destructive/70" />
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Chapter?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Are you sure you want to delete the chapter "{chapter.title}" and all of its sections? This action cannot be undone.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => onDeleteChapter(chapter.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </AccordionTrigger>
                 <AccordionContent>
                     <div className="border-t px-4 py-4 space-y-4">
@@ -150,6 +178,7 @@ const SortableChapterItem = ({
                                     section={section}
                                     index={sectionIndex}
                                     chapterIndex={props.chapterIndex}
+                                    onDelete={() => onDeleteSection(chapter.id, section.id)}
                                     onGenerate={() => props.onGenerateSection(section.id)}
                                     isGenerating={props.activeMutationKey === section.id}
                                     isAnythingGenerating={props.isAnythingGenerating}
@@ -195,6 +224,15 @@ export const GenerationTools = ({
           p.addSectionToChapter(chapterId, "New Section");
       });
   };
+
+  const handleDeleteSection = (chapterId: string, sectionId: string) => {
+    updateProject(p => p.removeSection(sectionId));
+  };
+  
+  const handleDeleteChapter = (chapterId: string) => {
+      updateProject(p => p.removeChapter(chapterId));
+  };
+
 
   const handleCreateFromToc = () => {
     if (!tocText.trim()) {
@@ -329,6 +367,8 @@ export const GenerationTools = ({
                                 index={chapterIndex}
                                 key={chapter.id}
                                 onAddSection={handleAddSectionToChapter}
+                                onDeleteSection={handleDeleteSection}
+                                onDeleteChapter={handleDeleteChapter}
                                 // Pass down necessary props to the inner list
                                 chapterIndex={chapterIndex}
                                 onGenerateSection={onGenerateSection}

@@ -121,6 +121,12 @@ export class Project implements SavedProject {
     return newChapterId;
   }
 
+  public removeChapter(chapterId: string): void {
+    if (!this._chapters) return;
+    this._chapters = this._chapters.filter(c => c.id !== chapterId);
+    this.hasUnsavedChanges = true;
+  }
+
   public getChapter(chapterId: string): Chapter | undefined {
       return this._chapters?.find(c => c.id === chapterId);
   }
