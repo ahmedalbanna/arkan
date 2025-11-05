@@ -149,43 +149,6 @@ export const SessionActions = () => {
                     </AlertDialogContent>
                 </AlertDialog>
 
-                <Dialog open={isSaveAsOpen} onOpenChange={setIsSaveAsOpen}>
-                    <DialogTrigger asChild>
-                         <Button
-                            variant="outline"
-                            size="icon"
-                            disabled={!hasContent}
-                            className="h-8 w-8 md:w-auto md:px-3"
-                        >
-                            <Save className="h-4 w-4" />
-                            <span className="hidden md:inline ms-2">{t('projects.saveAsButton')}</span>
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>{t('projects.saveAsTitle')}</DialogTitle>
-                            <DialogDescription>{t('projects.saveAsDescription')}</DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="save-as-name" className="text-right">{t('projects.nameLabel')}</Label>
-                                <Input id="save-as-name" value={saveAsName} onChange={(e) => setSaveAsName(e.target.value)} className="col-span-3" />
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button type="button" variant="secondary" onClick={handleDownloadAs}>
-                                <FileJson className="me-2 h-4 w-4" />
-                                {t('projects.downloadButton')}
-                            </Button>
-                            <Button onClick={handleSaveFromPrompt} disabled={isSaving}>
-                                {isSaving && <Loader2 className="h-4 w-4 animate-spin me-2" />}
-                                <Cloud className="me-2 h-4 w-4" />
-                                {t('projects.saveToCloudButton')}
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="icon" className="h-8 w-8 md:w-auto md:px-3" disabled={isBusy || !hasContent}>
@@ -196,7 +159,11 @@ export const SessionActions = () => {
                     <DropdownMenuContent align="end" className="w-64">
                          <DropdownMenuLabel>Export Options</DropdownMenuLabel>
                          <DropdownMenuSeparator />
-                        <ReportExportDialog
+                        <DropdownMenuItem onSelect={handleDownloadAs} disabled={isBusy || !hasContent}>
+                            <FileJson className="me-2 h-4 w-4" />
+                            <span>Download Project (.arkan)</span>
+                        </DropdownMenuItem>
+                         <ReportExportDialog
                             isExporting={isExporting}
                             onExport={handleExportReport}
                             disabled={isBusy || !project?.sections || project.sections.length === 0}

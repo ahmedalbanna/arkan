@@ -60,10 +60,8 @@ export function ReportExportDialog({ isExporting, onExport, disabled }: ReportEx
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={disabled}>
-          <div className="flex flex-col w-full">
-            <span>Export Report as DOCX</span>
-            <span className="text-xs text-muted-foreground">Requires generated report sections</span>
-          </div>
+           <FileText className="me-2 h-4 w-4" />
+           <span>Export Report as DOCX</span>
         </DropdownMenuItem>
       </DialogTrigger>
       <DialogContent>
