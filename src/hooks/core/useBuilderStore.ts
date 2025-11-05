@@ -6,6 +6,7 @@ import { create } from 'zustand';
 import { Project, type ProjectProperties } from '@/lib/models/project';
 import { useToast } from '@/hooks';
 import { useRouter } from 'next/navigation';
+import { Chapter } from '@/lib/models';
 
 // This type includes both the state and the actions for the store
 interface BuilderState {
@@ -76,7 +77,12 @@ const useBuilderStore = create<BuilderState>((set, get) => {
 
         // --- Core Project Actions ---
         loadProject: (projectData) => {
-            set({ project: new Project(projectData), hasUnsavedChanges: false });
+            // Re-instantiate the Project and its nested classes from plain data
+            const newProject = new Project({
+                ...projectData,
+                chapters: (projectData.chapters || []).map(c => new Chapter(c))
+            });
+            set({ project: newProject, hasUnsavedChanges: false });
         },
         updateProject: (updater) => {
             set(state => {
@@ -156,7 +162,8 @@ const useBuilderStore = create<BuilderState>((set, get) => {
                 reader.onload = (event) => {
                     try {
                         const projectData = JSON.parse(event.target?.result as string);
-                        if (projectData.id) { // Basic validation
+                        // More robust validation
+                        if (projectData && typeof projectData === 'object' && ('id' in projectData || 'name' in projectData)) {
                             loadProject(projectData);
                             toast({ title: t('builder.toasts.projectLoadedTitle'), description: t('builder.toasts.projectLoadedDesc', { projectName: projectData.name }) });
                              router.push('/builder');
