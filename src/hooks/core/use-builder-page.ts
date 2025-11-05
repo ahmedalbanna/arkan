@@ -1,14 +1,13 @@
-
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useFeatures, useProject } from '@/hooks';
 
 export function useBuilderPageLogic() {
-  const { project, loadProject } = useBuilderStore();
+  const { project: projectFromStore, loadProject, updateProject } = useBuilderStore();
   const { firebaseUser, userProfile, refetchUser } = useAuth();
   const { t, locale } = useLocalization();
   const queryClient = useQueryClient();
@@ -16,22 +15,33 @@ export function useBuilderPageLogic() {
 
   const [activeTab, setActiveTab] = useState<string>('files');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [hasLoadedProject, setHasLoadedProject] = useState(false);
+  const [activeProjectId, setActiveProjectId] = useState<string | undefined>(projectFromStore?.id);
 
-  const { data: projectData, isSuccess } = useProject(project?.id ?? '');
+  // When the project in the global store changes (e.g., loaded from a file), update our active ID
+  useEffect(() => {
+    if (projectFromStore?.id !== activeProjectId) {
+      setActiveProjectId(projectFromStore?.id);
+    }
+  }, [projectFromStore, activeProjectId]);
 
+  // useProject hook now fetches based on the activeProjectId
+  const { data: projectFromServer, isLoading: isLoadingProject, isSuccess } = useProject(activeProjectId);
+  
+  // When data is successfully fetched from the server, load it into the store.
+  useEffect(() => {
+    if (isSuccess && projectFromServer) {
+      // Avoid re-loading if the store already has this version
+      if (projectFromStore?.updatedAt !== projectFromServer.updatedAt) {
+          loadProject(projectFromServer.toStateObject());
+      }
+    }
+  }, [isSuccess, projectFromServer, loadProject, projectFromStore?.updatedAt]);
+  
   useEffect(() => {
     if (userProfile && !userProfile.hasCompletedOnboarding) {
       setShowOnboarding(true);
     }
   }, [userProfile]);
-
-  useEffect(() => {
-    if (isSuccess && projectData && !hasLoadedProject) {
-      loadProject(projectData);
-      setHasLoadedProject(true);
-    }
-  }, [isSuccess, projectData, loadProject, hasLoadedProject]);
 
   const onboardingMutation = useMutation({
     mutationFn: async () => {
@@ -82,6 +92,14 @@ export function useBuilderPageLogic() {
       setActiveTab('');
     }
   }, [features, activeTab, enabledTabs]);
+  
+  const updateProjectName = useCallback((name: string) => {
+      updateProject(p => { p.name = name; });
+  }, [updateProject]);
+
+  const updateProjectDescription = useCallback((description: string) => {
+      updateProject(p => { p.projectDescription = description; });
+  }, [updateProject]);
 
   return {
     activeTab,
@@ -91,10 +109,12 @@ export function useBuilderPageLogic() {
     handleOnboardingComplete,
     t,
     locale,
-    project,
-    projectData,
+    project: projectFromStore,
+    isLoadingProject,
     enabledTabs,
     featuresLoaded,
     isFeatureEnabled,
+    updateProjectName,
+    updateProjectDescription
   };
 }

@@ -17,6 +17,7 @@ export function useProjectsPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleLoadProject = (project: Project) => {
+        // Just load the project into the store; the builder page will handle fetching/displaying
         loadProject(project.toStateObject());
         router.push('/builder');
     };

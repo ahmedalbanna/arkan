@@ -1,13 +1,8 @@
-
 'use client';
 
 import OnboardingGuide from '@/components/auth/OnboardingGuide';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from '@/context/AuthContext';
-import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useFeatures, useProject } from '@/hooks';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { FileText, FolderKanban } from 'lucide-react';
@@ -40,22 +35,6 @@ const FileManager = dynamic(() => import('@/components/file/FileManager'), {
   loading: () => <LoadingSkeleton />,
 });
 
-
-async function markOnboardingComplete(userId: string, token: string) {
-  const response = await fetch(`/api/users/${userId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({ hasCompletedOnboarding: true })
-  });
-  if (!response.ok) {
-    throw new Error('Failed to update onboarding status');
-  }
-  return response.json();
-}
-
 function GeneratePageContent() {
   const {
     activeTab,
@@ -66,22 +45,19 @@ function GeneratePageContent() {
     t,
     locale,
     project,
-    projectData,
+    isLoadingProject,
     enabledTabs,
     featuresLoaded,
     isFeatureEnabled,
+    updateProjectName,
+    updateProjectDescription,
   } = useBuilderPageLogic();
+  
   const [isClient, setIsClient] = useState(false);
-  const { updateProject } = useBuilderStore();
-
 
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-
-
-  // hook provides tab enabling and activeTab upkeep
 
   return (
     <div className="relative flex-grow flex flex-col">
@@ -89,7 +65,7 @@ function GeneratePageContent() {
       <div className="flex-grow flex flex-col mx-auto px-4 py-8 w-full">
         <div className="flex justify-between items-start mb-4 gap-4 max-w-full">
           <div className="flex-1 space-y-2 overflow-auto">
-            {!isClient ? (
+            {!isClient || isLoadingProject ? (
               <>
                 <Skeleton className="h-8 w-48" />
                 <Skeleton className="h-10 w-full" />
@@ -100,18 +76,18 @@ function GeneratePageContent() {
                 <Input
                   className="text-xl font-semibold text-foreground border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
                   value={project?.name || ''}
-                  onChange={(e) => updateProject(p => { p.name = e.target.value; })}
+                  onChange={(e) => updateProjectName(e.target.value)}
                   placeholder={t('projects.untitled')}
                 />
                  <Textarea
                   className="text-sm text-muted-foreground border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto resize-none"
                   value={project?.projectDescription || ''}
-                  onChange={(e) => updateProject(p => { p.projectDescription = e.target.value; })}
+                  onChange={(e) => updateProjectDescription(e.target.value)}
                   placeholder={t('projects.noDescription')}
                 />
-                {projectData?.updatedAt && (
+                {project?.updatedAt && (
                   <p className="text-xs text-muted-foreground pt-1">
-                    {t('projects.updated', { time: formatDistanceToNow(new Date(projectData.updatedAt), { addSuffix: true, locale: locale === 'ar' ? ar : enUS }) })}
+                    {t('projects.updated', { time: formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true, locale: locale === 'ar' ? ar : enUS }) })}
                   </p>
                 )}
               </>
