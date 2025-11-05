@@ -153,7 +153,7 @@ const SortableChapterItem = ({
                     </AccordionTrigger>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => e.stopPropagation()}>
+                            <Button variant="ghost" size="icon" className="h-7 w-7">
                                 <Trash2 className="h-4 w-4 text-destructive/70" />
                             </Button>
                         </AlertDialogTrigger>

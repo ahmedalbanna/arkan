@@ -16,34 +16,23 @@ import { arrayMove } from '@dnd-kit/sortable';
 
 export function useReportModeGenerator() {
     const { t, locale } = useLocalization();
-    const { project, updateProject } = useBuilderStore();
+    const { project, updateProject } = useBuilderStore(); // Directly use the store
     const { data: sectionConfigs, isFetched: sectionsLoaded } = useSections();
     const { controlState, guidelineState, contextSelection, initializeControls } = useGenerationUIStore();
     const { userProfile, refetchUser, firebaseUser } = useAuth();
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     const queryClient = useQueryClient();
 
-    const orderedSections = useMemo(() => {
-        if (!project) return [];
-        return project.sections;
-    }, [project]);
-
-
-    const setOrderedSections = (newOrder: Section[]) => {
-        const orderIds = newOrder.map(s => s.id);
-        updateProject(p => {
-          p.updateSectionsOrder(orderIds[0], orderIds); // This needs a chapterId, which we don't have here.
-        });
-    };
+    // No need for orderedSections or setOrderedSections state, as we read directly from the project in the store.
 
     // Initialize UI stores when sections are ready
     useEffect(() => {
-        if (orderedSections.length > 0) {
-            orderedSections.forEach(section => {
+        if (project?.sections && project.sections.length > 0) {
+            project.sections.forEach(section => {
                 initializeControls(section.id);
             });
         }
-    }, [orderedSections, initializeControls]);
+    }, [project?.sections, initializeControls]);
 
 
     const agentMutation = useMutation({
@@ -51,7 +40,7 @@ export function useReportModeGenerator() {
         mutationFn: async (sectionId: string) => {
             if (!project || !userProfile || !firebaseUser) throw new Error("Project or user not found.");
 
-            const section = orderedSections?.find(s => s.id === sectionId);
+            const section = project.getSection(sectionId);
             if (!section) throw new Error("Section not found.");
 
             const token = await firebaseUser.getIdToken();
@@ -76,7 +65,6 @@ export function useReportModeGenerator() {
             const body = {
                 sectionToGenerate: section.id,
                 prompt: section.prompt,
-                model: section.model,
                 instructionText: `Please use a ${controls.tone} tone and aim for a word count of approximately ${controls.wordCount} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}.`,
                 guidelines: section.guidelines,
                 otherSections: { ...otherSectionsContext },
@@ -123,8 +111,13 @@ export function useReportModeGenerator() {
         locale,
         isPanelCollapsed,
         setIsPanelCollapsed,
-        orderedSections,
-        setOrderedSections,
+        orderedSections: project?.sections ?? [],
+        setOrderedSections: (newOrder: Section[]) => {
+            // This is now just a pass-through to the store update, if needed at all.
+            const orderIds = newOrder.map(s => s.id);
+            // This logic needs rethinking as we don't have chapter context here.
+            // updateProject(p => p.updateSectionsOrder(orderIds)); 
+        },
         generatedSections,
         isAnythingGenerating,
         activeMutationKey,

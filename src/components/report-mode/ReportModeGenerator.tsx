@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useReportModeGenerator, useBuilderStore } from '@/hooks';
+import { useReportModeGenerator } from '@/hooks';
 import { lazy, Suspense } from 'react';
 import { Skeleton } from '../ui/skeleton';
 import { GenerationTools } from './ReportGenerationTools';
@@ -29,8 +29,8 @@ export default function ReportModeGenerator() {
         locale,
         isPanelCollapsed,
         setIsPanelCollapsed,
-        orderedSections,
-        setOrderedSections,
+        orderedSections, // No longer used, but kept for compatibility
+        setOrderedSections, // No longer used, but kept for compatibility
         isAnythingGenerating,
         activeMutationKey,
         onGenerateSection,
@@ -60,8 +60,6 @@ export default function ReportModeGenerator() {
             <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
                 <GenerationTools
                     onCollapseToggle={() => setIsPanelCollapsed(true)}
-                    orderedSections={orderedSections}
-                    setOrderedSections={setOrderedSections}
                     isAnythingGenerating={isAnythingGenerating}
                     activeMutationKey={activeMutationKey}
                     onGenerateSection={onGenerateSection}
