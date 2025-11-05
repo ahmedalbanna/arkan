@@ -11,7 +11,7 @@ import { useBuilderStore } from '@/hooks';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { toast } from '@/hooks';
-import { Accordion } from '@/components/ui/accordion';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { SectionAccordionItem } from './SectionAccordionItem';
