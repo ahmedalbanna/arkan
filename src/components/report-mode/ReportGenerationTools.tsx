@@ -4,10 +4,10 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils/cn';
-import { PanelLeftClose, ListPlus, Wand2, BookCopy, PlusCircle } from 'lucide-react';
+import { PanelLeftClose, ListPlus, BookCopy, PlusCircle } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Button } from '../ui/button';
-import { useBuilderStore, useWritingTool } from '@/hooks';
+import { useBuilderStore } from '@/hooks';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { toast } from '@/hooks';
@@ -118,7 +118,13 @@ export const GenerationTools = ({
         const newIndex = chapter.sections.findIndex((s) => s.id === over.id);
         const newOrderedIds = arrayMove(chapter.sections.map(s => s.id), oldIndex, newIndex);
         updateProject(p => {
-            p.updateSectionsOrder(chapterId, newOrderedIds);
+            if (p) { // Ensure project exists
+              const chap = p.getChapter(chapterId);
+              if (chap) {
+                const newOrderedSections = newOrderedIds.map(id => chap.sections.find(s => s.id === id)).filter((s): s is Section => !!s);
+                chap.sections = newOrderedSections;
+              }
+            }
         });
     }
   };
@@ -189,8 +195,8 @@ export const GenerationTools = ({
                                     </Accordion>
                                 </SortableContext>
                             </DndContext>
-                            <Button onClick={() => handleAddSection(chapter.id)} variant="outline" className="w-full">
-                                <PlusCircle className="me-2 h-4 w-4" /> Add New Section
+                             <Button onClick={() => handleAddSection(chapter.id)} variant="outline" className="w-full mt-2">
+                                <PlusCircle className="me-2 h-4 w-4" /> Add Section
                             </Button>
                          </div>
                     </CardContent>
