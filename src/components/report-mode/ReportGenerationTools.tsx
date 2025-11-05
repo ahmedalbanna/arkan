@@ -23,11 +23,11 @@ import { Loader2 } from 'lucide-react';
 import { Input } from '../ui/input';
 
 interface GenerationToolsProps {
+  onCollapseToggle: () => void;
   isAnythingGenerating: boolean;
   activeMutationKey: string | null;
   onGenerateSection: (sectionId: string) => void;
   hasCreditsForSingleSection: boolean;
-  onCollapseToggle: () => void;
 }
 
 const SortableSectionItem = ({
@@ -66,10 +66,12 @@ const SortableSectionItem = ({
 const SortableChapterItem = ({
     chapter,
     index,
+    onAddSection,
     ...props
 }: {
     chapter: Chapter;
     index: number;
+    onAddSection: () => void;
     [key: string]: any;
 }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: chapter.id });
@@ -95,7 +97,34 @@ const SortableChapterItem = ({
                 </AccordionTrigger>
                 <AccordionContent>
                     <div className="border-t px-4 py-4 space-y-4">
-                        {props.children}
+                        {chapter.sections.length > 0 ? (
+                           <DndContext collisionDetection={closestCenter} onDragEnd={(e) => props.onSectionDragEnd(e, chapter.id)}>
+                                <SortableContext items={chapter.sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                                    <Accordion type="single" collapsible className="w-full space-y-2">
+                                        {chapter.sections.map((section, index) => (
+                                            <SortableSectionItem
+                                                key={section.id}
+                                                section={section}
+                                                index={index}
+                                                chapterIndex={props.chapterIndex}
+                                                onGenerate={props.onGenerateSection}
+                                                isGenerating={props.activeMutationKey === section.id}
+                                                isAnythingGenerating={props.isAnythingGenerating}
+                                                hasCredits={props.hasCreditsForSingleSection}
+                                            />
+                                        ))}
+                                    </Accordion>
+                                </SortableContext>
+                            </DndContext>
+                        ) : (
+                            <div className="text-center py-4">
+                                <p className="text-sm text-muted-foreground mb-3">This chapter is empty.</p>
+                                <Button size="sm" variant="outline" onClick={onAddSection}>
+                                    <PlusCircle className="me-2 h-4 w-4" />
+                                    Add New Section
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </AccordionContent>
              </AccordionItem>
@@ -115,6 +144,7 @@ export const GenerationTools = ({
   const { project, updateProject } = useBuilderStore();
   const [tocText, setTocText] = useState('');
   const [newChapterTitle, setNewChapterTitle] = useState('');
+  const [newSectionTitle, setNewSectionTitle] = useState('');
 
   const handleAddChapter = () => {
     if(!newChapterTitle.trim()) {
@@ -123,6 +153,13 @@ export const GenerationTools = ({
     }
     updateProject(p => p.addChapter(newChapterTitle));
     setNewChapterTitle('');
+  };
+  
+  const handleAddSectionToChapter = (chapterId: string) => {
+      updateProject(p => {
+          const newSectionId = p.addSectionToChapter(chapterId, "New Section");
+          // Optionally do something with the new section ID
+      });
   };
 
   const handleCreateFromToc = () => {
@@ -143,7 +180,6 @@ export const GenerationTools = ({
         let currentChapterId: string | null = null;
 
         lines.forEach(line => {
-            // Regex to match chapter (e.g., "1. Title") or section (e.g., "1.1 Title")
             const chapterMatch = line.match(/^\d+\.\s+(.+)/);
             const sectionMatch = line.match(/^\d+\.\d+\.?\s*(.*)/);
 
@@ -229,26 +265,19 @@ export const GenerationTools = ({
                       <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
                         <Accordion type="multiple" className="w-full space-y-4">
                           {(project?.chapters || []).map((chapter, chapterIndex) => (
-                            <SortableChapterItem chapter={chapter} index={chapterIndex} key={chapter.id}>
-                                <DndContext collisionDetection={closestCenter} onDragEnd={(e) => handleSectionDragEnd(e, chapter.id)}>
-                                    <SortableContext items={chapter.sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                                        <Accordion type="single" collapsible className="w-full space-y-2">
-                                            {chapter.sections.map((section, index) => (
-                                                <SortableSectionItem
-                                                    key={section.id}
-                                                    section={section}
-                                                    index={index}
-                                                    chapterIndex={chapterIndex}
-                                                    onGenerate={() => onGenerateSection(section.id)}
-                                                    isGenerating={activeMutationKey === section.id}
-                                                    isAnythingGenerating={isAnythingGenerating}
-                                                    hasCredits={hasCreditsForSingleSection}
-                                                />
-                                            ))}
-                                        </Accordion>
-                                    </SortableContext>
-                                </DndContext>
-                            </SortableChapterItem>
+                            <SortableChapterItem
+                                chapter={chapter}
+                                index={chapterIndex}
+                                key={chapter.id}
+                                onSectionDragEnd={handleSectionDragEnd}
+                                onAddSection={() => handleAddSectionToChapter(chapter.id)}
+                                // Pass down necessary props to the inner list
+                                chapterIndex={chapterIndex}
+                                onGenerateSection={onGenerateSection}
+                                activeMutationKey={activeMutationKey}
+                                isAnythingGenerating={isAnythingGenerating}
+                                hasCreditsForSingleSection={hasCreditsForSingleSection}
+                            />
                           ))}
                         </Accordion>
                       </SortableContext>
