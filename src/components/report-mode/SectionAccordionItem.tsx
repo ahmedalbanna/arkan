@@ -14,6 +14,8 @@ import { GuidelineEditor } from './SectionGuidelineEditor';
 import { useAuth } from '@/context/AuthContext';
 import { ContextSelector } from './SectionContextSelector';
 import { cn } from '@/lib/utils/cn';
+import { Form } from '../ui/form';
+import { useForm } from 'react-hook-form';
 
 export const SectionAccordionItem = ({
     itemKey,
@@ -37,6 +39,8 @@ export const SectionAccordionItem = ({
     const {
         t,
     } = useSectionAccordionItemLogic(section);
+
+    const form = useForm(); // Create a form instance for the provider
 
     const { userProfile } = useAuth();
 
@@ -90,22 +94,24 @@ export const SectionAccordionItem = ({
             </AccordionTrigger>
             <AccordionContent>
                 <div className="border-t px-4 pt-4">
-                    <Tabs defaultValue="controls" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="controls"><SlidersHorizontal className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_controls')}</TabsTrigger>
-                            <TabsTrigger value="prompt"><StickyNote className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_prompt')}</TabsTrigger>
-                            <TabsTrigger value="context"><LinkIcon className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="controls" className="py-4">
-                            <SectionGenerationControls sectionKey={itemKey} />
-                        </TabsContent>
-                        <TabsContent value="prompt" className="py-4">
-                            <GuidelineEditor itemKey={itemKey} />
-                        </TabsContent>
-                        <TabsContent value="context" className="py-4">
-                            <ContextSelector itemKey={itemKey} />
-                        </TabsContent>
-                    </Tabs>
+                    <Form {...form}>
+                        <Tabs defaultValue="controls" className="w-full">
+                            <TabsList className="grid w-full grid-cols-3">
+                                <TabsTrigger value="controls"><SlidersHorizontal className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_controls')}</TabsTrigger>
+                                <TabsTrigger value="prompt"><StickyNote className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_prompt')}</TabsTrigger>
+                                <TabsTrigger value="context"><LinkIcon className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="controls" className="py-4">
+                                <SectionGenerationControls sectionKey={itemKey} />
+                            </TabsContent>
+                            <TabsContent value="prompt" className="py-4">
+                                <GuidelineEditor itemKey={itemKey} />
+                            </TabsContent>
+                            <TabsContent value="context" className="py-4">
+                                <ContextSelector itemKey={itemKey} />
+                            </TabsContent>
+                        </Tabs>
+                    </Form>
                 </div>
             </AccordionContent>
         </AccordionItem>
