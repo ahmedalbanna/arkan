@@ -6,34 +6,29 @@ import { saveAs } from 'file-saver';
 
 import { templates } from './docx-styles';
 import { createDocxContent } from './markdown-to-word-converter';
+import type { Section } from '@/lib/models';
 
 
 const defaultStyles = templates.modern.styles;
 
 
-
 export async function exportReportAsDocx(
-    sections: { [key: string]: { title: string; content: string } | undefined },
-    projectName: string,
-    sectionsToInclude?: string[]
+    sections: Section[],
+    projectName: string
 ) {
     const styles = defaultStyles;
     const docxObjects: (Paragraph | Table)[] = [];
-    const sectionOrder = sectionsToInclude && sectionsToInclude.length > 0
-        ? sectionsToInclude
-        : Object.keys(sections);
 
-    for (const key of sectionOrder) {
-        const sectionData = sections[key];
-        if (sectionData && sectionData.content) {
-            const title = sectionData.title || key.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    for (const section of sections) {
+        if (section && section.content) {
             docxObjects.push(new Paragraph({
-                text: title,
+                text: section.title,
                 heading: 'Heading1',
             }));
-            const { docxObjects: sectionDocxObjects } = await createDocxContent(sectionData.content);
+            const { docxObjects: sectionDocxObjects } = await createDocxContent(section.content);
+            // Filter out any directive objects that shouldn't be in the final output
             docxObjects.push(...sectionDocxObjects.filter((obj): obj is Paragraph | Table => !('_type' in obj)));
-            docxObjects.push(new Paragraph({ text: '' })); // Add a spacer
+            docxObjects.push(new Paragraph({ text: '' })); // Add a spacer paragraph
         }
     }
 
