@@ -237,7 +237,6 @@ export const GenerateSectionInputSchema = z.object({
     sectionToGenerate: SectionNameSchema,
     // The agent prompt is now the main prompt for the section
     prompt: z.string().min(10, 'Prompt must be at least 10 characters.'),
-    model: z.string().optional(),
     otherSections: z.record(z.string(), z.string()).optional().describe("A map of previously generated text sections and other textual context (like the proposal or plan). The key is the item's name and the value is the markdown/JSON content."),
     externalContext: z.array(z.object({
         fileName: z.string(),
@@ -543,7 +542,7 @@ export type EvaluateReportOutput = z.infer<typeof EvaluateReportOutputSchema>;
 
 // generate-toc.ts
 export const GenerateTocInputSchema = z.object({
-    projectIdea: z.string().min(10, 'Project idea must be at least 10 characters.'),
+    projectDescription: z.string().min(10, 'Project idea must be at least 10 characters.'),
 });
 export type GenerateTocInput = z.infer<typeof GenerateTocInputSchema>;
 

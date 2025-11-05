@@ -9,7 +9,6 @@ export interface SectionProperties {
     // Agent-related properties are now part of the section itself
     prompt?: string;
     guidelines?: string[];
-    model?: string;
 }
 
 export class Section {
@@ -19,7 +18,6 @@ export class Section {
     private _content?: string;
     private _prompt?: string;
     private _guidelines?: string[];
-    private _model?: string;
 
 
     constructor(props: SectionProperties) {
@@ -29,7 +27,6 @@ export class Section {
         this._content = props.content ?? '';
         this._prompt = props.prompt ?? 'You are a helpful assistant.';
         this._guidelines = props.guidelines ?? [];
-        this._model = props.model ?? 'googleai/gemini-1.5-flash-preview-0514';
     }
 
     get id(): string {
@@ -71,12 +68,6 @@ export class Section {
     set guidelines(value: string[] | undefined) {
         this._guidelines = value;
     }
-    get model(): string | undefined {
-        return this._model;
-    }
-    set model(value: string | undefined) {
-        this._model = value;
-    }
 
     public toJSON(): SectionProperties {
         return {
@@ -86,7 +77,6 @@ export class Section {
             content: this._content,
             prompt: this._prompt,
             guidelines: this._guidelines,
-            model: this._model,
         };
     }
 
