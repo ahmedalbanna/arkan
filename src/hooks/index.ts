@@ -1,13 +1,8 @@
 
 // Admin Hooks
 export * from './admin/use-admin-dashboard';
-export * from './admin/use-agent-editor';
-export * from './admin/use-create-agent-dialog';
-export * from './admin/use-create-category-dialog';
 export * from './admin/use-create-user-dialog';
 export * from './admin/use-user-management-console';
-// export * from './admin/useDocxTemplateManager';
-
 // Auth Hooks
 export * from './auth/use-auth-mutations';
 
@@ -26,7 +21,6 @@ export * from './core/use-session-actions';
 
 
 // Data Fetching Hooks
-export * from './data/useAgents';
 export * from './data/use-analytics';
 export * from './data/use-features';
 export * from './data/use-notifications';

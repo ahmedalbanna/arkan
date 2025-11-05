@@ -235,6 +235,9 @@ export type GenerateQuizOutput = z.infer<typeof GenerateQuizOutputSchema>;
 // generate-report-section.ts
 export const GenerateSectionInputSchema = z.object({
     sectionToGenerate: SectionNameSchema,
+    // The agent prompt is now the main prompt for the section
+    prompt: z.string().min(10, 'Prompt must be at least 10 characters.'),
+    model: z.string().optional(),
     otherSections: z.record(z.string(), z.string()).optional().describe("A map of previously generated text sections and other textual context (like the proposal or plan). The key is the item's name and the value is the markdown/JSON content."),
     externalContext: z.array(z.object({
         fileName: z.string(),
@@ -243,10 +246,7 @@ export const GenerateSectionInputSchema = z.object({
     })).optional().describe("An array of external documents to be used for style, tone, and structure."),
     guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
     instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
-    agent: z.string().optional(),
-    agentPrompt: z.any().optional(), // Can be string or AgentPrompt
-    model: z.string().optional(),
-}).refine(data => (data.otherSections && Object.keys(data.otherSections).length > 0) || (data.externalContext && data.externalContext.length > 0), {
+}).refine(data => (data.otherSections && Object.keys(data.otherSections).length > 0) || (data.externalContext && data.externalContext.length > 0) || data.prompt, {
     message: "Some context (like a proposal, other sections, or context files) is required to generate a report section.",
     path: ["otherSections"], // Associate error with a path
 });
@@ -321,8 +321,8 @@ export type ImageToTextOutput = z.infer<typeof ImageToTextOutputSchema>;
 
 // improve-report-markdown.ts
 export const ImproveMarkdownInputSchema = z.object({
-    markdownContent: z.string().describe('The full report content in Markdown format.'),
-    userPrompt: z.string().describe('Specific instructions from the user on how to improve the document.'),
+    markdownContent: z.string().min(20, 'Markdown content is too short.'),
+    userPrompt: z.string().min(10, 'Instructions for the AI must be at least 10 characters.'),
 });
 export type ImproveMarkdownInput = z.infer<typeof ImproveMarkdownInputSchema>;
 

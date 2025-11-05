@@ -42,7 +42,6 @@ export class Project implements SavedProject {
     this._updatedAt = props.updatedAt || new Date().toISOString();
     this._name = props.name;
     this._projectIdea = props.projectIdea;
-    // Ensure sections are always instances of the Section class, even if props.sections is undefined.
     this._sections = (props.sections || []).map(s => s instanceof Section ? s : new Section(s as SectionProperties));
     this._sectionsOrder = props.sectionsOrder || [];
     this._externalContext = props.externalContext || [];
@@ -132,8 +131,9 @@ export class Project implements SavedProject {
       title: 'Untitled Section',
       type: 'report',
       content: '',
-      // Assign a default agent ID to satisfy backend validation
-      agentId: 'document-abstract-writer',
+      prompt: 'You are a helpful assistant. Write a section based on the user\'s instructions.',
+      guidelines: [],
+      model: 'googleai/gemini-1.5-flash-preview-0514'
     });
     if (!this._sections) this._sections = [];
     this._sections.push(newSection);

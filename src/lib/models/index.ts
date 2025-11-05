@@ -1,4 +1,4 @@
-export * from './agent';
+
 export * from './diagram';
 export * from './project';
 export * from './section';

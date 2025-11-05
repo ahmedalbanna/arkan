@@ -25,7 +25,6 @@ export const POST = withAuth(async ({ request, user }) => {
     const agentInput = validation.data;
 
     // The AI flow is now called directly with all necessary data from the client.
-    // No need to fetch agent or section info from Firestore here.
     const result = await generateReportSection(agentInput);
 
     // Safeguard: ensure the AI returned the section we requested.
@@ -40,7 +39,7 @@ export const POST = withAuth(async ({ request, user }) => {
     const transformedOutput = { [agentInput.sectionToGenerate]: result.content };
 
     await logGeneration({
-      agentId: agentInput.agent ?? 'unknown',
+      agentId: agentInput.sectionToGenerate, // Log the section ID as the 'agent'
       userId: user.id,
       input: agentInput,
       output: transformedOutput,

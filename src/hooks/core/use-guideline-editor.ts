@@ -1,45 +1,45 @@
 
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useAgents } from '@/hooks/data/useAgents';
-import { useGenerationUIStore } from './useGenerationUIStore';
+import { useMemo, useState, useEffect } from 'react';
+import { useBuilderStore } from './useBuilderStore';
 import { useLocalization } from '@/context/LocalizationContext';
-import { Section } from '@/lib/types';
 
-export function useGuidelineEditor(itemKey: string, section: Section) {
+export function useGuidelineEditor(itemKey: string) {
     const { t } = useLocalization();
-    const { agents, isLoaded: agentsLoaded } = useAgents();
-    const { guidelineState, handleGuidelineToggle, addCustomGuideline, removeCustomGuideline, initializeGuidelines } = useGenerationUIStore();
-
+    const { project, updateProject } = useBuilderStore();
     const [customGuidelineInput, setCustomGuidelineInput] = useState<Record<string, string>>({});
 
-    // The error was here. section.agent could be undefined if a section was created but no agent was assigned.
-    // We now safely check for section.agent before trying to access its id.
-    const agent = useMemo(() => {
-        if (!section?.agent?.id) return undefined;
-        return agents.find(a => a.id === section.agent.id);
-    }, [agents, section?.agent?.id]);
+    const section = useMemo(() => project?.getSection(itemKey), [project, itemKey]);
 
-    // Initialize state when agent data is loaded
-    if (agentsLoaded && agent && agent.guidelines && !guidelineState[itemKey]) {
-        // Since guidelines are just strings now, the default state is simple
-        const defaultChecked: Record<number, boolean> = {};
-        agent.guidelines.forEach((_, i) => { defaultChecked[i] = true; }); // Assume all default guidelines are checked initially
-        
-        const initialGuidelineState = {
-          checked: defaultChecked,
-          custom: [],
+    // Local state for prompt and guidelines to provide immediate feedback in the UI
+    const [prompt, setPrompt] = useState(section?.prompt || '');
+    const [guidelines, setGuidelines] = useState(section?.guidelines || []);
+
+    // Effect to update local state when the section in the store changes
+    useEffect(() => {
+        setPrompt(section?.prompt || '');
+        setGuidelines(section?.guidelines || []);
+    }, [section]);
+
+    // Debounce updates to the main store
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            if (project && (prompt !== section?.prompt || JSON.stringify(guidelines) !== JSON.stringify(section?.guidelines))) {
+                updateProject(p => {
+                    const sec = p.getSection(itemKey);
+                    if (sec) {
+                        sec.prompt = prompt;
+                        sec.guidelines = guidelines;
+                    }
+                });
+            }
+        }, 500); // 500ms debounce delay
+
+        return () => {
+            clearTimeout(handler);
         };
-        // This is a bit of a hack to set the initial state without causing a re-render loop
-        // The store logic should ideally handle initialization more gracefully.
-        if (JSON.stringify(guidelineState[itemKey]) !== JSON.stringify(initialGuidelineState)) {
-             initializeGuidelines(itemKey, agent.guidelines.map(g => ({ text: g, isDefault: true })));
-        }
-    }
-
-    const currentGuidelineState = guidelineState[itemKey];
-    const hasGuidelines = !!agent?.guidelines && agent.guidelines.length > 0;
+    }, [prompt, guidelines, itemKey, section, updateProject, project]);
 
     const setCustomGuidelineInputForItem = (key: string, value: string) => {
         setCustomGuidelineInput(prev => ({ ...prev, [key]: value }));
@@ -48,25 +48,26 @@ export function useGuidelineEditor(itemKey: string, section: Section) {
     const handleAddCustomGuidelineForItem = (key: string) => {
         const value = customGuidelineInput[key]?.trim();
         if (value) {
-            addCustomGuideline(key, value);
+            setGuidelines(prev => [...prev, value]);
             setCustomGuidelineInputForItem(key, '');
         }
     };
 
-    const handleRemoveCustomGuidelineForItem = (key: string, index: number) => {
-        removeCustomGuideline(key, index);
+    const handleRemoveCustomGuidelineForItem = (index: number) => {
+        setGuidelines(prev => prev.filter((_, i) => i !== index));
     };
 
     return {
         t,
-        agentsLoaded,
-        agent,
-        hasGuidelines,
-        currentGuidelineState,
+        prompt,
+        setPrompt,
+        guidelines,
+        setGuidelines,
         customGuidelineInput,
-        handleGuidelineToggle,
         setCustomGuidelineInputForItem,
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
+        currentGuidelineState: null, // This is now handled locally
+        hasGuidelines: guidelines.length > 0,
     };
 }

@@ -9,14 +9,12 @@
 
 import { ai } from '@/ai/genkit';
 import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/ai/schemas';
-import { AgentPrompt } from '@/lib/models/agent';
 import { z } from 'genkit';
 
 
 export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
 
-  const agentPrompt = input.agentPrompt;
-  const systemPrompt = `${agentPrompt.base}
+  const systemPrompt = `${input.prompt}
 
 You are also an expert analyst. Before you begin writing, you must first review all the provided context sections (proposal, project plan, other report sections, diagrams, etc.). From this context, intelligently identify and synthesize only the most relevant information needed to create the requested report section. Do not simply list information; integrate it into a well-written, coherent narrative.`;
 
@@ -24,7 +22,7 @@ You are also an expert analyst. Before you begin writing, you must first review 
     name: 'generateReportSectionPrompt', // Static name
     input: { schema: GenerateSectionInputSchema },
     output: { schema: GenerateSectionOutputSchema },
-    model: input.model || 'googleai/gemini-2.0-flash',
+    model: input.model || 'googleai/gemini-1.5-flash-preview-0514',
     system: systemPrompt,
     prompt: `
 CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
@@ -76,12 +74,7 @@ You have access to the following documents. Review them and use the most relevan
     },
   });
 
-  const promptVariables = {
-    ...input,
-    agentPrompt: agentPrompt,
-  };
-
-  const { output } = await reportSectionPrompt(promptVariables);
+  const { output } = await reportSectionPrompt(input);
 
   if (!output) {
     console.error(`AI failed to generate content for section: ${input.sectionToGenerate}`);

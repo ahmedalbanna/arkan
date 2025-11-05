@@ -1,10 +1,7 @@
 
 // src/lib/db/seed.ts
-//require('dotenv').config({ path: require('path').resolve(process.cwd(), '.env') });
 import { adminDb } from '@/lib/firebase/server-init';
-import { AGENTS as defaultAgents } from '@/lib/db/seed-data/agents-template';
 import { defaultFeatures } from '@/lib/db/seed-data/features';
-import { defaultAgentCategories } from '@/lib/db/seed-data/agent-categories';
 import { defaultSections } from '@/lib/db/seed-data/sections';
 import { templates as defaultDocxTemplates, type DocxTemplateKey  } from '@/lib/docx-styles';
 import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
@@ -23,25 +20,6 @@ async function seed() {
             bankAccounts: defaultBankAccounts
         });
         console.log("Default settings added to batch.");
-
-        // --- Agent Categories ---
-        console.log("Preparing to seed Agent Categories...");
-        const categoriesCollection = adminDb.collection('agent_categories');
-        defaultAgentCategories.forEach(category => {
-            const docRef = categoriesCollection.doc(category.id);
-            batch.set(docRef, { name: category.name });
-        });
-        console.log(`${defaultAgentCategories.length} Agent Categories added to batch.`);
-
-        // --- Agents ---
-        console.log("Preparing to seed Agents...");
-        const agentsCollection = adminDb.collection('agents');
-        defaultAgents.forEach(agent => {
-            const { ...agentData } = agent;
-            const docRef = agentsCollection.doc(agent.id);
-            batch.set(docRef, agentData);
-        });
-        console.log(`${defaultAgents.length} Agents added to batch.`);
 
         // --- Sections ---
         console.log("Preparing to seed Sections...");

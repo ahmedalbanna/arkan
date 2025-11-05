@@ -11,79 +11,57 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { useGuidelineEditor } from '@/hooks';
 import { Section } from '@/lib/types';
+import { useFormContext } from 'react-hook-form';
+import { Textarea } from '../ui/textarea';
 
 interface GuidelineEditorProps {
     itemKey: string;
-    section: Section;
-    isAdmin: boolean | undefined;
 }
 
-export function GuidelineEditor({ itemKey, section, isAdmin }: GuidelineEditorProps) {
+export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
+    const { control } = useFormContext(); // Assuming you are using react-hook-form
     const {
         t,
-        agentsLoaded,
-        agent,
-        hasGuidelines,
         currentGuidelineState,
         customGuidelineInput,
-        handleGuidelineToggle,
         setCustomGuidelineInputForItem,
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
-    } = useGuidelineEditor(itemKey, section);
+        prompt,
+        setPrompt,
+        guidelines,
+        setGuidelines
+    } = useGuidelineEditor(itemKey);
 
-    if (!agentsLoaded) {
-        return <div>Loading guidelines...</div>;
-    }
-
-    if (!agent || !agent.prompt) {
-        return <div>Agent configuration not found.</div>;
-    }
 
     return (
         <>
             <div className="space-y-2">
                 <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_prompt_label')}</Label>
-                <div className="p-3 rounded-md border bg-muted text-xs">
-                    <ReactMarkdown components={markdownComponents}>{agent.prompt}</ReactMarkdown>
-                </div>
+                 <Textarea
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    rows={6}
+                    className="font-mono text-xs"
+                    placeholder="Enter the main prompt for this section..."
+                />
             </div>
 
-            {hasGuidelines && (
-                <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.guidelines')}</Label>
-                    <div className="space-y-2 p-3 rounded-md border">
-                        {agent.guidelines!.map((guideline, index) => (
-                            <div key={index} className="flex items-start gap-2">
-                                <Checkbox
-                                    id={`guideline-${itemKey}-${index}`}
-                                    checked={currentGuidelineState?.checked[index] ?? false}
-                                    onCheckedChange={(checked) => handleGuidelineToggle(itemKey, index, !!checked)}
-                                />
-                                <Label htmlFor={`guideline-${itemKey}-${index}`} className="font-normal text-sm flex-1">
-                                    <ReactMarkdown components={markdownComponents}>{guideline}</ReactMarkdown>
-                                </Label>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            <div className="space-y-3">
+            <div className="space-y-3 mt-4">
                 <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.customGuidelines')}</Label>
                 <div className="space-y-2 rounded-md border p-3">
-                    {currentGuidelineState?.custom.map((custom, index) => (
+                    {guidelines.map((custom, index) => (
                         <div key={index} className="flex items-center justify-between text-sm bg-background p-2 rounded-md">
                             <div className="flex items-center gap-2">
                                 <StickyNote className="h-4 w-4 text-muted-foreground" />
                                 <span>{custom}</span>
                             </div>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveCustomGuidelineForItem(itemKey, index)}>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveCustomGuidelineForItem(index)}>
                                 <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                         </div>
                     ))}
-                    {currentGuidelineState?.custom.length === 0 && (
+                    {guidelines.length === 0 && (
                         <p className="text-xs text-muted-foreground text-center py-2">No custom guidelines added yet.</p>
                     )}
                 </div>

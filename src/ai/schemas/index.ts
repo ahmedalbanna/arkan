@@ -4,7 +4,6 @@
  * Centralized exports for ai schema / type modules.
  */
 
-export * from './api';
 export * from './enums';
 export * from './flows';
 export * from './lecture-generator';

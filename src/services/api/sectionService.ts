@@ -10,7 +10,8 @@ export async function fetchSections(token: string): Promise<SectionProperties[]>
     headers: { 'Authorization': `Bearer ${token}` },
   });
   if (!response.ok) throw new Error('Failed to fetch sections');
-  return response.json();
+  const data = await response.json();
+  return data;
 }
 
 export async function createSection(data: Omit<SectionProperties, 'id'> & { id: string }, token: string): Promise<SectionProperties> {

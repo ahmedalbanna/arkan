@@ -3,40 +3,34 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useAgents, useGenerationUIStore, useSaveProject } from '@/hooks';
+import { useBuilderStore, useGenerationUIStore, useSaveProject } from '@/hooks';
 import { toast } from '@/hooks/util/use-toast';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import { useAuth } from '@/context/AuthContext';
-import { Agent, Section } from '@/lib/models';
+import { Section } from '@/lib/models';
 import { useSections } from '../data/use-sections';
 import { SectionName } from '@/ai/schemas';
 
 export function useReportModeGenerator() {
     const { t, locale } = useLocalization();
     const { project, updateProject } = useBuilderStore();
-    const { agents, isLoaded: agentsLoaded } = useAgents();
     const { data: sectionConfigs, isFetched: sectionsLoaded } = useSections();
-    const { controlState, guidelineState, contextSelection, initializeControls, initializeGuidelines, initializeContext } = useGenerationUIStore();
+    const { controlState, guidelineState, contextSelection, initializeControls } = useGenerationUIStore();
     const { userProfile, refetchUser, firebaseUser } = useAuth();
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     const queryClient = useQueryClient();
 
     const orderedSections = useMemo(() => {
-        if (!project || !agentsLoaded || !sectionsLoaded) return [];
+        if (!project || !sectionsLoaded) return [];
 
         // If project has no sections, initialize them from the default config
         if (!project.sections || project.sections.length === 0) {
             const reportSectionModels = (sectionConfigs || [])
                 .filter(s => s.type === 'report')
-                .map(s => {
-                    const agent = agents.find(a => a.id === (s as any).agentId);
-                    return new Section({ ...s, agent: agent! });
-                });
+                .map(s => new Section({ ...s, prompt: s.prompt, guidelines: s.guidelines, model: s.model }));
             
-            // This is a temporary update, should not be directly saved
-            // We use this to populate the UI, the project object itself is updated via the store
             return reportSectionModels;
         }
 
@@ -47,7 +41,7 @@ export function useReportModeGenerator() {
         const unordered = project.sections.filter(s => !sectionsOrder.includes(s.id));
         
         return [...ordered, ...unordered];
-    }, [project, agentsLoaded, sectionsLoaded, sectionConfigs, agents]);
+    }, [project, sectionsLoaded, sectionConfigs]);
 
 
     const setOrderedSections = (newOrder: Section[]) => {
@@ -60,30 +54,9 @@ export function useReportModeGenerator() {
         if (orderedSections.length > 0) {
             orderedSections.forEach(section => {
                 initializeControls(section.id);
-                if (section.agent && section.agent.guidelines) {
-                    initializeGuidelines(section.id, section.agent.guidelines.map(g => ({ text: g, isDefault: true })));
-                }
-                initializeContext(section.id);
             });
         }
-    }, [orderedSections, initializeControls, initializeGuidelines, initializeContext]);
-
-
-    const getSelectedGuidelines = (agent: Agent, guidelineState: any) => {
-        const selectedGuidelines: string[] = [];
-
-        if (agent.guidelines) {
-            agent.guidelines.forEach((g: any, index: number) => {
-                if (guidelineState?.checked?.[index]) {
-                    selectedGuidelines.push(g);
-                }
-            });
-        }
-        if (guidelineState?.custom) {
-            selectedGuidelines.push(...guidelineState.custom);
-        }
-        return selectedGuidelines;
-    };
+    }, [orderedSections, initializeControls]);
 
 
     const agentMutation = useMutation({
@@ -93,14 +66,10 @@ export function useReportModeGenerator() {
 
             const section = orderedSections?.find(s => s.id === sectionId);
             if (!section) throw new Error("Section not found.");
-            
-            const agent = section.agent;
-            if (!agent) throw new Error("Agent not found for section.");
 
             const token = await firebaseUser.getIdToken();
 
             const controls = controlState[sectionId] || { tone: 'neutral', wordCount: 200, complexity: 50 };
-            const guidelines = getSelectedGuidelines(agent, guidelineState[sectionId]);
 
             const selectedContexts = contextSelection[sectionId];
             const otherSectionsContext = Object.entries(selectedContexts?.sections || {})
@@ -119,11 +88,10 @@ export function useReportModeGenerator() {
 
             const body = {
                 sectionToGenerate: section.id,
-                agent: section.agent.id,
-                agentPrompt: agent.prompt,
-                model: agent.model,
+                prompt: section.prompt,
+                model: section.model,
                 instructionText: `Please use a ${controls.tone} tone and aim for a word count of approximately ${controls.wordCount} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}.`,
-                guidelines: guidelines,
+                guidelines: section.guidelines,
                 otherSections: { ...otherSectionsContext },
                 externalContext: externalContext,
             };

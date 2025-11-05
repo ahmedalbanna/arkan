@@ -7,8 +7,10 @@ import { z } from 'zod';
 const SectionSchema = z.object({
   id: z.string().min(3, 'ID must be at least 3 characters'),
   title: z.string().min(1, 'Title is required'),
-  agentId: z.string().min(1, 'Agent is required'),
   type: z.enum(['report', 'diagram', 'presentation']),
+  prompt: z.string().optional(),
+  guidelines: z.array(z.string()).optional(),
+  model: z.string().optional(),
 });
 
 // GET all sections

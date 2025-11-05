@@ -20,13 +20,11 @@ import { z } from 'zod';
 
 import { useCreateSection, useUpdateSection } from '@/hooks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAgents } from '@/hooks';
 import { Section, type SectionProperties } from '@/lib/models/section';
 
 const SectionSchema = z.object({
   id: z.string().min(3, 'ID must be at least 3 characters'),
   title: z.string().min(1, 'Title is required'),
-  agentId: z.string().min(1, 'Agent is required'),
   type: z.enum(['report', 'diagram', 'presentation']),
 });
 
@@ -39,7 +37,6 @@ interface SectionFormDialogProps {
 
 export function SectionFormDialog({ sectionToEdit, children }: SectionFormDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { agents, isLoaded: agentsLoaded } = useAgents();
   const createMutation = useCreateSection();
   const updateMutation = useUpdateSection();
 
@@ -48,12 +45,10 @@ export function SectionFormDialog({ sectionToEdit, children }: SectionFormDialog
     defaultValues: sectionToEdit ? {
         id: sectionToEdit.id,
         title: sectionToEdit.title,
-        agentId: sectionToEdit.agentId,
         type: sectionToEdit.type,
     } : {
       id: '',
       title: '',
-      agentId: '',
       type: 'report',
     },
   });
@@ -92,20 +87,7 @@ export function SectionFormDialog({ sectionToEdit, children }: SectionFormDialog
             <Input id="title" {...form.register('title')} className="col-span-3" />
             {form.formState.errors.title && <p className="col-span-4 text-sm text-destructive text-right">{form.formState.errors.title.message}</p>}
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="agentId" className="text-right">Agent</Label>
-            <Select onValueChange={(value) => form.setValue('agentId', value)} defaultValue={form.getValues('agentId')}>
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select an agent" />
-              </SelectTrigger>
-              <SelectContent>
-                {agentsLoaded && agents.map(agent => (
-                  <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {form.formState.errors.agentId && <p className="col-span-4 text-sm text-destructive text-right">{form.formState.errors.agentId.message}</p>}
-          </div>
+          
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="type" className="text-right">Type</Label>
             <Select onValueChange={(value) => form.setValue('type', value as any)} defaultValue={form.getValues('type')}>

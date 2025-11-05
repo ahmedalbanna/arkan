@@ -1,6 +1,5 @@
 
 export * from './api/adminService';
-export * from './api/agentService';
 export * from './api/analyticsService';
 export * from './api/authService';
 export * from './api/contextService';

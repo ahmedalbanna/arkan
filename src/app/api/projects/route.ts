@@ -4,26 +4,16 @@ import { revalidatePath } from 'next/cache';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 import { z } from 'zod';
-import { AgentPromptSchema } from '@/ai/schemas';
 
 const SectionDataSchema = z.object({
   id: z.string(),
   title: z.string(),
-  agentId: z.string().optional(),
   type: z.enum(['report', 'diagram', 'presentation']),
   content: z.string().optional(),
-   // Agent is now nested, so we make it optional and passthrough
-  agent: z.object({
-      id: z.string(),
-      name: z.string(),
-      description: z.string(),
-      category: z.string(),
-      pageUrl: z.string(),
-      isEnabled: z.boolean(),
-      prompt: z.union([z.string(), AgentPromptSchema]),
-      guidelines: z.array(z.string()).optional(),
-  }).passthrough().optional(),
-});
+  prompt: z.string().optional(),
+  guidelines: z.array(z.string()).optional(),
+  model: z.string().optional(),
+}).passthrough();
 
 export const ProjectStateSchema = z.object({
     id: z.string().optional(),

@@ -19,18 +19,6 @@ export const userKeys = {
   admins: () => [...userKeys.all, 'admins'] as const,
 };
 
-export const agentKeys = {
-  all: ['agents'] as const,
-  lists: () => [...agentKeys.all, 'list'] as const,
-  details: () => [...agentKeys.all, 'detail'] as const,
-  detail: (agentId: string) => [...agentKeys.details(), agentId] as const,
-};
-
-export const categoryKeys = {
-  all: ['agent-categories'] as const,
-  lists: () => [...categoryKeys.all, 'list'] as const,
-}
-
 export const featureKeys = {
   all: ['features'] as const,
   lists: () => [...featureKeys.all, 'list'] as const,

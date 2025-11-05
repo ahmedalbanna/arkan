@@ -7,14 +7,13 @@ import { buttonVariants } from '@/components/ui/button';
 import { Loader2, Sparkles, GripVertical, SlidersHorizontal, StickyNote, Link as LinkIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSectionAccordionItemLogic } from '@/hooks/core/useSectionAccordionItemLogic';
-import type { Agent, Section } from '@/lib/models';
+import type { Section } from '@/lib/models';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { SectionGenerationControls } from './SectionGenerationControls';
 import { GuidelineEditor } from './SectionGuidelineEditor';
 import { useAuth } from '@/context/AuthContext';
 import { ContextSelector } from './SectionContextSelector';
 import { cn } from '@/lib/utils/cn';
-import { useMemo } from 'react';
 
 export const SectionAccordionItem = ({
     itemKey,
@@ -37,7 +36,6 @@ export const SectionAccordionItem = ({
 }) => {
     const {
         t,
-        disabledReason,
     } = useSectionAccordionItemLogic(section);
 
     const { userProfile } = useAuth();
@@ -81,9 +79,9 @@ export const SectionAccordionItem = ({
                                     {t('builder.reportGenerator.generateButton')}
                                 </div>
                             </TooltipTrigger>
-                            {disabledReason && (
+                            {!canGenerate && (
                                 <TooltipContent>
-                                    <p>{disabledReason}</p>
+                                    <p>{isAnythingGenerating ? "Another generation is in progress." : "Insufficient credits."}</p>
                                 </TooltipContent>
                             )}
                         </Tooltip>
@@ -102,7 +100,7 @@ export const SectionAccordionItem = ({
                             <SectionGenerationControls sectionKey={itemKey} />
                         </TabsContent>
                         <TabsContent value="prompt" className="py-4">
-                            <GuidelineEditor itemKey={itemKey} section={section} isAdmin={userProfile?.role === 'admin'} />
+                            <GuidelineEditor itemKey={itemKey} />
                         </TabsContent>
                         <TabsContent value="context" className="py-4">
                             <ContextSelector itemKey={itemKey} />

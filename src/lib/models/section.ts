@@ -1,32 +1,34 @@
-import { Agent, AgentProperties } from './agent';
 export type SectionType = 'report' | 'diagram' | 'presentation';
 
 export interface SectionProperties {
     id: string;
     title: string;
-    agent?: AgentProperties; // Now stores the plain object properties
     type: SectionType;
     content?: string;
-    agentId?: string;
+    // Agent-related properties are now part of the section itself
+    prompt?: string;
+    guidelines?: string[];
+    model?: string;
 }
 
 export class Section {
     private _id: string;
     private _title: string;
-    private _agent?: Agent;
     private _type: SectionType;
     private _content?: string;
-    private _agentId?: string;
+    private _prompt?: string;
+    private _guidelines?: string[];
+    private _model?: string;
+
 
     constructor(props: SectionProperties) {
         this._id = props.id;
         this._title = props.title;
-        // If agent properties are provided, create an Agent instance
-        this._agent = props.agent ? new Agent(props.agent) : undefined;
         this._type = props.type;
         this._content = props.content ?? '';
-        // Ensure agentId is consistent
-        this._agentId = props.agentId || this._agent?.id;
+        this._prompt = props.prompt ?? 'You are a helpful assistant.';
+        this._guidelines = props.guidelines ?? [];
+        this._model = props.model ?? 'googleai/gemini-1.5-flash-preview-0514';
     }
 
     get id(): string {
@@ -43,18 +45,6 @@ export class Section {
         this._title = value;
     }
 
-    get agent(): Agent | undefined {
-        return this._agent;
-    }
-    set agent(value: Agent | undefined) {
-        this._agent = value;
-        this._agentId = value?.id;
-    }
-    
-    get agentId(): string | undefined {
-        return this._agentId;
-    }
-
     get type(): SectionType {
         return this._type;
     }
@@ -68,15 +58,34 @@ export class Section {
         this._content = value;
     }
 
+    get prompt(): string | undefined {
+        return this._prompt;
+    }
+    set prompt(value: string | undefined) {
+        this._prompt = value;
+    }
+    get guidelines(): string[] | undefined {
+        return this._guidelines;
+    }
+    set guidelines(value: string[] | undefined) {
+        this._guidelines = value;
+    }
+    get model(): string | undefined {
+        return this._model;
+    }
+    set model(value: string | undefined) {
+        this._model = value;
+    }
+
     public toJSON(): SectionProperties {
         return {
             id: this._id,
             title: this._title,
-            // Serialize the agent by calling its toJSON method
-            agent: this._agent?.toJSON(),
-            agentId: this._agentId,
             type: this._type,
             content: this._content,
+            prompt: this._prompt,
+            guidelines: this._guidelines,
+            model: this._model,
         };
     }
 

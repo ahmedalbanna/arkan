@@ -1,9 +1,4 @@
-import { SectionProperties } from 'docx';
 
-
-
-export * from './models/agent';
-export * from './models/diagram';
 export * from './models/project';
 export * from './models/section';
 export * from './models/transaction';
@@ -117,35 +112,6 @@ export interface Feature {
     name: string;
     description: string;
     isEnabled: boolean;
-}
-
-// define types for the report mode generator
-export interface ReportModeGeneratorProps {
-    orderedSections: SectionProperties[];
-    setOrderedSections: (sections: SectionProperties[]) => void;
-}
-
-// define CreateAgentVariables, UpdateAgentVariables, UploadedFile
-export interface CreateAgentVariables {
-    name: string;
-    description: string;
-    category: string;
-    pageUrl: string;
-    prompt: string;
-
-}
-
-export interface UpdateAgentVariables {
-    agentId: string;
-    payload: {
-        name?: string;
-        description?: string;
-        category?: string;
-        pageUrl?: string;
-        prompt?: string;
-        isEnabled?: boolean;
-
-    }
 }
 
 export interface UploadedFile {
