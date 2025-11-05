@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState } from 'react';
@@ -71,7 +72,7 @@ const SortableChapterItem = ({
 }: {
     chapter: Chapter;
     index: number;
-    onAddSection: () => void;
+    onAddSection: (chapterId: string) => void;
     [key: string]: any;
 }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: chapter.id });
@@ -97,34 +98,32 @@ const SortableChapterItem = ({
                 </AccordionTrigger>
                 <AccordionContent>
                     <div className="border-t px-4 py-4 space-y-4">
-                        {chapter.sections.length > 0 ? (
-                           <DndContext collisionDetection={closestCenter} onDragEnd={(e) => props.onSectionDragEnd(e, chapter.id)}>
-                                <SortableContext items={chapter.sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                                    <Accordion type="single" collapsible className="w-full space-y-2">
-                                        {chapter.sections.map((section, index) => (
-                                            <SortableSectionItem
-                                                key={section.id}
-                                                section={section}
-                                                index={index}
-                                                chapterIndex={props.chapterIndex}
-                                                onGenerate={props.onGenerateSection}
-                                                isGenerating={props.activeMutationKey === section.id}
-                                                isAnythingGenerating={props.isAnythingGenerating}
-                                                hasCredits={props.hasCreditsForSingleSection}
-                                            />
-                                        ))}
-                                    </Accordion>
-                                </SortableContext>
-                            </DndContext>
-                        ) : (
-                            <div className="text-center py-4">
-                                <p className="text-sm text-muted-foreground mb-3">This chapter is empty.</p>
-                                <Button size="sm" variant="outline" onClick={onAddSection}>
-                                    <PlusCircle className="me-2 h-4 w-4" />
-                                    Add New Section
-                                </Button>
-                            </div>
-                        )}
+                        <div className="space-y-2">
+                            {chapter.sections.length > 0 && (
+                               <DndContext collisionDetection={closestCenter} onDragEnd={(e) => props.onSectionDragEnd(e, chapter.id)}>
+                                    <SortableContext items={chapter.sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                                        <Accordion type="single" collapsible className="w-full space-y-2">
+                                            {chapter.sections.map((section, index) => (
+                                                <SortableSectionItem
+                                                    key={section.id}
+                                                    section={section}
+                                                    index={index}
+                                                    chapterIndex={props.chapterIndex}
+                                                    onGenerate={() => props.onGenerateSection(section.id)}
+                                                    isGenerating={props.activeMutationKey === section.id}
+                                                    isAnythingGenerating={props.isAnythingGenerating}
+                                                    hasCredits={props.hasCreditsForSingleSection}
+                                                />
+                                            ))}
+                                        </Accordion>
+                                    </SortableContext>
+                                </DndContext>
+                            )}
+                        </div>
+                        <Button size="sm" variant="outline" onClick={() => onAddSection(chapter.id)} className="w-full">
+                            <PlusCircle className="me-2 h-4 w-4" />
+                            Add New Section
+                        </Button>
                     </div>
                 </AccordionContent>
              </AccordionItem>
@@ -270,7 +269,7 @@ export const GenerationTools = ({
                                 index={chapterIndex}
                                 key={chapter.id}
                                 onSectionDragEnd={handleSectionDragEnd}
-                                onAddSection={() => handleAddSectionToChapter(chapter.id)}
+                                onAddSection={handleAddSectionToChapter}
                                 // Pass down necessary props to the inner list
                                 chapterIndex={chapterIndex}
                                 onGenerateSection={onGenerateSection}
