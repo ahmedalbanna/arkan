@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils/cn';
 import { useProjectsPage } from '@/hooks/core/useProjectsPage';
 import { Input } from '@/components/ui/input';
+import { CreateProjectDialog } from '@/components/project/CreateProjectDialog';
+import { UploadProjectButton } from '@/components/project/UploadProjectButton';
 
 function ProjectsPageSkeleton() {
     return (
@@ -29,24 +31,13 @@ export default function MyProjectsPage() {
         refetch,
         isRefetching,
         deleteMutation,
-        fileInputRef,
         handleLoadProject,
         handleDeleteProject,
-        handleCreateNewProject,
-        handleUploadClick,
-        onFileChange,
     } = useProjectsPage();
 
 
     return (
         <div className="container mx-auto max-w-7xl px-4 py-12">
-            <Input
-                type="file"
-                ref={fileInputRef}
-                onChange={onFileChange}
-                accept=".arkan"
-                className="hidden"
-            />
             <div className="flex justify-between items-center mb-12 flex-wrap gap-4">
                 <div className="text-center sm:text-left">
                     <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary flex items-center gap-4 animate-fade-in-up" style={{ '--animation-delay': '0.1s' } as React.CSSProperties}>
@@ -62,19 +53,8 @@ export default function MyProjectsPage() {
                         <RefreshCw className={cn("me-2 h-4 w-4", isRefetching && "animate-spin")} />
                         {t('projects.refreshButton')}
                     </Button>
-                    <Button
-                        variant="outline"
-                        onClick={handleUploadClick}
-                        className="animate-fade-in-up"
-                        style={{ animationDelay: '0.4s' }}
-                    >
-                        <Upload className="me-2 h-4 w-4" />
-                        {t('projects.uploadButton')}
-                    </Button>
-                     <Button onClick={handleCreateNewProject} className="animate-fade-in-up"  style={{ animationDelay: '0.3s' }}>
-                        <PlusCircle className="me-2 h-4 w-4" />
-                        {t('projects.createButton')}
-                    </Button>
+                    <UploadProjectButton />
+                    <CreateProjectDialog />
                 </div>
             </div>
 

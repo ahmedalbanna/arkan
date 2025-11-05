@@ -21,47 +21,70 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useSessionActions } from '@/hooks';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
+import { useBuilderStore, useExport, useSaveProject, useToast } from '@/hooks';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { ReportExportDialog } from './ExportDialogs';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useRouter } from 'next/navigation';
 
 
 export const SessionActions = () => {
+    const { t } = useLocalization();
+    const router = useRouter();
+    const { toast } = useToast();
     const {
         fileInputRef,
         isSaveAsOpen,
         setIsSaveAsOpen,
         isSavePromptOpen,
         setIsSavePromptOpen,
-        projectName,
-        setProjectName,
         saveAsName,
         setSaveAsName,
         project,
-        isSaving,
         handleUploadClick,
         onFileChange,
-        handleSave,
-        handleSaveFromPrompt,
-        handleSaveAsCloud,
         handleDownloadAs,
         hasContent,
-        t,
-        isExporting,
-        handleExportReport,
         hasUnsavedChanges,
         newSession,
-    } = useSessionActions();
+    } = useBuilderStore(); 
 
-    // Effect to synchronize the saveAsName when the project name changes
+    const { saveProject, isSaving } = useSaveProject();
+    const { isExporting, exportReportDocx } = useExport();
+
     useEffect(() => {
         if (project?.name) {
             setSaveAsName(project.name);
         }
     }, [project?.name, setSaveAsName]);
+
+    const handleSave = () => {
+        if (!project) return;
+        if (!project.userId || !project.id.match(/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i)) { // Check if it's a temp project
+            setIsSavePromptOpen(true);
+        } else {
+            saveProject();
+        }
+    };
+
+    const handleSaveFromPrompt = () => {
+        if (project && saveAsName) {
+            project.name = saveAsName;
+            saveProject();
+            setIsSavePromptOpen(false);
+            setSaveAsName('');
+        } else {
+            toast({ title: t('projects.nameRequiredToastTitle'), description: t('projects.nameRequiredToastDesc'), variant: 'destructive' });
+        }
+    };
+    
+    const handleExportReport = async (sectionsToInclude: string[]) => {
+        if (!project) return;
+        await exportReportDocx(project, sectionsToInclude);
+    };
 
     const isBusy = isSaving || isExporting;
 
@@ -71,7 +94,7 @@ export const SessionActions = () => {
                 <Input
                     type="file"
                     ref={fileInputRef}
-                    onChange={onFileChange}
+                    onChange={(e) => onFileChange(e, toast, t, router)}
                     accept=".arkan"
                     className="hidden"
                 />
@@ -113,11 +136,11 @@ export const SessionActions = () => {
                          <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="save-project-name" className="text-right">{t('projects.nameLabel')}</Label>
-                                <Input id="save-project-name" value={projectName} onChange={(e) => setProjectName(e.target.value)} className="col-span-3" />
+                                <Input id="save-project-name" value={saveAsName} onChange={(e) => setSaveAsName(e.target.value)} className="col-span-3" />
                             </div>
                         </div>
                         <AlertDialogFooter>
-                            <AlertDialogCancel onClick={() => setProjectName('')}>{t('projects.cancelButton')}</AlertDialogCancel>
+                            <AlertDialogCancel onClick={() => setSaveAsName('')}>{t('projects.cancelButton')}</AlertDialogCancel>
                             <AlertDialogAction onClick={handleSaveFromPrompt} disabled={isSaving}>
                                 {isSaving && <Loader2 className="h-4 w-4 animate-spin me-2" />}
                                 {t('projects.saveButton')}
@@ -154,7 +177,7 @@ export const SessionActions = () => {
                                 <FileJson className="me-2 h-4 w-4" />
                                 {t('projects.downloadButton')}
                             </Button>
-                            <Button onClick={handleSaveAsCloud} disabled={isSaving}>
+                            <Button onClick={handleSaveFromPrompt} disabled={isSaving}>
                                 {isSaving && <Loader2 className="h-4 w-4 animate-spin me-2" />}
                                 <Cloud className="me-2 h-4 w-4" />
                                 {t('projects.saveToCloudButton')}

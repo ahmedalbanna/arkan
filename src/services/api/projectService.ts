@@ -1,18 +1,15 @@
 
 'use client';
 import { app } from '@/lib/firebase/client-init';
-import type { ProjectState, SavedProject } from "@/lib/models/project"; // Import from model
+import type { ProjectProperties } from "@/lib/models/project";
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
 
-
-// This represents the full state of a project that can be saved or loaded.
-// It is a combination of states from various Zustand stores.
-export type { ProjectState, SavedProject };
+export type { ProjectProperties };
 
 
 // Fetch all projects for the current user
-export async function fetchProjectsApi(token: string): Promise<SavedProject[]> {
+export async function fetchProjectsApi(token: string): Promise<ProjectProperties[]> {
     if (!token) throw new Error("User not authenticated");
     const response = await fetch('/api/projects', {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -24,7 +21,7 @@ export async function fetchProjectsApi(token: string): Promise<SavedProject[]> {
 }
 
 // Fetch a single project by its ID
-export async function fetchProjectApi(projectId: string, token: string): Promise<SavedProject> {
+export async function fetchProjectApi(token: string, projectId: string): Promise<ProjectProperties> {
     if (!token) throw new Error("User not authenticated");
     const response = await fetch(`/api/projects/${projectId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -37,7 +34,7 @@ export async function fetchProjectApi(projectId: string, token: string): Promise
 }
 
 // Create a new project
-export async function createProject(data: ProjectState, token: string): Promise<SavedProject> {
+export async function createProjectApi(data: Partial<ProjectProperties>, token: string): Promise<ProjectProperties> {
     if (!token) throw new Error("User not authenticated");
     const response = await fetch('/api/projects', {
         method: 'POST',
@@ -48,13 +45,14 @@ export async function createProject(data: ProjectState, token: string): Promise<
         body: JSON.stringify(data),
     });
     if (!response.ok) {
-        throw new Error('Failed to save project');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save project');
     }
     return await response.json();
 }
 
 // Update an existing project
-export async function updateProject(projectId: string, data: ProjectState, token: string): Promise<SavedProject> {
+export async function updateProjectApi(projectId: string, data: ProjectProperties, token: string): Promise<ProjectProperties> {
     if (!token) throw new Error("User not authenticated");
     const response = await fetch(`/api/projects/${projectId}`, {
         method: 'PUT',
@@ -65,7 +63,8 @@ export async function updateProject(projectId: string, data: ProjectState, token
         body: JSON.stringify(data),
     });
     if (!response.ok) {
-        throw new Error('Failed to update project');
+         const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update project');
     }
     return await response.json();
 }
@@ -78,7 +77,8 @@ export async function deleteProject(projectId: string, token: string): Promise<{
         headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!response.ok) {
-        throw new Error('Failed to delete project');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete project');
     }
     return await response.json();
 }

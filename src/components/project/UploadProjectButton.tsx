@@ -4,22 +4,23 @@
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { Input } from '../ui/input';
-import { useUploadProjectLogic } from '@/hooks';
+import { useBuilderStore } from '@/hooks';
+import { useToast } from '@/hooks/util/use-toast';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useRouter } from 'next/navigation';
 
 export function UploadProjectButton() {
-    const {
-        fileInputRef,
-        handleUploadClick,
-        onFileChange,
-        t
-    } = useUploadProjectLogic();
+    const { fileInputRef, handleUploadClick, onFileChange, t } = useBuilderStore();
+    const { toast } = useToast();
+    const router = useRouter();
+
 
     return (
         <>
             <Input
                 type="file"
                 ref={fileInputRef}
-                onChange={onFileChange}
+                onChange={(e) => onFileChange(e, toast, t, router)}
                 accept=".arkan"
                 className="hidden"
             />

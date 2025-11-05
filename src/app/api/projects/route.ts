@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 import { z } from 'zod';
+import { ProjectProperties } from '@/lib/models';
 
 const SectionDataSchema = z.object({
   id: z.string(),
@@ -12,8 +13,14 @@ const SectionDataSchema = z.object({
   content: z.string().optional(),
   prompt: z.string().optional(),
   guidelines: z.array(z.string()).optional(),
-  model: z.string().optional(),
 }).passthrough();
+
+const ChapterSchema = z.object({
+    id: z.string(),
+    title: z.string(),
+    sections: z.array(SectionDataSchema),
+});
+
 
 export const ProjectStateSchema = z.object({
     id: z.string().optional(),
@@ -22,8 +29,7 @@ export const ProjectStateSchema = z.object({
     updatedAt: z.string().optional(),
     name: z.string().optional(),
     projectDescription: z.string().optional(),
-    sections: z.array(SectionDataSchema).optional(),
-    sectionsOrder: z.array(z.string()).optional(),
+    chapters: z.array(ChapterSchema).optional(),
     externalContext: z.array(z.any()).nullable().optional(),
 });
 // GET /api/projects - Fetches all projects for the authenticated user
@@ -48,12 +54,13 @@ export const GET = withAuth(async ({ user }) => {
 export const POST = withAuth(async ({ request, user }) => {
     try {
         const body = await request.json();
+        // Use the zod schema for validation
         const validation = ProjectStateSchema.safeParse(body);
         if (!validation.success) {
             return handleApiError({ errors: validation.error.flatten().fieldErrors }, 400);
         }
 
-        const newProject = {
+        const newProject: Partial<ProjectProperties> = {
             ...validation.data,
             userId: user.id,
             createdAt: new Date().toISOString(),

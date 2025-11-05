@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { projectKeys } from '@/lib/query-keys';
-import { fetchProjectsApi, createProject as createProjectApi, updateProject, deleteProject, type ProjectState, fetchProjectApi, type SavedProject } from '@/services/api/projectService';
+import { fetchProjectsApi, createProjectApi, updateProjectApi, deleteProject as deleteProjectApi, type ProjectProperties, fetchProjectApi } from '@/services/api/projectService';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { toast } from '@/hooks/util/use-toast';
 import { Project } from '@/lib/models'; // Import the Project class
@@ -27,10 +27,10 @@ export function useProjects() {
     return { projects: data, isLoading, isError, error, refetch, isRefetching };
 }
 
-export function useProject(projectId: string) {
+export function useProject(projectId?: string) {
     const { firebaseUser } = useAuth();
-    const { data, ...rest } = useQuery<Project>({
-        queryKey: projectKeys.detail(projectId),
+    const { data, ...rest } = useQuery<Project | null>({
+        queryKey: projectKeys.detail(projectId!),
         queryFn: async () => {
             if (!firebaseUser || !projectId) return null;
             const token = await firebaseUser.getIdToken();
@@ -49,7 +49,7 @@ export function useSaveProject() {
     const router = useRouter();
 
     const createMutation = useMutation({
-        mutationFn: (data: ProjectState) => {
+        mutationFn: (data: Partial<ProjectProperties>) => {
             if (!firebaseUser) throw new Error("User not authenticated");
             return firebaseUser.getIdToken().then(token => createProjectApi(data, token));
         },
@@ -65,15 +65,15 @@ export function useSaveProject() {
     });
 
     const updateMutation = useMutation({
-        mutationFn: (data: ProjectState) => {
+        mutationFn: (data: ProjectProperties) => {
             if (!firebaseUser || !project?.id) throw new Error("User not authenticated or project ID missing");
-            return firebaseUser.getIdToken().then(token => updateProject(project.id, data, token));
+            return firebaseUser.getIdToken().then(token => updateProjectApi(project.id, data, token));
         },
         onSuccess: (savedProject) => {
             toast({ title: 'Project Saved', description: 'Your changes have been saved.' });
-            loadProject(savedProject);
+            loadProject(savedProject); // This also sets hasUnsavedChanges to false
             queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
-            queryClient.setQueryData(projectKeys.detail(savedProject.id), savedProject);
+            queryClient.setQueryData(projectKeys.detail(savedProject.id), new Project(savedProject));
         },
          onError: (error) => {
             toast({ title: 'Error', description: `Failed to save project: ${error.message}`, variant: 'destructive' });
@@ -83,14 +83,11 @@ export function useSaveProject() {
     const saveProject = () => {
         if (!project) return;
         
-        // This is the core logic change. If the project ID is a UUID, it's a new, unsaved project.
-        const isNewProject = project.id.length > 20 && /[a-f0-9]{8}-([a-f0-9]{4}-){3}[a-f0-9]{12}/.test(project.id);
+        const isNewProject = !project.userId; // A better check for a new project
         
         const projectData = project.toStateObject();
         
         if (isNewProject) {
-            // When creating, we don't send the client-generated UUID to the server.
-            // Firestore will generate its own ID.
             const { id, ...createData } = projectData;
             createMutation.mutate(createData);
         } else if (project.id) {
@@ -111,7 +108,7 @@ export function useCreateProject(options?: { onSuccess?: (data: any) => void }) 
     const { firebaseUser } = useAuth();
     
     return useMutation({
-        mutationFn: (data: Partial<ProjectState>) => {
+        mutationFn: (data: Partial<ProjectProperties>) => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const completeData = {
                 createdAt: new Date().toISOString(),
@@ -140,7 +137,7 @@ export function useDeleteProject() {
         mutationFn: async (projectId: string) => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
-            return deleteProject(projectId, token);
+            return deleteProjectApi(projectId, token);
         },
         onSuccess: (data, projectId) => {
             toast({ title: 'Project Deleted', description: 'The project has been successfully deleted.' });

@@ -3,146 +3,111 @@ import { Section, SectionProperties } from './section';
 import { ExternalContext, ExternalContextType } from './external-context';
 import { v4 as uuidv4 } from 'uuid';
 import { Chapter, ChapterProperties } from './chapter';
-import { arrayMove } from '@dnd-kit/sortable';
 
-export interface ProjectState {
+export interface ProjectProperties {
+  id?: string;
+  userId?: string;
+  createdAt?: string;
+  updatedAt?: string;
   name?: string | undefined;
   projectDescription?: string | undefined;
-  chapters?: Chapter[];
+  chapters?: (Chapter | ChapterProperties)[];
   externalContext?: ExternalContext[] | undefined;
 }
-export interface SavedProject extends ProjectState {
-  id: string;
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export type ProjectProperties = SavedProject;
 
 
-export class Project implements SavedProject {
-  private _id: string;
-  private _userId: string;
-  private _createdAt: string;
-  private _updatedAt: string;
-  public hasUnsavedChanges?: boolean;
+export class Project implements Required<ProjectProperties> {
+  public id: string;
+  public userId: string;
+  public createdAt: string;
+  public updatedAt: string;
+  public hasUnsavedChanges: boolean;
 
-  private _name?: string;
-  private _projectDescription?: string;
-  private _chapters?: Chapter[];
-  private _externalContext: ExternalContext[];
+  public name: string;
+  public projectDescription: string;
+  public chapters: Chapter[];
+  public externalContext: ExternalContext[];
 
 
-  constructor(props: Partial<ProjectProperties>) {
-    this._id = props.id || uuidv4(); // Use UUID for new projects
-    this._userId = props.userId || '';
-    this._createdAt = props.createdAt || new Date().toISOString();
-    this._updatedAt = props.updatedAt || new Date().toISOString();
-    this._name = props.name;
-    this._projectDescription = props.projectDescription;
-    this._chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c as ChapterProperties));
-    this._externalContext = props.externalContext || [];
+  constructor(props: ProjectProperties) {
+    this.id = props.id || uuidv4(); // Use UUID for new, unsaved projects
+    this.userId = props.userId || '';
+    this.createdAt = props.createdAt || new Date().toISOString();
+    this.updatedAt = props.updatedAt || new Date().toISOString();
+    this.name = props.name || '';
+    this.projectDescription = props.projectDescription || '';
+    // Ensure chapters are instances of the Chapter class for consistent API
+    this.chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c as ChapterProperties));
+    this.externalContext = props.externalContext || [];
+    this.hasUnsavedChanges = !props.userId; // New projects are considered to have unsaved changes
   }
 
-  // --- Public Getters ---
-  get id() { return this._id; }
-  get userId() { return this._userId; }
-  get createdAt() { return this._createdAt; }
-  get updatedAt() { return this._updatedAt; }
-  get name() { return this._name; }
-  get projectDescription() { return this._projectDescription; }
-  get chapters() { return this._chapters; }
-  get externalContext() { return this._externalContext; }
-  
+  // --- Getters for derived state ---
   get sections(): Section[] {
-    return this._chapters?.flatMap(c => c.sections) ?? [];
+    return this.chapters.flatMap(c => c.sections);
   }
 
   get sectionsOrder(): string[] {
-    return this._chapters?.flatMap(c => c.sections.map(s => s.id)) ?? [];
+    return this.sections.map(s => s.id);
   }
-
-
-  // --- Public Setters ---
-  set name(value: string | undefined) { this._name = value; }
-  set projectDescription(value: string | undefined) { this._projectDescription = value; }
 
   /**
    * Converts the Project instance to a plain JSON object for serialization.
    * This method is automatically used by `JSON.stringify`.
    */
-  public toJSON(): SavedProject {
+  public toJSON(): Required<ProjectProperties> {
     return {
-      id: this._id,
-      userId: this._userId,
-      createdAt: this._createdAt,
-      updatedAt: this._updatedAt,
-      name: this._name,
-      projectDescription: this._projectDescription,
-      // Serialize chapters by calling their toJSON method
-      chapters: this._chapters?.map(c => c.toJSON()),
-      externalContext: this._externalContext,
+      id: this.id,
+      userId: this.userId,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      name: this.name,
+      projectDescription: this.projectDescription,
+      chapters: this.chapters.map(c => c.toJSON()), // Serialize chapters
+      externalContext: this.externalContext,
     };
   }
-
-  public toStateObject(): SavedProject {
+  
+  public toStateObject(): Required<ProjectProperties> {
     return this.toJSON();
-  }
-
-
-  public newSession(): void {
-    this._id = '';
-    this._userId = '';
-    this._name = undefined;
-    this._projectDescription = undefined;
-    this._chapters = [];
-    this._externalContext = [];
-    this.hasUnsavedChanges = false;
   }
 
   // --- Chapter Methods ---
   public addChapter(title?: string): string {
-    if (!this._chapters) this._chapters = [];
     const chapterTitle = title || 'Untitled Chapter';
     let baseId = chapterTitle.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
     if (!baseId) baseId = 'chapter';
     
     let newChapterId = baseId;
     let counter = 1;
-    while(this._chapters.some(c => c.id === newChapterId)) {
+    while(this.chapters.some(c => c.id === newChapterId)) {
         newChapterId = `${baseId}-${counter}`;
         counter++;
     }
 
     const newChapter = new Chapter({ id: newChapterId, title: chapterTitle, sections: [] });
-    this._chapters.push(newChapter);
-    this.hasUnsavedChanges = true;
+    this.chapters.push(newChapter);
     return newChapterId;
   }
 
   public removeChapter(chapterId: string): void {
-    if (!this._chapters) return;
-    this._chapters = this._chapters.filter(c => c.id !== chapterId);
-    this.hasUnsavedChanges = true;
+    this.chapters = this.chapters.filter(c => c.id !== chapterId);
   }
 
   public getChapter(chapterId: string): Chapter | undefined {
-      return this._chapters?.find(c => c.id === chapterId);
+      return this.chapters.find(c => c.id === chapterId);
   }
   
   public updateChaptersOrder(newOrderIds: string[]): void {
-    if (!this._chapters) return;
     const newOrderedChapters = newOrderIds
-        .map(id => this._chapters!.find(c => c.id === id))
+        .map(id => this.chapters.find(c => c.id === id))
         .filter((c): c is Chapter => !!c);
-    this._chapters = newOrderedChapters;
-    this.hasUnsavedChanges = true;
+    this.chapters = newOrderedChapters;
   }
 
   // --- Section Methods ---
   public getSection(sectionId: string): Section | undefined {
-    return this.sections?.find(s => s.id === sectionId);
+    return this.sections.find(s => s.id === sectionId);
   }
 
   public getSectionContent(sectionId: string): string | undefined {
@@ -153,7 +118,6 @@ export class Project implements SavedProject {
     const section = this.getSection(sectionId);
     if (section) {
       section.content = newContent;
-      this.hasUnsavedChanges = true;
     }
   }
 
@@ -161,7 +125,6 @@ export class Project implements SavedProject {
     const section = this.getSection(sectionId);
     if (section) {
       section.title = newTitle;
-      this.hasUnsavedChanges = true;
     }
   }
 
@@ -178,7 +141,7 @@ export class Project implements SavedProject {
       
     let newSectionId = baseId;
     let counter = 1;
-    while(this.sections?.some(s => s.id === newSectionId)) {
+    while(this.sections.some(s => s.id === newSectionId)) {
         newSectionId = `${baseId}-${counter}`;
         counter++;
     }
@@ -190,11 +153,9 @@ export class Project implements SavedProject {
       content: '',
       prompt: 'You are a helpful assistant. Write a section based on the user\'s instructions.',
       guidelines: [],
-      model: 'googleai/gemini-1.5-flash-preview-0514'
     });
     
     chapter.addSection(newSection);
-    this.hasUnsavedChanges = true;
     return newSectionId;
   }
 
@@ -217,11 +178,9 @@ export class Project implements SavedProject {
       content: '',
       prompt: `You are an expert technical writer. Write a comprehensive section on "${title}".`,
       guidelines: [],
-      model: 'googleai/gemini-1.5-flash-preview-0514'
     });
     
     chapter.addSection(newSection);
-    this.hasUnsavedChanges = true;
     return newSectionId;
   }
 
@@ -241,16 +200,13 @@ export class Project implements SavedProject {
       } else {
           toChapter.sections.push(sectionToMove);
       }
-      
-      this.hasUnsavedChanges = true;
   }
 
 
   public removeSection(sectionId: string): void {
-    this._chapters?.forEach(chapter => {
+    this.chapters.forEach(chapter => {
         chapter.removeSection(sectionId);
     });
-    this.hasUnsavedChanges = true;
   }
 
   public updateSectionsOrder(chapterId: string, newOrder: string[]): void {
@@ -259,33 +215,28 @@ export class Project implements SavedProject {
     
     const newOrderedSections = newOrder.map(id => chapter.sections.find(s => s.id === id)).filter((s): s is Section => !!s);
     chapter.sections = newOrderedSections;
-    this.hasUnsavedChanges = true;
   }
 
 
 
   // --- External Context Methods ---
   public addExternalContext(externalContext: ExternalContext): void {
-    this._externalContext = [...(this._externalContext || []), externalContext];
-    this.hasUnsavedChanges = true;
+    this.externalContext = [...(this.externalContext || []), externalContext];
   }
 
   public removeExternalContext(index: number): Project {
-    this._externalContext = (this._externalContext || []).filter((_, i) => i !== index);
-    this.hasUnsavedChanges = true;
+    this.externalContext = (this.externalContext || []).filter((_, i) => i !== index);
     return this;
   }
 
   public replaceExternalContext(index: number, newItem: ExternalContext): void {
-    if (!this._externalContext || !this._externalContext[index]) return;
-    this._externalContext[index] = newItem;
-    this.hasUnsavedChanges = true;
+    if (!this.externalContext || !this.externalContext[index]) return;
+    this.externalContext[index] = newItem;
   }
 
   public updateExternalContextType(index: number, type: ExternalContextType): Project {
-    if (!this._externalContext || !this._externalContext[index]) return this;
-    this._externalContext[index].type = type;
-    this.hasUnsavedChanges = true;
+    if (!this.externalContext || !this.externalContext[index]) return this;
+    this.externalContext[index].type = type;
     return this;
   }
 }

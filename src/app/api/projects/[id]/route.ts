@@ -13,8 +13,13 @@ const SectionDataSchema = z.object({
   content: z.string().optional(),
   prompt: z.string().optional(),
   guidelines: z.array(z.string()).optional(),
-  model: z.string().optional(),
 }).passthrough();
+
+const ChapterSchema = z.object({
+    id: z.string(),
+    title: z.string(),
+    sections: z.array(SectionDataSchema),
+});
 
 
 export const ProjectStateSchema = z.object({
@@ -24,8 +29,7 @@ export const ProjectStateSchema = z.object({
     updatedAt: z.string().optional(),
     name: z.string().optional(),
     projectDescription: z.string().optional(),
-    sections: z.array(SectionDataSchema).optional(),
-    sectionsOrder: z.array(z.string()).optional(),
+    chapters: z.array(ChapterSchema).optional(),
     externalContext: z.array(z.any()).nullable().optional(),
 });
 // Helper to verify user owns the project
@@ -44,7 +48,7 @@ const verifyProjectOwner = async (requesterId: string, projectId: string) => {
 // GET a single project
 export const GET = withAuth(async ({ params, user }) => {
     try {
-        const { id: projectId } = await params;
+        const { id: projectId } = params;
         const project = await verifyProjectOwner(user.id, projectId);
         return createApiResponse({ id: projectId, ...project }, 200);
     } catch (error) {
@@ -55,7 +59,7 @@ export const GET = withAuth(async ({ params, user }) => {
 // PUT (update) a project
 export const PUT = withAuth(async ({ request, params, user }) => {
     try {
-        const { id: projectId } = await params;
+        const { id: projectId } = params;
         await verifyProjectOwner(user.id, projectId);
 
         const body = await request.json();
@@ -81,7 +85,7 @@ export const PUT = withAuth(async ({ request, params, user }) => {
 // DELETE a project
 export const DELETE = withAuth(async ({ params, user }) => {
     try {
-        const { id: projectId } = await params;
+        const { id: projectId } = params;
         await verifyProjectOwner(user.id, projectId);
         await adminDb.collection("projects").doc(projectId).delete();
         revalidatePath('/projects');

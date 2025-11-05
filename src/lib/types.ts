@@ -121,3 +121,34 @@ export interface UploadedFile {
     content: string;
 
 }
+
+export type ExternalContextType = 'context' | 'example' | 'question' | 'textbook' | 'guidelines';
+export interface ExternalContext {
+  fileName: string;
+  content: string;
+  type: ExternalContextType;
+}
+
+// Presentation Template Types
+export interface PresentationTemplateProperties {
+    id: string;
+    name: string;
+    description: string;
+    primaryAgentId: string;
+    relevantReportSectionIds?: string[];
+    isDefault?: boolean;
+}
+export type CreatePresentationTemplateData = Omit<PresentationTemplateProperties, 'id'> & { id: string };
+export type UpdatePresentationTemplateData = Partial<Omit<PresentationTemplateProperties, 'id'>>;
+
+// Report Template Types
+export interface ReportTemplateProperties {
+  id: string;
+  name: string;
+  description: string;
+  sectionIds: string[];
+  isDefault?: boolean;
+}
+
+export type CreateReportTemplateData = Omit<ReportTemplateProperties, 'id'> & { id: string };
+export type UpdateReportTemplateData = Partial<Omit<ReportTemplateProperties, 'id'>>;
