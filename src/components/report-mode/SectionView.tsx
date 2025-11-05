@@ -12,10 +12,12 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import dynamic from 'next/dynamic';
 import { Input } from '../ui/input';
+import { Badge } from '../ui/badge';
 
 const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), { ssr: false });
 
 interface SectionProps {
+    chapterTitle?: string;
     sectionKey: SectionName;
     title: string;
     content: string; // The markdown content of the section
@@ -23,7 +25,7 @@ interface SectionProps {
     onTitleChange: (key: SectionName, newTitle: string) => void;
 }
 
-export const SectionView = ({ sectionKey, title, content, onUpdate, onTitleChange }: SectionProps) => {
+export const SectionView = ({ chapterTitle, sectionKey, title, content, onUpdate, onTitleChange }: SectionProps) => {
     const {
         aiSuggestion,
         diff,
@@ -37,7 +39,8 @@ export const SectionView = ({ sectionKey, title, content, onUpdate, onTitleChang
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2">
+                 {chapterTitle && <Badge variant="secondary" className="w-fit">{chapterTitle}</Badge>}
                 <Input
                     value={title}
                     onChange={(e) => onTitleChange(sectionKey, e.target.value)}

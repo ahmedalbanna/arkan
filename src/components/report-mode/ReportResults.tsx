@@ -39,6 +39,11 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     setCurrentPage,
   } = useReportPaginator(generatedSections, reportSections);
 
+  const currentChapter = useMemo(() => {
+    if (!project || !currentSectionKey) return null;
+    return project.chapters?.find(chapter => chapter.sections.some(section => section.id === currentSectionKey));
+  }, [project, currentSectionKey]);
+
   const handleSectionUpdate = (key: SectionName, value: string) => {
     updateProject(p => {
       p.updateSectionContent(key, value);
@@ -54,7 +59,8 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
   const handleAddSection = () => {
     let newSectionId = '';
     updateProject(p => {
-        newSectionId = p.addCustomSection();
+        const targetChapterId = p.chapters && p.chapters.length > 0 ? p.chapters[p.chapters.length - 1].id : p.addChapter('Main Chapter');
+        newSectionId = p.addCustomSection(targetChapterId, 'New Section');
     });
 
     if (newSectionId && project?.sections) {
@@ -91,6 +97,7 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
                 {currentSectionKey && currentSection ? (
                     <A4Page key={currentSectionKey}>
                         <SectionView
+                            chapterTitle={currentChapter?.title}
                             sectionKey={currentSectionKey}
                             title={getSectionTitle(currentSectionKey)}
                             content={currentSection.content || ''}
