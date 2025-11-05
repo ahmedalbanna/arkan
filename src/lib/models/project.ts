@@ -1,5 +1,4 @@
 
-
 import { Section, SectionProperties } from './section';
 import { ExternalContext, ExternalContextType } from './external-context';
 import { v4 as uuidv4 } from 'uuid';

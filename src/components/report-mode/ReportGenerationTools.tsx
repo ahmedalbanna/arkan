@@ -144,20 +144,18 @@ const SortableChapterItem = ({
                 <AccordionContent>
                     <div className="border-t px-4 py-4 space-y-4">
                         <SortableContext items={chapter.sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                            <Accordion type="single" collapsible className="w-full space-y-2">
-                                {chapter.sections.map((section, sectionIndex) => (
-                                    <SortableSectionItem
-                                        key={section.id}
-                                        section={section}
-                                        index={sectionIndex}
-                                        chapterIndex={props.chapterIndex}
-                                        onGenerate={() => props.onGenerateSection(section.id)}
-                                        isGenerating={props.activeMutationKey === section.id}
-                                        isAnythingGenerating={props.isAnythingGenerating}
-                                        hasCredits={props.hasCreditsForSingleSection}
-                                    />
-                                ))}
-                            </Accordion>
+                            {chapter.sections.map((section, sectionIndex) => (
+                                <SortableSectionItem
+                                    key={section.id}
+                                    section={section}
+                                    index={sectionIndex}
+                                    chapterIndex={props.chapterIndex}
+                                    onGenerate={() => props.onGenerateSection(section.id)}
+                                    isGenerating={props.activeMutationKey === section.id}
+                                    isAnythingGenerating={props.isAnythingGenerating}
+                                    hasCredits={props.hasCreditsForSingleSection}
+                                />
+                            ))}
                         </SortableContext>
                         <Button size="sm" variant="outline" onClick={() => onAddSection(chapter.id)} className="w-full">
                             <PlusCircle className="me-2 h-4 w-4" />
@@ -315,7 +313,7 @@ export const GenerationTools = ({
                   rows={5}
              />
              <Button onClick={handleCreateFromToc} size="sm" className="w-full">
-                  <ListPlus className="me-2 h-4 w-4" /> Create Chapters &amp; Sections
+                  <ListPlus className="me-2 h-4 w-4" /> Create Chapters & Sections
              </Button>
           </div>
 
