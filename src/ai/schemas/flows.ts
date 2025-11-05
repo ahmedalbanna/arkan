@@ -540,3 +540,14 @@ export const EvaluateReportOutputSchema = z.object({
     aiContentAnalysis: z.array(AIContentAnalysisSchema).optional().describe("An analysis of each section for AI-generated content probability."),
 });
 export type EvaluateReportOutput = z.infer<typeof EvaluateReportOutputSchema>;
+
+// generate-toc.ts
+export const GenerateTocInputSchema = z.object({
+    projectIdea: z.string().min(10, 'Project idea must be at least 10 characters.'),
+});
+export type GenerateTocInput = z.infer<typeof GenerateTocInputSchema>;
+
+export const GenerateTocOutputSchema = z.object({
+    tableOfContents: z.array(z.string()).describe('A list of suggested section titles for the table of contents.'),
+});
+export type GenerateTocOutput = z.infer<typeof GenerateTocOutputSchema>;

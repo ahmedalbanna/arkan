@@ -38,3 +38,4 @@ export * from './text-to-speech';
 export * from './topic-explainer';
 export * from './translate-text';
 export * from './write-document';
+export * from './generate-toc';

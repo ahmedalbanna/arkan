@@ -4,10 +4,10 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils/cn';
-import { PanelLeftClose, ListPlus } from 'lucide-react';
+import { PanelLeftClose, ListPlus, Wand2 } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Button } from '../ui/button';
-import { useBuilderStore, useReportModeGenerator } from '@/hooks';
+import { useBuilderStore, useWritingTool } from '@/hooks';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { toast } from '@/hooks';
@@ -19,6 +19,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { Section } from '@/lib/models';
 import { ScrollArea } from '../ui/scroll-area';
 import { CSS } from '@dnd-kit/utilities';
+import { Loader2 } from 'lucide-react';
 
 interface GenerationToolsProps {
   onCollapseToggle: () => void;
@@ -71,8 +72,18 @@ export const GenerationTools = ({
   hasCreditsForSingleSection,
 }: GenerationToolsProps) => {
   const { t } = useLocalization();
-  const { updateProject } = useBuilderStore();
+  const { project, updateProject } = useBuilderStore();
   const [tocText, setTocText] = useState('');
+
+  const tocMutation = useWritingTool('/api/writing-tools/generate-toc', {
+    onSuccess: (data: any) => {
+        if (data.tableOfContents) {
+            setTocText(data.tableOfContents.join('\n'));
+            toast({ title: "Table of Contents Suggested", description: "AI has generated a suggested ToC for your project." });
+        }
+    }
+  });
+
 
   const handleCreateSections = () => {
     if (!tocText.trim()) {
@@ -85,7 +96,7 @@ export const GenerationTools = ({
     }
 
     const sectionTitles = tocText.split('\n').map(title => title.trim()).filter(title => title);
-
+    
     updateProject(p => {
         sectionTitles.forEach(title => {
             p.addCustomSection(undefined, title);
@@ -98,6 +109,14 @@ export const GenerationTools = ({
     });
     setTocText('');
   };
+
+  const handleSuggestToc = () => {
+      if (!project?.projectIdea) {
+          toast({ title: "Project Idea is Missing", description: "Please add a project idea first.", variant: "destructive" });
+          return;
+      }
+      tocMutation.mutate({ projectIdea: project.projectIdea });
+  }
 
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
@@ -134,10 +153,16 @@ export const GenerationTools = ({
                 rows={5}
               />
           </div>
-          <Button onClick={handleCreateSections} className="w-full">
-            <ListPlus className="me-2 h-4 w-4" />
-            Create Sections from ToC
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleSuggestToc} variant="outline" className="w-full" disabled={tocMutation.isPending}>
+                {tocMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin"/> : <Wand2 className="me-2 h-4 w-4" />}
+                AI Suggest ToC
+            </Button>
+            <Button onClick={handleCreateSections} className="w-full">
+                <ListPlus className="me-2 h-4 w-4" />
+                Create Sections
+            </Button>
+          </div>
           <ScrollArea className="flex-grow">
             <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={orderedSections.map(s => s.id)} strategy={verticalListSortingStrategy}>

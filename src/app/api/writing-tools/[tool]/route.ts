@@ -40,6 +40,8 @@ import { rewriteText, summarizeTextWithRatio } from '@/ai/flows/text-stylist';
 import { RewriteTextInputSchema, SummarizeTextWithRatioInputSchema } from '@/ai/schemas';
 import { manipulateText } from '@/ai/flows/manipulate-text';
 import { ManipulateTextInputSchema } from '@/ai/schemas';
+import { generateToc } from '@/ai/flows/generate-toc';
+import { GenerateTocInputSchema } from '@/ai/schemas';
 
 // Define a map for tool configurations
 const toolConfig = {
@@ -60,6 +62,7 @@ const toolConfig = {
   'rewrite-text': { flow: rewriteText, schema: RewriteTextInputSchema, creditCost: 1 },
   'summarize-with-ratio': { flow: summarizeTextWithRatio, schema: SummarizeTextWithRatioInputSchema, creditCost: 1 },
   'manipulate-text': { flow: manipulateText, schema: ManipulateTextInputSchema, creditCost: 1 },
+  'generate-toc': { flow: generateToc, schema: GenerateTocInputSchema, creditCost: 1 },
 };
 
 type ToolName = keyof typeof toolConfig;
