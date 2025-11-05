@@ -63,7 +63,7 @@ export const SessionActions = () => {
 
     const handleSave = () => {
         if (!project) return;
-        if (!project.userId || !project.id.match(/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i)) { // Check if it's a temp project
+        if (!project.userId) { // Check if it's a temp project
             setIsSavePromptOpen(true);
         } else {
             saveProject();
@@ -71,14 +71,7 @@ export const SessionActions = () => {
     };
 
     const handleSaveFromPrompt = () => {
-        if (project && saveAsName) {
-            project.name = saveAsName;
-            saveProject();
-            setIsSavePromptOpen(false);
-            setSaveAsName('');
-        } else {
-            toast({ title: t('projects.nameRequiredToastTitle'), description: t('projects.nameRequiredToastDesc'), variant: 'destructive' });
-        }
+        handleSaveFromPrompt(toast, t);
     };
     
     const handleExportReport = async (sectionsToInclude: string[]) => {
