@@ -7,20 +7,71 @@ import { cn } from '@/lib/utils/cn';
 import { PanelLeftClose, ListPlus } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Button } from '../ui/button';
-import { useBuilderStore } from '@/hooks';
+import { useBuilderStore, useReportModeGenerator } from '@/hooks';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { toast } from '@/hooks';
+import { Accordion } from '@/components/ui/accordion';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import { SectionAccordionItem } from './SectionAccordionItem';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import type { Section } from '@/lib/models';
+import { ScrollArea } from '../ui/scroll-area';
 
 interface GenerationToolsProps {
   onCollapseToggle: () => void;
+  orderedSections: Section[];
+  setOrderedSections: (sections: Section[]) => void;
+  isAnythingGenerating: boolean;
+  activeMutationKey: string | null;
+  onGenerateSection: (sectionId: string) => void;
+  hasCreditsForSingleSection: boolean;
 }
+
+const SortableSectionItem = ({
+  section,
+  index,
+  ...props
+}: {
+  section: Section;
+  index: number;
+  [key: string]: any; // To pass through other props
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: section.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <SectionAccordionItem
+        itemKey={section.id}
+        section={section}
+        handleProps={{ ...listeners }}
+        index={index}
+        {...props}
+      />
+    </div>
+  );
+};
+
 
 export const GenerationTools = ({
   onCollapseToggle,
+  orderedSections,
+  setOrderedSections,
+  isAnythingGenerating,
+  activeMutationKey,
+  onGenerateSection,
+  hasCreditsForSingleSection,
 }: GenerationToolsProps) => {
   const { t } = useLocalization();
-  const { project, updateProject } = useBuilderStore();
+  const { updateProject } = useBuilderStore();
   const [tocText, setTocText] = useState('');
 
   const handleCreateSections = () => {
@@ -36,13 +87,16 @@ export const GenerationTools = ({
     const sectionTitles = tocText.split('\n').map(title => title.trim()).filter(title => title);
 
     updateProject(p => {
+        const newSectionIds: string[] = [];
         sectionTitles.forEach(title => {
             const id = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-            // Check if section with this ID already exists to avoid duplicates
             if (!p.sections?.some(s => s.id === id)) {
-                 p.addCustomSection(id, title);
+                 const newId = p.addCustomSection(id, title);
+                 newSectionIds.push(newId);
             }
         });
+        // You might want to merge with existing order or just set the new ones
+        p.sectionsOrder = [...(p.sectionsOrder || []), ...newSectionIds];
     });
 
     toast({
@@ -50,6 +104,16 @@ export const GenerationTools = ({
         description: `${sectionTitles.length} sections have been added to your project.`,
     });
     setTocText('');
+  };
+
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    if (active.id !== over.id) {
+      const oldIndex = orderedSections.findIndex((s) => s.id === active.id);
+      const newIndex = orderedSections.findIndex((s) => s.id === over.id);
+      const newOrder = arrayMove(orderedSections, oldIndex, newIndex);
+      setOrderedSections(newOrder);
+    }
   };
 
   return (
@@ -65,8 +129,8 @@ export const GenerationTools = ({
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-grow flex flex-col gap-4">
-          <div className="space-y-2 flex-grow flex flex-col">
+      <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
+          <div className="space-y-2">
               <Label htmlFor="toc-input">Table of Contents</Label>
               <Textarea
                 id="toc-input"
@@ -74,12 +138,32 @@ export const GenerationTools = ({
                 onChange={(e) => setTocText(e.target.value)}
                 placeholder={"Introduction\nSystem Analysis\nSystem Design\nConclusion..."}
                 className="flex-grow resize-none"
+                rows={5}
               />
           </div>
           <Button onClick={handleCreateSections} className="w-full">
             <ListPlus className="me-2 h-4 w-4" />
             Create Sections from ToC
           </Button>
+          <ScrollArea className="flex-grow">
+            <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={orderedSections.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                <Accordion type="single" collapsible className="w-full space-y-2">
+                  {orderedSections.map((section, index) => (
+                    <SortableSectionItem
+                      key={section.id}
+                      section={section}
+                      index={index}
+                      onGenerate={() => onGenerateSection(section.id)}
+                      isGenerating={activeMutationKey === section.id}
+                      isAnythingGenerating={isAnythingGenerating}
+                      hasCredits={hasCreditsForSingleSection}
+                    />
+                  ))}
+                </Accordion>
+              </SortableContext>
+            </DndContext>
+          </ScrollArea>
       </CardContent>
     </Card>
   );
