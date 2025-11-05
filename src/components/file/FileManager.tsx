@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
-import { PanelLeftOpen, PanelRightOpen } from "lucide-react";
+import { PanelLeftClose, PanelRightOpen } from "lucide-react";
 import { UploadManager } from "./UploadManager";
 import AnalystAgent from "@/components/file/AnalystAgent";
 import { useLocalization } from "@/context/LocalizationContext";
