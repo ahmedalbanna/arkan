@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { buttonVariants } from '@/components/ui/button';
 import { Loader2, Sparkles, GripVertical, SlidersHorizontal, StickyNote, Link as LinkIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -26,6 +26,7 @@ export const SectionAccordionItem = ({
     hasCredits,
     handleProps,
     index,
+    chapterIndex,
 }: {
     itemKey: string,
     section: Section,
@@ -35,6 +36,7 @@ export const SectionAccordionItem = ({
     hasCredits: boolean,
     handleProps?: any,
     index: number,
+    chapterIndex: number,
 }) => {
     const {
         t,
@@ -59,7 +61,7 @@ export const SectionAccordionItem = ({
                 <div className="flex items-center gap-2 flex-1">
                     {handleProps && (
                         <div {...handleProps} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
-                            <span className="text-xs w-4 text-center">{index + 1}</span>
+                             <span className="text-xs w-8 text-left">{chapterIndex + 1}.{index + 1}</span>
                             <GripVertical className="h-5 w-5" />
                         </div>
                     )}

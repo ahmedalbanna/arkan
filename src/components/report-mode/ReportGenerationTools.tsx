@@ -33,10 +33,12 @@ interface GenerationToolsProps {
 const SortableSectionItem = ({
   section,
   index,
+  chapterIndex,
   ...props
 }: {
   section: Section;
   index: number;
+  chapterIndex: number;
   [key: string]: any; // To pass through other props
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -53,6 +55,7 @@ const SortableSectionItem = ({
         itemKey={section.id}
         section={section}
         handleProps={{ ...listeners }}
+        chapterIndex={chapterIndex}
         index={index}
         {...props}
       />
@@ -83,7 +86,7 @@ const SortableChapterItem = ({
                      <div className="flex items-center gap-2 flex-1">
                         {listeners && (
                             <div {...listeners} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
-                                <span className="text-xs w-4 text-center">{index + 1}</span>
+                                <span className="text-sm w-4 text-center font-semibold">{index + 1}.</span>
                                 <GripVertical className="h-5 w-5" />
                             </div>
                         )}
@@ -229,6 +232,7 @@ export const GenerationTools = ({
                                                         key={section.id}
                                                         section={section}
                                                         index={index}
+                                                        chapterIndex={chapterIndex}
                                                         onGenerate={() => onGenerateSection(section.id)}
                                                         isGenerating={activeMutationKey === section.id}
                                                         isAnythingGenerating={isAnythingGenerating}
