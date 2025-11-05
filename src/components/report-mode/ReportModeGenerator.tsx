@@ -10,6 +10,7 @@ import { Button } from '../ui/button';
 import { PanelRightOpen } from 'lucide-react';
 import { ReportResults } from './ReportResults';
 import type { Section } from '@/lib/models';
+import { useBuilderStore } from '@/hooks';
 
 function ReportSkeleton() {
     return (
@@ -29,22 +30,18 @@ export default function ReportModeGenerator() {
         locale,
         isPanelCollapsed,
         setIsPanelCollapsed,
-        orderedSections, // No longer used, but kept for compatibility
-        setOrderedSections, // No longer used, but kept for compatibility
         isAnythingGenerating,
         activeMutationKey,
         onGenerateSection,
         hasCreditsForSingleSection,
         generatedSections,
     } = useReportModeGenerator();
-
-
-    // The main logic is now encapsulated in the hook.
-    // The component just needs to render the UI based on the hook's state.
+    
+    // Directly subscribe to the project from the store
+    const project = useBuilderStore(state => state.project);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-            {/* Local cache is saved automatically; no manual button shown */}
             {isPanelCollapsed && (
                 <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-24">
                     <Button
