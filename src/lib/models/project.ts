@@ -193,7 +193,30 @@ export class Project implements SavedProject {
   }
 
   public addCustomSection(chapterId: string, title: string): string | null {
-    return this.addSectionToChapter(chapterId, title);
+    const chapter = this.getChapter(chapterId);
+    if (!chapter) return null;
+
+    const baseId = title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+    let newSectionId = baseId;
+    let counter = 1;
+    while(this.sections.some(s => s.id === newSectionId)) {
+        newSectionId = `${baseId}-${counter}`;
+        counter++;
+    }
+
+    const newSection = new Section({
+      id: newSectionId,
+      title: title,
+      type: 'report',
+      content: '',
+      prompt: `You are an expert technical writer. Write a comprehensive section on "${title}".`,
+      guidelines: [],
+      model: 'googleai/gemini-1.5-flash-preview-0514'
+    });
+    
+    chapter.addSection(newSection);
+    this.hasUnsavedChanges = true;
+    return newSectionId;
   }
 
 

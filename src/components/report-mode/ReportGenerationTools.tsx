@@ -113,7 +113,7 @@ export const GenerationTools = ({
 }: GenerationToolsProps) => {
   const { t } = useLocalization();
   const { project, updateProject } = useBuilderStore();
-  const [tocText, setTocText] = useState<Record<string, string>>({});
+  const [tocText, setTocText] = useState('');
   const [newChapterTitle, setNewChapterTitle] = useState('');
 
   const handleAddChapter = () => {
@@ -125,9 +125,8 @@ export const GenerationTools = ({
     setNewChapterTitle('');
   };
 
-  const handleCreateSectionsFromToc = (chapterId: string) => {
-    const text = tocText[chapterId];
-    if (!text || !text.trim()) {
+  const handleCreateFromToc = () => {
+    if (!tocText.trim()) {
       toast({
         title: "Table of Contents is empty",
         description: "Please paste the section titles into the text area.",
@@ -135,25 +134,42 @@ export const GenerationTools = ({
       });
       return;
     }
-    const sectionTitles = text.split('\n').map(title => title.trim()).filter(title => title);
-    
+
+    const lines = tocText.split('\n').map(line => line.trim()).filter(Boolean);
+    let chaptersCreated = 0;
+    let sectionsCreated = 0;
+
     updateProject(p => {
-        sectionTitles.forEach(title => {
-            p.addCustomSection(chapterId, title);
+        let currentChapterId: string | null = null;
+
+        lines.forEach(line => {
+            // Regex to match chapter (e.g., "1. Title") or section (e.g., "1.1 Title")
+            const chapterMatch = line.match(/^\d+\.\s+(.+)/);
+            const sectionMatch = line.match(/^\d+\.\d+\.?\s*(.*)/);
+
+            if (sectionMatch && currentChapterId) {
+                const sectionTitle = sectionMatch[1].trim();
+                if (sectionTitle) {
+                    p.addCustomSection(currentChapterId, sectionTitle);
+                    sectionsCreated++;
+                }
+            } else if (chapterMatch) {
+                const chapterTitle = chapterMatch[1].trim();
+                if (chapterTitle) {
+                    currentChapterId = p.addChapter(chapterTitle);
+                    chaptersCreated++;
+                }
+            }
         });
     });
 
     toast({
-      title: "Sections Created",
-      description: `${sectionTitles.length} sections have been added to the chapter.`,
+        title: "Structure Created",
+        description: `Created ${chaptersCreated} chapters and ${sectionsCreated} sections.`,
     });
-    setTocText(prev => ({...prev, [chapterId]: ''}));
+    setTocText('');
   };
   
-  const handleAddSection = (chapterId: string) => {
-      updateProject(p => p.addSectionToChapter(chapterId));
-  }
-
   const handleSectionDragEnd = (event: DragEndEvent, chapterId: string) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
@@ -191,68 +207,64 @@ export const GenerationTools = ({
         </div>
       </CardHeader>
       <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
-          <div className="flex gap-2">
+          <div className="space-y-2">
+             <Label htmlFor="toc-master-input">Table of Contents</Label>
+             <Textarea
+                  id="toc-master-input"
+                  value={tocText}
+                  onChange={(e) => setTocText(e.target.value)}
+                  placeholder={"1. Chapter One\n1.1. Section One\n2. Chapter Two..."}
+                  className="flex-grow resize-none"
+                  rows={5}
+             />
+             <Button onClick={handleCreateFromToc} size="sm" className="w-full">
+                  <ListPlus className="me-2 h-4 w-4" /> Create Chapters &amp; Sections
+             </Button>
+          </div>
+
+          <div className="relative flex-grow flex flex-col min-h-0">
+            <div className="flex-grow border-t pt-4">
+              <ScrollArea className="h-full -mx-6 px-6">
+                  <DndContext collisionDetection={closestCenter} onDragEnd={handleChapterDragEnd}>
+                      <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
+                        <Accordion type="multiple" className="w-full space-y-4">
+                          {(project?.chapters || []).map((chapter, chapterIndex) => (
+                            <SortableChapterItem chapter={chapter} index={chapterIndex} key={chapter.id}>
+                                <DndContext collisionDetection={closestCenter} onDragEnd={(e) => handleSectionDragEnd(e, chapter.id)}>
+                                    <SortableContext items={chapter.sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                                        <Accordion type="single" collapsible className="w-full space-y-2">
+                                            {chapter.sections.map((section, index) => (
+                                                <SortableSectionItem
+                                                    key={section.id}
+                                                    section={section}
+                                                    index={index}
+                                                    chapterIndex={chapterIndex}
+                                                    onGenerate={() => onGenerateSection(section.id)}
+                                                    isGenerating={activeMutationKey === section.id}
+                                                    isAnythingGenerating={isAnythingGenerating}
+                                                    hasCredits={hasCreditsForSingleSection}
+                                                />
+                                            ))}
+                                        </Accordion>
+                                    </SortableContext>
+                                </DndContext>
+                            </SortableChapterItem>
+                          ))}
+                        </Accordion>
+                      </SortableContext>
+                  </DndContext>
+              </ScrollArea>
+            </div>
+          </div>
+           <div className="flex gap-2 border-t pt-4">
               <Input
                 placeholder="New Chapter Title..."
                 value={newChapterTitle}
                 onChange={(e) => setNewChapterTitle(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddChapter())}
               />
-              <Button onClick={handleAddChapter}><BookCopy className="me-2 h-4 w-4" /> Add Chapter</Button>
+              <Button onClick={handleAddChapter} variant="outline"><BookCopy className="me-2 h-4 w-4" /> Add Chapter</Button>
           </div>
-          <ScrollArea className="flex-grow -mx-6 px-6">
-              <DndContext collisionDetection={closestCenter} onDragEnd={handleChapterDragEnd}>
-                  <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
-                    <Accordion type="multiple" className="w-full space-y-4">
-                      {(project?.chapters || []).map((chapter, chapterIndex) => (
-                        <SortableChapterItem chapter={chapter} index={chapterIndex} key={chapter.id}>
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                   <Label htmlFor={`toc-input-${chapter.id}`}>Table of Contents</Label>
-                                   <Textarea
-                                        id={`toc-input-${chapter.id}`}
-                                        value={tocText[chapter.id] || ''}
-                                        onChange={(e) => setTocText(prev => ({...prev, [chapter.id]: e.target.value}))}
-                                        placeholder={"Introduction\nSystem Analysis\n..."}
-                                        className="flex-grow resize-none"
-                                        rows={3}
-                                   />
-                                   <Button onClick={() => handleCreateSectionsFromToc(chapter.id)} size="sm" className="w-full">
-                                        <ListPlus className="me-2 h-4 w-4" /> Create Sections from List
-                                   </Button>
-                                </div>
-
-                                 <div className="border-t pt-4 mt-4 space-y-2">
-                                    <h4 className="text-sm font-medium">Sections in '{chapter.title}'</h4>
-                                    <DndContext collisionDetection={closestCenter} onDragEnd={(e) => handleSectionDragEnd(e, chapter.id)}>
-                                        <SortableContext items={chapter.sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                                            <Accordion type="single" collapsible className="w-full space-y-2">
-                                                {chapter.sections.map((section, index) => (
-                                                    <SortableSectionItem
-                                                        key={section.id}
-                                                        section={section}
-                                                        index={index}
-                                                        chapterIndex={chapterIndex}
-                                                        onGenerate={() => onGenerateSection(section.id)}
-                                                        isGenerating={activeMutationKey === section.id}
-                                                        isAnythingGenerating={isAnythingGenerating}
-                                                        hasCredits={hasCreditsForSingleSection}
-                                                    />
-                                                ))}
-                                            </Accordion>
-                                        </SortableContext>
-                                    </DndContext>
-                                     <Button onClick={() => handleAddSection(chapter.id)} variant="outline" className="w-full mt-2">
-                                        <PlusCircle className="me-2 h-4 w-4" /> Add Section
-                                    </Button>
-                                 </div>
-                            </div>
-                        </SortableChapterItem>
-                      ))}
-                    </Accordion>
-                  </SortableContext>
-              </DndContext>
-          </ScrollArea>
       </CardContent>
     </Card>
   );
