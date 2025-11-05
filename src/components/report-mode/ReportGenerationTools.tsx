@@ -23,11 +23,11 @@ import { Loader2 } from 'lucide-react';
 import { Input } from '../ui/input';
 
 interface GenerationToolsProps {
-  onCollapseToggle: () => void;
   isAnythingGenerating: boolean;
   activeMutationKey: string | null;
   onGenerateSection: (sectionId: string) => void;
   hasCreditsForSingleSection: boolean;
+  onCollapseToggle: () => void;
 }
 
 const SortableSectionItem = ({
