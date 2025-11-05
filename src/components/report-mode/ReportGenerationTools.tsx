@@ -125,33 +125,35 @@ const SortableChapterItem = ({
     return (
         <div ref={setNodeRef} style={style} {...attributes}>
              <AccordionItem value={chapter.id} className="bg-muted/30 border rounded-lg">
-                <AccordionTrigger className="px-4 py-2 hover:no-underline">
-                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                        {listeners && (
-                            <div {...listeners} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
-                                <span className="text-sm w-4 text-center font-semibold">{index + 1}.</span>
-                                <GripVertical className="h-5 w-5" />
-                            </div>
-                        )}
-                        {isEditing ? (
-                             <Input
-                                value={editedTitle}
-                                onChange={(e) => setEditedTitle(e.target.value)}
-                                onBlur={handleTitleSave}
-                                onKeyDown={handleKeyDown}
-                                autoFocus
-                                onClick={(e) => e.stopPropagation()}
-                                className="font-semibold border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent truncate"
-                            />
-                        ) : (
-                            <span onDoubleClick={() => setIsEditing(true)} className="font-semibold truncate p-0 h-auto">
-                                {chapter.title}
-                            </span>
-                        )}
-                     </div>
-                     <AlertDialog>
+                <div className="flex items-center px-4 py-2">
+                    <AccordionTrigger className="flex-1 hover:no-underline py-0">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                            {listeners && (
+                                <div {...listeners} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
+                                    <span className="text-sm w-4 text-center font-semibold">{index + 1}.</span>
+                                    <GripVertical className="h-5 w-5" />
+                                </div>
+                            )}
+                            {isEditing ? (
+                                <Input
+                                    value={editedTitle}
+                                    onChange={(e) => setEditedTitle(e.target.value)}
+                                    onBlur={handleTitleSave}
+                                    onKeyDown={handleKeyDown}
+                                    autoFocus
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="font-semibold border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent truncate"
+                                />
+                            ) : (
+                                <span onDoubleClick={() => setIsEditing(true)} className="font-semibold truncate p-0 h-auto">
+                                    {chapter.title}
+                                </span>
+                            )}
+                        </div>
+                    </AccordionTrigger>
+                    <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 mr-2" onClick={e => e.stopPropagation()}>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => e.stopPropagation()}>
                                 <Trash2 className="h-4 w-4 text-destructive/70" />
                             </Button>
                         </AlertDialogTrigger>
@@ -168,7 +170,7 @@ const SortableChapterItem = ({
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
-                </AccordionTrigger>
+                </div>
                 <AccordionContent>
                     <div className="border-t px-4 py-4 space-y-4">
                         <SortableContext items={chapter.sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
