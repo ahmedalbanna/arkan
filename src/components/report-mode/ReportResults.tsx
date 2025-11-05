@@ -11,9 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBuilderStore } from '@/hooks';
 import A4Page from '@/components/shared/A4Page';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useSections } from '@/hooks/data/use-sections';
 import { useReportPaginator } from '@/hooks/core/use-report-paginator';
-import { Input } from '../ui/input';
 
 interface ReportResultsProps {
   generatedSections: SectionName[];
@@ -26,11 +24,11 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
   const {
     currentPage,
     totalPages,
-    currentItem,
+    currentItem: currentChapter,
     handleNextPage,
     handlePrevPage,
     setCurrentPage,
-  } = useReportPaginator(generatedSections);
+  } = useReportPaginator();
 
   const handleSectionUpdate = (key: SectionName, value: string) => {
     updateProject(p => {
@@ -52,14 +50,16 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
         newSectionId = p.addCustomSection(targetChapterId, 'New Section');
     });
 
-    if (newSectionId && project?.sections) {
-        const newIndex = project.sections.findIndex(s => s.id === newSectionId) ?? (project.sections.length || 1) - 1;
-        setCurrentPage(newIndex);
+    if (newSectionId && project?.chapters) {
+        const newChapterIndex = project.chapters.findIndex(c => c.sections.some(s => s.id === newSectionId));
+        if (newChapterIndex !== -1) {
+            setCurrentPage(newChapterIndex);
+        }
     }
   };
 
   const renderContent = () => {
-    if (totalPages === 0 || !currentItem) {
+    if (totalPages === 0 || !currentChapter) {
       return (
         <div className="flex items-center justify-center h-full min-h-[400px]">
           <div className="text-center text-muted-foreground p-8">
@@ -75,31 +75,23 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
       );
     }
 
-    const currentSection = project?.getSection(currentItem.id);
-    const chapter = project?.chapters?.find(c => c.sections.some(s => s.id === currentItem.id));
-
     return (
         <div className="h-full p-4 gap-4 rounded-lg flex flex-col mt-4">
             <ScrollArea className="flex-grow">
-                {currentSection ? (
-                    <A4Page key={currentSection.id}>
-                        <SectionView
-                            chapterTitle={chapter?.title}
-                            sectionKey={currentSection.id}
-                            title={currentSection.title}
-                            content={currentSection.content || ''}
-                            onUpdate={handleSectionUpdate}
-                            onTitleChange={handleTitleUpdate}
-                        />
-                    </A4Page>
-                ) : (
-                     <div className="flex items-center justify-center h-full min-h-[400px]">
-                        <div className="text-center text-muted-foreground p-8">
-                            <FileText className="w-16 h-16 mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold">{t('builder.reportGenerator.selectSectionPrompt')}</h3>
+                <A4Page key={currentChapter.id}>
+                    {currentChapter.sections.map(section => (
+                        <div key={section.id} className="mb-8 last:mb-0">
+                           <SectionView
+                                chapterTitle={currentChapter.title}
+                                sectionKey={section.id}
+                                title={section.title}
+                                content={section.content || ''}
+                                onUpdate={handleSectionUpdate}
+                                onTitleChange={handleTitleUpdate}
+                            />
                         </div>
-                    </div>
-                )}
+                    ))}
+                </A4Page>
             </ScrollArea>
         </div>
     );
@@ -126,7 +118,7 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
                     {t('builder.presentationGenerator.prev')}
                 </Button>
                 <span className="text-sm font-medium text-muted-foreground mx-4">
-                    Page {currentPage + 1} of {totalPages}
+                    Chapter {currentPage + 1} of {totalPages}: {currentChapter?.title}
                 </span>
                 <Button onClick={handleNextPage} disabled={currentPage === totalPages - 1} variant="ghost">
                     {t('builder.presentationGenerator.next')}

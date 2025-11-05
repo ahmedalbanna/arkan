@@ -2,23 +2,22 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import type { SectionName } from '@/ai/schemas';
 import { useBuilderStore } from '@/hooks';
-import type { Section } from '@/lib/models';
+import type { Chapter } from '@/lib/models';
 
 
-export function useReportPaginator(generatedSections: SectionName[]) {
+export function useReportPaginator() {
     const { project } = useBuilderStore();
     const [currentPage, setCurrentPage] = useState(0);
 
-    const orderedSections = useMemo((): Section[] => {
+    const chapters = useMemo((): Chapter[] => {
         if (!project || !project.chapters || project.chapters.length === 0) return [];
-        return project.chapters.flatMap(chapter => chapter.sections || []);
+        return project.chapters;
     }, [project?.chapters]);
 
 
-    const totalPages = orderedSections.length;
-    const currentItem = orderedSections[currentPage];
+    const totalPages = chapters.length;
+    const currentItem = chapters[currentPage]; // Now currentItem is a Chapter
 
      useEffect(() => {
         if (currentPage >= totalPages && totalPages > 0) {
