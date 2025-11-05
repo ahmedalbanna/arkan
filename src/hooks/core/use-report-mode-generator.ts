@@ -24,24 +24,15 @@ export function useReportModeGenerator() {
     const queryClient = useQueryClient();
 
     const orderedSections = useMemo(() => {
-        if (!project?.sections) return [];
-
-        const order = project.sectionsOrder ?? [];
-        const sectionMap = new Map(project.sections.map(s => [s.id, s]));
-
-        const ordered = order.map(id => sectionMap.get(id)).filter((s): s is Section => !!s);
-        const unordered = project.sections.filter(s => !order.includes(s.id));
-        
-        return [...ordered, ...unordered];
-    }, [project?.sections, project?.sectionsOrder]);
+        if (!project) return [];
+        return project.sections;
+    }, [project]);
 
 
     const setOrderedSections = (newOrder: Section[]) => {
         const orderIds = newOrder.map(s => s.id);
         updateProject(p => {
-          if (p.sectionsOrder) {
-            p.sectionsOrder = orderIds;
-          }
+          p.updateSectionsOrder(orderIds);
         });
     };
 
@@ -122,7 +113,7 @@ export function useReportModeGenerator() {
     const hasCreditsForSingleSection = !!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1;
 
     const generatedSections = useMemo(() => {
-        if (!project || !project.sections) return [];
+        if (!project) return [];
         return project.sections.map(s => s.id);
     }, [project]);
 

@@ -2,12 +2,12 @@
 import { Section, SectionProperties } from './section';
 import { ExternalContext, ExternalContextType } from './external-context';
 import { v4 as uuidv4 } from 'uuid';
+import { Chapter, ChapterProperties } from './chapter';
 
 export interface ProjectState {
   name?: string | undefined;
   projectIdea?: string | undefined;
-  sections?: Section[];
-  sectionsOrder?: string[] | undefined;
+  chapters?: Chapter[];
   externalContext?: ExternalContext[] | undefined;
 }
 export interface SavedProject extends ProjectState {
@@ -29,8 +29,7 @@ export class Project implements SavedProject {
 
   private _name?: string;
   private _projectIdea?: string;
-  private _sections?: Section[];
-  private _sectionsOrder?: string[];
+  private _chapters?: Chapter[];
   private _externalContext: ExternalContext[];
 
 
@@ -41,8 +40,7 @@ export class Project implements SavedProject {
     this._updatedAt = props.updatedAt || new Date().toISOString();
     this._name = props.name;
     this._projectIdea = props.projectIdea;
-    this._sections = (props.sections || []).map(s => s instanceof Section ? s : new Section(s as SectionProperties));
-    this._sectionsOrder = props.sectionsOrder || [];
+    this._chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c as ChapterProperties));
     this._externalContext = props.externalContext || [];
   }
 
@@ -53,15 +51,21 @@ export class Project implements SavedProject {
   get updatedAt() { return this._updatedAt; }
   get name() { return this._name; }
   get projectIdea() { return this._projectIdea; }
-  get sections() { return this._sections; }
-  get sectionsOrder() { return this._sectionsOrder; }
+  get chapters() { return this._chapters; }
   get externalContext() { return this._externalContext; }
+  
+  get sections(): Section[] {
+    return this._chapters?.flatMap(c => c.sections) ?? [];
+  }
+
+  get sectionsOrder(): string[] {
+    return this._chapters?.flatMap(c => c.sections.map(s => s.id)) ?? [];
+  }
 
 
   // --- Public Setters ---
   set name(value: string | undefined) { this._name = value; }
   set projectIdea(value: string | undefined) { this._projectIdea = value; }
-  set sectionsOrder(value: string[] | undefined) { this._sectionsOrder = value; }
 
   /**
    * Converts the Project instance to a plain JSON object for serialization.
@@ -75,9 +79,8 @@ export class Project implements SavedProject {
       updatedAt: this._updatedAt,
       name: this._name,
       projectIdea: this._projectIdea,
-      // Serialize sections by calling their toJSON method
-      sections: this._sections?.map(s => s.toJSON()),
-      sectionsOrder: this._sectionsOrder,
+      // Serialize chapters by calling their toJSON method
+      chapters: this._chapters?.map(c => c.toJSON()),
       externalContext: this._externalContext,
     };
   }
@@ -92,15 +95,14 @@ export class Project implements SavedProject {
     this._userId = '';
     this._name = undefined;
     this._projectIdea = undefined;
-    this._sections = [];
-    this._sectionsOrder = [];
+    this._chapters = [];
     this._externalContext = [];
     this.hasUnsavedChanges = false;
   }
 
   // --- Section Methods ---
   public getSection(sectionId: string): Section | undefined {
-    return this._sections?.find(s => s.id === sectionId);
+    return this.sections?.find(s => s.id === sectionId);
   }
 
   public getSectionContent(sectionId: string): string | undefined {
@@ -135,7 +137,7 @@ export class Project implements SavedProject {
     let newSectionId = baseId;
     let counter = 1;
     // Ensure the ID is unique within the project
-    while(this._sections?.some(s => s.id === newSectionId)) {
+    while(this.sections?.some(s => s.id === newSectionId)) {
         newSectionId = `${baseId}-${counter}`;
         counter++;
     }
@@ -150,32 +152,36 @@ export class Project implements SavedProject {
       model: 'googleai/gemini-1.5-flash-preview-0514'
     });
 
-    if (!this._sections) this._sections = [];
-    this._sections.push(newSection);
+    if (!this._chapters) this._chapters = [];
     
-    if (!this._sectionsOrder) this._sectionsOrder = [];
-    this._sectionsOrder.push(newSectionId);
+    let defaultChapter = this._chapters.find(c => c.title === 'Main');
+    if (!defaultChapter) {
+        defaultChapter = new Chapter({ id: 'main', title: 'Main', sections: [] });
+        this._chapters.push(defaultChapter);
+    }
+    
+    defaultChapter.addSection(newSection);
     
     this.hasUnsavedChanges = true;
     return newSectionId;
   }
 
   public removeSection(sectionId: string): void {
-    if (this._sections) {
-      this._sections = this._sections.filter(s => s.id !== sectionId);
-    }
-    if (this._sectionsOrder) {
-        this._sectionsOrder = this._sectionsOrder.filter(id => id !== sectionId);
-    }
+    this._chapters?.forEach(chapter => {
+        chapter.removeSection(sectionId);
+    });
     this.hasUnsavedChanges = true;
   }
 
-  /**
-   * Update the saved order of sections (by id).
-   */
   public updateSectionsOrder(newOrder: string[]): void {
-    this._sectionsOrder = [...newOrder];
-    this.hasUnsavedChanges = true;
+    const allSections = this.sections;
+    const newOrderedSections = newOrder.map(id => allSections.find(s => s.id === id)).filter((s): s is Section => !!s);
+    
+    // For simplicity, this example assumes one chapter. A multi-chapter implementation would need more complex logic here.
+    if (this._chapters && this._chapters.length > 0) {
+        this._chapters[0].sections = newOrderedSections;
+        this.hasUnsavedChanges = true;
+    }
   }
 
 

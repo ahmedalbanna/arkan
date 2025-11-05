@@ -2,6 +2,7 @@
 export * from './diagram';
 export * from './project';
 export * from './section';
+export * from './chapter';
 export * from './transaction';
 export * from './user';
 export * from './template';

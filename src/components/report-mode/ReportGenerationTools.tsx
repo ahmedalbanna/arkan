@@ -15,9 +15,9 @@ import { Accordion } from '@/components/ui/accordion';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { SectionAccordionItem } from './SectionAccordionItem';
-import { useSortable } from '@dnd-kit/sortable';
 import { Section } from '@/lib/models';
 import { ScrollArea } from '../ui/scroll-area';
+import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Loader2 } from 'lucide-react';
 
@@ -120,11 +120,13 @@ export const GenerationTools = ({
 
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
-    if (active.id !== over.id) {
+    if (over && active.id !== over.id) {
       const oldIndex = orderedSections.findIndex((s) => s.id === active.id);
       const newIndex = orderedSections.findIndex((s) => s.id === over.id);
       const newOrder = arrayMove(orderedSections, oldIndex, newIndex);
-      setOrderedSections(newOrder);
+      updateProject(p => {
+          p.updateSectionsOrder(newOrder.map(s => s.id));
+      });
     }
   };
 
