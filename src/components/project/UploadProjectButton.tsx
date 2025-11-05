@@ -10,8 +10,9 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useRouter } from 'next/navigation';
 
 export function UploadProjectButton() {
-    const { fileInputRef, handleUploadClick, onFileChange, t } = useBuilderStore();
+    const { fileInputRef, handleUploadClick, onFileChange } = useBuilderStore();
     const { toast } = useToast();
+    const { t } = useLocalization();
     const router = useRouter();
 
 
