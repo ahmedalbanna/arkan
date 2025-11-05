@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Loader2, Sparkles, GripVertical, SlidersHorizontal, StickyNote, Link as LinkIcon, Trash2 } from 'lucide-react';
@@ -46,7 +46,7 @@ export const SectionAccordionItem = ({
     const [isEditing, setIsEditing] = useState(false);
     const [editedTitle, setEditedTitle] = useState(section.title);
 
-    const form = useForm(); 
+    const form = useForm();
 
     useEffect(() => {
         setEditedTitle(section.title);
@@ -108,7 +108,7 @@ export const SectionAccordionItem = ({
                 </AccordionTrigger>
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-7 w-7">
                             <Trash2 className="h-4 w-4 text-destructive/70" />
                         </Button>
                     </AlertDialogTrigger>
@@ -127,45 +127,47 @@ export const SectionAccordionItem = ({
                 </AlertDialog>
             </div>
             <AccordionContent>
-                <div className="border-t px-4 pt-4">
-                    <Tabs defaultValue="controls" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="controls"><SlidersHorizontal className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_controls')}</TabsTrigger>
-                            <TabsTrigger value="prompt"><StickyNote className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_prompt')}</TabsTrigger>
-                            <TabsTrigger value="context"><LinkIcon className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="controls" className="py-4">
-                            <SectionGenerationControls sectionKey={itemKey} />
-                        </TabsContent>
-                        <TabsContent value="prompt" className="py-4">
-                            <GuidelineEditor itemKey={itemKey} />
-                        </TabsContent>
-                        <TabsContent value="context" className="py-4">
-                            <ContextSelector itemKey={itemKey} />
-                        </TabsContent>
-                    </Tabs>
-                     <div className="p-2 border-t mt-2">
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        onClick={handleGenerateClick}
-                                        disabled={!canGenerate}
-                                        className='w-full'
-                                    >
-                                        {isGenerating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-                                        {t('builder.reportGenerator.generateButton')}
-                                    </Button>
-                                </TooltipTrigger>
-                                {!canGenerate && (
-                                    <TooltipContent>
-                                        <p>{isAnythingGenerating ? "Another generation is in progress." : "Insufficient credits."}</p>
-                                    </TooltipContent>
-                                )}
-                            </Tooltip>
-                        </TooltipProvider>
+                <FormProvider {...form}>
+                    <div className="border-t px-4 pt-4">
+                        <Tabs defaultValue="controls" className="w-full">
+                            <TabsList className="grid w-full grid-cols-3">
+                                <TabsTrigger value="controls"><SlidersHorizontal className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_controls')}</TabsTrigger>
+                                <TabsTrigger value="prompt"><StickyNote className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_prompt')}</TabsTrigger>
+                                <TabsTrigger value="context"><LinkIcon className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="controls" className="py-4">
+                                <SectionGenerationControls sectionKey={itemKey} />
+                            </TabsContent>
+                            <TabsContent value="prompt" className="py-4">
+                                <GuidelineEditor itemKey={itemKey} />
+                            </TabsContent>
+                            <TabsContent value="context" className="py-4">
+                                <ContextSelector itemKey={itemKey} />
+                            </TabsContent>
+                        </Tabs>
+                        <div className="p-2 border-t mt-2">
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            onClick={handleGenerateClick}
+                                            disabled={!canGenerate}
+                                            className='w-full'
+                                        >
+                                            {isGenerating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
+                                            {t('builder.reportGenerator.generateButton')}
+                                        </Button>
+                                    </TooltipTrigger>
+                                    {!canGenerate && (
+                                        <TooltipContent>
+                                            <p>{isAnythingGenerating ? "Another generation is in progress." : "Insufficient credits."}</p>
+                                        </TooltipContent>
+                                    )}
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
                     </div>
-                </div>
+                </FormProvider>
             </AccordionContent>
         </AccordionItem>
     );
