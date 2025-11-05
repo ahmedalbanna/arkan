@@ -11,8 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBuilderStore } from '@/hooks';
 import A4Page from '@/components/shared/A4Page';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAgents } from '@/hooks/data/useAgents';
-import { AgentCategory } from '@/lib/models/agent';
+import { useSections } from '@/hooks/data/use-sections';
 import { useMemo } from 'react';
 import { useReportPaginator } from '@/hooks/core/use-report-paginator';
 
@@ -23,12 +22,12 @@ interface ReportResultsProps {
 export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
   const { t } = useLocalization();
   const { project, updateProject } = useBuilderStore();
-  const { agents } = useAgents();
+  const { data: sectionConfigs } = useSections();
 
-  const reportAgents = useMemo(() => {
-    if (!agents) return [];
-    return agents.filter(a => a.category === AgentCategory.ReportGeneration);
-  }, [agents]);
+  const reportSections = useMemo(() => {
+    if (!sectionConfigs) return [];
+    return sectionConfigs.filter(s => s.type === 'report');
+  }, [sectionConfigs]);
 
   const {
     currentPage,
@@ -38,7 +37,7 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     handleNextPage,
     handlePrevPage,
     setCurrentPage,
-  } = useReportPaginator(generatedSections, reportAgents);
+  } = useReportPaginator(generatedSections, reportSections);
 
   const handleSectionUpdate = (key: SectionName, value: string) => {
     updateProject(p => {
@@ -58,11 +57,11 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
         newSectionId = p.addCustomSection();
     });
 
-    if (newSectionId) {
+    if (newSectionId && project?.sections) {
         // After a section is added, the project object in the store updates.
         // The useReportPaginator hook's useEffect will detect the change in `project.sections`
         // and we can find the new index and navigate to it.
-        const newIndex = project?.sections?.findIndex(s => s.id === newSectionId) ?? (project?.sections?.length || 1) - 1;
+        const newIndex = project.sections.findIndex(s => s.id === newSectionId) ?? (project.sections.length || 1) - 1;
         setCurrentPage(newIndex);
     }
   };

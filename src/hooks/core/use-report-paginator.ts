@@ -2,11 +2,11 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import type { Agent } from '@/lib/models/agent';
 import type { SectionName } from '@/ai/schemas';
 import { useBuilderStore } from '@/hooks';
+import { SectionProperties } from '@/lib/models';
 
-export function useReportPaginator(generatedSections: SectionName[], reportAgents: Agent[]) {
+export function useReportPaginator(generatedSections: SectionName[], sectionConfigs: SectionProperties[]) {
     const { project } = useBuilderStore();
     const [currentPage, setCurrentPage] = useState(0);
 
@@ -20,7 +20,7 @@ export function useReportPaginator(generatedSections: SectionName[], reportAgent
             // Get all sections from the project that are in the defined order
             const ordered = project.sectionsOrder
                 .map(id => project.sections.find(s => s.id === id))
-                .filter(Boolean) as any[]; // `any` to satisfy TS for now, should be Section[]
+                .filter(Boolean);
             
             // Find any sections in the project that are NOT in the sectionsOrder array (e.g., newly created)
             const unordered = project.sections.filter(s => !orderSet.has(s.id));
@@ -50,7 +50,8 @@ export function useReportPaginator(generatedSections: SectionName[], reportAgent
         if (section?.title && section.title !== key) {
             return section.title;
         }
-        return reportAgents.find(a => a.id === key)?.name || key.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        const config = sectionConfigs?.find(s => s.id === key);
+        return config?.title || key.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     };
 
     const handleNextPage = () => {
