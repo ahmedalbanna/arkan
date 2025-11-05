@@ -1,8 +1,7 @@
 
-
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils/cn';
 import { PanelLeftClose, ListPlus, BookCopy, PlusCircle, GripVertical } from 'lucide-react';
@@ -78,6 +77,28 @@ const SortableChapterItem = ({
     [key: string]: any;
 }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
+    const { updateProject } = useBuilderStore();
+    const [title, setTitle] = useState(chapter.title);
+
+    useEffect(() => {
+        setTitle(chapter.title);
+    }, [chapter.title]);
+
+    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setTitle(e.target.value);
+    };
+
+    const handleTitleBlur = () => {
+        if (title !== chapter.title) {
+            updateProject(p => {
+                const chap = p.getChapter(chapter.id);
+                if (chap) {
+                    chap.title = title;
+                }
+            });
+        }
+    };
+
 
     const style = {
         transform: transform ? CSS.Transform.toString(transform) : undefined,
@@ -90,14 +111,20 @@ const SortableChapterItem = ({
         <div ref={setNodeRef} style={style} {...attributes}>
              <AccordionItem value={chapter.id} className="bg-muted/30 border rounded-lg">
                 <AccordionTrigger className="px-4 py-2 hover:no-underline">
-                     <div className="flex items-center gap-2 flex-1">
+                     <div className="flex items-center gap-2 flex-1 min-w-0">
                         {listeners && (
                             <div {...listeners} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
                                 <span className="text-sm w-4 text-center font-semibold">{index + 1}.</span>
                                 <GripVertical className="h-5 w-5" />
                             </div>
                         )}
-                        <span className="font-semibold">{chapter.title}</span>
+                        <Input
+                            value={title}
+                            onChange={handleTitleChange}
+                            onBlur={handleTitleBlur}
+                            onClick={(e) => e.stopPropagation()}
+                            className="font-semibold border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent truncate"
+                        />
                      </div>
                 </AccordionTrigger>
                 <AccordionContent>
@@ -178,17 +205,17 @@ export const GenerationTools = ({
             const chapterMatch = line.match(/^\d+\.\s+(.+)/);
             const sectionMatch = line.match(/^\d+\.\d+\.?\s*(.*)/);
 
-            if (sectionMatch && currentChapterId) {
-                const sectionTitle = sectionMatch[1].trim();
-                if (sectionTitle) {
-                    p.addCustomSection(currentChapterId, sectionTitle);
-                    sectionsCreated++;
-                }
-            } else if (chapterMatch) {
+            if (chapterMatch && !sectionMatch) { // It's a chapter, not a subsection
                 const chapterTitle = chapterMatch[1].trim();
                 if (chapterTitle) {
                     currentChapterId = p.addChapter(chapterTitle);
                     chaptersCreated++;
+                }
+            } else if (sectionMatch && currentChapterId) {
+                const sectionTitle = sectionMatch[1].trim();
+                if (sectionTitle) {
+                    p.addCustomSection(currentChapterId, sectionTitle);
+                    sectionsCreated++;
                 }
             }
         });
