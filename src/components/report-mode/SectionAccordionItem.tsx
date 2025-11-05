@@ -41,21 +41,28 @@ export const SectionAccordionItem = ({
 }) => {
     const { t } = useSectionAccordionItemLogic(section);
     const { updateProject } = useBuilderStore();
-    const [title, setTitle] = useState(section.title);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedTitle, setEditedTitle] = useState(section.title);
 
     const form = useForm(); 
 
     useEffect(() => {
-        setTitle(section.title);
+        setEditedTitle(section.title);
     }, [section.title]);
 
-    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setTitle(e.target.value);
+    const handleTitleSave = () => {
+        if (editedTitle.trim() && editedTitle !== section.title) {
+            updateProject(p => p.updateSectionTitle(section.id, editedTitle.trim()));
+        }
+        setIsEditing(false);
     };
 
-    const handleTitleBlur = () => {
-        if (title !== section.title) {
-            updateProject(p => p.updateSectionTitle(section.id, title));
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleTitleSave();
+        } else if (e.key === 'Escape') {
+            setEditedTitle(section.title);
+            setIsEditing(false);
         }
     };
     
@@ -71,7 +78,7 @@ export const SectionAccordionItem = ({
     return (
         <AccordionItem value={itemKey} key={itemKey} className="bg-background border rounded-lg">
             <AccordionTrigger className="flex items-center w-full px-4 py-2 text-sm font-medium hover:no-underline rounded-t-lg">
-                <div className="flex items-center gap-2 flex-1">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
                     {handleProps && (
                         <div {...handleProps} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
                              <span className="text-xs w-8 text-left">{chapterIndex + 1}.{index + 1}</span>
@@ -79,13 +86,21 @@ export const SectionAccordionItem = ({
                         </div>
                     )}
                     {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}
-                    <Input 
-                        value={title}
-                        onChange={handleTitleChange}
-                        onBlur={handleTitleBlur}
-                        onClick={(e) => e.stopPropagation()} // Prevent accordion from toggling when clicking input
-                        className="font-medium border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent"
-                    />
+                    {isEditing ? (
+                        <Input
+                            value={editedTitle}
+                            onChange={(e) => setEditedTitle(e.target.value)}
+                            onBlur={handleTitleSave}
+                            onKeyDown={handleKeyDown}
+                            autoFocus
+                            onClick={(e) => e.stopPropagation()}
+                            className="font-medium border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent"
+                        />
+                    ) : (
+                        <span onDoubleClick={() => setIsEditing(true)} className="font-medium p-0 h-auto truncate">
+                            {section.title}
+                        </span>
+                    )}
                 </div>
             </AccordionTrigger>
             <AccordionContent>

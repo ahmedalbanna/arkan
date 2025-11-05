@@ -78,27 +78,33 @@ const SortableChapterItem = ({
 }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
     const { updateProject } = useBuilderStore();
-    const [title, setTitle] = useState(chapter.title);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedTitle, setEditedTitle] = useState(chapter.title);
 
     useEffect(() => {
-        setTitle(chapter.title);
+        setEditedTitle(chapter.title);
     }, [chapter.title]);
-
-    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setTitle(e.target.value);
-    };
-
-    const handleTitleBlur = () => {
-        if (title !== chapter.title) {
+    
+    const handleTitleSave = () => {
+        if (editedTitle.trim() && editedTitle !== chapter.title) {
             updateProject(p => {
                 const chap = p.getChapter(chapter.id);
                 if (chap) {
-                    chap.title = title;
+                    chap.title = editedTitle.trim();
                 }
             });
         }
+        setIsEditing(false);
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleTitleSave();
+        } else if (e.key === 'Escape') {
+            setEditedTitle(chapter.title);
+            setIsEditing(false);
+        }
+    };
 
     const style = {
         transform: transform ? CSS.Transform.toString(transform) : undefined,
@@ -118,13 +124,21 @@ const SortableChapterItem = ({
                                 <GripVertical className="h-5 w-5" />
                             </div>
                         )}
-                        <Input
-                            value={title}
-                            onChange={handleTitleChange}
-                            onBlur={handleTitleBlur}
-                            onClick={(e) => e.stopPropagation()}
-                            className="font-semibold border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent truncate"
-                        />
+                        {isEditing ? (
+                             <Input
+                                value={editedTitle}
+                                onChange={(e) => setEditedTitle(e.target.value)}
+                                onBlur={handleTitleSave}
+                                onKeyDown={handleKeyDown}
+                                autoFocus
+                                onClick={(e) => e.stopPropagation()}
+                                className="font-semibold border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent truncate"
+                            />
+                        ) : (
+                            <span onDoubleClick={() => setIsEditing(true)} className="font-semibold truncate p-0 h-auto">
+                                {chapter.title}
+                            </span>
+                        )}
                      </div>
                 </AccordionTrigger>
                 <AccordionContent>
@@ -238,11 +252,11 @@ export const GenerationTools = ({
     
     if (activeId === overId) return;
 
-    const isChapterDrag = project?.chapters.some(c => c.id === activeId);
+    const isChapterDrag = project?.chapters?.some(c => c.id === activeId);
 
     if (isChapterDrag) {
         // Handle chapter reordering
-        if (!project?.chapters.some(c => c.id === overId)) return;
+        if (!project?.chapters?.some(c => c.id === overId)) return;
         
         updateProject(p => {
             if (!p.chapters) return;
@@ -252,8 +266,8 @@ export const GenerationTools = ({
         });
     } else {
         // Handle section reordering (within or between chapters)
-        const activeContainer = project?.chapters.find(c => c.sections.some(s => s.id === activeId));
-        const overContainer = project?.chapters.find(c => c.sections.some(s => s.id === overId)) || project?.chapters.find(c => c.id === overId);
+        const activeContainer = project?.chapters?.find(c => c.sections.some(s => s.id === activeId));
+        const overContainer = project?.chapters?.find(c => c.sections.some(s => s.id === overId)) || project?.chapters?.find(c => c.id === overId);
 
         if (!activeContainer || !overContainer) return;
 
@@ -301,7 +315,7 @@ export const GenerationTools = ({
                   rows={5}
              />
              <Button onClick={handleCreateFromToc} size="sm" className="w-full">
-                  <ListPlus className="me-2 h-4 w-4" /> Create Chapters &amp; Sections
+                  <ListPlus className="me-2 h-4 w-4" /> Create Chapters & Sections
              </Button>
           </div>
 
