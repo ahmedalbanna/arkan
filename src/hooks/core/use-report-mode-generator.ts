@@ -23,25 +23,16 @@ export function useReportModeGenerator() {
     const queryClient = useQueryClient();
 
     const orderedSections = useMemo(() => {
-        if (!project || !sectionsLoaded) return [];
+        if (!project?.sections) return [];
 
-        // If project has no sections, initialize them from the default config
-        if (!project.sections || project.sections.length === 0) {
-            const reportSectionModels = (sectionConfigs || [])
-                .filter(s => s.type === 'report')
-                .map(s => new Section({ ...s, prompt: s.prompt, guidelines: s.guidelines, model: s.model }));
-            
-            return reportSectionModels;
-        }
+        const order = project.sectionsOrder ?? [];
+        const sectionMap = new Map(project.sections.map(s => [s.id, s]));
 
-        // If project has sections, use them and ensure they are ordered
-        const orderMap = new Map(project.sections.map(s => [s.id, s]));
-        const sectionsOrder = project.sectionsOrder || [];
-        const ordered = sectionsOrder.map(id => orderMap.get(id)).filter(Boolean) as Section[];
-        const unordered = project.sections.filter(s => !sectionsOrder.includes(s.id));
+        const ordered = order.map(id => sectionMap.get(id)).filter((s): s is Section => !!s);
+        const unordered = project.sections.filter(s => !order.includes(s.id));
         
         return [...ordered, ...unordered];
-    }, [project, sectionsLoaded, sectionConfigs]);
+    }, [project?.sections, project?.sectionsOrder]);
 
 
     const setOrderedSections = (newOrder: Section[]) => {
