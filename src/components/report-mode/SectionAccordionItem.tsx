@@ -1,9 +1,9 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { buttonVariants } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Loader2, Sparkles, GripVertical, SlidersHorizontal, StickyNote, Link as LinkIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSectionAccordionItemLogic } from '@/hooks/core/useSectionAccordionItemLogic';
@@ -11,11 +11,12 @@ import type { Section } from '@/lib/models';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { SectionGenerationControls } from './SectionGenerationControls';
 import { GuidelineEditor } from './SectionGuidelineEditor';
-import { useAuth } from '@/context/AuthContext';
 import { ContextSelector } from './SectionContextSelector';
 import { cn } from '@/lib/utils/cn';
 import { Form } from '../ui/form';
 import { useForm } from 'react-hook-form';
+import { Input } from '../ui/input';
+import { useBuilderStore } from '@/hooks';
 
 export const SectionAccordionItem = ({
     itemKey,
@@ -38,14 +39,26 @@ export const SectionAccordionItem = ({
     index: number,
     chapterIndex: number,
 }) => {
-    const {
-        t,
-    } = useSectionAccordionItemLogic(section);
+    const { t } = useSectionAccordionItemLogic(section);
+    const { updateProject } = useBuilderStore();
+    const [title, setTitle] = useState(section.title);
 
-    const form = useForm(); // Create a form instance for the provider
+    const form = useForm(); 
 
-    const { userProfile } = useAuth();
+    useEffect(() => {
+        setTitle(section.title);
+    }, [section.title]);
 
+    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setTitle(e.target.value);
+    };
+
+    const handleTitleBlur = () => {
+        if (title !== section.title) {
+            updateProject(p => p.updateSectionTitle(section.id, title));
+        }
+    };
+    
     const canGenerate = hasCredits && !isAnythingGenerating;
 
     const handleGenerateClick = (e: React.MouseEvent) => {
@@ -66,32 +79,13 @@ export const SectionAccordionItem = ({
                         </div>
                     )}
                     {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}
-                    <span className="font-medium">{section.title}</span>
-
-                </div>
-                <div className="p-2">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <div
-                                    onClick={handleGenerateClick}
-                                    className={cn(
-                                        buttonVariants({ size: 'sm' }),
-                                        'font-headline flex items-center',
-                                        !canGenerate ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                                    )}
-                                >
-                                    {isGenerating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-                                    {t('builder.reportGenerator.generateButton')}
-                                </div>
-                            </TooltipTrigger>
-                            {!canGenerate && (
-                                <TooltipContent>
-                                    <p>{isAnythingGenerating ? "Another generation is in progress." : "Insufficient credits."}</p>
-                                </TooltipContent>
-                            )}
-                        </Tooltip>
-                    </TooltipProvider>
+                    <Input 
+                        value={title}
+                        onChange={handleTitleChange}
+                        onBlur={handleTitleBlur}
+                        onClick={(e) => e.stopPropagation()} // Prevent accordion from toggling when clicking input
+                        className="font-medium border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent"
+                    />
                 </div>
             </AccordionTrigger>
             <AccordionContent>
@@ -114,6 +108,27 @@ export const SectionAccordionItem = ({
                             </TabsContent>
                         </Tabs>
                     </Form>
+                     <div className="p-2 border-t mt-2">
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        onClick={handleGenerateClick}
+                                        disabled={!canGenerate}
+                                        className='w-full'
+                                    >
+                                        {isGenerating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
+                                        {t('builder.reportGenerator.generateButton')}
+                                    </Button>
+                                </TooltipTrigger>
+                                {!canGenerate && (
+                                    <TooltipContent>
+                                        <p>{isAnythingGenerating ? "Another generation is in progress." : "Insufficient credits."}</p>
+                                    </TooltipContent>
+                                )}
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
                 </div>
             </AccordionContent>
         </AccordionItem>
