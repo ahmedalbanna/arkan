@@ -18,6 +18,7 @@ import { SectionAccordionItem } from './SectionAccordionItem';
 import { useSortable } from '@dnd-kit/sortable';
 import { Section } from '@/lib/models';
 import { ScrollArea } from '../ui/scroll-area';
+import { CSS } from '@dnd-kit/utilities';
 
 interface GenerationToolsProps {
   onCollapseToggle: () => void;
@@ -42,7 +43,7 @@ const SortableSectionItem = ({
     useSortable({ id: section.id });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: transform ? CSS.Transform.toString(transform) : undefined,
     transition,
   };
 
