@@ -190,6 +190,31 @@ export class Project implements Required<ProjectProperties> {
     return newSectionId;
   }
 
+  public moveSectionUp(sectionId: string): void {
+    for (const chapter of this.chapters) {
+        const index = chapter.sections.findIndex(s => s.id === sectionId);
+        if (index > 0) {
+            const [section] = chapter.sections.splice(index, 1);
+            chapter.sections.splice(index - 1, 0, section);
+            this.updatedAt = new Date().toISOString();
+            this.hasUnsavedChanges = true;
+            return;
+        }
+    }
+  }
+
+  public moveSectionDown(sectionId: string): void {
+      for (const chapter of this.chapters) {
+          const index = chapter.sections.findIndex(s => s.id === sectionId);
+          if (index !== -1 && index < chapter.sections.length - 1) {
+              const [section] = chapter.sections.splice(index, 1);
+              chapter.sections.splice(index + 1, 0, section);
+              this.updatedAt = new Date().toISOString();
+              this.hasUnsavedChanges = true;
+              return;
+          }
+      }
+  }
   public addCustomSection(chapterId: string, title: string): string | null {
     const chapter = this.getChapter(chapterId);
     if (!chapter) return null;

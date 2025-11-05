@@ -63,6 +63,14 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
       p.addSectionAtIndex(chapterId, index, 'New Section');
     });
   };
+  
+  const handleMoveSectionUp = (sectionId: string) => {
+    updateProject(p => p.moveSectionUp(sectionId));
+  };
+  
+  const handleMoveSectionDown = (sectionId: string) => {
+      updateProject(p => p.moveSectionDown(sectionId));
+  };
 
 
   const renderContent = () => {
@@ -95,6 +103,10 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
                                 content={section.content || ''}
                                 onUpdate={handleSectionUpdate}
                                 onTitleChange={handleTitleUpdate}
+                                isFirst={index === 0}
+                                isLast={index === currentChapter.sections.length - 1}
+                                onMoveUp={() => handleMoveSectionUp(section.id)}
+                                onMoveDown={() => handleMoveSectionDown(section.id)}
                             />
                             {/* Insertion Handle */}
                             <div className="absolute -bottom-4 left-0 right-0 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

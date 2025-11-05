@@ -6,7 +6,7 @@ import { useSectionLogic } from '@/hooks';
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { Wand2, ThumbsDown, Check } from 'lucide-react';
+import { Wand2, ThumbsDown, Check, ArrowUp, ArrowDown } from 'lucide-react';
 import { DiffView } from '../shared/DiffView';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
@@ -23,9 +23,13 @@ interface SectionProps {
     content: string; // The markdown content of the section
     onUpdate: (key: SectionName, value: string) => void;
     onTitleChange: (key: SectionName, newTitle: string) => void;
+    onMoveUp: () => void;
+    onMoveDown: () => void;
+    isFirst: boolean;
+    isLast: boolean;
 }
 
-export const SectionView = ({ chapterTitle, sectionKey, title, content, onUpdate, onTitleChange }: SectionProps) => {
+export const SectionView = ({ chapterTitle, sectionKey, title, content, onUpdate, onTitleChange, onMoveUp, onMoveDown, isFirst, isLast }: SectionProps) => {
     const {
         aiSuggestion,
         diff,
@@ -39,13 +43,23 @@ export const SectionView = ({ chapterTitle, sectionKey, title, content, onUpdate
 
     return (
         <div className="space-y-4">
-            <div className="flex flex-col gap-2">
+            <div className="group relative flex flex-col gap-2">
                  {chapterTitle && <Badge variant="secondary" className="w-fit">{chapterTitle}</Badge>}
-                <Input
-                    value={title}
-                    onChange={(e) => onTitleChange(sectionKey, e.target.value)}
-                    className="font-semibold text-lg md:text-xl text-primary/90 font-headline border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
-                />
+                <div className="flex items-center gap-2">
+                    <Input
+                        value={title}
+                        onChange={(e) => onTitleChange(sectionKey, e.target.value)}
+                        className="font-semibold text-lg md:text-xl text-primary/90 font-headline border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                    />
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
+                        <Button variant="ghost" size="icon" onClick={onMoveUp} disabled={isFirst} className="h-7 w-7">
+                            <ArrowUp className="h-4 w-4"/>
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={onMoveDown} disabled={isLast} className="h-7 w-7">
+                             <ArrowDown className="h-4 w-4"/>
+                        </Button>
+                    </div>
+                </div>
             </div>
             <div className="space-y-1 text-xs text-muted-foreground">
                 <span>{words} {t('builder.Section.words')}</span>
