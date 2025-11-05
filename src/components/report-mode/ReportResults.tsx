@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SectionView } from './SectionView';
 import type { SectionName } from '@/ai/schemas';
@@ -12,8 +12,8 @@ import { useBuilderStore } from '@/hooks';
 import A4Page from '@/components/shared/A4Page';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useSections } from '@/hooks/data/use-sections';
-import { useMemo } from 'react';
 import { useReportPaginator } from '@/hooks/core/use-report-paginator';
+import { Input } from '../ui/input';
 
 interface ReportResultsProps {
   generatedSections: SectionName[];
@@ -22,27 +22,15 @@ interface ReportResultsProps {
 export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
   const { t } = useLocalization();
   const { project, updateProject } = useBuilderStore();
-  const { data: sectionConfigs } = useSections();
-
-  const reportSections = useMemo(() => {
-    if (!sectionConfigs) return [];
-    return sectionConfigs.filter(s => s.type === 'report');
-  }, [sectionConfigs]);
 
   const {
     currentPage,
     totalPages,
-    currentSectionKey,
-    getSectionTitle,
+    currentItem,
     handleNextPage,
     handlePrevPage,
     setCurrentPage,
-  } = useReportPaginator(generatedSections, reportSections);
-
-  const currentChapter = useMemo(() => {
-    if (!project || !currentSectionKey) return null;
-    return project.chapters?.find(chapter => chapter.sections.some(section => section.id === currentSectionKey));
-  }, [project, currentSectionKey]);
+  } = useReportPaginator(generatedSections);
 
   const handleSectionUpdate = (key: SectionName, value: string) => {
     updateProject(p => {
@@ -52,7 +40,16 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
 
   const handleTitleUpdate = (key: SectionName, newTitle: string) => {
     updateProject(p => {
-        p.updateSectionTitle(key, newTitle);
+      p.updateSectionTitle(key, newTitle);
+    });
+  };
+
+   const handleChapterTitleUpdate = (chapterId: string, newTitle: string) => {
+    updateProject(p => {
+      const chapter = p.getChapter(chapterId);
+      if (chapter) {
+        chapter.title = newTitle;
+      }
     });
   };
   
@@ -64,9 +61,6 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     });
 
     if (newSectionId && project?.sections) {
-        // After a section is added, the project object in the store updates.
-        // The useReportPaginator hook's useEffect will detect the change in `project.sections`
-        // and we can find the new index and navigate to it.
         const newIndex = project.sections.findIndex(s => s.id === newSectionId) ?? (project.sections.length || 1) - 1;
         setCurrentPage(newIndex);
     }
@@ -89,17 +83,42 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
       );
     }
 
-    const currentSection = project?.getSection(currentSectionKey);
+    if (!currentItem) {
+      return (
+        <div className="flex items-center justify-center h-full min-h-[400px]">
+          <div className="text-center text-muted-foreground p-8">
+            <FileText className="w-16 h-16 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold">{t('builder.reportGenerator.selectSectionPrompt')}</h3>
+          </div>
+        </div>
+      );
+    }
+
+    if (currentItem.type === 'chapter') {
+        return (
+             <A4Page key={currentItem.id} className="flex flex-col items-center justify-center text-center">
+                <Input
+                    value={currentItem.title}
+                    onChange={(e) => handleChapterTitleUpdate(currentItem.id, e.target.value)}
+                    className="font-bold text-3xl md:text-4xl text-primary font-headline border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-center"
+                />
+            </A4Page>
+        )
+    }
+
+    // It's a section
+    const currentSection = project?.getSection(currentItem.id);
+    const chapter = project?.getChapter(currentItem.chapterId);
 
     return (
         <div className="h-full p-4 gap-4 rounded-lg flex flex-col mt-4">
             <ScrollArea className="flex-grow">
-                {currentSectionKey && currentSection ? (
-                    <A4Page key={currentSectionKey}>
+                {currentSection ? (
+                    <A4Page key={currentSection.id}>
                         <SectionView
-                            chapterTitle={currentChapter?.title}
-                            sectionKey={currentSectionKey}
-                            title={getSectionTitle(currentSectionKey)}
+                            chapterTitle={chapter?.title}
+                            sectionKey={currentSection.id}
+                            title={currentSection.title}
                             content={currentSection.content || ''}
                             onUpdate={handleSectionUpdate}
                             onTitleChange={handleTitleUpdate}

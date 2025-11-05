@@ -4,55 +4,57 @@
 import { useState, useMemo, useEffect } from 'react';
 import type { SectionName } from '@/ai/schemas';
 import { useBuilderStore } from '@/hooks';
-import { SectionProperties } from '@/lib/models';
 
-export function useReportPaginator(generatedSections: SectionName[], sectionConfigs: SectionProperties[]) {
+// New type to represent a page in the report, which can be a chapter or a section
+export type PageItem = {
+    type: 'chapter';
+    id: string; // chapter id
+    title: string;
+} | {
+    type: 'section';
+    id: string; // section id
+    chapterId: string;
+};
+
+export function useReportPaginator(generatedSections: SectionName[]) {
     const { project } = useBuilderStore();
     const [currentPage, setCurrentPage] = useState(0);
 
-    const orderedSections = useMemo(() => {
-        if (!project || !project.sections) return [];
-        const projectSections = project.sections.filter(s => s.content && s.content.trim() !== '');
+    const orderedPages = useMemo((): PageItem[] => {
+        if (!project || !project.chapters || project.chapters.length === 0) return [];
+        
+        const pages: PageItem[] = [];
+        
+        project.chapters.forEach(chapter => {
+            // Add a page for the chapter title itself
+            pages.push({
+                type: 'chapter',
+                id: chapter.id,
+                title: chapter.title,
+            });
 
-        // If a section order is defined, use it. Otherwise, just use the natural order.
-        if (project.sectionsOrder && project.sectionsOrder.length > 0) {
-            const orderSet = new Set(project.sectionsOrder);
-            // Get all sections from the project that are in the defined order
-            const ordered = project.sectionsOrder
-                .map(id => project.sections.find(s => s.id === id))
-                .filter(Boolean);
-            
-            // Find any sections in the project that are NOT in the sectionsOrder array (e.g., newly created)
-            const unordered = project.sections.filter(s => !orderSet.has(s.id));
-            
-            return [...ordered, ...unordered].map(s => s.id);
-        }
+            // Add pages for each section within the chapter
+            chapter.sections.forEach(section => {
+                pages.push({
+                    type: 'section',
+                    id: section.id,
+                    chapterId: chapter.id,
+                });
+            });
+        });
 
-        // Fallback to just the sections present in the project if no order is defined
-        return project.sections.map(s => s.id);
-
-    }, [project?.sections, project?.sectionsOrder]);
+        return pages;
+    }, [project?.chapters]);
 
 
-    const totalPages = orderedSections.length;
-    const currentSectionKey = orderedSections[currentPage];
+    const totalPages = orderedPages.length;
+    const currentItem = orderedPages[currentPage];
 
      useEffect(() => {
-        const total = project?.sections?.length || 0;
-        if (currentPage >= total && total > 0) {
-            setCurrentPage(total - 1);
+        if (currentPage >= totalPages && totalPages > 0) {
+            setCurrentPage(totalPages - 1);
         }
-    }, [project?.sections, currentPage]);
-
-
-    const getSectionTitle = (key: SectionName) => {
-        const section = project?.getSection(key);
-        if (section?.title && section.title !== key) {
-            return section.title;
-        }
-        const config = sectionConfigs?.find(s => s.id === key);
-        return config?.title || key.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    };
+    }, [totalPages, currentPage]);
 
     const handleNextPage = () => {
         setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1));
@@ -65,10 +67,9 @@ export function useReportPaginator(generatedSections: SectionName[], sectionConf
     return {
         currentPage,
         totalPages,
-        currentSectionKey,
-        getSectionTitle,
+        currentItem,
+        setCurrentPage,
         handleNextPage,
         handlePrevPage,
-        setCurrentPage,
     };
 }
