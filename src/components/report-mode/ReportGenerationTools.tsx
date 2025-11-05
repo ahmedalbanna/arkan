@@ -89,7 +89,11 @@ export const GenerationTools = ({
     updateProject(p => {
         const newSectionIds: string[] = [];
         sectionTitles.forEach(title => {
-            const id = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+            // FIX: Append timestamp to ensure unique IDs, even with identical titles.
+            const sanitizedId = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+            const id = `${sanitizedId}-${Date.now()}`;
+            
+            // The check for existing ID is less critical now but kept as a safeguard.
             if (!p.sections?.some(s => s.id === id)) {
                  const newId = p.addCustomSection(id, title);
                  newSectionIds.push(newId);
