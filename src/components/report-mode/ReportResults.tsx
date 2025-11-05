@@ -58,6 +58,13 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     }
   };
 
+  const handleAddSectionAtIndex = (chapterId: string, index: number) => {
+    updateProject(p => {
+      p.addSectionAtIndex(chapterId, index, 'New Section');
+    });
+  };
+
+
   const renderContent = () => {
     if (totalPages === 0 || !currentChapter) {
       return (
@@ -79,8 +86,8 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
         <div className="h-full p-4 gap-4 rounded-lg flex flex-col mt-4">
             <ScrollArea className="flex-grow">
                 <A4Page key={currentChapter.id}>
-                    {currentChapter.sections.map(section => (
-                        <div key={section.id} className="mb-8 last:mb-0">
+                    {currentChapter.sections.map((section, index) => (
+                        <div key={section.id} className="group relative mb-8 last:mb-0">
                            <SectionView
                                 chapterTitle={currentChapter.title}
                                 sectionKey={section.id}
@@ -89,6 +96,18 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
                                 onUpdate={handleSectionUpdate}
                                 onTitleChange={handleTitleUpdate}
                             />
+                            {/* Insertion Handle */}
+                            <div className="absolute -bottom-4 left-0 right-0 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="w-full h-px bg-primary/20"></div>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="absolute h-8 w-8 rounded-full bg-background hover:bg-muted"
+                                    onClick={() => handleAddSectionAtIndex(currentChapter.id, index + 1)}
+                                >
+                                    <PlusCircle className="h-4 w-4" />
+                                </Button>
+                            </div>
                         </div>
                     ))}
                 </A4Page>

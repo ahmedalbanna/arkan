@@ -159,6 +159,37 @@ export class Project implements Required<ProjectProperties> {
     return newSectionId;
   }
 
+  public addSectionAtIndex(chapterId: string, index: number, title?: string): string | null {
+    const chapter = this.getChapter(chapterId);
+    if (!chapter) return null;
+
+    const sectionTitle = title || 'Untitled Section';
+    let baseId = sectionTitle.toLowerCase().trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-');
+    if (!baseId) baseId = 'section';
+      
+    let newSectionId = baseId;
+    let counter = 1;
+    while(this.sections.some(s => s.id === newSectionId)) {
+        newSectionId = `${baseId}-${counter}`;
+        counter++;
+    }
+
+    const newSection = new Section({
+      id: newSectionId,
+      title: sectionTitle,
+      type: 'report',
+      content: '',
+      prompt: 'You are a helpful assistant. Write a section based on the user\'s instructions.',
+      guidelines: [],
+    });
+    
+    chapter.sections.splice(index, 0, newSection);
+    return newSectionId;
+  }
+
   public addCustomSection(chapterId: string, title: string): string | null {
     const chapter = this.getChapter(chapterId);
     if (!chapter) return null;

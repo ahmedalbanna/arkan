@@ -80,7 +80,7 @@ const useBuilderStore = create<BuilderState>((set, get) => {
             // Re-instantiate the Project and its nested classes from plain data
             const newProject = new Project({
                 ...projectData,
-                chapters: (projectData.chapters || []).map(c => new Chapter(c))
+                chapters: (projectData.chapters || []).map(c => new Chapter(c as Chapter))
             });
             set({ project: newProject, hasUnsavedChanges: false });
         },
@@ -163,7 +163,7 @@ const useBuilderStore = create<BuilderState>((set, get) => {
                     try {
                         const projectData = JSON.parse(event.target?.result as string);
                         // More robust validation
-                        if (projectData && typeof projectData === 'object' && ('id' in projectData || 'name' in projectData)) {
+                        if (projectData && typeof projectData === 'object' && ('name' in projectData)) {
                             loadProject(projectData);
                             toast({ title: t('builder.toasts.projectLoadedTitle'), description: t('builder.toasts.projectLoadedDesc', { projectName: projectData.name }) });
                              router.push('/builder');
