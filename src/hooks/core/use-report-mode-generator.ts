@@ -32,7 +32,7 @@ export function useReportModeGenerator() {
     const setOrderedSections = (newOrder: Section[]) => {
         const orderIds = newOrder.map(s => s.id);
         updateProject(p => {
-          p.updateSectionsOrder(orderIds);
+          p.updateSectionsOrder(orderIds[0], orderIds); // This needs a chapterId, which we don't have here.
         });
     };
 

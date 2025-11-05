@@ -3,6 +3,7 @@ import { Section, SectionProperties } from './section';
 import { ExternalContext, ExternalContextType } from './external-context';
 import { v4 as uuidv4 } from 'uuid';
 import { Chapter, ChapterProperties } from './chapter';
+import { arrayMove } from '@dnd-kit/sortable';
 
 export interface ProjectState {
   name?: string | undefined;
@@ -123,6 +124,15 @@ export class Project implements SavedProject {
   public getChapter(chapterId: string): Chapter | undefined {
       return this._chapters?.find(c => c.id === chapterId);
   }
+  
+  public updateChaptersOrder(newOrderIds: string[]): void {
+    if (!this._chapters) return;
+    const newOrderedChapters = newOrderIds
+        .map(id => this._chapters!.find(c => c.id === id))
+        .filter((c): c is Chapter => !!c);
+    this._chapters = newOrderedChapters;
+    this.hasUnsavedChanges = true;
+  }
 
   // --- Section Methods ---
   public getSection(sectionId: string): Section | undefined {
@@ -180,6 +190,10 @@ export class Project implements SavedProject {
     chapter.addSection(newSection);
     this.hasUnsavedChanges = true;
     return newSectionId;
+  }
+
+  public addCustomSection(chapterId: string, title: string): string | null {
+    return this.addSectionToChapter(chapterId, title);
   }
 
 
