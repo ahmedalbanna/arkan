@@ -124,20 +124,38 @@ export class Project implements SavedProject {
   }
 
   public addCustomSection(id?: string, title?: string): string {
-    const newSectionId = id || `custom-${Date.now()}`;
+    const sectionTitle = title || 'Untitled Section';
+    
+    // Generate a unique, URL-friendly ID from the title
+    let baseId = id || sectionTitle.toLowerCase().trim()
+      .replace(/[^\w\s-]/g, '') // remove non-word characters
+      .replace(/\s+/g, '-')    // replace spaces with hyphens
+      .replace(/-+/g, '-');   // replace multiple hyphens with a single one
+
+    let newSectionId = baseId;
+    let counter = 1;
+    // Ensure the ID is unique within the project
+    while(this._sections?.some(s => s.id === newSectionId)) {
+        newSectionId = `${baseId}-${counter}`;
+        counter++;
+    }
+
     const newSection = new Section({
       id: newSectionId,
-      title: title || 'Untitled Section',
+      title: sectionTitle,
       type: 'report',
       content: '',
       prompt: 'You are a helpful assistant. Write a section based on the user\'s instructions.',
       guidelines: [],
       model: 'googleai/gemini-1.5-flash-preview-0514'
     });
+
     if (!this._sections) this._sections = [];
     this._sections.push(newSection);
+    
     if (!this._sectionsOrder) this._sectionsOrder = [];
     this._sectionsOrder.push(newSectionId);
+    
     this.hasUnsavedChanges = true;
     return newSectionId;
   }

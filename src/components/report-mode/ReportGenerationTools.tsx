@@ -86,13 +86,9 @@ export const GenerationTools = ({
     const sectionTitles = tocText.split('\n').map(title => title.trim()).filter(title => title);
 
     updateProject(p => {
-        const newSectionIds: string[] = [];
         sectionTitles.forEach(title => {
-            const newId = p.addCustomSection(undefined, title); // Let the model handle ID generation
-            newSectionIds.push(newId);
+            p.addCustomSection(undefined, title);
         });
-        // Append only the newly created section IDs to the order
-        p.sectionsOrder = [...(p.sectionsOrder || []), ...newSectionIds];
     });
 
     toast({
