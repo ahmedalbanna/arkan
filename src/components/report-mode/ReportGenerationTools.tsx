@@ -42,12 +42,14 @@ const SortableSectionItem = ({
   chapterIndex: number;
   [key: string]: any; // To pass through other props
 }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } =
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: section.id });
 
   const style = {
     transform: transform ? CSS.Transform.toString(transform) : undefined,
     transition,
+    zIndex: isDragging ? 1 : 0,
+    position: 'relative' as 'relative'
   };
 
   return (
@@ -75,11 +77,13 @@ const SortableChapterItem = ({
     onAddSection: (chapterId: string) => void;
     [key: string]: any;
 }) => {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: chapter.id });
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
 
     const style = {
         transform: transform ? CSS.Transform.toString(transform) : undefined,
         transition,
+        zIndex: isDragging ? 2 : 0,
+        position: 'relative' as 'relative',
     };
 
     return (
@@ -98,28 +102,22 @@ const SortableChapterItem = ({
                 </AccordionTrigger>
                 <AccordionContent>
                     <div className="border-t px-4 py-4 space-y-4">
-                        <div className="space-y-2">
-                            {chapter.sections.length > 0 && (
-                               <DndContext collisionDetection={closestCenter} onDragEnd={(e) => props.onSectionDragEnd(e, chapter.id)}>
-                                    <SortableContext items={chapter.sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                                        <Accordion type="single" collapsible className="w-full space-y-2">
-                                            {chapter.sections.map((section, index) => (
-                                                <SortableSectionItem
-                                                    key={section.id}
-                                                    section={section}
-                                                    index={index}
-                                                    chapterIndex={props.chapterIndex}
-                                                    onGenerate={() => props.onGenerateSection(section.id)}
-                                                    isGenerating={props.activeMutationKey === section.id}
-                                                    isAnythingGenerating={props.isAnythingGenerating}
-                                                    hasCredits={props.hasCreditsForSingleSection}
-                                                />
-                                            ))}
-                                        </Accordion>
-                                    </SortableContext>
-                                </DndContext>
-                            )}
-                        </div>
+                        <SortableContext items={chapter.sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                            <Accordion type="single" collapsible className="w-full space-y-2">
+                                {chapter.sections.map((section, sectionIndex) => (
+                                    <SortableSectionItem
+                                        key={section.id}
+                                        section={section}
+                                        index={sectionIndex}
+                                        chapterIndex={props.chapterIndex}
+                                        onGenerate={() => props.onGenerateSection(section.id)}
+                                        isGenerating={props.activeMutationKey === section.id}
+                                        isAnythingGenerating={props.isAnythingGenerating}
+                                        hasCredits={props.hasCreditsForSingleSection}
+                                    />
+                                ))}
+                            </Accordion>
+                        </SortableContext>
                         <Button size="sm" variant="outline" onClick={() => onAddSection(chapter.id)} className="w-full">
                             <PlusCircle className="me-2 h-4 w-4" />
                             Add New Section
@@ -143,7 +141,6 @@ export const GenerationTools = ({
   const { project, updateProject } = useBuilderStore();
   const [tocText, setTocText] = useState('');
   const [newChapterTitle, setNewChapterTitle] = useState('');
-  const [newSectionTitle, setNewSectionTitle] = useState('');
 
   const handleAddChapter = () => {
     if(!newChapterTitle.trim()) {
@@ -156,8 +153,7 @@ export const GenerationTools = ({
   
   const handleAddSectionToChapter = (chapterId: string) => {
       updateProject(p => {
-          const newSectionId = p.addSectionToChapter(chapterId, "New Section");
-          // Optionally do something with the new section ID
+          p.addSectionToChapter(chapterId, "New Section");
       });
   };
 
@@ -204,26 +200,51 @@ export const GenerationTools = ({
     });
     setTocText('');
   };
-  
-  const handleSectionDragEnd = (event: DragEndEvent, chapterId: string) => {
+
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (over && active.id !== over.id) {
-        const chapter = project?.getChapter(chapterId);
-        if(!chapter) return;
-        const oldIndex = chapter.sections.findIndex((s) => s.id === active.id);
-        const newIndex = chapter.sections.findIndex((s) => s.id === over.id);
-        const newOrderedIds = arrayMove(chapter.sections.map(s => s.id), oldIndex, newIndex);
-        updateProject(p => p.updateSectionsOrder(chapterId, newOrderedIds));
-    }
-  };
-  
-  const handleChapterDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id && project?.chapters) {
-        const oldIndex = project.chapters.findIndex(c => c.id === active.id);
-        const newIndex = project.chapters.findIndex(c => c.id === over.id);
-        const newOrderIds = arrayMove(project.chapters.map(c => c.id), oldIndex, newIndex);
-        updateProject(p => p.updateChaptersOrder(newOrderIds));
+    
+    if (!over) return;
+
+    const activeId = active.id.toString();
+    const overId = over.id.toString();
+    
+    if (activeId === overId) return;
+
+    const isChapterDrag = project?.chapters.some(c => c.id === activeId);
+
+    if (isChapterDrag) {
+        // Handle chapter reordering
+        if (!project?.chapters.some(c => c.id === overId)) return;
+        
+        updateProject(p => {
+            if (!p.chapters) return;
+            const oldIndex = p.chapters.findIndex(c => c.id === activeId);
+            const newIndex = p.chapters.findIndex(c => c.id === overId);
+            p.updateChaptersOrder(arrayMove(p.chapters.map(c => c.id), oldIndex, newIndex));
+        });
+    } else {
+        // Handle section reordering (within or between chapters)
+        const activeContainer = project?.chapters.find(c => c.sections.some(s => s.id === activeId));
+        const overContainer = project?.chapters.find(c => c.sections.some(s => s.id === overId)) || project?.chapters.find(c => c.id === overId);
+
+        if (!activeContainer || !overContainer) return;
+
+        if (activeContainer.id === overContainer.id) {
+            // Reordering within the same chapter
+            updateProject(p => {
+                const chapter = p.getChapter(activeContainer.id);
+                if (!chapter) return;
+                const oldIndex = chapter.sections.findIndex(s => s.id === activeId);
+                const newIndex = chapter.sections.findIndex(s => s.id === overId);
+                chapter.sections = arrayMove(chapter.sections, oldIndex, newIndex);
+            });
+        } else {
+            // Moving section to a different chapter
+            updateProject(p => {
+                p.moveSectionToChapter(activeId, activeContainer.id, overContainer.id);
+            });
+        }
     }
   };
 
@@ -260,7 +281,7 @@ export const GenerationTools = ({
           <div className="relative flex-grow flex flex-col min-h-0">
             <div className="flex-grow border-t pt-4">
               <ScrollArea className="h-full -mx-6 px-6">
-                  <DndContext collisionDetection={closestCenter} onDragEnd={handleChapterDragEnd}>
+                  <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                       <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
                         <Accordion type="multiple" className="w-full space-y-4">
                           {(project?.chapters || []).map((chapter, chapterIndex) => (
@@ -268,7 +289,6 @@ export const GenerationTools = ({
                                 chapter={chapter}
                                 index={chapterIndex}
                                 key={chapter.id}
-                                onSectionDragEnd={handleSectionDragEnd}
                                 onAddSection={handleAddSectionToChapter}
                                 // Pass down necessary props to the inner list
                                 chapterIndex={chapterIndex}

@@ -1,4 +1,5 @@
 
+
 import { Section, SectionProperties } from './section';
 import { ExternalContext, ExternalContextType } from './external-context';
 import { v4 as uuidv4 } from 'uuid';
@@ -217,6 +218,26 @@ export class Project implements SavedProject {
     chapter.addSection(newSection);
     this.hasUnsavedChanges = true;
     return newSectionId;
+  }
+
+  public moveSectionToChapter(sectionId: string, fromChapterId: string, toChapterId: string, newIndex?: number): void {
+      const fromChapter = this.getChapter(fromChapterId);
+      const toChapter = this.getChapter(toChapterId);
+
+      if (!fromChapter || !toChapter) return;
+
+      const sectionIndex = fromChapter.sections.findIndex(s => s.id === sectionId);
+      if (sectionIndex === -1) return;
+
+      const [sectionToMove] = fromChapter.sections.splice(sectionIndex, 1);
+
+      if (newIndex !== undefined && newIndex >= 0 && newIndex <= toChapter.sections.length) {
+          toChapter.sections.splice(newIndex, 0, sectionToMove);
+      } else {
+          toChapter.sections.push(sectionToMove);
+      }
+      
+      this.hasUnsavedChanges = true;
   }
 
 
