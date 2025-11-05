@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Loader2, Sparkles, GripVertical, SlidersHorizontal, StickyNote, Link as LinkIcon, Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSectionAccordionItemLogic } from '@/hooks/core/useSectionAccordionItemLogic';
@@ -12,9 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { SectionGenerationControls } from './SectionGenerationControls';
 import { GuidelineEditor } from './SectionGuidelineEditor';
 import { ContextSelector } from './SectionContextSelector';
-import { cn } from '@/lib/utils/cn';
-import { Form } from '../ui/form';
-import { useForm } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import { Input } from '../ui/input';
 import { useBuilderStore } from '@/hooks';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -81,34 +79,36 @@ export const SectionAccordionItem = ({
 
     return (
         <AccordionItem value={itemKey} key={itemKey} className="bg-background border rounded-lg">
-            <AccordionTrigger className="flex items-center w-full px-4 py-2 text-sm font-medium hover:no-underline rounded-t-lg">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                    {handleProps && (
-                        <div {...handleProps} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
-                             <span className="text-xs w-8 text-left">{chapterIndex + 1}.{index + 1}</span>
-                            <GripVertical className="h-5 w-5" />
-                        </div>
-                    )}
-                    {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}
-                    {isEditing ? (
-                        <Input
-                            value={editedTitle}
-                            onChange={(e) => setEditedTitle(e.target.value)}
-                            onBlur={handleTitleSave}
-                            onKeyDown={handleKeyDown}
-                            autoFocus
-                            onClick={(e) => e.stopPropagation()}
-                            className="font-medium border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent"
-                        />
-                    ) : (
-                        <span onDoubleClick={() => setIsEditing(true)} className="font-medium p-0 h-auto truncate">
-                            {section.title}
-                        </span>
-                    )}
-                </div>
-                 <AlertDialog>
+            <div className="flex items-center px-4 py-2">
+                <AccordionTrigger className="flex-1 hover:no-underline py-0">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                        {handleProps && (
+                            <div {...handleProps} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
+                                <span className="text-xs w-8 text-left">{chapterIndex + 1}.{index + 1}</span>
+                                <GripVertical className="h-5 w-5" />
+                            </div>
+                        )}
+                        {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}
+                        {isEditing ? (
+                            <Input
+                                value={editedTitle}
+                                onChange={(e) => setEditedTitle(e.target.value)}
+                                onBlur={handleTitleSave}
+                                onKeyDown={handleKeyDown}
+                                autoFocus
+                                onClick={(e) => e.stopPropagation()}
+                                className="font-medium border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent"
+                            />
+                        ) : (
+                            <span onDoubleClick={() => setIsEditing(true)} className="font-medium p-0 h-auto truncate">
+                                {section.title}
+                            </span>
+                        )}
+                    </div>
+                </AccordionTrigger>
+                <AlertDialog>
                     <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 mr-2" onClick={e => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => e.stopPropagation()}>
                             <Trash2 className="h-4 w-4 text-destructive/70" />
                         </Button>
                     </AlertDialogTrigger>
@@ -125,7 +125,7 @@ export const SectionAccordionItem = ({
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
-            </AccordionTrigger>
+            </div>
             <AccordionContent>
                 <div className="border-t px-4 pt-4">
                     <Form {...form}>
