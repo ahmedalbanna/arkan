@@ -44,7 +44,7 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
         
         const newProjectData = {
             name: name || t('projects.untitled'),
-            projectIdea: description,
+            projectDescription: description,
             // other fields will be set by the server
         };
         createProjectMutation.mutate(newProjectData);
@@ -71,8 +71,8 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
                         <Input id="project-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('projects.projectNamePlaceholder')} />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="project-description">{t('projects.projectIdeaLabel')}</Label>
-                        <Textarea id="project-description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t('projects.projectIdeaPlaceholder')} />
+                        <Label htmlFor="project-description">{t('projects.projectDescriptionLabel')}</Label>
+                        <Textarea id="project-description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t('projects.projectDescriptionPlaceholder')} />
                     </div>
                 </div>
                 <DialogFooter>

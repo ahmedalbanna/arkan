@@ -105,8 +105,8 @@ function GeneratePageContent() {
                 />
                  <Textarea
                   className="text-sm text-muted-foreground border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto resize-none"
-                  value={project?.projectIdea || ''}
-                  onChange={(e) => updateProject(p => { p.projectIdea = e.target.value; })}
+                  value={project?.projectDescription || ''}
+                  onChange={(e) => updateProject(p => { p.projectDescription = e.target.value; })}
                   placeholder={t('projects.noDescription')}
                 />
                 {projectData?.updatedAt && (

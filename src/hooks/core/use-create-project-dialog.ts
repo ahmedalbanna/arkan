@@ -27,7 +27,7 @@ export function useCreateProjectDialog() {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             name: name || t('projects.untitled'),
-            projectIdea: description,
+            projectDescription: description,
         };
         loadProject(newProjectData);
         router.push('/builder');

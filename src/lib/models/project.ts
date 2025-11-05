@@ -7,7 +7,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 
 export interface ProjectState {
   name?: string | undefined;
-  projectIdea?: string | undefined;
+  projectDescription?: string | undefined;
   chapters?: Chapter[];
   externalContext?: ExternalContext[] | undefined;
 }
@@ -29,7 +29,7 @@ export class Project implements SavedProject {
   public hasUnsavedChanges?: boolean;
 
   private _name?: string;
-  private _projectIdea?: string;
+  private _projectDescription?: string;
   private _chapters?: Chapter[];
   private _externalContext: ExternalContext[];
 
@@ -40,7 +40,7 @@ export class Project implements SavedProject {
     this._createdAt = props.createdAt || new Date().toISOString();
     this._updatedAt = props.updatedAt || new Date().toISOString();
     this._name = props.name;
-    this._projectIdea = props.projectIdea;
+    this._projectDescription = props.projectDescription;
     this._chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c as ChapterProperties));
     this._externalContext = props.externalContext || [];
   }
@@ -51,7 +51,7 @@ export class Project implements SavedProject {
   get createdAt() { return this._createdAt; }
   get updatedAt() { return this._updatedAt; }
   get name() { return this._name; }
-  get projectIdea() { return this._projectIdea; }
+  get projectDescription() { return this._projectDescription; }
   get chapters() { return this._chapters; }
   get externalContext() { return this._externalContext; }
   
@@ -66,7 +66,7 @@ export class Project implements SavedProject {
 
   // --- Public Setters ---
   set name(value: string | undefined) { this._name = value; }
-  set projectIdea(value: string | undefined) { this._projectIdea = value; }
+  set projectDescription(value: string | undefined) { this._projectDescription = value; }
 
   /**
    * Converts the Project instance to a plain JSON object for serialization.
@@ -79,7 +79,7 @@ export class Project implements SavedProject {
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,
       name: this._name,
-      projectIdea: this._projectIdea,
+      projectDescription: this._projectDescription,
       // Serialize chapters by calling their toJSON method
       chapters: this._chapters?.map(c => c.toJSON()),
       externalContext: this._externalContext,
@@ -95,7 +95,7 @@ export class Project implements SavedProject {
     this._id = '';
     this._userId = '';
     this._name = undefined;
-    this._projectIdea = undefined;
+    this._projectDescription = undefined;
     this._chapters = [];
     this._externalContext = [];
     this.hasUnsavedChanges = false;

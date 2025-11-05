@@ -21,7 +21,7 @@ export const ProjectStateSchema = z.object({
     createdAt: z.string().optional(),
     updatedAt: z.string().optional(),
     name: z.string().optional(),
-    projectIdea: z.string().optional(),
+    projectDescription: z.string().optional(),
     sections: z.array(SectionDataSchema).optional(),
     sectionsOrder: z.array(z.string()).optional(),
     externalContext: z.array(z.any()).nullable().optional(),
