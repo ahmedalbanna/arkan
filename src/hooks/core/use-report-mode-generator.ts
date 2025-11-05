@@ -9,18 +9,11 @@ import { toast } from '@/hooks/util/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import { useAuth } from '@/context/AuthContext';
-import { Agent, AgentCategory, Section, SectionProperties } from '@/lib/models';
+import { Agent, Section } from '@/lib/models';
 import { useSections } from '../data/use-sections';
 import { SectionName } from '@/ai/schemas';
 
-
-interface UseReportModeGeneratorProps {
-    orderedSections: Section[];
-    setOrderedSections: (sections: Section[]) => void;
-}
-
-
-export function useReportModeGenerator({ orderedSections, setOrderedSections }: UseReportModeGeneratorProps) {
+export function useReportModeGenerator() {
     const { t, locale } = useLocalization();
     const { project, updateProject } = useBuilderStore();
     const { agents, isLoaded: agentsLoaded } = useAgents();
@@ -30,41 +23,42 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     const queryClient = useQueryClient();
 
+    const orderedSections = useMemo(() => {
+        if (!project || !agentsLoaded || !sectionsLoaded) return [];
 
-    // Memoize the initialization logic to prevent re-running on every render
-    const initialSetup = useMemo(() => {
-        if (sectionsLoaded && sectionConfigs && agentsLoaded && agents.length > 0) {
-             const reportSectionModels = sectionConfigs
+        // If project has no sections, initialize them from the default config
+        if (!project.sections || project.sections.length === 0) {
+            const reportSectionModels = (sectionConfigs || [])
                 .filter(s => s.type === 'report')
                 .map(s => {
                     const agent = agents.find(a => a.id === (s as any).agentId);
-                    if (!agent) {
-                        console.warn(`Agent with ID "${(s as any).agentId}" not found for section "${s.title}". Assigning a default agent.`);
-                        return new Section({ ...s, agent: agents.find(a => a.id === 'generate-introduction-section')! });
-                    }
-                    return new Section({ ...s, agent: agent });
+                    return new Section({ ...s, agent: agent! });
                 });
-
-            if (project && project.sectionsOrder && project.sectionsOrder.length > 0) {
-                const orderMap = new Map(reportSectionModels.map(r => [r.id, r]));
-                const ordered = project.sectionsOrder
-                    .map(id => orderMap.get(id))
-                    .filter(Boolean) as Section[];
-                
-                const missing = reportSectionModels.filter(r => !project.sectionsOrder!.includes(r.id));
-                return [...ordered, ...missing];
-            }
-
+            
+            // This is a temporary update, should not be directly saved
+            // We use this to populate the UI, the project object itself is updated via the store
             return reportSectionModels;
         }
-        return null;
-    }, [sectionsLoaded, sectionConfigs, agentsLoaded, project, agents]);
 
+        // If project has sections, use them and ensure they are ordered
+        const orderMap = new Map(project.sections.map(s => [s.id, s]));
+        const sectionsOrder = project.sectionsOrder || [];
+        const ordered = sectionsOrder.map(id => orderMap.get(id)).filter(Boolean) as Section[];
+        const unordered = project.sections.filter(s => !sectionsOrder.includes(s.id));
+        
+        return [...ordered, ...unordered];
+    }, [project, agentsLoaded, sectionsLoaded, sectionConfigs, agents]);
+
+
+    const setOrderedSections = (newOrder: Section[]) => {
+        const orderIds = newOrder.map(s => s.id);
+        updateProject(p => p.sectionsOrder = orderIds);
+    };
+
+    // Initialize UI stores when sections are ready
     useEffect(() => {
-        if (initialSetup) {
-            setOrderedSections(initialSetup);
-            // Initialize UI stores for each section
-            initialSetup.forEach(section => {
+        if (orderedSections.length > 0) {
+            orderedSections.forEach(section => {
                 initializeControls(section.id);
                 if (section.agent && section.agent.guidelines) {
                     initializeGuidelines(section.id, section.agent.guidelines.map(g => ({ text: g, isDefault: true })));
@@ -72,8 +66,7 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
                 initializeContext(section.id);
             });
         }
-    }, [initialSetup, setOrderedSections, initializeControls, initializeGuidelines, initializeContext]);
-
+    }, [orderedSections, initializeControls, initializeGuidelines, initializeContext]);
 
 
     const getSelectedGuidelines = (agent: Agent, guidelineState: any) => {
@@ -175,6 +168,8 @@ export function useReportModeGenerator({ orderedSections, setOrderedSections }: 
         locale,
         isPanelCollapsed,
         setIsPanelCollapsed,
+        orderedSections,
+        setOrderedSections,
         generatedSections,
         isAnythingGenerating,
         activeMutationKey,

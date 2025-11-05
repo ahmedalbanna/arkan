@@ -82,11 +82,19 @@ export function useSaveProject() {
 
     const saveProject = () => {
         if (!project) return;
+        
+        // This is the core logic change. If the project ID is a UUID, it's a new, unsaved project.
+        const isNewProject = project.id.length > 20 && /[a-f0-9]{8}-([a-f0-9]{4}-){3}[a-f0-9]{12}/.test(project.id);
+        
         const projectData = project.toStateObject();
-        if (project.id) {
+        
+        if (isNewProject) {
+            // When creating, we don't send the client-generated UUID to the server.
+            // Firestore will generate its own ID.
+            const { id, ...createData } = projectData;
+            createMutation.mutate(createData);
+        } else if (project.id) {
             updateMutation.mutate(projectData);
-        } else {
-            createMutation.mutate(projectData);
         }
     }
 

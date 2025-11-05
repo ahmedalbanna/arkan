@@ -1,19 +1,19 @@
-import { Agent } from './agent';
+import { Agent, AgentProperties } from './agent';
 export type SectionType = 'report' | 'diagram' | 'presentation';
 
 export interface SectionProperties {
     id: string;
     title: string;
-    agent?: Agent; // Agent can be optional, especially for user-created sections
+    agent?: AgentProperties; // Now stores the plain object properties
     type: SectionType;
     content?: string;
-    agentId?: string; // agentId can be a fallback
+    agentId?: string;
 }
 
 export class Section {
     private _id: string;
     private _title: string;
-    private _agent?: Agent; // Agent is now optional
+    private _agent?: Agent;
     private _type: SectionType;
     private _content?: string;
     private _agentId?: string;
@@ -21,10 +21,12 @@ export class Section {
     constructor(props: SectionProperties) {
         this._id = props.id;
         this._title = props.title;
-        this._agent = props.agent;
+        // If agent properties are provided, create an Agent instance
+        this._agent = props.agent ? new Agent(props.agent) : undefined;
         this._type = props.type;
         this._content = props.content ?? '';
-        this._agentId = props.agentId || props.agent?.id;
+        // Ensure agentId is consistent
+        this._agentId = props.agentId || this._agent?.id;
     }
 
     get id(): string {
@@ -70,7 +72,7 @@ export class Section {
         return {
             id: this._id,
             title: this._title,
-            // Serialize agent if it exists
+            // Serialize the agent by calling its toJSON method
             agent: this._agent?.toJSON(),
             agentId: this._agentId,
             type: this._type,
