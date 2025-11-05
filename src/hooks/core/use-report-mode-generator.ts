@@ -12,6 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Section } from '@/lib/models';
 import { useSections } from '../data/use-sections';
 import { SectionName } from '@/ai/schemas';
+import { arrayMove } from '@dnd-kit/sortable';
 
 export function useReportModeGenerator() {
     const { t, locale } = useLocalization();
@@ -37,7 +38,11 @@ export function useReportModeGenerator() {
 
     const setOrderedSections = (newOrder: Section[]) => {
         const orderIds = newOrder.map(s => s.id);
-        updateProject(p => p.sectionsOrder = orderIds);
+        updateProject(p => {
+          if (p.sectionsOrder) {
+            p.sectionsOrder = orderIds;
+          }
+        });
     };
 
     // Initialize UI stores when sections are ready

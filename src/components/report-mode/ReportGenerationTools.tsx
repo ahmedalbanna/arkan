@@ -16,8 +16,7 @@ import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { SectionAccordionItem } from './SectionAccordionItem';
 import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import type { Section } from '@/lib/models';
+import { Section } from '@/lib/models';
 import { ScrollArea } from '../ui/scroll-area';
 
 interface GenerationToolsProps {
@@ -89,17 +88,10 @@ export const GenerationTools = ({
     updateProject(p => {
         const newSectionIds: string[] = [];
         sectionTitles.forEach(title => {
-            // FIX: Append timestamp to ensure unique IDs, even with identical titles.
-            const sanitizedId = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-            const id = `${sanitizedId}-${Date.now()}`;
-            
-            // The check for existing ID is less critical now but kept as a safeguard.
-            if (!p.sections?.some(s => s.id === id)) {
-                 const newId = p.addCustomSection(id, title);
-                 newSectionIds.push(newId);
-            }
+            const newId = p.addCustomSection(undefined, title); // Let the model handle ID generation
+            newSectionIds.push(newId);
         });
-        // You might want to merge with existing order or just set the new ones
+        // Append only the newly created section IDs to the order
         p.sectionsOrder = [...(p.sectionsOrder || []), ...newSectionIds];
     });
 

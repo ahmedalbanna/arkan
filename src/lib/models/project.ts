@@ -1,5 +1,4 @@
 
-
 import { Section, SectionProperties } from './section';
 import { ExternalContext, ExternalContextType } from './external-context';
 import { v4 as uuidv4 } from 'uuid';
@@ -125,7 +124,7 @@ export class Project implements SavedProject {
   }
 
   public addCustomSection(id?: string, title?: string): string {
-    const newSectionId = id || `custom-section-${Date.now()}`;
+    const newSectionId = id || `custom-${Date.now()}`;
     const newSection = new Section({
       id: newSectionId,
       title: title || 'Untitled Section',
