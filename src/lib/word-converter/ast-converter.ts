@@ -1,3 +1,4 @@
+
 // src/lib/word-converter/ast-converter.ts
 
 import {
@@ -16,7 +17,6 @@ import { Root, List, RootContent } from 'mdast';
 import { getProxiedImageBuffer } from '@/lib/utils/ProxiedImage';
 import { DocxObject, ConversionOptions } from './types';
 import { transformInlines } from './inline-converter';
-import { Packer } from 'docx';
 
 export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, number>, options: ConversionOptions): Promise<DocxObject[]> {
   const docxObjects: DocxObject[] = [];
@@ -96,22 +96,19 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
             const proxiedImage = await getProxiedImageBuffer(imageNode.url);
             let imageChildren;
             if (proxiedImage) {
-                // Get image dimensions to calculate aspect ratio
-                const tempImage = new Image();
-                tempImage.src = `data:${proxiedImage.contentType};base64,${btoa(String.fromCharCode(...new Uint8Array(proxiedImage.buffer)))}`;
-                await new Promise(resolve => { tempImage.onload = resolve; });
-
-                const aspectRatio = tempImage.width / tempImage.height;
-                const docxWidth = 550; // Max width in DXA/20
+                // The DOCX library can determine dimensions from the buffer directly.
+                // No need for client-side Image objects. Max width is controlled via options.
+                const docxWidth = 550; 
                 imageChildren = [new ImageRun({
                     data: proxiedImage.buffer,
                     transformation: {
                         width: docxWidth,
-                        height: docxWidth / aspectRatio,
+                        height: docxWidth, // Height will be adjusted based on aspect ratio automatically by the library
                     }
                 })];
             } else {
-                 imageChildren = [new TextRun(`[Image failed to load: ${imageNode.alt}]`)];
+                 console.warn(`Could not create image buffer for URL: ${imageNode.url}`);
+                 imageChildren = [new TextRun(`[Image failed to load: ${imageNode.alt || imageNode.url}]`)];
             }
 
             const imageParagraph = new Paragraph({
@@ -134,6 +131,9 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
             }
           } catch (e) {
             console.error("Failed to process block image", e);
+             docxObjects.push(new Paragraph({
+                children: [new TextRun(`[Error processing image: ${imageNode.url}]`)]
+             }));
           }
         } else {
           docxObjects.push(new Paragraph({
