@@ -14,6 +14,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useReportPaginator } from '@/hooks/core/use-report-paginator';
 import { AdvancedExportDialog } from '@/components/project/AdvancedExportDialog';
 import { useExport } from '@/hooks';
+import { toast } from '@/hooks';
 
 interface ReportResultsProps {
   generatedSections: SectionName[];
@@ -80,6 +81,16 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     updateProject(p => p.removeSection(sectionId));
   };
 
+  const handleDeleteChapter = (chapterId: string) => {
+    updateProject(p => {
+        p.removeChapter(chapterId)
+    });
+    toast({
+        title: "Chapter Deleted",
+        description: "The chapter has been removed from your project."
+    })
+  };
+
   const handleExport = async (sectionsToInclude: string[]) => {
       if (!project) return;
       const sections = project.sections.filter(s => sectionsToInclude.includes(s.id));
@@ -94,11 +105,7 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
           <div className="text-center text-muted-foreground p-8">
             <FileText className="w-16 h-16 mx-auto mb-4" />
             <h3 className="text-lg font-semibold">{t('builder.reportGenerator.selectSectionPrompt')}</h3>
-            <p className="text-sm mt-1">Or create a new blank section to get started.</p>
-             <Button onClick={handleAddSection} className="mt-4">
-                <PlusCircle className="me-2 h-4 w-4" />
-                Create a Section
-            </Button>
+            <p className="text-sm mt-1">Or create a new chapter and section to get started.</p>
           </div>
         </div>
       );
@@ -107,7 +114,7 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     return (
         <div className="h-full p-4 gap-4 rounded-lg flex flex-col mt-4">
             <ScrollArea className="flex-grow">
-                <A4Page key={currentChapter.id}>
+                <A4Page key={currentChapter.id} onDelete={() => handleDeleteChapter(currentChapter.id)}>
                     {currentChapter.sections.map((section, index) => (
                         <div key={section.id} className="group relative mb-8 last:mb-0">
                            <SectionView
