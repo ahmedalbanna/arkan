@@ -25,6 +25,8 @@ interface ReportExportDialogProps {
   disabled: boolean;
 }
 
+// This component is now obsolete. Its logic has been superseded by AdvancedExportDialog.
+// It is kept for now to avoid breaking imports but should be removed in a future cleanup.
 export function ReportExportDialog({ isExporting, onExport, disabled }: ReportExportDialogProps) {
   const { project } = useBuilderStore();
   const [selectedSections, setSelectedSections] = useState<string[]>([]);

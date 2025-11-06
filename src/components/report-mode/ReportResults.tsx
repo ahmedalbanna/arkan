@@ -1,17 +1,19 @@
 
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SectionView } from './SectionView';
 import type { SectionName } from '@/ai/schemas';
-import { FileText, ChevronLeft, ChevronRight, PlusCircle } from 'lucide-react';
+import { FileText, ChevronLeft, ChevronRight, PlusCircle, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBuilderStore } from '@/hooks';
 import A4Page from '@/components/shared/A4Page';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useReportPaginator } from '@/hooks/core/use-report-paginator';
+import { AdvancedExportDialog } from '@/components/project/AdvancedExportDialog';
+import { useExport } from '@/hooks';
 
 interface ReportResultsProps {
   generatedSections: SectionName[];
@@ -20,6 +22,8 @@ interface ReportResultsProps {
 export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
   const { t } = useLocalization();
   const { project, updateProject } = useBuilderStore();
+  const { isExporting, exportReportDocx } = useExport();
+
 
   const {
     currentPage,
@@ -74,6 +78,12 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
 
   const handleDeleteSection = (sectionId: string) => {
     updateProject(p => p.removeSection(sectionId));
+  };
+
+  const handleExport = async (sectionsToInclude: string[]) => {
+      if (!project) return;
+      const sections = project.sections.filter(s => sectionsToInclude.includes(s.id));
+      await exportReportDocx(sections, project.name || 'Untitled Report');
   };
 
 
@@ -141,10 +151,7 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
                     <CardTitle className="font-headline">{t('builder.reportGenerator.resultsTitle')}</CardTitle>
                     <CardDescription>{t('builder.reportGenerator.resultsDesc')}</CardDescription>
                 </div>
-                 <Button onClick={handleAddSection}>
-                    <PlusCircle className="me-2 h-4 w-4" />
-                    Create a Section
-                </Button>
+                 <AdvancedExportDialog onExport={handleExport} isExporting={isExporting} />
             </div>
         </CardHeader>
         {totalPages > 1 && (
