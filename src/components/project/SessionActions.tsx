@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Download, Trash2, Save, FileJson, Upload, Cloud, Share2 } from 'lucide-react';
+import { Download, Trash2, Save, Upload, Cloud } from 'lucide-react';
 import React, { useEffect } from 'react';
 import {
   Tooltip,
@@ -11,25 +11,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Loader2 } from 'lucide-react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useBuilderStore, useExport, useSaveProject, useToast } from '@/hooks';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
-import { ReportExportDialog } from './ExportDialogs';
+
+import { useBuilderStore, useSaveProject, useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useRouter } from 'next/navigation';
-
 
 export const SessionActions = () => {
     const { t } = useLocalization();
@@ -37,13 +22,6 @@ export const SessionActions = () => {
     const { toast } = useToast();
     const {
         fileInputRef,
-        isSaveAsOpen,
-        setIsSaveAsOpen,
-        isSavePromptOpen,
-        setIsSavePromptOpen,
-        saveAsName,
-        setSaveAsName,
-        project,
         handleUploadClick,
         onFileChange,
         handleDownloadAs,
@@ -53,38 +31,17 @@ export const SessionActions = () => {
     } = useBuilderStore(); 
 
     const { saveProject, isSaving } = useSaveProject();
-    const { isExporting, exportReportDocx } = useExport();
-
-    useEffect(() => {
-        if (project?.name) {
-            setSaveAsName(project.name);
-        }
-    }, [project?.name, setSaveAsName]);
 
     const handleSave = () => {
-        if (!project) return;
-        if (!project.userId) { // Check if it's a temp project
-            setIsSavePromptOpen(true);
-        } else {
-            saveProject();
-        }
-    };
-
-    const handleSaveFromPrompt = () => {
-        handleSaveFromPrompt(toast, t);
+        saveProject();
     };
     
-    const handleExportReport = async (sectionsToInclude: string[]) => {
-        if (!project) return;
-        await exportReportDocx(project, sectionsToInclude);
-    };
-
-    const isBusy = isSaving || isExporting;
+    const isBusy = isSaving;
 
     return (
         <TooltipProvider>
             <div className="flex items-center gap-2">
-                <Input
+                <input
                     type="file"
                     ref={fileInputRef}
                     onChange={(e) => onFileChange(e, toast, t, router)}
@@ -120,49 +77,24 @@ export const SessionActions = () => {
                      <span className="hidden md:inline ms-2">{t('projects.saveButton')}</span>
                 </Button>
 
-                <AlertDialog open={isSavePromptOpen} onOpenChange={setIsSavePromptOpen}>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>{t('projects.savePromptTitle')}</AlertDialogTitle>
-                            <AlertDialogDescription>{t('projects.savePromptDescription')}</AlertDialogDescription>
-                        </AlertDialogHeader>
-                         <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="save-project-name" className="text-right">{t('projects.nameLabel')}</Label>
-                                <Input id="save-project-name" value={saveAsName} onChange={(e) => setSaveAsName(e.target.value)} className="col-span-3" />
-                            </div>
-                        </div>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel onClick={() => setSaveAsName('')}>{t('projects.cancelButton')}</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleSaveFromPrompt} disabled={isSaving}>
-                                {isSaving && <Loader2 className="h-4 w-4 animate-spin me-2" />}
-                                {t('projects.saveButton')}
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" className="h-8 w-8 md:w-auto md:px-3" disabled={isBusy || !hasContent}>
-                            <Share2 className="h-4 w-4" />
-                            <span className="hidden md:inline ms-2">Export</span>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                         <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={handleDownloadAs}
+                            disabled={isBusy || !hasContent}
+                            className="h-8 w-8 md:w-auto md:px-3"
+                         >
+                            <Download className="h-4 w-4" />
+                            <span className="hidden md:inline ms-2">Download</span>
                         </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-64">
-                         <DropdownMenuLabel>Export Options</DropdownMenuLabel>
-                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onSelect={handleDownloadAs} disabled={isBusy || !hasContent}>
-                            <FileJson className="me-2 h-4 w-4" />
-                            <span>Download Project (.arkan)</span>
-                        </DropdownMenuItem>
-                         <ReportExportDialog
-                            isExporting={isExporting}
-                            onExport={handleExportReport}
-                            disabled={isBusy || !project?.sections || project.sections.length === 0}
-                        />
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                    </TooltipTrigger>
+                     <TooltipContent className="md:hidden">
+                        <p>{t('builder.tooltips.downloadProject')}</p>
+                    </TooltipContent>
+                </Tooltip>
+                 
 
                  <Tooltip>
                     <TooltipTrigger asChild>

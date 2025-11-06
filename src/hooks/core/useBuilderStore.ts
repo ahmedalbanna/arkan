@@ -7,6 +7,7 @@ import { Project, type ProjectProperties } from '@/lib/models/project';
 import { useToast } from '@/hooks';
 import { useRouter } from 'next/navigation';
 import { Chapter } from '@/lib/models';
+import { localProjectService } from '@/services/local-project-service';
 
 // This type includes both the state and the actions for the store
 interface BuilderState {
@@ -19,12 +20,8 @@ interface BuilderState {
   newSession: () => void;
   
   // --- UI and Session management actions ---
-  isSaving: boolean;
-  saveProject: () => void;
   isSavePromptOpen: boolean;
   setIsSavePromptOpen: (isOpen: boolean) => void;
-  isSaveAsOpen: boolean;
-  setIsSaveAsOpen: (isOpen: boolean) => void;
   
   // States for dialogs
   newProjectName: string;
@@ -35,9 +32,6 @@ interface BuilderState {
   isCreateProjectOpen: boolean,
   setIsCreateProjectOpen: (isOpen: boolean) => void;
 
-  saveAsName: string;
-  setSaveAsName: (name: string) => void;
-  handleSaveFromPrompt: (toast: any, t: any) => void;
   handleDownloadAs: () => void;
   
   // File upload logic
@@ -56,8 +50,6 @@ const createNewTemporaryProject = (): Project => {
 
 // The create function now returns the combined state and actions
 const useBuilderStore = create<BuilderState>((set, get) => {
-    // This function is outside the React component tree, so we cannot use hooks here directly.
-    // We will pass hook-based functions like t and toast into the actions that need them.
     
     const fileInputRef = React.createRef<HTMLInputElement>();
 
@@ -65,19 +57,15 @@ const useBuilderStore = create<BuilderState>((set, get) => {
     return {
         project: null,
         hasUnsavedChanges: false,
-        isSaving: false,
         isSavePromptOpen: false,
-        isSaveAsOpen: false,
         newProjectName: '',
         newProjectDescription: '',
         isCreateProjectOpen: false,
-        saveAsName: '',
         hasContent: false,
         fileInputRef,
 
         // --- Core Project Actions ---
         loadProject: (projectData) => {
-            // Re-instantiate the Project and its nested classes from plain data
             const newProject = new Project({
                 ...projectData,
                 chapters: (projectData.chapters || []).map(c => new Chapter(c as Chapter))
@@ -87,7 +75,6 @@ const useBuilderStore = create<BuilderState>((set, get) => {
         updateProject: (updater) => {
             set(state => {
                 if (!state.project) return {};
-                // Create a new instance for immutability
                 const newProjectInstance = new Project(JSON.parse(JSON.stringify(state.project.toStateObject())));
                 updater(newProjectInstance);
                 return { project: newProjectInstance, hasUnsavedChanges: true };
@@ -99,58 +86,38 @@ const useBuilderStore = create<BuilderState>((set, get) => {
 
         // --- Dialog State Actions ---
         setIsSavePromptOpen: (isOpen) => set({ isSavePromptOpen: isOpen }),
-        setIsSaveAsOpen: (isOpen) => set({ isSaveAsOpen: isOpen }),
         setNewProjectName: (name) => set({ newProjectName: name }),
         setNewProjectDescription: (desc) => set({ newProjectDescription: desc }),
         setIsCreateProjectOpen: (isOpen) => set({ isCreateProjectOpen: isOpen }),
-        setSaveAsName: (name) => set({ saveAsName: name }),
 
         // --- Dialog Logic Actions ---
-        handleStartBuilding: (t, router) => {
+        handleStartBuilding: async (t, router) => {
             const { newProjectName, newProjectDescription, loadProject } = get();
             if (!newProjectName && !newProjectDescription) return;
 
             const newProjectData = {
-                id: '',
-                userId: '',
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
                 name: newProjectName || t('projects.untitled'),
                 projectDescription: newProjectDescription,
-                chapters: [],
-                externalContext: [],
             };
-            loadProject(newProjectData);
+            const newProject = new Project(newProjectData);
+            await localProjectService.saveProject(newProject.toStateObject());
+            loadProject(newProject.toStateObject());
             router.push('/builder'); 
             set({ isCreateProjectOpen: false, newProjectName: '', newProjectDescription: '' });
         },
-        handleSaveFromPrompt: (toast, t) => {
-            const { project, saveAsName, saveProject } = get();
-            if (project && saveAsName) {
-                project.name = saveAsName;
-                saveProject();
-                set({ isSavePromptOpen: false, saveAsName: '' });
-            } else {
-                toast({ title: t('projects.nameRequiredToastTitle'), description: t('projects.nameRequiredToastDesc'), variant: 'destructive' });
-            }
-        },
 
         handleDownloadAs: () => {
-            const { project, saveAsName } = get();
+            const { project } = get();
             if (!project) return;
             const projectData = JSON.stringify(project.toStateObject(), null, 2);
             const blob = new Blob([projectData], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${(saveAsName || project.name || 'project').replace(/\s+/g, '_')}.arkan`;
+            a.download = `${(project.name || 'project').replace(/\s+/g, '_')}.arkan`;
             a.click();
             URL.revokeObjectURL(url);
-            set({ isSaveAsOpen: false });
         },
-
-        // --- Session Actions (placeholder, logic will be in the hook that uses the store) ---
-        saveProject: () => { console.log("Save action needs to be triggered from a component with the useSaveProject hook."); },
         
         // --- File Upload ---
         handleUploadClick: () => get().fileInputRef.current?.click(),
@@ -162,7 +129,6 @@ const useBuilderStore = create<BuilderState>((set, get) => {
                 reader.onload = (event) => {
                     try {
                         const projectData = JSON.parse(event.target?.result as string);
-                        // More robust validation
                         if (projectData && typeof projectData === 'object' && ('name' in projectData)) {
                             loadProject(projectData);
                             toast({ title: t('builder.toasts.projectLoadedTitle'), description: t('builder.toasts.projectLoadedDesc', { projectName: projectData.name }) });
@@ -192,6 +158,5 @@ useBuilderStore.subscribe(
     useBuilderStore.setState({ hasContent: !!project });
   }
 );
-
 
 export { useBuilderStore };

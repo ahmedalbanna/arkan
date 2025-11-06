@@ -8,98 +8,8 @@ import { v4 as uuidv4 } from 'uuid';
 export type { ProjectProperties };
 
 
-// Fetch all projects for the current user
-export async function fetchProjectsApi(token: string): Promise<ProjectProperties[]> {
-    if (!token) throw new Error("User not authenticated");
-    const response = await fetch('/api/projects', {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!response.ok) {
-        throw new Error('Failed to fetch projects');
-    }
-    return await response.json();
-}
-
-// Fetch a single project by its ID
-export async function fetchProjectApi(token: string, projectId: string): Promise<ProjectProperties> {
-    if (!token) throw new Error("User not authenticated");
-    const response = await fetch(`/api/projects/${projectId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!response.ok) {
-        if(response.status === 404) throw new Error("Project not found.");
-        throw new Error('Failed to fetch project');
-    }
-    return await response.json();
-}
-
-// Create a new project
-export async function createProjectApi(data: Partial<ProjectProperties>, token: string): Promise<ProjectProperties> {
-    if (!token) throw new Error("User not authenticated");
-    const response = await fetch('/api/projects', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save project');
-    }
-    return await response.json();
-}
-
-// Update an existing project
-export async function updateProjectApi(projectId: string, data: ProjectProperties, token: string): Promise<ProjectProperties> {
-    if (!token) throw new Error("User not authenticated");
-    const response = await fetch(`/api/projects/${projectId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update project');
-    }
-    return await response.json();
-}
-
-// Delete a project
-export async function deleteProject(projectId: string, token: string): Promise<{ message: string }> {
-    if (!token) throw new Error("User not authenticated");
-    const response = await fetch(`/api/projects/${projectId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete project');
-    }
-    return await response.json();
-}
-
-// Add a context file to a project
-export async function addContextToProjectApi({ projectId, contextFile, token }: { projectId: string, contextFile: any, token: string }): Promise<{ message: string }> {
-    if (!token) throw new Error("User not authenticated");
-    const response = await fetch(`/api/projects/${projectId}`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(contextFile),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to add context to project');
-    }
-    return await response.json();
-}
+// This service is now only used for uploading project-related files (like images in the editor),
+// not for managing the project data itself.
 
 /**
  * Uploads a file to a dedicated 'project_files' folder in Firebase Storage and returns the public URL.
@@ -124,4 +34,22 @@ export async function uploadProjectFile(variables: { file: File; token: string }
   const publicUrl = await getDownloadURL(snapshot.ref);
 
   return { publicUrl };
+}
+
+// Add a context file to a project
+export async function addContextToProjectApi({ projectId, contextFile, token }: { projectId: string, contextFile: any, token: string }): Promise<{ message: string }> {
+    if (!token) throw new Error("User not authenticated");
+    const response = await fetch(`/api/projects/${projectId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(contextFile),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to add context to project');
+    }
+    return await response.json();
 }
