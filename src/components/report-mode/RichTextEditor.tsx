@@ -396,12 +396,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     onSuccess: (data: any) => {
       if (!editor) return;
       const { from, to } = editor.state.selection;
-      const rewrittenText = (data as { rewrittenText: string }).rewrittenText || '';
+      // don't change value data.text
       if (from !== to) { // If text was selected
-        editor.chain().focus().insertContentAt({ from, to }, rewrittenText).run();
+        editor.chain().focus().insertContentAt({ from, to }, data.text).run();
       } else { // Replace everything
-        const newHtml = marked.parse(rewrittenText) as string;
-        editor.chain().focus().setContent(newHtml).run();
+        // don't change value data.text
+        editor.chain().focus().setContent(data.text).run();
       }
       toast({ title: "AI Action Complete" });
       setActiveAiAction(null);
@@ -415,13 +415,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const translateMutation = useWritingTool('/api/writing-tools/translate-text', {
     onSuccess: (data: any) => {
       if (!editor) return;
-      const translatedText = (data as { translatedText: string }).translatedText || '';
+      // don't change value data.text
       const { from, to } = editor.state.selection;
       if (from !== to) {
-        editor.chain().focus().insertContentAt({ from, to }, translatedText).run();
+        editor.chain().focus().insertContentAt({ from, to }, data.text).run();
       } else {
-        const newHtml = marked.parse(translatedText) as string;
-        editor.chain().focus().setContent(newHtml).run();
+        // don't change value data.text
+        editor.chain().focus().setContent(data.text).run();
       }
       toast({ title: "Translation Ready" });
       setActiveAiAction(null);
@@ -498,14 +498,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     },
     immediatelyRender: false,
   });
-  
+
   // A simple language detection function based on character ranges.
   const detectLanguage = (text: string): 'ar' | 'en' => {
-      // Basic check for Arabic characters. If any are found, assume Arabic.
-      if (/[\u0600-\u06FF]/.test(text)) {
-          return 'ar';
-      }
-      return 'en';
+    // Basic check for Arabic characters. If any are found, assume Arabic.
+    if (/[\u0600-\u06FF]/.test(text)) {
+      return 'ar';
+    }
+    return 'en';
   };
 
   const handleAiActionWrapper = (action: string, payload: any = {}) => {
@@ -595,4 +595,3 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
 export default RichTextEditor;
 
-      

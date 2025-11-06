@@ -1,6 +1,4 @@
 
-'use server';
-
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { createTransaction } from '@/lib/db/queries';
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
