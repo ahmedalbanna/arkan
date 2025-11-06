@@ -103,6 +103,8 @@
       "docTypeFormalReport": "Formal Report",
       "docTypeTechnicalArticle": "Technical Article",
       "docTypeCreativeStory": "Creative Story",
+      "docTypeUniSubject": "University Subject Material",
+      "docTypeResearchPaper": "Research Paper",
       "knowledgeLabel": "Knowledge & Instructions (Optional)",
       "knowledgePlaceholder": "e.g., Keep the tone formal and include a section on challenges.",
       "tocLabel": "Table of Contents (Optional)",
@@ -368,7 +370,8 @@
       "aiResearcher": "AI Researcher",
       "topicExplainer": "Topic Explainer",
       "textToHandwriting": "Text to Handwriting",
-      "ideaGenerator": "AI Idea Generator"
+      "ideaGenerator": "AI Idea Generator",
+      "translator": "Translator"
     }
   },
   "markdownDisplay": {

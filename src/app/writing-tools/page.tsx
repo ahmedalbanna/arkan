@@ -6,7 +6,8 @@ import {
   CopyCheck, UserCheck, Fingerprint, Repeat, BookOpenText,
   SpellCheck, FileQuestion, CheckCircle, Quote, BrainCircuit, PenSquare, Search, Lightbulb, PencilLine, FileEdit, Presentation, Brain,
   GitGraph,
-  PencilRuler
+  PencilRuler,
+  Languages
 } from 'lucide-react';
 import { AIToolCard } from '@/components/writing-tools/AIToolCard';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -17,6 +18,7 @@ export default function WritingToolsPage() {
   const tools = [
     { name: t('writingTools.cards.textStylist'), icon: PenSquare, href: '/writing-tools/text-stylist' },
     { name: t('writingTools.cards.documentWriter'), icon: FileEdit, href: '/writing-tools/document-writer' },
+    { name: t('writingTools.cards.translator'), icon: Languages, href: '/writing-tools/translator' },
     { name: t('writingTools.cards.plagiarismChecker'), icon: CopyCheck, href: '/writing-tools/plagiarism-checker' },
     { name: t('writingTools.cards.aiHumanizer'), icon: UserCheck, href: '/writing-tools/humanizer' },
     { name: t('writingTools.cards.aiDetector'), icon: Fingerprint, href: '/writing-tools/ai-detector' },

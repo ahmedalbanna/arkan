@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { z } from 'zod';
@@ -41,6 +42,8 @@ import { manipulateText } from '@/ai/flows/manipulate-text';
 import { ManipulateTextInputSchema } from '@/ai/schemas';
 import { generateToc } from '@/ai/flows/generate-toc';
 import { GenerateTocInputSchema } from '@/ai/schemas';
+import { translateText } from '@/ai/flows/translate-text';
+import { TranslateTextInputSchema } from '@/ai/schemas';
 
 // Define a map for tool configurations
 const toolConfig = {
@@ -62,6 +65,7 @@ const toolConfig = {
   'summarize-with-ratio': { flow: summarizeTextWithRatio, schema: SummarizeTextWithRatioInputSchema, creditCost: 1 },
   'manipulate-text': { flow: manipulateText, schema: ManipulateTextInputSchema, creditCost: 1 },
   'generate-toc': { flow: generateToc, schema: GenerateTocInputSchema, creditCost: 1 },
+  'translate-text': { flow: translateText, schema: TranslateTextInputSchema, creditCost: 1 },
 };
 
 type ToolName = keyof typeof toolConfig;

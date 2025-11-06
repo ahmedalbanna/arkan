@@ -366,7 +366,8 @@
       "aiResearcher": "الباحث بالذكاء الاصطناعي",
       "topicExplainer": "شرح المواضيع",
       "textToHandwriting": "تحويل النص إلى خط يد",
-      "ideaGenerator": "مولد الأفكار بالذكاء الاصطناعي"
+      "ideaGenerator": "مولد الأفكار بالذكاء الاصطناعي",
+      "translator": "المترجم"
     }
   },
   "markdownDisplay": {
@@ -1486,6 +1487,7 @@
         "translate": "ترجمة",
         "versionHistory": "سجل الإصدارات",
         "humanize": "أنسنة",
+        "generateDiagram": "إنشاء رسم تخطيطي",
         "styles": {
           "formal": "رسمي",
           "friendly": "ودي",

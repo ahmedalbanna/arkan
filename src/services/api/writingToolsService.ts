@@ -77,6 +77,10 @@ export interface ManipulateTextVariables {
     textToManipulate: string;
     command: string;
 }
+export interface TranslateTextVariables {
+    text: string;
+    targetLang: string;
+}
 
 
 /**
