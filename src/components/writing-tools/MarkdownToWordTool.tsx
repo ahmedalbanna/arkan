@@ -2,7 +2,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { File as FileIcon, LoaderCircle, Presentation } from 'lucide-react';
+import { File as FileIcon, Loader2, Presentation } from 'lucide-react';
 import { useState, type ComponentPropsWithoutRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -41,12 +41,12 @@ export function MarkdownToWordTool() {
   const form = useForm<MarkdownToWordFormValues>({
     resolver: zodResolver(markdownToWordSchema),
     defaultValues: {
-      markdown: '# Hello World\n\nThis is a sample markdown document.\n\n![A placeholder image](https://picsum.photos/id/237/500/300)\n<!-- caption: A cute dog. -->\n\n## A Subheading\n\nAnd a paragraph with **bold** and *italic* text.\n\n<!-- orientation: landscape -->\n\n### A Wide Table on a Landscape Page\n\n<!-- caption: This table shows important data. -->\n| Header 1 | Header 2 | Header 3 | Header 4 | Header 5 | Header 6 |\n|---|---|---|---|---|---|\n| Data 1 | Data 2 | Data 3 | Data 4 | Data 5 | Data 6 |\n\n<!-- orientation: portrait -->\n\nBack to portrait.',
+      markdown: '# Hello World\\n\\nThis is a sample markdown document.\\n\\n![A placeholder image](https://picsum.photos/id/237/500/300)\\n<!-- caption: A cute dog. -->\\n\\n## A Subheading\\n\\nAnd a paragraph with **bold** and *italic* text.\\n\\n<!-- orientation: landscape -->\\n\\n### A Wide Table on a Landscape Page\\n\\n<!-- caption: This table shows important data. -->\\n| Header 1 | Header 2 | Header 3 | Header 4 | Header 5 | Header 6 |\\n|---|---|---|---|---|---|\\n| Data 1 | Data 2 | Data 3 | Data 4 | Data 5 | Data 6 |\\n\\n<!-- orientation: portrait -->\\n\\nBack to portrait.',
       fileName: 'document',
       template: 'modern',
       pageNumbers: true,
       addCoverPage: false,
-      coverPageMarkdown: '# My Document Title\n\nBy John Doe\n\n{currentDate}',
+      coverPageMarkdown: '# My Document Title\\n\\nBy John Doe\\n\\n{currentDate}',
       isRtl: false,
     },
   });
