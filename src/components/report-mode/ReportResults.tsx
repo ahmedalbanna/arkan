@@ -72,6 +72,10 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
       updateProject(p => p.moveSectionDown(sectionId));
   };
 
+  const handleDeleteSection = (sectionId: string) => {
+    updateProject(p => p.removeSection(sectionId));
+  };
+
 
   const renderContent = () => {
     if (totalPages === 0 || !currentChapter) {
@@ -107,6 +111,7 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
                                 isLast={index === currentChapter.sections.length - 1}
                                 onMoveUp={() => handleMoveSectionUp(section.id)}
                                 onMoveDown={() => handleMoveSectionDown(section.id)}
+                                onDelete={() => handleDeleteSection(section.id)}
                             />
                             {/* Insertion Handle */}
                             <div className="absolute -bottom-4 left-0 right-0 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

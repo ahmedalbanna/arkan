@@ -6,13 +6,15 @@ import { useSectionLogic } from '@/hooks';
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { Wand2, ThumbsDown, Check, ArrowUp, ArrowDown } from 'lucide-react';
+import { Wand2, ThumbsDown, Check, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 import { DiffView } from '../shared/DiffView';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import dynamic from 'next/dynamic';
 import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 
 const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), { ssr: false });
 
@@ -25,11 +27,12 @@ interface SectionProps {
     onTitleChange: (key: SectionName, newTitle: string) => void;
     onMoveUp: () => void;
     onMoveDown: () => void;
+    onDelete: () => void;
     isFirst: boolean;
     isLast: boolean;
 }
 
-export const SectionView = ({ chapterTitle, sectionKey, title, content, onUpdate, onTitleChange, onMoveUp, onMoveDown, isFirst, isLast }: SectionProps) => {
+export const SectionView = ({ chapterTitle, sectionKey, title, content, onUpdate, onTitleChange, onMoveUp, onMoveDown, onDelete, isFirst, isLast }: SectionProps) => {
     const {
         aiSuggestion,
         diff,
@@ -58,6 +61,25 @@ export const SectionView = ({ chapterTitle, sectionKey, title, content, onUpdate
                         <Button variant="ghost" size="icon" onClick={onMoveDown} disabled={isLast} className="h-7 w-7">
                              <ArrowDown className="h-4 w-4"/>
                         </Button>
+                         <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-7 w-7">
+                                    <Trash2 className="h-4 w-4 text-destructive/70" />
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Section?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Are you sure you want to delete the section "{title}"? This cannot be undone.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={onDelete} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </div>
                 </div>
             </div>
