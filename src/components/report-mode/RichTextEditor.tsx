@@ -408,7 +408,15 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const translateMutation = useWritingTool('/api/writing-tools/translate-text', {
     onSuccess: (data: any) => {
-      onAiSuggestion(data.text);
+      if (!editor) return;
+      const { from, to } = editor.state.selection;
+      // If there's a selection, replace only the selected text.
+      if (from !== to) {
+        editor.chain().focus().insertContentAt({ from, to }, data.text).run();
+      } else {
+        // Otherwise, use the onAiSuggestion prop to handle full content replacement.
+        onAiSuggestion(data.text);
+      }
       toast({ title: "Translation Ready" });
       setActiveAiAction(null);
     },
@@ -494,6 +502,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     const selectedText = editor.state.doc.textBetween(from, to);
     const textToProcess = selectedText || content;
 
+    if (action === 'translate') {
+      // The `onSuccess` for translateMutation now handles insertion directly.
+      translateMutation.mutate({ text: textToProcess, targetLang: 'ar' });
+      return;
+    }
+
     const commandMap: Record<string, string> = {
       summarize: `Summarize this text concisely: "${textToProcess}"`,
       expand: `Expand on this topic, adding more detail and explanation: "${textToProcess}"`,
@@ -501,11 +515,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       humanize: `Rewrite this text to sound more natural and human-like: "${textToProcess}"`,
       rewrite: `Rewrite this text in a ${payload.style || 'default'} style: "${textToProcess}"`
     };
-
-    if(action === 'translate') {
-        translateMutation.mutate({ text: textToProcess, targetLang: 'ar' });
-        return;
-    }
     
     const command = commandMap[action];
 
