@@ -9,7 +9,7 @@ import { useDebounce, useToast, useWritingTool, useTextToSpeech } from '@/hooks'
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import TextAlign from '@tiptap/extension-text-align';
 import { Bold, Italic, Strikethrough, List, ListOrdered, Quote, ImageIcon, Table as TableIcon, Sigma, Upload, Download, Palette, PenSquare, BrainCircuit, Workflow, Wrench, LifeBuoy, MoreVertical } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 import Image from '@tiptap/extension-image';
@@ -24,7 +24,7 @@ import mammoth from 'mammoth';
 import FileHandler from '@tiptap/extension-file-handler';
 import { uploadProjectFile } from '@/services/api/projectService';
 import { useAuth } from '@/context/AuthContext';
-
+//import { processPlantUml } from '@/lib/utils/processPlantUml';
 
 import {
   BookText,
@@ -379,12 +379,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const readAloudMutation = useTextToSpeech({
     onSuccess: (data) => {
-        const audio = new Audio(data.audioDataUri);
-        audio.play();
-        setActiveAiAction(null);
+      const audio = new Audio(data.audioDataUri);
+      audio.play();
+      setActiveAiAction(null);
     },
     onError: () => {
-        setActiveAiAction(null);
+      setActiveAiAction(null);
     }
   });
 
@@ -464,19 +464,19 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     const textToProcess = selectedText || content;
 
     const commandMap: Record<string, string> = {
-        summarize: `Summarize this text concisely: "${textToProcess}"`,
-        expand: `Expand on this topic, adding more detail and explanation: "${textToProcess}"`,
-        grammar: `Correct any spelling and grammar mistakes in this text: "${textToProcess}"`,
-        humanize: `Rewrite this text to sound more natural and human-like: "${textToProcess}"`,
-        rewrite: `Rewrite this text in a ${payload.style || 'default'} style: "${textToProcess}"`
+      summarize: `Summarize this text concisely: "${textToProcess}"`,
+      expand: `Expand on this topic, adding more detail and explanation: "${textToProcess}"`,
+      grammar: `Correct any spelling and grammar mistakes in this text: "${textToProcess}"`,
+      humanize: `Rewrite this text to sound more natural and human-like: "${textToProcess}"`,
+      rewrite: `Rewrite this text in a ${payload.style || 'default'} style: "${textToProcess}"`
     };
 
     const command = commandMap[action];
 
     if (command) {
-        aiActionMutation.mutate({ textToManipulate: content, command });
+      aiActionMutation.mutate({ textToManipulate: content, command });
     } else {
-        setActiveAiAction(null);
+      setActiveAiAction(null);
     }
   };
 
@@ -490,13 +490,16 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   useEffect(() => {
     if (editor && debouncedContent !== undefined) {
-      const currentMarkdown = turndownService.turndown(editor.getHTML());
-      if (currentMarkdown !== debouncedContent) {
-        const newHtml = marked.parse(debouncedContent) as string;
-        setIsUpdatingFromProp(true);
-        editor.commands.setContent(newHtml, false);
-        setTimeout(() => setIsUpdatingFromProp(false), 100);
-      }
+      (async () => {
+        //const processedMarkdown = await processPlantUml(editor.getText());
+        const currentMarkdown = turndownService.turndown(editor.getHTML());
+        if (currentMarkdown !== debouncedContent) {
+          const newHtml = marked.parse(debouncedContent) as string;
+          setIsUpdatingFromProp(true);
+          editor.commands.setContent(newHtml, false);
+          setTimeout(() => setIsUpdatingFromProp(false), 100);
+        }
+      })();
     }
   }, [debouncedContent, editor]);
 
@@ -535,4 +538,3 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
 export default RichTextEditor;
 
-    

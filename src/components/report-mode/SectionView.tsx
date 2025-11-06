@@ -16,7 +16,7 @@ import { Badge } from '../ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 
-const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), { ssr: false });
+const RichTextEditor = dynamic(() => import('@/components/report-mode/RichTextEditor'), { ssr: false });
 
 interface SectionProps {
     chapterTitle?: string;
