@@ -197,7 +197,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
     } else if (format === 'docx') {
       const html = editor.getHTML();
       try {
-        const response = await fetch('/api/export-docx', {
+        const response = await fetch('/api/export/docx', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
