@@ -3,7 +3,7 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useDebounce, useTextToSpeech, useToast, useWritingTool } from '@/hooks';
+import { useDebounce, useWritingTool, useToast, useBrowserSpeech } from '@/hooks';
 import { uploadProjectFile } from '@/services/api/projectService';
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import Dropcursor from '@tiptap/extension-dropcursor';
@@ -36,6 +36,7 @@ import {
   Upload,
   UserCheck,
   Volume2,
+  Square
 } from 'lucide-react';
 import { marked } from 'marked';
 import mammoth from 'mammoth';
@@ -59,11 +60,21 @@ interface SectionToolbarProps {
   onReadAloud: (text: string) => void;
   isProcessing: boolean;
   activeAction: string | null;
+  isSpeaking: boolean;
+  stopSpeaking: () => void;
 }
 
-export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAction }: SectionToolbarProps) {
+export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAction, isSpeaking, stopSpeaking }: SectionToolbarProps) {
   const { t } = useLocalization();
 
+  const handleReadAloudClick = () => {
+    if (isSpeaking) {
+      stopSpeaking();
+    } else {
+      onReadAloud('');
+    }
+  };
+  
   const rewriteStyles = [
     { label: t('writingTools.textStylist.styles.formal'), style: 'Formal' },
     { label: t('writingTools.textStylist.styles.friendly'), style: 'Friendly' },
@@ -136,13 +147,12 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onReadAloud('')} disabled={isProcessing}>
-              {activeAction === 'readAloud' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={handleReadAloudClick} disabled={isProcessing && activeAction !== 'readAloud'}>
+              {isSpeaking ? <Square className="h-4 w-4 text-red-500 fill-current" /> : <Volume2 className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
-          <TooltipContent><p>{t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
+          <TooltipContent><p>{isSpeaking ? 'Stop Speaking' : t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
         </Tooltip>
-
 
       </TooltipProvider>
     </div>
@@ -370,6 +380,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const { toast } = useToast();
   const [activeAiAction, setActiveAiAction] = useState<string | null>(null);
 
+  const { speak, stop, isSpeaking } = useBrowserSpeech();
+
   const aiActionMutation = useWritingTool('/api/writing-tools/manipulate-text', {
     onSuccess: (data: any) => {
       onAiSuggestion(data.rewrittenText);
@@ -382,16 +394,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   });
 
-  const readAloudMutation = useTextToSpeech({
-    onSuccess: (data) => {
-      const audio = new Audio(data.audioDataUri);
-      audio.play();
-      setActiveAiAction(null);
-    },
-    onError: () => {
-      setActiveAiAction(null);
-    }
-  });
 
   const handleImagePaste = async (editor: Editor, file: File) => {
     if (!firebaseUser) {
@@ -487,10 +489,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const handleReadAloudWrapper = () => {
     if (!editor) return;
-    setActiveAiAction('readAloud');
     const { from, to } = editor.state.selection;
     const textToRead = editor.state.doc.textBetween(from, to) || content;
-    readAloudMutation.mutate({ text: textToRead });
+    speak(textToRead);
   }
 
   useEffect(() => {
@@ -524,8 +525,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             <SectionToolbar
               onAiAction={handleAiActionWrapper}
               onReadAloud={handleReadAloudWrapper}
-              isProcessing={aiActionMutation.isPending || readAloudMutation.isPending}
+              isProcessing={aiActionMutation.isPending}
               activeAction={activeAiAction}
+              isSpeaking={isSpeaking}
+              stopSpeaking={stop}
             />
           )}
         </BubbleMenu>

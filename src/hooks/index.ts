@@ -55,6 +55,6 @@ export * from './writing-tools/use-writing-tool';
 export * from './util/use-debounce';
 export * from './util/use-mobile';
 export * from './util/use-sound';
-export * from './util/use-text-to-speech';
+export * from './util/use-browser-speech';
 export * from './util/use-toast';
 export * from './util/useExport';
