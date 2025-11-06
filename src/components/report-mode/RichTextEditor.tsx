@@ -75,7 +75,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
       onReadAloud('');
     }
   };
-  
+
   const rewriteStyles = [
     { label: t('writingTools.textStylist.styles.formal'), style: 'Formal' },
     { label: t('writingTools.textStylist.styles.friendly'), style: 'Friendly' },
@@ -145,7 +145,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
         </DropdownMenu>
 
         <Separator orientation="vertical" className="h-6 mx-1" />
-        
+
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('translate')} disabled={isProcessing}>
@@ -377,13 +377,11 @@ const handleFile = (file: File, editor: Editor) => {
 interface RichTextEditorProps {
   content: string;
   onChange: (markdown: string) => void;
-  onAiSuggestion: (suggestion: string) => void;
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
   content,
   onChange,
-  onAiSuggestion,
 }) => {
   const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr');
   const [isUpdatingFromProp, setIsUpdatingFromProp] = useState(false);
@@ -396,8 +394,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const aiActionMutation = useWritingTool('/api/writing-tools/manipulate-text', {
     onSuccess: (data: any) => {
-      onAiSuggestion(data.rewrittenText);
-      toast({ title: "AI Suggestion Ready" });
+      if (!editor) return;
+      const { from, to } = editor.state.selection;
+      if (from !== to) { // If text was selected
+        editor.chain().focus().insertContentAt({ from, to }, data.text).run();
+      } else { // Replace everything
+        editor.chain().focus().setContent(data.text).run();
+      }
+      toast({ title: "AI Action Complete" });
       setActiveAiAction(null);
     },
     onError: (error) => {
@@ -410,17 +414,15 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     onSuccess: (data: any) => {
       if (!editor) return;
       const { from, to } = editor.state.selection;
-      // If there's a selection, replace only the selected text.
       if (from !== to) {
         editor.chain().focus().insertContentAt({ from, to }, data.text).run();
       } else {
-        // Otherwise, use the onAiSuggestion prop to handle full content replacement.
-        onAiSuggestion(data.text);
+        editor.chain().focus().setContent(data.text).run();
       }
       toast({ title: "Translation Ready" });
       setActiveAiAction(null);
     },
-     onError: (error) => {
+    onError: (error) => {
       toast({ title: 'Translation Failed', description: error.message, variant: 'destructive' });
       setActiveAiAction(null);
     }
@@ -503,7 +505,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     const textToProcess = selectedText || content;
 
     if (action === 'translate') {
-      // The `onSuccess` for translateMutation now handles insertion directly.
       translateMutation.mutate({ text: textToProcess, targetLang: 'ar' });
       return;
     }
@@ -515,7 +516,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       humanize: `Rewrite this text to sound more natural and human-like: "${textToProcess}"`,
       rewrite: `Rewrite this text in a ${payload.style || 'default'} style: "${textToProcess}"`
     };
-    
+
     const command = commandMap[action];
 
     if (command) {
