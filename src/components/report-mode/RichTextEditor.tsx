@@ -36,7 +36,8 @@ import {
   Upload,
   UserCheck,
   Volume2,
-  Square
+  Square,
+  Languages
 } from 'lucide-react';
 import { marked } from 'marked';
 import mammoth from 'mammoth';
@@ -142,6 +143,17 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <Separator orientation="vertical" className="h-6 mx-1" />
+        
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('translate')} disabled={isProcessing}>
+              {activeAction === 'translate' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent><p>{t('builder.Section.aiActions.translate')}</p></TooltipContent>
+        </Tooltip>
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
@@ -394,6 +406,18 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   });
 
+  const translateMutation = useWritingTool('/api/writing-tools/translate-text', {
+    onSuccess: (data: any) => {
+      onAiSuggestion(data.text);
+      toast({ title: "Translation Ready" });
+      setActiveAiAction(null);
+    },
+     onError: (error) => {
+      toast({ title: 'Translation Failed', description: error.message, variant: 'destructive' });
+      setActiveAiAction(null);
+    }
+  });
+
 
   const handleImagePaste = async (editor: Editor, file: File) => {
     if (!firebaseUser) {
@@ -478,6 +502,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       rewrite: `Rewrite this text in a ${payload.style || 'default'} style: "${textToProcess}"`
     };
 
+    if(action === 'translate') {
+        translateMutation.mutate({ text: textToProcess, targetLang: 'ar' });
+        return;
+    }
+    
     const command = commandMap[action];
 
     if (command) {
@@ -525,7 +554,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             <SectionToolbar
               onAiAction={handleAiActionWrapper}
               onReadAloud={handleReadAloudWrapper}
-              isProcessing={aiActionMutation.isPending}
+              isProcessing={aiActionMutation.isPending || translateMutation.isPending}
               activeAction={activeAiAction}
               isSpeaking={isSpeaking}
               stopSpeaking={stop}
