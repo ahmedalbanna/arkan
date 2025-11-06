@@ -1,3 +1,4 @@
+
 // src/lib/markdown-to-word-converter.ts
 
 import {
@@ -49,7 +50,8 @@ const numbering: INumberingOptions = {
 };
 
 /**
- * Converts a markdown string to a styled .docx file and triggers a download.
+ * Converts a markdown string to a styled .docx file and returns a Buffer.
+ * Can be used on both client and server.
  * @param markdown The markdown content to convert.
  * @param fileName The name of the file to be saved (without extension).
  * @param options Optional styles and paper properties.
@@ -58,7 +60,7 @@ export async function convertMarkdownToWord(
   markdown: string,
   fileName: string,
   options: ConversionOptions = {}
-) {
+): Promise<Buffer | Blob> {
   const { styles, coverPageMarkdown } = options;
 
   const finalStyles: IStylesOptions = {
@@ -101,6 +103,10 @@ export async function convertMarkdownToWord(
     sections: sections,
   });
 
-  const blob = await Packer.toBlob(doc);
-  saveAs(blob, `${fileName}.docx`);
+  // Use Packer.toBuffer on the server and Packer.toBlob on the client
+  if (typeof window === 'undefined') {
+    return Packer.toBuffer(doc);
+  } else {
+    return Packer.toBlob(doc);
+  }
 }

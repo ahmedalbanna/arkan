@@ -1,11 +1,14 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2 } from 'lucide-react';
+import { File as FileIcon, LoaderCircle, Presentation } from 'lucide-react';
 import { useState, type ComponentPropsWithoutRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { saveAs } from 'file-saver';
 
+import { PptxStyleOptionsSchema } from '@/ai/schemas/template-schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -15,10 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/util/use-toast';
 import { templates, type DocxTemplateKey } from '@/lib/docx-styles';
-import { convertMarkdownToWord } from '@/lib/markdown-to-word-converter';
 import dynamic from 'next/dynamic';
 
-// Dynamically import FileWord to avoid SSR issues with lucide-react icons
 const FileWord = dynamic<ComponentPropsWithoutRef<typeof Loader2>>(() => import('lucide-react').then((mod) => mod.FileText), { ssr: false });
 
 const markdownToWordSchema = z.object({
@@ -55,12 +56,34 @@ export function MarkdownToWordTool() {
   const onSubmit = async (data: MarkdownToWordFormValues) => {
     setIsConverting(true);
     try {
-      await convertMarkdownToWord(data.markdown, data.fileName, {
-        styles: templates[data.template as DocxTemplateKey].styles as any, // Cast to any to bypass Zod type inference issues
+      const options = {
+        styles: templates[data.template as DocxTemplateKey].styles,
+        customStyles: templates[data.template as DocxTemplateKey].customStyles,
         pageNumbers: data.pageNumbers,
         coverPageMarkdown: data.addCoverPage ? data.coverPageMarkdown : undefined,
         isRtl: data.isRtl,
+      };
+
+      const response = await fetch('/api/export/docx', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          markdown: data.markdown,
+          fileName: data.fileName,
+          options,
+        }),
       });
+
+      if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to generate DOCX file.');
+      }
+      
+      const blob = await response.blob();
+      saveAs(blob, `${data.fileName}.docx`);
+
       toast({
         title: "Conversion Successful",
         description: `Your file ${data.fileName}.docx has been downloaded.`,
