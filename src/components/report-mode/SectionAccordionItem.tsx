@@ -130,11 +130,28 @@ export const SectionAccordionItem = ({
                 <FormProvider {...form}>
                     <div className="border-t px-4 pt-4">
                         <Tabs defaultValue="controls" className="w-full">
-                            <TabsList className="grid w-full grid-cols-3">
-                                <TabsTrigger value="controls"><SlidersHorizontal className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_controls')}</TabsTrigger>
-                                <TabsTrigger value="prompt"><StickyNote className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_prompt')}</TabsTrigger>
-                                <TabsTrigger value="context"><LinkIcon className="me-2 h-4 w-4" />{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
-                            </TabsList>
+                            <TooltipProvider>
+                                <TabsList className="grid w-full grid-cols-3">
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <TabsTrigger value="controls"><SlidersHorizontal className="h-4 w-4" /></TabsTrigger>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>{t('builder.reportGenerator.tool_tab_controls')}</p></TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <TabsTrigger value="prompt"><StickyNote className="h-4 w-4" /></TabsTrigger>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>{t('builder.reportGenerator.tool_tab_prompt')}</p></TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <TabsTrigger value="context"><LinkIcon className="h-4 w-4" /></TabsTrigger>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>{t('builder.reportGenerator.tool_tab_context')}</p></TooltipContent>
+                                    </Tooltip>
+                                </TabsList>
+                            </TooltipProvider>
                             <TabsContent value="controls" className="py-4">
                                 <SectionGenerationControls sectionKey={itemKey} />
                             </TabsContent>
