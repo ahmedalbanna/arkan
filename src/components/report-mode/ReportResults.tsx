@@ -16,6 +16,7 @@ import { AdvancedExportDialog } from '@/components/project/AdvancedExportDialog'
 import { useExport } from '@/hooks';
 import { toast } from '@/hooks';
 import type { Section } from '@/lib/models';
+import type { DocxTemplateKey } from '@/lib/docx-styles';
 
 interface ReportResultsProps {
   generatedSections: SectionName[];
@@ -92,9 +93,13 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     })
   };
 
-  const handleExport = async (sectionsToExport: Section[]) => {
+  const handleExport = async (sectionsToExport: Section[], options: { template: DocxTemplateKey, pageNumbers: boolean }) => {
       if (!project) return;
-      await exportReportDocx(sectionsToExport, project.name || 'Untitled Report');
+      await exportReportDocx({
+          sections: sectionsToExport,
+          projectName: project.name || 'Untitled Report',
+          options
+      });
   };
 
 

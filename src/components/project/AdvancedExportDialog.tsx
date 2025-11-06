@@ -20,16 +20,20 @@ import { useBuilderStore } from '@/hooks';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
 import { Section } from '@/lib/models';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { templates, type DocxTemplateKey } from '@/lib/docx-styles';
 
 interface AdvancedExportDialogProps {
   isExporting: boolean;
-  onExport: (sectionsToExport: Section[]) => void;
+  onExport: (sectionsToExport: Section[], options: { template: DocxTemplateKey, pageNumbers: boolean }) => void;
 }
 
 export function AdvancedExportDialog({ isExporting, onExport }: AdvancedExportDialogProps) {
   const { project } = useBuilderStore();
   const [selectedSections, setSelectedSections] = useState<Record<string, boolean>>({});
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<DocxTemplateKey>('modern');
+  const [includePageNumbers, setIncludePageNumbers] = useState(true);
 
   const availableChapters = useMemo(() => {
     if (!project?.chapters) return [];
@@ -70,14 +74,13 @@ export function AdvancedExportDialog({ isExporting, onExport }: AdvancedExportDi
   const handleExportClick = () => {
     const selectedIds = Object.keys(selectedSections).filter(key => selectedSections[key]);
     const sectionsToExport = project?.sections.filter(s => selectedIds.includes(s.id)) || [];
-    onExport(sectionsToExport);
+    onExport(sectionsToExport, { template: selectedTemplate, pageNumbers: includePageNumbers });
     if(sectionsToExport.length > 0) setIsOpen(false);
   }
   
   const allChapterSections = availableChapters.flatMap(c => c.sections.map(s => s.id));
   const selectedCount = Object.values(selectedSections).filter(Boolean).length;
   const isAllSelected = allChapterSections.length > 0 && selectedCount === allChapterSections.length;
-  const isIndeterminate = selectedCount > 0 && selectedCount < allChapterSections.length;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -103,13 +106,12 @@ export function AdvancedExportDialog({ isExporting, onExport }: AdvancedExportDi
             />
             <Label htmlFor="select-all" className="font-semibold">Select All Sections</Label>
           </div>
-          <ScrollArea className="h-72 w-full rounded-md border p-2">
+          <ScrollArea className="h-60 w-full rounded-md border p-2">
              <Accordion type="multiple" className="w-full" defaultValue={availableChapters.map(c => c.id)}>
                 {availableChapters.map(chapter => {
                     const sectionsInChapter = chapter.sections.filter(s => s.content && s.content.trim());
                     const selectedSectionsInChapter = sectionsInChapter.filter(s => selectedSections[s.id]).length;
                     const isChapterAllSelected = sectionsInChapter.length > 0 && selectedSectionsInChapter === sectionsInChapter.length;
-                    const isChapterIndeterminate = selectedSectionsInChapter > 0 && selectedSectionsInChapter < sectionsInChapter.length;
 
                     return (
                         <AccordionItem value={chapter.id} key={chapter.id} className="mb-2 border rounded-md">
@@ -142,6 +144,33 @@ export function AdvancedExportDialog({ isExporting, onExport }: AdvancedExportDi
                 })}
              </Accordion>
           </ScrollArea>
+           <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+              <div className="space-y-2">
+                <Label htmlFor="template-select">Document Theme</Label>
+                 <Select value={selectedTemplate} onValueChange={(value) => setSelectedTemplate(value as DocxTemplateKey)}>
+                  <SelectTrigger id="template-select">
+                    <SelectValue placeholder="Select a theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.keys(templates).map((key) => (
+                      <SelectItem key={key} value={key}>
+                        {templates[key].name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-end pb-2">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="page-numbers"
+                    checked={includePageNumbers}
+                    onCheckedChange={(checked) => setIncludePageNumbers(!!checked)}
+                  />
+                  <Label htmlFor="page-numbers">Include Page Numbers</Label>
+                </div>
+              </div>
+            </div>
         </div>
         <DialogFooter>
           <DialogClose asChild>

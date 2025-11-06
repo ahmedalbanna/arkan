@@ -27,7 +27,7 @@ import { prepareHeadersAndFooters, buildDocumentSections } from './word-converte
  */
 export async function createDocxContent(markdown: string, options: ConversionOptions = {}) {
   const processedMarkdown = processPlantUml(markdown);
-  const ast = unified().use(remarkParse).use(remarkGfm).parse(processedMarkdown) as Root;
+  const ast = unified().use(remarkParse).use(remarkGfm).parse(await processedMarkdown) as Root;
 
   const { footnoteIdMap, docxFootnotes } = await processFootnotes(ast, options);
   const docxObjects = await convertAstToDocxObjects(ast, footnoteIdMap, options);
