@@ -39,7 +39,7 @@ export function useProject(projectId?: string) {
 
 export function useSaveProject() {
     const queryClient = useQueryClient();
-    const { loadProject, project } = useBuilderStore();
+    const { loadProject, project, setHasUnsavedChanges } = useBuilderStore();
     const router = useRouter();
 
     const mutation = useMutation({
@@ -48,8 +48,15 @@ export function useSaveProject() {
         },
         onSuccess: (savedProject) => {
             toast({ title: 'Project Saved', description: 'Your changes have been saved locally.' });
-            loadProject(savedProject);
-            queryClient.invalidateQueries({ queryKey: projectKeys.all });
+            // Instead of reloading, just update the state to reflect that changes are saved.
+            setHasUnsavedChanges(false);
+            // Optionally, update the project in the store if the server returned a new version (e.g., new updatedAt)
+            if (project?.id === savedProject.id) {
+                // Create a new instance to ensure reactivity if needed, though not strictly necessary if only updatedAt changed.
+                const updatedProject = new Project(savedProject);
+                useBuilderStore.setState({ project: updatedProject });
+            }
+            queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
             queryClient.setQueryData(projectKeys.detail(savedProject.id!), new Project(savedProject));
         },
         onError: (error) => {
@@ -57,10 +64,21 @@ export function useSaveProject() {
         }
     });
 
-    const saveProject = () => {
+    const saveProject = (onSuccessCallback?: () => void) => {
         if (!project) return;
         const projectData = project.toStateObject();
-        mutation.mutate(projectData);
+        mutation.mutate(projectData, {
+            onSuccess: (savedProject) => {
+                toast({ title: 'Project Saved', description: 'Your changes have been saved locally.' });
+                setHasUnsavedChanges(false);
+                 if (project?.id === savedProject.id) {
+                    useBuilderStore.setState({ project: new Project(savedProject) });
+                }
+                queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
+                queryClient.setQueryData(projectKeys.detail(savedProject.id!), new Project(savedProject));
+                onSuccessCallback?.();
+            }
+        });
     }
 
     return {

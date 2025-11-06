@@ -6,13 +6,14 @@ import { create } from 'zustand';
 import { Project, type ProjectProperties } from '@/lib/models/project';
 import { useToast } from '@/hooks';
 import { useRouter } from 'next/navigation';
-import { Chapter } from '@/lib/models';
+import { Chapter } from '@/lib/models/chapter';
 import { localProjectService } from '@/services/local-project-service';
 
 // This type includes both the state and the actions for the store
 interface BuilderState {
   project: Project | null;
   hasUnsavedChanges: boolean;
+  setHasUnsavedChanges: (hasChanges: boolean) => void;
   
   // --- Project lifecycle actions ---
   loadProject: (projectData: ProjectProperties) => void;
@@ -57,6 +58,7 @@ const useBuilderStore = create<BuilderState>((set, get) => {
     return {
         project: null,
         hasUnsavedChanges: false,
+        setHasUnsavedChanges: (hasChanges) => set({ hasUnsavedChanges: hasChanges }),
         isSavePromptOpen: false,
         newProjectName: '',
         newProjectDescription: '',
@@ -70,6 +72,7 @@ const useBuilderStore = create<BuilderState>((set, get) => {
                 ...projectData,
                 chapters: (projectData.chapters || []).map(c => new Chapter(c as Chapter))
             });
+            localStorage.setItem('lastActiveProjectId', newProject.id);
             set({ project: newProject, hasUnsavedChanges: false });
         },
         updateProject: (updater) => {
@@ -81,6 +84,7 @@ const useBuilderStore = create<BuilderState>((set, get) => {
             });
         },
         newSession: () => {
+            localStorage.removeItem('lastActiveProjectId');
             set({ project: createNewTemporaryProject(), hasUnsavedChanges: false });
         },
 
