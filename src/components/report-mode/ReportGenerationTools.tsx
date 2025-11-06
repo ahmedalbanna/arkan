@@ -1,28 +1,62 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils/cn';
-import { PanelLeftClose, ListPlus, BookCopy, PlusCircle, GripVertical, Trash2 } from 'lucide-react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
-import { Button } from '../ui/button';
 import { useBuilderStore } from '@/hooks';
-import { Label } from '../ui/label';
-import { Textarea } from '../ui/textarea';
 import { toast } from '@/hooks';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
-import { SectionAccordionItem } from './SectionAccordionItem';
 import { Chapter, Section } from '@/lib/models';
-import { ScrollArea } from '../ui/scroll-area';
-import { useSortable } from '@dnd-kit/sortable';
+import { cn } from '@/lib/utils/cn';
+import {
+  DndContext,
+  closestCenter,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Loader2 } from 'lucide-react';
-import { Input } from '../ui/input';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-
+import {
+  BookCopy,
+  GripVertical,
+  ListPlus,
+  PanelLeftClose,
+  PlusCircle,
+  Trash2,
+} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { SectionAccordionItem } from './SectionAccordionItem';
 
 interface GenerationToolsProps {
   onCollapseToggle: () => void;
@@ -32,27 +66,32 @@ interface GenerationToolsProps {
   hasCreditsForSingleSection: boolean;
 }
 
+interface SortableSectionItemProps {
+  section: Section;
+  index: number;
+  chapterIndex: number;
+  onDelete: () => void;
+  onGenerate: () => void;
+  isGenerating: boolean;
+  isAnythingGenerating: boolean;
+  hasCredits: boolean;
+}
+
 const SortableSectionItem = ({
   section,
   index,
   chapterIndex,
   onDelete,
   ...props
-}: {
-  section: Section;
-  index: number;
-  chapterIndex: number;
-  onDelete: () => void;
-  [key: string]: any; // To pass through other props
-}) => {
+}: SortableSectionItemProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: section.id });
 
-  const style = {
-    transform: transform ? CSS.Transform.toString(transform) : undefined,
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 1 : 0,
-    position: 'relative' as 'relative'
+    position: 'relative',
   };
 
   return (
@@ -70,6 +109,19 @@ const SortableSectionItem = ({
   );
 };
 
+interface SortableChapterItemProps {
+    chapter: Chapter;
+    index: number;
+    onAddSection: (chapterId: string) => void;
+    onDeleteSection: (chapterId: string, sectionId: string) => void;
+    onDeleteChapter: (chapterId: string) => void;
+    chapterIndex: number;
+    onGenerateSection: (sectionId: string) => void;
+    activeMutationKey: string | null;
+    isAnythingGenerating: boolean;
+    hasCreditsForSingleSection: boolean;
+}
+
 const SortableChapterItem = ({
     chapter,
     index,
@@ -77,14 +129,7 @@ const SortableChapterItem = ({
     onDeleteSection,
     onDeleteChapter,
     ...props
-}: {
-    chapter: Chapter;
-    index: number;
-    onAddSection: (chapterId: string) => void;
-    onDeleteSection: (chapterId: string, sectionId: string) => void;
-    onDeleteChapter: (chapterId: string) => void;
-    [key: string]: any;
-}) => {
+}: SortableChapterItemProps) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
     const { updateProject } = useBuilderStore();
     const [isEditing, setIsEditing] = useState(false);
@@ -115,11 +160,11 @@ const SortableChapterItem = ({
         }
     };
 
-    const style = {
-        transform: transform ? CSS.Transform.toString(transform) : undefined,
+    const style: React.CSSProperties = {
+        transform: CSS.Transform.toString(transform),
         transition,
         zIndex: isDragging ? 2 : 0,
-        position: 'relative' as 'relative',
+        position: 'relative',
     };
 
     return (
@@ -257,7 +302,7 @@ export const GenerationTools = ({
             const chapterMatch = line.match(/^(\d+)\.?\s+(.+)/);
             const sectionMatch = line.match(/^\d+\.\d+\.?\s*(.*)/);
 
-            if (chapterMatch && !sectionMatch) { // It's a chapter, not a subsection
+            if (chapterMatch && !sectionMatch) {
                 const chapterTitle = chapterMatch[2].trim();
                 if (chapterTitle) {
                     currentChapterId = p.addChapter(chapterTitle);
@@ -293,7 +338,6 @@ export const GenerationTools = ({
     const isChapterDrag = project?.chapters?.some(c => c.id === activeId);
 
     if (isChapterDrag) {
-        // Handle chapter reordering
         if (!project?.chapters?.some(c => c.id === overId)) return;
         
         updateProject(p => {
@@ -303,14 +347,12 @@ export const GenerationTools = ({
             p.updateChaptersOrder(arrayMove(p.chapters.map(c => c.id), oldIndex, newIndex));
         });
     } else {
-        // Handle section reordering (within or between chapters)
         const activeContainer = project?.chapters?.find(c => c.sections.some(s => s.id === activeId));
         const overContainer = project?.chapters?.find(c => c.sections.some(s => s.id === overId)) || project?.chapters?.find(c => c.id === overId);
 
         if (!activeContainer || !overContainer) return;
 
         if (activeContainer.id === overContainer.id) {
-            // Reordering within the same chapter
             updateProject(p => {
                 const chapter = p.getChapter(activeContainer.id);
                 if (!chapter) return;
@@ -319,7 +361,6 @@ export const GenerationTools = ({
                 chapter.sections = arrayMove(chapter.sections, oldIndex, newIndex);
             });
         } else {
-            // Moving section to a different chapter
             updateProject(p => {
                 p.moveSectionToChapter(activeId, activeContainer.id, overContainer.id);
             });
@@ -371,7 +412,6 @@ export const GenerationTools = ({
                                 onAddSection={handleAddSectionToChapter}
                                 onDeleteSection={handleDeleteSection}
                                 onDeleteChapter={handleDeleteChapter}
-                                // Pass down necessary props to the inner list
                                 chapterIndex={chapterIndex}
                                 onGenerateSection={onGenerateSection}
                                 activeMutationKey={activeMutationKey}

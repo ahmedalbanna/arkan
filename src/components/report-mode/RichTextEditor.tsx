@@ -1,53 +1,58 @@
 
 'use client';
 
+import { useAuth } from '@/context/AuthContext';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useDebounce, useTextToSpeech, useToast, useWritingTool } from '@/hooks';
+import { uploadProjectFile } from '@/services/api/projectService';
+import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
+import Dropcursor from '@tiptap/extension-dropcursor';
+import FileHandler from '@tiptap/extension-file-handler';
+import Image from '@tiptap/extension-image';
+import Table from '@tiptap/extension-table';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import TableRow from '@tiptap/extension-table-row';
+import TextAlign from '@tiptap/extension-text-align';
 import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { marked } from 'marked';
-import React, { useEffect, useState } from 'react';
-import { useDebounce, useToast, useWritingTool, useTextToSpeech } from '@/hooks';
-import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
-import TextAlign from '@tiptap/extension-text-align';
-import { Bold, Italic, Strikethrough, List, ListOrdered, Quote, ImageIcon, Table as TableIcon, Sigma, Upload, Download, Palette, PenSquare, BrainCircuit, Workflow, Wrench, LifeBuoy, MoreVertical } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import TurndownService from 'turndown';
-import { gfm } from 'turndown-plugin-gfm';
-import Image from '@tiptap/extension-image';
-import Dropcursor from '@tiptap/extension-dropcursor';
-import Table from '@tiptap/extension-table';
-import TableRow from '@tiptap/extension-table-row';
-import TableHeader from '@tiptap/extension-table-header';
-import TableCell from '@tiptap/extension-table-cell';
-import Katex from 'tiptap-katex';
 import 'katex/dist/katex.min.css';
-import mammoth from 'mammoth';
-import FileHandler from '@tiptap/extension-file-handler';
-import { uploadProjectFile } from '@/services/api/projectService';
-import { useAuth } from '@/context/AuthContext';
-//import { processPlantUml } from '@/lib/utils/processPlantUml';
-
 import {
+  Bold,
   BookText,
   Brush,
-  GitCommitVertical,
-  Languages,
+  Download,
+  ImageIcon,
+  Italic,
+  List,
+  ListOrdered,
   Loader2,
   Maximize,
+  Quote,
+  Sigma,
   SpellCheck,
+  Strikethrough,
+  Table as TableIcon,
+  Upload,
   UserCheck,
   Volume2,
-  Trash2,
 } from 'lucide-react';
-import { Button } from '../ui/button';
+import { marked } from 'marked';
+import mammoth from 'mammoth';
+import React, { useEffect, useState } from 'react';
+import Katex from 'tiptap-katex';
+import TurndownService from 'turndown';
+import { gfm } from 'turndown-plugin-gfm';
 import {
   DropdownMenu,
+  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuContent,
 } from '../ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { useLocalization } from '@/context/LocalizationContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Separator } from '../ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { Button } from '../ui/button';
 
 interface SectionToolbarProps {
   onAiAction: (action: string, payload?: any) => void;
@@ -143,7 +148,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
     </div>
   )
 }
-// Initialize Turndown service with GFM for tables
+
 const turndownService = new TurndownService({ headingStyle: 'atx' });
 turndownService.use(gfm);
 
@@ -251,7 +256,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
         return `h${i}`;
       }
     }
-    return 'p'; // Default to paragraph
+    return 'p';
   };
 
   return (
@@ -428,7 +433,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         },
         onPaste: (currentEditor, files, htmlContent) => {
           if (htmlContent) {
-            return false; // Let the default paste handler deal with HTML
+            return false;
           }
           files.forEach(file => {
             if (file.type.startsWith('image/')) {
@@ -490,16 +495,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   useEffect(() => {
     if (editor && debouncedContent !== undefined) {
-      (async () => {
-        //const processedMarkdown = await processPlantUml(editor.getText());
-        const currentMarkdown = turndownService.turndown(editor.getHTML());
-        if (currentMarkdown !== debouncedContent) {
-          const newHtml = marked.parse(debouncedContent) as string;
-          setIsUpdatingFromProp(true);
-          editor.commands.setContent(newHtml, false);
-          setTimeout(() => setIsUpdatingFromProp(false), 100);
-        }
-      })();
+      const currentMarkdown = turndownService.turndown(editor.getHTML());
+      if (currentMarkdown !== debouncedContent) {
+        const newHtml = marked.parse(debouncedContent) as string;
+        setIsUpdatingFromProp(true);
+        editor.commands.setContent(newHtml, false);
+        setTimeout(() => setIsUpdatingFromProp(false), 100);
+      }
     }
   }, [debouncedContent, editor]);
 
@@ -537,4 +539,3 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 };
 
 export default RichTextEditor;
-

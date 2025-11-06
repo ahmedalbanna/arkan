@@ -1,16 +1,14 @@
 
 'use client';
 
-import { useReportModeGenerator } from '@/hooks';
-import { lazy, Suspense } from 'react';
-import { Skeleton } from '../ui/skeleton';
-import { GenerationTools } from './ReportGenerationTools';
-import { cn } from '@/lib/utils/cn';
 import { Button } from '../ui/button';
+import { Skeleton } from '../ui/skeleton';
+import { useReportModeGenerator } from '@/hooks';
+import { cn } from '@/lib/utils/cn';
 import { PanelRightOpen } from 'lucide-react';
+import { Suspense } from 'react';
+import { GenerationTools } from './ReportGenerationTools';
 import { ReportResults } from './ReportResults';
-import type { Section } from '@/lib/models';
-import { useBuilderStore } from '@/hooks';
 
 function ReportSkeleton() {
     return (
@@ -36,9 +34,6 @@ export default function ReportModeGenerator() {
         hasCreditsForSingleSection,
         generatedSections,
     } = useReportModeGenerator();
-    
-    // Directly subscribe to the project from the store
-    const project = useBuilderStore(state => state.project);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
