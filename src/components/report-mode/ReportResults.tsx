@@ -15,6 +15,7 @@ import { useReportPaginator } from '@/hooks/core/use-report-paginator';
 import { AdvancedExportDialog } from '@/components/project/AdvancedExportDialog';
 import { useExport } from '@/hooks';
 import { toast } from '@/hooks';
+import type { Section } from '@/lib/models';
 
 interface ReportResultsProps {
   generatedSections: SectionName[];
@@ -91,10 +92,9 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     })
   };
 
-  const handleExport = async (sectionsToInclude: string[]) => {
+  const handleExport = async (sectionsToExport: Section[]) => {
       if (!project) return;
-      const sections = project.sections.filter(s => sectionsToInclude.includes(s.id));
-      await exportReportDocx(sections, project.name || 'Untitled Report');
+      await exportReportDocx(sectionsToExport, project.name || 'Untitled Report');
   };
 
 

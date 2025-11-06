@@ -19,10 +19,11 @@ import { Label } from '@/components/ui/label';
 import { useBuilderStore } from '@/hooks';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
+import { Section } from '@/lib/models';
 
 interface AdvancedExportDialogProps {
   isExporting: boolean;
-  onExport: (sectionsToInclude: string[]) => void;
+  onExport: (sectionsToExport: Section[]) => void;
 }
 
 export function AdvancedExportDialog({ isExporting, onExport }: AdvancedExportDialogProps) {
@@ -67,7 +68,8 @@ export function AdvancedExportDialog({ isExporting, onExport }: AdvancedExportDi
   };
 
   const handleExportClick = () => {
-    const sectionsToExport = Object.keys(selectedSections).filter(key => selectedSections[key]);
+    const selectedIds = Object.keys(selectedSections).filter(key => selectedSections[key]);
+    const sectionsToExport = project?.sections.filter(s => selectedIds.includes(s.id)) || [];
     onExport(sectionsToExport);
     if(sectionsToExport.length > 0) setIsOpen(false);
   }
@@ -97,7 +99,6 @@ export function AdvancedExportDialog({ isExporting, onExport }: AdvancedExportDi
             <Checkbox
               id="select-all"
               checked={isAllSelected}
-              indeterminate={isIndeterminate}
               onCheckedChange={handleSelectAll}
             />
             <Label htmlFor="select-all" className="font-semibold">Select All Sections</Label>
@@ -116,7 +117,6 @@ export function AdvancedExportDialog({ isExporting, onExport }: AdvancedExportDi
                                 <div className="flex items-center gap-3 w-full">
                                     <Checkbox
                                         checked={isChapterAllSelected}
-                                        indeterminate={isChapterIndeterminate}
                                         onCheckedChange={(checked) => handleChapterToggle(chapter.id, !!checked)}
                                         onClick={(e) => e.stopPropagation()} // Prevent trigger from firing
                                     />
@@ -156,4 +156,3 @@ export function AdvancedExportDialog({ isExporting, onExport }: AdvancedExportDi
     </Dialog>
   );
 }
-
