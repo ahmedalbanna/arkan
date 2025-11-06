@@ -3,7 +3,7 @@
  * @param data The byte array to encode.
  * @returns The encoded string.
  */
-function encode64(data: Uint8Array): string {
+export function encode64(data: Uint8Array): string {
     const B64_MAP = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
     let r = '';
     for (let i = 0; i < data.length; i += 3) {

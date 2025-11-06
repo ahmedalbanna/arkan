@@ -1,4 +1,5 @@
 import pako from "pako";
+import { encode64 } from "./encode64";
 
 export function processPlantUml(markdown: string): string {
   if (typeof markdown !== 'string') {
