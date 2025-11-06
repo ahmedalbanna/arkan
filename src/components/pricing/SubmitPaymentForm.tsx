@@ -27,10 +27,11 @@ import type { PublicSettings } from '@/lib/types';
 
 const formSchema = z.object({
   file: z
-    .instanceof(File, { message: 'A file is required.' })
-    .refine((file) => file.size < 5 * 1024 * 1024, 'File size must be less than 5MB.')
+    .any()
+    .refine((files) => files?.length == 1, 'File is required.')
+    .refine((files) => files?.[0]?.size <= 5 * 1024 * 1024, `Max file size is 5MB.`)
     .refine(
-      (file) => ['image/jpeg', 'image/png', 'application/pdf'].includes(file.type),
+      (files) => ['image/jpeg', 'image/png', 'application/pdf'].includes(files?.[0]?.type),
       'Invalid file type. Only JPG, PNG, and PDF are allowed.'
     ),
 });
@@ -104,7 +105,7 @@ export default function SubmitPaymentForm() {
         title: t('submitPayment.successTitle'),
         description: t('submitPayment.successDescription'),
       });
-      router.push('/generate');
+      router.push('/builder');
     },
     onError: (error: Error) => {
         toast({
@@ -129,7 +130,7 @@ export default function SubmitPaymentForm() {
     const token = await firebaseUser.getIdToken();
 
     const formData = new FormData();
-    formData.append('file', data.file);
+    formData.append('file', data.file[0]);
     formData.append('userId', firebaseUser.uid);
     formData.append('planId', planId);
     formData.append('planName', planName || 'Unknown Plan');
@@ -140,6 +141,8 @@ export default function SubmitPaymentForm() {
 
     mutation.mutate({ formData, token });
   };
+
+  const { register, handleSubmit, formState: { errors } } = form;
 
   return (
     <div className="space-y-8">
@@ -159,7 +162,7 @@ export default function SubmitPaymentForm() {
             <CardDescription>{t('submitPayment.bankDetailsDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-                <Accordion type="multiple" className="w-full">
+                <Accordion type="multiple" className="w-full" defaultValue={settings?.bankAccounts.length === 1 ? ['item-0'] : []}>
                     {settings?.bankAccounts?.map((account, index) => (
                         <AccordionItem value={`item-${index}`} key={index}>
                             <AccordionTrigger>{account.bankName}</AccordionTrigger>
@@ -177,7 +180,7 @@ export default function SubmitPaymentForm() {
         </Card>
       )}
 
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <Card>
           <CardHeader>
             <CardTitle>{t('submitPayment.uploadReceiptTitle')}</CardTitle>
@@ -186,24 +189,15 @@ export default function SubmitPaymentForm() {
           <CardContent>
             <div className="space-y-2">
               <Label htmlFor="file">{t('submitPayment.proofLabel')}</Label>
-              <Controller
-                name="file"
-                control={form.control}
-                render={({ field: { onChange, onBlur, name, ref } }) => (
-                  <Input
-                    id="file"
-                    type="file"
-                    accept="image/jpeg,image/png,application/pdf"
-                    onChange={(e) => onChange(e.target.files?.[0])}
-                    onBlur={onBlur}
-                    name={name}
-                    ref={ref}
-                    className="file:text-primary file:font-semibold"
-                    disabled={mutation.isPending}
-                  />
-                )}
+              <Input
+                id="file"
+                type="file"
+                accept="image/jpeg,image/png,application/pdf"
+                className="file:text-primary file:font-semibold"
+                disabled={mutation.isPending}
+                {...register("file")}
               />
-              {form.formState.errors.file && <p className="text-sm text-destructive">{form.formState.errors.file.message}</p>}
+              {errors.file && <p className="text-sm text-destructive">{errors.file.message}</p>}
             </div>
           </CardContent>
           <CardFooter>
