@@ -74,7 +74,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('summarize')} disabled={isProcessing} >
-              {activeAction === 'summarize' ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookText className="h-4 w-4" />}
+              {activeAction === 'summarize' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookText className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.summarize')}</p></TooltipContent>
@@ -83,7 +83,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('expand')} disabled={isProcessing} >
-              {activeAction === 'expand' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Maximize className="h-4 w-4" />}
+              {activeAction === 'expand' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Maximize className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.expand')}</p></TooltipContent>
@@ -92,7 +92,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('grammar')} disabled={isProcessing}>
-              {activeAction === 'grammar' ? <Loader2 className="h-4 w-4 animate-spin" /> : <SpellCheck className="h-4 w-4" />}
+              {activeAction === 'grammar' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <SpellCheck className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.checkGrammar')}</p></TooltipContent>
@@ -101,7 +101,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('humanize')} disabled={isProcessing}>
-              {activeAction === 'humanize' ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCheck className="h-4 w-4" />}
+              {activeAction === 'humanize' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCheck className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.humanize')}</p></TooltipContent>
@@ -112,7 +112,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full" disabled={isProcessing}>
-                  {activeAction === 'rewrite' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brush className="h-4 w-4" />}
+                  {activeAction === 'rewrite' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brush className="h-4 w-4" />}
                 </Button>
               </DropdownMenuTrigger>
             </TooltipTrigger>
@@ -132,7 +132,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onReadAloud('')} disabled={isProcessing}>
-              {activeAction === 'readAloud' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4" />}
+              {activeAction === 'readAloud' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
@@ -534,3 +534,5 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 };
 
 export default RichTextEditor;
+
+    
