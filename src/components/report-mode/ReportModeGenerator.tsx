@@ -36,9 +36,9 @@ export default function ReportModeGenerator() {
     } = useReportModeGenerator();
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
             {isPanelCollapsed && (
-                <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-24">
+                <div className="hidden md:block md:col-span-1 md:sticky md:top-24">
                     <Button
                         variant="secondary"
                         className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
@@ -49,7 +49,7 @@ export default function ReportModeGenerator() {
                     </Button>
                 </div>
             )}
-            <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
+            <div className={cn("col-span-12 md:col-span-5 xl:col-span-4 space-y-6 md:overflow-y-auto md:pr-2 transition-all duration-300", isPanelCollapsed && "md:hidden")}>
                 <GenerationTools
                     onCollapseToggle={() => setIsPanelCollapsed(true)}
                     isAnythingGenerating={isAnythingGenerating}
@@ -59,7 +59,7 @@ export default function ReportModeGenerator() {
                 />
             </div>
 
-            <div className={cn("lg:overflow-y-auto pr-2", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
+            <div className={cn("col-span-12 md:overflow-y-auto pr-2", isPanelCollapsed ? "md:col-span-11 xl:col-span-11" : "md:col-span-7 xl:col-span-8")}>
                 <Suspense fallback={<ReportSkeleton />}>
                     <ReportResults generatedSections={generatedSections} />
                 </Suspense>

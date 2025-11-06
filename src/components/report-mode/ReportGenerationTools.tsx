@@ -432,7 +432,7 @@ export const GenerationTools = ({
                 onChange={(e) => setNewChapterTitle(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddChapter())}
               />
-              <Button onClick={handleAddChapter} variant="outline"><BookCopy className="me-2 h-4 w-4" /> Add Chapter</Button>
+              <Button onClick={handleAddChapter} variant="outline" className="shrink-0"><BookCopy className="me-2 h-4 w-4" /> Add Chapter</Button>
           </div>
       </CardContent>
     </Card>
