@@ -50,3 +50,4 @@ database-debug.log
 dataconnect-generated
 dataconnect
 .cursor
+.package-lock.json
