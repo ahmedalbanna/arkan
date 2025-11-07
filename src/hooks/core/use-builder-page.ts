@@ -15,9 +15,9 @@ export function useBuilderPageLogic() {
   const { firebaseUser, userProfile, refetchUser } = useAuth();
   const { t, locale } = useLocalization();
   const queryClient = useQueryClient();
-  const { features, isLoaded: featuresLoaded } = useFeatures();
 
-  const [activeTab, setActiveTab] = useState<string>('files');
+
+
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   // No longer use a separate state for project ID. The store is the source of truth.
@@ -81,36 +81,15 @@ export function useBuilderPageLogic() {
     }
   };
 
-  const isFeatureEnabled = (featureId: string) => {
-    if (!featuresLoaded) return false;
-    const feature = features.find(f => f.id === featureId);
-    return !!feature?.isEnabled;
-  };
 
-  const enabledTabs = [
-    { id: 'files', enabled: true },
-    { id: 'report', enabled: isFeatureEnabled('report') },
-  ].filter(t => t.enabled).map(t => t.id);
 
-  useEffect(() => {
-    if (!enabledTabs.includes(activeTab) && enabledTabs.length > 0) {
-      setActiveTab(enabledTabs[0]);
-    } else if (enabledTabs.length === 0) {
-      setActiveTab('');
-    }
-  }, [features, activeTab, enabledTabs]);
 
   const updateProjectName = useCallback((name: string) => {
     updateProject(p => { p.name = name; });
   }, [updateProject]);
 
-  const updateProjectDescription = useCallback((description: string) => {
-    updateProject(p => { p.projectDescription = description; });
-  }, [updateProject]);
-
   return {
-    activeTab,
-    setActiveTab,
+
     showOnboarding,
     setShowOnboarding,
     handleOnboardingComplete,
@@ -118,10 +97,6 @@ export function useBuilderPageLogic() {
     locale,
     project: projectFromStore,
     isLoadingProject: !projectFromStore && !!localStorage.getItem(LAST_PROJECT_ID_KEY), // Show loading if we expect a project
-    enabledTabs,
-    featuresLoaded,
-    isFeatureEnabled,
     updateProjectName,
-    updateProjectDescription
   };
 }

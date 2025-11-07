@@ -30,15 +30,10 @@ const ReportGenerator = dynamic(() => import('@/components/report-mode/ReportMod
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
-const FileManager = dynamic(() => import('@/components/file/FileManager'), {
-  ssr: false,
-  loading: () => <LoadingSkeleton />,
-});
 
 function GeneratePageContent() {
   const {
-    activeTab,
-    setActiveTab,
+
     showOnboarding,
     setShowOnboarding,
     handleOnboardingComplete,
@@ -46,13 +41,11 @@ function GeneratePageContent() {
     locale,
     project,
     isLoadingProject,
-    enabledTabs,
-    featuresLoaded,
-    isFeatureEnabled,
+
+
     updateProjectName,
-    updateProjectDescription,
   } = useBuilderPageLogic();
-  
+
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -79,12 +72,6 @@ function GeneratePageContent() {
                   onChange={(e) => updateProjectName(e.target.value)}
                   placeholder={t('projects.untitled')}
                 />
-                 <Textarea
-                  className="text-sm text-muted-foreground border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto resize-none"
-                  value={project?.projectDescription || ''}
-                  onChange={(e) => updateProjectDescription(e.target.value)}
-                  placeholder={t('projects.noDescription')}
-                />
                 {project?.updatedAt && (
                   <p className="text-xs text-muted-foreground pt-1">
                     {t('projects.updated', { time: formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true, locale: locale === 'ar' ? ar : enUS }) })}
@@ -98,31 +85,7 @@ function GeneratePageContent() {
           </div>
         </div>
         <div className="flex flex-col flex-grow">
-          {!featuresLoaded ? (
-            <LoadingSkeleton />
-          ) : (
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
-              <TabsList className="grid w-full h-auto grid-cols-2">
-                <TabsTrigger value="files" className="gap-2">
-                  <FolderKanban className="h-4 w-4" /> {t('builder.files.fileManagerTitle')}
-                </TabsTrigger>
-                {isFeatureEnabled('report') && (
-                  <TabsTrigger value="report" className="gap-2">
-                    <FileText className="h-4 w-4" /> {t('builder.tabs.document')}
-                  </TabsTrigger>
-                )}
-              </TabsList>
-
-              <div className="w-full flex-grow mt-4">
-                <TabsContent value="files" className="h-full animate-fade-in">
-                  {activeTab === 'files' && <FileManager />}
-                </TabsContent>
-                <TabsContent value="report" className="h-full animate-fade-in">
-                  {activeTab === 'report' && <ReportGenerator />}
-                </TabsContent>
-              </div>
-            </Tabs>
-          )}
+          <ReportGenerator />
         </div>
       </div>
     </div>

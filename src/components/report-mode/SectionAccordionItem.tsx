@@ -7,7 +7,6 @@ import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/
 import { Button } from '@/components/ui/button';
 import { Loader2, Sparkles, GripVertical, SlidersHorizontal, StickyNote, Link as LinkIcon, Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useSectionAccordionItemLogic } from '@/hooks/core/useSectionAccordionItemLogic';
 import type { Section } from '@/lib/models';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { SectionGenerationControls } from './SectionGenerationControls';
@@ -16,6 +15,7 @@ import { ContextSelector } from './SectionContextSelector';
 import { Input } from '../ui/input';
 import { useBuilderStore } from '@/hooks';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { LocalizationProvider, useLocalization } from '@/context/LocalizationContext';
 
 
 export const SectionAccordionItem = ({
@@ -41,7 +41,7 @@ export const SectionAccordionItem = ({
     chapterIndex: number,
     onDelete: () => void;
 }) => {
-    const { t } = useSectionAccordionItemLogic(section);
+    const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
     const [isEditing, setIsEditing] = useState(false);
     const [editedTitle, setEditedTitle] = useState(section.title);
@@ -67,7 +67,7 @@ export const SectionAccordionItem = ({
             setIsEditing(false);
         }
     };
-    
+
     const canGenerate = hasCredits && !isAnythingGenerating;
 
     const handleGenerateClick = (e: React.MouseEvent) => {
@@ -80,7 +80,7 @@ export const SectionAccordionItem = ({
     return (
         <AccordionItem value={itemKey} key={itemKey} className="bg-background border rounded-lg">
             <div className="flex items-center px-4 py-2">
-                 <AccordionTrigger className="flex-1 hover:no-underline py-0">
+                <AccordionTrigger className="flex-1 hover:no-underline py-0">
                     <div className="flex items-center gap-2 flex-1 min-w-0" onDoubleClick={() => setIsEditing(true)}>
                         {handleProps && (
                             <div {...handleProps} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">

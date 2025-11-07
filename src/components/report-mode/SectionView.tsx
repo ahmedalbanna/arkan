@@ -2,18 +2,16 @@
 'use client';
 
 import type { SectionName } from '@/ai/schemas';
-import { useSectionLogic } from '@/hooks';
-import React from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
+
+import { ArrowDown, ArrowUp, Trash2 } from 'lucide-react';
+import { useMemo } from 'react';
 import { Button } from '../ui/button';
-import { Wand2, ThumbsDown, Check, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
-import { DiffView } from '../shared/DiffView';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
-import dynamic from 'next/dynamic';
-import { Input } from '../ui/input';
-import { Badge } from '../ui/badge';
+
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { useLocalization } from '@/context/LocalizationContext';
+import dynamic from 'next/dynamic';
+import { Badge } from '../ui/badge';
+import { Input } from '../ui/input';
 
 
 const RichTextEditor = dynamic(() => import('@/components/report-mode/RichTextEditor'), { ssr: false });
@@ -33,16 +31,15 @@ interface SectionProps {
 }
 
 export const SectionView = ({ chapterTitle, sectionKey, title, content, onUpdate, onTitleChange, onMoveUp, onMoveDown, onDelete, isFirst, isLast }: SectionProps) => {
-    const {
-        t,
-        words,
-        chars,
-    } = useSectionLogic(sectionKey, content, onUpdate);
+    const { t } = useLocalization();
+    const words = useMemo(() => content?.split(/\s+/).filter(Boolean).length || 0, [content]);
+    const chars = useMemo(() => content?.length || 0, [content]);
+
 
     return (
         <div className="space-y-4">
             <div className="group relative flex flex-col gap-2">
-                 {chapterTitle && <Badge variant="secondary" className="w-fit">{chapterTitle}</Badge>}
+                {chapterTitle && <Badge variant="secondary" className="w-fit">{chapterTitle}</Badge>}
                 <div className="flex items-center gap-2">
                     <Input
                         value={title}
@@ -51,12 +48,12 @@ export const SectionView = ({ chapterTitle, sectionKey, title, content, onUpdate
                     />
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
                         <Button variant="ghost" size="icon" onClick={onMoveUp} disabled={isFirst} className="h-7 w-7">
-                            <ArrowUp className="h-4 w-4"/>
+                            <ArrowUp className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={onMoveDown} disabled={isLast} className="h-7 w-7">
-                             <ArrowDown className="h-4 w-4"/>
+                            <ArrowDown className="h-4 w-4" />
                         </Button>
-                         <AlertDialog>
+                        <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button variant="ghost" size="icon" className="h-7 w-7">
                                     <Trash2 className="h-4 w-4 text-destructive/70" />

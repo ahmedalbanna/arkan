@@ -31,7 +31,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore } from '@/hooks';
+import { useBuilderStore, useGenerationUIStore } from '@/hooks';
 import { toast } from '@/hooks';
 import { Chapter, Section } from '@/lib/models';
 import { cn } from '@/lib/utils/cn';
@@ -49,6 +49,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import {
   BookCopy,
+  BookOpenTextIcon,
   GripVertical,
   ListPlus,
   PanelLeftClose,
@@ -57,14 +58,14 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { SectionAccordionItem } from './SectionAccordionItem';
+import { useMemo } from 'react';
 
-interface GenerationToolsProps {
-  onCollapseToggle: () => void;
-  isAnythingGenerating: boolean;
-  activeMutationKey: string | null;
-  onGenerateSection: (sectionId: string) => void;
-  hasCreditsForSingleSection: boolean;
-}
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { generateReportSectionApi } from '@/services/api/reportService';
+import { useAuth } from '@/context/AuthContext';
+import { useSections } from '@/hooks/data/use-sections';
+import { SectionName } from '@/ai/schemas';
+
 
 interface SortableSectionItemProps {
   section: Section;
@@ -110,174 +111,255 @@ const SortableSectionItem = ({
 };
 
 interface SortableChapterItemProps {
-    chapter: Chapter;
-    index: number;
-    onAddSection: (chapterId: string) => void;
-    onDeleteSection: (chapterId: string, sectionId: string) => void;
-    onDeleteChapter: (chapterId: string) => void;
-    chapterIndex: number;
-    onGenerateSection: (sectionId: string) => void;
-    activeMutationKey: string | null;
-    isAnythingGenerating: boolean;
-    hasCreditsForSingleSection: boolean;
+  chapter: Chapter;
+  index: number;
+  onAddSection: (chapterId: string) => void;
+  onDeleteSection: (chapterId: string, sectionId: string) => void;
+  onDeleteChapter: (chapterId: string) => void;
+  chapterIndex: number;
+  onGenerateSection: (sectionId: string) => void;
+  activeMutationKey: string | null;
+  isAnythingGenerating: boolean;
+  hasCreditsForSingleSection: boolean;
 }
 
 const SortableChapterItem = ({
-    chapter,
-    index,
-    onAddSection,
-    onDeleteSection,
-    onDeleteChapter,
-    ...props
+  chapter,
+  index,
+  onAddSection,
+  onDeleteSection,
+  onDeleteChapter,
+  ...props
 }: SortableChapterItemProps) => {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
-    const { updateProject } = useBuilderStore();
-    const [isEditing, setIsEditing] = useState(false);
-    const [editedTitle, setEditedTitle] = useState(chapter.title);
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
+  const { updateProject } = useBuilderStore();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(chapter.title);
 
-    useEffect(() => {
-        setEditedTitle(chapter.title);
-    }, [chapter.title]);
-    
-    const handleTitleSave = () => {
-        if (editedTitle.trim() && editedTitle !== chapter.title) {
-            updateProject(p => {
-                const chap = p.getChapter(chapter.id);
-                if (chap) {
-                    chap.title = editedTitle.trim();
-                }
-            });
+  useEffect(() => {
+    setEditedTitle(chapter.title);
+  }, [chapter.title]);
+
+  const handleTitleSave = () => {
+    if (editedTitle.trim() && editedTitle !== chapter.title) {
+      updateProject(p => {
+        const chap = p.getChapter(chapter.id);
+        if (chap) {
+          chap.title = editedTitle.trim();
         }
-        setIsEditing(false);
-    };
+      });
+    }
+    setIsEditing(false);
+  };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            handleTitleSave();
-        } else if (e.key === 'Escape') {
-            setEditedTitle(chapter.title);
-            setIsEditing(false);
-        }
-    };
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleTitleSave();
+    } else if (e.key === 'Escape') {
+      setEditedTitle(chapter.title);
+      setIsEditing(false);
+    }
+  };
 
-    const style: React.CSSProperties = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        zIndex: isDragging ? 2 : 0,
-        position: 'relative',
-    };
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 2 : 0,
+    position: 'relative',
+  };
 
-    return (
-        <div ref={setNodeRef} style={style} {...attributes}>
-             <AccordionItem value={chapter.id} className="bg-muted/30 border rounded-lg">
-                <div className="flex items-center px-4 py-2">
-                    <AccordionTrigger className="flex-1 hover:no-underline py-0">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                            {listeners && (
-                                <div {...listeners} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
-                                    <span className="text-sm w-4 text-center font-semibold">{index + 1}.</span>
-                                    <GripVertical className="h-5 w-5" />
-                                </div>
-                            )}
-                            {isEditing ? (
-                                <Input
-                                    value={editedTitle}
-                                    onChange={(e) => setEditedTitle(e.target.value)}
-                                    onBlur={handleTitleSave}
-                                    onKeyDown={handleKeyDown}
-                                    autoFocus
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="font-semibold border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent truncate"
-                                />
-                            ) : (
-                                <span onDoubleClick={() => setIsEditing(true)} className="font-semibold truncate p-0 h-auto">
-                                    {chapter.title}
-                                </span>
-                            )}
-                        </div>
-                    </AccordionTrigger>
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7">
-                                <Trash2 className="h-4 w-4 text-destructive/70" />
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Chapter?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    Are you sure you want to delete the chapter "{chapter.title}" and all of its sections? This action cannot be undone.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => onDeleteChapter(chapter.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+  return (
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <AccordionItem value={chapter.id} className="bg-muted/30 border rounded-lg">
+        <div className="flex items-center px-4 py-2">
+          <AccordionTrigger className="flex-1 hover:no-underline py-0">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              {listeners && (
+                <div {...listeners} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
+                  <span className="text-sm w-4 text-center font-semibold">{index + 1}.</span>
+                  <GripVertical className="h-5 w-5" />
                 </div>
-                <AccordionContent>
-                    <div className="border-t px-4 py-4 space-y-4">
-                        <SortableContext items={chapter.sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                            {chapter.sections.map((section, sectionIndex) => (
-                                <SortableSectionItem
-                                    key={section.id}
-                                    section={section}
-                                    index={sectionIndex}
-                                    chapterIndex={props.chapterIndex}
-                                    onDelete={() => onDeleteSection(chapter.id, section.id)}
-                                    onGenerate={() => props.onGenerateSection(section.id)}
-                                    isGenerating={props.activeMutationKey === section.id}
-                                    isAnythingGenerating={props.isAnythingGenerating}
-                                    hasCredits={props.hasCreditsForSingleSection}
-                                />
-                            ))}
-                        </SortableContext>
-                        <Button size="sm" variant="outline" onClick={() => onAddSection(chapter.id)} className="w-full">
-                            <PlusCircle className="me-2 h-4 w-4" />
-                            Add New Section
-                        </Button>
-                    </div>
-                </AccordionContent>
-             </AccordionItem>
+              )}
+              {isEditing ? (
+                <Input
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  onBlur={handleTitleSave}
+                  onKeyDown={handleKeyDown}
+                  autoFocus
+                  onClick={(e) => e.stopPropagation()}
+                  className="font-semibold border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent truncate"
+                />
+              ) : (
+                <span onDoubleClick={() => setIsEditing(true)} className="font-semibold truncate p-0 h-auto">
+                  {chapter.title}
+                </span>
+              )}
+            </div>
+          </AccordionTrigger>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-7 w-7">
+                <Trash2 className="h-4 w-4 text-destructive/70" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Chapter?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete the chapter "{chapter.title}" and all of its sections? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => onDeleteChapter(chapter.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
-    );
+        <AccordionContent>
+          <div className="border-t px-4 py-4 space-y-4">
+            <SortableContext items={chapter.sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
+              {chapter.sections.map((section, sectionIndex) => (
+                <SortableSectionItem
+                  key={section.id}
+                  section={section}
+                  index={sectionIndex}
+                  chapterIndex={props.chapterIndex}
+                  onDelete={() => onDeleteSection(chapter.id, section.id)}
+                  onGenerate={() => props.onGenerateSection(section.id)}
+                  isGenerating={props.activeMutationKey === section.id}
+                  isAnythingGenerating={props.isAnythingGenerating}
+                  hasCredits={props.hasCreditsForSingleSection}
+                />
+              ))}
+            </SortableContext>
+            <Button size="sm" variant="outline" onClick={() => onAddSection(chapter.id)} className="w-full">
+              <PlusCircle className="me-2 h-4 w-4" />
+              Add New Section
+            </Button>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    </div>
+  );
 };
 
 
-export const GenerationTools = ({
-  onCollapseToggle,
-  isAnythingGenerating,
-  activeMutationKey,
-  onGenerateSection,
-  hasCreditsForSingleSection,
-}: GenerationToolsProps) => {
-  const { t } = useLocalization();
-  const { project, updateProject } = useBuilderStore();
+
+
+
+
+export const GenerationTools = () => {
+  const { t, locale } = useLocalization();
+  const { project, updateProject } = useBuilderStore(); // Directly use the store
+  const { data: sectionConfigs, isFetched: sectionsLoaded } = useSections();
+  const { controlState, guidelineState, contextSelection, initializeControls } = useGenerationUIStore();
+  const { userProfile, refetchUser, firebaseUser } = useAuth();
+  const queryClient = useQueryClient();
+
+  // No need for orderedSections or setOrderedSections state, as we read directly from the project in the store.
+
+  // Initialize UI stores when sections are ready
+  useEffect(() => {
+    if (project?.sections && project.sections.length > 0) {
+      project.sections.forEach(section => {
+        initializeControls(section.id);
+      });
+    }
+  }, [project?.sections, initializeControls]);
+
+
+  const agentMutation = useMutation({
+    mutationKey: ['generateReportSection'], // Static key
+    mutationFn: async (sectionId: string) => {
+      if (!project || !userProfile || !firebaseUser) throw new Error("Project or user not found.");
+
+      const section = project.getSection(sectionId);
+      if (!section) throw new Error("Section not found.");
+
+      const token = await firebaseUser.getIdToken();
+
+      const controls = controlState[sectionId] || { tone: 'neutral', wordCount: 200, complexity: 50 };
+
+      const selectedContexts = contextSelection[sectionId];
+      const otherSectionsContext = Object.entries(selectedContexts?.sections || {})
+        .filter(([, isSelected]) => isSelected)
+        .reduce((acc, [key]) => {
+          const sectionContent = project.getSectionContent(key as SectionName);
+          if (sectionContent) {
+            acc[key] = sectionContent;
+          }
+          return acc;
+        }, {} as Record<string, string>);
+
+      const externalContext = (selectedContexts?.externalContext || [])
+        .map((isSelected, index) => (isSelected && project.externalContext?.[index]) ? project.externalContext[index] : null)
+        .filter(Boolean) as { fileName: string, content: string, type: string }[];
+
+      const body = {
+        sectionToGenerate: section.id,
+        prompt: section.prompt,
+        instructionText: `Please use a ${controls.tone} tone and aim for a word count of approximately ${controls.wordCount} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}.`,
+        guidelines: section.guidelines,
+        otherSections: { ...otherSectionsContext },
+        externalContext: externalContext,
+      };
+
+      const result = await generateReportSectionApi(body, token);
+
+      const content = result?.[section.id] ?? Object.values(result || {})[0] as string | undefined;
+      if (!content) {
+        toast({ title: 'Generation failed', description: `No content returned for section ${section.id}.`, variant: 'destructive' });
+        throw new Error('Empty generation result');
+      }
+
+      updateProject(p => p.updateSectionContent(section.id, content));
+      refetchUser();
+      return result;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.setQueryData(['reportSection', variables], data);
+    },
+    onError: (error: any) => {
+      toast({ title: 'Generation error', description: error?.message || 'Failed to generate section', variant: 'destructive' });
+    },
+  });
+
+  const isAnythingGenerating = agentMutation.isPending;
+  const activeMutationKey = agentMutation.isPending ? agentMutation.variables as string : null;
+
+  const onGenerateSection = (sectionId: SectionName) => {
+    agentMutation.mutate(sectionId as string);
+  };
+
+  const hasCreditsForSingleSection = !!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1;
+
+
   const [tocText, setTocText] = useState('');
   const [newChapterTitle, setNewChapterTitle] = useState('');
 
   const handleAddChapter = () => {
-    if(!newChapterTitle.trim()) {
-        toast({ title: "Chapter title is required.", variant: "destructive" });
-        return;
+    if (!newChapterTitle.trim()) {
+      toast({ title: "Chapter title is required.", variant: "destructive" });
+      return;
     }
     updateProject(p => p.addChapter(newChapterTitle));
     setNewChapterTitle('');
   };
-  
+
   const handleAddSectionToChapter = (chapterId: string) => {
-      updateProject(p => {
-          p.addSectionToChapter(chapterId, "New Section");
-      });
+    updateProject(p => {
+      p.addSectionToChapter(chapterId, "New Section");
+    });
   };
 
   const handleDeleteSection = (chapterId: string, sectionId: string) => {
     updateProject(p => p.removeSection(sectionId));
   };
-  
+
   const handleDeleteChapter = (chapterId: string) => {
-      updateProject(p => p.removeChapter(chapterId));
+    updateProject(p => p.removeChapter(chapterId));
   };
 
 
@@ -296,75 +378,75 @@ export const GenerationTools = ({
     let sectionsCreated = 0;
 
     updateProject(p => {
-        let currentChapterId: string | null = null;
+      let currentChapterId: string | null = null;
 
-        lines.forEach(line => {
-            const chapterMatch = line.match(/^(\d+)\.?\s+(.+)/);
-            const sectionMatch = line.match(/^\d+\.\d+\.?\s*(.*)/);
+      lines.forEach(line => {
+        const chapterMatch = line.match(/^(\d+)\.?\s+(.+)/);
+        const sectionMatch = line.match(/^\d+\.\d+\.?\s*(.*)/);
 
-            if (chapterMatch && !sectionMatch) {
-                const chapterTitle = chapterMatch[2].trim();
-                if (chapterTitle) {
-                    currentChapterId = p.addChapter(chapterTitle);
-                    chaptersCreated++;
-                }
-            } else if (sectionMatch && currentChapterId) {
-                const sectionTitle = sectionMatch[1].trim();
-                if (sectionTitle) {
-                    p.addCustomSection(currentChapterId, sectionTitle);
-                    sectionsCreated++;
-                }
-            }
-        });
+        if (chapterMatch && !sectionMatch) {
+          const chapterTitle = chapterMatch[2].trim();
+          if (chapterTitle) {
+            currentChapterId = p.addChapter(chapterTitle);
+            chaptersCreated++;
+          }
+        } else if (sectionMatch && currentChapterId) {
+          const sectionTitle = sectionMatch[1].trim();
+          if (sectionTitle) {
+            p.addCustomSection(currentChapterId, sectionTitle);
+            sectionsCreated++;
+          }
+        }
+      });
     });
 
     toast({
-        title: "Structure Created",
-        description: `Created ${chaptersCreated} chapters and ${sectionsCreated} sections.`,
+      title: "Structure Created",
+      description: `Created ${chaptersCreated} chapters and ${sectionsCreated} sections.`,
     });
     setTocText('');
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    
+
     if (!over) return;
 
     const activeId = active.id.toString();
     const overId = over.id.toString();
-    
+
     if (activeId === overId) return;
 
     const isChapterDrag = project?.chapters?.some(c => c.id === activeId);
 
     if (isChapterDrag) {
-        if (!project?.chapters?.some(c => c.id === overId)) return;
-        
-        updateProject(p => {
-            if (!p.chapters) return;
-            const oldIndex = p.chapters.findIndex(c => c.id === activeId);
-            const newIndex = p.chapters.findIndex(c => c.id === overId);
-            p.updateChaptersOrder(arrayMove(p.chapters.map(c => c.id), oldIndex, newIndex));
-        });
+      if (!project?.chapters?.some(c => c.id === overId)) return;
+
+      updateProject(p => {
+        if (!p.chapters) return;
+        const oldIndex = p.chapters.findIndex(c => c.id === activeId);
+        const newIndex = p.chapters.findIndex(c => c.id === overId);
+        p.updateChaptersOrder(arrayMove(p.chapters.map(c => c.id), oldIndex, newIndex));
+      });
     } else {
-        const activeContainer = project?.chapters?.find(c => c.sections.some(s => s.id === activeId));
-        const overContainer = project?.chapters?.find(c => c.sections.some(s => s.id === overId)) || project?.chapters?.find(c => c.id === overId);
+      const activeContainer = project?.chapters?.find(c => c.sections.some(s => s.id === activeId));
+      const overContainer = project?.chapters?.find(c => c.sections.some(s => s.id === overId)) || project?.chapters?.find(c => c.id === overId);
 
-        if (!activeContainer || !overContainer) return;
+      if (!activeContainer || !overContainer) return;
 
-        if (activeContainer.id === overContainer.id) {
-            updateProject(p => {
-                const chapter = p.getChapter(activeContainer.id);
-                if (!chapter) return;
-                const oldIndex = chapter.sections.findIndex(s => s.id === activeId);
-                const newIndex = chapter.sections.findIndex(s => s.id === overId);
-                chapter.sections = arrayMove(chapter.sections, oldIndex, newIndex);
-            });
-        } else {
-            updateProject(p => {
-                p.moveSectionToChapter(activeId, activeContainer.id, overContainer.id);
-            });
-        }
+      if (activeContainer.id === overContainer.id) {
+        updateProject(p => {
+          const chapter = p.getChapter(activeContainer.id);
+          if (!chapter) return;
+          const oldIndex = chapter.sections.findIndex(s => s.id === activeId);
+          const newIndex = chapter.sections.findIndex(s => s.id === overId);
+          chapter.sections = arrayMove(chapter.sections, oldIndex, newIndex);
+        });
+      } else {
+        updateProject(p => {
+          p.moveSectionToChapter(activeId, activeContainer.id, overContainer.id);
+        });
+      }
     }
   };
 
@@ -377,63 +459,63 @@ export const GenerationTools = ({
             <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
             <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
           </div>
-          <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
-            <PanelLeftClose className="h-5 w-5" />
+          <Button variant="ghost" size="icon" className="hidden lg:inline-flex">
+            <BookOpenTextIcon className="h-5 w-5" />
           </Button>
         </div>
       </CardHeader>
       <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
-          <div className="space-y-2">
-             <Label htmlFor="toc-master-input">Table of Contents</Label>
-             <Textarea
-                  id="toc-master-input"
-                  value={tocText}
-                  onChange={(e) => setTocText(e.target.value)}
-                  placeholder={"1. Chapter One\n1.1. Section One\n2. Chapter Two..."}
-                  className="flex-grow resize-none"
-                  rows={5}
-             />
-             <Button onClick={handleCreateFromToc} size="sm" className="w-full">
-                  <ListPlus className="me-2 h-4 w-4" /> Create Chapters & Sections
-             </Button>
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="toc-master-input">Table of Contents</Label>
+          <Textarea
+            id="toc-master-input"
+            value={tocText}
+            onChange={(e) => setTocText(e.target.value)}
+            placeholder={"1. Chapter One\n1.1. Section One\n2. Chapter Two..."}
+            className="flex-grow resize-none"
+            rows={5}
+          />
+          <Button onClick={handleCreateFromToc} size="sm" className="w-full">
+            <ListPlus className="me-2 h-4 w-4" /> Create Chapters & Sections
+          </Button>
+        </div>
 
-          <div className="relative flex-grow flex flex-col min-h-0">
-            <div className="flex-grow border-t pt-4">
-              <ScrollArea className="h-full -mx-6 px-6">
-                  <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                      <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
-                        <Accordion type="multiple" className="w-full space-y-4">
-                          {(project?.chapters || []).map((chapter, chapterIndex) => (
-                            <SortableChapterItem
-                                chapter={chapter}
-                                index={chapterIndex}
-                                key={chapter.id}
-                                onAddSection={handleAddSectionToChapter}
-                                onDeleteSection={handleDeleteSection}
-                                onDeleteChapter={handleDeleteChapter}
-                                chapterIndex={chapterIndex}
-                                onGenerateSection={onGenerateSection}
-                                activeMutationKey={activeMutationKey}
-                                isAnythingGenerating={isAnythingGenerating}
-                                hasCreditsForSingleSection={hasCreditsForSingleSection}
-                            />
-                          ))}
-                        </Accordion>
-                      </SortableContext>
-                  </DndContext>
-              </ScrollArea>
-            </div>
+        <div className="relative flex-grow flex flex-col min-h-0">
+          <div className="flex-grow border-t pt-4">
+            <ScrollArea className="h-full -mx-6 px-6">
+              <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
+                  <Accordion type="multiple" className="w-full space-y-4">
+                    {(project?.chapters || []).map((chapter, chapterIndex) => (
+                      <SortableChapterItem
+                        chapter={chapter}
+                        index={chapterIndex}
+                        key={chapter.id}
+                        onAddSection={handleAddSectionToChapter}
+                        onDeleteSection={handleDeleteSection}
+                        onDeleteChapter={handleDeleteChapter}
+                        chapterIndex={chapterIndex}
+                        onGenerateSection={onGenerateSection}
+                        activeMutationKey={activeMutationKey}
+                        isAnythingGenerating={isAnythingGenerating}
+                        hasCreditsForSingleSection={hasCreditsForSingleSection}
+                      />
+                    ))}
+                  </Accordion>
+                </SortableContext>
+              </DndContext>
+            </ScrollArea>
           </div>
-           <div className="flex gap-2 border-t pt-4">
-              <Input
-                placeholder="New Chapter Title..."
-                value={newChapterTitle}
-                onChange={(e) => setNewChapterTitle(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddChapter())}
-              />
-              <Button onClick={handleAddChapter} variant="outline" className="shrink-0"><BookCopy className="me-2 h-4 w-4" /> Add Chapter</Button>
-          </div>
+        </div>
+        <div className="flex gap-2 border-t pt-4">
+          <Input
+            placeholder="New Chapter Title..."
+            value={newChapterTitle}
+            onChange={(e) => setNewChapterTitle(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddChapter())}
+          />
+          <Button onClick={handleAddChapter} variant="outline" className="shrink-0"><BookCopy className="me-2 h-4 w-4" /> Add Chapter</Button>
+        </div>
       </CardContent>
     </Card>
   );

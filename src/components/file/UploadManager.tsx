@@ -16,7 +16,7 @@ import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { ExternalContextType } from '@/lib/types';
 import { cn } from '@/lib/utils/cn';
 import { processFileApi } from '@/services';
-import { FileText, ImageIcon, Loader2, PanelLeftClose, UploadCloud, Wand2, X } from 'lucide-react';
+import { AtomIcon, FileText, ImageIcon, Loader2, PanelLeftClose, UploadCloud, Wand2, X } from 'lucide-react';
 import Image from 'next/image';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -24,7 +24,7 @@ import ReactMarkdown from 'react-markdown';
 import { PasteTextUploader } from './PasteTextUploader';
 
 interface UploadManagerProps {
-    onCollapseToggle: () => void;
+
 }
 
 function ViewContextDialog({ item }: { item: { fileName: string, content: string, type: ExternalContextType } }) {
@@ -89,7 +89,7 @@ function FileDropzone() {
                 toast({ title: t('builder.files.toasts.fileAdded'), description: t('builder.files.toasts.fileAddedDesc').replace('{fileName}', file.name) });
                 refetchUser();
             } catch (error: any) {
-                 toast({ title: t('builder.files.toasts.uploadFailed'), description: error.message, variant: "destructive" });
+                toast({ title: t('builder.files.toasts.uploadFailed'), description: error.message, variant: "destructive" });
             }
         }
         setIsLoading(false);
@@ -137,10 +137,10 @@ function FileDropzone() {
     );
 }
 
-export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
+export function UploadManager() {
     const { t } = useLocalization();
     const { project, updateProject } = useBuilderStore();
-    
+
     const externalContext = project?.externalContext || [];
 
     const removeExternalContext = (index: number) => {
@@ -158,8 +158,8 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <CardTitle>{t('builder.files.fileManagerTitle')}</CardTitle>
-                    <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
-                        <PanelLeftClose className="h-5 w-5" />
+                    <Button variant="ghost" size="icon" className="hidden lg:inline-flex">
+                        <AtomIcon className="h-5 w-5" />
                     </Button>
                 </div>
                 <CardDescription>
