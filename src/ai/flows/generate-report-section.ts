@@ -28,42 +28,42 @@ You are also an expert analyst. Before you begin writing, you must first review 
 CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
 
 {{#if guidelines}}
---- Guidelines ---
+--- Guidelines ---\n
 {{#each guidelines}}
 - {{{this}}}
 {{/each}}
 {{/if}}
 
 {{#if instructionText}}
---- Additional Instructions ---
+--- Additional Instructions ---\n
 {{{instructionText}}}
 {{/if}}
 
---- AVAILABLE CONTEXT FROM PROJECT ---
+--- AVAILABLE CONTEXT FROM PROJECT ---\n
 You have access to the following documents. Review them and use the most relevant information to generate the requested section.
 
 {{#if otherSections}}
---- Other Report Sections & Context ---
+--- Other Report Sections & Context ---\n
 {{#each otherSections}}
---- Context Item: {{@key}} ---
+--- Context Item: {{@key}} ---\n
 {{{this}}}
 ---
 {{/each}}
 {{/if}}
 
 {{#if otherDiagrams}}
---- Other Generated Diagrams (PlantUML) ---
+--- Other Generated Diagrams (PlantUML) ---\n
 {{#each otherDiagrams}}
---- Diagram: {{@key}} ---
+--- Diagram: {{@key}} ---\n
 {{{this}}}
 ---
 {{/each}}
 {{/if}}
 
 {{#if externalContext}}
---- Additional Context Files ---
+--- Additional Context Files ---\n
 {{#each externalContext}}
---- File: {{this.fileName}} (Type: {{this.type}}) ---
+--- File: {{this.fileName}} (Type: {{this.type}}) ---\n
 {{{this.content}}}
 ---
 {{/each}}

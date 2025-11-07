@@ -12,7 +12,7 @@ const improveMarkdownPrompt = ai.definePrompt({
   name: 'improveReportMarkdownPrompt',
   input: { schema: ImproveMarkdownInputSchema },
   output: { schema: ImproveMarkdownOutputSchema },
-  model: 'googleai/gemini-2.0-flash',
+  model: 'googleai/gemini-2.5-flash-lite',
   prompt: `You are an expert technical editor and document formatter. A user has provided a full report in Markdown format and a set of instructions for how to improve it.
 
 Your tasks are to:

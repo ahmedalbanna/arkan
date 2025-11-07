@@ -40,7 +40,7 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
         <>
             <div className="space-y-2">
                 <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_prompt_label')}</Label>
-                 <Textarea
+                <Textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     rows={6}
@@ -66,7 +66,7 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
                             ) : (
                                 <div className="flex items-center gap-2 flex-1 min-w-0" onDoubleClick={() => setEditingGuideline({ index, text: custom })}>
                                     <StickyNote className="h-4 w-4 text-muted-foreground shrink-0" />
-                                    <span className="truncate">{custom}</span>
+                                    <span className="text-ellipsis">{custom}</span>
                                 </div>
                             )}
                             <div className="flex items-center">

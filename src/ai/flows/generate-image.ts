@@ -23,7 +23,7 @@ const generateImageFlow = ai.defineFlow(
   },
   async ({ prompt }) => {
     const { media } = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-preview-image-generation',
+      model: 'googleai/gemini-2.5-flash-lite-preview-image-generation',
       prompt: prompt,
       config: {
         responseModalities: ['TEXT', 'IMAGE'],
@@ -33,7 +33,7 @@ const generateImageFlow = ai.defineFlow(
     if (!media || !media.url) {
       throw new Error("Image generation failed to produce an image.");
     }
-    
+
     return { imageUrl: media.url };
   }
 );

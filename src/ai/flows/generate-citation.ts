@@ -12,7 +12,7 @@ const generateCitationPrompt = ai.definePrompt({
   name: 'generateCitationPrompt',
   input: { schema: GenerateCitationInputSchema },
   output: { schema: GenerateCitationOutputSchema },
-  model: 'googleai/gemini-2.0-flash',
+  model: 'googleai/gemini-2.5-flash-lite',
   prompt: `You are an expert academic librarian specializing in generating accurate citations. Your task is to analyze the provided source material and generate one or more correctly formatted citations in the specified style.
 
 If the source material contains multiple distinct sources, generate a citation for each one.

@@ -12,7 +12,7 @@ const generatePlantUMLPrompt = ai.definePrompt({
   name: 'generatePlantUMLPrompt',
   input: { schema: GeneratePlantUMLInputSchema },
   output: { schema: GeneratePlantUMLOutputSchema },
-  model: 'googleai/gemini-2.0-flash',
+  model: 'googleai/gemini-2.5-flash-lite',
   prompt: `You are an expert in software architecture and diagramming. Your task is to generate PlantUML code based on a user's description.
 
 **Diagram Type:** {{{diagramType}}}

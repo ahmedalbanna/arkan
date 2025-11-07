@@ -12,7 +12,7 @@ const generateTocPrompt = ai.definePrompt({
   name: 'generateTocPrompt',
   input: { schema: GenerateTocInputSchema },
   output: { schema: GenerateTocOutputSchema },
-  model: 'googleai/gemini-2.0-flash',
+  model: 'googleai/gemini-2.5-flash-lite',
   prompt: `You are an expert project planner and technical writer. Based on the provided project idea, generate a logical and comprehensive table of contents for a formal report.
 
 **Project Idea:**

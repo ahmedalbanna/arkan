@@ -12,7 +12,7 @@ const multipleChoiceQuizPrompt = ai.definePrompt({
     name: 'multipleChoiceQuizPrompt',
     input: { schema: GenerateQuizInputSchema },
     output: { schema: GenerateQuizOutputSchema },
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-2.5-flash-lite',
     prompt: `You are an expert educator and quiz creator. Your task is to generate a multiple-choice quiz based on the provided text.
 
 **Instructions:**
@@ -35,7 +35,7 @@ const trueFalseQuizPrompt = ai.definePrompt({
     name: 'trueFalseQuizPrompt',
     input: { schema: GenerateQuizInputSchema },
     output: { schema: GenerateQuizOutputSchema },
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-2.5-flash-lite',
     prompt: `You are an expert educator and quiz creator. Your task is to generate a true/false quiz based on the provided text.
 
 **Instructions:**
@@ -58,7 +58,7 @@ const directQuestionQuizPrompt = ai.definePrompt({
     name: 'directQuestionQuizPrompt',
     input: { schema: GenerateQuizInputSchema },
     output: { schema: GenerateQuizOutputSchema },
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-2.5-flash-lite',
     prompt: `You are an expert educator and quiz creator. Your task is to generate a direct question quiz based on the provided text.
 
 **Instructions:**

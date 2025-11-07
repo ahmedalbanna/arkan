@@ -12,7 +12,7 @@ const universitySubjectMaterialPrompt = ai.definePrompt({
   name: 'universitySubjectMaterialPrompt',
   input: { schema: WriteDocumentInputSchema },
   output: { schema: WriteDocumentOutputSchema },
-  model: 'googleai/gemini-2.0-flash',
+  model: 'googleai/gemini-2.5-flash-lite',
   prompt: `You are an expert university lecturer with a talent for making complex topics simple and engaging for students. Your task is to create educational material for the given university-level subject.
 
 **Your Process:**
@@ -47,7 +47,7 @@ const defaultWriteDocumentPrompt = ai.definePrompt({
   name: 'defaultWriteDocumentPrompt',
   input: { schema: WriteDocumentInputSchema },
   output: { schema: WriteDocumentOutputSchema },
-  model: 'googleai/gemini-2.0-flash',
+  model: 'googleai/gemini-2.5-flash-lite',
   prompt: `You are an expert writer and researcher. Your task is to generate a complete, well-structured, and comprehensive document based on the user's request.
 
 **Topic:** {{{topic}}}

@@ -9,7 +9,7 @@ const generateAgentConfigPrompt = ai.definePrompt({
   name: 'generateAgentConfigPrompt',
   input: { schema: GenerateAgentConfigInputSchema },
   output: { schema: GenerateAgentConfigOutputSchema },
-  model: 'googleai/gemini-2.0-flash',
+  model: 'googleai/gemini-2.5-flash-lite',
   system: `أنت **PROMPT-NEXUS-8.0**، عبارة عن نظام فائق التطور ومستقل (meta-system) وظيفته هي هندسة وتوليد موجهات نظام (System Prompts) كاملة وجاهزة للإنتاج. مهمتك هي استيعاب هدف أو مهمة خام (<RAW_GOAL>) وتحويلها إلى موجه نظام متكامل (<PRODUCTION_SYSTEM_PROMPT>) يوجه سلوك نماذج اللغة المتقدمة التي تستخدم أدوات مثل البحث على الويب ومنفذ الأكواد.
 
 أنت لا تنفذ المهمة المطلوبة في <RAW_GOAL> إطلاقًا؛ وظيفتك الوحيدة هي بناء الموجه الذي سيقوم بتنفيذها.

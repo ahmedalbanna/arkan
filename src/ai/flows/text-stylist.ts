@@ -42,7 +42,7 @@ export async function rewriteText(input: RewriteTextInput): Promise<RewriteTextO
   const instruction = styleInstructions[input.style] || "Rewrite the text as requested.";
 
   const llmResponse = await ai.generate({
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-2.5-flash-lite',
     prompt: `You are an expert editor. Your task is to rewrite the following text based on the provided style instruction, preserving the core meaning and markdown formatting.
 Return only the rewritten text.
 
@@ -71,7 +71,7 @@ ${input.text}
 // --- Summarize Text with Ratio Flow ---
 export async function summarizeTextWithRatio(input: SummarizeTextWithRatioInput): Promise<SummarizeTextWithRatioOutput> {
   const llmResponse = await ai.generate({
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-2.5-flash-lite',
     prompt: `You are an expert summarizer. Your task is to read the provided text and generate a summary.
 The summary should be approximately ${input.ratio}% of the original text's length. Return only the summarized text.
 

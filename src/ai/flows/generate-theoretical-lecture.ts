@@ -19,7 +19,7 @@ const generateTheoreticalLecturePrompt = ai.definePrompt({
   name: 'generateTheoreticalLecturePrompt',
   input: { schema: GenerateTheoreticalLectureInputSchema },
   output: { schema: GenerateTheoreticalLectureOutputSchema },
-  model: 'googleai/gemini-2.0-flash', // Using a more powerful model for content generation
+  model: 'googleai/gemini-2.5-flash-lite', // Using a more powerful model for content generation
   prompt: `You are an esteemed university professor and a leading expert in your field. Your task is to write a comprehensive, clear, and engaging theoretical lecture for the specified target audience.
 
 **Your Process:**

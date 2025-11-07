@@ -17,7 +17,7 @@ export function useBrowserSpeech() {
     // The 'voiceschanged' event is fired when the list of supported voices is ready.
     window.speechSynthesis.onvoiceschanged = handleVoicesChanged;
     // Also call it directly in case the voices are already available.
-    handleVoicesChanged(); 
+    handleVoicesChanged();
     return () => {
       window.speechSynthesis.onvoiceschanged = null;
       stop(); // Stop any speech on unmount
@@ -26,11 +26,11 @@ export function useBrowserSpeech() {
 
   // A simple language detection function based on character ranges.
   const detectLanguage = (text: string): 'ar' | 'en' => {
-      // Basic check for Arabic characters. If any are found, assume Arabic.
-      if (/[\u0600-\u06FF]/.test(text)) {
-          return 'ar';
-      }
-      return 'en';
+    // Basic check for Arabic characters. If any are found, assume Arabic.
+    if (/[\u0600-\u06FF]/.test(text)) {
+      return 'ar';
+    }
+    return 'en';
   };
 
   const speak = useCallback((text: string) => {
@@ -43,14 +43,14 @@ export function useBrowserSpeech() {
 
     // Find the best voice for the detected language.
     // We prioritize voices that match the language exactly, then by prefix.
-    const selectedVoice = voices.find(voice => voice.lang === detectedLang) 
-                       || voices.find(voice => voice.lang.startsWith(detectedLang));
-    
+    const selectedVoice = voices.find(voice => voice.lang === detectedLang)
+      || voices.find(voice => voice.lang.startsWith(detectedLang));
+
     // Fallback logic if no specific voice is found.
     utterance.voice = selectedVoice || voices.find(v => v.lang.startsWith('en')) || voices[0];
     utterance.lang = selectedVoice ? selectedVoice.lang : (detectedLang === 'ar' ? 'ar-SA' : 'en-US');
-    utterance.pitch = 1;
-    utterance.rate = 1;
+    utterance.pitch = 1.42;
+    utterance.rate = 0.85;
     utterance.volume = 1;
 
     utterance.onstart = () => setIsSpeaking(true);

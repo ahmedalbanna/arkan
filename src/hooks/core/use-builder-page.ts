@@ -19,7 +19,7 @@ export function useBuilderPageLogic() {
 
   const [activeTab, setActiveTab] = useState<string>('files');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  
+
   // No longer use a separate state for project ID. The store is the source of truth.
 
   // When the project in the global store changes, save its ID to localStorage.
@@ -34,11 +34,12 @@ export function useBuilderPageLogic() {
     // This effect should only run once on mount
     const lastProjectId = localStorage.getItem(LAST_PROJECT_ID_KEY);
     if (lastProjectId && !projectFromStore) { // Only load if no project is in the store
-        localProjectService.getProject(lastProjectId).then(projectData => {
-            if (projectData) {
-                loadProject(projectData);
-            }
-        });
+      localProjectService.getProject(lastProjectId).then(projectData => {
+        if (projectData) {
+          loadProject(projectData);
+        }
+
+      });
     }
   }, []); // Empty dependency array ensures it runs only once
 
@@ -98,13 +99,13 @@ export function useBuilderPageLogic() {
       setActiveTab('');
     }
   }, [features, activeTab, enabledTabs]);
-  
+
   const updateProjectName = useCallback((name: string) => {
-      updateProject(p => { p.name = name; });
+    updateProject(p => { p.name = name; });
   }, [updateProject]);
 
   const updateProjectDescription = useCallback((description: string) => {
-      updateProject(p => { p.projectDescription = description; });
+    updateProject(p => { p.projectDescription = description; });
   }, [updateProject]);
 
   return {

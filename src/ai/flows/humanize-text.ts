@@ -12,7 +12,7 @@ const humanizeTextPrompt = ai.definePrompt({
   name: 'humanizeTextPrompt',
   input: { schema: HumanizeTextInputSchema },
   output: { schema: HumanizeTextOutputSchema },
-  model: 'googleai/gemini-2.0-flash',
+  model: 'googleai/gemini-2.5-flash-lite',
   prompt: `You are a world-class editor and ghostwriter, a true linguistic chameleon whose specialty is subtlety and authenticity. Your expertise is in transforming robotic, AI-generated text into prose that is indistinguishable from authentic, high-quality human writing. Your primary goal is to rewrite the text to achieve the lowest possible AI-detection score by eliminating statistical patterns and injecting genuine, natural human variation.
 
 Rewrite the provided text to maximize its 'human' score by focusing on these principles:
