@@ -36,6 +36,7 @@ export type AiProofreadDocumentOutput = z.infer<typeof AiProofreadDocumentOutput
 // ai-researcher.ts
 export const AIResearcherInputSchema = z.object({
     topic: z.string().describe('The research topic.'),
+    depth: z.enum(['basic', 'comprehensive', 'in-depth']).optional().describe('The depth of research to conduct.'),
 });
 export type AIResearcherInput = z.infer<typeof AIResearcherInputSchema>;
 
@@ -43,8 +44,73 @@ export const AIResearcherOutputSchema = z.object({
     summary: z.string().describe('A comprehensive summary of the research topic.'),
     keyPoints: z.array(z.string()).describe('A list of key points or facts about the topic.'),
     sources: z.array(z.string()).describe('A list of URLs for the sources used.'),
+    methodology: z.string().optional().describe('A brief description of the research methodology used.'),
+    findings: z.array(z.string()).optional().describe('Detailed findings from the research.'),
 });
 export type AIResearcherOutput = z.infer<typeof AIResearcherOutputSchema>;
+
+// literature-review-generator.ts
+export const LiteratureReviewInputSchema = z.object({
+    topic: z.string().describe('The topic for the literature review.'),
+    focusAreas: z.array(z.string()).optional().describe('Specific areas or themes to focus on in the review.'),
+    numberOfSources: z.number().int().min(5).max(50).optional().describe('Desired number of sources to include (default: 10).'),
+    timeRange: z.string().optional().describe('Time range for sources (e.g., "last 5 years", "2020-2024").'),
+});
+export type LiteratureReviewInput = z.infer<typeof LiteratureReviewInputSchema>;
+
+export const LiteratureReviewOutputSchema = z.object({
+    introduction: z.string().describe('An introduction to the literature review.'),
+    mainBody: z.string().describe('The main body of the literature review, organized by themes or topics.'),
+    conclusion: z.string().describe('A conclusion summarizing key findings and gaps in the literature.'),
+    sources: z.array(z.object({
+        title: z.string().describe('Title of the source.'),
+        url: z.string().url().describe('URL of the source.'),
+        summary: z.string().describe('Brief summary of the source.'),
+        relevance: z.string().describe('Why this source is relevant to the topic.'),
+    })).describe('An array of sources used in the literature review.'),
+    gaps: z.array(z.string()).optional().describe('Identified gaps in the current literature.'),
+});
+export type LiteratureReviewOutput = z.infer<typeof LiteratureReviewOutputSchema>;
+
+// question-answering.ts
+export const QuestionAnsweringInputSchema = z.object({
+    question: z.string().describe('The question to answer.'),
+    context: z.string().optional().describe('Optional context text to base the answer on. If provided, answer based on this text.'),
+    useWebSearch: z.boolean().optional().default(false).describe('Whether to search the web for additional information.'),
+    maxSources: z.number().int().min(1).max(10).optional().describe('Maximum number of sources to use (only if useWebSearch is true).'),
+});
+export type QuestionAnsweringInput = z.infer<typeof QuestionAnsweringInputSchema>;
+
+export const QuestionAnsweringOutputSchema = z.object({
+    answer: z.string().describe('A comprehensive answer to the question.'),
+    confidence: z.enum(['high', 'medium', 'low']).describe('Confidence level in the answer.'),
+    sources: z.array(z.object({
+        url: z.string().url().describe('URL of the source.'),
+        title: z.string().optional().describe('Title of the source.'),
+        relevance: z.string().optional().describe('Why this source is relevant.'),
+    })).optional().describe('Sources used to answer the question.'),
+    contextUsed: z.boolean().describe('Whether the provided context was used in the answer.'),
+    additionalNotes: z.string().optional().describe('Any additional notes or caveats about the answer.'),
+});
+export type QuestionAnsweringOutput = z.infer<typeof QuestionAnsweringOutputSchema>;
+
+// fact-retrieval.ts
+export const FactRetrievalInputSchema = z.object({
+    factQuery: z.string().describe('The specific fact or information to retrieve (e.g., "population of Japan", "date of first moon landing").'),
+    useWebSearch: z.boolean().optional().default(true).describe('Whether to search the web for the fact.'),
+    requireSource: z.boolean().optional().default(true).describe('Whether to require a source for the fact.'),
+});
+export type FactRetrievalInput = z.infer<typeof FactRetrievalInputSchema>;
+
+export const FactRetrievalOutputSchema = z.object({
+    fact: z.string().describe('The retrieved fact or information.'),
+    source: z.string().url().optional().describe('URL of the source for this fact.'),
+    sourceTitle: z.string().optional().describe('Title of the source.'),
+    lastVerified: z.string().optional().describe('When this fact was last verified or the date of the source.'),
+    confidence: z.enum(['high', 'medium', 'low']).describe('Confidence level in the accuracy of the fact.'),
+    relatedFacts: z.array(z.string()).optional().describe('Related facts that might be of interest.'),
+});
+export type FactRetrievalOutput = z.infer<typeof FactRetrievalOutputSchema>;
 
 // analyze-context.ts
 export const AnalyzeContextInputSchema = z.object({

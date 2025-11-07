@@ -28,6 +28,12 @@ import { generateCitation } from '@/ai/flows/generate-citation';
 import { GenerateCitationInputSchema } from '@/ai/schemas';
 import { aiResearcher } from '@/ai/flows/ai-researcher';
 import { AIResearcherInputSchema } from '@/ai/schemas';
+import { generateLiteratureReview } from '@/ai/flows/literature-review-generator';
+import { LiteratureReviewInputSchema } from '@/ai/schemas';
+import { answerQuestion } from '@/ai/flows/question-answering';
+import { QuestionAnsweringInputSchema } from '@/ai/schemas';
+import { retrieveFact } from '@/ai/flows/fact-retrieval';
+import { FactRetrievalInputSchema } from '@/ai/schemas';
 import { topicExplainer } from '@/ai/flows/topic-explainer';
 import { TopicExplainerInputSchema } from '@/ai/schemas';
 import { generateIdeas } from '@/ai/flows/generate-ideas';
@@ -57,6 +63,9 @@ const toolConfig = {
   'plagiarism-checker': { flow: plagiarismCheck, schema: PlagiarismCheckInputSchema, creditCost: 2 },
   'citation-generator': { flow: generateCitation, schema: GenerateCitationInputSchema, creditCost: 1 },
   'ai-researcher': { flow: aiResearcher, schema: AIResearcherInputSchema, creditCost: 2 },
+  'literature-review': { flow: generateLiteratureReview, schema: LiteratureReviewInputSchema, creditCost: 3 },
+  'question-answering': { flow: answerQuestion, schema: QuestionAnsweringInputSchema, creditCost: 1 },
+  'fact-retrieval': { flow: retrieveFact, schema: FactRetrievalInputSchema, creditCost: 1 },
   'topic-explainer': { flow: topicExplainer, schema: TopicExplainerInputSchema, creditCost: 1 },
   'generate-ideas': { flow: generateIdeas, schema: IdeaGenerationInputSchema, creditCost: 1 },
   'write-document': { flow: writeDocument, schema: WriteDocumentInputSchema, creditCost: 3 },
