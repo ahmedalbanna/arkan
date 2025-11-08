@@ -1,14 +1,14 @@
 // src/lib/word-converter/inline-converter.ts
 
+import { getProxiedImageBuffer } from '@/lib/utils/ProxiedImage';
 import {
-  TextRun,
-  ImageRun,
   ExternalHyperlink,
   FootnoteReferenceRun,
+  ImageRun,
   IRunOptions,
+  TextRun,
 } from 'docx';
 import { PhrasingContent } from 'mdast';
-import { getProxiedImageBuffer } from '@/lib/utils/ProxiedImage';
 import { ConversionOptions } from './types';
 
 export async function transformInlines(

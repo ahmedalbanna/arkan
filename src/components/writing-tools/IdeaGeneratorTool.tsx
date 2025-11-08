@@ -1,16 +1,15 @@
 
 'use client';
 
-import { Controller } from 'react-hook-form';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Sparkles, Brain } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Textarea } from '@/components/ui/textarea';
 import { useIdeaGeneratorLogic } from '@/hooks/writing-tools/use-idea-generator-logic';
+import { Loader2, Sparkles } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 
 export function IdeaGeneratorTool() {
   const {
@@ -44,23 +43,23 @@ export function IdeaGeneratorTool() {
             <AccordionItem value="advanced-options">
               <AccordionTrigger className="text-sm">{t('writingTools.ideaGenerator.advancedOptions')}</AccordionTrigger>
               <AccordionContent className="pt-4 space-y-4">
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="domain">{t('writingTools.ideaGenerator.domainLabel')}</Label>
-                        <Input id="domain" {...form.register('domain')} placeholder={t('writingTools.ideaGenerator.domainPlaceholder')} disabled={mutation.isPending}/>
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="region">{t('writingTools.ideaGenerator.regionLabel')}</Label>
-                        <Input id="region" {...form.register('region')} placeholder={t('writingTools.ideaGenerator.regionPlaceholder')} disabled={mutation.isPending}/>
-                    </div>
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="circumstances">{t('writingTools.ideaGenerator.circumstancesLabel')}</Label>
-                    <Input id="circumstances" {...form.register('circumstances')} placeholder={t('writingTools.ideaGenerator.circumstancesPlaceholder')} disabled={mutation.isPending}/>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="domain">{t('writingTools.ideaGenerator.domainLabel')}</Label>
+                    <Input id="domain" {...form.register('domain')} placeholder={t('writingTools.ideaGenerator.domainPlaceholder')} disabled={mutation.isPending} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="region">{t('writingTools.ideaGenerator.regionLabel')}</Label>
+                    <Input id="region" {...form.register('region')} placeholder={t('writingTools.ideaGenerator.regionPlaceholder')} disabled={mutation.isPending} />
+                  </div>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="additionalContext">{t('writingTools.ideaGenerator.additionalContextLabel')}</Label>
-                    <Textarea id="additionalContext" {...form.register('additionalContext')} rows={4} placeholder={t('writingTools.ideaGenerator.additionalContextPlaceholder')} disabled={mutation.isPending} />
+                  <Label htmlFor="circumstances">{t('writingTools.ideaGenerator.circumstancesLabel')}</Label>
+                  <Input id="circumstances" {...form.register('circumstances')} placeholder={t('writingTools.ideaGenerator.circumstancesPlaceholder')} disabled={mutation.isPending} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="additionalContext">{t('writingTools.ideaGenerator.additionalContextLabel')}</Label>
+                  <Textarea id="additionalContext" {...form.register('additionalContext')} rows={4} placeholder={t('writingTools.ideaGenerator.additionalContextPlaceholder')} disabled={mutation.isPending} />
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -82,14 +81,14 @@ export function IdeaGeneratorTool() {
                 </div>
               ) : (
                 <Accordion type="single" collapsible className="w-full space-y-2">
-                    {results?.ideas.map((idea, index) => (
-                        <AccordionItem value={`item-${index}`} key={index} className="bg-background border rounded-md">
-                            <AccordionTrigger className="p-4 text-left font-semibold hover:no-underline">{idea.title}</AccordionTrigger>
-                            <AccordionContent className="p-4 pt-0 text-muted-foreground">
-                                {idea.description}
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))}
+                  {results?.ideas.map((idea, index) => (
+                    <AccordionItem value={`item-${index}`} key={index} className="bg-background border rounded-md">
+                      <AccordionTrigger className="p-4 text-left font-semibold hover:no-underline">{idea.title}</AccordionTrigger>
+                      <AccordionContent className="p-4 pt-0 text-muted-foreground">
+                        {idea.description}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
                 </Accordion>
               )}
             </ScrollArea>

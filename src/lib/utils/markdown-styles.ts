@@ -1,8 +1,8 @@
 
 'use client';
 
-import React from 'react';
 import { cn } from '@/lib/utils/cn';
+import React from 'react';
 
 // Helper to check if a node is a paragraph with only text/inline children
 const isSimpleParagraph = (node: any) => {

@@ -1,21 +1,21 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Loader2, Sparkles, GripVertical, SlidersHorizontal, StickyNote, Link as LinkIcon, Trash2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useBuilderStore } from '@/hooks';
 import type { Section } from '@/lib/models';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { GripVertical, Link as LinkIcon, Loader2, SlidersHorizontal, Sparkles, StickyNote, Trash2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { Input } from '../ui/input';
+import { ContextSelector } from './SectionContextSelector';
 import { SectionGenerationControls } from './SectionGenerationControls';
 import { GuidelineEditor } from './SectionGuidelineEditor';
-import { ContextSelector } from './SectionContextSelector';
-import { Input } from '../ui/input';
-import { useBuilderStore } from '@/hooks';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { LocalizationProvider, useLocalization } from '@/context/LocalizationContext';
 
 
 export const SectionAccordionItem = ({

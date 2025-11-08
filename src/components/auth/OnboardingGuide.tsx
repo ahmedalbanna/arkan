@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -10,9 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight, Lightbulb, PartyPopper } from 'lucide-react';
 import Image from 'next/image';
+import { useMemo, useState } from 'react';
 
 interface OnboardingGuideProps {
   isOpen: boolean;

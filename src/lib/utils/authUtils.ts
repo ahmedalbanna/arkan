@@ -16,8 +16,8 @@ export interface LoginCredentials {
  * @throws An error with the message "User not authenticated" if firebaseUser is null.
  */
 export const getAuthenticatedToken = async (firebaseUser: FirebaseUser | null): Promise<string> => {
-    if (!firebaseUser) {
-        throw new Error("User not authenticated");
-    }
-    return await firebaseUser.getIdToken();
+  if (!firebaseUser) {
+    throw new Error("User not authenticated");
+  }
+  return await firebaseUser.getIdToken();
 };

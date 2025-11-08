@@ -1,9 +1,9 @@
 
-import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
-import { format } from 'date-fns';
-import type { DateRange } from 'react-day-picker';
 import type { TransactionData } from '@/lib/types';
+import { format } from 'date-fns';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
+import type { DateRange } from 'react-day-picker';
 
 export async function generateFinancialReportPdf(data: TransactionData[], dateRange: DateRange) {
     const doc = new jsPDF();

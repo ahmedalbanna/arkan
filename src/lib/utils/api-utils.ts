@@ -1,18 +1,15 @@
 
+import { getUserProfile } from '@/lib/db/queries';
+import { CustomFirebaseError, handleFirebaseError } from '@/lib/firebase/error';
+import { adminAuth } from '@/lib/firebase/server-init';
 import { NextResponse, type NextRequest } from 'next/server';
 import { ZodError } from 'zod';
-import { adminAuth } from '@/lib/firebase/server-init';
-import { getUserProfile } from '@/lib/db/queries';
-import { handleFirebaseError, CustomFirebaseError } from '@/lib/firebase/error';
 
 
 interface ApiHandlerOptions {
   requireAdmin?: boolean;
 }
 
-interface RouteContext {
-    params: { [key: string]: string | string[] | undefined };
-}
 
 interface AuthContext {
   request: NextRequest;
@@ -45,7 +42,7 @@ export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) =
 
       const user = await getUserProfile(decodedToken.uid);
       if (!user) {
-         return handleApiError({ message: 'Forbidden: User profile not found' }, 403);
+        return handleApiError({ message: 'Forbidden: User profile not found' }, 403);
       }
 
       if (options.requireAdmin && user.role !== 'admin') {
@@ -54,8 +51,8 @@ export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) =
 
       return handler({ request, user, token, params });
     } catch (error: any) {
-       // All errors, including auth errors, are now piped through the central handler
-       return handleApiError(error);
+      // All errors, including auth errors, are now piped through the central handler
+      return handleApiError(error);
     }
   };
 };
@@ -77,13 +74,13 @@ export const handleApiError = (error: any, defaultStatus = 500) => {
   // 2. Attempt to handle as a Firebase error
   const firebaseError = handleFirebaseError(error);
   if (firebaseError instanceof CustomFirebaseError) {
-      let status = 400; // Default for many auth errors
-      if (firebaseError.code.includes('not-found')) status = 404;
-      if (firebaseError.code.includes('permission-denied')) status = 403;
-      if (firebaseError.code.includes('already-exists')) status = 409;
-      if (firebaseError.code.includes('unauthenticated') || firebaseError.code.includes('token-expired')) status = 401;
+    let status = 400; // Default for many auth errors
+    if (firebaseError.code.includes('not-found')) status = 404;
+    if (firebaseError.code.includes('permission-denied')) status = 403;
+    if (firebaseError.code.includes('already-exists')) status = 409;
+    if (firebaseError.code.includes('unauthenticated') || firebaseError.code.includes('token-expired')) status = 401;
 
-      return NextResponse.json({ message: firebaseError.message, code: firebaseError.code }, { status });
+    return NextResponse.json({ message: firebaseError.message, code: firebaseError.code }, { status });
   }
 
   // 3. Handle custom thrown errors (e.g., from our own logic)

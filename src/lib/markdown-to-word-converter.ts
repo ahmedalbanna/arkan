@@ -1,23 +1,22 @@
 
 // src/lib/markdown-to-word-converter.ts
 
-import {
-  Document,
-  Packer,
-  IStylesOptions,
-  INumberingOptions,
-  AlignmentType,
-} from 'docx';
-import { saveAs } from 'file-saver';
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkGfm from 'remark-gfm';
-import { Root } from 'mdast';
 import { processPlantUml } from '@/lib/utils/processPlantUml';
-import { ConversionOptions, DocxObject } from './word-converter/types';
-import { processFootnotes } from './word-converter/node-handlers';
+import {
+  AlignmentType,
+  Document,
+  INumberingOptions,
+  IStylesOptions,
+  Packer,
+} from 'docx';
+import { Root } from 'mdast';
+import remarkGfm from 'remark-gfm';
+import remarkParse from 'remark-parse';
+import { unified } from 'unified';
 import { convertAstToDocxObjects } from './word-converter/ast-converter';
-import { prepareHeadersAndFooters, buildDocumentSections } from './word-converter/document-builder';
+import { buildDocumentSections, prepareHeadersAndFooters } from './word-converter/document-builder';
+import { processFootnotes } from './word-converter/node-handlers';
+import { ConversionOptions, DocxObject } from './word-converter/types';
 
 /**
  * Parses markdown, processes it, and creates an array of docx objects and footnotes.
@@ -58,7 +57,6 @@ const numbering: INumberingOptions = {
  */
 export async function convertMarkdownToWord(
   markdown: string,
-  fileName: string,
   options: ConversionOptions = {}
 ): Promise<Buffer | Blob> {
   const { styles, coverPageMarkdown } = options;

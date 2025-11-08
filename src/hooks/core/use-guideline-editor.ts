@@ -1,9 +1,9 @@
 
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
-import { useBuilderStore } from './useBuilderStore';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useEffect, useMemo, useState } from 'react';
+import { useBuilderStore } from './useBuilderStore';
 
 interface EditingGuidelineState {
     index: number;

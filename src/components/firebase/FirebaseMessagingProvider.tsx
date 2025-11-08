@@ -1,17 +1,17 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { useAuth } from '@/context/AuthContext';
-import { app } from '@/lib/firebase/client-init';
 import { useToast } from '@/hooks';
+import { app } from '@/lib/firebase/client-init';
 import { saveDeviceToken } from '@/services/api/deviceTokenService';
+import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { useEffect, useState } from 'react';
 
 export default function FirebaseMessagingProvider({ children }: { children: React.ReactNode }) {
     const { firebaseUser } = useAuth();
     const { toast } = useToast();
-    const [token, setToken] = useState<string | null>(null);
+    const [, setToken] = useState<string | null>(null);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {

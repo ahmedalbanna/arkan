@@ -14,11 +14,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useLocalization } from "@/context/LocalizationContext";
 import type { Project } from '@/lib/models';
 import { cn } from '@/lib/utils/cn';
 import { formatDistanceToNow } from 'date-fns';
 import { FileText, Loader2, Trash2 } from 'lucide-react';
-import { useLocalization } from "@/context/LocalizationContext";
 
 
 interface ProjectCardProps {

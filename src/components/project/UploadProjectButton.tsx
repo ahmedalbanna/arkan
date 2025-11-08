@@ -2,12 +2,12 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Upload } from 'lucide-react';
-import { Input } from '../ui/input';
+import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { useToast } from '@/hooks/util/use-toast';
-import { useLocalization } from '@/context/LocalizationContext';
+import { Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Input } from '../ui/input';
 
 export function UploadProjectButton() {
     const { fileInputRef, handleUploadClick, onFileChange } = useBuilderStore();

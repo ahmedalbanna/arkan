@@ -1,6 +1,6 @@
-import { useState, type ReactNode, type ReactElement } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useState, type ReactElement, type ReactNode } from 'react';
 
 export interface PanelItem {
   key: string;

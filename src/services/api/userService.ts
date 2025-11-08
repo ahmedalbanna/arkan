@@ -2,9 +2,9 @@
 // src/services/user-service.ts
 'use client';
 
-import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 import { app } from '@/lib/firebase/client-init';
 import type { UserProfile } from '@/lib/models/user';
+import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 
 /**
  * Fetches a list of all administrators.

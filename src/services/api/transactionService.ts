@@ -6,10 +6,10 @@ import type { VerifyPaymentVariables } from '@/lib/types';
 
 export type TransactionStatus = 'pending' | 'verified' | 'rejected';
 interface FetchTransactionsParams {
-  token: string;
-  status: TransactionStatus;
-  limit: number;
-  lastVisibleId?: string;
+    token: string;
+    status: TransactionStatus;
+    limit: number;
+    lastVisibleId?: string;
 }
 
 export async function getTransactions(params: FetchTransactionsParams): Promise<{ transactions: TransactionProperties[], hasNextPage: boolean, lastVisibleId?: string | null }> {
@@ -23,7 +23,7 @@ export async function getTransactions(params: FetchTransactionsParams): Promise<
         limit: limit.toString(),
     });
 
-    if(lastVisibleId) queryParams.append('lastVisibleId', lastVisibleId);
+    if (lastVisibleId) queryParams.append('lastVisibleId', lastVisibleId);
 
     const response = await fetch(`/api/admin/transactions?${queryParams.toString()}`, {
         headers: {
@@ -59,9 +59,9 @@ export async function verifyPayment(variables: VerifyPaymentVariables, token: st
 }
 
 interface FetchReportParams {
-  token: string;
-  startDate: string;
-  endDate: string;
+    token: string;
+    startDate: string;
+    endDate: string;
 }
 
 export async function fetchTransactionsForReport(params: FetchReportParams): Promise<TransactionProperties[]> {
@@ -75,7 +75,7 @@ export async function fetchTransactionsForReport(params: FetchReportParams): Pro
             'Authorization': `Bearer ${token}`
         }
     });
-     if (!response.ok) {
+    if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch transaction report data');
     }

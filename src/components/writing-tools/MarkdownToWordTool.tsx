@@ -2,13 +2,11 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { File as FileIcon, Loader2, Presentation } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useState, type ComponentPropsWithoutRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { saveAs } from 'file-saver';
 
-import { PptxStyleOptionsSchema } from '@/ai/schemas/template-schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -77,10 +75,10 @@ export function MarkdownToWordTool() {
       });
 
       if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Failed to generate DOCX file.');
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate DOCX file.');
       }
-      
+
       const blob = await response.blob();
       saveAs(blob, `${data.fileName}.docx`);
 

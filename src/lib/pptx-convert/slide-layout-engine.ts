@@ -1,11 +1,11 @@
+import { type FootnoteDefinition, type List, type ListItem, type Root as MdastRoot, type Paragraph, type RootContent } from 'mdast';
 import PptxGenJS from 'pptxgenjs';
-import { type Root as MdastRoot, type RootContent, type Paragraph, type List, type ListItem, type FootnoteDefinition } from 'mdast';
 
 import type { PptxStyleOptions } from '@/lib/types';
-import { POINTS_PER_INCH, DEFAULT_FONT, DEFAULT_CODE_FONT, layout } from './constants';
-import { calculateLineCount, calculateCodeLineCount } from './text-measurement';
 import { getNodeText } from './ast-utils';
+import { DEFAULT_CODE_FONT, DEFAULT_FONT, layout, POINTS_PER_INCH } from './constants';
 import { renderNodeOnSlide, transformInlinesToPptxText } from './pptx-renderer';
+import { calculateCodeLineCount, calculateLineCount } from './text-measurement';
 
 // These types were in the main file, moving them here as they are primarily used by the layout engine.
 export interface FontOptions {

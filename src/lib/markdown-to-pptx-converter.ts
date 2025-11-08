@@ -1,16 +1,16 @@
-import PptxGenJS from 'pptxgenjs';
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkGfm from 'remark-gfm'; // Import remarkGfm
-import remarkRehype from 'remark-rehype';
-import rehypeSanitize from 'rehype-sanitize';
-import rehypeStringify from 'rehype-stringify';
-import { type Root as MdastRoot, type ListItem } from 'mdast';
 import { templates } from '@/lib/pptx-styles'; // Keep for default styles
 import type { PptxStyleOptions } from '@/lib/types';
+import { type ListItem, type Root as MdastRoot } from 'mdast';
+import PptxGenJS from 'pptxgenjs';
+import rehypeSanitize from 'rehype-sanitize';
+import rehypeStringify from 'rehype-stringify';
+import remarkGfm from 'remark-gfm'; // Import remarkGfm
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import { unified } from 'unified';
 import { exportComponentAsPDF } from './pdf-exporter';
-import { DEFAULT_FONT, DEFAULT_CODE_FONT, layout } from './pptx-convert/constants';
 import { getNodeText, splitAstIntoSlides } from './pptx-convert/ast-utils';
+import { DEFAULT_CODE_FONT, DEFAULT_FONT, layout } from './pptx-convert/constants';
 import { createSlidesWithContent, type FontOptions } from './pptx-convert/slide-layout-engine';
 import { processPlantUml } from './utils/processPlantUml';
 
@@ -64,7 +64,7 @@ export async function convertMarkdownToPptx(
         background: styles.background,
         objects: [{
             placeholder: { options: { name: 'title', type: 'title', x: layout.CONTENT_X, y: layout.TITLE_Y, w: layout.CONTENT_WIDTH, h: layout.TITLE_H, margin: 0, ...contentTitleStyle } },
-        }, ],
+        },],
     });
 
     pptx.layout = 'LAYOUT_16x9';

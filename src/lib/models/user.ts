@@ -1,20 +1,19 @@
-import type { LucideIcon } from 'lucide-react';
 
 // --- Types moved from types.ts ---
 
 export type UserRole = 'admin' | 'user'; // Removed team-specific roles
 
 export interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  credits?: number;
-  role: UserRole;
-  createdAt: string;
-  updatedAt: string;
-  bio?: string;
-  profilePictureUrl?: string;
-  hasCompletedOnboarding?: boolean;
+    id: string;
+    name: string;
+    email: string;
+    credits?: number;
+    role: UserRole;
+    createdAt: string;
+    updatedAt: string;
+    bio?: string;
+    profilePictureUrl?: string;
+    hasCompletedOnboarding?: boolean;
 }
 
 // TeamMember is no longer needed

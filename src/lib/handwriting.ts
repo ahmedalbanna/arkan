@@ -1,11 +1,5 @@
 
 'use client';
-// Adapted from https://github.com/saurabhdaware/text-to-handwriting
-
-interface Point {
-    x: number;
-    y: number;
-}
 
 interface HandwritingOptions {
     font?: {
@@ -205,3 +199,4 @@ class Handwriting {
 
 export { Handwriting };
 export type { HandwritingOptions };
+

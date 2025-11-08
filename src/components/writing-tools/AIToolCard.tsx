@@ -2,8 +2,8 @@
 'use client';
 
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
-import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
+import Link from 'next/link';
 
 interface AIToolCardProps {
   name: string;

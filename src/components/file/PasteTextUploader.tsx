@@ -1,16 +1,15 @@
 
 'use client';
 
-import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks';
-import { useBuilderStore } from '@/hooks';
-import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PlusCircle } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useBuilderStore, useToast } from '@/hooks';
+import { PlusCircle } from 'lucide-react';
+import { useState } from 'react';
 
 export function PasteTextUploader() {
     const { t } = useLocalization();
@@ -36,7 +35,7 @@ export function PasteTextUploader() {
                 type: 'context'
             });
         });
-        
+
         toast({
             title: t('builder.files.toasts.contextAddedToastTitle'),
             description: t('builder.files.toasts.contextAddedToastDesc').replace('{fileName}', `${fileName.trim()}.md`),
@@ -48,7 +47,7 @@ export function PasteTextUploader() {
     return (
         <Card>
             <CardContent className="p-6 space-y-4">
-                 <div className="space-y-2">
+                <div className="space-y-2">
                     <Label htmlFor="context-name">{t('builder.files.pasteText.titleLabel')}</Label>
                     <Input
                         id="context-name"

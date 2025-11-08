@@ -27,15 +27,15 @@ export const featureKeys = {
 };
 
 export const transactionKeys = {
-    all: ['transactions'] as const,
-    lists: () => [...transactionKeys.all, 'list'] as const,
-    list: (identifier: 'pending' | 'verified' | 'rejected' | string) => [...transactionKeys.lists(), { identifier }] as const,
+  all: ['transactions'] as const,
+  lists: () => [...transactionKeys.all, 'list'] as const,
+  list: (identifier: 'pending' | 'verified' | 'rejected' | string) => [...transactionKeys.lists(), { identifier }] as const,
 }
 
 export const generationLogKeys = {
-    all: ['generation-logs'] as const,
-    lists: () => [...generationLogKeys.all, 'list'] as const,
-    list: (filters: { agentId?: string; userId?: string; }) => [...generationLogKeys.lists(), filters] as const,
+  all: ['generation-logs'] as const,
+  lists: () => [...generationLogKeys.all, 'list'] as const,
+  list: (filters: { agentId?: string; userId?: string; }) => [...generationLogKeys.lists(), filters] as const,
 }
 
 export const adminKeys = {
@@ -44,20 +44,20 @@ export const adminKeys = {
 }
 
 export const analyticsKeys = {
-    all: ['analytics'] as const,
-    userStats: (userId: string) => [...analyticsKeys.all, 'user-stats', userId] as const,
+  all: ['analytics'] as const,
+  userStats: (userId: string) => [...analyticsKeys.all, 'user-stats', userId] as const,
 }
 
 export const projectKeys = {
-    all: ['projects'] as const,
-    lists: () => [...projectKeys.all, 'list'] as const,
-    details: () => [...projectKeys.all, 'detail'] as const,
-    detail: (projectId: string) => [...projectKeys.details(), projectId] as const,
+  all: ['projects'] as const,
+  lists: () => [...projectKeys.all, 'list'] as const,
+  details: () => [...projectKeys.all, 'detail'] as const,
+  detail: (projectId: string) => [...projectKeys.details(), projectId] as const,
 }
 
 export const homeworkKeys = {
-    all: ['homework'] as const,
-    history: (userId?: string) => [...homeworkKeys.all, 'history', userId] as const,
+  all: ['homework'] as const,
+  history: (userId?: string) => [...homeworkKeys.all, 'history', userId] as const,
 };
 
 export const notificationKeys = {

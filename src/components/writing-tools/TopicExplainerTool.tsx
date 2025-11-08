@@ -1,15 +1,15 @@
 
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Sparkles } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { useTopicExplainerLogic } from '@/hooks/writing-tools/use-topic-explainer-logic';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { Loader2, Sparkles } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 export function TopicExplainerTool() {
   const {
@@ -49,16 +49,16 @@ export function TopicExplainerTool() {
           <div className="space-y-4 pt-6 border-t">
             <h3 className="font-semibold text-lg">{t('writingTools.topicExplainer.resultTitle')}</h3>
             <ScrollArea className="h-[60vh] rounded-md border p-4 bg-muted/30">
-                {mutation.isPending ? (
-                     <div className="flex justify-center items-center h-full text-muted-foreground">
-                        <Loader2 className="me-2 h-6 w-6 animate-spin" />
-                        {t('writingTools.topicExplainer.analyzing')}
-                    </div>
-                ) : results?.explanation ? (
-                    <div className="prose dark:prose-invert max-w-none">
-                        <ReactMarkdown components={markdownComponents}>{results.explanation}</ReactMarkdown>
-                    </div>
-                ) : null}
+              {mutation.isPending ? (
+                <div className="flex justify-center items-center h-full text-muted-foreground">
+                  <Loader2 className="me-2 h-6 w-6 animate-spin" />
+                  {t('writingTools.topicExplainer.analyzing')}
+                </div>
+              ) : results?.explanation ? (
+                <div className="prose dark:prose-invert max-w-none">
+                  <ReactMarkdown components={markdownComponents}>{results.explanation}</ReactMarkdown>
+                </div>
+              ) : null}
             </ScrollArea>
           </div>
         )}

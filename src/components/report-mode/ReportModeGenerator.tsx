@@ -1,17 +1,16 @@
 
 'use client';
 
-import { Button } from '../ui/button';
-import { Skeleton } from '../ui/skeleton';
-import { useBuilderStore } from '@/hooks';
+import { useLocalization } from '@/context/LocalizationContext';
 import { cn } from '@/lib/utils/cn';
 import { PanelRightOpen } from 'lucide-react';
-import { Suspense, useMemo, useState } from 'react';
+import { Suspense, useState } from 'react';
+import { UploadManager } from '../file/UploadManager';
+import { Button } from '../ui/button';
+import { Skeleton } from '../ui/skeleton';
+import { AIResearcherTool } from '../writing-tools/AIResearcherTool';
 import { GenerationTools } from './ReportGenerationTools';
 import { ReportResults } from './ReportResults';
-import { AIResearcherTool } from '../writing-tools/AIResearcherTool';
-import { useLocalization } from '@/context/LocalizationContext';
-import { UploadManager } from '../file/UploadManager';
 
 function ReportSkeleton() {
     return (
@@ -32,17 +31,12 @@ export default function ReportModeGenerator() {
     const [isGenerateCollapsed, setIsGenerateCollapsed] = useState(false);
     const [isResearchCollapsed, setIsResearchCollapsed] = useState(false);
 
-    const { project } = useBuilderStore();
-    const generatedSections = useMemo(() => {
-        if (!project) return [];
-        return project.sections.map(s => s.id);
-    }, [project]);
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
 
             <div className="col-span-12 md:col-span-5 xl:col-span-4 space-y-6 md:overflow-y-auto md:pr-2 transition-all duration-300 inline-flex">
-                <div className="hidden md:block md:col-span-1 md:sticky md:top-24">
+                <div className="hidden md:block md:col-span-1 md:sticky">
 
                     <div className="col">
                         <Button
@@ -99,7 +93,7 @@ export default function ReportModeGenerator() {
             </div>
             <div className={cn("col-span-12 md:overflow-y-auto pr-2", isGenerateCollapsed && isResearchCollapsed && isFileManagerCollapsed ? "md:col-span-11 xl:col-span-11" : "md:col-span-7 xl:col-span-8")}>
                 <Suspense fallback={<ReportSkeleton />}>
-                    <ReportResults generatedSections={generatedSections} />
+                    <ReportResults />
                 </Suspense>
             </div>
         </div>

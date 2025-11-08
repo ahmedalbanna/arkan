@@ -1,46 +1,44 @@
 
 'use client';
 
+import { Chapter } from '@/lib/models/chapter';
+import { Project, type ProjectProperties } from '@/lib/models/project';
+import { localProjectService } from '@/services/local-project-service';
 import React from 'react';
 import { create } from 'zustand';
-import { Project, type ProjectProperties } from '@/lib/models/project';
-import { useToast } from '@/hooks';
-import { useRouter } from 'next/navigation';
-import { Chapter } from '@/lib/models/chapter';
-import { localProjectService } from '@/services/local-project-service';
 
 // This type includes both the state and the actions for the store
 interface BuilderState {
-  project: Project | null;
-  hasUnsavedChanges: boolean;
-  setHasUnsavedChanges: (hasChanges: boolean) => void;
-  
-  // --- Project lifecycle actions ---
-  loadProject: (projectData: ProjectProperties) => void;
-  updateProject: (updater: (project: Project) => void) => void;
-  newSession: () => void;
-  
-  // --- UI and Session management actions ---
-  isSavePromptOpen: boolean;
-  setIsSavePromptOpen: (isOpen: boolean) => void;
-  
-  // States for dialogs
-  newProjectName: string;
-  setNewProjectName: (name: string) => void;
-  newProjectDescription: string;
-  setNewProjectDescription: (desc: string) => void;
-  handleStartBuilding: (t: (key: string) => string, router: any) => void;
-  isCreateProjectOpen: boolean,
-  setIsCreateProjectOpen: (isOpen: boolean) => void;
+    project: Project | null;
+    hasUnsavedChanges: boolean;
+    setHasUnsavedChanges: (hasChanges: boolean) => void;
 
-  handleDownloadAs: () => void;
-  
-  // File upload logic
-  fileInputRef: React.RefObject<HTMLInputElement>;
-  handleUploadClick: () => void;
-  onFileChange: (e: React.ChangeEvent<HTMLInputElement>, toast: any, t: any, router: any) => void;
-  
-  hasContent: boolean;
+    // --- Project lifecycle actions ---
+    loadProject: (projectData: ProjectProperties) => void;
+    updateProject: (updater: (project: Project) => void) => void;
+    newSession: () => void;
+
+    // --- UI and Session management actions ---
+    isSavePromptOpen: boolean;
+    setIsSavePromptOpen: (isOpen: boolean) => void;
+
+    // States for dialogs
+    newProjectName: string;
+    setNewProjectName: (name: string) => void;
+    newProjectDescription: string;
+    setNewProjectDescription: (desc: string) => void;
+    handleStartBuilding: (t: (key: string) => string, router: any) => void;
+    isCreateProjectOpen: boolean,
+    setIsCreateProjectOpen: (isOpen: boolean) => void;
+
+    handleDownloadAs: () => void;
+
+    // File upload logic
+    fileInputRef: React.RefObject<HTMLInputElement>;
+    handleUploadClick: () => void;
+    onFileChange: (e: React.ChangeEvent<HTMLInputElement>, toast: any, t: any, router: any) => void;
+
+    hasContent: boolean;
 }
 
 const createNewTemporaryProject = (): Project => {
@@ -51,7 +49,7 @@ const createNewTemporaryProject = (): Project => {
 
 // The create function now returns the combined state and actions
 const useBuilderStore = create<BuilderState>((set, get) => {
-    
+
     const fileInputRef = React.createRef<HTMLInputElement>();
 
     // Initial state setup
@@ -106,7 +104,7 @@ const useBuilderStore = create<BuilderState>((set, get) => {
             const newProject = new Project(newProjectData);
             await localProjectService.saveProject(newProject.toStateObject());
             loadProject(newProject.toStateObject());
-            router.push('/builder'); 
+            router.push('/builder');
             set({ isCreateProjectOpen: false, newProjectName: '', newProjectDescription: '' });
         },
 
@@ -122,7 +120,7 @@ const useBuilderStore = create<BuilderState>((set, get) => {
             a.click();
             URL.revokeObjectURL(url);
         },
-        
+
         // --- File Upload ---
         handleUploadClick: () => get().fileInputRef.current?.click(),
         onFileChange: (e, toast, t, router) => {
@@ -136,7 +134,7 @@ const useBuilderStore = create<BuilderState>((set, get) => {
                         if (projectData && typeof projectData === 'object' && ('name' in projectData)) {
                             loadProject(projectData);
                             toast({ title: t('builder.toasts.projectLoadedTitle'), description: t('builder.toasts.projectLoadedDesc', { projectName: projectData.name }) });
-                             router.push('/builder');
+                            router.push('/builder');
                         } else {
                             throw new Error(t('builder.errors.invalidProjectFile'));
                         }
@@ -146,21 +144,11 @@ const useBuilderStore = create<BuilderState>((set, get) => {
                 };
                 reader.readAsText(file);
             }
-             if (e.target) e.target.value = ''; // Reset file input
+            if (e.target) e.target.value = ''; // Reset file input
         },
     };
 });
 
-// Selector hook to get a memoized 'hasContent' value
-const useHasContent = () => useBuilderStore(state => !!state.project);
-
-// Subscribe to the store to update the 'hasContent' property
-useBuilderStore.subscribe(
-  (state) => state.project, // Listen to changes in the project object
-  (project) => {
-    // Update the 'hasContent' flag based on whether a project exists
-    useBuilderStore.setState({ hasContent: !!project });
-  }
-);
 
 export { useBuilderStore };
+

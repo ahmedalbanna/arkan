@@ -1,14 +1,14 @@
 
 "use client"
 
-import { PanelResizeHandle, type PanelResizeHandleProps } from "react-resizable-panels"
 import { GripVertical } from "lucide-react"
+import { PanelResizeHandle, type PanelResizeHandleProps } from "react-resizable-panels"
 
 import { cn } from "@/lib/utils/cn"
 
 import {
-  PanelGroup as ResizablePanelGroup,
   Panel as ResizablePanel,
+  PanelGroup as ResizablePanelGroup,
 } from "react-resizable-panels"
 
 const ResizableHandle = ({
@@ -31,4 +31,5 @@ const ResizableHandle = ({
   </PanelResizeHandle>
 )
 
-export { ResizablePanelGroup, ResizablePanel, ResizableHandle }
+export { ResizableHandle, ResizablePanel, ResizablePanelGroup }
+

@@ -1,6 +1,6 @@
 
-import { Section, type SectionProperties } from './section';
 import { v4 as uuidv4 } from 'uuid';
+import { Section, type SectionProperties } from './section';
 
 export interface ChapterProperties {
     id: string;
@@ -22,7 +22,7 @@ export class Chapter {
     public addSection(section: Section): void {
         this.sections.push(section);
     }
-    
+
     public removeSection(sectionId: string): void {
         this.sections = this.sections.filter(s => s.id !== sectionId);
     }

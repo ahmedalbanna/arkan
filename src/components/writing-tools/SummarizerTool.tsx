@@ -1,19 +1,19 @@
 
 'use client';
 
-import { Controller } from 'react-hook-form';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Loader2, Sparkles, Copy, Check, UploadCloud } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import ReactMarkdown from 'react-markdown';
 import { useSummarizerLogic } from '@/hooks/writing-tools/use-summarizer-logic';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { Check, Copy, Loader2, Sparkles, UploadCloud } from 'lucide-react';
+import { Controller } from 'react-hook-form';
+import ReactMarkdown from 'react-markdown';
 
 export function SummarizerTool() {
   const { t } = useLocalization();
@@ -39,33 +39,33 @@ export function SummarizerTool() {
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 
-           <Tabs defaultValue="paste">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="paste">{t('writingTools.summarizer.pasteTab')}</TabsTrigger>
-                    <TabsTrigger value="upload">{t('writingTools.summarizer.uploadTab')}</TabsTrigger>
-                </TabsList>
-                <TabsContent value="paste" className="pt-4">
-                     <Textarea
-                        {...form.register('text')}
-                        rows={10}
-                        placeholder={t('writingTools.summarizer.placeholder')}
-                        className="resize-none"
-                        />
-                </TabsContent>
-                <TabsContent value="upload" className="pt-4">
-                     <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer ${isDragActive ? 'border-primary' : ''}`}>
-                        <input {...getInputProps()} />
-                        <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
-                        {isUploading ? (
-                            <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.summarizer.processingFile')}</p>
-                        ) : (
-                            <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.summarizer.dropzoneHint')}</p>
-                        )}
-                        <p className="text-xs text-muted-foreground">{t('writingTools.summarizer.supportedFiles')}</p>
-                    </div>
-                </TabsContent>
-            </Tabs>
-            {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}
+          <Tabs defaultValue="paste">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="paste">{t('writingTools.summarizer.pasteTab')}</TabsTrigger>
+              <TabsTrigger value="upload">{t('writingTools.summarizer.uploadTab')}</TabsTrigger>
+            </TabsList>
+            <TabsContent value="paste" className="pt-4">
+              <Textarea
+                {...form.register('text')}
+                rows={10}
+                placeholder={t('writingTools.summarizer.placeholder')}
+                className="resize-none"
+              />
+            </TabsContent>
+            <TabsContent value="upload" className="pt-4">
+              <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer ${isDragActive ? 'border-primary' : ''}`}>
+                <input {...getInputProps()} />
+                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                {isUploading ? (
+                  <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.summarizer.processingFile')}</p>
+                ) : (
+                  <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.summarizer.dropzoneHint')}</p>
+                )}
+                <p className="text-xs text-muted-foreground">{t('writingTools.summarizer.supportedFiles')}</p>
+              </div>
+            </TabsContent>
+          </Tabs>
+          {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}
 
           <div className="space-y-2">
             <Label htmlFor="summarize-length">{t('writingTools.summarizer.lengthLabel')}</Label>

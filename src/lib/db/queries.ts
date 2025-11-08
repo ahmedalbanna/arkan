@@ -1,12 +1,8 @@
 'use server';
 import { adminAuth, adminDb } from '@/lib/firebase/server-init';
+import type { DocxTemplateProperties, PptxTemplateProperties, ReportTemplateProperties, UserProfile } from '@/lib/models';
 import { FieldValue } from 'firebase-admin/firestore';
-import type { UserProfile } from '@/lib/models';
-import type { ReportTemplateProperties } from '@/lib/models';
-import type { DocxTemplateProperties } from '@/lib/models';
-import type { PptxTemplateProperties } from '@/lib/models';
-import { AgentProperties } from '../models';
-import { TransactionProperties } from '../models';
+import { AgentProperties, TransactionProperties } from '../models';
 
 
 // === User Queries ===
@@ -23,14 +19,14 @@ export async function getUserProfile(id: string): Promise<UserProfile | null> {
 
 export async function getPaginatedUsers({ limit, lastVisibleId }: { limit: number, lastVisibleId?: string }) {
     let query = adminDb.collection('users')
-      .orderBy('createdAt', 'desc')
-      .limit(limit + 1); // Fetch one extra to check for hasNextPage
+        .orderBy('createdAt', 'desc')
+        .limit(limit + 1); // Fetch one extra to check for hasNextPage
 
     if (lastVisibleId) {
-      const lastDoc = await adminDb.collection('users').doc(lastVisibleId).get();
-      if (lastDoc.exists) {
-          query = query.startAfter(lastDoc);
-      }
+        const lastDoc = await adminDb.collection('users').doc(lastVisibleId).get();
+        if (lastDoc.exists) {
+            query = query.startAfter(lastDoc);
+        }
     }
 
     const snapshot = await query.get();
@@ -80,7 +76,7 @@ export async function deleteUser(userId: string) {
 }
 
 export async function resetUserPassword(userId: string, newPassword: string): Promise<void> {
- await adminAuth.updateUser(userId, { password: newPassword });
+    await adminAuth.updateUser(userId, { password: newPassword });
 }
 
 
@@ -143,7 +139,7 @@ export async function getTransactionsByStatus({ status, limit, lastVisibleId }: 
     if (lastVisibleId) {
         const lastDoc = await adminDb.collection('transactions').doc(lastVisibleId).get();
         if (lastDoc.exists) {
-          query = query.startAfter(lastDoc);
+            query = query.startAfter(lastDoc);
         }
     }
 
@@ -193,38 +189,38 @@ const CACHE_DURATION = 1000 * 60 * 5; // 5 minutes
  * @returns A promise that resolves to an array of Agent objects.
  */
 export async function getEnabledAgents(): Promise<AgentProperties[]> {
-  const now = Date.now();
-  // Return cached data if it's not stale
-  if (allAgents && (now - lastFetchTimestamp < CACHE_DURATION)) {
-    return allAgents;
-  }
-
-  try {
-    const agentsCollectionRef = adminDb.collection('agents');
-    const q = agentsCollectionRef.where("isEnabled", "==", true);
-    const querySnapshot = await q.get();
-
-    if (querySnapshot.empty) {
-      return [];
+    const now = Date.now();
+    // Return cached data if it's not stale
+    if (allAgents && (now - lastFetchTimestamp < CACHE_DURATION)) {
+        return allAgents;
     }
 
-    const fetchedAgents: AgentProperties[] = [];
-    querySnapshot.forEach((doc) => {
-      // We cast to Agent, assuming the data in Firestore matches the type.
-      // Add validation here if needed (e.g., with Zod).
-      fetchedAgents.push({ id: doc.id, ...doc.data() } as AgentProperties);
-    });
-    
-    // Update cache
-    allAgents = fetchedAgents;
-    lastFetchTimestamp = now;
+    try {
+        const agentsCollectionRef = adminDb.collection('agents');
+        const q = agentsCollectionRef.where("isEnabled", "==", true);
+        const querySnapshot = await q.get();
 
-    return fetchedAgents;
-  } catch (error) {
-    console.error("Error fetching enabled agents with Admin SDK:", error);
-    // In case of an error, return an empty array or re-throw, depending on desired behavior.
-    return [];
-  }
+        if (querySnapshot.empty) {
+            return [];
+        }
+
+        const fetchedAgents: AgentProperties[] = [];
+        querySnapshot.forEach((doc) => {
+            // We cast to Agent, assuming the data in Firestore matches the type.
+            // Add validation here if needed (e.g., with Zod).
+            fetchedAgents.push({ id: doc.id, ...doc.data() } as AgentProperties);
+        });
+
+        // Update cache
+        allAgents = fetchedAgents;
+        lastFetchTimestamp = now;
+
+        return fetchedAgents;
+    } catch (error) {
+        console.error("Error fetching enabled agents with Admin SDK:", error);
+        // In case of an error, return an empty array or re-throw, depending on desired behavior.
+        return [];
+    }
 }
 
 export async function getAgent(agentId: string): Promise<AgentProperties | null> {
@@ -247,14 +243,14 @@ export async function getAgent(agentId: string): Promise<AgentProperties | null>
 
 // --- Template Queries ---
 export type TemplateType = 'proposal' | 'report' | 'presentation' | 'docx' | 'pptx';
-export type TemplateData = ReportTemplateProperties |DocxTemplateProperties | PptxTemplateProperties;
+export type TemplateData = ReportTemplateProperties | DocxTemplateProperties | PptxTemplateProperties;
 
 export async function createGenerativeTemplate(templateType: TemplateType, id: string, data: Omit<TemplateData, 'id' | 'createdAt'>): Promise<TemplateData> {
     const collectionName = ['docx', 'pptx'].includes(templateType) ? 'styles' : 'items';
     const docRef = adminDb.collection('templates').doc(templateType).collection(collectionName).doc(id);
 
     const doc = await docRef.get();
-    if(doc.exists) {
+    if (doc.exists) {
         throw { status: 409, message: 'A template with this ID already exists.' };
     }
 

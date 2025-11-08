@@ -2,8 +2,8 @@
 'use client';
 
 import type { SectionName } from '@/ai/schemas';
+import { ExportDialog } from '@/components/project/ExportDialog';
 import A4Page from '@/components/shared/A4Page';
-import { AdvancedExportDialog } from '@/components/project/AdvancedExportDialog';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useExport, toast } from '@/hooks';
+import { toast, useBuilderStore, useExport } from '@/hooks';
 import { useReportPaginator } from '@/hooks/core/use-report-paginator';
 import type { DocxTemplateKey } from '@/lib/docx-styles';
 import type { Section } from '@/lib/models';
@@ -30,7 +30,7 @@ interface ReportResultsProps {
   generatedSections: SectionName[];
 }
 
-export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
+export const ReportResults = () => {
   const { t } = useLocalization();
   const { project, updateProject } = useBuilderStore();
   const { isExporting, exportReportDocx } = useExport();
@@ -41,7 +41,6 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
     currentItem: currentChapter,
     handleNextPage,
     handlePrevPage,
-    setCurrentPage,
   } = useReportPaginator();
 
   const handleSectionUpdate = (key: SectionName, value: string) => {
@@ -168,7 +167,7 @@ export const ReportResults = ({ generatedSections }: ReportResultsProps) => {
               {t('builder.reportGenerator.resultsDesc')}
             </CardDescription>
           </div>
-          <AdvancedExportDialog
+          <ExportDialog
             onExport={handleExport}
             isExporting={isExporting}
           />

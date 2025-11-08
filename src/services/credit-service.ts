@@ -1,7 +1,7 @@
 
 'use server';
 
-import { getUserProfile, deductUserCredits } from '@/lib/db/queries';
+import { deductUserCredits, getUserProfile } from '@/lib/db/queries';
 
 export async function deductCredit(userId: string, amount: number = 1) {
     // Allows disabling credit deduction in development environments if needed
@@ -16,6 +16,6 @@ export async function deductCredit(userId: string, amount: number = 1) {
     if (user.credits === undefined || user.credits < amount) {
         throw { status: 402, message: "Insufficient credits. Please purchase more to continue." };
     }
-    
+
     await deductUserCredits(userId, amount);
 }

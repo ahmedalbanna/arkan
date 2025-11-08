@@ -1,18 +1,18 @@
 
 'use client';
 
-import { Controller } from 'react-hook-form';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Sparkles, Copy, Check } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { useDocumentWriterLogic } from '@/hooks/writing-tools/use-document-writer-logic';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { Check, Copy, Loader2, Sparkles } from 'lucide-react';
+import { Controller } from 'react-hook-form';
+import ReactMarkdown from 'react-markdown';
 
 export function DocumentWriterTool() {
   const {
@@ -82,7 +82,7 @@ export function DocumentWriterTool() {
               disabled={mutation.isPending}
             />
           </div>
-           <div className="space-y-2">
+          <div className="space-y-2">
             <Label htmlFor="toc">{t('writingTools.documentWriter.tocLabel')}</Label>
             <Textarea
               id="toc"

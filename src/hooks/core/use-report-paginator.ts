@@ -1,9 +1,9 @@
 
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
 import { useBuilderStore } from '@/hooks';
 import type { Chapter } from '@/lib/models';
+import { useEffect, useMemo, useState } from 'react';
 
 
 export function useReportPaginator() {
@@ -19,7 +19,7 @@ export function useReportPaginator() {
     const totalPages = chapters.length;
     const currentItem = chapters[currentPage]; // Now currentItem is a Chapter
 
-     useEffect(() => {
+    useEffect(() => {
         if (currentPage >= totalPages && totalPages > 0) {
             setCurrentPage(totalPages - 1);
         } else if (totalPages === 0) {

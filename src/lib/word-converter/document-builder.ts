@@ -1,15 +1,15 @@
 // src/lib/word-converter/document-builder.ts
 
 import {
-  Paragraph,
-  Table,
-  Header,
-  Footer,
-  PageNumber,
   AlignmentType,
+  Footer,
+  Header,
   IHeaderOptions,
   ISectionOptions,
+  PageNumber,
+  Paragraph,
   SectionType,
+  Table,
   TableOfContents,
   TextRun,
 } from 'docx';

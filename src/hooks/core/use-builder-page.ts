@@ -1,26 +1,21 @@
 
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useFeatures, useProject } from '@/hooks';
+import { useBuilderStore } from '@/hooks';
 import { localProjectService } from '@/services';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useState } from 'react';
 
 const LAST_PROJECT_ID_KEY = 'lastActiveProjectId';
 
 export function useBuilderPageLogic() {
-  const { project: projectFromStore, loadProject, updateProject, hasUnsavedChanges, setHasUnsavedChanges } = useBuilderStore();
+  const { project: projectFromStore, loadProject, updateProject } = useBuilderStore();
   const { firebaseUser, userProfile, refetchUser } = useAuth();
   const { t, locale } = useLocalization();
   const queryClient = useQueryClient();
-
-
-
   const [showOnboarding, setShowOnboarding] = useState(false);
-
-  // No longer use a separate state for project ID. The store is the source of truth.
 
   // When the project in the global store changes, save its ID to localStorage.
   useEffect(() => {

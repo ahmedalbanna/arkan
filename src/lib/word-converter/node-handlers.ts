@@ -1,14 +1,14 @@
 // src/lib/word-converter/node-handlers.ts
 
+import type { IFootnotesOptions } from 'docx';
 import {
-  Paragraph,
   AlignmentType,
   IRunOptions,
+  Paragraph,
 } from 'docx';
-import type { IFootnotesOptions } from 'docx';
-import { Root, FootnoteDefinition } from 'mdast';
-import { ConversionOptions } from './types';
+import { FootnoteDefinition, Root } from 'mdast';
 import { transformInlines } from './inline-converter';
+import { ConversionOptions } from './types';
 
 export async function processFootnotes(
   ast: Root,

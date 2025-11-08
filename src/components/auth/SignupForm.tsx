@@ -1,21 +1,18 @@
 
 'use client';
 
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Phone } from 'lucide-react';
-import Link from 'next/link';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
-import { useSignup, useGoogleSignIn } from '@/hooks/auth/use-auth-mutations';
-import { useToast } from '@/hooks';
+import { Input } from '@/components/ui/input';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useToast } from '@/hooks';
+import { useGoogleSignIn, useSignup } from '@/hooks/auth/use-auth-mutations';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -23,7 +20,7 @@ const formSchema = z.object({
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
 
-export interface SignupCredentials extends z.infer<typeof formSchema> {}
+export interface SignupCredentials extends z.infer<typeof formSchema> { }
 
 export default function SignupForm() {
   const router = useRouter();

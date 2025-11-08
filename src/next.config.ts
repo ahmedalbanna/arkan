@@ -1,11 +1,10 @@
 
-import type {NextConfig} from 'next';
-import fs from 'fs';
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true, // Enable React strict mode for better development experience
   output: 'standalone',
-  
+
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -26,7 +25,7 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/plantuml/**',
       },
-       {
+      {
         protocol: 'https',
         hostname: 'storage.googleapis.com',
         port: '',

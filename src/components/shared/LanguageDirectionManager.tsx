@@ -12,9 +12,9 @@ export default function LanguageDirectionManager({ children }: { children: React
     document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
 
     if (locale === 'ar') {
-        document.body.classList.add('font-arabic');
+      document.body.classList.add('font-arabic');
     } else {
-        document.body.classList.remove('font-arabic');
+      document.body.classList.remove('font-arabic');
     }
   }, [locale]);
 

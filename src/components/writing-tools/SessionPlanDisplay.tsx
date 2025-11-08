@@ -7,7 +7,6 @@ import { MarkdownViewer } from "@/components/shared/MarkdownViewer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { markdownComponents } from "@/lib/utils/markdown-styles";
 import { BookOpen, CheckCircle, Clock, FileSignature, FileText, HelpCircle, Lightbulb, List, MessageSquare, Package, Target, Users } from "lucide-react";
 
 interface SessionPlanDisplayProps {
@@ -68,7 +67,7 @@ export const SessionPlanDisplay = ({ data }: SessionPlanDisplayProps) => {
                 <AccordionTrigger className="text-lg font-medium">
                   {index + 1}. {activity.title}
                 </AccordionTrigger>
-                <AccordionContent className="space-y-6 pl-2 border-l-2 ml-2 pl-4">
+                <AccordionContent className="space-y-6 border-l-2 ml-2 pl-4">
                   <div className="flex flex-wrap gap-4 items-center text-sm text-muted-foreground">
                     <Badge variant="secondary" className="flex items-center gap-1.5">
                       <Clock className="h-4 w-4" /> {activity.duration} mins

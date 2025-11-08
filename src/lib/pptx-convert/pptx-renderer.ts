@@ -1,20 +1,18 @@
-import PptxGenJS from 'pptxgenjs';
 import type {
     Blockquote,
     Code,
-    List,
-    ListItem,
     Paragraph,
     PhrasingContent,
     RootContent,
-    Table,
+    Table
 } from 'mdast';
+import PptxGenJS from 'pptxgenjs';
 
-import { arrayBufferToBase64 } from '@/lib/utils/arrayBufferToBase64';
 import type { PptxStyleOptions } from '@/lib/types';
-import { layout, DEFAULT_CODE_FONT } from './constants';
-import type { FontOptions } from './slide-layout-engine';
+import { arrayBufferToBase64 } from '@/lib/utils/arrayBufferToBase64';
 import { getProxiedImageBuffer } from '../utils/ProxiedImage';
+import { DEFAULT_CODE_FONT, layout } from './constants';
+import type { FontOptions } from './slide-layout-engine';
 
 /**
  * Transforms inline markdown content (strong, emphasis, links, etc.) into an array of PptxGenJS TextProps runs.

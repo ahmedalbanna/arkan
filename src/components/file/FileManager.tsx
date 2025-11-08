@@ -1,13 +1,11 @@
 
 'use client';
 
-import { useState } from "react";
-import { cn } from "@/lib/utils/cn";
-import { Button } from "@/components/ui/button";
-import { PanelLeftClose, PanelRightOpen } from "lucide-react";
-import { UploadManager } from "./UploadManager";
 import AnalystAgent from "@/components/file/AnalystAgent";
 import { useLocalization } from "@/context/LocalizationContext";
+import { cn } from "@/lib/utils/cn";
+import { useState } from "react";
+import { UploadManager } from "./UploadManager";
 
 export default function FileManager() {
     const { t } = useLocalization();

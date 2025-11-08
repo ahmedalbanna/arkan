@@ -2,18 +2,16 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Download, Trash2, Save, Upload, Cloud } from 'lucide-react';
-import React, { useEffect } from 'react';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Loader2 } from 'lucide-react';
+import { Download, Loader2, Save, Trash2, Upload } from 'lucide-react';
 
-import { useBuilderStore, useSaveProject, useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useBuilderStore, useSaveProject, useToast } from '@/hooks';
 import { useRouter } from 'next/navigation';
 
 export const SessionActions = () => {
@@ -28,14 +26,14 @@ export const SessionActions = () => {
         hasContent,
         hasUnsavedChanges,
         newSession,
-    } = useBuilderStore(); 
+    } = useBuilderStore();
 
     const { saveProject, isSaving } = useSaveProject();
 
     const handleSave = () => {
         saveProject();
     };
-    
+
     const isBusy = isSaving;
 
     return (
@@ -49,9 +47,9 @@ export const SessionActions = () => {
                     className="hidden"
                 />
 
-                 <Tooltip>
+                <Tooltip>
                     <TooltipTrigger asChild>
-                       <Button
+                        <Button
                             variant="outline"
                             size="icon"
                             onClick={handleUploadClick}
@@ -66,7 +64,7 @@ export const SessionActions = () => {
                     </TooltipContent>
                 </Tooltip>
 
-                 <Button
+                <Button
                     variant="default"
                     size="icon"
                     onClick={handleSave}
@@ -74,38 +72,38 @@ export const SessionActions = () => {
                     className="h-8 w-8 md:w-auto md:px-3"
                 >
                     {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                     <span className="hidden md:inline ms-2">{t('projects.saveButton')}</span>
+                    <span className="hidden md:inline ms-2">{t('projects.saveButton')}</span>
                 </Button>
 
                 <Tooltip>
                     <TooltipTrigger asChild>
-                         <Button
+                        <Button
                             variant="outline"
                             size="icon"
                             onClick={handleDownloadAs}
                             disabled={isBusy || !hasContent}
                             className="h-8 w-8 md:w-auto md:px-3"
-                         >
+                        >
                             <Download className="h-4 w-4" />
                             <span className="hidden md:inline ms-2">Download</span>
                         </Button>
                     </TooltipTrigger>
-                     <TooltipContent className="md:hidden">
+                    <TooltipContent className="md:hidden">
                         <p>{t('builder.tooltips.downloadProject')}</p>
                     </TooltipContent>
                 </Tooltip>
-                 
 
-                 <Tooltip>
+
+                <Tooltip>
                     <TooltipTrigger asChild>
-                       <Button
+                        <Button
                             variant="destructive"
                             size="icon"
                             onClick={() => newSession()}
                             className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <Trash2 className="h-4 w-4" />
-                             <span className="hidden md:inline ms-2">{t('builder.buttons.newSession')}</span>
+                            <span className="hidden md:inline ms-2">{t('builder.buttons.newSession')}</span>
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent className="md:hidden">

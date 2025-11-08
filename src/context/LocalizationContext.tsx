@@ -1,8 +1,8 @@
 'use client';
 
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import en from '@/locales/en.json';
 import ar from '@/locales/ar.json';
+import en from '@/locales/en.json';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 type Locale = 'en' | 'ar';
 

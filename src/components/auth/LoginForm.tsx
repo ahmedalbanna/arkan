@@ -1,21 +1,19 @@
 
 'use client';
 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useGoogleSignIn, useLogin } from '@/hooks/auth/use-auth-mutations';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { AlertCircle, Loader2, Phone } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Phone } from 'lucide-react';
-import Link from 'next/link';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
-import { useLogin, useGoogleSignIn } from '@/hooks/auth/use-auth-mutations';
 
-import { Separator } from '@/components/ui/separator';
 import { LoginCredentials } from '@/lib/types';
 
 const formSchema = z.object({

@@ -1,18 +1,18 @@
 
 'use client';
 
-import { Controller } from 'react-hook-form';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Loader2, Sparkles, Copy, Check } from 'lucide-react';
-import { useLocalization } from '@/context/LocalizationContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useLocalization } from '@/context/LocalizationContext';
 import { useCitationGeneratorLogic } from '@/hooks/writing-tools/use-citation-generator-logic';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { Check, Copy, Loader2, Sparkles } from 'lucide-react';
+import { Controller } from 'react-hook-form';
+import ReactMarkdown from 'react-markdown';
 
 export function CitationGeneratorTool() {
   const { t } = useLocalization();
@@ -85,9 +85,9 @@ export function CitationGeneratorTool() {
             </h3>
             <ScrollArea className="h-72 rounded-md border p-4 bg-muted/30">
               {mutation.isPending ? (
-                  <div className="flex items-center justify-center h-full">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
               ) : (
                 <ul className="space-y-4">
                   {generatedCitations.map((citation, index) => (

@@ -38,21 +38,21 @@ export function handleFirebaseError(error: any): CustomFirebaseError | any {
     let message = error.message;
     // Provide more user-friendly messages for common auth errors
     switch (error.code) {
-        case 'auth/id-token-expired':
-            message = 'Your session has expired. Please log in again.';
-            break;
-        case 'auth/user-not-found':
-        case 'auth/wrong-password':
-        case 'auth/invalid-credential':
-        case 'auth/invalid-email':
-            message = 'Invalid email or password.';
-            break;
-        case 'auth/email-already-exists':
-            message = 'An account with this email address already exists.';
-            break;
-        case 'auth/weak-password':
-            message = 'The password is too weak. It must be at least 6 characters long.';
-            break;
+      case 'auth/id-token-expired':
+        message = 'Your session has expired. Please log in again.';
+        break;
+      case 'auth/user-not-found':
+      case 'auth/wrong-password':
+      case 'auth/invalid-credential':
+      case 'auth/invalid-email':
+        message = 'Invalid email or password.';
+        break;
+      case 'auth/email-already-exists':
+        message = 'An account with this email address already exists.';
+        break;
+      case 'auth/weak-password':
+        message = 'The password is too weak. It must be at least 6 characters long.';
+        break;
     }
     return new CustomFirebaseError(error.code, message, error);
   }

@@ -1,6 +1,6 @@
 'use client';
 
-import type { PptxTemplateProperties, DocxTemplateProperties, ReportTemplateProperties, CreateReportTemplateData, UpdateReportTemplateData, PresentationTemplateProperties, CreatePresentationTemplateData, UpdatePresentationTemplateData } from '@/lib/types';
+import type { CreatePresentationTemplateData, CreateReportTemplateData, DocxTemplateProperties, PptxTemplateProperties, PresentationTemplateProperties, ReportTemplateProperties, UpdatePresentationTemplateData, UpdateReportTemplateData } from '@/lib/types';
 
 
 // ============================================================================

@@ -1,5 +1,5 @@
+import type { Root as MdastRoot, PhrasingContent, RootContent, Text } from 'mdast';
 import { visit } from 'unist-util-visit';
-import type { Root as MdastRoot, RootContent, PhrasingContent, Text } from 'mdast';
 import { SLIDE_BREAK_COMMENT } from './constants';
 
 /**

@@ -1,16 +1,16 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, RefreshCw } from 'lucide-react';
-import { Handwriting } from '@/lib/handwriting';
+import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
+import { Handwriting } from '@/lib/handwriting';
+import { Download, RefreshCw } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 const HANDWRITING_FONTS = [
   { name: 'Homemade Apple', value: "'Homemade Apple', cursive" },
@@ -44,7 +44,7 @@ export default function HandwritingGenerator() {
       });
       const parentElement = canvasRef.current?.parentNode;
       if (parentElement instanceof Element) {
-          resizeObserver.observe(parentElement);
+        resizeObserver.observe(parentElement);
       }
 
       return () => {
@@ -69,8 +69,8 @@ export default function HandwritingGenerator() {
 
   useEffect(() => {
     if (handwriting) {
-        handwriting.setBackground(backgroundColor);
-        handwriting.draw();
+      handwriting.setBackground(backgroundColor);
+      handwriting.draw();
     }
   }, [handwriting, backgroundColor]);
 
@@ -85,8 +85,8 @@ export default function HandwritingGenerator() {
   };
 
   const handleRedraw = () => {
-    if(handwriting) {
-        handwriting.draw();
+    if (handwriting) {
+      handwriting.draw();
     }
   }
 
@@ -124,19 +124,19 @@ export default function HandwritingGenerator() {
               />
             </div>
             <div className="space-y-2">
-                <Label htmlFor="font-family">{t('writingTools.handwriting.fontLabel')}</Label>
-                <Select value={fontFamily} onValueChange={setFontFamily}>
-                    <SelectTrigger id="font-family">
-                        <SelectValue placeholder="Select a font" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {HANDWRITING_FONTS.map((font) => (
-                            <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>
-                                {font.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+              <Label htmlFor="font-family">{t('writingTools.handwriting.fontLabel')}</Label>
+              <Select value={fontFamily} onValueChange={setFontFamily}>
+                <SelectTrigger id="font-family">
+                  <SelectValue placeholder="Select a font" />
+                </SelectTrigger>
+                <SelectContent>
+                  {HANDWRITING_FONTS.map((font) => (
+                    <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+                      {font.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="font-size">{t('writingTools.handwriting.fontSizeLabel')}</Label>

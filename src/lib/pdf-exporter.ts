@@ -25,7 +25,7 @@ export const exportComponentAsPDF = async (element: HTMLElement, filename: strin
 
         let newCanvasWidth = pdfWidth;
         let newCanvasHeight = newCanvasWidth / ratio;
-        
+
         if (newCanvasHeight > pdfHeight) {
             newCanvasHeight = pdfHeight;
             newCanvasWidth = newCanvasHeight * ratio;

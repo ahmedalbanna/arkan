@@ -19,20 +19,20 @@ export async function processPlantUml(markdown: string): Promise<string> {
         const compressed = pako.deflate(utf8Encoder.encode(plantUmlCode));
         const encoded = encode64(compressed);
         const imageUrl = `https://www.plantuml.com/plantuml/png/~1${encoded}`;
-        
+
         // Fetch the image and convert to a data URI
         const proxiedImage = await getProxiedImageBuffer(imageUrl);
         if (proxiedImage) {
-            let base64String = '';
-            const bytes = new Uint8Array(proxiedImage.buffer);
-            const len = bytes.byteLength;
-            for (let i = 0; i < len; i++) {
-                base64String += String.fromCharCode(bytes[i]);
-            }
-            const dataUri = `data:${proxiedImage.contentType};base64,${btoa(base64String)}`;
-            processedMarkdown = processedMarkdown.replace(match[0], `![Diagram](${dataUri})`);
+          let base64String = '';
+          const bytes = new Uint8Array(proxiedImage.buffer);
+          const len = bytes.byteLength;
+          for (let i = 0; i < len; i++) {
+            base64String += String.fromCharCode(bytes[i]);
+          }
+          const dataUri = `data:${proxiedImage.contentType};base64,${btoa(base64String)}`;
+          processedMarkdown = processedMarkdown.replace(match[0], `![Diagram](${dataUri})`);
         } else {
-            console.warn(`Failed to fetch and embed PlantUML image for code:\n${plantUmlCode}`);
+          console.warn(`Failed to fetch and embed PlantUML image for code:\n${plantUmlCode}`);
         }
 
       } catch (error) {

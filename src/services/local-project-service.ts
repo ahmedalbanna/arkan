@@ -1,8 +1,8 @@
 
 'use client';
 
-import { openDB, type IDBPDatabase } from 'idb';
 import type { ProjectProperties } from '@/lib/models';
+import { openDB, type IDBPDatabase } from 'idb';
 
 const DB_NAME = 'ArkanProjectsDB';
 const DB_VERSION = 1;
@@ -22,9 +22,9 @@ class LocalProjectService {
   private getDB(): Promise<IDBPDatabase<MyDB>> {
     // Delay DB initialization until it's actually needed on the client-side
     if (typeof window === 'undefined') {
-      return new Promise(() => {}); // Return a promise that never resolves on the server
+      return new Promise(() => { }); // Return a promise that never resolves on the server
     }
-    
+
     if (!this.dbPromise) {
       this.dbPromise = openDB<MyDB>(DB_NAME, DB_VERSION, {
         upgrade(db) {
@@ -42,9 +42,9 @@ class LocalProjectService {
     const allProjects = await db.getAll(STORE_NAME);
     // Sort projects by updatedAt date in descending order
     return allProjects.sort((a, b) => {
-        const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
-        const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
-        return dateB - dateA;
+      const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+      const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+      return dateB - dateA;
     });
   }
 
@@ -56,8 +56,8 @@ class LocalProjectService {
   public async saveProject(project: ProjectProperties): Promise<ProjectProperties> {
     const db = await this.getDB();
     const projectToSave = {
-        ...project,
-        updatedAt: new Date().toISOString(), // Always update timestamp on save
+      ...project,
+      updatedAt: new Date().toISOString(), // Always update timestamp on save
     };
     await db.put(STORE_NAME, projectToSave);
     return projectToSave;

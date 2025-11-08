@@ -1,12 +1,12 @@
 
-export * from './models/project';
-export * from './models/section';
-export * from './models/transaction';
-export * from './models/user';
-export * from './models/template';
 export * from './models/docxTemplate';
 export * from './models/pptxTemplate';
+export * from './models/project';
 export * from './models/reportTemplate';
+export * from './models/section';
+export * from './models/template';
+export * from './models/transaction';
+export * from './models/user';
 // word-converter types are exported under a namespace to avoid name collisions
 export * as WordConverterTypes from './word-converter/types';
 
@@ -124,9 +124,9 @@ export interface UploadedFile {
 
 export type ExternalContextType = 'context' | 'example' | 'question' | 'textbook' | 'guidelines';
 export interface ExternalContext {
-  fileName: string;
-  content: string;
-  type: ExternalContextType;
+    fileName: string;
+    content: string;
+    type: ExternalContextType;
 }
 
 // Presentation Template Types
@@ -143,11 +143,11 @@ export type UpdatePresentationTemplateData = Partial<Omit<PresentationTemplatePr
 
 // Report Template Types
 export interface ReportTemplateProperties {
-  id: string;
-  name: string;
-  description: string;
-  sectionIds: string[];
-  isDefault?: boolean;
+    id: string;
+    name: string;
+    description: string;
+    sectionIds: string[];
+    isDefault?: boolean;
 }
 
 export type CreateReportTemplateData = Omit<ReportTemplateProperties, 'id'> & { id: string };

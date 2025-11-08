@@ -1,27 +1,27 @@
 
 'use client';
 
-import React, { useState } from 'react';
-import { cn } from '@/lib/utils/cn';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Button } from '../ui/button';
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { cn } from '@/lib/utils/cn';
 import { Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Button } from '../ui/button';
 
 interface A4PageProps {
-  children: React.ReactNode;
-  title?: string;
-  className?: string;
-  onDelete?: () => void;
+    children: React.ReactNode;
+    title?: string;
+    className?: string;
+    onDelete?: () => void;
 }
 
 const A4Page = ({ children, title, className, onDelete }: A4PageProps) => {

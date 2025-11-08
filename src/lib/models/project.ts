@@ -1,8 +1,8 @@
 
-import { Section, SectionProperties } from './section';
-import { ExternalContext, ExternalContextType } from './external-context';
 import { v4 as uuidv4 } from 'uuid';
 import { Chapter, ChapterProperties } from './chapter';
+import { ExternalContext, ExternalContextType } from './external-context';
+import { Section } from './section';
 
 export interface ProjectProperties {
   id?: string;
@@ -67,7 +67,7 @@ export class Project implements Required<ProjectProperties> {
       externalContext: this.externalContext,
     };
   }
-  
+
   public toStateObject(): Required<ProjectProperties> {
     return this.toJSON();
   }
@@ -77,12 +77,12 @@ export class Project implements Required<ProjectProperties> {
     const chapterTitle = title || 'Untitled Chapter';
     let baseId = chapterTitle.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
     if (!baseId) baseId = 'chapter';
-    
+
     let newChapterId = baseId;
     let counter = 1;
-    while(this.chapters.some(c => c.id === newChapterId)) {
-        newChapterId = `${baseId}-${counter}`;
-        counter++;
+    while (this.chapters.some(c => c.id === newChapterId)) {
+      newChapterId = `${baseId}-${counter}`;
+      counter++;
     }
 
     const newChapter = new Chapter({ id: newChapterId, title: chapterTitle, sections: [] });
@@ -95,13 +95,13 @@ export class Project implements Required<ProjectProperties> {
   }
 
   public getChapter(chapterId: string): Chapter | undefined {
-      return this.chapters.find(c => c.id === chapterId);
+    return this.chapters.find(c => c.id === chapterId);
   }
-  
+
   public updateChaptersOrder(newOrderIds: string[]): void {
     const newOrderedChapters = newOrderIds
-        .map(id => this.chapters.find(c => c.id === id))
-        .filter((c): c is Chapter => !!c);
+      .map(id => this.chapters.find(c => c.id === id))
+      .filter((c): c is Chapter => !!c);
     this.chapters = newOrderedChapters;
   }
 
@@ -138,12 +138,12 @@ export class Project implements Required<ProjectProperties> {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-');
     if (!baseId) baseId = 'section';
-      
+
     let newSectionId = baseId;
     let counter = 1;
-    while(this.sections.some(s => s.id === newSectionId)) {
-        newSectionId = `${baseId}-${counter}`;
-        counter++;
+    while (this.sections.some(s => s.id === newSectionId)) {
+      newSectionId = `${baseId}-${counter}`;
+      counter++;
     }
 
     const newSection = new Section({
@@ -154,7 +154,7 @@ export class Project implements Required<ProjectProperties> {
       prompt: 'You are a helpful assistant. Write a section based on the user\'s instructions.',
       guidelines: [],
     });
-    
+
     chapter.addSection(newSection);
     return newSectionId;
   }
@@ -169,12 +169,12 @@ export class Project implements Required<ProjectProperties> {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-');
     if (!baseId) baseId = 'section';
-      
+
     let newSectionId = baseId;
     let counter = 1;
-    while(this.sections.some(s => s.id === newSectionId)) {
-        newSectionId = `${baseId}-${counter}`;
-        counter++;
+    while (this.sections.some(s => s.id === newSectionId)) {
+      newSectionId = `${baseId}-${counter}`;
+      counter++;
     }
 
     const newSection = new Section({
@@ -185,35 +185,35 @@ export class Project implements Required<ProjectProperties> {
       prompt: 'You are a helpful assistant. Write a section based on the user\'s instructions.',
       guidelines: [],
     });
-    
+
     chapter.sections.splice(index, 0, newSection);
     return newSectionId;
   }
 
   public moveSectionUp(sectionId: string): void {
     for (const chapter of this.chapters) {
-        const index = chapter.sections.findIndex(s => s.id === sectionId);
-        if (index > 0) {
-            const [section] = chapter.sections.splice(index, 1);
-            chapter.sections.splice(index - 1, 0, section);
-            this.updatedAt = new Date().toISOString();
-            this.hasUnsavedChanges = true;
-            return;
-        }
+      const index = chapter.sections.findIndex(s => s.id === sectionId);
+      if (index > 0) {
+        const [section] = chapter.sections.splice(index, 1);
+        chapter.sections.splice(index - 1, 0, section);
+        this.updatedAt = new Date().toISOString();
+        this.hasUnsavedChanges = true;
+        return;
+      }
     }
   }
 
   public moveSectionDown(sectionId: string): void {
-      for (const chapter of this.chapters) {
-          const index = chapter.sections.findIndex(s => s.id === sectionId);
-          if (index !== -1 && index < chapter.sections.length - 1) {
-              const [section] = chapter.sections.splice(index, 1);
-              chapter.sections.splice(index + 1, 0, section);
-              this.updatedAt = new Date().toISOString();
-              this.hasUnsavedChanges = true;
-              return;
-          }
+    for (const chapter of this.chapters) {
+      const index = chapter.sections.findIndex(s => s.id === sectionId);
+      if (index !== -1 && index < chapter.sections.length - 1) {
+        const [section] = chapter.sections.splice(index, 1);
+        chapter.sections.splice(index + 1, 0, section);
+        this.updatedAt = new Date().toISOString();
+        this.hasUnsavedChanges = true;
+        return;
       }
+    }
   }
   public addCustomSection(chapterId: string, title: string): string | null {
     const chapter = this.getChapter(chapterId);
@@ -222,9 +222,9 @@ export class Project implements Required<ProjectProperties> {
     const baseId = title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
     let newSectionId = baseId;
     let counter = 1;
-    while(this.sections.some(s => s.id === newSectionId)) {
-        newSectionId = `${baseId}-${counter}`;
-        counter++;
+    while (this.sections.some(s => s.id === newSectionId)) {
+      newSectionId = `${baseId}-${counter}`;
+      counter++;
     }
 
     const newSection = new Section({
@@ -235,40 +235,40 @@ export class Project implements Required<ProjectProperties> {
       prompt: `You are an expert technical writer. Write a comprehensive section on "${title}".`,
       guidelines: [],
     });
-    
+
     chapter.addSection(newSection);
     return newSectionId;
   }
 
   public moveSectionToChapter(sectionId: string, fromChapterId: string, toChapterId: string, newIndex?: number): void {
-      const fromChapter = this.getChapter(fromChapterId);
-      const toChapter = this.getChapter(toChapterId);
+    const fromChapter = this.getChapter(fromChapterId);
+    const toChapter = this.getChapter(toChapterId);
 
-      if (!fromChapter || !toChapter) return;
+    if (!fromChapter || !toChapter) return;
 
-      const sectionIndex = fromChapter.sections.findIndex(s => s.id === sectionId);
-      if (sectionIndex === -1) return;
+    const sectionIndex = fromChapter.sections.findIndex(s => s.id === sectionId);
+    if (sectionIndex === -1) return;
 
-      const [sectionToMove] = fromChapter.sections.splice(sectionIndex, 1);
+    const [sectionToMove] = fromChapter.sections.splice(sectionIndex, 1);
 
-      if (newIndex !== undefined && newIndex >= 0 && newIndex <= toChapter.sections.length) {
-          toChapter.sections.splice(newIndex, 0, sectionToMove);
-      } else {
-          toChapter.sections.push(sectionToMove);
-      }
+    if (newIndex !== undefined && newIndex >= 0 && newIndex <= toChapter.sections.length) {
+      toChapter.sections.splice(newIndex, 0, sectionToMove);
+    } else {
+      toChapter.sections.push(sectionToMove);
+    }
   }
 
 
   public removeSection(sectionId: string): void {
     this.chapters.forEach(chapter => {
-        chapter.removeSection(sectionId);
+      chapter.removeSection(sectionId);
     });
   }
 
   public updateSectionsOrder(chapterId: string, newOrder: string[]): void {
     const chapter = this.getChapter(chapterId);
     if (!chapter) return;
-    
+
     const newOrderedSections = newOrder.map(id => chapter.sections.find(s => s.id === id)).filter((s): s is Section => !!s);
     chapter.sections = newOrderedSections;
   }

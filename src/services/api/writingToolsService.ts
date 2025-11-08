@@ -1,17 +1,17 @@
 
 'use client';
 
-import type { ParaphraseMode, SummarizeLength, CitationStyle, DiagramTypeSchema } from "@/ai/schemas";
+import type { CitationStyle, DiagramTypeSchema, ParaphraseMode, SummarizeLength } from "@/ai/schemas";
 import { z } from "zod";
 
 // Base types for form data
 export interface ParaphraseTextVariables {
-  text: string;
-  mode: ParaphraseMode;
+    text: string;
+    mode: ParaphraseMode;
 }
 export interface SummarizeTextVariables {
-  text: string;
-  length: SummarizeLength;
+    text: string;
+    length: SummarizeLength;
 }
 export interface GenerateQuizVariables {
     text: string;
@@ -90,25 +90,24 @@ export interface TranslateTextVariables {
  * @returns A promise that resolves to the API response.
  */
 export async function writingToolApi<TRequest, TResponse>(
-  endpoint: string,
-  variables: { data: TRequest; token: string }
+    endpoint: string,
+    variables: { data: TRequest; token: string }
 ): Promise<TResponse> {
-  const { token, data } = variables;
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  });
+    const { token, data } = variables;
+    const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+    });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || `API call to ${endpoint} failed.`);
-  }
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || `API call to ${endpoint} failed.`);
+    }
 
-  return response.json();
+    return response.json();
 }
 
-      

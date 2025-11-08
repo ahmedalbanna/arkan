@@ -3,21 +3,21 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { PlusCircle } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
+import { PlusCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function CreateProjectDialog() {
@@ -40,7 +40,7 @@ export function CreateProjectDialog() {
     return (
         <Dialog open={isCreateProjectOpen} onOpenChange={setIsCreateProjectOpen}>
             <DialogTrigger asChild>
-                 <Button className="animate-fade-in-up"  style={{ animationDelay: '0.3s' }}>
+                <Button className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
                     <PlusCircle className="me-2 h-4 w-4" />
                     {t('projects.createButton')}
                 </Button>

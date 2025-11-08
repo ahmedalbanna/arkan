@@ -1,34 +1,34 @@
 
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
-  DialogClose,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { FileText, Loader2, Download } from 'lucide-react';
-import { useState, useMemo } from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { useBuilderStore } from '@/hooks';
+import { templates, type DocxTemplateKey } from '@/lib/docx-styles';
+import { Section } from '@/lib/models';
+import { Download, FileText, Loader2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
-import { Section } from '@/lib/models';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { templates, type DocxTemplateKey } from '@/lib/docx-styles';
 
 interface AdvancedExportDialogProps {
   isExporting: boolean;
   onExport: (sectionsToExport: Section[], options: { template: DocxTemplateKey, pageNumbers: boolean }) => void;
 }
 
-export function AdvancedExportDialog({ isExporting, onExport }: AdvancedExportDialogProps) {
+export function ExportDialog({ isExporting, onExport }: AdvancedExportDialogProps) {
   const { project } = useBuilderStore();
   const [selectedSections, setSelectedSections] = useState<Record<string, boolean>>({});
   const [isOpen, setIsOpen] = useState(false);
@@ -57,7 +57,7 @@ export function AdvancedExportDialog({ isExporting, onExport }: AdvancedExportDi
   const handleChapterToggle = (chapterId: string, checked: boolean) => {
     const chapter = availableChapters.find(c => c.id === chapterId);
     if (!chapter) return;
-    
+
     const newSelection = { ...selectedSections };
     chapter.sections.forEach(section => {
       if (section.content && section.content.trim()) {
@@ -75,9 +75,9 @@ export function AdvancedExportDialog({ isExporting, onExport }: AdvancedExportDi
     const selectedIds = Object.keys(selectedSections).filter(key => selectedSections[key]);
     const sectionsToExport = project?.sections.filter(s => selectedIds.includes(s.id)) || [];
     onExport(sectionsToExport, { template: selectedTemplate, pageNumbers: includePageNumbers });
-    if(sectionsToExport.length > 0) setIsOpen(false);
+    if (sectionsToExport.length > 0) setIsOpen(false);
   }
-  
+
   const allChapterSections = availableChapters.flatMap(c => c.sections.map(s => s.id));
   const selectedCount = Object.values(selectedSections).filter(Boolean).length;
   const isAllSelected = allChapterSections.length > 0 && selectedCount === allChapterSections.length;
@@ -107,70 +107,70 @@ export function AdvancedExportDialog({ isExporting, onExport }: AdvancedExportDi
             <Label htmlFor="select-all" className="font-semibold">Select All Sections</Label>
           </div>
           <ScrollArea className="h-60 w-full rounded-md border p-2">
-             <Accordion type="multiple" className="w-full" defaultValue={availableChapters.map(c => c.id)}>
-                {availableChapters.map(chapter => {
-                    const sectionsInChapter = chapter.sections.filter(s => s.content && s.content.trim());
-                    const selectedSectionsInChapter = sectionsInChapter.filter(s => selectedSections[s.id]).length;
-                    const isChapterAllSelected = sectionsInChapter.length > 0 && selectedSectionsInChapter === sectionsInChapter.length;
+            <Accordion type="multiple" className="w-full" defaultValue={availableChapters.map(c => c.id)}>
+              {availableChapters.map(chapter => {
+                const sectionsInChapter = chapter.sections.filter(s => s.content && s.content.trim());
+                const selectedSectionsInChapter = sectionsInChapter.filter(s => selectedSections[s.id]).length;
+                const isChapterAllSelected = sectionsInChapter.length > 0 && selectedSectionsInChapter === sectionsInChapter.length;
 
-                    return (
-                        <AccordionItem value={chapter.id} key={chapter.id} className="mb-2 border rounded-md">
-                            <AccordionTrigger className="p-3 hover:no-underline">
-                                <div className="flex items-center gap-3 w-full">
-                                    <Checkbox
-                                        checked={isChapterAllSelected}
-                                        onCheckedChange={(checked) => handleChapterToggle(chapter.id, !!checked)}
-                                        onClick={(e) => e.stopPropagation()} // Prevent trigger from firing
-                                    />
-                                    <Label className="font-semibold text-base truncate flex-1 text-left">{chapter.title}</Label>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="border-t p-3">
-                                <div className="space-y-2">
-                                {sectionsInChapter.map(section => (
-                                    <div key={section.id} className="flex items-center space-x-3 rounded-md p-2 hover:bg-muted">
-                                        <Checkbox
-                                            id={`section-${section.id}`}
-                                            checked={!!selectedSections[section.id]}
-                                            onCheckedChange={(checked) => handleSectionToggle(section.id, !!checked)}
-                                        />
-                                        <Label htmlFor={`section-${section.id}`} className="font-normal flex-1">{section.title}</Label>
-                                    </div>
-                                ))}
-                                </div>
-                            </AccordionContent>
-                        </AccordionItem>
-                    )
-                })}
-             </Accordion>
+                return (
+                  <AccordionItem value={chapter.id} key={chapter.id} className="mb-2 border rounded-md">
+                    <AccordionTrigger className="p-3 hover:no-underline">
+                      <div className="flex items-center gap-3 w-full">
+                        <Checkbox
+                          checked={isChapterAllSelected}
+                          onCheckedChange={(checked) => handleChapterToggle(chapter.id, !!checked)}
+                          onClick={(e) => e.stopPropagation()} // Prevent trigger from firing
+                        />
+                        <Label className="font-semibold text-base truncate flex-1 text-left">{chapter.title}</Label>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="border-t p-3">
+                      <div className="space-y-2">
+                        {sectionsInChapter.map(section => (
+                          <div key={section.id} className="flex items-center space-x-3 rounded-md p-2 hover:bg-muted">
+                            <Checkbox
+                              id={`section-${section.id}`}
+                              checked={!!selectedSections[section.id]}
+                              onCheckedChange={(checked) => handleSectionToggle(section.id, !!checked)}
+                            />
+                            <Label htmlFor={`section-${section.id}`} className="font-normal flex-1">{section.title}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                )
+              })}
+            </Accordion>
           </ScrollArea>
-           <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-              <div className="space-y-2">
-                <Label htmlFor="template-select">Document Theme</Label>
-                 <Select value={selectedTemplate} onValueChange={(value) => setSelectedTemplate(value as DocxTemplateKey)}>
-                  <SelectTrigger id="template-select">
-                    <SelectValue placeholder="Select a theme" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.keys(templates).map((key) => (
-                      <SelectItem key={key} value={key}>
-                        {templates[key].name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-end pb-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="page-numbers"
-                    checked={includePageNumbers}
-                    onCheckedChange={(checked) => setIncludePageNumbers(!!checked)}
-                  />
-                  <Label htmlFor="page-numbers">Include Page Numbers</Label>
-                </div>
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+            <div className="space-y-2">
+              <Label htmlFor="template-select">Document Theme</Label>
+              <Select value={selectedTemplate} onValueChange={(value) => setSelectedTemplate(value as DocxTemplateKey)}>
+                <SelectTrigger id="template-select">
+                  <SelectValue placeholder="Select a theme" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(templates).map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {templates[key].name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-end pb-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="page-numbers"
+                  checked={includePageNumbers}
+                  onCheckedChange={(checked) => setIncludePageNumbers(!!checked)}
+                />
+                <Label htmlFor="page-numbers">Include Page Numbers</Label>
               </div>
             </div>
+          </div>
         </div>
         <DialogFooter>
           <DialogClose asChild>

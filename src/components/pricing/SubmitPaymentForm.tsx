@@ -1,29 +1,23 @@
 
 'use client';
-import { useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, UploadCloud, AlertCircle, Copy, Check } from 'lucide-react';
-import { useToast } from '@/hooks';
-import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { fetchPublicSettings } from '@/services';
-import { submitPaymentProof } from '@/services';
+import { useAuth } from '@/context/AuthContext';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useToast } from '@/hooks';
 import type { PublicSettings } from '@/lib/types';
+import { fetchPublicSettings, submitPaymentProof } from '@/services';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { AlertCircle, Check, Copy, Loader2, UploadCloud } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 
 const formSchema = z.object({
   file: z
@@ -39,41 +33,41 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 function BankDetailsSkeleton() {
-    return (
-        <Card>
-            <CardHeader>
-                <Skeleton className="h-7 w-48" />
-                <Skeleton className="h-4 w-full" />
-            </CardHeader>
-            <CardContent className="space-y-3">
-                <Skeleton className="h-20 w-full" />
-                <Skeleton className="h-20 w-full" />
-            </CardContent>
-        </Card>
-    )
+  return (
+    <Card>
+      <CardHeader>
+        <Skeleton className="h-7 w-48" />
+        <Skeleton className="h-4 w-full" />
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-20 w-full" />
+      </CardContent>
+    </Card>
+  )
 }
 
 function AccountDetail({ label, value }: { label: string, value?: string }) {
-    const [isCopied, setIsCopied] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
-    if (!value) return null;
+  if (!value) return null;
 
-    const handleCopy = () => {
-        navigator.clipboard.writeText(value);
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2000);
-    }
-    return (
-        <div className="flex justify-between items-center text-sm">
-            <span className="font-semibold">{label}:</span>
-            <div className="flex items-center gap-2 font-mono text-muted-foreground">
-                <span>{value}</span>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCopy}>
-                    {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                </Button>
-            </div>
-        </div>
-    )
+  const handleCopy = () => {
+    navigator.clipboard.writeText(value);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  }
+  return (
+    <div className="flex justify-between items-center text-sm">
+      <span className="font-semibold">{label}:</span>
+      <div className="flex items-center gap-2 font-mono text-muted-foreground">
+        <span>{value}</span>
+        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCopy}>
+          {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+        </Button>
+      </div>
+    </div>
+  )
 }
 
 export default function SubmitPaymentForm() {
@@ -84,9 +78,9 @@ export default function SubmitPaymentForm() {
   const { t } = useLocalization();
 
   const { data: settings, isLoading: isLoadingSettings, isError: isSettingsError } = useQuery<PublicSettings>({
-      queryKey: ['publicSettings'],
-      queryFn: fetchPublicSettings,
-      staleTime: 1000 * 60 * 60, // 1 hour
+    queryKey: ['publicSettings'],
+    queryFn: fetchPublicSettings,
+    staleTime: 1000 * 60 * 60, // 1 hour
   });
 
   const planId = searchParams.get('planId');
@@ -108,11 +102,11 @@ export default function SubmitPaymentForm() {
       router.push('/builder');
     },
     onError: (error: Error) => {
-        toast({
-            title: t('submitPayment.errorTitle'),
-            description: error.message,
-            variant: 'destructive',
-        });
+      toast({
+        title: t('submitPayment.errorTitle'),
+        description: error.message,
+        variant: 'destructive',
+      });
     }
   });
 
@@ -147,36 +141,36 @@ export default function SubmitPaymentForm() {
   return (
     <div className="space-y-8">
       {isLoadingSettings ? (
-          <BankDetailsSkeleton />
+        <BankDetailsSkeleton />
       ) : isSettingsError ? (
-          <Card className="border-destructive">
-             <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-destructive"><AlertCircle /> Error</CardTitle>
-                <CardDescription>Could not load payment information. Please try again later.</CardDescription>
-             </CardHeader>
-          </Card>
+        <Card className="border-destructive">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive"><AlertCircle /> Error</CardTitle>
+            <CardDescription>Could not load payment information. Please try again later.</CardDescription>
+          </CardHeader>
+        </Card>
       ) : (
         <Card>
-            <CardHeader>
+          <CardHeader>
             <CardTitle className="font-headline">{t('submitPayment.bankDetailsTitle')}</CardTitle>
             <CardDescription>{t('submitPayment.bankDetailsDescription')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-                <Accordion type="multiple" className="w-full" defaultValue={settings?.bankAccounts.length === 1 ? ['item-0'] : []}>
-                    {settings?.bankAccounts?.map((account, index) => (
-                        <AccordionItem value={`item-${index}`} key={index}>
-                            <AccordionTrigger>{account.bankName}</AccordionTrigger>
-                            <AccordionContent className="space-y-3 pt-4">
-                                <AccountDetail label={t('submitPayment.accountHolderLabel')} value={account.accountHolder} />
-                                <AccountDetail label="SAR IBAN" value={account.currencies.SAR?.iban} />
-                                <AccountDetail label="USD IBAN" value={account.currencies.USD?.iban} />
-                                <AccountDetail label="YER Account" value={account.currencies.YER?.iban} />
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))}
-                </Accordion>
-                <p className="text-sm pt-4"><strong>{t('submitPayment.referenceLabel')}:</strong> {t('submitPayment.yourUserIdLabel')} ({firebaseUser?.uid || t('submitPayment.pleaseLogin')})</p>
-            </CardContent>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Accordion type="multiple" className="w-full" defaultValue={settings?.bankAccounts.length === 1 ? ['item-0'] : []}>
+              {settings?.bankAccounts?.map((account, index) => (
+                <AccordionItem value={`item-${index}`} key={index}>
+                  <AccordionTrigger>{account.bankName}</AccordionTrigger>
+                  <AccordionContent className="space-y-3 pt-4">
+                    <AccountDetail label={t('submitPayment.accountHolderLabel')} value={account.accountHolder} />
+                    <AccountDetail label="SAR IBAN" value={account.currencies.SAR?.iban} />
+                    <AccountDetail label="USD IBAN" value={account.currencies.USD?.iban} />
+                    <AccountDetail label="YER Account" value={account.currencies.YER?.iban} />
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+            <p className="text-sm pt-4"><strong>{t('submitPayment.referenceLabel')}:</strong> {t('submitPayment.yourUserIdLabel')} ({firebaseUser?.uid || t('submitPayment.pleaseLogin')})</p>
+          </CardContent>
         </Card>
       )}
 

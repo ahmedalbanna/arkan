@@ -1,6 +1,8 @@
 
 'use client';
 
+import { auth } from '@/lib/firebase/client-init';
+import type { LoginCredentials, SignupCredentials } from '@/lib/types';
 import {
   GoogleAuthProvider,
   sendPasswordResetEmail,
@@ -8,8 +10,6 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import { auth } from '@/lib/firebase/client-init';
-import type { LoginCredentials, SignupCredentials } from '@/lib/types';
 
 
 // --- Authentication Functions ---

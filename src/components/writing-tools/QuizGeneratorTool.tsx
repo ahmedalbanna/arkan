@@ -1,23 +1,18 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useWritingTool } from '@/hooks';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Loader2, Sparkles, FileText, Check, X } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { toast } from '@/hooks';
-import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Slider } from '@/components/ui/slider';
+import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useQuizGeneratorLogic } from '@/hooks/writing-tools/use-quiz-generator-logic';
+import { Check, FileText, Loader2, Sparkles, X } from 'lucide-react';
+import { Controller } from 'react-hook-form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 export function QuizGeneratorTool() {
   const { t } = useLocalization();

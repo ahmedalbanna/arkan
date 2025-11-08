@@ -1,6 +1,6 @@
 // src/lib/word-converter/types.ts
 
-import { Paragraph, Table, IStylesOptions, IParagraphOptions } from 'docx';
+import { IParagraphOptions, IStylesOptions, Paragraph, Table } from 'docx';
 
 // Define font options for different language scripts
 export interface FontOptions {

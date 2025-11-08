@@ -1,18 +1,17 @@
 
 'use client';
 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { usePhoneSignIn } from '@/hooks/auth/use-auth-mutations';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { usePhoneSignIn } from '@/hooks/auth/use-auth-mutations';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2 } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 
 const phoneSchema = z.object({
   phoneNumber: z.string().min(10, 'Please enter a valid phone number including country code (e.g., +15551234567).'),
@@ -96,7 +95,7 @@ export default function PhoneAuthForm() {
               <p className="text-sm text-muted-foreground mb-4">
                 Enter the 6-digit code sent to your phone.
               </p>
-               {error && (
+              {error && (
                 <Alert variant="destructive" className="mb-4">
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Error</AlertTitle>
