@@ -83,6 +83,7 @@ export const SectionView = ({ chapterTitle, sectionKey, title, content, onUpdate
 
             <div className="group relative space-y-4 mt-4">
                 <RichTextEditor
+                    key={sectionKey}
                     content={content}
                     onChange={(newMarkdown) => onUpdate(sectionKey, newMarkdown)}
                 />

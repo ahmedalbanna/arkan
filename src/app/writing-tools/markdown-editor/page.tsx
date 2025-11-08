@@ -1,6 +1,6 @@
 'use client';
 
-import RichTextEditor from '@/components/ui/RichTextEditor';
+import RichTextEditor from '@/components/report-mode/RichTextEditor';
 
 export default function MarkdownEditorPage() {
   const markdownContent = `# Welcome to the Markdown Editor!

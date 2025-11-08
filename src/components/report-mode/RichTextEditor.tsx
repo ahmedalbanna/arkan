@@ -3,7 +3,7 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useDebounce, useWritingTool, useToast, useBrowserSpeech } from '@/hooks';
+import { useBrowserSpeech, useDebounce, useToast, useWritingTool } from '@/hooks';
 import { uploadProjectFile } from '@/services/api/projectService';
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import Dropcursor from '@tiptap/extension-dropcursor';
@@ -24,27 +24,29 @@ import {
   Download,
   ImageIcon,
   Italic,
+  Languages,
   List,
   ListOrdered,
   Loader2,
   Maximize,
   Quote,
   Sigma,
+  Sparkles,
   SpellCheck,
+  Square,
   Strikethrough,
   Table as TableIcon,
   Upload,
   UserCheck,
-  Volume2,
-  Square,
-  Languages
+  Volume2
 } from 'lucide-react';
-import { marked } from 'marked';
 import mammoth from 'mammoth';
+import { marked } from 'marked';
 import React, { useEffect, useState } from 'react';
 import Katex from 'tiptap-katex';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
+import { Button } from '../ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,7 +56,6 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Separator } from '../ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { Button } from '../ui/button';
 
 interface SectionToolbarProps {
   onAiAction: (action: string, payload?: any) => void;
@@ -86,11 +87,11 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
   ];
 
   return (
-    <div className="flex items-center gap-1 rounded-full border bg-background p-1 shadow-lg">
+    <div className="flex items-center gap-1 rounded-full border bg-gradient-to-r from-background/80 to-primary/5 backdrop-blur-md p-1 shadow-soft hover:shadow-glow transition-all duration-200">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('summarize')} disabled={isProcessing} >
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={() => onAiAction('summarize')} disabled={isProcessing} >
               {activeAction === 'summarize' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookText className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
@@ -99,7 +100,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('expand')} disabled={isProcessing} >
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={() => onAiAction('expand')} disabled={isProcessing} >
               {activeAction === 'expand' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Maximize className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
@@ -108,7 +109,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('grammar')} disabled={isProcessing}>
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={() => onAiAction('grammar')} disabled={isProcessing}>
               {activeAction === 'grammar' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <SpellCheck className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
@@ -117,7 +118,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('humanize')} disabled={isProcessing}>
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={() => onAiAction('humanize')} disabled={isProcessing}>
               {activeAction === 'humanize' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCheck className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
@@ -128,17 +129,25 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
           <Tooltip>
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full" disabled={isProcessing}>
+                <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200"
+                  disabled={isProcessing}>
                   {activeAction === 'rewrite' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brush className="h-4 w-4" />}
                 </Button>
               </DropdownMenuTrigger>
             </TooltipTrigger>
             <TooltipContent><p>{t('builder.Section.aiActions.rewrite')}</p></TooltipContent>
           </Tooltip>
-          <DropdownMenuContent>
+          <DropdownMenuContent className="backdrop-blur-md bg-gradient-to-r from-background/90 to-primary/5 border shadow-soft">
             {rewriteStyles.map(({ label, style }) => (
-              <DropdownMenuItem key={style} onClick={() => onAiAction('rewrite', { style })}>
-                {label}
+              <DropdownMenuItem
+                className="hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200"
+                key={style} onClick={() => onAiAction('rewrite', { style })} disabled={isProcessing}>
+                <div className="flex items-center gap-2">
+                  <div className="p-1 rounded-md bg-gradient-to-br from-muted to-muted/80">
+                    <Sparkles className="h-3 w-3 text-muted-foreground" />
+                  </div>
+                  {label}
+                </div>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -148,7 +157,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onAiAction('translate')} disabled={isProcessing}>
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={() => onAiAction('translate')} disabled={isProcessing}>
               {activeAction === 'translate' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
@@ -159,7 +168,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full" onClick={handleReadAloudClick} disabled={isProcessing && activeAction !== 'readAloud'}>
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={handleReadAloudClick} disabled={isProcessing && activeAction !== 'readAloud'}>
               {isSpeaking ? <Square className="h-4 w-4 text-red-500 fill-current" /> : <Volume2 className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
@@ -383,7 +392,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   content,
   onChange,
 }) => {
-  const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr');
+  const [, setDirection] = useState<'ltr' | 'rtl'>('ltr');
   const [isUpdatingFromProp, setIsUpdatingFromProp] = useState(false);
   const debouncedContent = useDebounce(content, 1000);
   const { firebaseUser } = useAuth();
@@ -396,12 +405,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     onSuccess: (data: any) => {
       if (!editor) return;
       const { from, to } = editor.state.selection;
-      // don't change value data.text
+      // don't change value data.rewrittenText
       if (from !== to) { // If text was selected
-        editor.chain().focus().insertContentAt({ from, to }, data.text).run();
+        editor.chain().focus().insertContentAt({ from, to }, data.rewrittenText).run();
       } else { // Replace everything
-        // don't change value data.text
-        editor.chain().focus().setContent(data.text).run();
+        // don't change value data.rewrittenText
+        editor.chain().focus().setContent(data.rewrittenText).run();
       }
       toast({ title: "AI Action Complete" });
       setActiveAiAction(null);
@@ -449,6 +458,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   const editor = useEditor({
+    autofocus: 'all',
+
     extensions: [
       StarterKit.configure({
         table: false,
@@ -465,7 +476,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       TableCell,
       Katex.configure({}),
       FileHandler.configure({
-        onDrop: (currentEditor, files, pos) => {
+        onDrop: (currentEditor, files) => {
           files.forEach(file => handleFile(file, currentEditor));
           return true;
         },
@@ -560,7 +571,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
 
   return (
-    <div dir={direction}>
+    <div className="relative">
       {editor && (
         <BubbleMenu editor={editor} tippyOptions={{ duration: 100, placement: 'top' }}>
           {editor.isActive('table') ? (
