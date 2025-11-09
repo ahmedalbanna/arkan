@@ -15,7 +15,7 @@ const commonParagraphStyles = [
         next: 'Normal',
         quickFormat: true,
         run: { size: 22 }, // 11pt
-        paragraph: { spacing: { after: 120 } },
+        paragraph: { spacing: { after: 120, line: 276 } }, // 1.15 line spacing
     },
     {
         id: 'Title',
@@ -83,6 +83,67 @@ const commonParagraphStyles = [
         },
     },
     {
+        id: 'PageBreak',
+        name: 'Page Break',
+        basedOn: 'Normal',
+        paragraph: {
+            spacing: { before: 0, after: 0 },
+        },
+    },
+    {
+        id: 'TaskList',
+        name: 'Task List',
+        basedOn: 'ListParagraph',
+        quickFormat: true,
+        paragraph: {
+            indent: { left: 720, hanging: 360 },
+        },
+    },
+    {
+        id: 'DefinitionTerm',
+        name: 'Definition Term',
+        basedOn: 'Normal',
+        next: 'Normal',
+        run: { bold: true },
+        paragraph: {
+            spacing: { before: 120, after: 60 },
+        },
+    },
+    {
+        id: 'DefinitionDescription',
+        name: 'Definition Description',
+        basedOn: 'Normal',
+        next: 'Normal',
+        paragraph: {
+            indent: { left: 720 },
+            spacing: { before: 0, after: 120 },
+        },
+    },
+    {
+        id: 'CodeBlock',
+        name: 'Code Block',
+        basedOn: 'Normal',
+        run: {
+            font: { name: 'Courier New' },
+            size: 18, // 9pt
+        },
+        paragraph: {
+            spacing: { before: 200, after: 200 },
+            indent: { left: 400 },
+            shading: { type: ShadingType.CLEAR, fill: 'F2F2F2' },
+        },
+    },
+    {
+        id: 'FootnoteText',
+        name: 'Footnote Text',
+        basedOn: 'Normal',
+        run: { size: 20 }, // 10pt
+        paragraph: {
+            spacing: { after: 60, line: 240 },
+            indent: { left: 200, hanging: 200 },
+        },
+    },
+    {
         id: 'CustomTableStyle',
         name: 'Custom Table',
         basedOn: 'TableNormal',
@@ -118,6 +179,26 @@ const commonParagraphStyles = [
                 run: { bold: true },
                 tableCell: { shading: { type: 'clear', fill: 'F2F2F2' } },
             },
+            lastRow: {
+                run: { bold: true },
+                tableCell: {
+                    borders: {
+                        bottom: { style: 'double', size: 4, color: 'BFBFBF' }
+                    }
+                },
+            },
+            firstColumn: {
+                run: { bold: true },
+            },
+            lastColumn: {
+                run: { bold: true },
+            },
+            oddRowBanding: {
+                tableCell: { shading: { type: 'clear', fill: 'FAFAFA' } },
+            },
+            evenRowBanding: {
+                tableCell: { shading: { type: 'clear', fill: 'FFFFFF' } },
+            },
         }
     }
 ];
@@ -140,6 +221,39 @@ const commonCharacterStyles = [
             font: { name: 'Courier New' },
             size: 18, // 9pt
             shading: { type: ShadingType.CLEAR, fill: 'F2F2F2' },
+        },
+    },
+    {
+        id: 'Strong',
+        name: 'Strong',
+        basedOn: 'Default Paragraph Font',
+        run: {
+            bold: true,
+        },
+    },
+    {
+        id: 'Emphasis',
+        name: 'Emphasis',
+        basedOn: 'Default Paragraph Font',
+        run: {
+            italics: true,
+        },
+    },
+    {
+        id: 'Strikethrough',
+        name: 'Strikethrough',
+        basedOn: 'Default Paragraph Font',
+        run: {
+            strike: true,
+        },
+    },
+    {
+        id: 'FootnoteReference',
+        name: 'Footnote Reference',
+        basedOn: 'Default Paragraph Font',
+        run: {
+            size: 16, // 8pt
+            superScript: true,
         },
     },
 ];
@@ -201,12 +315,12 @@ const academicCustomStyles: CustomStyles = {
 const modernStyles: IStylesOptions = {
     default: {
         document: { run: { font: { name: 'Calibri' }, size: 22, color: '333333' } },
-        heading1: { run: { font: { name: 'Calibri Light' }, size: 32, bold: true, color: "2E74B5" }, paragraph: { spacing: { after: 240, before: 240 }, outlineLevel: 1 } },
-        heading2: { run: { font: { name: 'Calibri Light' }, size: 26, bold: true, color: "2E74B5" }, paragraph: { spacing: { after: 220, before: 220 }, outlineLevel: 2 } },
-        heading3: { run: { font: { name: 'Calibri Light' }, size: 24, bold: true, color: "5B9BD5" }, paragraph: { spacing: { after: 200, before: 200 }, outlineLevel: 3 } },
-        heading4: { run: { font: { name: 'Calibri Light' }, size: 22, bold: true, color: "5B9BD5" }, paragraph: { spacing: { after: 180, before: 180 }, outlineLevel: 4 } },
-        heading5: { run: { font: { name: 'Calibri' }, size: 22, color: "595959" }, paragraph: { spacing: { after: 160, before: 160 }, outlineLevel: 5 } },
-        heading6: { run: { font: { name: 'Calibri' }, size: 22, italics: true, color: "595959" }, paragraph: { spacing: { after: 140, before: 140 }, outlineLevel: 6 } },
+        heading1: { run: { font: { name: 'Calibri Light' }, size: 32, bold: true, color: "2E74B5" }, paragraph: { spacing: { after: 240, before: 240 }, outlineLevel: 1, keepNext: true } },
+        heading2: { run: { font: { name: 'Calibri Light' }, size: 26, bold: true, color: "2E74B5" }, paragraph: { spacing: { after: 220, before: 220 }, outlineLevel: 2, keepNext: true } },
+        heading3: { run: { font: { name: 'Calibri Light' }, size: 24, bold: true, color: "5B9BD5" }, paragraph: { spacing: { after: 200, before: 200 }, outlineLevel: 3, keepNext: true } },
+        heading4: { run: { font: { name: 'Calibri Light' }, size: 22, bold: true, color: "5B9BD5" }, paragraph: { spacing: { after: 180, before: 180 }, outlineLevel: 4, keepNext: true } },
+        heading5: { run: { font: { name: 'Calibri' }, size: 22, color: "595959" }, paragraph: { spacing: { after: 160, before: 160 }, outlineLevel: 5, keepNext: true } },
+        heading6: { run: { font: { name: 'Calibri' }, size: 22, italics: true, color: "595959" }, paragraph: { spacing: { after: 140, before: 140 }, outlineLevel: 6, keepNext: true } },
     },
     paragraphStyles: [
         ...commonParagraphStyles,
@@ -218,18 +332,17 @@ const modernStyles: IStylesOptions = {
         }
     ],
     characterStyles: commonCharacterStyles,
-
 };
 
 const classicStyles: IStylesOptions = {
     default: {
         document: { run: { font: { name: 'Times New Roman' }, size: 24, color: '000000' } },
-        heading1: { run: { font: { name: 'Times New Roman' }, size: 32, bold: true, color: "000000" }, paragraph: { spacing: { after: 240, before: 240 }, outlineLevel: 1 } },
-        heading2: { run: { font: { name: 'Times New Roman' }, size: 26, bold: true, color: "000000" }, paragraph: { spacing: { after: 220, before: 220 }, outlineLevel: 2 } },
-        heading3: { run: { font: { name: 'Times New Roman' }, size: 24, bold: true, color: "000000" }, paragraph: { spacing: { after: 200, before: 200 }, outlineLevel: 3 } },
-        heading4: { run: { font: { name: 'Times New Roman' }, size: 22, bold: true, color: "000000" }, paragraph: { spacing: { after: 180, before: 180 }, outlineLevel: 4 } },
-        heading5: { run: { font: { name: 'Times New Roman' }, size: 22, color: "000000" }, paragraph: { spacing: { after: 160, before: 160 }, outlineLevel: 5 } },
-        heading6: { run: { font: { name: 'Times New Roman' }, size: 22, italics: true, color: "000000" }, paragraph: { spacing: { after: 140, before: 140 }, outlineLevel: 6 } },
+        heading1: { run: { font: { name: 'Times New Roman' }, size: 32, bold: true, color: "000000" }, paragraph: { spacing: { after: 240, before: 240 }, outlineLevel: 1, keepNext: true } },
+        heading2: { run: { font: { name: 'Times New Roman' }, size: 26, bold: true, color: "000000" }, paragraph: { spacing: { after: 220, before: 220 }, outlineLevel: 2, keepNext: true } },
+        heading3: { run: { font: { name: 'Times New Roman' }, size: 24, bold: true, color: "000000" }, paragraph: { spacing: { after: 200, before: 200 }, outlineLevel: 3, keepNext: true } },
+        heading4: { run: { font: { name: 'Times New Roman' }, size: 22, bold: true, color: "000000" }, paragraph: { spacing: { after: 180, before: 180 }, outlineLevel: 4, keepNext: true } },
+        heading5: { run: { font: { name: 'Times New Roman' }, size: 22, color: "000000" }, paragraph: { spacing: { after: 160, before: 160 }, outlineLevel: 5, keepNext: true } },
+        heading6: { run: { font: { name: 'Times New Roman' }, size: 22, italics: true, color: "000000" }, paragraph: { spacing: { after: 140, before: 140 }, outlineLevel: 6, keepNext: true } },
     },
     paragraphStyles: commonParagraphStyles.map(p => ({
         ...p,
@@ -241,12 +354,12 @@ const classicStyles: IStylesOptions = {
 const academicStyles: IStylesOptions = {
     default: {
         document: { run: { font: { name: 'Garamond' }, size: 24, color: '000000' } },
-        heading1: { run: { font: { name: 'Garamond' }, size: 28, bold: true, color: "000000" }, paragraph: { spacing: { after: 240, before: 240, line: 480 }, outlineLevel: 1 } },
-        heading2: { run: { font: { name: 'Garamond' }, size: 24, bold: true, color: "333333" }, paragraph: { spacing: { after: 220, before: 220, line: 480 }, outlineLevel: 2 } },
-        heading3: { run: { font: { name: 'Garamond' }, size: 22, bold: true, color: "333333" }, paragraph: { spacing: { after: 200, before: 200 }, outlineLevel: 3 } },
-        heading4: { run: { font: { name: 'Garamond' }, size: 22, bold: true, color: "333333" }, paragraph: { spacing: { after: 180, before: 180, line: 480 }, outlineLevel: 4 } },
-        heading5: { run: { font: { name: 'Garamond' }, size: 22, color: "333333" }, paragraph: { spacing: { after: 160, before: 160 }, outlineLevel: 5 } },
-        heading6: { run: { font: { name: 'Garamond' }, size: 22, italics: true, color: "333333" }, paragraph: { spacing: { after: 140, before: 140 }, outlineLevel: 6 } },
+        heading1: { run: { font: { name: 'Garamond' }, size: 28, bold: true, color: "000000" }, paragraph: { spacing: { after: 240, before: 240, line: 480 }, outlineLevel: 1, keepNext: true } },
+        heading2: { run: { font: { name: 'Garamond' }, size: 24, bold: true, color: "333333" }, paragraph: { spacing: { after: 220, before: 220, line: 480 }, outlineLevel: 2, keepNext: true } },
+        heading3: { run: { font: { name: 'Garamond' }, size: 22, bold: true, color: "333333" }, paragraph: { spacing: { after: 200, before: 200 }, outlineLevel: 3, keepNext: true } },
+        heading4: { run: { font: { name: 'Garamond' }, size: 22, bold: true, color: "333333" }, paragraph: { spacing: { after: 180, before: 180, line: 480 }, outlineLevel: 4, keepNext: true } },
+        heading5: { run: { font: { name: 'Garamond' }, size: 22, color: "333333" }, paragraph: { spacing: { after: 160, before: 160 }, outlineLevel: 5, keepNext: true } },
+        heading6: { run: { font: { name: 'Garamond' }, size: 22, italics: true, color: "333333" }, paragraph: { spacing: { after: 140, before: 140 }, outlineLevel: 6, keepNext: true } },
     },
     paragraphStyles: commonParagraphStyles.map(p => ({
         ...p,
