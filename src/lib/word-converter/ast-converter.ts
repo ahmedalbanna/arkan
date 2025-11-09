@@ -39,17 +39,16 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
       // Check if this is a task list item (GFM extension)
       // Task lists have a 'checked' property on list items
       const hasCheckedProperty = 'checked' in listItem;
-      const isChecked = hasCheckedProperty && (listItem as any).checked === true;
 
       for (const itemContent of listItem.children) {
         if (itemContent.type === 'paragraph') {
           const children = await transformInlines(itemContent.children, footnoteIdMap, baseRunOptions, options);
 
           // For task lists, prepend checkbox symbol
-          if (hasCheckedProperty) {
-            const checkboxSymbol = isChecked ? '☑' : '☐';
-            children.unshift(new TextRun({ text: `${checkboxSymbol} `, ...baseRunOptions }));
-          }
+          // if (hasCheckedProperty) {
+          //   const checkboxSymbol = isChecked ? '☑' : '☐';
+          //   children.unshift(new TextRun({ text: `${checkboxSymbol} `, ...baseRunOptions }));
+          // }
 
           paragraphs.push(new Paragraph({
             ...baseParagraphOptions,
