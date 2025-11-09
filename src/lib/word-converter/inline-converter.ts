@@ -69,6 +69,27 @@ export async function transformInlines(
         }
         break;
       }
+      case 'break': {
+        // Line break - add a line break to the text run
+        runs.push(new TextRun({ ...baseOptions, break: 1 }));
+        break;
+      }
+      case 'html': {
+        // Inline HTML - try to extract text content or render as plain text
+        // Remove HTML tags and decode entities if possible
+        const textContent = node.value
+          .replace(/<[^>]*>/g, '') // Remove HTML tags
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'");
+        if (textContent.trim()) {
+          runs.push(new TextRun({ ...baseOptions, text: textContent }));
+        }
+        break;
+      }
     }
   }
   return runs;
