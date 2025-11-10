@@ -2,15 +2,29 @@
 
 'use client';
 
-import {
-  CopyCheck, UserCheck, Fingerprint, Repeat, BookOpenText,
-  SpellCheck, FileQuestion, CheckCircle, Quote, BrainCircuit, PenSquare, Search, Lightbulb, PencilLine, FileEdit, Presentation, Brain,
-  GitGraph,
-  PencilRuler,
-  Languages
-} from 'lucide-react';
 import { AIToolCard } from '@/components/writing-tools/AIToolCard';
 import { useLocalization } from '@/context/LocalizationContext';
+import {
+  BookOpenText,
+  Brain,
+  BrainCircuit,
+  CheckCircle,
+  CopyCheck,
+  EyeOff,
+  FileEdit,
+  FileQuestion,
+  Fingerprint,
+  GitGraph,
+  Languages,
+  Lightbulb, PencilLine,
+  PencilRuler,
+  PenSquare,
+  Quote,
+  Repeat,
+  Search,
+  SpellCheck,
+  UserCheck
+} from 'lucide-react';
 
 export default function WritingToolsPage() {
   const { t } = useLocalization();
@@ -36,8 +50,9 @@ export default function WritingToolsPage() {
     { name: 'Session Plan Generator', icon: BrainCircuit, href: '/writing-tools/session-plan' },
     { name: 'Lecture Generator', icon: BrainCircuit, href: '/writing-tools/lecture-generator' },
     { name: 'Markdown Editor', icon: PencilRuler, href: '/writing-tools/markdown-editor' },
-    {name: 'Markdown to Word', icon: PencilRuler, href: '/writing-tools/markdown-to-word'},
-    {name: 'Markdown to PPTX', icon: PencilRuler, href: '/writing-tools/pptx-convert'}
+    { name: 'Markdown to Word', icon: PencilRuler, href: '/writing-tools/markdown-to-word' },
+    { name: 'Markdown to PPTX', icon: PencilRuler, href: '/writing-tools/pptx-convert' },
+    { name: 'Invisible Text Detector', icon: EyeOff, href: '/writing-tools/invisible-text-detector' }
   ];
 
   return (

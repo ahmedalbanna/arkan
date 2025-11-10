@@ -458,7 +458,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   const editor = useEditor({
-    autofocus: 'all',
 
     extensions: [
       StarterKit.configure({
