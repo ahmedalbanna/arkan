@@ -346,6 +346,7 @@ export const CorrectionSchema = z.object({
     original: z.string().describe("The original incorrect phrase or word."),
     corrected: z.string().describe("The corrected version of the phrase or word."),
     explanation: z.string().describe("A brief, clear explanation of why the correction was made."),
+    type: z.enum(['grammar', 'spelling', 'punctuation']).describe("The type of correction: 'grammar' for grammatical errors, 'spelling' for misspellings, 'punctuation' for punctuation issues."),
 });
 
 export const GrammarCheckInputSchema = z.object({
@@ -356,6 +357,12 @@ export type GrammarCheckInput = z.infer<typeof GrammarCheckInputSchema>;
 export const GrammarCheckOutputSchema = z.object({
     correctedText: z.string().describe("The full text with all corrections applied, preserving original markdown."),
     corrections: z.array(CorrectionSchema).describe("A list of the specific corrections made."),
+    statistics: z.object({
+        total: z.number().describe("Total number of corrections made."),
+        grammar: z.number().describe("Number of grammar corrections."),
+        spelling: z.number().describe("Number of spelling corrections."),
+        punctuation: z.number().describe("Number of punctuation corrections."),
+    }).optional().describe("Summary statistics of corrections by type."),
 });
 export type GrammarCheckOutput = z.infer<typeof GrammarCheckOutputSchema>;
 
