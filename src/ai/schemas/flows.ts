@@ -544,6 +544,68 @@ export const SummarizeTextWithRatioOutputSchema = z.object({
 });
 export type SummarizeTextWithRatioOutput = z.infer<typeof SummarizeTextWithRatioOutputSchema>;
 
+// Style Editor
+export const StyleEditorInputSchema = z.object({
+    text: z.string().describe('The text to be edited for style improvements.'),
+    targetAudience: z.string().optional().describe('The target audience for the text (e.g., "general public", "academics", "professionals").'),
+    tone: z.string().optional().describe('The desired tone (e.g., "professional", "casual", "persuasive").'),
+});
+export type StyleEditorInput = z.infer<typeof StyleEditorInputSchema>;
+
+export const StyleEditorOutputSchema = z.object({
+    editedText: z.string().describe('The text with improved style, maintaining the original meaning.'),
+    improvements: z.array(z.string()).optional().describe('A list of style improvements made to the text.'),
+});
+export type StyleEditorOutput = z.infer<typeof StyleEditorOutputSchema>;
+
+// Readability Enhancer
+export const ReadabilityEnhancerInputSchema = z.object({
+    text: z.string().describe('The text to be enhanced for readability.'),
+    targetLevel: z.enum(['elementary', 'middle-school', 'high-school', 'college', 'graduate']).optional().describe('The target reading level.'),
+});
+export type ReadabilityEnhancerInput = z.infer<typeof ReadabilityEnhancerInputSchema>;
+
+export const ReadabilityEnhancerOutputSchema = z.object({
+    enhancedText: z.string().describe('The text enhanced for better readability.'),
+    readabilityScore: z.number().min(0).max(100).optional().describe('A readability score (0-100) for the enhanced text.'),
+    improvements: z.array(z.string()).optional().describe('A list of readability improvements made.'),
+});
+export type ReadabilityEnhancerOutput = z.infer<typeof ReadabilityEnhancerOutputSchema>;
+
+// Conciseness Checker
+export const ConcisenessCheckerInputSchema = z.object({
+    text: z.string().describe('The text to be checked and improved for conciseness.'),
+    targetReduction: z.number().min(0).max(50).optional().describe('Target percentage reduction in word count (0-50%).'),
+});
+export type ConcisenessCheckerInput = z.infer<typeof ConcisenessCheckerInputSchema>;
+
+export const ConcisenessCheckerOutputSchema = z.object({
+    conciseText: z.string().describe('The text made more concise while preserving meaning.'),
+    originalWordCount: z.number().optional().describe('The original word count.'),
+    newWordCount: z.number().optional().describe('The new word count after making it concise.'),
+    reductionPercentage: z.number().optional().describe('The percentage reduction in word count.'),
+    improvements: z.array(z.string()).optional().describe('A list of conciseness improvements made.'),
+});
+export type ConcisenessCheckerOutput = z.infer<typeof ConcisenessCheckerOutputSchema>;
+
+// Clarity Advisor
+export const ClarityAdvisorInputSchema = z.object({
+    text: z.string().describe('The text to be analyzed and improved for clarity.'),
+    focusAreas: z.array(z.string()).optional().describe('Specific areas to focus on (e.g., "sentence structure", "word choice", "logical flow").'),
+});
+export type ClarityAdvisorInput = z.infer<typeof ClarityAdvisorInputSchema>;
+
+export const ClarityAdvisorOutputSchema = z.object({
+    improvedText: z.string().describe('The text improved for clarity.'),
+    clarityScore: z.number().min(0).max(100).optional().describe('A clarity score (0-100) for the improved text.'),
+    suggestions: z.array(z.object({
+        issue: z.string().describe('The clarity issue identified.'),
+        suggestion: z.string().describe('A suggestion for improvement.'),
+        location: z.string().optional().describe('The location or context of the issue in the text.'),
+    })).optional().describe('A list of clarity suggestions and improvements.'),
+});
+export type ClarityAdvisorOutput = z.infer<typeof ClarityAdvisorOutputSchema>;
+
 
 // topic-explainer.ts
 export const TopicExplainerInputSchema = z.object({

@@ -12,7 +12,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useTextStylistLogic } from '@/hooks/writing-tools/use-text-stylist-logic';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
-import { BookOpenText, Check, Copy, Loader2, Sparkles, Wand2 } from 'lucide-react';
+import { BookOpenText, Check, Copy, Loader2, Sparkles, Wand2, Edit3, Eye, Scissors, Lightbulb } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Controller } from 'react-hook-form';
 import ReactMarkdown from 'react-markdown';
 import { DiffView } from '../shared/DiffView';
@@ -29,6 +30,10 @@ export function AITextTune() {
         form,
         rewriteMutation,
         summarizeMutation,
+        styleEditorMutation,
+        readabilityMutation,
+        concisenessMutation,
+        clarityMutation,
         isProcessing,
         originalText,
         processedText,
@@ -40,6 +45,10 @@ export function AITextTune() {
         setActiveView,
         onSubmitRewrite,
         onSubmitSummarize,
+        onSubmitStyleEditor,
+        onSubmitReadability,
+        onSubmitConciseness,
+        onSubmitClarity,
         handleCopy,
     } = useTextStylistLogic();
 
@@ -69,7 +78,7 @@ export function AITextTune() {
                     <CardTitle>{t('writingTools.textStylist.aiToolsTitle')}</CardTitle>
                     <CardDescription>{t('writingTools.textStylist.aiToolsDescription')}</CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <form onSubmit={form.handleSubmit(onSubmitRewrite)} className="space-y-4">
                         <h3 className="font-semibold flex items-center gap-2"><Wand2 className="h-5 w-5" /> {t('writingTools.textStylist.rewriteTitle')}</h3>
                         <div className="space-y-2">
@@ -113,6 +122,127 @@ export function AITextTune() {
                         <Button type="submit" disabled={isProcessing} className="w-full">
                             {summarizeMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
                             {t('writingTools.textStylist.summarizeButton')}
+                        </Button>
+                    </form>
+
+                    <form onSubmit={form.handleSubmit(onSubmitStyleEditor)} className="space-y-4">
+                        <h3 className="font-semibold flex items-center gap-2"><Edit3 className="h-5 w-5" /> Style Editor</h3>
+                        <div className="space-y-2">
+                            <Label htmlFor="target-audience">Target Audience (Optional)</Label>
+                            <Controller
+                                name="targetAudience"
+                                control={form.control}
+                                render={({ field }) => (
+                                    <Input
+                                        id="target-audience"
+                                        {...field}
+                                        placeholder="e.g., general public, academics"
+                                        disabled={isProcessing}
+                                    />
+                                )}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="tone">Tone (Optional)</Label>
+                            <Controller
+                                name="tone"
+                                control={form.control}
+                                render={({ field }) => (
+                                    <Input
+                                        id="tone"
+                                        {...field}
+                                        placeholder="e.g., professional, casual"
+                                        disabled={isProcessing}
+                                    />
+                                )}
+                            />
+                        </div>
+                        <Button type="submit" disabled={isProcessing} className="w-full">
+                            {styleEditorMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
+                            Improve Style
+                        </Button>
+                    </form>
+
+                    <form onSubmit={form.handleSubmit(onSubmitReadability)} className="space-y-4">
+                        <h3 className="font-semibold flex items-center gap-2"><Eye className="h-5 w-5" /> Readability Enhancer</h3>
+                        <div className="space-y-2">
+                            <Label htmlFor="target-level">Target Reading Level (Optional)</Label>
+                            <Controller
+                                name="targetLevel"
+                                control={form.control}
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} value={field.value} disabled={isProcessing}>
+                                        <SelectTrigger id="target-level">
+                                            <SelectValue placeholder="Select reading level" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="elementary">Elementary</SelectItem>
+                                            <SelectItem value="middle-school">Middle School</SelectItem>
+                                            <SelectItem value="high-school">High School</SelectItem>
+                                            <SelectItem value="college">College</SelectItem>
+                                            <SelectItem value="graduate">Graduate</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
+                        </div>
+                        <Button type="submit" disabled={isProcessing} className="w-full">
+                            {readabilityMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
+                            Enhance Readability
+                        </Button>
+                    </form>
+
+                    <form onSubmit={form.handleSubmit(onSubmitConciseness)} className="space-y-4">
+                        <h3 className="font-semibold flex items-center gap-2"><Scissors className="h-5 w-5" /> Conciseness Checker</h3>
+                        <div className="space-y-2">
+                            <div className="flex justify-between">
+                                <Label>Target Reduction (Optional)</Label>
+                                <Badge variant="outline">{form.watch('targetReduction') || 0}%</Badge>
+                            </div>
+                            <Controller
+                                name="targetReduction"
+                                control={form.control}
+                                render={({ field }) => (
+                                    <Slider
+                                        value={[field.value || 0]}
+                                        onValueChange={(val) => field.onChange(val[0])}
+                                        min={0} max={50} step={5}
+                                        disabled={isProcessing}
+                                    />
+                                )}
+                            />
+                        </div>
+                        <Button type="submit" disabled={isProcessing} className="w-full">
+                            {concisenessMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
+                            Make Concise
+                        </Button>
+                    </form>
+
+                    <form onSubmit={form.handleSubmit(onSubmitClarity)} className="space-y-4">
+                        <h3 className="font-semibold flex items-center gap-2"><Lightbulb className="h-5 w-5" /> Clarity Advisor</h3>
+                        <div className="space-y-2">
+                            <Label htmlFor="focus-areas">Focus Areas (Optional)</Label>
+                            <Controller
+                                name="focusAreas"
+                                control={form.control}
+                                render={({ field }) => (
+                                    <Input
+                                        id="focus-areas"
+                                        value={field.value?.join(', ') || ''}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            field.onChange(value ? value.split(',').map(s => s.trim()).filter(s => s) : []);
+                                        }}
+                                        placeholder="e.g., sentence structure, word choice"
+                                        disabled={isProcessing}
+                                    />
+                                )}
+                            />
+                            <p className="text-xs text-muted-foreground">Separate multiple areas with commas</p>
+                        </div>
+                        <Button type="submit" disabled={isProcessing} className="w-full">
+                            {clarityMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
+                            Improve Clarity
                         </Button>
                     </form>
                 </CardContent>

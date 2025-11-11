@@ -42,8 +42,8 @@ import { writeDocument } from '@/ai/flows/write-document';
 import { WriteDocumentInputSchema } from '@/ai/schemas';
 import { generatePlantUML } from '@/ai/flows/generate-plantuml';
 import { GeneratePlantUMLInputSchema } from '@/ai/schemas';
-import { rewriteText, summarizeTextWithRatio } from '@/ai/flows/text-stylist';
-import { RewriteTextInputSchema, SummarizeTextWithRatioInputSchema } from '@/ai/schemas';
+import { rewriteText, summarizeTextWithRatio, styleEditor, readabilityEnhancer, concisenessChecker, clarityAdvisor } from '@/ai/flows/text-stylist';
+import { RewriteTextInputSchema, SummarizeTextWithRatioInputSchema, StyleEditorInputSchema, ReadabilityEnhancerInputSchema, ConcisenessCheckerInputSchema, ClarityAdvisorInputSchema } from '@/ai/schemas';
 import { manipulateText } from '@/ai/flows/manipulate-text';
 import { ManipulateTextInputSchema } from '@/ai/schemas';
 import { generateToc } from '@/ai/flows/generate-toc';
@@ -72,6 +72,10 @@ const toolConfig = {
   'generate-plantuml': { flow: generatePlantUML, schema: GeneratePlantUMLInputSchema, creditCost: 1 },
   'rewrite-text': { flow: rewriteText, schema: RewriteTextInputSchema, creditCost: 1 },
   'summarize-with-ratio': { flow: summarizeTextWithRatio, schema: SummarizeTextWithRatioInputSchema, creditCost: 1 },
+  'style-editor': { flow: styleEditor, schema: StyleEditorInputSchema, creditCost: 1 },
+  'readability-enhancer': { flow: readabilityEnhancer, schema: ReadabilityEnhancerInputSchema, creditCost: 1 },
+  'conciseness-checker': { flow: concisenessChecker, schema: ConcisenessCheckerInputSchema, creditCost: 1 },
+  'clarity-advisor': { flow: clarityAdvisor, schema: ClarityAdvisorInputSchema, creditCost: 1 },
   'manipulate-text': { flow: manipulateText, schema: ManipulateTextInputSchema, creditCost: 1 },
   'generate-toc': { flow: generateToc, schema: GenerateTocInputSchema, creditCost: 1 },
   'translate-text': { flow: translateText, schema: TranslateTextInputSchema, creditCost: 1 },
