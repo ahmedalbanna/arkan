@@ -129,6 +129,27 @@ export const AnalyzeContextOutputSchema = z.object({
 });
 export type AnalyzeContextOutput = z.infer<typeof AnalyzeContextOutputSchema>;
 
+// bias-checker.ts
+export const BiasCheckInputSchema = z.object({
+    text: z.string().describe('The text to be analyzed for potential bias.'),
+});
+export type BiasCheckInput = z.infer<typeof BiasCheckInputSchema>;
+
+export const BiasIssueSchema = z.object({
+    phrase: z.string().describe('The potentially biased phrase or sentence.'),
+    explanation: z.string().describe('An explanation of why the phrase might be considered biased.'),
+    suggestion: z.string().describe('A more inclusive alternative.'),
+    biasType: z.enum(['Gender', 'Racial', 'Age-related', 'Ableism', 'Cultural', 'General Stereotype']).describe('The type of bias identified.'),
+});
+export type BiasIssue = z.infer<typeof BiasIssueSchema>;
+
+export const BiasCheckOutputSchema = z.object({
+    issues: z.array(BiasIssueSchema).describe('An array of identified bias issues.'),
+    overallAssessment: z.string().describe('A brief, overall assessment of the text\'s inclusivity.'),
+    inclusivityScore: z.number().min(0).max(100).describe('A score from 0 to 100 representing the inclusivity of the text, where 100 is completely inclusive.'),
+});
+export type BiasCheckOutput = z.infer<typeof BiasCheckOutputSchema>;
+
 // detect-ai-content.ts
 export const DetectAIInputSchema = z.object({
     text: z.string().describe('The text to be analyzed for AI content probability.'),

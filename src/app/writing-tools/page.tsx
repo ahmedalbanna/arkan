@@ -21,6 +21,7 @@ import {
   PenSquare,
   Quote,
   Repeat,
+  Scale,
   Search,
   SpellCheck,
   UserCheck
@@ -39,6 +40,7 @@ export default function WritingToolsPage() {
     { name: t('writingTools.cards.aiParaphraser'), icon: Repeat, href: '/writing-tools/paraphraser' },
     { name: t('writingTools.cards.aiSummarizer'), icon: BookOpenText, href: '/writing-tools/summarizer' },
     { name: t('writingTools.cards.grammarChecker'), icon: SpellCheck, href: '/writing-tools/grammar-checker' },
+    { name: t('writingTools.cards.biasChecker'), icon: Scale, href: '/writing-tools/bias-checker' },
     { name: t('writingTools.cards.aiQuizGenerator'), icon: FileQuestion, href: '/writing-tools/quiz-generator' },
     { name: t('writingTools.cards.factChecker'), icon: CheckCircle, href: '/writing-tools/fact-checker' },
     { name: t('writingTools.cards.citationGenerator'), icon: Quote, href: '/writing-tools/citation-generator' },

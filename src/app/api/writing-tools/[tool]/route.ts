@@ -50,6 +50,8 @@ import { generateToc } from '@/ai/flows/generate-toc';
 import { GenerateTocInputSchema } from '@/ai/schemas';
 import { translateText } from '@/ai/flows/translate-text';
 import { TranslateTextInputSchema } from '@/ai/schemas';
+import { biasCheckText } from '@/ai/flows/bias-checker';
+import { BiasCheckInputSchema } from '@/ai/schemas';
 
 // Define a map for tool configurations
 const toolConfig = {
@@ -79,6 +81,7 @@ const toolConfig = {
   'manipulate-text': { flow: manipulateText, schema: ManipulateTextInputSchema, creditCost: 1 },
   'generate-toc': { flow: generateToc, schema: GenerateTocInputSchema, creditCost: 1 },
   'translate-text': { flow: translateText, schema: TranslateTextInputSchema, creditCost: 1 },
+  'bias-checker': { flow: biasCheckText, schema: BiasCheckInputSchema, creditCost: 1 },
 };
 
 type ToolName = keyof typeof toolConfig;

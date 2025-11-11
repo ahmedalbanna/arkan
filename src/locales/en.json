@@ -1,3 +1,4 @@
+
 {
   "header": {
     "title": "Arkan",
@@ -363,6 +364,7 @@
       "aiParaphraser": "AI Paraphraser",
       "aiSummarizer": "AI Summarizer",
       "grammarChecker": "Grammar Checker",
+      "biasChecker": "Bias Checker",
       "aiQuizGenerator": "AI Quiz Generator",
       "factChecker": "Fact Checker",
       "citationGenerator": "Citation Generator",
