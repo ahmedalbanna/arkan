@@ -8,18 +8,18 @@
 
 import { ai } from '@/ai/genkit';
 import {
-  type RewriteTextInput,
-  type RewriteTextOutput,
-  type SummarizeTextWithRatioInput,
-  type SummarizeTextWithRatioOutput,
-  type StyleEditorInput,
-  type StyleEditorOutput,
-  type ReadabilityEnhancerInput,
-  type ReadabilityEnhancerOutput,
+  type ClarityAdvisorInput,
+  type ClarityAdvisorOutput,
   type ConcisenessCheckerInput,
   type ConcisenessCheckerOutput,
-  type ClarityAdvisorInput,
-  type ClarityAdvisorOutput
+  type ReadabilityEnhancerInput,
+  type ReadabilityEnhancerOutput,
+  type RewriteTextInput,
+  type RewriteTextOutput,
+  type StyleEditorInput,
+  type StyleEditorOutput,
+  type SummarizeTextWithRatioInput,
+  type SummarizeTextWithRatioOutput
 } from '@/ai/schemas';
 
 // --- Rewrite Text Flow ---
@@ -112,7 +112,7 @@ export async function styleEditor(input: StyleEditorInput): Promise<StyleEditorO
     prompt: `You are an expert style editor. Your task is to improve the style of the following text while preserving its core meaning and markdown formatting.
 ${audienceContext}${toneContext}Focus on enhancing clarity, flow, word choice, sentence structure, and overall writing quality.
 
-Return the improved text and optionally list the key style improvements made.
+IMPORTANT: Return ONLY the improved text. Do not include any introductory phrases, explanations, or meta-commentary. Start directly with the improved text.
 
 **Original Text:**
 ---
@@ -124,23 +124,38 @@ ${input.text}
     }
   });
 
-  const responseText = llmResponse.text.replace(/---/g, '').trim();
-  
-  // Try to extract improvements if listed
-  const improvementsMatch = responseText.match(/improvements?[:\-]?\s*\n([\s\S]*?)(?=\n\n|$)/i);
-  const improvements = improvementsMatch 
-    ? improvementsMatch[1].split('\n').filter(line => line.trim().match(/^[-•*]\s/)).map(line => line.replace(/^[-•*]\s*/, '').trim())
+  let responseText = llmResponse.text.replace(/---/g, '').trim();
+
+  // Remove common introductory phrases that models sometimes add
+  const introPatterns = [
+    /^here'?s?\s+(?:the\s+)?(?:improved|edited|enhanced|revised)\s+text[:\-]?\s*/i,
+    /^here'?s?\s+(?:the\s+)?(?:result|output)[:\-]?\s*/i,
+    /^improved\s+text[:\-]?\s*/i,
+    /^edited\s+text[:\-]?\s*/i,
+    /^enhanced\s+text[:\-]?\s*/i,
+    /^below\s+is\s+(?:the\s+)?(?:improved|edited|enhanced)\s+text[:\-]?\s*/i,
+    /^the\s+(?:improved|edited|enhanced)\s+text\s+(?:is|follows)[:\-]?\s*/i,
+  ];
+
+  for (const pattern of introPatterns) {
+    responseText = responseText.replace(pattern, '').trim();
+  }
+
+  // Try to extract improvements if listed (usually at the end)
+  const improvementsMatch = responseText.match(/\n\s*(?:improvements?|changes?|edits?)[:\-]?\s*\n([\s\S]*?)$/i);
+  const improvements = improvementsMatch
+    ? improvementsMatch[1].split('\n').filter(line => line.trim().match(/^[-•*]\s/)).map(line => line.replace(/^[-•*]\s*/, '').trim()).filter(Boolean)
     : undefined;
 
-  const editedText = improvements 
-    ? responseText.replace(/improvements?[:\-]?\s*\n[\s\S]*$/i, '').trim()
+  const editedText = improvements
+    ? responseText.replace(/\n\s*(?:improvements?|changes?|edits?)[:\-]?\s*\n[\s\S]*$/i, '').trim()
     : responseText;
 
   if (!editedText) {
     throw new Error("Failed to edit text style.");
   }
 
-  return { 
+  return {
     editedText,
     improvements: improvements && improvements.length > 0 ? improvements : undefined
   };
@@ -148,7 +163,7 @@ ${input.text}
 
 // --- Readability Enhancer Flow ---
 export async function readabilityEnhancer(input: ReadabilityEnhancerInput): Promise<ReadabilityEnhancerOutput> {
-  const levelContext = input.targetLevel 
+  const levelContext = input.targetLevel
     ? `Target Reading Level: ${input.targetLevel}. Adjust sentence length, vocabulary complexity, and structure accordingly. `
     : '';
 
@@ -162,7 +177,7 @@ ${levelContext}Focus on:
 - Breaking up long paragraphs
 - Ensuring logical progression of ideas
 
-Return the enhanced text and optionally provide a readability score (0-100) and list key improvements.
+IMPORTANT: Return ONLY the enhanced text. Do not include any introductory phrases, explanations, or meta-commentary. Start directly with the enhanced text.
 
 **Original Text:**
 ---
@@ -174,30 +189,45 @@ ${input.text}
     }
   });
 
-  const responseText = llmResponse.text.replace(/---/g, '').trim();
-  
-  // Try to extract score and improvements
-  const scoreMatch = responseText.match(/readability\s+score[:\-]?\s*(\d+)/i);
+  let responseText = llmResponse.text.replace(/---/g, '').trim();
+
+  // Remove common introductory phrases
+  const introPatterns = [
+    /^here'?s?\s+(?:the\s+)?(?:enhanced|improved|readable)\s+text[:\-]?\s*/i,
+    /^here'?s?\s+(?:the\s+)?(?:result|output)[:\-]?\s*/i,
+    /^enhanced\s+text[:\-]?\s*/i,
+    /^improved\s+text[:\-]?\s*/i,
+    /^below\s+is\s+(?:the\s+)?(?:enhanced|improved)\s+text[:\-]?\s*/i,
+    /^the\s+(?:enhanced|improved)\s+text\s+(?:is|follows)[:\-]?\s*/i,
+    /^aiming\s+for\s+[^,]+,\s+with\s+explanations?\s+of\s+the\s*/i,
+  ];
+
+  for (const pattern of introPatterns) {
+    responseText = responseText.replace(pattern, '').trim();
+  }
+
+  // Try to extract score and improvements (usually at the end)
+  const scoreMatch = responseText.match(/\n\s*readability\s+score[:\-]?\s*(\d+)/i);
   const readabilityScore = scoreMatch ? parseInt(scoreMatch[1], 10) : undefined;
 
-  const improvementsMatch = responseText.match(/improvements?[:\-]?\s*\n([\s\S]*?)(?=\n\n|$)/i);
-  const improvements = improvementsMatch 
-    ? improvementsMatch[1].split('\n').filter(line => line.trim().match(/^[-•*]\s/)).map(line => line.replace(/^[-•*]\s*/, '').trim())
+  const improvementsMatch = responseText.match(/\n\s*(?:improvements?|changes?|enhancements?)[:\-]?\s*\n([\s\S]*?)$/i);
+  const improvements = improvementsMatch
+    ? improvementsMatch[1].split('\n').filter(line => line.trim().match(/^[-•*]\s/)).map(line => line.replace(/^[-•*]\s*/, '').trim()).filter(Boolean)
     : undefined;
 
   let enhancedText = responseText;
   if (scoreMatch) {
-    enhancedText = enhancedText.replace(/readability\s+score[:\-]?\s*\d+[.\s]*/i, '').trim();
+    enhancedText = enhancedText.replace(/\n\s*readability\s+score[:\-]?\s*\d+[.\s]*/i, '').trim();
   }
   if (improvementsMatch) {
-    enhancedText = enhancedText.replace(/improvements?[:\-]?\s*\n[\s\S]*$/i, '').trim();
+    enhancedText = enhancedText.replace(/\n\s*(?:improvements?|changes?|enhancements?)[:\-]?\s*\n[\s\S]*$/i, '').trim();
   }
 
   if (!enhancedText) {
     throw new Error("Failed to enhance text readability.");
   }
 
-  return { 
+  return {
     enhancedText,
     readabilityScore,
     improvements: improvements && improvements.length > 0 ? improvements : undefined
@@ -206,7 +236,7 @@ ${input.text}
 
 // --- Conciseness Checker Flow ---
 export async function concisenessChecker(input: ConcisenessCheckerInput): Promise<ConcisenessCheckerOutput> {
-  const reductionContext = input.targetReduction 
+  const reductionContext = input.targetReduction
     ? `Target Reduction: Aim to reduce the text by approximately ${input.targetReduction}% while preserving all essential meaning. `
     : 'Aim to make the text more concise while preserving all essential meaning. ';
 
@@ -222,7 +252,7 @@ ${reductionContext}Focus on:
 - Combining related ideas efficiently
 - Maintaining clarity and completeness
 
-Return the concise text and optionally list the key improvements made.
+IMPORTANT: Return ONLY the concise text. Do not include any introductory phrases, explanations, or meta-commentary. Start directly with the concise text.
 
 **Original Text:**
 ---
@@ -234,15 +264,29 @@ ${input.text}
     }
   });
 
-  const responseText = llmResponse.text.replace(/---/g, '').trim();
-  
-  const improvementsMatch = responseText.match(/improvements?[:\-]?\s*\n([\s\S]*?)(?=\n\n|$)/i);
-  const improvements = improvementsMatch 
-    ? improvementsMatch[1].split('\n').filter(line => line.trim().match(/^[-•*]\s/)).map(line => line.replace(/^[-•*]\s*/, '').trim())
+  let responseText = llmResponse.text.replace(/---/g, '').trim();
+
+  // Remove common introductory phrases
+  const introPatterns = [
+    /^here'?s?\s+(?:the\s+)?(?:concise|shortened|condensed)\s+text[:\-]?\s*/i,
+    /^here'?s?\s+(?:the\s+)?(?:result|output)[:\-]?\s*/i,
+    /^concise\s+text[:\-]?\s*/i,
+    /^shortened\s+text[:\-]?\s*/i,
+    /^below\s+is\s+(?:the\s+)?(?:concise|shortened)\s+text[:\-]?\s*/i,
+    /^the\s+(?:concise|shortened)\s+text\s+(?:is|follows)[:\-]?\s*/i,
+  ];
+
+  for (const pattern of introPatterns) {
+    responseText = responseText.replace(pattern, '').trim();
+  }
+
+  const improvementsMatch = responseText.match(/\n\s*(?:improvements?|changes?|reductions?)[:\-]?\s*\n([\s\S]*?)$/i);
+  const improvements = improvementsMatch
+    ? improvementsMatch[1].split('\n').filter(line => line.trim().match(/^[-•*]\s/)).map(line => line.replace(/^[-•*]\s*/, '').trim()).filter(Boolean)
     : undefined;
 
-  const conciseText = improvements 
-    ? responseText.replace(/improvements?[:\-]?\s*\n[\s\S]*$/i, '').trim()
+  const conciseText = improvements
+    ? responseText.replace(/\n\s*(?:improvements?|changes?|reductions?)[:\-]?\s*\n[\s\S]*$/i, '').trim()
     : responseText;
 
   if (!conciseText) {
@@ -250,11 +294,11 @@ ${input.text}
   }
 
   const newWordCount = conciseText.split(/\s+/).filter(word => word.length > 0).length;
-  const reductionPercentage = originalWordCount > 0 
+  const reductionPercentage = originalWordCount > 0
     ? Math.round(((originalWordCount - newWordCount) / originalWordCount) * 100)
     : 0;
 
-  return { 
+  return {
     conciseText,
     originalWordCount,
     newWordCount,
@@ -279,7 +323,7 @@ ${focusContext}Focus on:
 - Ambiguity and confusion
 - Overall comprehensibility
 
-Return the improved text, a clarity score (0-100), and specific suggestions for improvement.
+IMPORTANT: Return ONLY the improved text. Do not include any introductory phrases, explanations, or meta-commentary. Start directly with the improved text.
 
 **Original Text:**
 ---
@@ -291,16 +335,30 @@ ${input.text}
     }
   });
 
-  const responseText = llmResponse.text.replace(/---/g, '').trim();
-  
-  // Try to extract clarity score
-  const scoreMatch = responseText.match(/clarity\s+score[:\-]?\s*(\d+)/i);
+  let responseText = llmResponse.text.replace(/---/g, '').trim();
+
+  // Remove common introductory phrases
+  const introPatterns = [
+    /^here'?s?\s+(?:the\s+)?(?:improved|clarified|clearer)\s+text[:\-]?\s*/i,
+    /^here'?s?\s+(?:the\s+)?(?:result|output)[:\-]?\s*/i,
+    /^improved\s+text[:\-]?\s*/i,
+    /^clarified\s+text[:\-]?\s*/i,
+    /^below\s+is\s+(?:the\s+)?(?:improved|clarified)\s+text[:\-]?\s*/i,
+    /^the\s+(?:improved|clarified)\s+text\s+(?:is|follows)[:\-]?\s*/i,
+  ];
+
+  for (const pattern of introPatterns) {
+    responseText = responseText.replace(pattern, '').trim();
+  }
+
+  // Try to extract clarity score (usually at the end)
+  const scoreMatch = responseText.match(/\n\s*clarity\s+score[:\-]?\s*(\d+)/i);
   const clarityScore = scoreMatch ? parseInt(scoreMatch[1], 10) : undefined;
 
-  // Try to extract suggestions
-  const suggestionsMatch = responseText.match(/(?:suggestions?|improvements?)[:\-]?\s*\n([\s\S]*?)(?=\n\n|$)/i);
+  // Try to extract suggestions (usually at the end)
+  const suggestionsMatch = responseText.match(/\n\s*(?:suggestions?|improvements?|recommendations?)[:\-]?\s*\n([\s\S]*?)$/i);
   let suggestions = undefined;
-  
+
   if (suggestionsMatch) {
     const suggestionsText = suggestionsMatch[1];
     const suggestionLines = suggestionsText.split('\n').filter(line => line.trim());
@@ -308,7 +366,7 @@ ${input.text}
       const issueMatch = line.match(/issue[:\-]?\s*(.+?)(?:suggestion|improvement|location|$)/i);
       const suggestionMatch = line.match(/suggestion[:\-]?\s*(.+?)(?:location|$)/i);
       const locationMatch = line.match(/location[:\-]?\s*(.+?)$/i);
-      
+
       return {
         issue: issueMatch ? issueMatch[1].trim() : line.replace(/^[-•*]\s*/, '').trim(),
         suggestion: suggestionMatch ? suggestionMatch[1].trim() : '',
@@ -319,17 +377,17 @@ ${input.text}
 
   let improvedText = responseText;
   if (scoreMatch) {
-    improvedText = improvedText.replace(/clarity\s+score[:\-]?\s*\d+[.\s]*/i, '').trim();
+    improvedText = improvedText.replace(/\n\s*clarity\s+score[:\-]?\s*\d+[.\s]*/i, '').trim();
   }
   if (suggestionsMatch) {
-    improvedText = improvedText.replace(/(?:suggestions?|improvements?)[:\-]?\s*\n[\s\S]*$/i, '').trim();
+    improvedText = improvedText.replace(/\n\s*(?:suggestions?|improvements?|recommendations?)[:\-]?\s*\n[\s\S]*$/i, '').trim();
   }
 
   if (!improvedText) {
     throw new Error("Failed to improve text clarity.");
   }
 
-  return { 
+  return {
     improvedText,
     clarityScore,
     suggestions: suggestions && suggestions.length > 0 ? suggestions : undefined
