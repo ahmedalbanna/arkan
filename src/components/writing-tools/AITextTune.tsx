@@ -4,19 +4,67 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useTextStylistLogic } from '@/hooks/writing-tools/use-text-stylist-logic';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
-import { BookOpenText, Check, Copy, Loader2, Sparkles, Wand2, Edit3, Eye, Scissors, Lightbulb } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { BookOpenText, Check, Copy, Edit3, Eye, Lightbulb, Loader2, Scissors, Sparkles, Wand2 } from 'lucide-react';
 import { Controller } from 'react-hook-form';
 import ReactMarkdown from 'react-markdown';
 import { DiffView } from '../shared/DiffView';
+
+function ResultDetails({ result }: { result: any }) {
+    if (!result) return null;
+    // Heuristics: show output fields in nice format
+    return (
+        <div className="space-y-2 mt-2">
+            {/* Readability/clarity/conciseness scores */}
+            {typeof result.readabilityScore === 'number' && (
+                <Badge variant="outline">Readability Score: {result.readabilityScore}/100</Badge>
+            )}
+            {typeof result.clarityScore === 'number' && (
+                <Badge variant="outline">Clarity Score: {result.clarityScore}/100</Badge>
+            )}
+            {/* Word count reduction stats */}
+            {typeof result.reductionPercentage === 'number' && (
+                <Badge variant="outline">
+                    Reduction: {result.reductionPercentage}% ({result.originalWordCount}→{result.newWordCount} words)
+                </Badge>
+            )}
+            {/* Improvements/suggestions lists */}
+            {result.improvements?.length > 0 && (
+                <div>
+                    <Separator className="my-2" />
+                    <Label>Improvements</Label>
+                    <ul className="list-disc pl-6 mt-1">
+                        {result.improvements.map((imp: string, i: number) => (
+                            <li key={i}>{imp}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+            {result.suggestions?.length > 0 && (
+                <div>
+                    <Separator className="my-2" />
+                    <Label>Suggestions</Label>
+                    <ul className="list-disc pl-6 mt-1">
+                        {result.suggestions.map((s: any, i: number) => (
+                            <li key={i}>
+                                <b>{s.issue}</b>: {s.suggestion} {s.location && <span>({s.location})</span>}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
+}
 
 const styles = [
     "Informal", "Friendly", "Simple", "Formal", "Professional", "Narrative",
@@ -290,9 +338,26 @@ export function AITextTune() {
                                                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                                             </div>
                                         ) : (
-                                            <div className="prose dark:prose-invert max-w-none text-sm">
-                                                <ReactMarkdown components={markdownComponents}>{processedText || t('writingTools.textStylist.processedTextPlaceholder')}</ReactMarkdown>
-                                            </div>
+                                            <>
+                                                <div className="prose dark:prose-invert max-w-none text-sm">
+                                                    {/* Try to parse structured output for smart rendering */}
+                                                    {typeof processedText === 'string' ? (
+                                                        <ReactMarkdown components={markdownComponents}>{processedText || t('writingTools.textStylist.processedTextPlaceholder')}</ReactMarkdown>
+                                                    ) : processedText && processedText.rewrittenText ? (
+                                                        <ReactMarkdown components={markdownComponents}>{processedText.rewrittenText}</ReactMarkdown>
+                                                    ) : processedText && processedText.editedText ? (
+                                                        <ReactMarkdown components={markdownComponents}>{processedText.editedText}</ReactMarkdown>
+                                                    ) : processedText && processedText.enhancedText ? (
+                                                        <ReactMarkdown components={markdownComponents}>{processedText.enhancedText}</ReactMarkdown>
+                                                    ) : processedText && processedText.conciseText ? (
+                                                        <ReactMarkdown components={markdownComponents}>{processedText.conciseText}</ReactMarkdown>
+                                                    ) : processedText && processedText.improvedText ? (
+                                                        <ReactMarkdown components={markdownComponents}>{processedText.improvedText}</ReactMarkdown>
+                                                    ) : null}
+                                                </div>
+                                                {/* Render details/metadata contextually */}
+                                                <ResultDetails result={processedText} />
+                                            </>
                                         )}
                                     </ScrollArea>
                                 </div>
