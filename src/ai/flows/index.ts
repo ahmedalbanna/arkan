@@ -39,3 +39,5 @@ export * from './topic-explainer';
 export * from './translate-text';
 export * from './write-document';
 export * from './generate-toc';
+export * from './bias-checker';
+export * from './sentence-structure-checker';

@@ -34,6 +34,8 @@ export * from './data/use-users';
 // Writing Tools Logic Hooks
 export * from './writing-tools/use-ai-detector-logic';
 export * from './writing-tools/use-ai-researcher-logic';
+export * from './writing-tools/use-bias-checker-logic';
+export * from './writing-tools/use-sentence-structure-checker-logic';
 export * from './writing-tools/use-citation-generator-logic';
 export * from './writing-tools/use-document-writer-logic';
 export * from './writing-tools/use-fact-checker-logic';
@@ -58,4 +60,3 @@ export * from './util/use-mobile';
 export * from './util/use-sound';
 export * from './util/use-toast';
 export * from './util/useExport';
-

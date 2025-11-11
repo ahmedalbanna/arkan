@@ -24,7 +24,8 @@ import {
   Scale,
   Search,
   SpellCheck,
-  UserCheck
+  UserCheck,
+  Workflow
 } from 'lucide-react';
 
 export default function WritingToolsPage() {
@@ -41,6 +42,7 @@ export default function WritingToolsPage() {
     { name: t('writingTools.cards.aiSummarizer'), icon: BookOpenText, href: '/writing-tools/summarizer' },
     { name: t('writingTools.cards.grammarChecker'), icon: SpellCheck, href: '/writing-tools/grammar-checker' },
     { name: t('writingTools.cards.biasChecker'), icon: Scale, href: '/writing-tools/bias-checker' },
+    { name: "Sentence Structure Checker", icon: Workflow, href: '/writing-tools/sentence-structure-checker' },
     { name: t('writingTools.cards.aiQuizGenerator'), icon: FileQuestion, href: '/writing-tools/quiz-generator' },
     { name: t('writingTools.cards.factChecker'), icon: CheckCircle, href: '/writing-tools/fact-checker' },
     { name: t('writingTools.cards.citationGenerator'), icon: Quote, href: '/writing-tools/citation-generator' },
