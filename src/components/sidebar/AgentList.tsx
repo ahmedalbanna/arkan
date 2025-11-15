@@ -23,9 +23,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAgentStore } from '@/hooks/use-agent-store';
 import type { Agent } from '@/types/agent';
 import { cn } from '@/lib/utils/cn';
-import { Edit, MoreVertical, PlusCircle, Trash2 } from 'lucide-react';
-import React, { useState } from 'react';
+import { Edit, MoreVertical, PlusCircle, Search, Trash2 } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
 import { AgentDialog } from './AgentDialog';
+import { Input } from '../ui/input';
 
 interface AgentListProps {
   agents: Agent[];
@@ -38,6 +39,7 @@ export const AgentList: React.FC<AgentListProps> = ({ agents }) => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [agentToEdit, setAgentToEdit] = useState<Agent | null>(null);
   const [agentToDelete, setAgentToDelete] = useState<Agent | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleEditClick = (agent: Agent) => {
     setAgentToEdit(agent);
@@ -57,17 +59,35 @@ export const AgentList: React.FC<AgentListProps> = ({ agents }) => {
     setAgentToDelete(null);
   }
 
+  const filteredAgents = useMemo(() => {
+    if (!searchQuery) {
+        return agents;
+    }
+    return agents.filter(agent => 
+        agent.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [agents, searchQuery]);
+
   return (
     <div className="flex h-full flex-col">
-      <header className="flex h-14 items-center justify-between border-b px-4">
+      <header className="flex h-14 shrink-0 items-center justify-between border-b px-4">
         <h2 className="text-lg font-semibold">Agents</h2>
         <Button variant="ghost" size="icon" onClick={() => setIsCreateOpen(true)}>
           <PlusCircle className="h-5 w-5" />
         </Button>
       </header>
+       <div className="relative border-b p-2">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search agents..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
+      </div>
       <ScrollArea className="flex-1">
         <div className="p-2 space-y-1">
-          {agents.map((agent) => (
+          {filteredAgents.map((agent) => (
             <div
               key={agent.id}
               className={cn(
