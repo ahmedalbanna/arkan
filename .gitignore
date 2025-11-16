@@ -51,3 +51,9 @@ dataconnect-generated
 dataconnect
 .cursor
 .package-lock.json
+acli.exe
+/src/lib/AllAgents.json
+/.firebase/
+/.idx/
+/.vscode/
+/public/

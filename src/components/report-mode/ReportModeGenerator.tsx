@@ -37,9 +37,9 @@ export default function ReportModeGenerator() {
     return (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
 
-            <div className="col-span-12 md:col-span-5 xl:col-span-4 space-y-6 md:overflow-y-auto md:pr-2 transition-all duration-300 inline-flex">
+            <div className="col-span-12 md:col-span-5 xl:col-span-4 col-mb-2 md:overflow-y-auto md:pr-2 transition-all duration-300 inline-flex gap-2 flex-nowrap flex-row">
                 <div className=" md:block md:col-span-1 md:sticky">
-
+                    
                     <div className="col">
                         <Button
                             variant="secondary"
