@@ -9,6 +9,7 @@ import {
   BookOpenText,
   Brain,
   BrainCircuit,
+  Building2,
   CheckCircle,
   CopyCheck,
   EyeOff,
@@ -58,7 +59,8 @@ export default function WritingToolsPage() {
     { name: 'Markdown to Word', icon: PencilRuler, href: '/writing-tools/markdown-to-word' },
     { name: 'Markdown to PPTX', icon: PencilRuler, href: '/writing-tools/pptx-convert' },
     { name: 'Invisible Text Detector', icon: EyeOff, href: '/writing-tools/invisible-text-detector' },
-    { name: t('writingTools.assignmentsSolver.cardTitle'), icon: BookCheck, href: '/writing-tools/assignments-solver' }
+    { name: t('writingTools.assignmentsSolver.cardTitle'), icon: BookCheck, href: '/writing-tools/assignments-solver' },
+    { name: t('writingTools.projectBlueprint.cardTitle'), icon: Building2, href: '/writing-tools/project-blueprint' }
   ];
 
   return (

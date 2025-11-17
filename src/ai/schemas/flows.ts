@@ -60,6 +60,25 @@ export const SolveAssignmentsOutputSchema = z.object({
 });
 export type SolveAssignmentsOutput = z.infer<typeof SolveAssignmentsOutputSchema>;
 
+// generate-project-blueprint.ts
+export const GenerateProjectBlueprintInputSchema = z.object({
+    projectName: z.string().describe('The name of the project/application to be developed.'),
+    projectType: z.string().describe('Type of project (e.g., Web Application, Mobile App, E-commerce, Blog, Portfolio).'),
+    description: z.string().describe('Detailed description of the project requirements and vision.'),
+    targetAudience: z.string().describe('Description of the target users and audience for the project.'),
+    complexity: z.enum(['Simple', 'Medium', 'Complex', 'Enterprise']).describe('Project complexity level.'),
+    features: z.string().describe('List of desired features and functionalities.'),
+    techStack: z.string().optional().describe('Preferred technology stack or specific requirements.'),
+    budget: z.string().optional().describe('Budget range or constraints.'),
+    timeline: z.string().optional().describe('Project timeline or deadline requirements.'),
+});
+export type GenerateProjectBlueprintInput = z.infer<typeof GenerateProjectBlueprintInputSchema>;
+
+export const GenerateProjectBlueprintOutputSchema = z.object({
+    blueprint: z.string().describe('Comprehensive project blueprint in markdown format with architecture, features, timeline, and implementation details.'),
+});
+export type GenerateProjectBlueprintOutput = z.infer<typeof GenerateProjectBlueprintOutputSchema>;
+
 // literature-review-generator.ts
 export const LiteratureReviewInputSchema = z.object({
     topic: z.string().describe('The topic for the literature review.'),

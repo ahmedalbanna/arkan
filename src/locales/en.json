@@ -373,7 +373,8 @@
       "textToHandwriting": "Text to Handwriting",
       "ideaGenerator": "AI Idea Generator",
       "translator": "Translator",
-      "assignmentsSolver": "Assignments Solver"
+      "assignmentsSolver": "Assignments Solver",
+      "projectBlueprint": "Project Blueprint"
     },
     "assignmentsSolver": {
       "pageTitle": "AI Assignments Solver",
@@ -394,6 +395,36 @@
       "successToast": "Assignment solved successfully!",
       "errorToast": "Failed to solve assignment",
       "fileProcessedToast": "File Processed"
+    },
+    "projectBlueprint": {
+      "pageTitle": "AI Project Blueprint Generator",
+      "pageSubtitle": "Generate comprehensive layered project blueprints with enterprise-grade architecture patterns and implementation guidelines.",
+      "cardTitle": "Project Blueprint Generator",
+      "cardDescription": "Create detailed project blueprints including architecture, features, timeline, and implementation strategy.",
+      "projectNameLabel": "Project Name",
+      "projectNamePlaceholder": "Enter your project name (e.g., E-learning Platform)",
+      "projectTypeLabel": "Project Type",
+      "projectTypePlaceholder": "Select project type",
+      "descriptionLabel": "Project Description",
+      "descriptionPlaceholder": "Describe your project vision, goals, and main purpose in detail...",
+      "targetAudienceLabel": "Target Audience",
+      "targetAudiencePlaceholder": "Who will use this application? Describe your target users, their needs, and demographics...",
+      "complexityLabel": "Project Complexity",
+      "complexityPlaceholder": "Select complexity level",
+      "featuresLabel": "Desired Features",
+      "featuresPlaceholder": "List the main features and functionalities you want to include:\n• User authentication\n• Dashboard\n• Payment system\n• Real-time notifications\n• Mobile responsiveness\n• etc.",
+      "techStackLabel": "Technology Stack Preferences (Optional)",
+      "techStackPlaceholder": "Specify preferred technologies, frameworks, or platforms (e.g., React, Node.js, PostgreSQL)...",
+      "budgetLabel": "Budget Range (Optional)",
+      "budgetPlaceholder": "Select budget range",
+      "timelineLabel": "Timeline (Optional)",
+      "timelinePlaceholder": "Select project timeline",
+      "buttonText": "Generate Blueprint (3 Credits)",
+      "blueprintLabel": "Project Blueprint",
+      "processingMessage": "Analyzing requirements and generating comprehensive project blueprint...",
+      "emptyState": "Your project blueprint will appear here after generation",
+      "successToast": "Project blueprint generated successfully!",
+      "errorToast": "Failed to generate project blueprint"
     }
   },
   "markdownDisplay": {

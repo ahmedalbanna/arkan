@@ -367,7 +367,8 @@
       "textToHandwriting": "تحويل النص إلى خط يد",
       "ideaGenerator": "مولد الأفكار بالذكاء الاصطناعي",
       "translator": "المترجم",
-      "assignmentsSolver": "حلال الواجبات"
+      "assignmentsSolver": "حلال الواجبات",
+      "projectBlueprint": "مخطط المشروع"
     },
     "assignmentsSolver": {
       "pageTitle": "حلال الواجبات بالذكاء الاصطناعي",
@@ -388,6 +389,36 @@
       "successToast": "تم حل الواجب بنجاح!",
       "errorToast": "فشل في حل الواجب",
       "fileProcessedToast": "تمت معالجة الملف"
+    },
+    "projectBlueprint": {
+      "pageTitle": "مولد مخططات المشاريع بالذكاء الاصطناعي",
+      "pageSubtitle": "أنشئ مخططات مشاريع شاملة للتطبيقات والمواقع الإلكترونية مع توصيات المعمارية المدعومة بالذكاء الاصطناعي.",
+      "cardTitle": "مولد مخططات المشاريع",
+      "cardDescription": "أنشئ مخططات مشاريع مفصلة تتضمن المعمارية والميزات والجدول الزمني واستراتيجية التنفيذ.",
+      "projectNameLabel": "اسم المشروع",
+      "projectNamePlaceholder": "أدخل اسم مشروعك (مثال: منصة التعلم الإلكتروني)",
+      "projectTypeLabel": "نوع المشروع",
+      "projectTypePlaceholder": "اختر نوع المشروع",
+      "descriptionLabel": "وصف المشروع",
+      "descriptionPlaceholder": "اصف رؤية مشروعك وأهدافه والغرض الرئيسي منه بالتفصيل...",
+      "targetAudienceLabel": "الجمهور المستهدف",
+      "targetAudiencePlaceholder": "من سيستخدم هذا التطبيق؟ اصف المستخدمين المستهدفين واحتياجاتهم والخصائص الديموغرافية...",
+      "complexityLabel": "تعقيد المشروع",
+      "complexityPlaceholder": "اختر مستوى التعقيد",
+      "featuresLabel": "الميزات المطلوبة",
+      "featuresPlaceholder": "اذكر الميزات والوظائف الرئيسية التي تريد تضمينها:\n• مصادقة المستخدمين\n• لوحة التحكم\n• نظام الدفع\n• الإشعارات الفورية\n• التجاوب مع الجوال\n• إلخ.",
+      "techStackLabel": "تفضيلات المكدس التقني (اختياري)",
+      "techStackPlaceholder": "حدد التقنيات أو الأطر أو المنصات المفضلة (مثل: React, Node.js, PostgreSQL)...",
+      "budgetLabel": "نطاق الميزانية (اختياري)",
+      "budgetPlaceholder": "اختر نطاق الميزانية",
+      "timelineLabel": "الجدول الزمني (اختياري)",
+      "timelinePlaceholder": "اختر الجدول الزمني للمشروع",
+      "buttonText": "توليد المخطط (3 أرصدة)",
+      "blueprintLabel": "مخطط المشروع",
+      "processingMessage": "جاري تحليل المتطلبات وإنشاء مخطط مشروع شامل...",
+      "emptyState": "سيظهر مخطط مشروعك هنا بعد التوليد",
+      "successToast": "تم إنشاء مخطط المشروع بنجاح!",
+      "errorToast": "فشل في إنشاء مخطط المشروع"
     }
   },
   "markdownDisplay": {

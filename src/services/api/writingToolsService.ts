@@ -84,6 +84,17 @@ export interface TranslateTextVariables {
 export interface SolveAssignmentsVariables {
     text: string;
 }
+export interface GenerateProjectBlueprintVariables {
+    projectName: string;
+    projectType: string;
+    description: string;
+    targetAudience: string;
+    complexity: 'Simple' | 'Medium' | 'Complex' | 'Enterprise';
+    features: string;
+    techStack?: string;
+    budget?: string;
+    timeline?: string;
+}
 
 
 /**
