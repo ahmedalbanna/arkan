@@ -49,6 +49,17 @@ export const AIResearcherOutputSchema = z.object({
 });
 export type AIResearcherOutput = z.infer<typeof AIResearcherOutputSchema>;
 
+// solve-assignments.ts
+export const SolveAssignmentsInputSchema = z.object({
+    text: z.string().describe('The assignment text or document content containing questions to be solved.'),
+});
+export type SolveAssignmentsInput = z.infer<typeof SolveAssignmentsInputSchema>;
+
+export const SolveAssignmentsOutputSchema = z.object({
+    solutions: z.string().describe('The comprehensive solutions to all identified questions and problems in markdown format.'),
+});
+export type SolveAssignmentsOutput = z.infer<typeof SolveAssignmentsOutputSchema>;
+
 // literature-review-generator.ts
 export const LiteratureReviewInputSchema = z.object({
     topic: z.string().describe('The topic for the literature review.'),

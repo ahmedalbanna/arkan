@@ -54,6 +54,8 @@ import { biasCheckText } from '@/ai/flows/bias-checker';
 import { BiasCheckInputSchema } from '@/ai/schemas';
 import { sentenceStructureCheck } from '@/ai/flows/sentence-structure-checker';
 import { SentenceStructureCheckInputSchema } from '@/ai/schemas';
+import { solveAssignments } from '@/ai/flows/solve-assignments';
+import { SolveAssignmentsInputSchema } from '@/ai/schemas';
 
 // Define a map for tool configurations
 const toolConfig = {
@@ -85,6 +87,7 @@ const toolConfig = {
   'translate-text': { flow: translateText, schema: TranslateTextInputSchema, creditCost: 1 },
   'bias-checker': { flow: biasCheckText, schema: BiasCheckInputSchema, creditCost: 1 },
   'sentence-structure-checker': { flow: sentenceStructureCheck, schema: SentenceStructureCheckInputSchema, creditCost: 1 },
+  'solve-assignments': { flow: solveAssignments, schema: SolveAssignmentsInputSchema, creditCost: 2 },
 };
 
 type ToolName = keyof typeof toolConfig;

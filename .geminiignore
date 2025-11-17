@@ -13,3 +13,8 @@
 *.tmp
 *.temp
 /locales/*
+/src/lib/AllAgents.json
+/.firebase/
+/.idx/
+/.vscode/
+/public/

@@ -7,12 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { type CreateLectureUnitOutput, type CreateLectureUnitInput } from '@/ai/schemas/lecture-generator';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { SessionPlanDisplay } from '@/components/writing-tools/SessionPlanDisplay';
-import { markdownComponents } from '@/lib/markdown-styles';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
 
 // A simple component to render markdown content
 const MarkdownPreview = ({ content }: { content: string }) => {

@@ -5,6 +5,7 @@
 import { AIToolCard } from '@/components/writing-tools/AIToolCard';
 import { useLocalization } from '@/context/LocalizationContext';
 import {
+  BookCheck,
   BookOpenText,
   Brain,
   BrainCircuit,
@@ -56,7 +57,8 @@ export default function WritingToolsPage() {
     { name: 'Markdown Editor', icon: PencilRuler, href: '/writing-tools/markdown-editor' },
     { name: 'Markdown to Word', icon: PencilRuler, href: '/writing-tools/markdown-to-word' },
     { name: 'Markdown to PPTX', icon: PencilRuler, href: '/writing-tools/pptx-convert' },
-    { name: 'Invisible Text Detector', icon: EyeOff, href: '/writing-tools/invisible-text-detector' }
+    { name: 'Invisible Text Detector', icon: EyeOff, href: '/writing-tools/invisible-text-detector' },
+    { name: t('writingTools.assignmentsSolver.cardTitle'), icon: BookCheck, href: '/writing-tools/assignments-solver' }
   ];
 
   return (

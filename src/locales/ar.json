@@ -366,7 +366,28 @@
       "topicExplainer": "شرح المواضيع",
       "textToHandwriting": "تحويل النص إلى خط يد",
       "ideaGenerator": "مولد الأفكار بالذكاء الاصطناعي",
-      "translator": "المترجم"
+      "translator": "المترجم",
+      "assignmentsSolver": "حلال الواجبات"
+    },
+    "assignmentsSolver": {
+      "pageTitle": "حلال الواجبات بالذكاء الاصطناعي",
+      "pageSubtitle": "ارفع الواجبات أو الصق النص للحصول على حلول شاملة بواسطة الذكاء الاصطناعي.",
+      "cardTitle": "حلال الواجبات",
+      "cardDescription": "ارفع ملفات الواجبات بصيغة PDF أو الصق النص الذي يحتوي على أسئلة، واحصل على حلول مفصلة بصيغة markdown.",
+      "pasteTab": "لصق النص",
+      "uploadTab": "رفع ملف",
+      "textLabel": "محتوى الواجب",
+      "placeholder": "الصق أسئلة واجبك هنا...\n\nمثال:\n1. ما هي عملية البناء الضوئي ولماذا هي مهمة؟\n2. اشرح دورة المياه بالتفصيل.\n3. احسب مساحة مثلث قاعدته 10 سم وارتفاعه 8 سم.",
+      "uploadLabel": "رفع ملف الواجب",
+      "dropzoneHint": "اسحب وأفلت ملف الواجب هنا، أو انقر للاختيار",
+      "supportedFiles": "الصيغ المدعومة: PDF, DOC, DOCX, TXT, MD",
+      "processingFile": "جاري معالجة الملف...",
+      "buttonText": "حل الواجب (2 رصيد)",
+      "solutionsLabel": "حلول الواجب",
+      "processingMessage": "جاري تحليل الأسئلة وإنشاء حلول شاملة...",
+      "successToast": "تم حل الواجب بنجاح!",
+      "errorToast": "فشل في حل الواجب",
+      "fileProcessedToast": "تمت معالجة الملف"
     }
   },
   "markdownDisplay": {

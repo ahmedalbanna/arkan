@@ -372,7 +372,28 @@
       "topicExplainer": "Topic Explainer",
       "textToHandwriting": "Text to Handwriting",
       "ideaGenerator": "AI Idea Generator",
-      "translator": "Translator"
+      "translator": "Translator",
+      "assignmentsSolver": "Assignments Solver"
+    },
+    "assignmentsSolver": {
+      "pageTitle": "AI Assignments Solver",
+      "pageSubtitle": "Upload assignments or paste text to get comprehensive solutions powered by AI.",
+      "cardTitle": "Assignments Solver",
+      "cardDescription": "Upload PDF assignments or paste text containing questions, and get detailed solutions in markdown format.",
+      "pasteTab": "Paste Text",
+      "uploadTab": "Upload File",
+      "textLabel": "Assignment Content",
+      "placeholder": "Paste your assignment questions here...\n\nExample:\n1. What is photosynthesis and why is it important?\n2. Explain the water cycle in detail.\n3. Calculate the area of a triangle with base 10cm and height 8cm.",
+      "uploadLabel": "Upload Assignment File",
+      "dropzoneHint": "Drag 'n' drop an assignment file here, or click to select",
+      "supportedFiles": "Supported: PDF, DOC, DOCX, TXT, MD",
+      "processingFile": "Processing file...",
+      "buttonText": "Solve Assignment (2 Credits)",
+      "solutionsLabel": "Assignment Solutions",
+      "processingMessage": "Analyzing questions and generating comprehensive solutions...",
+      "successToast": "Assignment solved successfully!",
+      "errorToast": "Failed to solve assignment",
+      "fileProcessedToast": "File Processed"
     }
   },
   "markdownDisplay": {

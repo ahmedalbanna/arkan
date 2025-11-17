@@ -41,3 +41,4 @@ export * from './write-document';
 export * from './generate-toc';
 export * from './bias-checker';
 export * from './sentence-structure-checker';
+export * from './solve-assignments';

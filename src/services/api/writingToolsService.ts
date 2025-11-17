@@ -81,6 +81,9 @@ export interface TranslateTextVariables {
     text: string;
     targetLang: string;
 }
+export interface SolveAssignmentsVariables {
+    text: string;
+}
 
 
 /**
