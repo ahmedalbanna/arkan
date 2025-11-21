@@ -1,7 +1,7 @@
 'use server';
 
-import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { TranslateTextInputSchema } from '@/ai/schemas';
+import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { translate } from '@vitalets/google-translate-api';
 
 export const POST = withAuth(async ({ request, user }) => {
@@ -13,7 +13,7 @@ export const POST = withAuth(async ({ request, user }) => {
     }
 
     const agentInput = validation.data;
-    const result = await translate(agentInput.text, { to: 'ar' });
+    const result = await translate(agentInput.text, { to: agentInput.targetLang });
 
 
     return createApiResponse(result, 200);
