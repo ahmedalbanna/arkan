@@ -61,10 +61,10 @@ export const AgentDialog: React.FC<AgentDialogProps> = ({
   const form = useForm<AgentFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: agent ? {
-        name: agent.data.name,
-        description: agent.data.description,
-        avatar: agent.data.avatar || { type: 'emoji', data: { value: '' } },
-        commands: agent.data.commands.map(c => ({...c, mode: 'default'}))
+        name: agent.name,
+        description: agent.description || agent.data?.description || '',
+        avatar: agent.data?.avatar || { type: 'emoji', data: { value: agent.icon || '' } },
+        commands: (agent.commands || agent.data?.commands || []).map(c => ({...c, mode: 'default'}))
     } : {
       name: '',
       description: '',
@@ -83,10 +83,10 @@ export const AgentDialog: React.FC<AgentDialogProps> = ({
   useEffect(() => {
     if (agent) {
         form.reset({
-            name: agent.data.name,
-            description: agent.data.description,
-            avatar: agent.data.avatar || { type: 'emoji', data: { value: '' } },
-            commands: agent.data.commands.map(c => ({...c, mode: 'default'}))
+            name: agent.name,
+            description: agent.description || agent.data?.description || '',
+            avatar: agent.data?.avatar || { type: 'emoji', data: { value: agent.icon || '' } },
+            commands: (agent.commands || agent.data?.commands || []).map(c => ({...c, mode: 'default'}))
         });
     } else {
         form.reset({

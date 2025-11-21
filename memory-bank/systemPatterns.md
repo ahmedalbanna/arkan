@@ -228,7 +228,51 @@ function useCreateUser() {
 
 ## Error Handling Patterns
 
-### 1. Centralized Error Handling
+### 1. Document Processing Error Handling (Updated December 2024)
+**Purpose**: Robust error handling for document generation and conversion
+
+```typescript
+// Document Processing Error Handler Pattern
+async function processDocumentContent(content: any, options: ProcessingOptions) {
+  try {
+    // Validate input first
+    if (!content || typeof content !== 'object') {
+      throw new ValidationError('Invalid content structure');
+    }
+
+    // Process with fallback mechanisms
+    const result = await processContent(content);
+    
+    if (!result || result.length === 0) {
+      console.warn('Empty result from content processing, using fallback');
+      return createFallbackContent(content);
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Content processing failed:', error);
+    
+    // Return graceful fallback instead of crashing
+    return createErrorFallback(error, content);
+  }
+}
+
+// Example: Table processing with error handling
+function processTable(tableNode: any): TableElement[] {
+  try {
+    if (!tableNode.children || tableNode.children.length === 0) {
+      return [createPlaceholderTable('[Empty table]')];
+    }
+
+    return tableNode.children.map(processTableRow);
+  } catch (error) {
+    console.error('Table processing error:', error);
+    return [createPlaceholderTable('[Table processing error]')];
+  }
+}
+```
+
+### 2. Centralized Error Handling
 **Purpose**: Consistent error handling across the application
 
 ```typescript
@@ -304,7 +348,44 @@ function withAuth<T extends object>(Component: ComponentType<T>) {
 const ProtectedPage = withAuth(DashboardPage);
 ```
 
-### 2. Input Validation Pattern
+### 2. Image Processing Error Pattern (Updated December 2024)
+**Purpose**: Handling image processing failures gracefully
+
+```typescript
+// Robust Image Processing Pattern
+async function processImageWithFallback(imageUrl: string, altText?: string) {
+  try {
+    // Validate URL first
+    if (!imageUrl || imageUrl.trim() === '') {
+      throw new ValidationError('Empty image URL');
+    }
+
+    const imageBuffer = await getImageBuffer(imageUrl);
+    
+    if (!imageBuffer || imageBuffer.byteLength === 0) {
+      throw new ProcessingError('Invalid image buffer');
+    }
+
+    return {
+      type: 'image',
+      data: imageBuffer,
+      success: true
+    };
+  } catch (error) {
+    console.warn(`Image processing failed for ${imageUrl}:`, error);
+    
+    // Return text fallback instead of breaking document
+    return {
+      type: 'text',
+      content: altText || '[Image not available]',
+      success: false,
+      originalUrl: imageUrl
+    };
+  }
+}
+```
+
+### 3. Input Validation Pattern
 **Purpose**: Validating user inputs with Zod schemas
 
 ```typescript

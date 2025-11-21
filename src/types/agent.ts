@@ -5,8 +5,18 @@ export interface Root {
 export interface Agent {
   id: string;
   name: string;
-  space_id: string;
-  data: Data;
+  space_id?: string;
+  data?: Data; // Optional for backward compatibility
+  // New flattened structure
+  description?: string;
+  icon?: string;
+  category?: string;
+  version?: string;
+  author?: string;
+  tags?: string[];
+  commands?: Command[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Data {
@@ -21,6 +31,7 @@ export interface Data {
 }
 
 export interface Command {
+  description: string;
   name: string;
   prompt: string;
   id: string;

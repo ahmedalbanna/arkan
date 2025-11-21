@@ -45,12 +45,15 @@ const AgentPlayground: React.FC<AgentPlaygroundProps> = ({ agent }) => {
     },
   });
 
-  const selectedCommand = agent?.data.commands.find(c => c.id === selectedCommandId);
+  // Handle both old format (agent.data.commands) and new format (agent.commands)
+  const commands = agent?.commands || agent?.data?.commands || [];
+  const selectedCommand = commands.find(c => c.id === selectedCommandId);
 
   // Effect to update form when agent or selected command changes
   useEffect(() => {
     if (agent) {
-      const firstCommandId = agent.data.commands[0]?.id || '';
+      const commands = agent.commands || agent.data?.commands || [];
+      const firstCommandId = commands[0]?.id || '';
       const commandToSelect = selectedCommandId || firstCommandId;
       form.reset({
         commandId: commandToSelect,
@@ -83,7 +86,8 @@ const AgentPlayground: React.FC<AgentPlaygroundProps> = ({ agent }) => {
 
   const onSubmit = (values: PlaygroundFormValues) => {
     if (!agent || !selectedCommand) return;
-    const systemPrompt = `${agent.data.description}\n\nCOMMAND: ${selectedCommand.name}\nPROMPT: ${selectedCommand.prompt}`;
+    const description = agent.description || agent.data?.description || '';
+    const systemPrompt = `${description}\n\nCOMMAND: ${selectedCommand.name}\nPROMPT: ${selectedCommand.prompt}`;
     mutation.mutate({ systemPrompt, userPrompt: values.userPrompt });
   };
 
@@ -110,11 +114,11 @@ const AgentPlayground: React.FC<AgentPlaygroundProps> = ({ agent }) => {
     <div className="flex h-full flex-col">
       <header className="flex items-center gap-4 border-b bg-background p-4">
         <Avatar className="h-10 w-10">
-          <AvatarFallback>{agent.data.avatar?.data.value || agent.name.charAt(0)}</AvatarFallback>
+          <AvatarFallback>{agent.icon || agent.data?.avatar?.data?.value || agent.name.charAt(0)}</AvatarFallback>
         </Avatar>
         <div>
           <h1 className="text-lg font-semibold">{agent.name}</h1>
-          <p className="text-sm text-muted-foreground">{agent.data.description}</p>
+          <p className="text-sm text-muted-foreground">{agent.description || agent.data?.description}</p>
         </div>
       </header>
       <div className="flex-1 overflow-y-auto p-4">
@@ -163,7 +167,7 @@ const AgentPlayground: React.FC<AgentPlaygroundProps> = ({ agent }) => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {agent.data.commands.map((cmd: Command) => (
+                          {commands.map((cmd: Command) => (
                             <SelectItem key={cmd.id} value={cmd.id}>
                               {cmd.name}
                             </SelectItem>
