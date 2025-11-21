@@ -126,6 +126,7 @@ const commonParagraphStyles = [
         run: {
             font: { name: 'Courier New' },
             size: 18, // 9pt
+            color: '000000',
         },
         paragraph: {
             spacing: { before: 200, after: 200 },

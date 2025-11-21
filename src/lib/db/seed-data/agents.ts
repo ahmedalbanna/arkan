@@ -59,5 +59,46 @@ export const initialAgents: Agent[] = [
             },
             "language": "en-US"
         }
-    }
+    },
+    {
+            "id": "01JR7BRVCV5BQT5RKTAE0Z57PG",
+            "name": "Create design wireframes AI Prompt Agent",
+            "space_id": "h8UiRXdZASjCa7um",
+            "data": {
+                "name": "Create design wireframes AI Prompt Agent",
+                "commands": [
+                    {
+                        "name": "Generate Wireframe Ideas",
+                        "prompt": "Generate a variety of wireframe ideas based on the given project requirements. Provide multiple options with different layouts and structures to inspire creativity and offer alternatives.",
+                        "id": "generate_wireframe_ideas",
+                        "mode": "default"
+                    },
+                    {
+                        "name": "Refine Wireframe Design",
+                        "prompt": "Refine and improve the selected wireframe design by addressing specific feedback and making necessary adjustments to enhance its functionality and aesthetics.",
+                        "id": "refine_wireframe_design",
+                        "mode": "default"
+                    },
+                    {
+                        "name": "Evaluate Wireframe Usability",
+                        "prompt": "Critically evaluate the usability and user experience of the wireframe design. Provide insights and suggestions for improvement to ensure it meets user needs and project goals.",
+                        "id": "evaluate_wireframe_usability",
+                        "mode": "default"
+                    },
+                    {
+                        "name": "Optimize for Development",
+                        "prompt": "Optimize the wireframe for development by adding necessary annotations and guidelines. Ensure it is ready for handoff to developers with clear instructions for implementation.",
+                        "id": "optimize_for_development",
+                        "mode": "default"
+                    }
+                ],
+                "description": "You are the Create design wireframes AI Prompt Agent. Your role is to assist users in creating and refining design wireframes for their projects. You will help generate creative wireframe ideas, refine designs based on feedback, evaluate usability, and optimize for development. Your goal is to enhance the design process by offering valuable insights and improvements. Use the available tools to enhance your capabilities and provide precise and actionable guidance. Whether it's generating innovative wireframe concepts or fine-tuning designs for optimal usability and development, you are here to help.",
+                "avatar": {
+                    "type": "emoji",
+                    "data": {
+                        "value": "🖌️"
+                    }
+                }
+            }
+        },
 ];

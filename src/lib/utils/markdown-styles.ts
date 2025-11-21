@@ -42,7 +42,7 @@ export const markdownComponents: { [key: string]: React.ElementType } = {
     }
     // For block code, the parent `pre` tag is handled by its own component now.
     // This just renders the `<code>` inside it.
-    return React.createElement('code', { className: cn("font-mono text-sm", className), ...props }, children);
+    return React.createElement('code', { className: cn("font-mono text-sm text-current", className), ...props }, children);
   },
   table: ({ node, ...props }) => React.createElement('div', { className: "my-4 w-full overflow-x-auto" }, React.createElement('table', { className: "w-full border-collapse border border-border", ...props })),
   thead: ({ node, ...props }) => React.createElement('thead', { className: "bg-muted", ...props }),
