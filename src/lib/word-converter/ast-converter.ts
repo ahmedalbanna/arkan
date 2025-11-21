@@ -170,31 +170,48 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
 
         if (imageNode) {
           try {
+            // Skip invalid or empty URLs
+            if (!imageNode.url || imageNode.url.trim() === '') {
+              console.warn('Empty or invalid image URL detected, skipping...');
+              docxObjects.push(new Paragraph({
+                children: [new TextRun(`[Invalid image URL]`)],
+                alignment: AlignmentType.CENTER,
+              }));
+              break;
+            }
+
             const proxiedImage = await getProxiedImageBuffer(imageNode.url);
             let imageChildren;
-            if (proxiedImage) {
-              // The DOCX library can determine dimensions from the buffer directly.
-              // No need for client-side Image objects. Max width is controlled via options.
-              const docxWidth = 550;
+            
+            if (proxiedImage && proxiedImage.buffer && proxiedImage.buffer.byteLength > 0) {
+              // Calculate appropriate dimensions (max width: 550, maintain aspect ratio)
+              const maxWidth = 550;
+              const defaultHeight = 400; // Default height, will be adjusted by aspect ratio
+              
               imageChildren = [new ImageRun({
                 data: proxiedImage.buffer,
                 transformation: {
-                  width: docxWidth,
-                  height: docxWidth, // Height will be adjusted based on aspect ratio automatically by the library
-                }
+                  width: maxWidth,
+                  height: defaultHeight,
+                },
+                type: 'png', // Default type, will be overridden by actual content type
               })];
+              
+              console.log(`Successfully processed image: ${imageNode.url}`);
             } else {
-              console.warn(`Could not create image buffer for URL: ${imageNode.url}`);
-              imageChildren = [new TextRun(`[Image failed to load: ${imageNode.alt || imageNode.url}]`)];
+              console.warn(`Could not create valid image buffer for URL: ${imageNode.url}`);
+              const fallbackText = imageNode.alt || imageNode.url || '[Image not available]';
+              imageChildren = [new TextRun(`[Image failed to load: ${fallbackText}]`)];
             }
 
             const imageParagraph = new Paragraph({
-              ...(customStyles.imageParagraph || { alignment: AlignmentType.CENTER }),
+              ...(customStyles?.imageParagraph || { alignment: AlignmentType.CENTER }),
               children: imageChildren,
             });
             docxObjects.push(imageParagraph);
 
-            if (captionText) {
+            // Add caption if present
+            if (captionText && captionText.trim()) {
               docxObjects.push(new Paragraph({
                 children: [
                   new TextRun({ text: "Figure ", bold: true }),
@@ -203,13 +220,16 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
                   new TextRun(captionText),
                 ],
                 style: "Caption",
+                alignment: AlignmentType.CENTER,
               }));
-              i++;
+              i++; // Skip the caption node in next iteration
             }
           } catch (e) {
             console.error("Failed to process block image", e);
+            const errorMessage = e instanceof Error ? e.message : 'Unknown error';
             docxObjects.push(new Paragraph({
-              children: [new TextRun(`[Error processing image: ${imageNode.url}]`)]
+              children: [new TextRun(`[Error processing image: ${imageNode.url} - ${errorMessage}]`)],
+              alignment: AlignmentType.CENTER,
             }));
           }
         } else {
@@ -221,7 +241,22 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
         break;
       }
       case 'list':
-        docxObjects.push(...await processListItems(node, 0));
+        try {
+          const listItems = await processListItems(node, 0);
+          if (listItems.length > 0) {
+            docxObjects.push(...listItems);
+          } else {
+            console.warn('Empty list detected, adding placeholder...');
+            docxObjects.push(new Paragraph({
+              children: [new TextRun('[Empty list]')],
+            }));
+          }
+        } catch (listError) {
+          console.error('Error processing list:', listError);
+          docxObjects.push(new Paragraph({
+            children: [new TextRun('[List processing error]')],
+          }));
+        }
         break;
       case 'table': {
         const captionText = getCaption(nextNode);
@@ -237,31 +272,82 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
           }));
           i++;
         }
-        const tableRows = await Promise.all(node.children.map(async (row, rowIndex) => {
-          return new TableRow({
-            children: await Promise.all(row.children.map(async cell => {
-              // Table cells contain phrasing content (inline content)
-              // Process all inline content in the cell
-              const children = await transformInlines(cell.children, footnoteIdMap, baseRunOptions, options);
+        try {
+          // Ensure we have table rows
+          if (!node.children || node.children.length === 0) {
+            console.warn('Empty table detected, skipping...');
+            docxObjects.push(new Paragraph({
+              children: [new TextRun('[Empty table]')],
+            }));
+            break;
+          }
 
-              // Ensure at least one paragraph in the cell (even if empty)
-              const cellParagraph = new Paragraph({
-                ...baseParagraphOptions,
-                children: children.length > 0 ? children : [new TextRun('')],
-              });
+          const tableRows = await Promise.all(node.children.map(async (row, rowIndex) => {
+            try {
+              return new TableRow({
+                children: await Promise.all(row.children.map(async cell => {
+                  try {
+                    // Table cells contain phrasing content (inline content)
+                    // Process all inline content in the cell
+                    const children = await transformInlines(cell.children, footnoteIdMap, baseRunOptions, options);
 
-              return new TableCell({
-                children: [cellParagraph],
+                    // Ensure at least one paragraph in the cell (even if empty)
+                    const cellParagraph = new Paragraph({
+                      ...baseParagraphOptions,
+                      children: children.length > 0 ? children : [new TextRun('')],
+                    });
+
+                    return new TableCell({
+                      children: [cellParagraph],
+                      margins: {
+                        top: 100,
+                        bottom: 100,
+                        left: 100,
+                        right: 100,
+                      },
+                    });
+                  } catch (cellError) {
+                    console.error('Error processing table cell:', cellError);
+                    return new TableCell({
+                      children: [new Paragraph({
+                        children: [new TextRun('[Cell error]')],
+                      })],
+                    });
+                  }
+                })),
+                tableHeader: rowIndex === 0,
               });
-            })),
-            tableHeader: rowIndex === 0,
-          });
-        }));
-        docxObjects.push(new Table({
-          rows: tableRows,
-          width: { size: 100, type: WidthType.PERCENTAGE },
-          style: "CustomTableStyle",
-        }));
+            } catch (rowError) {
+              console.error('Error processing table row:', rowError);
+              return new TableRow({
+                children: [new TableCell({
+                  children: [new Paragraph({
+                    children: [new TextRun('[Row error]')],
+                  })],
+                })],
+              });
+            }
+          }));
+
+          docxObjects.push(new Table({
+            rows: tableRows,
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            style: "CustomTableStyle",
+            borders: {
+              top: { style: 'single', size: 1 },
+              bottom: { style: 'single', size: 1 },
+              left: { style: 'single', size: 1 },
+              right: { style: 'single', size: 1 },
+              insideHorizontal: { style: 'single', size: 1 },
+              insideVertical: { style: 'single', size: 1 },
+            },
+          }));
+        } catch (tableError) {
+          console.error('Error processing table:', tableError);
+          docxObjects.push(new Paragraph({
+            children: [new TextRun('[Table processing error]')],
+          }));
+        }
         break;
       }
       case 'blockquote':
@@ -357,7 +443,14 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
               }));
             }
           } catch (e) {
-            // Silently skip if we can't extract content
+            console.warn('Unable to process unknown node type:', node.type, e);
+            // Add fallback paragraph for unknown content
+            const nodeContent = extractTextFromNode(node);
+            if (nodeContent.trim()) {
+              docxObjects.push(new Paragraph({
+                children: [new TextRun(nodeContent)],
+              }));
+            }
           }
         }
         break;

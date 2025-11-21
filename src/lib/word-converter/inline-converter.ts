@@ -34,15 +34,31 @@ export async function transformInlines(
         break;
       case 'image':
         try {
+          // Skip invalid or empty URLs for inline images
+          if (!node.url || node.url.trim() === '') {
+            console.warn('Empty or invalid inline image URL detected, skipping...');
+            runs.push(new TextRun({ text: `[Invalid image]` }));
+            break;
+          }
+
           const proxiedImage = await getProxiedImageBuffer(node.url);
-          if (proxiedImage) {
-            // Removed hardcoded size for inline images
+          if (proxiedImage && proxiedImage.buffer && proxiedImage.buffer.byteLength > 0) {
             runs.push(new ImageRun({
               data: proxiedImage.buffer,
-              transformation: { width: 150, height: 100 } // A smaller default
+              transformation: { width: 150, height: 100 }, // Smaller default for inline
+              type: 'png', // Default type
             }));
+            console.log(`Successfully processed inline image: ${node.url}`);
+          } else {
+            // Fallback to alt text or URL
+            const fallbackText = node.alt || '[Image]';
+            runs.push(new TextRun({ text: fallbackText }));
           }
-        } catch (e) { console.error("Failed to process inline image", e); }
+        } catch (e) { 
+          console.error("Failed to process inline image", e); 
+          const fallbackText = node.alt || '[Image error]';
+          runs.push(new TextRun({ text: fallbackText }));
+        }
         break;
       case 'link': {
         const linkChildren = await transformInlines(node.children, footnoteIdMap, { ...baseOptions, style: 'Hyperlink' }, options);

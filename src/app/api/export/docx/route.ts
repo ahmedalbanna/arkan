@@ -8,9 +8,9 @@ import type { ConversionOptions } from '@/lib/word-converter/types';
 import { templates } from '@/lib/docx-styles';
 
 const exportSchema = z.object({
-  markdown: z.string(),
-  fileName: z.string(),
-  options: z.custom<ConversionOptions>(),
+  markdown: z.string().min(1, "Markdown content is required"),
+  fileName: z.string().min(1, "File name is required"),
+  options: z.custom<ConversionOptions>().optional().default({}),
 });
 
 export async function POST(req: NextRequest) {
@@ -23,6 +23,11 @@ export async function POST(req: NextRequest) {
     }
 
     const { markdown, fileName, options } = validation.data;
+    
+    // Validate markdown content is not empty
+    if (!markdown.trim()) {
+      return new NextResponse(JSON.stringify({ message: 'Markdown content cannot be empty' }), { status: 400 });
+    }
     
     // The conversion function returns a Buffer/Blob when run on the server
     const docxBuffer = await convertMarkdownToWord(markdown, fileName, options);

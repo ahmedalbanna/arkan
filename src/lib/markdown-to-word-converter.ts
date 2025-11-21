@@ -57,6 +57,7 @@ const numbering: INumberingOptions = {
  */
 export async function convertMarkdownToWord(
   markdown: string,
+  fileName?: string,
   options: ConversionOptions = {}
 ): Promise<Buffer | Blob> {
   const { styles, coverPageMarkdown } = options;
