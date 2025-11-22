@@ -20,7 +20,7 @@ const AGENTS_JSON_PATH = path.join(__dirname, '..', 'AllAgents.json');
 async function createDatabase() {
   return new Promise((resolve, reject) => {
     console.log('🗄️  Creating SQLite database...');
-    
+
     // Remove existing database
     if (fs.existsSync(DB_PATH)) {
       fs.unlinkSync(DB_PATH);
@@ -37,7 +37,7 @@ async function createDatabase() {
 
     // Read and execute schema
     const schema = fs.readFileSync(SCHEMA_PATH, 'utf8');
-    
+
     db.exec(schema, (err) => {
       if (err) {
         reject(err);
@@ -54,7 +54,7 @@ async function createDatabase() {
  */
 function loadAgentsData() {
   console.log('📄 Loading agents data...');
-  
+
   if (!fs.existsSync(AGENTS_JSON_PATH)) {
     throw new Error(`AllAgents.json not found at ${AGENTS_JSON_PATH}`);
   }
@@ -73,7 +73,7 @@ function transformAgentData(agentData) {
     name: agentData.name,
     description: agentData.data.description || '',
     icon: agentData.data.avatar?.data?.value || '🤖',
-    category: extractCategory(agentData.name),
+    category: extractCategory(agentData),
     version: '1.0.0',
     author: 'System',
     tags: JSON.stringify(extractTags(agentData)),
@@ -98,16 +98,150 @@ function transformAgentData(agentData) {
 /**
  * Extract category from agent name
  */
-function extractCategory(name) {
-  if (name.includes('Academic') || name.includes('Report') || name.includes('Research')) {
-    return 'Academic';
+function extractCategory(agentData) {
+  const name = agentData.name.toLowerCase();
+  const description = (agentData.data.description || '').toLowerCase();
+  const content = `${name} ${description}`;
+
+  // Featured/Popular categories first
+  if (content.includes('featured') || content.includes('popular') || content.includes('top')) {
+    return 'Featured';
   }
-  if (name.includes('Blog') || name.includes('Content') || name.includes('Writing')) {
-    return 'Content Creation';
-  }
-  if (name.includes('User Stories') || name.includes('Task') || name.includes('Project')) {
+
+  // Business & Management
+  if (content.includes('project') || content.includes('user stories') || content.includes('agile') || 
+      content.includes('scrum') || content.includes('kanban')) {
     return 'Project Management';
   }
+  
+  if (content.includes('task') || content.includes('todo') || content.includes('schedule') || 
+      content.includes('organize') || content.includes('plan')) {
+    return 'Task Management';
+  }
+
+  if (content.includes('productivity') || content.includes('efficiency') || content.includes('workflow')) {
+    return 'Productivity';
+  }
+
+  if (content.includes('meeting') || content.includes('standup') || content.includes('conference')) {
+    return 'Meetings';
+  }
+
+  if (content.includes('crm') || content.includes('customer') || content.includes('client')) {
+    return 'CRM';
+  }
+
+  if (content.includes('sales') || content.includes('lead') || content.includes('prospect') || 
+      content.includes('revenue') || content.includes('deal')) {
+    return 'Sales';
+  }
+
+  if (content.includes('finance') || content.includes('budget') || content.includes('accounting') || 
+      content.includes('invoice') || content.includes('financial')) {
+    return 'Finance';
+  }
+
+  if (content.includes('business') || content.includes('strategy') || content.includes('entrepreneur')) {
+    return 'Business';
+  }
+
+  // Marketing & Content
+  if (content.includes('marketing') || content.includes('campaign') || content.includes('promotion')) {
+    return 'Marketing';
+  }
+
+  if (content.includes('social media') || content.includes('facebook') || content.includes('twitter') || 
+      content.includes('linkedin') || content.includes('instagram')) {
+    return 'Social Media';
+  }
+
+  if (content.includes('advertising') || content.includes('ads') || content.includes('ppc') || 
+      content.includes('adword')) {
+    return 'Digital Advertising';
+  }
+
+  if (content.includes('brand') || content.includes('identity') || content.includes('logo') || 
+      content.includes('visual')) {
+    return 'Branding';
+  }
+
+  if (content.includes('pr ') || content.includes('public relations') || content.includes('media relations') || 
+      content.includes('press')) {
+    return 'Public Relations';
+  }
+
+  if (content.includes('community') || content.includes('forum') || content.includes('moderation')) {
+    return 'Community Management';
+  }
+
+  // Content & Creative
+  if (content.includes('content') || content.includes('blog') || content.includes('article') || 
+      content.includes('writing') || content.includes('copywriting')) {
+    return 'Content';
+  }
+
+  if (content.includes('creative') || content.includes('design') || content.includes('art') || 
+      content.includes('brainstorm')) {
+    return 'Creativity';
+  }
+
+  if (content.includes('curation') || content.includes('curator') || content.includes('collect')) {
+    return 'Content Curation';
+  }
+
+  // Technical & Development
+  if (content.includes('program') || content.includes('code') || content.includes('develop') || 
+      content.includes('software') || content.includes('api')) {
+    return 'Programming';
+  }
+
+  if (content.includes('product') || content.includes('development') || content.includes('feature') || 
+      content.includes('roadmap')) {
+    return 'Product Development';
+  }
+
+  if (content.includes('automation') || content.includes('automate') || content.includes('script')) {
+    return 'Task Automation';
+  }
+
+  // Research & Analysis
+  if (content.includes('research') || content.includes('academic') || content.includes('study') || 
+      content.includes('analysis')) {
+    return 'Research';
+  }
+
+  if (content.includes('analytics') || content.includes('data') || content.includes('metrics') || 
+      content.includes('report')) {
+    return 'Analytics';
+  }
+
+  if (content.includes('knowledge') || content.includes('wiki') || content.includes('documentation') || 
+      content.includes('library')) {
+    return 'Knowledge Management';
+  }
+
+  // Language & Translation
+  if (content.includes('translat') || content.includes('language') || content.includes('localiz')) {
+    return 'Translator';
+  }
+
+  // Learning & Personal Development
+  if (content.includes('learn') || content.includes('education') || content.includes('training') || 
+      content.includes('course') || content.includes('tutorial')) {
+    return 'Learning and Development';
+  }
+
+  if (content.includes('coach') || content.includes('mentor') || content.includes('guidance') || 
+      content.includes('advice')) {
+    return 'Coaching';
+  }
+
+  if (content.includes('personal') || content.includes('habit') || content.includes('goal') || 
+      content.includes('lifestyle')) {
+    return 'Personal';
+  }
+
+  // Default category
   return 'General';
 }
 
@@ -116,22 +250,153 @@ function extractCategory(name) {
  */
 function extractTags(agentData) {
   const tags = [];
-  
-  if (agentData.name.includes('Academic')) tags.push('academic');
-  if (agentData.name.includes('Blog')) tags.push('blogging');
-  if (agentData.name.includes('User Stories')) tags.push('agile');
-  if (agentData.data.language) tags.push(agentData.data.language);
-  if (agentData.data.tone) tags.push(agentData.data.tone);
-  
-  // Add command-based tags
+  const name = agentData.name.toLowerCase();
+  const description = (agentData.data.description || '').toLowerCase();
+  const content = `${name} ${description}`;
+
+  // Core functionality tags
+  if (content.includes('write') || content.includes('writing') || content.includes('author')) {
+    tags.push('writing', 'content-creation');
+  }
+  if (content.includes('generate') || content.includes('creation') || content.includes('create')) {
+    tags.push('generation', 'ai-powered');
+  }
+  if (content.includes('analyze') || content.includes('analysis') || content.includes('review')) {
+    tags.push('analysis', 'insights');
+  }
+  if (content.includes('manage') || content.includes('management') || content.includes('organize')) {
+    tags.push('management', 'organization');
+  }
+  if (content.includes('automate') || content.includes('automation') || content.includes('workflow')) {
+    tags.push('automation', 'efficiency');
+  }
+
+  // Business tags
+  if (content.includes('business') || content.includes('professional') || content.includes('corporate')) {
+    tags.push('business', 'professional');
+  }
+  if (content.includes('startup') || content.includes('entrepreneur')) {
+    tags.push('startup', 'entrepreneurship');
+  }
+  if (content.includes('team') || content.includes('collaboration') || content.includes('group')) {
+    tags.push('teamwork', 'collaboration');
+  }
+
+  // Marketing & Sales tags
+  if (content.includes('marketing') || content.includes('campaign') || content.includes('promotion')) {
+    tags.push('marketing', 'digital-marketing');
+  }
+  if (content.includes('seo') || content.includes('search engine')) {
+    tags.push('seo', 'search-optimization');
+  }
+  if (content.includes('social') || content.includes('facebook') || content.includes('twitter')) {
+    tags.push('social-media', 'social-marketing');
+  }
+  if (content.includes('email') || content.includes('newsletter') || content.includes('outreach')) {
+    tags.push('email-marketing', 'outreach');
+  }
+  if (content.includes('sales') || content.includes('lead') || content.includes('prospect')) {
+    tags.push('sales', 'lead-generation');
+  }
+
+  // Content & Creative tags
+  if (content.includes('blog') || content.includes('article') || content.includes('post')) {
+    tags.push('blogging', 'articles');
+  }
+  if (content.includes('creative') || content.includes('design') || content.includes('art')) {
+    tags.push('creative', 'design');
+  }
+  if (content.includes('story') || content.includes('narrative') || content.includes('storytelling')) {
+    tags.push('storytelling', 'narrative');
+  }
+  if (content.includes('video') || content.includes('podcast') || content.includes('multimedia')) {
+    tags.push('multimedia', 'video-content');
+  }
+
+  // Technical tags
+  if (content.includes('code') || content.includes('programming') || content.includes('development')) {
+    tags.push('programming', 'development');
+  }
+  if (content.includes('api') || content.includes('integration') || content.includes('webhook')) {
+    tags.push('api', 'integration');
+  }
+  if (content.includes('data') || content.includes('database') || content.includes('analytics')) {
+    tags.push('data', 'analytics');
+  }
+
+  // Language & Communication tags
+  if (content.includes('translat') || content.includes('language') || content.includes('multilingual')) {
+    tags.push('translation', 'multilingual');
+  }
+  if (content.includes('communication') || content.includes('messaging') || content.includes('chat')) {
+    tags.push('communication', 'messaging');
+  }
+
+  // Industry-specific tags
+  if (content.includes('healthcare') || content.includes('medical') || content.includes('health')) {
+    tags.push('healthcare', 'medical');
+  }
+  if (content.includes('education') || content.includes('learning') || content.includes('training')) {
+    tags.push('education', 'e-learning');
+  }
+  if (content.includes('finance') || content.includes('financial') || content.includes('accounting')) {
+    tags.push('finance', 'fintech');
+  }
+  if (content.includes('legal') || content.includes('law') || content.includes('compliance')) {
+    tags.push('legal', 'compliance');
+  }
+  if (content.includes('retail') || content.includes('ecommerce') || content.includes('shopping')) {
+    tags.push('retail', 'ecommerce');
+  }
+
+  // Productivity & Organization tags
+  if (content.includes('todo') || content.includes('task') || content.includes('checklist')) {
+    tags.push('todo', 'task-management');
+  }
+  if (content.includes('calendar') || content.includes('schedule') || content.includes('appointment')) {
+    tags.push('scheduling', 'calendar');
+  }
+  if (content.includes('note') || content.includes('documentation') || content.includes('wiki')) {
+    tags.push('documentation', 'notes');
+  }
+
+  // User experience tags
+  if (content.includes('beginner') || content.includes('simple') || content.includes('easy')) {
+    tags.push('beginner-friendly', 'easy-to-use');
+  }
+  if (content.includes('advanced') || content.includes('expert') || content.includes('professional')) {
+    tags.push('advanced', 'expert-level');
+  }
+  if (content.includes('quick') || content.includes('fast') || content.includes('instant')) {
+    tags.push('quick-results', 'fast');
+  }
+
+  // Command-based tags
   (agentData.data.commands || []).forEach(cmd => {
-    if (cmd.name.includes('Write') || cmd.name.includes('Generate')) {
-      tags.push('generation');
+    const cmdName = cmd.name.toLowerCase();
+    if (cmdName.includes('write') || cmdName.includes('generate')) {
+      tags.push('content-generation');
     }
-    if (cmd.name.includes('Analyze') || cmd.name.includes('Review')) {
-      tags.push('analysis');
+    if (cmdName.includes('analyze') || cmdName.includes('review') || cmdName.includes('audit')) {
+      tags.push('analysis-tools');
+    }
+    if (cmdName.includes('optimize') || cmdName.includes('improve')) {
+      tags.push('optimization');
+    }
+    if (cmdName.includes('plan') || cmdName.includes('strategy')) {
+      tags.push('planning', 'strategy');
+    }
+    if (cmdName.includes('research') || cmdName.includes('investigate')) {
+      tags.push('research-tools');
     }
   });
+
+  // Legacy data tags
+  if (agentData.data.language) tags.push(`language-${agentData.data.language.toLowerCase()}`);
+  if (agentData.data.tone) tags.push(`tone-${agentData.data.tone.toLowerCase()}`);
+
+  // Platform tags
+  tags.push('ai-assistant', 'arkan-platform');
 
   return [...new Set(tags)]; // Remove duplicates
 }
@@ -193,7 +458,7 @@ async function insertAgentData(db, agentsData) {
           });
 
           // Insert capabilities based on commands
-          const capabilities = [...new Set(commands.map(cmd => 
+          const capabilities = [...new Set(commands.map(cmd =>
             cmd.name.split(' ')[0].toLowerCase()
           ))];
 

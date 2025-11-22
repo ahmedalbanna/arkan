@@ -176,15 +176,15 @@ export const useAgentStore = create<AgentState>()(
           return get().agents;
         }
 
-        // Check search cache first
-        const { searchCache } = get();
+        // Check search cache first (read-only)
+        const { searchCache, agents } = get();
         const cacheKey = searchTerm.toLowerCase();
         if (searchCache.has(cacheKey)) {
           return searchCache.get(cacheKey) || [];
         }
 
-        // Perform search
-        const results = get().agents.filter(agent => {
+        // Perform search (pure function)
+        const results = agents.filter(agent => {
           const name = agent.name.toLowerCase();
           const description = (agent.description || agent.data?.description || '').toLowerCase();
           const category = (agent.category || '').toLowerCase();
@@ -197,10 +197,13 @@ export const useAgentStore = create<AgentState>()(
           return searchText.includes(searchTerm.toLowerCase());
         });
 
-        // Cache the search results
-        const newSearchCache = new Map(searchCache);
-        newSearchCache.set(cacheKey, results);
-        set({ searchCache: newSearchCache });
+        // Cache the search results asynchronously to avoid render issues
+        setTimeout(() => {
+          const currentCache = get().searchCache;
+          const newSearchCache = new Map(currentCache);
+          newSearchCache.set(cacheKey, results);
+          set({ searchCache: newSearchCache });
+        }, 0);
 
         return results;
       },

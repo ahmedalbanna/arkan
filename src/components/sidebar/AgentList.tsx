@@ -14,16 +14,29 @@ interface AgentListProps {
 }
 
 export const AgentList: React.FC<AgentListProps> = ({ agents }) => {
-  const { selectedAgent, selectAgent, searchAgents } = useAgentStore();
+  const { selectedAgent, selectAgent } = useAgentStore();
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Use the optimized search from the store
+  // Use local filtering to avoid setState during render
   const filteredAgents = useMemo(() => {
     if (!searchQuery.trim()) {
         return agents;
     }
-    return searchAgents(searchQuery);
-  }, [agents, searchQuery, searchAgents]);
+    
+    // Perform local search without updating store state
+    return agents.filter(agent => {
+      const name = agent.name.toLowerCase();
+      const description = (agent.description || agent.data?.description || '').toLowerCase();
+      const category = (agent.category || '').toLowerCase();
+      const tags = (agent.tags || []).join(' ').toLowerCase();
+      const commands = (agent.commands || agent.data?.commands || [])
+        .map(cmd => (cmd.name + ' ' + cmd.description).toLowerCase())
+        .join(' ');
+      
+      const searchText = `${name} ${description} ${category} ${tags} ${commands}`;
+      return searchText.includes(searchQuery.toLowerCase());
+    });
+  }, [agents, searchQuery]);
 
   return (
     <div className="flex h-full flex-col">
