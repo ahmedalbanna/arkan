@@ -10,6 +10,9 @@ export * from './models/user';
 // word-converter types are exported under a namespace to avoid name collisions
 export * as WordConverterTypes from './word-converter/types';
 
+// Re-export PptxStyleOptions from the schemas
+export type { PptxStyleOptions } from '@/ai/schemas/template-schemas';
+
 export interface HistoryEntry {
     id: string;
     createdAt: string;

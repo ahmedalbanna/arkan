@@ -73,7 +73,7 @@ export async function convertMarkdownToPptx(
     pptx.subject = options.subject || 'Markdown Presentation';
     pptx.title = options.title || fileName;
 
-    const processedMarkdown = processPlantUml(markdown);
+    const processedMarkdown = await processPlantUml(markdown);
     const ast = unified().use(remarkParse).use(remarkGfm).parse(processedMarkdown) as MdastRoot;
     let slidesContent = splitAstIntoSlides(ast);
 
@@ -124,7 +124,7 @@ export async function convertMarkdownToPdf(
 ) {
     const { styles = templates.modern.styles } = options;
 
-    const processedMarkdown = processPlantUml(markdown);
+    const processedMarkdown = await processPlantUml(markdown);
     const ast = unified().use(remarkParse).use(remarkGfm).parse(processedMarkdown) as MdastRoot;
     const slidesContent = splitAstIntoSlides(ast);
 

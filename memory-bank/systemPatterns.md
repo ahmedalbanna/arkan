@@ -444,6 +444,227 @@ const ExpensiveComponent = memo(({ data }: Props) => {
 });
 ```
 
+## Document Processing Patterns
+
+### 1. PPTX Export Processing Pattern
+
+#### **Overview**
+A comprehensive pattern for converting markdown content to PowerPoint presentations with professional quality and reliability.
+
+#### **Core Architecture**
+```typescript
+// Main processing pipeline
+interface PptxExportPipeline {
+  // Input validation and preprocessing
+  validateInput(markdown: string): ValidationResult;
+  
+  // AST generation and processing
+  parseMarkdown(markdown: string): MdastRoot;
+  
+  // Content organization
+  groupContent(nodes: RootContent[]): RootContent[][];
+  
+  // Slide generation
+  generateSlides(groups: RootContent[][], styles: PptxStyleOptions): PptxGenJS.Slide[];
+  
+  // Export finalization
+  finalizeExport(pptx: PptxGenJS): Promise<Buffer>;
+}
+```
+
+#### **Content Processing Strategy**
+```typescript
+// Individual element processing for maximum control
+function groupContentNodes(nodes: RootContent[]): RootContent[][] {
+  // Each node gets its own group - no combining of elements
+  return nodes.map(node => [node]);
+}
+
+// Specialized processors for different content types
+const contentProcessors = {
+  paragraph: processParagraphNode,
+  list: processListNode,
+  table: processTableNode,
+  code: processCodeNode,
+  image: processImageNode,
+  heading: processHeadingNode
+};
+```
+
+#### **Height Calculation & Overflow Management**
+```typescript
+// Enhanced height calculation with safety margins
+function calculateElementHeight(
+  node: RootContent, 
+  styles: PptxStyleOptions, 
+  widthInches: number
+): number {
+  const minElementHeight = 0.3;
+  const safetyMargin = 0.1;
+  
+  // Content-specific calculations with fallback handling
+  const baseHeight = calculateBaseHeight(node, styles, widthInches);
+  return Math.max(minElementHeight, baseHeight + safetyMargin);
+}
+
+// Smart text overflow handling
+function splitRunsByHeight(
+  allRuns: PptxGenJS.TextProps[],
+  availableHeight: number,
+  styles: PptxStyleOptions
+): { current: PptxGenJS.TextProps[], remaining: PptxGenJS.TextProps[] } {
+  // Sentence-boundary splitting first, word-level fallback
+  // Prevents awkward mid-sentence breaks
+  // Includes safety margins to prevent cutoff
+}
+```
+
+#### **Bullet and List Formatting**
+```typescript
+// PptxGenJS v3.12.0 compatible bullet configuration
+function configureBulletFormatting(isOrdered: boolean, level: number, styles: PptxStyleOptions) {
+  const baseIndent = 25 + (level * 25);
+  
+  if (isOrdered) {
+    return {
+      indent: baseIndent,
+      type: 'number',
+      numberType: 'arabicPeriod' // Ensures "1.", "2.", "3." format
+    };
+  } else {
+    return {
+      indent: baseIndent,
+      type: 'bullet',
+      code: styles.bullet?.code || '2022' // Default bullet character
+    };
+  }
+}
+```
+
+#### **Error Recovery & Graceful Degradation**
+```typescript
+// Robust error handling with fallbacks
+async function processContentWithFallback<T>(
+  processor: () => Promise<T>,
+  fallback: () => T,
+  errorContext: string
+): Promise<T> {
+  try {
+    return await processor();
+  } catch (error) {
+    console.warn(`${errorContext} failed, using fallback:`, error);
+    return fallback();
+  }
+}
+```
+
+#### **Performance Optimization Patterns**
+```typescript
+// Efficient memory management
+interface ProcessingContext {
+  memoryPool: Map<string, any>;
+  cache: Map<string, CalculationResult>;
+  
+  // Automatic cleanup
+  cleanup(): void;
+  
+  // Resource tracking
+  trackMemoryUsage(): MemoryMetrics;
+}
+
+// Batch processing for large documents
+async function processSlidesInBatches(
+  slideGroups: RootContent[][],
+  batchSize: number = 10
+): Promise<PptxGenJS.Slide[]> {
+  const results = [];
+  for (let i = 0; i < slideGroups.length; i += batchSize) {
+    const batch = slideGroups.slice(i, i + batchSize);
+    const batchResults = await Promise.all(
+      batch.map(group => processSlideGroup(group))
+    );
+    results.push(...batchResults);
+    
+    // Memory cleanup between batches
+    if (i % (batchSize * 2) === 0) {
+      await forceGarbageCollection();
+    }
+  }
+  return results;
+}
+```
+
+#### **Type Safety & Validation**
+```typescript
+// Comprehensive type definitions
+interface PptxExportOptions {
+  title?: string;
+  author?: string;
+  styles?: PptxStyleOptions;
+  template?: PptxTemplate;
+  rtl?: boolean;
+  fonts?: FontOptions;
+}
+
+// Runtime validation with Zod
+const PptxExportOptionsSchema = z.object({
+  title: z.string().optional(),
+  author: z.string().optional(),
+  styles: PptxStyleOptionsSchema.optional(),
+  template: z.string().optional(),
+  rtl: z.boolean().optional()
+});
+```
+
+#### **Usage Example**
+```typescript
+// Complete PPTX export implementation
+async function exportToPptx(markdown: string, options: PptxExportOptions = {}) {
+  try {
+    // 1. Input validation
+    const validatedOptions = PptxExportOptionsSchema.parse(options);
+    
+    // 2. Process markdown to AST
+    const processedMarkdown = await processPlantUml(markdown);
+    const ast = unified().use(remarkParse).use(remarkGfm).parse(processedMarkdown);
+    
+    // 3. Initialize presentation
+    const pptx = new PptxGenJS();
+    setupPptxDefaults(pptx, validatedOptions);
+    
+    // 4. Generate slides with error handling
+    const slides = await createSlidesWithContent(
+      pptx, 
+      extractSlideContent(ast), 
+      resolveStyles(validatedOptions.styles),
+      getMasterNames(validatedOptions.template),
+      validatedOptions.rtl || false
+    );
+    
+    // 5. Finalize and return
+    return await pptx.write('nodebuffer');
+    
+  } catch (error) {
+    throw new Error(`PPTX export failed: ${error.message}`);
+  }
+}
+```
+
+#### **Benefits & Best Practices**
+- **Reliability**: Comprehensive error handling prevents export failures
+- **Performance**: Optimized processing pipeline handles large documents efficiently
+- **Quality**: Professional output with proper formatting and layout
+- **Maintainability**: Clear separation of concerns and type safety
+- **Flexibility**: Individual element control allows for precise customization
+- **Scalability**: Efficient memory management supports large document exports
+
+#### **Common Pitfalls & Solutions**
+1. **Memory Leaks**: Implement proper cleanup and resource management
+2. **Type Mismatches**: Use comprehensive TypeScript definitions and runtime validation
+3. **Layout Issues**: Include safety margins and minimum height requirements
+4. **Performance Degradation**: Use batch processing and memory monitoring
+5. **Bullet Formatting**: Ensure PptxGenJS version compatibility
+
 ## Testing Patterns
 
 ### 1. Component Testing Pattern

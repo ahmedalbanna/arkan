@@ -13,14 +13,18 @@ export const layout = {
     SUBTITLE_Y: 1.2,
     SUBTITLE_H: 0.4,
     BODY_START_Y: 1.5,
-    SLIDE_MARGIN_BOTTOM: 0.675, // Vertical margin at the bottom of the slide in inches
+    SLIDE_MARGIN_BOTTOM: 0.8, // Increased margin to prevent cutting off content
     IMAGE_H: 2.5,
     IMAGE_W: 7.0,
-    ELEMENT_PADDING: 0.2, // Vertical padding between elements in inches
+    ELEMENT_PADDING: 0.15, // Optimized padding for better content flow
     get BODY_END_Y() {
         return this.SLIDE_HEIGHT - this.SLIDE_MARGIN_BOTTOM;
     },
     get IMAGE_X() {
         return (this.SLIDE_WIDTH - this.IMAGE_W) / 2; // Center the image
     },
+    // Additional spacing constants for improved layout
+    MIN_ELEMENT_HEIGHT: 0.3,
+    SAFETY_MARGIN: 0.1,
+    TEXT_BOX_MARGIN: 0.05,
 };

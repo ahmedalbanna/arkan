@@ -194,6 +194,8 @@ export const PptxStyleOptionsSchema = z.object({
   }),
 });
 
+export type PptxStyleOptions = z.infer<typeof PptxStyleOptionsSchema>;
+
 // PPTX Template
 export const PptxTemplateSchema = BaseTemplateSchema.extend({
   styles: PptxStyleOptionsSchema,
