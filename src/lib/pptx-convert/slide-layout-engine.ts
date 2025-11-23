@@ -1,4 +1,4 @@
-import { type FootnoteDefinition, type List, type ListItem, type Root as MdastRoot, type Paragraph, type RootContent, type Blockquote } from 'mdast';
+import { type FootnoteDefinition, type List, type ListItem, type Root as MdastRoot, type Paragraph, type RootContent } from 'mdast';
 import PptxGenJS from 'pptxgenjs';
 
 import type { PptxStyleOptions } from '@/lib/types';
@@ -43,7 +43,7 @@ function getFontProperties(
 function calculateElementHeight(node: RootContent, styles: PptxStyleOptions, widthInches: number = layout.CONTENT_WIDTH): number {
     const minElementHeight = 0.3; // Minimum height for any element
     const safetyMargin = 0.1; // Extra margin for safety
-    
+
     switch (node.type) {
         case 'paragraph': {
             if (node.children.length === 1 && node.children[0].type === 'image') {
@@ -53,7 +53,7 @@ function calculateElementHeight(node: RootContent, styles: PptxStyleOptions, wid
             if (!paraText.trim()) {
                 return minElementHeight + layout.ELEMENT_PADDING;
             }
-            
+
             const { fontFace, fontSize, lineHeight } = getFontProperties(styles.body, {}); // styles.body is always defined
             const lineCount = calculateLineCount(paraText, fontFace, fontSize, widthInches);
             const calculatedHeight = (lineCount * lineHeight) + layout.ELEMENT_PADDING + safetyMargin;
@@ -68,19 +68,19 @@ function calculateElementHeight(node: RootContent, styles: PptxStyleOptions, wid
             const calculatedHeight = totalHeight + layout.ELEMENT_PADDING + safetyMargin;
             return Math.max(minElementHeight, calculatedHeight);
         }
-        
+
         case 'blockquote': {
             const bqText = getNodeText(node);
             if (!bqText.trim()) {
                 return minElementHeight + layout.ELEMENT_PADDING;
             }
-            
+
             const { fontFace, fontSize, lineHeight } = getFontProperties(styles.blockquote, styles.body);
             const lineCount = calculateLineCount(bqText, fontFace, fontSize, widthInches);
             const calculatedHeight = (lineCount * lineHeight) + layout.ELEMENT_PADDING + safetyMargin;
             return Math.max(minElementHeight, calculatedHeight);
         }
-        
+
         case 'table': {
             let totalTableHeight = 0;
             const tableStyle = styles.table || {};
@@ -115,12 +115,12 @@ function calculateElementHeight(node: RootContent, styles: PptxStyleOptions, wid
             if (!codeText.trim()) {
                 return minElementHeight + layout.ELEMENT_PADDING;
             }
-            
+
             const codeFontSize = styles.code?.fontSize || 12;
             const codeFontFace = styles.code?.fontFace || DEFAULT_CODE_FONT;
             const codeLineHeight = (codeFontSize * 1.4) / POINTS_PER_INCH;
             const lineCount = calculateCodeLineCount(codeText, codeFontFace, codeFontSize, widthInches);
-            
+
             // Code blocks need extra spacing for readability
             const codeMargin = 0.2;
             const calculatedHeight = (lineCount * codeLineHeight) + layout.ELEMENT_PADDING + codeMargin + safetyMargin;
@@ -132,7 +132,7 @@ function calculateElementHeight(node: RootContent, styles: PptxStyleOptions, wid
             if (!headingText.trim()) {
                 return minElementHeight + layout.ELEMENT_PADDING;
             }
-            
+
             const { fontFace, fontSize, lineHeight } = getFontProperties(styles.title, styles.body);
             const lineCount = calculateLineCount(headingText, fontFace, fontSize, widthInches);
             const calculatedHeight = (lineCount * lineHeight) + layout.ELEMENT_PADDING + safetyMargin;
@@ -358,7 +358,7 @@ function splitRunsByHeight(
     const safetyMargin = 0.1;
     const effectiveHeight = Math.max(0, availableHeight - safetyMargin);
     const maxLines = Math.floor(effectiveHeight / lineHeight);
-    
+
     if (maxLines <= 0) {
         return { current: [], remaining: allRuns };
     }
@@ -366,7 +366,7 @@ function splitRunsByHeight(
     // Quick check: if all content fits, return it
     const totalText = allRuns.map(r => r.text || '').join('');
     const totalLineCount = calculateLineCount(totalText, fontFace, fontSize, layout.CONTENT_WIDTH);
-    
+
     if (totalLineCount <= maxLines) {
         return { current: allRuns, remaining: [] };
     }
@@ -374,12 +374,12 @@ function splitRunsByHeight(
     // Find the split point by testing progressively longer text segments
     let splitRunIndex = -1;
     let runsBeforeSplit: PptxGenJS.TextProps[] = [];
-    
+
     for (let i = 0; i < allRuns.length; i++) {
         const testRuns = allRuns.slice(0, i + 1);
         const testText = testRuns.map(r => r.text || '').join('');
         const testLineCount = calculateLineCount(testText, fontFace, fontSize, layout.CONTENT_WIDTH);
-        
+
         if (testLineCount > maxLines) {
             splitRunIndex = i;
             runsBeforeSplit = allRuns.slice(0, i);
@@ -395,7 +395,7 @@ function splitRunsByHeight(
     // Handle the run that needs to be split
     const runToSplit = allRuns[splitRunIndex];
     const textToSplit = runToSplit.text || '';
-    
+
     // If the run is empty, just return what we have so far
     if (!textToSplit.trim()) {
         return {
@@ -415,7 +415,7 @@ function splitRunsByHeight(
         const sentence = sentences[i] + (sentences[i + 1] || '');
         const testText = baseText + textForCurrentRun + sentence;
         const testLineCount = calculateLineCount(testText, fontFace, fontSize, layout.CONTENT_WIDTH);
-        
+
         if (testLineCount > maxLines && textForCurrentRun.length > 0) {
             sentenceIndex = i;
             break;
@@ -427,11 +427,11 @@ function splitRunsByHeight(
     // If we couldn't fit any complete sentences, fall back to word-based splitting
     if (textForCurrentRun.trim().length === 0) {
         const words = textToSplit.split(/(\s+)/);
-        
+
         for (const word of words) {
             const testText = baseText + textForCurrentRun + word;
             const testLineCount = calculateLineCount(testText, fontFace, fontSize, layout.CONTENT_WIDTH);
-            
+
             if (testLineCount > maxLines && textForCurrentRun.length > 0) {
                 break;
             }
@@ -442,13 +442,13 @@ function splitRunsByHeight(
     // Ensure we don't end with just whitespace
     const finalCurrentText = textForCurrentRun.trimEnd();
     let remainingText = textToSplit.substring(finalCurrentText.length).trimStart();
-    
+
     // If we couldn't fit anything meaningful, force at least one word
     if (finalCurrentText.length === 0 && textToSplit.trim().length > 0) {
         const firstWord = textToSplit.trim().split(/\s+/)[0];
         const finalCurrentText2 = firstWord;
         remainingText = textToSplit.substring(firstWord.length).trimStart();
-        
+
         const currentRuns: PptxGenJS.TextProps[] = [...runsBeforeSplit];
         currentRuns.push({ ...runToSplit, text: finalCurrentText2 });
 
@@ -500,7 +500,7 @@ async function processParagraphNode(
         const availableHeight = bodyEndY - y;
         const lineHeight = (styles.body.lineSpacing || (styles.body.fontSize || 18) * 1.2) / POINTS_PER_INCH;
         const minRequiredHeight = lineHeight + 0.1; // Minimum space needed for one line plus margin
-        
+
         // If not enough space for even one line, create new slide
         if (availableHeight < minRequiredHeight) {
             currentSlide = createNewSlide();
@@ -519,37 +519,37 @@ async function processParagraphNode(
 
         if (current.length > 0) {
             const heightForTheseRuns = calculateRunsHeight(current, styles);
-            
+
             // Ensure we don't exceed available space
             const maxAllowedHeight = availableHeight - 0.1; // Safety margin
             const renderHeight = Math.min(
                 Math.max(heightForTheseRuns - layout.ELEMENT_PADDING, minRequiredHeight - layout.ELEMENT_PADDING),
                 maxAllowedHeight
             );
-            
+
             const textOptions: PptxGenJS.TextPropsOptions = {
-                x: options.x ?? layout.CONTENT_X, 
-                y, 
-                w: options.w ?? layout.CONTENT_WIDTH, 
+                x: options.x ?? layout.CONTENT_X,
+                y,
+                w: options.w ?? layout.CONTENT_WIDTH,
                 h: renderHeight,
-                ...styles.body, 
-                rtlMode: isRtl, 
+                ...styles.body,
+                rtlMode: isRtl,
                 align: isRtl ? 'right' : styles.body.align,
                 valign: 'top' // Ensure text starts at the top of the textbox
             };
-            
+
             // Apply bullet formatting only to the first chunk of a list item
             if (isFirstChunk && options.bullet) {
                 textOptions.bullet = options.bullet;
             }
-            
+
             currentSlide.addText(current, textOptions);
             y += Math.min(heightForTheseRuns, availableHeight - 0.05); // Small buffer for next element
         }
 
         textRuns = remaining;
         isFirstChunk = false;
-        
+
         // Prevent infinite loops
         if (remaining.length > 0 && current.length === 0) {
             console.warn('Text processing stuck in loop, forcing new slide');
@@ -588,21 +588,21 @@ async function processListNode(
                 const paraOptions: { bullet?: any; x?: number; w?: number } = {};
                 if (isFirstBlockOfItem) {
                     const baseIndent = 25 + (level * 25);
-                    
+
                     if (node.ordered) {
                         // For numbered lists (1., 2., 3., etc.) - PptxGenJS v3.x format
-                        paraOptions.bullet = { 
+                        paraOptions.bullet = {
                             indent: baseIndent,
                             type: 'number',
                             numberType: 'arabicPeriod'  // This ensures "1.", "2.", "3." format
                         };
                     } else {
                         // For bulleted lists (•, -, etc.) - PptxGenJS v3.x format
-                        const bulletConfig: any = { 
+                        const bulletConfig: any = {
                             indent: baseIndent,
                             type: 'bullet'
                         };
-                        
+
                         // Add bullet code/character if specified in styles
                         if (styles.bullet?.code) {
                             if (typeof styles.bullet.code === 'string') {
@@ -614,7 +614,7 @@ async function processListNode(
                         } else {
                             bulletConfig.code = '2022'; // Default bullet character (•)
                         }
-                        
+
                         paraOptions.bullet = bulletConfig;
                     }
                 } else {
@@ -715,7 +715,7 @@ function manageUnsplittableElementOverflow(
  */
 function groupContentNodes(nodes: RootContent[]): RootContent[][] {
     if (nodes.length === 0) return [];
-    
+
     // Each node gets its own group - no combining of elements
     return nodes.map(node => [node]);
 }
@@ -734,10 +734,10 @@ async function renderContentGroup(
     footnoteIdMap: Map<string, number>,
     createNewSlide: () => PptxGenJS.Slide
 ): Promise<{ slide: PptxGenJS.Slide; y: number }> {
-    
+
     // Since we're not grouping anymore, each group contains only one node
     const node = group[0];
-    
+
     if (node.type === 'paragraph' && !(node.children.length === 1 && node.children[0].type === 'image')) {
         return await processParagraphNode(node, slide, currentY, bodyEndY, styles, isRtl, fonts, footnoteIdMap, createNewSlide);
     } else if (node.type === 'list') {
@@ -792,17 +792,17 @@ export async function createSlidesWithContent(
 
         // Process each content node individually - each gets its own textbox
         const contentGroups = groupContentNodes(bodyNodes);
-        
+
         for (const group of contentGroups) {
             const result = await renderContentGroup(
-                group, 
-                slide, 
-                currentY, 
-                bodyEndY, 
-                styles, 
-                isRtl, 
-                font, 
-                footnoteIdMap, 
+                group,
+                slide,
+                currentY,
+                bodyEndY,
+                styles,
+                isRtl,
+                font,
+                footnoteIdMap,
                 createNewSlideForOverflow
             );
             slide = result.slide;

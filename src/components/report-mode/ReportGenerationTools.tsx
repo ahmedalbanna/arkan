@@ -28,11 +28,9 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useGenerationUIStore } from '@/hooks';
-import { toast } from '@/hooks';
+import { toast, useBuilderStore, useGenerationUIStore } from '@/hooks';
 import { Chapter, Section } from '@/lib/models';
 import { cn } from '@/lib/utils/cn';
 import {
@@ -52,19 +50,17 @@ import {
   BookOpenTextIcon,
   GripVertical,
   ListPlus,
-  PanelLeftClose,
   PlusCircle,
-  Trash2,
+  Trash2
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { SectionAccordionItem } from './SectionAccordionItem';
-import { useMemo } from 'react';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { generateReportSectionApi } from '@/services/api/reportService';
+import { SectionName } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useSections } from '@/hooks/data/use-sections';
-import { SectionName } from '@/ai/schemas';
+import { generateReportSectionApi } from '@/services/api/reportService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 
 interface SortableSectionItemProps {
@@ -482,29 +478,29 @@ export const GenerationTools = () => {
 
         <div className="relative flex-grow flex flex-col min-h-0">
           <div className="flex-grow border-t pt-4">
-            <ScrollArea className="h-full -mx-6 px-6">
-              <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
-                  <Accordion type="multiple" className="w-full space-y-4">
-                    {(project?.chapters || []).map((chapter, chapterIndex) => (
-                      <SortableChapterItem
-                        chapter={chapter}
-                        index={chapterIndex}
-                        key={chapter.id}
-                        onAddSection={handleAddSectionToChapter}
-                        onDeleteSection={handleDeleteSection}
-                        onDeleteChapter={handleDeleteChapter}
-                        chapterIndex={chapterIndex}
-                        onGenerateSection={onGenerateSection}
-                        activeMutationKey={activeMutationKey}
-                        isAnythingGenerating={isAnythingGenerating}
-                        hasCreditsForSingleSection={hasCreditsForSingleSection}
-                      />
-                    ))}
-                  </Accordion>
-                </SortableContext>
-              </DndContext>
-            </ScrollArea>
+
+            <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
+                <Accordion type="multiple" className="w-full space-y-4">
+                  {(project?.chapters || []).map((chapter, chapterIndex) => (
+                    <SortableChapterItem
+                      chapter={chapter}
+                      index={chapterIndex}
+                      key={chapter.id}
+                      onAddSection={handleAddSectionToChapter}
+                      onDeleteSection={handleDeleteSection}
+                      onDeleteChapter={handleDeleteChapter}
+                      chapterIndex={chapterIndex}
+                      onGenerateSection={onGenerateSection}
+                      activeMutationKey={activeMutationKey}
+                      isAnythingGenerating={isAnythingGenerating}
+                      hasCreditsForSingleSection={hasCreditsForSingleSection}
+                    />
+                  ))}
+                </Accordion>
+              </SortableContext>
+            </DndContext>
+
           </div>
         </div>
         <div className="flex gap-2 border-t pt-4">
