@@ -16,27 +16,27 @@ export function useBuilderPageLogic() {
   const { t, locale } = useLocalization();
   const queryClient = useQueryClient();
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   // When the project in the global store changes, save its ID to localStorage.
   useEffect(() => {
-    if (projectFromStore?.id) {
+    if (isClient && projectFromStore?.id) {
       localStorage.setItem(LAST_PROJECT_ID_KEY, projectFromStore.id);
     }
-  }, [projectFromStore?.id]);
+  }, [projectFromStore?.id, isClient]);
 
   // Effect to load the last active project on initial mount
   useEffect(() => {
-    // This effect should only run once on mount
+    setIsClient(true); // Component has mounted
     const lastProjectId = localStorage.getItem(LAST_PROJECT_ID_KEY);
     if (lastProjectId && !projectFromStore) { // Only load if no project is in the store
       localProjectService.getProject(lastProjectId).then(projectData => {
         if (projectData) {
           loadProject(projectData);
         }
-
       });
     }
-  }, []); // Empty dependency array ensures it runs only once
+  }, [loadProject, projectFromStore]);
 
 
   useEffect(() => {
@@ -76,22 +76,21 @@ export function useBuilderPageLogic() {
     }
   };
 
-
-
-
   const updateProjectName = useCallback((name: string) => {
     updateProject(p => { p.name = name; });
   }, [updateProject]);
+  
+  const isLoadingProject = isClient && !projectFromStore && !!localStorage.getItem(LAST_PROJECT_ID_KEY);
+
 
   return {
-
     showOnboarding,
     setShowOnboarding,
     handleOnboardingComplete,
     t,
     locale,
     project: projectFromStore,
-    isLoadingProject: !projectFromStore && !!localStorage.getItem(LAST_PROJECT_ID_KEY), // Show loading if we expect a project
+    isLoadingProject,
     updateProjectName,
   };
 }
