@@ -39,7 +39,8 @@
     "templates": "Templates",
     "generationTemplates": "Generation Templates",
     "promptTemplates": "Prompt Templates",
-    "manageSections": "Manage Sections"
+    "manageSections": "Manage Sections",
+    "agentLab": "Agent Lab"
   },
   "writingTools": {
     "pageTitle": "AI Writing Tools",
@@ -384,7 +385,7 @@
       "pasteTab": "Paste Text",
       "uploadTab": "Upload File",
       "textLabel": "Assignment Content",
-      "placeholder": "Paste your assignment questions here...\n\nExample:\n1. What is photosynthesis and why is it important?\n2. Explain the water cycle in detail.\n3. Calculate the area of a triangle with base 10cm and height 8cm.",
+      "placeholder": "Paste your assignment questions here...\\n\\nExample:\\n1. What is photosynthesis and why is it important?\\n2. Explain the water cycle in detail.\\n3. Calculate the area of a triangle with base 10cm and height 8cm.",
       "uploadLabel": "Upload Assignment File",
       "dropzoneHint": "Drag 'n' drop an assignment file here, or click to select",
       "supportedFiles": "Supported: PDF, DOC, DOCX, TXT, MD",
@@ -412,7 +413,7 @@
       "complexityLabel": "Project Complexity",
       "complexityPlaceholder": "Select complexity level",
       "featuresLabel": "Desired Features",
-      "featuresPlaceholder": "List the main features and functionalities you want to include:\n• User authentication\n• Dashboard\n• Payment system\n• Real-time notifications\n• Mobile responsiveness\n• etc.",
+      "featuresPlaceholder": "List the main features and functionalities you want to include:\\n• User authentication\\n• Dashboard\\n• Payment system\\n• Real-time notifications\\n• Mobile responsiveness\\n• etc.",
       "techStackLabel": "Technology Stack Preferences (Optional)",
       "techStackPlaceholder": "Specify preferred technologies, frameworks, or platforms (e.g., React, Node.js, PostgreSQL)...",
       "budgetLabel": "Budget Range (Optional)",
@@ -1703,3 +1704,5 @@
     }
   }
 }
+
+    
