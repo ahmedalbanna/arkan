@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -18,7 +19,7 @@ export const SectionGenerationControls = ({ sectionKey }: { sectionKey: string }
         return null;
     }
 
-    const handleOutputStyleChange = (style: 'heading' | 'paragraph' | 'list', checked: boolean) => {
+    const handleOutputStyleChange = (style: 'heading' | 'paragraph' | 'list' | 'table' | 'code', checked: boolean) => {
         const newOutputStyle = {
             ...controls.outputStyle,
             [style]: checked
@@ -60,7 +61,7 @@ export const SectionGenerationControls = ({ sectionKey }: { sectionKey: string }
             </div>
             <div className="space-y-2">
                 <Label>Output Format</Label>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center flex-wrap gap-4">
                     <div className="flex items-center gap-2">
                         <Checkbox id={`output-heading-${sectionKey}`} checked={controls.outputStyle.heading} onCheckedChange={(checked) => handleOutputStyleChange('heading', !!checked)} />
                         <Label htmlFor={`output-heading-${sectionKey}`}>Heading</Label>
@@ -72,6 +73,14 @@ export const SectionGenerationControls = ({ sectionKey }: { sectionKey: string }
                     <div className="flex items-center gap-2">
                         <Checkbox id={`output-list-${sectionKey}`} checked={controls.outputStyle.list} onCheckedChange={(checked) => handleOutputStyleChange('list', !!checked)} />
                         <Label htmlFor={`output-list-${sectionKey}`}>List</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Checkbox id={`output-table-${sectionKey}`} checked={controls.outputStyle.table} onCheckedChange={(checked) => handleOutputStyleChange('table', !!checked)} />
+                        <Label htmlFor={`output-table-${sectionKey}`}>Table</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Checkbox id={`output-code-${sectionKey}`} checked={controls.outputStyle.code} onCheckedChange={(checked) => handleOutputStyleChange('code', !!checked)} />
+                        <Label htmlFor={`output-code-${sectionKey}`}>Code</Label>
                     </div>
                 </div>
             </div>

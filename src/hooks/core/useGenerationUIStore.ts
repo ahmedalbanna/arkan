@@ -7,6 +7,8 @@ type OutputStyle = {
   heading: boolean;
   paragraph: boolean;
   list: boolean;
+  table: boolean;
+  code: boolean;
 };
 
 export type Tone = 'professional' | 'academic' | 'casual' | 'persuasive';
@@ -57,7 +59,7 @@ const defaultControlState: GenerationControlState = {
   formality: 50,
   complexity: 50,
   tone: 'professional',
-  outputStyle: { heading: true, paragraph: true, list: false },
+  outputStyle: { heading: true, paragraph: true, list: false, table: false, code: false },
   wordCount: '',
 };
 
