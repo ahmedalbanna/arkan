@@ -371,7 +371,8 @@
       "ideaGenerator": "مولد الأفكار بالذكاء الاصطناعي",
       "translator": "المترجم",
       "assignmentsSolver": "حلال الواجبات",
-      "projectBlueprint": "مخطط المشروع"
+      "projectBlueprint": "مخطط المشروع",
+      "uiDescription": "وصف تصميم واجهة المستخدم"
     },
     "assignmentsSolver": {
       "pageTitle": "حلال الواجبات بالذكاء الاصطناعي",
@@ -422,6 +423,20 @@
       "emptyState": "سيظهر مخطط مشروعك هنا بعد التوليد",
       "successToast": "تم إنشاء مخطط المشروع بنجاح!",
       "errorToast": "فشل في إنشاء مخطط المشروع"
+    },
+    "uiDescription": {
+      "pageTitle": "مولد وصف واجهة المستخدم",
+      "pageSubtitle": "حول ميزات المشروع إلى وصف مفصل لسير عمل واجهة المستخدم/تجربة المستخدم.",
+      "cardTitle": "وصف تصميم واجهة المستخدم",
+      "cardDescription": "صف ميزات مشروعك، وسيقوم الذكاء الاصطناعي بإنشاء سير عمل واجهة مستخدم لكل شاشة.",
+      "featuresLabel": "الميزات الأساسية للمشروع (Markdown)",
+      "featuresPlaceholder": "اذكر الميزات الأساسية لمشروعك باستخدام markdown...\\n- تسجيل المستخدم وتسجيل الدخول\\n- لوحة تحكم لعرض الإحصائيات\\n- صفحة تعديل الملف الشخصي",
+      "designTypeLabel": "الهدف التصميمي",
+      "buttonText": "إنشاء وصف لواجهة المستخدم (2 رصيد)",
+      "generatedDescriptionLabel": "وصف واجهة المستخدم/تجربة المستخدم الذي تم إنشاؤه",
+      "processingMessage": "جارٍ تحليل الميزات وتصميم سير عمل واجهة المستخدم...",
+      "successToast": "تم إنشاء وصف واجهة المستخدم بنجاح!",
+      "errorToast": "فشل في إنشاء وصف واجهة المستخدم"
     }
   },
   "markdownDisplay": {
@@ -439,7 +454,6 @@
     "rejectButton": "رفض",
     "acceptButton": "قبول الاقتراح",
     "exportButton": "تصدير بصيغة DOCX",
-    "aiAssistantDesc": "قدم تعليمات للذكاء الاصطناعي لتنسيق تقريرك أو تنظيمه أو تحسينه.",
     "toasts": {
       "suggestionReadyTitle": "اقتراح الذكاء الاصطناعي جاهز",
       "suggestionReadyDesc": "لقد انتهى الذكاء الاصطناعي من تحسين المستند الخاص بك.",
@@ -1432,7 +1446,7 @@
         "generatingStateTitle": "جارٍ إنشاء قاعدة الكود...",
         "generatingStateDesc": "يقوم الذكاء الاصطناعي ببناء هيكل مشروعك. قد يستغرق هذا بعض الوقت.",
         "emptyStateTitle": "ستظهر قاعدة الكود هنا",
-        "emptyStateDesc": "انقر فوق \"إنشاء قاعدة الكود\" لبناء ملفات مشروعك.",
+        "emptyStateDesc": "انقر فوق \"إنشاء قاعدة الكود\" لبناء ملفات مشروعك بناءً على الاقتراح الخاص بك.",
         "fileTreeView": {
           "title": "قاعدة الكود التي تم إنشاؤها",
           "description": "راجع الملفات التي تم إنشاؤها وقم بتنزيل أرشيف ZIP.",
@@ -1573,7 +1587,7 @@
       "uploadCardTitle": "تحميل مستند أكاديمي",
       "examType": "امتحان",
       "homeworkType": "واجب منزلي",
-      "uploadLabel": "حدد ملف PDF",
+      "uploadLabel": "Select PDF File",
       "analyzeButton": "تحميل وتحليل ({creditCost} رصيد)",
       "analysisPlaceholder": "لم يتم تحليل أي مستند بعد. يرجى تحميل ملف أولاً.",
       "solveButton": "حل المستند ({creditCost} أرصدة)",

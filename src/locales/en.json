@@ -375,7 +375,8 @@
       "ideaGenerator": "AI Idea Generator",
       "translator": "Translator",
       "assignmentsSolver": "Assignments Solver",
-      "projectBlueprint": "Project Blueprint"
+      "projectBlueprint": "Project Blueprint",
+      "uiDescription": "UI Design Description"
     },
     "assignmentsSolver": {
       "pageTitle": "AI Assignments Solver",
@@ -426,6 +427,20 @@
       "emptyState": "Your project blueprint will appear here after generation",
       "successToast": "Project blueprint generated successfully!",
       "errorToast": "Failed to generate project blueprint"
+    },
+    "uiDescription": {
+      "pageTitle": "UI Design Description Generator",
+      "pageSubtitle": "Transform project features into a detailed UI/UX workflow description.",
+      "cardTitle": "UI Design Description",
+      "cardDescription": "Describe your project's features, and the AI will generate a screen-by-screen UI workflow.",
+      "featuresLabel": "Core Project Features (Markdown)",
+      "featuresPlaceholder": "List your project's core features using markdown...\n- User registration and login\n- Dashboard to view statistics\n- Profile editing page",
+      "designTypeLabel": "Design Target",
+      "buttonText": "Generate UI Description (2 Credits)",
+      "generatedDescriptionLabel": "Generated UI/UX Description",
+      "processingMessage": "Analyzing features and designing UI workflow...",
+      "successToast": "UI description generated successfully!",
+      "errorToast": "Failed to generate UI description"
     }
   },
   "markdownDisplay": {
@@ -443,7 +458,6 @@
     "rejectButton": "Reject",
     "acceptButton": "Accept Suggestion",
     "exportButton": "Export as DOCX",
-    "aiAssistantDesc": "Provide instructions for the AI to format, organize, or improve your report.",
     "toasts": {
       "suggestionReadyTitle": "AI Suggestion Ready",
       "suggestionReadyDesc": "The AI has finished improving your document.",

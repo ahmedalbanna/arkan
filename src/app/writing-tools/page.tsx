@@ -18,6 +18,7 @@ import {
   Fingerprint,
   GitGraph,
   Languages,
+  LayoutTemplate,
   Lightbulb, PencilLine,
   PencilRuler,
   PenSquare,
@@ -60,7 +61,8 @@ export default function WritingToolsPage() {
     { name: 'Markdown to PPTX', icon: PencilRuler, href: '/writing-tools/pptx-convert' },
     { name: 'Invisible Text Detector', icon: EyeOff, href: '/writing-tools/invisible-text-detector' },
     { name: t('writingTools.assignmentsSolver.cardTitle'), icon: BookCheck, href: '/writing-tools/assignments-solver' },
-    { name: t('writingTools.projectBlueprint.cardTitle'), icon: Building2, href: '/writing-tools/project-blueprint' }
+    { name: t('writingTools.projectBlueprint.cardTitle'), icon: Building2, href: '/writing-tools/project-blueprint' },
+    { name: t('writingTools.uiDescription.cardTitle'), icon: LayoutTemplate, href: '/writing-tools/generate-ui-description' },
   ];
 
   return (
