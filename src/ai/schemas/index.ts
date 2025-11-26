@@ -14,3 +14,5 @@ export * from './lecture-generator';
 export * from './template-schemas';
 export { GenerateUIDescriptionInputSchema, GenerateUIDescriptionOutputSchema } from './flows';
 export type { GenerateUIDescriptionInput, GenerateUIDescriptionOutput } from './flows';
+
+    
