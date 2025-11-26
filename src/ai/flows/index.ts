@@ -43,3 +43,4 @@ export * from './bias-checker';
 export * from './sentence-structure-checker';
 export * from './solve-assignments';
 export * from './generate-project-blueprint';
+export * from './generate-ui-description';

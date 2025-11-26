@@ -765,3 +765,15 @@ export const GenerateTocOutputSchema = z.object({
     tableOfContents: z.array(z.string()).describe('A list of suggested section titles for the table of contents.'),
 });
 export type GenerateTocOutput = z.infer<typeof GenerateTocOutputSchema>;
+
+// generate-ui-description.ts
+export const GenerateUIDescriptionInputSchema = z.object({
+    projectFeatures: z.string().min(20, 'Please provide more details about the project features.'),
+    designType: z.enum(['website', 'mobile']),
+});
+export type GenerateUIDescriptionInput = z.infer<typeof GenerateUIDescriptionInputSchema>;
+
+export const GenerateUIDescriptionOutputSchema = z.object({
+    uiDescription: z.string().describe('The generated UI/UX description and workflow in markdown format.'),
+});
+export type GenerateUIDescriptionOutput = z.infer<typeof GenerateUIDescriptionOutputSchema>;

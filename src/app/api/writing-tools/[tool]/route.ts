@@ -58,6 +58,8 @@ import { solveAssignments } from '@/ai/flows/solve-assignments';
 import { SolveAssignmentsInputSchema } from '@/ai/schemas';
 import { generateProjectBlueprint } from '@/ai/flows/generate-project-blueprint';
 import { GenerateProjectBlueprintInputSchema } from '@/ai/schemas';
+import { generateUiDescription } from '@/ai/flows/generate-ui-description';
+import { GenerateUIDescriptionInputSchema } from '@/ai/schemas';
 
 // Define a map for tool configurations
 const toolConfig = {
@@ -91,6 +93,7 @@ const toolConfig = {
   'sentence-structure-checker': { flow: sentenceStructureCheck, schema: SentenceStructureCheckInputSchema, creditCost: 1 },
   'solve-assignments': { flow: solveAssignments, schema: SolveAssignmentsInputSchema, creditCost: 2 },
   'project-blueprint': { flow: generateProjectBlueprint, schema: GenerateProjectBlueprintInputSchema, creditCost: 3 },
+  'generate-ui-description': { flow: generateUiDescription, schema: GenerateUIDescriptionInputSchema, creditCost: 2 },
 };
 
 type ToolName = keyof typeof toolConfig;
