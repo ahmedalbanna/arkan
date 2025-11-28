@@ -31,14 +31,10 @@ interface BuilderState {
     isCreateProjectOpen: boolean,
     setIsCreateProjectOpen: (isOpen: boolean) => void;
 
-    handleDownloadAs: () => void;
-
     // File upload logic
     fileInputRef: React.RefObject<HTMLInputElement>;
     handleUploadClick: () => void;
     onFileChange: (e: React.ChangeEvent<HTMLInputElement>, toast: any, t: any, router: any) => void;
-
-    hasContent: boolean;
 }
 
 const createNewTemporaryProject = (): Project => {
@@ -61,10 +57,6 @@ const useBuilderStore = create<BuilderState>((set, get) => {
         newProjectName: '',
         newProjectDescription: '',
         isCreateProjectOpen: false,
-        get hasContent() {
-            const project = get().project;
-            return !!project && (!!project.name || !!project.projectDescription || project.chapters.length > 0 || project.externalContext.length > 0);
-        },
         fileInputRef,
 
         // --- Core Project Actions ---
@@ -109,19 +101,6 @@ const useBuilderStore = create<BuilderState>((set, get) => {
             loadProject(newProject.toStateObject());
             router.push('/builder');
             set({ isCreateProjectOpen: false, newProjectName: '', newProjectDescription: '' });
-        },
-
-        handleDownloadAs: () => {
-            const { project } = get();
-            if (!project) return;
-            const projectData = JSON.stringify(project.toStateObject(), null, 2);
-            const blob = new Blob([projectData], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${(project.name || 'project').replace(/\s+/g, '_')}.arkan`;
-            a.click();
-            URL.revokeObjectURL(url);
         },
 
         // --- File Upload ---

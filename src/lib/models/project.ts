@@ -53,6 +53,13 @@ export class Project implements Required<ProjectProperties> {
     return this.sections.map(s => s.id);
   }
 
+  public hasContent(): boolean {
+    const hasBasicInfo = !!this.name || !!this.projectDescription;
+    const hasChaptersWithContent = this.chapters.some(c => c.title || c.sections.length > 0);
+    const hasExternalContext = this.externalContext.length > 0;
+    return hasBasicInfo || hasChaptersWithContent || hasExternalContext;
+  }
+
   /**
    * Converts the Project instance to a plain JSON object for serialization.
    * This method is automatically used by `JSON.stringify`.

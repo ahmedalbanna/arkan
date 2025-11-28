@@ -13,6 +13,7 @@ import { Download, Loader2, Save, Trash2, Upload } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useSaveProject } from '@/hooks';
 import { useRouter } from 'next/navigation';
+import { DownloadProjectButton } from './DownloadProjectButton';
 
 export const SessionActions = () => {
     const { t } = useLocalization();
@@ -21,13 +22,9 @@ export const SessionActions = () => {
         fileInputRef,
         handleUploadClick,
         onFileChange,
-        handleDownloadAs,
         hasUnsavedChanges,
         newSession,
     } = useBuilderStore();
-
-    // Correctly subscribe to the hasContent state
-    const hasContent = useBuilderStore(state => state.hasContent);
 
     const { saveProject, isSaving } = useSaveProject();
 
@@ -76,24 +73,7 @@ export const SessionActions = () => {
                     <span className="hidden md:inline ms-2">{t('projects.saveButton')}</span>
                 </Button>
 
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={handleDownloadAs}
-                            disabled={isBusy || !hasContent}
-                            className="h-8 w-8 md:w-auto md:px-3"
-                        >
-                            <Download className="h-4 w-4" />
-                            <span className="hidden md:inline ms-2">Download</span>
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent className="md:hidden">
-                        <p>{t('builder.tooltips.downloadProject')}</p>
-                    </TooltipContent>
-                </Tooltip>
-
+                <DownloadProjectButton />
 
                 <Tooltip>
                     <TooltipTrigger asChild>
