@@ -23,18 +23,21 @@ export const AgentList: React.FC<AgentListProps> = ({ agents }) => {
         return agents;
     }
     
+    const lowercasedQuery = searchQuery.toLowerCase();
+
     // Perform local search without updating store state
     return agents.filter(agent => {
-      const name = agent.name.toLowerCase();
+      const name = (agent.name || '').toLowerCase();
       const description = (agent.description || agent.data?.description || '').toLowerCase();
       const category = (agent.category || '').toLowerCase();
       const tags = (agent.tags || []).join(' ').toLowerCase();
-      const commands = (agent.commands || agent.data?.commands || [])
-        .map(cmd => (cmd.name + ' ' + (cmd.description || '')).toLowerCase()) // Add guard for description
+      
+      const commandsText = (agent.commands || agent.data?.commands || [])
+        .map(cmd => `${cmd.name.toLowerCase()} ${cmd.prompt.toLowerCase()}`)
         .join(' ');
       
-      const searchText = `${name} ${description} ${category} ${tags} ${commands}`;
-      return searchText.includes(searchQuery.toLowerCase());
+      const searchText = `${name} ${description} ${category} ${tags} ${commandsText}`;
+      return searchText.includes(lowercasedQuery);
     });
   }, [agents, searchQuery]);
 
@@ -81,11 +84,11 @@ export const AgentList: React.FC<AgentListProps> = ({ agents }) => {
                   )}
                 </div>
               </div>
-              {(agent.commands?.length || agent.data?.commands?.length) && (
+              {(agent.commands?.length || agent.data?.commands?.length) ? (
                 <div className="text-xs text-muted-foreground shrink-0">
                   {(agent.commands || agent.data?.commands || []).length} commands
                 </div>
-              )}
+              ) : null}
             </div>
           ))}
         </div>

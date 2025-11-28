@@ -178,7 +178,7 @@ export class AgentDatabaseService {
   }
 
   /**
-   * Search agents by name or description
+   * Search agents by name, description, category, or tags
    */
   searchAgents(searchTerm: string): Agent[] {
     const query = `
@@ -201,13 +201,16 @@ export class AgentDatabaseService {
         ) as commands
       FROM agents a
       LEFT JOIN agent_commands ac ON a.id = ac.agent_id
-      WHERE a.name LIKE ? OR a.description LIKE ?
+      WHERE a.name LIKE ? 
+         OR a.description LIKE ?
+         OR a.category LIKE ?
+         OR a.tags LIKE ?
       GROUP BY a.id
       ORDER BY a.name
     `;
 
     const searchPattern = `%${searchTerm}%`;
-    const rows = this.db.prepare(query).all(searchPattern, searchPattern) as (DatabaseAgent & { commands: string })[];
+    const rows = this.db.prepare(query).all(searchPattern, searchPattern, searchPattern, searchPattern) as (DatabaseAgent & { commands: string })[];
     
     return rows.map(row => this.mapDatabaseAgentToAgent(row));
   }
