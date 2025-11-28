@@ -13,7 +13,7 @@ const generateIdeasPrompt = ai.definePrompt({
   input: { schema: IdeaGenerationInputSchema },
   output: { schema: IdeaGenerationOutputSchema },
   model: 'googleai/gemini-2.5-flash-lite',
-  prompt: `You are an expert strategist and innovator. Your task is to generate creative and actionable ideas based on the user's provided context.
+  prompt: `You are an expert strategist and innovator. Your task is to generate creative and actionable ideas based on the user's provided context and format them as a single Markdown string.
 
 **User's Context:**
 - **Specialization:** {{{specialization}}}
@@ -33,11 +33,9 @@ const generateIdeasPrompt = ai.definePrompt({
 **Your Task:**
 1.  **Analyze the Context:** Deeply analyze all the provided information to understand the user's unique position, market, and constraints.
 2.  **Brainstorm Ideas:** Generate a list of 5-7 unique and robust ideas tailored to the user's inputs.
-3.  **Structure the Output:** For each idea, provide:
-    - A short, catchy **title**.
-    - A one-paragraph **description** explaining the concept, its potential, and why it's a good fit for the user's context.
+3.  **Format as Markdown:** For each idea, create a heading for the **title** and a paragraph for the **description**. The final output must be a single, well-formatted Markdown string.
 
-Your output must be a valid JSON object containing an array of these ideas.
+Your output must be a valid JSON object containing a single 'markdown' field with the complete formatted text.
 `,
   config: {
     temperature: 0.9, // Higher temperature for more creative brainstorming

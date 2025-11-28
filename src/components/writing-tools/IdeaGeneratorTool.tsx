@@ -10,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useIdeaGeneratorLogic } from '@/hooks/writing-tools/use-idea-generator-logic';
 import { Loader2, Sparkles } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+import ReactMarkdown from 'react-markdown';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
 
 export function IdeaGeneratorTool() {
   const {
@@ -74,22 +76,17 @@ export function IdeaGeneratorTool() {
         {(mutation.isPending || results) && (
           <div className="space-y-4 pt-6 border-t">
             <h3 className="font-semibold text-lg">{t('writingTools.ideaGenerator.resultsTitle')}</h3>
-            <ScrollArea className="h-[60vh] rounded-md border p-2 bg-muted/30">
+            <ScrollArea className="h-[60vh] rounded-md border p-4 bg-muted/30">
               {mutation.isPending ? (
                 <div className="flex items-center justify-center h-full">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : (
-                <Accordion type="single" collapsible className="w-full space-y-2">
-                  {results?.ideas.map((idea, index) => (
-                    <AccordionItem value={`item-${index}`} key={index} className="bg-background border rounded-md">
-                      <AccordionTrigger className="p-4 text-left font-semibold hover:no-underline">{idea.title}</AccordionTrigger>
-                      <AccordionContent className="p-4 pt-0 text-muted-foreground">
-                        {idea.description}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
+                <div className="prose dark:prose-invert max-w-none">
+                  <ReactMarkdown components={markdownComponents}>
+                    {results?.markdown || ''}
+                  </ReactMarkdown>
+                </div>
               )}
             </ScrollArea>
           </div>

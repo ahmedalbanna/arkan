@@ -320,11 +320,6 @@ export const GenerateImageOutputSchema = z.object({
 export type GenerateImageOutput = z.infer<typeof GenerateImageOutputSchema>;
 
 // generate-ideas.ts
-export const IdeaSchema = z.object({
-    title: z.string().describe('A catchy and descriptive title for the idea.'),
-    description: z.string().describe('A brief, one-paragraph description of the idea, explaining the concept and its potential.'),
-});
-
 export const IdeaGenerationInputSchema = z.object({
     specialization: z.string().describe('The user\'s field of expertise or specialization (e.g., "Web Development", "Marketing", "Biotechnology").'),
     domain: z.string().optional().describe('The specific industry or domain of interest (e.g., "E-commerce", "Healthcare", "Education").'),
@@ -335,9 +330,10 @@ export const IdeaGenerationInputSchema = z.object({
 export type IdeaGenerationInput = z.infer<typeof IdeaGenerationInputSchema>;
 
 export const IdeaGenerationOutputSchema = z.object({
-    ideas: z.array(IdeaSchema).describe('A list of generated ideas, each with a title and description.'),
+    markdown: z.string().describe('A markdown formatted string of generated ideas, each with a title and description.'),
 });
 export type IdeaGenerationOutput = z.infer<typeof IdeaGenerationOutputSchema>;
+
 
 // generate-quiz.ts
 const MultipleChoiceQuestionSchema = z.object({
