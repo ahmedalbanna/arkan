@@ -44,13 +44,13 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import {
   BookOpenTextIcon,
   GripVertical,
   ListPlus,
   PlusCircle,
-  Trash2
+  Trash2,
+  ChevronDown
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { SectionAccordionItem } from './SectionAccordionItem';
@@ -60,6 +60,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useSections } from '@/hooks/data/use-sections';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { GenerateTocDialog } from './GenerateTocDialog';
 
 
 interface SortableSectionItemProps {
@@ -249,12 +251,11 @@ export const GenerationTools = () => {
   const { t, locale } = useLocalization();
   const { project, updateProject } = useBuilderStore(); // Directly use the store
   const { data: sectionConfigs, isFetched: sectionsLoaded } = useSections();
-  const { controlState, guidelineState, contextSelection, initializeControls } = useGenerationUIStore();
+  const { initializeControls } = useGenerationUIStore();
   const { userProfile, refetchUser, firebaseUser } = useAuth();
   const queryClient = useQueryClient();
   const [showTocInput, setShowTocInput] = useState(false);
-
-  // No need for orderedSections or setOrderedSections state, as we read directly from the project in the store.
+  const [isGenerateTocOpen, setIsGenerateTocOpen] = useState(false);
 
   // Initialize UI stores when sections are ready
   useEffect(() => {
@@ -275,31 +276,15 @@ export const GenerationTools = () => {
       if (!section) throw new Error("Section not found.");
 
       const token = await firebaseUser.getIdToken();
-
-      const controls = controlState[sectionId] || { tone: 'neutral', wordCount: 200, complexity: 50 };
-
-      const selectedContexts = contextSelection[sectionId];
-      const otherSectionsContext = Object.entries(selectedContexts?.sections || {})
-        .filter(([, isSelected]) => isSelected)
-        .reduce((acc, [key]) => {
-          const sectionContent = project.getSectionContent(key as SectionName);
-          if (sectionContent) {
-            acc[key] = sectionContent;
-          }
-          return acc;
-        }, {} as Record<string, string>);
-
-      const externalContext = (selectedContexts?.externalContext || [])
-        .map((isSelected, index) => (isSelected && project.externalContext?.[index]) ? project.externalContext[index] : null)
-        .filter(Boolean) as { fileName: string, content: string, type: string }[];
+      // This part for fetching control state will be refactored into a custom hook
+      // For now, we simulate default controls.
+      const controls = { tone: 'professional', formality: 50, complexity: 50, wordCount: '250', outputStyle: { heading: true, paragraph: true } };
 
       const body = {
         sectionToGenerate: section.id,
         prompt: section.prompt,
         instructionText: `Please use a ${controls.tone} tone and aim for a word count of approximately ${controls.wordCount} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}.`,
         guidelines: section.guidelines,
-        otherSections: { ...otherSectionsContext },
-        externalContext: externalContext,
       };
 
       const result = await generateReportSectionApi(body, token);
@@ -374,20 +359,22 @@ export const GenerationTools = () => {
     let sectionsCreated = 0;
 
     updateProject(p => {
+      p.chapters = []; // Clear existing chapters
       let currentChapterId: string | null = null;
+      let chapterCounter = 1;
 
       lines.forEach(line => {
-        const chapterMatch = line.match(/^(\d+)\.?\s+(.+)/);
-        const sectionMatch = line.match(/^\d+\.\d+\.?\s*(.*)/);
-
-        if (chapterMatch && !sectionMatch) {
-          const chapterTitle = chapterMatch[2].trim();
+        const isChapter = !line.match(/^\s*\d+\.\d+/); // If it doesn't look like "1.1", it's a chapter
+        
+        if (isChapter) {
+          const chapterTitle = line.replace(/^\d+\.?\s*/, '').trim();
           if (chapterTitle) {
             currentChapterId = p.addChapter(chapterTitle);
             chaptersCreated++;
+            chapterCounter++;
           }
-        } else if (sectionMatch && currentChapterId) {
-          const sectionTitle = sectionMatch[1].trim();
+        } else if (currentChapterId) { // It's a section
+          const sectionTitle = line.replace(/^\d+\.\d+\.?\s*/, '').trim();
           if (sectionTitle) {
             p.addCustomSection(currentChapterId, sectionTitle);
             sectionsCreated++;
@@ -449,73 +436,87 @@ export const GenerationTools = () => {
 
 
   return (
-    <Card className={cn("flex flex-col h-full")}>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
-            <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
+    <>
+      <GenerateTocDialog isOpen={isGenerateTocOpen} onOpenChange={setIsGenerateTocOpen} />
+      <Card className={cn("flex flex-col h-full")}>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
+              <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="hidden lg:inline-flex">
+                  <BookOpenTextIcon className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onSelect={() => setShowTocInput(true)}>Import from Text</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setIsGenerateTocOpen(true)}>Generate with AI</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setShowTocInput(prev => !prev)} className={cn("hidden lg:inline-flex", showTocInput && "bg-accent")}>
-            <BookOpenTextIcon className="h-5 w-5" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
-        {showTocInput && (
-          <div className="space-y-2">
-            <Label htmlFor="toc-master-input">Table of Contents</Label>
-            <Textarea
-              id="toc-master-input"
-              value={tocText}
-              onChange={(e) => setTocText(e.target.value)}
-              placeholder={"1. Chapter One\n1.1. Section One\n2. Chapter Two..."}
-              className="flex-grow resize-none"
-              rows={5}
+        </CardHeader>
+        <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
+          {showTocInput && (
+            <div className="space-y-2 p-4 border rounded-lg bg-muted/50">
+              <Label htmlFor="toc-master-input">Paste Table of Contents</Label>
+              <Textarea
+                id="toc-master-input"
+                value={tocText}
+                onChange={(e) => setTocText(e.target.value)}
+                placeholder={"1. Chapter One\n1.1. Section One\n2. Chapter Two..."}
+                className="flex-grow resize-none"
+                rows={5}
+              />
+              <div className='flex gap-2'>
+                <Button onClick={handleCreateFromToc} size="sm" className="w-full">
+                  <ListPlus className="me-2 h-4 w-4" /> Create Structure
+                </Button>
+                <Button onClick={() => setShowTocInput(false)} size="sm" variant="secondary" className="w-full">
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <div className="relative flex-grow flex flex-col min-h-0">
+            <div className={cn("flex-grow", showTocInput && "border-t pt-4")}>
+              <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
+                  <Accordion type="multiple" className="w-full space-y-4">
+                    {(project?.chapters || []).map((chapter, chapterIndex) => (
+                      <SortableChapterItem
+                        chapter={chapter}
+                        index={chapterIndex}
+                        key={chapter.id}
+                        onAddSection={handleAddSectionToChapter}
+                        onDeleteSection={handleDeleteSection}
+                        onDeleteChapter={handleDeleteChapter}
+                        chapterIndex={chapterIndex}
+                        onGenerateSection={onGenerateSection}
+                        activeMutationKey={activeMutationKey}
+                        isAnythingGenerating={isAnythingGenerating}
+                        hasCreditsForSingleSection={hasCreditsForSingleSection}
+                      />
+                    ))}
+                  </Accordion>
+                </SortableContext>
+              </DndContext>
+            </div>
+          </div>
+          <div className="flex gap-2 border-t pt-4">
+            <Input
+              placeholder="New Chapter Title..."
+              value={newChapterTitle}
+              onChange={(e) => setNewChapterTitle(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddChapter())}
             />
-            <Button onClick={handleCreateFromToc} size="sm" className="w-full">
-              <ListPlus className="me-2 h-4 w-4" /> Create Chapters & Sections
-            </Button>
+            <Button onClick={handleAddChapter} variant="outline" className="shrink-0"><PlusCircle className="me-2 h-4 w-4" /> Add Chapter</Button>
           </div>
-        )}
-
-        <div className="relative flex-grow flex flex-col min-h-0">
-          <div className={cn("flex-grow pt-4", showTocInput && "border-t")}>
-
-            <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
-                <Accordion type="multiple" className="w-full space-y-4">
-                  {(project?.chapters || []).map((chapter, chapterIndex) => (
-                    <SortableChapterItem
-                      chapter={chapter}
-                      index={chapterIndex}
-                      key={chapter.id}
-                      onAddSection={handleAddSectionToChapter}
-                      onDeleteSection={handleDeleteSection}
-                      onDeleteChapter={handleDeleteChapter}
-                      chapterIndex={chapterIndex}
-                      onGenerateSection={onGenerateSection}
-                      activeMutationKey={activeMutationKey}
-                      isAnythingGenerating={isAnythingGenerating}
-                      hasCreditsForSingleSection={hasCreditsForSingleSection}
-                    />
-                  ))}
-                </Accordion>
-              </SortableContext>
-            </DndContext>
-
-          </div>
-        </div>
-        <div className="flex gap-2 border-t pt-4">
-          <Input
-            placeholder="New Chapter Title..."
-            value={newChapterTitle}
-            onChange={(e) => setNewChapterTitle(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddChapter())}
-          />
-          <Button onClick={handleAddChapter} variant="outline" className="shrink-0"><PlusCircle className="me-2 h-4 w-4" /> Add Chapter</Button>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </>
   );
 };

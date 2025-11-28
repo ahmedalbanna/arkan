@@ -753,7 +753,7 @@ export type EvaluateReportOutput = z.infer<typeof EvaluateReportOutputSchema>;
 
 // generate-toc.ts
 export const GenerateTocInputSchema = z.object({
-    projectDescription: z.string().min(10, 'Project idea must be at least 10 characters.'),
+    projectIdea: z.string().min(10, 'Project idea must be at least 10 characters.'),
 });
 export type GenerateTocInput = z.infer<typeof GenerateTocInputSchema>;
 
@@ -761,6 +761,7 @@ export const GenerateTocOutputSchema = z.object({
     tableOfContents: z.array(z.string()).describe('A list of suggested section titles for the table of contents.'),
 });
 export type GenerateTocOutput = z.infer<typeof GenerateTocOutputSchema>;
+
 
 // generate-ui-description.ts
 export const GenerateUIDescriptionInputSchema = z.object({
