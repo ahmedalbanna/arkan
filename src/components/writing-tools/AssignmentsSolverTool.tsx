@@ -12,6 +12,7 @@ import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { Check, Copy, Loader2, BookCheck, UploadCloud, Download } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { FileUploadZone } from './FileUploadZone';
+import { FileListDisplay } from './FileListDisplay';
 
 export function AssignmentsSolverTool() {
   const { t } = useLocalization();
@@ -26,6 +27,8 @@ export function AssignmentsSolverTool() {
     isCopied,
     handleCopy,
     handleDownload,
+    uploadedFiles,
+    removeFile,
   } = useAssignmentsSolverLogic();
 
   return (
@@ -39,7 +42,6 @@ export function AssignmentsSolverTool() {
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-
           <Tabs defaultValue="paste">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="paste">{t('writingTools.assignmentsSolver.pasteTab')}</TabsTrigger>
@@ -51,27 +53,30 @@ export function AssignmentsSolverTool() {
                 <Textarea
                   id="assignment-text"
                   {...form.register('text')}
-                  rows={12}
+                  rows={8}
                   placeholder={t('writingTools.assignmentsSolver.placeholder')}
                   className="resize-none"
                 />
               </div>
             </TabsContent>
-            <TabsContent value="upload" className="pt-4">
-               <FileUploadZone 
+            <TabsContent value="upload" className="pt-4 space-y-4">
+              <FileUploadZone
                 onFileUpload={onFileUpload}
                 isUploading={isUploading}
                 setIsUploading={setIsUploading}
               />
+              {uploadedFiles.length > 0 && (
+                <FileListDisplay files={uploadedFiles} onRemoveFile={removeFile} />
+              )}
             </TabsContent>
           </Tabs>
           {form.formState.errors.text && (
             <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>
           )}
 
-          <Button 
-            type="submit" 
-            disabled={solveMutation.isPending || isUploading} 
+          <Button
+            type="submit"
+            disabled={solveMutation.isPending || isUploading}
             className="w-full"
           >
             {solveMutation.isPending || isUploading ? (
