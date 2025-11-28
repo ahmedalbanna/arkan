@@ -18,13 +18,13 @@ export function useGuidelineEditor(itemKey: string) {
     const [selectedCommandId, setSelectedCommandId] = useState<string | null>(null);
     const [prompt, setPrompt] = useState('');
     const [guidelines, setGuidelines] = useState<string[]>([]);
-    
+
     // Sync local state when the underlying section changes
     useEffect(() => {
         if (section) {
             setSelectedAgentId(section.agentId || null);
             setSelectedCommandId(section.commandId || null);
-            setPrompt(section.prompt || 'You are a helpful assistant.');
+            setPrompt(section.prompt || 'You are a helpful assistant. Write a section based on the user\'s instructions.');
             setGuidelines(section.guidelines || []);
         }
     }, [section]);
@@ -89,7 +89,7 @@ export function useGuidelineEditor(itemKey: string) {
             setPrompt(newPrompt);
         }
     };
-    
+
     const addGuideline = (guideline: string) => {
         if (guideline.trim()) {
             setGuidelines(prev => [...prev, guideline.trim()]);
