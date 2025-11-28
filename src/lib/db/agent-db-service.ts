@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import type { Agent } from '@/types/agent';
+import fs from 'fs';
 
 /**
  * Agent Database Service
@@ -47,6 +48,20 @@ export class AgentDatabaseService {
 
   constructor() {
     const dbPath = path.join(process.cwd(), 'src/lib/db/agents.db');
+    // Ensure the directory exists
+    const dbDir = path.dirname(dbPath);
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true });
+    }
+    
+    // Check if the database file exists. If not, we should probably throw an error
+    // or attempt to create it from a schema file. For this case, we'll assume it exists.
+    if (!fs.existsSync(dbPath)) {
+        // For local dev, if the DB doesn't exist, we can try to create it.
+        console.log(`Database not found at ${dbPath}. A new one will be created. Run the seed script to populate it.`);
+        // Note: The setup script should be run manually if the db is missing.
+    }
+    
     this.db = new Database(dbPath);
     this.db.pragma('journal_mode = WAL');
   }
@@ -86,9 +101,13 @@ export class AgentDatabaseService {
       ORDER BY a.name
     `;
 
-    const rows = this.db.prepare(query).all() as (DatabaseAgent & { commands: string })[];
-    
-    return rows.map(row => this.mapDatabaseAgentToAgent(row));
+    try {
+        const rows = this.db.prepare(query).all() as (DatabaseAgent & { commands: string })[];
+        return rows.map(row => this.mapDatabaseAgentToAgent(row));
+    } catch (error) {
+        console.error("Failed to query agents. Is the database file present and structured correctly?", error);
+        return [];
+    }
   }
 
   /**

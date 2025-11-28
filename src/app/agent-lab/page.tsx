@@ -14,7 +14,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 const MainApp: React.FC = () => {
     const { 
         loadInitialAgents, 
-        refreshAgentsFromApi, 
         agents, 
         selectedAgent, 
         isLoading, 
@@ -25,10 +24,6 @@ const MainApp: React.FC = () => {
         loadInitialAgents();
     }, [loadInitialAgents]);
 
-    const handleRefreshAgents = async () => {
-        await refreshAgentsFromApi();
-    };
-
     return (
         <div className="flex h-screen w-screen flex-col">
             <header className="flex h-14 items-center justify-between border-b bg-background px-4">
@@ -38,16 +33,16 @@ const MainApp: React.FC = () => {
                         <span>AgentLab</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>{agents.length} agents loaded from database</span>
+                        <span>{agents.length} agents loaded</span>
                         <Button 
-                            onClick={handleRefreshAgents}
+                            onClick={loadInitialAgents}
                             disabled={isLoading}
                             variant="ghost"
                             size="sm"
                             className="h-7 px-2"
                         >
                             <RefreshCw className={`h-3 w-3 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-                            Refresh from DB
+                            Refresh
                         </Button>
                     </div>
                 </div>
@@ -73,16 +68,16 @@ const MainApp: React.FC = () => {
                 <Alert variant="destructive" className="mx-4 mt-2">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                        Failed to load agents from API: {error}
+                        Failed to load agents: {error}
                     </AlertDescription>
                 </Alert>
             )}
             <main className="flex-1 overflow-hidden">
-                {isLoading && agents.length === 0 ? (
+                {isLoading ? (
                     <div className="flex h-full items-center justify-center">
                         <div className="text-center">
                             <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                            <p className="text-muted-foreground">Loading agents from API...</p>
+                            <p className="text-muted-foreground">Loading agents from database...</p>
                         </div>
                     </div>
                 ) : (
