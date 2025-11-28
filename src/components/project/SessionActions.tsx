@@ -11,22 +11,23 @@ import {
 import { Download, Loader2, Save, Trash2, Upload } from 'lucide-react';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useSaveProject, useToast } from '@/hooks';
+import { useBuilderStore, useSaveProject } from '@/hooks';
 import { useRouter } from 'next/navigation';
 
 export const SessionActions = () => {
     const { t } = useLocalization();
     const router = useRouter();
-    const { toast } = useToast();
     const {
         fileInputRef,
         handleUploadClick,
         onFileChange,
         handleDownloadAs,
-        hasContent,
         hasUnsavedChanges,
         newSession,
     } = useBuilderStore();
+
+    // Correctly subscribe to the hasContent state
+    const hasContent = useBuilderStore(state => state.hasContent);
 
     const { saveProject, isSaving } = useSaveProject();
 
@@ -42,7 +43,7 @@ export const SessionActions = () => {
                 <input
                     type="file"
                     ref={fileInputRef}
-                    onChange={(e) => onFileChange(e, toast, t, router)}
+                    onChange={(e) => onFileChange(e, t, router)}
                     accept=".arkan"
                     className="hidden"
                 />
