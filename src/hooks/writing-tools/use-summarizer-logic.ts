@@ -1,14 +1,10 @@
-
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
-import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services';
-import { useDropzone } from 'react-dropzone';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const summarizerSchema = z.object({
@@ -22,7 +18,6 @@ export function useSummarizerLogic() {
   const { t } = useLocalization();
   const [summarizedText, setSummarizedText] = useState('');
   const [isCopied, setIsCopied] = useState(false);
-  const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
@@ -41,41 +36,10 @@ export function useSummarizerLogic() {
     defaultValues: { text: '', length: 'medium' },
   });
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
-
-    if (!firebaseUser) {
-        toast({ title: "Authentication Error", description: "You must be logged in to process files.", variant: "destructive" });
-        return;
-    }
-
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-        const token = await firebaseUser.getIdToken();
-        const result = await processFileApi(formData, token);
-        form.setValue('text', result.markdown, { shouldValidate: true });
-        toast({ title: t('writingTools.summarizer.processingFile'), description: `Text extracted from ${file.name}.` });
-        refetchUser();
-    } catch (error: any) {
-        toast({ title: "File Processing Failed", description: error.message, variant: "destructive" });
-    } finally {
-        setIsUploading(false);
-    }
-  }, [firebaseUser, form, refetchUser, toast, t]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    multiple: false,
-    accept: {
-      'application/pdf': ['.pdf'],
-      'text/plain': ['.txt'],
-      'text/markdown': ['.md'],
-    },
-  });
+  const onFileUpload = (fileContent: string) => {
+    form.setValue('text', fileContent, { shouldValidate: true });
+    toast({ title: t('writingTools.summarizer.processingFile') });
+  };
 
   const onSubmit = (data: SummarizerFormValues) => {
     summarizeMutation.mutate(data);
@@ -95,9 +59,8 @@ export function useSummarizerLogic() {
     form,
     summarizeMutation,
     isUploading,
-    getRootProps,
-    getInputProps,
-    isDragActive,
+    setIsUploading,
+    onFileUpload,
     onSubmit,
     summarizedText,
     isCopied,

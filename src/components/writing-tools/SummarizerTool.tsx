@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -11,9 +10,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useSummarizerLogic } from '@/hooks/writing-tools/use-summarizer-logic';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
-import { Check, Copy, Loader2, Sparkles, UploadCloud } from 'lucide-react';
+import { Check, Copy, Loader2, Sparkles } from 'lucide-react';
 import { Controller } from 'react-hook-form';
 import ReactMarkdown from 'react-markdown';
+import { FileUploadZone } from './FileUploadZone';
 
 export function SummarizerTool() {
   const { t } = useLocalization();
@@ -21,9 +21,8 @@ export function SummarizerTool() {
     form,
     summarizeMutation,
     isUploading,
-    getRootProps,
-    getInputProps,
-    isDragActive,
+    setIsUploading,
+    onFileUpload,
     onSubmit,
     summarizedText,
     isCopied,
@@ -53,16 +52,11 @@ export function SummarizerTool() {
               />
             </TabsContent>
             <TabsContent value="upload" className="pt-4">
-              <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer ${isDragActive ? 'border-primary' : ''}`}>
-                <input {...getInputProps()} />
-                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
-                {isUploading ? (
-                  <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.summarizer.processingFile')}</p>
-                ) : (
-                  <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.summarizer.dropzoneHint')}</p>
-                )}
-                <p className="text-xs text-muted-foreground">{t('writingTools.summarizer.supportedFiles')}</p>
-              </div>
+              <FileUploadZone 
+                onFileUpload={onFileUpload}
+                isUploading={isUploading}
+                setIsUploading={setIsUploading}
+              />
             </TabsContent>
           </Tabs>
           {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}

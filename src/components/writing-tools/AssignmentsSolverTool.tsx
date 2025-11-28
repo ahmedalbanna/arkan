@@ -11,6 +11,7 @@ import { useAssignmentsSolverLogic } from '@/hooks/writing-tools/use-assignments
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { Check, Copy, Loader2, BookCheck, UploadCloud, Download } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { FileUploadZone } from './FileUploadZone';
 
 export function AssignmentsSolverTool() {
   const { t } = useLocalization();
@@ -18,9 +19,8 @@ export function AssignmentsSolverTool() {
     form,
     solveMutation,
     isUploading,
-    getRootProps,
-    getInputProps,
-    isDragActive,
+    setIsUploading,
+    onFileUpload,
     onSubmit,
     solvedAssignments,
     isCopied,
@@ -58,24 +58,11 @@ export function AssignmentsSolverTool() {
               </div>
             </TabsContent>
             <TabsContent value="upload" className="pt-4">
-              <div className="space-y-2">
-                <Label>{t('writingTools.assignmentsSolver.uploadLabel')}</Label>
-                <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${isDragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-primary/50'}`}>
-                  <input {...getInputProps()} />
-                  <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
-                  {isUploading ? (
-                    <div className="mt-4">
-                      <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
-                      <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.assignmentsSolver.processingFile')}</p>
-                    </div>
-                  ) : (
-                    <div className="mt-4">
-                      <p className="text-sm text-muted-foreground">{t('writingTools.assignmentsSolver.dropzoneHint')}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{t('writingTools.assignmentsSolver.supportedFiles')}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
+               <FileUploadZone 
+                onFileUpload={onFileUpload}
+                isUploading={isUploading}
+                setIsUploading={setIsUploading}
+              />
             </TabsContent>
           </Tabs>
           {form.formState.errors.text && (

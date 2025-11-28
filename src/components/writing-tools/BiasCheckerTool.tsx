@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { BiasCheckOutput, BiasIssue } from '@/ai/schemas';
@@ -8,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useBiasCheckerLogic } from '@/hooks/writing-tools/use-bias-checker-logic';
-import { AlertCircle, ArrowRight, Loader2, Scale, Sparkles, UploadCloud } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Loader2, Scale, Sparkles } from 'lucide-react';
+import { FileUploadZone } from './FileUploadZone';
 
 function getScoreColor(score: number) {
   if (score < 50) return 'text-destructive';
@@ -38,9 +38,8 @@ export function BiasCheckerTool() {
     form,
     mutation,
     isUploading,
-    getRootProps,
-    getInputProps,
-    isDragActive,
+    setIsUploading,
+    onFileUpload,
     onSubmit,
     results,
   } = useBiasCheckerLogic();
@@ -68,16 +67,11 @@ export function BiasCheckerTool() {
               />
             </TabsContent>
             <TabsContent value="upload" className="pt-4">
-              <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer ${isDragActive ? 'border-primary' : ''}`}>
-                <input {...getInputProps()} />
-                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
-                {isUploading ? (
-                  <p className="mt-2 text-sm text-muted-foreground">Processing file...</p>
-                ) : (
-                  <p className="mt-2 text-sm text-muted-foreground">Drag 'n' drop a file here, or click to select</p>
-                )}
-                <p className="text-xs text-muted-foreground">Supported: PDF, TXT, MD</p>
-              </div>
+              <FileUploadZone 
+                onFileUpload={onFileUpload}
+                isUploading={isUploading}
+                setIsUploading={setIsUploading}
+              />
             </TabsContent>
           </Tabs>
           {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -14,6 +13,7 @@ import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { ArrowRight, Check, Copy, Loader2, Sparkles, UploadCloud, Filter } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Checkbox } from '@/components/ui/checkbox';
+import { FileUploadZone } from './FileUploadZone';
 
 type CorrectionType = 'grammar' | 'spelling' | 'punctuation';
 
@@ -23,9 +23,8 @@ export function GrammarCheckerTool() {
     form,
     mutation,
     isUploading,
-    getRootProps,
-    getInputProps,
-    isDragActive,
+    setIsUploading,
+    onFileUpload,
     onSubmit,
     results,
     isCopied,
@@ -98,16 +97,11 @@ export function GrammarCheckerTool() {
               />
             </TabsContent>
             <TabsContent value="upload" className="pt-4">
-              <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer ${isDragActive ? 'border-primary' : ''}`}>
-                <input {...getInputProps()} />
-                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
-                {isUploading ? (
-                  <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.grammarChecker.processingFile')}</p>
-                ) : (
-                  <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.grammarChecker.dropzoneHint')}</p>
-                )}
-                <p className="text-xs text-muted-foreground">{t('writingTools.grammarChecker.supportedFiles')}</p>
-              </div>
+              <FileUploadZone 
+                onFileUpload={onFileUpload}
+                isUploading={isUploading}
+                setIsUploading={setIsUploading}
+              />
             </TabsContent>
           </Tabs>
           {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}

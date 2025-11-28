@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { ClaimStatus, FactCheckOutput } from '@/ai/schemas';
@@ -11,6 +10,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useFactCheckerLogic } from '@/hooks/writing-tools/use-fact-checker-logic';
 import { CheckCircle, ExternalLink, HelpCircle, Loader2, Sparkles, UploadCloud, XCircle } from 'lucide-react';
 import Link from 'next/link';
+import { FileUploadZone } from './FileUploadZone';
 
 function getStatusInfo(status: ClaimStatus) {
   switch (status) {
@@ -35,9 +35,8 @@ export function FactCheckerTool() {
     form,
     mutation,
     isUploading,
-    getRootProps,
-    getInputProps,
-    isDragActive,
+    setIsUploading,
+    onFileUpload,
     onSubmit,
     results,
   } = useFactCheckerLogic();
@@ -65,16 +64,11 @@ export function FactCheckerTool() {
               />
             </TabsContent>
             <TabsContent value="upload" className="pt-4">
-              <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer ${isDragActive ? 'border-primary' : ''}`}>
-                <input {...getInputProps()} />
-                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
-                {isUploading ? (
-                  <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.factChecker.processingFile')}</p>
-                ) : (
-                  <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.factChecker.dropzoneHint')}</p>
-                )}
-                <p className="text-xs text-muted-foreground">{t('writingTools.factChecker.supportedFiles')}</p>
-              </div>
+              <FileUploadZone 
+                onFileUpload={onFileUpload}
+                isUploading={isUploading}
+                setIsUploading={setIsUploading}
+              />
             </TabsContent>
           </Tabs>
           {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}
@@ -119,7 +113,7 @@ export function FactCheckerTool() {
                     const { icon: Icon, color, badgeVariant } = getStatusInfo(claim.status);
                     return (
                       <div key={index} className="border p-4 rounded-lg space-y-2">
-                        <div className="flex justify-between items-start">
+                        <div className="flex justify-between items-start gap-4">
                           <p className="font-medium italic">"{claim.statement}"</p>
                           <Badge variant={badgeVariant} className="flex-shrink-0 ml-4">
                             <Icon className={`mr-1 h-3.5 w-3.5 ${color}`} />
