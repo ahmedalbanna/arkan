@@ -15,7 +15,6 @@ import { useBuilderStore, useToast } from '@/hooks';
 import { ExternalContextType } from '@/lib/types';
 import { cn } from '@/lib/utils/cn';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
-import { processFileApi } from '@/services';
 import { AtomIcon, FileText, ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
 import Image from 'next/image';
 import { useCallback, useState } from 'react';
@@ -62,38 +61,37 @@ function ViewContextDialog({ item }: { item: { fileName: string, content: string
 function FileDropzone() {
     const { t } = useLocalization();
     const { toast } = useToast();
-    const { firebaseUser, refetchUser } = useAuth();
     const { updateProject } = useBuilderStore();
     const [isLoading, setIsLoading] = useState(false);
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
-        if (!firebaseUser) {
-            toast({ title: t('builder.files.toasts.authError'), variant: "destructive" });
-            return;
-        }
-
         setIsLoading(true);
         for (const file of acceptedFiles) {
-            try {
-                const token = await firebaseUser.getIdToken();
-                const formData = new FormData();
-                formData.append('file', file);
-                const result = await processFileApi(formData, token);
+            const reader = new FileReader();
+
+            reader.onabort = () => console.log('file reading was aborted');
+            reader.onerror = () => console.log('file reading has failed');
+            reader.onload = () => {
+                const binaryStr = reader.result as string;
                 updateProject(p => {
                     p.addExternalContext({
-                        fileName: file.name.replace(/\.[^/.]+$/, ".md"),
-                        content: result.markdown,
+                        fileName: file.name,
+                        content: binaryStr,
                         type: 'context'
                     });
                 });
                 toast({ title: t('builder.files.toasts.fileAdded'), description: t('builder.files.toasts.fileAddedDesc').replace('{fileName}', file.name) });
-                refetchUser();
-            } catch (error: any) {
-                toast({ title: t('builder.files.toasts.uploadFailed'), description: error.message, variant: "destructive" });
+            };
+
+            const isTextFile = file.type.startsWith('text/') || file.name.endsWith('.md');
+            if (isTextFile) {
+                reader.readAsText(file);
+            } else {
+                reader.readAsDataURL(file);
             }
         }
         setIsLoading(false);
-    }, [firebaseUser, updateProject, toast, refetchUser, t]);
+    }, [updateProject, toast, t]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -166,7 +164,7 @@ export function UploadManager() {
                     {t('builder.files.fileManagerDesc')}
                 </CardDescription>
             </CardHeader>
-            <CardContent className="flex-grow flex flex-col gap-4">
+            <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
                 <Tabs defaultValue="upload" className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="upload">{t('builder.files.uploadFilesTab')}</TabsTrigger>

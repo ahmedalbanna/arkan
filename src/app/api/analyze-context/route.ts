@@ -12,7 +12,7 @@ import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdo
 // Define the schema for a single file in the request
 const FileContextSchema = z.object({
   fileName: z.string(),
-  content: z.string(), // This will now always be markdown or plain text
+  content: z.string(), // This can be a data URI or plain text
   type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
 });
 
@@ -31,7 +31,25 @@ export const POST = withAuth(async ({ request, user }) => {
       return handleApiError(validation.error);
     }
 
-    const agentInput = validation.data;
+    const { prompt, contextFiles } = validation.data;
+
+    // Pre-process files if they are not already text-based
+    const processedContextFiles = await Promise.all(
+        contextFiles.map(async (file) => {
+            if (file.content.startsWith('data:application/pdf')) {
+                const result = await rewriteDocumentToMarkdown({ pdfDataUri: file.content });
+                return { ...file, content: result.markdown };
+            } else if (file.content.startsWith('data:image/')) {
+                const result = await imageToText({ imageDataUri: file.content });
+                return { ...file, content: result.text };
+            }
+            // If it's already text or another data URI we don't process, pass it through.
+            // The AI flow itself will handle media data URIs if the prompt specifies.
+            return file;
+        })
+    );
+    
+    const agentInput = { prompt, contextFiles: processedContextFiles };
     const result = await analyzeContext(agentInput);
 
     // This is a complex task, so we deduct 2 credits.
@@ -58,4 +76,3 @@ export const POST = withAuth(async ({ request, user }) => {
     return handleApiError(error);
   }
 });
-
