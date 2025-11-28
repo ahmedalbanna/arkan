@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useWritingTool, useToast } from '@/hooks/util';
+import { useWritingTool, useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const detectorSchema = z.object({

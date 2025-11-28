@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useCallback } from 'react';
@@ -7,8 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
 import { useDropzone } from 'react-dropzone';
-import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services';
 import type { SentenceStructureCheckOutput } from '@/ai/schemas';
 
 const sentenceStructureSchema = z.object({
@@ -19,7 +16,6 @@ type FormValues = z.infer<typeof sentenceStructureSchema>;
 
 export function useSentenceStructureCheckerLogic() {
   const [isUploading, setIsUploading] = useState(false);
-  const { firebaseUser, refetchUser } = useAuth();
   const { toast } = useToast();
 
   const mutation = useWritingTool('/api/writing-tools/sentence-structure-checker', {
@@ -33,37 +29,48 @@ export function useSentenceStructureCheckerLogic() {
     defaultValues: { text: '' },
   });
 
+  const onFileUpload = useCallback((content: string) => {
+    form.setValue('text', content, { shouldValidate: true });
+    toast({ title: 'File Processed', description: 'Text from file has been loaded.' });
+  }, [form, toast]);
+
+
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (!file) return;
 
-    if (!firebaseUser) {
-      toast({ title: 'Authentication Error', description: 'You must be logged in to process files.', variant: "destructive" });
-      return;
-    }
-
     setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
+    
     try {
-      const token = await firebaseUser.getIdToken();
-      const result = await processFileApi(formData, token);
-      form.setValue('text', result.markdown, { shouldValidate: true });
-      toast({ title: 'File Processed', description: `Text extracted from ${file.name}.` });
-      refetchUser();
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const result = event.target?.result as string;
+            onFileUpload(result);
+            setIsUploading(false);
+        };
+        reader.onerror = () => {
+            throw new Error("Error reading file.");
+        };
+
+        const isTextFile = file.type.startsWith('text/') || file.name.endsWith('.md');
+        if (isTextFile) {
+            reader.readAsText(file);
+        } else {
+             // For other file types like PDF, you might need a different processing step
+             // For now, we'll assume text-based for this tool.
+             toast({ title: 'Unsupported File', description: 'Please upload a text-based file (.txt, .md).', variant: 'destructive' });
+             setIsUploading(false);
+        }
     } catch (error: any) {
       toast({ title: 'File Processing Failed', description: error.message, variant: "destructive" });
-    } finally {
       setIsUploading(false);
     }
-  }, [firebaseUser, form, refetchUser, toast]);
+  }, [onFileUpload, toast]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     multiple: false,
     accept: {
-      'application/pdf': ['.pdf'],
       'text/plain': ['.txt'],
       'text/markdown': ['.md'],
     },
