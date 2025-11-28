@@ -46,7 +46,6 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
-  BookCopy,
   BookOpenTextIcon,
   GripVertical,
   ListPlus,
@@ -253,6 +252,7 @@ export const GenerationTools = () => {
   const { controlState, guidelineState, contextSelection, initializeControls } = useGenerationUIStore();
   const { userProfile, refetchUser, firebaseUser } = useAuth();
   const queryClient = useQueryClient();
+  const [showTocInput, setShowTocInput] = useState(false);
 
   // No need for orderedSections or setOrderedSections state, as we read directly from the project in the store.
 
@@ -401,6 +401,7 @@ export const GenerationTools = () => {
       description: `Created ${chaptersCreated} chapters and ${sectionsCreated} sections.`,
     });
     setTocText('');
+    setShowTocInput(false);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -455,29 +456,31 @@ export const GenerationTools = () => {
             <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
             <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
           </div>
-          <Button variant="ghost" size="icon" className="hidden lg:inline-flex">
+          <Button variant="ghost" size="icon" onClick={() => setShowTocInput(prev => !prev)} className={cn("hidden lg:inline-flex", showTocInput && "bg-accent")}>
             <BookOpenTextIcon className="h-5 w-5" />
           </Button>
         </div>
       </CardHeader>
       <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
-        <div className="space-y-2">
-          <Label htmlFor="toc-master-input">Table of Contents</Label>
-          <Textarea
-            id="toc-master-input"
-            value={tocText}
-            onChange={(e) => setTocText(e.target.value)}
-            placeholder={"1. Chapter One\n1.1. Section One\n2. Chapter Two..."}
-            className="flex-grow resize-none"
-            rows={5}
-          />
-          <Button onClick={handleCreateFromToc} size="sm" className="w-full">
-            <ListPlus className="me-2 h-4 w-4" /> Create Chapters & Sections
-          </Button>
-        </div>
+        {showTocInput && (
+          <div className="space-y-2">
+            <Label htmlFor="toc-master-input">Table of Contents</Label>
+            <Textarea
+              id="toc-master-input"
+              value={tocText}
+              onChange={(e) => setTocText(e.target.value)}
+              placeholder={"1. Chapter One\n1.1. Section One\n2. Chapter Two..."}
+              className="flex-grow resize-none"
+              rows={5}
+            />
+            <Button onClick={handleCreateFromToc} size="sm" className="w-full">
+              <ListPlus className="me-2 h-4 w-4" /> Create Chapters & Sections
+            </Button>
+          </div>
+        )}
 
         <div className="relative flex-grow flex flex-col min-h-0">
-          <div className="flex-grow border-t pt-4">
+          <div className={cn("flex-grow pt-4", showTocInput && "border-t")}>
 
             <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
@@ -510,7 +513,7 @@ export const GenerationTools = () => {
             onChange={(e) => setNewChapterTitle(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddChapter())}
           />
-          <Button onClick={handleAddChapter} variant="outline" className="shrink-0"><BookCopy className="me-2 h-4 w-4" /> Add Chapter</Button>
+          <Button onClick={handleAddChapter} variant="outline" className="shrink-0"><PlusCircle className="me-2 h-4 w-4" /> Add Chapter</Button>
         </div>
       </CardContent>
     </Card>
