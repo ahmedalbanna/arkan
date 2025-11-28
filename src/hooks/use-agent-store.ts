@@ -28,37 +28,17 @@ interface AgentState {
   clearResponses: (agentId: string, commandId?: string) => void;
 }
 
-export const useAgentStore = create<AgentState>()(
+const useAgentStore = create<AgentState>()(
   persist(
-    (set, get) => ({
-      agents: [],
-      selectedAgent: null,
-      selectedCommandId: null,
-      responses: {},
-      isLoading: true, // Start in loading state
-      error: null,
-
-      loadInitialAgents: async () => {
-        if (!get().isLoading) {
-            set({ isLoading: true, error: null });
-        }
-
+    (set, get) => {
+      const loadAgents = async () => {
         try {
-          console.log('Loading agents from API...');
           const response = await fetch('/api/agents');
-
           if (!response.ok) {
             throw new Error(`API request failed: ${response.statusText}`);
           }
-
           const agentsFromApi = await response.json();
           const agents = Array.isArray(agentsFromApi) ? agentsFromApi : [];
-
-          if (agents.length === 0) {
-            console.warn('No agents found in API response.');
-          } else {
-            console.log(`Successfully loaded ${agents.length} agents from API`);
-          }
 
           set({
             agents,
@@ -71,63 +51,79 @@ export const useAgentStore = create<AgentState>()(
           if ((!selectedAgent || !agents.some(a => a.id === selectedAgent.id)) && agents.length > 0) {
             get().selectAgent(agents[0].id);
           }
-
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Failed to load agents';
           console.error('Error loading agents:', errorMessage);
           set({ agents: [], isLoading: false, error: errorMessage });
         }
-      },
+      };
 
-      refreshAgentsFromApi: async () => {
-        await get().loadInitialAgents();
-      },
+      // Automatically load agents when the store is initialized on the client
+      if (typeof window !== 'undefined') {
+        loadAgents();
+      }
 
-      selectAgent: (agentId) => {
-        if (agentId === null) {
-          set({ selectedAgent: null, selectedCommandId: null });
-          return;
-        }
-        const agent = get().agents.find(a => a.id === agentId);
-        if (agent) {
-          const commands = agent.commands || agent.data?.commands || [];
-          const firstCommandId = commands[0]?.id || null;
-          set({ selectedAgent: agent, selectedCommandId: firstCommandId });
-        }
-      },
+      return {
+        agents: [],
+        selectedAgent: null,
+        selectedCommandId: null,
+        responses: {},
+        isLoading: true,
+        error: null,
 
-      setSelectedCommandId: (commandId) => {
-        set({ selectedCommandId: commandId });
-      },
-
-      setResponse: (agentId, commandId, response) => {
-        set(state => {
-          const newResponses = { ...state.responses };
-          if (!newResponses[agentId]) {
-            newResponses[agentId] = {};
+        loadInitialAgents: async () => {
+          if (!get().isLoading) {
+            set({ isLoading: true, error: null });
           }
-          if (!newResponses[agentId][commandId]) {
-            newResponses[agentId][commandId] = [];
-          }
-          newResponses[agentId][commandId].push(response);
-          return { responses: newResponses };
-        });
-      },
+          await loadAgents();
+        },
 
-      clearResponses: (agentId, commandId) => {
-        set(state => {
-          const newResponses = { ...state.responses };
-          if (newResponses[agentId]) {
-            if (commandId) {
-              delete newResponses[agentId][commandId];
-            } else {
-              delete newResponses[agentId];
+        selectAgent: (agentId) => {
+          if (agentId === null) {
+            set({ selectedAgent: null, selectedCommandId: null });
+            return;
+          }
+          const agent = get().agents.find(a => a.id === agentId);
+          if (agent) {
+            const commands = agent.commands || agent.data?.commands || [];
+            const firstCommandId = commands[0]?.id || null;
+            set({ selectedAgent: agent, selectedCommandId: firstCommandId });
+          }
+        },
+
+        setSelectedCommandId: (commandId) => {
+          set({ selectedCommandId: commandId });
+        },
+
+        setResponse: (agentId, commandId, response) => {
+          set(state => {
+            const newResponses = { ...state.responses };
+            if (!newResponses[agentId]) {
+              newResponses[agentId] = {};
             }
-          }
-          return { responses: newResponses };
-        });
-      },
-    }),
+            if (!newResponses[agentId][commandId]) {
+              newResponses[agentId][commandId] = [];
+            }
+            newResponses[agentId][commandId].push(response);
+            return { responses: newResponses };
+          });
+        },
+
+        clearResponses: (agentId, commandId) => {
+          set(state => {
+            const newResponses = { ...state.responses };
+            if (newResponses[agentId]) {
+              if (commandId) {
+                delete newResponses[agentId][commandId];
+              } else {
+                delete newResponses[agentId];
+              }
+            }
+            return { responses: newResponses };
+          });
+        },
+      };
+    },
     {
       name: 'agent-store',
       storage: createJSONStorage(() => localStorage),
@@ -139,3 +135,5 @@ export const useAgentStore = create<AgentState>()(
     }
   )
 );
+
+export { useAgentStore };

@@ -30,7 +30,7 @@ export const AgentList: React.FC<AgentListProps> = ({ agents }) => {
       const category = (agent.category || '').toLowerCase();
       const tags = (agent.tags || []).join(' ').toLowerCase();
       const commands = (agent.commands || agent.data?.commands || [])
-        .map(cmd => (cmd.name + ' ' + cmd.description).toLowerCase())
+        .map(cmd => (cmd.name + ' ' + (cmd.description || '')).toLowerCase()) // Add guard for description
         .join(' ');
       
       const searchText = `${name} ${description} ${category} ${tags} ${commands}`;

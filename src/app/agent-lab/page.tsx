@@ -13,16 +13,15 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 
 const MainApp: React.FC = () => {
     const { 
-        loadInitialAgents, 
         agents, 
         selectedAgent, 
         isLoading, 
-        error 
+        error,
+        loadInitialAgents, // Keep the refresh function
     } = useAgentStore();
 
-    useEffect(() => {
-        loadInitialAgents();
-    }, [loadInitialAgents]);
+    // The store now handles initial loading automatically via its initializer.
+    // This useEffect is no longer needed for the initial load.
 
     return (
         <div className="flex h-screen w-screen flex-col">
@@ -32,22 +31,24 @@ const MainApp: React.FC = () => {
                         <Bot className="h-6 w-6" />
                         <span>AgentLab</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>{agents.length} agents loaded</span>
-                        <Button 
-                            onClick={loadInitialAgents}
-                            disabled={isLoading}
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2"
-                        >
-                            <RefreshCw className={`h-3 w-3 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-                            Refresh
-                        </Button>
-                    </div>
                 </div>
                 <div className="flex items-center gap-2">
                     <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                 <Button 
+                                    onClick={loadInitialAgents}
+                                    disabled={isLoading}
+                                    variant="ghost"
+                                    size="icon"
+                                >
+                                    <RefreshCw className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Refresh Agents</p>
+                            </TooltipContent>
+                        </Tooltip>
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button variant="ghost" size="icon" asChild>
