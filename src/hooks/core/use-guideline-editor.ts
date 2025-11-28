@@ -59,8 +59,15 @@ export function useGuidelineEditor(itemKey: string) {
     }, [selectedAgentId, selectedCommandId, prompt, guidelines, itemKey, project, updateProject]);
 
     const handleAgentChange = (agentId: string) => {
+        if (!agentId) { // This handles the case where the user deselects the agent
+            setSelectedAgentId(null);
+            setSelectedCommandId(null);
+            setPrompt('You are a helpful assistant.');
+            return;
+        }
+
         setSelectedAgentId(agentId);
-        setSelectedCommandId(null);
+        setSelectedCommandId(null); // Reset command when agent changes
 
         const agent = agents.find(a => a.id === agentId);
         const newPrompt = agent?.description || agent?.data?.description || 'You are a helpful assistant.';
@@ -68,7 +75,7 @@ export function useGuidelineEditor(itemKey: string) {
     };
 
     const handleCommandChange = (commandId: string) => {
-        if (commandId === 'default') {
+        if (commandId === 'default' || !commandId) {
             setSelectedCommandId(null);
             const agent = agents.find(a => a.id === selectedAgentId);
             const newPrompt = agent?.description || agent?.data?.description || 'You are a helpful assistant.';
