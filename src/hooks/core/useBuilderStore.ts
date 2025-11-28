@@ -61,7 +61,10 @@ const useBuilderStore = create<BuilderState>((set, get) => {
         newProjectName: '',
         newProjectDescription: '',
         isCreateProjectOpen: false,
-        hasContent: false,
+        get hasContent() {
+            const project = get().project;
+            return !!project && (!!project.name || !!project.projectDescription || project.chapters.length > 0 || project.externalContext.length > 0);
+        },
         fileInputRef,
 
         // --- Core Project Actions ---
