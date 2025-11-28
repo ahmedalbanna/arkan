@@ -2,7 +2,7 @@
 'use server';
 
 /**
- * @fileOverview An AI agent for generating a table of contents from a project idea.
+ * @fileOverview An AI agent for generating a table of contents from a project Description.
  */
 
 import { ai } from '@/ai/genkit';
@@ -13,15 +13,15 @@ const generateTocPrompt = ai.definePrompt({
   input: { schema: GenerateTocInputSchema },
   output: { schema: GenerateTocOutputSchema },
   model: 'googleai/gemini-2.5-flash-lite',
-  prompt: `You are an expert project planner and technical writer. Based on the provided project idea, generate a logical and comprehensive table of contents for a formal report.
+  prompt: `You are an expert project planner and technical writer. Based on the provided project Description, generate a logical and comprehensive table of contents for a formal report.
 
-**Project Idea:**
+**Project Description:**
 ---
-{{{projectIdea}}}
+{{{projectDescription}}}
 ---
 
 **Instructions:**
-1.  Analyze the project idea to understand its core components, objectives, and scope.
+1.  Analyze the project Description to understand its core components, objectives, and scope.
 2.  Generate a list of relevant section titles for a detailed report.
 3.  The list should be ordered logically, starting from an introduction and ending with a conclusion.
 4.  Include standard sections like 'System Analysis', 'System Design', and 'Conclusion'.

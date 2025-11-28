@@ -182,30 +182,30 @@ export type BiasCheckOutput = z.infer<typeof BiasCheckOutputSchema>;
 
 // sentence-structure-checker.ts
 export const SentenceStructureCheckInputSchema = z.object({
-  text: z.string().describe('The text to be analyzed for sentence structure.'),
+    text: z.string().describe('The text to be analyzed for sentence structure.'),
 });
 export type SentenceStructureCheckInput = z.infer<typeof SentenceStructureCheckInputSchema>;
 
 export const SentenceStructureIssueSchema = z.object({
-  sentence: z.string().describe('The problematic sentence.'),
-  issue: z.string().describe('A brief description of the issue (e.g., "Too long", "Too short/choppy", "Complex").'),
-  suggestion: z.string().describe('A suggestion for how to improve or rewrite the sentence.'),
+    sentence: z.string().describe('The problematic sentence.'),
+    issue: z.string().describe('A brief description of the issue (e.g., "Too long", "Too short/choppy", "Complex").'),
+    suggestion: z.string().describe('A suggestion for how to improve or rewrite the sentence.'),
 });
 export type SentenceStructureIssue = z.infer<typeof SentenceStructureIssueSchema>;
 
 export const SentenceStructureCheckOutputSchema = z.object({
-  statistics: z.object({
-    sentenceCount: z.number().describe('Total number of sentences.'),
-    averageSentenceLength: z.number().describe('Average number of words per sentence.'),
-    shortestSentence: z.number().describe('Length of the shortest sentence in words.'),
-    longestSentence: z.number().describe('Length of the longest sentence in words.'),
-  }).describe('Basic statistics about the text.'),
-  varietyAssessment: z.object({
-    lengthVariety: z.enum(['low', 'medium', 'high']).describe('Assessment of sentence length variation.'),
-    structureVariety: z.enum(['low', 'medium', 'high']).describe('Assessment of sentence structure variation (simple, compound, complex).'),
-  }).describe('Analysis of sentence variety.'),
-  issues: z.array(SentenceStructureIssueSchema).describe('An array of identified issues with specific sentences.'),
-  overallAssessment: z.string().describe('A brief, overall assessment of the sentence structure.'),
+    statistics: z.object({
+        sentenceCount: z.number().describe('Total number of sentences.'),
+        averageSentenceLength: z.number().describe('Average number of words per sentence.'),
+        shortestSentence: z.number().describe('Length of the shortest sentence in words.'),
+        longestSentence: z.number().describe('Length of the longest sentence in words.'),
+    }).describe('Basic statistics about the text.'),
+    varietyAssessment: z.object({
+        lengthVariety: z.enum(['low', 'medium', 'high']).describe('Assessment of sentence length variation.'),
+        structureVariety: z.enum(['low', 'medium', 'high']).describe('Assessment of sentence structure variation (simple, compound, complex).'),
+    }).describe('Analysis of sentence variety.'),
+    issues: z.array(SentenceStructureIssueSchema).describe('An array of identified issues with specific sentences.'),
+    overallAssessment: z.string().describe('A brief, overall assessment of the sentence structure.'),
 });
 export type SentenceStructureCheckOutput = z.infer<typeof SentenceStructureCheckOutputSchema>;
 
@@ -753,7 +753,7 @@ export type EvaluateReportOutput = z.infer<typeof EvaluateReportOutputSchema>;
 
 // generate-toc.ts
 export const GenerateTocInputSchema = z.object({
-    projectIdea: z.string().min(10, 'Project idea must be at least 10 characters.'),
+    projectDescription: z.string().min(10, 'Project idea must be at least 10 characters.'),
 });
 export type GenerateTocInput = z.infer<typeof GenerateTocInputSchema>;
 
@@ -775,4 +775,4 @@ export const GenerateUIDescriptionOutputSchema = z.object({
 });
 export type GenerateUIDescriptionOutput = z.infer<typeof GenerateUIDescriptionOutputSchema>;
 
-    
+
