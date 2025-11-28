@@ -377,7 +377,6 @@ export type GenerateQuizOutput = z.infer<typeof GenerateQuizOutputSchema>;
 // generate-report-section.ts
 export const GenerateSectionInputSchema = z.object({
     sectionToGenerate: SectionNameSchema,
-    // The agent prompt is now the main prompt for the section
     prompt: z.string().min(10, 'Prompt must be at least 10 characters.'),
     otherSections: z.record(z.string(), z.string()).optional().describe("A map of previously generated text sections and other textual context (like the proposal or plan). The key is the item's name and the value is the markdown/JSON content."),
     externalContext: z.array(z.object({
@@ -753,12 +752,12 @@ export type EvaluateReportOutput = z.infer<typeof EvaluateReportOutputSchema>;
 
 // generate-toc.ts
 export const GenerateTocInputSchema = z.object({
-    projectDescription: z.string().min(10, 'Project idea must be at least 10 characters.'),
+  projectDescription: z.string().min(10, 'Project idea must be at least 10 characters.'),
 });
 export type GenerateTocInput = z.infer<typeof GenerateTocInputSchema>;
 
 export const GenerateTocOutputSchema = z.object({
-    tableOfContents: z.array(z.string()).describe('A list of suggested section titles for the table of contents.'),
+  tableOfContents: z.array(z.string()).describe('A list of suggested section titles for the table of contents.'),
 });
 export type GenerateTocOutput = z.infer<typeof GenerateTocOutputSchema>;
 
