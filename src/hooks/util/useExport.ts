@@ -4,8 +4,8 @@
 import { useState } from 'react';
 import { saveAs } from 'file-saver';
 import { toast } from './use-toast';
-import type { Project, Section } from '@/lib/models';
-import { templates, type DocxTemplateKey } from '@/lib/docx-styles'; // Assuming default styles are needed for options
+import type { Section } from '@/lib/models';
+import { templates, type DocxTemplateKey } from '@/lib/docx-styles';
 import { ConversionOptions } from '@/lib/word-converter/types';
 
 interface ExportParams {

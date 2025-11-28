@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { useBuilderStore } from '@/hooks';
+import { useBuilderStore, useExport } from '@/hooks';
 import { templates, type DocxTemplateKey } from '@/lib/docx-styles';
 import { Section } from '@/lib/models';
 import { Download, FileText, Loader2 } from 'lucide-react';
@@ -23,13 +23,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '..
 import { ScrollArea } from '../ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
-interface AdvancedExportDialogProps {
-  isExporting: boolean;
-  onExport: (sectionsToExport: Section[], options: { template: DocxTemplateKey, pageNumbers: boolean }) => void;
-}
 
-export function ExportDialog({ isExporting, onExport }: AdvancedExportDialogProps) {
+export function ExportDialog() {
   const { project } = useBuilderStore();
+  const { isExporting, exportReportDocx } = useExport();
   const [selectedSections, setSelectedSections] = useState<Record<string, boolean>>({});
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<DocxTemplateKey>('modern');
@@ -71,11 +68,20 @@ export function ExportDialog({ isExporting, onExport }: AdvancedExportDialogProp
     setSelectedSections(prev => ({ ...prev, [sectionId]: checked }));
   };
 
-  const handleExportClick = () => {
+  const handleExportClick = async () => {
+    if (!project) return;
     const selectedIds = Object.keys(selectedSections).filter(key => selectedSections[key]);
     const sectionsToExport = project?.sections.filter(s => selectedIds.includes(s.id)) || [];
-    onExport(sectionsToExport, { template: selectedTemplate, pageNumbers: includePageNumbers });
-    if (sectionsToExport.length > 0) setIsOpen(false);
+    
+    await exportReportDocx({
+      sections: sectionsToExport,
+      projectName: project.name || 'Untitled Report',
+      options: { template: selectedTemplate, pageNumbers: includePageNumbers },
+    });
+
+    if (sectionsToExport.length > 0) {
+      setIsOpen(false);
+    }
   }
 
   const allChapterSections = availableChapters.flatMap(c => c.sections.map(s => s.id));
@@ -85,9 +91,13 @@ export function ExportDialog({ isExporting, onExport }: AdvancedExportDialogProp
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Download className="me-2 h-4 w-4" />
-          Export
+        <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 md:w-auto md:px-3"
+        >
+          <Download className="h-4 w-4" />
+          <span className="hidden md:inline ms-2">Export</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
@@ -154,7 +164,7 @@ export function ExportDialog({ isExporting, onExport }: AdvancedExportDialogProp
                 <SelectContent>
                   {Object.keys(templates).map((key) => (
                     <SelectItem key={key} value={key}>
-                      {templates[key].name}
+                      {templates[key as DocxTemplateKey].name}
                     </SelectItem>
                   ))}
                 </SelectContent>

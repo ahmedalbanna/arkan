@@ -14,6 +14,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useSaveProject } from '@/hooks';
 import { useRouter } from 'next/navigation';
 import { DownloadProjectButton } from './DownloadProjectButton';
+import { ExportDialog } from './ExportDialog';
 
 export const SessionActions = () => {
     const { t } = useLocalization();
@@ -74,6 +75,8 @@ export const SessionActions = () => {
                 </Button>
 
                 <DownloadProjectButton />
+                
+                <ExportDialog />
 
                 <Tooltip>
                     <TooltipTrigger asChild>

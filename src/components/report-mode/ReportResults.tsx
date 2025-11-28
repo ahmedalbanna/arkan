@@ -2,7 +2,6 @@
 'use client';
 
 import type { SectionName } from '@/ai/schemas';
-import { ExportDialog } from '@/components/project/ExportDialog';
 import A4Page from '@/components/shared/A4Page';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,10 +13,8 @@ import {
 } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
-import { toast, useBuilderStore, useExport } from '@/hooks';
+import { toast, useBuilderStore } from '@/hooks';
 import { useReportPaginator } from '@/hooks/core/use-report-paginator';
-import type { DocxTemplateKey } from '@/lib/docx-styles';
-import type { Section } from '@/lib/models';
 import {
   ChevronLeft,
   ChevronRight,
@@ -26,14 +23,9 @@ import {
 } from 'lucide-react';
 import { SectionView } from './SectionView';
 
-interface ReportResultsProps {
-  generatedSections: SectionName[];
-}
-
 export const ReportResults = () => {
   const { t } = useLocalization();
   const { project, updateProject } = useBuilderStore();
-  const { isExporting, exportReportDocx } = useExport();
 
   const {
     currentPage,
@@ -80,18 +72,6 @@ export const ReportResults = () => {
     toast({
       title: 'Chapter Deleted',
       description: 'The chapter has been removed from your project.',
-    });
-  };
-
-  const handleExport = async (
-    sectionsToExport: Section[],
-    options: { template: DocxTemplateKey; pageNumbers: boolean },
-  ) => {
-    if (!project) return;
-    await exportReportDocx({
-      sections: sectionsToExport,
-      projectName: project.name || 'Untitled Report',
-      options,
     });
   };
 
@@ -167,10 +147,6 @@ export const ReportResults = () => {
               {t('builder.reportGenerator.resultsDesc')}
             </CardDescription>
           </div>
-          <ExportDialog
-            onExport={handleExport}
-            isExporting={isExporting}
-          />
         </div>
       </CardHeader>
       {totalPages > 1 && (
