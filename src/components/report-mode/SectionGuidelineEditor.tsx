@@ -1,100 +1,87 @@
 
 'use client';
 
-import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Plus, Trash2, StickyNote, Pencil } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
-import { useGuidelineEditor } from '@/hooks';
-import { Section } from '@/lib/types';
+import { useAgentStore } from '@/hooks/use-agent-store';
 import { useFormContext } from 'react-hook-form';
+
+import { Combobox } from '@/components/ui/combobox';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '../ui/textarea';
+import { useGuidelineEditor } from '@/hooks';
+import { useEffect, useState } from 'react';
 
 interface GuidelineEditorProps {
     itemKey: string;
 }
 
 export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
-    const { control } = useFormContext(); // Assuming you are using react-hook-form
     const {
         t,
         prompt,
         setPrompt,
         guidelines,
-        setGuidelines,
-        editingGuideline,
-        setEditingGuideline,
-        handleUpdateCustomGuideline,
-        customGuidelineInput,
-        setCustomGuidelineInputForItem,
-        handleAddCustomGuidelineForItem,
-        handleRemoveCustomGuidelineForItem,
+        section,
+        handleAgentChange,
+        handleCommandChange,
+        selectedAgentId,
+        selectedCommandId,
     } = useGuidelineEditor(itemKey);
+    const { agents, isLoading: isLoadingAgents } = useAgentStore();
+    const [agentSearch, setAgentSearch] = useState('');
 
+    const selectedAgent = agents.find(a => a.id === selectedAgentId);
+    const availableCommands = selectedAgent?.commands || selectedAgent?.data?.commands || [];
+
+    const agentOptions = agents.map(agent => ({
+        value: agent.id,
+        label: agent.name,
+    }));
 
     return (
-        <>
+        <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label>Agent</Label>
+                    <Combobox
+                        options={agentOptions}
+                        value={selectedAgentId}
+                        onChange={handleAgentChange}
+                        placeholder="Select an agent..."
+                        searchPlaceholder="Search agents..."
+                        isLoading={isLoadingAgents}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label>Command</Label>
+                    <Select
+                        value={selectedCommandId || 'default'}
+                        onValueChange={handleCommandChange}
+                        disabled={!selectedAgentId}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select a command..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="default">Default Behavior</SelectItem>
+                            {availableCommands.map(cmd => (
+                                <SelectItem key={cmd.id} value={cmd.id}>{cmd.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
             <div className="space-y-2">
                 <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_prompt_label')}</Label>
                 <Textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    rows={6}
+                    rows={8}
                     className="font-mono text-xs"
-                    placeholder="Enter the main prompt for this section..."
+                    placeholder="The agent's base prompt will appear here..."
                 />
             </div>
-
-            <div className="space-y-3 mt-4">
-                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.customGuidelines')}</Label>
-                <div className="space-y-2 rounded-md border p-3">
-                    {guidelines.map((custom, index) => (
-                        <div key={index} className="flex items-center justify-between text-sm bg-background p-2 rounded-md gap-2">
-                            {editingGuideline?.index === index ? (
-                                <Input
-                                    value={editingGuideline.text}
-                                    onChange={(e) => setEditingGuideline({ ...editingGuideline, text: e.target.value })}
-                                    onBlur={() => handleUpdateCustomGuideline()}
-                                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleUpdateCustomGuideline())}
-                                    autoFocus
-                                    className="h-8"
-                                />
-                            ) : (
-                                <div className="flex items-center gap-2 flex-1 min-w-0" onDoubleClick={() => setEditingGuideline({ index, text: custom })}>
-                                    <StickyNote className="h-4 w-4 text-muted-foreground shrink-0" />
-                                    <span className="text-ellipsis">{custom}</span>
-                                </div>
-                            )}
-                            <div className="flex items-center">
-                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditingGuideline({ index, text: custom })}>
-                                    <Pencil className="h-3 w-3" />
-                                </Button>
-                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveCustomGuidelineForItem(index)}>
-                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                </Button>
-                            </div>
-                        </div>
-                    ))}
-                    {guidelines.length === 0 && (
-                        <p className="text-xs text-muted-foreground text-center py-2">No custom guidelines added yet.</p>
-                    )}
-                </div>
-                <div className="flex gap-2">
-                    <Input
-                        placeholder={t('builder.reportGenerator.addGuidelinePlaceholder')}
-                        value={customGuidelineInput[itemKey] || ''}
-                        onChange={(e) => setCustomGuidelineInputForItem(itemKey, e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuidelineForItem(itemKey))}
-                    />
-                    <Button type="button" variant="secondary" onClick={() => handleAddCustomGuidelineForItem(itemKey)}>
-                        <Plus className="h-4 w-4" />
-                    </Button>
-                </div>
-            </div>
-        </>
+        </div>
     );
 }

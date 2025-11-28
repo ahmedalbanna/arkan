@@ -4,6 +4,7 @@
 import { useLocalization } from '@/context/LocalizationContext';
 import { useEffect, useMemo, useState } from 'react';
 import { useBuilderStore } from './useBuilderStore';
+import { useAgentStore } from '../use-agent-store';
 
 interface EditingGuidelineState {
     index: number;
@@ -13,81 +14,83 @@ interface EditingGuidelineState {
 export function useGuidelineEditor(itemKey: string) {
     const { t } = useLocalization();
     const { project, updateProject } = useBuilderStore();
-    const [customGuidelineInput, setCustomGuidelineInput] = useState<Record<string, string>>({});
-    const [editingGuideline, setEditingGuideline] = useState<EditingGuidelineState | null>(null);
+    const { agents, isLoading: agentsLoading } = useAgentStore();
 
     const section = useMemo(() => project?.getSection(itemKey), [project, itemKey]);
 
+    // Local state for UI
+    const [selectedAgentId, setSelectedAgentId] = useState<string | null>(section?.agentId || null);
+    const [selectedCommandId, setSelectedCommandId] = useState<string | null>(section?.commandId || null);
     const [prompt, setPrompt] = useState(section?.prompt || '');
-    const [guidelines, setGuidelines] = useState(section?.guidelines || []);
 
+    // Sync local state when the underlying section changes (e.g., loading a new project)
     useEffect(() => {
-        setPrompt(section?.prompt || '');
-        setGuidelines(section?.guidelines || []);
+        setSelectedAgentId(section?.agentId || null);
+        setSelectedCommandId(section?.commandId || null);
+        setPrompt(section?.prompt || 'You are a helpful assistant.');
     }, [section]);
 
+    // Persist changes to the global store after a delay
     useEffect(() => {
         const handler = setTimeout(() => {
-            if (project && (prompt !== section?.prompt || JSON.stringify(guidelines) !== JSON.stringify(section?.guidelines))) {
+            if (!project) return;
+            const currentSection = project.getSection(itemKey);
+            if (!currentSection) return;
+
+            const hasChanged =
+                currentSection.agentId !== selectedAgentId ||
+                currentSection.commandId !== selectedCommandId ||
+                currentSection.prompt !== prompt;
+
+            if (hasChanged) {
                 updateProject(p => {
                     const sec = p.getSection(itemKey);
                     if (sec) {
+                        sec.agentId = selectedAgentId;
+                        sec.commandId = selectedCommandId;
                         sec.prompt = prompt;
-                        sec.guidelines = guidelines;
                     }
                 });
             }
-        }, 500);
+        }, 500); // 500ms debounce
 
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [prompt, guidelines, itemKey, section, updateProject, project]);
+        return () => clearTimeout(handler);
+    }, [selectedAgentId, selectedCommandId, prompt, itemKey, project, updateProject]);
 
-    const setCustomGuidelineInputForItem = (key: string, value: string) => {
-        setCustomGuidelineInput(prev => ({ ...prev, [key]: value }));
+    const handleAgentChange = (agentId: string) => {
+        setSelectedAgentId(agentId);
+        setSelectedCommandId(null); // Reset command when agent changes
+
+        const agent = agents.find(a => a.id === agentId);
+        const newPrompt = agent?.description || agent?.data?.description || 'You are a helpful assistant.';
+        setPrompt(newPrompt);
     };
 
-    const handleAddCustomGuidelineForItem = (key: string) => {
-        const value = customGuidelineInput[key]?.trim();
-        if (value) {
-            setGuidelines(prev => [...prev, value]);
-            setCustomGuidelineInputForItem(key, '');
-        }
-    };
-
-    const handleRemoveCustomGuidelineForItem = (index: number) => {
-        setGuidelines(prev => prev.filter((_, i) => i !== index));
-    };
-
-    const handleUpdateCustomGuideline = () => {
-        if (editingGuideline === null) return;
-        const { index, text } = editingGuideline;
-        if (text.trim()) {
-            const newGuidelines = [...guidelines];
-            newGuidelines[index] = text.trim();
-            setGuidelines(newGuidelines);
+    const handleCommandChange = (commandId: string) => {
+        if (commandId === 'default') {
+            setSelectedCommandId(null);
+            const agent = agents.find(a => a.id === selectedAgentId);
+            const newPrompt = agent?.description || agent?.data?.description || 'You are a helpful assistant.';
+            setPrompt(newPrompt);
         } else {
-            // If the edited text is empty, remove the guideline
-            handleRemoveCustomGuidelineForItem(index);
+            setSelectedCommandId(commandId);
+            const agent = agents.find(a => a.id === selectedAgentId);
+            const commands = agent?.commands || agent?.data?.commands || [];
+            const command = commands.find(c => c.id === commandId);
+            const newPrompt = command?.prompt || 'You are a helpful assistant.';
+            setPrompt(newPrompt);
         }
-        setEditingGuideline(null);
     };
+
 
     return {
         t,
         prompt,
         setPrompt,
-        guidelines,
-        setGuidelines,
-        editingGuideline,
-        setEditingGuideline,
-        handleUpdateCustomGuideline,
-        customGuidelineInput,
-        setCustomGuidelineInputForItem,
-        handleAddCustomGuidelineForItem,
-        handleRemoveCustomGuidelineForItem,
-        currentGuidelineState: null,
-        hasGuidelines: guidelines.length > 0,
+        section,
+        handleAgentChange,
+        handleCommandChange,
+        selectedAgentId,
+        selectedCommandId
     };
 }
