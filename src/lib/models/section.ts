@@ -10,10 +10,7 @@ export interface GenerationControlState {
     wordCount: string;
 }
 
-export interface ContextSelection {
-    sections: Record<string, boolean>;
-    externalContext: boolean[];
-}
+
 
 export type SectionType = 'report' | 'diagram' | 'presentation';
 
@@ -30,7 +27,7 @@ export interface SectionProperties {
     // Generation controls are now part of the section
     controls?: GenerationControlState;
     // Context selection is now part of the section
-    context?: ContextSelection;
+
 }
 
 export const defaultControls: GenerationControlState = {
