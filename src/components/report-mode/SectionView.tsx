@@ -4,7 +4,7 @@
 import type { SectionName } from '@/ai/schemas';
 
 import { ArrowDown, ArrowUp, Trash2 } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -12,11 +12,13 @@ import { useLocalization } from '@/context/LocalizationContext';
 import dynamic from 'next/dynamic';
 import { Badge } from '../ui/badge';
 import { Input } from '../ui/input';
+import { useBuilderStore } from '@/hooks';
 
 
 const RichTextEditor = dynamic(() => import('@/components/report-mode/RichTextEditor'), { ssr: false });
 
 interface SectionProps {
+    chapterId?: string; // Add chapterId to identify which chapter to update
     chapterTitle?: string;
     sectionKey: SectionName;
     title: string;
@@ -30,16 +32,59 @@ interface SectionProps {
     isLast: boolean;
 }
 
-export const SectionView = ({ chapterTitle, sectionKey, title, content, onUpdate, onTitleChange, onMoveUp, onMoveDown, onDelete, isFirst, isLast }: SectionProps) => {
+export const SectionView = ({ chapterId, chapterTitle, sectionKey, title, content, onUpdate, onTitleChange, onMoveUp, onMoveDown, onDelete, isFirst, isLast }: SectionProps) => {
     const { t } = useLocalization();
+    const { updateProject } = useBuilderStore();
+    const [isEditingChapterTitle, setIsEditingChapterTitle] = useState(false);
+    const [editedChapterTitle, setEditedChapterTitle] = useState(chapterTitle || '');
+
     const words = useMemo(() => content?.split(/\s+/).filter(Boolean).length || 0, [content]);
     const chars = useMemo(() => content?.length || 0, [content]);
 
+    useEffect(() => {
+        setEditedChapterTitle(chapterTitle || '');
+    }, [chapterTitle]);
+
+    const handleChapterTitleSave = () => {
+        if (chapterId && editedChapterTitle.trim() && editedChapterTitle !== chapterTitle) {
+            updateProject(p => {
+                const chap = p.getChapter(chapterId);
+                if (chap) {
+                    chap.title = editedChapterTitle.trim();
+                }
+            });
+        }
+        setIsEditingChapterTitle(false);
+    };
+
+    const handleChapterTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleChapterTitleSave();
+        } else if (e.key === 'Escape') {
+            setEditedChapterTitle(chapterTitle || '');
+            setIsEditingChapterTitle(false);
+        }
+    };
 
     return (
         <div className="space-y-4">
             <div className="group relative flex flex-col gap-2">
-                {chapterTitle && <Badge variant="secondary" className="w-fit">{chapterTitle}</Badge>}
+                {chapterTitle && (
+                    isEditingChapterTitle ? (
+                        <Input
+                            value={editedChapterTitle}
+                            onChange={(e) => setEditedChapterTitle(e.target.value)}
+                            onBlur={handleChapterTitleSave}
+                            onKeyDown={handleChapterTitleKeyDown}
+                            autoFocus
+                            className="w-fit font-semibold border-0 focus-visible:ring-1 focus-visible:ring-offset-0 p-1 h-auto bg-muted"
+                        />
+                    ) : (
+                        <Badge variant="secondary" className="w-fit cursor-pointer" onDoubleClick={() => setIsEditingChapterTitle(true)}>
+                            {chapterTitle}
+                        </Badge>
+                    )
+                )}
                 <div className="flex items-center gap-2">
                     <Input
                         value={title}

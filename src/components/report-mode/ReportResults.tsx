@@ -102,6 +102,7 @@ export const ReportResults = () => {
             {currentChapter.sections.map((section, index) => (
               <div key={section.id} className="group relative mb-8 last:mb-0">
                 <SectionView
+                  chapterId={currentChapter.id}
                   chapterTitle={currentChapter.title}
                   sectionKey={section.id}
                   title={section.title}
