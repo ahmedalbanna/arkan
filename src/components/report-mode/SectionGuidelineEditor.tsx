@@ -52,18 +52,18 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
 
     return (
         <div className="space-y-4">
-            <div className="space-y-4">
-                <div className="space-y-2">
-                    <Label>Agent</Label>
-                    <Combobox
-                        options={agentOptions}
-                        value={selectedAgentId}
-                        onChange={handleAgentChange}
-                        placeholder="Select an agent..."
-                        searchPlaceholder="Search agents..."
-                        isLoading={isLoadingAgents}
-                    />
-                </div>
+            <div className="space-y-2">
+                <Label>Agent</Label>
+                <Combobox
+                    options={agentOptions}
+                    value={selectedAgentId}
+                    onChange={handleAgentChange}
+                    placeholder="Select an agent..."
+                    searchPlaceholder="Search agents..."
+                    isLoading={isLoadingAgents}
+                />
+            </div>
+            {selectedAgentId && (
                 <div className="space-y-2">
                     <Label>Command</Label>
                     <Select
@@ -82,7 +82,8 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
                         </SelectContent>
                     </Select>
                 </div>
-            </div>
+            )}
+
 
             <div className="space-y-2">
                 <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_prompt_label')}</Label>
