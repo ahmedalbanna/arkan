@@ -3,25 +3,7 @@
 
 import { create } from 'zustand';
 
-type OutputStyle = {
-  heading: boolean;
-  paragraph: boolean;
-  list: boolean;
-  table: boolean;
-  code: boolean;
-};
 
-export type Tone = 'professional' | 'academic' | 'casual' | 'persuasive';
-export type Language = 'default' | 'en' | 'ar' | 'es' | 'fr' | 'de';
-
-export type GenerationControlState = {
-  formality: number;
-  complexity: number;
-  tone: Tone;
-  language: Language;
-  outputStyle: OutputStyle;
-  wordCount: string;
-};
 
 type GuidelineState = {
   checked: Record<number, boolean>;
@@ -35,17 +17,12 @@ type ContextSelection = {
 };
 
 interface GenerationUIState {
-  controlState: Record<string, GenerationControlState>;
+
   guidelineState: Record<string, GuidelineState>;
   contextSelection: Record<string, ContextSelection>;
-  initializeControls: (key: string) => void;
   initializeGuidelines: (key: string, defaultGuidelines: any[]) => void;
   initializeContext: (key: string) => void;
-  handleControlChange: <K extends keyof GenerationControlState>(
-    key: string,
-    field: K,
-    value: GenerationControlState[K]
-  ) => void;
+
   handleGuidelineToggle: (key: string, index: number, checked: boolean) => void;
   addCustomGuideline: (key: string, guideline: string) => void;
   removeCustomGuideline: (key: string, index: number) => void;
@@ -58,30 +35,14 @@ interface GenerationUIState {
   resetAll: () => void;
 }
 
-const defaultControlState: GenerationControlState = {
-  formality: 50,
-  complexity: 50,
-  tone: 'professional',
-  language: 'default',
-  outputStyle: { heading: true, paragraph: true, list: false, table: false, code: false },
-  wordCount: '',
-};
+
 
 export const useGenerationUIStore = create<GenerationUIState>((set, get) => ({
-  controlState: {},
+
   guidelineState: {},
   contextSelection: {},
 
-  initializeControls: (key) => {
-    if (!get().controlState[key]) {
-      set((state) => ({
-        controlState: {
-          ...state.controlState,
-          [key]: { ...defaultControlState },
-        },
-      }));
-    }
-  },
+
 
   initializeGuidelines: (key, defaultGuidelines) => {
     if (!get().guidelineState[key]) {
@@ -111,14 +72,6 @@ export const useGenerationUIStore = create<GenerationUIState>((set, get) => ({
     }
   },
 
-  handleControlChange: (key, field, value) => {
-    set((state) => ({
-      controlState: {
-        ...state.controlState,
-        [key]: { ...state.controlState[key], [field]: value },
-      },
-    }));
-  },
 
   handleGuidelineToggle: (key, index, checked) => {
     set((state) => {
@@ -195,7 +148,6 @@ export const useGenerationUIStore = create<GenerationUIState>((set, get) => ({
 
   resetAll: () => {
     set({
-      controlState: {},
       guidelineState: {},
       contextSelection: {},
     });

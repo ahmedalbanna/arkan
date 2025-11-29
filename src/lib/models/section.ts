@@ -1,4 +1,20 @@
 
+import type { Tone, Language, OutputStyle } from './control-types';
+
+export interface GenerationControlState {
+    formality: number;
+    complexity: number;
+    tone: Tone;
+    language: Language;
+    outputStyle: OutputStyle;
+    wordCount: string;
+}
+
+export interface ContextSelection {
+    sections: Record<string, boolean>;
+    externalContext: boolean[];
+}
+
 export type SectionType = 'report' | 'diagram' | 'presentation';
 
 export interface SectionProperties {
@@ -11,7 +27,23 @@ export interface SectionProperties {
     guidelines?: string[];
     agentId?: string | null;
     commandId?: string | null;
+    // Generation controls are now part of the section
+    controls?: GenerationControlState;
+    // Context selection is now part of the section
+    context?: ContextSelection;
 }
+
+export const defaultControls: GenerationControlState = {
+    formality: 50,
+    complexity: 50,
+    tone: 'professional',
+    language: 'default',
+    outputStyle: { heading: true, paragraph: true, list: false, table: false, code: false },
+    wordCount: '',
+};
+
+
+
 
 export class Section {
     public id: string;
@@ -22,6 +54,8 @@ export class Section {
     public guidelines?: string[];
     public agentId?: string | null;
     public commandId?: string | null;
+    public controls: GenerationControlState;
+
 
 
     constructor(props: SectionProperties) {
@@ -33,6 +67,8 @@ export class Section {
         this.guidelines = props.guidelines ?? [];
         this.agentId = props.agentId || null;
         this.commandId = props.commandId || null;
+        this.controls = { ...defaultControls, ...props.controls };
+
     }
 
     public toJSON(): SectionProperties {
@@ -45,6 +81,8 @@ export class Section {
             guidelines: this.guidelines,
             agentId: this.agentId,
             commandId: this.commandId,
+            controls: this.controls,
+
         };
     }
 

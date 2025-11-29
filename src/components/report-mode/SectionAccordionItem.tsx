@@ -156,7 +156,7 @@ export const SectionAccordionItem = ({
                             </div>
                             <div className="px-4">
                                 <TabsContent value="controls" className="py-4">
-                                    <SectionGenerationControls sectionKey={itemKey} />
+                                    <SectionGenerationControls section={section} />
                                 </TabsContent>
                                 <TabsContent value="prompt" className="py-4">
                                     <GuidelineEditor itemKey={itemKey} />

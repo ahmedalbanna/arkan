@@ -30,7 +30,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
-import { toast, useBuilderStore, useGenerationUIStore } from '@/hooks';
+import { toast, useBuilderStore } from '@/hooks';
 import { Chapter, Section } from '@/lib/models';
 import { cn } from '@/lib/utils/cn';
 import {
@@ -252,20 +252,10 @@ export const GenerationTools = () => {
   const { t, locale } = useLocalization();
   const { project, updateProject } = useBuilderStore(); // Directly use the store
   const { data: sectionConfigs, isFetched: sectionsLoaded } = useSections();
-  const { initializeControls, controlState, contextSelection } = useGenerationUIStore();
   const { userProfile, refetchUser, firebaseUser } = useAuth();
   const queryClient = useQueryClient();
   const [showTocInput, setShowTocInput] = useState(false);
   const [isGenerateTocOpen, setIsGenerateTocOpen] = useState(false);
-
-  // Initialize UI stores when sections are ready
-  useEffect(() => {
-    if (project?.sections && project.sections.length > 0) {
-      project.sections.forEach(section => {
-        initializeControls(section.id);
-      });
-    }
-  }, [project?.sections, initializeControls]);
 
 
   const agentMutation = useMutation({
@@ -278,8 +268,8 @@ export const GenerationTools = () => {
 
       const token = await firebaseUser.getIdToken();
       
-      const controls = controlState[sectionId] || {};
-      const context = contextSelection[sectionId] || {};
+      const controls = section.controls;
+      const context = section.context;
 
       let instructionText = `Please use a ${controls.tone || 'professional'} tone and aim for a word count of approximately ${controls.wordCount || 250} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}.`;
       if (controls.language && controls.language !== 'default') {

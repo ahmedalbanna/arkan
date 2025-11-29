@@ -2,6 +2,7 @@ export type ExternalContextType = 'context' | 'example' | 'question' | 'textbook
 
 // define externalContext 
 export interface ExternalContext {
+  id: string;
   fileName: string;
   content: string;
   type: ExternalContextType;
