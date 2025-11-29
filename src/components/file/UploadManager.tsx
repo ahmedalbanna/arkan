@@ -21,6 +21,7 @@ import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import ReactMarkdown from 'react-markdown';
 import { PasteTextUploader } from './PasteTextUploader';
+import { randomUUID } from 'crypto';
 
 interface UploadManagerProps {
 
@@ -75,6 +76,7 @@ function FileDropzone() {
                 const binaryStr = reader.result as string;
                 updateProject(p => {
                     p.addExternalContext({
+                        id: randomUUID(),
                         fileName: file.name,
                         content: binaryStr,
                         type: 'context'

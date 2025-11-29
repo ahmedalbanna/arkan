@@ -31,7 +31,7 @@ export default function ReportModeGenerator() {
     const panels = [
         {
             key: 'files',
-            title: t('builder.tabs.files'),
+            title: 'Contextual',
             icon: <UploadCloud className="h-5 w-5" />,
             content: <UploadManager />,
         },
