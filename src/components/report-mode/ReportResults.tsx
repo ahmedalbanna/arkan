@@ -1,6 +1,7 @@
 
 'use client';
 
+import A4Page from '@/components/shared/A4Page';
 import type { SectionName } from '@/ai/schemas';
 import {
   Card,
@@ -86,21 +87,19 @@ export const ReportResults = () => {
     }
 
     return (
-      <div className="h-full p-4 gap-4 rounded-lg flex flex-col">
-        <ScrollArea className="flex-grow">
-            <ContentChapterView
-                chapter={currentChapter}
-                onUpdateSection={handleSectionUpdate}
-                onUpdateSectionTitle={handleSectionTitleUpdate}
-                onUpdateChapterTitle={handleChapterTitleUpdate}
-                onAddSection={handleAddSectionAtIndex}
-                onMoveSectionUp={handleMoveSectionUp}
-                onMoveSectionDown={handleMoveSectionDown}
-                onDeleteSection={handleDeleteSection}
-                onDeleteChapter={handleDeleteChapter}
-            />
-        </ScrollArea>
-      </div>
+      <A4Page>
+        <ContentChapterView
+            chapter={currentChapter}
+            onUpdateSection={handleSectionUpdate}
+            onUpdateSectionTitle={handleSectionTitleUpdate}
+            onUpdateChapterTitle={handleChapterTitleUpdate}
+            onAddSection={handleAddSectionAtIndex}
+            onMoveSectionUp={handleMoveSectionUp}
+            onMoveSectionDown={handleMoveSectionDown}
+            onDeleteSection={handleDeleteSection}
+            onDeleteChapter={handleDeleteChapter}
+        />
+      </A4Page>
     );
   };
 
@@ -142,7 +141,9 @@ export const ReportResults = () => {
         </div>
       )}
       <CardContent className="flex-grow flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50">
-        {renderContent()}
+        <ScrollArea className="flex-grow">
+         {renderContent()}
+        </ScrollArea>
       </CardContent>
     </Card>
   );

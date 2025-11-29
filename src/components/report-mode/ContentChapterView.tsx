@@ -1,12 +1,23 @@
 
 'use client';
 
-import A4Page from '@/components/shared/A4Page';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLocalization } from '@/context/LocalizationContext';
-import { Chapter, Section } from '@/lib/models';
-import { PlusCircle } from 'lucide-react';
+import { Chapter } from '@/lib/models';
+import { cn } from '@/lib/utils/cn';
+import { PlusCircle, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { SectionView } from './SectionView';
 
@@ -35,6 +46,8 @@ export function ContentChapterView({
 }: ContentChapterViewProps) {
   const { t } = useLocalization();
   const [editedChapterTitle, setEditedChapterTitle] = useState(chapter.title);
+  const [isHovering, setIsHovering] = useState(false);
+
 
   useEffect(() => {
     setEditedChapterTitle(chapter.title);
@@ -55,7 +68,40 @@ export function ContentChapterView({
   const hasSections = chapter.sections && chapter.sections.length > 0;
 
   return (
-    <A4Page key={chapter.id} onDelete={() => onDeleteChapter(chapter.id)}>
+    <div
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      className="relative"
+    >
+      {onDeleteChapter && (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="destructive"
+              size="icon"
+              className={cn(
+                "absolute top-4 right-4 h-8 w-8 rounded-full transition-opacity opacity-0 group-hover:opacity-100",
+                isHovering && "opacity-100"
+              )}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete this chapter?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this chapter and all of its sections? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => onDeleteChapter(chapter.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
       <Input
         value={editedChapterTitle}
         onChange={(e) => setEditedChapterTitle(e.target.value)}
@@ -102,6 +148,6 @@ export function ContentChapterView({
           </Button>
         </div>
       )}
-    </A4Page>
+    </div>
   );
 }
