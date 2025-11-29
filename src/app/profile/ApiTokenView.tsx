@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AlertTriangle, Check, Copy } from 'lucide-react';
-import { Alert } from '../ui/alert';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 
 export function ApiTokenView() {
@@ -43,9 +43,9 @@ export function ApiTokenView() {
       <CardContent className="space-y-4">
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <p>
+          <AlertDescription>
             <strong>Warning:</strong> Treat this token like a password. Do not share it or expose it in client-side code.
-          </p>
+          </AlertDescription>
         </Alert>
         {token ? (
           <div className="flex items-center gap-2">
