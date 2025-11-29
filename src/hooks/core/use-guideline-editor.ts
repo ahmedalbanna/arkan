@@ -59,10 +59,11 @@ export function useGuidelineEditor(itemKey: string) {
     }, [selectedAgentId, selectedCommandId, prompt, guidelines, itemKey, project, updateProject]);
 
     const handleAgentChange = (agentId: string) => {
-        if (!agentId) { // This handles the case where the user deselects the agent
+        // When an agent is deselected, reset to the default state.
+        if (!agentId) {
             setSelectedAgentId(null);
             setSelectedCommandId(null);
-            setPrompt('You are a helpful assistant.');
+            setPrompt('You are a helpful assistant. Write a section based on the user\'s instructions.');
             return;
         }
 
