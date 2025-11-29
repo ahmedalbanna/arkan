@@ -22,6 +22,8 @@ import {
   PlusCircle,
 } from 'lucide-react';
 import { SectionView } from './SectionView';
+import { Input } from '../ui/input';
+import { useEffect, useState } from 'react';
 
 export const ReportResults = () => {
   const { t } = useLocalization();
@@ -34,6 +36,13 @@ export const ReportResults = () => {
     handleNextPage,
     handlePrevPage,
   } = useReportPaginator();
+
+  const [editedChapterTitle, setEditedChapterTitle] = useState(currentChapter?.title || '');
+
+  useEffect(() => {
+    setEditedChapterTitle(currentChapter?.title || '');
+  }, [currentChapter]);
+
 
   const handleSectionUpdate = (key: SectionName, value: string) => {
     updateProject(p => {
@@ -75,6 +84,23 @@ export const ReportResults = () => {
     });
   };
 
+  const handleChapterTitleSave = () => {
+    if (currentChapter && editedChapterTitle.trim() && editedChapterTitle !== currentChapter.title) {
+        updateProject(p => {
+            const chap = p.getChapter(currentChapter.id);
+            if (chap) {
+                chap.title = editedChapterTitle.trim();
+            }
+        });
+    }
+  };
+
+  const handleChapterTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter' || e.key === 'Escape') {
+          e.currentTarget.blur(); // This will trigger onBlur to save
+      }
+  };
+
   const renderContent = () => {
     if (totalPages === 0 || !currentChapter) {
       return (
@@ -101,12 +127,18 @@ export const ReportResults = () => {
             key={currentChapter.id}
             onDelete={() => handleDeleteChapter(currentChapter.id)}
           >
+             <Input
+                value={editedChapterTitle}
+                onChange={(e) => setEditedChapterTitle(e.target.value)}
+                onBlur={handleChapterTitleSave}
+                onKeyDown={handleChapterTitleKeyDown}
+                className="w-full text-3xl font-bold text-primary font-headline border-0 focus-visible:ring-1 focus-visible:ring-offset-0 p-1 h-auto bg-transparent mb-6"
+            />
             {hasSections ? (
               currentChapter.sections.map((section, index) => (
                 <div key={section.id} className="group relative mb-8 last:mb-0">
                   <SectionView
                     chapterId={currentChapter.id}
-                    chapterTitle={currentChapter.title}
                     sectionKey={section.id}
                     title={section.title}
                     content={section.content || ''}
@@ -135,20 +167,6 @@ export const ReportResults = () => {
               ))
             ) : (
               <div className="text-center py-20 border-2 border-dashed rounded-lg">
-                  <SectionView
-                    chapterId={currentChapter.id}
-                    chapterTitle={currentChapter.title}
-                    sectionKey={''}
-                    title={''}
-                    content={''}
-                    onUpdate={() => {}}
-                    onTitleChange={() => {}}
-                    isFirst={true}
-                    isLast={true}
-                    onMoveUp={() => {}}
-                    onMoveDown={() => {}}
-                    onDelete={() => {}}
-                  />
                 <h3 className="mt-4 text-lg font-semibold text-muted-foreground">This chapter is empty.</h3>
                 <p className="text-sm text-muted-foreground mb-4">Add a section to start building your report.</p>
                 <Button onClick={() => handleAddSectionAtIndex(currentChapter.id, 0)}>

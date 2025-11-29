@@ -19,7 +19,6 @@ const RichTextEditor = dynamic(() => import('@/components/report-mode/RichTextEd
 
 interface SectionProps {
     chapterId?: string; // Add chapterId to identify which chapter to update
-    chapterTitle?: string;
     sectionKey: SectionName;
     title: string;
     content: string; // The markdown content of the section
@@ -32,47 +31,15 @@ interface SectionProps {
     isLast: boolean;
 }
 
-export const SectionView = ({ chapterId, chapterTitle, sectionKey, title, content, onUpdate, onTitleChange, onMoveUp, onMoveDown, onDelete, isFirst, isLast }: SectionProps) => {
+export const SectionView = ({ chapterId, sectionKey, title, content, onUpdate, onTitleChange, onMoveUp, onMoveDown, onDelete, isFirst, isLast }: SectionProps) => {
     const { t } = useLocalization();
-    const { updateProject } = useBuilderStore();
-    const [editedChapterTitle, setEditedChapterTitle] = useState(chapterTitle || '');
 
     const words = useMemo(() => content?.split(/\s+/).filter(Boolean).length || 0, [content]);
     const chars = useMemo(() => content?.length || 0, [content]);
 
-    useEffect(() => {
-        setEditedChapterTitle(chapterTitle || '');
-    }, [chapterTitle]);
-
-    const handleChapterTitleSave = () => {
-        if (chapterId && editedChapterTitle.trim() && editedChapterTitle !== chapterTitle) {
-            updateProject(p => {
-                const chap = p.getChapter(chapterId);
-                if (chap) {
-                    chap.title = editedChapterTitle.trim();
-                }
-            });
-        }
-    };
-
-    const handleChapterTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter' || e.key === 'Escape') {
-            e.currentTarget.blur(); // This will trigger onBlur to save
-        }
-    };
-
     return (
         <div className="space-y-4">
             <div className="group relative flex flex-col gap-2">
-                {chapterTitle !== undefined && (
-                     <Input
-                        value={editedChapterTitle}
-                        onChange={(e) => setEditedChapterTitle(e.target.value)}
-                        onBlur={handleChapterTitleSave}
-                        onKeyDown={handleChapterTitleKeyDown}
-                        className="w-full text-3xl font-bold text-primary font-headline border-0 focus-visible:ring-1 focus-visible:ring-offset-0 p-1 h-auto bg-transparent"
-                    />
-                )}
                 { sectionKey && (
                     <>
                         <div className="flex items-center gap-2">
