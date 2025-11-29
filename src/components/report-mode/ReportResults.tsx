@@ -92,6 +92,8 @@ export const ReportResults = () => {
       );
     }
 
+    const hasSections = currentChapter.sections && currentChapter.sections.length > 0;
+
     return (
       <div className="h-full p-4 gap-4 rounded-lg flex flex-col mt-4">
         <ScrollArea className="flex-grow">
@@ -99,37 +101,62 @@ export const ReportResults = () => {
             key={currentChapter.id}
             onDelete={() => handleDeleteChapter(currentChapter.id)}
           >
-            {currentChapter.sections.map((section, index) => (
-              <div key={section.id} className="group relative mb-8 last:mb-0">
-                <SectionView
-                  chapterId={currentChapter.id}
-                  chapterTitle={currentChapter.title}
-                  sectionKey={section.id}
-                  title={section.title}
-                  content={section.content || ''}
-                  onUpdate={handleSectionUpdate}
-                  onTitleChange={handleTitleUpdate}
-                  isFirst={index === 0}
-                  isLast={index === currentChapter.sections.length - 1}
-                  onMoveUp={() => handleMoveSectionUp(section.id)}
-                  onMoveDown={() => handleMoveSectionDown(section.id)}
-                  onDelete={() => handleDeleteSection(section.id)}
-                />
-                <div className="absolute -bottom-4 left-0 right-0 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="w-full h-px bg-primary/20"></div>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="absolute h-8 w-8 rounded-full bg-background hover:bg-muted"
-                    onClick={() =>
-                      handleAddSectionAtIndex(currentChapter.id, index + 1)
-                    }
-                  >
-                    <PlusCircle className="h-4 w-4" />
-                  </Button>
+            {hasSections ? (
+              currentChapter.sections.map((section, index) => (
+                <div key={section.id} className="group relative mb-8 last:mb-0">
+                  <SectionView
+                    chapterId={currentChapter.id}
+                    chapterTitle={currentChapter.title}
+                    sectionKey={section.id}
+                    title={section.title}
+                    content={section.content || ''}
+                    onUpdate={handleSectionUpdate}
+                    onTitleChange={handleTitleUpdate}
+                    isFirst={index === 0}
+                    isLast={index === currentChapter.sections.length - 1}
+                    onMoveUp={() => handleMoveSectionUp(section.id)}
+                    onMoveDown={() => handleMoveSectionDown(section.id)}
+                    onDelete={() => handleDeleteSection(section.id)}
+                  />
+                  <div className="absolute -bottom-4 left-0 right-0 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="w-full h-px bg-primary/20"></div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="absolute h-8 w-8 rounded-full bg-background hover:bg-muted"
+                      onClick={() =>
+                        handleAddSectionAtIndex(currentChapter.id, index + 1)
+                      }
+                    >
+                      <PlusCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-20 border-2 border-dashed rounded-lg">
+                  <SectionView
+                    chapterId={currentChapter.id}
+                    chapterTitle={currentChapter.title}
+                    sectionKey={''}
+                    title={''}
+                    content={''}
+                    onUpdate={() => {}}
+                    onTitleChange={() => {}}
+                    isFirst={true}
+                    isLast={true}
+                    onMoveUp={() => {}}
+                    onMoveDown={() => {}}
+                    onDelete={() => {}}
+                  />
+                <h3 className="mt-4 text-lg font-semibold text-muted-foreground">This chapter is empty.</h3>
+                <p className="text-sm text-muted-foreground mb-4">Add a section to start building your report.</p>
+                <Button onClick={() => handleAddSectionAtIndex(currentChapter.id, 0)}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add First Section
+                </Button>
               </div>
-            ))}
+            )}
           </A4Page>
         </ScrollArea>
       </div>
