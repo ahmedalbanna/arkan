@@ -241,6 +241,7 @@ export function Header() {
                   <DropdownMenuLabel>{userProfile.name}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   
+                  <DropdownMenuItem asChild><Link href="/profile"><UserCog className="me-2 h-4 w-4" />{t('header.profile')}</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild><Link href="/dashboard"><AreaChart className="me-2 h-4 w-4" />{t('header.myDashboard')}</Link></DropdownMenuItem>
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>

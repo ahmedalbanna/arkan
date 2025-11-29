@@ -1,7 +1,6 @@
-
 import { z } from "zod";
 import { getUserProfile } from "@/lib/db/queries";
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminAuth, adminDb } from '@/lib/firebase/server-init';
 import { revalidatePath } from "next/cache";
 import { withAuth, handleApiError, createApiResponse } from "@/lib/utils/api-utils";
 
@@ -38,6 +37,7 @@ const adminUpdateUserSchema = z.object({
 
 const userUpdateSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
+  email: z.string().email('Invalid email address').optional(),
   bio: z.string().optional(),
   hasCompletedOnboarding: z.boolean().optional(),
 });
@@ -50,15 +50,13 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
         const body = await request.json();
         let validation;
 
-        // An admin can update any field. A regular user can only update their own name/bio/onboarding.
+        // An admin can update any field. A regular user can only update their own profile.
         if (requester.role !== 'admin') {
             if (userId !== requester.id) {
                 return handleApiError({ message: "Forbidden: Users can only update their own profile." }, 403);
             }
-            // If not admin, use the more restrictive schema
             validation = userUpdateSchema.safeParse(body);
         } else {
-            // Admins use the full schema
             validation = adminUpdateUserSchema.safeParse(body);
         }
 
@@ -66,7 +64,13 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
             return handleApiError(validation.error);
         }
 
-        const updateData = { ...validation.data, updatedAt: new Date().toISOString() };
+        const updateData: any = { ...validation.data, updatedAt: new Date().toISOString() };
+
+        // If email is being updated, update it in Firebase Auth as well
+        if (validation.data.email && validation.data.email !== requester.email) {
+            await adminAuth.updateUser(userId, { email: validation.data.email });
+        }
+
         await adminDb.collection("users").doc(userId).update(updateData);
 
         revalidatePath(`/profile/${userId}`);
@@ -74,7 +78,10 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
 
         const updatedUser = await getUserProfile(userId);
         return createApiResponse(updatedUser, 200);
-    } catch (error) {
+    } catch (error: any) {
+        if(error.code === 'auth/email-already-exists') {
+            return handleApiError({ message: "This email is already in use by another account." }, 409);
+        }
         return handleApiError(error);
     }
 });
