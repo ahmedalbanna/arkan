@@ -35,7 +35,6 @@ interface SectionProps {
 export const SectionView = ({ chapterId, chapterTitle, sectionKey, title, content, onUpdate, onTitleChange, onMoveUp, onMoveDown, onDelete, isFirst, isLast }: SectionProps) => {
     const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
-    const [isEditingChapterTitle, setIsEditingChapterTitle] = useState(false);
     const [editedChapterTitle, setEditedChapterTitle] = useState(chapterTitle || '');
 
     const words = useMemo(() => content?.split(/\s+/).filter(Boolean).length || 0, [content]);
@@ -54,36 +53,25 @@ export const SectionView = ({ chapterId, chapterTitle, sectionKey, title, conten
                 }
             });
         }
-        setIsEditingChapterTitle(false);
     };
 
     const handleChapterTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            handleChapterTitleSave();
-        } else if (e.key === 'Escape') {
-            setEditedChapterTitle(chapterTitle || '');
-            setIsEditingChapterTitle(false);
+        if (e.key === 'Enter' || e.key === 'Escape') {
+            e.currentTarget.blur(); // This will trigger onBlur to save
         }
     };
 
     return (
         <div className="space-y-4">
             <div className="group relative flex flex-col gap-2">
-                {chapterTitle && (
-                    isEditingChapterTitle ? (
-                        <Input
-                            value={editedChapterTitle}
-                            onChange={(e) => setEditedChapterTitle(e.target.value)}
-                            onBlur={handleChapterTitleSave}
-                            onKeyDown={handleChapterTitleKeyDown}
-                            autoFocus
-                            className="w-fit font-semibold border-0 focus-visible:ring-1 focus-visible:ring-offset-0 p-1 h-auto bg-muted"
-                        />
-                    ) : (
-                        <Badge variant="secondary" className="w-fit cursor-pointer" onDoubleClick={() => setIsEditingChapterTitle(true)}>
-                            {chapterTitle}
-                        </Badge>
-                    )
+                {chapterTitle !== undefined && (
+                     <Input
+                        value={editedChapterTitle}
+                        onChange={(e) => setEditedChapterTitle(e.target.value)}
+                        onBlur={handleChapterTitleSave}
+                        onKeyDown={handleChapterTitleKeyDown}
+                        className="w-fit font-semibold border-0 focus-visible:ring-1 focus-visible:ring-offset-0 p-1 h-auto bg-muted text-sm text-muted-foreground"
+                    />
                 )}
                 <div className="flex items-center gap-2">
                     <Input
