@@ -25,40 +25,40 @@ export default function OnboardingGuide({ isOpen, onOpenChange, onComplete }: On
 
   const steps = useMemo(() => [
     {
-      title: 'Welcome to Arkan!',
-      description: "Let's take a quick tour to see how you can use AI to build amazing things.",
+      title: 'Welcome to the Arkan Builder!',
+      description: "Let's take a quick tour to see how you can use AI to build complex documents and reports.",
       imgSrc: 'https://placehold.co/600x400.png',
       dataAiHint: 'welcome illustration'
     },
     {
-      title: '1. Proposal Mode',
-      description: 'Start by describing your project idea. Our AI will generate a complete, professional proposal with objectives, timelines, and budgets.',
+      title: '1. Add Your Context',
+      description: 'Start by uploading files or pasting text into the File Manager. This context (like requirements, research, or data) is crucial for the AI to understand your project.',
       imgSrc: 'https://placehold.co/600x400.png',
-      dataAiHint: 'document idea'
+      dataAiHint: 'upload document'
     },
     {
-      title: '2. Document Generator',
-      description: 'Expand your proposal into a full-fledged report. Generate sections like introductions, system analysis, and conclusions with a single click.',
+      title: '2. Structure Your Report',
+      description: 'Use the Generation Tools panel to add and organize chapters and sections. You can generate a Table of Contents with AI or build it manually.',
       imgSrc: 'https://placehold.co/600x400.png',
-      dataAiHint: 'report generation'
+      dataAiHint: 'report structure'
     },
     {
-      title: '3. Diagram Generator',
-      description: 'Visualize your system. Create class diagrams, use cases, sequence diagrams, and more using simple text descriptions.',
+      title: '3. Generate Content with AI',
+      description: "For each section, select the context you want the AI to use, adjust the controls (like tone and formality), and click 'Generate'.",
       imgSrc: 'https://placehold.co/600x400.png',
-      dataAiHint: 'flowchart diagram'
+      dataAiHint: 'ai writing'
     },
     {
-      title: '4. Code Generator',
-      description: "Need a UI component? Describe what you want, and the AI will generate the HTML, CSS, and JavaScript for you.",
+      title: '4. Edit and Refine',
+      description: "Your generated content appears in the main editor. You can edit it directly, use the floating AI toolbar for quick actions, and see word counts.",
       imgSrc: 'https://placehold.co/600x400.png',
-      dataAiHint: 'code editor'
+      dataAiHint: 'text editor'
     },
     {
-      title: '5. Presentation Mode',
-      description: 'Turn your generated content into a professional slide deck instantly, ready for your next big presentation.',
+      title: '5. Export Your Document',
+      description: 'Once your report is complete, use the "Export" button to download it as a professionally formatted DOCX file.',
       imgSrc: 'https://placehold.co/600x400.png',
-      dataAiHint: 'presentation slide'
+      dataAiHint: 'download document'
     },
     {
       title: 'Your AI Credits',
