@@ -1,7 +1,7 @@
 
 'use client';
 
-import { A4Page } from '@/components/shared';
+import A4Page from '@/components/shared/A4Page';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLocalization } from '@/context/LocalizationContext';
