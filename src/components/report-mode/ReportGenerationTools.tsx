@@ -252,7 +252,7 @@ export const GenerationTools = () => {
   const { t, locale } = useLocalization();
   const { project, updateProject } = useBuilderStore(); // Directly use the store
   const { data: sectionConfigs, isFetched: sectionsLoaded } = useSections();
-  const { initializeControls } = useGenerationUIStore();
+  const { initializeControls, controlState } = useGenerationUIStore();
   const { userProfile, refetchUser, firebaseUser } = useAuth();
   const queryClient = useQueryClient();
   const [showTocInput, setShowTocInput] = useState(false);
@@ -277,14 +277,20 @@ export const GenerationTools = () => {
       if (!section) throw new Error("Section not found.");
 
       const token = await firebaseUser.getIdToken();
-      // This part for fetching control state will be refactored into a custom hook
-      // For now, we simulate default controls.
-      const controls = { tone: 'professional', formality: 50, complexity: 50, wordCount: '250', outputStyle: { heading: true, paragraph: true } };
+      
+      const controls = controlState[sectionId] || {};
+      
+      let instructionText = `Please use a ${controls.tone || 'professional'} tone and aim for a word count of approximately ${controls.wordCount || 250} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}.`;
+      if (controls.language && controls.language !== 'default') {
+        const langMap = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
+        instructionText += ` The output language must be ${langMap[controls.language]}.`;
+      }
+
 
       const body = {
         sectionToGenerate: section.id,
         prompt: section.prompt,
-        instructionText: `Please use a ${controls.tone} tone and aim for a word count of approximately ${controls.wordCount} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}.`,
+        instructionText,
         guidelines: section.guidelines,
       };
 

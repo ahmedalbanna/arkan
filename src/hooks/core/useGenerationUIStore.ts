@@ -12,10 +12,13 @@ type OutputStyle = {
 };
 
 export type Tone = 'professional' | 'academic' | 'casual' | 'persuasive';
+export type Language = 'default' | 'en' | 'ar' | 'es' | 'fr' | 'de';
+
 export type GenerationControlState = {
   formality: number;
   complexity: number;
   tone: Tone;
+  language: Language;
   outputStyle: OutputStyle;
   wordCount: string;
 };
@@ -59,6 +62,7 @@ const defaultControlState: GenerationControlState = {
   formality: 50,
   complexity: 50,
   tone: 'professional',
+  language: 'default',
   outputStyle: { heading: true, paragraph: true, list: false, table: false, code: false },
   wordCount: '',
 };

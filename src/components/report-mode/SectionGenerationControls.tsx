@@ -9,7 +9,8 @@ import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '../ui/checkbox';
-import { type Tone } from '@/hooks/core/useGenerationUIStore';
+import { type Tone, type Language } from '@/hooks/core/useGenerationUIStore';
+
 export const SectionGenerationControls = ({ sectionKey }: { sectionKey: string }) => {
     const { t } = useLocalization();
     const { controlState, handleControlChange } = useGenerationUIStore();
@@ -47,17 +48,33 @@ export const SectionGenerationControls = ({ sectionKey }: { sectionKey: string }
                     <span>Technical</span>
                 </div>
             </div>
-            <div className="space-y-2">
-                <Label htmlFor={`tone-${sectionKey}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
-                <Select value={controls.tone} onValueChange={(val) => handleControlChange(sectionKey, 'tone', val as Tone)}>
-                    <SelectTrigger id={`tone-${sectionKey}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="professional">{t('builder.reportGenerator.tool_tone_professional')}</SelectItem>
-                        <SelectItem value="academic">{t('builder.reportGenerator.tool_tone_academic')}</SelectItem>
-                        <SelectItem value="casual">{t('builder.reportGenerator.tool_tone_casual')}</SelectItem>
-                        <SelectItem value="persuasive">{t('builder.reportGenerator.tool_tone_persuasive')}</SelectItem>
-                    </SelectContent>
-                </Select>
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor={`tone-${sectionKey}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
+                    <Select value={controls.tone} onValueChange={(val) => handleControlChange(sectionKey, 'tone', val as Tone)}>
+                        <SelectTrigger id={`tone-${sectionKey}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="professional">{t('builder.reportGenerator.tool_tone_professional')}</SelectItem>
+                            <SelectItem value="academic">{t('builder.reportGenerator.tool_tone_academic')}</SelectItem>
+                            <SelectItem value="casual">{t('builder.reportGenerator.tool_tone_casual')}</SelectItem>
+                            <SelectItem value="persuasive">{t('builder.reportGenerator.tool_tone_persuasive')}</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor={`language-${sectionKey}`}>Language</Label>
+                    <Select value={controls.language} onValueChange={(val) => handleControlChange(sectionKey, 'language', val as Language)}>
+                        <SelectTrigger id={`language-${sectionKey}`}><SelectValue placeholder="Select language..." /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="default">Default</SelectItem>
+                            <SelectItem value="en">English</SelectItem>
+                            <SelectItem value="ar">Arabic</SelectItem>
+                            <SelectItem value="es">Spanish</SelectItem>
+                            <SelectItem value="fr">French</SelectItem>
+                            <SelectItem value="de">German</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
             <div className="space-y-2">
                 <Label>Output Format</Label>
