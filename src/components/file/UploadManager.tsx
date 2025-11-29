@@ -15,13 +15,13 @@ import { useBuilderStore, useToast } from '@/hooks';
 import { ExternalContextType } from '@/lib/types';
 import { cn } from '@/lib/utils/cn';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { generateRandomId } from '@/lib/utils/randomId';
 import { AtomIcon, FileText, ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
 import Image from 'next/image';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import ReactMarkdown from 'react-markdown';
 import { PasteTextUploader } from './PasteTextUploader';
-import { randomUUID } from 'crypto';
 
 interface UploadManagerProps {
 
@@ -76,7 +76,7 @@ function FileDropzone() {
                 const binaryStr = reader.result as string;
                 updateProject(p => {
                     p.addExternalContext({
-                        id: randomUUID(),
+                        id: generateRandomId(),
                         fileName: file.name,
                         content: binaryStr,
                         type: 'context'
@@ -216,7 +216,7 @@ export function UploadManager() {
                                                     <SelectContent>
                                                         {fileTypes.map(type => (
                                                             <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
-                                                        ))}
+                                                        )) M}
                                                     </SelectContent>
                                                 </Select>
                                                 <ViewContextDialog item={item} />
