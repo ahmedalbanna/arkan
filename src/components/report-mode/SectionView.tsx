@@ -70,7 +70,7 @@ export const SectionView = ({ chapterId, chapterTitle, sectionKey, title, conten
                         onChange={(e) => setEditedChapterTitle(e.target.value)}
                         onBlur={handleChapterTitleSave}
                         onKeyDown={handleChapterTitleKeyDown}
-                        className="w-fit font-semibold border-0 focus-visible:ring-1 focus-visible:ring-offset-0 p-1 h-auto bg-muted text-sm text-muted-foreground"
+                        className="w-full text-3xl font-bold text-primary font-headline border-0 focus-visible:ring-1 focus-visible:ring-offset-0 p-1 h-auto bg-transparent"
                     />
                 )}
                 { sectionKey && (
