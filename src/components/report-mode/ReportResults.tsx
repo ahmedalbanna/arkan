@@ -1,8 +1,8 @@
 
 'use client';
 
-import A4Page from '@/components/shared/A4Page';
 import type { SectionName } from '@/ai/schemas';
+import A4Page from '@/components/shared/A4Page';
 import {
   Card,
   CardContent,
@@ -15,11 +15,9 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useBuilderStore } from '@/hooks';
 import { useReportPaginator } from '@/hooks/core/use-report-paginator';
 import { ChevronLeft, ChevronRight, FileText, PlusCircle } from 'lucide-react';
-import { Button } from '../ui/button';
-import { ContentChapterView } from './ContentChapterView';
-import { Input } from '../ui/input';
 import { useState } from 'react';
-import { Label } from '../ui/label';
+import { Button } from '../ui/button';
+import { ChapterView } from './ChapterView';
 
 export const ReportResults = () => {
   const { t } = useLocalization();
@@ -44,8 +42,8 @@ export const ReportResults = () => {
 
   const handleChapterTitleUpdate = (chapterId: string, newTitle: string) => {
     updateProject(p => {
-        const chap = p.getChapter(chapterId);
-        if (chap) chap.title = newTitle;
+      const chap = p.getChapter(chapterId);
+      if (chap) chap.title = newTitle;
     });
   };
 
@@ -74,20 +72,14 @@ export const ReportResults = () => {
   };
 
   const handleCreateFirstChapter = () => {
-    if (!newChapterTitle.trim()) {
-      toast({
-        title: "Chapter title cannot be empty.",
-        variant: "destructive"
-      });
-      return;
-    }
+
     updateProject(p => {
-      p.addChapter(newChapterTitle);
+      p.addChapter("New Chapter Title");
     });
     setNewChapterTitle('');
     toast({
       title: "Chapter Created",
-      description: `Your first chapter "${newChapterTitle}" is ready.`
+      description: `Your first chapter "New Chapter Title" is ready.`
     })
   }
 
@@ -103,15 +95,9 @@ export const ReportResults = () => {
             <p className="text-sm mt-1 mb-6">
               Create your first chapter to get started. You can also generate a Table of Contents from the tools panel.
             </p>
-            <div className="flex w-full items-center gap-2">
-              <Input 
-                placeholder="Enter first chapter title..." 
-                value={newChapterTitle}
-                onChange={(e) => setNewChapterTitle(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleCreateFirstChapter()}
-              />
+            <div className="flex w-full items-center justify-center gap-2">
               <Button onClick={handleCreateFirstChapter}>
-                <PlusCircle className="me-2 h-4 w-4"/> Create Chapter
+                <PlusCircle className="me-2 h-4 w-4" /> Create Chapter
               </Button>
             </div>
           </div>
@@ -121,16 +107,16 @@ export const ReportResults = () => {
 
     return (
       <A4Page>
-        <ContentChapterView
-            chapter={currentChapter}
-            onUpdateSection={handleSectionUpdate}
-            onUpdateSectionTitle={handleSectionTitleUpdate}
-            onUpdateChapterTitle={handleChapterTitleUpdate}
-            onAddSection={handleAddSectionAtIndex}
-            onMoveSectionUp={handleMoveSectionUp}
-            onMoveSectionDown={handleMoveSectionDown}
-            onDeleteSection={handleDeleteSection}
-            onDeleteChapter={handleDeleteChapter}
+        <ChapterView
+          chapter={currentChapter}
+          onUpdateSection={handleSectionUpdate}
+          onUpdateSectionTitle={handleSectionTitleUpdate}
+          onUpdateChapterTitle={handleChapterTitleUpdate}
+          onAddSection={handleAddSectionAtIndex}
+          onMoveSectionUp={handleMoveSectionUp}
+          onMoveSectionDown={handleMoveSectionDown}
+          onDeleteSection={handleDeleteSection}
+          onDeleteChapter={handleDeleteChapter}
         />
       </A4Page>
     );
@@ -175,7 +161,7 @@ export const ReportResults = () => {
       )}
       <CardContent className="flex-grow flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50">
         <ScrollArea className="flex-grow">
-         {renderContent()}
+          {renderContent()}
         </ScrollArea>
       </CardContent>
     </Card>

@@ -2,15 +2,15 @@
 'use client';
 
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +21,7 @@ import { PlusCircle, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { SectionView } from './SectionView';
 
-interface ContentChapterViewProps {
+interface ChapterViewProps {
   chapter: Chapter;
   onUpdateSection: (sectionId: string, newContent: string) => void;
   onUpdateSectionTitle: (sectionId: string, newTitle: string) => void;
@@ -33,7 +33,7 @@ interface ContentChapterViewProps {
   onDeleteChapter: (chapterId: string) => void;
 }
 
-export function ContentChapterView({
+export function ChapterView({
   chapter,
   onUpdateSection,
   onUpdateSectionTitle,
@@ -43,7 +43,7 @@ export function ContentChapterView({
   onMoveSectionDown,
   onDeleteSection,
   onDeleteChapter,
-}: ContentChapterViewProps) {
+}: ChapterViewProps) {
   const { t } = useLocalization();
   const [editedChapterTitle, setEditedChapterTitle] = useState(chapter.title);
   const [isHovering, setIsHovering] = useState(false);

@@ -9,7 +9,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useToast } from '@/hooks';
 import { ExternalContextType } from '@/lib/types';
@@ -22,7 +21,6 @@ import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import ReactMarkdown from 'react-markdown';
 import { PasteTextUploader } from './PasteTextUploader';
-
 interface UploadManagerProps {
 
 }
@@ -216,7 +214,7 @@ export function UploadManager() {
                                                     <SelectContent>
                                                         {fileTypes.map(type => (
                                                             <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
-                                                        )) M}
+                                                        ))}
                                                     </SelectContent>
                                                 </Select>
                                                 <ViewContextDialog item={item} />
