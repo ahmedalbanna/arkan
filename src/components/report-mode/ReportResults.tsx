@@ -2,8 +2,6 @@
 'use client';
 
 import type { SectionName } from '@/ai/schemas';
-import A4Page from '@/components/shared/A4Page';
-import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -15,15 +13,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useBuilderStore } from '@/hooks';
 import { useReportPaginator } from '@/hooks/core/use-report-paginator';
-import {
-  ChevronLeft,
-  ChevronRight,
-  FileText,
-  PlusCircle,
-} from 'lucide-react';
-import { SectionView } from './SectionView';
-import { Input } from '../ui/input';
-import { useEffect, useState } from 'react';
+import { ChevronLeft, ChevronRight, FileText } from 'lucide-react';
+import { Button } from '../ui/button';
+import { ContentChapterView } from './ContentChapterView';
 
 export const ReportResults = () => {
   const { t } = useLocalization();
@@ -37,29 +29,23 @@ export const ReportResults = () => {
     handlePrevPage,
   } = useReportPaginator();
 
-  const [editedChapterTitle, setEditedChapterTitle] = useState(currentChapter?.title || '');
-
-  useEffect(() => {
-    setEditedChapterTitle(currentChapter?.title || '');
-  }, [currentChapter]);
-
-
   const handleSectionUpdate = (key: SectionName, value: string) => {
-    updateProject(p => {
-      p.updateSectionContent(key, value);
-    });
+    updateProject(p => p.updateSectionContent(key, value));
   };
 
-  const handleTitleUpdate = (key: SectionName, newTitle: string) => {
+  const handleSectionTitleUpdate = (key: SectionName, newTitle: string) => {
+    updateProject(p => p.updateSectionTitle(key, newTitle));
+  };
+
+  const handleChapterTitleUpdate = (chapterId: string, newTitle: string) => {
     updateProject(p => {
-      p.updateSectionTitle(key, newTitle);
+        const chap = p.getChapter(chapterId);
+        if (chap) chap.title = newTitle;
     });
   };
 
   const handleAddSectionAtIndex = (chapterId: string, index: number) => {
-    updateProject(p => {
-      p.addSectionAtIndex(chapterId, index, 'New Section');
-    });
+    updateProject(p => p.addSectionAtIndex(chapterId, index, 'New Section'));
   };
 
   const handleMoveSectionUp = (sectionId: string) => {
@@ -75,30 +61,11 @@ export const ReportResults = () => {
   };
 
   const handleDeleteChapter = (chapterId: string) => {
-    updateProject(p => {
-      p.removeChapter(chapterId);
-    });
+    updateProject(p => p.removeChapter(chapterId));
     toast({
       title: 'Chapter Deleted',
       description: 'The chapter has been removed from your project.',
     });
-  };
-
-  const handleChapterTitleSave = () => {
-    if (currentChapter && editedChapterTitle.trim() && editedChapterTitle !== currentChapter.title) {
-        updateProject(p => {
-            const chap = p.getChapter(currentChapter.id);
-            if (chap) {
-                chap.title = editedChapterTitle.trim();
-            }
-        });
-    }
-  };
-
-  const handleChapterTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' || e.key === 'Escape') {
-          e.currentTarget.blur(); // This will trigger onBlur to save
-      }
   };
 
   const renderContent = () => {
@@ -118,64 +85,20 @@ export const ReportResults = () => {
       );
     }
 
-    const hasSections = currentChapter.sections && currentChapter.sections.length > 0;
-
     return (
-      <div className="h-full p-4 gap-4 rounded-lg flex flex-col mt-4">
+      <div className="h-full p-4 gap-4 rounded-lg flex flex-col">
         <ScrollArea className="flex-grow">
-          <A4Page
-            key={currentChapter.id}
-            onDelete={() => handleDeleteChapter(currentChapter.id)}
-          >
-             <Input
-                value={editedChapterTitle}
-                onChange={(e) => setEditedChapterTitle(e.target.value)}
-                onBlur={handleChapterTitleSave}
-                onKeyDown={handleChapterTitleKeyDown}
-                className="w-full text-3xl font-bold text-primary font-headline border-0 focus-visible:ring-1 focus-visible:ring-offset-0 p-1 h-auto bg-transparent mb-6"
+            <ContentChapterView
+                chapter={currentChapter}
+                onUpdateSection={handleSectionUpdate}
+                onUpdateSectionTitle={handleSectionTitleUpdate}
+                onUpdateChapterTitle={handleChapterTitleUpdate}
+                onAddSection={handleAddSectionAtIndex}
+                onMoveSectionUp={handleMoveSectionUp}
+                onMoveSectionDown={handleMoveSectionDown}
+                onDeleteSection={handleDeleteSection}
+                onDeleteChapter={handleDeleteChapter}
             />
-            {hasSections ? (
-              currentChapter.sections.map((section, index) => (
-                <div key={section.id} className="group relative mb-8 last:mb-0">
-                  <SectionView
-                    chapterId={currentChapter.id}
-                    sectionKey={section.id}
-                    title={section.title}
-                    content={section.content || ''}
-                    onUpdate={handleSectionUpdate}
-                    onTitleChange={handleTitleUpdate}
-                    isFirst={index === 0}
-                    isLast={index === currentChapter.sections.length - 1}
-                    onMoveUp={() => handleMoveSectionUp(section.id)}
-                    onMoveDown={() => handleMoveSectionDown(section.id)}
-                    onDelete={() => handleDeleteSection(section.id)}
-                  />
-                  <div className="absolute -bottom-4 left-0 right-0 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="w-full h-px bg-primary/20"></div>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="absolute h-8 w-8 rounded-full bg-background hover:bg-muted"
-                      onClick={() =>
-                        handleAddSectionAtIndex(currentChapter.id, index + 1)
-                      }
-                    >
-                      <PlusCircle className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-20 border-2 border-dashed rounded-lg">
-                <h3 className="mt-4 text-lg font-semibold text-muted-foreground">This chapter is empty.</h3>
-                <p className="text-sm text-muted-foreground mb-4">Add a section to start building your report.</p>
-                <Button onClick={() => handleAddSectionAtIndex(currentChapter.id, 0)}>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Add First Section
-                </Button>
-              </div>
-            )}
-          </A4Page>
         </ScrollArea>
       </div>
     );

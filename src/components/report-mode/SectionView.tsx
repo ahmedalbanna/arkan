@@ -10,18 +10,16 @@ import { Button } from '../ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useLocalization } from '@/context/LocalizationContext';
 import dynamic from 'next/dynamic';
-import { Badge } from '../ui/badge';
 import { Input } from '../ui/input';
-import { useBuilderStore } from '@/hooks';
 
 
 const RichTextEditor = dynamic(() => import('@/components/report-mode/RichTextEditor'), { ssr: false });
 
 interface SectionProps {
-    chapterId?: string; // Add chapterId to identify which chapter to update
+    chapterId?: string;
     sectionKey: SectionName;
     title: string;
-    content: string; // The markdown content of the section
+    content: string;
     onUpdate: (key: SectionName, value: string) => void;
     onTitleChange: (key: SectionName, newTitle: string) => void;
     onMoveUp: () => void;
