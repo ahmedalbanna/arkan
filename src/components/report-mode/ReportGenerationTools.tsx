@@ -252,7 +252,7 @@ export const GenerationTools = () => {
   const { t, locale } = useLocalization();
   const { project, updateProject } = useBuilderStore(); // Directly use the store
   const { data: sectionConfigs, isFetched: sectionsLoaded } = useSections();
-  const { initializeControls, controlState } = useGenerationUIStore();
+  const { initializeControls, controlState, contextSelection } = useGenerationUIStore();
   const { userProfile, refetchUser, firebaseUser } = useAuth();
   const queryClient = useQueryClient();
   const [showTocInput, setShowTocInput] = useState(false);
@@ -279,19 +279,33 @@ export const GenerationTools = () => {
       const token = await firebaseUser.getIdToken();
       
       const controls = controlState[sectionId] || {};
-      
+      const context = contextSelection[sectionId] || {};
+
       let instructionText = `Please use a ${controls.tone || 'professional'} tone and aim for a word count of approximately ${controls.wordCount || 250} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}.`;
       if (controls.language && controls.language !== 'default') {
-        const langMap = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
-        instructionText += ` The output language must be ${langMap[controls.language]}.`;
+        const langMap: Record<string, string> = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
+        instructionText += ` The output language must be ${langMap[controls.language] || 'English'}.`;
       }
-
+      
+      const otherSectionsContext: Record<string, string> = {};
+      Object.keys(context.sections || {}).forEach(key => {
+        if (context.sections[key]) {
+          const content = project.getSectionContent(key);
+          if (content) {
+            otherSectionsContext[key] = content;
+          }
+        }
+      });
+      
+      const externalContextFiles = (project.externalContext || []).filter((_, index) => context.externalContext?.[index]);
 
       const body = {
-        sectionToGenerate: section.id,
+        sectionToGenerate: section.id as SectionName,
         prompt: section.prompt,
-        instructionText,
+        otherSections: otherSectionsContext,
+        externalContext: externalContextFiles,
         guidelines: section.guidelines,
+        instructionText,
       };
 
       const result = await generateReportSectionApi(body, token);
@@ -454,7 +468,7 @@ export const GenerationTools = () => {
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="hidden lg:inline-flex">
+                <Button variant="ghost" size="icon">
                   <BookOpenTextIcon className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
