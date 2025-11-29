@@ -14,13 +14,17 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useBuilderStore } from '@/hooks';
 import { useReportPaginator } from '@/hooks/core/use-report-paginator';
-import { ChevronLeft, ChevronRight, FileText } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileText, PlusCircle } from 'lucide-react';
 import { Button } from '../ui/button';
 import { ContentChapterView } from './ContentChapterView';
+import { Input } from '../ui/input';
+import { useState } from 'react';
+import { Label } from '../ui/label';
 
 export const ReportResults = () => {
   const { t } = useLocalization();
   const { project, updateProject } = useBuilderStore();
+  const [newChapterTitle, setNewChapterTitle] = useState('');
 
   const {
     currentPage,
@@ -69,18 +73,47 @@ export const ReportResults = () => {
     });
   };
 
+  const handleCreateFirstChapter = () => {
+    if (!newChapterTitle.trim()) {
+      toast({
+        title: "Chapter title cannot be empty.",
+        variant: "destructive"
+      });
+      return;
+    }
+    updateProject(p => {
+      p.addChapter(newChapterTitle);
+    });
+    setNewChapterTitle('');
+    toast({
+      title: "Chapter Created",
+      description: `Your first chapter "${newChapterTitle}" is ready.`
+    })
+  }
+
   const renderContent = () => {
     if (totalPages === 0 || !currentChapter) {
       return (
         <div className="flex items-center justify-center h-full min-h-[400px]">
-          <div className="text-center text-muted-foreground p-8">
+          <div className="text-center text-muted-foreground p-8 max-w-md">
             <FileText className="w-16 h-16 mx-auto mb-4" />
             <h3 className="text-lg font-semibold">
-              {t('builder.reportGenerator.selectSectionPrompt')}
+              Your Report is Empty
             </h3>
-            <p className="text-sm mt-1">
-              Or create a new chapter and section to get started.
+            <p className="text-sm mt-1 mb-6">
+              Create your first chapter to get started. You can also generate a Table of Contents from the tools panel.
             </p>
+            <div className="flex w-full items-center gap-2">
+              <Input 
+                placeholder="Enter first chapter title..." 
+                value={newChapterTitle}
+                onChange={(e) => setNewChapterTitle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleCreateFirstChapter()}
+              />
+              <Button onClick={handleCreateFirstChapter}>
+                <PlusCircle className="me-2 h-4 w-4"/> Create Chapter
+              </Button>
+            </div>
           </div>
         </div>
       );
