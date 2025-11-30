@@ -50,7 +50,7 @@ const useBuilderStore = create<BuilderState>((set, get) => {
 
     // Initial state setup
     return {
-        project: null,
+        project: createNewTemporaryProject(),
         hasUnsavedChanges: false,
         setHasUnsavedChanges: (hasChanges) => set({ hasUnsavedChanges: hasChanges }),
         isSavePromptOpen: false,
