@@ -17,7 +17,8 @@ import { useReportPaginator } from '@/hooks/core/use-report-paginator';
 import { ChevronLeft, ChevronRight, FileText, PlusCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../ui/button';
-import { ContentChapterView } from './ContentChapterView';
+import { Input } from '../ui/input';
+import { ChapterView } from '@/components/report-mode/ChapterView';
 import { MenuBar } from './MenuBar';
 
 
@@ -74,13 +75,20 @@ export const ReportResults = () => {
   };
 
   const handleCreateFirstChapter = () => {
+    if (!newChapterTitle.trim()) {
+        toast({
+            title: "Chapter title cannot be empty",
+            variant: "destructive",
+        });
+        return;
+    }
     updateProject(p => {
-      p.addChapter("New Chapter Title");
+      p.addChapter(newChapterTitle);
     });
     setNewChapterTitle('');
     toast({
       title: "Chapter Created",
-      description: `Your first chapter "New Chapter Title" is ready.`
+      description: `Your first chapter "${newChapterTitle}" is ready.`
     })
   }
 
@@ -94,9 +102,15 @@ export const ReportResults = () => {
               Your Report is Empty
             </h3>
             <p className="text-sm mt-1 mb-6">
-              Create your first chapter to get started. You can also generate a Table of Contents from the tools panel.
+             Create your first chapter to get started. You can also generate a Table of Contents from the tools panel.
             </p>
-            <div className="flex w-full items-center justify-center gap-2">
+            <div className="flex w-full max-w-sm mx-auto items-center space-x-2">
+               <Input 
+                value={newChapterTitle} 
+                onChange={(e) => setNewChapterTitle(e.target.value)}
+                placeholder="Enter chapter title..."
+                onKeyDown={(e) => e.key === 'Enter' && handleCreateFirstChapter()}
+              />
               <Button onClick={handleCreateFirstChapter}>
                 <PlusCircle className="me-2 h-4 w-4" /> Create Chapter
               </Button>
@@ -108,7 +122,7 @@ export const ReportResults = () => {
 
     return (
       <A4Page>
-        <ContentChapterView
+        <ChapterView
           chapter={currentChapter}
           onUpdateSection={handleSectionUpdate}
           onUpdateSectionTitle={handleSectionTitleUpdate}
