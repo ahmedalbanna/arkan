@@ -25,13 +25,11 @@ export const handleFileDrop = (editor: Editor, file: File) => {
     const content = event.target?.result;
     if (typeof content === 'string') {
       // This branch handles text files (md) and images (read as data URI)
-      let html = '';
       if (file.type.startsWith('image/')) {
-        html = `<img src="${content}" />`;
+        // For images, use the editor's setImage command
+        editor.chain().focus().setImage({ src: content }).run();
       } else if (fileExtension === 'md' || file.type === 'text/markdown') {
-        html = marked.parse(content) as string;
-      }
-      if (html) {
+        const html = marked.parse(content) as string;
         editor.chain().focus().insertContent(html).run();
       }
     } else if (content instanceof ArrayBuffer) {
