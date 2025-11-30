@@ -6,7 +6,6 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBrowserSpeech, useDebounce, useToast, useWritingTool } from '@/hooks';
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import Dropcursor from '@tiptap/extension-dropcursor';
-import FileHandler from '@tiptap/extension-file-handler';
 import Image from '@tiptap/extension-image';
 import Table from '@tiptap/extension-table';
 import TableCell from '@tiptap/extension-table-cell';
@@ -52,6 +51,7 @@ import {
 import { Separator } from '../ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useEditorStore } from '@/hooks/core/use-editor-store';
+import { handleFilePaste } from '@/lib/utils/paste-handler';
 
 interface SectionToolbarProps {
   onAiAction: (action: string, payload?: any) => void;
@@ -180,7 +180,7 @@ const turndownService = new TurndownService({ headingStyle: 'atx' });
 turndownService.use(gfm);
 
 
-const handleFile = (file: File, editor: Editor) => {
+const handleFileDrop = (file: File, editor: Editor) => {
   const reader = new FileReader();
   const fileExtension = file.name.split('.').pop()?.toLowerCase();
 
@@ -225,7 +225,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   onChange,
 }) => {
   const setActiveEditor = useEditorStore((state) => state.setActiveEditor);
-  const clearActiveEditor = useEditorStore((state) => state.clearActiveEditor);
   
   const [isUpdatingFromProp, setIsUpdatingFromProp] = useState(false);
   const debouncedContent = useDebounce(content, 1000);
@@ -238,11 +237,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     onSuccess: (data: any) => {
       if (!editor) return;
       const { from, to } = editor.state.selection;
-      // don't change value data.rewrittenText
-      if (from !== to) { // If text was selected
+      if (from !== to) {
         editor.chain().focus().insertContentAt({ from, to }, data.rewrittenText).run();
-      } else { // Replace everything
-        // don't change value data.rewrittenText
+      } else {
         editor.chain().focus().setContent(data.rewrittenText).run();
       }
       toast({ title: "AI Action Complete" });
@@ -257,12 +254,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const translateMutation = useWritingTool('/api/writing-tools/translate-text', {
     onSuccess: (data: any) => {
       if (!editor) return;
-      // don't change value data.text
       const { from, to } = editor.state.selection;
       if (from !== to) {
         editor.chain().focus().insertContentAt({ from, to }, data.text).run();
       } else {
-        // don't change value data.text
         editor.chain().focus().setContent(data.text).run();
       }
       toast({ title: "Translation Ready" });
@@ -274,19 +269,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   });
 
-  const handleImagePaste = (editor: Editor, file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const src = e.target?.result as string;
-        if (src) {
-            editor.chain().focus().setImage({ src }).run();
-        }
-    };
-    reader.readAsDataURL(file);
-  };
-
   const editor = useEditor({
-
     extensions: [
       StarterKit.configure({
         table: false,
@@ -304,7 +287,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       Katex.configure({}),
       FileHandler.configure({
         onDrop: (currentEditor, files) => {
-          files.forEach(file => handleFile(file, currentEditor));
+          files.forEach(file => handleFileDrop(file, currentEditor));
           return true;
         },
         onPaste: (currentEditor, files, htmlContent) => {
@@ -313,9 +296,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           }
           files.forEach(file => {
             if (file.type.startsWith('image/')) {
-              handleImagePaste(currentEditor, file);
+              handleFilePaste(currentEditor, file);
             } else {
-              handleFile(file, currentEditor)
+              handleFileDrop(file, currentEditor)
             }
           });
           return true;
@@ -329,11 +312,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       const markdown = turndownService.turndown(html);
       onChange(markdown);
     },
-    onFocus: ({ editor }) => {
+    onSelectionUpdate: ({ editor }) => {
       setActiveEditor(editor);
-    },
-    onBlur: () => {
-      clearActiveEditor();
     },
     editorProps: {
       attributes: {

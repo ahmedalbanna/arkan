@@ -164,7 +164,10 @@ export const MenuBar = () => {
   };
 
   return (
-    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-background/80 backdrop-blur-sm border rounded-full shadow-lg flex items-center p-1 gap-1">
+    <div 
+      onMouseDown={(e) => e.preventDefault()} // Prevent editor from losing focus
+      className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-background/80 backdrop-blur-sm border rounded-full shadow-lg flex items-center p-1 gap-1"
+    >
       <div className="flex items-center gap-1">
         <Button onClick={handleImport} size="icon" className="h-9 w-9 rounded-full">
           <Upload className="h-4 w-4" />
