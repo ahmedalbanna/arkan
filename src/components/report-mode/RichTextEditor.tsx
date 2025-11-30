@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
@@ -52,6 +53,7 @@ import { Separator } from '../ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useEditorStore } from '@/hooks/core/use-editor-store';
 import { handleFilePaste } from '@/lib/utils/paste-handler';
+import { handleFileDrop } from '@/lib/utils/drop-handler';
 
 interface SectionToolbarProps {
   onAiAction: (action: string, payload?: any) => void;
@@ -83,7 +85,9 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
   ];
 
   return (
-    <div className="flex items-center gap-1 rounded-full border bg-gradient-to-r from-background/80 to-primary/5 backdrop-blur-md p-1 shadow-soft hover:shadow-glow transition-all duration-200">
+    <div className="flex items-center gap-1 rounded-full border bg-gradient-to-r from-background/80 to-primary/5 backdrop-blur-md p-1 shadow-soft hover:shadow-glow transition-all duration-200"
+      onMouseDown={(e) => e.preventDefault()} // Prevent editor from losing focus
+    >
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -142,7 +146,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
             {rewriteStyles.map(({ label, style }) => (
               <DropdownMenuItem
                 className="hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200"
-                key={style} onClick={() => onAiAction('rewrite', { style })} disabled={isProcessing}>
+                key={style} onSelect={() => onAiAction('rewrite', { style })} disabled={isProcessing}>
                 <div className="flex items-center gap-2">
                   <div className="p-1 rounded-md bg-gradient-to-br from-muted to-muted/80">
                     <Sparkles className="h-3 w-3 text-muted-foreground" />
@@ -185,41 +189,6 @@ const turndownService = new TurndownService({ headingStyle: 'atx' });
 turndownService.use(gfm);
 
 
-const handleFileDrop = (file: File, editor: Editor) => {
-  const reader = new FileReader();
-  const fileExtension = file.name.split('.').pop()?.toLowerCase();
-
-  if (file.type.startsWith('image/')) {
-    reader.onload = (event) => {
-      const imageUrl = event.target?.result as string;
-      editor.chain().focus().setImage({ src: imageUrl }).run();
-    };
-    reader.readAsDataURL(file);
-  } else if (fileExtension === 'md') {
-    reader.onload = (event) => {
-      const content = event.target?.result as string;
-      const html = marked.parse(content) as string;
-      editor.chain().focus().setContent(html).run();
-    };
-    reader.readAsText(file);
-  } else if (fileExtension === 'docx') {
-    reader.onload = (event) => {
-      const arrayBuffer = event.target?.result as ArrayBuffer;
-      mammoth.convertToHtml({ arrayBuffer: arrayBuffer })
-        .then((result) => {
-          editor.chain().focus().setContent(result.value).run();
-        })
-        .catch((error) => {
-          console.error(error);
-          window.alert('Error converting .docx file.');
-        });
-    };
-    reader.readAsArrayBuffer(file);
-  } else {
-    window.alert('Unsupported file type for drag and drop.');
-  }
-}
-
 interface RichTextEditorProps {
   content: string;
   onChange: (markdown: string) => void;
@@ -231,6 +200,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   const setActiveEditor = useEditorStore((state) => state.setActiveEditor);
   
+  // FIX: Call useId unconditionally at the top of the component.
+  const uniqueId = React.useId();
+
   const [isUpdatingFromProp, setIsUpdatingFromProp] = useState(false);
   const debouncedContent = useDebounce(content, 1000);
   const { toast } = useToast();
@@ -282,19 +254,23 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       BubbleMenuExtension.configure({
         element: document.querySelector('.menu') as HTMLElement,
-        pluginKey: `bubbleMenu-${React.useId()}`,
-        // Prevent focus loss when clicking menu
+        pluginKey: `bubbleMenu-${uniqueId}`,
         pluginProps: {
-          handleDOMEvents: {
-            mousedown: (view, event) => {
-              // Prevent default only for clicks inside the menu
-              if (view.dom.parentElement?.querySelector('.menu')?.contains(event.target as Node)) {
-                event.preventDefault();
-              }
-              return false;
+            attributes: {
+              class: 'bubble-menu',
+            },
+            handleDOMEvents: {
+              mousedown: (view, event) => {
+                const target = event.target as HTMLElement;
+                if (target.closest('.bubble-menu')) {
+                  event.preventDefault();
+                  view.focus();
+                  return true;
+                }
+                return false;
+              },
             },
           },
-        },
       }),
       Image,
       Dropcursor,
@@ -305,7 +281,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       Katex.configure({}),
       FileHandler.configure({
         onDrop: (currentEditor, files) => {
-          files.forEach(file => handleFileDrop(file, currentEditor));
+          files.forEach(file => handleFileDrop(currentEditor, file));
           return true;
         },
         onPaste: (currentEditor, files, htmlContent) => {
@@ -316,7 +292,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             if (file.type.startsWith('image/')) {
               handleFilePaste(currentEditor, file);
             } else {
-              handleFileDrop(file, currentEditor)
+              handleFileDrop(currentEditor, file)
             }
           });
           return true;
@@ -407,7 +383,24 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         <BubbleMenu
           editor={editor}
           tippyOptions={{ duration: 100, placement: 'top' }}
-          pluginKey={`bubbleMenu-${React.useId()}`}
+          pluginKey={`bubbleMenu-${uniqueId}`}
+          pluginProps={{
+            attributes: {
+              class: 'bubble-menu',
+            },
+            handleDOMEvents: {
+              mousedown: (view, event) => {
+                const target = event.target as HTMLElement;
+                // Prevent editor from losing focus if the click is inside the bubble menu
+                if (target.closest('.bubble-menu')) {
+                  event.preventDefault();
+                  view.focus();
+                  return true;
+                }
+                return false;
+              },
+            },
+          }}
         >
           {editor.isActive('table') ? (
             <div className="bg-background p-1 rounded-lg shadow-lg border flex gap-1">
