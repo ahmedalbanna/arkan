@@ -6,6 +6,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBrowserSpeech, useDebounce, useToast, useWritingTool } from '@/hooks';
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import Dropcursor from '@tiptap/extension-dropcursor';
+import FileHandler from '@tiptap/extension-file-handler';
 import Image from '@tiptap/extension-image';
 import Table from '@tiptap/extension-table';
 import TableCell from '@tiptap/extension-table-cell';
