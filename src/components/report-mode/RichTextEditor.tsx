@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
@@ -6,7 +5,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBrowserSpeech, useDebounce, useToast, useWritingTool } from '@/hooks';
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import Dropcursor from '@tiptap/extension-dropcursor';
-import FileHandler from '@tiptap/extension-file-handler';
+import { FileHandler } from '@tiptap/extension-file-handler';
 import Image from '@tiptap/extension-image';
 import Table from '@tiptap/extension-table';
 import TableCell from '@tiptap/extension-table-cell';
@@ -126,8 +125,13 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
           <Tooltip>
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200"
-                  disabled={isProcessing}>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200"
+                  disabled={isProcessing}
+                  onMouseDown={(e) => e.preventDefault()}
+                >
                   {activeAction === 'rewrite' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brush className="h-4 w-4" />}
                 </Button>
               </DropdownMenuTrigger>
@@ -278,6 +282,19 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       BubbleMenuExtension.configure({
         element: document.querySelector('.menu') as HTMLElement,
+        pluginKey: `bubbleMenu-${React.useId()}`,
+        // Prevent focus loss when clicking menu
+        pluginProps: {
+          handleDOMEvents: {
+            mousedown: (view, event) => {
+              // Prevent default only for clicks inside the menu
+              if (view.dom.parentElement?.querySelector('.menu')?.contains(event.target as Node)) {
+                event.preventDefault();
+              }
+              return false;
+            },
+          },
+        },
       }),
       Image,
       Dropcursor,
@@ -387,7 +404,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   return (
     <div className="relative">
       {editor && (
-        <BubbleMenu editor={editor} tippyOptions={{ duration: 100, placement: 'top' }}>
+        <BubbleMenu
+          editor={editor}
+          tippyOptions={{ duration: 100, placement: 'top' }}
+          pluginKey={`bubbleMenu-${React.useId()}`}
+        >
           {editor.isActive('table') ? (
             <div className="bg-background p-1 rounded-lg shadow-lg border flex gap-1">
               <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addColumnBefore().run()}>Add Col Before</Button>
