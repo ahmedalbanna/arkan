@@ -11,12 +11,11 @@ import { marked } from 'marked';
  * @param file The file that was dropped.
  * @param editor The Tiptap editor instance.
  */
-export const handleFileDrop = (file: File, editor: Editor) => {
+export const handleFileDrop = (editor: Editor, file: File) => {
   const reader = new FileReader();
-  
-  // FIX: Add a check to ensure file.name is not undefined before splitting.
-  if (!file.name) {
-    console.warn('File dropped without a name, skipping.');
+
+  if (!file || !file.name) {
+    console.warn('File dropped without a name or content, skipping.');
     return;
   }
   
@@ -25,6 +24,7 @@ export const handleFileDrop = (file: File, editor: Editor) => {
   reader.onload = (event) => {
     const content = event.target?.result;
     if (typeof content === 'string') {
+      // This branch handles text files (md) and images (read as data URI)
       let html = '';
       if (file.type.startsWith('image/')) {
         html = `<img src="${content}" />`;
@@ -35,6 +35,7 @@ export const handleFileDrop = (file: File, editor: Editor) => {
         editor.chain().focus().insertContent(html).run();
       }
     } else if (content instanceof ArrayBuffer) {
+      // This branch handles docx files
       if (fileExtension === 'docx') {
         mammoth.convertToHtml({ arrayBuffer: content })
           .then((result) => {
@@ -52,13 +53,14 @@ export const handleFileDrop = (file: File, editor: Editor) => {
     console.error('Error reading file:', error);
     window.alert('Error reading file.');
   };
-
+  
+  // Decide how to read the file based on its type
   if (file.type.startsWith('image/')) {
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(file); // For images
   } else if (fileExtension === 'md' || file.type === 'text/markdown') {
-    reader.readAsText(file);
+    reader.readAsText(file); // For markdown
   } else if (fileExtension === 'docx') {
-    reader.readAsArrayBuffer(file);
+    reader.readAsArrayBuffer(file); // For docx
   } else {
     console.warn(`Unsupported file type dropped: ${file.type}`);
   }
