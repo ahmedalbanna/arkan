@@ -17,7 +17,9 @@ import { useReportPaginator } from '@/hooks/core/use-report-paginator';
 import { ChevronLeft, ChevronRight, FileText, PlusCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../ui/button';
-import { ChapterView } from './ChapterView';
+import { ContentChapterView } from './ContentChapterView';
+import { MenuBar } from './MenuBar';
+
 
 export const ReportResults = () => {
   const { t } = useLocalization();
@@ -72,7 +74,6 @@ export const ReportResults = () => {
   };
 
   const handleCreateFirstChapter = () => {
-
     updateProject(p => {
       p.addChapter("New Chapter Title");
     });
@@ -107,7 +108,7 @@ export const ReportResults = () => {
 
     return (
       <A4Page>
-        <ChapterView
+        <ContentChapterView
           chapter={currentChapter}
           onUpdateSection={handleSectionUpdate}
           onUpdateSectionTitle={handleSectionTitleUpdate}
@@ -163,6 +164,7 @@ export const ReportResults = () => {
         <ScrollArea className="flex-grow">
           {renderContent()}
         </ScrollArea>
+        <MenuBar />
       </CardContent>
     </Card>
   );

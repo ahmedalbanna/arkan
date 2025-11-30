@@ -20,8 +20,6 @@ import {
   Bold,
   BookText,
   Brush,
-  Download,
-  ImageIcon,
   Italic,
   Languages,
   List,
@@ -35,7 +33,6 @@ import {
   Square,
   Strikethrough,
   Table as TableIcon,
-  Upload,
   UserCheck,
   Volume2
 } from 'lucide-react';
@@ -52,9 +49,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Separator } from '../ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { useEditorStore } from '@/hooks/core/use-editor-store';
 
 interface SectionToolbarProps {
   onAiAction: (action: string, payload?: any) => void;
@@ -182,170 +179,6 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
 const turndownService = new TurndownService({ headingStyle: 'atx' });
 turndownService.use(gfm);
 
-interface MenuBarProps {
-  editor: Editor | null;
-  setDirection: (dir: 'rtl' | 'ltr') => void;
-}
-
-const MenuBar: React.FC<MenuBarProps> = ({ editor, setDirection }) => {
-  if (!editor) {
-    return null;
-  }
-
-  const addImage = () => {
-    const url = window.prompt('Enter image URL');
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
-    }
-  };
-
-  const addTable = () => {
-    editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
-  };
-
-  const addMath = () => {
-    const formula = window.prompt('Enter LaTeX formula');
-    if (formula) {
-      editor.chain().focus().insertContent(`<katex-component content="${formula}"></katex-component>`).run()
-    }
-  }
-
-  const handleExport = async () => {
-    if (!editor) return;
-
-    const format = window.prompt("Export as: 'md' or 'docx'", 'md');
-
-    if (format === 'md') {
-      const markdown = turndownService.turndown(editor.getHTML());
-      const blob = new Blob([markdown], { type: 'text/markdown' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'document.md';
-      a.click();
-      URL.revokeObjectURL(url);
-    } else if (format === 'docx') {
-      const html = editor.getHTML();
-      try {
-        const response = await fetch('/api/export/docx', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ html }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to export as DOCX');
-        }
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'document.docx';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } catch (error) {
-        console.error(error);
-        window.alert('Error exporting .docx file.');
-      }
-
-    } else if (format) {
-      window.alert("Unsupported format. Please choose 'md' or 'docx'.");
-    }
-  };
-
-  const handleImport = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.md,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file && editor) {
-        handleFile(file, editor);
-      }
-    };
-    input.click();
-  };
-
-  const handleHeadingChange = (value: string) => {
-    if (value === 'p') {
-      editor.chain().focus().setParagraph().run();
-      return;
-    }
-    const level = parseInt(value.replace('h', '')) as 1 | 2 | 3 | 4 | 5 | 6;
-    editor.chain().focus().toggleHeading({ level }).run();
-  };
-
-  const getCurrentHeadingLevel = () => {
-    for (let i = 1; i <= 6; i++) {
-      if (editor.isActive('heading', { level: i as 1 | 2 | 3 | 4 | 5 | 6 })) {
-        return `h${i}`;
-      }
-    }
-    return 'p';
-  };
-
-  return (
-    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-background/80 backdrop-blur-sm border rounded-full shadow-lg flex items-center p-1 gap-1">
-      <div className="flex items-center gap-1">
-        <Button onClick={handleImport} size="icon" className="h-9 w-9 rounded-full">
-          <Upload className="h-4 w-4" />
-        </Button>
-        <Button onClick={handleExport} size="icon" className="h-9 w-9 rounded-full">
-          <Download className="h-4 w-4" />
-        </Button>
-        <div className="h-6 w-px bg-border"></div>
-        <Select value={getCurrentHeadingLevel()} onValueChange={handleHeadingChange}>
-          <SelectTrigger aria-label="Select heading level" className="h-9 w-32 border-none bg-transparent focus:ring-0 focus:ring-offset-0">
-            <SelectValue placeholder="Paragraph" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="p">Paragraph</SelectItem>
-            <SelectItem value="h1">Heading 1</SelectItem>
-            <SelectItem value="h2">Heading 2</SelectItem>
-            <SelectItem value="h3">Heading 3</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button onClick={() => editor.chain().focus().toggleBold().run()} variant={editor.isActive('bold') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
-          <Bold className="h-4 w-4" />
-        </Button>
-        <Button onClick={() => editor.chain().focus().toggleItalic().run()} variant={editor.isActive('italic') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
-          <Italic className="h-4 w-4" />
-        </Button>
-        <Button onClick={() => editor.chain().focus().toggleStrike().run()} variant={editor.isActive('strike') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
-          <Strikethrough className="h-4 w-4" />
-        </Button>
-        <Button onClick={() => editor.chain().focus().toggleBulletList().run()} variant={editor.isActive('bulletList') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
-          <List className="h-4 w-4" />
-        </Button>
-        <Button onClick={() => editor.chain().focus().toggleOrderedList().run()} variant={editor.isActive('orderedList') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
-          <ListOrdered className="h-4 w-4" />
-        </Button>
-        <Button onClick={() => editor.chain().focus().toggleBlockquote().run()} variant={editor.isActive('blockquote') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
-          <Quote className="h-4 w-4" />
-        </Button>
-        <Button onClick={addImage} size="icon" className="h-9 w-9 rounded-full">
-          <ImageIcon className="h-4 w-4" />
-        </Button>
-        <Button onClick={addTable} size="icon" className="h-9 w-9 rounded-full">
-          <TableIcon className="h-4 w-4" />
-        </Button>
-        <Button onClick={addMath} size="icon" className="h-9 w-9 rounded-full">
-          <Sigma className="h-4 w-4" />
-        </Button>
-      </div>
-      <div className="h-6 w-px bg-border"></div>
-      <div className="flex items-center gap-1">
-        <Button onClick={() => { editor.chain().focus().setTextAlign('left').run(); setDirection('ltr'); }} variant={editor.isActive({ textAlign: 'left' }) ? 'secondary' : 'ghost'} className="h-9 rounded-full">LTR</Button>
-        <Button onClick={() => { editor.chain().focus().setTextAlign('right').run(); setDirection('rtl'); }} variant={editor.isActive({ textAlign: 'right' }) ? 'secondary' : 'ghost'} className="h-9 rounded-full">RTL</Button>
-      </div>
-    </div>
-  );
-};
 
 const handleFile = (file: File, editor: Editor) => {
   const reader = new FileReader();
@@ -391,7 +224,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   content,
   onChange,
 }) => {
-  const [, setDirection] = useState<'ltr' | 'rtl'>('ltr');
+  const setActiveEditor = useEditorStore((state) => state.setActiveEditor);
+  const clearActiveEditor = useEditorStore((state) => state.clearActiveEditor);
+  
   const [isUpdatingFromProp, setIsUpdatingFromProp] = useState(false);
   const debouncedContent = useDebounce(content, 1000);
   const { toast } = useToast();
@@ -494,6 +329,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       const markdown = turndownService.turndown(html);
       onChange(markdown);
     },
+    onFocus: ({ editor }) => {
+      setActiveEditor(editor);
+    },
+    onBlur: () => {
+      clearActiveEditor();
+    },
     editorProps: {
       attributes: {
         class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif prose-p:text-[12px] prose-headings:text-[16px] prose-h1:text-[16px] prose-h2:text-[16px] prose-h3:text-[16px] prose-h4:text-[16px] prose-h5:text-[16px] prose-h6:text-[16px] prose-a:text-primary hover:prose-a:text-primary/90 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2',
@@ -588,7 +429,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           )}
         </BubbleMenu>
       )}
-      <MenuBar editor={editor} setDirection={setDirection} />
       <div className="rounded-b-lg p-2 min-h-[200px] relative">
         <EditorContent editor={editor} />
       </div>
@@ -597,5 +437,3 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 };
 
 export default RichTextEditor;
-
-    
