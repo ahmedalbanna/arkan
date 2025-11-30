@@ -4,7 +4,6 @@
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBrowserSpeech, useDebounce, useToast, useWritingTool } from '@/hooks';
-import { uploadProjectFile } from '@/services/api/projectService';
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import Dropcursor from '@tiptap/extension-dropcursor';
 import FileHandler from '@tiptap/extension-file-handler';
@@ -395,7 +394,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const [, setDirection] = useState<'ltr' | 'rtl'>('ltr');
   const [isUpdatingFromProp, setIsUpdatingFromProp] = useState(false);
   const debouncedContent = useDebounce(content, 1000);
-  const { firebaseUser } = useAuth();
   const { toast } = useToast();
   const [activeAiAction, setActiveAiAction] = useState<string | null>(null);
 
@@ -441,20 +439,15 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   });
 
-  const handleImagePaste = async (editor: Editor, file: File) => {
-    if (!firebaseUser) {
-      toast({ title: 'Authentication required', description: 'You must be logged in to upload images.', variant: 'destructive' });
-      return;
-    }
-    toast({ title: 'Uploading Image...', description: 'Your image is being uploaded to storage.' });
-    try {
-      const token = await firebaseUser.getIdToken();
-      const { publicUrl } = await uploadProjectFile({ file, token });
-      editor.chain().focus().setImage({ src: publicUrl }).run();
-    } catch (error) {
-      console.error("Image upload failed:", error);
-      toast({ title: 'Upload Failed', description: 'Could not upload your image.', variant: 'destructive' });
-    }
+  const handleImagePaste = (editor: Editor, file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const src = e.target?.result as string;
+        if (src) {
+            editor.chain().focus().setImage({ src }).run();
+        }
+    };
+    reader.readAsDataURL(file);
   };
 
   const editor = useEditor({
@@ -605,3 +598,4 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
 export default RichTextEditor;
 
+    

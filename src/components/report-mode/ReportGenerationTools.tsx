@@ -50,14 +50,14 @@ import {
   GripVertical,
   ListPlus,
   PlusCircle,
-  Trash2,
-  ChevronDown
+  Trash2
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { SectionAccordionItem } from './SectionAccordionItem';
 
 import { SectionName } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
+import { useGenerationUIStore } from '@/hooks/core/useGenerationUIStore';
 import { useSections } from '@/hooks/data/use-sections';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -256,6 +256,7 @@ export const GenerationTools = () => {
   const queryClient = useQueryClient();
   const [showTocInput, setShowTocInput] = useState(false);
   const [isGenerateTocOpen, setIsGenerateTocOpen] = useState(false);
+  const { contextSelection } = useGenerationUIStore();
 
 
   const agentMutation = useMutation({
@@ -267,16 +268,16 @@ export const GenerationTools = () => {
       if (!section) throw new Error("Section not found.");
 
       const token = await firebaseUser.getIdToken();
-      
+
       const controls = section.controls;
-      const context = section.context;
+      const context = contextSelection[sectionId] || {};
 
       let instructionText = `Please use a ${controls.tone || 'professional'} tone and aim for a word count of approximately ${controls.wordCount || 250} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}.`;
       if (controls.language && controls.language !== 'default') {
         const langMap: Record<string, string> = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
         instructionText += ` The output language must be ${langMap[controls.language] || 'English'}.`;
       }
-      
+
       const otherSectionsContext: Record<string, string> = {};
       Object.keys(context.sections || {}).forEach(key => {
         if (context.sections[key]) {
@@ -286,7 +287,7 @@ export const GenerationTools = () => {
           }
         }
       });
-      
+
       const externalContextFiles = (project.externalContext || []).filter((_, index) => context.externalContext?.[index]);
 
       const body = {
@@ -376,7 +377,7 @@ export const GenerationTools = () => {
 
       lines.forEach(line => {
         const isChapter = !line.match(/^\s*\d+\.\d+/); // If it doesn't look like "1.1", it's a chapter
-        
+
         if (isChapter) {
           const chapterTitle = line.replace(/^\d+\.?\s*/, '').trim();
           if (chapterTitle) {
