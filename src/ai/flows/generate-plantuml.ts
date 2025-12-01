@@ -26,6 +26,16 @@ const generatePlantUMLPrompt = ai.definePrompt({
 2.  Generate complete and syntactically correct PlantUML code for the specified diagram type.
 3.  The code must start with '@startuml' and end with '@enduml'.
 4.  Do not include any explanations, comments, or markdown formatting in your output. Return only the raw PlantUML code.
+5.  If the diagramType is 'dfd' (Data Flow Diagram), you MUST include the following skin parameters to style the elements correctly:
+    \`\`\`plantuml
+    skinparam collections {
+      BorderColor black
+      BorderThickness 2
+      BackgroundColor white
+      ArrowColor Black
+    }
+    \`\`\`
+    For DFDs, use \`collections\` for external entities, \`rectangle\` for processes, and \`database\` for data stores.
 `,
   config: {
     temperature: 0.2, // Lower temperature for precise code generation

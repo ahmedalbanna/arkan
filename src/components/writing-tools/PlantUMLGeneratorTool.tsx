@@ -18,6 +18,8 @@ const diagramTypes = DiagramTypeSchema.options.map(value => {
   let label = '';
   if (value === 'er') {
     label = 'ER Diagram';
+  } else if (value === 'dfd') {
+    label = 'Data Flow Diagram (DFD)';
   } else {
     label = value.charAt(0).toUpperCase() + value.slice(1).replace(/([A-Z])/g, ' $1').trim();
   }
