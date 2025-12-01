@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { BiasCheckOutput, BiasIssue } from '@/ai/schemas';
@@ -7,8 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useBiasCheckerLogic } from '@/hooks/writing-tools/use-bias-checker-logic';
-import { AlertTriangle, ArrowRight, Loader2, Scale, Sparkles } from 'lucide-react';
-import { FileUploadZone } from './FileUploadZone';
+import { AlertCircle, ArrowRight, Loader2, Scale, Sparkles, UploadCloud } from 'lucide-react';
 
 function getScoreColor(score: number) {
   if (score < 50) return 'text-destructive';
@@ -27,7 +27,7 @@ function getBiasTypeColor(type: BiasIssue['biasType']) {
     case 'Ableism':
       return 'bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300';
     case 'Cultural':
-        return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300';
+      return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300';
     default:
       return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
   }
@@ -38,8 +38,9 @@ export function BiasCheckerTool() {
     form,
     mutation,
     isUploading,
-    setIsUploading,
-    onFileUpload,
+    getRootProps,
+    getInputProps,
+    isDragActive,
     onSubmit,
     results,
   } = useBiasCheckerLogic();
@@ -67,11 +68,16 @@ export function BiasCheckerTool() {
               />
             </TabsContent>
             <TabsContent value="upload" className="pt-4">
-              <FileUploadZone 
-                onFileUpload={onFileUpload}
-                isUploading={isUploading}
-                setIsUploading={setIsUploading}
-              />
+              <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer ${isDragActive ? 'border-primary' : ''}`}>
+                <input {...getInputProps()} />
+                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                {isUploading ? (
+                  <p className="mt-2 text-sm text-muted-foreground">Processing file...</p>
+                ) : (
+                  <p className="mt-2 text-sm text-muted-foreground">Drag 'n' drop a file here, or click to select</p>
+                )}
+                <p className="text-xs text-muted-foreground">Supported: PDF, TXT, MD</p>
+              </div>
             </TabsContent>
           </Tabs>
           {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}

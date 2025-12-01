@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { PlagiarismCheckOutput } from '@/ai/schemas';
@@ -10,7 +11,6 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { usePlagiarismCheckerLogic } from '@/hooks/writing-tools/use-plagiarism-checker-logic';
 import { ExternalLink, Loader2, ShieldCheck, UploadCloud } from 'lucide-react';
 import Link from 'next/link';
-import { FileUploadZone } from './FileUploadZone';
 
 export function PlagiarismCheckerTool() {
   const { t } = useLocalization();
@@ -18,8 +18,9 @@ export function PlagiarismCheckerTool() {
     form,
     mutation,
     isUploading,
-    setIsUploading,
-    onFileUpload,
+    getRootProps,
+    getInputProps,
+    isDragActive,
     onSubmit,
     getScoreColor,
     results,
@@ -48,11 +49,16 @@ export function PlagiarismCheckerTool() {
               />
             </TabsContent>
             <TabsContent value="upload" className="pt-4">
-              <FileUploadZone 
-                onFileUpload={onFileUpload}
-                isUploading={isUploading}
-                setIsUploading={setIsUploading}
-              />
+              <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer ${isDragActive ? 'border-primary' : ''}`}>
+                <input {...getInputProps()} />
+                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                {isUploading ? (
+                  <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.plagiarismChecker.processingFile')}</p>
+                ) : (
+                  <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.plagiarismChecker.dropzoneHint')}</p>
+                )}
+                <p className="text-xs text-muted-foreground">{t('writingTools.plagiarismChecker.supportedFiles')}</p>
+              </div>
             </TabsContent>
           </Tabs>
           {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}

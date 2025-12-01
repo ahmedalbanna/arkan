@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAIDetectorLogic } from '@/hooks/writing-tools/use-ai-detector-logic';
 import { Loader2, Sparkles, UploadCloud } from 'lucide-react';
-import { FileUploadZone } from './FileUploadZone';
 
 export function AIDetectorTool() {
   const { t } = useLocalization();
@@ -16,8 +16,9 @@ export function AIDetectorTool() {
     form,
     mutation,
     isUploading,
-    setIsUploading,
-    onFileUpload,
+    getRootProps,
+    getInputProps,
+    isDragActive,
     onSubmit,
     getScoreColor,
     results,
@@ -46,11 +47,16 @@ export function AIDetectorTool() {
               />
             </TabsContent>
             <TabsContent value="upload" className="pt-4">
-              <FileUploadZone 
-                onFileUpload={onFileUpload}
-                isUploading={isUploading}
-                setIsUploading={setIsUploading}
-              />
+              <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer ${isDragActive ? 'border-primary' : ''}`}>
+                <input {...getInputProps()} />
+                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                {isUploading ? (
+                  <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.aiDetector.processingFile')}</p>
+                ) : (
+                  <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.aiDetector.dropzoneHint')}</p>
+                )}
+                <p className="text-xs text-muted-foreground">{t('writingTools.aiDetector.supportedFiles')}</p>
+              </div>
             </TabsContent>
           </Tabs>
 

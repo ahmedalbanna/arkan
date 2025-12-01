@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -9,10 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useParaphraserLogic } from '@/hooks/writing-tools/use-paraphraser-logic';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
-import { Check, Copy, Loader2, Sparkles } from 'lucide-react';
+import { Check, Copy, Loader2, Sparkles, UploadCloud } from 'lucide-react';
 import { Controller } from 'react-hook-form';
 import ReactMarkdown from 'react-markdown';
-import { FileUploadZone } from './FileUploadZone';
 
 export function ParaphraserTool() {
   const {
@@ -20,8 +20,9 @@ export function ParaphraserTool() {
     form,
     paraphraseMutation,
     isUploading,
-    setIsUploading,
-    onFileUpload,
+    getRootProps,
+    getInputProps,
+    isDragActive,
     onSubmit,
     originalText,
     paraphrasedText,
@@ -52,11 +53,16 @@ export function ParaphraserTool() {
               />
             </TabsContent>
             <TabsContent value="upload" className="pt-4">
-              <FileUploadZone 
-                onFileUpload={onFileUpload}
-                isUploading={isUploading}
-                setIsUploading={setIsUploading}
-              />
+              <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer ${isDragActive ? 'border-primary' : ''}`}>
+                <input {...getInputProps()} />
+                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                {isUploading ? (
+                  <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.paraphraser.processingFile')}</p>
+                ) : (
+                  <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.paraphraser.dropzoneHint')}</p>
+                )}
+                <p className="text-xs text-muted-foreground">{t('writingTools.paraphraser.supportedFiles')}</p>
+              </div>
             </TabsContent>
           </Tabs>
           {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}
