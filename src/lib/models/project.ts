@@ -36,12 +36,12 @@ export class Project implements Required<ProjectProperties> {
     this.userId = props.userId || '';
     this.createdAt = props.createdAt || new Date().toISOString();
     this.updatedAt = props.updatedAt || new Date().toISOString();
-    this.name = props.name || '';
-    this.projectDescription = props.projectDescription || '';
+    this.name = props.name || 'Untitle Project';
+    this.projectDescription = props.projectDescription || 'Simple Project';
     // Ensure chapters are instances of the Chapter class for consistent API
     this.chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c as ChapterProperties));
     this.externalContext = props.externalContext || [];
-    this.hasUnsavedChanges = !props.userId; // New projects are considered to have unsaved changes
+    this.hasUnsavedChanges = !props.userId || false; // New projects are considered to have unsaved changes
   }
 
   // --- Getters for derived state ---
