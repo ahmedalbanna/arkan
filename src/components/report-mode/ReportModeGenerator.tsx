@@ -2,7 +2,7 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { BookOpenText, GitGraph, Search, UploadCloud } from 'lucide-react';
+import { BookOpenText, GitGraph, Search, UploadCloud, PenSquare } from 'lucide-react';
 import { Suspense } from 'react';
 import { Skeleton } from '../ui/skeleton';
 import { ReportResults } from './ReportResults';
@@ -11,6 +11,7 @@ import { UploadManager } from '../file/UploadManager';
 import { GenerationTools } from './ReportGenerationTools';
 import { AIResearcherTool } from '../writing-tools/AIResearcherTool';
 import { PlantUMLGeneratorTool } from '../writing-tools/PlantUMLGeneratorTool';
+import WritingToolsPanel from '../writing-tools/WritingToolsPanel';
 
 
 function ReportSkeleton() {
@@ -53,6 +54,12 @@ export default function ReportModeGenerator() {
             title: 'UML Diagrams',
             icon: <GitGraph className="h-5 w-5" />,
             content: <PlantUMLGeneratorTool />,
+        },
+        {
+            key: 'writing-tools',
+            title: 'Writing Tools',
+            icon: <PenSquare className="h-5 w-5" />,
+            content: <WritingToolsPanel />,
         },
     ];
 
