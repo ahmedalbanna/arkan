@@ -204,7 +204,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                             <DropdownMenuLabel>{userProfile.name}</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem asChild><Link href={`/profile/${firebaseUser?.uid}`}>Profile</Link></DropdownMenuItem>
-                            <DropdownMenuItem asChild><Link href="/generate">Go to Builder</Link></DropdownMenuItem>
+                            <DropdownMenuItem asChild><Link href="/builder">Go to Builder</Link></DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => logoutMutation.mutate()}>Logout</DropdownMenuItem>
                         </DropdownMenuContent>
