@@ -38,9 +38,12 @@ interface BuilderState {
 }
 
 const createNewTemporaryProject = (): Project => {
-    return new Project({
-        // The new Project() constructor will assign a UUID automatically
-    });
+    const project = new Project({});
+    const chapterId = project.addChapter('Introduction');
+    if (chapterId) {
+        project.addSectionToChapter(chapterId, 'Overview');
+    }
+    return project;
 };
 
 // The create function now returns the combined state and actions
