@@ -8,13 +8,14 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Download, Loader2, Save, Trash2, Upload } from 'lucide-react';
+import { Download, Loader2, Save, Search, Trash2, Upload } from 'lucide-react';
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useSaveProject } from '@/hooks';
 import { useRouter } from 'next/navigation';
 import { DownloadProjectButton } from './DownloadProjectButton';
 import { ExportDialog } from './ExportDialog';
+import { BrowseProjectsDialog } from './BrowseProjectsDialog'; // Import the new component
 
 export const SessionActions = () => {
     const { t } = useLocalization();
@@ -45,6 +46,8 @@ export const SessionActions = () => {
                     accept=".arkan"
                     className="hidden"
                 />
+
+                <BrowseProjectsDialog /> 
 
                 <Tooltip>
                     <TooltipTrigger asChild>

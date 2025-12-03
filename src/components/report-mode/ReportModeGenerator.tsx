@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { BookOpenText, BrainCircuit, GitGraph, Search, UploadCloud } from 'lucide-react';
+import { BookOpenText, GitGraph, Search, UploadCloud } from 'lucide-react';
 import { Suspense } from 'react';
 import { Skeleton } from '../ui/skeleton';
 import { ReportResults } from './ReportResults';
