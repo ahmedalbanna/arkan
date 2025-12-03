@@ -36,7 +36,7 @@ export class Project implements Required<ProjectProperties> {
     this.userId = props.userId || '';
     this.createdAt = props.createdAt || new Date().toISOString();
     this.updatedAt = props.updatedAt || new Date().toISOString();
-    this.name = props.name || 'Untitle Project';
+    this.name = props.name || 'Untitled Project';
     this.projectDescription = props.projectDescription || 'Simple Project';
     // Ensure chapters are instances of the Chapter class for consistent API
     this.chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c as ChapterProperties));

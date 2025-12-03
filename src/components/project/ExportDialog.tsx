@@ -15,22 +15,31 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useBuilderStore, useExport } from '@/hooks';
-import { templates, type DocxTemplateKey } from '@/lib/docx-styles';
+import { templates as docxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
+import { templates as pptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 import { Section } from '@/lib/models';
-import { Download, FileText, Loader2 } from 'lucide-react';
+import { Download, FileText, Loader2, Presentation } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 
 export function ExportDialog() {
   const { project } = useBuilderStore();
-  const { isExporting, exportReportDocx } = useExport();
+  const { isExporting, exportReportDocx, exportPresentationPptx } = useExport();
   const [selectedSections, setSelectedSections] = useState<Record<string, boolean>>({});
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<DocxTemplateKey>('modern');
+
+  // State for DOCX
+  const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<DocxTemplateKey>('modern');
   const [includePageNumbers, setIncludePageNumbers] = useState(true);
+  
+  // State for PPTX
+  const [selectedPptxTemplate, setSelectedPptxTemplate] = useState<PptxTemplateKey>('modern');
+  const [includeToc, setIncludeToc] = useState(false);
+  const [isRtl, setIsRtl] = useState(false);
 
   const availableChapters = useMemo(() => {
     if (!project?.chapters) return [];
@@ -68,16 +77,28 @@ export function ExportDialog() {
     setSelectedSections(prev => ({ ...prev, [sectionId]: checked }));
   };
 
-  const handleExportClick = async () => {
+  const handleExportClick = async (format: 'docx' | 'pptx') => {
     if (!project) return;
     const selectedIds = Object.keys(selectedSections).filter(key => selectedSections[key]);
     const sectionsToExport = project?.sections.filter(s => selectedIds.includes(s.id)) || [];
-    
-    await exportReportDocx({
-      sections: sectionsToExport,
-      projectName: project.name || 'Untitled Report',
-      options: { template: selectedTemplate, pageNumbers: includePageNumbers },
-    });
+
+    if (format === 'docx') {
+      await exportReportDocx({
+        sections: sectionsToExport,
+        projectName: project.name || 'Untitled Report',
+        options: { template: selectedDocxTemplate, pageNumbers: includePageNumbers },
+      });
+    } else {
+      await exportPresentationPptx({
+        sections: sectionsToExport,
+        projectName: project.name || 'Untitled Presentation',
+        options: { 
+          template: selectedPptxTemplate,
+          includeToc: includeToc,
+          isRtl: isRtl,
+         },
+      });
+    }
 
     if (sectionsToExport.length > 0) {
       setIsOpen(false);
@@ -100,13 +121,14 @@ export function ExportDialog() {
           <span className="hidden md:inline ms-2">Export</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Select Sections to Export</DialogTitle>
+          <DialogTitle>Select Content to Export</DialogTitle>
           <DialogDescription>
-            Choose which generated report sections you would like to include in the DOCX export.
+            Choose which generated sections to include in your exported document.
           </DialogDescription>
         </DialogHeader>
+        
         <div className="py-4 space-y-4">
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -114,7 +136,7 @@ export function ExportDialog() {
               checked={isAllSelected}
               onCheckedChange={handleSelectAll}
             />
-            <Label htmlFor="select-all" className="font-semibold">Select All Sections</Label>
+            <Label htmlFor="select-all" className="font-semibold">Select All Sections ({selectedCount} selected)</Label>
           </div>
           <ScrollArea className="h-60 w-full rounded-md border p-2">
             <Accordion type="multiple" className="w-full" defaultValue={availableChapters.map(c => c.id)}>
@@ -130,7 +152,7 @@ export function ExportDialog() {
                         <Checkbox
                           checked={isChapterAllSelected}
                           onCheckedChange={(checked) => handleChapterToggle(chapter.id, !!checked)}
-                          onClick={(e) => e.stopPropagation()} // Prevent trigger from firing
+                          onClick={(e) => e.stopPropagation()}
                         />
                         <Label className="font-semibold text-base truncate flex-1 text-left">{chapter.title}</Label>
                       </div>
@@ -154,43 +176,94 @@ export function ExportDialog() {
               })}
             </Accordion>
           </ScrollArea>
-          <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-            <div className="space-y-2">
-              <Label htmlFor="template-select">Document Theme</Label>
-              <Select value={selectedTemplate} onValueChange={(value) => setSelectedTemplate(value as DocxTemplateKey)}>
-                <SelectTrigger id="template-select">
-                  <SelectValue placeholder="Select a theme" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.keys(templates).map((key) => (
-                    <SelectItem key={key} value={key}>
-                      {templates[key as DocxTemplateKey].name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-end pb-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="page-numbers"
-                  checked={includePageNumbers}
-                  onCheckedChange={(checked) => setIncludePageNumbers(!!checked)}
-                />
-                <Label htmlFor="page-numbers">Include Page Numbers</Label>
+        </div>
+
+        <Tabs defaultValue="docx" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="docx"><FileText className="me-2 h-4 w-4" /> Word (.docx)</TabsTrigger>
+            <TabsTrigger value="pptx"><Presentation className="me-2 h-4 w-4" /> PowerPoint (.pptx)</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="docx" className="pt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="template-select">Document Theme</Label>
+                <Select value={selectedDocxTemplate} onValueChange={(value) => setSelectedDocxTemplate(value as DocxTemplateKey)}>
+                  <SelectTrigger id="template-select">
+                    <SelectValue placeholder="Select a theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.keys(docxTemplates).map((key) => (
+                      <SelectItem key={key} value={key}>
+                        {docxTemplates[key as DocxTemplateKey].name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-end pb-2">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="page-numbers"
+                    checked={includePageNumbers}
+                    onCheckedChange={(checked) => setIncludePageNumbers(!!checked)}
+                  />
+                  <Label htmlFor="page-numbers">Include Page Numbers</Label>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="ghost">Cancel</Button>
-          </DialogClose>
-          <Button onClick={handleExportClick} disabled={isExporting || selectedCount === 0}>
-            {isExporting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <FileText className="me-2 h-4 w-4" />}
-            Export ({selectedCount})
-          </Button>
-        </DialogFooter>
+             <DialogFooter className="mt-6">
+                <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
+                <Button onClick={() => handleExportClick('docx')} disabled={isExporting || selectedCount === 0}>
+                  {isExporting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <FileText className="me-2 h-4 w-4" />}
+                  Export as DOCX
+                </Button>
+            </DialogFooter>
+          </TabsContent>
+          
+          <TabsContent value="pptx" className="pt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="pptx-template-select">Presentation Theme</Label>
+                <Select value={selectedPptxTemplate} onValueChange={(value) => setSelectedPptxTemplate(value as PptxTemplateKey)}>
+                  <SelectTrigger id="pptx-template-select">
+                    <SelectValue placeholder="Select a theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.keys(pptxTemplates).map((key) => (
+                      <SelectItem key={key} value={key}>
+                        {pptxTemplates[key as PptxTemplateKey].name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+             <div className="flex items-center space-x-2 mt-4">
+                <Checkbox
+                  id="include-toc"
+                  checked={includeToc}
+                  onCheckedChange={(checked) => setIncludeToc(!!checked)}
+                />
+                <Label htmlFor="include-toc">Include Table of Contents slide</Label>
+              </div>
+              <div className="flex items-center space-x-2 mt-2">
+                <Checkbox
+                  id="is-rtl"
+                  checked={isRtl}
+                  onCheckedChange={(checked) => setIsRtl(!!checked)}
+                />
+                <Label htmlFor="is-rtl">Enable Right-to-Left (RTL) text direction</Label>
+              </div>
+            <DialogFooter className="mt-6">
+                <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
+                <Button onClick={() => handleExportClick('pptx')} disabled={isExporting || selectedCount === 0}>
+                  {isExporting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Presentation className="me-2 h-4 w-4" />}
+                  Export as PPTX
+                </Button>
+            </DialogFooter>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

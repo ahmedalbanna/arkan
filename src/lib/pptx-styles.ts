@@ -15,7 +15,7 @@ const modern: PptxStyleOptions = {
     code: { fontFace: 'Courier New', fontSize: 12, fill: { color: 'F5F5F5' }, margin: 10, valign: 'top' },
     link: { color: '0052CC', underline: true },
     inlineCode: { fontFace: 'Courier New', color: 'E74C3C', highlight: 'F2F2F2', fontSize: 14 },
-    bullet: { type: 'bullet', code: { fontFamily: 'Calibri' } }, // A standard solid circle bullet
+    bullet: { type: 'bullet' }, // A standard solid circle bullet
     border: { type: 'solid', pt: 1, color: 'D9D9D9' },
     table: {
         // Table-wide properties, including default cell styles
