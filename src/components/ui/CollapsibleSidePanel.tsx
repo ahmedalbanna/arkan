@@ -1,6 +1,7 @@
 
 import { cn } from '@/lib/utils/cn';
 import { SidePanelContent, type PanelItem } from './SidePanelContent';
+import { useMobile } from '@/hooks';
 
 interface CollapsibleSidePanelProps {
   /**
@@ -25,8 +26,13 @@ export function CollapsibleSidePanel({
   defaultActiveKey,
   className,
 }: CollapsibleSidePanelProps) {
+    const isMobile = useMobile();
   return (
-    <div className={cn("lg:sticky lg:top-24 self-start", className)}>
+    <div className={cn(
+        "lg:sticky lg:top-24 self-start",
+        isMobile && "mb-16", // Add margin-bottom on mobile to avoid overlap with bottom nav
+        className
+    )}>
       <SidePanelContent panels={panels} defaultActiveKey={defaultActiveKey} />
     </div>
   );
