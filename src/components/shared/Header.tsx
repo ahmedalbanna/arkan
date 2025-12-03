@@ -89,7 +89,6 @@ export function Header() {
     { href: '/', label: t('header.home'), icon: HomeIcon, auth: 'any' },
     { href: '/builder', label: t('header.generateDocs'), icon: SlidersHorizontal, auth: true },
     { href: '/pricing', label: t('header.pricing'), icon: Gem, auth: 'any' },
-    { href: '/docs', label: t('header.documentation'), icon: BookOpenCheck, auth: 'any' },
   ];
 
   const toolsLinks = [
@@ -344,6 +343,14 @@ export function Header() {
             </>
           ) : (
             <Button asChild><Link href="/login">{t('login.pageTitle')}</Link></Button>
+          )}
+
+          {!isMobile && isClient && (
+            <Button asChild variant="ghost" size="icon">
+              <Link href="/docs" aria-label={t('header.documentation')}>
+                <BookOpenCheck className="h-5 w-5" />
+              </Link>
+            </Button>
           )}
           {!isMobile && isClient && <ThemeToggle />}
           {!isMobile && <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">
