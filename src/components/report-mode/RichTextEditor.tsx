@@ -271,18 +271,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const [localContent, setLocalContent] = useState(content);
   const debouncedLocalContent = useDebounce(localContent, 500);
 
-  const handleTextUpdate = useCallback((newText: string, from: number, to: number) => {
-    if (!editor) return;
-    editor.chain().focus().insertContentAt({ from, to }, newText).run();
-    setLocalContent(turndownService.turndown(editor.getHTML()));
-  }, [editor]);
-  
-  const handleWholeUpdate = useCallback((newText: string) => {
-    if (!editor) return;
-    editor.chain().focus().setContent(newText).run();
-    setLocalContent(turndownService.turndown(editor.getHTML()));
-  }, [editor]);
-  
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -333,6 +321,18 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     immediatelyRender: false,
   });
 
+  const handleTextUpdate = useCallback((newText: string, from: number, to: number) => {
+    if (!editor) return;
+    editor.chain().focus().insertContentAt({ from, to }, newText).run();
+    setLocalContent(turndownService.turndown(editor.getHTML()));
+  }, [editor]);
+  
+  const handleWholeUpdate = useCallback((newText: string) => {
+    if (!editor) return;
+    editor.chain().focus().setContent(newText).run();
+    setLocalContent(turndownService.turndown(editor.getHTML()));
+  }, [editor]);
+  
   useEffect(() => {
     // This effect now listens to the debounced local content
     // and calls the main onChange prop.
