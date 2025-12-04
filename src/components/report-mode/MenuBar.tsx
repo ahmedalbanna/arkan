@@ -6,17 +6,20 @@ import { Editor } from '@tiptap/react';
 import mammoth from 'mammoth';
 import { marked } from 'marked';
 import {
-    Bold,
-    Download,
-    ImageIcon,
-    Italic,
-    List,
-    ListOrdered,
-    Quote,
-    Sigma,
-    Strikethrough,
-    Table as TableIcon,
-    Upload
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
+  Bold,
+  Download,
+  ImageIcon,
+  Italic,
+  List,
+  ListOrdered,
+  Quote,
+  Sigma,
+  Strikethrough,
+  Table as TableIcon,
+  Upload
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -164,12 +167,11 @@ export const MenuBar = () => {
   };
 
   return (
-    <div 
+    <div
       onMouseDown={(e) => e.preventDefault()} // Prevent editor from losing focus
       className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-background/80 backdrop-blur-sm border rounded-full shadow-lg flex items-center p-1 gap-1"
     >
       <div className="flex items-center gap-1">
-        <div className="h-6 w-px bg-border"></div>
         <Select value={getCurrentHeadingLevel()} onValueChange={handleHeadingChange}>
           <SelectTrigger aria-label="Select heading level" className="h-9 w-32 border-none bg-transparent focus:ring-0 focus:ring-offset-0">
             <SelectValue placeholder="Paragraph" />
@@ -181,6 +183,7 @@ export const MenuBar = () => {
             <SelectItem value="h3">Heading 3</SelectItem>
           </SelectContent>
         </Select>
+        <div className="h-6 w-px bg-border"></div>
         <Button onClick={() => editor.chain().focus().toggleBold().run()} variant={editor.isActive('bold') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
           <Bold className="h-4 w-4" />
         </Button>
@@ -190,6 +193,7 @@ export const MenuBar = () => {
         <Button onClick={() => editor.chain().focus().toggleStrike().run()} variant={editor.isActive('strike') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
           <Strikethrough className="h-4 w-4" />
         </Button>
+        <div className="h-6 w-px bg-border"></div>
         <Button onClick={() => editor.chain().focus().toggleBulletList().run()} variant={editor.isActive('bulletList') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
           <List className="h-4 w-4" />
         </Button>
@@ -202,8 +206,15 @@ export const MenuBar = () => {
       </div>
       <div className="h-6 w-px bg-border"></div>
       <div className="flex items-center gap-1">
-        <Button onClick={() => { editor.chain().focus().setTextAlign('left').run(); setDirection('ltr'); }} variant={editor.isActive({ textAlign: 'left' }) ? 'secondary' : 'ghost'} className="h-9 rounded-full">LTR</Button>
-        <Button onClick={() => { editor.chain().focus().setTextAlign('right').run(); setDirection('rtl'); }} variant={editor.isActive({ textAlign: 'right' }) ? 'secondary' : 'ghost'} className="h-9 rounded-full">RTL</Button>
+        <Button onClick={() => { editor.chain().focus().setTextAlign('left').run(); setDirection('ltr'); }} variant={editor.isActive({ textAlign: 'left' }) ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
+          <AlignLeft className="h-4 w-4" />
+        </Button>
+        <Button onClick={() => { editor.chain().focus().setTextAlign('center').run(); }} variant={editor.isActive({ textAlign: 'center' }) ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
+          <AlignCenter className="h-4 w-4" />
+        </Button>
+        <Button onClick={() => { editor.chain().focus().setTextAlign('right').run(); setDirection('rtl'); }} variant={editor.isActive({ textAlign: 'right' }) ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
+          <AlignRight className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
