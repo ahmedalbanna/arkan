@@ -39,7 +39,7 @@ import {
 } from 'lucide-react';
 import mammoth from 'mammoth';
 import { marked } from 'marked';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, memo } from 'react';
 import Katex from 'tiptap-katex';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
@@ -58,22 +58,87 @@ import { handleFileDrop } from '@/lib/utils/drop-handler';
 
 
 interface SectionToolbarProps {
-  onAiAction: (action: string, payload?: any) => void;
-  onReadAloud: (text: string) => void;
-  isProcessing: boolean;
-  activeAction: string | null;
-  isSpeaking: boolean;
-  stopSpeaking: () => void;
+  editor: Editor;
+  onTextUpdate: (newText: string, from: number, to: number) => void;
+  onWholeUpdate: (newText: string) => void;
 }
 
-export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAction, isSpeaking, stopSpeaking }: SectionToolbarProps) {
+const SectionToolbar = memo(function SectionToolbar({ editor, onTextUpdate, onWholeUpdate }: SectionToolbarProps) {
   const { t } = useLocalization();
+  const [activeAiAction, setActiveAiAction] = useState<string | null>(null);
+  const { speak, stop, isSpeaking } = useBrowserSpeech();
+  const { toast } = useToast();
+
+  const handleSuccess = (resultText: string) => {
+    const { from, to } = editor.state.selection;
+    if (from !== to) { // There was a selection
+      onTextUpdate(resultText, from, to);
+    } else { // Replace whole content
+      onWholeUpdate(resultText);
+    }
+    toast({ title: "AI Action Complete" });
+  };
+  
+  const handleError = (error: Error) => {
+    toast({ title: 'AI Action Failed', description: error.message, variant: 'destructive' });
+  };
+
+  const aiActionMutation = useWritingTool('/api/writing-tools/manipulate-text', {
+    onSuccess: (data: any) => handleSuccess(data.rewrittenText),
+    onError: handleError,
+    onSettled: () => setActiveAiAction(null),
+  });
+
+  const translateMutation = useWritingTool('/api/writing-tools/translate-text', {
+    onSuccess: (data: any) => handleSuccess(data.text),
+    onError: handleError,
+    onSettled: () => setActiveAiAction(null),
+  });
+
+  const isProcessing = aiActionMutation.isPending || translateMutation.isPending;
 
   const handleReadAloudClick = () => {
     if (isSpeaking) {
-      stopSpeaking();
+      stop();
     } else {
-      onReadAloud('');
+      const { from, to } = editor.state.selection;
+      const textToRead = editor.state.doc.textBetween(from, to) || editor.getText();
+      speak(textToRead);
+    }
+  };
+  
+  const detectLanguage = (text: string): 'ar' | 'en' => {
+    if (/[\u0600-\u06FF]/.test(text)) return 'ar';
+    return 'en';
+  };
+
+  const handleAiActionWrapper = (action: string, payload: any = {}) => {
+    setActiveAiAction(action);
+    const { from, to } = editor.state.selection;
+    const selectedText = editor.state.doc.textBetween(from, to);
+    const textToProcess = selectedText || editor.getText();
+
+    if (action === 'translate') {
+      const sourceLang = detectLanguage(textToProcess);
+      const targetLang = sourceLang === 'ar' ? 'en' : 'ar';
+      translateMutation.mutate({ text: textToProcess, targetLang: targetLang });
+      return;
+    }
+
+    const commandMap: Record<string, string> = {
+      summarize: `Summarize this text concisely: "${textToProcess}"`,
+      expand: `Expand on this topic, adding more detail and explanation: "${textToProcess}"`,
+      grammar: `Correct any spelling and grammar mistakes in this text: "${textToProcess}"`,
+      humanize: `Rewrite this text to sound more natural and human-like: "${textToProcess}"`,
+      rewrite: `Rewrite this text in a ${payload.style || 'default'} style: "${textToProcess}"`
+    };
+
+    const command = commandMap[action];
+
+    if (command) {
+      aiActionMutation.mutate({ textToManipulate: textToProcess, command });
+    } else {
+      setActiveAiAction(null);
     }
   };
 
@@ -93,8 +158,8 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={() => onAiAction('summarize')} disabled={isProcessing} >
-              {activeAction === 'summarize' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookText className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={() => handleAiActionWrapper('summarize')} disabled={isProcessing} >
+              {activeAiAction === 'summarize' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookText className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.summarize')}</p></TooltipContent>
@@ -102,8 +167,8 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={() => onAiAction('expand')} disabled={isProcessing} >
-              {activeAction === 'expand' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Maximize className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={() => handleAiActionWrapper('expand')} disabled={isProcessing} >
+              {activeAiAction === 'expand' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Maximize className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.expand')}</p></TooltipContent>
@@ -111,8 +176,8 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={() => onAiAction('grammar')} disabled={isProcessing}>
-              {activeAction === 'grammar' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <SpellCheck className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={() => handleAiActionWrapper('grammar')} disabled={isProcessing}>
+              {activeAiAction === 'grammar' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <SpellCheck className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.checkGrammar')}</p></TooltipContent>
@@ -120,8 +185,8 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={() => onAiAction('humanize')} disabled={isProcessing}>
-              {activeAction === 'humanize' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCheck className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={() => handleAiActionWrapper('humanize')} disabled={isProcessing}>
+              {activeAiAction === 'humanize' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCheck className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.humanize')}</p></TooltipContent>
@@ -136,9 +201,8 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
                   size="icon" 
                   className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200"
                   disabled={isProcessing}
-                  onMouseDown={(e) => e.preventDefault()}
                 >
-                  {activeAction === 'rewrite' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brush className="h-4 w-4" />}
+                  {activeAiAction === 'rewrite' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brush className="h-4 w-4" />}
                 </Button>
               </DropdownMenuTrigger>
             </TooltipTrigger>
@@ -148,7 +212,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
             {rewriteStyles.map(({ label, style }) => (
               <DropdownMenuItem
                 className="hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200"
-                key={style} onSelect={() => onAiAction('rewrite', { style })} disabled={isProcessing}>
+                key={style} onSelect={() => handleAiActionWrapper('rewrite', { style })} disabled={isProcessing}>
                 <div className="flex items-center gap-2">
                   <div className="p-1 rounded-md bg-gradient-to-br from-muted to-muted/80">
                     <Sparkles className="h-3 w-3 text-muted-foreground" />
@@ -164,8 +228,8 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={() => onAiAction('translate')} disabled={isProcessing}>
-              {activeAction === 'translate' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={() => handleAiActionWrapper('translate')} disabled={isProcessing}>
+              {activeAiAction === 'translate' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent><p>{t('builder.Section.aiActions.translate')}</p></TooltipContent>
@@ -175,7 +239,7 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={handleReadAloudClick} disabled={isProcessing && activeAction !== 'readAloud'}>
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-primary/10 hover:to-blue-500/10 hover:shadow-soft transition-all duration-200" onClick={handleReadAloudClick} disabled={isProcessing && activeAiAction !== 'readAloud'}>
               {isSpeaking ? <Square className="h-4 w-4 text-red-500 fill-current" /> : <Volume2 className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
@@ -185,7 +249,8 @@ export function SectionToolbar({ onAiAction, onReadAloud, isProcessing, activeAc
       </TooltipProvider>
     </div>
   )
-}
+});
+
 
 const turndownService = new TurndownService({ headingStyle: 'atx' });
 turndownService.use(gfm);
@@ -201,65 +266,22 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   onChange,
 }) => {
   const setActiveEditor = useEditorStore((state) => state.setActiveEditor);
-  
   const uniqueId = React.useId();
   
   const [localContent, setLocalContent] = useState(content);
   const debouncedLocalContent = useDebounce(localContent, 500);
 
-  const { toast } = useToast();
-  const [activeAiAction, setActiveAiAction] = useState<string | null>(null);
-
-  const { speak, stop, isSpeaking } = useBrowserSpeech();
-
-  const aiActionMutation = useWritingTool('/api/writing-tools/manipulate-text', {
-    onSuccess: (data: any) => {
-      if (!editor) return;
-      const { from, to } = editor.state.selection;
-      const newMarkdown = turndownService.turndown(data.rewrittenText);
-      
-      const contentToInsert = data.rewrittenText;
-
-      // Update the editor content directly
-      if (from !== to) { // If there was a selection
-        editor.chain().focus().insertContentAt({ from, to }, contentToInsert).run();
-      } else { // Replace the whole content
-        editor.chain().focus().setContent(contentToInsert).run();
-      }
-      
-      // Update local state, which will trigger the debounced onChange
-      setLocalContent(newMarkdown);
-      
-      toast({ title: "AI Action Complete" });
-      setActiveAiAction(null);
-    },
-    onError: (error) => {
-      toast({ title: 'AI Action Failed', description: error.message, variant: 'destructive' });
-      setActiveAiAction(null);
-    }
-  });
-
-
-  const translateMutation = useWritingTool('/api/writing-tools/translate-text', {
-    onSuccess: (data: any) => {
-      if (!editor) return;
-      const { from, to } = editor.state.selection;
-      const newMarkdown = turndownService.turndown(data.text);
-
-      if (from !== to) {
-        editor.chain().focus().insertContentAt({ from, to }, data.text).run();
-      } else {
-        editor.chain().focus().setContent(data.text).run();
-      }
-      setLocalContent(newMarkdown);
-      toast({ title: "Translation Ready" });
-      setActiveAiAction(null);
-    },
-    onError: (error) => {
-      toast({ title: 'Translation Failed', description: error.message, variant: 'destructive' });
-      setActiveAiAction(null);
-    }
-  });
+  const handleTextUpdate = useCallback((newText: string, from: number, to: number) => {
+    if (!editor) return;
+    editor.chain().focus().insertContentAt({ from, to }, newText).run();
+    setLocalContent(turndownService.turndown(editor.getHTML()));
+  }, [editor]);
+  
+  const handleWholeUpdate = useCallback((newText: string) => {
+    if (!editor) return;
+    editor.chain().focus().setContent(newText).run();
+    setLocalContent(turndownService.turndown(editor.getHTML()));
+  }, [editor]);
   
   const editor = useEditor({
     extensions: [
@@ -332,54 +354,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   }, [content, editor]);
 
-
-  // A simple language detection function based on character ranges.
-  const detectLanguage = (text: string): 'ar' | 'en' => {
-    // Basic check for Arabic characters. If any are found, assume Arabic.
-    if (/[\u0600-\u06FF]/.test(text)) {
-      return 'ar';
-    }
-    return 'en';
-  };
-
-  const handleAiActionWrapper = (action: string, payload: any = {}) => {
-    if (!editor) return;
-    setActiveAiAction(action);
-    const { from, to } = editor.state.selection;
-    const selectedText = editor.state.doc.textBetween(from, to);
-    const textToProcess = selectedText || localContent;
-
-    if (action === 'translate') {
-      const sourceLang = detectLanguage(textToProcess);
-      const targetLang = sourceLang === 'ar' ? 'en' : 'ar';
-      translateMutation.mutate({ text: textToProcess, targetLang: targetLang });
-      return;
-    }
-
-    const commandMap: Record<string, string> = {
-      summarize: `Summarize this text concisely: "${textToProcess}"`,
-      expand: `Expand on this topic, adding more detail and explanation: "${textToProcess}"`,
-      grammar: `Correct any spelling and grammar mistakes in this text: "${textToProcess}"`,
-      humanize: `Rewrite this text to sound more natural and human-like: "${textToProcess}"`,
-      rewrite: `Rewrite this text in a ${payload.style || 'default'} style: "${textToProcess}"`
-    };
-
-    const command = commandMap[action];
-
-    if (command) {
-      aiActionMutation.mutate({ textToManipulate: textToProcess, command });
-    } else {
-      setActiveAiAction(null);
-    }
-  };
-
-  const handleReadAloudWrapper = () => {
-    if (!editor) return;
-    const { from, to } = editor.state.selection;
-    const textToRead = editor.state.doc.textBetween(from, to) || localContent;
-    speak(textToRead);
-  }
-  
   return (
     <div className="relative">
       {editor && (
@@ -400,12 +374,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             </div>
           ) : (
             <SectionToolbar
-              onAiAction={handleAiActionWrapper}
-              onReadAloud={handleReadAloudWrapper}
-              isProcessing={aiActionMutation.isPending || translateMutation.isPending}
-              activeAction={activeAiAction}
-              isSpeaking={isSpeaking}
-              stopSpeaking={stop}
+              editor={editor}
+              onTextUpdate={handleTextUpdate}
+              onWholeUpdate={handleWholeUpdate}
             />
           )}
         </BubbleMenu>
