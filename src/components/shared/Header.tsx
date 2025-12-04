@@ -231,9 +231,7 @@ export function Header() {
                   <DropdownMenuLabel>{userProfile.name}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   
-                  <DropdownMenuItem asChild><Link href="/profile"><UserCog className="me-2 h-4 w-4" />{t('header.profile')}</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild><Link href="/dashboard"><AreaChart className="me-2 h-4 w-4" />{t('header.myDashboard')}</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link href="/payment-history"><CreditCard className="me-2 h-4 w-4" />{t('header.paymentHistory')}</Link></DropdownMenuItem>
                   {userProfile?.role === 'admin' && (
                     <DropdownMenuItem asChild>
                       <Link href="/admin/dashboard">
@@ -322,6 +320,7 @@ export function Header() {
             <Button asChild><Link href="/login">{t('login.pageTitle')}</Link></Button>
           )}
           {!isMobile && isClient && <ThemeToggle />}
+          <Button asChild variant="ghost" size="icon"><Link href="/docs" aria-label="Documentation"><BookOpenCheck className="h-5 w-5"/></Link></Button>
           {!isMobile && <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">
             <Languages className="h-5 w-5" />
           </Button>}

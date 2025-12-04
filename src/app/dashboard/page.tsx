@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { StatCard } from '@/components/admin/dashboard/StatCard';
 import { AgentUsageChart } from '@/components/admin/dashboard/AgentUsageChart';
 import { RecentActivity } from '@/components/admin/dashboard/RecentActivity';
-import { AlertCircle, Bot, History, AreaChart, TrendingDown, Gem, MessageSquare, Loader2 } from 'lucide-react';
+import { AlertCircle, Bot, History, AreaChart, TrendingDown, Gem, MessageSquare, Loader2, UserCog, CreditCard } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
@@ -15,6 +15,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { UserProfile } from '@/lib/types';
 import { useLocalization } from '@/context/LocalizationContext';
+import Link from 'next/link';
 
 
 function DashboardSkeleton() {
@@ -52,7 +53,7 @@ export default function UserDashboardPage() {
 
     return (
         <div className="container mx-auto max-w-7xl px-4 py-12">
-            <div className="flex justify-between items-center mb-12 flex-wrap gap-4">
+            <div className="flex justify-between items-start mb-12 flex-wrap gap-4">
                 <div className="text-center sm:text-left">
                     <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary flex items-center justify-center sm:justify-start gap-4">
                         <AreaChart className="w-10 h-10" />
@@ -61,6 +62,20 @@ export default function UserDashboardPage() {
                     <p className="text-lg text-muted-foreground mt-2">
                         {t('userDashboard.pageSubtitle', { name: userProfile?.name })}
                     </p>
+                </div>
+                 <div className="flex gap-2 justify-center w-full sm:w-auto">
+                    <Button asChild variant="outline">
+                        <Link href="/profile">
+                            <UserCog className="mr-2 h-4 w-4"/>
+                            View Profile
+                        </Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                         <Link href="/payment-history">
+                            <CreditCard className="mr-2 h-4 w-4"/>
+                            Payment History
+                        </Link>
+                    </Button>
                 </div>
             </div>
 
