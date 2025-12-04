@@ -91,12 +91,6 @@ export function Header() {
     { href: '/pricing', label: t('header.pricing'), icon: Gem, auth: 'any' },
   ];
 
-  const toolsLinks = [
-    { href: '/writing-tools', label: 'Writing Tools', icon: PenSquare },
-    { href: '/writing-tools/markdown-to-word', label: 'Markdown to Word', icon: PencilRuler },
-    { href: '/writing-tools/pptx-convert', label: 'Markdown to PPTX', icon: PencilRuler },
-  ];
-
   const adminLinks = [
     { href: '/admin/dashboard', label: t('adminDashboard.pageTitle'), icon: LayoutDashboard },
     { href: '/admin/manage-users', label: t('header.manageUsers'), icon: Users },
@@ -239,22 +233,6 @@ export function Header() {
                   
                   <DropdownMenuItem asChild><Link href="/profile"><UserCog className="me-2 h-4 w-4" />{t('header.profile')}</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild><Link href="/dashboard"><AreaChart className="me-2 h-4 w-4" />{t('header.myDashboard')}</Link></DropdownMenuItem>
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
-                      <Wrench className="me-2 h-4 w-4" />
-                      <span>{t('header.tools')}</span>
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent>
-                      {toolsLinks.map(link => (
-                        <DropdownMenuItem key={link.href} asChild>
-                          <Link href={link.href}>
-                            <link.icon className="me-2 h-4 w-4" />
-                            {link.label}
-                          </Link>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
                   <DropdownMenuItem asChild><Link href="/payment-history"><CreditCard className="me-2 h-4 w-4" />{t('header.paymentHistory')}</Link></DropdownMenuItem>
                   {userProfile?.role === 'admin' && (
                     <DropdownMenuItem asChild>
@@ -342,14 +320,6 @@ export function Header() {
             </>
           ) : (
             <Button asChild><Link href="/login">{t('login.pageTitle')}</Link></Button>
-          )}
-
-          {!isMobile && isClient && (
-            <Button asChild variant="ghost" size="icon">
-              <Link href="/docs" aria-label={t('header.documentation')}>
-                <BookOpenCheck className="h-5 w-5" />
-              </Link>
-            </Button>
           )}
           {!isMobile && isClient && <ThemeToggle />}
           {!isMobile && <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">

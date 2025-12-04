@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { AIToolCard } from '@/components/writing-tools/AIToolCard';
