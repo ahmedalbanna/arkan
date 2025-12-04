@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useLocalization } from '@/context/LocalizationContext';
 import { cn } from '@/lib/utils/cn';
-import { AreaChart, Bell, BookOpenCheck, Bot, CreditCard, FileImage, FileText, FolderOpen, Gem, History, HomeIcon, Languages, LayoutDashboard, LogOut, Menu, Palette, PencilLine, PencilRuler, PenSquare, Settings, SlidersHorizontal, Trash2, User, UserCog, UserPlus, Users, Wrench } from 'lucide-react';
+import { AreaChart, Bell, BookOpenCheck, Bot, CreditCard, FileImage, FileText, FolderOpen, Gem, History, HomeIcon, Languages, LayoutDashboard, LogOut, Menu, Palette, PencilRuler, PenSquare, Settings, SlidersHorizontal, Trash2, User, UserCog, UserPlus, Users, Wrench } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -93,7 +93,6 @@ export function Header() {
 
   const toolsLinks = [
     { href: '/writing-tools', label: 'Writing Tools', icon: PenSquare },
-    { href: '/handwriting', label: 'Text to Handwriting', icon: PencilLine },
     { href: '/pdf-to-markdown', label: 'PDF to Markdown', icon: FileText },
     { href: '/writing-tools/markdown-editor', label: 'Markdown Editor', icon: PencilRuler },
   ];
