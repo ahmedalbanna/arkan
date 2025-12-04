@@ -93,8 +93,8 @@ export function Header() {
 
   const toolsLinks = [
     { href: '/writing-tools', label: 'Writing Tools', icon: PenSquare },
-    { href: '/pdf-to-markdown', label: 'PDF to Markdown', icon: FileText },
-    { href: '/writing-tools/markdown-editor', label: 'Markdown Editor', icon: PencilRuler },
+    { href: '/writing-tools/markdown-to-word', label: 'Markdown to Word', icon: PencilRuler },
+    { href: '/writing-tools/pptx-convert', label: 'Markdown to PPTX', icon: PencilRuler },
   ];
 
   const adminLinks = [

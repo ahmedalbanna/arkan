@@ -55,7 +55,6 @@ export default function WritingToolsPage() {
     { name: 'PlantUML Diagram Generator', icon: GitGraph, href: '/writing-tools/generate-plantuml' },
     { name: 'Session Plan Generator', icon: BrainCircuit, href: '/writing-tools/session-plan' },
     { name: 'Lecture Generator', icon: BrainCircuit, href: '/writing-tools/lecture-generator' },
-    { name: 'Markdown Editor', icon: PencilRuler, href: '/writing-tools/markdown-editor' },
     { name: 'Markdown to Word', icon: PencilRuler, href: '/writing-tools/markdown-to-word' },
     { name: 'Markdown to PPTX', icon: PencilRuler, href: '/writing-tools/pptx-convert' },
     { name: 'Invisible Text Detector', icon: EyeOff, href: '/writing-tools/invisible-text-detector' },
