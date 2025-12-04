@@ -169,12 +169,6 @@ export const MenuBar = () => {
       className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-background/80 backdrop-blur-sm border rounded-full shadow-lg flex items-center p-1 gap-1"
     >
       <div className="flex items-center gap-1">
-        <Button onClick={handleImport} size="icon" className="h-9 w-9 rounded-full">
-          <Upload className="h-4 w-4" />
-        </Button>
-        <Button onClick={handleExport} size="icon" className="h-9 w-9 rounded-full">
-          <Download className="h-4 w-4" />
-        </Button>
         <div className="h-6 w-px bg-border"></div>
         <Select value={getCurrentHeadingLevel()} onValueChange={handleHeadingChange}>
           <SelectTrigger aria-label="Select heading level" className="h-9 w-32 border-none bg-transparent focus:ring-0 focus:ring-offset-0">
@@ -204,9 +198,6 @@ export const MenuBar = () => {
         </Button>
         <Button onClick={() => editor.chain().focus().toggleBlockquote().run()} variant={editor.isActive('blockquote') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
           <Quote className="h-4 w-4" />
-        </Button>
-        <Button onClick={addImage} size="icon" className="h-9 w-9 rounded-full">
-          <ImageIcon className="h-4 w-4" />
         </Button>
         <Button onClick={addTable} size="icon" className="h-9 w-9 rounded-full">
           <TableIcon className="h-4 w-4" />
