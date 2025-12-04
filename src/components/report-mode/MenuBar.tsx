@@ -199,12 +199,6 @@ export const MenuBar = () => {
         <Button onClick={() => editor.chain().focus().toggleBlockquote().run()} variant={editor.isActive('blockquote') ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
           <Quote className="h-4 w-4" />
         </Button>
-        <Button onClick={addTable} size="icon" className="h-9 w-9 rounded-full">
-          <TableIcon className="h-4 w-4" />
-        </Button>
-        <Button onClick={addMath} size="icon" className="h-9 w-9 rounded-full">
-          <Sigma className="h-4 w-4" />
-        </Button>
       </div>
       <div className="h-6 w-px bg-border"></div>
       <div className="flex items-center gap-1">
