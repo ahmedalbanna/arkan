@@ -53,7 +53,8 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: '10mb' as SizeLimit },
 
     useCache: true,
-    allowDevelopmentBuild: true,
+    allowDevelopmentBuild: false,
+
 
 
   }
