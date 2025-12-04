@@ -8,6 +8,7 @@ import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import Dropcursor from '@tiptap/extension-dropcursor';
 import { FileHandler } from '@tiptap/extension-file-handler';
 import Image from '@tiptap/extension-image';
+import Placeholder from '@tiptap/extension-placeholder';
 import Table from '@tiptap/extension-table';
 import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
@@ -38,7 +39,7 @@ import {
 } from 'lucide-react';
 import mammoth from 'mammoth';
 import { marked } from 'marked';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Katex from 'tiptap-katex';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
@@ -54,7 +55,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 import { useEditorStore } from '@/hooks/core/use-editor-store';
 import { handleFilePaste } from '@/lib/utils/paste-handler';
 import { handleFileDrop } from '@/lib/utils/drop-handler';
-import Placeholder from '@tiptap/extension-placeholder'
 
 
 interface SectionToolbarProps {
@@ -202,11 +202,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   const setActiveEditor = useEditorStore((state) => state.setActiveEditor);
   
-  // FIX: Call useId unconditionally at the top of the component.
   const uniqueId = React.useId();
+  
+  const [localContent, setLocalContent] = useState(content);
+  const debouncedLocalContent = useDebounce(localContent, 500);
 
-  const [isUpdatingFromProp, setIsUpdatingFromProp] = useState(false);
-  const debouncedContent = useDebounce(content, 1000);
   const { toast } = useToast();
   const [activeAiAction, setActiveAiAction] = useState<string | null>(null);
 
@@ -216,11 +216,20 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     onSuccess: (data: any) => {
       if (!editor) return;
       const { from, to } = editor.state.selection;
-      if (from !== to) {
-        editor.chain().focus().insertContentAt({ from, to }, data.rewrittenText).run();
-      } else {
-        editor.chain().focus().setContent(data.rewrittenText).run();
+      const newMarkdown = turndownService.turndown(data.rewrittenText);
+      
+      const contentToInsert = data.rewrittenText;
+
+      // Update the editor content directly
+      if (from !== to) { // If there was a selection
+        editor.chain().focus().insertContentAt({ from, to }, contentToInsert).run();
+      } else { // Replace the whole content
+        editor.chain().focus().setContent(contentToInsert).run();
       }
+      
+      // Update local state, which will trigger the debounced onChange
+      setLocalContent(newMarkdown);
+      
       toast({ title: "AI Action Complete" });
       setActiveAiAction(null);
     },
@@ -230,15 +239,19 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   });
 
+
   const translateMutation = useWritingTool('/api/writing-tools/translate-text', {
     onSuccess: (data: any) => {
       if (!editor) return;
       const { from, to } = editor.state.selection;
+      const newMarkdown = turndownService.turndown(data.text);
+
       if (from !== to) {
         editor.chain().focus().insertContentAt({ from, to }, data.text).run();
       } else {
         editor.chain().focus().setContent(data.text).run();
       }
+      setLocalContent(newMarkdown);
       toast({ title: "Translation Ready" });
       setActiveAiAction(null);
     },
@@ -247,12 +260,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       setActiveAiAction(null);
     }
   });
-
+  
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        table: false,
-      }),
+      StarterKit,
       Placeholder.configure({
         placeholder: 'Start writing or use AI...',
       }),
@@ -260,22 +271,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       BubbleMenuExtension.configure({
         element: document.querySelector('.menu') as HTMLElement,
         pluginKey: `bubbleMenu-${uniqueId}`,
-        pluginProps: {
-            attributes: {
-              class: 'bubble-menu',
-            },
-            handleDOMEvents: {
-              mousedown: (view, event) => {
-                const target = event.target as HTMLElement;
-                if (target.closest('.bubble-menu')) {
-                  event.preventDefault();
-                  view.focus();
-                  return true;
-                }
-                return false;
-              },
-            },
-          },
       }),
       Image,
       Dropcursor,
@@ -290,26 +285,20 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           return true;
         },
         onPaste: (currentEditor, files, htmlContent) => {
-          if (htmlContent) {
-            return false;
-          }
-          files.forEach(file => {
-            if (file.type.startsWith('image/')) {
-              handleFilePaste(currentEditor, file);
-            } else {
-              handleFileDrop(currentEditor, file)
-            }
-          });
+          if (htmlContent) return false;
+          files.forEach(file => handleFilePaste(currentEditor, file));
           return true;
         }
       }),
     ],
-    content: '',
+    content: marked.parse(content) as string,
     onUpdate: ({ editor }) => {
-      if (isUpdatingFromProp) return;
-      const html = editor.getHTML();
-      const markdown = turndownService.turndown(html);
-      onChange(markdown);
+        const markdown = turndownService.turndown(editor.getHTML());
+        setLocalContent(markdown);
+    },
+    onBlur: ({ editor }) => {
+        const markdown = turndownService.turndown(editor.getHTML());
+        onChange(markdown);
     },
     onSelectionUpdate: ({ editor }) => {
       setActiveEditor(editor);
@@ -321,6 +310,28 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     },
     immediatelyRender: false,
   });
+
+  useEffect(() => {
+    // This effect now listens to the debounced local content
+    // and calls the main onChange prop.
+    if (debouncedLocalContent !== content) {
+        onChange(debouncedLocalContent);
+    }
+  }, [debouncedLocalContent, onChange, content]);
+
+  useEffect(() => {
+    // This effect ensures that if the `content` prop changes from the parent,
+    // the local state and editor content are updated.
+    if (editor && !editor.isFocused) {
+        const newHtml = marked.parse(content) as string;
+        // Check if the content is actually different to avoid unnecessary updates
+        if (editor.getHTML() !== newHtml) {
+            editor.commands.setContent(newHtml, false);
+            setLocalContent(content);
+        }
+    }
+  }, [content, editor]);
+
 
   // A simple language detection function based on character ranges.
   const detectLanguage = (text: string): 'ar' | 'en' => {
@@ -336,7 +347,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     setActiveAiAction(action);
     const { from, to } = editor.state.selection;
     const selectedText = editor.state.doc.textBetween(from, to);
-    const textToProcess = selectedText || content;
+    const textToProcess = selectedText || localContent;
 
     if (action === 'translate') {
       const sourceLang = detectLanguage(textToProcess);
@@ -365,23 +376,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const handleReadAloudWrapper = () => {
     if (!editor) return;
     const { from, to } = editor.state.selection;
-    const textToRead = editor.state.doc.textBetween(from, to) || content;
+    const textToRead = editor.state.doc.textBetween(from, to) || localContent;
     speak(textToRead);
   }
-
-  useEffect(() => {
-    if (editor && debouncedContent !== undefined) {
-      const currentMarkdown = turndownService.turndown(editor.getHTML());
-      if (currentMarkdown !== debouncedContent) {
-        const newHtml = marked.parse(debouncedContent) as string;
-        setIsUpdatingFromProp(true);
-        editor.commands.setContent(newHtml, false);
-        setTimeout(() => setIsUpdatingFromProp(false), 100);
-      }
-    }
-  }, [debouncedContent, editor]);
-
-
+  
   return (
     <div className="relative">
       {editor && (
@@ -389,23 +387,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           editor={editor}
           tippyOptions={{ duration: 100, placement: 'top' }}
           pluginKey={`bubbleMenu-${uniqueId}`}
-          pluginProps={{
-            attributes: {
-              class: 'bubble-menu',
-            },
-            handleDOMEvents: {
-              mousedown: (view, event) => {
-                const target = event.target as HTMLElement;
-                // Prevent editor from losing focus if the click is inside the bubble menu
-                if (target.closest('.bubble-menu')) {
-                  event.preventDefault();
-                  view.focus();
-                  return true;
-                }
-                return false;
-              },
-            },
-          }}
         >
           {editor.isActive('table') ? (
             <div className="bg-background p-1 rounded-lg shadow-lg border flex gap-1">
