@@ -54,6 +54,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 import { useEditorStore } from '@/hooks/core/use-editor-store';
 import { handleFilePaste } from '@/lib/utils/paste-handler';
 import { handleFileDrop } from '@/lib/utils/drop-handler';
+import Placeholder from '@tiptap/extension-placeholder'
+
 
 interface SectionToolbarProps {
   onAiAction: (action: string, payload?: any) => void;
@@ -250,6 +252,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     extensions: [
       StarterKit.configure({
         table: false,
+      }),
+      Placeholder.configure({
+        placeholder: 'Start writing or use AI...',
       }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       BubbleMenuExtension.configure({
