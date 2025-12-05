@@ -29,7 +29,6 @@ function ReportSkeleton() {
         </div>
     );
 }
-
 function BottomNavBar({ activeView, setActiveView }: { activeView: 'generator' | 'result', setActiveView: (view: 'generator' | 'result') => void }) {
     return (
         <div className="fixed bottom-0 left-0 right-0 h-16 bg-background border-t p-2 flex items-center justify-around z-50 lg:hidden">
@@ -53,11 +52,11 @@ function BottomNavBar({ activeView, setActiveView }: { activeView: 'generator' |
     );
 }
 
-
 export default function ReportModeGenerator() {
     const { locale, t } = useLocalization();
     const isMobile = useMobile();
     const [activeMobileView, setActiveMobileView] = useState<'generator' | 'result'>('result');
+
 
     const panels = [
         {
@@ -92,35 +91,37 @@ export default function ReportModeGenerator() {
         },
     ];
 
-    const GeneratorPanel = () => (
-         <CollapsibleSidePanel
-                panels={panels}
-                defaultActiveKey="generate"
-                className="lg:col-span-4 xl:col-span-4"
-            />
-    )
-
-    const ResultsPanel = () => (
-         <div className="lg:col-span-8 xl:col-span-8 h-full">
-                <Suspense fallback={<ReportSkeleton />}>
-                    <ReportResults />
-                </Suspense>
-            </div>
-    )
-
 
     return (
+
+
         <div className="pb-16 lg:pb-0">
-             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
                 {isMobile ? (
                     <>
-                        {activeMobileView === 'generator' && <GeneratorPanel />}
-                        {activeMobileView === 'result' && <ResultsPanel />}
+                        {activeMobileView === 'generator' && <CollapsibleSidePanel
+                            panels={panels}
+                            defaultActiveKey="generate"
+                            className="lg:col-span-4 xl:col-span-4"
+                        />}
+                        {activeMobileView === 'result' && <div className="lg:col-span-8 xl:col-span-8 h-full">
+                            <Suspense fallback={<ReportSkeleton />}>
+                                <ReportResults />
+                            </Suspense>
+                        </div>}
                     </>
                 ) : (
                     <>
-                        <GeneratorPanel />
-                        <ResultsPanel />
+                        <CollapsibleSidePanel
+                            panels={panels}
+                            defaultActiveKey="generate"
+                            className="lg:col-span-4 xl:col-span-4"
+                        />
+                        <div className="lg:col-span-8 xl:col-span-8 h-full">
+                            <Suspense fallback={<ReportSkeleton />}>
+                                <ReportResults />
+                            </Suspense>
+                        </div>
                     </>
                 )}
             </div>
