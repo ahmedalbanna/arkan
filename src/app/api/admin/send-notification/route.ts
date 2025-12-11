@@ -22,10 +22,25 @@ export const POST = withAuth(async ({ request }) => {
 
     const { userId, title, body: notificationBody, link } = validation.data;
 
-    // Get the user's device token from Firestore
+    // Save notification to Realtime Database as well
+    const rtdb = admin.database();
+    const notificationRef = rtdb.ref(`notifications/${userId}`).push();
+    await notificationRef.set({
+      title,
+      description: notificationBody,
+      icon: 'bell', // A generic icon
+      isRead: false,
+      createdAt: new Date().toISOString(),
+      link: link || '/dashboard', // Default link if not provided
+    });
+
+
+    // Get the user's device token from Firestore to send a push notification
     const tokenDoc = await adminDb.collection('deviceTokens').doc(userId).get();
     if (!tokenDoc.exists) {
-      return handleApiError({ message: 'User device token not found. They may not have granted notification permissions.' }, 404);
+      // If there's no token, we just skip the push notification silently
+      // The notification is already saved in the database for the user to see later
+      return createApiResponse({ messageId: 'No device token, notification saved to DB.' }, 200);
     }
 
     const { token } = tokenDoc.data() as { token: string };

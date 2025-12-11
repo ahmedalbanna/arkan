@@ -153,3 +153,29 @@ export async function deleteUserApi(userId: string, token: string): Promise<{ me
   }
   return response.json();
 }
+
+interface SendNotificationVariables {
+  userId: string;
+  title: string;
+  body: string;
+  link?: string;
+}
+
+/**
+ * Sends a push notification to a specific user via the admin API.
+ * @param variables - The notification details.
+ * @param token - The admin user's authentication token.
+ * @returns A promise that resolves with a success message.
+ */
+export async function sendNotificationApi(variables: SendNotificationVariables, token: string): Promise<{ messageId: string }> {
+    const response = await fetch('/api/admin/send-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(variables),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to send notification.');
+    }
+    return response.json();
+}

@@ -7,7 +7,8 @@ import {
   deleteUserApi,
   fetchUserProfileApi,
   updateUserApi,
-  fetchUsersApi
+  fetchUsersApi,
+  sendNotificationApi,
 } from '@/services/api/userService';
 import { User, type UserProfile } from '@/lib/models';
 import { userKeys } from '@/lib/query-keys';
@@ -102,6 +103,7 @@ export function useUpdateUser() {
       return updateUserApi(variables.userId, variables.data, token);
     },
     onSuccess: (data) => {
+      toast({ title: 'Success', description: 'User profile has been successfully updated.' });
       // Invalidate both the list and the specific user's detail query
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
       queryClient.invalidateQueries({ queryKey: userKeys.profile(data.id) });
@@ -127,5 +129,35 @@ export function useDeleteUser() {
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
     },
     onError: (error) => handleErrorUtility(error, "Delete Failed"),
+  });
+}
+
+/**
+ * Mutation hook for sending a notification to a user.
+ * Requires admin privileges.
+ */
+export function useSendNotification() {
+  const { firebaseUser } = useAuth();
+  return useMutation({
+    mutationFn: async (variables: {
+      userId: string;
+      title: string;
+      body: string;
+      link?: string;
+    }) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return sendNotificationApi(variables, token);
+    },
+    onSuccess: () => {
+      toast({ title: 'Notification Sent', description: 'The user has been notified of the changes.' });
+    },
+    onError: (error: any) => {
+      let errorMessage = 'Failed to send notification.';
+      // We don't want to bother the admin with "token not found" errors, as they are common.
+      if (error?.message && !error.message.includes('token not found')) {
+        errorMessage = error.message;
+      }
+      toast({ title: 'Notification Error', description: errorMessage, variant: 'destructive' });
+    }
   });
 }
