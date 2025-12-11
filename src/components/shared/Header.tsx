@@ -89,6 +89,7 @@ export function Header() {
   const navLinks = [
     { href: '/', label: t('header.home'), icon: HomeIcon, auth: 'any' },
     { href: '/builder', label: t('header.generateDocs'), icon: SlidersHorizontal, auth: true },
+    { href: '/writing-tools', label: t('header.tools'), icon: Wrench, auth: true },
   ];
 
   const adminLinks = [

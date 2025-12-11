@@ -11,7 +11,6 @@ import { UploadManager } from '../file/UploadManager';
 import { GenerationTools } from './ReportGenerationTools';
 import { AIResearcherTool } from '../writing-tools/AIResearcherTool';
 import { PlantUMLGeneratorTool } from '../writing-tools/PlantUMLGeneratorTool';
-import WritingToolsPanel from '../writing-tools/WritingToolsPanel';
 import { useMobile } from '@/hooks';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils/cn';
@@ -82,12 +81,6 @@ export default function ReportModeGenerator() {
             title: t('builder.tabs.diagram'),
             icon: <GitGraph className="h-5 w-5" />,
             content: <PlantUMLGeneratorTool />,
-        },
-        {
-            key: 'writing-tools',
-            title: t('header.tools'),
-            icon: <PenSquare className="h-5 w-5" />,
-            content: <WritingToolsPanel />,
         },
     ];
 
