@@ -1,10 +1,9 @@
-
 'use client';
 
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, MessageSquare } from "lucide-react";
+import { Pencil, MessageSquare, Gift } from "lucide-react";
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { useQueryClient } from "@tanstack/react-query";
@@ -15,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/util/use-toast";
 import { useLocalization } from "@/context/LocalizationContext";
 import { User, type UserProperties } from '@/lib/models'; // Import User class and properties
+import { GiftCreditsDialog } from "./GiftCreditsDialog";
 
 interface UserTableRowProps {
     user: UserProperties; // Accept plain object
@@ -54,6 +54,7 @@ export function UserTableRow({ user: userProps }: UserTableRowProps) {
             <TableCell>{user.credits}</TableCell>
             <TableCell>{user.createdAt ? format(new Date(user.createdAt), 'd MMM yyyy') : 'N/A'}</TableCell>
             <TableCell className="text-right">
+               <GiftCreditsDialog user={user} />
                <Button variant="ghost" size="icon">
                   <MessageSquare className="h-4 w-4" />
                   <span className="sr-only">{t('manageUsers.chatWithUserSr')}</span>
