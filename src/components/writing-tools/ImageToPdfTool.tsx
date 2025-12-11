@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useImageToPdfLogic } from '@/hooks/writing-tools/use-image-to-pdf-logic';
-import { File, Loader2, UploadCloud, FilePdf, X } from 'lucide-react';
+import { FileText, Loader2, UploadCloud, X } from 'lucide-react';
 import Image from 'next/image';
 import { SortableImageItem } from './SortableImageItem';
 
@@ -85,7 +85,7 @@ export function ImageToPdfTool() {
               {isConverting ? (
                 <Loader2 className="me-2 h-4 w-4 animate-spin" />
               ) : (
-                <FilePdf className="me-2 h-4 w-4" />
+                <FileText className="me-2 h-4 w-4" />
               )}
               {isConverting ? t('writingTools.imageToPdf.convertingButton') : t('writingTools.imageToPdf.generateButton')}
             </Button>
