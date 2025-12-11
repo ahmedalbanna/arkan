@@ -89,7 +89,6 @@ export function Header() {
   const navLinks = [
     { href: '/', label: t('header.home'), icon: HomeIcon, auth: 'any' },
     { href: '/builder', label: t('header.generateDocs'), icon: SlidersHorizontal, auth: true },
-    { href: '/pricing', label: t('header.pricing'), icon: Gem, auth: 'any' },
   ];
 
   const adminLinks = [
