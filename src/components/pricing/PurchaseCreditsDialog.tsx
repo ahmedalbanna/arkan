@@ -19,7 +19,7 @@ import { Gem, ShoppingCart, ArrowLeft, Banknote, AlertCircle, Copy, Check, Uploa
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { fetchPublicSettings, submitPaymentProof } from '@/services';
 import type { PublicSettings, BankAccount } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Skeleton } from '../ui/skeleton';
 import { Label } from '../ui/label';
