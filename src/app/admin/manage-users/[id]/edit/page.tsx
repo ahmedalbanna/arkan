@@ -2,12 +2,14 @@
 'use client';
 
 import { useUserProfile } from '@/hooks';
-import { notFound } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
 import { UserCog } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect, use, lazy, Suspense } from 'react';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft } from 'lucide-react';
 
 // Dynamically import the EditUserForm
 const EditUserForm = lazy(() => import('@/components/admin/EditUserForm'));
@@ -32,13 +34,16 @@ function EditUserPageSkeleton() {
 
 function EditUserPageContent({ userId }: { userId: string }) {
     const { data: user, isLoading, isError } = useUserProfile(userId);
-    const { firebaseUser, isLoading: authIsLoading } = useAuth();
+    const { userProfile: adminProfile, isLoading: authIsLoading } = useAuth();
+    const router = useRouter();
+
 
     useEffect(() => {
-        if (!isLoading && !authIsLoading && user?.id !== firebaseUser?.uid && user?.role !== 'admin') {
-          // notFound();
+        // Only admins can access this page.
+        if (!authIsLoading && adminProfile?.role !== 'admin') {
+          notFound();
         }
-    }, [user, firebaseUser, isLoading, authIsLoading]);
+    }, [adminProfile, authIsLoading]);
 
     if (isLoading || authIsLoading) {
       return <EditUserPageSkeleton />;
@@ -50,6 +55,10 @@ function EditUserPageContent({ userId }: { userId: string }) {
 
     return (
         <div className="container mx-auto max-w-2xl px-4 py-12">
+            <Button variant="outline" onClick={() => router.back()} className="mb-8">
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                Back to User Management
+            </Button>
             <HeaderSection userName={user.name} />
             <Suspense fallback={<EditUserPageSkeleton />}>
                 <EditUserForm user={user} />
@@ -58,7 +67,7 @@ function EditUserPageContent({ userId }: { userId: string }) {
     );
 }
 
-function HeaderSection({ userName }: { userName: string }) {
+function HeaderSection({ userName }: { userName: string | undefined }) {
   const { t } = useLocalization();
   return (
     <div className="text-center mb-12">
@@ -67,7 +76,7 @@ function HeaderSection({ userName }: { userName: string }) {
         {t('editUser.pageTitle')}
       </h1>
       <p className="text-lg text-muted-foreground mt-2">
-        {t('editUser.pageSubtitle').replace('{userName}', userName)}
+        {t('editUser.pageSubtitle').replace('{userName}', userName || 'user')}
       </p>
     </div>
   )
