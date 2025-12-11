@@ -212,7 +212,7 @@ export function Header() {
                           <span>{userProfile.credits} {isClient && t('header.credits')}</span>
                         </Button>
                       </TooltipTrigger>
-                      {hasNoCredits && (
+                       {hasNoCredits && (
                         <TooltipContent>
                           <p>You have run out of credits. Please purchase more.</p>
                         </TooltipContent>
