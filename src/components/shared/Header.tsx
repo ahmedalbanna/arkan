@@ -22,6 +22,7 @@ import { useLogout } from '@/hooks/auth/use-auth-mutations';
 import type { Notification } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 import { useEffect, useState } from 'react';
+import { PurchaseCreditsDialog } from '../pricing/PurchaseCreditsDialog';
 
 
 function NotificationIcon({ icon }: { icon: Notification['icon'] }) {
@@ -196,30 +197,32 @@ export function Header() {
             </div>
           ) : firebaseUser && userProfile ? (
             <>
-              <TooltipProvider>
-                <Tooltip open={hasNoCredits ? undefined : false}>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      asChild
-                      className={cn(
-                        'flex items-center gap-2 text-sm font-semibold text-primary',
-                        hasNoCredits && 'border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive animate-pulse'
+              <PurchaseCreditsDialog
+                trigger={
+                  <TooltipProvider>
+                    <Tooltip open={hasNoCredits ? undefined : false}>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            'flex items-center gap-2 text-sm font-semibold text-primary',
+                            hasNoCredits && 'border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive animate-pulse'
+                          )}
+                        >
+                          <Gem className="h-4 w-4" />
+                          <span>{userProfile.credits} {isClient && t('header.credits')}</span>
+                        </Button>
+                      </TooltipTrigger>
+                      {hasNoCredits && (
+                        <TooltipContent>
+                          <p>You have run out of credits. Please purchase more.</p>
+                        </TooltipContent>
                       )}
-                    >
-                      <Link href="/pricing">
-                        <Gem className="h-4 w-4" />
-                        <span>{userProfile.credits} {isClient && t('header.credits')}</span>
-                      </Link>
-                    </Button>
-                  </TooltipTrigger>
-                  {hasNoCredits && (
-                    <TooltipContent>
-                      <p>You have run out of credits. Please purchase more.</p>
-                    </TooltipContent>
-                  )}
-                </Tooltip>
-              </TooltipProvider>
+                    </Tooltip>
+                  </TooltipProvider>
+                }
+              />
+
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
