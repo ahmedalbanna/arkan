@@ -16,6 +16,7 @@ import {
   FileQuestion,
   Fingerprint,
   GitGraph,
+  Images,
   Languages,
   LayoutTemplate,
   Lightbulb,
@@ -60,6 +61,7 @@ export default function WritingToolsPage() {
     { name: t('writingTools.assignmentsSolver.cardTitle'), icon: BookCheck, href: '/writing-tools/assignments-solver' },
     { name: t('writingTools.projectBlueprint.cardTitle'), icon: Building2, href: '/writing-tools/project-blueprint' },
     { name: t('writingTools.uiDescription.cardTitle'), icon: LayoutTemplate, href: '/writing-tools/generate-ui-description' },
+    { name: t('writingTools.imageToPdf.cardTitle'), icon: Images, href: '/writing-tools/image-to-pdf' },
   ];
 
   return (
