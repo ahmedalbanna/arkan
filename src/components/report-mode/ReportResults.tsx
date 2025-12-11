@@ -20,6 +20,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { ChapterView } from '@/components/report-mode/ChapterView';
 import { MenuBar } from './MenuBar';
+import RichTextEditor from './RichTextEditor';
 
 
 export const ReportResults = () => {
@@ -37,6 +38,10 @@ export const ReportResults = () => {
 
   const handleSectionUpdate = (key: SectionName, value: string) => {
     updateProject(p => p.updateSectionContent(key, value));
+  };
+  
+  const handleProposalUpdate = (value: string) => {
+    updateProject(p => { p.proposalContent = value; });
   };
 
   const handleSectionTitleUpdate = (key: SectionName, newTitle: string) => {
@@ -93,7 +98,7 @@ export const ReportResults = () => {
   }
 
   const renderContent = () => {
-    if (totalPages === 0 || !currentChapter) {
+    if (!project?.hasContent()) {
       return (
         <div className="flex items-center justify-center h-full min-h-[400px]">
           <div className="text-center text-muted-foreground p-8 max-w-md">
@@ -102,7 +107,7 @@ export const ReportResults = () => {
               Your Report is Empty
             </h3>
             <p className="text-sm mt-1 mb-6">
-             Create your first chapter to get started. You can also generate a Table of Contents from the tools panel.
+             Start by generating a proposal, or create your first chapter to get started.
             </p>
             <div className="flex w-full max-w-sm mx-auto items-center space-x-2">
                <Input 
@@ -118,6 +123,45 @@ export const ReportResults = () => {
           </div>
         </div>
       );
+    }
+    
+    // Display proposal content if it exists and there are no chapters yet
+    if (project.proposalContent && totalPages === 0) {
+       return (
+        <A4Page title="Project Proposal">
+           <RichTextEditor
+             content={project.proposalContent}
+             onChange={handleProposalUpdate}
+           />
+        </A4Page>
+       )
+    }
+
+    if (totalPages === 0 || !currentChapter) {
+        return (
+             <div className="flex items-center justify-center h-full min-h-[400px]">
+              <div className="text-center text-muted-foreground p-8 max-w-md">
+                <FileText className="w-16 h-16 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold">
+                  No Chapters to Display
+                </h3>
+                 <p className="text-sm mt-1 mb-6">
+                 Create your first chapter to get started. You can also generate a Table of Contents from the tools panel.
+                </p>
+                <div className="flex w-full max-w-sm mx-auto items-center space-x-2">
+                   <Input 
+                    value={newChapterTitle} 
+                    onChange={(e) => setNewChapterTitle(e.target.value)}
+                    placeholder="Enter chapter title..."
+                    onKeyDown={(e) => e.key === 'Enter' && handleCreateFirstChapter()}
+                  />
+                  <Button onClick={handleCreateFirstChapter}>
+                    <PlusCircle className="me-2 h-4 w-4" /> Create Chapter
+                  </Button>
+                </div>
+              </div>
+            </div>
+        )
     }
 
     return (

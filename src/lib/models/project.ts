@@ -13,6 +13,7 @@ export interface ProjectProperties {
   updatedAt?: string;
   name?: string | undefined;
   projectDescription?: string | undefined;
+  proposalContent?: string | undefined; // Added for the generated proposal
   chapters?: (Chapter | ChapterProperties)[];
   externalContext?: ExternalContext[] | undefined;
 }
@@ -27,6 +28,7 @@ export class Project implements Required<ProjectProperties> {
 
   public name: string;
   public projectDescription: string;
+  public proposalContent: string; // Added field
   public chapters: Chapter[];
   public externalContext: ExternalContext[];
 
@@ -38,6 +40,7 @@ export class Project implements Required<ProjectProperties> {
     this.updatedAt = props.updatedAt || new Date().toISOString();
     this.name = props.name || 'Untitled Project';
     this.projectDescription = props.projectDescription || 'Simple Project';
+    this.proposalContent = props.proposalContent || ''; // Initialize new field
     // Ensure chapters are instances of the Chapter class for consistent API
     this.chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c as ChapterProperties));
     this.externalContext = props.externalContext || [];
@@ -54,7 +57,7 @@ export class Project implements Required<ProjectProperties> {
   }
 
   public hasContent(): boolean {
-    const hasBasicInfo = !!this.name || !!this.projectDescription;
+    const hasBasicInfo = !!this.name || !!this.projectDescription || !!this.proposalContent;
     const hasChaptersWithContent = this.chapters.some(c => c.title || c.sections.length > 0);
     const hasExternalContext = this.externalContext.length > 0;
     return hasBasicInfo || hasChaptersWithContent || hasExternalContext;
@@ -72,6 +75,7 @@ export class Project implements Required<ProjectProperties> {
       updatedAt: this.updatedAt,
       name: this.name,
       projectDescription: this.projectDescription,
+      proposalContent: this.proposalContent, // Serialize new field
       chapters: this.chapters.map(c => c.toJSON()), // Serialize chapters
       externalContext: this.externalContext,
     };

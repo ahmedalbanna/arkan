@@ -26,10 +26,9 @@ export default function ProposalGenerator() {
 
   const mutation = useWritingTool('/api/generate/proposal', {
     onSuccess: (data: any) => {
-        // Here, we update the project description with the generated proposal.
-        // The builder is designed to work from the `projectDescription` field.
+        // Update the dedicated proposalContent field in the project state
         updateProject(p => {
-            p.projectDescription = data.proposal;
+            p.proposalContent = data.proposal;
         });
         toast({ title: t('builder.toasts.generationSuccessTitle'), description: t('builder.toasts.generationSuccessDesc', { item: 'Proposal' }) });
     },

@@ -39,10 +39,6 @@ interface BuilderState {
 
 const createNewTemporaryProject = (): Project => {
     const project = new Project({});
-    const chapterId = project.addChapter('Introduction');
-    if (chapterId) {
-        project.addSectionToChapter(chapterId, 'Overview');
-    }
     return project;
 };
 
