@@ -198,27 +198,16 @@ export function Header() {
             <>
               <PurchaseCreditsDialog
                 trigger={
-                  <TooltipProvider>
-                    <Tooltip open={hasNoCredits ? undefined : false}>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            'flex items-center gap-2 text-sm font-semibold text-primary',
-                            hasNoCredits && 'border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive animate-pulse'
-                          )}
-                        >
-                          <Gem className="h-4 w-4" />
-                          <span>{userProfile.credits} {isClient && t('header.credits')}</span>
-                        </Button>
-                      </TooltipTrigger>
-                       {hasNoCredits && (
-                        <TooltipContent>
-                          <p>You have run out of credits. Please purchase more.</p>
-                        </TooltipContent>
-                      )}
-                    </Tooltip>
-                  </TooltipProvider>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      'flex items-center gap-2 text-sm font-semibold text-primary',
+                      hasNoCredits && 'border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive animate-pulse'
+                    )}
+                  >
+                    <Gem className="h-4 w-4" />
+                    <span>{userProfile.credits} {isClient && t('header.credits')}</span>
+                  </Button>
                 }
               />
 
