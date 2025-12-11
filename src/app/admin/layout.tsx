@@ -56,7 +56,6 @@ const navConfig: NavLink[] = [
     { href: '/admin/manage-users', labelKey: 'header.manageUsers', icon: Users },
     { href: '/admin/manage-payments', labelKey: 'header.managePayments', icon: CreditCard },
     { href: '/admin/manage-agents', labelKey: 'header.agentManager', icon: Bot },
-    { href: '/admin/writing-tools', labelKey: 'header.tools', icon: Wrench },
     { href: '/admin/manage-sections', labelKey: 'header.manageSections', icon: PencilRuler },
     { href: '/admin/manage-features', labelKey: 'header.manageFeatures', icon: SlidersHorizontal },
     { href: '/admin/manage-generations', labelKey: 'header.activityHistory', icon: History },
