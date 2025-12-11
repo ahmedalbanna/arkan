@@ -15,7 +15,6 @@ import WritingToolsPanel from '../writing-tools/WritingToolsPanel';
 import { useMobile } from '@/hooks';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils/cn';
-import ProposalGenerator from './ProposalGenerator';
 
 
 function ReportSkeleton() {
@@ -61,12 +60,6 @@ export default function ReportModeGenerator() {
 
     const panels = [
         {
-            key: 'proposal',
-            title: t('builder.tabs.proposal'),
-            icon: <FileInput className="h-5 w-5" />,
-            content: <ProposalGenerator />,
-        },
-        {
             key: 'files',
             title: t('builder.tabs.files'),
             icon: <UploadCloud className="h-5 w-5" />,
@@ -108,7 +101,7 @@ export default function ReportModeGenerator() {
                     <>
                         {activeMobileView === 'generator' && <CollapsibleSidePanel
                             panels={panels}
-                            defaultActiveKey="proposal"
+                            defaultActiveKey="files"
                             className="lg:col-span-4 xl:col-span-4"
                         />}
                         {activeMobileView === 'result' && <div className="lg:col-span-8 xl:col-span-8 h-full">
@@ -121,7 +114,7 @@ export default function ReportModeGenerator() {
                     <>
                         <CollapsibleSidePanel
                             panels={panels}
-                            defaultActiveKey="proposal"
+                            defaultActiveKey="files"
                             className="lg:col-span-4 xl:col-span-4"
                         />
                         <div className="lg:col-span-8 xl:col-span-8 h-full">

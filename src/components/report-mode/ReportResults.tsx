@@ -21,13 +21,11 @@ import { Input } from '../ui/input';
 import { ChapterView } from '@/components/report-mode/ChapterView';
 import { MenuBar } from './MenuBar';
 import RichTextEditor from './RichTextEditor';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export const ReportResults = () => {
   const { t } = useLocalization();
   const { project, updateProject } = useBuilderStore();
   const [newChapterTitle, setNewChapterTitle] = useState('');
-  const [activeTab, setActiveTab] = useState<'proposal' | 'report'>('report');
 
 
   const {
@@ -40,10 +38,6 @@ export const ReportResults = () => {
 
   const handleSectionUpdate = (key: SectionName, value: string) => {
     updateProject(p => p.updateSectionContent(key, value));
-  };
-  
-  const handleProposalUpdate = (value: string) => {
-    updateProject(p => { p.proposalContent = value; });
   };
 
   const handleSectionTitleUpdate = (key: SectionName, newTitle: string) => {
@@ -115,20 +109,8 @@ export const ReportResults = () => {
         </div>
       );
     }
-    
-    // Display proposal content if it exists and there are no chapters yet
-    if (project.proposalContent && totalPages === 0 && activeTab === 'proposal') {
-       return (
-        <A4Page title="Project Proposal">
-           <RichTextEditor
-             content={project.proposalContent}
-             onChange={handleProposalUpdate}
-           />
-        </A4Page>
-       )
-    }
 
-    if (totalPages === 0 && activeTab === 'report') {
+    if (totalPages === 0) {
         return (
              <div className="flex items-center justify-center h-full min-h-[400px]">
               <div className="text-center text-muted-foreground p-8 max-w-md">
@@ -156,41 +138,29 @@ export const ReportResults = () => {
     }
 
     return (
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'proposal' | 'report')} className="h-full flex flex-col">
-            <TabsContent value="proposal" className="flex-grow overflow-hidden">
-                 <A4Page title="Project Proposal">
-                    <RichTextEditor
-                        content={project.proposalContent}
-                        onChange={handleProposalUpdate}
-                    />
-                </A4Page>
-            </TabsContent>
-            <TabsContent value="report" className="flex-grow overflow-hidden">
-                {currentChapter ? (
-                     <A4Page>
-                        <ChapterView
-                        chapter={currentChapter}
-                        onUpdateSection={handleSectionUpdate}
-                        onUpdateSectionTitle={handleSectionTitleUpdate}
-                        onUpdateChapterTitle={handleChapterTitleUpdate}
-                        onAddSection={handleAddSectionAtIndex}
-                        onMoveSectionUp={handleMoveSectionUp}
-                        onMoveSectionDown={handleMoveSectionDown}
-                        onDeleteSection={handleDeleteSection}
-                        onDeleteChapter={handleDeleteChapter}
-                        />
-                    </A4Page>
-                ): (
-                     <div className="flex items-center justify-center h-full min-h-[400px]">
-                        <div className="text-center text-muted-foreground p-8 max-w-md">
-                            <FileText className="w-16 h-16 mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold">No Chapters to Display</h3>
-                            <p className="text-sm mt-1 mb-6">Create your first chapter to get started.</p>
-                        </div>
-                    </div>
-                )}
-            </TabsContent>
-        </Tabs>
+        currentChapter ? (
+            <A4Page>
+                <ChapterView
+                chapter={currentChapter}
+                onUpdateSection={handleSectionUpdate}
+                onUpdateSectionTitle={handleSectionTitleUpdate}
+                onUpdateChapterTitle={handleChapterTitleUpdate}
+                onAddSection={handleAddSectionAtIndex}
+                onMoveSectionUp={handleMoveSectionUp}
+                onMoveSectionDown={handleMoveSectionDown}
+                onDeleteSection={handleDeleteSection}
+                onDeleteChapter={handleDeleteChapter}
+                />
+            </A4Page>
+        ) : (
+            <div className="flex items-center justify-center h-full min-h-[400px]">
+                <div className="text-center text-muted-foreground p-8 max-w-md">
+                    <FileText className="w-16 h-16 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold">No Chapters to Display</h3>
+                    <p className="text-sm mt-1 mb-6">Create your first chapter to get started.</p>
+                </div>
+            </div>
+        )
     );
   };
 
@@ -206,18 +176,10 @@ export const ReportResults = () => {
                     {t('builder.reportGenerator.resultsDesc')}
                     </CardDescription>
                 </div>
-                 {project?.hasContent() && (
-                    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'proposal' | 'report')}>
-                        <TabsList>
-                            <TabsTrigger value="proposal" disabled={!project.proposalContent}>Proposal</TabsTrigger>
-                            <TabsTrigger value="report" disabled={totalPages === 0}>Report</TabsTrigger>
-                        </TabsList>
-                    </Tabs>
-                )}
             </div>
         </CardHeader>
         
-        {activeTab === 'report' && totalPages > 1 && (
+        {totalPages > 1 && (
             <div className="flex w-full justify-center items-center p-2 border-y bg-background">
                 <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost">
                     <ChevronLeft className="h-4 w-4 mr-2" />
