@@ -1,5 +1,4 @@
 
-
 import { object, z } from 'zod';
 import {
     CitationStyleSchema,
@@ -774,4 +773,15 @@ export const GenerateUIDescriptionOutputSchema = z.object({
 });
 export type GenerateUIDescriptionOutput = z.infer<typeof GenerateUIDescriptionOutputSchema>;
 
+// generate-proposal.ts
+export const GenerateProposalInputSchema = z.object({
+    mainSubject: z.string().describe('The core idea or subject of the project.'),
+    templateId: z.string().optional().describe('The ID of a proposal template to use.'),
+    guidelines: z.array(z.string()).optional().describe('A list of specific guidelines for the AI to follow.'),
+});
+export type GenerateProposalInput = z.infer<typeof GenerateProposalInputSchema>;
 
+export const GenerateProposalOutputSchema = z.object({
+    proposal: z.string().describe('The fully generated project proposal content, formatted as markdown.'),
+});
+export type GenerateProposalOutput = z.infer<typeof GenerateProposalOutputSchema>;

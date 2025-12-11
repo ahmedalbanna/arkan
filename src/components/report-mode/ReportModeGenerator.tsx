@@ -2,7 +2,7 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { BookOpenText, GitGraph, Search, UploadCloud, PenSquare, Edit } from 'lucide-react';
+import { BookOpenText, GitGraph, Search, UploadCloud, PenSquare, Edit, FileInput } from 'lucide-react';
 import { Suspense, useState } from 'react';
 import { Skeleton } from '../ui/skeleton';
 import { ReportResults } from './ReportResults';
@@ -15,6 +15,7 @@ import WritingToolsPanel from '../writing-tools/WritingToolsPanel';
 import { useMobile } from '@/hooks';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils/cn';
+import ProposalGenerator from './ProposalGenerator';
 
 
 function ReportSkeleton() {
@@ -60,8 +61,14 @@ export default function ReportModeGenerator() {
 
     const panels = [
         {
+            key: 'proposal',
+            title: t('builder.tabs.proposal'),
+            icon: <FileInput className="h-5 w-5" />,
+            content: <ProposalGenerator />,
+        },
+        {
             key: 'files',
-            title: 'Contextual',
+            title: t('builder.tabs.files'),
             icon: <UploadCloud className="h-5 w-5" />,
             content: <UploadManager />,
         },
@@ -73,19 +80,19 @@ export default function ReportModeGenerator() {
         },
         {
             key: 'research',
-            title: 'AI Researcher',
+            title: t('writingTools.aiResearcher.pageTitle'),
             icon: <Search className="h-5 w-5" />,
             content: <AIResearcherTool />,
         },
         {
             key: 'diagram',
-            title: 'UML Diagrams',
+            title: t('builder.tabs.diagram'),
             icon: <GitGraph className="h-5 w-5" />,
             content: <PlantUMLGeneratorTool />,
         },
         {
             key: 'writing-tools',
-            title: 'Writing Tools',
+            title: t('header.tools'),
             icon: <PenSquare className="h-5 w-5" />,
             content: <WritingToolsPanel />,
         },
@@ -101,7 +108,7 @@ export default function ReportModeGenerator() {
                     <>
                         {activeMobileView === 'generator' && <CollapsibleSidePanel
                             panels={panels}
-                            defaultActiveKey="generate"
+                            defaultActiveKey="proposal"
                             className="lg:col-span-4 xl:col-span-4"
                         />}
                         {activeMobileView === 'result' && <div className="lg:col-span-8 xl:col-span-8 h-full">
@@ -114,7 +121,7 @@ export default function ReportModeGenerator() {
                     <>
                         <CollapsibleSidePanel
                             panels={panels}
-                            defaultActiveKey="generate"
+                            defaultActiveKey="proposal"
                             className="lg:col-span-4 xl:col-span-4"
                         />
                         <div className="lg:col-span-8 xl:col-span-8 h-full">

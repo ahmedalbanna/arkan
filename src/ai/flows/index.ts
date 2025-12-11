@@ -17,6 +17,7 @@ export * from './generate-diagrams';
 export * from './generate-ideas';
 export * from './generate-image';
 export * from './generate-plantuml';
+export * from './generate-proposal';
 export * from './generate-quiz';
 export * from './generate-report-section';
 export * from './generate-session-plan';
