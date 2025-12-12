@@ -29,6 +29,7 @@ export * from './data/use-sections';
 export * from './data/use-templates';
 export * from './data/use-transactions';
 export * from './data/use-users';
+export * from './data/use-agent-categories';
 
 
 // Writing Tools Logic Hooks
@@ -60,4 +61,3 @@ export * from './util/use-mobile';
 export * from './util/use-sound';
 export * from './util/use-toast';
 export * from './util/useExport';
-
