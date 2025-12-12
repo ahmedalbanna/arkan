@@ -2,7 +2,6 @@
 'use client';
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import type { AgentProperties } from '@/lib/models';
 import { fetchAgentsApi, createAgentApi, updateAgentApi, deleteAgentApi } from '@/services/api/agentService';
 import { useAuth } from '@/context/AuthContext';
@@ -17,26 +16,21 @@ type ResponseMap = Record<string, Record<string, AgentResponse[]>>;
 interface AgentState {
   agents: AgentProperties[];
   selectedAgent: AgentProperties | null;
-  selectedCommandId: string | null; // This might be deprecated if commands are just guidelines
   responses: ResponseMap;
   isLoading: boolean;
   error: string | null;
   fetchAgents: (token: string) => Promise<void>;
   selectAgent: (agentId: string | null) => void;
-  setSelectedCommandId: (commandId: string | null) => void;
   setResponse: (agentId: string, commandId: string, response: AgentResponse) => void;
   clearResponses: (agentId: string, commandId?: string) => void;
-  createAgent: (data: Omit<AgentProperties, 'id'>, token: string) => Promise<void>;
-  updateAgent: (id: string, data: Partial<AgentProperties>, token: string) => Promise<void>;
-  deleteAgent: (id: string, token: string) => Promise<void>;
+  addAgent: (agent: AgentProperties) => void;
+  updateAgentInStore: (agent: AgentProperties) => void;
+  removeAgentFromStore: (agentId: string) => void;
 }
 
-const useAgentStore = create<AgentState>()(
-  persist(
-    (set, get) => ({
+const useAgentStore = create<AgentState>((set, get) => ({
       agents: [],
       selectedAgent: null,
-      selectedCommandId: null,
       responses: {},
       isLoading: true,
       error: null,
@@ -53,11 +47,7 @@ const useAgentStore = create<AgentState>()(
 
       selectAgent: (agentId) => {
         const agent = get().agents.find(a => a.id === agentId);
-        set({ selectedAgent: agent || null, selectedCommandId: null });
-      },
-
-      setSelectedCommandId: (commandId) => {
-        set({ selectedCommandId: commandId });
+        set({ selectedAgent: agent || null });
       },
 
       setResponse: (agentId, commandId, response) => {
@@ -84,36 +74,18 @@ const useAgentStore = create<AgentState>()(
         });
       },
       
-      createAgent: async (data, token) => {
-          const newAgent = await createAgentApi(data, token);
-          set(state => ({ agents: [...state.agents, newAgent] }));
-      },
+      addAgent: (agent) => set(state => ({ agents: [...state.agents, agent] })),
 
-      updateAgent: async (id, data, token) => {
-          const updatedAgent = await updateAgentApi(id, data, token);
-          set(state => ({
-              agents: state.agents.map(a => a.id === id ? updatedAgent : a),
-              selectedAgent: state.selectedAgent?.id === id ? updatedAgent : state.selectedAgent
-          }));
-      },
+      updateAgentInStore: (updatedAgent) => set(state => ({
+        agents: state.agents.map(a => a.id === updatedAgent.id ? updatedAgent : a),
+        selectedAgent: state.selectedAgent?.id === updatedAgent.id ? updatedAgent : state.selectedAgent
+      })),
 
-      deleteAgent: async (id, token) => {
-          await deleteAgentApi(id, token);
-          set(state => ({
-              agents: state.agents.filter(a => a.id !== id),
-              selectedAgent: state.selectedAgent?.id === id ? null : state.selectedAgent
-          }));
-      },
-    }),
-    {
-      name: 'agent-store',
-      storage: createJSONStorage(() => localStorage),
-      partialize: state => ({
-        selectedAgent: state.selectedAgent,
-        selectedCommandId: state.selectedCommandId,
-      }),
-    }
-  )
+      removeAgentFromStore: (agentId) => set(state => ({
+        agents: state.agents.filter(a => a.id !== agentId),
+        selectedAgent: state.selectedAgent?.id === agentId ? null : state.selectedAgent
+      })),
+    })
 );
 
 export function useAgentManager() {
@@ -127,21 +99,25 @@ export function useAgentManager() {
 
     const createAgent = async (data: Omit<AgentProperties, 'id'>) => {
         const token = await getToken();
-        await store.createAgent(data, token);
+        const newAgent = await createAgentApi(data as any, token);
+        store.addAgent(newAgent);
+        return newAgent;
     };
 
     const updateAgent = async (id: string, data: Partial<AgentProperties>) => {
         const token = await getToken();
-        await store.updateAgent(id, data, token);
+        const updatedAgent = await updateAgentApi(id, data, token);
+        store.updateAgentInStore(updatedAgent);
+        return updatedAgent;
     };
 
     const deleteAgent = async (id: string) => {
         const token = await getToken();
-        await store.deleteAgent(id, token);
+        await deleteAgentApi(id, token);
+        store.removeAgentFromStore(id);
     };
     
-    const fetchAgents = async () => {
-        const token = await getToken();
+    const fetchAgents = async (token: string) => {
         await store.fetchAgents(token);
     };
 
