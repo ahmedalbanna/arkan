@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -46,7 +45,7 @@ export function ExportDialog() {
     return project.chapters.filter(chapter => chapter.sections.some(s => s.content && s.content.trim()));
   }, [project?.chapters]);
 
-  const handleSelectAll = (checked: boolean) => {
+  function handleSelectAll(checked: boolean) {
     const newSelection: Record<string, boolean> = {};
     if (checked) {
       availableChapters.forEach(chapter => {
@@ -58,9 +57,9 @@ export function ExportDialog() {
       });
     }
     setSelectedSections(newSelection);
-  };
+  }
 
-  const handleChapterToggle = (chapterId: string, checked: boolean) => {
+  function handleChapterToggle(chapterId: string, checked: boolean) {
     const chapter = availableChapters.find(c => c.id === chapterId);
     if (!chapter) return;
 
@@ -71,13 +70,13 @@ export function ExportDialog() {
       }
     });
     setSelectedSections(newSelection);
-  };
+  }
 
-  const handleSectionToggle = (sectionId: string, checked: boolean) => {
+  function handleSectionToggle(sectionId: string, checked: boolean) {
     setSelectedSections(prev => ({ ...prev, [sectionId]: checked }));
-  };
+  }
 
-  const handleExportClick = async (format: 'docx' | 'pptx') => {
+  async function handleExportClick(format: 'docx' | 'pptx') {
     if (!project) return;
     const selectedIds = Object.keys(selectedSections).filter(key => selectedSections[key]);
     const sectionsToExport = project?.sections.filter(s => selectedIds.includes(s.id)) || [];

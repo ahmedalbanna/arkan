@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,7 @@ export function DownloadProjectButton() {
     // Use the new hasContent method from the Project model
     const hasContent = project?.hasContent() ?? false;
 
-    const handleDownload = () => {
+    function handleDownload() {
         if (!project) return;
         const projectData = JSON.stringify(project.toStateObject(), null, 2);
         const blob = new Blob([projectData], { type: 'application/json' });
@@ -36,7 +35,7 @@ export function DownloadProjectButton() {
         a.download = `${fileName}.arkan`;
         a.click();
         URL.revokeObjectURL(url);
-    };
+    }
 
     return (
         <TooltipProvider>

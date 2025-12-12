@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -47,11 +46,11 @@ export function BrowseProjectsDialog() {
         );
     }, [projects, searchQuery]);
 
-    const handleLoadProject = (project: any) => {
+    function handleLoadProject(project: any) {
         loadProject(project.toStateObject());
         setIsOpen(false);
         router.push('/builder');
-    };
+    }
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>

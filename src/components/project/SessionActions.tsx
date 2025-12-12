@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Download, Loader2, Save, Search, Trash2, Upload } from 'lucide-react';
+import { Loader2, Save, Trash2, Upload } from 'lucide-react';
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useSaveProject } from '@/hooks';
@@ -17,7 +16,7 @@ import { DownloadProjectButton } from './DownloadProjectButton';
 import { ExportDialog } from './ExportDialog';
 import { BrowseProjectsDialog } from './BrowseProjectsDialog'; // Import the new component
 
-export const SessionActions = () => {
+export function SessionActions() {
     const { t } = useLocalization();
     const router = useRouter();
     const {
@@ -30,11 +29,9 @@ export const SessionActions = () => {
 
     const { saveProject, isSaving } = useSaveProject();
 
-    const handleSave = () => {
+    function handleSave() {
         saveProject();
-    };
-
-    const isBusy = isSaving;
+    }
 
     return (
         <TooltipProvider>
@@ -70,7 +67,7 @@ export const SessionActions = () => {
                     variant="default"
                     size="icon"
                     onClick={handleSave}
-                    disabled={!hasUnsavedChanges || isBusy}
+                    disabled={!hasUnsavedChanges || isSaving}
                     className="h-8 w-8 md:w-auto md:px-3"
                 >
                     {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
@@ -100,4 +97,4 @@ export const SessionActions = () => {
             </div>
         </TooltipProvider>
     );
-};
+}
