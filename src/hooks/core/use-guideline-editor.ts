@@ -1,15 +1,14 @@
-
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { useEffect, useMemo, useState } from 'react';
 import { useBuilderStore } from './useBuilderStore';
-import { useAgentStore } from '../use-agent-store';
+import { useAgentManager } from '../use-agent-store';
 
 export function useGuidelineEditor(itemKey: string) {
     const { t } = useLocalization();
     const { project, updateProject } = useBuilderStore();
-    const { agents } = useAgentStore();
+    const { agents } = useAgentManager();
 
     const section = useMemo(() => project?.getSection(itemKey), [project, itemKey]);
 
