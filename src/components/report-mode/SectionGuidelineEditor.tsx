@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useAgentStore } from '@/hooks/use-agent-store';
+import { useAgentManager } from '@/hooks/use-agent-store';
 import { useFormContext } from 'react-hook-form';
 
 import { Combobox } from '@/components/ui/combobox';
@@ -34,7 +34,7 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
         selectedAgentId,
         selectedCommandId,
     } = useGuidelineEditor(itemKey);
-    const { agents, isLoading: isLoadingAgents } = useAgentStore();
+    const { agents, isLoading: isLoadingAgents } = useAgentManager();
     const [newGuideline, setNewGuideline] = useState('');
 
     const selectedAgent = agents.find(a => a.id === selectedAgentId);
