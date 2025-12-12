@@ -1,4 +1,5 @@
 
+
 export * from './api/adminService';
 export * from './api/analyticsService';
 export * from './api/authService';
@@ -18,8 +19,8 @@ export * from './api/templateService';
 export * from './api/transactionService';
 export * from './api/userService';
 export * from './api/writingToolsService';
+export * from './api/agentService';
 
 export * from './credit-service';
 export * from './generation-service';
 export * from './local-project-service';
-

@@ -1,15 +1,17 @@
 
 'use client';
 
+import { useEffect } from 'react';
 import AgentPlayground from '@/components/agent/AgentPlayground';
 import { AgentList } from '@/components/sidebar/AgentList';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { useAgentStore } from '@/hooks/use-agent-store';
+import { useAgentManager } from '@/hooks/use-agent-store';
 import { Bot, RefreshCw, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ManageAgentsPage() {
     const { t } = useLocalization();
@@ -18,8 +20,15 @@ export default function ManageAgentsPage() {
         selectedAgent, 
         isLoading, 
         error,
-        loadInitialAgents,
-    } = useAgentStore();
+        fetchAgents,
+    } = useAgentManager();
+    const { firebaseUser, isLoading: authIsLoading } = useAuth();
+
+    useEffect(() => {
+        if (firebaseUser) {
+            fetchAgents();
+        }
+    }, [firebaseUser, fetchAgents]);
 
     return (
         <>
@@ -37,8 +46,8 @@ export default function ManageAgentsPage() {
                     <Tooltip>
                         <TooltipTrigger asChild>
                              <Button 
-                                onClick={loadInitialAgents}
-                                disabled={isLoading}
+                                onClick={fetchAgents}
+                                disabled={isLoading || authIsLoading}
                                 variant="outline"
                                 size="sm"
                             >
@@ -63,7 +72,7 @@ export default function ManageAgentsPage() {
             )}
 
             <div className="flex-1 mt-4 border rounded-lg overflow-hidden h-[calc(100vh-220px)] bg-background">
-                {isLoading ? (
+                {isLoading || authIsLoading ? (
                     <div className="flex h-full items-center justify-center">
                         <div className="text-center">
                             <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
