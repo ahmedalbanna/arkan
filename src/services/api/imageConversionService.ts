@@ -1,6 +1,6 @@
 'use client';
 
-const API_ENDPOINT = 'http://185.190.140.93:9003/api/convert';
+const API_ENDPOINT = '/api/image-to-svg';
 
 export async function convertImageToSvgApi(formData: FormData): Promise<string> {
     try {
@@ -17,8 +17,8 @@ export async function convertImageToSvgApi(formData: FormData): Promise<string> 
         return await response.text();
     } catch (error) {
         if (error instanceof TypeError) {
-            // This often indicates a network error or CORS issue
-            throw new Error("Network error or CORS issue. Could not connect to the conversion service. Please check your network or if the service is running.");
+            // This often indicates a network error.
+            throw new Error("Network error. Could not connect to the conversion service. Please check your network connection.");
         }
         throw error;
     }
