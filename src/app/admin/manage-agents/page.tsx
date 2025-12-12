@@ -9,7 +9,7 @@ import { useAgentManager } from '@/hooks/use-agent-store';
 import { Bot, RefreshCw, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAuth } from '@/context/AuthContext';
 
@@ -24,11 +24,22 @@ export default function ManageAgentsPage() {
     } = useAgentManager();
     const { firebaseUser, isLoading: authIsLoading } = useAuth();
 
+    const handleFetch = async () => {
+        if (!firebaseUser) return;
+        try {
+            const token = await firebaseUser.getIdToken();
+            fetchAgents(token);
+        } catch (error) {
+            console.error("Error fetching token:", error);
+        }
+    };
+
     useEffect(() => {
         if (firebaseUser) {
-            fetchAgents();
+            handleFetch();
         }
-    }, [firebaseUser, fetchAgents]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [firebaseUser]);
 
     return (
         <>
@@ -46,7 +57,7 @@ export default function ManageAgentsPage() {
                     <Tooltip>
                         <TooltipTrigger asChild>
                              <Button 
-                                onClick={fetchAgents}
+                                onClick={handleFetch}
                                 disabled={isLoading || authIsLoading}
                                 variant="outline"
                                 size="sm"
