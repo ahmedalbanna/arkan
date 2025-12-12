@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -34,7 +33,7 @@ export function GrammarCheckerTool() {
 
   const [filterTypes, setFilterTypes] = useState<Set<CorrectionType>>(new Set(['grammar', 'spelling', 'punctuation']));
 
-  const toggleFilter = (type: CorrectionType) => {
+  function toggleFilter(type: CorrectionType) {
     const newFilters = new Set(filterTypes);
     if (newFilters.has(type)) {
       newFilters.delete(type);
@@ -42,14 +41,14 @@ export function GrammarCheckerTool() {
       newFilters.add(type);
     }
     setFilterTypes(newFilters);
-  };
+  }
 
   const filteredCorrections = useMemo(() => {
     if (!results?.corrections) return [];
     return results.corrections.filter(c => filterTypes.has(c.type));
   }, [results?.corrections, filterTypes]);
 
-  const getTypeColor = (type: CorrectionType) => {
+  function getTypeColor(type: CorrectionType) {
     switch (type) {
       case 'grammar':
         return 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20';
@@ -60,9 +59,9 @@ export function GrammarCheckerTool() {
       default:
         return 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20';
     }
-  };
+  }
 
-  const getTypeLabel = (type: CorrectionType) => {
+  function getTypeLabel(type: CorrectionType) {
     switch (type) {
       case 'grammar':
         return 'Grammar';
@@ -73,7 +72,7 @@ export function GrammarCheckerTool() {
       default:
         return type;
     }
-  };
+  }
 
   return (
     <Card>

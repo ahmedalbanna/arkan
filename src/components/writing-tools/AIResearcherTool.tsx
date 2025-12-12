@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -68,13 +67,13 @@ export function AIResearcherTool() {
     getTitle,
   } = useAIResearcherLogic();
 
-  const handleExportPdf = () => {
+  function handleExportPdf() {
     if (reportRef.current) {
       exportComponentAsPDF(reportRef.current, 'ai_research_report.pdf');
     }
   }
 
-  const getModeIcon = (mode: ResearchMode) => {
+  function getModeIcon(mode: ResearchMode) {
     switch (mode) {
       case 'ai-researcher':
         return <Sparkles className="h-4 w-4" />;
@@ -85,9 +84,9 @@ export function AIResearcherTool() {
       case 'fact-retrieval':
         return <Search className="h-4 w-4" />;
     }
-  };
+  }
 
-  const renderFormFields = () => {
+  function renderFormFields() {
     switch (researchMode) {
       case 'ai-researcher':
         return (
@@ -254,7 +253,7 @@ export function AIResearcherTool() {
           </>
         );
     }
-  };
+  }
 
   return (
     <Card>
@@ -358,4 +357,3 @@ export function AIResearcherTool() {
     </Card>
   );
 }
-

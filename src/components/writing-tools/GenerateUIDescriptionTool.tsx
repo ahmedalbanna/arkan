@@ -43,18 +43,18 @@ export function GenerateUIDescriptionTool() {
     },
   });
 
-  const onSubmit = (data: FormValues) => {
+  function onSubmit(data: FormValues) {
     mutation.mutate(data);
-  };
+  }
 
-  const handleCopy = () => {
+  function handleCopy() {
     if (!generatedDescription) return;
     navigator.clipboard.writeText(generatedDescription).then(() => {
       setIsCopied(true);
       toast({ title: 'Copied to clipboard!' });
       setTimeout(() => setIsCopied(false), 2000);
     });
-  };
+  }
 
   return (
     <Card>
@@ -129,5 +129,3 @@ export function GenerateUIDescriptionTool() {
     </Card>
   );
 }
-
-    
