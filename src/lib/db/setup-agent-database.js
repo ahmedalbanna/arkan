@@ -1,3 +1,4 @@
+
 #!/usr/bin/env node
 
 /**
@@ -12,7 +13,7 @@ const path = require('path');
 // Database file path
 const DB_PATH = path.join(__dirname, 'agents.db');
 const SCHEMA_PATH = path.join(__dirname, 'agent-database.sql');
-const AGENTS_JSON_PATH = path.join(__dirname, '..', 'AllAgents.json');
+const AGENTS_JSON_PATH = path.join(__dirname, 'seed-data', 'AllAgents.json');
 
 /**
  * Create database and tables from schema file
@@ -77,26 +78,17 @@ function transformAgentData(agentData) {
     version: '1.0.0',
     author: 'System',
     tags: JSON.stringify(extractTags(agentData)),
-    space_id: agentData.space_id
+    space_id: agentData.space_id,
+    prompt: agentData.data.prompt || `You are an expert ${agentData.name}.`,
+    guidelines: JSON.stringify(agentData.data.guidelines || [])
   };
 
-  const commands = (agentData.data.commands || []).map(cmd => ({
-    id: `${agentData.id}_${cmd.id}`,
-    agent_id: agentData.id,
-    name: cmd.name,
-    description: cmd.prompt.substring(0, 200) + '...',
-    prompt: cmd.prompt,
-    example: cmd.example || '',
-    temperature: 0.7,
-    max_tokens: 1000,
-    mode: cmd.mode || 'default'
-  }));
-
-  return { agent, commands };
+  return { agent };
 }
 
+
 /**
- * Extract category from agent name
+ * Extract category from agent data
  */
 function extractCategory(agentData) {
   const name = agentData.name.toLowerCase();
@@ -370,27 +362,7 @@ function extractTags(agentData) {
   if (content.includes('quick') || content.includes('fast') || content.includes('instant')) {
     tags.push('quick-results', 'fast');
   }
-
-  // Command-based tags
-  (agentData.data.commands || []).forEach(cmd => {
-    const cmdName = cmd.name.toLowerCase();
-    if (cmdName.includes('write') || cmdName.includes('generate')) {
-      tags.push('content-generation');
-    }
-    if (cmdName.includes('analyze') || cmdName.includes('review') || cmdName.includes('audit')) {
-      tags.push('analysis-tools');
-    }
-    if (cmdName.includes('optimize') || cmdName.includes('improve')) {
-      tags.push('optimization');
-    }
-    if (cmdName.includes('plan') || cmdName.includes('strategy')) {
-      tags.push('planning', 'strategy');
-    }
-    if (cmdName.includes('research') || cmdName.includes('investigate')) {
-      tags.push('research-tools');
-    }
-  });
-
+  
   // Legacy data tags
   if (agentData.data.language) tags.push(`language-${agentData.data.language.toLowerCase()}`);
   if (agentData.data.tone) tags.push(`tone-${agentData.data.tone.toLowerCase()}`);
@@ -410,18 +382,8 @@ async function insertAgentData(db, agentsData) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       const insertAgent = db.prepare(`
-        INSERT INTO agents (id, name, description, icon, category, version, author, tags)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-
-      const insertCommand = db.prepare(`
-        INSERT INTO agent_commands (id, agent_id, name, description, prompt, example, temperature, max_tokens)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-
-      const insertCapability = db.prepare(`
-        INSERT INTO agent_capabilities (agent_id, capability, description)
-        VALUES (?, ?, ?)
+        INSERT INTO agents (id, name, description, icon, category, version, author, tags, prompt, guidelines)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       let processedCount = 0;
@@ -429,10 +391,10 @@ async function insertAgentData(db, agentsData) {
 
       agentsData.forEach((agentData) => {
         try {
-          const { agent, commands } = transformAgentData(agentData);
+          const { agent } = transformAgentData(agentData);
 
           // Insert agent
-          insertAgent.run([
+          insertAgent.run(
             agent.id,
             agent.name,
             agent.description,
@@ -440,35 +402,10 @@ async function insertAgentData(db, agentsData) {
             agent.category,
             agent.version,
             agent.author,
-            agent.tags
-          ]);
-
-          // Insert commands
-          commands.forEach(cmd => {
-            insertCommand.run([
-              cmd.id,
-              cmd.agent_id,
-              cmd.name,
-              cmd.description,
-              cmd.prompt,
-              cmd.example,
-              cmd.temperature,
-              cmd.max_tokens
-            ]);
-          });
-
-          // Insert capabilities based on commands
-          const capabilities = [...new Set(commands.map(cmd =>
-            cmd.name.split(' ')[0].toLowerCase()
-          ))];
-
-          capabilities.forEach(capability => {
-            insertCapability.run([
-              agent.id,
-              capability,
-              `Can ${capability.toLowerCase()} content`
-            ]);
-          });
+            agent.tags,
+            agent.prompt,
+            agent.guidelines
+          );
 
           processedCount++;
           console.log(`   ✅ Processed: ${agent.name}`);
@@ -480,8 +417,6 @@ async function insertAgentData(db, agentsData) {
       });
 
       insertAgent.finalize();
-      insertCommand.finalize();
-      insertCapability.finalize();
 
       console.log(`\n📊 Import Summary:`);
       console.log(`   Successfully processed: ${processedCount} agents`);
@@ -496,6 +431,7 @@ async function insertAgentData(db, agentsData) {
   });
 }
 
+
 /**
  * Verify database contents
  */
@@ -509,23 +445,7 @@ async function verifyDatabase(db) {
       } else {
         console.log(`   Total agents: ${row.agent_count}`);
       }
-
-      db.get('SELECT COUNT(*) as command_count FROM agent_commands', (err, row) => {
-        if (err) {
-          console.error('   Error verifying commands:', err);
-        } else {
-          console.log(`   Total commands: ${row.command_count}`);
-        }
-
-        db.get('SELECT COUNT(*) as capability_count FROM agent_capabilities', (err, row) => {
-          if (err) {
-            console.error('   Error verifying capabilities:', err);
-          } else {
-            console.log(`   Total capabilities: ${row.capability_count}`);
-          }
-          resolve();
-        });
-      });
+      resolve();
     });
   });
 }
