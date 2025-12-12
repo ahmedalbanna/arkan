@@ -13,13 +13,14 @@ import Katex from 'tiptap-katex';
 import { handleFileDrop } from '@/lib/utils/drop-handler';
 import { handleFilePaste } from '@/lib/utils/paste-handler';
 import 'katex/dist/katex.min.css';
+import SlashCommand from './editor/slash-command';
 
 export const editorExtensions = (uniqueId: string) => [
   StarterKit.configure({
     // Future configurations can go here
   }),
   Placeholder.configure({
-    placeholder: 'Start writing, drag-and-drop files, or use AI...',
+    placeholder: 'Start writing, drag-and-drop files, or type / for commands...',
   }),
   TextAlign.configure({ types: ['heading', 'paragraph'] }),
   BubbleMenuExtension.configure({
@@ -43,4 +44,5 @@ export const editorExtensions = (uniqueId: string) => [
       return true;
     },
   }),
+  SlashCommand,
 ];
