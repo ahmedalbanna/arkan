@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -51,7 +50,7 @@ export function MarkdownToWordTool() {
 
   const addCoverPage = form.watch('addCoverPage');
 
-  const onSubmit = async (data: MarkdownToWordFormValues) => {
+  async function onSubmit(data: MarkdownToWordFormValues) {
     setIsConverting(true);
     try {
       const options = {
@@ -91,12 +90,12 @@ export function MarkdownToWordTool() {
       toast({
         title: "Conversion Failed",
         description: error instanceof Error ? error.message : String(error),
-        variant: 'destructive',
+        variant: "destructive",
       });
     } finally {
       setIsConverting(false);
     }
-  };
+  }
 
   return (
     <Card>

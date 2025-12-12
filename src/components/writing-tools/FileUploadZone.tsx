@@ -13,7 +13,7 @@ interface FileUploadZoneProps {
 export function FileUploadZone({ onFileUpload, isUploading, setIsUploading }: FileUploadZoneProps) {
   const { t } = useLocalization();
 
-  const onDrop = (acceptedFiles: File[]) => {
+  function onDrop(acceptedFiles: File[]) {
     const file = acceptedFiles[0];
     if (!file) return;
 
@@ -36,7 +36,7 @@ export function FileUploadZone({ onFileUpload, isUploading, setIsUploading }: Fi
     } else {
         reader.readAsDataURL(file); // Read as data URI for PDF, DOCX, etc.
     }
-  };
+  }
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
