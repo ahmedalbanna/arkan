@@ -1,8 +1,9 @@
+
 'use client';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useAgentStore } from '@/hooks/use-agent-store';
+import { useAgentManager } from '@/hooks/use-agent-store';
 import type { Agent } from '@/types/agent';
 import { cn } from '@/lib/utils/cn';
 import { Search } from 'lucide-react';
@@ -14,7 +15,7 @@ interface AgentListProps {
 }
 
 export const AgentList: React.FC<AgentListProps> = ({ agents }) => {
-  const { selectedAgent, selectAgent } = useAgentStore();
+  const { selectedAgent, selectAgent } = useAgentManager();
   const [searchQuery, setSearchQuery] = useState('');
 
   // Use local filtering to avoid setState during render
