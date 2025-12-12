@@ -56,7 +56,11 @@ export function ImageToSvgTool() {
                 <Label htmlFor="quality">Quality Preset</Label>
                 <Select name="quality" onValueChange={(v) => form.setValue('quality', v as any)}>
                   <SelectTrigger><SelectValue placeholder="(default)" /></SelectTrigger>
-                  <SelectContent><SelectItem value="">(default)</SelectItem><SelectItem value="low">low</SelectItem><SelectItem value="medium">medium</SelectItem><SelectItem value="high">high</SelectItem></SelectContent>
+                  <SelectContent>
+                    <SelectItem value="low">low</SelectItem>
+                    <SelectItem value="medium">medium</SelectItem>
+                    <SelectItem value="high">high</SelectItem>
+                  </SelectContent>
                 </Select>
               </div>
             </div>
