@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -23,7 +22,7 @@ export function FinancialReportExporter() {
     const { toast } = useToast();
     const { t } = useLocalization();
 
-    const handleExport = async () => {
+    async function handleExport() {
         if (!dateRange?.from || !dateRange?.to || !firebaseUser) {
             toast({
                 title: t('adminFinancialReport.missingInfoError'),
@@ -61,7 +60,7 @@ export function FinancialReportExporter() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }
 
     return (
         <Card>

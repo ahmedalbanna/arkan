@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -53,7 +52,7 @@ export function SectionFormDialog({ sectionToEdit, children }: SectionFormDialog
     },
   });
 
-  const onSubmit = (data: SectionFormData) => {
+  function onSubmit(data: SectionFormData) {
     if (sectionToEdit) {
       // When updating, we don't send the ID in the payload, only in the URL
       const { id, ...updateData } = data;
@@ -64,7 +63,7 @@ export function SectionFormDialog({ sectionToEdit, children }: SectionFormDialog
     } else {
       createMutation.mutate(data, { onSuccess: () => { form.reset(); setIsOpen(false); } });
     }
-  };
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

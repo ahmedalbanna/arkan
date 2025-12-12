@@ -1,4 +1,3 @@
-
 'use client';
 
 import { MoreHorizontal } from 'lucide-react';
@@ -34,9 +33,9 @@ interface SectionActionsProps {
 export function SectionActions({ section }: SectionActionsProps) {
   const deleteSectionMutation = useDeleteSection();
 
-  const handleDelete = () => {
+  function handleDelete() {
     deleteSectionMutation.mutate(section.id);
-  };
+  }
 
   return (
     <AlertDialog>

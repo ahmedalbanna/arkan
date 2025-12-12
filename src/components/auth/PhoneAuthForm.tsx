@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -36,19 +35,19 @@ export default function PhoneAuthForm() {
     defaultValues: { otp: '' },
   });
 
-  const onSendOtp = async (values: { phoneNumber: string }) => {
+  async function onSendOtp(values: { phoneNumber: string }) {
     const result = await sendOtp(values.phoneNumber);
     if (result) {
       setConfirmationResult(result);
       setStep('otp');
     }
-  };
+  }
 
-  const onVerifyOtp = async (values: { otp: string }) => {
+  async function onVerifyOtp(values: { otp: string }) {
     if (confirmationResult) {
       await verifyOtp(confirmationResult, values.otp);
     }
-  };
+  }
 
   return (
     <Card>

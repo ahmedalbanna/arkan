@@ -30,7 +30,7 @@ export function UserTableRow({ user: userProps }: UserTableRowProps) {
     const user = new User(userProps);
     
     // Prefetch user profile on hover for a smoother navigation experience
-    const prefetchUser = async (userId: string) => {
+    async function prefetchUser(userId: string) {
         if (!firebaseUser) return;
         const token = await firebaseUser.getIdToken();
         await queryClient.prefetchQuery({
@@ -38,7 +38,7 @@ export function UserTableRow({ user: userProps }: UserTableRowProps) {
             queryFn: () => fetchUserProfileApi(userId, token),
             staleTime: 1000 * 60 * 1, // Prefetched data is fresh for 1 minute
         });
-    };
+    }
 
 
 

@@ -97,7 +97,7 @@ export default function EditUserForm({ user }: EditUserFormProps) {
     });
   }, [user, form]);
 
-  const onSubmit = (data: ProfileFormValues) => {
+  function onSubmit(data: ProfileFormValues) {
     const payload: Partial<ProfileFormValues> = {};
 
     // Build payload with only changed values
@@ -114,9 +114,9 @@ export default function EditUserForm({ user }: EditUserFormProps) {
     }
     setPendingData(payload);
     setIsConfirming(true);
-  };
+  }
 
-  const handleConfirmUpdate = () => {
+  function handleConfirmUpdate() {
     if (!pendingData) return;
 
     updateUserMutation.mutate(
@@ -136,7 +136,7 @@ export default function EditUserForm({ user }: EditUserFormProps) {
     );
     setIsConfirming(false);
     setNotificationMessage('');
-  };
+  }
 
   const isMutating = updateUserMutation.isPending || sendNotificationMutation.isPending;
   const isAdmin = adminProfile?.role === 'admin';

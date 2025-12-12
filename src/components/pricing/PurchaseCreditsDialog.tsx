@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -50,8 +49,8 @@ function AccountDetail({ label, value }: { label: string, value?: string }) {
 
   if (!value) return null;
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(value);
+  function handleCopy() {
+    navigator.clipboard.writeText(value as string);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   }
@@ -120,11 +119,11 @@ export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode })
     }
   });
 
-  const handleContinue = () => {
+  function handleContinue() {
     setStep(2);
-  };
+  }
 
-  const onSubmit = async (data: FileFormValues) => {
+  async function onSubmit(data: FileFormValues) {
     if (!firebaseUser) return;
     const token = await firebaseUser.getIdToken();
     const formData = new FormData();
@@ -138,7 +137,7 @@ export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode })
     formData.append('userEmail', firebaseUser.email || 'N/A');
 
     mutation.mutate({ formData, token });
-  };
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
