@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
@@ -14,11 +15,11 @@ export function useGuidelineEditor(itemKey: string) {
 
     // Local state for UI
     const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
-    const [selectedCommandId, setSelectedCommandId] = useState<string | null>(null);
+    const [selectedCommandId, setSelectedCommandId] = useState<string | null>(null); // This is now deprecated but kept for safety
     const [prompt, setPrompt] = useState('');
     const [guidelines, setGuidelines] = useState<string[]>([]);
 
-    // Sync local state when the underlying section changes
+    // Sync local state when the underlying section in the project store changes
     useEffect(() => {
         if (section) {
             setSelectedAgentId(section.agentId || null);
@@ -28,7 +29,7 @@ export function useGuidelineEditor(itemKey: string) {
         }
     }, [section]);
 
-    // Persist changes to the global store after a delay
+    // Persist changes from the UI back to the global project store after a short delay
     useEffect(() => {
         const handler = setTimeout(() => {
             if (!project) return;
@@ -46,7 +47,7 @@ export function useGuidelineEditor(itemKey: string) {
                     const sec = p.getSection(itemKey);
                     if (sec) {
                         sec.agentId = selectedAgentId;
-                        sec.commandId = selectedCommandId;
+                        sec.commandId = selectedCommandId; // Still here for legacy reasons
                         sec.prompt = prompt;
                         sec.guidelines = guidelines;
                     }
@@ -57,36 +58,38 @@ export function useGuidelineEditor(itemKey: string) {
         return () => clearTimeout(handler);
     }, [selectedAgentId, selectedCommandId, prompt, guidelines, itemKey, project, updateProject]);
 
+    // Handle agent selection change
     const handleAgentChange = (agentId: string) => {
-        // When an agent is deselected, reset to the default state.
         if (!agentId) {
             setSelectedAgentId(null);
             setSelectedCommandId(null);
             setPrompt('You are a helpful assistant. Write a section based on the user\'s instructions.');
+            setGuidelines([]);
             return;
         }
 
         setSelectedAgentId(agentId);
-        setSelectedCommandId(null); // Reset command when agent changes
+        setSelectedCommandId(null); // Reset command selection
 
         const agent = agents.find(a => a.id === agentId);
-        const newPrompt = agent?.description || agent?.data?.description || 'You are a helpful assistant.';
-        setPrompt(newPrompt);
+        // Correctly read from the top-level `prompt` and `guidelines` fields
+        setPrompt(agent?.prompt || 'You are a helpful assistant.');
+        setGuidelines(agent?.guidelines || []);
     };
-
+    
+    // This function is now effectively deprecated as commands are no longer a primary concept,
+    // but it is kept to avoid breaking changes if it's used elsewhere.
     const handleCommandChange = (commandId: string) => {
+        // We'll just reset to the agent's base prompt if the default is selected.
         if (commandId === 'default' || !commandId) {
             setSelectedCommandId(null);
             const agent = agents.find(a => a.id === selectedAgentId);
-            const newPrompt = agent?.description || agent?.data?.description || 'You are a helpful assistant.';
-            setPrompt(newPrompt);
+            setPrompt(agent?.prompt || 'You are a helpful assistant.');
+            setGuidelines(agent?.guidelines || []);
         } else {
             setSelectedCommandId(commandId);
-            const agent = agents.find(a => a.id === selectedAgentId);
-            const commands = agent?.commands || agent?.data?.commands || [];
-            const command = commands.find(c => c.id === commandId);
-            const newPrompt = command?.prompt || 'You are a helpful assistant.';
-            setPrompt(newPrompt);
+            // In the new model, commands don't have separate prompts.
+            // This part can be adjusted if commands regain a specific function.
         }
     };
 
