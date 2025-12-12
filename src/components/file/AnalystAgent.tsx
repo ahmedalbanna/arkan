@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -101,7 +99,7 @@ export default function AnalystAgent() {
         }
     });
 
-    const onSubmit = async (data: AnalysisFormValues) => {
+    async function onSubmit(data: AnalysisFormValues) {
         if (externalContext.length === 0) {
             toast({ title: t('builder.files.toasts.contextRequired'), description: t('builder.files.toasts.contextRequiredDesc'), variant: 'destructive' });
             return;
@@ -110,9 +108,9 @@ export default function AnalystAgent() {
         setMarkdownResult(null); // Clear previous markdown result
         const token = await firebaseUser.getIdToken();
         analysisMutation.mutate({ prompt: data.prompt, contextFiles: externalContext, token });
-    };
+    }
 
-    const handleSaveAnalysis = () => {
+    function handleSaveAnalysis() {
         if (!markdownResult || !form.getValues('prompt')) return;
 
         const fileName = form.getValues('prompt').toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').slice(0, 50) + '.md';
@@ -125,7 +123,7 @@ export default function AnalystAgent() {
             });
         });
         toast({ title: t('builder.files.toasts.analysisSaved'), description: t('builder.files.toasts.analysisSavedDesc').replace('{fileName}', fileName) });
-    };
+    }
 
     const creditCost = 2;
     const isProcessing = analysisMutation.isPending;

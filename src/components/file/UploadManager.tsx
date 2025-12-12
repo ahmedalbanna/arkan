@@ -1,4 +1,3 @@
-
 'use client';
 
 import { PdfPreview } from '@/components/file/PdfPreview';
@@ -17,7 +16,7 @@ import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { generateRandomId } from '@/lib/utils/randomId';
 import { AtomIcon, FileText, ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
 import Image from 'next/image';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import ReactMarkdown from 'react-markdown';
 import { PasteTextUploader } from './PasteTextUploader';
@@ -63,7 +62,7 @@ function FileDropzone() {
     const { updateProject } = useBuilderStore();
     const [isLoading, setIsLoading] = useState(false);
 
-    const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    async function onDrop(acceptedFiles: File[]) {
         setIsLoading(true);
         for (const file of acceptedFiles) {
             const reader = new FileReader();
@@ -91,7 +90,7 @@ function FileDropzone() {
             }
         }
         setIsLoading(false);
-    }, [updateProject, toast, t]);
+    }
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -141,13 +140,13 @@ export function UploadManager() {
 
     const externalContext = project?.externalContext || [];
 
-    const removeExternalContext = (index: number) => {
+    function removeExternalContext(index: number) {
         updateProject(p => { p.removeExternalContext(index); });
-    };
+    }
 
-    const updateExternalContextType = (index: number, type: ExternalContextType) => {
+    function updateExternalContextType(index: number, type: ExternalContextType) {
         updateProject(p => { p.updateExternalContextType(index, type); });
-    };
+    }
 
     const fileTypes: ExternalContextType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
 

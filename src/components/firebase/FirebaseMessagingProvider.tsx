@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
@@ -17,7 +16,7 @@ export default function FirebaseMessagingProvider({ children }: { children: Reac
         if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
             const messaging = getMessaging(app);
 
-            const requestPermission = async () => {
+            async function requestPermission() {
                 try {
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted' && firebaseUser) {
@@ -34,7 +33,7 @@ export default function FirebaseMessagingProvider({ children }: { children: Reac
                 } catch (err) {
                     console.error('An error occurred while retrieving token. ', err);
                 }
-            };
+            }
 
             requestPermission();
 

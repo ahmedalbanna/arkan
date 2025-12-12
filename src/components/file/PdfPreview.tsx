@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -25,7 +24,7 @@ export function PdfPreview({ fileUri }: PdfPreviewProps) {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const loadPdf = async () => {
+        async function loadPdf() {
             setIsLoading(true);
             setError(null);
             try {
@@ -39,13 +38,13 @@ export function PdfPreview({ fileUri }: PdfPreviewProps) {
             } finally {
                 setIsLoading(false);
             }
-        };
+        }
         loadPdf();
     }, [fileUri]);
 
     useEffect(() => {
         if (!pdf) return;
-        const renderPage = async () => {
+        async function renderPage() {
             setIsLoading(true);
             try {
                 const page = await pdf.getPage(currentPage);
@@ -69,12 +68,17 @@ export function PdfPreview({ fileUri }: PdfPreviewProps) {
             } finally {
                 setIsLoading(false);
             }
-        };
+        }
         renderPage();
     }, [pdf, currentPage, scale]);
 
-    const goToPrevPage = () => setCurrentPage(prev => Math.max(1, prev - 1));
-    const goToNextPage = () => setCurrentPage(prev => Math.min(numPages, prev + 1));
+    function goToPrevPage() {
+        setCurrentPage(prev => Math.max(1, prev - 1));
+    }
+
+    function goToNextPage() {
+        setCurrentPage(prev => Math.min(numPages, prev + 1));
+    }
 
     if (error) {
         return <div className="p-4 text-center text-destructive">{error}</div>;

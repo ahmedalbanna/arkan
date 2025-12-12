@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -19,7 +18,7 @@ export function PasteTextUploader() {
     const [text, setText] = useState('');
     const [fileName, setFileName] = useState('');
 
-    const handleAddContext = () => {
+    function handleAddContext() {
         if (!text.trim() || !fileName.trim()) {
             toast({
                 title: t('builder.files.toasts.missingInfoToastTitle'),
@@ -44,7 +43,7 @@ export function PasteTextUploader() {
         });
         setText('');
         setFileName('');
-    };
+    }
 
     return (
         <Card>
