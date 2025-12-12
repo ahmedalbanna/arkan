@@ -8,7 +8,7 @@
  * @returns A promise that resolves to the extracted markdown text.
  */
 export async function processFileApi(formData: FormData, token: string): Promise<{ markdown: string }> {
-    const response = await fetch('/api/document-processing/process-file', {
+    const response = await fetch('/api/process-file', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData

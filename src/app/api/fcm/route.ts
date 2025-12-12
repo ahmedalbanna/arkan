@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
@@ -10,14 +9,14 @@ const deviceTokenSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const validation = deviceTokenSchema.safeParse(body);
+    let body = await request.json();
+    let validation = deviceTokenSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { userId, token } = validation.data;
+    let { userId, token } = validation.data;
 
     // Save or update the token in Firestore
     await adminDb.collection('deviceTokens').doc(userId).set({

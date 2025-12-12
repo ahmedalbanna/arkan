@@ -1,4 +1,3 @@
-
 'use server';
 
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
@@ -18,8 +17,8 @@ const SUPPORTED_MIME_TYPES = [
 
 export const POST = withAuth(async ({ request, user }) => {
     try {
-        const formData = await request.formData();
-        const file = formData.get('file') as File;
+        let formData = await request.formData();
+        let file = formData.get('file') as File;
 
         if (!file) {
             return handleApiError({ message: 'No file uploaded.' }, 400);
@@ -32,9 +31,9 @@ export const POST = withAuth(async ({ request, user }) => {
         // Standard credit deduction for processing
         await deductCredit(user.id, 1);
 
-        const fileArrayBuffer = await file.arrayBuffer();
-        const base64 = Buffer.from(fileArrayBuffer).toString('base64');
-        const dataUri = `data:${file.type};base64,${base64}`;
+        let fileArrayBuffer = await file.arrayBuffer();
+        let base64 = Buffer.from(fileArrayBuffer).toString('base64');
+        let dataUri = `data:${file.type};base64,${base64}`;
 
         let result: { markdown: string } | { text: string };
         let agentId: string;

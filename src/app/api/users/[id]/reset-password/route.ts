@@ -1,4 +1,3 @@
-
 'use server';
 
 import { getUserProfile } from '@/lib/db/queries';

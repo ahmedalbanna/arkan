@@ -1,4 +1,3 @@
-
 import { getStorage } from 'firebase-admin/storage';
 import { adminDb } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';

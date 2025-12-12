@@ -36,7 +36,7 @@ export async function getProxiedImageBuffer(imageUrl: string): Promise<ProxiedIm
     }
 
     // Client-side fetch via API proxy for remote URLs
-    const proxiedUrl = `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+    const proxiedUrl = `/api/proxy/convert?url=${encodeURIComponent(imageUrl)}`;
     const response = await fetch(proxiedUrl);
     if (!response.ok) {
       console.warn(`[CLIENT] Failed to fetch proxied image from ${imageUrl}. Status: ${response.statusText}`);

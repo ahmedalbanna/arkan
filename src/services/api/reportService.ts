@@ -9,7 +9,7 @@
  * @returns A promise that resolves to the generated section data.
  */
 export async function generateReportSectionApi(body: any, token: string): Promise<any> {
-    const response = await fetch('/api/generate/report', {
+    const response = await fetch('/api/generate/section', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect } from 'react';
@@ -24,7 +23,7 @@ export default function ManageAgentsPage() {
     } = useAgentManager();
     const { firebaseUser, isLoading: authIsLoading } = useAuth();
 
-    const handleFetch = async () => {
+    async function handleFetch() {
         if (!firebaseUser) return;
         try {
             const token = await firebaseUser.getIdToken();
@@ -32,7 +31,7 @@ export default function ManageAgentsPage() {
         } catch (error) {
             console.error("Error fetching token:", error);
         }
-    };
+    }
 
     useEffect(() => {
         if (firebaseUser) {

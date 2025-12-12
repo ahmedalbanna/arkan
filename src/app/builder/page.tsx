@@ -13,12 +13,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
 
-const LoadingSkeleton = () => (
-  <div className="space-y-4">
-    <Skeleton className="h-12 w-full" />
-    <Skeleton className="h-[calc(100vh-300px)] w-full" />
-  </div>
-);
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-4">
+      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-[calc(100vh-300px)] w-full" />
+    </div>
+  );
+}
 
 const SessionActions = dynamic(() => import('@/components/project/SessionActions').then(mod => mod.SessionActions), {
   ssr: false,

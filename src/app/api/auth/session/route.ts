@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import { adminAuth } from '@/lib/firebase/server-init';
 import { handleApiError } from '@/lib/utils/api-utils';
@@ -6,15 +5,15 @@ import { handleApiError } from '@/lib/utils/api-utils';
 export async function POST(request: Request) {
   try {
 
-    const { idToken } = await request.json();
+    let { idToken } = await request.json();
     if (!idToken) {
       return handleApiError({ message: 'ID token is required.' }, 400);
     }
 
-    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-    const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+    let expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
+    let sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
 
-    const options = {
+    let options = {
       name: '__session',
       value: sessionCookie,
       maxAge: expiresIn,
@@ -23,7 +22,7 @@ export async function POST(request: Request) {
       path: '/',
     };
 
-    const response = NextResponse.json({ status: 'success' }, { status: 200 });
+    let response = NextResponse.json({ status: 'success' }, { status: 200 });
     response.cookies.set(options);
 
     return response;

@@ -1,5 +1,3 @@
-
-
 'use server';
 
 import { z } from 'zod';
@@ -12,20 +10,20 @@ import { GenerateSectionInputSchema } from '@/ai/schemas';
 
 export const POST = withAuth(async ({ request, user }) => {
   try {
-    const body = await request.json();
-    const validation = GenerateSectionInputSchema.safeParse(body);
+    let body = await request.json();
+    let validation = GenerateSectionInputSchema.safeParse(body);
 
     if (!validation.success) {
       return handleApiError(validation.error);
     }
 
-    const creditCost = 1;
+    let creditCost = 1;
     await deductCredit(user.id, creditCost);
 
-    const agentInput = validation.data;
+    let agentInput = validation.data;
 
     // The AI flow is now called directly with all necessary data from the client.
-    const result = await generateReportSection(agentInput);
+    let result = await generateReportSection(agentInput);
 
     // Safeguard: ensure the AI returned the section we requested.
     // If there's a mismatch, log a warning and normalize the returned key to the requested one.
@@ -36,7 +34,7 @@ export const POST = withAuth(async ({ request, user }) => {
       );
     }
 
-    const transformedOutput = { [agentInput.sectionToGenerate]: result.content };
+    let transformedOutput = { [agentInput.sectionToGenerate]: result.content };
 
     await logGeneration({
       agentId: agentInput.sectionToGenerate, // Log the section ID as the 'agent'
