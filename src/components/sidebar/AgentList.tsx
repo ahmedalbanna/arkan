@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAgentManager } from '@/hooks/use-agent-store';
 import type { AgentProperties } from '@/lib/models';
 import { cn } from '@/lib/utils/cn';
-import { MoreHorizontal, PlusCircle, Search } from 'lucide-react';
+import { MoreHorizontal, PlusCircle, Search, Sparkles } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { Input } from '../ui/input';
 import { AgentDialog } from './AgentDialog';
@@ -14,6 +14,8 @@ import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { toast } from '../ui/use-toast';
+import { AgentGeneratorDialog } from './AgentGeneratorDialog';
+
 
 interface AgentListProps {
   agents: AgentProperties[];
@@ -23,6 +25,7 @@ export const AgentList: React.FC<AgentListProps> = ({ agents }) => {
   const { selectedAgent, selectAgent, deleteAgent } = useAgentManager();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isAiCreateOpen, setIsAiCreateOpen] = useState(false);
   const [editingAgent, setEditingAgent] = useState<AgentProperties | null>(null);
 
   const handleDelete = (agentId: string) => {
@@ -65,13 +68,29 @@ export const AgentList: React.FC<AgentListProps> = ({ agents }) => {
           }
         }}
       />
+      <AgentGeneratorDialog isOpen={isAiCreateOpen} onOpenChange={setIsAiCreateOpen} />
+
       <div className="flex h-full flex-col">
         <header className="flex h-14 shrink-0 items-center justify-between border-b px-4">
           <h2 className="text-lg font-semibold">Agents</h2>
-          <Button variant="ghost" size="sm" onClick={() => setIsCreateOpen(true)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            New
-          </Button>
+           <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  New
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onSelect={() => setIsCreateOpen(true)}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  New Blank Agent
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setIsAiCreateOpen(true)}>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Create with AI
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
         </header>
         <div className="relative border-b p-2">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
