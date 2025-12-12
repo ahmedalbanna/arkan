@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -62,7 +61,7 @@ export function Header() {
 
   const unreadCount = notifications?.filter(n => !n.isRead).length ?? 0;
 
-  const handleNotificationClick = (notification: Notification) => {
+  function handleNotificationClick(notification: Notification) {
     // Mark as read only if it's currently unread
     if (!notification.isRead) {
       markAsReadMutation.mutate([notification.id]);
@@ -71,20 +70,20 @@ export function Header() {
     if (notification.link) {
       router.push(notification.link);
     }
-  };
+  }
 
-  const handleClearAll = (e: React.MouseEvent) => {
+  function handleClearAll(e: React.MouseEvent) {
     e.stopPropagation();
     if (notifications && notifications.length > 0) {
       const notificationIds = notifications.map(n => n.id);
       clearAllMutation.mutate(notificationIds);
     }
-  };
+  }
 
 
-  const toggleLocale = () => {
+  function toggleLocale() {
     setLocale(locale === 'en' ? 'ar' : 'en');
-  };
+  }
 
   const navLinks = [
     { href: '/', label: t('header.home'), icon: HomeIcon, auth: 'any' },
@@ -105,12 +104,12 @@ export function Header() {
     { href: '/admin/settings', label: t('header.adminSettings'), icon: Settings },
   ];
 
-  const handleLinkClick = () => {
+  function handleLinkClick() {
     setIsSheetOpen(false);
-  };
+  }
 
-  const renderNavLinks = (links: typeof navLinks, isMobile = false) =>
-    links
+  function renderNavLinks(links: typeof navLinks, isMobile = false) {
+    return links
       .filter(link => link.auth === 'any' || (link.auth && firebaseUser))
       .map((link) => (
         <Button
@@ -129,10 +128,11 @@ export function Header() {
           </Link>
         </Button>
       ));
+  }
 
-  const handleLogout = async () => {
+  async function handleLogout() {
     await logoutMutation.mutate();
-  };
+  }
 
   const showSkeleton = !isClient || isLoadingAuth;
 

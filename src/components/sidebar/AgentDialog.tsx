@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -43,11 +42,11 @@ interface AgentDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export const AgentDialog: React.FC<AgentDialogProps> = ({
+export function AgentDialog({
   agent,
   isOpen,
   onOpenChange,
-}) => {
+}: AgentDialogProps) {
   const { createAgent, updateAgent } = useAgentManager();
   const { categories } = useAgentCategories();
 
@@ -79,7 +78,7 @@ export const AgentDialog: React.FC<AgentDialogProps> = ({
     name: 'guidelines',
   });
 
-  const onSubmit = async (data: AgentFormValues) => {
+  async function onSubmit(data: AgentFormValues) {
     try {
       if (agent) {
         await updateAgent(agent.id, data);
@@ -96,7 +95,7 @@ export const AgentDialog: React.FC<AgentDialogProps> = ({
     } catch (error: any) {
       toast({ title: "Operation Failed", description: error.message, variant: "destructive" });
     }
-  };
+  }
 
   const isMutating = form.formState.isSubmitting;
 
@@ -231,4 +230,4 @@ export const AgentDialog: React.FC<AgentDialogProps> = ({
       </DialogContent>
     </Dialog>
   );
-};
+}

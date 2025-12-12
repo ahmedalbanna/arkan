@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -21,14 +20,14 @@ interface AgentListProps {
   agents: AgentProperties[];
 }
 
-export const AgentList: React.FC<AgentListProps> = ({ agents }) => {
+export function AgentList({ agents }: AgentListProps) {
   const { selectedAgent, selectAgent, deleteAgent } = useAgentManager();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isAiCreateOpen, setIsAiCreateOpen] = useState(false);
   const [editingAgent, setEditingAgent] = useState<AgentProperties | null>(null);
 
-  const handleDelete = (agentId: string) => {
+  function handleDelete(agentId: string) {
     deleteAgent(agentId).catch((error) => {
       toast({
         title: 'Error Deleting Agent',
@@ -36,7 +35,7 @@ export const AgentList: React.FC<AgentListProps> = ({ agents }) => {
         variant: 'destructive',
       });
     });
-  };
+  }
 
   const filteredAgents = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -173,4 +172,4 @@ export const AgentList: React.FC<AgentListProps> = ({ agents }) => {
       </div>
     </>
   );
-};
+}

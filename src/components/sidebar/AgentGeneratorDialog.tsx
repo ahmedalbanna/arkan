@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -51,7 +50,7 @@ const saveSchema = z.object({
 type GenerateFormValues = z.infer<typeof generateSchema>;
 type SaveFormValues = z.infer<typeof saveSchema>;
 
-export const AgentGeneratorDialog = ({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChange: (open: boolean) => void }) => {
+export function AgentGeneratorDialog({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChange: (open: boolean) => void }) {
   const [step, setStep] = useState<'generate' | 'review'>('generate');
   const { toast } = useToast();
   const { createAgent } = useAgentManager();
@@ -64,7 +63,7 @@ export const AgentGeneratorDialog = ({ isOpen, onOpenChange }: { isOpen: boolean
   const saveForm = useForm<SaveFormValues>({
     resolver: zodResolver(saveSchema),
   });
-  
+
   const debouncedId = useDebounce(saveForm.watch('id'), 500);
 
   const generateMutation = useMutation({
@@ -88,23 +87,23 @@ export const AgentGeneratorDialog = ({ isOpen, onOpenChange }: { isOpen: boolean
   const createMutation = useMutation({
     mutationFn: (agentData: AgentProperties) => createAgent(agentData),
     onSuccess: (newAgent) => {
-        toast({ title: "Agent Created", description: `"${newAgent.name}" has been successfully created.` });
-        onOpenChange(false);
-        setStep('generate');
-        generateForm.reset();
+      toast({ title: "Agent Created", description: `"${newAgent.name}" has been successfully created.` });
+      onOpenChange(false);
+      setStep('generate');
+      generateForm.reset();
     },
     onError: (error: any) => {
       toast({ title: "Creation Failed", description: error.message, variant: 'destructive' });
     }
   });
 
-  const onGenerateSubmit = (data: GenerateFormValues) => {
+  function onGenerateSubmit(data: GenerateFormValues) {
     generateMutation.mutate(data);
-  };
+  }
 
-  const onSaveSubmit = (data: SaveFormValues) => {
+  function onSaveSubmit(data: SaveFormValues) {
     createMutation.mutate(data as AgentProperties);
-  };
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -137,7 +136,7 @@ export const AgentGeneratorDialog = ({ isOpen, onOpenChange }: { isOpen: boolean
                     </FormItem>
                   )}
                 />
-                 <FormField
+                <FormField
                   control={generateForm.control}
                   name="includeJsonOutput"
                   render={({ field }) => (
@@ -177,7 +176,7 @@ export const AgentGeneratorDialog = ({ isOpen, onOpenChange }: { isOpen: boolean
             </DialogHeader>
             <Form {...saveForm}>
               <form onSubmit={saveForm.handleSubmit(onSaveSubmit)} className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
-                 <FormField control={saveForm.control} name="id" render={({ field }) => (
+                <FormField control={saveForm.control} name="id" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Agent ID</FormLabel>
                     <FormControl><Input {...field} disabled={createMutation.isPending} /></FormControl>
@@ -187,27 +186,27 @@ export const AgentGeneratorDialog = ({ isOpen, onOpenChange }: { isOpen: boolean
                 <FormField control={saveForm.control} name="name" render={({ field }) => (
                   <FormItem><FormLabel>Name</FormLabel><FormControl><Input {...field} disabled={createMutation.isPending} /></FormControl><FormMessage /></FormItem>
                 )} />
-                 <FormField control={saveForm.control} name="description" render={({ field }) => (
+                <FormField control={saveForm.control} name="description" render={({ field }) => (
                   <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} disabled={createMutation.isPending} /></FormControl><FormMessage /></FormItem>
                 )} />
-                 <FormField control={saveForm.control} name="prompt" render={({ field }) => (
+                <FormField control={saveForm.control} name="prompt" render={({ field }) => (
                   <FormItem><FormLabel>System Prompt (Instructions)</FormLabel><FormControl><Textarea {...field} rows={5} disabled={createMutation.isPending} /></FormControl><FormMessage /></FormItem>
                 )} />
-                 <FormField control={saveForm.control} name="guidelines" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Guidelines</FormLabel>
-                        <FormControl>
-                            <Textarea
-                                value={field.value?.join('\n') || ''}
-                                onChange={(e) => field.onChange(e.target.value.split('\n'))}
-                                rows={4}
-                                disabled={createMutation.isPending}
-                            />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
+                <FormField control={saveForm.control} name="guidelines" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Guidelines</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        value={field.value?.join('\n') || ''}
+                        onChange={(e) => field.onChange(e.target.value.split('\n'))}
+                        rows={4}
+                        disabled={createMutation.isPending}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )} />
-                 <FormField control={saveForm.control} name="category" render={({ field }) => (
+                <FormField control={saveForm.control} name="category" render={({ field }) => (
                   <FormItem><FormLabel>Category</FormLabel><FormControl><Input {...field} disabled={createMutation.isPending} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <DialogFooter className="sticky bottom-0 bg-background pt-4">
@@ -224,4 +223,4 @@ export const AgentGeneratorDialog = ({ isOpen, onOpenChange }: { isOpen: boolean
       </DialogContent>
     </Dialog>
   );
-};
+}

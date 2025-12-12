@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -30,7 +29,7 @@ const formSchema = z.object({
 
 type PlaygroundFormValues = z.infer<typeof formSchema>;
 
-const AgentPlayground: React.FC<AgentPlaygroundProps> = ({ agent }) => {
+function AgentPlayground({ agent }: AgentPlaygroundProps) {
   const {
     responses,
     setResponse,
@@ -85,12 +84,12 @@ const AgentPlayground: React.FC<AgentPlaygroundProps> = ({ agent }) => {
     },
   });
 
-  const onSubmit = (values: PlaygroundFormValues) => {
+  function onSubmit(values: PlaygroundFormValues) {
     if (!agent || !selectedCommand) return;
     const description = agent.description || agent.data?.description || '';
     const systemPrompt = `${description}\n\nCOMMAND: ${selectedCommand.name}\nPROMPT: ${selectedCommand.prompt}`;
     mutation.mutate({ systemPrompt, userPrompt: values.userPrompt });
-  };
+  }
 
   if (!agent) {
     return (
@@ -104,10 +103,10 @@ const AgentPlayground: React.FC<AgentPlaygroundProps> = ({ agent }) => {
     );
   }
 
-  const handleCommandChange = (commandId: string) => {
+  function handleCommandChange(commandId: string) {
     form.setValue('commandId', commandId);
     setSelectedCommandId(commandId);
-  };
+  }
 
   const agentResponses = (agent && selectedCommandId && responses[agent.id]?.[selectedCommandId]) || [];
 
@@ -199,6 +198,6 @@ const AgentPlayground: React.FC<AgentPlaygroundProps> = ({ agent }) => {
       </div>
     </div>
   );
-};
+}
 
 export default AgentPlayground;
