@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useAgentStore } from '@/hooks/use-agent-store';
+import { useAgentManager } from '@/hooks/use-agent-store';
 import type { Agent, Command } from '@/types/agent';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from '../ui/use-toast';
@@ -35,7 +36,7 @@ const AgentPlayground: React.FC<AgentPlaygroundProps> = ({ agent }) => {
     setResponse,
     setSelectedCommandId,
     selectedCommandId,
-  } = useAgentStore();
+  } = useAgentManager();
 
   const form = useForm<PlaygroundFormValues>({
     resolver: zodResolver(formSchema),
