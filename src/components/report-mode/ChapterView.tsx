@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -53,17 +52,17 @@ export function ChapterView({
     setEditedChapterTitle(chapter.title);
   }, [chapter.title]);
 
-  const handleChapterTitleSave = () => {
+  function handleChapterTitleSave() {
     if (editedChapterTitle.trim() && editedChapterTitle !== chapter.title) {
       onUpdateChapterTitle(chapter.id, editedChapterTitle.trim());
     }
-  };
+  }
 
-  const handleChapterTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  function handleChapterTitleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter' || e.key === 'Escape') {
       e.currentTarget.blur();
     }
-  };
+  }
 
   const hasSections = chapter.sections && chapter.sections.length > 0;
 

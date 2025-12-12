@@ -1,4 +1,3 @@
-
 'use client';
 
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -18,7 +17,7 @@ import { SectionGenerationControls } from './SectionGenerationControls';
 import { GuidelineEditor } from './SectionGuidelineEditor';
 
 
-export const SectionAccordionItem = ({
+export function SectionAccordionItem({
     itemKey,
     section,
     onGenerate,
@@ -40,7 +39,7 @@ export const SectionAccordionItem = ({
     index: number,
     chapterIndex: number,
     onDelete: () => void;
-}) => {
+}) {
     const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
     const [isEditing, setIsEditing] = useState(false);
@@ -52,30 +51,30 @@ export const SectionAccordionItem = ({
         setEditedTitle(section.title);
     }, [section.title]);
 
-    const handleTitleSave = () => {
+    function handleTitleSave() {
         if (editedTitle.trim() && editedTitle !== section.title) {
             updateProject(p => p.updateSectionTitle(section.id, editedTitle.trim()));
         }
         setIsEditing(false);
-    };
+    }
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
         if (e.key === 'Enter') {
             handleTitleSave();
         } else if (e.key === 'Escape') {
             setEditedTitle(section.title);
             setIsEditing(false);
         }
-    };
+    }
 
     const canGenerate = hasCredits && !isAnythingGenerating;
 
-    const handleGenerateClick = (e: React.MouseEvent) => {
+    function handleGenerateClick(e: React.MouseEvent) {
         e.stopPropagation();
         if (canGenerate) {
             onGenerate();
         }
-    };
+    }
 
     return (
         <AccordionItem value={itemKey} key={itemKey} className="bg-background border rounded-lg">
@@ -192,4 +191,4 @@ export const SectionAccordionItem = ({
             </AccordionContent>
         </AccordionItem>
     );
-};
+}

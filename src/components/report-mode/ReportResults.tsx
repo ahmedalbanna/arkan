@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { SectionName } from '@/ai/schemas';
@@ -22,7 +21,7 @@ import { ChapterView } from '@/components/report-mode/ChapterView';
 import { MenuBar } from './MenuBar';
 import RichTextEditor from './RichTextEditor';
 
-export const ReportResults = () => {
+export function ReportResults() {
   const { t } = useLocalization();
   const { project, updateProject } = useBuilderStore();
   const [newChapterTitle, setNewChapterTitle] = useState('');
@@ -36,38 +35,38 @@ export const ReportResults = () => {
     handlePrevPage,
   } = useReportPaginator();
 
-  const handleSectionUpdate = (key: SectionName, value: string) => {
+  function handleSectionUpdate(key: SectionName, value: string) {
     updateProject(p => p.updateSectionContent(key, value));
   };
 
-  const handleSectionTitleUpdate = (key: SectionName, newTitle: string) => {
+  function handleSectionTitleUpdate(key: SectionName, newTitle: string) {
     updateProject(p => p.updateSectionTitle(key, newTitle));
   };
 
-  const handleChapterTitleUpdate = (chapterId: string, newTitle: string) => {
+  function handleChapterTitleUpdate(chapterId: string, newTitle: string) {
     updateProject(p => {
       const chap = p.getChapter(chapterId);
       if (chap) chap.title = newTitle;
     });
   };
 
-  const handleAddSectionAtIndex = (chapterId: string, index: number) => {
+  function handleAddSectionAtIndex(chapterId: string, index: number) {
     updateProject(p => p.addSectionAtIndex(chapterId, index, 'New Section'));
   };
 
-  const handleMoveSectionUp = (sectionId: string) => {
+  function handleMoveSectionUp(sectionId: string) {
     updateProject(p => p.moveSectionUp(sectionId));
   };
 
-  const handleMoveSectionDown = (sectionId: string) => {
+  function handleMoveSectionDown(sectionId: string) {
     updateProject(p => p.moveSectionDown(sectionId));
   };
 
-  const handleDeleteSection = (sectionId: string) => {
+  function handleDeleteSection(sectionId: string) {
     updateProject(p => p.removeSection(sectionId));
   };
 
-  const handleDeleteChapter = (chapterId: string) => {
+  function handleDeleteChapter(chapterId: string) {
     updateProject(p => p.removeChapter(chapterId));
     toast({
       title: 'Chapter Deleted',
@@ -75,7 +74,7 @@ export const ReportResults = () => {
     });
   };
 
-  const handleCreateFirstChapter = () => {
+  function handleCreateFirstChapter() {
     if (!newChapterTitle.trim()) {
         toast({
             title: "Chapter title cannot be empty",
@@ -93,7 +92,7 @@ export const ReportResults = () => {
     })
   }
 
-  const renderContent = () => {
+  function renderContent() {
     if (!project?.hasContent()) {
       return (
         <div className="flex items-center justify-center h-full min-h-[400px]">

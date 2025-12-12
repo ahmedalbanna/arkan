@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -76,13 +75,13 @@ interface SortableSectionItemProps {
   hasCredits: boolean;
 }
 
-const SortableSectionItem = ({
+function SortableSectionItem({
   section,
   index,
   chapterIndex,
   onDelete,
   ...props
-}: SortableSectionItemProps) => {
+}: SortableSectionItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: section.id });
 
@@ -121,14 +120,14 @@ interface SortableChapterItemProps {
   hasCreditsForSingleSection: boolean;
 }
 
-const SortableChapterItem = ({
+function SortableChapterItem({
   chapter,
   index,
   onAddSection,
   onDeleteSection,
   onDeleteChapter,
   ...props
-}: SortableChapterItemProps) => {
+}: SortableChapterItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
   const { updateProject } = useBuilderStore();
   const [isEditing, setIsEditing] = useState(false);
@@ -138,7 +137,7 @@ const SortableChapterItem = ({
     setEditedTitle(chapter.title);
   }, [chapter.title]);
 
-  const handleTitleSave = () => {
+  function handleTitleSave() {
     if (editedTitle.trim() && editedTitle !== chapter.title) {
       updateProject(p => {
         const chap = p.getChapter(chapter.id);
@@ -150,7 +149,7 @@ const SortableChapterItem = ({
     setIsEditing(false);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') {
       handleTitleSave();
     } else if (e.key === 'Escape') {
@@ -243,12 +242,7 @@ const SortableChapterItem = ({
   );
 };
 
-
-
-
-
-
-export const GenerationTools = () => {
+export function GenerationTools() {
   const { t, locale } = useLocalization();
   const { project, updateProject } = useBuilderStore(); // Directly use the store
   const { data: sectionConfigs, isFetched: sectionsLoaded } = useSections();
@@ -319,20 +313,14 @@ export const GenerationTools = () => {
     },
   });
 
-  const isAnythingGenerating = agentMutation.isPending;
-  const activeMutationKey = agentMutation.isPending ? agentMutation.variables as string : null;
-
-  const onGenerateSection = (sectionId: SectionName) => {
+  function onGenerateSection(sectionId: SectionName) {
     agentMutation.mutate(sectionId as string);
   };
-
-  const hasCreditsForSingleSection = !!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1;
-
 
   const [tocText, setTocText] = useState('');
   const [newChapterTitle, setNewChapterTitle] = useState('');
 
-  const handleAddChapter = () => {
+  function handleAddChapter() {
     if (!newChapterTitle.trim()) {
       toast({ title: "Chapter title is required.", variant: "destructive" });
       return;
@@ -341,22 +329,22 @@ export const GenerationTools = () => {
     setNewChapterTitle('');
   };
 
-  const handleAddSectionToChapter = (chapterId: string) => {
+  function handleAddSectionToChapter(chapterId: string) {
     updateProject(p => {
       p.addSectionToChapter(chapterId, "New Section");
     });
   };
 
-  const handleDeleteSection = (chapterId: string, sectionId: string) => {
+  function handleDeleteSection(chapterId: string, sectionId: string) {
     updateProject(p => p.removeSection(sectionId));
   };
 
-  const handleDeleteChapter = (chapterId: string) => {
+  function handleDeleteChapter(chapterId: string) {
     updateProject(p => p.removeChapter(chapterId));
   };
 
 
-  const handleCreateFromToc = () => {
+  function handleCreateFromToc() {
     if (!tocText.trim()) {
       toast({
         title: "Table of Contents is empty",
@@ -366,7 +354,7 @@ export const GenerationTools = () => {
       return;
     }
 
-    const lines = tocText.split('\n').map(line => line.trim()).filter(Boolean);
+    const lines = tocText.split('n').map(line => line.trim()).filter(Boolean);
     let chaptersCreated = 0;
     let sectionsCreated = 0;
 
@@ -376,17 +364,17 @@ export const GenerationTools = () => {
       let chapterCounter = 1;
 
       lines.forEach(line => {
-        const isChapter = !line.match(/^\s*\d+\.\d+/); // If it doesn't look like "1.1", it's a chapter
+        const isChapter = !line.match(/^s*d+.d+/); // If it doesn't look like "1.1", it's a chapter
 
         if (isChapter) {
-          const chapterTitle = line.replace(/^\d+\.?\s*/, '').trim();
+          const chapterTitle = line.replace(/^d+.?s*/, '').trim();
           if (chapterTitle) {
             currentChapterId = p.addChapter(chapterTitle);
             chaptersCreated++;
             chapterCounter++;
           }
         } else if (currentChapterId) { // It's a section
-          const sectionTitle = line.replace(/^\d+\.\d+\.?\s*/, '').trim();
+          const sectionTitle = line.replace(/^d+.d+.?s*/, '').trim();
           if (sectionTitle) {
             p.addCustomSection(currentChapterId, sectionTitle);
             sectionsCreated++;
@@ -403,7 +391,7 @@ export const GenerationTools = () => {
     setShowTocInput(false);
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
     if (!over) return;
@@ -478,7 +466,7 @@ export const GenerationTools = () => {
                 id="toc-master-input"
                 value={tocText}
                 onChange={(e) => setTocText(e.target.value)}
-                placeholder={"1. Chapter One\n1.1. Section One\n2. Chapter Two..."}
+                placeholder={"1. Chapter Onen1.1. Section Onen2. Chapter Two..."}
                 className="flex-grow resize-none"
                 rows={5}
               />
@@ -508,9 +496,9 @@ export const GenerationTools = () => {
                         onDeleteChapter={handleDeleteChapter}
                         chapterIndex={chapterIndex}
                         onGenerateSection={onGenerateSection}
-                        activeMutationKey={activeMutationKey}
-                        isAnythingGenerating={isAnythingGenerating}
-                        hasCreditsForSingleSection={hasCreditsForSingleSection}
+                        activeMutationKey={agentMutation.isPending ? agentMutation.variables as string : null}
+                        isAnythingGenerating={agentMutation.isPending}
+                        hasCreditsForSingleSection={!!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1}
                       />
                     ))}
                   </Accordion>

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -28,7 +27,7 @@ export function GenerateTocDialog({ isOpen, onOpenChange }: GenerateTocDialogPro
         }
     }, [project, form, isOpen]);
 
-    const handleApplyToc = () => {
+    function handleApplyToc() {
         if (!results) return;
 
         updateProject(p => {
@@ -44,7 +43,7 @@ export function GenerateTocDialog({ isOpen, onOpenChange }: GenerateTocDialogPro
             description: `${results.tableOfContents.length} chapters have been created.`,
         });
         onOpenChange(false);
-    };
+    }
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>

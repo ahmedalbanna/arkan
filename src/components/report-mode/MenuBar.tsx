@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEditorStore } from '@/hooks/core/use-editor-store';
@@ -24,7 +23,7 @@ import {
 import { Button } from '../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
-const handleFile = (file: File, editor: Editor) => {
+function handleFile(file: File, editor: Editor) {
   const reader = new FileReader();
   const fileExtension = file.name.split('.').pop()?.toLowerCase();
 
@@ -59,7 +58,7 @@ const handleFile = (file: File, editor: Editor) => {
   }
 }
 
-export const MenuBar = () => {
+export function MenuBar() {
   const { activeEditor, setDirection } = useEditorStore();
 
   if (!activeEditor) {
@@ -68,25 +67,25 @@ export const MenuBar = () => {
 
   const editor = activeEditor;
 
-  const addImage = () => {
+  function addImage() {
     const url = window.prompt('Enter image URL');
     if (url) {
       editor.chain().focus().setImage({ src: url }).run();
     }
-  };
+  }
 
-  const addTable = () => {
+  function addTable() {
     editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
-  };
+  }
 
-  const addMath = () => {
+  function addMath() {
     const formula = window.prompt('Enter LaTeX formula');
     if (formula) {
       editor.chain().focus().insertContent(`<katex-component content="${formula}"></katex-component>`).run()
     }
   }
 
-  const handleExport = async () => {
+  async function handleExport() {
     if (!editor) return;
 
     const format = window.prompt("Export as: 'md' or 'docx'", 'md');
@@ -133,9 +132,9 @@ export const MenuBar = () => {
     } else if (format) {
       window.alert("Unsupported format. Please choose 'md' or 'docx'.");
     }
-  };
+  }
 
-  const handleImport = () => {
+  function handleImport() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.md,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
@@ -146,25 +145,25 @@ export const MenuBar = () => {
       }
     };
     input.click();
-  };
+  }
 
-  const handleHeadingChange = (value: string) => {
+  function handleHeadingChange(value: string) {
     if (value === 'p') {
       editor.chain().focus().setParagraph().run();
       return;
     }
     const level = parseInt(value.replace('h', '')) as 1 | 2 | 3 | 4 | 5 | 6;
     editor.chain().focus().toggleHeading({ level }).run();
-  };
+  }
 
-  const getCurrentHeadingLevel = () => {
+  function getCurrentHeadingLevel() {
     for (let i = 1; i <= 6; i++) {
       if (editor.isActive('heading', { level: i as 1 | 2 | 3 | 4 | 5 | 6 })) {
         return `h${i}`;
       }
     }
     return 'p';
-  };
+  }
 
   return (
     <div
@@ -218,4 +217,4 @@ export const MenuBar = () => {
       </div>
     </div>
   );
-};
+}

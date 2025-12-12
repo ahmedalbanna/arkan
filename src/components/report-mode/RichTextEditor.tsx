@@ -57,7 +57,7 @@ const SectionToolbar = memo(function SectionToolbar({ editor, onTextUpdate, onWh
     onWholeUpdate,
   });
 
-  const handleReadAloudClick = () => {
+  function handleReadAloudClick() {
     if (isSpeaking) {
       stop();
     } else {
@@ -65,12 +65,25 @@ const SectionToolbar = memo(function SectionToolbar({ editor, onTextUpdate, onWh
       const textToRead = editor.state.doc.textBetween(from, to) || editor.getText();
       speak(textToRead);
     }
-  };
+  }
 
   const formatButtons = [
     { action: () => editor.chain().focus().toggleBold().run(), isActive: editor.isActive('bold'), icon: Bold, label: t('builder.Section.tooltips.bold') },
     { action: () => editor.chain().focus().toggleItalic().run(), isActive: editor.isActive('italic'), icon: Italic, label: t('builder.Section.tooltips.italic') },
     { action: () => editor.chain().focus().toggleStrike().run(), isActive: editor.isActive('strike'), icon: Strikethrough, label: t('builder.Section.tooltips.strike') },
+  ];
+
+  const aiActionButtons = [
+    {
+      name: 'summarize',
+      icon: BookText,
+      label: t('builder.Section.aiActions.summarize'),
+    },
+    {
+      name: 'translate',
+      icon: Languages,
+      label: t('builder.Section.aiActions.translate'),
+    },
   ];
 
   return (
@@ -98,14 +111,22 @@ const SectionToolbar = memo(function SectionToolbar({ editor, onTextUpdate, onWh
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         {/* AI Action Buttons */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8" onClick={() => handleAiAction('summarize')} disabled={isProcessing} >
-              {activeAiAction === 'summarize' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookText className="h-4 w-4" />}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent><p>{t('builder.Section.aiActions.summarize')}</p></TooltipContent>
-        </Tooltip>
+        {aiActionButtons.map(({ name, icon: Icon, label }) => (
+          <Tooltip key={name}>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full h-8 w-8"
+                onClick={() => handleAiAction(name as any)}
+                disabled={isProcessing}
+              >
+                {activeAiAction === name && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent><p>{label}</p></TooltipContent>
+          </Tooltip>
+        ))}
 
         <DropdownMenu>
           <Tooltip>
@@ -132,15 +153,6 @@ const SectionToolbar = memo(function SectionToolbar({ editor, onTextUpdate, onWh
         {/* Utility Buttons */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8" onClick={() => handleAiAction('translate')} disabled={isProcessing}>
-              {activeAiAction === 'translate' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent><p>{t('builder.Section.aiActions.translate')}</p></TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full h-8 w-8" onClick={handleReadAloudClick}>
               {isSpeaking ? <Square className="h-4 w-4 text-red-500 fill-current" /> : <Volume2 className="h-4 w-4" />}
             </Button>
@@ -162,7 +174,7 @@ interface RichTextEditorProps {
   onChange: (markdown: string) => void;
 }
 
-const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange }) => {
+function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const setActiveEditor = useEditorStore((state) => state.setActiveEditor);
   const uniqueId = React.useId();
 

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useAgentManager } from '@/hooks/use-agent-store';
@@ -45,7 +44,7 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
         label: agent.name,
     }));
 
-    const handleAddGuideline = () => {
+    function handleAddGuideline() {
         addGuideline(newGuideline);
         setNewGuideline('');
     };

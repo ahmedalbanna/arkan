@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -11,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '../ui/checkbox';
 import type { Tone, Language, GenerationControlState, Section } from '@/lib/models';
 
-export const SectionGenerationControls = ({ section }: { section: Section }) => {
+export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
     const controls = section.controls;
@@ -20,10 +19,10 @@ export const SectionGenerationControls = ({ section }: { section: Section }) => 
         return null; // Or a loading/default state
     }
 
-    const handleControlChange = <K extends keyof GenerationControlState>(
+    function handleControlChange<K extends keyof GenerationControlState>(
         field: K,
         value: GenerationControlState[K]
-    ) => {
+    ) {
         updateProject(p => {
             const s = p.getSection(section.id);
             if (s) {
@@ -32,12 +31,11 @@ export const SectionGenerationControls = ({ section }: { section: Section }) => 
         });
     };
 
-    const handleOutputStyleChange = (style: 'heading' | 'paragraph' | 'list' | 'table' | 'code', checked: boolean) => {
-        const newOutputStyle = {
+    function handleOutputStyleChange(style: 'heading' | 'paragraph' | 'list' | 'table' | 'code', checked: boolean) {
+        handleControlChange('outputStyle', {
             ...controls.outputStyle,
             [style]: checked
-        };
-        handleControlChange('outputStyle', newOutputStyle);
+        });
     }
 
     return (
