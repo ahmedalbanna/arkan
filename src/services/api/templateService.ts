@@ -8,13 +8,13 @@ import type { CreatePresentationTemplateData, CreateReportTemplateData, DocxTemp
 // ============================================================================
 
 export async function fetchDocxTemplatesApi(): Promise<Record<string, DocxTemplateProperties>> {
-    const response = await fetch('/api/admin/templates/docx');
+    const response = await fetch('/api/templates/docx');
     if (!response.ok) throw new Error('Failed to fetch DOCX templates');
     return response.json();
 }
 
 export async function updateDocxTemplateApi(key: string, data: { styles: any }, token: string): Promise<DocxTemplateProperties> {
-    const response = await fetch(`/api/admin/templates/docx/${key}`, {
+    const response = await fetch(`/api/templates/docx/${key}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(data),
@@ -24,7 +24,7 @@ export async function updateDocxTemplateApi(key: string, data: { styles: any }, 
 }
 
 export async function deleteDocxTemplateApi(key: string, token: string): Promise<{ message: string }> {
-    const response = await fetch(`/api/admin/templates/docx/${key}`, {
+    const response = await fetch(`/api/templates/docx/${key}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
     });
@@ -33,7 +33,7 @@ export async function deleteDocxTemplateApi(key: string, token: string): Promise
 }
 
 export async function createDocxTemplateApi(data: { id: string; name: string; description: string }, token: string): Promise<DocxTemplateProperties> {
-    const response = await fetch('/api/admin/templates/docx', {
+    const response = await fetch('/api/templates/docx', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(data),
@@ -48,13 +48,13 @@ export async function createDocxTemplateApi(data: { id: string; name: string; de
 // ============================================================================
 
 export async function fetchPptxTemplatesApi(): Promise<Record<string, PptxTemplateProperties>> {
-    const response = await fetch('/api/admin/templates/pptx');
+    const response = await fetch('/api/templates/pptx');
     if (!response.ok) throw new Error('Failed to fetch PPTX templates');
     return response.json();
 }
 
 export async function updatePptxTemplateApi(key: string, data: { styles: any }, token: string): Promise<PptxTemplateProperties> {
-    const response = await fetch(`/api/admin/templates/pptx/${key}`, {
+    const response = await fetch(`/api/templates/pptx/${key}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(data),
@@ -64,7 +64,7 @@ export async function updatePptxTemplateApi(key: string, data: { styles: any }, 
 }
 
 export async function deletePptxTemplateApi(key: string, token: string): Promise<{ message: string }> {
-    const response = await fetch(`/api/admin/templates/pptx/${key}`, {
+    const response = await fetch(`/api/templates/pptx/${key}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
     });
@@ -73,7 +73,7 @@ export async function deletePptxTemplateApi(key: string, token: string): Promise
 }
 
 export async function createPptxTemplateApi(data: { id: string; name: string; description: string }, token: string): Promise<PptxTemplateProperties> {
-    const response = await fetch('/api/admin/templates/pptx', {
+    const response = await fetch('/api/templates/pptx', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(data),
@@ -184,7 +184,7 @@ export async function refreshTemplateImage(
     variables: { templateType: 'docx' | 'pptx', templateId: string, prompt: string },
     token: string
 ): Promise<any> {
-    const response = await fetch('/api/admin/templates/refresh-image', {
+    const response = await fetch('/api/templates/refresh-image', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

@@ -1,4 +1,3 @@
-
 // src/app/api/notifications/mark-as-read/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -11,28 +10,28 @@ const markAsReadSchema = z.object({
 
 export async function POST(request: Request) {
 
-    const authorization = request.headers.get('Authorization');
+    let authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const token = authorization.substring(7);
+    let token = authorization.substring(7);
     try {
-        const decodedToken = await adminAuth.verifyIdToken(token, true);
-        const userId = decodedToken.uid;
+        let decodedToken = await adminAuth.verifyIdToken(token, true);
+        let userId = decodedToken.uid;
 
-        const body = await request.json();
-        const validation = markAsReadSchema.safeParse(body);
+        let body = await request.json();
+        let validation = markAsReadSchema.safeParse(body);
 
         if (!validation.success) {
             return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
 
-        const { notificationIds } = validation.data;
+        let { notificationIds } = validation.data;
 
         // Use the Admin SDK to interact with the Realtime Database
-        const db = getDatabase();
-        const updates: { [key: string]: any } = {};
+        let db = getDatabase();
+        let updates: { [key: string]: any } = {};
         notificationIds.forEach(id => {
             updates[`/notifications/${userId}/${id}/isRead`] = true;
         });

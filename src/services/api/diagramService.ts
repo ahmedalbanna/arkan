@@ -52,7 +52,7 @@ export async function updateDiagramApi(plantUmlCode: string, token: string): Pro
  * @returns A promise that resolves to the explanation text.
  */
 export async function explainDiagramApi(body: { imageDataUri: string, prompt: string }, token: string): Promise<ImageToTextOutput> {
-    const response = await fetch('/api/explain-diagram', {
+    const response = await fetch('/api/actions/explain-diagram', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(body),

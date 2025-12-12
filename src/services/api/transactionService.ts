@@ -43,7 +43,7 @@ export async function verifyPayment(variables: VerifyPaymentVariables, token: st
     if (!token) {
         throw new Error("Authentication token is required.");
     }
-    const response = await fetch('/api/admin/verify-payment', {
+    const response = await fetch('/api/admin/payments/verify', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

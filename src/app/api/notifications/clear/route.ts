@@ -1,4 +1,3 @@
-
 // src/app/api/notifications/clear/route.ts
 import { NextResponse } from 'next/server';
 import { adminAuth } from '@/lib/firebase/server-init';
@@ -12,26 +11,26 @@ const clearSchema = z.object({
 
 export async function POST(request: Request) {
 
-    const authorization = request.headers.get('Authorization');
+    let authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const token = authorization.substring(7);
+    let token = authorization.substring(7);
     try {
-        const decodedToken = await adminAuth.verifyIdToken(token, true);
-        const userId = decodedToken.uid;
+        let decodedToken = await adminAuth.verifyIdToken(token, true);
+        let userId = decodedToken.uid;
 
-        const body = await request.json();
-        const validation = clearSchema.safeParse(body);
+        let body = await request.json();
+        let validation = clearSchema.safeParse(body);
         if (!validation.success) {
             return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
 
-        const { notificationIds } = validation.data;
+        let { notificationIds } = validation.data;
 
-        const db = getDatabase();
-        const updates: { [key: string]: null } = {};
+        let db = getDatabase();
+        let updates: { [key: string]: null } = {};
         notificationIds.forEach(id => {
             updates[`/notifications/${userId}/${id}`] = null; // Setting to null deletes the key in RTDB
         });

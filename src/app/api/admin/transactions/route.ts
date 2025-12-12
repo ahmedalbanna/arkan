@@ -11,16 +11,16 @@ const getTransactionsSchema = z.object({
 
 export const GET = withAuth(async ({ request }) => {
   try {
-    const { searchParams } = new URL(request.url);
-    const queryValidation = getTransactionsSchema.safeParse(Object.fromEntries(searchParams));
+    let { searchParams } = new URL(request.url);
+    let queryValidation = getTransactionsSchema.safeParse(Object.fromEntries(searchParams));
 
     if (!queryValidation.success) {
       return handleApiError(queryValidation.error);
     }
 
-    const { limit, lastVisibleId, status } = queryValidation.data;
+    let { limit, lastVisibleId, status } = queryValidation.data;
 
-    const { transactions, hasNextPage, lastVisibleId: newLastVisibleId } = await getTransactionsByStatus({ status, limit, lastVisibleId });
+    let { transactions, hasNextPage, lastVisibleId: newLastVisibleId } = await getTransactionsByStatus({ status, limit, lastVisibleId });
     return createApiResponse({ transactions, hasNextPage, lastVisibleId: newLastVisibleId }, 200);
 
   } catch (error) {

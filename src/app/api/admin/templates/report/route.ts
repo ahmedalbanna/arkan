@@ -5,17 +5,17 @@ import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-uti
 
 export const POST = withAuth(async ({ request }) => {
     try {
-        const body = await request.json();
-        const validation = CreateReportTemplateSchema.safeParse(body);
+        let body = await request.json();
+        let validation = CreateReportTemplateSchema.safeParse(body);
         if (!validation.success) {
             return handleApiError(validation.error);
         }
 
-        const { id, ...data } = validation.data;
-        const collectionRef = adminDb.collection('templates').doc('report').collection('items');
+        let { id, ...data } = validation.data;
+        let collectionRef = adminDb.collection('templates').doc('report').collection('items');
 
-        const docRef = collectionRef.doc(id);
-        const doc = await docRef.get();
+        let docRef = collectionRef.doc(id);
+        let doc = await docRef.get();
         if (doc.exists) {
             return handleApiError({ message: 'A report template with this ID already exists.' }, 409);
         }

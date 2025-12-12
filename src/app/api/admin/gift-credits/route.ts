@@ -1,4 +1,3 @@
-
 'use server';
 
 import { z } from 'zod';
@@ -15,30 +14,30 @@ const giftCreditsSchema = z.object({
 
 export const POST = withAuth(async ({ request, user: adminUser }) => {
   try {
-    const body = await request.json();
-    const validation = giftCreditsSchema.safeParse(body);
+    let body = await request.json();
+    let validation = giftCreditsSchema.safeParse(body);
     if (!validation.success) {
       return handleApiError(validation.error);
     }
 
-    const { userId, credits, message } = validation.data;
+    let { userId, credits, message } = validation.data;
 
     // Get the user's profile to ensure they exist
-    const userProfile = await getUserProfile(userId);
+    let userProfile = await getUserProfile(userId);
     if (!userProfile) {
       return handleApiError({ message: 'User not found.' }, 404);
     }
     
     // Add credits to user's account
-    const userRef = adminDb.collection('users').doc(userId);
+    let userRef = adminDb.collection('users').doc(userId);
     await userRef.update({
         credits: FieldValue.increment(credits)
     });
     
     // Send notification
-    const rtdb = adminRealtimeDb;
-    const notificationRef = rtdb.ref(`notifications/${userId}`).push();
-    const notificationPayload = {
+    let rtdb = adminRealtimeDb;
+    let notificationRef = rtdb.ref(`notifications/${userId}`).push();
+    let notificationPayload = {
       title: "🎁 You've received a gift!",
       description: message ? `Admin ${adminUser.name} sent you ${credits} credits with a message: "${message}"` : `An admin has sent you ${credits} credits!`,
       icon: "gem",
@@ -49,10 +48,10 @@ export const POST = withAuth(async ({ request, user: adminUser }) => {
     await notificationRef.set(notificationPayload);
     
     // Try to send a push notification if the user has a device token
-    const tokenDoc = await adminDb.collection('deviceTokens').doc(userId).get();
+    let tokenDoc = await adminDb.collection('deviceTokens').doc(userId).get();
     if (tokenDoc.exists) {
-        const { token } = tokenDoc.data() as { token: string };
-        const pushMessage = {
+        let { token } = tokenDoc.data() as { token: string };
+        let pushMessage = {
             token: token,
             notification: {
                 title: notificationPayload.title,

@@ -7,12 +7,12 @@ import { PresentationGenerationTemplateSchema, UpdatePresentationTemplateSchema 
 // GET a single presentation template
 export const GET = withAuth(async ({ params }) => {
     try {
-        const { id } = params;
+        let { id } = params;
         if (!id) {
             return handleApiError({ message: 'Template ID is required.' }, 400);
         }
-        const docRef = adminDb.collection('templates').doc('presentation').collection('items').doc(id);
-        const doc = await docRef.get();
+        let docRef = adminDb.collection('templates').doc('presentation').collection('items').doc(id);
+        let doc = await docRef.get();
 
         if (!doc.exists) {
             return handleApiError({ message: 'Presentation template not found.' }, 404);
@@ -27,21 +27,21 @@ export const GET = withAuth(async ({ params }) => {
 // PUT to update a presentation template
 export const PUT = withAuth(async ({ request, params }) => {
     try {
-        const { id } = params;
+        let { id } = params;
         if (!id) {
             return handleApiError({ message: 'Template ID is required.' }, 400);
         }
 
-        const body = await request.json();
-        const validation = UpdatePresentationTemplateSchema.safeParse(body);
+        let body = await request.json();
+        let validation = UpdatePresentationTemplateSchema.safeParse(body);
         if (!validation.success) {
             return handleApiError(validation.error);
         }
 
-        const docRef = adminDb.collection('templates').doc('presentation').collection('items').doc(id);
+        let docRef = adminDb.collection('templates').doc('presentation').collection('items').doc(id);
         await docRef.update(validation.data);
 
-        const updatedDoc = await docRef.get();
+        let updatedDoc = await docRef.get();
         return createApiResponse({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
 
     } catch (error) {
@@ -53,7 +53,7 @@ export const PUT = withAuth(async ({ request, params }) => {
 // DELETE a presentation template
 export const DELETE = withAuth(async ({ params }) => {
     try {
-        const { id } = params;
+        let { id } = params;
         if (!id) {
             return handleApiError({ message: 'Template ID is required.' }, 400);
         }

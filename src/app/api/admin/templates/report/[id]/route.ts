@@ -7,12 +7,12 @@ import { UpdateReportTemplateSchema } from '@/ai/schemas';
 // GET a single report template
 export const GET = withAuth(async ({ params }) => {
     try {
-        const { id } = params;
+        let { id } = params;
         if (!id) {
             return handleApiError({ message: 'Template ID is required.' }, 400);
         }
-        const docRef = adminDb.collection('templates').doc('report').collection('items').doc(id);
-        const doc = await docRef.get();
+        let docRef = adminDb.collection('templates').doc('report').collection('items').doc(id);
+        let doc = await docRef.get();
 
         if (!doc.exists) {
             return handleApiError({ message: 'Report template not found.' }, 404);
@@ -26,21 +26,21 @@ export const GET = withAuth(async ({ params }) => {
 // PUT to update a report template
 export const PUT = withAuth(async ({ request, params }) => {
     try {
-        const { id } = params;
+        let { id } = params;
         if (!id) {
             return handleApiError({ message: 'Template ID is required.' }, 400);
         }
 
-        const body = await request.json();
-        const validation = UpdateReportTemplateSchema.safeParse(body);
+        let body = await request.json();
+        let validation = UpdateReportTemplateSchema.safeParse(body);
         if (!validation.success) {
             return handleApiError(validation.error);
         }
 
-        const docRef = adminDb.collection('templates').doc('report').collection('items').doc(id);
+        let docRef = adminDb.collection('templates').doc('report').collection('items').doc(id);
         await docRef.update(validation.data);
 
-        const updatedDoc = await docRef.get();
+        let updatedDoc = await docRef.get();
         return createApiResponse({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
 
     } catch (error) {
@@ -51,7 +51,7 @@ export const PUT = withAuth(async ({ request, params }) => {
 // DELETE a report template
 export const DELETE = withAuth(async ({ params }) => {
     try {
-        const { id } = params;
+        let { id } = params;
         if (!id) {
             return handleApiError({ message: 'Template ID is required.' }, 400);
         }

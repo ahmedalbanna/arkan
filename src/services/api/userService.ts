@@ -168,14 +168,14 @@ interface SendNotificationVariables {
  * @returns A promise that resolves with a success message.
  */
 export async function sendNotificationApi(variables: SendNotificationVariables, token: string): Promise<{ messageId: string }> {
-    const response = await fetch('/api/admin/send-notification', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(variables),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to send notification.');
-    }
-    return response.json();
+  const response = await fetch('/api/admin/notifications/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify(variables),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to send notification.');
+  }
+  return response.json();
 }

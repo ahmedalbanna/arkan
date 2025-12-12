@@ -13,7 +13,7 @@ interface AnalyzeContextVariables {
 
 export async function analyzeContextApi(variables: AnalyzeContextVariables): Promise<AnalyzeContextOutput> {
   const { prompt, contextFiles, token } = variables;
-  const response = await fetch('/api/analyze-context', {
+  const response = await fetch('/api/actions/analyze-context', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
     body: JSON.stringify({ prompt, contextFiles }),

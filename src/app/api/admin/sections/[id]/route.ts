@@ -14,18 +14,18 @@ const SectionUpdateSchema = z.object({
 // PUT to update a section (Admin only)
 export const PUT = withAuth(async ({ request, params }) => {
   try {
-    const sectionId = params.id;
+    let sectionId = params.id;
     if (!sectionId) {
       return handleApiError({ message: 'Section ID is required' }, 400);
     }
-    const body = await request.json();
-    const validation = SectionUpdateSchema.safeParse(body);
+    let body = await request.json();
+    let validation = SectionUpdateSchema.safeParse(body);
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-    const docRef = adminDb.collection('sections').doc(sectionId);
+    let docRef = adminDb.collection('sections').doc(sectionId);
     await docRef.update(validation.data);
-    const updatedDoc = await docRef.get();
+    let updatedDoc = await docRef.get();
     return createApiResponse({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
   } catch (error) {
     return handleApiError(error);
@@ -35,7 +35,7 @@ export const PUT = withAuth(async ({ request, params }) => {
 // DELETE a section (Admin only)
 export const DELETE = withAuth(async ({ params }) => {
   try {
-    const sectionId = params.id;
+    let sectionId = params.id;
     if (!sectionId) {
       return handleApiError({ message: 'Section ID is required' }, 400);
     }

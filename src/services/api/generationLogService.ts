@@ -34,7 +34,7 @@ export async function fetchGenerationLogs(params: FetchLogsParams): Promise<{ lo
     if (userId) queryParams.append('userId', userId);
     if (lastVisibleId) queryParams.append('lastVisibleId', lastVisibleId);
 
-    const response = await fetch(`/api/admin/generations?${queryParams.toString()}`, {
+    const response = await fetch(`/api/admin/logs?${queryParams.toString()}`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }

@@ -1,6 +1,6 @@
 'use client';
 
-const API_ENDPOINT = '/api/image-to-svg';
+const API_ENDPOINT = '/api/svg-conversion';
 
 export async function convertImageToSvgApi(formData: FormData): Promise<string> {
     try {

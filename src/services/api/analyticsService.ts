@@ -16,7 +16,7 @@ export interface UserDashboardStats {
 }
 
 export async function fetchUserStats(token: string): Promise<UserDashboardStats> {
-    const response = await fetch('/api/analytics/user-stats', {
+    const response = await fetch('/api/stats', {
         headers: {
             'Authorization': `Bearer ${token}`
         }

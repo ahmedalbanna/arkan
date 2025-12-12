@@ -78,7 +78,7 @@ export default function LectureGeneratorPage() {
 
         try {
             const token = await user.getIdToken();
-            const response = await fetch('/api/lecture-generator', {
+            const response = await fetch('/api/actions/create-lecture-unit', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

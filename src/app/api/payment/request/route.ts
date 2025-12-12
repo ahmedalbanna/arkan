@@ -1,12 +1,14 @@
-import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
-import { createTransaction } from '@/lib/db/queries';
-import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
+
 import { getStorage } from 'firebase-admin/storage';
+import { createTransaction } from '@/lib/db/queries';
+import { getDatabase } from 'firebase-admin/database';
+import { adminDb } from '@/lib/firebase/server-init';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 export const config = {
-  api: {
-    bodyParser: false,
-  },
+    api: {
+        bodyParser: false,
+    },
 };
 
 export const POST = withAuth(async ({ request }) => {
@@ -56,7 +58,7 @@ export const POST = withAuth(async ({ request }) => {
 
     let adminsSnapshot = await adminDb.collection('users').where('role', '==', 'admin').get();
     if (!adminsSnapshot.empty) {
-      let rtdb = adminRealtimeDb;
+      let rtdb = getDatabase();
       let notificationPayload = {
         title: "New Payment Request",
         description: `User ${userName || userEmail} submitted a payment request for $${price}.`,
@@ -67,9 +69,9 @@ export const POST = withAuth(async ({ request }) => {
       };
 
       let notificationPromises = adminsSnapshot.docs.map(adminDoc => {
-        let adminId = adminDoc.id;
-        let notificationRef = rtdb.ref(`notifications/${adminId}`).push();
-        return notificationRef.set(notificationPayload);
+          let adminId = adminDoc.id;
+          let notificationRef = rtdb.ref(`notifications/${adminId}`).push();
+          return notificationRef.set(notificationPayload);
       });
       await Promise.all(notificationPromises);
     }

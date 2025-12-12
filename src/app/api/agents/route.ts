@@ -1,4 +1,3 @@
-
 // src/app/api/agents/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
 import { handleApiError, createApiResponse, withAuth } from '@/lib/utils/api-utils';
@@ -20,9 +19,9 @@ const agentSchema = z.object({
 
 export const GET = withAuth(async ({ request }) => {
     try {
-        const { searchParams } = new URL(request.url);
-        const category = searchParams.get('category');
-        const enabledOnly = searchParams.get('enabledOnly') !== 'false';
+        let { searchParams } = new URL(request.url);
+        let category = searchParams.get('category');
+        let enabledOnly = searchParams.get('enabledOnly') !== 'false';
 
         let query: FirebaseFirestore.Query = adminDb.collection('agents');
 
@@ -33,8 +32,8 @@ export const GET = withAuth(async ({ request }) => {
             query = query.where('isEnabled', '==', true);
         }
 
-        const snapshot = await query.orderBy('name').get();
-        const agents = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        let snapshot = await query.orderBy('name').get();
+        let agents = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         return createApiResponse(agents, 200);
     } catch (error) {
@@ -45,16 +44,16 @@ export const GET = withAuth(async ({ request }) => {
 
 export const POST = withAuth(async ({ request }) => {
     try {
-        const body = await request.json();
-        const validation = agentSchema.safeParse(body);
+        let body = await request.json();
+        let validation = agentSchema.safeParse(body);
         if (!validation.success) {
             return handleApiError(validation.error);
         }
 
-        const { id, ...agentData } = validation.data;
-        const agentRef = adminDb.collection('agents').doc(id);
+        let { id, ...agentData } = validation.data;
+        let agentRef = adminDb.collection('agents').doc(id);
 
-        const doc = await agentRef.get();
+        let doc = await agentRef.get();
         if (doc.exists) {
             return handleApiError({ message: 'Agent with this ID already exists.' }, 409);
         }

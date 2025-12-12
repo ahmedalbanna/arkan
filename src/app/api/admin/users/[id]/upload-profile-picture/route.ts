@@ -1,55 +1,82 @@
-
 import { getStorage } from 'firebase-admin/storage';
+import { createTransaction } from '@/lib/db/queries';
+import { getDatabase } from 'firebase-admin/database';
 import { adminDb } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
-export const POST = withAuth(async ({ request, params, user }) => {
-    const { id: targetUserId } = params;
+export const config = {
+    api: {
+        bodyParser: false,
+    },
+};
 
-    // Check if the user is an admin or is updating their own profile
-    if (user.role !== 'admin' && user.id !== targetUserId) {
-        return handleApiError({ message: 'Forbidden' }, 403);
+export const POST = withAuth(async ({ request }) => {
+  try {
+    let formData = await request.formData();
+    let file = formData.get('file') as File | null;
+    let userId = formData.get('userId') as string | null;
+    let planId = formData.get('planId') as string | null;
+    let planName = formData.get('planName') as string | null;
+    let credits = formData.get('credits') as string | null;
+    let price = formData.get('price') as string | null;
+    let userName = formData.get('userName') as string | null;
+    let userEmail = formData.get('userEmail') as string | null;
+
+    if (!file || !userId || !planId || !credits || !price) {
+      return handleApiError({ message: 'Missing required fields.' }, 400);
     }
 
-    try {
-        const formData = await request.formData();
-        const file = formData.get('file') as File | null;
+    let storage = getStorage();
+    let bucket = storage.bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'arkan-docudec.appspot.com');
+    let fileName = `payment_proofs/${userId}/${Date.now()}-${file.name}`;
 
-        if (!file) {
-            return handleApiError({ message: 'No file uploaded.' }, 400);
-        }
+    let fileBuffer = Buffer.from(await file.arrayBuffer());
 
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-        if (!allowedTypes.includes(file.type)) {
-            return handleApiError({ message: 'Invalid file type. Only JPG, PNG, and WebP are allowed.' }, 400);
-        }
+    await bucket.file(fileName).save(fileBuffer, {
+      metadata: { contentType: file.type },
+    });
 
-        const storage = getStorage();
-        const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
-        if (!bucketName) {
-            throw new Error("Firebase Storage bucket name not configured.");
-        }
-        const bucket = storage.bucket(bucketName);
-        const fileName = `profile_pictures/${targetUserId}/${Date.now()}-${file.name}`;
+    let [fileUrl] = await bucket.file(fileName).getSignedUrl({
+      action: 'read',
+      expires: '03-09-2491'
+    });
 
-        const fileBuffer = Buffer.from(await file.arrayBuffer());
+    let transactionData = {
+      userId,
+      planId,
+      planName: planName || 'Unknown Plan',
+      credits: parseInt(credits, 10),
+      price: parseFloat(price),
+      userName: userName || 'N/A',
+      userEmail: userEmail || 'N/A',
+      status: 'pending' as const,
+      proofUrl: fileUrl,
+    };
 
-        const fileUpload = bucket.file(fileName);
-        await fileUpload.save(fileBuffer, {
-            metadata: { contentType: file.type },
-        });
+    let { id: transactionId } = await createTransaction(transactionData);
 
-        await fileUpload.makePublic();
-        const publicUrl = fileUpload.publicUrl();
+    let adminsSnapshot = await adminDb.collection('users').where('role', '==', 'admin').get();
+    if (!adminsSnapshot.empty) {
+      let rtdb = getDatabase();
+      let notificationPayload = {
+        title: "New Payment Request",
+        description: `User ${userName || userEmail} submitted a payment request for $${price}.`,
+        icon: "credit-card",
+        isRead: false,
+        createdAt: new Date().toISOString(),
+        link: '/admin/manage-payments'
+      };
 
-        await adminDb.collection('users').doc(targetUserId).update({
-            profilePictureUrl: publicUrl,
-            updatedAt: new Date().toISOString(),
-        });
-
-        return createApiResponse({ profilePictureUrl: publicUrl }, 200);
-
-    } catch (error) {
-        return handleApiError(error);
+      let notificationPromises = adminsSnapshot.docs.map(adminDoc => {
+          let adminId = adminDoc.id;
+          let notificationRef = rtdb.ref(`notifications/${adminId}`).push();
+          return notificationRef.set(notificationPayload);
+      });
+      await Promise.all(notificationPromises);
     }
+
+    return createApiResponse({ message: 'Request submitted successfully for review.', transactionId }, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
 });

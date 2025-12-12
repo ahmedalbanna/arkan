@@ -1,4 +1,3 @@
-
 // src/app/api/agents/[id]/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
 import { handleApiError, createApiResponse, withAuth } from '@/lib/utils/api-utils';
@@ -17,9 +16,9 @@ const agentUpdateSchema = z.object({
 
 export const GET = withAuth(async ({ params }) => {
     try {
-        const { id } = params;
-        const agentRef = adminDb.collection('agents').doc(id);
-        const doc = await agentRef.get();
+        let { id } = params;
+        let agentRef = adminDb.collection('agents').doc(id);
+        let doc = await agentRef.get();
 
         if (!doc.exists) {
             return handleApiError({ message: 'Agent not found' }, 404);
@@ -32,21 +31,21 @@ export const GET = withAuth(async ({ params }) => {
 
 export const PUT = withAuth(async ({ request, params }) => {
     try {
-        const { id } = params;
-        const body = await request.json();
-        const validation = agentUpdateSchema.safeParse(body);
+        let { id } = params;
+        let body = await request.json();
+        let validation = agentUpdateSchema.safeParse(body);
 
         if (!validation.success) {
             return handleApiError(validation.error);
         }
 
-        const agentRef = adminDb.collection('agents').doc(id);
+        let agentRef = adminDb.collection('agents').doc(id);
         await agentRef.update({
             ...validation.data,
             updatedAt: new Date().toISOString(),
         });
 
-        const updatedDoc = await agentRef.get();
+        let updatedDoc = await agentRef.get();
         return createApiResponse({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
     } catch (error) {
         return handleApiError(error);
@@ -55,7 +54,7 @@ export const PUT = withAuth(async ({ request, params }) => {
 
 export const DELETE = withAuth(async ({ params }) => {
     try {
-        const { id } = params;
+        let { id } = params;
         await adminDb.collection('agents').doc(id).delete();
         return createApiResponse({ message: 'Agent deleted successfully' }, 200);
     } catch (error) {
