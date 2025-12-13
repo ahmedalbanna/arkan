@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ExternalContextTypeSchema } from './enums';
+import { ExternalContextTypeSchema, TargetAudienceSchema, ToneSchema } from './enums';
 
 // Base schema for external context files used across flows
 export const BaseContextFileSchema = z.object({
@@ -21,14 +21,8 @@ export const BaseControlsSchema = z
       .string()
       .optional()
       .describe('Additional instructions for generation (e.g., tone, formality).'),
-    targetAudience: z
-      .string()
-      .optional()
-      .describe('The intended audience for the content (e.g., general public, academics).'),
-    tone: z
-      .string()
-      .optional()
-      .describe('Desired tone (e.g., professional, casual, persuasive).'),
+    targetAudience: TargetAudienceSchema.optional().describe('The intended audience for the content.'),
+    tone: ToneSchema.optional().describe('Desired tone (e.g., professional, casual, persuasive).'),
   })
   .strict();
 

@@ -29,6 +29,36 @@ export const QuestionTypeSchema = z.enum([
 export type QuestionType = z.infer<typeof QuestionTypeSchema>;
 
 export const ParaphraseModeSchema = z.enum(['standard', 'fluent', 'formal', 'creative', 'simplify']);
+
+// Curated tone options for generation controls
+export const ToneSchema = z.enum([
+  'professional',
+  'formal',
+  'neutral',
+  'friendly',
+  'casual',
+  'persuasive',
+  'informative',
+  'confident',
+  'empathetic',
+  'enthusiastic',
+]);
+export type Tone = z.infer<typeof ToneSchema>;
+
+// Curated target audiences for generation controls
+export const TargetAudienceSchema = z.enum([
+  'general-public',
+  'students',
+  'academics',
+  'professionals',
+  'executives',
+  'developers',
+  'designers',
+  'marketers',
+  'product-managers',
+  'healthcare-professionals',
+]);
+export type TargetAudience = z.infer<typeof TargetAudienceSchema>;
 export type ParaphraseMode = z.infer<typeof ParaphraseModeSchema>;
 
 export const SummarizeLengthSchema = z.enum(['short', 'medium', 'long']);

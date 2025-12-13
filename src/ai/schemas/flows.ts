@@ -526,7 +526,7 @@ export type GrammarCheckOutput = z.infer<typeof GrammarCheckOutputSchema>;
 // humanize-text.ts
 export const HumanizeTextInputSchema = BaseTextInputSchema.extend({
     flow: z.literal('humanize-text'),
-});
+}).merge(BaseControlsSchema);
 export type HumanizeTextInput = z.infer<typeof HumanizeTextInputSchema>;
 
 export const HumanizeTextOutputSchema = z.object({
@@ -702,11 +702,16 @@ export const StyleEditorOutputSchema = z.object({
 export type StyleEditorOutput = z.infer<typeof StyleEditorOutputSchema>;
 
 // Readability Enhancer
-export const ReadabilityEnhancerInputSchema = z.object({
+export const ReadabilityEnhancerInputSchema = z
+  .object({
     flow: z.literal('readability-enhancer'),
     text: z.string().describe('The text to be enhanced for readability.'),
-    targetLevel: z.enum(['elementary', 'middle-school', 'high-school', 'college', 'graduate']).optional().describe('The target reading level.'),
-});
+    targetLevel: z
+      .enum(['elementary', 'middle-school', 'high-school', 'college', 'graduate'])
+      .optional()
+      .describe('The target reading level.'),
+  })
+  .merge(BaseControlsSchema);
 export type ReadabilityEnhancerInput = z.infer<typeof ReadabilityEnhancerInputSchema>;
 
 export const ReadabilityEnhancerOutputSchema = z.object({
@@ -734,11 +739,16 @@ export const ConcisenessCheckerOutputSchema = z.object({
 export type ConcisenessCheckerOutput = z.infer<typeof ConcisenessCheckerOutputSchema>;
 
 // Clarity Advisor
-export const ClarityAdvisorInputSchema = z.object({
+export const ClarityAdvisorInputSchema = z
+  .object({
     flow: z.literal('clarity-advisor'),
     text: z.string().describe('The text to be analyzed and improved for clarity.'),
-    focusAreas: z.array(z.string()).optional().describe('Specific areas to focus on (e.g., "sentence structure", "word choice", "logical flow").'),
-});
+    focusAreas: z
+      .array(z.string())
+      .optional()
+      .describe('Specific areas to focus on (e.g., "sentence structure", "word choice", "logical flow").'),
+  })
+  .merge(BaseControlsSchema);
 export type ClarityAdvisorInput = z.infer<typeof ClarityAdvisorInputSchema>;
 
 export const ClarityAdvisorOutputSchema = z.object({
