@@ -285,6 +285,7 @@ export function GenerationTools() {
       const externalContextFiles = (project.externalContext || []).filter((_, index) => context.externalContext?.[index]);
 
       const body = {
+        flow: 'generate-section',
         sectionToGenerate: section.id as SectionName,
         prompt: section.prompt,
         otherSections: otherSectionsContext,
