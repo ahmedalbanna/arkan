@@ -42,20 +42,32 @@ export const ToneSchema = z.enum([
   'confident',
   'empathetic',
   'enthusiastic',
+  'authoritative',
+  'approachable',
+  'analytical',
+  'conversational',
 ]);
 export type Tone = z.infer<typeof ToneSchema>;
 
 // Curated target audiences for generation controls
 export const TargetAudienceSchema = z.enum([
   'general-public',
+  'non-technical-users',
   'students',
   'academics',
   'professionals',
+  'stakeholders',
+  'investors',
+  'vcs',
   'executives',
   'developers',
+  'qa-engineers',
   'designers',
   'marketers',
+  'sales',
+  'customer-support',
   'product-managers',
+  'project-managers',
   'healthcare-professionals',
 ]);
 export type TargetAudience = z.infer<typeof TargetAudienceSchema>;

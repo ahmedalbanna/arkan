@@ -523,11 +523,13 @@ export type ImageToTextOutput = z.infer<typeof ImageToTextOutputSchema>;
 
 
 // improve-report-markdown.ts
-export const ImproveMarkdownInputSchema = z.object({
+export const ImproveMarkdownInputSchema = z
+  .object({
     flow: z.literal('improve-report-markdown'),
     markdownContent: z.string().min(20, 'Markdown content is too short.'),
     userPrompt: z.string().min(10, 'Instructions for the AI must be at least 10 characters.'),
-});
+  })
+  .merge(BaseControlsSchema);
 export type ImproveMarkdownInput = z.infer<typeof ImproveMarkdownInputSchema>;
 
 export const ImproveMarkdownOutputSchema = z.object({
@@ -537,11 +539,15 @@ export type ImproveMarkdownOutput = z.infer<typeof ImproveMarkdownOutputSchema>;
 
 
 // manipulate-text.ts
-export const ManipulateTextInputSchema = z.object({
+export const ManipulateTextInputSchema = z
+  .object({
     flow: z.literal('manipulate-text'),
     textToManipulate: z.string().describe('The original text to be modified.'),
-    command: z.string().describe('The instruction for how to modify the text (e.g., "summarize", "expand on this topic", "rewrite this to be more formal").'),
-});
+    command: z.string().describe(
+      'The instruction for how to modify the text (e.g., "summarize", "expand on this topic", "rewrite this to be more formal").',
+    ),
+  })
+  .merge(BaseControlsSchema);
 export type ManipulateTextInput = z.infer<typeof ManipulateTextInputSchema>;
 
 export const ManipulateTextOutputSchema = z.object({
@@ -693,11 +699,18 @@ export const ReadabilityEnhancerOutputSchema = z.object({
 export type ReadabilityEnhancerOutput = z.infer<typeof ReadabilityEnhancerOutputSchema>;
 
 // Conciseness Checker
-export const ConcisenessCheckerInputSchema = z.object({
+export const ConcisenessCheckerInputSchema = z
+  .object({
     flow: z.literal('conciseness-checker'),
     text: z.string().describe('The text to be checked and improved for conciseness.'),
-    targetReduction: z.number().min(0).max(50).optional().describe('Target percentage reduction in word count (0-50%).'),
-});
+    targetReduction: z
+      .number()
+      .min(0)
+      .max(50)
+      .optional()
+      .describe('Target percentage reduction in word count (0-50%).'),
+  })
+  .merge(BaseControlsSchema);
 export type ConcisenessCheckerInput = z.infer<typeof ConcisenessCheckerInputSchema>;
 
 export const ConcisenessCheckerOutputSchema = z.object({
@@ -746,11 +759,13 @@ export const TopicExplainerOutputSchema = z.object({
 export type TopicExplainerOutput = z.infer<typeof TopicExplainerOutputSchema>;
 
 // translate-text.ts
-export const TranslateTextInputSchema = z.object({
+export const TranslateTextInputSchema = z
+  .object({
     flow: z.literal('translate-text'),
     text: z.string().describe('The text to be translated.'),
     targetLang: TargetLanaguage.describe('The target language (e.g., "English", "Arabic").'),
-});
+  })
+  .merge(BaseControlsSchema);
 export type TranslateTextInput = z.infer<typeof TranslateTextInputSchema>;
 
 export const TranslateTextOutputSchema = z.object({
