@@ -6,6 +6,7 @@
 
 export * from './enums';
 export * from './flows';
+export * from './base-schemas';
 export { SolveAssignmentsInputSchema, SolveAssignmentsOutputSchema } from './flows';
 export type { SolveAssignmentsInput, SolveAssignmentsOutput } from './flows';
 export { GenerateProjectBlueprintInputSchema, GenerateProjectBlueprintOutputSchema } from './flows';
