@@ -22,7 +22,7 @@ const universitySubjectMaterialPrompt = ai.definePrompt({
 4.  **Format as Markdown:** Use clear and consistent Markdown for headings, lists, bold text, etc., to ensure readability.
 5.  **Return Only the Document:** Your final output must be only the complete markdown content of the document, with no additional commentary.
 
-**Topic:** {{{topic}}}
+**Topic:** {{{text}}}
 **Document Type:** {{{documentType}}}
 
 {{#if knowledge}}
@@ -50,7 +50,7 @@ const defaultWriteDocumentPrompt = ai.definePrompt({
   model: 'googleai/gemini-2.5-flash-lite',
   prompt: `You are an expert writer and researcher. Your task is to generate a complete, well-structured, and comprehensive document based on the user's request.
 
-**Topic:** {{{topic}}}
+**Topic:** {{{text}}}
 **Document Type:** {{{documentType}}}
 
 {{#if knowledge}}

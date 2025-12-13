@@ -38,7 +38,7 @@ const literatureReviewPrompt = ai.definePrompt({
 
 **Topic:**
 ---
-{{{topic}}}
+{{{text}}}
 ---
 
 **Focus Areas (if specified):**

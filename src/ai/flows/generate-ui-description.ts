@@ -8,7 +8,7 @@ const uiDescriptionFlow = ai.defineFlow({
     inputSchema: GenerateUIDescriptionInputSchema,
     outputSchema: GenerateUIDescriptionOutputSchema,
 }, async (input) => {
-    const { projectFeatures, designType } = input;
+    const { text, designType } = input;
 
     const uiPrompt = ai.definePrompt({
         name: 'generateUiDescriptionPrompt',
@@ -16,13 +16,13 @@ const uiDescriptionFlow = ai.defineFlow({
         output: { schema: GenerateUIDescriptionOutputSchema },
         model: 'googleai/gemini-2.5-flash-lite',
         system: `You are a senior UI/UX designer and product manager. Your task is to take a list of project features and generate a comprehensive, screen-by-screen UI/UX workflow description for either a website or mobile app. The output must be well-structured markdown.`,
-        prompt: `Based on the following project features for a new ${designType}, generate a detailed UI/UX workflow. 
+        prompt: `Based on the following project features for a new ${designType}, generate a detailed UI/UX workflow.
 
 For each core feature, describe the necessary screens or pages. For each screen, detail its primary purpose and list the key UI elements (e.g., buttons, forms, navigation bars, content areas). Think about the user journey and how they will navigate between screens.
 
 **Project Features:**
 ---
-{{{projectFeatures}}}
+{{{text}}}
 ---
 
 **Output Format (Markdown):**
@@ -35,11 +35,11 @@ For each core feature, describe the necessary screens or pages. For each screen,
         }
     });
 
-    const { output } = await uiPrompt({ projectFeatures, designType });
+    const { output } = await uiPrompt(input);
     if (!output) {
         throw new Error("Failed to generate UI description.");
     }
-    
+
     return output;
 });
 
@@ -51,4 +51,3 @@ export async function generateUiDescription(input: GenerateUIDescriptionInput): 
     return uiDescriptionFlow(validation.data);
 }
 
-    

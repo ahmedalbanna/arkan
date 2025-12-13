@@ -34,7 +34,7 @@ const factRetrievalPrompt = ai.definePrompt({
 
 **Fact Query:**
 ---
-{{{factQuery}}}
+{{{text}}}
 ---
 
 **Output Requirements:**

@@ -24,10 +24,10 @@ Your tasks are to:
 
 ---
 **User Instructions:**
-{{{userPrompt}}}
+{{{prompt}}}
 ---
 **Original Markdown Document:**
-{{{markdownContent}}}
+{{{text}}}
 ---
 `,
 });

@@ -136,7 +136,7 @@ const generateAgentConfigPrompt = ai.definePrompt({
 **Provided Context Files for Analysis:**
 The following files have been provided to give you more context about the desired agent's domain and tasks. Analyze them carefully to inform your generated configuration.
 {{#each contextFiles}}
---- File: {{this.name}} (Type: {{this.type}}) ---
+--- File: {{this.fileName}} (Type: {{this.type}}) ---
 {{media url=this.content}}
 ---
 {{/each}}

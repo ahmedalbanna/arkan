@@ -8,7 +8,7 @@ import { ExternalContextTypeSchema, TargetAudienceSchema, ToneSchema } from './e
 
 // Base schema for prompt
 export const BasePromptSchema = z.object({
-  prompt: z.string().min(10)
+  prompt: z.string().min(10, 'Prompt must be at least 10 characters.')
 });
 
 /**
@@ -18,12 +18,6 @@ export const BaseTextInputSchema = z.object({
   text: z.string().min(1, 'Input text cannot be empty.'),
 });
 
-/**
- * Base schema for flows that operate on a given topic.
- */
-export const BaseTopicInputSchema = z.object({
-  topic: z.string().min(1, 'Topic cannot be empty.'),
-});
 
 /**
  * Base schema for flows that accept a file as a data URI.
@@ -79,15 +73,6 @@ export const BaseTextSchema = z.object({
   text: z.string().min(1, 'Text cannot be empty').transform((s) => s.trim()),
 });
 
-// A looser context file shape used by some legacy flows (name vs fileName)
-export const BaseLooseContextFileSchema = z.union([
-  BaseContextFileSchema,
-  z.object({
-    name: z.string(),
-    type: z.string(),
-    content: z.string(), // data URI or text
-  }),
-]);
 
 // Common combined generation schema (external context + generation controls)
 export const BaseGenerationSchema = BaseExternalContextSchema.merge(BaseControlsSchema);

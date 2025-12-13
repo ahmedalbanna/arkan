@@ -27,7 +27,7 @@ If the source material contains multiple distinct sources, generate a citation f
 
 **Source Material:**
 ---
-{{{sourceText}}}
+{{{text}}}
 ---
 `,
 });

@@ -36,7 +36,7 @@ Follow these guidelines:
 
 Raw Text Input:
 ---
-{{{rawText}}}
+{{{text}}}
 ---
 `,
       config: {
