@@ -9,6 +9,7 @@ import {
     QuestionTypeSchema,
     SectionNameSchema,
     SummarizeLengthSchema,
+    TargetLanaguage,
     TargetReadingLevelSchema
 } from './enums';
 
@@ -748,9 +749,8 @@ export type TopicExplainerOutput = z.infer<typeof TopicExplainerOutputSchema>;
 export const TranslateTextInputSchema = z.object({
     flow: z.literal('translate-text'),
     text: z.string().describe('The text to be translated.'),
-    targetLang: z.string().describe('The target language (e.g., "English", "Arabic").'),
+    targetLang: TargetLanaguage.describe('The target language (e.g., "English", "Arabic").'),
 });
-export type TranslateVariables = z.infer<typeof TranslateTextInputSchema>;
 export type TranslateTextInput = z.infer<typeof TranslateTextInputSchema>;
 
 export const TranslateTextOutputSchema = z.object({

@@ -1,14 +1,14 @@
 import { z } from 'zod';
 
 export const DiagramTypeSchema = z.enum([
-    'useCase',
-    'class',
-    'sequence',
-    'activity',
-    'component',
-    'archimate',
-    'er',
-    'dfd'
+  'useCase',
+  'class',
+  'sequence',
+  'activity',
+  'component',
+  'archimate',
+  'er',
+  'dfd'
 ]);
 export type DiagramType = z.infer<typeof DiagramTypeSchema>;
 
@@ -22,9 +22,9 @@ export const CitationStyleSchema = z.enum(['apa', 'mla', 'chicago', 'ieee']);
 export type CitationStyle = z.infer<typeof CitationStyleSchema>;
 
 export const QuestionTypeSchema = z.enum([
-    'multiple-choice',
-    'true-false',
-    'direct-question',
+  'multiple-choice',
+  'true-false',
+  'direct-question',
 ]);
 export type QuestionType = z.infer<typeof QuestionTypeSchema>;
 
@@ -70,3 +70,6 @@ export type SummarizeLength = z.infer<typeof SummarizeLengthSchema>;
 
 export const ExternalContextTypeSchema = z.enum(['context', 'example', 'question', 'textbook', 'guidelines']);
 export type ExternalContextType = z.infer<typeof ExternalContextTypeSchema>;
+
+export const TargetLanaguage = z.enum(['English', 'Arabic']);
+export type TargetLanaguage = z.infer<typeof TargetLanaguage>;
