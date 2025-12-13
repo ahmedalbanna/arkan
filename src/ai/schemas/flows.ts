@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-import { BaseControlsSchema, BaseExternalContextSchema, BaseGenerationSchema, BaseLooseContextFileSchema, BaseWebSearchSchema } from './base-schemas';
+import { BaseControlsSchema, BaseExternalContextSchema, BaseGenerationSchema, BaseLooseContextFileSchema, BasePromptSchema, BaseTextInputSchema, BaseTopicInputSchema, BaseWebSearchSchema } from './base-schemas';
 import {
     CitationStyleSchema,
     ClaimStatusSchema,
@@ -8,34 +8,10 @@ import {
     ParaphraseModeSchema,
     QuestionTypeSchema,
     SectionNameSchema,
-    SummarizeLengthSchema
+    SummarizeLengthSchema,
+    TargetReadingLevelSchema
 } from './enums';
 
-
-// ============================================================================
-// BASE SCHEMAS
-// ============================================================================
-
-/**
- * Base schema for flows that take a single string of text as input.
- */
-const BaseTextInputSchema = z.object({
-    text: z.string().min(1, 'Input text cannot be empty.'),
-});
-
-/**
- * Base schema for flows that operate on a given topic.
- */
-const BaseTopicInputSchema = z.object({
-    topic: z.string().min(1, 'Topic cannot be empty.'),
-});
-
-/**
- * Base schema for flows that accept a file as a data URI.
- */
-const BaseDataUriInputSchema = z.object({
-    dataUri: z.string().url().startsWith('data:', 'Input must be a valid data URI.'),
-});
 
 // ============================================================================
 // INDIVIDUAL FLOW SCHEMAS (EXTENDING BASE SCHEMAS)
@@ -199,9 +175,8 @@ export const FactRetrievalOutputSchema = z.object({
 export type FactRetrievalOutput = z.infer<typeof FactRetrievalOutputSchema>;
 
 // analyze-context.ts
-export const AnalyzeContextInputSchema = z.object({
+export const AnalyzeContextInputSchema = BasePromptSchema.extend({
     flow: z.literal('analyze-context'),
-    prompt: z.string().describe("The user's question or instruction for what to extract or analyze from the context files."),
     contextFiles: z.array(BaseLooseContextFileSchema).describe(
         'An array of context files (text, images, PDFs as data URIs) to be analyzed.'
     ),
@@ -217,7 +192,7 @@ export type AnalyzeContextOutput = z.infer<typeof AnalyzeContextOutputSchema>;
 // bias-checker.ts
 export const BiasCheckInputSchema = BaseTextInputSchema.extend({
     flow: z.literal('bias-checker'),
-});
+}).merge(BaseControlsSchema);
 export type BiasCheckInput = z.infer<typeof BiasCheckInputSchema>;
 
 export const BiasIssueSchema = z.object({
@@ -238,7 +213,7 @@ export type BiasCheckOutput = z.infer<typeof BiasCheckOutputSchema>;
 // sentence-structure-checker.ts
 export const SentenceStructureCheckInputSchema = BaseTextInputSchema.extend({
     flow: z.literal('sentence-structure-checker'),
-});
+}).merge(BaseControlsSchema);
 export type SentenceStructureCheckInput = z.infer<typeof SentenceStructureCheckInputSchema>;
 
 export const SentenceStructureIssueSchema = z.object({
@@ -267,7 +242,7 @@ export type SentenceStructureCheckOutput = z.infer<typeof SentenceStructureCheck
 // detect-ai-content.ts
 export const DetectAIInputSchema = BaseTextInputSchema.extend({
     flow: z.literal('detect-ai-content'),
-});
+}).merge(BaseControlsSchema);
 export type DetectAIInput = z.infer<typeof DetectAIInputSchema>;
 
 export const DetectAIOutputSchema = z.object({
@@ -297,9 +272,8 @@ export const FactCheckOutputSchema = z.object({
 export type FactCheckOutput = z.infer<typeof FactCheckOutputSchema>;
 
 // generate-agent-config.ts
-export const GenerateAgentConfigInputSchema = z.object({
+export const GenerateAgentConfigInputSchema = BasePromptSchema.extend({
     flow: z.literal('generate-agent-config'),
-    prompt: z.string().describe("The user's description of the agent to create."),
     includeJsonOutput: z.boolean().optional().describe(
         "Whether to include a sample JSON output structure in the agent's prompt."
     ),
@@ -370,9 +344,8 @@ export type GeneratePlantUMLOutput = z.infer<typeof GeneratePlantUMLOutputSchema
 
 
 // generate-image.ts
-export const GenerateImageInputSchema = z.object({
+export const GenerateImageInputSchema = BasePromptSchema.extend({
     flow: z.literal('generate-image'),
-    prompt: z.string().describe("A text description of the image to be generated."),
 });
 export type GenerateImageInput = z.infer<typeof GenerateImageInputSchema>;
 
@@ -507,7 +480,7 @@ export const CorrectionSchema = z.object({
 
 export const GrammarCheckInputSchema = BaseTextInputSchema.extend({
     flow: z.literal('grammar-checker'),
-});
+}).merge(BaseControlsSchema);
 export type GrammarCheckInput = z.infer<typeof GrammarCheckInputSchema>;
 
 export const GrammarCheckOutputSchema = z.object({
@@ -588,7 +561,7 @@ export const MatchedSourceSchema = z.object({
 
 export const PlagiarismCheckInputSchema = BaseTextInputSchema.extend({
     flow: z.literal('plagiarism-checker'),
-});
+}).merge(BaseControlsSchema);
 export type PlagiarismCheckInput = z.infer<typeof PlagiarismCheckInputSchema>;
 
 export const PlagiarismCheckOutputSchema = z.object({
@@ -703,15 +676,12 @@ export type StyleEditorOutput = z.infer<typeof StyleEditorOutputSchema>;
 
 // Readability Enhancer
 export const ReadabilityEnhancerInputSchema = z
-  .object({
-    flow: z.literal('readability-enhancer'),
-    text: z.string().describe('The text to be enhanced for readability.'),
-    targetLevel: z
-      .enum(['elementary', 'middle-school', 'high-school', 'college', 'graduate'])
-      .optional()
-      .describe('The target reading level.'),
-  })
-  .merge(BaseControlsSchema);
+    .object({
+        flow: z.literal('readability-enhancer'),
+        text: z.string().describe('The text to be enhanced for readability.'),
+        targetLevel: TargetReadingLevelSchema.optional().describe('The target reading level.'),
+    })
+    .merge(BaseControlsSchema);
 export type ReadabilityEnhancerInput = z.infer<typeof ReadabilityEnhancerInputSchema>;
 
 export const ReadabilityEnhancerOutputSchema = z.object({
@@ -740,15 +710,15 @@ export type ConcisenessCheckerOutput = z.infer<typeof ConcisenessCheckerOutputSc
 
 // Clarity Advisor
 export const ClarityAdvisorInputSchema = z
-  .object({
-    flow: z.literal('clarity-advisor'),
-    text: z.string().describe('The text to be analyzed and improved for clarity.'),
-    focusAreas: z
-      .array(z.string())
-      .optional()
-      .describe('Specific areas to focus on (e.g., "sentence structure", "word choice", "logical flow").'),
-  })
-  .merge(BaseControlsSchema);
+    .object({
+        flow: z.literal('clarity-advisor'),
+        text: z.string().describe('The text to be analyzed and improved for clarity.'),
+        focusAreas: z
+            .array(z.string())
+            .optional()
+            .describe('Specific areas to focus on (e.g., "sentence structure", "word choice", "logical flow").'),
+    })
+    .merge(BaseControlsSchema);
 export type ClarityAdvisorInput = z.infer<typeof ClarityAdvisorInputSchema>;
 
 export const ClarityAdvisorOutputSchema = z.object({

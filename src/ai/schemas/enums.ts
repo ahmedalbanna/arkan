@@ -62,6 +62,10 @@ export type TargetAudience = z.infer<typeof TargetAudienceSchema>;
 export type ParaphraseMode = z.infer<typeof ParaphraseModeSchema>;
 
 export const SummarizeLengthSchema = z.enum(['short', 'medium', 'long']);
+
+// Reading levels for readability-related operations
+export const TargetReadingLevelSchema = z.enum(['elementary', 'middle-school', 'high-school', 'college', 'graduate']);
+export type TargetReadingLevel = z.infer<typeof TargetReadingLevelSchema>;
 export type SummarizeLength = z.infer<typeof SummarizeLengthSchema>;
 
 export const ExternalContextTypeSchema = z.enum(['context', 'example', 'question', 'textbook', 'guidelines']);

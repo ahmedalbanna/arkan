@@ -1,6 +1,37 @@
 import { z } from 'zod';
 import { ExternalContextTypeSchema, TargetAudienceSchema, ToneSchema } from './enums';
 
+// ============================================================================
+// BASE SCHEMAS
+// ============================================================================
+
+
+// Base schema for prompt
+export const BasePromptSchema = z.object({
+  prompt: z.string().min(10)
+});
+
+/**
+ * Base schema for flows that take a single string of text as input.
+ */
+export const BaseTextInputSchema = z.object({
+  text: z.string().min(1, 'Input text cannot be empty.'),
+});
+
+/**
+ * Base schema for flows that operate on a given topic.
+ */
+export const BaseTopicInputSchema = z.object({
+  topic: z.string().min(1, 'Topic cannot be empty.'),
+});
+
+/**
+ * Base schema for flows that accept a file as a data URI.
+ */
+export const BaseDataUriInputSchema = z.object({
+  dataUri: z.string().url().startsWith('data:', 'Input must be a valid data URI.'),
+});
+
 // Base schema for external context files used across flows
 export const BaseContextFileSchema = z.object({
   fileName: z.string().min(1),
