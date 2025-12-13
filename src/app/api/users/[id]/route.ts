@@ -8,7 +8,7 @@ import { withAuth, handleApiError, createApiResponse } from "@/lib/utils/api-uti
 // GET a single user profile.
 export const GET = withAuth(async ({ params, user: requester }) => {
     try {
-        const {id:targetUserId} = params;
+        const { id: targetUserId } = await params;
 
         // Authorization check: either admin or self
         if (requester.role !== 'admin' && requester.id !== targetUserId) {
@@ -27,19 +27,19 @@ export const GET = withAuth(async ({ params, user: requester }) => {
 
 
 const adminUpdateUserSchema = z.object({
-  name: z.string().min(1, 'Name is required').optional(),
-  email: z.string().email('Invalid email address').optional(),
-  bio: z.string().optional(),
-  credits: z.coerce.number().int().min(0).optional(),
-  role: z.enum(['user', 'admin']).optional(),
-  hasCompletedOnboarding: z.boolean().optional(),
+    name: z.string().min(1, 'Name is required').optional(),
+    email: z.string().email('Invalid email address').optional(),
+    bio: z.string().optional(),
+    credits: z.coerce.number().int().min(0).optional(),
+    role: z.enum(['user', 'admin']).optional(),
+    hasCompletedOnboarding: z.boolean().optional(),
 });
 
 const userUpdateSchema = z.object({
-  name: z.string().min(1, 'Name is required').optional(),
-  email: z.string().email('Invalid email address').optional(),
-  bio: z.string().optional(),
-  hasCompletedOnboarding: z.boolean().optional(),
+    name: z.string().min(1, 'Name is required').optional(),
+    email: z.string().email('Invalid email address').optional(),
+    bio: z.string().optional(),
+    hasCompletedOnboarding: z.boolean().optional(),
 });
 
 
@@ -79,7 +79,7 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
         const updatedUser = await getUserProfile(userId);
         return createApiResponse(updatedUser, 200);
     } catch (error: any) {
-        if(error.code === 'auth/email-already-exists') {
+        if (error.code === 'auth/email-already-exists') {
             return handleApiError({ message: "This email is already in use by another account." }, 409);
         }
         return handleApiError(error);
