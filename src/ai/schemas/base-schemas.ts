@@ -18,6 +18,13 @@ export const BaseTextInputSchema = z.object({
   text: z.string().min(1, 'Input text cannot be empty.'),
 });
 
+/**
+ * Base schema for flows that operate on a given topic.
+ */
+export const BaseTopicInputSchema = z.object({
+  topic: z.string().min(1, 'Topic cannot be empty.'),
+});
+
 
 /**
  * Base schema for flows that accept a file as a data URI.

@@ -25,7 +25,7 @@ const topicExplainerPrompt = ai.definePrompt({
 
 **Topic to Explain:**
 ---
-{{{text}}}
+{{{topic}}}
 ---
 `,
     config: {

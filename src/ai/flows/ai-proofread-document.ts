@@ -23,7 +23,7 @@ const prompt = ai.definePrompt({
   model: 'googleai/gemini-2.5-flash-lite',
   prompt: `You are an AI proofreading assistant. Review the document text and provide suggestions for spelling, grammar, and style corrections.
 
-Document Text: {{{text}}}
+Document Text: {{{documentText}}}
 
 Constraints (if any): {{{constraints}}}
 

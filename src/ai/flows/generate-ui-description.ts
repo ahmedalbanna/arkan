@@ -8,7 +8,7 @@ const uiDescriptionFlow = ai.defineFlow({
     inputSchema: GenerateUIDescriptionInputSchema,
     outputSchema: GenerateUIDescriptionOutputSchema,
 }, async (input) => {
-    const { text, designType } = input;
+    const { projectFeatures, designType } = input;
 
     const uiPrompt = ai.definePrompt({
         name: 'generateUiDescriptionPrompt',
@@ -22,7 +22,7 @@ For each core feature, describe the necessary screens or pages. For each screen,
 
 **Project Features:**
 ---
-{{{text}}}
+{{{projectFeatures}}}
 ---
 
 **Output Format (Markdown):**
@@ -35,7 +35,7 @@ For each core feature, describe the necessary screens or pages. For each screen,
         }
     });
 
-    const { output } = await uiPrompt(input);
+    const { output } = await uiPrompt({ projectFeatures, designType });
     if (!output) {
         throw new Error("Failed to generate UI description.");
     }

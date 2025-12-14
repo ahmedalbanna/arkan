@@ -18,7 +18,7 @@ const diagramPromptConfig: Record<DiagramType, { system: string; prompt: string 
 - Connect actors to use cases to show interactions.
 - The code must start with '@startuml' and end with '@enduml'.
 - Do not include any explanations, comments, or markdown formatting in your output. Return only the raw PlantUML code.`,
-    prompt: `Description:\n---\n{{{text}}}\n---`,
+    prompt: `Description:\n---\n{{{description}}}\n---`,
   },
   class: {
     system: `You are an expert software architect. Your task is to generate a valid PlantUML class diagram.
@@ -27,7 +27,7 @@ const diagramPromptConfig: Record<DiagramType, { system: string; prompt: string 
 - Use visibility markers (+, -, #).
 - The code must start with '@startuml' and end with '@enduml'.
 - Do not include any explanations, comments, or markdown formatting in your output. Return only the raw PlantUML code.`,
-    prompt: `Description:\n---\n{{{text}}}\n---`,
+    prompt: `Description:\n---\n{{{description}}}\n---`,
   },
   sequence: {
     system: `You are an expert systems designer. Your task is to generate a valid PlantUML sequence diagram.
@@ -36,7 +36,7 @@ const diagramPromptConfig: Record<DiagramType, { system: string; prompt: string 
 - Include at least one 'alt/else' block for conditional logic if described.
 - The code must start with '@startuml' and end with '@enduml'.
 - Do not include any explanations, comments, or markdown formatting in your output. Return only the raw PlantUML code.`,
-    prompt: `Description:\n---\n{{{text}}}\n---`,
+    prompt: `Description:\n---\n{{{description}}}\n---`,
   },
   activity: {
     system: `You are a business process modeler. Your task is to generate a valid PlantUML activity diagram.
@@ -46,7 +46,7 @@ const diagramPromptConfig: Record<DiagramType, { system: string; prompt: string 
 - Use partitions for different actors or departments if mentioned.
 - The code must start with '@startuml' and end with '@enduml'.
 - Do not include any explanations, comments, or markdown formatting in your output. Return only the raw PlantUML code.`,
-    prompt: `Description:\n---\n{{{text}}}\n---`,
+    prompt: `Description:\n---\n{{{description}}}\n---`,
   },
   component: {
     system: `You are a software architect. Your task is to generate a valid PlantUML component diagram.
@@ -56,7 +56,7 @@ const diagramPromptConfig: Record<DiagramType, { system: string; prompt: string 
 - Group related components in a package if applicable.
 - The code must start with '@startuml' and end with '@enduml'.
 - Do not include any explanations, comments, or markdown formatting in your output. Return only the raw PlantUML code.`,
-    prompt: `Description:\n---\n{{{text}}}\n---`,
+    prompt: `Description:\n---\n{{{description}}}\n---`,
   },
   archimate: {
     system: `You are an enterprise architect. Your task is to generate a valid ArchiMate diagram using PlantUML.
@@ -65,7 +65,7 @@ const diagramPromptConfig: Record<DiagramType, { system: string; prompt: string 
 - Use proper ArchiMate relationship types (e.g., realization, serving).
 - The code must start with '@startuml' and end with '@enduml'.
 - Do not include any explanations, comments, or markdown formatting in your output. Return only the raw PlantUML code.`,
-    prompt: `Description:\n---\n{{{text}}}\n---`,
+    prompt: `Description:\n---\n{{{description}}}\n---`,
   },
   er: {
     system: `You are a database designer. Your task is to generate a valid PlantUML Entity-Relationship (ER) diagram.
@@ -74,7 +74,7 @@ const diagramPromptConfig: Record<DiagramType, { system: string; prompt: string 
 - Establish relationships between entities with standard ERD cardinality notation (e.g., "||--o{", "}o--||").
 - The code must start with '@startuml' and end with '@enduml'.
 - Do not include any explanations, comments, or markdown formatting in your output. Return only the raw PlantUML code.`,
-    prompt: `Description:\n---\n{{{text}}}\n---`,
+    prompt: `Description:\n---\n{{{description}}}\n---`,
   },
   dfd: {
     system: `You are a systems analyst creating Data Flow Diagrams (DFDs) with PlantUML. Your task is to generate valid PlantUML code based on the user's description.
@@ -93,7 +93,7 @@ const diagramPromptConfig: Record<DiagramType, { system: string; prompt: string 
 - Connect elements with arrows to show data flow, and label the arrows with the data being transferred.
 - The code must start with '@startuml' and end with '@enduml'.
 - Do not include any explanations, comments, or markdown formatting in your output. Return only the raw PlantUML code.`,
-    prompt: `Description:\n---\n{{{text}}}\n---`,
+    prompt: `Description:\n---\n{{{description}}}\n---`,
   },
 };
 
@@ -102,7 +102,7 @@ const generatePlantUMLFlow = ai.defineFlow({
   inputSchema: GeneratePlantUMLInputSchema,
   outputSchema: GeneratePlantUMLOutputSchema
 }, async (input) => {
-  const { text, diagramType } = input;
+  const { description, diagramType } = input;
 
   // Select the appropriate prompt configuration based on the diagram type
   const config = diagramPromptConfig[diagramType];
@@ -124,7 +124,7 @@ const generatePlantUMLFlow = ai.defineFlow({
     },
   });
 
-  const { output } = await diagramPrompt(input);
+  const { output } = await diagramPrompt({ description, diagramType });
   if (!output) {
     throw new Error("PlantUML code generation failed.");
   }

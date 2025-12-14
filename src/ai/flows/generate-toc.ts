@@ -17,7 +17,7 @@ const generateTocPrompt = ai.definePrompt({
 
 **Project Description:**
 ---
-{{{text}}}
+{{{projectDescription}}}
 ---
 
 **Instructions:**
