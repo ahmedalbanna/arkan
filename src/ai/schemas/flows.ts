@@ -2,15 +2,27 @@
 import { z } from 'zod';
 import { BaseContextFileSchema, BaseControlsSchema, BaseExternalContextSchema, BaseGenerationSchema, BasePromptSchema, BaseTextInputSchema, BaseWebSearchSchema } from './base-schemas';
 import {
+    BiasTypeSchema,
     CitationStyleSchema,
     ClaimStatusSchema,
+    ConfidenceLevelSchema,
+    CorrectionTypeSchema,
+    DesignTypeSchema,
     DiagramTypeSchema,
+    DirectQuestionTypeSchema,
+    FeedbackStatusSchema,
+    MultipleChoiceTypeSchema,
     ParaphraseModeSchema,
+    ProjectComplexitySchema,
     QuestionTypeSchema,
+    ResearchDepthSchema,
     SectionNameSchema,
+    SentenceVarietySchema,
     SummarizeLengthSchema,
     TargetLanaguage,
-    TargetReadingLevelSchema
+    TargetReadingLevelSchema,
+    TrueFalseAnswerSchema,
+    TrueFalseTypeSchema
 } from './enums';
 
 
@@ -60,7 +72,7 @@ export type AiProofreadDocumentOutput = z.infer<typeof AiProofreadDocumentOutput
 // ai-researcher.ts
 export const AIResearcherInputSchema = BaseTextInputSchema.extend({
     flow: z.literal('ai-researcher'),
-    depth: z.enum(['basic', 'comprehensive', 'in-depth']).optional().describe('The depth of research to conduct.'),
+    depth: ResearchDepthSchema.optional().describe('The depth of research to conduct.'),
 });
 export type AIResearcherInput = z.infer<typeof AIResearcherInputSchema>;
 
@@ -91,7 +103,7 @@ export const GenerateProjectBlueprintInputSchema = z.object({
     projectType: z.string().describe('Type of project (e.g., Web Application, Mobile App, E-commerce, Blog, Portfolio).'),
     description: z.string().describe('Detailed description of the project requirements and vision.'),
     targetAudience: z.string().describe('Description of the target users and audience for the project.'),
-    complexity: z.enum(['Simple', 'Medium', 'Complex', 'Enterprise']).describe('Project complexity level.'),
+    complexity: ProjectComplexitySchema.describe('Project complexity level.'),
     features: z.string().describe('List of desired features and functionalities.'),
     techStack: z.string().optional().describe('Preferred technology stack or specific requirements.'),
     budget: z.string().optional().describe('Budget range or constraints.'),
@@ -142,7 +154,7 @@ export type QuestionAnsweringInput = z.infer<typeof QuestionAnsweringInputSchema
 
 export const QuestionAnsweringOutputSchema = z.object({
     answer: z.string().describe('A comprehensive answer to the question.'),
-    confidence: z.enum(['high', 'medium', 'low']).describe('Confidence level in the answer.'),
+    confidence: ConfidenceLevelSchema.describe('Confidence level in the answer.'),
     sources: z.array(z.object({
         url: z.string().url().describe('URL of the source.'),
         title: z.string().optional().describe('Title of the source.'),
@@ -166,7 +178,7 @@ export const FactRetrievalOutputSchema = z.object({
     source: z.string().url().optional().describe('URL of the source for this fact.'),
     sourceTitle: z.string().optional().describe('Title of the source.'),
     lastVerified: z.string().optional().describe('When this fact was last verified or the date of the source.'),
-    confidence: z.enum(['high', 'medium', 'low']).describe('Confidence level in the accuracy of the fact.'),
+    confidence: ConfidenceLevelSchema.describe('Confidence level in the accuracy of the fact.'),
     relatedFacts: z.array(z.string()).optional().describe('Related facts that might be of interest.'),
 });
 export type FactRetrievalOutput = z.infer<typeof FactRetrievalOutputSchema>;
@@ -196,7 +208,7 @@ export const BiasIssueSchema = z.object({
     phrase: z.string().describe('The potentially biased phrase or sentence.'),
     explanation: z.string().describe('An explanation of why the phrase might be considered biased.'),
     suggestion: z.string().describe('A more inclusive alternative.'),
-    biasType: z.enum(['Gender', 'Racial', 'Age-related', 'Ableism', 'Cultural', 'General Stereotype']).describe('The type of bias identified.'),
+    biasType: BiasTypeSchema.describe('The type of bias identified.'),
 });
 export type BiasIssue = z.infer<typeof BiasIssueSchema>;
 
@@ -228,8 +240,8 @@ export const SentenceStructureCheckOutputSchema = z.object({
         longestSentence: z.number().describe('Length of the longest sentence in words.'),
     }).describe('Basic statistics about the text.'),
     varietyAssessment: z.object({
-        lengthVariety: z.enum(['low', 'medium', 'high']).describe('Assessment of sentence length variation.'),
-        structureVariety: z.enum(['low', 'medium', 'high']).describe('Assessment of sentence structure variation (simple, compound, complex).'),
+        lengthVariety: SentenceVarietySchema.describe('Assessment of sentence length variation.'),
+        structureVariety: SentenceVarietySchema.describe('Assessment of sentence structure variation (simple, compound, complex).'),
     }).describe('Analysis of sentence variety.'),
     issues: z.array(SentenceStructureIssueSchema).describe('An array of identified issues with specific sentences.'),
     overallAssessment: z.string().describe('A brief, overall assessment of the sentence structure.'),
@@ -388,21 +400,21 @@ export type IdeaGenerationOutput = z.infer<typeof IdeaGenerationOutputSchema>;
 
 // generate-quiz.ts
 const MultipleChoiceQuestionSchema = z.object({
-    type: z.enum(['multiple-choice']),
+    type: MultipleChoiceTypeSchema,
     question: z.string().describe("The question text."),
     options: z.array(z.string()).length(4).describe("An array of 4 possible answers."),
     answer: z.string().describe("The correct answer from the options."),
 });
 
 const TrueFalseQuestionSchema = z.object({
-    type: z.enum(['true-false']),
+    type: TrueFalseTypeSchema,
     question: z.string().describe("The statement to be evaluated."),
     options: z.array(z.string()).length(2).describe("The options: an array containing 'True' and 'False'."),
-    answer: z.enum(['True', 'False']).describe("The correct answer, either 'True' or 'False'."),
+    answer: TrueFalseAnswerSchema.describe("The correct answer, either 'True' or 'False'."),
 });
 
 const DirectQuestionSchema = z.object({
-    type: z.enum(['direct-question']),
+    type: DirectQuestionTypeSchema,
     question: z.string().describe("The open-ended question."),
     answer: z.string().describe("A concise, ideal answer to the question."),
 });
@@ -467,7 +479,7 @@ export const CorrectionSchema = z.object({
     original: z.string().describe("The original incorrect phrase or word."),
     corrected: z.string().describe("The corrected version of the phrase or word."),
     explanation: z.string().describe("A brief, clear explanation of why the correction was made."),
-    type: z.enum(['grammar', 'spelling', 'punctuation']).describe("The type of correction: 'grammar' for grammatical errors, 'spelling' for misspellings, 'punctuation' for punctuation issues."),
+    type: CorrectionTypeSchema.describe("The type of correction: 'grammar' for grammatical errors, 'spelling' for misspellings, 'punctuation' for punctuation issues."),
 });
 
 export const GrammarCheckInputSchema = BaseTextInputSchema.extend({
@@ -780,7 +792,7 @@ export type EvaluateReportInput = z.infer<typeof EvaluateReportInputSchema>;
 
 export const FeedbackItemSchema = z.object({
     point: z.string().describe("A specific feedback point related to one of the acceptance criteria."),
-    status: z.enum(["Acceptable", "Weak", "Not Present"]).describe("The status of the report regarding this feedback point."),
+    status: FeedbackStatusSchema.describe("The status of the report regarding this feedback point."),
     sectionKey: SectionNameSchema.optional().describe("The specific section key (e.g., 'introduction', 'systemDesign') this feedback point applies to. This is crucial for applying automated fixes."),
     solution: z.string().optional().describe("A suggested prompt for an AI agent to fix the issue if status is 'Weak' or 'Not Present'. This prompt should be a clear, actionable command."),
 });
@@ -814,7 +826,7 @@ export type GenerateTocOutput = z.infer<typeof GenerateTocOutputSchema>;
 // generate-ui-description.ts
 export const GenerateUIDescriptionInputSchema = BaseTextInputSchema.extend({
     flow: z.literal('generate-ui-description'),
-    designType: z.enum(['website', 'mobile']),
+    designType: DesignTypeSchema,
 });
 export type GenerateUIDescriptionInput = z.infer<typeof GenerateUIDescriptionInputSchema>;
 
