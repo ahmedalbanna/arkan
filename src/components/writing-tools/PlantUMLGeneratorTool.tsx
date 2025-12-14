@@ -69,12 +69,12 @@ export function PlantUMLGeneratorTool() {
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              {...form.register('description')}
+              {...form.register('text')}
               rows={8}
               placeholder="e.g., A user logs into the system. The system authenticates the user. If successful, the user can view their dashboard."
               disabled={mutation.isPending}
             />
-            {form.formState.errors.description && <p className="text-sm text-destructive">{form.formState.errors.description.message}</p>}
+            {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}
           </div>
 
           <Button type="submit" disabled={mutation.isPending} className="w-full">
