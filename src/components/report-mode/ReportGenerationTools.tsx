@@ -46,7 +46,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
-  BookOpenTextIcon,
+  BookOpenText,
   GripVertical,
   ListPlus,
   PlusCircle,
@@ -218,19 +218,21 @@ function SortableChapterItem({
         <AccordionContent>
           <div className="border-t px-4 py-4 space-y-4">
             <SortableContext items={chapter.sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
-              {chapter.sections.map((section, sectionIndex) => (
-                <SortableSectionItem
-                  key={section.id}
-                  section={section}
-                  index={sectionIndex}
-                  chapterIndex={props.chapterIndex}
-                  onDelete={() => onDeleteSection(chapter.id, section.id)}
-                  onGenerate={() => props.onGenerateSection(section.id)}
-                  isGenerating={props.activeMutationKey === section.id}
-                  isAnythingGenerating={props.isAnythingGenerating}
-                  hasCredits={props.hasCreditsForSingleSection}
-                />
-              ))}
+              <Accordion type="single" collapsible className="w-full space-y-2">
+                {chapter.sections.map((section, sectionIndex) => (
+                  <SortableSectionItem
+                    key={section.id}
+                    section={section}
+                    index={sectionIndex}
+                    chapterIndex={props.chapterIndex}
+                    onDelete={() => onDeleteSection(chapter.id, section.id)}
+                    onGenerate={() => props.onGenerateSection(section.id)}
+                    isGenerating={props.activeMutationKey === section.id}
+                    isAnythingGenerating={props.isAnythingGenerating}
+                    hasCredits={props.hasCreditsForSingleSection}
+                  />
+                ))}
+              </Accordion>
             </SortableContext>
             <Button size="sm" variant="outline" onClick={() => onAddSection(chapter.id)} className="w-full">
               <PlusCircle className="me-2 h-4 w-4" />
@@ -249,9 +251,9 @@ export function GenerationTools() {
   const { data: sectionConfigs, isFetched: sectionsLoaded } = useSections();
   const { userProfile, refetchUser, firebaseUser } = useAuth();
   const queryClient = useQueryClient();
+  const [newChapterTitle, setNewChapterTitle] = useState('');
   const [showTocInput, setShowTocInput] = useState(false);
   const [isGenerateTocOpen, setIsGenerateTocOpen] = useState(false);
-
 
   const agentMutation = useMutation({
     mutationKey: ['generateReportSection'], // Static key
@@ -317,8 +319,6 @@ export function GenerationTools() {
   function onGenerateSection(sectionId: SectionName) {
     agentMutation.mutate(sectionId as string);
   };
-
-  const [newChapterTitle, setNewChapterTitle] = useState('');
 
   function handleAddChapter() {
     updateProject(p => p.addChapter());
