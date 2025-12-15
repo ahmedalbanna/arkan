@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Label } from '@/components/ui/label';
@@ -56,14 +57,14 @@ export function ContextSelector({ itemKey }: ContextSelectorProps) {
                 {externalContext && externalContext.length > 0 && (
                     <div className="space-y-2 pt-2 border-t">
                         <Label className="font-semibold">{t('builder.reportGenerator.externalContext')}</Label>
-                        {externalContext.map((item, index) => (
-                            <div key={index} className="flex items-center space-x-2">
+                        {externalContext.map((item) => (
+                            <div key={item.id} className="flex items-center space-x-2">
                                 <Checkbox
-                                    id={`context-external-${itemKey}-${index}`}
-                                    checked={!!currentSelection.externalContext?.[index]}
-                                    onCheckedChange={(checked) => toggleContextSelection(itemKey, 'externalContext', index, !!checked)}
+                                    id={`context-external-${itemKey}-${item.id}`}
+                                    checked={!!currentSelection.externalContext?.[item.id]}
+                                    onCheckedChange={(checked) => toggleContextSelection(itemKey, 'externalContext', item.id, !!checked)}
                                 />
-                                <Label htmlFor={`context-external-${itemKey}-${index}`} className="text-sm font-normal">
+                                <Label htmlFor={`context-external-${itemKey}-${item.id}`} className="text-sm font-normal">
                                     <div className="flex items-center gap-2">
                                         <FileText className="h-4 w-4" />
                                         <span className="truncate">{item.fileName}</span>

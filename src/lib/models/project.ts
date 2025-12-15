@@ -40,7 +40,7 @@ export class Project implements Required<ProjectProperties> {
     this.projectDescription = props.projectDescription || 'Simple Project';
     // Ensure chapters are instances of the Chapter class for consistent API
     this.chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c as ChapterProperties));
-    this.externalContext = props.externalContext || [];
+    this.externalContext = (props.externalContext || []).map(ctx => ({ ...ctx, id: ctx.id || uuidv4() }));
     this.hasUnsavedChanges = !props.userId || false; // New projects are considered to have unsaved changes
   }
 
@@ -285,8 +285,9 @@ export class Project implements Required<ProjectProperties> {
 
 
   // --- External Context Methods ---
-  public addExternalContext(externalContext: ExternalContext): void {
-    this.externalContext = [...(this.externalContext || []), externalContext];
+  public addExternalContext(externalContext: Omit<ExternalContext, 'id'> & { id?: string }): void {
+    const newContext = { ...externalContext, id: externalContext.id || uuidv4() };
+    this.externalContext = [...(this.externalContext || []), newContext];
   }
 
   public removeExternalContext(index: number): Project {

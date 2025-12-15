@@ -1,3 +1,4 @@
+
 'use client';
 
 import { PdfPreview } from '@/components/file/PdfPreview';
@@ -10,10 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useToast } from '@/hooks';
-import { ExternalContextType } from '@/lib/types';
+import { ExternalContext, ExternalContextType } from '@/lib/types';
 import { cn } from '@/lib/utils/cn';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
-import { generateRandomId } from '@/lib/utils/randomId';
 import { AtomIcon, FileText, ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
@@ -73,7 +73,6 @@ function FileDropzone() {
                 const binaryStr = reader.result as string;
                 updateProject(p => {
                     p.addExternalContext({
-                        id: generateRandomId(),
                         fileName: file.name,
                         content: binaryStr,
                         type: 'context'
@@ -184,7 +183,7 @@ export function UploadManager() {
                             <ul className="space-y-1 list-none p-2">
                                 {externalContext.map((item, index) => {
                                     return (
-                                        <li key={index} className="flex items-center justify-between p-2 rounded-md hover:bg-muted transition-colors">
+                                        <li key={item.id} className="flex items-center justify-between p-2 rounded-md hover:bg-muted transition-colors">
                                             <div className="flex items-center gap-2 flex-1 min-w-0">
                                                 <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                                                 <span className="truncate font-medium text-sm" title={item.fileName}>{item.fileName}</span>

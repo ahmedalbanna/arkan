@@ -13,7 +13,7 @@ export interface GenerationControlState {
 
 export interface SectionContext {
     sections: Record<string, boolean>;
-    externalContext: boolean[];
+    externalContext: Record<string, boolean>;
 }
 
 
@@ -47,7 +47,7 @@ export const defaultControls: GenerationControlState = {
 
 export const defaultContext: SectionContext = {
     sections: {},
-    externalContext: [],
+    externalContext: {},
 };
 
 

@@ -14,7 +14,7 @@ export function useContextSelector(itemKey: string) {
     const section = useMemo(() => project?.getSection(itemKey), [project, itemKey]);
 
     const currentSelection = useMemo(() => {
-        return section?.context || { sections: {}, externalContext: [] };
+        return section?.context || { sections: {}, externalContext: {} };
     }, [section?.context]);
 
     const reportSections = useMemo(() => {
@@ -36,22 +36,16 @@ export function useContextSelector(itemKey: string) {
     const toggleContextSelection = useCallback((
         sectionId: string,
         type: keyof Omit<SectionContext, 'diagrams'>,
-        subKey: string | number,
+        subKey: string,
         checked: boolean
     ) => {
         updateProject(p => {
             const sec = p.getSection(sectionId);
             if (sec) {
                 const newContext = { ...sec.context };
-                if (type === 'externalContext') {
-                    const newArray = [...(newContext.externalContext || [])];
-                    newArray[subKey as number] = checked;
-                    newContext.externalContext = newArray;
-                } else {
-                    const newDict = { ...(newContext[type] || {}) };
-                    newDict[subKey as string] = checked;
-                    newContext[type] = newDict;
-                }
+                const newDict = { ...(newContext[type] || {}) };
+                newDict[subKey] = checked;
+                newContext[type] = newDict;
                 sec.context = newContext;
             }
         });

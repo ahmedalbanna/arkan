@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,6 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useToast } from '@/hooks';
 import { PlusCircle } from 'lucide-react';
 import { useState } from 'react';
-import { generateRandomId } from '@/lib/utils/randomId';
 
 export function PasteTextUploader() {
     const { t } = useLocalization();
@@ -30,7 +30,6 @@ export function PasteTextUploader() {
 
         updateProject(project => {
             project.addExternalContext({
-                id: generateRandomId(),
                 fileName: `${fileName.trim()}.md`,
                 content: text,
                 type: 'context'
