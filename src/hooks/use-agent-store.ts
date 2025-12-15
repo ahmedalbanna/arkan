@@ -6,6 +6,8 @@ import type { AgentProperties } from '@/lib/models';
 import { fetchAgentsApi, createAgentApi, updateAgentApi, deleteAgentApi } from '@/services/api/agentService';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect } from 'react';
+import { getAuth } from 'firebase/auth';
+import { app } from '@/lib/firebase/client-init';
 
 interface AgentResponse {
   prompt: string;
@@ -20,6 +22,7 @@ interface AgentState {
   responses: ResponseMap;
   isLoading: boolean;
   error: string | null;
+  hasFetched: boolean; // Add a flag to track if initial fetch has happened
   fetchAgents: (token: string) => Promise<void>;
   selectAgent: (agentId: string | null) => void;
   setResponse: (agentId: string, commandId: string, response: AgentResponse) => void;
@@ -33,16 +36,21 @@ const useAgentStore = create<AgentState>((set, get) => ({
       agents: [],
       selectedAgent: null,
       responses: {},
-      isLoading: true,
+      isLoading: false, // Start with false, set to true only during fetch
       error: null,
+      hasFetched: false, // Initialize as false
 
       fetchAgents: async (token: string) => {
+        // Prevent re-fetching if already fetched or currently fetching
+        if (get().hasFetched || get().isLoading) {
+          return;
+        }
         set({ isLoading: true, error: null });
         try {
           const agents = await fetchAgentsApi(token);
-          set({ agents, isLoading: false });
+          set({ agents, isLoading: false, hasFetched: true });
         } catch (error: any) {
-          set({ error: error.message, isLoading: false });
+          set({ error: error.message, isLoading: false, hasFetched: false });
         }
       },
 
@@ -89,27 +97,31 @@ const useAgentStore = create<AgentState>((set, get) => ({
     })
 );
 
+// Initialize auth outside the hook to avoid re-declarations
+const auth = getAuth(app);
+
+// This custom hook is now primarily for interacting with the store's actions
+// and ensuring the initial data load happens correctly.
 export function useAgentManager() {
     const store = useAgentStore();
-    const { firebaseUser, isLoading: isAuthLoading } = useAuth();
 
     useEffect(() => {
-        const loadAgents = async () => {
-            if (firebaseUser) {
-                const token = await firebaseUser.getIdToken();
+        const loadInitialAgents = async () => {
+            const user = auth.currentUser;
+            if (user && !store.hasFetched) {
+                const token = await user.getIdToken();
                 await store.fetchAgents(token);
             }
         };
 
-        if (!isAuthLoading) {
-            loadAgents();
-        }
-    }, [firebaseUser, isAuthLoading, store.fetchAgents]);
+        loadInitialAgents();
+    }, [store.hasFetched, store.fetchAgents]);
 
 
     const getToken = async () => {
-        if (!firebaseUser) throw new Error("User not authenticated.");
-        return firebaseUser.getIdToken();
+        const user = auth.currentUser;
+        if (!user) throw new Error("User not authenticated.");
+        return user.getIdToken();
     };
 
     const createAgent = async (data: Omit<AgentProperties, 'id'>) => {
@@ -131,10 +143,6 @@ export function useAgentManager() {
         await deleteAgentApi(id, token);
         store.removeAgentFromStore(id);
     };
-    
-    const fetchAgents = async (token: string) => {
-        await store.fetchAgents(token);
-    };
 
-    return { ...store, createAgent, updateAgent, deleteAgent, fetchAgents };
+    return { ...store, createAgent, updateAgent, deleteAgent };
 }
