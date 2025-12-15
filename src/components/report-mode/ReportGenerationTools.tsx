@@ -251,7 +251,6 @@ export function GenerationTools() {
   const queryClient = useQueryClient();
   const [showTocInput, setShowTocInput] = useState(false);
   const [isGenerateTocOpen, setIsGenerateTocOpen] = useState(false);
-  const { contextSelection } = useGenerationUIStore();
 
 
   const agentMutation = useMutation({
@@ -265,7 +264,7 @@ export function GenerationTools() {
       const token = await firebaseUser.getIdToken();
 
       const controls = section.controls;
-      const context = contextSelection[sectionId] || {};
+      const context = section.context;
 
       let instructionText = `Please use a ${controls.tone || 'professional'} tone and aim for a word count of approximately ${controls.wordCount || 250} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}.`;
       if (controls.language && controls.language !== 'default') {
@@ -283,7 +282,7 @@ export function GenerationTools() {
         }
       });
 
-      const externalContextFiles = (project.externalContext || []).filter((_, index) => context.externalContext?.[index]);
+      const externalContextFiles = (project.externalContext || []).filter(item => context.externalContext?.[item.id]);
 
       const body = {
         flow: 'generate-section',
@@ -319,10 +318,14 @@ export function GenerationTools() {
     agentMutation.mutate(sectionId as string);
   };
 
-  const [tocText, setTocText] = useState('');
+  const [newChapterTitle, setNewChapterTitle] = useState('');
 
   function handleAddChapter() {
     updateProject(p => p.addChapter());
+    toast({
+      title: "Chapter Created",
+      description: `A new untitled chapter has been added.`
+    });
   };
 
   function handleAddSectionToChapter(chapterId: string) {
@@ -340,7 +343,7 @@ export function GenerationTools() {
   };
 
 
-  function handleCreateFromToc() {
+  function handleCreateFromToc(tocText: string) {
     if (!tocText.trim()) {
       toast({
         title: "Table of Contents is empty",
@@ -350,7 +353,7 @@ export function GenerationTools() {
       return;
     }
 
-    const lines = tocText.split('n').map(line => line.trim()).filter(Boolean);
+    const lines = tocText.split('\n').map(line => line.trim()).filter(Boolean);
     let chaptersCreated = 0;
     let sectionsCreated = 0;
 
@@ -383,7 +386,6 @@ export function GenerationTools() {
       title: "Structure Created",
       description: `Created ${chaptersCreated} chapters and ${sectionsCreated} sections.`,
     });
-    setTocText('');
     setShowTocInput(false);
   };
 
@@ -462,14 +464,14 @@ export function GenerationTools() {
               <Label htmlFor="toc-master-input">Paste Table of Contents</Label>
               <Textarea
                 id="toc-master-input"
-                value={tocText}
-                onChange={(e) => setTocText(e.target.value)}
-                placeholder={"1. Chapter Onen1.1. Section Onen2. Chapter Two..."}
+                value={newChapterTitle}
+                onChange={(e) => setNewChapterTitle(e.target.value)}
+                placeholder={"1. Chapter One\n1.1. Section One\n2. Chapter Two..."}
                 className="flex-grow resize-none"
                 rows={5}
               />
               <div className='flex gap-2'>
-                <Button onClick={handleCreateFromToc} size="sm" className="w-full">
+                <Button onClick={() => handleCreateFromToc(newChapterTitle)} size="sm" className="w-full">
                   <ListPlus className="me-2 h-4 w-4" /> Create Structure
                 </Button>
                 <Button onClick={() => setShowTocInput(false)} size="sm" variant="secondary" className="w-full">
@@ -483,7 +485,7 @@ export function GenerationTools() {
             <div className={cn("flex-grow", showTocInput && "border-t pt-4")}>
               <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
-                  <Accordion type="multiple" className="w-full space-y-4">
+                  <Accordion type="single" collapsible className="w-full space-y-4">
                     {(project?.chapters || []).map((chapter, chapterIndex) => (
                       <SortableChapterItem
                         chapter={chapter}
@@ -509,4 +511,3 @@ export function GenerationTools() {
     </>
   );
 };
-
