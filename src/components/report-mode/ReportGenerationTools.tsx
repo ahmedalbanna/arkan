@@ -320,15 +320,9 @@ export function GenerationTools() {
   };
 
   const [tocText, setTocText] = useState('');
-  const [newChapterTitle, setNewChapterTitle] = useState('');
 
   function handleAddChapter() {
-    if (!newChapterTitle.trim()) {
-      toast({ title: "Chapter title is required.", variant: "destructive" });
-      return;
-    }
-    updateProject(p => p.addChapter(newChapterTitle));
-    setNewChapterTitle('');
+    updateProject(p => p.addChapter());
   };
 
   function handleAddSectionToChapter(chapterId: string) {
@@ -461,14 +455,10 @@ export function GenerationTools() {
           </div>
         </CardHeader>
         <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
-          <div className="flex gap-2 border p-2 rounded-lg bg-muted/20">
-            <Input
-              placeholder="New Chapter Title..."
-              value={newChapterTitle}
-              onChange={(e) => setNewChapterTitle(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddChapter())}
-            />
-            <Button onClick={handleAddChapter} variant="outline" className="shrink-0"><PlusCircle className="me-2 h-4 w-4" /> Add Chapter</Button>
+          <div className="flex gap-2">
+            <Button onClick={handleAddChapter} variant="outline" className="w-full">
+              <PlusCircle className="me-2 h-4 w-4" /> Add Chapter
+            </Button>
           </div>
           {showTocInput && (
             <div className="space-y-2 p-4 border rounded-lg bg-muted/50">

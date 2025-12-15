@@ -13,9 +13,9 @@ export class Chapter {
     public title: string;
     public sections: Section[];
 
-    constructor(props: ChapterProperties) {
+    constructor(props: Partial<ChapterProperties>) {
         this.id = props.id || uuidv4();
-        this.title = props.title;
+        this.title = props.title || 'Untitled Chapter';
         this.sections = (props.sections || []).map(s => s instanceof Section ? s : new Section(s as SectionProperties));
     }
 
