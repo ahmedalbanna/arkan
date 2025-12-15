@@ -1,4 +1,5 @@
 
+
 import type { Tone, Language, OutputStyle } from './control-types';
 
 export interface GenerationControlState {
@@ -10,6 +11,10 @@ export interface GenerationControlState {
     wordCount: string;
 }
 
+export interface SectionContext {
+    sections: Record<string, boolean>;
+    externalContext: boolean[];
+}
 
 
 export type SectionType = 'report' | 'diagram' | 'presentation';
@@ -27,6 +32,7 @@ export interface SectionProperties {
     // Generation controls are now part of the section
     controls?: GenerationControlState;
     // Context selection is now part of the section
+    context?: SectionContext;
 
 }
 
@@ -39,7 +45,10 @@ export const defaultControls: GenerationControlState = {
     wordCount: '',
 };
 
-
+export const defaultContext: SectionContext = {
+    sections: {},
+    externalContext: [],
+};
 
 
 export class Section {
@@ -52,6 +61,7 @@ export class Section {
     public agentId?: string | null;
     public commandId?: string | null;
     public controls: GenerationControlState;
+    public context: SectionContext;
 
 
 
@@ -65,6 +75,7 @@ export class Section {
         this.agentId = props.agentId || null;
         this.commandId = props.commandId || null;
         this.controls = { ...defaultControls, ...props.controls };
+        this.context = { ...defaultContext, ...props.context };
 
     }
 
@@ -79,6 +90,7 @@ export class Section {
             agentId: this.agentId,
             commandId: this.commandId,
             controls: this.controls,
+            context: this.context,
 
         };
     }

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { toast, useBuilderStore } from '@/hooks'; // Corrected import
+import { toast, useBuilderStore } from '@/hooks';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { analyzeContextApi } from '@/services';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -117,6 +118,7 @@ export default function AnalystAgent() {
 
         updateProject(p => {
             p.addExternalContext({
+                id: '', // Will be assigned by the model
                 fileName: fileName,
                 content: markdownResult,
                 type: 'context'
