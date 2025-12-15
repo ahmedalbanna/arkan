@@ -5,6 +5,7 @@ import { create } from 'zustand';
 import type { AgentProperties } from '@/lib/models';
 import { fetchAgentsApi, createAgentApi, updateAgentApi, deleteAgentApi } from '@/services/api/agentService';
 import { useAuth } from '@/context/AuthContext';
+import { useEffect } from 'react';
 
 interface AgentResponse {
   prompt: string;
@@ -90,7 +91,21 @@ const useAgentStore = create<AgentState>((set, get) => ({
 
 export function useAgentManager() {
     const store = useAgentStore();
-    const { firebaseUser } = useAuth();
+    const { firebaseUser, isLoading: isAuthLoading } = useAuth();
+
+    useEffect(() => {
+        const loadAgents = async () => {
+            if (firebaseUser) {
+                const token = await firebaseUser.getIdToken();
+                await store.fetchAgents(token);
+            }
+        };
+
+        if (!isAuthLoading) {
+            loadAgents();
+        }
+    }, [firebaseUser, isAuthLoading, store.fetchAgents]);
+
 
     const getToken = async () => {
         if (!firebaseUser) throw new Error("User not authenticated.");
