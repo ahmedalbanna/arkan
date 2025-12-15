@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -460,6 +461,15 @@ export function GenerationTools() {
           </div>
         </CardHeader>
         <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
+          <div className="flex gap-2 border p-2 rounded-lg bg-muted/20">
+            <Input
+              placeholder="New Chapter Title..."
+              value={newChapterTitle}
+              onChange={(e) => setNewChapterTitle(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddChapter())}
+            />
+            <Button onClick={handleAddChapter} variant="outline" className="shrink-0"><PlusCircle className="me-2 h-4 w-4" /> Add Chapter</Button>
+          </div>
           {showTocInput && (
             <div className="space-y-2 p-4 border rounded-lg bg-muted/50">
               <Label htmlFor="toc-master-input">Paste Table of Contents</Label>
@@ -506,15 +516,6 @@ export function GenerationTools() {
                 </SortableContext>
               </DndContext>
             </div>
-          </div>
-          <div className="flex gap-2 border-t pt-4">
-            <Input
-              placeholder="New Chapter Title..."
-              value={newChapterTitle}
-              onChange={(e) => setNewChapterTitle(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddChapter())}
-            />
-            <Button onClick={handleAddChapter} variant="outline" className="shrink-0"><PlusCircle className="me-2 h-4 w-4" /> Add Chapter</Button>
           </div>
         </CardContent>
       </Card>

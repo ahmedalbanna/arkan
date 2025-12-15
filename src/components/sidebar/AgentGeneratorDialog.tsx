@@ -34,6 +34,7 @@ import { Checkbox } from '../ui/checkbox';
 import { useDebounce } from '@/hooks';
 
 const generateSchema = z.object({
+  flow: z.string(),
   prompt: z.string().min(10, 'Please describe the agent you want to create in more detail.'),
   includeJsonOutput: z.boolean().default(false),
 });
@@ -57,7 +58,7 @@ export function AgentGeneratorDialog({ isOpen, onOpenChange }: { isOpen: boolean
 
   const generateForm = useForm<GenerateFormValues>({
     resolver: zodResolver(generateSchema),
-    defaultValues: { prompt: '', includeJsonOutput: false },
+    defaultValues: { flow: 'generate-agent-config', prompt: '', includeJsonOutput: false },
   });
 
   const saveForm = useForm<SaveFormValues>({
