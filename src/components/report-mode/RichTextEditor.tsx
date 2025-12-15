@@ -2,13 +2,11 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBrowserSpeech, useDebounce } from '@/hooks';
-import { useEditorStore } from '@/hooks/core/use-editor-store';
 import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
 import { editorExtensions } from '@/lib/tiptap-extensions';
 import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
 import { marked } from 'marked';
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 
@@ -21,16 +19,10 @@ import {
   List,
   ListOrdered,
   Loader2,
-  Maximize,
   Quote,
-  Sigma,
   Sparkles,
-  SpellCheck,
-  Square,
   Strikethrough,
   Table as TableIcon,
-  UserCheck,
-  Volume2,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import {
@@ -41,6 +33,8 @@ import {
 } from '../ui/dropdown-menu';
 import { Separator } from '../ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { useEditorStore } from '@/hooks/core/use-editor-store';
+
 
 // Toolbar Component
 interface SectionToolbarProps {
@@ -51,22 +45,12 @@ interface SectionToolbarProps {
 
 const SectionToolbar = memo(function SectionToolbar({ editor, onTextUpdate, onWholeUpdate }: SectionToolbarProps) {
   const { t } = useLocalization();
-  const { speak, stop, isSpeaking } = useBrowserSpeech();
+  const { isSpeaking } = useBrowserSpeech();
   const { activeAiAction, isProcessing, handleAiAction, rewriteStyles } = useAiActions({
     editor,
     onTextUpdate,
     onWholeUpdate,
   });
-
-  function handleReadAloudClick() {
-    if (isSpeaking) {
-      stop();
-    } else {
-      const { from, to } = editor.state.selection;
-      const textToRead = editor.state.doc.textBetween(from, to) || editor.getText();
-      speak(textToRead);
-    }
-  }
 
   const formatButtons = [
     { action: () => editor.chain().focus().toggleBold().run(), isActive: editor.isActive('bold'), icon: Bold, label: t('builder.Section.tooltips.bold') },
@@ -149,17 +133,6 @@ const SectionToolbar = memo(function SectionToolbar({ editor, onTextUpdate, onWh
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Separator orientation="vertical" className="h-6 mx-1" />
-
-        {/* Utility Buttons */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8" onClick={handleReadAloudClick}>
-              {isSpeaking ? <Square className="h-4 w-4 text-red-500 fill-current" /> : <Volume2 className="h-4 w-4" />}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent><p>{isSpeaking ? 'Stop Speaking' : t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
-        </Tooltip>
       </TooltipProvider>
     </div>
   )
@@ -179,15 +152,12 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const setActiveEditor = useEditorStore((state) => state.setActiveEditor);
   const uniqueId = React.useId();
 
-  const [localContent, setLocalContent] = useState(content);
-  const debouncedLocalContent = useDebounce(localContent, 500);
-
   const editor = useEditor({
     extensions: editorExtensions(uniqueId),
     content: marked.parse(content) as string,
     onUpdate: ({ editor }) => {
       const markdown = turndownService.turndown(editor.getHTML());
-      setLocalContent(markdown);
+      onChange(markdown);
     },
     onSelectionUpdate: ({ editor }) => {
       setActiveEditor(editor);
@@ -198,11 +168,9 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       },
       handlePaste(view, event) {
         const text = event.clipboardData?.getData('text/plain');
-
-
+        
         if (text && editor) {
           const html = marked.parse(text);
-
           // Create a transaction to first delete the selection, then insert the new content.
           const { from, to } = view.state.selection;
           const tr = view.state.tr.deleteRange(from, to);
@@ -213,10 +181,8 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           setTimeout(() => {
             editor.chain().focus().insertContent(html).run();
           }, 10);
-
           return true; // We've handled the paste
         }
-
         return false; // Let the default paste handler take over
       },
     },
@@ -226,33 +192,26 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const handleTextUpdate = useCallback((newText: string, from: number, to: number) => {
     if (!editor) return;
     editor.chain().focus().insertContentAt({ from, to }, newText).run();
-    setLocalContent(turndownService.turndown(editor.getHTML()));
   }, [editor]);
 
   const handleWholeUpdate = useCallback((newText: string) => {
     if (!editor) return;
     const html = marked.parse(newText) as string;
     editor.chain().focus().setContent(html).run();
-    setLocalContent(newText);
   }, [editor]);
 
-  // Unified channel for updating the parent component
-  useEffect(() => {
-    if (debouncedLocalContent !== content) {
-      onChange(debouncedLocalContent);
-    }
-  }, [debouncedLocalContent, onChange, content]);
 
-  // Smarter handling of incoming prop changes
   useEffect(() => {
-    if (editor && !editor.isFocused) {
-      const currentMarkdown = turndownService.turndown(editor.getHTML());
-      if (content !== currentMarkdown) {
-        const newHtml = marked.parse(content) as string;
-        editor.commands.setContent(newHtml, false); // false to prevent firing update event
+    if (editor && !editor.isDestroyed) {
+      const currentEditorMarkdown = turndownService.turndown(editor.getHTML());
+      if (content !== currentEditorMarkdown) {
+        const { from, to } = editor.state.selection;
+        editor.commands.setContent(marked.parse(content) as string, false);
+        editor.commands.setTextSelection({ from, to });
       }
     }
   }, [content, editor]);
+
 
   return (
     <div className="relative text-base">

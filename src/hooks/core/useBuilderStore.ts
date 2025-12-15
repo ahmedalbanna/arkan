@@ -70,6 +70,7 @@ const useBuilderStore = create<BuilderState>((set, get) => {
         updateProject: (updater) => {
             set(state => {
                 if (!state.project) return {};
+                // Create a deep clone to ensure React detects the change.
                 const newProjectInstance = new Project(JSON.parse(JSON.stringify(state.project.toStateObject())));
                 updater(newProjectInstance);
                 return { project: newProjectInstance, hasUnsavedChanges: true };
