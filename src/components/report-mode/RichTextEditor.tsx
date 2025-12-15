@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
@@ -88,7 +89,7 @@ const SectionToolbar = memo(function SectionToolbar({ editor, onTextUpdate, onWh
 
   return (
     <div className="flex items-center gap-1 rounded-full border bg-gradient-to-r from-background/80 to-primary/5 backdrop-blur-md p-1 shadow-soft hover:shadow-glow transition-all duration-200"
-         onMouseDown={(e) => e.preventDefault()} // Prevent editor from losing focus
+      onMouseDown={(e) => e.preventDefault()} // Prevent editor from losing focus
     >
       <TooltipProvider>
         {/* Formatting Buttons */}
@@ -142,7 +143,7 @@ const SectionToolbar = memo(function SectionToolbar({ editor, onTextUpdate, onWh
           <DropdownMenuContent className="backdrop-blur-md bg-gradient-to-r from-background/90 to-primary/5 border shadow-soft">
             {rewriteStyles.map(({ label, style }) => (
               <DropdownMenuItem key={style} onSelect={() => handleAiAction('rewrite', { style })} disabled={isProcessing}>
-                  {label}
+                {label}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -195,6 +196,29 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       attributes: {
         class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif prose-p:text-[12px] prose-headings:text-[16px] prose-a:text-primary hover:prose-a:text-primary/90 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2',
       },
+      handlePaste(view, event) {
+        const text = event.clipboardData?.getData('text/plain');
+
+
+        if (text && editor) {
+          const html = marked.parse(text);
+
+          // Create a transaction to first delete the selection, then insert the new content.
+          const { from, to } = view.state.selection;
+          const tr = view.state.tr.deleteRange(from, to);
+          view.dispatch(tr);
+
+          // Now insert the parsed HTML content.
+          // Using a small timeout can help ensure the view has updated before inserting.
+          setTimeout(() => {
+            editor.chain().focus().insertContent(html).run();
+          }, 10);
+
+          return true; // We've handled the paste
+        }
+
+        return false; // Let the default paste handler take over
+      },
     },
     immediatelyRender: false,
   });
@@ -204,7 +228,7 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     editor.chain().focus().insertContentAt({ from, to }, newText).run();
     setLocalContent(turndownService.turndown(editor.getHTML()));
   }, [editor]);
-  
+
   const handleWholeUpdate = useCallback((newText: string) => {
     if (!editor) return;
     const html = marked.parse(newText) as string;
@@ -215,7 +239,7 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   // Unified channel for updating the parent component
   useEffect(() => {
     if (debouncedLocalContent !== content) {
-        onChange(debouncedLocalContent);
+      onChange(debouncedLocalContent);
     }
   }, [debouncedLocalContent, onChange, content]);
 

@@ -26,10 +26,10 @@ export function useAiActions({ editor, onTextUpdate, onWholeUpdate }: AiActionsP
   };
 
   const handleError = (error: Error) => {
-    toast({ 
-      title: t('builder.Section.aiActionFailed'), 
-      description: error.message, 
-      variant: 'destructive' 
+    toast({
+      title: t('builder.Section.aiActionFailed'),
+      description: error.message,
+      variant: 'destructive'
     });
   };
 
@@ -47,9 +47,9 @@ export function useAiActions({ editor, onTextUpdate, onWholeUpdate }: AiActionsP
 
   const isProcessing = aiActionMutation.isPending || translateMutation.isPending;
 
-  const detectLanguage = (text: string): 'ar' | 'en' => {
+  const detectLanguage = (text: string): 'Arabic' | 'English' => {
     // Basic detection: if the text contains Arabic characters, assume 'ar'
-    return /[؀-ۿ]/.test(text) ? 'ar' : 'en';
+    return /[؀-ۿ]/.test(text) ? 'Arabic' : 'English';
   };
 
   const handleAiAction = (action: string, payload: any = {}) => {
@@ -66,7 +66,7 @@ export function useAiActions({ editor, onTextUpdate, onWholeUpdate }: AiActionsP
 
     if (action === 'translate') {
       const sourceLang = detectLanguage(textToProcess);
-      const targetLang = sourceLang === 'ar' ? 'en' : 'ar';
+      const targetLang = sourceLang === 'Arabic' ? 'English' : 'Arabic';
       translateMutation.mutate({ text: textToProcess, targetLang });
       return;
     }
@@ -87,7 +87,7 @@ export function useAiActions({ editor, onTextUpdate, onWholeUpdate }: AiActionsP
       setActiveAiAction(null);
     }
   };
-  
+
   const rewriteStyles = useMemo(() => [
     { label: t('writingTools.textStylist.styles.formal'), style: 'Formal' },
     { label: t('writingTools.textStylist.styles.friendly'), style: 'Friendly' },
