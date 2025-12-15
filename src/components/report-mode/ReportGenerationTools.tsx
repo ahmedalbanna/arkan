@@ -50,6 +50,7 @@ import {
   GripVertical,
   ListPlus,
   PlusCircle,
+  Sparkles,
   Trash2
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
@@ -61,7 +62,6 @@ import { useGenerationUIStore } from '@/hooks/core/useGenerationUIStore';
 import { useSections } from '@/hooks/data/use-sections';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { GenerateTocDialog } from './GenerateTocDialog';
 
 
@@ -441,22 +441,19 @@ export function GenerationTools() {
               <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
               <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <BookOpenTextIcon className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onSelect={() => setShowTocInput(true)}>Import from Text</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setIsGenerateTocOpen(true)}>Generate with AI</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </CardHeader>
         <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button onClick={() => setShowTocInput(true)} variant="outline" className="w-full">
+              <ListPlus className="me-2 h-4 w-4" /> Import from Text
+            </Button>
+            <Button onClick={() => setIsGenerateTocOpen(true)} variant="outline" className="w-full">
+              <Sparkles className="me-2 h-4 w-4" /> Generate with AI
+            </Button>
+          </div>
           <div className="flex gap-2">
-            <Button onClick={handleAddChapter} variant="outline" className="w-full">
+            <Button onClick={handleAddChapter} variant="default" className="w-full">
               <PlusCircle className="me-2 h-4 w-4" /> Add Chapter
             </Button>
           </div>
@@ -512,3 +509,4 @@ export function GenerationTools() {
     </>
   );
 };
+
