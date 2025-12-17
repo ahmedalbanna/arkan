@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Chapter } from '@/lib/models/chapter';
+import { Chapter, ChapterProperties } from '@/lib/models/chapter';
 import { Project, type ProjectProperties } from '@/lib/models/project';
 import { localProjectService } from '@/services/local-project-service';
 import React from 'react';
@@ -62,7 +62,7 @@ const useBuilderStore = create<BuilderState>((set, get) => {
         loadProject: (projectData) => {
             const newProject = new Project({
                 ...projectData,
-                chapters: (projectData.chapters || []).map(c => new Chapter(c as Chapter))
+                chapters: (projectData.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c as ChapterProperties))
             });
             localStorage.setItem('lastActiveProjectId', newProject.id);
             set({ project: newProject, hasUnsavedChanges: false });

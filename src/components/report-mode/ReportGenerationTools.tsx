@@ -217,23 +217,21 @@ function SortableChapterItem({
         </div>
         <AccordionContent>
           <div className="border-t px-4 py-4 space-y-4">
-            <SortableContext items={chapter.sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
-              <Accordion type="single" collapsible className="w-full space-y-2">
-                {chapter.sections.map((section, sectionIndex) => (
-                  <SortableSectionItem
-                    key={section.id}
-                    section={section}
-                    index={sectionIndex}
-                    chapterIndex={props.chapterIndex}
-                    onDelete={() => onDeleteSection(chapter.id, section.id)}
-                    onGenerate={() => props.onGenerateSection(section.id)}
-                    isGenerating={props.activeMutationKey === section.id}
-                    isAnythingGenerating={props.isAnythingGenerating}
-                    hasCredits={props.hasCreditsForSingleSection}
-                  />
-                ))}
-              </Accordion>
-            </SortableContext>
+            <Accordion type="single" collapsible className="w-full space-y-2">
+              {chapter.sections.map((section, sectionIndex) => (
+                <SortableSectionItem
+                  key={section.id}
+                  section={section}
+                  index={sectionIndex}
+                  chapterIndex={props.chapterIndex}
+                  onDelete={() => onDeleteSection(chapter.id, section.id)}
+                  onGenerate={() => props.onGenerateSection(section.id)}
+                  isGenerating={props.activeMutationKey === section.id}
+                  isAnythingGenerating={props.isAnythingGenerating}
+                  hasCredits={props.hasCreditsForSingleSection}
+                />
+              ))}
+            </Accordion>
             <Button size="sm" variant="outline" onClick={() => onAddSection(chapter.id)} className="w-full">
               <PlusCircle className="me-2 h-4 w-4" />
               Add New Section
@@ -303,13 +301,15 @@ export function GenerationTools() {
         toast({ title: 'Generation failed', description: `No content returned for section ${section.id}.`, variant: 'destructive' });
         throw new Error('Empty generation result');
       }
-
-      updateProject(p => p.updateSectionContent(section.id, content));
-      refetchUser();
-      return result;
+      
+      // The payload for the onSuccess callback
+      return { sectionId: section.id, content };
     },
-    onSuccess: (data, variables) => {
-      queryClient.setQueryData(['reportSection', variables], data);
+    onSuccess: (data) => {
+      // Update the project state with the new content
+      updateProject(p => p.updateSectionContent(data.sectionId, data.content));
+      refetchUser(); // Refetch user to update credits
+      toast({ title: 'Section Generated', description: 'The AI has generated the content for your section.' });
     },
     onError: (error: any) => {
       toast({ title: 'Generation error', description: error?.message || 'Failed to generate section', variant: 'destructive' });
