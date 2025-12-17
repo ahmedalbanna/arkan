@@ -4,7 +4,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Chapter, ChapterProperties } from './chapter';
 import { ExternalContext, ExternalContextType } from './external-context';
-import { Section } from './section';
+import { Section, type SectionProperties } from './section';
 
 export interface ProjectProperties {
   id?: string;
@@ -105,6 +105,34 @@ export class Project implements Required<ProjectProperties> {
 
   public getChapter(chapterId: string): Chapter | undefined {
     return this.chapters.find(c => c.id === chapterId);
+  }
+  
+  public updateChapter(chapterId: string, newTitle: string): void {
+    const chapter = this.getChapter(chapterId);
+    if (chapter) {
+      chapter.rename(newTitle);
+    }
+  }
+
+  public moveChapter(chapterId: string, toIndex: number): void {
+    const fromIndex = this.chapters.findIndex(c => c.id === chapterId);
+    if (fromIndex === -1 || toIndex < 0 || toIndex >= this.chapters.length) return;
+    const [chapter] = this.chapters.splice(fromIndex, 1);
+    this.chapters.splice(toIndex, 0, chapter);
+  }
+
+  public copyChapter(chapterId: string): Chapter | null {
+    const chapterToCopy = this.getChapter(chapterId);
+    if (!chapterToCopy) return null;
+    const newChapterData = {
+        ...chapterToCopy.toJSON(),
+        id: uuidv4(),
+        title: `${chapterToCopy.title} (Copy)`,
+        sections: chapterToCopy.sections.map(s => new Section({ ...s.toJSON(), id: uuidv4() }))
+    };
+    const newChapter = new Chapter(newChapterData);
+    this.chapters.push(newChapter);
+    return newChapter;
   }
 
   public updateChaptersOrder(newOrderIds: string[]): void {
@@ -248,7 +276,8 @@ export class Project implements Required<ProjectProperties> {
     chapter.addSection(newSection);
     return newSectionId;
   }
-
+  
+  /** Moves a section from one chapter to another. */
   public moveSectionToChapter(sectionId: string, fromChapterId: string, toChapterId: string, newIndex?: number): void {
     const fromChapter = this.getChapter(fromChapterId);
     const toChapter = this.getChapter(toChapterId);
@@ -265,6 +294,23 @@ export class Project implements Required<ProjectProperties> {
     } else {
       toChapter.sections.push(sectionToMove);
     }
+  }
+  
+  public renameSection(sectionId: string, newTitle: string): void {
+    const section = this.getSection(sectionId);
+    if (section) {
+      section.title = newTitle;
+    }
+  }
+  
+  public copySection(sectionId: string): Section | null {
+    for (const chapter of this.chapters) {
+        const section = chapter.getSection(sectionId);
+        if (section) {
+            return chapter.copySection(sectionId);
+        }
+    }
+    return null;
   }
 
 

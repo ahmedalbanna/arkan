@@ -1,4 +1,6 @@
 
+'use client';
+
 import { v4 as uuidv4 } from 'uuid';
 import { Section, type SectionProperties } from './section';
 
@@ -19,14 +21,54 @@ export class Chapter {
         this.sections = (props.sections || []).map(s => s instanceof Section ? s : new Section(s as SectionProperties));
     }
 
-    public addSection(section: Section): void {
-        this.sections.push(section);
+    /** Renames the chapter. */
+    public rename(newTitle: string): void {
+        this.title = newTitle;
     }
 
+    /** Adds a new section to the chapter. */
+    public addSection(sectionData: Omit<SectionProperties, 'id'>): Section {
+        const newSection = new Section({ id: uuidv4(), ...sectionData });
+        this.sections.push(newSection);
+        return newSection;
+    }
+
+    /** Removes a section from the chapter by its ID. */
     public removeSection(sectionId: string): void {
         this.sections = this.sections.filter(s => s.id !== sectionId);
     }
+    
+    /** Retrieves a section by its ID. */
+    public getSection(sectionId: string): Section | undefined {
+        return this.sections.find(s => s.id === sectionId);
+    }
 
+    /** Moves a section to a new index within the chapter. */
+    public moveSection(sectionId: string, toIndex: number): void {
+        const fromIndex = this.sections.findIndex(s => s.id === sectionId);
+        if (fromIndex === -1 || toIndex < 0 || toIndex >= this.sections.length) return;
+        
+        const [section] = this.sections.splice(fromIndex, 1);
+        this.sections.splice(toIndex, 0, section);
+    }
+
+    /** Creates a copy of a section and adds it to the chapter. */
+    public copySection(sectionId: string): Section | null {
+        const sectionToCopy = this.getSection(sectionId);
+        if (!sectionToCopy) return null;
+
+        const newSectionData = {
+            ...sectionToCopy.toJSON(),
+            id: uuidv4(),
+            title: `${sectionToCopy.title} (Copy)`,
+        };
+        const newSection = new Section(newSectionData);
+        this.sections.push(newSection);
+        return newSection;
+    }
+
+
+    /** Converts the Chapter instance to a plain JSON object. */
     public toJSON(): ChapterProperties {
         return {
             id: this.id,
