@@ -67,6 +67,27 @@ export class Chapter {
         return newSection;
     }
 
+    /** Updates the order of sections in the chapter. */
+    public updateSectionsOrder(newOrder: string[]): void {
+        const newOrderedSections = newOrder
+            .map(id => this.sections.find(s => s.id === id))
+            .filter((s): s is Section => !!s);
+        this.sections = newOrderedSections;
+    }
+
+    /** Updates properties of a specific section. */
+    public updateSection(sectionId: string, updates: Partial<Omit<SectionProperties, 'id'>>): void {
+        const section = this.getSection(sectionId);
+        if (section) {
+            Object.assign(section, updates);
+        }
+    }
+
+    /** Gets the index of a section. */
+    public getSectionIndex(sectionId: string): number {
+        return this.sections.findIndex(s => s.id === sectionId);
+    }
+
 
     /** Converts the Chapter instance to a plain JSON object. */
     public toJSON(): ChapterProperties {

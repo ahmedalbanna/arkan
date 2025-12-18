@@ -95,6 +95,10 @@ export class Section {
         };
     }
 
+    public clone(): Section {
+        return new Section(this.toJSON());
+    }
+
     public toStateObject(): SectionProperties {
         return this.toJSON();
     }
