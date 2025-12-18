@@ -1,7 +1,8 @@
 
+
 import type { Tone, Language, OutputStyle } from './control-types';
 
-export type ManipulationType = 'rewrite' | 'summarize';
+export type ManipulationType = 'rewrite' | 'summarize' | 'style-editor' | 'readability-enhancer' | 'conciseness-checker' | 'clarity-advisor';
 
 export interface GenerationControlState {
     formality: number;
@@ -14,6 +15,10 @@ export interface GenerationControlState {
     manipulationType?: ManipulationType;
     rewriteStyle?: string;
     compressionRatio?: number;
+    targetAudience?: string;
+    targetLevel?: 'elementary' | 'middle-school' | 'high-school' | 'college' | 'graduate';
+    targetReduction?: number;
+    focusAreas?: string[];
 }
 
 export interface SectionContext {
@@ -48,6 +53,10 @@ export const defaultControls: GenerationControlState = {
     manipulationType: 'rewrite',
     rewriteStyle: 'Formal',
     compressionRatio: 50,
+    targetAudience: '',
+    targetLevel: undefined,
+    targetReduction: 0,
+    focusAreas: [],
 };
 
 export const defaultContext: SectionContext = {

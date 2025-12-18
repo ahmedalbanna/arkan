@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React from 'react';
@@ -9,7 +10,7 @@ import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '../ui/checkbox';
-import type { Tone, Language, GenerationControlState, Section } from '@/lib/models';
+import type { Tone, Language, GenerationControlState, Section, ManipulationType } from '@/lib/models';
 import { Info } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
@@ -18,6 +19,15 @@ const styles = [
     "Informal", "Friendly", "Simple", "Formal", "Professional", "Narrative",
     "Descriptive", "Expository", "Argumentative", "Persuasive", "Creative",
     "Technical", "Academic", "Journalistic", "Poetic", "Satirical", "Humorous"
+];
+
+const manipulationTypes: { value: ManipulationType; label: string }[] = [
+    { value: 'rewrite', label: 'Rewrite' },
+    { value: 'summarize', label: 'Summarize' },
+    { value: 'style-editor', label: 'Improve Style' },
+    { value: 'readability-enhancer', label: 'Enhance Readability' },
+    { value: 'conciseness-checker', label: 'Make Concise' },
+    { value: 'clarity-advisor', label: 'Improve Clarity' },
 ];
 
 export function SectionGenerationControls({ section }: { section: Section }) {
@@ -143,28 +153,27 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="rewrite">Rewrite</SelectItem>
-                        <SelectItem value="summarize">Summarize</SelectItem>
+                        {manipulationTypes.map(type => (
+                            <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                        ))}
                     </SelectContent>
                 </Select>
             </div>
 
             <Separator />
-            
+
             {controls.manipulationType === 'rewrite' && (
                 <div className="space-y-2">
                     <Label htmlFor={`rewriteStyle-${section.id}`}>{t('writingTools.textStylist.styleLabel')}</Label>
                     <Select value={controls.rewriteStyle || 'Formal'} onValueChange={(val) => handleControlChange('rewriteStyle', val as any)}>
-                        <SelectTrigger id={`rewriteStyle-${section.id}`}>
-                            <SelectValue />
-                        </SelectTrigger>
+                        <SelectTrigger id={`rewriteStyle-${section.id}`}><SelectValue /></SelectTrigger>
                         <SelectContent>
-                             {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                            {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                         </SelectContent>
                     </Select>
                 </div>
             )}
-            
+
             {controls.manipulationType === 'summarize' && (
                 <div className="space-y-3">
                     <div className="flex justify-between">
@@ -177,6 +186,57 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                         onValueChange={(val) => handleControlChange('compressionRatio', val[0])}
                         min={10} max={90} step={5}
                     />
+                </div>
+            )}
+
+            {controls.manipulationType === 'style-editor' && (
+                <>
+                    <div className="space-y-2">
+                        <Label htmlFor={`targetAudience-${section.id}`}>Target Audience (Optional)</Label>
+                        <Input id={`targetAudience-${section.id}`} value={controls.targetAudience || ''} onChange={e => handleControlChange('targetAudience', e.target.value)} placeholder="e.g., general public" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor={`tone-${section.id}`}>Tone (Optional)</Label>
+                        <Input id={`tone-${section.id}`} value={controls.tone || ''} onChange={e => handleControlChange('tone', e.target.value as Tone)} placeholder="e.g., professional" />
+                    </div>
+                </>
+            )}
+
+            {controls.manipulationType === 'readability-enhancer' && (
+                 <div className="space-y-2">
+                    <Label htmlFor={`targetLevel-${section.id}`}>Target Reading Level</Label>
+                    <Select value={controls.targetLevel} onValueChange={(val) => handleControlChange('targetLevel', val as any)}>
+                        <SelectTrigger id={`targetLevel-${section.id}`}><SelectValue placeholder="Select reading level" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="elementary">Elementary</SelectItem>
+                            <SelectItem value="middle-school">Middle School</SelectItem>
+                            <SelectItem value="high-school">High School</SelectItem>
+                            <SelectItem value="college">College</SelectItem>
+                            <SelectItem value="graduate">Graduate</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            )}
+            
+            {controls.manipulationType === 'conciseness-checker' && (
+                <div className="space-y-3">
+                    <div className="flex justify-between">
+                        <Label htmlFor={`targetReduction-${section.id}`}>Target Reduction</Label>
+                        <Badge variant="outline">{controls.targetReduction || 0}%</Badge>
+                    </div>
+                    <Slider
+                        id={`targetReduction-${section.id}`}
+                        value={[controls.targetReduction || 0]}
+                        onValueChange={(val) => handleControlChange('targetReduction', val[0])}
+                        min={0} max={50} step={5}
+                    />
+                </div>
+            )}
+
+            {controls.manipulationType === 'clarity-advisor' && (
+                <div className="space-y-2">
+                    <Label htmlFor={`focusAreas-${section.id}`}>Focus Areas (comma-separated)</Label>
+                    <Input id={`focusAreas-${section.id}`} value={controls.focusAreas?.join(', ') || ''} onChange={(e) => handleControlChange('focusAreas', e.target.value.split(',').map(s => s.trim()))} placeholder="e.g., sentence structure, word choice" />
                 </div>
             )}
         </div>
