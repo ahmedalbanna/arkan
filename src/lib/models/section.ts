@@ -1,8 +1,11 @@
 
+'use client';
 
 import type { Tone, Language, OutputStyle } from './control-types';
 
 export type ManipulationType = 'rewrite' | 'summarize' | 'style-editor' | 'readability-enhancer' | 'conciseness-checker' | 'clarity-advisor';
+
+export type AnalysisType = 'custom-analysis' | 'question-answering' | 'fact-retrieval';
 
 export interface GenerationControlState {
     formality: number;
@@ -11,7 +14,7 @@ export interface GenerationControlState {
     language: Language;
     outputStyle: OutputStyle;
     wordCount: string;
-    // New fields for text manipulation
+    // Text manipulation
     manipulationType?: ManipulationType;
     rewriteStyle?: string;
     compressionRatio?: number;
@@ -19,6 +22,10 @@ export interface GenerationControlState {
     targetLevel?: 'elementary' | 'middle-school' | 'high-school' | 'college' | 'graduate';
     targetReduction?: number;
     focusAreas?: string[];
+    // Analysis
+    analysisType?: AnalysisType;
+    question?: string; // For question-answering
+    factQuery?: string; // For fact-retrieval
 }
 
 export interface SectionContext {
@@ -57,6 +64,9 @@ export const defaultControls: GenerationControlState = {
     targetLevel: undefined,
     targetReduction: 0,
     focusAreas: [],
+    analysisType: 'custom-analysis',
+    question: '',
+    factQuery: '',
 };
 
 export const defaultContext: SectionContext = {

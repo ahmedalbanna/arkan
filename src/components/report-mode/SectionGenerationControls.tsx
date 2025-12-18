@@ -10,10 +10,11 @@ import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '../ui/checkbox';
-import type { Tone, Language, GenerationControlState, Section, ManipulationType } from '@/lib/models';
+import type { Tone, Language, GenerationControlState, Section, ManipulationType, AnalysisType } from '@/lib/models';
 import { Info } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
+import { Textarea } from '../ui/textarea';
 
 const styles = [
     "Informal", "Friendly", "Simple", "Formal", "Professional", "Narrative",
@@ -28,6 +29,12 @@ const manipulationTypes: { value: ManipulationType; label: string }[] = [
     { value: 'readability-enhancer', label: 'Enhance Readability' },
     { value: 'conciseness-checker', label: 'Make Concise' },
     { value: 'clarity-advisor', label: 'Improve Clarity' },
+];
+
+const analysisTypes: { value: AnalysisType, label: string }[] = [
+    { value: 'custom-analysis', label: 'Custom Analysis' },
+    { value: 'question-answering', label: 'Question Answering' },
+    { value: 'fact-retrieval', label: 'Fact Retrieval' },
 ];
 
 export function SectionGenerationControls({ section }: { section: Section }) {
@@ -242,6 +249,59 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         </div>
     );
 
+    const renderAnalysisControls = () => (
+        <div className="space-y-4">
+            <div className="space-y-2">
+                <Label htmlFor={`analysisType-${section.id}`}>Analysis Type</Label>
+                <Select value={controls.analysisType || 'custom-analysis'} onValueChange={(val) => handleControlChange('analysisType', val as any)}>
+                    <SelectTrigger id={`analysisType-${section.id}`}>
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {analysisTypes.map(type => (
+                            <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+            
+            <Separator />
+
+            {controls.analysisType === 'question-answering' && (
+                <div className="space-y-2">
+                    <Label htmlFor={`question-${section.id}`}>Question to Answer</Label>
+                    <Textarea 
+                        id={`question-${section.id}`} 
+                        value={controls.question || ''} 
+                        onChange={(e) => handleControlChange('question', e.target.value)}
+                        placeholder="e.g., What are the main risks associated with this project?"
+                        rows={3}
+                    />
+                </div>
+            )}
+
+            {controls.analysisType === 'fact-retrieval' && (
+                <div className="space-y-2">
+                    <Label htmlFor={`factQuery-${section.id}`}>Fact to Retrieve</Label>
+                    <Input 
+                        id={`factQuery-${section.id}`} 
+                        value={controls.factQuery || ''} 
+                        onChange={(e) => handleControlChange('factQuery', e.target.value)}
+                        placeholder="e.g., 'market size for AI in healthcare'"
+                    />
+                </div>
+            )}
+            
+            {controls.analysisType === 'custom-analysis' && (
+                 <div className="text-center text-muted-foreground p-4 border rounded-md bg-muted/50">
+                    <Info className="mx-auto h-6 w-6 mb-2" />
+                    <p className="text-sm">For custom analysis, define your goal in the 'Prompt' tab.</p>
+                </div>
+            )}
+        </div>
+    );
+
+
     const renderNoControlsMessage = () => (
         <div className="text-center text-muted-foreground p-4 border rounded-md bg-muted/50">
             <Info className="mx-auto h-6 w-6 mb-2" />
@@ -256,6 +316,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             case 'text-manipulation':
                 return renderTextManipulationControls();
             case 'analysis':
+                return renderAnalysisControls();
             case 'document-processing':
             case 'utilities':
             default:
