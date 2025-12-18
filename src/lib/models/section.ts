@@ -5,7 +5,7 @@ import {
     GenerationControlState,
     defaultControls
 } from '@/ai/schemas/generation-state';
-import type { SectionContext } from './external-context';
+import type { SectionContext } from './context';
 
 export type ManipulationType = 'rewrite' | 'summarize' | 'style-editor' | 'readability-enhancer' | 'conciseness-checker' | 'clarity-advisor';
 

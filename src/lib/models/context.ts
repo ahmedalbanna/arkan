@@ -7,3 +7,7 @@ export interface ExternalContext {
   content: string;
   type: ExternalContextType;
 }
+
+export interface SectionContext {
+
+}
