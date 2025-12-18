@@ -52,6 +52,9 @@ import { useBuilderStore, toast } from '@/hooks';
 import { useSectionGenerator } from '@/hooks/report-mode/use-section-generator';
 import { useSections } from '@/hooks/data/use-sections';
 import { GenerateTocDialog } from './GenerateTocDialog';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
 
 
 interface SortableSectionItemProps {

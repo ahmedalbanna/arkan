@@ -76,6 +76,7 @@ export function SectionAccordionItem({
                     sec.agentId = sectionId; // Keep track of the selected config
                     sec.prompt = config.prompt || sec.prompt;
                     sec.guidelines = config.guidelines || sec.guidelines;
+                    sec.type = config.type || 'generation';
                 }
             });
         }
@@ -89,6 +90,8 @@ export function SectionAccordionItem({
             onGenerate(section.id);
         }
     }
+
+    const selectedConfig = sectionConfigs?.find(s => s.id === section.agentId);
 
     return (
         <div className="bg-background border rounded-lg">
@@ -150,7 +153,7 @@ export function SectionAccordionItem({
                                 </SelectTrigger>
                                 <SelectContent>
                                     {sectionConfigs?.map(s => (
-                                        <SelectItem key={s.id} value={s.id}>{s.title}</SelectItem>
+                                        <SelectItem key={s.id} value={s.id}>{s.title} ({s.type})</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>

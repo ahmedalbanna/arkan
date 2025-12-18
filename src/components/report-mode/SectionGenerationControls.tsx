@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -9,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '../ui/checkbox';
 import type { Tone, Language, GenerationControlState, Section } from '@/lib/models';
+import { Info } from 'lucide-react';
 
 export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
@@ -38,8 +40,8 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         });
     }
 
-    return (
-        <div className="space-y-6">
+    const renderFullControls = () => (
+        <>
             <div className="space-y-3">
                 <Label htmlFor={`formality-${section.id}`}>{t('builder.reportGenerator.tool_formality_label')}</Label>
                 <Slider id={`formality-${section.id}`} value={[controls.formality]} onValueChange={(val) => handleControlChange('formality', val[0])} max={100} step={1} />
@@ -59,32 +61,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                 </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor={`tone-${section.id}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
-                    <Select value={controls.tone} onValueChange={(val) => handleControlChange('tone', val as Tone)}>
-                        <SelectTrigger id={`tone-${section.id}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="professional">{t('builder.reportGenerator.tool_tone_professional')}</SelectItem>
-                            <SelectItem value="academic">{t('builder.reportGenerator.tool_tone_academic')}</SelectItem>
-                            <SelectItem value="casual">{t('builder.reportGenerator.tool_tone_casual')}</SelectItem>
-                            <SelectItem value="persuasive">{t('builder.reportGenerator.tool_tone_persuasive')}</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor={`language-${section.id}`}>Language</Label>
-                    <Select value={controls.language} onValueChange={(val) => handleControlChange('language', val as Language)}>
-                        <SelectTrigger id={`language-${section.id}`}><SelectValue placeholder="Select language..." /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="default">Default</SelectItem>
-                            <SelectItem value="en">English</SelectItem>
-                            <SelectItem value="ar">Arabic</SelectItem>
-                            <SelectItem value="es">Spanish</SelectItem>
-                            <SelectItem value="fr">French</SelectItem>
-                            <SelectItem value="de">German</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
+                {renderToneAndLanguageControls()}
             </div>
             <div className="space-y-2">
                 <Label>Output Format</Label>
@@ -115,6 +92,70 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                 <Label htmlFor={`wordCount-${section.id}`}>{t('builder.reportGenerator.tool_word_count_label')}</Label>
                 <Input id={`wordCount-${section.id}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controls.wordCount} onChange={(e) => handleControlChange('wordCount', e.target.value)} />
             </div>
+        </>
+    );
+
+    const renderToneAndLanguageControls = () => (
+        <>
+            <div className="space-y-2">
+                <Label htmlFor={`tone-${section.id}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
+                <Select value={controls.tone} onValueChange={(val) => handleControlChange('tone', val as Tone)}>
+                    <SelectTrigger id={`tone-${section.id}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="professional">{t('builder.reportGenerator.tool_tone_professional')}</SelectItem>
+                        <SelectItem value="academic">{t('builder.reportGenerator.tool_tone_academic')}</SelectItem>
+                        <SelectItem value="casual">{t('builder.reportGenerator.tool_tone_casual')}</SelectItem>
+                        <SelectItem value="persuasive">{t('builder.reportGenerator.tool_tone_persuasive')}</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor={`language-${section.id}`}>Language</Label>
+                <Select value={controls.language} onValueChange={(val) => handleControlChange('language', val as Language)}>
+                    <SelectTrigger id={`language-${section.id}`}><SelectValue placeholder="Select language..." /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="default">Default</SelectItem>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="ar">Arabic</SelectItem>
+                        <SelectItem value="es">Spanish</SelectItem>
+                        <SelectItem value="fr">French</SelectItem>
+                        <SelectItem value="de">German</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+        </>
+    );
+
+    const renderNoControlsMessage = () => (
+        <div className="text-center text-muted-foreground p-4 border rounded-md bg-muted/50">
+            <Info className="mx-auto h-6 w-6 mb-2" />
+            <p className="text-sm">No specific output controls are available for this section type.</p>
+        </div>
+    );
+
+    const renderControlsForType = () => {
+        switch (section.type) {
+            case 'generation':
+                return renderFullControls();
+            case 'text-manipulation':
+                return (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                            {renderToneAndLanguageControls()}
+                        </div>
+                    </div>
+                );
+            case 'analysis':
+            case 'document-processing':
+            case 'utilities':
+            default:
+                return renderNoControlsMessage();
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            {renderControlsForType()}
         </div>
     );
 };
