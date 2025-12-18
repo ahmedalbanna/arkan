@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ExternalContextTypeSchema, TargetAudienceSchema, ToneSchema } from './enums';
+import { ExternalContextTypeSchema, TargetAudienceSchema, TargetLanaguage, ToneSchema } from './enums';
 
 // ============================================================================
 // BASE SCHEMAS
@@ -45,6 +45,24 @@ export const BaseExternalContextSchema = z.object({
   externalContext: z.array(BaseContextFileSchema).optional().describe('An array of external documents (text or data URIs) provided by the user.'),
 });
 
+export const BaseOutputStyleSchema = z.object({
+  heading: z.boolean().optional().describe('Whether to include headings in the output.'),
+  paragraph: z.boolean().optional().describe('Whether to include paragraphs in the output.'),
+  list: z.boolean().optional().describe('Whether to include lists in the output.'),
+  table: z.boolean().optional().describe('Whether to include tables in the output.'),
+  code: z.boolean().optional().describe('Whether to include codes in the output.'),
+});
+
+export const BaseOutputWriterSchema = z.object({
+  controls: z.object({
+    language: TargetLanaguage.optional().describe('The target language for the content.'),
+    tone: ToneSchema.optional().describe('Desired tone (e.g., professional, casual, persuasive).'),
+    wordCount: z.number().optional().describe('Maximum word count for the generated content.'),
+    complexity: z.number().optional().describe('Complexity level (1-10).'),
+    formality: z.number().optional().describe('Formality level (1-10).'),
+    outputStyle: BaseOutputStyleSchema.optional().describe('Desired output style.'),
+  })
+})
 // Common generation controls (kept minimal to avoid breaking existing flows)
 export const BaseControlsSchema = z
   .object({
@@ -57,6 +75,7 @@ export const BaseControlsSchema = z
     tone: ToneSchema.optional().describe('Desired tone (e.g., professional, casual, persuasive).'),
   })
   .strict();
+
 
 // Common optional web search controls
 export const BaseWebSearchSchema = z

@@ -265,10 +265,25 @@ export function GenerationTools() {
       const controls = section.controls;
       const context = section.context;
 
-      let instructionText = `Please use a ${controls.tone || 'professional'} tone and aim for a word count of approximately ${controls.wordCount || 250} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}.`;
+      let instructionText = `Please use a ${controls.tone || 'professional'} tone and aim for a word count of approximately ${controls.wordCount || 250} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}. The formality should be ${controls.formality > 66 ? 'formal' : controls.formality > 33 ? 'semi-formal' : 'informal'}.`;
       if (controls.language && controls.language !== 'default') {
         const langMap: Record<string, string> = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
         instructionText += ` The output language must be ${langMap[controls.language] || 'English'}.`;
+      }
+      if (controls.outputStyle) {
+        const styleMap: Record<string, string> = {
+
+          heading: 'Include headings in the output.',
+          paragraph: 'Include paragraphs in the output.',
+          list: 'Include lists in the output.',
+          table: 'Include tables in the output.',
+          code: 'Include code blocks in the output.',
+        }
+        instructionText += ` The output should be ${Object.entries(controls.outputStyle)
+          .filter(([key, value]) => value)
+          .map(([key, _]) => styleMap[key as keyof typeof styleMap])
+
+          }`
       }
 
       const otherSectionsContext: Record<string, string> = {};
