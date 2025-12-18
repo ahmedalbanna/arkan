@@ -6,13 +6,14 @@ import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore, toast } from '@/hooks';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Chapter } from '@/lib/models';
 
 /**
  * Builds a detailed instruction string for the AI based on the section's controls.
  * @param controls The generation controls for the section.
  * @returns A string containing the formatted instructions.
  */
-function buildInstructionText(controls: GenerationControlState): string {
+function buildInstructionText(controls: GenerationControlState, allChapters: Chapter[] = []): string {
     let instructions: string[] = [];
 
     // General instructions from the textarea
@@ -102,6 +103,15 @@ function buildInstructionText(controls: GenerationControlState): string {
                     break;
             }
             break;
+        
+        case 'utilities':
+            switch(controls.utilityAction) {
+                case 'generate-toc':
+                    const sectionTitles = allChapters.flatMap(c => c.sections.map(s => s.title));
+                    instructions.push(`Generate a formatted table of contents based on the following section titles: ${sectionTitles.join(', ')}. The output should be a markdown list.`);
+                    break;
+            }
+            break;
     }
     
     return instructions.join(' ');
@@ -125,7 +135,7 @@ export function useSectionGenerator() {
       const controls = section.controls;
       const context = section.context;
 
-      const instructionText = buildInstructionText(controls);
+      const instructionText = buildInstructionText(controls, project.chapters);
 
       const otherSectionsContext: Record<string, string> = {};
       Object.keys(context.sections || {}).forEach(key => {

@@ -13,6 +13,8 @@ export type AnalysisType = 'custom-analysis' | 'question-answering' | 'fact-retr
 
 export type ProcessingAction = 'extract-text' | 'summarize' | 'translate';
 
+export type UtilityAction = 'generate-toc';
+
 export const defaultContext: SectionContext = {
     sections: {},
     externalContext: {},

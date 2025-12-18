@@ -1,7 +1,7 @@
 
 import { z } from 'zod';
 import { LanguageSchema, SectionTypeSchema, ToneSchema } from './enums';
-import { AnalysisType, ManipulationType, ProcessingAction } from '@/lib/models';
+import { AnalysisType, ManipulationType, ProcessingAction, UtilityAction } from '@/lib/models';
 
 export const GenerationControlStateSchema = z.object({
     type: SectionTypeSchema.default('generation'),
@@ -36,6 +36,9 @@ export const GenerationControlStateSchema = z.object({
     // Document Processing
     sourceFileId: z.string().optional(),
     processingAction: z.custom<ProcessingAction>().default('extract-text'),
+    
+    // Utilities
+    utilityAction: z.custom<UtilityAction>().default('generate-toc'),
 });
 
 export type GenerationControlState = z.infer<typeof GenerationControlStateSchema>;

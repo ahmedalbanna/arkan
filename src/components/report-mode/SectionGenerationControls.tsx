@@ -9,7 +9,7 @@ import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '../ui/checkbox';
-import type { Tone, Language, GenerationControlState, Section, ManipulationType, AnalysisType, ProcessingAction } from '@/lib/models';
+import type { Tone, Language, GenerationControlState, Section, ManipulationType, AnalysisType, ProcessingAction, UtilityAction } from '@/lib/models';
 import { Info } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
@@ -43,6 +43,10 @@ const processingActions: { value: ProcessingAction, label: string }[] = [
     { value: 'translate', label: 'Translate Document' },
 ];
 
+const utilityActions: { value: UtilityAction, label: string }[] = [
+    { value: 'generate-toc', label: 'Generate Table of Contents' },
+];
+
 export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
     const { project, updateProject } = useBuilderStore();
@@ -53,7 +57,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         return null;
     }
     
-    const instructionPreview = buildInstructionText(controls);
+    const instructionPreview = buildInstructionText(controls, project?.chapters);
 
     function handleControlChange<K extends keyof GenerationControlState>(
         field: K,
@@ -359,11 +363,19 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         );
     };
 
-
-    const renderNoControlsMessage = () => (
-        <div className="text-center text-muted-foreground p-4 border rounded-md bg-muted/50">
-            <Info className="mx-auto h-6 w-6 mb-2" />
-            <p className="text-sm">No specific output controls are available for this section type.</p>
+    const renderUtilityControls = () => (
+        <div className="space-y-4">
+            <div className="space-y-2">
+                <Label htmlFor={`utilityAction-${section.id}`}>Utility Action</Label>
+                <Select value={controls.utilityAction} onValueChange={(val) => handleControlChange('utilityAction', val as UtilityAction)}>
+                    <SelectTrigger id={`utilityAction-${section.id}`}><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                        {utilityActions.map(action => (
+                            <SelectItem key={action.value} value={action.value}>{action.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
         </div>
     );
 
@@ -378,8 +390,9 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             case 'document-processing':
                 return renderDocumentProcessingControls();
             case 'utilities':
+                return renderUtilityControls();
             default:
-                return renderNoControlsMessage();
+                return null;
         }
     };
 
