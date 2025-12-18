@@ -123,3 +123,10 @@ export type DirectQuestionType = z.infer<typeof DirectQuestionTypeSchema>;
 
 export const TrueFalseAnswerSchema = z.enum(['True', 'False']);
 export type TrueFalseAnswer = z.infer<typeof TrueFalseAnswerSchema>;
+
+// New Enums for Section Types
+export const SectionTypeSchema = z.enum(['generation', 'analysis', 'document-processing', 'text-manipulation', 'utilities']);
+export type SectionType = z.infer<typeof SectionTypeSchema>;
+
+export const LanguageSchema = z.enum(['default', 'en', 'ar', 'es', 'fr', 'de']);
+export type Language = z.infer<typeof LanguageSchema>;

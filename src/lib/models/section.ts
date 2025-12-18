@@ -1,7 +1,11 @@
 
 'use client';
 
-import type { Tone, Language, OutputStyle } from './control-types';
+import {
+    GenerationControlState,
+    defaultControls
+} from '@/ai/schemas/generation-state';
+import type { SectionContext } from './external-context';
 
 export type ManipulationType = 'rewrite' | 'summarize' | 'style-editor' | 'readability-enhancer' | 'conciseness-checker' | 'clarity-advisor';
 
@@ -9,36 +13,11 @@ export type AnalysisType = 'custom-analysis' | 'question-answering' | 'fact-retr
 
 export type ProcessingAction = 'extract-text' | 'summarize' | 'translate';
 
-export interface GenerationControlState {
-    formality: number;
-    complexity: number;
-    tone: Tone;
-    language: Language;
-    outputStyle: OutputStyle;
-    wordCount: string;
-    instructionText?: string;
-    // Text manipulation
-    manipulationType?: ManipulationType;
-    rewriteStyle?: string;
-    compressionRatio?: number;
-    targetAudience?: string;
-    targetLevel?: 'elementary' | 'middle-school' | 'high-school' | 'college' | 'graduate';
-    targetReduction?: number;
-    focusAreas?: string[];
-    // Analysis
-    analysisType?: AnalysisType;
-    question?: string;
-    factQuery?: string;
-    // Document Processing
-    sourceFileId?: string;
-    processingAction?: ProcessingAction;
-}
-
-export interface SectionContext {
-    sections: Record<string, boolean>;
-    externalContext: Record<string, boolean>;
-    themes: Record<string, boolean>;
-}
+export const defaultContext: SectionContext = {
+    sections: {},
+    externalContext: {},
+    themes: {},
+};
 
 
 export type SectionType = 'generation' | 'analysis' | 'document-processing' | 'text-manipulation' | 'utilities';
@@ -55,35 +34,6 @@ export interface SectionProperties {
     controls: GenerationControlState;
     context: SectionContext;
 }
-
-export const defaultControls: GenerationControlState = {
-    formality: 50,
-    complexity: 50,
-    tone: 'professional',
-    language: 'default',
-    outputStyle: { heading: true, paragraph: true, list: false, table: false, code: false },
-    wordCount: '',
-    instructionText: '',
-    manipulationType: 'rewrite',
-    rewriteStyle: 'Formal',
-    compressionRatio: 50,
-    targetAudience: '',
-    targetLevel: undefined,
-    targetReduction: 0,
-    focusAreas: [],
-    analysisType: 'custom-analysis',
-    question: '',
-    factQuery: '',
-    sourceFileId: undefined,
-    processingAction: 'extract-text',
-};
-
-export const defaultContext: SectionContext = {
-    sections: {},
-    externalContext: {},
-    themes: {},
-};
-
 
 export class Section {
     public id: string;
