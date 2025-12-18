@@ -32,6 +32,11 @@ export * from './data/use-users';
 export * from './data/use-agent-categories';
 
 
+// Report Mode Hooks
+export * from './report-mode/use-ai-actions';
+export * from './report-mode/use-section-generator';
+
+
 // Writing Tools Logic Hooks
 export * from './writing-tools/use-ai-detector-logic';
 export * from './writing-tools/use-ai-researcher-logic';

@@ -6,7 +6,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
+} from "@/components/ui/accordion";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,18 +19,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
-import { toast, useBuilderStore } from '@/hooks';
 import { Chapter, Section } from '@/lib/models';
 import { cn } from '@/lib/utils/cn';
 import {
@@ -58,10 +48,9 @@ import { SectionAccordionItem } from './SectionAccordionItem';
 
 import { SectionName } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
-import { useGenerationUIStore } from '@/hooks/core/useGenerationUIStore';
+import { useBuilderStore, toast } from '@/hooks';
+import { useSectionGenerator } from '@/hooks/report-mode/use-section-generator';
 import { useSections } from '@/hooks/data/use-sections';
-import { generateReportSectionApi } from '@/services/api/reportService';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { GenerateTocDialog } from './GenerateTocDialog';
 
 
@@ -70,10 +59,6 @@ interface SortableSectionItemProps {
   index: number;
   chapterIndex: number;
   onDelete: () => void;
-  onGenerate: () => void;
-  isGenerating: boolean;
-  isAnythingGenerating: boolean;
-  hasCreditsForSingleSection: boolean;
 }
 
 function SortableSectionItem({
@@ -96,13 +81,13 @@ function SortableSectionItem({
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <SectionAccordionItem
-        hasCredits={true} itemKey={section.id}
+        itemKey={section.id}
         section={section}
         handleProps={{ ...listeners }}
         chapterIndex={chapterIndex}
         index={index}
         onDelete={onDelete}
-        {...props} />
+      />
     </div>
   );
 };
@@ -113,11 +98,6 @@ interface SortableChapterItemProps {
   onAddSection: (chapterId: string) => void;
   onDeleteSection: (chapterId: string, sectionId: string) => void;
   onDeleteChapter: (chapterId: string) => void;
-  chapterIndex: number;
-  onGenerateSection: (sectionId: string) => void;
-  activeMutationKey: string | null;
-  isAnythingGenerating: boolean;
-  hasCreditsForSingleSection: boolean;
 }
 
 function SortableChapterItem({
@@ -126,7 +106,6 @@ function SortableChapterItem({
   onAddSection,
   onDeleteSection,
   onDeleteChapter,
-  ...props
 }: SortableChapterItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
   const { updateProject } = useBuilderStore();
@@ -222,12 +201,8 @@ function SortableChapterItem({
                   key={section.id}
                   section={section}
                   index={sectionIndex}
-                  chapterIndex={props.chapterIndex}
+                  chapterIndex={index}
                   onDelete={() => onDeleteSection(chapter.id, section.id)}
-                  onGenerate={() => props.onGenerateSection(section.id)}
-                  isGenerating={props.activeMutationKey === section.id}
-                  isAnythingGenerating={props.isAnythingGenerating}
-                  hasCreditsForSingleSection={props.hasCreditsForSingleSection}
                 />
               ))}
             </Accordion>
@@ -243,96 +218,11 @@ function SortableChapterItem({
 };
 
 export function GenerationTools() {
-  const { t, locale } = useLocalization();
-  const { project, updateProject } = useBuilderStore(); // Directly use the store
-  const { data: sectionConfigs, isFetched: sectionsLoaded } = useSections();
-  const { userProfile, refetchUser, firebaseUser } = useAuth();
-  const queryClient = useQueryClient();
+  const { t } = useLocalization();
+  const { project, updateProject } = useBuilderStore();
   const [newChapterTitle, setNewChapterTitle] = useState('');
   const [showTocInput, setShowTocInput] = useState(false);
   const [isGenerateTocOpen, setIsGenerateTocOpen] = useState(false);
-
-  const agentMutation = useMutation({
-    mutationKey: ['generateReportSection'], // Static key
-    mutationFn: async (sectionId: string) => {
-      if (!project || !userProfile || !firebaseUser) throw new Error("Project or user not found.");
-
-      const section = project.getSection(sectionId);
-      if (!section) throw new Error("Section not found.");
-
-      const token = await firebaseUser.getIdToken();
-
-      const controls = section.controls;
-      const context = section.context;
-
-      let instructionText = `Please use a ${controls.tone || 'professional'} tone and aim for a word count of approximately ${controls.wordCount || 250} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}. The formality should be ${controls.formality > 66 ? 'formal' : controls.formality > 33 ? 'semi-formal' : 'informal'}.`;
-      if (controls.language && controls.language !== 'default') {
-        const langMap: Record<string, string> = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
-        instructionText += ` The output language must be ${langMap[controls.language] || 'English'}.`;
-      }
-      if (controls.outputStyle) {
-        const styleMap: Record<string, string> = {
-
-          heading: 'Include headings in the output.',
-          paragraph: 'Include paragraphs in the output.',
-          list: 'Include lists in the output.',
-          table: 'Include tables in the output.',
-          code: 'Include code blocks in the output.',
-        }
-        instructionText += ` The output should be ${Object.entries(controls.outputStyle)
-          .filter(([key, value]) => value)
-          .map(([key, _]) => styleMap[key as keyof typeof styleMap])
-
-          }`
-      }
-
-      const otherSectionsContext: Record<string, string> = {};
-      Object.keys(context.sections || {}).forEach(key => {
-        if (context.sections[key]) {
-          const content = project.getSectionContent(key);
-          if (content) {
-            otherSectionsContext[key] = content;
-          }
-        }
-      });
-
-      const externalContextFiles = (project.externalContext || []).filter(item => context.externalContext?.[item.id]);
-
-      const body = {
-        flow: 'generate-section',
-        sectionToGenerate: section.id as SectionName,
-        prompt: section.prompt,
-        otherSections: otherSectionsContext,
-        externalContext: externalContextFiles,
-        guidelines: section.guidelines,
-        instructionText,
-      };
-
-      const result = await generateReportSectionApi(body, token);
-
-      const content = result?.[section.id] ?? Object.values(result || {})[0] as string | undefined;
-      if (!content) {
-        toast({ title: 'Generation failed', description: `No content returned for section ${section.id}.`, variant: 'destructive' });
-        throw new Error('Empty generation result');
-      }
-
-      // The payload for the onSuccess callback
-      return { sectionId: section.id, content };
-    },
-    onSuccess: (data) => {
-      // Update the project state with the new content
-      updateProject(p => p.updateSectionContent(data.sectionId, data.content));
-      refetchUser(); // Refetch user to update credits
-      toast({ title: 'Section Generated', description: 'The AI has generated the content for your section.' });
-    },
-    onError: (error: any) => {
-      toast({ title: 'Generation error', description: error?.message || 'Failed to generate section', variant: 'destructive' });
-    },
-  });
-
-  function onGenerateSection(sectionId: SectionName) {
-    agentMutation.mutate(sectionId as string);
-  };
 
   function handleAddChapter() {
     updateProject(p => { p.addChapter(); });
@@ -374,19 +264,17 @@ export function GenerationTools() {
     updateProject(p => {
       p.chapters = []; // Clear existing chapters
       let currentChapterId: string | null = null;
-      let chapterCounter = 1;
 
       lines.forEach(line => {
-        const isChapter = !line.match(/^s*d+.d+/); // If it doesn't look like "1.1", it's a chapter
+        const isChapter = !line.match(/^s*d+.d+/);
 
         if (isChapter) {
           const chapterTitle = line.replace(/^d+.?s*/, '').trim();
           if (chapterTitle) {
             currentChapterId = p.addChapter(chapterTitle);
             chaptersCreated++;
-            chapterCounter++;
           }
-        } else if (currentChapterId) { // It's a section
+        } else if (currentChapterId) {
           const sectionTitle = line.replace(/^d+.d+.?s*/, '').trim();
           if (sectionTitle) {
             p.addCustomSection(currentChapterId, sectionTitle);
@@ -460,15 +348,13 @@ export function GenerationTools() {
           </div>
         </CardHeader>
         <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button onClick={() => setShowTocInput(true)} variant="outline" className="w-full">
               <ListPlus className="me-2 h-4 w-4" /> Import from Text
             </Button>
             <Button onClick={() => setIsGenerateTocOpen(true)} variant="outline" className="w-full">
               <Sparkles className="me-2 h-4 w-4" /> Generate with AI
             </Button>
-          </div>
-          <div className="flex gap-2">
             <Button onClick={handleAddChapter} variant="default" className="w-full">
               <PlusCircle className="me-2 h-4 w-4" /> Add Chapter
             </Button>
@@ -508,11 +394,6 @@ export function GenerationTools() {
                         onAddSection={handleAddSectionToChapter}
                         onDeleteSection={handleDeleteSection}
                         onDeleteChapter={handleDeleteChapter}
-                        chapterIndex={chapterIndex}
-                        onGenerateSection={onGenerateSection}
-                        activeMutationKey={agentMutation.isPending ? agentMutation.variables as string : null}
-                        isAnythingGenerating={agentMutation.isPending}
-                        hasCreditsForSingleSection={!!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1}
                       />
                     ))}
                   </Accordion>

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { AccordionContent, AccordionTrigger } from '@/components/ui/accordion';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,15 +16,15 @@ import { Input } from '../ui/input';
 import { ContextSelector } from './SectionContextSelector';
 import { SectionGenerationControls } from './SectionGenerationControls';
 import { GuidelineEditor } from './SectionGuidelineEditor';
+import { useSectionGenerator } from '@/hooks/report-mode/useSectionGenerator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useSections } from '@/hooks/data/use-sections';
+import { Label } from '../ui/label';
 
 
 export function SectionAccordionItem({
     itemKey,
     section,
-    onGenerate,
-    isGenerating,
-    isAnythingGenerating,
-    hasCredits,
     handleProps,
     index,
     chapterIndex,
@@ -32,10 +32,6 @@ export function SectionAccordionItem({
 }: {
     itemKey: string,
     section: Section,
-    onGenerate: () => void,
-    isGenerating: boolean,
-    isAnythingGenerating: boolean,
-    hasCredits: boolean,
     handleProps?: any,
     index: number,
     chapterIndex: number,
@@ -43,6 +39,9 @@ export function SectionAccordionItem({
 }) {
     const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
+    const { data: sectionConfigs = [] } = useSections();
+    const { onGenerate, isGenerating, isAnythingGenerating, hasCredits } = useSectionGenerator();
+
     const [isEditing, setIsEditing] = useState(false);
     const [editedTitle, setEditedTitle] = useState(section.title);
 
@@ -68,17 +67,31 @@ export function SectionAccordionItem({
         }
     }
 
+    const handleSectionTypeChange = (sectionId: string) => {
+        const config = sectionConfigs?.find(s => s.id === sectionId);
+        if (config) {
+            updateProject(p => {
+                const sec = p.getSection(itemKey);
+                if (sec) {
+                    sec.agentId = sectionId; // Keep track of the selected config
+                    sec.prompt = config.prompt || sec.prompt;
+                    sec.guidelines = config.guidelines || sec.guidelines;
+                }
+            });
+        }
+    };
+
     const canGenerate = hasCredits && !isAnythingGenerating;
 
     function handleGenerateClick(e: React.MouseEvent) {
         e.stopPropagation();
         if (canGenerate) {
-            onGenerate();
+            onGenerate(section.id);
         }
     }
 
     return (
-        <AccordionItem value={itemKey} key={itemKey} className="bg-background border rounded-lg">
+        <div className="bg-background border rounded-lg">
             <div className="flex items-center px-4 py-2">
                 <AccordionTrigger className="flex-1 hover:no-underline py-0">
                     <div className="flex items-center gap-2 flex-1 min-w-0" onDoubleClick={() => setIsEditing(true)}>
@@ -129,8 +142,21 @@ export function SectionAccordionItem({
             <AccordionContent>
                 <FormProvider {...form}>
                     <div className="border-t">
+                        <div className="p-4 space-y-2">
+                             <Label>Section Type</Label>
+                             <Select onValueChange={handleSectionTypeChange} value={section.agentId || ''}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a pre-configured section type..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {sectionConfigs?.map(s => (
+                                        <SelectItem key={s.id} value={s.id}>{s.title}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <Tabs defaultValue="controls" className="w-full">
-                            <div className="px-4 pt-4">
+                            <div className="px-4">
                                 <TooltipProvider>
                                     <TabsList className="grid w-full grid-cols-3">
                                         <Tooltip>
@@ -190,6 +216,6 @@ export function SectionAccordionItem({
                     </div>
                 </FormProvider>
             </AccordionContent>
-        </AccordionItem>
+        </div>
     );
 }

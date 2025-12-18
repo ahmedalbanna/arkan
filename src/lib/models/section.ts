@@ -17,7 +17,7 @@ export interface SectionContext {
 }
 
 
-export type SectionType = 'report' | 'diagram' | 'presentation';
+export type SectionType = 'analysis' | 'generation' | 'document-processing' | 'text-manipulation' | 'utilities';
 
 export interface SectionProperties {
     id: string;
