@@ -1,6 +1,8 @@
 
 import type { Tone, Language, OutputStyle } from './control-types';
 
+export type ManipulationType = 'rewrite' | 'summarize';
+
 export interface GenerationControlState {
     formality: number;
     complexity: number;
@@ -8,6 +10,10 @@ export interface GenerationControlState {
     language: Language;
     outputStyle: OutputStyle;
     wordCount: string;
+    // New fields for text manipulation
+    manipulationType?: ManipulationType;
+    rewriteStyle?: string;
+    compressionRatio?: number;
 }
 
 export interface SectionContext {
@@ -39,6 +45,9 @@ export const defaultControls: GenerationControlState = {
     language: 'default',
     outputStyle: { heading: true, paragraph: true, list: false, table: false, code: false },
     wordCount: '',
+    manipulationType: 'rewrite',
+    rewriteStyle: 'Formal',
+    compressionRatio: 50,
 };
 
 export const defaultContext: SectionContext = {

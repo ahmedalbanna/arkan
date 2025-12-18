@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
-import type { Section } from '@/lib/models';
+import type { Section, SectionType } from '@/lib/models';
 import { GripVertical, Link as LinkIcon, Loader2, SlidersHorizontal, Sparkles, StickyNote, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -18,7 +18,6 @@ import { SectionGenerationControls } from './SectionGenerationControls';
 import { GuidelineEditor } from './SectionGuidelineEditor';
 import { useSectionGenerator } from '@/hooks/report-mode/use-section-generator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { useSections } from '@/hooks/data/use-sections';
 import { Label } from '../ui/label';
 
 
@@ -39,7 +38,6 @@ export function SectionAccordionItem({
 }) {
     const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
-    const { data: sectionConfigs = [] } = useSections();
     const { onGenerate, isGenerating, isAnythingGenerating, hasCredits } = useSectionGenerator();
 
     const [isEditing, setIsEditing] = useState(false);
@@ -67,19 +65,16 @@ export function SectionAccordionItem({
         }
     }
 
-    const handleSectionTypeChange = (sectionId: string) => {
-        const config = sectionConfigs?.find(s => s.id === sectionId);
-        if (config) {
-            updateProject(p => {
-                const sec = p.getSection(itemKey);
-                if (sec) {
-                    sec.agentId = sectionId; // Keep track of the selected config
-                    sec.prompt = config.prompt || sec.prompt;
-                    sec.guidelines = config.guidelines || sec.guidelines;
-                    sec.type = config.type || 'generation';
-                }
-            });
-        }
+    const handleSectionTypeChange = (newType: SectionType) => {
+        updateProject(p => {
+            const sec = p.getSection(itemKey);
+            if (sec) {
+                sec.type = newType;
+                // Optional: Reset prompt/guidelines when type changes
+                // sec.prompt = 'You are a helpful assistant.';
+                // sec.guidelines = [];
+            }
+        });
     };
 
     const canGenerate = hasCredits && !isAnythingGenerating;
@@ -91,7 +86,14 @@ export function SectionAccordionItem({
         }
     }
 
-    const selectedConfig = sectionConfigs?.find(s => s.id === section.agentId);
+    const sectionTypes: { value: SectionType, label: string }[] = [
+        { value: 'generation', label: 'AI Generation' },
+        { value: 'text-manipulation', label: 'Text Manipulation' },
+        { value: 'analysis', label: 'Analysis' },
+        { value: 'document-processing', label: 'Document Processing' },
+        { value: 'utilities', label: 'Utilities' },
+    ];
+
 
     return (
         <div className="bg-background border rounded-lg">
@@ -147,13 +149,13 @@ export function SectionAccordionItem({
                     <div className="border-t">
                         <div className="p-4 space-y-2">
                              <Label>Section Type</Label>
-                             <Select onValueChange={handleSectionTypeChange} value={section.agentId || ''}>
+                             <Select onValueChange={(value) => handleSectionTypeChange(value as SectionType)} value={section.type || 'generation'}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select a pre-configured section type..." />
+                                    <SelectValue placeholder="Select a section type..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {sectionConfigs?.map(s => (
-                                        <SelectItem key={s.id} value={s.id}>{s.title} ({s.type})</SelectItem>
+                                    {sectionTypes?.map(s => (
+                                        <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>

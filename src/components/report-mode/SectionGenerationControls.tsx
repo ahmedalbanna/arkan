@@ -11,6 +11,14 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '../ui/checkbox';
 import type { Tone, Language, GenerationControlState, Section } from '@/lib/models';
 import { Info } from 'lucide-react';
+import { Badge } from '../ui/badge';
+import { Separator } from '../ui/separator';
+
+const styles = [
+    "Informal", "Friendly", "Simple", "Formal", "Professional", "Narrative",
+    "Descriptive", "Expository", "Argumentative", "Persuasive", "Creative",
+    "Technical", "Academic", "Journalistic", "Poetic", "Satirical", "Humorous"
+];
 
 export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
@@ -126,6 +134,54 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         </>
     );
 
+    const renderTextManipulationControls = () => (
+        <div className="space-y-4">
+            <div className="space-y-2">
+                <Label htmlFor={`manipulationType-${section.id}`}>Manipulation Type</Label>
+                <Select value={controls.manipulationType || 'rewrite'} onValueChange={(val) => handleControlChange('manipulationType', val as any)}>
+                    <SelectTrigger id={`manipulationType-${section.id}`}>
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="rewrite">Rewrite</SelectItem>
+                        <SelectItem value="summarize">Summarize</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <Separator />
+            
+            {controls.manipulationType === 'rewrite' && (
+                <div className="space-y-2">
+                    <Label htmlFor={`rewriteStyle-${section.id}`}>{t('writingTools.textStylist.styleLabel')}</Label>
+                    <Select value={controls.rewriteStyle || 'Formal'} onValueChange={(val) => handleControlChange('rewriteStyle', val as any)}>
+                        <SelectTrigger id={`rewriteStyle-${section.id}`}>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                             {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+            )}
+            
+            {controls.manipulationType === 'summarize' && (
+                <div className="space-y-3">
+                    <div className="flex justify-between">
+                        <Label htmlFor={`compressionRatio-${section.id}`}>{t('writingTools.textStylist.compressionRatioLabel')}</Label>
+                        <Badge variant="outline">{controls.compressionRatio || 50}%</Badge>
+                    </div>
+                    <Slider
+                        id={`compressionRatio-${section.id}`}
+                        value={[controls.compressionRatio || 50]}
+                        onValueChange={(val) => handleControlChange('compressionRatio', val[0])}
+                        min={10} max={90} step={5}
+                    />
+                </div>
+            )}
+        </div>
+    );
+
     const renderNoControlsMessage = () => (
         <div className="text-center text-muted-foreground p-4 border rounded-md bg-muted/50">
             <Info className="mx-auto h-6 w-6 mb-2" />
@@ -138,13 +194,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             case 'generation':
                 return renderFullControls();
             case 'text-manipulation':
-                return (
-                    <div className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
-                            {renderToneAndLanguageControls()}
-                        </div>
-                    </div>
-                );
+                return renderTextManipulationControls();
             case 'analysis':
             case 'document-processing':
             case 'utilities':
