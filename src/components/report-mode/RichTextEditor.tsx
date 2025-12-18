@@ -21,8 +21,10 @@ import {
   Loader2,
   Quote,
   Sparkles,
+  Square,
   Strikethrough,
   Table as TableIcon,
+  Volume2,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import {
@@ -34,6 +36,7 @@ import {
 import { Separator } from '../ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useEditorStore } from '@/hooks/core/use-editor-store';
+import { useBrowserSpeech } from '@/hooks';
 
 
 // Toolbar Component
@@ -45,13 +48,22 @@ interface SectionToolbarProps {
 
 const SectionToolbar = memo(function SectionToolbar({ editor, onTextUpdate, onWholeUpdate }: SectionToolbarProps) {
   const { t } = useLocalization();
-  const { isSpeaking } = useBrowserSpeech();
+  const { speak, stop, isSpeaking } = useBrowserSpeech();
   const { activeAiAction, isProcessing, handleAiAction, rewriteStyles } = useAiActions({
     editor,
     onTextUpdate,
     onWholeUpdate,
   });
 
+  function handleReadAloudClick() {
+    if (isSpeaking) {
+      stop();
+    } else {
+      const { from, to } = editor.state.selection;
+      const textToRead = editor.state.doc.textBetween(from, to) || editor.getText();
+      speak(textToRead);
+    }
+  }
   const formatButtons = [
     { action: () => editor.chain().focus().toggleBold().run(), isActive: editor.isActive('bold'), icon: Bold, label: t('builder.Section.tooltips.bold') },
     { action: () => editor.chain().focus().toggleItalic().run(), isActive: editor.isActive('italic'), icon: Italic, label: t('builder.Section.tooltips.italic') },
@@ -133,6 +145,15 @@ const SectionToolbar = memo(function SectionToolbar({ editor, onTextUpdate, onWh
           </DropdownMenuContent>
         </DropdownMenu>
 
+        {/* Utility Buttons */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8" onClick={handleReadAloudClick}>
+              {isSpeaking ? <Square className="h-4 w-4 text-red-500 fill-current" /> : <Volume2 className="h-4 w-4" />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent><p>{isSpeaking ? 'Stop Speaking' : t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
+        </Tooltip>
       </TooltipProvider>
     </div>
   )
@@ -168,7 +189,7 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       },
       handlePaste(view, event) {
         const text = event.clipboardData?.getData('text/plain');
-        
+
         if (text && editor) {
           const html = marked.parse(text);
           // Create a transaction to first delete the selection, then insert the new content.
