@@ -20,10 +20,10 @@ export function useContextSelector(itemKey: string) {
     const reportSections = useMemo(() => {
         if (!project?.sections) return [];
         return project.sections
-            .filter(s => s.id !== itemKey)
+            // .filter(s => s.id !== itemKey)
             .map(s => ({ id: s.id, title: s.title }));
     }, [project?.sections, itemKey]);
-    
+
     const sectionsContent = useMemo(() => {
         if (!project?.sections) return {};
         return project.sections.reduce((acc, section) => {
