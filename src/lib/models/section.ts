@@ -1,5 +1,4 @@
 
-
 import type { Tone, Language, OutputStyle } from './control-types';
 
 export interface GenerationControlState {
@@ -14,6 +13,7 @@ export interface GenerationControlState {
 export interface SectionContext {
     sections: Record<string, boolean>;
     externalContext: Record<string, boolean>;
+    themes: Record<string, boolean>;
 }
 
 
@@ -23,17 +23,13 @@ export interface SectionProperties {
     id: string;
     title: string;
     type: SectionType;
-    content?: string;
-    // Agent-related properties are now part of the section itself
-    prompt?: string;
-    guidelines?: string[];
-    agentId?: string | null;
-    commandId?: string | null;
-    // Generation controls are now part of the section
-    controls?: GenerationControlState;
-    // Context selection is now part of the section
-    context?: SectionContext;
-
+    content: string;
+    prompt: string;
+    guidelines: string[];
+    agentId: string | null;
+    commandId: string | null;
+    controls: GenerationControlState;
+    context: SectionContext;
 }
 
 export const defaultControls: GenerationControlState = {
@@ -48,6 +44,7 @@ export const defaultControls: GenerationControlState = {
 export const defaultContext: SectionContext = {
     sections: {},
     externalContext: {},
+    themes: {},
 };
 
 
@@ -55,15 +52,13 @@ export class Section {
     public id: string;
     public title: string;
     public type: SectionType;
-    public content?: string;
-    public prompt?: string;
-    public guidelines?: string[];
-    public agentId?: string | null;
-    public commandId?: string | null;
+    public content: string;
+    public prompt: string;
+    public guidelines: string[];
+    public agentId: string | null;
+    public commandId: string | null;
     public controls: GenerationControlState;
     public context: SectionContext;
-
-
 
     constructor(props: SectionProperties) {
         this.id = props.id;
@@ -76,7 +71,14 @@ export class Section {
         this.commandId = props.commandId || null;
         this.controls = { ...defaultControls, ...props.controls };
         this.context = { ...defaultContext, ...props.context };
+    }
 
+    public rename(newTitle: string): void {
+        this.title = newTitle;
+    }
+
+    public updateContent(newContent: string): void {
+        this.content = newContent;
     }
 
     public toJSON(): SectionProperties {
@@ -91,12 +93,12 @@ export class Section {
             commandId: this.commandId,
             controls: this.controls,
             context: this.context,
-
         };
     }
 
     public clone(): Section {
-        return new Section(this.toJSON());
+        // Ensure a deep copy of nested objects
+        return new Section(JSON.parse(JSON.stringify(this.toJSON())));
     }
 
     public toStateObject(): SectionProperties {

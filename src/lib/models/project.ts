@@ -32,19 +32,18 @@ export class Project implements Required<ProjectProperties> {
 
 
   constructor(props: ProjectProperties) {
-    this.id = props.id || uuidv4(); // Use UUID for new, unsaved projects
+    this.id = props.id || uuidv4();
     this.userId = props.userId || '';
     this.createdAt = props.createdAt || new Date().toISOString();
     this.updatedAt = props.updatedAt || new Date().toISOString();
     this.name = props.name || 'Untitled Project';
     this.projectDescription = props.projectDescription || 'Simple Project';
-    // Ensure chapters are instances of the Chapter class for consistent API
     this.chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c as ChapterProperties));
     this.externalContext = (props.externalContext || []).map(ctx => ({ ...ctx, id: ctx.id || uuidv4() }));
-    this.hasUnsavedChanges = !props.userId || false; // New projects are considered to have unsaved changes
+    this.hasUnsavedChanges = !props.userId || false;
   }
 
-  // --- Getters for derived state ---
+  // --- DERIVED STATE GETTERS ---
   get sections(): Section[] {
     return this.chapters.flatMap(c => c.sections);
   }
@@ -60,10 +59,7 @@ export class Project implements Required<ProjectProperties> {
     return hasBasicInfo || hasChaptersWithContent || hasExternalContext;
   }
 
-  /**
-   * Converts the Project instance to a plain JSON object for serialization.
-   * This method is automatically used by `JSON.stringify`.
-   */
+  // --- SERIALIZATION ---
   public toJSON(): Required<Omit<ProjectProperties, 'proposalContent'>> {
     return {
       id: this.id,
@@ -72,7 +68,7 @@ export class Project implements Required<ProjectProperties> {
       updatedAt: this.updatedAt,
       name: this.name,
       projectDescription: this.projectDescription,
-      chapters: this.chapters.map(c => c.toJSON()), // Serialize chapters
+      chapters: this.chapters.map(c => c.toJSON()),
       externalContext: this.externalContext,
     };
   }
@@ -81,26 +77,18 @@ export class Project implements Required<ProjectProperties> {
     return this.toJSON();
   }
 
-  // --- Chapter Methods ---
+  // --- CHAPTER MANAGEMENT ---
   public addChapter(title?: string): string {
     const chapterTitle = title || 'Untitled Chapter';
-    let baseId = chapterTitle.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
-    if (!baseId) baseId = 'chapter';
-
-    let newChapterId = baseId;
-    let counter = 1;
-    while (this.chapters.some(c => c.id === newChapterId)) {
-      newChapterId = `${baseId}-${counter}`;
-      counter++;
-    }
-
-    const newChapter = new Chapter({ id: newChapterId, title: chapterTitle, sections: [] });
+    const newChapter = new Chapter({ title: chapterTitle, sections: [] });
     this.chapters.push(newChapter);
-    return newChapterId;
+    this.markAsModified();
+    return newChapter.id;
   }
 
   public removeChapter(chapterId: string): void {
     this.chapters = this.chapters.filter(c => c.id !== chapterId);
+    this.markAsModified();
   }
 
   public getChapter(chapterId: string): Chapter | undefined {
@@ -111,6 +99,7 @@ export class Project implements Required<ProjectProperties> {
     const chapter = this.getChapter(chapterId);
     if (chapter) {
       chapter.rename(newTitle);
+      this.markAsModified();
     }
   }
 
@@ -119,236 +108,155 @@ export class Project implements Required<ProjectProperties> {
     if (fromIndex === -1 || toIndex < 0 || toIndex >= this.chapters.length) return;
     const [chapter] = this.chapters.splice(fromIndex, 1);
     this.chapters.splice(toIndex, 0, chapter);
+    this.markAsModified();
   }
 
   public copyChapter(chapterId: string): Chapter | null {
     const chapterToCopy = this.getChapter(chapterId);
     if (!chapterToCopy) return null;
-    const newChapterData = {
-        ...chapterToCopy.toJSON(),
+
+    const newChapter = new Chapter({
         id: uuidv4(),
-        title: `${chapterToCopy.title} (Copy)`,
-        sections: chapterToCopy.sections.map(s => new Section({ ...s.toJSON(), id: uuidv4() }))
-    };
-    const newChapter = new Chapter(newChapterData);
+        title: `${chapterToCopy.title} (Copy)`.trim(),
+        sections: chapterToCopy.sections.map(s => s.clone())
+    });
     this.chapters.push(newChapter);
+    this.markAsModified();
     return newChapter;
   }
 
   public updateChaptersOrder(newOrderIds: string[]): void {
-    const newOrderedChapters = newOrderIds
+    this.chapters = newOrderIds
       .map(id => this.chapters.find(c => c.id === id))
       .filter((c): c is Chapter => !!c);
-    this.chapters = newOrderedChapters;
+    this.markAsModified();
   }
 
-  // --- Section Methods ---
-  public getSection(sectionId: string): Section | undefined {
-    return this.sections.find(s => s.id === sectionId);
+  // --- SECTION MANAGEMENT (DELEGATED) ---
+  public getChapterForSection(sectionId: string): Chapter | undefined {
+    return this.chapters.find(c => c.getSection(sectionId) !== undefined);
   }
 
+  public getSection(sectionId:string): Section | undefined {
+      for (const chapter of this.chapters) {
+          const section = chapter.getSection(sectionId);
+          if (section) return section;
+      }
+      return undefined;
+  }
+  
   public getSectionContent(sectionId: string): string | undefined {
-    return this.getSection(sectionId)?.content;
-  }
-
-  public updateSectionContent(sectionId: string, newContent: string): void {
     const section = this.getSection(sectionId);
-    if (section) {
-      section.content = newContent;
-    }
+    return section?.content;
   }
 
-  public updateSectionTitle(sectionId: string, newTitle: string): void {
-    const section = this.getSection(sectionId);
-    if (section) {
-      section.title = newTitle;
-    }
-  }
-
-  public addSectionToChapter(chapterId: string, title?: string): string | null {
+  public addSectionToChapter(chapterId: string, sectionTitle: string): Section | null {
     const chapter = this.getChapter(chapterId);
     if (!chapter) return null;
-
-    const sectionTitle = title || 'Untitled Section';
-    let baseId = sectionTitle.toLowerCase().trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-');
-    if (!baseId) baseId = 'section';
-
-    let newSectionId = baseId;
-    let counter = 1;
-    while (this.sections.some(s => s.id === newSectionId)) {
-      newSectionId = `${baseId}-${counter}`;
-      counter++;
-    }
-
-    const newSection = new Section({
-      id: newSectionId,
-      title: sectionTitle,
-      type: 'report',
-      content: '',
-      prompt: 'You are a helpful assistant. Write a section based on the user\'s instructions.',
-      guidelines: [],
-    });
-
-    chapter.addSection(newSection);
-    return newSectionId;
+    const newSection = chapter.addSection({title: sectionTitle});
+    this.markAsModified();
+    return newSection;
+  }
+  
+  public addSectionAtIndex(chapterId: string, index: number, sectionTitle: string): Section | null {
+      const chapter = this.getChapter(chapterId);
+      if (!chapter) return null;
+      const newSection = chapter.addSectionAtIndex(index, {title: sectionTitle});
+      this.markAsModified();
+      return newSection;
+  }
+  
+  public addCustomSection(chapterId: string, title: string): Section | null {
+      const chapter = this.getChapter(chapterId);
+      if (!chapter) return null;
+      const newSection = chapter.addCustomSection(title);
+      this.markAsModified();
+      return newSection;
   }
 
-  public addSectionAtIndex(chapterId: string, index: number, title?: string): string | null {
-    const chapter = this.getChapter(chapterId);
-    if (!chapter) return null;
+  public removeSection(sectionId: string): void {
+      const chapter = this.getChapterForSection(sectionId);
+      if(chapter) {
+          chapter.removeSection(sectionId);
+          this.markAsModified();
+      }
+  }
+  
+  public moveSectionToChapter(sectionId: string, fromChapterId: string, toChapterId: string, toIndex: number = -1): void {
+      const fromChapter = this.getChapter(fromChapterId);
+      const toChapter = this.getChapter(toChapterId);
+      if (!fromChapter || !toChapter) return;
 
-    const sectionTitle = title || 'Untitled Section';
-    let baseId = sectionTitle.toLowerCase().trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-');
-    if (!baseId) baseId = 'section';
+      const sectionIndex = fromChapter.getSectionIndex(sectionId);
+      if (sectionIndex === -1) return;
 
-    let newSectionId = baseId;
-    let counter = 1;
-    while (this.sections.some(s => s.id === newSectionId)) {
-      newSectionId = `${baseId}-${counter}`;
-      counter++;
-    }
+      const [section] = fromChapter.sections.splice(sectionIndex, 1);
 
-    const newSection = new Section({
-      id: newSectionId,
-      title: sectionTitle,
-      type: 'report',
-      content: '',
-      prompt: 'You are a helpful assistant. Write a section based on the user\'s instructions.',
-      guidelines: [],
-    });
-
-    chapter.sections.splice(index, 0, newSection);
-    return newSectionId;
+      const finalIndex = toIndex === -1 ? toChapter.sections.length : toIndex;
+      toChapter.sections.splice(finalIndex, 0, section);
+      
+      this.markAsModified();
   }
 
   public moveSectionUp(sectionId: string): void {
-    for (const chapter of this.chapters) {
-      const index = chapter.sections.findIndex(s => s.id === sectionId);
-      if (index > 0) {
-        const [section] = chapter.sections.splice(index, 1);
-        chapter.sections.splice(index - 1, 0, section);
-        this.updatedAt = new Date().toISOString();
-        this.hasUnsavedChanges = true;
-        return;
+      const chapter = this.getChapterForSection(sectionId);
+      if (chapter) {
+          chapter.moveSectionUp(sectionId);
+          this.markAsModified();
       }
-    }
   }
 
   public moveSectionDown(sectionId: string): void {
-    for (const chapter of this.chapters) {
-      const index = chapter.sections.findIndex(s => s.id === sectionId);
-      if (index !== -1 && index < chapter.sections.length - 1) {
-        const [section] = chapter.sections.splice(index, 1);
-        chapter.sections.splice(index + 1, 0, section);
-        this.updatedAt = new Date().toISOString();
-        this.hasUnsavedChanges = true;
-        return;
+      const chapter = this.getChapterForSection(sectionId);
+      if (chapter) {
+          chapter.moveSectionDown(sectionId);
+          this.markAsModified();
       }
-    }
-  }
-  public addCustomSection(chapterId: string, title: string): string | null {
-    const chapter = this.getChapter(chapterId);
-    if (!chapter) return null;
-
-    const baseId = title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
-    let newSectionId = baseId;
-    let counter = 1;
-    while (this.sections.some(s => s.id === newSectionId)) {
-      newSectionId = `${baseId}-${counter}`;
-      counter++;
-    }
-
-    const newSection = new Section({
-      id: newSectionId,
-      title: title,
-      type: 'report',
-      content: '',
-      prompt: `You are an expert technical writer. Write a comprehensive section on "${title}".`,
-      guidelines: [],
-    });
-
-    chapter.addSection(newSection);
-    return newSectionId;
   }
   
-  /** Moves a section from one chapter to another. */
-  public moveSectionToChapter(sectionId: string, fromChapterId: string, toChapterId: string, newIndex?: number): void {
-    const fromChapter = this.getChapter(fromChapterId);
-    const toChapter = this.getChapter(toChapterId);
+  public updateSectionContent(sectionId: string, content: string): void {
+      const section = this.getSection(sectionId);
+      if(section) {
+          section.updateContent(content);
+          this.markAsModified();
+      }
+  }
 
-    if (!fromChapter || !toChapter) return;
-
-    const sectionIndex = fromChapter.sections.findIndex(s => s.id === sectionId);
-    if (sectionIndex === -1) return;
-
-    const [sectionToMove] = fromChapter.sections.splice(sectionIndex, 1);
-
-    if (newIndex !== undefined && newIndex >= 0 && newIndex <= toChapter.sections.length) {
-      toChapter.sections.splice(newIndex, 0, sectionToMove);
-    } else {
-      toChapter.sections.push(sectionToMove);
-    }
+  public updateSectionTitle(sectionId: string, title: string): void {
+      const section = this.getSection(sectionId);
+      if (section) {
+          section.rename(title);
+          this.markAsModified();
+      }
   }
   
-  public renameSection(sectionId: string, newTitle: string): void {
-    const section = this.getSection(sectionId);
-    if (section) {
-      section.title = newTitle;
-    }
-  }
-  
-  public copySection(sectionId: string): Section | null {
-    for (const chapter of this.chapters) {
-        const section = chapter.getSection(sectionId);
-        if (section) {
-            return chapter.copySection(sectionId);
-        }
-    }
-    return null;
-  }
-
-
-  public removeSection(sectionId: string): void {
-    this.chapters.forEach(chapter => {
-      chapter.removeSection(sectionId);
-    });
-  }
-
-  public updateSectionsOrder(chapterId: string, newOrder: string[]): void {
-    const chapter = this.getChapter(chapterId);
-    if (!chapter) return;
-
-    const newOrderedSections = newOrder.map(id => chapter.sections.find(s => s.id === id)).filter((s): s is Section => !!s);
-    chapter.sections = newOrderedSections;
-  }
-
-
-
-  // --- External Context Methods ---
+  // --- EXTERNAL CONTEXT METHODS ---
   public addExternalContext(externalContext: Omit<ExternalContext, 'id'> & { id?: string }): void {
     const newContext = { ...externalContext, id: externalContext.id || uuidv4() };
     this.externalContext = [...(this.externalContext || []), newContext];
+    this.markAsModified();
   }
 
-  public removeExternalContext(index: number): Project {
+  public removeExternalContext(index: number): void {
     this.externalContext = (this.externalContext || []).filter((_, i) => i !== index);
-    return this;
+    this.markAsModified();
   }
 
   public replaceExternalContext(index: number, newItem: ExternalContext): void {
     if (!this.externalContext || !this.externalContext[index]) return;
     this.externalContext[index] = newItem;
+    this.markAsModified();
   }
 
-  public updateExternalContextType(index: number, type: ExternalContextType): Project {
-    if (!this.externalContext || !this.externalContext[index]) return this;
+  public updateExternalContextType(index: number, type: ExternalContextType): void {
+    if (!this.externalContext || !this.externalContext[index]) return;
     this.externalContext[index].type = type;
-    return this;
+    this.markAsModified();
+  }
+  
+  // --- UTILITY METHODS ---
+  private markAsModified(): void {
+      this.updatedAt = new Date().toISOString();
+      this.hasUnsavedChanges = true;
   }
 }

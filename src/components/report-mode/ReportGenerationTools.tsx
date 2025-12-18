@@ -44,7 +44,6 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import {
   BookOpenText,
   GripVertical,
@@ -306,7 +305,6 @@ export function GenerationTools() {
       return { sectionId: section.id, content };
     },
     onSuccess: (data) => {
-      // Update the project state with the new content
       updateProject(p => p.updateSectionContent(data.sectionId, data.content));
       refetchUser(); // Refetch user to update credits
       toast({ title: 'Section Generated', description: 'The AI has generated the content for your section.' });
@@ -321,7 +319,7 @@ export function GenerationTools() {
   };
 
   function handleAddChapter() {
-    updateProject(p => p.addChapter());
+    updateProject(p => { p.addChapter(); });
     toast({
       title: "Chapter Created",
       description: `A new untitled chapter has been added.`

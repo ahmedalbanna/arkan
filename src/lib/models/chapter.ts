@@ -3,6 +3,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { Section, type SectionProperties } from './section';
+import { arrayMove } from '@dnd-kit/sortable';
 
 export interface ChapterProperties {
     id: string;
@@ -21,53 +22,105 @@ export class Chapter {
         this.sections = (props.sections || []).map(s => s instanceof Section ? s : new Section(s as SectionProperties));
     }
 
-    /** Renames the chapter. */
     public rename(newTitle: string): void {
         this.title = newTitle;
     }
 
-    /** Adds a new section to the chapter. */
-    public addSection(sectionData: Omit<SectionProperties, 'id'>): Section {
-        const newSection = new Section({ id: uuidv4(), ...sectionData });
+    public addSection(sectionData: Partial<Omit<SectionProperties, 'id'>> = {}): Section {
+        const newSection = new Section({
+            id: uuidv4(),
+            title: 'Untitled Section',
+            type: 'report',
+            content: '',
+            prompt: 'You are a helpful assistant.',
+            guidelines: [],
+            ...sectionData,
+        } as SectionProperties);
         this.sections.push(newSection);
         return newSection;
     }
 
-    /** Removes a section from the chapter by its ID. */
+    public addSectionAtIndex(index: number, sectionData: Partial<Omit<SectionProperties, 'id'>> = {}): Section {
+        const newSection = new Section({
+            id: uuidv4(),
+            title: 'Untitled Section',
+            type: 'report',
+            content: '',
+            prompt: 'You are a helpful assistant.',
+            guidelines: [],
+            ...sectionData,
+        } as SectionProperties);
+        this.sections.splice(index, 0, newSection);
+        return newSection;
+    }
+
+    public addCustomSection(title: string): Section {
+        const newSection = new Section({
+            id: uuidv4(),
+            title: title,
+            type: 'report',
+            content: '',
+            prompt: `You are an expert technical writer. Write a comprehensive section on "${title}".`,
+            guidelines: [],
+        } as SectionProperties);
+        this.sections.push(newSection);
+        return newSection;
+    }
+
     public removeSection(sectionId: string): void {
         this.sections = this.sections.filter(s => s.id !== sectionId);
     }
-    
-    /** Retrieves a section by its ID. */
+
     public getSection(sectionId: string): Section | undefined {
         return this.sections.find(s => s.id === sectionId);
     }
 
-    /** Moves a section to a new index within the chapter. */
-    public moveSection(sectionId: string, toIndex: number): void {
-        const fromIndex = this.sections.findIndex(s => s.id === sectionId);
-        if (fromIndex === -1 || toIndex < 0 || toIndex >= this.sections.length) return;
-        
-        const [section] = this.sections.splice(fromIndex, 1);
-        this.sections.splice(toIndex, 0, section);
+    public getSectionIndex(sectionId: string): number {
+        return this.sections.findIndex(s => s.id === sectionId);
     }
 
-    /** Creates a copy of a section and adds it to the chapter. */
+    public moveSection(fromIndex: number, toIndex: number): void {
+        this.sections = arrayMove(this.sections, fromIndex, toIndex);
+    }
+
+    public moveSectionUp(sectionId: string): void {
+        const index = this.getSectionIndex(sectionId);
+        if (index > 0) {
+            this.moveSection(index, index - 1);
+        }
+    }
+
+    public moveSectionDown(sectionId: string): void {
+        const index = this.getSectionIndex(sectionId);
+        if (index !== -1 && index < this.sections.length - 1) {
+            this.moveSection(index, index + 1);
+        }
+    }
+
     public copySection(sectionId: string): Section | null {
         const sectionToCopy = this.getSection(sectionId);
         if (!sectionToCopy) return null;
-
-        const newSectionData = {
-            ...sectionToCopy.toJSON(),
-            id: uuidv4(),
-            title: `${sectionToCopy.title} (Copy)`,
-        };
-        const newSection = new Section(newSectionData);
+        const newSection = sectionToCopy.clone();
+        newSection.id = uuidv4();
+        newSection.title = `${sectionToCopy.title} (Copy)`.trim();
         this.sections.push(newSection);
         return newSection;
     }
 
-    /** Updates the order of sections in the chapter. */
+    public renameSection(sectionId: string, newTitle: string): void {
+        const section = this.getSection(sectionId);
+        if (section) {
+            section.rename(newTitle);
+        }
+    }
+
+    public updateSectionContent(sectionId: string, newContent: string): void {
+        const section = this.getSection(sectionId);
+        if (section) {
+            section.updateContent(newContent);
+        }
+    }
+
     public updateSectionsOrder(newOrder: string[]): void {
         const newOrderedSections = newOrder
             .map(id => this.sections.find(s => s.id === id))
@@ -75,7 +128,6 @@ export class Chapter {
         this.sections = newOrderedSections;
     }
 
-    /** Updates properties of a specific section. */
     public updateSection(sectionId: string, updates: Partial<Omit<SectionProperties, 'id'>>): void {
         const section = this.getSection(sectionId);
         if (section) {
@@ -83,13 +135,6 @@ export class Chapter {
         }
     }
 
-    /** Gets the index of a section. */
-    public getSectionIndex(sectionId: string): number {
-        return this.sections.findIndex(s => s.id === sectionId);
-    }
-
-
-    /** Converts the Chapter instance to a plain JSON object. */
     public toJSON(): ChapterProperties {
         return {
             id: this.id,
