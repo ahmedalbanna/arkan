@@ -63,7 +63,7 @@ export class Section {
     constructor(props: SectionProperties) {
         this.id = props.id;
         this.title = props.title;
-        this.type = props.type;
+        this.type = props.type || 'generation';
         this.content = props.content ?? '';
         this.prompt = props.prompt ?? 'You are a helpful assistant.';
         this.guidelines = props.guidelines ?? [];

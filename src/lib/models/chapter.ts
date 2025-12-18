@@ -30,7 +30,7 @@ export class Chapter {
         const newSection = new Section({
             id: uuidv4(),
             title: 'Untitled Section',
-            type: 'report',
+            type: 'generation',
             content: '',
             prompt: 'You are a helpful assistant.',
             guidelines: [],
@@ -44,7 +44,7 @@ export class Chapter {
         const newSection = new Section({
             id: uuidv4(),
             title: 'Untitled Section',
-            type: 'report',
+            type: 'generation',
             content: '',
             prompt: 'You are a helpful assistant.',
             guidelines: [],
@@ -58,7 +58,7 @@ export class Chapter {
         const newSection = new Section({
             id: uuidv4(),
             title: title,
-            type: 'report',
+            type: 'generation',
             content: '',
             prompt: `You are an expert technical writer. Write a comprehensive section on "${title}".`,
             guidelines: [],
@@ -102,7 +102,7 @@ export class Chapter {
         if (!sectionToCopy) return null;
         const newSection = sectionToCopy.clone();
         newSection.id = uuidv4();
-        newSection.title = `${sectionToCopy.title} (Copy)`.trim();
+        newSection.title = `${newSection.title} (Copy)`.trim();
         this.sections.push(newSection);
         return newSection;
     }
