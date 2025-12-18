@@ -1,11 +1,64 @@
 
 'use client';
 
-import { SectionName } from '@/ai/schemas';
+import { GenerationControlState, SectionName } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore, toast } from '@/hooks';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+/**
+ * Builds a detailed instruction string for the AI based on the section's controls.
+ * @param controls The generation controls for the section.
+ * @returns A string containing the formatted instructions.
+ */
+function buildInstructionText(controls: GenerationControlState): string {
+    let instructions: string[] = [];
+
+    if (controls.instructionText) {
+        instructions.push(controls.instructionText);
+    }
+
+    const formalityMap: { [key: number]: string } = {
+        0: 'very informal and casual',
+        33: 'balanced and neutral',
+        67: 'formal and professional',
+        100: 'very formal and academic',
+    };
+    const formality = controls.formality > 67 ? formalityMap[100] : controls.formality > 33 ? formalityMap[67] : controls.formality > 0 ? formalityMap[33] : formalityMap[0];
+    instructions.push(`The formality should be ${formality}.`);
+
+    const complexityMap: { [key: number]: string } = {
+        0: 'very simple and easy to understand',
+        33: 'clear and straightforward',
+        67: 'detailed and technical',
+        100: 'highly complex and expert-level',
+    };
+    const complexity = controls.complexity > 67 ? complexityMap[100] : controls.complexity > 33 ? complexityMap[67] : controls.complexity > 0 ? complexityMap[33] : complexityMap[0];
+    instructions.push(`The complexity should be ${complexity}.`);
+
+    if (controls.tone) {
+        instructions.push(`The tone should be ${controls.tone}.`);
+    }
+    if (controls.language && controls.language !== 'default') {
+        const langMap: Record<string, string> = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
+        instructions.push(`The output language must be ${langMap[controls.language] || 'English'}.`);
+    }
+    if (controls.wordCount) {
+        instructions.push(`Aim for a word count of approximately ${controls.wordCount} words.`);
+    }
+
+    const enabledStyles = Object.entries(controls.outputStyle)
+        .filter(([, value]) => value)
+        .map(([key]) => key);
+
+    if (enabledStyles.length > 0) {
+        instructions.push(`The output should include the following elements: ${enabledStyles.join(', ')}.`);
+    }
+
+    return instructions.join(' ');
+}
+
 
 export function useSectionGenerator() {
   const { project, updateProject } = useBuilderStore();
@@ -24,26 +77,7 @@ export function useSectionGenerator() {
       const controls = section.controls;
       const context = section.context;
 
-      let instructionText = `Please use a ${controls.tone || 'professional'} tone and aim for a word count of approximately ${controls.wordCount || 250} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}. The formality should be ${controls.formality > 66 ? 'formal' : controls.formality > 33 ? 'semi-formal' : 'informal'}.`;
-      if (controls.language && controls.language !== 'default') {
-        const langMap: Record<string, string> = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
-        instructionText += ` The output language must be ${langMap[controls.language] || 'English'}.`;
-      }
-      if (controls.outputStyle) {
-        const styleMap: Record<string, string> = {
-
-          heading: 'Include headings in the output.',
-          paragraph: 'Include paragraphs in the output.',
-          list: 'Include lists in the output.',
-          table: 'Include tables in the output.',
-          code: 'Include code blocks in the output.',
-        }
-        instructionText += ` The output should be ${Object.entries(controls.outputStyle)
-          .filter(([key, value]) => value)
-          .map(([key, _]) => styleMap[key as keyof typeof styleMap])
-
-          }`
-      }
+      const instructionText = buildInstructionText(controls);
 
       const otherSectionsContext: Record<string, string> = {};
       Object.keys(context.sections || {}).forEach(key => {
@@ -92,5 +126,6 @@ export function useSectionGenerator() {
     isGenerating: agentMutation.isPending && agentMutation.variables === agentMutation.variables,
     isAnythingGenerating: agentMutation.isPending,
     hasCredits: !!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1,
+    buildInstructionText, // Export for use in UI
   };
 }

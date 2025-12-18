@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React from 'react';
@@ -15,6 +14,7 @@ import { Info } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { Textarea } from '../ui/textarea';
+import { useSectionGenerator } from '@/hooks/report-mode/use-section-generator';
 
 const styles = [
     "Informal", "Friendly", "Simple", "Formal", "Professional", "Narrative",
@@ -40,11 +40,14 @@ const analysisTypes: { value: AnalysisType, label: string }[] = [
 export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
+    const { buildInstructionText } = useSectionGenerator();
     const controls = section.controls;
 
     if (!controls) {
         return null; // Or a loading/default state
     }
+    
+    const instructionPreview = buildInstructionText(controls);
 
     function handleControlChange<K extends keyof GenerationControlState>(
         field: K,
@@ -67,6 +70,17 @@ export function SectionGenerationControls({ section }: { section: Section }) {
 
     const renderFullControls = () => (
         <>
+            <div className="space-y-2">
+                <Label htmlFor={`custom-instructions-${section.id}`}>{t('builder.reportGenerator.customInstructionsLabel', { defaultValue: 'Custom Instructions' })}</Label>
+                <Textarea 
+                    id={`custom-instructions-${section.id}`} 
+                    placeholder={t('builder.reportGenerator.customInstructionsPlaceholder', { defaultValue: 'e.g., Focus on the financial implications...' })}
+                    value={controls.instructionText || ''}
+                    onChange={(e) => handleControlChange('instructionText', e.target.value)}
+                    rows={3}
+                />
+            </div>
+
             <div className="space-y-3">
                 <Label htmlFor={`formality-${section.id}`}>{t('builder.reportGenerator.tool_formality_label')}</Label>
                 <Slider id={`formality-${section.id}`} value={[controls.formality]} onValueChange={(val) => handleControlChange('formality', val[0])} max={100} step={1} />
@@ -116,6 +130,13 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             <div className="space-y-2">
                 <Label htmlFor={`wordCount-${section.id}`}>{t('builder.reportGenerator.tool_word_count_label')}</Label>
                 <Input id={`wordCount-${section.id}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controls.wordCount} onChange={(e) => handleControlChange('wordCount', e.target.value)} />
+            </div>
+
+            <Separator />
+            
+            <div className="space-y-1">
+                 <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_instruction_preview')}</Label>
+                 <p className="text-xs text-muted-foreground italic h-16 overflow-y-auto p-2 border rounded-md bg-muted/20">{instructionPreview || t('builder.reportGenerator.tool_instruction_none')}</p>
             </div>
         </>
     );

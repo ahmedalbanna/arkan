@@ -14,6 +14,7 @@ export interface GenerationControlState {
     language: Language;
     outputStyle: OutputStyle;
     wordCount: string;
+    instructionText?: string; // New field for custom instructions
     // Text manipulation
     manipulationType?: ManipulationType;
     rewriteStyle?: string;
@@ -35,7 +36,7 @@ export interface SectionContext {
 }
 
 
-export type SectionType = 'analysis' | 'generation' | 'document-processing' | 'text-manipulation' | 'utilities';
+export type SectionType = 'generation' | 'analysis' | 'document-processing' | 'text-manipulation' | 'utilities';
 
 export interface SectionProperties {
     id: string;
@@ -57,6 +58,7 @@ export const defaultControls: GenerationControlState = {
     language: 'default',
     outputStyle: { heading: true, paragraph: true, list: false, table: false, code: false },
     wordCount: '',
+    instructionText: '',
     manipulationType: 'rewrite',
     rewriteStyle: 'Formal',
     compressionRatio: 50,
