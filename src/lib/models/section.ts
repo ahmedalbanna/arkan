@@ -7,6 +7,8 @@ export type ManipulationType = 'rewrite' | 'summarize' | 'style-editor' | 'reada
 
 export type AnalysisType = 'custom-analysis' | 'question-answering' | 'fact-retrieval';
 
+export type ProcessingAction = 'extract-text' | 'summarize' | 'translate';
+
 export interface GenerationControlState {
     formality: number;
     complexity: number;
@@ -14,7 +16,7 @@ export interface GenerationControlState {
     language: Language;
     outputStyle: OutputStyle;
     wordCount: string;
-    instructionText?: string; // New field for custom instructions
+    instructionText?: string;
     // Text manipulation
     manipulationType?: ManipulationType;
     rewriteStyle?: string;
@@ -25,8 +27,11 @@ export interface GenerationControlState {
     focusAreas?: string[];
     // Analysis
     analysisType?: AnalysisType;
-    question?: string; // For question-answering
-    factQuery?: string; // For fact-retrieval
+    question?: string;
+    factQuery?: string;
+    // Document Processing
+    sourceFileId?: string;
+    processingAction?: ProcessingAction;
 }
 
 export interface SectionContext {
@@ -69,6 +74,8 @@ export const defaultControls: GenerationControlState = {
     analysisType: 'custom-analysis',
     question: '',
     factQuery: '',
+    sourceFileId: undefined,
+    processingAction: 'extract-text',
 };
 
 export const defaultContext: SectionContext = {

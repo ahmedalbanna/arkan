@@ -9,7 +9,7 @@ import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '../ui/checkbox';
-import type { Tone, Language, GenerationControlState, Section, ManipulationType, AnalysisType } from '@/lib/models';
+import type { Tone, Language, GenerationControlState, Section, ManipulationType, AnalysisType, ProcessingAction } from '@/lib/models';
 import { Info } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
@@ -37,14 +37,20 @@ const analysisTypes: { value: AnalysisType, label: string }[] = [
     { value: 'fact-retrieval', label: 'Fact Retrieval' },
 ];
 
+const processingActions: { value: ProcessingAction, label: string }[] = [
+    { value: 'extract-text', label: 'Extract & Clean Text' },
+    { value: 'summarize', label: 'Summarize Document' },
+    { value: 'translate', label: 'Translate Document' },
+];
+
 export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
-    const { updateProject } = useBuilderStore();
+    const { project, updateProject } = useBuilderStore();
     const { buildInstructionText } = useSectionGenerator();
     const controls = section.controls;
 
     if (!controls) {
-        return null; // Or a loading/default state
+        return null;
     }
     
     const instructionPreview = buildInstructionText(controls);
@@ -322,6 +328,37 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         </div>
     );
 
+    const renderDocumentProcessingControls = () => {
+        const contextFiles = project?.externalContext || [];
+        return (
+            <div className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor={`sourceFile-${section.id}`}>Source Document</Label>
+                    <Select value={controls.sourceFileId} onValueChange={(val) => handleControlChange('sourceFileId', val)}>
+                        <SelectTrigger id={`sourceFile-${section.id}`}><SelectValue placeholder="Select a context file to process..." /></SelectTrigger>
+                        <SelectContent>
+                            {contextFiles.map(file => (
+                                <SelectItem key={file.id} value={file.id}>{file.fileName}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor={`processingAction-${section.id}`}>Processing Action</Label>
+                    <Select value={controls.processingAction} onValueChange={(val) => handleControlChange('processingAction', val as ProcessingAction)}>
+                        <SelectTrigger id={`processingAction-${section.id}`}><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            {processingActions.map(action => (
+                                <SelectItem key={action.value} value={action.value}>{action.label}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                {controls.processingAction === 'translate' && renderToneAndLanguageControls()}
+            </div>
+        );
+    };
+
 
     const renderNoControlsMessage = () => (
         <div className="text-center text-muted-foreground p-4 border rounded-md bg-muted/50">
@@ -339,6 +376,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             case 'analysis':
                 return renderAnalysisControls();
             case 'document-processing':
+                return renderDocumentProcessingControls();
             case 'utilities':
             default:
                 return renderNoControlsMessage();
