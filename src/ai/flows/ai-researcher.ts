@@ -44,7 +44,7 @@ const researcherPrompt = ai.definePrompt({
 
 **Topic:**
 ---
-{{{text}}}
+{{{topic}}}
 ---
 
 **Instructions:**

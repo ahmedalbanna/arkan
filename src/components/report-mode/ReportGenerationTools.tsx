@@ -96,14 +96,13 @@ function SortableSectionItem({
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <SectionAccordionItem
-        itemKey={section.id}
+        hasCredits={true} itemKey={section.id}
         section={section}
         handleProps={{ ...listeners }}
         chapterIndex={chapterIndex}
         index={index}
         onDelete={onDelete}
-        {...props}
-      />
+        {...props} />
     </div>
   );
 };
@@ -228,7 +227,7 @@ function SortableChapterItem({
                   onGenerate={() => props.onGenerateSection(section.id)}
                   isGenerating={props.activeMutationKey === section.id}
                   isAnythingGenerating={props.isAnythingGenerating}
-                  hasCredits={props.hasCreditsForSingleSection}
+                  hasCreditsForSingleSection={props.hasCreditsForSingleSection}
                 />
               ))}
             </Accordion>
@@ -446,7 +445,7 @@ export function GenerationTools() {
           </div>
         </CardHeader>
         <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <Button onClick={() => setShowTocInput(true)} variant="outline" className="w-full">
               <ListPlus className="me-2 h-4 w-4" /> Import from Text
             </Button>
