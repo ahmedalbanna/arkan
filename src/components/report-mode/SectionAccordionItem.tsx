@@ -16,7 +16,7 @@ import { Input } from '../ui/input';
 import { ContextSelector } from './SectionContextSelector';
 import { SectionGenerationControls } from './SectionGenerationControls';
 import { GuidelineEditor } from './SectionGuidelineEditor';
-import { useSectionGenerator } from '@/hooks/report-mode/useSectionGenerator';
+import { useSectionGenerator } from '@/hooks/report-mode/use-section-generator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useSections } from '@/hooks/data/use-sections';
 import { Label } from '../ui/label';
