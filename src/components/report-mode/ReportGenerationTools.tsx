@@ -185,9 +185,11 @@ function SortableChapterItem({
               </div>
             </AccordionTrigger>
             <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsToolsOpen(true)}>
-                <Wrench className="h-4 w-4" />
-              </Button>
+              {chapter.sections.length > 0 && (
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsToolsOpen(true)}>
+                  <Wrench className="h-4 w-4" />
+                </Button>
+              )}
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-7 w-7">
