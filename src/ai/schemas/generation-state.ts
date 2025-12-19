@@ -1,11 +1,8 @@
 
 import { z } from 'zod';
 import { PresentationToneSchema, ReportToneSchema, LanguageSchema, DiagramTypeSchema } from './enums';
-import { AnalysisType, ManipulationType, ProcessingAction, UtilityAction } from '@/lib/models';
 
 export const GenerationControlStateSchema = z.object({
-    type: z.custom<AnalysisType>().default('generation'),
-    
     // Report Controls
     formality: z.number().min(0).max(100).default(50),
     complexity: z.number().min(0).max(100).default(50),
@@ -17,27 +14,14 @@ export const GenerationControlStateSchema = z.object({
         list: z.boolean().default(false),
         table: z.boolean().default(false),
         code: z.boolean().default(false),
-        diagram: z.boolean().default(false), // New
+        diagram: z.boolean().default(false), 
     }).default({ heading: true, paragraph: true, list: false, table: false, code: false, diagram: false }),
     wordCount: z.string().default(''),
-    outputDiagramType: DiagramTypeSchema.optional(), // New
-
-    // Diagram Controls
-    diagramType: DiagramTypeSchema.default('useCase'),
-    description: z.string().optional(),
+    outputDiagramType: DiagramTypeSchema.optional(),
 
     // Presentation Controls
     presentationTone: PresentationToneSchema.default('enthusiastic'),
     slideCount: z.string().default('10'),
-
-    // Deprecated/Legacy
-    instructionText: z.string().optional(),
-    processingAction: z.custom<ProcessingAction>().default('extract-text'),
-    utilityAction: z.custom<UtilityAction>().default('generate-toc'),
-    manipulationType: z.custom<ManipulationType>().default('rewrite'),
-    analysisType: z.custom<AnalysisType>().default('custom-analysis'),
-    rewriteStyle: z.string().optional(),
-    compressionRatio: z.number().optional(),
 });
 
 export type GenerationControlState = z.infer<typeof GenerationControlStateSchema>;

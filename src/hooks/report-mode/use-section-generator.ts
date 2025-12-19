@@ -1,21 +1,20 @@
 
 'use client';
 
-import { GenerationControlState, SectionName } from '@/ai/schemas';
+import { GenerationControlState, SectionName, SectionType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore, toast } from '@/hooks';
 import { generateReportSectionApi } from '@/services/api/reportService';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Chapter } from '@/lib/models';
+import { useMutation } from '@tanstack/react-query';
 
 /**
  * Builds a detailed instruction string for the AI based on the section's controls.
  * @param controls The generation controls for the section.
+ * @param sectionType The type of the section ('report' or 'presentation').
  * @returns A string containing the formatted instructions.
  */
-function buildInstructionText(controls: GenerationControlState): string {
+function buildInstructionText(controls: GenerationControlState, sectionType: SectionType): string {
     let instructions: string[] = [];
-    const sectionType = controls.type;
 
     if (sectionType === 'report') {
         const formalityMap: { [key: number]: string } = { 0: 'very informal and casual', 33: 'balanced and neutral', 67: 'formal and professional', 100: 'very formal and academic' };
@@ -29,19 +28,15 @@ function buildInstructionText(controls: GenerationControlState): string {
         
         if (controls.tone) instructions.push(`The tone should be ${controls.tone}.`);
         if (controls.wordCount) instructions.push(`Aim for a word count of approximately ${controls.wordCount} words.`);
-    
-    } else if (sectionType === 'diagram') {
-        if (controls.description) {
-            instructions.push(controls.description);
-        } else {
-            instructions.push('Generate a diagram based on the context.');
+
+        if (controls.outputStyle.diagram && controls.outputDiagramType) {
+            instructions.push(`The output must include a PlantUML diagram of type '${controls.outputDiagramType}'.`);
         }
 
     } else if (sectionType === 'presentation') {
         if (controls.presentationTone) instructions.push(`The tone for this presentation slide should be ${controls.presentationTone}.`);
-        if (controls.slideCount) instructions.push(`This is one of approximately ${controls.slideCount} slides.`);
+        if (controls.slideCount) instructions.push(`This is one slide of an approximate ${controls.slideCount}-slide presentation.`);
     }
-
 
     if (controls.language && controls.language !== 'default') {
         const langMap: Record<string, string> = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
@@ -49,7 +44,7 @@ function buildInstructionText(controls: GenerationControlState): string {
     }
 
     const enabledStyles = Object.entries(controls.outputStyle).filter(([, value]) => value).map(([key]) => key);
-    if (enabledStyles.length > 0) instructions.push(`The output should include the following elements: ${enabledStyles.join(', ')}.`);
+    if (enabledStyles.length > 0) instructions.push(`The output should primarily include the following elements: ${enabledStyles.join(', ')}.`);
 
     
     return instructions.join(' ');
@@ -73,7 +68,7 @@ export function useSectionGenerator() {
       const controls = section.controls;
       const context = section.context;
 
-      const instructionText = buildInstructionText(controls);
+      const instructionText = buildInstructionText(controls, section.type);
 
       const otherSectionsContext: Record<string, string> = {};
       Object.keys(context.sections || {}).forEach(key => {
@@ -95,21 +90,12 @@ export function useSectionGenerator() {
         externalContext: externalContextFiles,
         guidelines: section.guidelines,
         instructionText,
-        // Pass diagram specific controls if applicable
-        diagramType: section.type === 'diagram' ? controls.diagramType : undefined,
       };
 
-      const endpoint = section.type === 'diagram' ? '/api/generate/diagrams' : '/api/generate/section';
-      const result = await generateReportSectionApi(body, token, endpoint);
+      const result = await generateReportSectionApi(body, token);
 
-      // Handle both section and diagram responses
-      let content;
-      if (section.type === 'diagram') {
-        content = `\`\`\`plantuml\n${result?.plantUmlCode}\n\`\`\``;
-      } else {
-        content = result?.[section.id] ?? Object.values(result || {})[0] as string | undefined;
-      }
-
+      const content = result?.[section.id] ?? Object.values(result || {})[0] as string | undefined;
+      
       if (!content) {
         toast({ title: 'Generation failed', description: `No content returned for section ${section.id}.`, variant: 'destructive' });
         throw new Error('Empty generation result');

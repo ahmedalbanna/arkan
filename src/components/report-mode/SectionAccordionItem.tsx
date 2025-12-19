@@ -85,7 +85,6 @@ export function SectionAccordionItem({
 
     const sectionTypes: { value: SectionType, label: string }[] = [
         { value: 'report', label: 'Report' },
-        { value: 'diagram', label: 'Diagram' },
         { value: 'presentation', label: 'Presentation' },
     ];
 

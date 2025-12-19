@@ -12,12 +12,11 @@ import { Checkbox } from '../ui/checkbox';
 import type { GenerationControlState, Section } from '@/lib/models';
 import { Separator } from '../ui/separator';
 import { useSectionGenerator } from '@/hooks/report-mode/use-section-generator';
-import { Textarea } from '../ui/textarea';
 import { DiagramTypeSchema } from '@/ai/schemas';
 
 export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
-    const { project, updateProject } = useBuilderStore();
+    const { updateProject } = useBuilderStore();
     const { buildInstructionText } = useSectionGenerator();
     const controls = section.controls;
 
@@ -25,7 +24,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         return null;
     }
 
-    const instructionPreview = buildInstructionText(controls);
+    const instructionPreview = buildInstructionText(controls, section.type);
 
     function handleControlChange<K extends keyof GenerationControlState>(
         field: K,
@@ -127,39 +126,6 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         </>
     );
 
-    const renderDiagramControls = () => (
-        <>
-            <div className="space-y-2">
-                <Label htmlFor={`diagram-type-${section.id}`}>Diagram Type</Label>
-                <Select
-                    value={controls.diagramType}
-                    onValueChange={(val) => handleControlChange('diagramType', val as any)}
-                >
-                    <SelectTrigger id={`diagram-type-${section.id}`}>
-                        <SelectValue placeholder="Select a diagram type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {DiagramTypeSchema.options.map((type) => (
-                            <SelectItem key={type} value={type}>
-                                {type.charAt(0).toUpperCase() + type.slice(1)}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor={`description-${section.id}`}>Description</Label>
-                <Textarea
-                    id={`description-${section.id}`}
-                    placeholder="Describe the diagram you want to generate based on the context..."
-                    value={controls.description || ''}
-                    onChange={(e) => handleControlChange('description', e.target.value)}
-                    rows={4}
-                />
-            </div>
-        </>
-    );
-    
     const renderPresentationControls = () => (
          <>
             <div className="grid grid-cols-2 gap-4">
@@ -237,8 +203,6 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         switch (section.type) {
             case 'report':
                 return renderReportControls();
-            case 'diagram':
-                return renderDiagramControls();
             case 'presentation':
                 return renderPresentationControls();
             default:

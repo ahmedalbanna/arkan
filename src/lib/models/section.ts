@@ -7,15 +7,7 @@ import {
 } from '@/ai/schemas/generation-state';
 import type { SectionContext } from './context';
 
-export type ManipulationType = 'rewrite' | 'summarize';
-
-export const defaultContext: SectionContext = {
-    sections: {},
-    externalContext: {},
-};
-
-
-export type SectionType = 'report' | 'diagram' | 'presentation';
+export type SectionType = 'report' | 'presentation';
 
 export interface SectionProperties {
     id: string;
@@ -29,6 +21,11 @@ export interface SectionProperties {
     controls: GenerationControlState;
     context: SectionContext;
 }
+
+export const defaultContext: SectionContext = {
+    sections: {},
+    externalContext: {},
+};
 
 export class Section {
     public id: string;
