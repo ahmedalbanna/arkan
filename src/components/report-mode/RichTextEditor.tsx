@@ -6,7 +6,7 @@ import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
 import { editorExtensions } from '@/lib/tiptap-extensions';
 import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
 import { marked } from 'marked';
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 
@@ -172,13 +172,19 @@ interface RichTextEditorProps {
 function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const setActiveEditor = useEditorStore((state) => state.setActiveEditor);
   const uniqueId = React.useId();
+  // Ref to control whether the onUpdate hook should fire.
+  const shouldFireUpdate = useRef(true);
+
 
   const editor = useEditor({
     extensions: editorExtensions(uniqueId),
     content: marked.parse(content) as string,
     onUpdate: ({ editor }) => {
-      const markdown = turndownService.turndown(editor.getHTML());
-      onChange(markdown);
+      // Only call onChange if the update was not programmatic
+      if (shouldFireUpdate.current) {
+        const markdown = turndownService.turndown(editor.getHTML());
+        onChange(markdown);
+      }
     },
     onSelectionUpdate: ({ editor }) => {
       setActiveEditor(editor);
@@ -227,8 +233,14 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       const currentEditorMarkdown = turndownService.turndown(editor.getHTML());
       if (content !== currentEditorMarkdown) {
         const { from, to } = editor.state.selection;
+        
+        // Temporarily disable the onUpdate handler
+        shouldFireUpdate.current = false;
         editor.commands.setContent(marked.parse(content) as string, false);
+        // Restore the previous selection
         editor.commands.setTextSelection({ from, to });
+        // Re-enable the onUpdate handler
+        shouldFireUpdate.current = true;
       }
     }
   }, [content, editor]);
