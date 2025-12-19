@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
@@ -6,81 +5,33 @@ import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
 import { editorExtensions } from '@/lib/tiptap-extensions';
 import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
 import { marked } from 'marked';
-import React, { memo, useCallback, useEffect, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 
 import {
   Bold,
-  BookText,
-  Brush,
   Italic,
-  Languages,
-  List,
-  ListOrdered,
-  Loader2,
-  Quote,
-  Sparkles,
-  Square,
   Strikethrough,
   Table as TableIcon,
-  Volume2,
 } from 'lucide-react';
 import { Button } from '../ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { Separator } from '../ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useEditorStore } from '@/hooks/core/use-editor-store';
-import { useBrowserSpeech } from '@/hooks';
 
 
 // Toolbar Component
 interface SectionToolbarProps {
   editor: Editor;
-  onTextUpdate: (newText: string, from: number, to: number) => void;
-  onWholeUpdate: (newText: string) => void;
 }
 
-const SectionToolbar = memo(function SectionToolbar({ editor, onTextUpdate, onWholeUpdate }: SectionToolbarProps) {
+const SectionToolbar = memo(function SectionToolbar({ editor }: SectionToolbarProps) {
   const { t } = useLocalization();
-  const { speak, stop, isSpeaking } = useBrowserSpeech();
-  const { activeAiAction, isProcessing, handleAiAction, rewriteStyles } = useAiActions({
-    editor,
-    onTextUpdate,
-    onWholeUpdate,
-  });
 
-  function handleReadAloudClick() {
-    if (isSpeaking) {
-      stop();
-    } else {
-      const { from, to } = editor.state.selection;
-      const textToRead = editor.state.doc.textBetween(from, to) || editor.getText();
-      speak(textToRead);
-    }
-  }
   const formatButtons = [
     { action: () => editor.chain().focus().toggleBold().run(), isActive: editor.isActive('bold'), icon: Bold, label: t('builder.Section.tooltips.bold') },
     { action: () => editor.chain().focus().toggleItalic().run(), isActive: editor.isActive('italic'), icon: Italic, label: t('builder.Section.tooltips.italic') },
     { action: () => editor.chain().focus().toggleStrike().run(), isActive: editor.isActive('strike'), icon: Strikethrough, label: t('builder.Section.tooltips.strike') },
-  ];
-
-  const aiActionButtons = [
-    {
-      name: 'summarize',
-      icon: BookText,
-      label: t('builder.Section.aiActions.summarize'),
-    },
-    {
-      name: 'translate',
-      icon: Languages,
-      label: t('builder.Section.aiActions.translate'),
-    },
   ];
 
   return (
@@ -104,56 +55,6 @@ const SectionToolbar = memo(function SectionToolbar({ editor, onTextUpdate, onWh
             <TooltipContent><p>{label}</p></TooltipContent>
           </Tooltip>
         ))}
-
-        <Separator orientation="vertical" className="h-6 mx-1" />
-
-        {/* AI Action Buttons */}
-        {aiActionButtons.map(({ name, icon: Icon, label }) => (
-          <Tooltip key={name}>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full h-8 w-8"
-                onClick={() => handleAiAction(name as any)}
-                disabled={isProcessing}
-              >
-                {activeAiAction === name && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent><p>{label}</p></TooltipContent>
-          </Tooltip>
-        ))}
-
-        <DropdownMenu>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full h-8 w-8" disabled={isProcessing}>
-                  {activeAiAction === 'rewrite' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brush className="h-4 w-4" />}
-                </Button>
-              </DropdownMenuTrigger>
-            </TooltipTrigger>
-            <TooltipContent><p>{t('builder.Section.aiActions.rewrite')}</p></TooltipContent>
-          </Tooltip>
-          <DropdownMenuContent className="backdrop-blur-md bg-gradient-to-r from-background/90 to-primary/5 border shadow-soft">
-            {rewriteStyles.map(({ label, style }) => (
-              <DropdownMenuItem key={style} onSelect={() => handleAiAction('rewrite', { style })} disabled={isProcessing}>
-                {label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {/* Utility Buttons */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8" onClick={handleReadAloudClick}>
-              {isSpeaking ? <Square className="h-4 w-4 text-red-500 fill-current" /> : <Volume2 className="h-4 w-4" />}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent><p>{isSpeaking ? 'Stop Speaking' : t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
-        </Tooltip>
       </TooltipProvider>
     </div>
   )
@@ -167,9 +68,10 @@ turndownService.use(gfm);
 interface RichTextEditorProps {
   content: string;
   onChange: (markdown: string) => void;
+  onEditorChange: (editor: Editor | null) => void;
 }
 
-function RichTextEditor({ content, onChange }: RichTextEditorProps) {
+const RichTextEditor = forwardRef(({ content, onChange, onEditorChange }: RichTextEditorProps, ref) => {
   const setActiveEditor = useEditorStore((state) => state.setActiveEditor);
   const uniqueId = React.useId();
   // Ref to control whether the onUpdate hook should fire.
@@ -216,16 +118,15 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     immediatelyRender: false,
   });
 
-  const handleTextUpdate = useCallback((newText: string, from: number, to: number) => {
-    if (!editor) return;
-    editor.chain().focus().insertContentAt({ from, to }, newText).run();
-  }, [editor]);
+  // Expose the editor instance via the ref
+  useImperativeHandle(ref, () => editor, [editor]);
 
-  const handleWholeUpdate = useCallback((newText: string) => {
-    if (!editor) return;
-    const html = marked.parse(newText) as string;
-    editor.chain().focus().setContent(html).run();
-  }, [editor]);
+  useEffect(() => {
+    onEditorChange(editor);
+    return () => {
+      onEditorChange(null);
+    };
+  }, [editor, onEditorChange]);
 
 
   useEffect(() => {
@@ -261,11 +162,7 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
               <Button size="sm" variant="destructive" onClick={() => editor.chain().focus().deleteTable().run()}>Delete Table</Button>
             </div>
           ) : (
-            <SectionToolbar
-              editor={editor}
-              onTextUpdate={handleTextUpdate}
-              onWholeUpdate={handleWholeUpdate}
-            />
+            <SectionToolbar editor={editor} />
           )}
         </BubbleMenu>
       )}
@@ -274,6 +171,8 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       </div>
     </div>
   );
-};
+});
+
+RichTextEditor.displayName = 'RichTextEditor';
 
 export default RichTextEditor;
