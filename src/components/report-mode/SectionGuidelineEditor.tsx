@@ -32,14 +32,15 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
         handleCommandChange,
         selectedAgentId,
         selectedCommandId,
+        availableAgents
     } = useGuidelineEditor(itemKey);
-    const { agents, isLoading: isLoadingAgents } = useAgentManager();
+    const { isLoading: isLoadingAgents } = useAgentManager();
     const [newGuideline, setNewGuideline] = useState('');
 
-    const selectedAgent = agents.find(a => a.id === selectedAgentId);
+    const selectedAgent = availableAgents.find(a => a.id === selectedAgentId);
     const availableCommands = selectedAgent?.commands || selectedAgent?.data?.commands || [];
 
-    const agentOptions = agents.map(agent => ({
+    const agentOptions = availableAgents.map(agent => ({
         value: agent.id,
         label: agent.name,
     }));

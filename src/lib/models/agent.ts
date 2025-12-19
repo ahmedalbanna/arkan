@@ -6,6 +6,7 @@ export interface AgentProperties {
   name: string;
   description: string;
   category: string;
+  type: 'document' | 'presentation' | 'universal'; // Added to filter agents by section type
   prompt: string;
   guidelines?: string[];
   isEnabled: boolean;

@@ -14,6 +14,7 @@ export const defaultAgents: AgentProperties[] = [
         name: "Introduction Writer",
         description: "Writes compelling introductions for reports and articles.",
         category: "Report Generation",
+        type: "document",
         prompt: "You are an expert technical writer specializing in project proposals. Based on the provided context, write a complete and professional introduction section for a formal report. Synthesize information to create a coherent and engaging introduction. Use markdown for formatting.",
         guidelines: [
             "**Purpose of the Project**: Clearly state why the project is being undertaken.",
@@ -33,6 +34,7 @@ export const defaultAgents: AgentProperties[] = [
         name: "Use Case Diagram Generator",
         description: "Generates PlantUML code for Use Case diagrams.",
         category: "Diagram Generation",
+        type: 'document',
         prompt: "You are a systems analyst specializing in PlantUML. Generate a valid PlantUML use case diagram based on the project context.",
         guidelines: [
             "Identify actors from stakeholders.",
@@ -49,6 +51,7 @@ export const defaultAgents: AgentProperties[] = [
         name: "Abstract Writer",
         description: "Writes concise and informative abstracts for training or research reports.",
         category: "Report Generation",
+        type: "document",
         prompt: "You are an academic writer. Based on the provided context, write a concise and informative abstract for a training report. The abstract should summarize the purpose, methods, key experiences, and major conclusions of the training period.",
         guidelines: [
             "Keep the abstract to a single paragraph and under 250 words.",
@@ -65,6 +68,7 @@ export const defaultAgents: AgentProperties[] = [
         name: "Acknowledgment Writer",
         description: "Drafts a heartfelt and professional 'Acknowledgment' section.",
         category: "Report Generation",
+        type: "document",
         prompt: "You are a professional writer. Based on the provided context, draft a heartfelt and professional 'Acknowledgment' section. Thank the individuals, supervisors, and organizations that supported the training or research.",
         guidelines: [
             "Maintain a formal and appreciative tone.",
@@ -80,6 +84,7 @@ export const defaultAgents: AgentProperties[] = [
         name: "Literature Review Generator",
         description: "Generates a comprehensive 'Literature Review' section.",
         category: "Report Generation",
+        type: "document",
         prompt: "You are an academic and technical writer. Based on the provided project proposal and any additional context, write a comprehensive 'Literature Review' section for the final report. Synthesize information from the entire proposal and the provided context to create a coherent and well-supported literature review. Use markdown for formatting.",
         guidelines: [
             "**Introduction**: Explain the purpose and role of literature reviews in academic and technical reports.",
@@ -100,6 +105,7 @@ export const defaultAgents: AgentProperties[] = [
         name: "System Analysis Writer",
         description: "Writes a thorough 'System Analysis' section, detailing functional and non-functional requirements.",
         category: "Technical Documentation",
+        type: "document",
         prompt: "You are an expert systems analyst. Based on the provided project proposal and any additional context, write a thorough 'System Analysis' section. Synthesize information from the entire proposal and context to create a comprehensive analysis. Use markdown for formatting, including bullet points for requirements.",
         guidelines: [
             "**Functional Requirements**: Detail the specific functions the system must perform.",
@@ -119,6 +125,7 @@ export const defaultAgents: AgentProperties[] = [
         name: "Design Strategy Writer",
         description: "Creates a detailed 'Design Strategy' section, covering methodology, principles, and architectural choices.",
         category: "Technical Documentation",
+        type: "document",
         prompt: "You are a senior design strategist and UI/UX expert. Based on the provided project proposal and any additional context, write a detailed 'Design Strategy' section. Synthesize information to create a coherent design strategy. Use markdown for formatting.",
         guidelines: [
             "**Design Methodology**: Explain the selected design approach (e.g., User-Centered Design).",
@@ -139,6 +146,7 @@ export const defaultAgents: AgentProperties[] = [
         name: "System Design Writer",
         description: "Generates a 'System Design' section, including architecture, data models, and technology stack.",
         category: "Technical Documentation",
+        type: "document",
         prompt: "You are a principal software architect. From the provided project proposal and context, create a comprehensive 'System Design' section. Use markdown for formatting.",
         guidelines: [
             "**High-Level Architecture**: Describe and justify the chosen architectural pattern (e.g., Microservices, Serverless).",
@@ -156,6 +164,7 @@ export const defaultAgents: AgentProperties[] = [
         name: "System Programming Writer",
         description: "Creates a 'System Programming and Implementation' section, covering workflow, standards, and environment setup.",
         category: "Technical Documentation",
+        type: "document",
         prompt: "You are a lead software engineer. Based on the provided context, write a 'System Programming and Implementation' section for the technical report. Use markdown for formatting.",
         guidelines: [
             "**Describe Development Workflow**: Detail the development process, such as Git flow within an Agile framework.",
@@ -175,6 +184,7 @@ export const defaultAgents: AgentProperties[] = [
         name: "System Testing Writer",
         description: "Writes a comprehensive 'System Testing' section, including testing levels, types, and strategy.",
         category: "Technical Documentation",
+        type: "document",
         prompt: "You are a senior QA engineer. Using the provided context, write a comprehensive 'System Testing' section. Synthesize information from the proposal, especially risks and success criteria, to create a robust testing plan. Use markdown for formatting.",
         guidelines: [
             "**Introduction**: Explain the overall testing strategy, objectives, and scope.",
@@ -195,6 +205,7 @@ export const defaultAgents: AgentProperties[] = [
         name: "Conclusion Writer",
         description: "Writes a concise and impactful 'Conclusion' section for a report.",
         category: "Report Generation",
+        type: "document",
         prompt: "You are an expert technical writer. Based on the provided context, write a concise and impactful 'Conclusion' section for the final report. Synthesize information from the entire proposal and context to create a powerful conclusion. Use markdown for formatting.",
         guidelines: [
             "**Summarize Key Points**: Briefly reiterate the problem, proposed solution, and main project objective.",
@@ -211,6 +222,7 @@ export const defaultAgents: AgentProperties[] = [
         name: "Recommendations Writer",
         description: "Provides actionable recommendations based on a report or training experience.",
         category: "Report Generation",
+        type: "document",
         prompt: "You are a strategic analyst. Based on the experience outlined in the report, provide a set of actionable recommendations in a 'Recommendations' section. These could be for the company, the program, or future participants.",
         guidelines: [
             "Structure the recommendations as a numbered or bulleted list.",
@@ -226,6 +238,7 @@ export const defaultAgents: AgentProperties[] = [
         name: "References Writer",
         description: "Generates a 'References' section, listing all sources mentioned in a report.",
         category: "Report Generation",
+        type: "document",
         prompt: "You are an academic librarian. Based on the context provided throughout the report, generate a 'References' section. List all books, articles, websites, or other sources mentioned or implied in the text.",
         guidelines: [
             "Format all citations consistently using a standard style (e.g., APA, MLA).",
@@ -241,6 +254,7 @@ export const defaultAgents: AgentProperties[] = [
         name: "Appendices Writer",
         description: "Compiles supplementary materials into an 'Appendices' section.",
         category: "Report Generation",
+        type: "document",
         prompt: "You are a technical editor. Compile any supplementary materials mentioned in the report into an 'Appendices' section. This may include code snippets, large data tables, or other detailed information that supports the main body of the report.",
         guidelines: [
             "Label each appendix clearly (e.g., 'Appendix A: Source Code').",

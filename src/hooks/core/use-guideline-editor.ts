@@ -14,6 +14,15 @@ export function useGuidelineEditor(itemKey: string) {
 
     const section = useMemo(() => project?.getSection(itemKey), [project, itemKey]);
 
+    // Filter agents based on the current section's type
+    const availableAgents = useMemo(() => {
+        if (!section?.type) return agents;
+        return agents.filter(agent => 
+            !agent.type || agent.type === 'universal' || agent.type === section.type
+        );
+    }, [agents, section?.type]);
+
+
     // Local state for UI
     const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
     const [selectedCommandId, setSelectedCommandId] = useState<string | null>(null);
@@ -136,6 +145,7 @@ export function useGuidelineEditor(itemKey: string) {
         removeGuideline,
         updateGuideline,
         section,
+        availableAgents,
         handleAgentChange,
         handleCommandChange,
         selectedAgentId,
