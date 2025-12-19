@@ -23,7 +23,6 @@ export const GenerationControlStateSchema = z.object({
     // Presentation Controls
     presentationType: PresentationTypeSchema.default('informative'),
     presentationTone: PresentationToneSchema.default('enthusiastic'),
-    slideCount: z.string().default('10'),
 });
 
 export type GenerationControlState = z.infer<typeof GenerationControlStateSchema>;

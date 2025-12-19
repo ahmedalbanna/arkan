@@ -39,7 +39,6 @@ export function buildInstructionText(controls: GenerationControlState, sectionTy
     } else if (sectionType === 'presentation') {
         if (controls.presentationType) instructions.push(`This is for a ${controls.presentationType} presentation.`);
         if (controls.presentationTone) instructions.push(`The tone for this presentation slide should be ${controls.presentationTone}.`);
-        if (controls.slideCount) instructions.push(`This is one slide of an approximate ${controls.slideCount}-slide presentation.`);
     }
 
     if (controls.language && controls.language !== 'default') {

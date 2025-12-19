@@ -182,10 +182,6 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                     </div>
                 </div>
             </div>
-            <div className="space-y-2">
-                <Label htmlFor={`slideCount-${section.id}`}>Approximate Slide Count</Label>
-                <Input id={`slideCount-${section.id}`} type="number" placeholder="e.g., 10" value={controls.slideCount} onChange={(e) => handleControlChange('slideCount', e.target.value)} />
-            </div>
         </>
     );
 
