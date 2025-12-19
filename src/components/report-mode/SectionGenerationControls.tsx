@@ -9,22 +9,10 @@ import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '../ui/checkbox';
-import type { GenerationControlState, Section, AnalysisType, UtilityAction } from '@/lib/models';
-import { Info } from 'lucide-react';
-import { Badge } from '../ui/badge';
+import type { GenerationControlState, Section } from '@/lib/models';
 import { Separator } from '../ui/separator';
-import { Textarea } from '../ui/textarea';
 import { useSectionGenerator } from '@/hooks/report-mode/use-section-generator';
-
-const analysisTypes: { value: AnalysisType, label: string }[] = [
-    { value: 'custom-analysis', label: 'Custom Analysis' },
-    { value: 'question-answering', label: 'Question Answering' },
-    { value: 'fact-retrieval', label: 'Fact Retrieval' },
-];
-
-const utilityActions: { value: UtilityAction, label: string }[] = [
-    { value: 'generate-toc', label: 'Generate Table of Contents' },
-];
+import { Textarea } from '../ui/textarea';
 
 export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
@@ -35,7 +23,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
     if (!controls) {
         return null;
     }
-    
+
     const instructionPreview = buildInstructionText(controls, project?.chapters);
 
     function handleControlChange<K extends keyof GenerationControlState>(
@@ -61,8 +49,8 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         <>
             <div className="space-y-2">
                 <Label htmlFor={`custom-instructions-${section.id}`}>{t('builder.reportGenerator.customInstructionsLabel', { defaultValue: 'Custom Instructions' })}</Label>
-                <Textarea 
-                    id={`custom-instructions-${section.id}`} 
+                <Textarea
+                    id={`custom-instructions-${section.id}`}
                     placeholder={t('builder.reportGenerator.customInstructionsPlaceholder', { defaultValue: 'e.g., Focus on the financial implications...' })}
                     value={controls.instructionText || ''}
                     onChange={(e) => handleControlChange('instructionText', e.target.value)}
@@ -122,10 +110,10 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             </div>
 
             <Separator />
-            
+
             <div className="space-y-1">
-                 <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_instruction_preview')}</Label>
-                 <p className="text-xs text-muted-foreground italic h-16 overflow-y-auto p-2 border rounded-md bg-muted/20">{instructionPreview || t('builder.reportGenerator.tool_instruction_none')}</p>
+                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_instruction_preview')}</Label>
+                <p className="text-xs text-muted-foreground italic h-16 overflow-y-auto p-2 border rounded-md bg-muted/20">{instructionPreview || t('builder.reportGenerator.tool_instruction_none')}</p>
             </div>
         </>
     );
@@ -160,37 +148,10 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             </div>
         </>
     );
-    
-    const renderUtilityControls = () => (
-        <div className="space-y-4">
-            <div className="space-y-2">
-                <Label htmlFor={`utilityAction-${section.id}`}>Utility Action</Label>
-                <Select value={controls.utilityAction} onValueChange={(val) => handleControlChange('utilityAction', val as any)}>
-                    <SelectTrigger id={`utilityAction-${section.id}`}><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                        {utilityActions.map(action => (
-                            <SelectItem key={action.value} value={action.value}>{action.label}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-        </div>
-    );
-
-    const renderControlsForType = () => {
-        switch (section.type) {
-            case 'generation':
-                return renderFullControls();
-            case 'utilities':
-                return renderUtilityControls();
-            default:
-                return null;
-        }
-    };
 
     return (
         <div className="space-y-6">
-            {renderControlsForType()}
+            {renderFullControls()}
         </div>
     );
 };

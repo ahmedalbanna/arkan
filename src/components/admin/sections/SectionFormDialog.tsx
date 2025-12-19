@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -24,7 +25,7 @@ import { Section, type SectionProperties } from '@/lib/models/section';
 const SectionSchema = z.object({
   id: z.string().min(3, 'ID must be at least 3 characters'),
   title: z.string().min(1, 'Title is required'),
-  type: z.enum(['analysis', 'generation', 'document-processing', 'text-manipulation', 'utilities']),
+  type: z.enum(['report', 'diagram', 'presentation']),
 });
 
 type SectionFormData = z.infer<typeof SectionSchema>;

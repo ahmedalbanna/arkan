@@ -15,7 +15,7 @@ export const defaultContext: SectionContext = {
 };
 
 
-export type SectionType = 'generation' | 'report' | 'diagram' | 'presentation';
+export type SectionType = 'report' | 'diagram' | 'presentation';
 
 export interface SectionProperties {
     id: string;
@@ -45,7 +45,7 @@ export class Section {
     constructor(props: SectionProperties) {
         this.id = props.id;
         this.title = props.title;
-        this.type = props.type || 'generation';
+        this.type = props.type || 'report';
         this.content = props.content ?? '';
         this.prompt = props.prompt ?? 'You are a helpful assistant.';
         this.guidelines = props.guidelines ?? [];
