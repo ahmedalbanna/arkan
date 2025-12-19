@@ -56,6 +56,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { ChapterToolsDialog } from './ChapterToolsDialog';
+import { CSS } from '@dnd-kit/utilities';
 
 
 interface SortableSectionItemProps {
@@ -76,7 +77,7 @@ function SortableSectionItem({
     useSortable({ id: section.id });
 
   const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     transition,
     zIndex: isDragging ? 1 : 0,
     position: 'relative',
@@ -385,7 +386,7 @@ export function GenerationTools() {
                 id="toc-master-input"
                 value={newChapterTitle}
                 onChange={(e) => setNewChapterTitle(e.target.value)}
-                placeholder={"1. Chapter One\n1.1. Section One\n2. Chapter Two..."}
+                placeholder={"1. Chapter One\\n1.1. Section One\\n2. Chapter Two..."}
                 className="flex-grow resize-none"
                 rows={5}
               />
