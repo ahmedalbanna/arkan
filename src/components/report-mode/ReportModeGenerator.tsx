@@ -2,17 +2,17 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { BookOpenText, GitGraph, UploadCloud, PenSquare, Edit, FileInput } from 'lucide-react';
+import { BookOpenText, UploadCloud, PenSquare, Edit, FileInput } from 'lucide-react';
 import { Suspense, useState } from 'react';
 import { Skeleton } from '../ui/skeleton';
 import { ReportResults } from './ReportResults';
-import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
 import { UploadManager } from '../file/UploadManager';
 import { GenerationTools } from './ReportGenerationTools';
-import { PlantUMLGeneratorTool } from '../writing-tools/PlantUMLGeneratorTool';
 import { useMobile } from '@/hooks';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils/cn';
+import { Card, CardContent } from '../ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
 
 function ReportSkeleton() {
@@ -50,46 +50,46 @@ function BottomNavBar({ activeView, setActiveView }: { activeView: 'generator' |
     );
 }
 
+function LeftPanel() {
+    const { t } = useLocalization();
+    return (
+        <Card className="h-full flex flex-col">
+            <CardContent className="p-4 flex-1">
+                 <Tabs defaultValue="files" className="w-full h-full flex flex-col">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="files" className="flex items-center gap-2">
+                            <UploadCloud className="h-4 w-4" />
+                            {t('builder.tabs.files')}
+                        </TabsTrigger>
+                        <TabsTrigger value="generate" className="flex items-center gap-2">
+                            <BookOpenText className="h-4 w-4" />
+                            {t('builder.reportGenerator.toolsTitle')}
+                        </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="files" className="flex-1 mt-4 overflow-y-auto">
+                        <UploadManager />
+                    </TabsContent>
+                    <TabsContent value="generate" className="flex-1 mt-4 overflow-y-auto">
+                        <GenerationTools />
+                    </TabsContent>
+                </Tabs>
+            </CardContent>
+        </Card>
+    )
+}
+
+
 export default function ReportModeGenerator() {
-    const { locale, t } = useLocalization();
+    const { locale } = useLocalization();
     const isMobile = useMobile();
     const [activeMobileView, setActiveMobileView] = useState<'generator' | 'result'>('result');
 
-
-    const panels = [
-        {
-            key: 'files',
-            title: t('builder.tabs.files'),
-            icon: <UploadCloud className="h-5 w-5" />,
-            content: <UploadManager />,
-        },
-        {
-            key: 'generate',
-            title: t('builder.reportGenerator.toolsTitle'),
-            icon: <BookOpenText className="h-5 w-5" />,
-            content: <GenerationTools />,
-        },
-        {
-            key: 'diagram',
-            title: t('builder.tabs.diagram'),
-            icon: <GitGraph className="h-5 w-5" />,
-            content: <PlantUMLGeneratorTool />,
-        },
-    ];
-
-
     return (
-
-
         <div className="pb-16 lg:pb-0">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
                 {isMobile ? (
                     <>
-                        {activeMobileView === 'generator' && <CollapsibleSidePanel
-                            panels={panels}
-                            defaultActiveKey="files"
-                            className="lg:col-span-4 xl:col-span-4"
-                        />}
+                        {activeMobileView === 'generator' && <div className="lg:col-span-4 xl:col-span-4"><LeftPanel /></div>}
                         {activeMobileView === 'result' && <div className="lg:col-span-8 xl:col-span-8 h-full">
                             <Suspense fallback={<ReportSkeleton />}>
                                 <ReportResults />
@@ -98,11 +98,9 @@ export default function ReportModeGenerator() {
                     </>
                 ) : (
                     <>
-                        <CollapsibleSidePanel
-                            panels={panels}
-                            defaultActiveKey="files"
-                            className="lg:col-span-4 xl:col-span-4"
-                        />
+                        <div className="lg:col-span-4 xl:col-span-4 h-full">
+                           <LeftPanel />
+                        </div>
                         <div className="lg:col-span-8 xl:col-span-8 h-full">
                             <Suspense fallback={<ReportSkeleton />}>
                                 <ReportResults />

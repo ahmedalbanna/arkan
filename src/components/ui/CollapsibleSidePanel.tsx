@@ -1,4 +1,6 @@
 
+'use client';
+
 import { cn } from '@/lib/utils/cn';
 import { SidePanelContent, type PanelItem } from './SidePanelContent';
 import { useMobile } from '@/hooks';
@@ -29,7 +31,7 @@ export function CollapsibleSidePanel({
     const isMobile = useMobile();
   return (
     <div className={cn(
-        "lg:sticky lg:top-24 self-start",
+        "lg:sticky lg:top-24 self-start h-full",
         isMobile && "mb-16", // Add margin-bottom on mobile to avoid overlap with bottom nav
         className
     )}>
