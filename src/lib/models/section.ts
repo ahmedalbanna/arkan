@@ -8,9 +8,6 @@ import {
 import type { SectionContext } from './context';
 
 export type ManipulationType = 'rewrite' | 'summarize';
-export type ProcessingAction = 'extract-text' | 'summarize' | 'translate';
-export type UtilityAction = 'generate-toc';
-
 
 export const defaultContext: SectionContext = {
     sections: {},
@@ -18,7 +15,7 @@ export const defaultContext: SectionContext = {
 };
 
 
-export type SectionType = 'generation' | 'utilities';
+export type SectionType = 'generation' | 'report' | 'diagram' | 'presentation';
 
 export interface SectionProperties {
     id: string;

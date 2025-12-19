@@ -5,27 +5,23 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { DiffPart, computeDiff } from '@/lib/utils/diff';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { Chapter } from '@/lib/models';
-import type { ManipulationType, ProcessingAction } from '@/lib/models';
+import type { ManipulationType } from '@/lib/models';
 
 const formSchema = z.object({
   rewriteStyle: z.string().optional(),
-  sourceFileId: z.string().optional(),
-  selectedSectionIds: z.record(z.boolean()).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: boolean) => void) {
-  const { project, updateProject } = useBuilderStore();
+  const { updateProject } = useBuilderStore();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<'manipulation' | 'processing'>('manipulation');
   const [activeView, setActiveView] = useState<'result' | 'diff'>('result');
   const [manipulationType, setManipulationType] = useState<ManipulationType>('rewrite');
-  const [processingAction, setProcessingAction] = useState<ProcessingAction>('extract-text');
   const [compressionRatio, setCompressionRatio] = useState(50);
   const [diff, setDiff] = useState<DiffPart[] | null>(null);
 
@@ -38,23 +34,8 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     resolver: zodResolver(formSchema),
     defaultValues: {
       rewriteStyle: 'Formal',
-      selectedSectionIds: {},
     },
   });
-
-  const getSourceContent = (data: FormValues): string => {
-    if (activeTab === 'processing' && data.selectedSectionIds) {
-      const selectedIds = Object.keys(data.selectedSectionIds).filter(id => data.selectedSectionIds![id]);
-      if (selectedIds.length > 0) {
-        return chapter?.sections
-          .filter(s => selectedIds.includes(s.id))
-          .map(s => `# ${s.title}\n\n${s.content || ''}`)
-          .join('\n\n---\n\n') || '';
-      }
-    }
-    // Default to full chapter content for manipulation or if no sections are selected for processing
-    return chapterContent;
-  };
 
   const mutation = useWritingTool('/api/writing-tools/manipulate-text', {
     onSuccess: (data: any, variables) => {
@@ -67,42 +48,24 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     }
   });
 
-  useEffect(() => {
-    // When switching top-level tabs, clear previous results
-    setDiff(null);
-    mutation.reset();
-  }, [activeTab]);
-
-
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = () => {
     let command = '';
-    const textToProcess = getSourceContent(data);
+    const textToProcess = chapterContent;
 
     if (!textToProcess.trim()) {
-        toast({ title: 'No content to process', description: 'Please select sections or ensure the chapter has content.', variant: 'destructive' });
+        toast({ title: 'No content to process', description: 'The chapter has no content.', variant: 'destructive' });
         return;
     }
 
-    if (activeTab === 'manipulation') {
-        switch (manipulationType) {
-            case 'rewrite':
-                command = `Rewrite this entire document in a ${data.rewriteStyle || 'neutral'} style, preserving the chapter and section structure.`;
-                break;
-            case 'summarize':
-                command = `Summarize this entire document to about ${compressionRatio}% of its original length, keeping the main chapter and section headings.`;
-                break;
-            default:
-                command = 'Improve the overall style and flow of this document.';
-        }
-    } else if (activeTab === 'processing') {
-         switch (processingAction) {
-            case 'summarize':
-                command = `Provide a concise summary of the provided text.`;
-                break;
-            case 'translate':
-                command = `Translate this document to Arabic.`;
-                break;
-        }
+    switch (manipulationType) {
+        case 'rewrite':
+            command = `Rewrite this entire document in a ${form.getValues('rewriteStyle') || 'neutral'} style, preserving the chapter and section structure.`;
+            break;
+        case 'summarize':
+            command = `Summarize this entire document to about ${compressionRatio}% of its original length, keeping the main chapter and section headings.`;
+            break;
+        default:
+            command = 'Improve the overall style and flow of this document.';
     }
     
     mutation.mutate({ textToManipulate: textToProcess, command });
@@ -121,11 +84,6 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     { value: 'summarize', label: 'Summarize' },
   ];
   
-  const processingActions: { value: ProcessingAction, label: string}[] = [
-      { value: 'summarize', label: 'Summarize Selected' },
-      { value: 'translate', label: 'Translate Selected' },
-  ];
-
   const styles = ["Informal", "Friendly", "Simple", "Formal", "Professional", "Narrative", "Descriptive", "Expository", "Argumentative", "Persuasive", "Creative", "Technical", "Academic", "Journalistic", "Poetic", "Satirical", "Humorous"];
 
   const handleApplyToNewSection = () => {
@@ -134,8 +92,7 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
       return;
     }
     
-    let actionLabel = activeTab === 'manipulation' ? manipulationType : processingAction;
-    const newSectionTitle = `${chapter.title} - ${actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1)}`;
+    const newSectionTitle = `${chapter.title} - ${manipulationType.charAt(0).toUpperCase() + manipulationType.slice(1)}`;
 
     updateProject(p => {
       p.addSectionToChapter(chapter.id, newSectionTitle, processedText || '');
@@ -147,16 +104,11 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
 
   return {
     form,
-    activeTab,
-    setActiveTab,
     activeView,
     setActiveView,
     manipulationType,
     setManipulationType,
     manipulationTypes,
-    processingAction,
-    setProcessingAction,
-    processingActions,
     styles,
     compressionRatio,
     setCompressionRatio,

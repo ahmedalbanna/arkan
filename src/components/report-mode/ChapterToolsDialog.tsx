@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useChapterActions } from '@/hooks/report-mode/use-chapter-actions';
 import { Chapter } from '@/lib/models';
-import { Loader2, Sparkles, Wand2, PlusCircle, BrainCircuit, Edit, FileCog } from 'lucide-react';
+import { Loader2, Wand2, PlusCircle } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -20,9 +20,8 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { DiffView } from '../shared/DiffView';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Form, FormField, FormProvider } from '../ui/form';
-import { useBuilderStore } from '@/hooks';
-import { Checkbox } from '../ui/checkbox';
+import { Form, FormField } from '../ui/form';
+import { Badge } from '../ui/badge';
 
 interface ChapterToolsDialogProps {
   isOpen: boolean;
@@ -33,16 +32,11 @@ interface ChapterToolsDialogProps {
 export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToolsDialogProps) {
   const {
     form,
-    activeTab,
-    setActiveTab,
     activeView,
     setActiveView,
     manipulationType,
     setManipulationType,
     manipulationTypes,
-    processingAction,
-    setProcessingAction,
-    processingActions,
     styles,
     compressionRatio,
     setCompressionRatio,
@@ -52,93 +46,8 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
     diff,
     handleApplyToNewSection,
   } = useChapterActions(chapter, onOpenChange);
-  const { project } = useBuilderStore();
 
   if (!chapter) return null;
-
-  const renderManipulationControls = () => (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label>Manipulation Type</Label>
-        <Select value={manipulationType} onValueChange={(v) => setManipulationType(v as any)}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {manipulationTypes.map(type => (
-              <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {manipulationType === 'rewrite' && (
-        <div className="space-y-2">
-          <Label>Rewrite Style</Label>
-          <FormField
-            control={form.control}
-            name="rewriteStyle"
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <SelectTrigger><SelectValue placeholder="Select a style" /></SelectTrigger>
-                <SelectContent>
-                  {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            )}
-          />
-        </div>
-      )}
-
-      {manipulationType === 'summarize' && (
-        <div className="space-y-3">
-          <div className="flex justify-between">
-            <Label>Compression Ratio</Label>
-            <Badge variant="outline">{compressionRatio}%</Badge>
-          </div>
-          <Slider value={[compressionRatio]} onValueChange={(v) => setCompressionRatio(v[0])} min={10} max={90} step={5} />
-        </div>
-      )}
-    </div>
-  );
-  
-  const renderProcessingControls = () => (
-     <div className="space-y-4">
-        <div className="space-y-2">
-            <Label>Action</Label>
-            <Select value={processingAction} onValueChange={(v) => setProcessingAction(v as any)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                    {processingActions.map(type => (
-                        <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
-        </div>
-        <div className="space-y-2">
-            <Label>Source Sections</Label>
-            <ScrollArea className="h-40 rounded-md border p-2">
-                <div className='space-y-2'>
-                {chapter.sections.map(section => (
-                     <FormField
-                        key={section.id}
-                        control={form.control}
-                        name={`selectedSectionIds.${section.id}`}
-                        render={({ field }) => (
-                            <div className="flex items-center space-x-2 rounded-md p-2 hover:bg-muted">
-                                <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                />
-                                <Label htmlFor={field.name} className="flex-1 font-normal truncate">{section.title}</Label>
-                            </div>
-                        )}
-                    />
-                ))}
-                </div>
-            </ScrollArea>
-        </div>
-     </div>
-  );
-
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -154,18 +63,45 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
         <form id="chapter-tools-form" onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-12 gap-6 flex-1 min-h-0">
           {/* Controls Panel */}
           <div className="md:col-span-4 space-y-4">
-             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="manipulation"><Edit className="mr-2 h-4 w-4"/> Manipulation</TabsTrigger>
-                    <TabsTrigger value="processing"><FileCog className="mr-2 h-4 w-4"/> Processing</TabsTrigger>
-                </TabsList>
-                <TabsContent value="manipulation" className="pt-4">
-                    {renderManipulationControls()}
-                </TabsContent>
-                <TabsContent value="processing" className="pt-4">
-                    {renderProcessingControls()}
-                </TabsContent>
-            </Tabs>
+            <div className="space-y-2">
+              <Label>Manipulation Type</Label>
+              <Select value={manipulationType} onValueChange={(v) => setManipulationType(v as any)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {manipulationTypes.map(type => (
+                    <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {manipulationType === 'rewrite' && (
+              <div className="space-y-2">
+                <Label>Rewrite Style</Label>
+                <FormField
+                  control={form.control}
+                  name="rewriteStyle"
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger><SelectValue placeholder="Select a style" /></SelectTrigger>
+                      <SelectContent>
+                        {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+            )}
+
+            {manipulationType === 'summarize' && (
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <Label>Compression Ratio</Label>
+                  <Badge variant="outline">{compressionRatio}%</Badge>
+                </div>
+                <Slider value={[compressionRatio]} onValueChange={(v) => setCompressionRatio(v[0])} min={10} max={90} step={5} />
+              </div>
+            )}
           </div>
 
           {/* Content Panel */}
