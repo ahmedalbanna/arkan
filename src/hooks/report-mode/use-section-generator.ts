@@ -13,7 +13,7 @@ import { useMutation } from '@tanstack/react-query';
  * @param sectionType The type of the section ('report' or 'presentation').
  * @returns A string containing the formatted instructions.
  */
-function buildInstructionText(controls: GenerationControlState, sectionType: SectionType): string {
+export function buildInstructionText(controls: GenerationControlState, sectionType: SectionType): string {
     let instructions: string[] = [];
 
     if (sectionType === 'report') {
@@ -122,6 +122,5 @@ export function useSectionGenerator() {
     isGenerating: agentMutation.isPending && agentMutation.variables === agentMutation.variables,
     isAnythingGenerating: agentMutation.isPending,
     hasCredits: !!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1,
-    buildInstructionText, // Export for use in UI
   };
 }

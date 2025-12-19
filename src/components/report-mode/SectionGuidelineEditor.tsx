@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useAgentManager } from '@/hooks/use-agent-store';
@@ -21,13 +22,12 @@ interface GuidelineEditorProps {
 export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
     const {
         t,
-        prompt,
-        setPrompt,
+        fullPrompt,
+        basePrompt,
+        setBasePrompt,
         guidelines,
         addGuideline,
         removeGuideline,
-        updateGuideline,
-        section,
         handleAgentChange,
         handleCommandChange,
         selectedAgentId,
@@ -87,11 +87,11 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
             <div className="space-y-2">
                 <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_prompt_label')}</Label>
                 <Textarea
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    rows={6}
+                    value={basePrompt}
+                    onChange={(e) => setBasePrompt(e.target.value)}
+                    rows={4}
                     className="font-mono text-xs"
-                    placeholder="The agent's base prompt will appear here..."
+                    placeholder="Describe the agent's core role and purpose..."
                 />
             </div>
 
@@ -133,6 +133,17 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
                         </div>
                     </ScrollArea>
                 )}
+            </div>
+            
+             <div className="space-y-2">
+                <Label className="text-xs font-semibold text-muted-foreground">Final System Prompt (Read-only Preview)</Label>
+                <Textarea
+                    value={fullPrompt}
+                    readOnly
+                    rows={8}
+                    className="font-mono text-xs bg-muted/50"
+                    placeholder="The full prompt sent to the AI will appear here..."
+                />
             </div>
         </div>
     );

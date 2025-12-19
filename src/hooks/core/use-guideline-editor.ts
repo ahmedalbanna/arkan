@@ -5,6 +5,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useEffect, useMemo, useState } from 'react';
 import { useBuilderStore } from './useBuilderStore';
 import { useAgentManager } from '../use-agent-store';
+import { buildInstructionText } from '../report-mode/use-section-generator';
 
 export function useGuidelineEditor(itemKey: string) {
     const { t } = useLocalization();
@@ -15,16 +16,24 @@ export function useGuidelineEditor(itemKey: string) {
 
     // Local state for UI
     const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
-    const [selectedCommandId, setSelectedCommandId] = useState<string | null>(null); // This is now deprecated but kept for safety
-    const [prompt, setPrompt] = useState('');
+    const [selectedCommandId, setSelectedCommandId] = useState<string | null>(null);
+    const [basePrompt, setBasePrompt] = useState('');
     const [guidelines, setGuidelines] = useState<string[]>([]);
+
+    // This is the derived full prompt that combines base + controls
+    const fullPrompt = useMemo(() => {
+        if (!section) return '';
+        const controlInstructions = buildInstructionText(section.controls, section.type);
+        return `${basePrompt}\n\n${controlInstructions}`.trim();
+    }, [basePrompt, section]);
+
 
     // Sync local state when the underlying section in the project store changes
     useEffect(() => {
         if (section) {
             setSelectedAgentId(section.agentId || null);
             setSelectedCommandId(section.commandId || null);
-            setPrompt(section.prompt || 'You are a helpful assistant. Write a section based on the user\'s instructions.');
+            setBasePrompt(section.prompt || 'You are a helpful assistant. Write a section based on the user\'s instructions.');
             setGuidelines(section.guidelines || []);
         }
     }, [section]);
@@ -39,7 +48,7 @@ export function useGuidelineEditor(itemKey: string) {
             const hasChanged =
                 currentSection.agentId !== selectedAgentId ||
                 currentSection.commandId !== selectedCommandId ||
-                currentSection.prompt !== prompt ||
+                currentSection.prompt !== basePrompt || // Compare with basePrompt now
                 JSON.stringify(currentSection.guidelines) !== JSON.stringify(guidelines);
 
             if (hasChanged) {
@@ -47,8 +56,8 @@ export function useGuidelineEditor(itemKey: string) {
                     const sec = p.getSection(itemKey);
                     if (sec) {
                         sec.agentId = selectedAgentId;
-                        sec.commandId = selectedCommandId; // Still here for legacy reasons
-                        sec.prompt = prompt;
+                        sec.commandId = selectedCommandId;
+                        sec.prompt = basePrompt; // Save the basePrompt
                         sec.guidelines = guidelines;
                     }
                 });
@@ -56,14 +65,14 @@ export function useGuidelineEditor(itemKey: string) {
         }, 500); // 500ms debounce
 
         return () => clearTimeout(handler);
-    }, [selectedAgentId, selectedCommandId, prompt, guidelines, itemKey, project, updateProject]);
+    }, [selectedAgentId, selectedCommandId, basePrompt, guidelines, itemKey, project, updateProject]);
 
     // Handle agent selection change
     const handleAgentChange = (agentId: string) => {
         if (!agentId) {
             setSelectedAgentId(null);
             setSelectedCommandId(null);
-            setPrompt('You are a helpful assistant. Write a section based on the user\'s instructions.');
+            setBasePrompt('You are a helpful assistant. Write a section based on the user\'s instructions.');
             setGuidelines([]);
             return;
         }
@@ -72,24 +81,18 @@ export function useGuidelineEditor(itemKey: string) {
         setSelectedCommandId(null); // Reset command selection
 
         const agent = agents.find(a => a.id === agentId);
-        // Correctly read from the top-level `prompt` and `guidelines` fields
-        setPrompt(agent?.prompt || 'You are a helpful assistant.');
+        setBasePrompt(agent?.prompt || 'You are a helpful assistant.');
         setGuidelines(agent?.guidelines || []);
     };
     
-    // This function is now effectively deprecated as commands are no longer a primary concept,
-    // but it is kept to avoid breaking changes if it's used elsewhere.
     const handleCommandChange = (commandId: string) => {
-        // We'll just reset to the agent's base prompt if the default is selected.
         if (commandId === 'default' || !commandId) {
             setSelectedCommandId(null);
             const agent = agents.find(a => a.id === selectedAgentId);
-            setPrompt(agent?.prompt || 'You are a helpful assistant.');
+            setBasePrompt(agent?.prompt || 'You are a helpful assistant.');
             setGuidelines(agent?.guidelines || []);
         } else {
             setSelectedCommandId(commandId);
-            // In the new model, commands don't have separate prompts.
-            // This part can be adjusted if commands regain a specific function.
         }
     };
 
@@ -113,8 +116,9 @@ export function useGuidelineEditor(itemKey: string) {
 
     return {
         t,
-        prompt,
-        setPrompt,
+        fullPrompt, // Expose the combined prompt
+        basePrompt, // Expose the editable base prompt
+        setBasePrompt,
         guidelines,
         addGuideline,
         removeGuideline,
