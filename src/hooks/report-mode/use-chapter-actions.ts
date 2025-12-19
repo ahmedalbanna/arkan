@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -9,7 +8,7 @@ import { useWritingTool, useToast } from '@/hooks';
 import { useState, useMemo } from 'react';
 import { DiffPart, computeDiff } from '@/lib/utils/diff';
 import { useBuilderStore } from '../core/useBuilderStore';
-import { Chapter } from '@/lib/models';
+import { Chapter, SectionContext } from '@/lib/models';
 import type { ManipulationType } from '@/lib/models';
 
 const formSchema = z.object({
@@ -24,12 +23,13 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: boolean) => void) {
-  const { updateProject } = useBuilderStore();
+  const { project, updateProject } = useBuilderStore();
   const { toast } = useToast();
   const [activeView, setActiveView] = useState<'result' | 'diff'>('result');
   const [manipulationType, setManipulationType] = useState<ManipulationType>('rewrite');
   const [compressionRatio, setCompressionRatio] = useState(50);
   const [diff, setDiff] = useState<DiffPart[] | null>(null);
+  const [context, setContext] = useState<SectionContext>({ sections: {}, externalContext: {} });
 
   const chapterContent = useMemo(() => {
     if (!chapter) return '';
@@ -60,14 +60,30 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
   });
 
   const onSubmit = (formData: FormValues) => {
-    let command = '';
     const textToProcess = chapterContent;
-
     if (!textToProcess.trim()) {
         toast({ title: 'No content to process', description: 'The chapter has no content.', variant: 'destructive' });
         return;
     }
 
+    const contextSectionsContent = Object.keys(context.sections || {})
+        .filter(key => context.sections?.[key])
+        .map(key => {
+            const section = project?.getSection(key);
+            return `--- Context from Section: ${section?.title} ---\n${section?.content}`;
+        }).join('\n\n');
+
+    const contextFilesContent = Object.keys(context.externalContext || {})
+        .filter(key => context.externalContext?.[key])
+        .map(key => {
+            const file = project?.externalContext?.find(f => f.id === key);
+            return `--- Context from File: ${file?.fileName} ---\n${file?.content}`;
+        }).join('\n\n');
+    
+    const fullContext = [contextSectionsContent, contextFilesContent].filter(Boolean).join('\n\n');
+    const textWithContext = `${textToProcess}\n\n${fullContext ? `--- Additional Context ---\n${fullContext}`: ''}`;
+
+    let command = '';
     switch (manipulationType) {
         case 'rewrite':
             command = `Rewrite this entire document in a ${formData.rewriteStyle || 'neutral'} style, preserving the chapter and section structure.`;
@@ -96,7 +112,7 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
             command = 'Improve the overall style and flow of this document.';
     }
     
-    mutation.mutate({ textToManipulate: textToProcess, command });
+    mutation.mutate({ textToManipulate: textWithContext, command });
   };
   
   const isProcessing = mutation.isPending;
@@ -149,5 +165,7 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     processedText,
     diff,
     handleApplyToNewSection,
+    context,
+    setContext,
   };
 }
