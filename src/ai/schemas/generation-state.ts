@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-import { PresentationToneSchema, ReportToneSchema, LanguageSchema, DiagramTypeSchema } from './enums';
+import { PresentationToneSchema, ReportToneSchema, LanguageSchema, DiagramTypeSchema, PresentationTypeSchema } from './enums';
 
 export const GenerationControlStateSchema = z.object({
     // Report Controls
@@ -20,6 +20,7 @@ export const GenerationControlStateSchema = z.object({
     outputDiagramType: DiagramTypeSchema.optional(),
 
     // Presentation Controls
+    presentationType: PresentationTypeSchema.default('informative'),
     presentationTone: PresentationToneSchema.default('enthusiastic'),
     slideCount: z.string().default('10'),
 });

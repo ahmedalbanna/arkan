@@ -55,6 +55,19 @@ export const PresentationToneSchema = z.enum([
 ]);
 export type PresentationTone = z.infer<typeof PresentationToneSchema>;
 
+// New enum for Presentation Type
+export const PresentationTypeSchema = z.enum([
+  'informative',
+  'persuasive',
+  'demonstration',
+  'training',
+  'sales',
+  'pitch',
+  'motivational',
+  'status-report',
+]);
+export type PresentationType = z.infer<typeof PresentationTypeSchema>;
+
 
 // Curated target audiences for generation controls
 export const TargetAudienceSchema = z.enum([

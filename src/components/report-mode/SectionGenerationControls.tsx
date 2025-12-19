@@ -12,7 +12,8 @@ import { Checkbox } from '../ui/checkbox';
 import type { GenerationControlState, Section } from '@/lib/models';
 import { Separator } from '../ui/separator';
 import { useSectionGenerator } from '@/hooks/report-mode/use-section-generator';
-import { DiagramTypeSchema } from '@/ai/schemas';
+import { DiagramTypeSchema, PresentationTypeSchema, ReportToneSchema } from '@/ai/schemas';
+import { PresentationToneSchema } from '@/ai/schemas/enums';
 
 export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
@@ -44,6 +45,17 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             [style]: checked
         });
     }
+    
+    const presentationTypeLabels: Record<z.infer<typeof PresentationTypeSchema>, string> = {
+        'informative': 'Informative: Knowledge sharing',
+        'persuasive': 'Persuasive: Influencing opinions',
+        'demonstration': 'Demonstration: Step-by-step guide',
+        'training': 'Training: Skill development',
+        'sales': 'Sales: Business promotion',
+        'pitch': 'Pitch: Securing support',
+        'motivational': 'Motivational: Inspiring audiences',
+        'status-report': 'Status Report: Project updates',
+    };
 
     const renderReportControls = () => (
         <>
@@ -128,6 +140,17 @@ export function SectionGenerationControls({ section }: { section: Section }) {
 
     const renderPresentationControls = () => (
          <>
+            <div className="space-y-2">
+                <Label htmlFor={`presentationType-${section.id}`}>Presentation Type</Label>
+                <Select value={controls.presentationType} onValueChange={(val) => handleControlChange('presentationType', val as any)}>
+                    <SelectTrigger id={`presentationType-${section.id}`}><SelectValue placeholder="Select presentation type..." /></SelectTrigger>
+                    <SelectContent>
+                        {PresentationTypeSchema.options.map(type => (
+                            <SelectItem key={type} value={type}>{presentationTypeLabels[type]}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
             <div className="grid grid-cols-2 gap-4">
                 {renderToneAndLanguageControls('presentation')}
             </div>
@@ -156,11 +179,9 @@ export function SectionGenerationControls({ section }: { section: Section }) {
     );
 
     const renderToneAndLanguageControls = (type: 'report' | 'presentation') => {
-        const toneOptions = type === 'report' ?
-            ['professional', 'academic', 'formal', 'neutral', 'informative', 'analytical'] :
-            ['enthusiastic', 'confident', 'friendly', 'persuasive', 'casual', 'conversational'];
-        
+        const toneOptions = type === 'report' ? ReportToneSchema.options : PresentationToneSchema.options;
         const toneValue = type === 'report' ? controls.tone : controls.presentationTone;
+        
         const onToneChange = (val: string) => {
             if (type === 'report') {
                 handleControlChange('tone', val as any);
