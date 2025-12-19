@@ -142,5 +142,5 @@ export const TrueFalseAnswerSchema = z.enum(['True', 'False']);
 export type TrueFalseAnswer = z.infer<typeof TrueFalseAnswerSchema>;
 
 // New Enums for Section Types
-export const SectionTypeSchema = z.enum(['report', 'presentation']);
+export const SectionTypeSchema = z.enum(['document', 'presentation']);
 export type SectionType = z.infer<typeof SectionTypeSchema>;

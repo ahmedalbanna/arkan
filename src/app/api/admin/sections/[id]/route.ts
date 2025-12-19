@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 const SectionUpdateSchema = z.object({
   title: z.string().min(1).optional(),
-  type: z.enum(['report', 'diagram', 'presentation']).optional(),
+  type: z.enum(['document', 'presentation']).optional(),
   prompt: z.string().optional(),
   guidelines: z.array(z.string()).optional(),
   model: z.string().optional(),

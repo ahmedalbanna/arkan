@@ -84,7 +84,7 @@ export function SectionAccordionItem({
     }
 
     const sectionTypes: { value: SectionType, label: string }[] = [
-        { value: 'report', label: 'Report' },
+        { value: 'document', label: 'Document' },
         { value: 'presentation', label: 'Presentation' },
     ];
 
@@ -143,7 +143,7 @@ export function SectionAccordionItem({
                     <div className="border-t">
                         <div className="p-4 space-y-2">
                              <Label>Section Type</Label>
-                             <Select onValueChange={(value) => handleSectionTypeChange(value as SectionType)} value={section.type || 'report'}>
+                             <Select onValueChange={(value) => handleSectionTypeChange(value as SectionType)} value={section.type || 'document'}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select a section type..." />
                                 </SelectTrigger>

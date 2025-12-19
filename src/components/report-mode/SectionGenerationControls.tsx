@@ -56,7 +56,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         'status-report': 'Status Report: Project updates',
     };
 
-    const renderReportControls = () => (
+    const renderDocumentControls = () => (
         <>
             <div className="space-y-3">
                 <Label htmlFor={`formality-${section.id}`}>{t('builder.reportGenerator.tool_formality_label')}</Label>
@@ -77,7 +77,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                 </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-                {renderToneAndLanguageControls('report')}
+                {renderToneAndLanguageControls('document')}
             </div>
             <div className="space-y-2">
                 <Label>Output Format</Label>
@@ -185,12 +185,12 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         </>
     );
 
-    const renderToneAndLanguageControls = (type: 'report' | 'presentation') => {
-        const toneOptions = type === 'report' ? ReportToneSchema.options : PresentationToneSchema.options;
-        const toneValue = type === 'report' ? controls.tone : controls.presentationTone;
+    const renderToneAndLanguageControls = (type: 'document' | 'presentation') => {
+        const toneOptions = type === 'document' ? ReportToneSchema.options : PresentationToneSchema.options;
+        const toneValue = type === 'document' ? controls.tone : controls.presentationTone;
         
         const onToneChange = (val: string) => {
-            if (type === 'report') {
+            if (type === 'document') {
                 handleControlChange('tone', val as any);
             } else {
                 handleControlChange('presentationTone', val as any);
@@ -229,8 +229,8 @@ export function SectionGenerationControls({ section }: { section: Section }) {
 
     const renderControlsForType = () => {
         switch (section.type) {
-            case 'report':
-                return renderReportControls();
+            case 'document':
+                return renderDocumentControls();
             case 'presentation':
                 return renderPresentationControls();
             default:

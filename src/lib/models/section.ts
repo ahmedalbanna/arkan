@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -7,7 +6,7 @@ import {
 } from '@/ai/schemas/generation-state';
 import type { SectionContext } from './context';
 
-export type SectionType = 'report' | 'presentation';
+export type SectionType = 'document' | 'presentation';
 
 export interface SectionProperties {
     id: string;
@@ -42,7 +41,7 @@ export class Section {
     constructor(props: SectionProperties) {
         this.id = props.id;
         this.title = props.title;
-        this.type = props.type || 'report';
+        this.type = props.type || 'document';
         this.content = props.content ?? '';
         this.prompt = props.prompt ?? 'You are a helpful assistant.';
         this.guidelines = props.guidelines ?? [];

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { GenerationControlState, SectionName, SectionType } from '@/ai/schemas';
+import { GenerationControlState, SectionType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore, toast } from '@/hooks';
 import { generateReportSectionApi } from '@/services/api/reportService';
@@ -10,13 +10,13 @@ import { useMutation } from '@tanstack/react-query';
 /**
  * Builds a detailed instruction string for the AI based on the section's controls.
  * @param controls The generation controls for the section.
- * @param sectionType The type of the section ('report' or 'presentation').
+ * @param sectionType The type of the section ('document' or 'presentation').
  * @returns A string containing the formatted instructions.
  */
 export function buildInstructionText(controls: GenerationControlState, sectionType: SectionType): string {
     let instructions: string[] = [];
 
-    if (sectionType === 'report') {
+    if (sectionType === 'document') {
         const formalityMap: { [key: number]: string } = { 0: 'very informal and casual', 33: 'balanced and neutral', 67: 'formal and professional', 100: 'very formal and academic' };
         const complexityMap: { [key: number]: string } = { 0: 'very simple and easy to understand', 33: 'clear and straightforward', 67: 'detailed and technical', 100: 'highly complex and expert-level' };
 

@@ -25,7 +25,7 @@ import { Section, type SectionProperties } from '@/lib/models/section';
 const SectionSchema = z.object({
   id: z.string().min(3, 'ID must be at least 3 characters'),
   title: z.string().min(1, 'Title is required'),
-  type: z.enum(['report', 'diagram', 'presentation']),
+  type: z.enum(['document', 'presentation']),
 });
 
 type SectionFormData = z.infer<typeof SectionSchema>;
@@ -49,7 +49,7 @@ export function SectionFormDialog({ sectionToEdit, children }: SectionFormDialog
     } : {
       id: '',
       title: '',
-      type: 'report',
+      type: 'document',
     },
   });
 
@@ -95,8 +95,7 @@ export function SectionFormDialog({ sectionToEdit, children }: SectionFormDialog
                 <SelectValue placeholder="Select a type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="report">Report</SelectItem>
-                <SelectItem value="diagram">Diagram</SelectItem>
+                <SelectItem value="document">Document</SelectItem>
                 <SelectItem value="presentation">Presentation</SelectItem>
               </SelectContent>
             </Select>
