@@ -2,19 +2,17 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { BookOpenText, GitGraph, Search, UploadCloud, PenSquare, Edit, FileInput, BrainCircuit } from 'lucide-react';
+import { BookOpenText, GitGraph, UploadCloud, PenSquare, Edit, FileInput } from 'lucide-react';
 import { Suspense, useState } from 'react';
 import { Skeleton } from '../ui/skeleton';
 import { ReportResults } from './ReportResults';
 import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
 import { UploadManager } from '../file/UploadManager';
 import { GenerationTools } from './ReportGenerationTools';
-import { AIResearcherTool } from '../writing-tools/AIResearcherTool';
 import { PlantUMLGeneratorTool } from '../writing-tools/PlantUMLGeneratorTool';
 import { useMobile } from '@/hooks';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils/cn';
-import AnalystAgent from '../file/AnalystAgent';
 
 
 function ReportSkeleton() {
@@ -70,12 +68,6 @@ export default function ReportModeGenerator() {
             title: t('builder.reportGenerator.toolsTitle'),
             icon: <BookOpenText className="h-5 w-5" />,
             content: <GenerationTools />,
-        },
-        {
-            key: 'analysis',
-            title: t('builder.files.analystAgentTitle'),
-            icon: <BrainCircuit className="h-5 w-5" />,
-            content: <AnalystAgent />,
         },
         {
             key: 'diagram',

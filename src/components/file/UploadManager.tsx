@@ -1,11 +1,18 @@
 
 'use client';
 
-import { PdfPreview } from '@/components/file/PdfPreview';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import AnalystAgent from "@/components/file/AnalystAgent";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,48 +20,12 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useToast } from '@/hooks';
 import { ExternalContext, ExternalContextType } from '@/lib/types';
 import { cn } from '@/lib/utils/cn';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
-import { AtomIcon, FileText, ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
-import Image from 'next/image';
+import { AtomIcon, BrainCircuit, FileText, Loader2, UploadCloud, X } from 'lucide-react';
 import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import ReactMarkdown from 'react-markdown';
 import { PasteTextUploader } from './PasteTextUploader';
-interface UploadManagerProps {
+import { ViewContextDialog } from './ViewContextDialog';
 
-}
-
-function ViewContextDialog({ item }: { item: { fileName: string, content: string, type: ExternalContextType } }) {
-    const isDataUri = item.content.startsWith('data:');
-    const isImage = isDataUri && item.content.startsWith('data:image');
-    const isPdf = isDataUri && item.content.startsWith('data:application/pdf');
-
-    return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6" title="View Content">
-                    <ImageIcon className="h-4 w-4" />
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl h-[90vh]">
-                <DialogHeader><DialogTitle>{item.fileName}</DialogTitle></DialogHeader>
-                <div className="h-full overflow-y-auto">
-                    {isImage ? (
-                        <Image src={item.content} alt={item.fileName} width={500} height={700} className="mx-auto" />
-                    ) : isPdf ? (
-                        <PdfPreview fileUri={item.content} />
-                    ) : !isDataUri ? (
-                        <ScrollArea className="h-full rounded-md border p-4">
-                            <ReactMarkdown components={markdownComponents}>{item.content}</ReactMarkdown>
-                        </ScrollArea>
-                    ) : (
-                        <p className="text-muted-foreground p-8 text-center">Preview for this file type is not available. Please process the file to view its content.</p>
-                    )}
-                </div>
-            </DialogContent>
-        </Dialog>
-    )
-}
 
 function FileDropzone() {
     const { t } = useLocalization();
@@ -154,9 +125,24 @@ export function UploadManager() {
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <CardTitle>{t('builder.files.fileManagerTitle')}</CardTitle>
-                    <Button variant="ghost" size="icon" className="hidden lg:inline-flex">
-                        <AtomIcon className="h-5 w-5" />
-                    </Button>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="hidden lg:inline-flex">
+                                <AtomIcon className="h-5 w-5" />
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl h-[80vh]">
+                             <DialogHeader>
+                                <DialogTitle>Analyst Agent</DialogTitle>
+                                <DialogDescription>
+                                    Ask questions or give instructions based on the files you've uploaded.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="flex-grow overflow-auto -mx-6 px-6">
+                                <AnalystAgent />
+                            </div>
+                        </DialogContent>
+                    </Dialog>
                 </div>
                 <CardDescription>
                     {t('builder.files.fileManagerDesc')}
