@@ -13,6 +13,7 @@ import type { GenerationControlState, Section } from '@/lib/models';
 import { Separator } from '../ui/separator';
 import { useSectionGenerator } from '@/hooks/report-mode/use-section-generator';
 import { Textarea } from '../ui/textarea';
+import { DiagramTypeSchema } from '@/ai/schemas';
 
 export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
@@ -24,7 +25,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         return null;
     }
 
-    const instructionPreview = buildInstructionText(controls, project?.chapters);
+    const instructionPreview = buildInstructionText(controls);
 
     function handleControlChange<K extends keyof GenerationControlState>(
         field: K,
@@ -45,19 +46,8 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         });
     }
 
-    const renderFullControls = () => (
+    const renderReportControls = () => (
         <>
-            <div className="space-y-2">
-                <Label htmlFor={`custom-instructions-${section.id}`}>{t('builder.reportGenerator.customInstructionsLabel', { defaultValue: 'Custom Instructions' })}</Label>
-                <Textarea
-                    id={`custom-instructions-${section.id}`}
-                    placeholder={t('builder.reportGenerator.customInstructionsPlaceholder', { defaultValue: 'e.g., Focus on the financial implications...' })}
-                    value={controls.instructionText || ''}
-                    onChange={(e) => handleControlChange('instructionText', e.target.value)}
-                    rows={3}
-                />
-            </div>
-
             <div className="space-y-3">
                 <Label htmlFor={`formality-${section.id}`}>{t('builder.reportGenerator.tool_formality_label')}</Label>
                 <Slider id={`formality-${section.id}`} value={[controls.formality]} onValueChange={(val) => handleControlChange('formality', val[0])} max={100} step={1} />
@@ -77,7 +67,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                 </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-                {renderToneAndLanguageControls()}
+                {renderToneAndLanguageControls('report')}
             </div>
             <div className="space-y-2">
                 <Label>Output Format</Label>
@@ -108,27 +98,95 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                 <Label htmlFor={`wordCount-${section.id}`}>{t('builder.reportGenerator.tool_word_count_label')}</Label>
                 <Input id={`wordCount-${section.id}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controls.wordCount} onChange={(e) => handleControlChange('wordCount', e.target.value)} />
             </div>
+        </>
+    );
 
-            <Separator />
-
-            <div className="space-y-1">
-                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_instruction_preview')}</Label>
-                <p className="text-xs text-muted-foreground italic h-16 overflow-y-auto p-2 border rounded-md bg-muted/20">{instructionPreview || t('builder.reportGenerator.tool_instruction_none')}</p>
+    const renderDiagramControls = () => (
+        <>
+            <div className="space-y-2">
+                <Label htmlFor={`diagram-type-${section.id}`}>Diagram Type</Label>
+                <Select
+                    value={controls.diagramType}
+                    onValueChange={(val) => handleControlChange('diagramType', val as any)}
+                >
+                    <SelectTrigger id={`diagram-type-${section.id}`}>
+                        <SelectValue placeholder="Select a diagram type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {DiagramTypeSchema.options.map((type) => (
+                            <SelectItem key={type} value={type}>
+                                {type.charAt(0).toUpperCase() + type.slice(1)}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor={`description-${section.id}`}>Description</Label>
+                <Textarea
+                    id={`description-${section.id}`}
+                    placeholder="Describe the diagram you want to generate based on the context..."
+                    value={controls.description || ''}
+                    onChange={(e) => handleControlChange('description', e.target.value)}
+                    rows={4}
+                />
+            </div>
+        </>
+    );
+    
+    const renderPresentationControls = () => (
+         <>
+            <div className="grid grid-cols-2 gap-4">
+                {renderToneAndLanguageControls('presentation')}
+            </div>
+             <div className="space-y-2">
+                <Label>Output Format</Label>
+                <div className="flex items-center flex-wrap gap-4">
+                    <div className="flex items-center gap-2">
+                        <Checkbox id={`output-heading-pres-${section.id}`} checked={controls.outputStyle.heading} onCheckedChange={(checked) => handleOutputStyleChange('heading', !!checked)} />
+                        <Label htmlFor={`output-heading-pres-${section.id}`}>Heading</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Checkbox id={`output-paragraph-pres-${section.id}`} checked={controls.outputStyle.paragraph} onCheckedChange={(checked) => handleOutputStyleChange('paragraph', !!checked)} />
+                        <Label htmlFor={`output-paragraph-pres-${section.id}`}>Paragraph</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Checkbox id={`output-list-pres-${section.id}`} checked={controls.outputStyle.list} onCheckedChange={(checked) => handleOutputStyleChange('list', !!checked)} />
+                        <Label htmlFor={`output-list-pres-${section.id}`}>List</Label>
+                    </div>
+                </div>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor={`slideCount-${section.id}`}>Approximate Slide Count</Label>
+                <Input id={`slideCount-${section.id}`} type="number" placeholder="e.g., 10" value={controls.slideCount} onChange={(e) => handleControlChange('slideCount', e.target.value)} />
             </div>
         </>
     );
 
-    const renderToneAndLanguageControls = () => (
+    const renderToneAndLanguageControls = (type: 'report' | 'presentation') => {
+        const toneOptions = type === 'report' ?
+            ['professional', 'academic', 'formal', 'neutral', 'informative', 'analytical'] :
+            ['enthusiastic', 'confident', 'friendly', 'persuasive', 'casual', 'conversational'];
+        
+        const toneValue = type === 'report' ? controls.tone : controls.presentationTone;
+        const onToneChange = (val: string) => {
+            if (type === 'report') {
+                handleControlChange('tone', val as any);
+            } else {
+                handleControlChange('presentationTone', val as any);
+            }
+        };
+
+        return (
         <>
             <div className="space-y-2">
                 <Label htmlFor={`tone-${section.id}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
-                <Select value={controls.tone} onValueChange={(val) => handleControlChange('tone', val as any)}>
+                <Select value={toneValue} onValueChange={onToneChange}>
                     <SelectTrigger id={`tone-${section.id}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="professional">{t('builder.reportGenerator.tool_tone_professional')}</SelectItem>
-                        <SelectItem value="academic">{t('builder.reportGenerator.tool_tone_academic')}</SelectItem>
-                        <SelectItem value="casual">{t('builder.reportGenerator.tool_tone_casual')}</SelectItem>
-                        <SelectItem value="persuasive">{t('builder.reportGenerator.tool_tone_persuasive')}</SelectItem>
+                        {toneOptions.map(tone => (
+                           <SelectItem key={tone} value={tone}>{tone.charAt(0).toUpperCase() + tone.slice(1)}</SelectItem>
+                        ))}
                     </SelectContent>
                 </Select>
             </div>
@@ -147,11 +205,29 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                 </Select>
             </div>
         </>
-    );
+    )};
+
+    const renderControlsForType = () => {
+        switch (section.type) {
+            case 'report':
+                return renderReportControls();
+            case 'diagram':
+                return renderDiagramControls();
+            case 'presentation':
+                return renderPresentationControls();
+            default:
+                return <p className="text-muted-foreground text-sm">Select a section type to see available controls.</p>;
+        }
+    }
 
     return (
         <div className="space-y-6">
-            {renderFullControls()}
+            {renderControlsForType()}
+            <Separator />
+            <div className="space-y-1">
+                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_instruction_preview')}</Label>
+                <p className="text-xs text-muted-foreground italic h-16 overflow-y-auto p-2 border rounded-md bg-muted/20">{instructionPreview || t('builder.reportGenerator.tool_instruction_none')}</p>
+            </div>
         </div>
     );
 };

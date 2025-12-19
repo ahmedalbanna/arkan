@@ -13,29 +13,40 @@ import { Chapter } from '@/lib/models';
  * @param controls The generation controls for the section.
  * @returns A string containing the formatted instructions.
  */
-function buildInstructionText(controls: GenerationControlState, allChapters: Chapter[] = []): string {
+function buildInstructionText(controls: GenerationControlState): string {
     let instructions: string[] = [];
+    const sectionType = controls.type;
 
-    // General instructions from the textarea
-    if (controls.instructionText) {
-        instructions.push(controls.instructionText);
-    }
+    if (sectionType === 'report') {
+        const formalityMap: { [key: number]: string } = { 0: 'very informal and casual', 33: 'balanced and neutral', 67: 'formal and professional', 100: 'very formal and academic' };
+        const complexityMap: { [key: number]: string } = { 0: 'very simple and easy to understand', 33: 'clear and straightforward', 67: 'detailed and technical', 100: 'highly complex and expert-level' };
+
+        const formality = controls.formality > 67 ? formalityMap[100] : controls.formality > 33 ? formalityMap[67] : controls.formality > 0 ? formalityMap[33] : formalityMap[0];
+        instructions.push(`The formality should be ${formality}.`);
+
+        const complexity = controls.complexity > 67 ? complexityMap[100] : controls.complexity > 33 ? complexityMap[67] : controls.complexity > 0 ? complexityMap[33] : complexityMap[0];
+        instructions.push(`The complexity should be ${complexity}.`);
+        
+        if (controls.tone) instructions.push(`The tone should be ${controls.tone}.`);
+        if (controls.wordCount) instructions.push(`Aim for a word count of approximately ${controls.wordCount} words.`);
     
-    const formalityMap: { [key: number]: string } = { 0: 'very informal and casual', 33: 'balanced and neutral', 67: 'formal and professional', 100: 'very formal and academic' };
-    const complexityMap: { [key: number]: string } = { 0: 'very simple and easy to understand', 33: 'clear and straightforward', 67: 'detailed and technical', 100: 'highly complex and expert-level' };
+    } else if (sectionType === 'diagram') {
+        if (controls.description) {
+            instructions.push(controls.description);
+        } else {
+            instructions.push('Generate a diagram based on the context.');
+        }
 
-    const formality = controls.formality > 67 ? formalityMap[100] : controls.formality > 33 ? formalityMap[67] : controls.formality > 0 ? formalityMap[33] : formalityMap[0];
-    instructions.push(`The formality should be ${formality}.`);
+    } else if (sectionType === 'presentation') {
+        if (controls.presentationTone) instructions.push(`The tone for this presentation slide should be ${controls.presentationTone}.`);
+        if (controls.slideCount) instructions.push(`This is one of approximately ${controls.slideCount} slides.`);
+    }
 
-    const complexity = controls.complexity > 67 ? complexityMap[100] : controls.complexity > 33 ? complexityMap[67] : controls.complexity > 0 ? complexityMap[33] : complexityMap[0];
-    instructions.push(`The complexity should be ${complexity}.`);
 
-    if (controls.tone) instructions.push(`The tone should be ${controls.tone}.`);
     if (controls.language && controls.language !== 'default') {
         const langMap: Record<string, string> = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
         instructions.push(`The output language must be ${langMap[controls.language] || 'English'}.`);
     }
-    if (controls.wordCount) instructions.push(`Aim for a word count of approximately ${controls.wordCount} words.`);
 
     const enabledStyles = Object.entries(controls.outputStyle).filter(([, value]) => value).map(([key]) => key);
     if (enabledStyles.length > 0) instructions.push(`The output should include the following elements: ${enabledStyles.join(', ')}.`);
@@ -62,7 +73,7 @@ export function useSectionGenerator() {
       const controls = section.controls;
       const context = section.context;
 
-      const instructionText = buildInstructionText(controls, project.chapters);
+      const instructionText = buildInstructionText(controls);
 
       const otherSectionsContext: Record<string, string> = {};
       Object.keys(context.sections || {}).forEach(key => {
@@ -84,11 +95,21 @@ export function useSectionGenerator() {
         externalContext: externalContextFiles,
         guidelines: section.guidelines,
         instructionText,
+        // Pass diagram specific controls if applicable
+        diagramType: section.type === 'diagram' ? controls.diagramType : undefined,
       };
 
-      const result = await generateReportSectionApi(body, token);
+      const endpoint = section.type === 'diagram' ? '/api/generate/diagrams' : '/api/generate/section';
+      const result = await generateReportSectionApi(body, token, endpoint);
 
-      const content = result?.[section.id] ?? Object.values(result || {})[0] as string | undefined;
+      // Handle both section and diagram responses
+      let content;
+      if (section.type === 'diagram') {
+        content = `\`\`\`plantuml\n${result?.plantUmlCode}\n\`\`\``;
+      } else {
+        content = result?.[section.id] ?? Object.values(result || {})[0] as string | undefined;
+      }
+
       if (!content) {
         toast({ title: 'Generation failed', description: `No content returned for section ${section.id}.`, variant: 'destructive' });
         throw new Error('Empty generation result');

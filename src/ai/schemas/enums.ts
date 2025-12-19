@@ -33,24 +33,28 @@ export const ParaphraseModeSchema = z.enum(['standard', 'fluent', 'formal', 'cre
 export type ParaphraseMode = z.infer<typeof ParaphraseModeSchema>;
 
 
-// Curated tone options for generation controls
-export const ToneSchema = z.enum([
+// Tones for written reports
+export const ReportToneSchema = z.enum([
   'professional',
   'formal',
+  'academic',
   'neutral',
-  'friendly',
-  'casual',
-  'persuasive',
   'informative',
-  'confident',
-  'empathetic',
-  'enthusiastic',
-  'authoritative',
-  'approachable',
   'analytical',
+]);
+export type ReportTone = z.infer<typeof ReportToneSchema>;
+
+// Tones for oral presentations
+export const PresentationToneSchema = z.enum([
+  'enthusiastic',
+  'confident',
+  'friendly',
+  'persuasive',
+  'casual',
   'conversational',
 ]);
-export type Tone = z.infer<typeof ToneSchema>;
+export type PresentationTone = z.infer<typeof PresentationToneSchema>;
+
 
 // Curated target audiences for generation controls
 export const TargetAudienceSchema = z.enum([
@@ -85,8 +89,8 @@ export type TargetReadingLevel = z.infer<typeof TargetReadingLevelSchema>;
 export const ExternalContextTypeSchema = z.enum(['context', 'example', 'question', 'textbook', 'guidelines']);
 export type ExternalContextType = z.infer<typeof ExternalContextTypeSchema>;
 
-export const TargetLanaguage = z.enum(['English', 'Arabic']);
-export type TargetLanaguage = z.infer<typeof TargetLanaguage>;
+export const LanguageSchema = z.enum(['default', 'en', 'ar', 'es', 'fr', 'de']);
+export type Language = z.infer<typeof LanguageSchema>;
 
 export const ResearchDepthSchema = z.enum(['basic', 'comprehensive', 'in-depth']);
 export type ResearchDepth = z.infer<typeof ResearchDepthSchema>;
@@ -125,8 +129,5 @@ export const TrueFalseAnswerSchema = z.enum(['True', 'False']);
 export type TrueFalseAnswer = z.infer<typeof TrueFalseAnswerSchema>;
 
 // New Enums for Section Types
-export const SectionTypeSchema = z.enum(['generation', 'analysis', 'document-processing', 'text-manipulation', 'utilities']);
+export const SectionTypeSchema = z.enum(['report', 'diagram', 'presentation']);
 export type SectionType = z.infer<typeof SectionTypeSchema>;
-
-export const LanguageSchema = z.enum(['default', 'en', 'ar', 'es', 'fr', 'de']);
-export type Language = z.infer<typeof LanguageSchema>;

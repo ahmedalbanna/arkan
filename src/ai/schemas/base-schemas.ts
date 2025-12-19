@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ExternalContextTypeSchema, TargetAudienceSchema, TargetLanaguage, ToneSchema } from './enums';
+import { ExternalContextTypeSchema, TargetAudienceSchema, LanguageSchema, ReportToneSchema } from './enums';
 
 // ============================================================================
 // BASE SCHEMAS
@@ -55,8 +55,8 @@ export const BaseOutputStyleSchema = z.object({
 
 export const BaseOutputWriterSchema = z.object({
   controls: z.object({
-    language: TargetLanaguage.optional().describe('The target language for the content.'),
-    tone: ToneSchema.optional().describe('Desired tone (e.g., professional, casual, persuasive).'),
+    language: LanguageSchema.optional().describe('The target language for the content.'),
+    tone: ReportToneSchema.optional().describe('Desired tone (e.g., professional, casual, persuasive).'),
     wordCount: z.number().optional().describe('Maximum word count for the generated content.'),
     complexity: z.number().optional().describe('Complexity level (1-10).'),
     formality: z.number().optional().describe('Formality level (1-10).'),
@@ -72,7 +72,7 @@ export const BaseControlsSchema = z
       .optional()
       .describe('Additional instructions for generation (e.g., tone, formality).'),
     targetAudience: TargetAudienceSchema.optional().describe('The intended audience for the content.'),
-    tone: ToneSchema.optional().describe('Desired tone (e.g., professional, casual, persuasive).'),
+    tone: ReportToneSchema.optional().describe('Desired tone (e.g., professional, casual, persuasive).'),
   })
   .strict();
 

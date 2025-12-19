@@ -17,7 +17,7 @@ import {
     SectionNameSchema,
     SentenceVarietySchema,
     SummarizeLengthSchema,
-    TargetLanaguage,
+    LanguageSchema,
     TargetReadingLevelSchema,
     TrueFalseAnswerSchema,
     TrueFalseTypeSchema
@@ -759,7 +759,7 @@ export type TopicExplainerOutput = z.infer<typeof TopicExplainerOutputSchema>;
 // translate-text.ts
 export const TranslateTextInputSchema = BaseTextInputSchema.extend({
     flow: z.literal('translate-text'),
-    targetLang: TargetLanaguage.describe('The target language (e.g., "English", "Arabic").'),
+    targetLang: LanguageSchema.describe('The target language (e.g., "English", "Arabic").'),
 })
     .merge(BaseControlsSchema);
 export type TranslateTextInput = z.infer<typeof TranslateTextInputSchema>;
