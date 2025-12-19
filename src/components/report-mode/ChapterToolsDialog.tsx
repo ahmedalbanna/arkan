@@ -21,7 +21,7 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { DiffView } from '../shared/DiffView';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { FormProvider, FormField } from '../ui/form';
+import { Form, FormProvider, FormField } from '../ui/form';
 import { useBuilderStore } from '@/hooks';
 
 interface ChapterToolsDialogProps {
@@ -140,7 +140,7 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
           </DialogDescription>
         </DialogHeader>
         
-        <FormProvider {...form}>
+        <Form {...form}>
         <form id="chapter-tools-form" onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-12 gap-6 flex-1 min-h-0">
           {/* Controls Panel */}
           <div className="md:col-span-4 space-y-4">
@@ -204,7 +204,7 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
               </Button>
             </div>
         </form>
-        </FormProvider>
+        </Form>
       </DialogContent>
     </Dialog>
   );
