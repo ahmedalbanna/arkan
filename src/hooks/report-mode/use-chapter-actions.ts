@@ -62,7 +62,7 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     // When switching top-level tabs, clear previous results
     setDiff(null);
     mutation.reset();
-  }, [activeTab, mutation]);
+  }, [activeTab, mutation.reset]);
 
 
   const onSubmit = (data: FormValues) => {
