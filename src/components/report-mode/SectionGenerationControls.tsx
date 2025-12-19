@@ -11,14 +11,13 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '../ui/checkbox';
 import type { GenerationControlState, Section } from '@/lib/models';
 import { Separator } from '../ui/separator';
-import { useSectionGenerator } from '@/hooks/report-mode/use-section-generator';
+import { buildInstructionText } from '@/hooks/report-mode/use-section-generator';
 import { DiagramTypeSchema, PresentationTypeSchema, ReportToneSchema } from '@/ai/schemas';
 import { PresentationToneSchema } from '@/ai/schemas/enums';
 
 export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
-    const { buildInstructionText } = useSectionGenerator();
     const controls = section.controls;
 
     if (!controls) {
