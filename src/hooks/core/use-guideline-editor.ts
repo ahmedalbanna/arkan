@@ -20,12 +20,24 @@ export function useGuidelineEditor(itemKey: string) {
     const [basePrompt, setBasePrompt] = useState('');
     const [guidelines, setGuidelines] = useState<string[]>([]);
 
-    // This is the derived full prompt that combines base + controls
+    // This is the derived full prompt that combines base + controls + guidelines
     const fullPrompt = useMemo(() => {
         if (!section) return '';
         const controlInstructions = buildInstructionText(section.controls, section.type);
-        return `${basePrompt}\n\n${controlInstructions}`.trim();
-    }, [basePrompt, section]);
+        
+        let prompt = basePrompt;
+
+        if (guidelines && guidelines.length > 0) {
+            const guidelinesText = guidelines.map(g => `- ${g}`).join('\n');
+            prompt += `\n\n**Guidelines:**\n${guidelinesText}`;
+        }
+        
+        if (controlInstructions) {
+            prompt += `\n\n${controlInstructions}`;
+        }
+        
+        return prompt.trim();
+    }, [basePrompt, guidelines, section]);
 
 
     // Sync local state when the underlying section in the project store changes
