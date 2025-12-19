@@ -9,24 +9,25 @@ import { useState, useMemo, useEffect } from 'react';
 import { DiffPart, computeDiff } from '@/lib/utils/diff';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { Chapter } from '@/lib/models';
-import type { ManipulationType, AnalysisType } from '@/lib/models';
-import { text } from 'stream/consumers';
+import type { ManipulationType, AnalysisType, ProcessingAction } from '@/lib/models';
 
 const formSchema = z.object({
   rewriteStyle: z.string().optional(),
   question: z.string().optional(),
   factQuery: z.string().optional(),
+  sourceFileId: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: boolean) => void) {
-  const { updateProject } = useBuilderStore();
+  const { project, updateProject } = useBuilderStore();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<'manipulation' | 'analysis'>('manipulation');
+  const [activeTab, setActiveTab] = useState<'manipulation' | 'analysis' | 'processing'>('manipulation');
   const [activeView, setActiveView] = useState<'result' | 'diff'>('result');
   const [manipulationType, setManipulationType] = useState<ManipulationType>('rewrite');
   const [analysisType, setAnalysisType] = useState<AnalysisType>('custom-analysis');
+  const [processingAction, setProcessingAction] = useState<ProcessingAction>('extract-text');
   const [compressionRatio, setCompressionRatio] = useState(50);
   const [diff, setDiff] = useState<DiffPart[] | null>(null);
 
@@ -41,80 +42,88 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
       rewriteStyle: 'Formal',
       question: '',
       factQuery: '',
+      sourceFileId: '',
     },
   });
 
-  const manipulationMutation = useWritingTool('/api/writing-tools/manipulate-text', {
+  const getSourceContent = (sourceId: string | undefined): string => {
+    if (!sourceId) return chapterContent; // Default to chapter content for manipulation/analysis
+    const file = project?.externalContext.find(f => f.id === sourceId);
+    return file?.content || '';
+  };
+
+  const mutation = useWritingTool('/api/writing-tools/manipulate-text', {
     onSuccess: (data: any) => {
-      const resultText = data.rewrittenText || '';
-      setDiff(computeDiff(chapterContent, resultText));
+      const resultText = data.rewrittenText || JSON.stringify(data, null, 2);
+      const original = getSourceContent(form.getValues('sourceFileId'));
+      setDiff(computeDiff(original, resultText));
     },
     onError: (error) => {
       toast({ title: 'Action Failed', description: error.message, variant: 'destructive' });
     }
   });
-  
-  const analysisMutation = useWritingTool('/api/writing-tools/question-answering', {
-      onSuccess: (data: any) => {
-          const resultText = data.answer || JSON.stringify(data, null, 2);
-          setDiff(computeDiff(chapterContent, resultText))
-      },
-      onError: (error) => {
-          toast({ title: 'Analysis Failed', description: error.message, variant: 'destructive' });
-      }
-  })
 
   useEffect(() => {
     // When switching top-level tabs, clear previous results
     setDiff(null);
-    manipulationMutation.reset();
-    analysisMutation.reset();
-  }, [activeTab]);
+    mutation.reset();
+  }, [activeTab, mutation]);
 
   const onSubmit = (data: FormValues) => {
-      if (activeTab === 'manipulation') {
-          let command: string;
-          switch (manipulationType) {
-              case 'rewrite':
-                  command = `Rewrite this entire document in a ${data.rewriteStyle || 'neutral'} style, preserving the chapter and section structure.`;
-                  break;
-              case 'summarize':
-                  command = `Summarize this entire document to about ${compressionRatio}% of its original length, keeping the main chapter and section headings.`;
-                  break;
-              default:
-                  command = 'Improve the overall style and flow of this document.';
-          }
-          manipulationMutation.mutate({ textToManipulate: chapterContent, command });
-      } else { // Analysis
-          let payload: any = { context: chapterContent };
-           switch (analysisType) {
-              case 'question-answering':
-                  payload.question = data.question;
-                  payload.useWebSearch = true;
-                  break;
-              case 'fact-retrieval':
-                  payload.factQuery = data.factQuery;
-                  payload.useWebSearch = true;
-                  payload.requireSource = true;
-                  break;
-              default:
-                  // For 'custom-analysis', the prompt is constructed differently or taken from elsewhere
-                  toast({ title: 'Not implemented', description: 'Custom analysis from chapter tools is not yet implemented.'});
-                  return;
-           }
-          analysisMutation.mutate(payload);
-      }
+    let command = '';
+    let textToProcess = chapterContent;
+
+    if (activeTab === 'manipulation') {
+        switch (manipulationType) {
+            case 'rewrite':
+                command = `Rewrite this entire document in a ${data.rewriteStyle || 'neutral'} style, preserving the chapter and section structure.`;
+                break;
+            case 'summarize':
+                command = `Summarize this entire document to about ${compressionRatio}% of its original length, keeping the main chapter and section headings.`;
+                break;
+            default:
+                command = 'Improve the overall style and flow of this document.';
+        }
+    } else if (activeTab === 'analysis') {
+         switch (analysisType) {
+            case 'question-answering':
+                command = `Based on the provided text, answer the following question: "${data.question}"`;
+                break;
+            case 'fact-retrieval':
+                command = `From the text, retrieve information about: "${data.factQuery}"`;
+                break;
+            default:
+                command = "Analyze the provided text.";
+        }
+    } else if (activeTab === 'processing') {
+        if (!data.sourceFileId) {
+            toast({ title: 'No source file selected', description: 'Please select a document to process.', variant: 'destructive' });
+            return;
+        }
+        textToProcess = getSourceContent(data.sourceFileId);
+         switch (processingAction) {
+            case 'extract-text':
+                command = `Extract and clean the text from this document, formatting it as clean markdown.`;
+                break;
+            case 'summarize':
+                command = `Provide a concise summary of this document.`;
+                break;
+            case 'translate':
+                command = `Translate this document to Arabic.`;
+                break;
+        }
+    }
+    
+    mutation.mutate({ textToManipulate: textToProcess, command });
   };
   
-  const isProcessing = manipulationMutation.isPending || analysisMutation.isPending;
-  const resultData = activeTab === 'manipulation' ? manipulationMutation.data : analysisMutation.data;
+  const isProcessing = mutation.isPending;
+  const resultData = mutation.data;
   let processedText = '';
   if (resultData) {
-      if ('rewrittenText' in resultData) processedText = resultData.rewrittenText;
-      else if ('answer' in resultData) processedText = resultData.answer;
+      if ('rewrittenText' in (resultData as any)) processedText = (resultData as any).rewrittenText;
       else if (typeof resultData === 'object') processedText = JSON.stringify(resultData, null, 2);
   }
-
 
   const manipulationTypes: { value: ManipulationType; label: string }[] = [
     { value: 'rewrite', label: 'Rewrite' },
@@ -125,6 +134,12 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
       { value: 'question-answering', label: 'Ask a Question' },
       { value: 'fact-retrieval', label: 'Retrieve a Fact' },
   ];
+  
+  const processingActions: { value: ProcessingAction, label: string}[] = [
+      { value: 'extract-text', label: 'Extract & Clean Text'},
+      { value: 'summarize', label: 'Summarize Document' },
+      { value: 'translate', label: 'Translate Document' },
+  ];
 
   const styles = ["Informal", "Friendly", "Simple", "Formal", "Professional", "Narrative", "Descriptive", "Expository", "Argumentative", "Persuasive", "Creative", "Technical", "Academic", "Journalistic", "Poetic", "Satirical", "Humorous"];
 
@@ -134,8 +149,7 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
       return;
     }
     
-    let actionLabel = activeTab === 'manipulation' ? manipulationType : analysisType;
-
+    let actionLabel = activeTab === 'manipulation' ? manipulationType : activeTab === 'analysis' ? analysisType : processingAction;
     const newSectionTitle = `${chapter.title} - ${actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1)}`;
 
     updateProject(p => {
@@ -145,7 +159,6 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     toast({ title: 'Section Added', description: `"${newSectionTitle}" has been added to the chapter.` });
     onOpenChange(false);
   };
-
 
   return {
     form,
@@ -159,6 +172,9 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     analysisType,
     setAnalysisType,
     analysisTypes,
+    processingAction,
+    setProcessingAction,
+    processingActions,
     styles,
     compressionRatio,
     setCompressionRatio,

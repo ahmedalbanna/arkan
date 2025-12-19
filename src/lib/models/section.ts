@@ -20,7 +20,7 @@ export const defaultContext: SectionContext = {
 };
 
 
-export type SectionType = 'generation' | 'document-processing' | 'utilities';
+export type SectionType = 'generation' | 'utilities';
 
 export interface SectionProperties {
     id: string;

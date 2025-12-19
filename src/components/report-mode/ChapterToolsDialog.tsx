@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useChapterActions } from '@/hooks/report-mode/use-chapter-actions';
 import { Chapter } from '@/lib/models';
-import { Loader2, Sparkles, Wand2, PlusCircle, BrainCircuit, Edit } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, PlusCircle, BrainCircuit, Edit, FileCog } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -24,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Form, FormField, FormControl } from '../ui/form';
 import { Textarea } from '../ui/textarea';
 import { Input } from '../ui/input';
+import { useBuilderStore } from '@/hooks';
 
 interface ChapterToolsDialogProps {
   isOpen: boolean;
@@ -44,6 +45,9 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
     analysisType,
     setAnalysisType,
     analysisTypes,
+    processingAction,
+    setProcessingAction,
+    processingActions,
     styles,
     compressionRatio,
     setCompressionRatio,
@@ -53,6 +57,7 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
     diff,
     handleApplyToNewSection,
   } = useChapterActions(chapter, onOpenChange);
+  const { project } = useBuilderStore();
 
   if (!chapter) return null;
 
@@ -127,6 +132,41 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
           )}
       </div>
   );
+  
+  const renderProcessingControls = () => (
+     <div className="space-y-4">
+        <div className="space-y-2">
+            <Label>Source File</Label>
+            <FormField
+                control={form.control}
+                name="sourceFileId"
+                render={({ field }) => (
+                     <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select a file from context..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {(project?.externalContext || []).map(file => (
+                                <SelectItem key={file.id} value={file.id}>{file.fileName}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
+            />
+        </div>
+         <div className="space-y-2">
+            <Label>Action</Label>
+            <Select value={processingAction} onValueChange={(v) => setProcessingAction(v as any)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                    {processingActions.map(type => (
+                        <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </div>
+     </div>
+  );
 
 
   return (
@@ -143,16 +183,20 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
         <form id="chapter-tools-form" onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-12 gap-6 flex-1 min-h-0">
           {/* Controls Panel */}
           <div className="md:col-span-4 space-y-4">
-             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'manipulation' | 'analysis')} className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
+             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="manipulation"><Edit className="mr-2 h-4 w-4"/> Manipulation</TabsTrigger>
                     <TabsTrigger value="analysis"><BrainCircuit className="mr-2 h-4 w-4"/> Analysis</TabsTrigger>
+                    <TabsTrigger value="processing"><FileCog className="mr-2 h-4 w-4"/> Processing</TabsTrigger>
                 </TabsList>
                 <TabsContent value="manipulation">
                     {renderManipulationControls()}
                 </TabsContent>
                 <TabsContent value="analysis">
                     {renderAnalysisControls()}
+                </TabsContent>
+                <TabsContent value="processing">
+                    {renderProcessingControls()}
                 </TabsContent>
             </Tabs>
           </div>

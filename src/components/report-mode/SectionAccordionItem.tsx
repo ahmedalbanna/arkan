@@ -85,8 +85,6 @@ export function SectionAccordionItem({
 
     const sectionTypes: { value: SectionType, label: string }[] = [
         { value: 'generation', label: 'AI Generation' },
-        { value: 'analysis', label: 'Analysis' },
-        { value: 'document-processing', label: 'Document Processing' },
         { value: 'utilities', label: 'Utilities' },
     ];
 

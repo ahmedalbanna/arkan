@@ -9,38 +9,17 @@ import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '../ui/checkbox';
-import type { Tone, Language, GenerationControlState, Section, ManipulationType, AnalysisType, ProcessingAction, UtilityAction } from '@/lib/models';
+import type { GenerationControlState, Section, AnalysisType, UtilityAction } from '@/lib/models';
 import { Info } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { Textarea } from '../ui/textarea';
 import { useSectionGenerator } from '@/hooks/report-mode/use-section-generator';
 
-const styles = [
-    "Informal", "Friendly", "Simple", "Formal", "Professional", "Narrative",
-    "Descriptive", "Expository", "Argumentative", "Persuasive", "Creative",
-    "Technical", "Academic", "Journalistic", "Poetic", "Satirical", "Humorous"
-];
-
-const manipulationTypes: { value: ManipulationType; label: string }[] = [
-    { value: 'rewrite', label: 'Rewrite' },
-    { value: 'summarize', label: 'Summarize' },
-    { value: 'style-editor', label: 'Improve Style' },
-    { value: 'readability-enhancer', label: 'Enhance Readability' },
-    { value: 'conciseness-checker', label: 'Make Concise' },
-    { value: 'clarity-advisor', label: 'Improve Clarity' },
-];
-
 const analysisTypes: { value: AnalysisType, label: string }[] = [
     { value: 'custom-analysis', label: 'Custom Analysis' },
     { value: 'question-answering', label: 'Question Answering' },
     { value: 'fact-retrieval', label: 'Fact Retrieval' },
-];
-
-const processingActions: { value: ProcessingAction, label: string }[] = [
-    { value: 'extract-text', label: 'Extract & Clean Text' },
-    { value: 'summarize', label: 'Summarize Document' },
-    { value: 'translate', label: 'Translate Document' },
 ];
 
 const utilityActions: { value: UtilityAction, label: string }[] = [
@@ -155,7 +134,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         <>
             <div className="space-y-2">
                 <Label htmlFor={`tone-${section.id}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
-                <Select value={controls.tone} onValueChange={(val) => handleControlChange('tone', val as Tone)}>
+                <Select value={controls.tone} onValueChange={(val) => handleControlChange('tone', val as any)}>
                     <SelectTrigger id={`tone-${section.id}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
                     <SelectContent>
                         <SelectItem value="professional">{t('builder.reportGenerator.tool_tone_professional')}</SelectItem>
@@ -167,7 +146,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             </div>
             <div className="space-y-2">
                 <Label htmlFor={`language-${section.id}`}>Language</Label>
-                <Select value={controls.language} onValueChange={(val) => handleControlChange('language', val as Language)}>
+                <Select value={controls.language} onValueChange={(val) => handleControlChange('language', val as any)}>
                     <SelectTrigger id={`language-${section.id}`}><SelectValue placeholder="Select language..." /></SelectTrigger>
                     <SelectContent>
                         <SelectItem value="default">Default</SelectItem>
@@ -181,193 +160,12 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             </div>
         </>
     );
-
-    const renderTextManipulationControls = () => (
-        <div className="space-y-4">
-            <div className="space-y-2">
-                <Label htmlFor={`manipulationType-${section.id}`}>Manipulation Type</Label>
-                <Select value={controls.manipulationType || 'rewrite'} onValueChange={(val) => handleControlChange('manipulationType', val as any)}>
-                    <SelectTrigger id={`manipulationType-${section.id}`}>
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {manipulationTypes.map(type => (
-                            <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-
-            <Separator />
-
-            {controls.manipulationType === 'rewrite' && (
-                <div className="space-y-2">
-                    <Label htmlFor={`rewriteStyle-${section.id}`}>{t('writingTools.textStylist.styleLabel')}</Label>
-                    <Select value={controls.rewriteStyle || 'Formal'} onValueChange={(val) => handleControlChange('rewriteStyle', val as any)}>
-                        <SelectTrigger id={`rewriteStyle-${section.id}`}><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                            {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                </div>
-            )}
-
-            {controls.manipulationType === 'summarize' && (
-                <div className="space-y-3">
-                    <div className="flex justify-between">
-                        <Label htmlFor={`compressionRatio-${section.id}`}>{t('writingTools.textStylist.compressionRatioLabel')}</Label>
-                        <Badge variant="outline">{controls.compressionRatio || 50}%</Badge>
-                    </div>
-                    <Slider
-                        id={`compressionRatio-${section.id}`}
-                        value={[controls.compressionRatio || 50]}
-                        onValueChange={(val) => handleControlChange('compressionRatio', val[0])}
-                        min={10} max={90} step={5}
-                    />
-                </div>
-            )}
-
-            {controls.manipulationType === 'style-editor' && (
-                <>
-                    <div className="space-y-2">
-                        <Label htmlFor={`targetAudience-${section.id}`}>Target Audience (Optional)</Label>
-                        <Input id={`targetAudience-${section.id}`} value={controls.targetAudience || ''} onChange={e => handleControlChange('targetAudience', e.target.value)} placeholder="e.g., general public" />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor={`tone-${section.id}`}>Tone (Optional)</Label>
-                        <Input id={`tone-${section.id}`} value={controls.tone || ''} onChange={e => handleControlChange('tone', e.target.value as Tone)} placeholder="e.g., professional" />
-                    </div>
-                </>
-            )}
-
-            {controls.manipulationType === 'readability-enhancer' && (
-                 <div className="space-y-2">
-                    <Label htmlFor={`targetLevel-${section.id}`}>Target Reading Level</Label>
-                    <Select value={controls.targetLevel} onValueChange={(val) => handleControlChange('targetLevel', val as any)}>
-                        <SelectTrigger id={`targetLevel-${section.id}`}><SelectValue placeholder="Select reading level" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="elementary">Elementary</SelectItem>
-                            <SelectItem value="middle-school">Middle School</SelectItem>
-                            <SelectItem value="high-school">High School</SelectItem>
-                            <SelectItem value="college">College</SelectItem>
-                            <SelectItem value="graduate">Graduate</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-            )}
-            
-            {controls.manipulationType === 'conciseness-checker' && (
-                <div className="space-y-3">
-                    <div className="flex justify-between">
-                        <Label htmlFor={`targetReduction-${section.id}`}>Target Reduction</Label>
-                        <Badge variant="outline">{controls.targetReduction || 0}%</Badge>
-                    </div>
-                    <Slider
-                        id={`targetReduction-${section.id}`}
-                        value={[controls.targetReduction || 0]}
-                        onValueChange={(val) => handleControlChange('targetReduction', val[0])}
-                        min={0} max={50} step={5}
-                    />
-                </div>
-            )}
-
-            {controls.manipulationType === 'clarity-advisor' && (
-                <div className="space-y-2">
-                    <Label htmlFor={`focusAreas-${section.id}`}>Focus Areas (comma-separated)</Label>
-                    <Input id={`focusAreas-${section.id}`} value={controls.focusAreas?.join(', ') || ''} onChange={(e) => handleControlChange('focusAreas', e.target.value.split(',').map(s => s.trim()))} placeholder="e.g., sentence structure, word choice" />
-                </div>
-            )}
-        </div>
-    );
-
-    const renderAnalysisControls = () => (
-        <div className="space-y-4">
-            <div className="space-y-2">
-                <Label htmlFor={`analysisType-${section.id}`}>Analysis Type</Label>
-                <Select value={controls.analysisType || 'custom-analysis'} onValueChange={(val) => handleControlChange('analysisType', val as any)}>
-                    <SelectTrigger id={`analysisType-${section.id}`}>
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {analysisTypes.map(type => (
-                            <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-            
-            <Separator />
-
-            {controls.analysisType === 'question-answering' && (
-                <div className="space-y-2">
-                    <Label htmlFor={`question-${section.id}`}>Question to Answer</Label>
-                    <Textarea 
-                        id={`question-${section.id}`} 
-                        value={controls.question || ''} 
-                        onChange={(e) => handleControlChange('question', e.target.value)}
-                        placeholder="e.g., What are the main risks associated with this project?"
-                        rows={3}
-                    />
-                </div>
-            )}
-
-            {controls.analysisType === 'fact-retrieval' && (
-                <div className="space-y-2">
-                    <Label htmlFor={`factQuery-${section.id}`}>Fact to Retrieve</Label>
-                    <Input 
-                        id={`factQuery-${section.id}`} 
-                        value={controls.factQuery || ''} 
-                        onChange={(e) => handleControlChange('factQuery', e.target.value)}
-                        placeholder="e.g., 'market size for AI in healthcare'"
-                    />
-                </div>
-            )}
-            
-            {controls.analysisType === 'custom-analysis' && (
-                 <div className="text-center text-muted-foreground p-4 border rounded-md bg-muted/50">
-                    <Info className="mx-auto h-6 w-6 mb-2" />
-                    <p className="text-sm">For custom analysis, define your goal in the 'Prompt' tab.</p>
-                </div>
-            )}
-        </div>
-    );
-
-    const renderDocumentProcessingControls = () => {
-        const contextFiles = project?.externalContext || [];
-        return (
-            <div className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor={`sourceFile-${section.id}`}>Source Document</Label>
-                    <Select value={controls.sourceFileId} onValueChange={(val) => handleControlChange('sourceFileId', val)}>
-                        <SelectTrigger id={`sourceFile-${section.id}`}><SelectValue placeholder="Select a context file to process..." /></SelectTrigger>
-                        <SelectContent>
-                            {contextFiles.map(file => (
-                                <SelectItem key={file.id} value={file.id}>{file.fileName}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor={`processingAction-${section.id}`}>Processing Action</Label>
-                    <Select value={controls.processingAction} onValueChange={(val) => handleControlChange('processingAction', val as ProcessingAction)}>
-                        <SelectTrigger id={`processingAction-${section.id}`}><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                            {processingActions.map(action => (
-                                <SelectItem key={action.value} value={action.value}>{action.label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                {controls.processingAction === 'translate' && renderToneAndLanguageControls()}
-            </div>
-        );
-    };
-
+    
     const renderUtilityControls = () => (
         <div className="space-y-4">
             <div className="space-y-2">
                 <Label htmlFor={`utilityAction-${section.id}`}>Utility Action</Label>
-                <Select value={controls.utilityAction} onValueChange={(val) => handleControlChange('utilityAction', val as UtilityAction)}>
+                <Select value={controls.utilityAction} onValueChange={(val) => handleControlChange('utilityAction', val as any)}>
                     <SelectTrigger id={`utilityAction-${section.id}`}><SelectValue /></SelectTrigger>
                     <SelectContent>
                         {utilityActions.map(action => (
@@ -383,12 +181,6 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         switch (section.type) {
             case 'generation':
                 return renderFullControls();
-            case 'text-manipulation':
-                return renderTextManipulationControls();
-            case 'analysis':
-                return renderAnalysisControls();
-            case 'document-processing':
-                return renderDocumentProcessingControls();
             case 'utilities':
                 return renderUtilityControls();
             default:
