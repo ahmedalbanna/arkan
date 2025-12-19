@@ -64,6 +64,7 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     mutation.reset();
   }, [activeTab, mutation]);
 
+
   const onSubmit = (data: FormValues) => {
     let command = '';
     let textToProcess = chapterContent;
