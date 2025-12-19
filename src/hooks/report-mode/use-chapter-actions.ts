@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { DiffPart, computeDiff } from '@/lib/utils/diff';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { Chapter, SectionContext } from '@/lib/models';
@@ -30,6 +30,20 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
   const [compressionRatio, setCompressionRatio] = useState(50);
   const [diff, setDiff] = useState<DiffPart[] | null>(null);
   const [context, setContext] = useState<SectionContext>({ sections: {}, externalContext: {} });
+
+  // When the dialog opens (and chapter is available), default the context
+  useEffect(() => {
+    if (chapter) {
+      const defaultContext: SectionContext = { sections: {}, externalContext: {} };
+      // Default all sections within this chapter to be selected
+      chapter.sections.forEach(section => {
+        defaultContext.sections[section.id] = true;
+      });
+      // For now, we are not including external context by default.
+      setContext(defaultContext);
+    }
+  }, [chapter]);
+
 
   const chapterContent = useMemo(() => {
     if (!chapter) return '';

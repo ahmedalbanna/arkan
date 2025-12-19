@@ -35,55 +35,40 @@ interface ChapterToolsDialogProps {
 function ContextSelector({
   selectedContext,
   onContextChange,
+  chapter, // Receive the current chapter to filter its sections
 }: {
   selectedContext: SectionContext;
   onContextChange: (newContext: SectionContext) => void;
+  chapter: Chapter | null;
 }) {
-  const { project } = useBuilderStore();
-  const allSections = project?.sections || [];
-  const externalContext = project?.externalContext || [];
 
-  const toggleSelection = (type: 'sections' | 'externalContext', key: string) => {
+  // Only show sections from the current chapter
+  const availableSections = chapter?.sections || [];
+
+  const toggleSelection = (key: string) => {
     const newContext = { ...selectedContext };
-    if (!newContext[type]) {
-      (newContext as any)[type] = {};
+    if (!newContext.sections) {
+      newContext.sections = {};
     }
-    (newContext[type] as any)[key] = !(newContext[type] as any)[key];
+    newContext.sections[key] = !newContext.sections[key];
     onContextChange(newContext);
   };
 
   return (
     <ScrollArea className="h-96">
       <div className="space-y-4">
-        {allSections.length > 0 && (
+        {availableSections.length > 0 && (
           <div className="space-y-2">
-            <h4 className="font-semibold">Project Sections</h4>
-            {allSections.map(section => (
+            <h4 className="font-semibold">Sections in this Chapter</h4>
+            {availableSections.map(section => (
               <div key={section.id} className="flex items-center space-x-2">
                 <Checkbox
                   id={`ctx-sec-${section.id}`}
                   checked={!!selectedContext.sections?.[section.id]}
-                  onCheckedChange={() => toggleSelection('sections', section.id)}
+                  onCheckedChange={() => toggleSelection(section.id)}
                 />
                 <Label htmlFor={`ctx-sec-${section.id}`} className="font-normal">
                   {section.title}
-                </Label>
-              </div>
-            ))}
-          </div>
-        )}
-        {externalContext.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-semibold">External Files</h4>
-            {externalContext.map(file => (
-              <div key={file.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`ctx-file-${file.id}`}
-                  checked={!!selectedContext.externalContext?.[file.id]}
-                  onCheckedChange={() => toggleSelection('externalContext', file.id)}
-                />
-                <Label htmlFor={`ctx-file-${file.id}`} className="font-normal truncate">
-                  {file.fileName}
                 </Label>
               </div>
             ))}
@@ -224,7 +209,7 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
                   )}
                 </TabsContent>
                 <TabsContent value="context" className="flex-1 mt-4">
-                  <ContextSelector selectedContext={context} onContextChange={setContext} />
+                  <ContextSelector selectedContext={context} onContextChange={setContext} chapter={chapter} />
                 </TabsContent>
               </Tabs>
             </div>
