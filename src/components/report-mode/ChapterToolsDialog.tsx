@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useChapterActions } from '@/hooks/report-mode/use-chapter-actions';
 import { Chapter } from '@/lib/models';
-import { Loader2, Sparkles, Wand2 } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, PlusCircle } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -41,9 +41,11 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
     setCompressionRatio,
     onSubmit,
     mutation,
+    processedText,
     diff,
     isProcessing,
-  } = useChapterActions(chapter);
+    handleApplyToNewSection,
+  } = useChapterActions(chapter, onOpenChange);
 
   if (!chapter) return null;
 
@@ -76,7 +78,7 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
               {manipulationType === 'rewrite' && (
                 <div className="space-y-2">
                   <Label>Rewrite Style</Label>
-                  <Select name="rewriteStyle" onValueChange={(v) => form.setValue('rewriteStyle', v)}>
+                  <Select name="rewriteStyle" onValueChange={(v) => form.setValue('rewriteStyle', v)} defaultValue={form.getValues('rewriteStyle')}>
                     <SelectTrigger><SelectValue placeholder="Select a style" /></SelectTrigger>
                     <SelectContent>
                       {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
@@ -115,7 +117,7 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
                         <Loader2 className="h-8 w-8 animate-spin" />
                       </div>
                     ) : (
-                      <ReactMarkdown components={markdownComponents}>{mutation.data?.processedText || ''}</ReactMarkdown>
+                      <ReactMarkdown components={markdownComponents}>{processedText || ''}</ReactMarkdown>
                     )}
                   </div>
                 </ScrollArea>
@@ -133,6 +135,12 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
 
         <div className="flex justify-end gap-2 flex-shrink-0">
           <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+          {processedText && (
+            <Button variant="secondary" onClick={handleApplyToNewSection} disabled={isProcessing}>
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Apply to New Section
+            </Button>
+          )}
           <Button form="chapter-tools-form" type="submit" disabled={isProcessing}>
             {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Wand2 className="h-4 w-4 mr-2" />}
             Apply Action

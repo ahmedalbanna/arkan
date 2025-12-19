@@ -150,10 +150,10 @@ export class Project implements Required<ProjectProperties> {
     return section?.content;
   }
 
-  public addSectionToChapter(chapterId: string, sectionTitle: string): Section | null {
+  public addSectionToChapter(chapterId: string, sectionTitle: string, content?: string): Section | null {
     const chapter = this.getChapter(chapterId);
     if (!chapter) return null;
-    const newSection = chapter.addSection({ title: sectionTitle });
+    const newSection = chapter.addSection({ title: sectionTitle, content: content || '' });
     this.markAsModified();
     return newSection;
   }

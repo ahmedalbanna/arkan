@@ -17,7 +17,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function useChapterActions(chapter: Chapter | null) {
+export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: boolean) => void) {
   const { updateProject } = useBuilderStore();
   const { toast } = useToast();
   const [activeView, setActiveView] = useState<'result' | 'diff'>('result');
@@ -39,18 +39,21 @@ export function useChapterActions(chapter: Chapter | null) {
 
   const mutation = useWritingTool('/api/writing-tools/manipulate-text', {
     onSuccess: (data: any) => {
-      setDiff(computeDiff(chapterContent, data.rewrittenText)); // The mutation's output has `rewrittenText` not `processedText`
+      const resultText = data.rewrittenText || '';
+      setDiff(computeDiff(chapterContent, resultText));
     },
     onError: (error) => {
       toast({ title: 'Action Failed', description: error.message, variant: 'destructive' });
     }
   });
 
+  const processedText = (mutation.data as { rewrittenText: string })?.rewrittenText || '';
+
   useEffect(() => {
     // When switching manipulation type, clear previous results
     setDiff(null);
     mutation.reset();
-  }, [manipulationType, mutation.reset]);
+  }, [manipulationType]);
 
   const onSubmit = (data: FormValues) => {
     let command: string;
@@ -66,13 +69,29 @@ export function useChapterActions(chapter: Chapter | null) {
     }
     mutation.mutate({ textToManipulate: chapterContent, command });
   };
-  
+
   const manipulationTypes: { value: ManipulationType; label: string }[] = [
     { value: 'rewrite', label: 'Rewrite' },
     { value: 'summarize', label: 'Summarize' },
   ];
-  
+
   const styles = ["Informal", "Friendly", "Simple", "Formal", "Professional", "Narrative", "Descriptive", "Expository", "Argumentative", "Persuasive", "Creative", "Technical", "Academic", "Journalistic", "Poetic", "Satirical", "Humorous"];
+
+  const handleApplyToNewSection = () => {
+    if (!chapter || !processedText) {
+      toast({ title: 'No result to save', variant: 'destructive' });
+      return;
+    }
+
+    const newSectionTitle = `${chapter.title} - ${manipulationType === 'rewrite' ? form.getValues('rewriteStyle') : 'Summary'}`;
+
+    updateProject(p => {
+      p.addSectionToChapter(chapter.id, newSectionTitle, processedText || '');
+    });
+
+    toast({ title: 'Section Added', description: `"${newSectionTitle}" has been added to the chapter.` });
+    onOpenChange(false);
+  };
 
 
   return {
@@ -87,7 +106,9 @@ export function useChapterActions(chapter: Chapter | null) {
     setCompressionRatio,
     onSubmit,
     mutation,
+    processedText,
     diff,
     isProcessing: mutation.isPending,
+    handleApplyToNewSection,
   };
 }
