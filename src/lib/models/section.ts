@@ -22,7 +22,7 @@ export const defaultContext: SectionContext = {
 };
 
 
-export type SectionType = 'generation' | 'analysis' | 'document-processing' | 'text-manipulation' | 'utilities';
+export type SectionType = 'generation' | 'analysis' | 'document-processing' | 'utilities';
 
 export interface SectionProperties {
     id: string;

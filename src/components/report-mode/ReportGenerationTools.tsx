@@ -41,7 +41,8 @@ import {
   ListPlus,
   PlusCircle,
   Sparkles,
-  Trash2
+  Trash2,
+  Wrench
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { SectionAccordionItem } from './SectionAccordionItem';
@@ -55,6 +56,7 @@ import { GenerateTocDialog } from './GenerateTocDialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
+import { ChapterToolsDialog } from './ChapterToolsDialog';
 
 
 interface SortableSectionItemProps {
@@ -113,6 +115,7 @@ function SortableChapterItem({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
   const { updateProject } = useBuilderStore();
   const [isEditing, setIsEditing] = useState(false);
+  const [isToolsOpen, setIsToolsOpen] = useState(false);
   const [editedTitle, setEditedTitle] = useState(chapter.title);
 
   useEffect(() => {
@@ -148,75 +151,87 @@ function SortableChapterItem({
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes}>
-      <AccordionItem value={chapter.id} className="bg-muted/30 border rounded-lg">
-        <div className="flex items-center px-4 py-2">
-          <AccordionTrigger className="flex-1 hover:no-underline py-0">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              {listeners && (
-                <div {...listeners} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
-                  <span className="text-sm w-4 text-center font-semibold">{index + 1}.</span>
-                  <GripVertical className="h-5 w-5" />
-                </div>
-              )}
-              {isEditing ? (
-                <Input
-                  value={editedTitle}
-                  onChange={(e) => setEditedTitle(e.target.value)}
-                  onBlur={handleTitleSave}
-                  onKeyDown={handleKeyDown}
-                  autoFocus
-                  onClick={(e) => e.stopPropagation()}
-                  className="font-semibold border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent truncate"
-                />
-              ) : (
-                <span onDoubleClick={() => setIsEditing(true)} className="font-semibold truncate p-0 h-auto">
-                  {chapter.title}
-                </span>
-              )}
-            </div>
-          </AccordionTrigger>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-7 w-7">
-                <Trash2 className="h-4 w-4 text-destructive/70" />
+    <>
+      <ChapterToolsDialog
+        isOpen={isToolsOpen}
+        onOpenChange={setIsToolsOpen}
+        chapter={chapter}
+      />
+      <div ref={setNodeRef} style={style} {...attributes}>
+        <AccordionItem value={chapter.id} className="bg-muted/30 border rounded-lg">
+          <div className="flex items-center px-4 py-2">
+            <AccordionTrigger className="flex-1 hover:no-underline py-0">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                {listeners && (
+                  <div {...listeners} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
+                    <span className="text-sm w-4 text-center font-semibold">{index + 1}.</span>
+                    <GripVertical className="h-5 w-5" />
+                  </div>
+                )}
+                {isEditing ? (
+                  <Input
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    onBlur={handleTitleSave}
+                    onKeyDown={handleKeyDown}
+                    autoFocus
+                    onClick={(e) => e.stopPropagation()}
+                    className="font-semibold border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent truncate"
+                  />
+                ) : (
+                  <span onDoubleClick={() => setIsEditing(true)} className="font-semibold truncate p-0 h-auto">
+                    {chapter.title}
+                  </span>
+                )}
+              </div>
+            </AccordionTrigger>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsToolsOpen(true)}>
+                <Wrench className="h-4 w-4" />
               </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Chapter?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to delete the chapter "{chapter.title}" and all of its sections? This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => onDeleteChapter(chapter.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-        <AccordionContent>
-          <div className="border-t px-4 py-4 space-y-4">
-            <Accordion type="single" collapsible className="w-full space-y-2">
-              {chapter.sections.map((section, sectionIndex) => (
-                <SortableSectionItem
-                  key={section.id}
-                  section={section}
-                  index={sectionIndex}
-                  chapterIndex={index}
-                  onDelete={() => onDeleteSection(chapter.id, section.id)}
-                />
-              ))}
-            </Accordion>
-            <Button size="sm" variant="outline" onClick={() => onAddSection(chapter.id)} className="w-full">
-              <PlusCircle className="me-2 h-4 w-4" />
-              Add New Section
-            </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-7 w-7">
+                    <Trash2 className="h-4 w-4 text-destructive/70" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Chapter?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete the chapter "{chapter.title}" and all of its sections? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => onDeleteChapter(chapter.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
-        </AccordionContent>
-      </AccordionItem>
-    </div>
+          <AccordionContent>
+            <div className="border-t px-4 py-4 space-y-4">
+              <Accordion type="single" collapsible className="w-full space-y-2">
+                {chapter.sections.map((section, sectionIndex) => (
+                  <SortableSectionItem
+                    key={section.id}
+                    section={section}
+                    index={sectionIndex}
+                    chapterIndex={index}
+                    onDelete={() => onDeleteSection(chapter.id, section.id)}
+                  />
+                ))}
+              </Accordion>
+              <Button size="sm" variant="outline" onClick={() => onAddSection(chapter.id)} className="w-full">
+                <PlusCircle className="me-2 h-4 w-4" />
+                Add New Section
+              </Button>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </div>
+    </>
   );
 };
 

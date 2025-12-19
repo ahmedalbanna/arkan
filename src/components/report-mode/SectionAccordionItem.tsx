@@ -70,9 +70,6 @@ export function SectionAccordionItem({
             const sec = p.getSection(itemKey);
             if (sec) {
                 sec.type = newType;
-                // Optional: Reset prompt/guidelines when type changes
-                // sec.prompt = 'You are a helpful assistant.';
-                // sec.guidelines = [];
             }
         });
     };
@@ -88,7 +85,6 @@ export function SectionAccordionItem({
 
     const sectionTypes: { value: SectionType, label: string }[] = [
         { value: 'generation', label: 'AI Generation' },
-        { value: 'text-manipulation', label: 'Text Manipulation' },
         { value: 'analysis', label: 'Analysis' },
         { value: 'document-processing', label: 'Document Processing' },
         { value: 'utilities', label: 'Utilities' },
