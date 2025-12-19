@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useChapterActions } from '@/hooks/report-mode/use-chapter-actions';
 import { Chapter } from '@/lib/models';
-import { Loader2, Sparkles, Wand2, PlusCircle } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, PlusCircle, BrainCircuit, Edit } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -21,6 +21,9 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { DiffView } from '../shared/DiffView';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Form, FormField, FormControl } from '../ui/form';
+import { Textarea } from '../ui/textarea';
+import { Input } from '../ui/input';
 
 interface ChapterToolsDialogProps {
   isOpen: boolean;
@@ -31,23 +34,100 @@ interface ChapterToolsDialogProps {
 export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToolsDialogProps) {
   const {
     form,
+    activeTab,
+    setActiveTab,
     activeView,
     setActiveView,
     manipulationType,
     setManipulationType,
     manipulationTypes,
+    analysisType,
+    setAnalysisType,
+    analysisTypes,
     styles,
     compressionRatio,
     setCompressionRatio,
     onSubmit,
-    mutation,
+    isProcessing,
     processedText,
     diff,
-    isProcessing,
     handleApplyToNewSection,
   } = useChapterActions(chapter, onOpenChange);
 
   if (!chapter) return null;
+
+  const renderManipulationControls = () => (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label>Manipulation Type</Label>
+        <Select value={manipulationType} onValueChange={(v) => setManipulationType(v as any)}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {manipulationTypes.map(type => (
+              <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {manipulationType === 'rewrite' && (
+        <div className="space-y-2">
+          <Label>Rewrite Style</Label>
+          <Select name="rewriteStyle" onValueChange={(v) => form.setValue('rewriteStyle', v)} defaultValue={form.getValues('rewriteStyle')}>
+            <SelectTrigger><SelectValue placeholder="Select a style" /></SelectTrigger>
+            <SelectContent>
+              {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {manipulationType === 'summarize' && (
+        <div className="space-y-3">
+          <div className="flex justify-between">
+            <Label>Compression Ratio</Label>
+            <Badge variant="outline">{compressionRatio}%</Badge>
+          </div>
+          <Slider value={[compressionRatio]} onValueChange={(v) => setCompressionRatio(v[0])} min={10} max={90} step={5} />
+        </div>
+      )}
+    </div>
+  );
+
+  const renderAnalysisControls = () => (
+      <div className="space-y-4">
+          <div className="space-y-2">
+              <Label>Analysis Type</Label>
+              <Select value={analysisType} onValueChange={(v) => setAnalysisType(v as any)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                      {analysisTypes.map(type => (
+                          <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                      ))}
+                  </SelectContent>
+              </Select>
+          </div>
+          {analysisType === 'question-answering' && (
+              <FormField
+                  control={form.control}
+                  name="question"
+                  render={({ field }) => (
+                      <Textarea {...field} placeholder="Ask a question about the chapter's content..." rows={4} />
+                  )}
+              />
+          )}
+          {analysisType === 'fact-retrieval' && (
+               <FormField
+                  control={form.control}
+                  name="factQuery"
+                  render={({ field }) => (
+                      <Input {...field} placeholder="Enter a fact to retrieve, e.g., 'main keywords'..." />
+                  )}
+              />
+          )}
+      </div>
+  );
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -55,49 +135,26 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
         <DialogHeader>
           <DialogTitle>Chapter Tools: {chapter.title}</DialogTitle>
           <DialogDescription>
-            Apply AI text manipulations to the entire content of this chapter.
+            Apply AI actions to the entire content of this chapter. The result can be saved as a new section.
           </DialogDescription>
         </DialogHeader>
-
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 flex-1 min-h-0">
+        
+        <Form {...form}>
+        <form id="chapter-tools-form" onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-12 gap-6 flex-1 min-h-0">
           {/* Controls Panel */}
           <div className="md:col-span-4 space-y-4">
-            <div className="space-y-2">
-              <Label>Manipulation Type</Label>
-              <Select value={manipulationType} onValueChange={(v) => setManipulationType(v as any)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {manipulationTypes.map(type => (
-                    <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <form id="chapter-tools-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {manipulationType === 'rewrite' && (
-                <div className="space-y-2">
-                  <Label>Rewrite Style</Label>
-                  <Select name="rewriteStyle" onValueChange={(v) => form.setValue('rewriteStyle', v)} defaultValue={form.getValues('rewriteStyle')}>
-                    <SelectTrigger><SelectValue placeholder="Select a style" /></SelectTrigger>
-                    <SelectContent>
-                      {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {manipulationType === 'summarize' && (
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <Label>Compression Ratio</Label>
-                    <Badge variant="outline">{compressionRatio}%</Badge>
-                  </div>
-                  <Slider value={[compressionRatio]} onValueChange={(v) => setCompressionRatio(v[0])} min={10} max={90} step={5} />
-                </div>
-              )}
-              {/* Add more controls for other manipulation types here */}
-            </form>
+             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'manipulation' | 'analysis')} className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="manipulation"><Edit className="mr-2 h-4 w-4"/> Manipulation</TabsTrigger>
+                    <TabsTrigger value="analysis"><BrainCircuit className="mr-2 h-4 w-4"/> Analysis</TabsTrigger>
+                </TabsList>
+                <TabsContent value="manipulation">
+                    {renderManipulationControls()}
+                </TabsContent>
+                <TabsContent value="analysis">
+                    {renderAnalysisControls()}
+                </TabsContent>
+            </Tabs>
           </div>
 
           {/* Content Panel */}
@@ -131,21 +188,22 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
               </TabsContent>
             </Tabs>
           </div>
-        </div>
-
-        <div className="flex justify-end gap-2 flex-shrink-0">
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-          {processedText && (
-            <Button variant="secondary" onClick={handleApplyToNewSection} disabled={isProcessing}>
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Apply to New Section
-            </Button>
-          )}
-          <Button form="chapter-tools-form" type="submit" disabled={isProcessing}>
-            {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Wand2 className="h-4 w-4 mr-2" />}
-            Apply Action
-          </Button>
-        </div>
+          
+          <div className="md:col-span-12 flex justify-end gap-2 flex-shrink-0">
+              <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+              {processedText && (
+                <Button type="button" variant="secondary" onClick={handleApplyToNewSection} disabled={isProcessing}>
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Apply to New Section
+                </Button>
+              )}
+              <Button form="chapter-tools-form" type="submit" disabled={isProcessing}>
+                {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Wand2 className="h-4 w-4 mr-2" />}
+                Apply Action
+              </Button>
+            </div>
+        </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

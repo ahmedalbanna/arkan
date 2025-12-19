@@ -7,13 +7,11 @@ import {
 } from '@/ai/schemas/generation-state';
 import type { SectionContext } from './context';
 
-export type ManipulationType = 'rewrite' | 'summarize' | 'style-editor' | 'readability-enhancer' | 'conciseness-checker' | 'clarity-advisor';
-
+export type ManipulationType = 'rewrite' | 'summarize';
 export type AnalysisType = 'custom-analysis' | 'question-answering' | 'fact-retrieval';
-
 export type ProcessingAction = 'extract-text' | 'summarize' | 'translate';
-
 export type UtilityAction = 'generate-toc';
+
 
 export const defaultContext: SectionContext = {
     sections: {},
@@ -22,7 +20,7 @@ export const defaultContext: SectionContext = {
 };
 
 
-export type SectionType = 'generation' | 'analysis' | 'document-processing' | 'utilities';
+export type SectionType = 'generation' | 'document-processing' | 'utilities';
 
 export interface SectionProperties {
     id: string;
