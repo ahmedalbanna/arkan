@@ -16,13 +16,13 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Slider } from '../ui/slider';
-import { Badge } from '../ui/badge';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { DiffView } from '../shared/DiffView';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Form, FormProvider, FormField } from '../ui/form';
+import { Form, FormField, FormProvider } from '../ui/form';
 import { useBuilderStore } from '@/hooks';
+import { Checkbox } from '../ui/checkbox';
 
 interface ChapterToolsDialogProps {
   isOpen: boolean;
@@ -73,12 +73,18 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
       {manipulationType === 'rewrite' && (
         <div className="space-y-2">
           <Label>Rewrite Style</Label>
-          <Select name="rewriteStyle" onValueChange={(v) => form.setValue('rewriteStyle', v)} defaultValue={form.getValues('rewriteStyle')}>
-            <SelectTrigger><SelectValue placeholder="Select a style" /></SelectTrigger>
-            <SelectContent>
-              {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <FormField
+            control={form.control}
+            name="rewriteStyle"
+            render={({ field }) => (
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <SelectTrigger><SelectValue placeholder="Select a style" /></SelectTrigger>
+                <SelectContent>
+                  {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            )}
+          />
         </div>
       )}
 
@@ -97,25 +103,6 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
   const renderProcessingControls = () => (
      <div className="space-y-4">
         <div className="space-y-2">
-            <Label>Source File</Label>
-            <FormField
-                control={form.control}
-                name="sourceFileId"
-                render={({ field }) => (
-                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select a file from context..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {(project?.externalContext || []).map(file => (
-                                <SelectItem key={file.id} value={file.id}>{file.fileName}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                )}
-            />
-        </div>
-         <div className="space-y-2">
             <Label>Action</Label>
             <Select value={processingAction} onValueChange={(v) => setProcessingAction(v as any)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -125,6 +112,29 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
                     ))}
                 </SelectContent>
             </Select>
+        </div>
+        <div className="space-y-2">
+            <Label>Source Sections</Label>
+            <ScrollArea className="h-40 rounded-md border p-2">
+                <div className='space-y-2'>
+                {chapter.sections.map(section => (
+                     <FormField
+                        key={section.id}
+                        control={form.control}
+                        name={`selectedSectionIds.${section.id}`}
+                        render={({ field }) => (
+                            <div className="flex items-center space-x-2 rounded-md p-2 hover:bg-muted">
+                                <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                />
+                                <Label htmlFor={field.name} className="flex-1 font-normal truncate">{section.title}</Label>
+                            </div>
+                        )}
+                    />
+                ))}
+                </div>
+            </ScrollArea>
         </div>
      </div>
   );
@@ -147,12 +157,12 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="manipulation"><Edit className="mr-2 h-4 w-4"/> Manipulation</TabsTrigger>
-                    <TabsTrigger value="processing"><FileCog className="mr-2 h-4 w-4"/> Document Processing</TabsTrigger>
+                    <TabsTrigger value="processing"><FileCog className="mr-2 h-4 w-4"/> Processing</TabsTrigger>
                 </TabsList>
-                <TabsContent value="manipulation">
+                <TabsContent value="manipulation" className="pt-4">
                     {renderManipulationControls()}
                 </TabsContent>
-                <TabsContent value="processing">
+                <TabsContent value="processing" className="pt-4">
                     {renderProcessingControls()}
                 </TabsContent>
             </Tabs>

@@ -14,6 +14,7 @@ import type { ManipulationType, ProcessingAction } from '@/lib/models';
 const formSchema = z.object({
   rewriteStyle: z.string().optional(),
   sourceFileId: z.string().optional(),
+  selectedSectionIds: z.record(z.boolean()).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -37,20 +38,28 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     resolver: zodResolver(formSchema),
     defaultValues: {
       rewriteStyle: 'Formal',
-      sourceFileId: '',
+      selectedSectionIds: {},
     },
   });
 
-  const getSourceContent = (sourceId: string | undefined): string => {
-    if (!sourceId) return chapterContent; // Default to chapter content for manipulation/analysis
-    const file = project?.externalContext.find(f => f.id === sourceId);
-    return file?.content || '';
+  const getSourceContent = (data: FormValues): string => {
+    if (activeTab === 'processing' && data.selectedSectionIds) {
+      const selectedIds = Object.keys(data.selectedSectionIds).filter(id => data.selectedSectionIds![id]);
+      if (selectedIds.length > 0) {
+        return chapter?.sections
+          .filter(s => selectedIds.includes(s.id))
+          .map(s => `# ${s.title}\n\n${s.content || ''}`)
+          .join('\n\n---\n\n') || '';
+      }
+    }
+    // Default to full chapter content for manipulation or if no sections are selected for processing
+    return chapterContent;
   };
 
   const mutation = useWritingTool('/api/writing-tools/manipulate-text', {
-    onSuccess: (data: any) => {
+    onSuccess: (data: any, variables) => {
       const resultText = data.rewrittenText || JSON.stringify(data, null, 2);
-      const original = getSourceContent(form.getValues('sourceFileId'));
+      const original = variables.textToManipulate;
       setDiff(computeDiff(original, resultText));
     },
     onError: (error) => {
@@ -62,12 +71,17 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     // When switching top-level tabs, clear previous results
     setDiff(null);
     mutation.reset();
-  }, [activeTab, mutation.reset]);
+  }, [activeTab]);
 
 
   const onSubmit = (data: FormValues) => {
     let command = '';
-    let textToProcess = chapterContent;
+    const textToProcess = getSourceContent(data);
+
+    if (!textToProcess.trim()) {
+        toast({ title: 'No content to process', description: 'Please select sections or ensure the chapter has content.', variant: 'destructive' });
+        return;
+    }
 
     if (activeTab === 'manipulation') {
         switch (manipulationType) {
@@ -81,17 +95,9 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
                 command = 'Improve the overall style and flow of this document.';
         }
     } else if (activeTab === 'processing') {
-        if (!data.sourceFileId) {
-            toast({ title: 'No source file selected', description: 'Please select a document to process.', variant: 'destructive' });
-            return;
-        }
-        textToProcess = getSourceContent(data.sourceFileId);
          switch (processingAction) {
-            case 'extract-text':
-                command = `Extract and clean the text from this document, formatting it as clean markdown.`;
-                break;
             case 'summarize':
-                command = `Provide a concise summary of this document.`;
+                command = `Provide a concise summary of the provided text.`;
                 break;
             case 'translate':
                 command = `Translate this document to Arabic.`;
@@ -116,9 +122,8 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
   ];
   
   const processingActions: { value: ProcessingAction, label: string}[] = [
-      { value: 'extract-text', label: 'Extract & Clean Text'},
-      { value: 'summarize', label: 'Summarize Document' },
-      { value: 'translate', label: 'Translate Document' },
+      { value: 'summarize', label: 'Summarize Selected' },
+      { value: 'translate', label: 'Translate Selected' },
   ];
 
   const styles = ["Informal", "Friendly", "Simple", "Formal", "Professional", "Narrative", "Descriptive", "Expository", "Argumentative", "Persuasive", "Creative", "Technical", "Academic", "Journalistic", "Poetic", "Satirical", "Humorous"];
