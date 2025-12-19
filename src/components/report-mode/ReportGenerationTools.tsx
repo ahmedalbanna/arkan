@@ -46,15 +46,9 @@ import {
 import React, { useEffect, useState } from 'react';
 import { SectionAccordionItem } from './SectionAccordionItem';
 
-import { SectionName } from '@/ai/schemas';
-import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore, toast } from '@/hooks';
-import { useSectionGenerator } from '@/hooks/report-mode/use-section-generator';
-import { useSections } from '@/hooks/data/use-sections';
 import { GenerateTocDialog } from './GenerateTocDialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { Label } from "../ui/label";
-import { Textarea } from "../ui/textarea";
 import { ChapterToolsDialog } from './ChapterToolsDialog';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -77,7 +71,7 @@ function SortableSectionItem({
     useSortable({ id: section.id });
 
   const style: React.CSSProperties = {
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transform: transform ? CSS.Transform.toString(transform) : undefined,
     transition,
     zIndex: isDragging ? 1 : 0,
     position: 'relative',
@@ -144,7 +138,7 @@ function SortableChapterItem({
   };
 
   const style: React.CSSProperties = {
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transform: transform ? CSS.Transform.toString(transform) : undefined,
     transition,
     zIndex: isDragging ? 2 : 0,
     position: 'relative',

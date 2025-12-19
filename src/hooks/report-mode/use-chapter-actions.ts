@@ -9,12 +9,10 @@ import { useState, useMemo, useEffect } from 'react';
 import { DiffPart, computeDiff } from '@/lib/utils/diff';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { Chapter } from '@/lib/models';
-import type { ManipulationType, AnalysisType, ProcessingAction } from '@/lib/models';
+import type { ManipulationType, ProcessingAction } from '@/lib/models';
 
 const formSchema = z.object({
   rewriteStyle: z.string().optional(),
-  question: z.string().optional(),
-  factQuery: z.string().optional(),
   sourceFileId: z.string().optional(),
 });
 
@@ -23,10 +21,9 @@ type FormValues = z.infer<typeof formSchema>;
 export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: boolean) => void) {
   const { project, updateProject } = useBuilderStore();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<'manipulation' | 'analysis' | 'processing'>('manipulation');
+  const [activeTab, setActiveTab] = useState<'manipulation' | 'processing'>('manipulation');
   const [activeView, setActiveView] = useState<'result' | 'diff'>('result');
   const [manipulationType, setManipulationType] = useState<ManipulationType>('rewrite');
-  const [analysisType, setAnalysisType] = useState<AnalysisType>('custom-analysis');
   const [processingAction, setProcessingAction] = useState<ProcessingAction>('extract-text');
   const [compressionRatio, setCompressionRatio] = useState(50);
   const [diff, setDiff] = useState<DiffPart[] | null>(null);
@@ -40,8 +37,6 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     resolver: zodResolver(formSchema),
     defaultValues: {
       rewriteStyle: 'Formal',
-      question: '',
-      factQuery: '',
       sourceFileId: '',
     },
   });
@@ -84,17 +79,6 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
             default:
                 command = 'Improve the overall style and flow of this document.';
         }
-    } else if (activeTab === 'analysis') {
-         switch (analysisType) {
-            case 'question-answering':
-                command = `Based on the provided text, answer the following question: "${data.question}"`;
-                break;
-            case 'fact-retrieval':
-                command = `From the text, retrieve information about: "${data.factQuery}"`;
-                break;
-            default:
-                command = "Analyze the provided text.";
-        }
     } else if (activeTab === 'processing') {
         if (!data.sourceFileId) {
             toast({ title: 'No source file selected', description: 'Please select a document to process.', variant: 'destructive' });
@@ -130,11 +114,6 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     { value: 'summarize', label: 'Summarize' },
   ];
   
-  const analysisTypes: { value: AnalysisType, label: string }[] = [
-      { value: 'question-answering', label: 'Ask a Question' },
-      { value: 'fact-retrieval', label: 'Retrieve a Fact' },
-  ];
-  
   const processingActions: { value: ProcessingAction, label: string}[] = [
       { value: 'extract-text', label: 'Extract & Clean Text'},
       { value: 'summarize', label: 'Summarize Document' },
@@ -149,7 +128,7 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
       return;
     }
     
-    let actionLabel = activeTab === 'manipulation' ? manipulationType : activeTab === 'analysis' ? analysisType : processingAction;
+    let actionLabel = activeTab === 'manipulation' ? manipulationType : processingAction;
     const newSectionTitle = `${chapter.title} - ${actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1)}`;
 
     updateProject(p => {
@@ -169,9 +148,6 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     manipulationType,
     setManipulationType,
     manipulationTypes,
-    analysisType,
-    setAnalysisType,
-    analysisTypes,
     processingAction,
     setProcessingAction,
     processingActions,

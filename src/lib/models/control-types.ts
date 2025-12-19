@@ -9,3 +9,6 @@ export type OutputStyle = {
 
 export type Tone = 'professional' | 'academic' | 'casual' | 'persuasive';
 export type Language = 'default' | 'en' | 'ar' | 'es' | 'fr' | 'de';
+export type ManipulationType = 'rewrite' | 'summarize' | 'style-editor' | 'readability-enhancer' | 'conciseness-checker' | 'clarity-advisor';
+export type AnalysisType = 'custom-analysis' | 'question-answering' | 'fact-retrieval';
+export type ProcessingAction = 'extract-text' | 'summarize' | 'translate';

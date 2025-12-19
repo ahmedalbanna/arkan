@@ -12,3 +12,4 @@ export * from './template';
 export * from './transaction';
 export * from './user';
 export * from './agent';
+export * from './control-types';

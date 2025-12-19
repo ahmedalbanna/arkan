@@ -8,7 +8,6 @@ import {
 import type { SectionContext } from './context';
 
 export type ManipulationType = 'rewrite' | 'summarize';
-export type AnalysisType = 'custom-analysis' | 'question-answering' | 'fact-retrieval';
 export type ProcessingAction = 'extract-text' | 'summarize' | 'translate';
 export type UtilityAction = 'generate-toc';
 
@@ -16,7 +15,6 @@ export type UtilityAction = 'generate-toc';
 export const defaultContext: SectionContext = {
     sections: {},
     externalContext: {},
-    themes: {},
 };
 
 
@@ -30,7 +28,7 @@ export interface SectionProperties {
     prompt: string;
     guidelines: string[];
     agentId: string | null;
-    commandId: string | null;
+    commandId: string | null; // This is now deprecated but kept for safety
     controls: GenerationControlState;
     context: SectionContext;
 }

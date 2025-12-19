@@ -21,9 +21,7 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { DiffView } from '../shared/DiffView';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Form, FormField, FormControl } from '../ui/form';
-import { Textarea } from '../ui/textarea';
-import { Input } from '../ui/input';
+import { FormProvider, FormField } from '../ui/form';
 import { useBuilderStore } from '@/hooks';
 
 interface ChapterToolsDialogProps {
@@ -42,9 +40,6 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
     manipulationType,
     setManipulationType,
     manipulationTypes,
-    analysisType,
-    setAnalysisType,
-    analysisTypes,
     processingAction,
     setProcessingAction,
     processingActions,
@@ -98,40 +93,6 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
       )}
     </div>
   );
-
-  const renderAnalysisControls = () => (
-      <div className="space-y-4">
-          <div className="space-y-2">
-              <Label>Analysis Type</Label>
-              <Select value={analysisType} onValueChange={(v) => setAnalysisType(v as any)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                      {analysisTypes.map(type => (
-                          <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                      ))}
-                  </SelectContent>
-              </Select>
-          </div>
-          {analysisType === 'question-answering' && (
-              <FormField
-                  control={form.control}
-                  name="question"
-                  render={({ field }) => (
-                      <Textarea {...field} placeholder="Ask a question about the chapter's content..." rows={4} />
-                  )}
-              />
-          )}
-          {analysisType === 'fact-retrieval' && (
-               <FormField
-                  control={form.control}
-                  name="factQuery"
-                  render={({ field }) => (
-                      <Input {...field} placeholder="Enter a fact to retrieve, e.g., 'main keywords'..." />
-                  )}
-              />
-          )}
-      </div>
-  );
   
   const renderProcessingControls = () => (
      <div className="space-y-4">
@@ -179,21 +140,17 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
           </DialogDescription>
         </DialogHeader>
         
-        <Form {...form}>
+        <FormProvider {...form}>
         <form id="chapter-tools-form" onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-12 gap-6 flex-1 min-h-0">
           {/* Controls Panel */}
           <div className="md:col-span-4 space-y-4">
              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="manipulation"><Edit className="mr-2 h-4 w-4"/> Manipulation</TabsTrigger>
-                    <TabsTrigger value="analysis"><BrainCircuit className="mr-2 h-4 w-4"/> Analysis</TabsTrigger>
-                    <TabsTrigger value="processing"><FileCog className="mr-2 h-4 w-4"/> Processing</TabsTrigger>
+                    <TabsTrigger value="processing"><FileCog className="mr-2 h-4 w-4"/> Document Processing</TabsTrigger>
                 </TabsList>
                 <TabsContent value="manipulation">
                     {renderManipulationControls()}
-                </TabsContent>
-                <TabsContent value="analysis">
-                    {renderAnalysisControls()}
                 </TabsContent>
                 <TabsContent value="processing">
                     {renderProcessingControls()}
@@ -247,7 +204,7 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
               </Button>
             </div>
         </form>
-        </Form>
+        </FormProvider>
       </DialogContent>
     </Dialog>
   );

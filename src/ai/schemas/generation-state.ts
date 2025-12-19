@@ -18,13 +18,26 @@ export const GenerationControlStateSchema = z.object({
     }).default({ heading: true, paragraph: true, list: false, table: false, code: false }),
     wordCount: z.string().default(''),
     instructionText: z.string().optional(),
-
+    
     // Document Processing
     sourceFileId: z.string().optional(),
     processingAction: z.custom<ProcessingAction>().default('extract-text'),
     
     // Utilities
     utilityAction: z.custom<UtilityAction>().default('generate-toc'),
+    
+    // Text Manipulation
+    manipulationType: z.custom<ManipulationType>().default('rewrite'),
+    rewriteStyle: z.string().optional(),
+    compressionRatio: z.number().optional(),
+    targetReduction: z.number().optional(),
+    targetLevel: z.string().optional(),
+    focusAreas: z.array(z.string()).optional(),
+    
+    // Analysis
+    analysisType: z.custom<AnalysisType>().default('custom-analysis'),
+    question: z.string().optional(),
+    factQuery: z.string().optional(),
 });
 
 export type GenerationControlState = z.infer<typeof GenerationControlStateSchema>;

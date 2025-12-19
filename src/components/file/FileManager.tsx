@@ -18,7 +18,7 @@ export default function FileManager() {
             <div className={cn("lg:col-span-5 xl:col-span-4 h-full transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
                 <UploadManager />
             </div>
-            <div className={cn("transition-all duration-300", isPanelCollapsed ? "lg:col-span-11 xl:col-span-11" : "lg:col-span-7 xl:col-span-8")}>
+            <div className={cn("lg:col-span-7 xl:col-span-8 h-full", isPanelCollapsed && "lg:col-span-12 xl:col-span-12")}>
                 <AnalystAgent />
             </div>
         </div>

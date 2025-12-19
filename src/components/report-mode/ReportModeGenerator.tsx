@@ -2,7 +2,7 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { BookOpenText, GitGraph, Search, UploadCloud, PenSquare, Edit, FileInput } from 'lucide-react';
+import { BookOpenText, GitGraph, Search, UploadCloud, PenSquare, Edit, FileInput, BrainCircuit } from 'lucide-react';
 import { Suspense, useState } from 'react';
 import { Skeleton } from '../ui/skeleton';
 import { ReportResults } from './ReportResults';
@@ -14,6 +14,7 @@ import { PlantUMLGeneratorTool } from '../writing-tools/PlantUMLGeneratorTool';
 import { useMobile } from '@/hooks';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils/cn';
+import AnalystAgent from '../file/AnalystAgent';
 
 
 function ReportSkeleton() {
@@ -71,10 +72,10 @@ export default function ReportModeGenerator() {
             content: <GenerationTools />,
         },
         {
-            key: 'research',
-            title: t('writingTools.aiResearcher.pageTitle'),
-            icon: <Search className="h-5 w-5" />,
-            content: <AIResearcherTool />,
+            key: 'analysis',
+            title: t('builder.files.analystAgentTitle'),
+            icon: <BrainCircuit className="h-5 w-5" />,
+            content: <AnalystAgent />,
         },
         {
             key: 'diagram',
