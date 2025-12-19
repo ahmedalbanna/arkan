@@ -34,7 +34,6 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import {
   BookOpenText,
   GripVertical,
@@ -284,16 +283,16 @@ export function GenerationTools() {
       let currentChapterId: string | null = null;
 
       lines.forEach(line => {
-        const isChapter = !line.match(/^s*d+.d+/);
+        const isChapter = !line.match(/^\\s*\\d+\\.\\d+/);
 
         if (isChapter) {
-          const chapterTitle = line.replace(/^d+.?s*/, '').trim();
+          const chapterTitle = line.replace(/^\\d+\\.?\\s*/, '').trim();
           if (chapterTitle) {
             currentChapterId = p.addChapter(chapterTitle);
             chaptersCreated++;
           }
         } else if (currentChapterId) {
-          const sectionTitle = line.replace(/^d+.d+.?s*/, '').trim();
+          const sectionTitle = line.replace(/^\\d+\\.\\d+\\.?\\s*/, '').trim();
           if (sectionTitle) {
             p.addCustomSection(currentChapterId, sectionTitle);
             sectionsCreated++;

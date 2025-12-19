@@ -35,6 +35,7 @@ export * from './data/use-agent-categories';
 // Report Mode Hooks
 export * from './report-mode/use-ai-actions';
 export * from './report-mode/use-section-generator';
+export * from './report-mode/use-chapter-actions';
 
 
 // Writing Tools Logic Hooks
