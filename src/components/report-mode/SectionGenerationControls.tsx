@@ -39,7 +39,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         });
     };
 
-    function handleOutputStyleChange(style: 'heading' | 'paragraph' | 'list' | 'table' | 'code', checked: boolean) {
+    function handleOutputStyleChange(style: 'heading' | 'paragraph' | 'list' | 'table' | 'code' | 'diagram', checked: boolean) {
         handleControlChange('outputStyle', {
             ...controls.outputStyle,
             [style]: checked
@@ -92,8 +92,34 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                         <Checkbox id={`output-code-${section.id}`} checked={controls.outputStyle.code} onCheckedChange={(checked) => handleOutputStyleChange('code', !!checked)} />
                         <Label htmlFor={`output-code-${section.id}`}>Code</Label>
                     </div>
+                    <div className="flex items-center gap-2">
+                        <Checkbox id={`output-diagram-${section.id}`} checked={controls.outputStyle.diagram} onCheckedChange={(checked) => handleOutputStyleChange('diagram', !!checked)} />
+                        <Label htmlFor={`output-diagram-${section.id}`}>Diagram</Label>
+                    </div>
                 </div>
             </div>
+
+            {controls.outputStyle.diagram && (
+                 <div className="space-y-2 pl-6">
+                    <Label htmlFor={`output-diagram-type-${section.id}`}>Diagram Type</Label>
+                    <Select
+                        value={controls.outputDiagramType}
+                        onValueChange={(val) => handleControlChange('outputDiagramType', val as any)}
+                    >
+                        <SelectTrigger id={`output-diagram-type-${section.id}`}>
+                            <SelectValue placeholder="Select diagram type..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {DiagramTypeSchema.options.map((type) => (
+                                <SelectItem key={type} value={type}>
+                                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            )}
+
             <div className="space-y-2">
                 <Label htmlFor={`wordCount-${section.id}`}>{t('builder.reportGenerator.tool_word_count_label')}</Label>
                 <Input id={`wordCount-${section.id}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controls.wordCount} onChange={(e) => handleControlChange('wordCount', e.target.value)} />

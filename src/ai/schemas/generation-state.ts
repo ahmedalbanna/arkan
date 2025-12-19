@@ -17,9 +17,11 @@ export const GenerationControlStateSchema = z.object({
         list: z.boolean().default(false),
         table: z.boolean().default(false),
         code: z.boolean().default(false),
-    }).default({ heading: true, paragraph: true, list: false, table: false, code: false }),
+        diagram: z.boolean().default(false), // New
+    }).default({ heading: true, paragraph: true, list: false, table: false, code: false, diagram: false }),
     wordCount: z.string().default(''),
-    
+    outputDiagramType: DiagramTypeSchema.optional(), // New
+
     // Diagram Controls
     diagramType: DiagramTypeSchema.default('useCase'),
     description: z.string().optional(),
