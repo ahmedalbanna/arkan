@@ -32,6 +32,9 @@ function buildInstructionText(controls: GenerationControlState, sectionType: Sec
         if (controls.outputStyle.diagram && controls.outputDiagramType) {
             instructions.push(`The output must include a PlantUML diagram of type '${controls.outputDiagramType}'.`);
         }
+        if (controls.outputStyle.code && controls.programmingLanguage) {
+            instructions.push(`The code blocks should be in ${controls.programmingLanguage}.`);
+        }
 
     } else if (sectionType === 'presentation') {
         if (controls.presentationType) instructions.push(`This is for a ${controls.presentationType} presentation.`);

@@ -110,6 +110,18 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                 </div>
             </div>
 
+             {controls.outputStyle.code && (
+                <div className="space-y-2 pl-6">
+                    <Label htmlFor={`programming-language-${section.id}`}>Programming Language</Label>
+                    <Input
+                        id={`programming-language-${section.id}`}
+                        placeholder="e.g., Python, JavaScript"
+                        value={controls.programmingLanguage || ''}
+                        onChange={(e) => handleControlChange('programmingLanguage', e.target.value)}
+                    />
+                </div>
+            )}
+
             {controls.outputStyle.diagram && (
                  <div className="space-y-2 pl-6">
                     <Label htmlFor={`output-diagram-type-${section.id}`}>Diagram Type</Label>

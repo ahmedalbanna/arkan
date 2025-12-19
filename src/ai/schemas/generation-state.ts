@@ -14,10 +14,11 @@ export const GenerationControlStateSchema = z.object({
         list: z.boolean().default(false),
         table: z.boolean().default(false),
         code: z.boolean().default(false),
-        diagram: z.boolean().default(false), 
+        diagram: z.boolean().default(false),
     }).default({ heading: true, paragraph: true, list: false, table: false, code: false, diagram: false }),
     wordCount: z.string().default(''),
     outputDiagramType: DiagramTypeSchema.optional(),
+    programmingLanguage: z.string().optional(), // New field for code language
 
     // Presentation Controls
     presentationType: PresentationTypeSchema.default('informative'),
