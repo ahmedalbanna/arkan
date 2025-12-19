@@ -39,7 +39,7 @@ export function useChapterActions(chapter: Chapter | null) {
 
   const mutation = useWritingTool('/api/writing-tools/manipulate-text', {
     onSuccess: (data: any) => {
-      setDiff(computeDiff(chapterContent, data.processedText));
+      setDiff(computeDiff(chapterContent, data.rewrittenText)); // The mutation's output has `rewrittenText` not `processedText`
     },
     onError: (error) => {
       toast({ title: 'Action Failed', description: error.message, variant: 'destructive' });
@@ -50,7 +50,7 @@ export function useChapterActions(chapter: Chapter | null) {
     // When switching manipulation type, clear previous results
     setDiff(null);
     mutation.reset();
-  }, [manipulationType, mutation]);
+  }, [manipulationType, mutation.reset]);
 
   const onSubmit = (data: FormValues) => {
     let command: string;
