@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -20,8 +21,9 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { DiffView } from '../shared/DiffView';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Form, FormField } from '../ui/form';
+import { Form } from '../ui/form';
 import { Badge } from '../ui/badge';
+import { Input } from '../ui/input';
 
 interface ChapterToolsDialogProps {
   isOpen: boolean;
@@ -76,21 +78,15 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
             </div>
 
             {manipulationType === 'rewrite' && (
-              <div className="space-y-2">
-                <Label>Rewrite Style</Label>
-                <FormField
-                  control={form.control}
-                  name="rewriteStyle"
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <SelectTrigger><SelectValue placeholder="Select a style" /></SelectTrigger>
-                      <SelectContent>
-                        {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                      </SelectContent>
+                <div className="space-y-2">
+                    <Label>Rewrite Style</Label>
+                    <Select onValueChange={(val) => form.setValue('rewriteStyle', val)} defaultValue={form.getValues('rewriteStyle')}>
+                        <SelectTrigger><SelectValue placeholder="Select a style" /></SelectTrigger>
+                        <SelectContent>
+                            {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                        </SelectContent>
                     </Select>
-                  )}
-                />
-              </div>
+                </div>
             )}
 
             {manipulationType === 'summarize' && (
@@ -102,6 +98,60 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
                 <Slider value={[compressionRatio]} onValueChange={(v) => setCompressionRatio(v[0])} min={10} max={90} step={5} />
               </div>
             )}
+
+            {manipulationType === 'style-editor' && (
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label>Target Audience</Label>
+                        <Input {...form.register('targetAudience')} placeholder="e.g., general public" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Desired Tone</Label>
+                        <Input {...form.register('tone')} placeholder="e.g., professional, casual" />
+                    </div>
+                </div>
+            )}
+
+            {manipulationType === 'readability-enhancer' && (
+                 <div className="space-y-2">
+                    <Label>Target Reading Level</Label>
+                    <Select onValueChange={(val) => form.setValue('targetLevel', val)} defaultValue={form.getValues('targetLevel')}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="elementary">Elementary</SelectItem>
+                            <SelectItem value="middle-school">Middle School</SelectItem>
+                            <SelectItem value="high-school">High School</SelectItem>
+                            <SelectItem value="college">College</SelectItem>
+                            <SelectItem value="graduate">Graduate</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            )}
+            
+            {manipulationType === 'conciseness-checker' && (
+                <div className="space-y-3">
+                    <div className="flex justify-between">
+                        <Label>Target Reduction</Label>
+                        <Badge variant="outline">{form.watch('targetReduction') || 0}%</Badge>
+                    </div>
+                    <Slider 
+                        value={[form.watch('targetReduction') || 0]} 
+                        onValueChange={(val) => form.setValue('targetReduction', val[0])} 
+                        min={0} max={50} step={5} 
+                    />
+                </div>
+            )}
+
+            {manipulationType === 'clarity-advisor' && (
+                <div className="space-y-2">
+                    <Label>Focus Areas (comma-separated)</Label>
+                    <Input 
+                        {...form.register('focusAreas')} 
+                        placeholder="e.g., sentence structure, word choice" 
+                    />
+                </div>
+            )}
+
           </div>
 
           {/* Content Panel */}

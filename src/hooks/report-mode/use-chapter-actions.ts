@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -13,6 +14,11 @@ import type { ManipulationType } from '@/lib/models';
 
 const formSchema = z.object({
   rewriteStyle: z.string().optional(),
+  targetAudience: z.string().optional(),
+  tone: z.string().optional(),
+  targetLevel: z.string().optional(),
+  targetReduction: z.number().optional(),
+  focusAreas: z.string().optional(), // Storing as string, will split later
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -34,6 +40,11 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     resolver: zodResolver(formSchema),
     defaultValues: {
       rewriteStyle: 'Formal',
+      targetAudience: '',
+      tone: '',
+      targetLevel: 'high-school',
+      targetReduction: 20,
+      focusAreas: '',
     },
   });
 
@@ -48,7 +59,7 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     }
   });
 
-  const onSubmit = () => {
+  const onSubmit = (formData: FormValues) => {
     let command = '';
     const textToProcess = chapterContent;
 
@@ -59,10 +70,27 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
 
     switch (manipulationType) {
         case 'rewrite':
-            command = `Rewrite this entire document in a ${form.getValues('rewriteStyle') || 'neutral'} style, preserving the chapter and section structure.`;
+            command = `Rewrite this entire document in a ${formData.rewriteStyle || 'neutral'} style, preserving the chapter and section structure.`;
             break;
         case 'summarize':
             command = `Summarize this entire document to about ${compressionRatio}% of its original length, keeping the main chapter and section headings.`;
+            break;
+        case 'style-editor':
+            command = `Improve the writing style of the context text.`;
+            if (formData.targetAudience) command += ` The target audience is ${formData.targetAudience}.`;
+            if (formData.tone) command += ` The desired tone is ${formData.tone}.`;
+            break;
+        case 'readability-enhancer':
+            command = `Enhance the readability of the context text. Target a ${formData.targetLevel || 'high-school'} reading level.`;
+            break;
+        case 'conciseness-checker':
+             command = `Make the context text more concise, aiming for a ${formData.targetReduction || 20}% reduction in word count.`;
+             break;
+        case 'clarity-advisor':
+            command = 'Improve the clarity of the context text.';
+            if (formData.focusAreas) {
+                command += ` Focus on these areas: ${formData.focusAreas}.`;
+            }
             break;
         default:
             command = 'Improve the overall style and flow of this document.';
@@ -82,6 +110,10 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
   const manipulationTypes: { value: ManipulationType; label: string }[] = [
     { value: 'rewrite', label: 'Rewrite' },
     { value: 'summarize', label: 'Summarize' },
+    { value: 'style-editor', label: 'Improve Style' },
+    { value: 'readability-enhancer', label: 'Enhance Readability' },
+    { value: 'conciseness-checker', label: 'Make Concise' },
+    { value: 'clarity-advisor', label: 'Improve Clarity' },
   ];
   
   const styles = ["Informal", "Friendly", "Simple", "Formal", "Professional", "Narrative", "Descriptive", "Expository", "Argumentative", "Persuasive", "Creative", "Technical", "Academic", "Journalistic", "Poetic", "Satirical", "Humorous"];
