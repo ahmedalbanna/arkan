@@ -1,9 +1,10 @@
 
+
 'use client';
 
 import { GenerationControlState, SectionType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
-import { useBuilderStore, toast } from '@/hooks';
+import { toast, useBuilderStore } from '@/hooks';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import { useMutation } from '@tanstack/react-query';
 
@@ -14,43 +15,51 @@ import { useMutation } from '@tanstack/react-query';
  * @returns A string containing the formatted instructions.
  */
 export function buildInstructionText(controls: GenerationControlState, sectionType: SectionType): string {
-    let instructions: string[] = [];
+  let instructions: string[] = [];
 
-    if (sectionType === 'document') {
-        const formalityMap: { [key: number]: string } = { 0: 'very informal and casual', 33: 'balanced and neutral', 67: 'formal and professional', 100: 'very formal and academic' };
-        const complexityMap: { [key: number]: string } = { 0: 'very simple and easy to understand', 33: 'clear and straightforward', 67: 'detailed and technical', 100: 'highly complex and expert-level' };
+  if (sectionType === 'document') {
+    const formalityMap: { [key: number]: string } = { 0: 'very informal and casual', 33: 'balanced and neutral', 67: 'formal and professional', 100: 'very formal and academic' };
+    const complexityMap: { [key: number]: string } = { 0: 'very simple and easy to understand', 33: 'clear and straightforward', 67: 'detailed and technical', 100: 'highly complex and expert-level' };
+    const academicMap: { [key: number]: string } = { 0: 'for a general student audience', 50: 'for a graduate-level audience', 100: 'for a doctorate-level, expert audience' };
+    const styleFocusMap: { [key: number]: string } = { 0: 'highly analytical and data-driven', 33: 'a balance of analysis and narrative', 67: 'descriptive and engaging', 100: 'very creative and writerly' };
 
-        const formality = controls.formality > 67 ? formalityMap[100] : controls.formality > 33 ? formalityMap[67] : controls.formality > 0 ? formalityMap[33] : formalityMap[0];
-        instructions.push(`The formality should be ${formality}.`);
+    const formality = controls.formality > 67 ? formalityMap[100] : controls.formality > 33 ? formalityMap[67] : controls.formality > 0 ? formalityMap[33] : formalityMap[0];
+    instructions.push(`The formality should be ${formality}.`);
 
-        const complexity = controls.complexity > 67 ? complexityMap[100] : controls.complexity > 33 ? complexityMap[67] : controls.complexity > 0 ? complexityMap[33] : complexityMap[0];
-        instructions.push(`The complexity should be ${complexity}.`);
-        
-        if (controls.tone) instructions.push(`The tone should be ${controls.tone}.`);
-        if (controls.wordCount) instructions.push(`Aim for a word count of approximately ${controls.wordCount} words.`);
+    const complexity = controls.complexity > 67 ? complexityMap[100] : controls.complexity > 33 ? complexityMap[67] : controls.complexity > 0 ? complexityMap[33] : complexityMap[0];
+    instructions.push(`The complexity should be ${complexity}.`);
 
-        if (controls.outputStyle.diagram && controls.outputDiagramType) {
-            instructions.push(`The output must include a PlantUML diagram of type '${controls.outputDiagramType}'.`);
-        }
-        if (controls.outputStyle.code && controls.programmingLanguage) {
-            instructions.push(`The code blocks should be in ${controls.programmingLanguage}.`);
-        }
+    const academicLevel = controls.academicLevel > 75 ? academicMap[100] : controls.academicLevel > 25 ? academicMap[50] : academicMap[0];
+    instructions.push(`The content should be written ${academicLevel}.`);
 
-    } else if (sectionType === 'presentation') {
-        if (controls.presentationType) instructions.push(`This is for a ${controls.presentationType} presentation.`);
-        if (controls.presentationTone) instructions.push(`The tone for this presentation slide should be ${controls.presentationTone}.`);
+    const styleFocus = controls.styleFocus > 67 ? styleFocusMap[100] : controls.styleFocus > 33 ? styleFocusMap[67] : controls.styleFocus > 0 ? styleFocusMap[33] : styleFocusMap[0];
+    instructions.push(`The writing style should be ${styleFocus}.`);
+
+    if (controls.tone) instructions.push(`The tone should be ${controls.tone}.`);
+    if (controls.wordCount) instructions.push(`Aim for a word count of approximately ${controls.wordCount} words.`);
+
+    if (controls.outputStyle.diagram && controls.outputDiagramType) {
+      instructions.push(`The output must include a PlantUML diagram of type '${controls.outputDiagramType}'.`);
+    }
+    if (controls.outputStyle.code && controls.programmingLanguage) {
+      instructions.push(`The code blocks should be in ${controls.programmingLanguage}.`);
     }
 
-    if (controls.language && controls.language !== 'default') {
-        const langMap: Record<string, string> = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
-        instructions.push(`The output language must be ${langMap[controls.language] || 'English'}.`);
-    }
+  } else if (sectionType === 'presentation') {
+    if (controls.presentationType) instructions.push(`This is for a ${controls.presentationType} presentation.`);
+    if (controls.presentationTone) instructions.push(`The tone for this presentation slide should be ${controls.presentationTone}.`);
+  }
 
-    const enabledStyles = Object.entries(controls.outputStyle).filter(([, value]) => value).map(([key]) => key);
-    if (enabledStyles.length > 0) instructions.push(`The output should primarily include the following elements: ${enabledStyles.join(', ')}.`);
+  if (controls.language && controls.language !== 'default') {
+    const langMap: Record<string, string> = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
+    instructions.push(`The output language must be ${langMap[controls.language] || 'English'}.`);
+  }
 
-    
-    return instructions.join(' ');
+  const enabledStyles = Object.entries(controls.outputStyle).filter(([, value]) => value).map(([key]) => key);
+  if (enabledStyles.length > 0) instructions.push(`The output should primarily include the following elements: ${enabledStyles.join(', ')}.`);
+
+
+  return instructions.join(' ');
 }
 
 
@@ -59,12 +68,13 @@ export function useSectionGenerator() {
   const { userProfile, refetchUser, firebaseUser } = useAuth();
 
   const agentMutation = useMutation({
-    mutationKey: ['generateReportSection'], 
+    mutationKey: ['generateReportSection'],
     mutationFn: async (sectionId: string) => {
       if (!project || !userProfile || !firebaseUser) throw new Error("Project or user not found.");
 
+      const chapter = project.chapters.find(c => c.sections.some(s => s.id === sectionId));
       const section = project.getSection(sectionId);
-      if (!section) throw new Error("Section not found.");
+      if (!section || !chapter) throw new Error("Section or chapter not found.");
 
       const token = await firebaseUser.getIdToken();
 
@@ -82,13 +92,16 @@ export function useSectionGenerator() {
           }
         }
       });
-      
+
       let externalContextFiles = (project.externalContext || []).filter(item => context.externalContext?.[item.id]);
+
+      const dynamicPrompt = `Based on the user's instructions, write the '${section.title}' section for the '${chapter.title}' chapter, which is a '${section.type}' type. ${section.prompt}`;
+
 
       const body = {
         flow: 'generate-section',
-        sectionToGenerate: section.id as SectionName,
-        prompt: section.prompt,
+        sectionToGenerate: section.id,
+        prompt: dynamicPrompt,
         otherSections: otherSectionsContext,
         externalContext: externalContextFiles,
         guidelines: section.guidelines,
@@ -98,7 +111,7 @@ export function useSectionGenerator() {
       const result = await generateReportSectionApi(body, token);
 
       const content = result?.[section.id] ?? Object.values(result || {})[0] as string | undefined;
-      
+
       if (!content) {
         toast({ title: 'Generation failed', description: `No content returned for section ${section.id}.`, variant: 'destructive' });
         throw new Error('Empty generation result');

@@ -1,19 +1,19 @@
 
+
 'use client';
 
-import React from 'react';
-import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore } from '@/hooks';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '../ui/checkbox';
-import type { GenerationControlState, Section } from '@/lib/models';
-import { Separator } from '../ui/separator';
-import { buildInstructionText } from '@/hooks/report-mode/use-section-generator';
 import { DiagramTypeSchema, PresentationTypeSchema, ReportToneSchema } from '@/ai/schemas';
 import { PresentationToneSchema } from '@/ai/schemas/enums';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useBuilderStore } from '@/hooks';
+import { buildInstructionText } from '@/hooks/report-mode/use-section-generator';
+import type { GenerationControlState, Section } from '@/lib/models';
+import { Checkbox } from '../ui/checkbox';
+import { Separator } from '../ui/separator';
 
 export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
@@ -44,7 +44,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             [style]: checked
         });
     }
-    
+
     const presentationTypeLabels: Record<z.infer<typeof PresentationTypeSchema>, string> = {
         'informative': 'Informative: Knowledge sharing',
         'persuasive': 'Persuasive: Influencing opinions',
@@ -74,6 +74,24 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                     <span>Simple</span>
                     <span>Balanced</span>
                     <span>Technical</span>
+                </div>
+            </div>
+            <div className="space-y-3">
+                <Label htmlFor={`academicLevel-${section.id}`}>Academic Level</Label>
+                <Slider id={`academicLevel-${section.id}`} value={[controls.academicLevel]} onValueChange={(val) => handleControlChange('academicLevel', val[0])} max={100} step={1} />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Student</span>
+                    <span>Graduate</span>
+                    <span>Doctorate</span>
+                </div>
+            </div>
+            <div className="space-y-3">
+                <Label htmlFor={`styleFocus-${section.id}`}>Style Focus</Label>
+                <Slider id={`styleFocus-${section.id}`} value={[controls.styleFocus]} onValueChange={(val) => handleControlChange('styleFocus', val[0])} max={100} step={1} />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Analysis</span>
+                    <span>Balanced</span>
+                    <span>Writer</span>
                 </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -109,7 +127,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                 </div>
             </div>
 
-             {controls.outputStyle.code && (
+            {controls.outputStyle.code && (
                 <div className="space-y-2 pl-6">
                     <Label htmlFor={`programming-language-${section.id}`}>Programming Language</Label>
                     <Input
@@ -122,7 +140,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             )}
 
             {controls.outputStyle.diagram && (
-                 <div className="space-y-2 pl-6">
+                <div className="space-y-2 pl-6">
                     <Label htmlFor={`output-diagram-type-${section.id}`}>Diagram Type</Label>
                     <Select
                         value={controls.outputDiagramType}
@@ -150,7 +168,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
     );
 
     const renderPresentationControls = () => (
-         <>
+        <>
             <div className="space-y-2">
                 <Label htmlFor={`presentationType-${section.id}`}>Presentation Type</Label>
                 <Select value={controls.presentationType} onValueChange={(val) => handleControlChange('presentationType', val as any)}>
@@ -165,7 +183,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             <div className="grid grid-cols-2 gap-4">
                 {renderToneAndLanguageControls('presentation')}
             </div>
-             <div className="space-y-2">
+            <div className="space-y-2">
                 <Label>Output Format</Label>
                 <div className="flex items-center flex-wrap gap-4">
                     <div className="flex items-center gap-2">
@@ -188,7 +206,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
     const renderToneAndLanguageControls = (type: 'document' | 'presentation') => {
         const toneOptions = type === 'document' ? ReportToneSchema.options : PresentationToneSchema.options;
         const toneValue = type === 'document' ? controls.tone : controls.presentationTone;
-        
+
         const onToneChange = (val: string) => {
             if (type === 'document') {
                 handleControlChange('tone', val as any);
@@ -198,34 +216,35 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         };
 
         return (
-        <>
-            <div className="space-y-2">
-                <Label htmlFor={`tone-${section.id}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
-                <Select value={toneValue} onValueChange={onToneChange}>
-                    <SelectTrigger id={`tone-${section.id}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
-                    <SelectContent>
-                        {toneOptions.map(tone => (
-                           <SelectItem key={tone} value={tone}>{tone.charAt(0).toUpperCase() + tone.slice(1)}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor={`language-${section.id}`}>Language</Label>
-                <Select value={controls.language} onValueChange={(val) => handleControlChange('language', val as any)}>
-                    <SelectTrigger id={`language-${section.id}`}><SelectValue placeholder="Select language..." /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="default">Default</SelectItem>
-                        <SelectItem value="en">English</SelectItem>
-                        <SelectItem value="ar">Arabic</SelectItem>
-                        <SelectItem value="es">Spanish</SelectItem>
-                        <SelectItem value="fr">French</SelectItem>
-                        <SelectItem value="de">German</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-        </>
-    )};
+            <>
+                <div className="space-y-2">
+                    <Label htmlFor={`tone-${section.id}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
+                    <Select value={toneValue} onValueChange={onToneChange}>
+                        <SelectTrigger id={`tone-${section.id}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
+                        <SelectContent>
+                            {toneOptions.map(tone => (
+                                <SelectItem key={tone} value={tone}>{tone.charAt(0).toUpperCase() + tone.slice(1)}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor={`language-${section.id}`}>Language</Label>
+                    <Select value={controls.language} onValueChange={(val) => handleControlChange('language', val as any)}>
+                        <SelectTrigger id={`language-${section.id}`}><SelectValue placeholder="Select language..." /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="default">Default</SelectItem>
+                            <SelectItem value="en">English</SelectItem>
+                            <SelectItem value="ar">Arabic</SelectItem>
+                            <SelectItem value="es">Spanish</SelectItem>
+                            <SelectItem value="fr">French</SelectItem>
+                            <SelectItem value="de">German</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </>
+        )
+    };
 
     const renderControlsForType = () => {
         switch (section.type) {

@@ -1,11 +1,14 @@
 
+
 import { z } from 'zod';
-import { PresentationToneSchema, ReportToneSchema, LanguageSchema, DiagramTypeSchema, PresentationTypeSchema } from './enums';
+import { DiagramTypeSchema, LanguageSchema, PresentationToneSchema, PresentationTypeSchema, ReportToneSchema } from './enums';
 
 export const GenerationControlStateSchema = z.object({
     // Report Controls
     formality: z.number().min(0).max(100).default(50),
     complexity: z.number().min(0).max(100).default(50),
+    academicLevel: z.number().min(0).max(100).default(50),
+    styleFocus: z.number().min(0).max(100).default(50).describe('A slider from 0 (analytical) to 100 (creative writer).'),
     tone: ReportToneSchema.default('professional'),
     language: LanguageSchema.default('default'),
     outputStyle: z.object({
