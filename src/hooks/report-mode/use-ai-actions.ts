@@ -1,3 +1,6 @@
+
+'use client';
+
 import { useMemo, useState } from 'react';
 import { Editor } from '@tiptap/react';
 import { useWritingTool } from '@/hooks';
@@ -5,7 +8,7 @@ import { useToast } from '@/hooks/util/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
 
 interface AiActionsProps {
-  editor: Editor;
+  editor: Editor | null;
   onTextUpdate: (newText: string, from: number, to: number) => void;
   onWholeUpdate: (newText: string) => void;
 }
@@ -16,6 +19,7 @@ export function useAiActions({ editor, onTextUpdate, onWholeUpdate }: AiActionsP
   const { toast } = useToast();
 
   const handleSuccess = (resultText: string) => {
+    if (!editor) return;
     const { from, to } = editor.state.selection;
     if (from !== to) { // There was a selection
       onTextUpdate(resultText, from, to);
@@ -40,7 +44,7 @@ export function useAiActions({ editor, onTextUpdate, onWholeUpdate }: AiActionsP
   });
 
   const translateMutation = useWritingTool('/api/writing-tools/translate-text', {
-    onSuccess: (data: any) => handleSuccess(data.text),
+    onSuccess: (data: any) => handleSuccess(data.translatedText),
     onError: handleError,
     onSettled: () => setActiveAiAction(null),
   });
@@ -53,6 +57,7 @@ export function useAiActions({ editor, onTextUpdate, onWholeUpdate }: AiActionsP
   };
 
   const handleAiAction = (action: string, payload: any = {}) => {
+    if (!editor) return;
     setActiveAiAction(action);
     const { from, to } = editor.state.selection;
     const selectedText = editor.state.doc.textBetween(from, to);

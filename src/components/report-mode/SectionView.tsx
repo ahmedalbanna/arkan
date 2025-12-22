@@ -3,18 +3,18 @@
 
 import type { SectionName } from '@/ai/schemas';
 
-import { ArrowDown, ArrowUp, BookText, Brush, Languages, List, ListOrdered, Loader2, PlusCircle, Quote, Sparkles, Strikethrough, Table, Trash2, Volume2, Square } from 'lucide-react';
-import { useMemo, useState, useEffect } from 'react';
+import { ArrowDown, ArrowUp, Languages, Loader2, PlusCircle, Trash2, Volume2, Square, Copy, PlusSquare } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { Button } from '../ui/button';
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useLocalization } from '@/context/LocalizationContext';
 import dynamic from 'next/dynamic';
 import { Input } from '../ui/input';
-import { useAiActions, useBrowserSpeech } from '@/hooks';
+import { useAiActions, useBrowserSpeech, useToast } from '@/hooks';
 import type { Editor } from '@tiptap/react';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { useBuilderStore } from '@/hooks';
 
 
 const RichTextEditor = dynamic(() => import('@/components/report-mode/RichTextEditor'), { ssr: false });
@@ -37,12 +37,15 @@ interface SectionProps {
 
 export const SectionView = ({ chapterId, sectionIndex, sectionKey, title, content, onUpdate, onTitleChange, onAddSection, onMoveUp, onMoveDown, onDelete, isFirst, isLast }: SectionProps) => {
     const { t } = useLocalization();
+    const { toast } = useToast();
+    const { updateProject } = useBuilderStore();
     const [editor, setEditor] = useState<Editor | null>(null);
+    const [isCopied, setIsCopied] = useState(false);
 
     const words = useMemo(() => content?.split(/\s+/).filter(Boolean).length || 0, [content]);
     const chars = useMemo(() => content?.length || 0, [content]);
 
-    const { activeAiAction, isProcessing, handleAiAction, rewriteStyles } = useAiActions({
+    const { handleAiAction } = useAiActions({
         editor,
         onTextUpdate: (newText, from, to) => {
             if (!editor) return;
@@ -64,7 +67,22 @@ export const SectionView = ({ chapterId, sectionIndex, sectionKey, title, conten
           const textToRead = editor.state.doc.textBetween(from, to) || editor.getText();
           speak(textToRead);
         }
-      }
+    }
+    
+    function handleCopy() {
+        if (!content) return;
+        navigator.clipboard.writeText(content).then(() => {
+            setIsCopied(true);
+            toast({ title: 'Section content copied!' });
+            setTimeout(() => setIsCopied(false), 2000);
+        });
+    }
+
+    function handleDuplicate() {
+        if (!chapterId || !sectionKey) return;
+        updateProject(p => p.duplicateSection(sectionKey));
+        toast({ title: 'Section Duplicated' });
+    }
 
     return (
         <div className="space-y-4">
@@ -77,45 +95,44 @@ export const SectionView = ({ chapterId, sectionIndex, sectionKey, title, conten
                                 onChange={(e) => onTitleChange(sectionKey, e.target.value)}
                                 className="font-semibold text-lg md:text-xl text-primary/90 font-headline border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
                             />
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
-                                 {/* AI Actions */}
+                            <div className="flex items-center">
+                                {/* AI Actions */}
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleAiAction('summarize')} disabled={isProcessing}>
-                                            {activeAiAction === 'summarize' ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookText className="h-4 w-4" />}
+                                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleCopy}>
+                                            <Copy className="h-4 w-4" />
                                         </Button>
                                         </TooltipTrigger>
-                                        <TooltipContent><p>{t('builder.Section.aiActions.summarize')}</p></TooltipContent>
+                                        <TooltipContent><p>Copy Content</p></TooltipContent>
                                     </Tooltip>
-                                    <DropdownMenu>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="h-7 w-7" disabled={isProcessing}>
-                                                    {activeAiAction === 'rewrite' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brush className="h-4 w-4" />}
-                                                </Button>
-                                                </DropdownMenuTrigger>
-                                            </TooltipTrigger>
-                                            <TooltipContent><p>{t('builder.Section.aiActions.rewrite')}</p></TooltipContent>
-                                        </Tooltip>
-                                        <DropdownMenuContent>
-                                            {rewriteStyles.map(({ label, style }) => (
-                                            <DropdownMenuItem key={style} onSelect={() => handleAiAction('rewrite', { style })} disabled={isProcessing}>
-                                                {label}
-                                            </DropdownMenuItem>
-                                            ))}
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleDuplicate}>
+                                            <PlusSquare className="h-4 w-4" />
+                                        </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>Duplicate Section</p></TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleAiAction('translate', {})}>
+                                            <Languages className="h-4 w-4" />
+                                        </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>Translate</p></TooltipContent>
+                                    </Tooltip>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
                                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleReadAloudClick}>
                                             {isSpeaking ? <Square className="h-4 w-4 text-red-500 fill-current" /> : <Volume2 className="h-4 w-4" />}
                                         </Button>
                                         </TooltipTrigger>
-                                        <TooltipContent><p>{isSpeaking ? 'Stop' : t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
+                                        <TooltipContent><p>{isSpeaking ? 'Stop Speaking' : t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
+
+                                <div className="h-6 w-px bg-border mx-1"></div>
 
                                 {/* Structural Actions */}
                                 <Button variant="ghost" size="icon" onClick={onMoveUp} disabled={isFirst} className="h-7 w-7">
