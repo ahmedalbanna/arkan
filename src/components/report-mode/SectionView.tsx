@@ -1,8 +1,9 @@
+
 'use client';
 
 import type { SectionName } from '@/ai/schemas';
 
-import { ArrowDown, ArrowUp, BookText, Brush, Languages, List, ListOrdered, Loader2, Quote, Sparkles, Strikethrough, Table, Trash2, Volume2, Square } from 'lucide-react';
+import { ArrowDown, ArrowUp, BookText, Brush, Languages, List, ListOrdered, Loader2, PlusCircle, Quote, Sparkles, Strikethrough, Table, Trash2, Volume2, Square } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 
@@ -19,12 +20,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 const RichTextEditor = dynamic(() => import('@/components/report-mode/RichTextEditor'), { ssr: false });
 
 interface SectionProps {
-    chapterId?: string;
+    chapterId: string;
+    sectionIndex: number;
     sectionKey: SectionName;
     title: string;
     content: string;
     onUpdate: (key: SectionName, value: string) => void;
     onTitleChange: (key: SectionName, newTitle: string) => void;
+    onAddSection: (chapterId: string, index: number) => void;
     onMoveUp: () => void;
     onMoveDown: () => void;
     onDelete: () => void;
@@ -32,7 +35,7 @@ interface SectionProps {
     isLast: boolean;
 }
 
-export const SectionView = ({ chapterId, sectionKey, title, content, onUpdate, onTitleChange, onMoveUp, onMoveDown, onDelete, isFirst, isLast }: SectionProps) => {
+export const SectionView = ({ chapterId, sectionIndex, sectionKey, title, content, onUpdate, onTitleChange, onAddSection, onMoveUp, onMoveDown, onDelete, isFirst, isLast }: SectionProps) => {
     const { t } = useLocalization();
     const [editor, setEditor] = useState<Editor | null>(null);
 
@@ -157,6 +160,17 @@ export const SectionView = ({ chapterId, sectionKey, title, content, onUpdate, o
                         </div>
                     </>
                 )}
+                 <div className="absolute -bottom-4 left-0 right-0 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="w-full h-px bg-primary/20"></div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="absolute h-8 w-8 rounded-full bg-background hover:bg-muted"
+                      onClick={() => onAddSection(chapterId, sectionIndex + 1)}
+                    >
+                      <PlusCircle className="h-4 w-4" />
+                    </Button>
+                </div>
             </div>
         </div>
     );

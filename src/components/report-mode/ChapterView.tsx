@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -14,7 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Chapter } from '@/lib/models';
-import { Copy, PlusSquare, Speaker, Square, Trash2, Languages, Wrench } from 'lucide-react';
+import { Languages, PlusSquare, Speaker, Square, Trash2, Wrench, Copy } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { ChapterToolsDialog } from "./ChapterToolsDialog";
 import { useChapterActions } from "@/hooks/report-mode/use-chapter-actions";
@@ -177,11 +178,14 @@ export function ChapterView({
           {chapter.sections.map((section, index) => (
             <SectionView
               key={section.id}
+              chapterId={chapter.id}
+              sectionIndex={index}
               sectionKey={section.id}
               title={section.title}
               content={section.content || ''}
               onUpdate={onUpdateSection}
               onTitleChange={onUpdateSectionTitle}
+              onAddSection={onAddSection}
               onMoveUp={() => onMoveSectionUp(section.id)}
               onMoveDown={() => onMoveSectionDown(section.id)}
               onDelete={() => onDeleteSection(section.id)}
