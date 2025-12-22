@@ -1,6 +1,7 @@
+
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { Label } from '@/components/ui/label';
@@ -9,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '../ui/checkbox';
 import type { Tone, Language, GenerationControlState, Section } from '@/lib/models';
+import { Card, CardContent, CardDescription, CardHeader } from '../ui/card';
+import { Info } from 'lucide-react';
 
 export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
@@ -37,6 +40,38 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             [style]: checked
         });
     }
+
+    const instructionPreview = useMemo(() => {
+        const parts: string[] = [];
+        
+        parts.push(`a ${controls.tone} tone`);
+
+        if (controls.complexity < 33) parts.push('simple complexity');
+        else if (controls.complexity > 66) parts.push('technical complexity');
+        else parts.push('balanced complexity');
+
+        if (controls.wordCount && parseInt(controls.wordCount) > 0) {
+            parts.push(`a word count of approximately ${controls.wordCount} words`);
+        }
+        
+        const langMap: Record<string, string> = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
+        if (controls.language && controls.language !== 'default') {
+            parts.push(`and the output language must be ${langMap[controls.language] || 'the default'}`);
+        }
+
+        const sentenceStart = `Please use ${parts.join(', ')}.`;
+
+        const formatParts = Object.entries(controls.outputStyle)
+            .filter(([, value]) => value)
+            .map(([key]) => key);
+        
+        let formatSentence = '';
+        if (formatParts.length > 0) {
+            formatSentence = ` The output should be formatted as ${formatParts.join(', ')}.`;
+        }
+
+        return sentenceStart + formatSentence;
+    }, [controls]);
 
     return (
         <div className="space-y-6">
@@ -115,6 +150,18 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                 <Label htmlFor={`wordCount-${section.id}`}>{t('builder.reportGenerator.tool_word_count_label')}</Label>
                 <Input id={`wordCount-${section.id}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controls.wordCount} onChange={(e) => handleControlChange('wordCount', e.target.value)} />
             </div>
+
+            <Card className="bg-muted/50 border-dashed">
+                <CardHeader className="flex flex-row items-center gap-2 p-3">
+                    <Info className="w-4 h-4 text-muted-foreground"/>
+                    <CardDescription className="text-xs">
+                        {t('builder.reportGenerator.tool_instruction_preview')}
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="p-3 pt-0">
+                    <p className="text-xs italic text-muted-foreground">{instructionPreview}</p>
+                </CardContent>
+            </Card>
         </div>
     );
 };
