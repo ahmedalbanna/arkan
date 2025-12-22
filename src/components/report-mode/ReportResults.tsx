@@ -12,13 +12,10 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
-import { FileText, PlusCircle } from 'lucide-react';
+import { Project } from '@/lib/models';
 import { useEffect, useMemo, useState } from 'react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
 import { MenuBar } from './MenuBar';
 import RichTextEditor from './RichTextEditor';
-import { Project } from '@/lib/models';
 
 /**
  * Parses a single markdown string into a Project object's chapters and sections.
@@ -93,15 +90,14 @@ function parseMarkdownToProject(markdown: string, existingProject: Project): Pro
       };
     });
 
-    return existingProject.with({ chapters: finalChapters });
+    return existingProject.with({ chapters: finalChapters as any });
 }
 
 
 export function ReportResults() {
   const { t } = useLocalization();
   const { project, updateProject } = useBuilderStore();
-  const [newChapterTitle, setNewChapterTitle] = useState('');
-
+  
   const fullMarkdownContent = useMemo(() => {
     if (!project || !project.chapters) return '';
     return project.chapters.map(chapter => {
@@ -125,63 +121,11 @@ export function ReportResults() {
     useBuilderStore.setState({ project: updatedProject, hasUnsavedChanges: true });
   }
 
-  function handleCreateFirstChapter() {
-    if (!newChapterTitle.trim()) {
-        return;
-    }
-    const markdown = `# ${newChapterTitle.trim()}`;
-    handleContentChange(markdown);
-    setNewChapterTitle('');
-  }
-
   function renderContent() {
-    if (!project?.hasContent()) {
-      return (
-        <div className="flex items-center justify-center h-full min-h-[400px]">
-          <div className="text-center text-muted-foreground p-8 max-w-md">
-            <FileText className="w-16 h-16 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold">
-              Your Report is Empty
-            </h3>
-            <p className="text-sm mt-1 mb-6">
-             Start by generating a proposal, or create your first chapter to get started.
-            </p>
-          </div>
-        </div>
-      );
-    }
-
-    if (!project.chapters || project.chapters.length === 0) {
-        return (
-             <div className="flex items-center justify-center h-full min-h-[400px]">
-              <div className="text-center text-muted-foreground p-8 max-w-md">
-                <FileText className="w-16 h-16 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold">
-                  No Chapters to Display
-                </h3>
-                 <p className="text-sm mt-1 mb-6">
-                 Create your first chapter to get started. You can also generate a Table of Contents from the tools panel.
-                </p>
-                <div className="flex w-full max-w-sm mx-auto items-center space-x-2">
-                   <Input 
-                    value={newChapterTitle} 
-                    onChange={(e) => setNewChapterTitle(e.target.value)}
-                    placeholder="Enter chapter title..."
-                    onKeyDown={(e) => e.key === 'Enter' && handleCreateFirstChapter()}
-                  />
-                  <Button onClick={handleCreateFirstChapter}>
-                    <PlusCircle className="me-2 h-4 w-4" /> Create Chapter
-                  </Button>
-                </div>
-              </div>
-            </div>
-        )
-    }
-
     return (
         <A4Page>
             <RichTextEditor
-              key={project.id} // Re-mount editor when project changes
+              key={project?.id} // Re-mount editor when project changes
               content={localMarkdown}
               onChange={handleContentChange}
             />
