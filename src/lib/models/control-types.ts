@@ -5,6 +5,7 @@ export type OutputStyle = {
   list: boolean;
   table: boolean;
   code: boolean;
+  diagram: boolean;
 };
 
 export type Tone = 'professional' | 'academic' | 'casual' | 'persuasive';

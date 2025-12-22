@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -12,6 +13,19 @@ import { Checkbox } from '../ui/checkbox';
 import type { Tone, Language, GenerationControlState, Section } from '@/lib/models';
 import { Card, CardContent, CardDescription, CardHeader } from '../ui/card';
 import { Info } from 'lucide-react';
+import { DiagramType, DiagramTypeSchema } from '@/ai/schemas';
+
+const diagramTypes = DiagramTypeSchema.options.map(value => {
+    let label = '';
+    if (value === 'er') {
+        label = 'ER Diagram';
+    } else if (value === 'dfd') {
+        label = 'Data Flow Diagram (DFD)';
+    } else {
+        label = value.charAt(0).toUpperCase() + value.slice(1).replace(/([A-Z])/g, ' $1').trim();
+    }
+    return { value, label };
+});
 
 export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
@@ -34,7 +48,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         });
     };
 
-    function handleOutputStyleChange(style: 'heading' | 'paragraph' | 'list' | 'table' | 'code', checked: boolean) {
+    function handleOutputStyleChange(style: 'heading' | 'paragraph' | 'list' | 'table' | 'code' | 'diagram', checked: boolean) {
         handleControlChange('outputStyle', {
             ...controls.outputStyle,
             [style]: checked
@@ -63,7 +77,13 @@ export function SectionGenerationControls({ section }: { section: Section }) {
 
         const formatParts = Object.entries(controls.outputStyle)
             .filter(([, value]) => value)
-            .map(([key]) => key);
+            .map(([key]) => {
+                if (key === 'diagram' && controls.diagramType) {
+                    const diagramLabel = diagramTypes.find(d => d.value === controls.diagramType)?.label || controls.diagramType;
+                    return `a ${diagramLabel}`;
+                }
+                return key;
+            });
         
         let formatSentence = '';
         if (formatParts.length > 0) {
@@ -121,7 +141,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                     </Select>
                 </div>
             </div>
-            <div className="space-y-2">
+             <div className="space-y-2">
                 <Label>Output Format</Label>
                 <div className="flex items-center flex-wrap gap-4">
                     <div className="flex items-center gap-2">
@@ -144,8 +164,27 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                         <Checkbox id={`output-code-${section.id}`} checked={controls.outputStyle.code} onCheckedChange={(checked) => handleOutputStyleChange('code', !!checked)} />
                         <Label htmlFor={`output-code-${section.id}`}>Code</Label>
                     </div>
+                    <div className="flex items-center gap-2">
+                        <Checkbox id={`output-diagram-${section.id}`} checked={controls.outputStyle.diagram} onCheckedChange={(checked) => handleOutputStyleChange('diagram', !!checked)} />
+                        <Label htmlFor={`output-diagram-${section.id}`}>Diagram</Label>
+                    </div>
                 </div>
             </div>
+
+            {controls.outputStyle.diagram && (
+                <div className="space-y-2 pl-6 border-l-2 ml-2">
+                    <Label htmlFor={`diagramType-${section.id}`}>Diagram Type</Label>
+                    <Select value={controls.diagramType} onValueChange={(val) => handleControlChange('diagramType', val as DiagramType)}>
+                        <SelectTrigger id={`diagramType-${section.id}`}><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            {diagramTypes.map(type => (
+                                <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            )}
+
             <div className="space-y-2">
                 <Label htmlFor={`wordCount-${section.id}`}>{t('builder.reportGenerator.tool_word_count_label')}</Label>
                 <Input id={`wordCount-${section.id}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controls.wordCount} onChange={(e) => handleControlChange('wordCount', e.target.value)} />

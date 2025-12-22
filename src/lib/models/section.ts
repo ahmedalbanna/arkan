@@ -1,5 +1,6 @@
 
 
+import type { DiagramType } from '@/ai/schemas';
 import type { Tone, Language, OutputStyle } from './control-types';
 
 export interface GenerationControlState {
@@ -9,6 +10,7 @@ export interface GenerationControlState {
     language: Language;
     outputStyle: OutputStyle;
     wordCount: string;
+    diagramType: DiagramType;
 }
 
 export interface SectionContext {
@@ -41,8 +43,9 @@ export const defaultControls: GenerationControlState = {
     complexity: 50,
     tone: 'professional',
     language: 'default',
-    outputStyle: { heading: true, paragraph: true, list: false, table: false, code: false },
+    outputStyle: { heading: true, paragraph: true, list: false, table: false, code: false, diagram: false },
     wordCount: '',
+    diagramType: 'useCase',
 };
 
 export const defaultContext: SectionContext = {
