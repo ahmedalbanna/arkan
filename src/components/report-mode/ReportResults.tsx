@@ -38,16 +38,20 @@ function parseMarkdownToProject(markdown: string, existingProject: Project): Pro
         contentBuffer = [];
     };
 
-    const finalizeChapter = () => {
+    const finalizeSection = () => {
         flushContent();
-        if (currentSectionData) {
-            currentChapterData?.sections.push(currentSectionData);
-            currentSectionData = null;
+        if (currentSectionData && currentChapterData) {
+            currentChapterData.sections.push(currentSectionData);
         }
+        currentSectionData = null;
+    }
+
+    const finalizeChapter = () => {
+        finalizeSection();
         if (currentChapterData) {
             newChaptersData.push(currentChapterData);
-            currentChapterData = null;
         }
+        currentChapterData = null;
     }
 
     lines.forEach(line => {
@@ -58,10 +62,7 @@ function parseMarkdownToProject(markdown: string, existingProject: Project): Pro
             finalizeChapter();
             currentChapterData = { title: h1Match[1].trim(), sections: [] };
         } else if (h2Match) {
-            flushContent();
-            if (currentSectionData && currentChapterData) {
-                currentChapterData.sections.push(currentSectionData);
-            }
+            finalizeSection();
             currentSectionData = { title: h2Match[1].trim(), content: '' };
         } else {
             contentBuffer.push(line);
@@ -70,17 +71,25 @@ function parseMarkdownToProject(markdown: string, existingProject: Project): Pro
 
     finalizeChapter();
 
-    const finalChapters = newChaptersData.map(chData => {
-        const oldChapter = existingProject.chapters.find(c => c.title === chData.title);
-        const chapterId = oldChapter?.id || existingProject.generateUniqueId(chData.title, existingProject.chapters, 'chapter');
+    // Now, reconcile the new structure with the old one
+    const finalChapters = newChaptersData.map((chData, index) => {
+        const oldChapter = existingProject.chapters[index];
+        const chapterId = oldChapter?.id || existingProject.generateUniqueId();
         
-        const finalSections = chData.sections.map(secData => {
-            const oldSection = oldChapter?.sections.find(s => s.title === secData.title) || existingProject.getSectionByTitle(secData.title);
+        const finalSections = chData.sections.map((secData, secIndex) => {
+            const oldSection = oldChapter?.sections[secIndex];
             return {
-                id: oldSection?.id || existingProject.generateUniqueId(secData.title, existingProject.sections, 'section'),
+                id: oldSection?.id || existingProject.generateUniqueId(),
                 title: secData.title,
                 content: secData.content,
-                type: 'report' as const
+                type: 'report' as const,
+                // Preserve old controls and context if the section still exists
+                controls: oldSection?.controls, 
+                context: oldSection?.context,
+                prompt: oldSection?.prompt,
+                guidelines: oldSection?.guidelines,
+                agentId: oldSection?.agentId,
+                commandId: oldSection?.commandId,
             };
         });
 
@@ -95,7 +104,6 @@ function parseMarkdownToProject(markdown: string, existingProject: Project): Pro
     if (finalChapters.length === 0 && existingProject.chapters.length > 0 && markdown.trim() === '') {
         return existingProject;
     }
-
 
     return existingProject.with({ chapters: finalChapters });
 }
