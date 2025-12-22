@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Chapter } from '@/lib/models';
-import { Languages, PlusSquare, Speaker, Square, Trash2, Wrench, Copy } from 'lucide-react';
+import { Chapter, SectionContext } from '@/lib/models';
+import { Languages, PlusSquare, Speaker, Square, Trash2, Wrench, Copy, PlusCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { ChapterToolsDialog } from "./ChapterToolsDialog";
 import { useChapterActions } from "@/hooks/report-mode/use-chapter-actions";
@@ -175,24 +175,38 @@ export function ChapterView({
         </div>
 
         <div className="space-y-6">
-          {chapter.sections.map((section, index) => (
-            <SectionView
-              key={section.id}
-              chapterId={chapter.id}
-              sectionIndex={index}
-              sectionKey={section.id}
-              title={section.title}
-              content={section.content || ''}
-              onUpdate={onUpdateSection}
-              onTitleChange={onUpdateSectionTitle}
-              onAddSection={onAddSection}
-              onMoveUp={() => onMoveSectionUp(section.id)}
-              onMoveDown={() => onMoveSectionDown(section.id)}
-              onDelete={() => onDeleteSection(section.id)}
-              isFirst={index === 0}
-              isLast={index === chapter.sections.length - 1}
-            />
-          ))}
+          {chapter.sections.length > 0 ? (
+            chapter.sections.map((section, index) => (
+              <SectionView
+                key={section.id}
+                chapterId={chapter.id}
+                sectionIndex={index}
+                sectionKey={section.id}
+                title={section.title}
+                content={section.content || ''}
+                onUpdate={onUpdateSection}
+                onTitleChange={onUpdateSectionTitle}
+                onAddSection={onAddSection}
+                onMoveUp={() => onMoveSectionUp(section.id)}
+                onMoveDown={() => onMoveSectionDown(section.id)}
+                onDelete={() => onDeleteSection(section.id)}
+                isFirst={index === 0}
+                isLast={index === chapter.sections.length - 1}
+              />
+            ))
+          ) : (
+            <div className="text-center p-8 border-2 border-dashed rounded-lg bg-muted/20">
+              <p className="text-muted-foreground">This chapter is empty.</p>
+              <Button
+                variant="outline"
+                className="mt-4"
+                onClick={() => onAddSection(chapter.id, 0)}
+              >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add First Section
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </>
