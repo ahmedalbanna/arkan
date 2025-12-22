@@ -47,24 +47,8 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     return new Project({ ...this.toJSON(), ...props });
   }
 
-  public generateUniqueId(baseName: string, collection: readonly { id: string }[], fallback: string = 'item'): string {
-    const sanitize = (name: string) => name.toLowerCase().trim()
-      .replace(/[^\w\s-]/g, '') // remove non-word chars
-      .replace(/\s+/g, '-')    // collapse whitespace to a single dash
-      .replace(/-+/g, '-');   // collapse dashes
-
-    let baseId = sanitize(baseName);
-    if (!baseId) baseId = fallback;
-
-    const existingIds = new Set(collection.map(item => item.id));
-
-    let newId = baseId;
-    let counter = 1;
-    // Check for uniqueness and append a counter if necessary
-    while (existingIds.has(newId)) {
-        newId = `${baseId}-${counter++}`;
-    }
-    return newId;
+  public generateUniqueId(): string {
+    return uuidv4();
   }
 
   // --- Getters for derived state ---
@@ -99,7 +83,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
   // --- Chapter Methods ---
   public addChapter(title?: string): Project {
     const chapterTitle = title || 'Untitled Chapter';
-    const newChapterId = this.generateUniqueId(chapterTitle, this.chapters, 'chapter');
+    const newChapterId = this.generateUniqueId();
     const newChapter = new Chapter({ id: newChapterId, title: chapterTitle, sections: [] });
     return this.with({ chapters: [...this.chapters, newChapter] });
   }
@@ -151,7 +135,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
 
   public addSectionToChapter(chapterId: string, title: string, index?: number): Project {
     const sectionTitle = title || 'Untitled Section';
-    const newSectionId = this.generateUniqueId(sectionTitle, this.sections, 'section');
+    const newSectionId = this.generateUniqueId();
     const newSection = new Section({ id: newSectionId, title: sectionTitle, type: 'report' });
     
     return this.updateChapter(chapterId, c => {
