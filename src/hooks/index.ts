@@ -21,6 +21,7 @@ export * from './core/use-builder-page';
 // Report Mode Hooks
 export * from './report-mode/use-ai-actions';
 export * from './report-mode/use-chapter-actions';
+export * from './report-mode/use-report-generation-tools';
 // Data Fetching Hooks
 export * from './data/use-analytics';
 export * from './data/use-features';
