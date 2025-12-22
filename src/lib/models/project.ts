@@ -47,7 +47,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     return new Project({ ...this.toJSON(), ...props });
   }
 
-  private generateUniqueId(baseName: string, collection: readonly { id: string }[], fallback: string = 'item'): string {
+  public generateUniqueId(baseName: string, collection: readonly { id: string }[], fallback: string = 'item'): string {
     let baseId = baseName.toLowerCase().trim()
       .replace(/[^\w\s-]/g, '')
       .replace(/\s+/g, '-')
@@ -130,6 +130,10 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
   // --- Section Methods (Delegation) ---
   public getSection(sectionId: string): Section | undefined {
     return this.sections.find(s => s.id === sectionId);
+  }
+  
+  public getSectionByTitle(title: string): Section | undefined {
+    return this.sections.find(s => s.title === title);
   }
 
   public getSectionContent(sectionId: string): string | undefined {

@@ -18,79 +18,86 @@ import { MenuBar } from './MenuBar';
 import RichTextEditor from './RichTextEditor';
 
 /**
- * Parses a single markdown string into a Project object's chapters and sections.
+ * Parses a single markdown string into a Project object's chapters and sections,
+ * intelligently reusing existing IDs to maintain stability.
  * @param markdown The markdown string to parse.
- * @param existingProject The existing project to merge IDs from, to maintain stability.
+ * @param existingProject The existing project to merge IDs from.
  * @returns A new Project instance with the parsed structure.
  */
 function parseMarkdownToProject(markdown: string, existingProject: Project): Project {
     const lines = markdown.split('\n');
-    const newChapters: any[] = [];
-    let currentChapter: any = null;
-    let currentSection: any = null;
+    let currentChapterData: { title: string; sections: { title: string; content: string }[] } | null = null;
+    let currentSectionData: { title: string; content: string } | null = null;
     let contentBuffer: string[] = [];
+    const newChaptersData: { title: string; sections: { title: string; content: string }[] }[] = [];
 
     const flushContent = () => {
-        if (contentBuffer.length > 0 && currentSection) {
-            currentSection.content = contentBuffer.join('\n').trim();
+        if (contentBuffer.length > 0 && currentSectionData) {
+            currentSectionData.content = contentBuffer.join('\n').trim();
         }
         contentBuffer = [];
     };
+
+    const finalizeChapter = () => {
+        flushContent();
+        if (currentSectionData) {
+            currentChapterData?.sections.push(currentSectionData);
+            currentSectionData = null;
+        }
+        if (currentChapterData) {
+            newChaptersData.push(currentChapterData);
+            currentChapterData = null;
+        }
+    }
 
     lines.forEach(line => {
         const h1Match = line.match(/^#\s+(.*)/);
         const h2Match = line.match(/^##\s+(.*)/);
 
         if (h1Match) {
-            flushContent();
-            if (currentChapter) {
-                if (currentSection) {
-                    currentChapter.sections.push(currentSection);
-                }
-                newChapters.push(currentChapter);
-            }
-            currentChapter = { title: h1Match[1].trim(), sections: [] };
-            currentSection = null;
+            finalizeChapter();
+            currentChapterData = { title: h1Match[1].trim(), sections: [] };
         } else if (h2Match) {
             flushContent();
-            if (currentSection && currentChapter) {
-                currentChapter.sections.push(currentSection);
+            if (currentSectionData && currentChapterData) {
+                currentChapterData.sections.push(currentSectionData);
             }
-            currentSection = { title: h2Match[1].trim(), content: '' };
+            currentSectionData = { title: h2Match[1].trim(), content: '' };
         } else {
             contentBuffer.push(line);
         }
     });
 
-    // Flush any remaining content
-    flushContent();
-    if (currentSection && currentChapter) {
-        currentChapter.sections.push(currentSection);
-    }
-    if (currentChapter) {
-        newChapters.push(currentChapter);
-    }
+    finalizeChapter();
 
-    // Reconstruct the project with the new structure, preserving old IDs where possible.
-    const finalChapters = newChapters.map((ch, i) => {
-      const oldChapter = existingProject.chapters[i];
-      const newSections = ch.sections.map((sec: any, j: number) => {
-        const oldSection = oldChapter?.sections[j];
+    const finalChapters = newChaptersData.map(chData => {
+        const oldChapter = existingProject.chapters.find(c => c.title === chData.title);
+        const chapterId = oldChapter?.id || existingProject.generateUniqueId(chData.title, existingProject.chapters, 'chapter');
+        
+        const finalSections = chData.sections.map(secData => {
+            const oldSection = oldChapter?.sections.find(s => s.title === secData.title) || existingProject.getSectionByTitle(secData.title);
+            return {
+                id: oldSection?.id || existingProject.generateUniqueId(secData.title, existingProject.sections, 'section'),
+                title: secData.title,
+                content: secData.content,
+                type: 'report' as const
+            };
+        });
+
         return {
-          id: oldSection?.id, // Keep old section ID if possible
-          title: sec.title,
-          content: sec.content,
-          type: 'report'
+            id: chapterId,
+            title: chData.title,
+            sections: finalSections
         };
-      });
-      return {
-        id: oldChapter?.id, // Keep old chapter ID
-        title: ch.title,
-        sections: newSections
-      };
     });
+    
+    // If the input was empty and resulted in no chapters, but the project had empty chapters, preserve them.
+    if (finalChapters.length === 0 && existingProject.chapters.length > 0 && markdown.trim() === '') {
+        return existingProject;
+    }
 
-    return existingProject.with({ chapters: finalChapters as any });
+
+    return existingProject.with({ chapters: finalChapters });
 }
 
 
@@ -103,7 +110,7 @@ export function ReportResults() {
     return project.chapters.map(chapter => {
       const sectionsMarkdown = chapter.sections.map(section => `## ${section.title}\n\n${section.content || ''}`).join('\n\n');
       return `# ${chapter.title}\n\n${sectionsMarkdown}`;
-    }).join('\n\n');
+    }).join('\n\n---\n\n');
   }, [project]);
   
   const [localMarkdown, setLocalMarkdown] = useState(fullMarkdownContent);
