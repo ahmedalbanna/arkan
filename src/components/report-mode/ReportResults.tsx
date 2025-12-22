@@ -1,6 +1,6 @@
+
 'use client';
 
-import type { SectionName } from '@/ai/schemas';
 import A4Page from '@/components/shared/A4Page';
 import {
   Card,
@@ -11,82 +11,127 @@ import {
 } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
-import { toast, useBuilderStore } from '@/hooks';
-import { useReportPaginator } from '@/hooks/core/use-report-paginator';
-import { ChevronLeft, ChevronRight, FileText, PlusCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useBuilderStore } from '@/hooks';
+import { FileText, PlusCircle } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { ChapterView } from '@/components/report-mode/ChapterView';
 import { MenuBar } from './MenuBar';
+import RichTextEditor from './RichTextEditor';
+import { Project } from '@/lib/models';
+
+/**
+ * Parses a single markdown string into a Project object's chapters and sections.
+ * @param markdown The markdown string to parse.
+ * @param existingProject The existing project to merge IDs from, to maintain stability.
+ * @returns A new Project instance with the parsed structure.
+ */
+function parseMarkdownToProject(markdown: string, existingProject: Project): Project {
+    const lines = markdown.split('\n');
+    const newChapters: any[] = [];
+    let currentChapter: any = null;
+    let currentSection: any = null;
+    let contentBuffer: string[] = [];
+
+    const flushContent = () => {
+        if (contentBuffer.length > 0 && currentSection) {
+            currentSection.content = contentBuffer.join('\n').trim();
+        }
+        contentBuffer = [];
+    };
+
+    lines.forEach(line => {
+        const h1Match = line.match(/^#\s+(.*)/);
+        const h2Match = line.match(/^##\s+(.*)/);
+
+        if (h1Match) {
+            flushContent();
+            if (currentChapter) {
+                if (currentSection) {
+                    currentChapter.sections.push(currentSection);
+                }
+                newChapters.push(currentChapter);
+            }
+            currentChapter = { title: h1Match[1].trim(), sections: [] };
+            currentSection = null;
+        } else if (h2Match) {
+            flushContent();
+            if (currentSection && currentChapter) {
+                currentChapter.sections.push(currentSection);
+            }
+            currentSection = { title: h2Match[1].trim(), content: '' };
+        } else {
+            contentBuffer.push(line);
+        }
+    });
+
+    // Flush any remaining content
+    flushContent();
+    if (currentSection && currentChapter) {
+        currentChapter.sections.push(currentSection);
+    }
+    if (currentChapter) {
+        newChapters.push(currentChapter);
+    }
+
+    // Reconstruct the project with the new structure, preserving old IDs where possible.
+    const finalChapters = newChapters.map((ch, i) => {
+      const oldChapter = existingProject.chapters[i];
+      const newSections = ch.sections.map((sec: any, j: number) => {
+        const oldSection = oldChapter?.sections[j];
+        return {
+          id: oldSection?.id, // Keep old section ID if possible
+          title: sec.title,
+          content: sec.content,
+          type: 'report'
+        };
+      });
+      return {
+        id: oldChapter?.id, // Keep old chapter ID
+        title: ch.title,
+        sections: newSections
+      };
+    });
+
+    return existingProject.with({ chapters: finalChapters });
+}
+
 
 export function ReportResults() {
   const { t } = useLocalization();
   const { project, updateProject } = useBuilderStore();
   const [newChapterTitle, setNewChapterTitle] = useState('');
 
+  const fullMarkdownContent = useMemo(() => {
+    if (!project || !project.chapters) return '';
+    return project.chapters.map(chapter => {
+      const sectionsMarkdown = chapter.sections.map(section => `## ${section.title}\n\n${section.content || ''}`).join('\n\n');
+      return `# ${chapter.title}\n\n${sectionsMarkdown}`;
+    }).join('\n\n');
+  }, [project]);
+  
+  const [localMarkdown, setLocalMarkdown] = useState(fullMarkdownContent);
 
-  const {
-    currentPage,
-    totalPages,
-    currentItem: currentChapter,
-    handleNextPage,
-    handlePrevPage,
-  } = useReportPaginator();
+  useEffect(() => {
+    setLocalMarkdown(fullMarkdownContent);
+  }, [fullMarkdownContent]);
+  
 
-  function handleSectionUpdate(key: SectionName, value: string) {
-    updateProject(p => p.updateSection(key as string, s => s.with({ content: value })));
-  };
-
-  function handleSectionTitleUpdate(key: SectionName, newTitle: string) {
-    updateProject(p => p.updateSection(key as string, s => s.with({ title: newTitle })));
-  };
-
-  function handleChapterTitleUpdate(chapterId: string, newTitle: string) {
-    updateProject(p => p.updateChapter(chapterId, c => c.with({ title: newTitle })));
-  };
-
-  function handleAddSectionAtIndex(chapterId: string, index: number) {
-    updateProject(p => p.addSectionToChapter(chapterId, "New Section", index));
-  };
-
-  function handleMoveSectionUp(sectionId: string) {
-    updateProject(p => p.moveSectionUp(sectionId));
-  };
-
-  function handleMoveSectionDown(sectionId: string) {
-    updateProject(p => p.moveSectionDown(sectionId));
-  };
-
-  function handleDeleteSection(sectionId: string) {
-    updateProject(p => p.removeSection(sectionId));
-  };
-
-  function handleDeleteChapter(chapterId: string) {
-    const newProject = project?.removeChapter(chapterId);
-    if(newProject) {
-        updateProject(() => newProject);
-    }
-    toast({
-      title: 'Chapter Deleted',
-      description: 'The chapter has been removed from your project.',
-    });
-  };
+  function handleContentChange(markdown: string) {
+    if (!project) return;
+    setLocalMarkdown(markdown);
+    const updatedProject = parseMarkdownToProject(markdown, project);
+    // Directly update the store without causing a loop
+    useBuilderStore.setState({ project: updatedProject, hasUnsavedChanges: true });
+  }
 
   function handleCreateFirstChapter() {
     if (!newChapterTitle.trim()) {
-        toast({
-            title: "Chapter title cannot be empty",
-            variant: "destructive",
-        });
         return;
     }
-    updateProject(p => p.addChapter(newChapterTitle));
+    const markdown = `# ${newChapterTitle.trim()}`;
+    handleContentChange(markdown);
     setNewChapterTitle('');
-    toast({
-      title: "Chapter Created",
-      description: `Your first chapter "${newChapterTitle}" is ready.`
-    })
   }
 
   function renderContent() {
@@ -106,7 +151,7 @@ export function ReportResults() {
       );
     }
 
-    if (totalPages === 0) {
+    if (!project.chapters || project.chapters.length === 0) {
         return (
              <div className="flex items-center justify-center h-full min-h-[400px]">
               <div className="text-center text-muted-foreground p-8 max-w-md">
@@ -134,29 +179,13 @@ export function ReportResults() {
     }
 
     return (
-        currentChapter ? (
-            <A4Page>
-                <ChapterView
-                chapter={currentChapter}
-                onUpdateSection={handleSectionUpdate}
-                onUpdateSectionTitle={handleSectionTitleUpdate}
-                onUpdateChapterTitle={handleChapterTitleUpdate}
-                onAddSection={handleAddSectionAtIndex}
-                onMoveSectionUp={handleMoveSectionUp}
-                onMoveSectionDown={handleMoveSectionDown}
-                onDeleteSection={handleDeleteSection}
-                onDeleteChapter={handleDeleteChapter}
-                />
-            </A4Page>
-        ) : (
-            <div className="flex items-center justify-center h-full min-h-[400px]">
-                <div className="text-center text-muted-foreground p-8 max-w-md">
-                    <FileText className="w-16 h-16 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold">No Chapters to Display</h3>
-                    <p className="text-sm mt-1 mb-6">Create your first chapter to get started.</p>
-                </div>
-            </div>
-        )
+        <A4Page>
+            <RichTextEditor
+              key={project.id} // Re-mount editor when project changes
+              content={localMarkdown}
+              onChange={handleContentChange}
+            />
+        </A4Page>
     );
   };
 
@@ -175,25 +204,9 @@ export function ReportResults() {
             </div>
         </CardHeader>
         
-        {totalPages > 1 && (
-            <div className="flex w-full justify-center items-center p-2 border-y bg-background">
-                <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost">
-                    <ChevronLeft className="h-4 w-4 mr-2" />
-                    {t('builder.presentationGenerator.prev')}
-                </Button>
-                <span className="text-sm font-medium text-muted-foreground mx-4">
-                    Chapter {currentPage + 1} of {totalPages}: {currentChapter?.title}
-                </span>
-                <Button onClick={handleNextPage} disabled={currentPage === totalPages - 1} variant="ghost">
-                    {t('builder.presentationGenerator.next')}
-                    <ChevronRight className="h-4 w-4 ml-2" />
-                </Button>
-            </div>
-        )}
-
         <CardContent className="flex-grow flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 min-h-0">
             <ScrollArea className="flex-grow">
-            {renderContent()}
+              {renderContent()}
             </ScrollArea>
             <MenuBar />
         </CardContent>
