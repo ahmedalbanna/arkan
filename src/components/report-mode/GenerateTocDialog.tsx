@@ -29,14 +29,16 @@ export function GenerateTocDialog({ isOpen, onOpenChange }: GenerateTocDialogPro
 
     function handleApplyToc() {
         if (!results) return;
+        
+        const newProject = project?.with({ chapters: [] });
+        if (!newProject) return;
 
-        updateProject(p => {
-            // Clear existing chapters before applying new ones
-            p.chapters = []; 
-            results.tableOfContents.forEach(title => {
-                p.addChapter(title);
-            });
+        let projectWithChapters = newProject;
+        results.tableOfContents.forEach(title => {
+            projectWithChapters = projectWithChapters.addChapter(title);
         });
+
+        updateProject(() => projectWithChapters);
 
         toast({
             title: 'Table of Contents Applied',

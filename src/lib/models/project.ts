@@ -15,8 +15,8 @@ export interface ProjectProperties {
   updatedAt?: string;
   name?: string;
   projectDescription?: string;
-  chapters?: (Chapter | ChapterProperties)[];
-  externalContext?: ExternalContext[];
+  chapters?: readonly (Chapter | ChapterProperties)[];
+  externalContext?: readonly ExternalContext[];
 }
 
 
@@ -109,14 +109,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     return this.chapters.find(c => c.id === chapterId);
   }
 
-  public updateChaptersOrder(newOrderIds: string[]): Project {
-    const newOrderedChapters = newOrderIds
-      .map(id => this.chapters.find(c => c.id === id))
-      .filter((c): c is Chapter => !!c);
-    return this.with({ chapters: newOrderedChapters });
-  }
-
-  private updateChapter(chapterId: string, updater: (chapter: Chapter) => Chapter): Project {
+  public updateChapter(chapterId: string, updater: (chapter: Chapter) => Chapter): Project {
     const chapterIndex = this.chapters.findIndex(c => c.id === chapterId);
     if (chapterIndex === -1) return this;
 
@@ -125,6 +118,13 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     newChapters[chapterIndex] = updatedChapter;
 
     return this.with({ chapters: newChapters });
+  }
+
+  public updateChaptersOrder(newOrderIds: string[]): Project {
+    const newOrderedChapters = newOrderIds
+      .map(id => this.chapters.find(c => c.id === id))
+      .filter((c): c is Chapter => !!c);
+    return this.with({ chapters: newOrderedChapters });
   }
   
   // --- Section Methods (Delegation) ---
@@ -141,11 +141,17 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
   }
 
 
-  public addSectionToChapter(chapterId: string, title?: string, content?: string): Project {
+  public addSectionToChapter(chapterId: string, title: string, index?: number): Project {
     const sectionTitle = title || 'Untitled Section';
     const newSectionId = this.generateUniqueId(sectionTitle, this.sections, 'section');
-    const newSection = new Section({ id: newSectionId, title: sectionTitle, type: 'report', content: content || '' });
-    return this.updateChapter(chapterId, c => c.addSection(newSection));
+    const newSection = new Section({ id: newSectionId, title: sectionTitle, type: 'report' });
+    
+    return this.updateChapter(chapterId, c => {
+      const newSections = [...c.sections];
+      const finalIndex = (index === undefined || index < 0 || index > newSections.length) ? newSections.length : index;
+      newSections.splice(finalIndex, 0, newSection);
+      return c.with({ sections: newSections });
+    });
   }
   
   public removeSection(sectionId: string): Project {

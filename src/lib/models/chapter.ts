@@ -8,7 +8,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 export interface ChapterProperties {
     id: string;
     title: string;
-    sections: Section[];
+    sections: readonly (Section | SectionProperties)[];
 }
 
 export class Chapter {
@@ -16,13 +16,13 @@ export class Chapter {
     public readonly title: string;
     public readonly sections: readonly Section[];
 
-    constructor(props: Partial<Omit<ChapterProperties, 'sections'>> & { sections?: (Section | SectionProperties)[] }) {
+    constructor(props: Partial<Omit<ChapterProperties, 'sections'>> & { sections?: readonly (Section | SectionProperties)[] }) {
         this.id = props.id || uuidv4();
         this.title = props.title || 'Untitled Chapter';
         this.sections = (props.sections || []).map(s => s instanceof Section ? s : new Section(s));
     }
 
-    private with(props: Partial<Omit<ChapterProperties, 'id'>>): Chapter {
+    public with(props: Partial<Omit<ChapterProperties, 'id' | 'sections'>> & { sections?: readonly (Section | SectionProperties)[] }): Chapter {
         return new Chapter({ ...this.toJSON(), ...props });
     }
 
@@ -72,7 +72,7 @@ export class Chapter {
         return this.with({ sections: newSections });
     }
 
-    public toJSON(): Omit<ChapterProperties, 'sections'> & { sections: SectionProperties[] } {
+    public toJSON(): ChapterProperties {
         return {
             id: this.id,
             title: this.title,

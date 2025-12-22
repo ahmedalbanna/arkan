@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -30,6 +29,7 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { SortableSectionItem } from './SortableSectionItem';
+import { CSS } from '@dnd-kit/utilities';
 
 
 interface SortableChapterItemProps {
@@ -79,7 +79,7 @@ export function SortableChapterItem({
   };
 
   const style: React.CSSProperties = {
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 2 : 0,
     position: 'relative',

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
@@ -13,7 +12,7 @@ export function useProjectsPage() {
     const router = useRouter();
     const { toast } = useToast();
     const { projects, isLoading, isError, error, refetch, isRefetching } = useProjects();
-    const { loadProject } = useBuilderStore();
+    const { loadProject, setIsCreateProjectOpen } = useBuilderStore();
     const deleteMutation = useDeleteProject();
 
     const handleLoadProject = (project: Project) => {
@@ -26,9 +25,7 @@ export function useProjectsPage() {
     };
 
     const handleCreateNewProject = () => {
-        // This function is now handled by the dialog trigger in the component.
-        // If complex logic were needed, it would go here.
-        // For now, it's a placeholder if direct creation logic is needed from this hook.
+        setIsCreateProjectOpen(true);
     };
 
     return {

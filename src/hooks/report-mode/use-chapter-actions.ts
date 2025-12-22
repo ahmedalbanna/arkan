@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -8,8 +7,7 @@ import { useWritingTool, useToast } from '@/hooks';
 import { useState, useMemo, useEffect } from 'react';
 import { DiffPart, computeDiff } from '@/lib/utils/diff';
 import { useBuilderStore } from '../core/useBuilderStore';
-import { Chapter, SectionContext } from '@/lib/models';
-import type { ManipulationType } from '@/lib/models';
+import { Chapter, SectionContext, ManipulationType } from '@/lib/models';
 
 const formSchema = z.object({
   rewriteStyle: z.string().optional(),
@@ -150,8 +148,8 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     }
     
     const newSectionTitle = `${chapter.title} - ${manipulationType.charAt(0).toUpperCase() + manipulationType.slice(1)}`;
-
-    updateProject(p => p.addSectionToChapter(chapter!.id, newSectionTitle, processedText));
+    
+    updateProject(p => p.addSectionToChapter(chapter.id, newSectionTitle, processedText));
 
     toast({ title: 'Section Added', description: `"${newSectionTitle}" has been added to the chapter.` });
     onOpenChange(false);

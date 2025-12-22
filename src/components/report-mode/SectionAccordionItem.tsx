@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -54,7 +53,7 @@ export function SectionAccordionItem({
 
     function handleTitleSave() {
         if (editedTitle.trim() && editedTitle !== section.title) {
-            updateProject(p => p.updateSectionTitle(section.id, editedTitle.trim()));
+            updateProject(p => p.updateSection(section.id, s => s.with({ title: editedTitle.trim() })));
         }
         setIsEditing(false);
     }

@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { DiagramType } from '@/ai/schemas';
@@ -83,8 +82,7 @@ export class Section {
         this.commandId = props.commandId || null;
         this.controls = { ...defaultControls, ...props.controls };
         this.context = { ...defaultContext, ...props.context };
-        this.instruction = props.instruction || this.buildInstructionText();
-
+        this.instruction = this.buildInstructionText();
     }
 
     public buildInstructionText(): string {

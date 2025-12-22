@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { SectionName } from '@/ai/schemas';
@@ -20,7 +19,6 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { ChapterView } from '@/components/report-mode/ChapterView';
 import { MenuBar } from './MenuBar';
-import RichTextEditor from './RichTextEditor';
 
 export function ReportResults() {
   const { t } = useLocalization();
@@ -37,11 +35,11 @@ export function ReportResults() {
   } = useReportPaginator();
 
   function handleSectionUpdate(key: SectionName, value: string) {
-    updateProject(p => p.updateSection(key, s => s.with({ content: value })));
+    updateProject(p => p.updateSection(key as string, s => s.with({ content: value })));
   };
 
   function handleSectionTitleUpdate(key: SectionName, newTitle: string) {
-    updateProject(p => p.updateSection(key, s => s.with({ title: newTitle })));
+    updateProject(p => p.updateSection(key as string, s => s.with({ title: newTitle })));
   };
 
   function handleChapterTitleUpdate(chapterId: string, newTitle: string) {
@@ -49,7 +47,7 @@ export function ReportResults() {
   };
 
   function handleAddSectionAtIndex(chapterId: string, index: number) {
-    updateProject(p => p.addSectionToChapter(chapterId, 'New Section', index));
+    updateProject(p => p.addSectionToChapter(chapterId, "New Section", index));
   };
 
   function handleMoveSectionUp(sectionId: string) {
@@ -65,7 +63,10 @@ export function ReportResults() {
   };
 
   function handleDeleteChapter(chapterId: string) {
-    updateProject(p => p.removeChapter(chapterId));
+    const newProject = project?.removeChapter(chapterId);
+    if(newProject) {
+        updateProject(() => newProject);
+    }
     toast({
       title: 'Chapter Deleted',
       description: 'The chapter has been removed from your project.',

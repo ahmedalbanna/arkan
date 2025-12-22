@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
@@ -10,7 +9,7 @@ import type { SectionName } from '@/ai/schemas';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { Chapter } from '@/lib/models';
+import { Chapter, Project } from '@/lib/models';
 
 export function useReportGenerationTools() {
     const { t } = useLocalization();
@@ -74,35 +73,21 @@ export function useReportGenerationTools() {
     };
 
     const handleAddChapter = () => {
-        const updatedProject = project?.addChapter();
-        if (updatedProject) {
-            updateProject(() => updatedProject);
-            toast({ title: "Chapter Created", description: `A new untitled chapter has been added.` });
-        }
+        updateProject(p => p.addChapter());
+        toast({ title: "Chapter Created", description: `A new untitled chapter has been added.` });
     };
 
     const handleAddSectionToChapter = (chapterId: string) => {
-        const updatedProject = project?.addSectionToChapter(chapterId, "New Section");
-        if (updatedProject) {
-            updateProject(() => updatedProject);
-        }
+        updateProject(p => p.addSectionToChapter(chapterId, "New Section"));
     };
 
     const handleDeleteSection = (chapterId: string, sectionId: string) => {
-        const chapter = project?.getChapter(chapterId);
-        if (chapter) {
-            const updatedChapter = chapter.removeSection(sectionId);
-            const updatedProject = project!.updateChapter(chapterId, () => updatedChapter);
-            updateProject(() => updatedProject);
-        }
+        updateProject(p => p.updateChapter(chapterId, c => c.removeSection(sectionId)));
     };
 
     const handleDeleteChapter = (chapterId: string) => {
-        const updatedProject = project?.removeChapter(chapterId);
-        if (updatedProject) {
-            updateProject(() => updatedProject);
-            toast({ title: "Chapter Deleted", description: 'The chapter has been removed from your project.' });
-        }
+        updateProject(p => p.removeChapter(chapterId));
+        toast({ title: "Chapter Deleted", description: 'The chapter has been removed from your project.' });
     };
 
     const handleCreateFromToc = (tocText: string) => {
@@ -110,39 +95,38 @@ export function useReportGenerationTools() {
             toast({ title: "Table of Contents is empty", description: "Please paste the section titles into the text area.", variant: "destructive" });
             return;
         }
+        
+        updateProject(p => {
+            let newProject = p.with({ chapters: [] });
+            const lines = tocText.split('\n').map(line => line.trim()).filter(Boolean);
+            let currentChapterId: string | null = null;
+            let chaptersCreated = 0;
+            let sectionsCreated = 0;
 
-        const lines = tocText.split('\n').map(line => line.trim()).filter(Boolean);
-        let chaptersCreated = 0;
-        let sectionsCreated = 0;
-
-        let newProject = project ? project.with({ chapters: [] }) : new Project({ chapters: [] });
-        let currentChapter: Chapter | null = null;
-
-        lines.forEach(line => {
-            const isChapter = !line.match(/^s*d+.d+/);
-            if (isChapter) {
-                const chapterTitle = line.replace(/^d+.?s*/, '').trim();
-                if (chapterTitle) {
-                    newProject = newProject.addChapter(chapterTitle);
-                    currentChapter = newProject.chapters[newProject.chapters.length - 1];
-                    chaptersCreated++;
+            lines.forEach(line => {
+                const isChapter = !line.match(/^\\s*\\d+\\.\\d+/);
+                if (isChapter) {
+                    const chapterTitle = line.replace(/^\\d+\\.?\\s*/, '').trim();
+                    if (chapterTitle) {
+                        newProject = newProject.addChapter(chapterTitle);
+                        currentChapterId = newProject.chapters[newProject.chapters.length - 1].id;
+                        chaptersCreated++;
+                    }
+                } else if (currentChapterId) {
+                    const sectionTitle = line.replace(/^\\d+\\.\\d+\\.?\\s*/, '').trim();
+                    if (sectionTitle) {
+                        newProject = newProject.addSectionToChapter(currentChapterId, sectionTitle);
+                        sectionsCreated++;
+                    }
                 }
-            } else if (currentChapter) {
-                const sectionTitle = line.replace(/^d+.d+.?s*/, '').trim();
-                if (sectionTitle) {
-                    newProject = newProject.addSectionToChapter(currentChapter.id, sectionTitle);
-                    sectionsCreated++;
-                }
-            }
+            });
+            toast({
+                title: "Structure Created",
+                description: `Created ${chaptersCreated} chapters and ${sectionsCreated} sections.`,
+            });
+            setShowTocInput(false);
+            return newProject;
         });
-
-        updateProject(() => newProject);
-
-        toast({
-            title: "Structure Created",
-            description: `Created ${chaptersCreated} chapters and ${sectionsCreated} sections.`,
-        });
-        setShowTocInput(false);
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
@@ -156,27 +140,28 @@ export function useReportGenerationTools() {
 
         if (isChapterDrag) {
             if (!project.chapters?.some(c => c.id === overId)) return;
-            const oldIndex = project.chapters.findIndex(c => c.id === activeId);
-            const newIndex = project.chapters.findIndex(c => c.id === overId);
-            const updatedProject = project.updateChaptersOrder(arrayMove(project.chapters.map(c => c.id), oldIndex, newIndex));
-            updateProject(() => updatedProject);
+            updateProject(p => {
+                const oldIndex = p.chapters.findIndex(c => c.id === activeId);
+                const newIndex = p.chapters.findIndex(c => c.id === overId);
+                return p.updateChaptersOrder(arrayMove(p.chapters.map(c => c.id), oldIndex, newIndex));
+            });
         } else {
-            const activeContainer = project.chapters?.find(c => c.sections.some(s => s.id === activeId));
-            const overContainer = project.chapters?.find(c => c.sections.some(s => s.id === overId)) || project.chapters?.find(c => c.id === overId);
+             updateProject(p => {
+                const activeContainer = p.chapters?.find(c => c.sections.some(s => s.id === activeId));
+                const overContainer = p.chapters?.find(c => c.sections.some(s => s.id === overId)) || p.chapters?.find(c => c.id === overId);
 
-            if (!activeContainer || !overContainer) return;
+                if (!activeContainer || !overContainer) return p;
 
-            if (activeContainer.id === overContainer.id) {
-                const updatedProject = project.updateChapter(activeContainer.id, c => {
-                    const oldIndex = c.sections.findIndex(s => s.id === activeId);
-                    const newIndex = c.sections.findIndex(s => s.id === overId);
-                    return c.with({ sections: arrayMove([...c.sections], oldIndex, newIndex) });
-                });
-                updateProject(() => updatedProject);
-            } else {
-                const updatedProject = project.moveSectionToChapter(activeId, activeContainer.id, overContainer.id);
-                updateProject(() => updatedProject);
-            }
+                if (activeContainer.id === overContainer.id) {
+                    return p.updateChapter(activeContainer.id, c => {
+                        const oldIndex = c.sections.findIndex(s => s.id === activeId);
+                        const newIndex = c.sections.findIndex(s => s.id === overId);
+                        return c.with({ sections: arrayMove([...c.sections], oldIndex, newIndex) });
+                    });
+                } else {
+                    return p.moveSectionToChapter(activeId, activeContainer.id, overContainer.id);
+                }
+             });
         }
     };
 

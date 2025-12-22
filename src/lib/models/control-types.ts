@@ -1,4 +1,3 @@
-
 export type OutputStyle = {
   heading: boolean;
   paragraph: boolean;
