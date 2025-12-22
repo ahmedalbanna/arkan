@@ -153,7 +153,6 @@ export const SectionView = ({ chapterId, sectionKey, title, content, onUpdate, o
                                 key={sectionKey}
                                 content={content}
                                 onChange={(newMarkdown) => onUpdate(sectionKey, newMarkdown)}
-                                onEditorChange={setEditor}
                             />
                         </div>
                     </>

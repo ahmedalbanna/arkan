@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -15,7 +14,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Chapter } from '@/lib/models';
-import { cn } from '@/lib/utils/cn';
 import { Copy, PlusSquare, Speaker, Square, Trash2, Languages, Wrench } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { ChapterToolsDialog } from "./ChapterToolsDialog";
@@ -26,6 +24,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { SectionView } from "./SectionView";
 
 interface ChapterViewProps {
   chapter: Chapter;
@@ -172,6 +171,24 @@ export function ChapterView({
                 )}
             </TooltipProvider>
           </div>
+        </div>
+
+        <div className="space-y-6">
+          {chapter.sections.map((section, index) => (
+            <SectionView
+              key={section.id}
+              sectionKey={section.id}
+              title={section.title}
+              content={section.content || ''}
+              onUpdate={onUpdateSection}
+              onTitleChange={onUpdateSectionTitle}
+              onMoveUp={() => onMoveSectionUp(section.id)}
+              onMoveDown={() => onMoveSectionDown(section.id)}
+              onDelete={() => onDeleteSection(section.id)}
+              isFirst={index === 0}
+              isLast={index === chapter.sections.length - 1}
+            />
+          ))}
         </div>
       </div>
     </>
