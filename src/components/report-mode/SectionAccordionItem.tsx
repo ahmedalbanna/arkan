@@ -1,17 +1,15 @@
 'use client';
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import type { Section } from '@/lib/models';
 import { GripVertical, Link as LinkIcon, Loader2, SlidersHorizontal, Sparkles, StickyNote, Trash2 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Input } from '../ui/input';
 import { ContextSelector } from './SectionContextSelector';
 import { SectionGenerationControls } from './SectionGenerationControls';
 import { GuidelineEditor } from './SectionGuidelineEditor';
@@ -42,30 +40,7 @@ export function SectionAccordionItem({
 }) {
     const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
-    const [isEditing, setIsEditing] = useState(false);
-    const [editedTitle, setEditedTitle] = useState(section.title);
-
     const form = useForm();
-
-    useEffect(() => {
-        setEditedTitle(section.title);
-    }, [section.title]);
-
-    function handleTitleSave() {
-        if (editedTitle.trim() && editedTitle !== section.title) {
-            updateProject(p => p.updateSection(section.id, s => s.with({ title: editedTitle.trim() })));
-        }
-        setIsEditing(false);
-    }
-
-    function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-        if (e.key === 'Enter') {
-            handleTitleSave();
-        } else if (e.key === 'Escape') {
-            setEditedTitle(section.title);
-            setIsEditing(false);
-        }
-    }
 
     const canGenerate = hasCredits && !isAnythingGenerating;
 
@@ -80,7 +55,7 @@ export function SectionAccordionItem({
         <AccordionItem value={itemKey} key={itemKey} className="bg-background border rounded-lg">
             <div className="flex items-center px-4 py-2">
                 <AccordionTrigger className="flex-1 hover:no-underline py-0">
-                    <div className="flex items-center gap-2 flex-1 min-w-0" onDoubleClick={() => setIsEditing(true)}>
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
                         {handleProps && (
                             <div {...handleProps} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
                                 <span className="text-xs w-8 text-left">{chapterIndex + 1}.{index + 1}</span>
@@ -88,42 +63,11 @@ export function SectionAccordionItem({
                             </div>
                         )}
                         {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}
-                        {isEditing ? (
-                            <Input
-                                value={editedTitle}
-                                onChange={(e) => setEditedTitle(e.target.value)}
-                                onBlur={handleTitleSave}
-                                onKeyDown={handleKeyDown}
-                                autoFocus
-                                onClick={(e) => e.stopPropagation()}
-                                className="font-medium border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent"
-                            />
-                        ) : (
-                            <span className="font-medium p-0 h-auto truncate">
-                                {section.title}
-                            </span>
-                        )}
+                        <span className="font-medium p-0 h-auto truncate">
+                            {section.title}
+                        </span>
                     </div>
                 </AccordionTrigger>
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7">
-                            <Trash2 className="h-4 w-4 text-destructive/70" />
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Section?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Are you sure you want to delete the section "{section.title}"? This cannot be undone.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={onDelete} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
             </div>
             <AccordionContent>
                 <FormProvider {...form}>

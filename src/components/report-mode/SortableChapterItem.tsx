@@ -6,28 +6,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useBuilderStore } from '@/hooks';
 import type { Chapter } from '@/lib/models';
 import { useSortable } from '@dnd-kit/sortable';
 import {
   GripVertical,
-  PlusCircle,
-  Trash2
+  PlusCircle
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { SortableSectionItem } from './SortableSectionItem';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -54,29 +41,6 @@ export function SortableChapterItem({
   ...props
 }: SortableChapterItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
-  const { updateProject } = useBuilderStore();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedTitle, setEditedTitle] = useState(chapter.title);
-
-  useEffect(() => {
-    setEditedTitle(chapter.title);
-  }, [chapter.title]);
-
-  function handleTitleSave() {
-    if (editedTitle.trim() && editedTitle !== chapter.title) {
-        updateProject(p => p.updateChapter(chapter.id, c => c.with({ title: editedTitle.trim() })));
-    }
-    setIsEditing(false);
-  };
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') {
-      handleTitleSave();
-    } else if (e.key === 'Escape') {
-      setEditedTitle(chapter.title);
-      setIsEditing(false);
-    }
-  };
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -97,42 +61,11 @@ export function SortableChapterItem({
                   <GripVertical className="h-5 w-5" />
                 </div>
               )}
-              {isEditing ? (
-                <Input
-                  value={editedTitle}
-                  onChange={(e) => setEditedTitle(e.target.value)}
-                  onBlur={handleTitleSave}
-                  onKeyDown={handleKeyDown}
-                  autoFocus
-                  onClick={(e) => e.stopPropagation()}
-                  className="font-semibold border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent truncate"
-                />
-              ) : (
-                <span onDoubleClick={() => setIsEditing(true)} className="font-semibold truncate p-0 h-auto">
-                  {chapter.title}
-                </span>
-              )}
+              <span className="font-semibold truncate p-0 h-auto">
+                {chapter.title}
+              </span>
             </div>
           </AccordionTrigger>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-7 w-7">
-                <Trash2 className="h-4 w-4 text-destructive/70" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Chapter?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to delete the chapter "{chapter.title}" and all of its sections? This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => onDeleteChapter(chapter.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
         </div>
         <AccordionContent>
           <div className="border-t px-4 py-4 space-y-4">
