@@ -41,6 +41,7 @@ import {
 } from 'lucide-react';
 import { GenerateTocDialog } from './GenerateTocDialog';
 import { SortableChapterItem } from './SortableChapterItem';
+import { ScrollArea } from "../ui/scroll-area";
 
 
 export function GenerationTools() {
@@ -114,7 +115,7 @@ export function GenerationTools() {
           )}
 
           <div className="relative flex-grow flex flex-col min-h-0">
-            <div className="flex-grow">
+            <ScrollArea className="flex-grow">
               <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
                   <Accordion type="single" collapsible className="w-full space-y-4">
@@ -136,7 +137,7 @@ export function GenerationTools() {
                   </Accordion>
                 </SortableContext>
               </DndContext>
-            </div>
+            </ScrollArea>
           </div>
         </CardContent>
       </Card>
