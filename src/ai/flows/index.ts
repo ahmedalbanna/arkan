@@ -1,3 +1,4 @@
+
 /**
  * Barrel for ai flows
  *
@@ -44,4 +45,5 @@ export * from './sentence-structure-checker';
 export * from './solve-assignments';
 export * from './generate-project-blueprint';
 export * from './generate-ui-description';
+export * from './generate-chapter-content';
     

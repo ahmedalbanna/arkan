@@ -49,6 +49,7 @@ export function GenerationTools() {
     t,
     project,
     agentMutation,
+    chapterMutation,
     userProfile,
     newChapterTitle,
     setNewChapterTitle,
@@ -57,6 +58,7 @@ export function GenerationTools() {
     isGenerateTocOpen,
     setIsGenerateTocOpen,
     onGenerateSection,
+    onGenerateChapter,
     handleAddChapter,
     handleAddSection,
     handleCreateFromToc,
@@ -124,8 +126,9 @@ export function GenerationTools() {
                         key={chapter.id}
                         onAddSection={handleAddSection}
                         onGenerateSection={onGenerateSection}
+                        onGenerateChapter={onGenerateChapter}
                         activeMutationKey={agentMutation.isPending ? agentMutation.variables as string : null}
-                        isAnythingGenerating={agentMutation.isPending}
+                        isAnythingGenerating={agentMutation.isPending || chapterMutation.isPending}
                         hasCreditsForSingleSection={!!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1}
                       />
                     ))}

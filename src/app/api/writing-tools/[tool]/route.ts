@@ -8,6 +8,7 @@ import { logGeneration } from '@/services/generation-service';
 // Import all flows and schemas
 import { aiResearcher } from '@/ai/flows/ai-researcher';
 import { biasCheckText } from '@/ai/flows/bias-checker';
+import { generateChapterContent } from '@/ai/flows/generate-chapter-content';
 import { detectAiContent } from '@/ai/flows/detect-ai-content';
 import { factCheckText } from '@/ai/flows/fact-checker';
 import { retrieveFact } from '@/ai/flows/fact-retrieval';
@@ -32,7 +33,7 @@ import { clarityAdvisor, concisenessChecker, readabilityEnhancer, rewriteText, s
 import { topicExplainer } from '@/ai/flows/topic-explainer';
 import { translateText } from '@/ai/flows/translate-text';
 import { writeDocument } from '@/ai/flows/write-document';
-import { AIResearcherInputSchema, BiasCheckInputSchema, ClarityAdvisorInputSchema, ConcisenessCheckerInputSchema, DetectAIInputSchema, FactCheckInputSchema, FactRetrievalInputSchema, GenerateCitationInputSchema, GeneratePlantUMLInputSchema, GenerateProjectBlueprintInputSchema, GenerateQuizInputSchema, GenerateTocInputSchema, GenerateUIDescriptionInputSchema, GrammarCheckInputSchema, HumanizeTextInputSchema, IdeaGenerationInputSchema, LiteratureReviewInputSchema, ManipulateTextInputSchema, ParaphraseInputSchema, PlagiarismCheckInputSchema, QuestionAnsweringInputSchema, ReadabilityEnhancerInputSchema, RewriteTextInputSchema, SentenceStructureCheckInputSchema, SolveAssignmentsInputSchema, StyleEditorInputSchema, SummarizeInputSchema, SummarizeTextWithRatioInputSchema, TopicExplainerInputSchema, TranslateTextInputSchema, WriteDocumentInputSchema } from '@/ai/schemas';
+import { AIResearcherInputSchema, BiasCheckInputSchema, ClarityAdvisorInputSchema, ConcisenessCheckerInputSchema, DetectAIInputSchema, FactCheckInputSchema, FactRetrievalInputSchema, GenerateCitationInputSchema, GeneratePlantUMLInputSchema, GenerateProjectBlueprintInputSchema, GenerateQuizInputSchema, GenerateTocInputSchema, GenerateUIDescriptionInputSchema, GrammarCheckInputSchema, HumanizeTextInputSchema, IdeaGenerationInputSchema, LiteratureReviewInputSchema, ManipulateTextInputSchema, ParaphraseInputSchema, PlagiarismCheckInputSchema, QuestionAnsweringInputSchema, ReadabilityEnhancerInputSchema, RewriteTextInputSchema, SentenceStructureCheckInputSchema, SolveAssignmentsInputSchema, StyleEditorInputSchema, SummarizeInputSchema, SummarizeTextWithRatioInputSchema, TopicExplainerInputSchema, TranslateTextInputSchema, WriteDocumentInputSchema, GenerateChapterInputSchema } from '@/ai/schemas';
 
 // Define a map for tool configurations
 const toolConfig = {
@@ -67,6 +68,7 @@ const toolConfig = {
   'solve-assignments': { flow: solveAssignments, schema: SolveAssignmentsInputSchema, creditCost: 2 },
   'project-blueprint': { flow: generateProjectBlueprint, schema: GenerateProjectBlueprintInputSchema, creditCost: 3 },
   'generate-ui-description': { flow: generateUiDescription, schema: GenerateUIDescriptionInputSchema, creditCost: 2 },
+  'generate-chapter': { flow: generateChapterContent, schema: GenerateChapterInputSchema, creditCost: 2 }, // Added new flow
 };
 
 type ToolName = keyof typeof toolConfig;

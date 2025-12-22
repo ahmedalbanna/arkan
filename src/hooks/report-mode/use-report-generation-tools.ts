@@ -11,6 +11,7 @@ import { generateReportSectionApi } from '@/services/api/reportService';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Chapter, Project } from '@/lib/models';
+import { writingToolApi } from '@/services/api/writingToolsService';
 
 export function useReportGenerationTools() {
     const { t } = useLocalization();
@@ -20,6 +21,75 @@ export function useReportGenerationTools() {
     const [newChapterTitle, setNewChapterTitle] = useState('');
     const [showTocInput, setShowTocInput] = useState(false);
     const [isGenerateTocOpen, setIsGenerateTocOpen] = useState(false);
+
+    const chapterMutation = useMutation({
+        mutationKey: ['generateChapterContent'],
+        mutationFn: async (chapterId: string) => {
+            if (!project || !userProfile || !firebaseUser) throw new Error("Project or user not found.");
+            const chapter = project.getChapter(chapterId);
+            if (!chapter) throw new Error("Chapter not found.");
+            if (chapter.sections.length === 0) {
+                toast({ title: 'Cannot Generate', description: 'This chapter has no sections. Please add sections first.', variant: 'destructive' });
+                throw new Error('Chapter has no sections.');
+            }
+
+            const token = await firebaseUser.getIdToken();
+
+            const sectionInstructions = chapter.sections.map(section => {
+                const contextSectionsContent = Object.keys(section.context.sections || {})
+                    .filter(key => section.context.sections[key])
+                    .map(key => {
+                        const content = project.getSectionContent(key);
+                        return `--- Context from Section: ${project.getSection(key)?.title} ---\n${content}`;
+                    })
+                    .join('\n\n');
+
+                const externalContextContent = (project.externalContext || [])
+                    .filter(item => section.context.externalContext?.[item.id])
+                    .map(file => `--- Context from File: ${file.fileName} ---\n${file.content}`)
+                    .join('\n\n');
+
+                const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\n\n');
+
+                return {
+                    title: section.title,
+                    prompt: section.prompt,
+                    guidelines: section.guidelines,
+                    instructionText: section.instruction,
+                    context: fullContext,
+                };
+            });
+
+            const body = {
+                flow: 'generate-chapter',
+                chapterTitle: chapter.title,
+                sectionInstructions: sectionInstructions,
+            };
+
+            const result = await writingToolApi<any, { markdownContent: string }>('/api/writing-tools/generate-chapter', { data: body, token });
+            return { chapterId, content: result.markdownContent };
+        },
+        onSuccess: (data) => {
+            updateProject(p => p.updateChapter(data.chapterId, c => {
+                const newSections = [...c.sections];
+                // This is a simplified approach: it replaces the content of all sections with the new content.
+                // A more advanced approach would parse the returned markdown and update section by section.
+                // For now, we'll put the whole content into the first section and clear others.
+                if (newSections.length > 0) {
+                    newSections[0] = newSections[0].with({ content: data.content });
+                    for (let i = 1; i < newSections.length; i++) {
+                        newSections[i] = newSections[i].with({ content: '' });
+                    }
+                }
+                return c.with({ sections: newSections });
+            }));
+            refetchUser();
+            toast({ title: 'Chapter Generated', description: 'The AI has generated the content for the entire chapter.' });
+        },
+        onError: (error: any) => {
+            toast({ title: 'Chapter Generation Error', description: error?.message || 'Failed to generate chapter content.', variant: 'destructive' });
+        }
+    });
 
     const agentMutation = useMutation({
         mutationKey: ['generateReportSection'],
@@ -72,6 +142,11 @@ export function useReportGenerationTools() {
     const onGenerateSection = (sectionId: SectionName) => {
         agentMutation.mutate(sectionId as string);
     };
+
+    const onGenerateChapter = (chapterId: string) => {
+        chapterMutation.mutate(chapterId);
+    };
+
 
     const handleAddChapter = () => {
         updateProject(p => p.addChapter());
@@ -165,6 +240,7 @@ export function useReportGenerationTools() {
         t,
         project,
         agentMutation,
+        chapterMutation, // expose new mutation
         userProfile,
         newChapterTitle,
         setNewChapterTitle,
@@ -173,6 +249,7 @@ export function useReportGenerationTools() {
         isGenerateTocOpen,
         setIsGenerateTocOpen,
         onGenerateSection,
+        onGenerateChapter, // expose new handler
         handleAddChapter,
         handleAddSection,
         handleCreateFromToc,

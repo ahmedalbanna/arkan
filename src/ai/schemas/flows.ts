@@ -7,6 +7,7 @@ import {
     CitationStyleSchema,
     ClaimStatusSchema,
     ConfidenceLevelSchema,
+    DesignTypeSchema,
     DiagramTypeSchema,
     DirectQuestionTypeSchema,
     FeedbackStatusSchema,
@@ -345,7 +346,7 @@ export type GenerateDiagramOutput = z.infer<typeof GenerateDiagramOutputSchema>;
 // generate-plantuml.ts
 export const GeneratePlantUMLInputSchema = z.object({
     flow: z.literal('generate-plantuml'),
-    description: z.string().describe("A detailed text description of the diagram to be generated."),
+    text: z.string().describe("A detailed text description of the diagram to be generated."),
     diagramType: DiagramTypeSchema.describe("The type of PlantUML diagram to generate."),
 });
 export type GeneratePlantUMLInput = z.infer<typeof GeneratePlantUMLInputSchema>;
@@ -467,6 +468,28 @@ export const GenerateSectionOutputSchema = z.object({
     content: z.string().describe("The generated markdown content for the specified section."),
 });
 export type GenerateSectionOutput = z.infer<typeof GenerateSectionOutputSchema>;
+
+// generate-chapter-content.ts
+const SectionInstructionSchema = z.object({
+    title: z.string().describe("The title of the section."),
+    prompt: z.string().describe("The base prompt for generating this section."),
+    guidelines: z.array(z.string()).optional().describe("Specific guidelines for this section."),
+    instructionText: z.string().optional().describe("Dynamically generated instructions from UI controls."),
+    context: z.string().optional().describe("All contextual information (from other sections, files, etc.) to be used for generating this section.")
+});
+
+export const GenerateChapterInputSchema = z.object({
+    flow: z.literal('generate-chapter'),
+    chapterTitle: z.string().describe("The main title of the chapter to be generated."),
+    sectionInstructions: z.array(SectionInstructionSchema).describe("An ordered array of instructions for each section within the chapter."),
+});
+export type GenerateChapterInput = z.infer<typeof GenerateChapterInputSchema>;
+
+export const GenerateChapterOutputSchema = z.object({
+    markdownContent: z.string().describe("The complete markdown content for the entire chapter, with each section formatted with a level 2 heading (##)."),
+});
+export type GenerateChapterOutput = z.infer<typeof GenerateChapterOutputSchema>;
+
 
 // generate-text.ts
 export const GenerateTextInputSchema = BaseTextInputSchema.extend({
@@ -849,7 +872,7 @@ export type GenerateTocOutput = z.infer<typeof GenerateTocOutputSchema>;
 export const GenerateUIDescriptionInputSchema = z.object({
     flow: z.literal('generate-ui-description'),
     projectFeatures: z.string().min(20, 'Please provide more details about the project features.'),
-    designType: z.enum(['website', 'mobile']),
+    designType: DesignTypeSchema,
 });
 export type GenerateUIDescriptionInput = z.infer<typeof GenerateUIDescriptionInputSchema>;
 
@@ -882,6 +905,7 @@ export const AIFlowInputSchema = z.discriminatedUnion("flow", [
     IdeaGenerationInputSchema,
     GenerateQuizInputSchema,
     GenerateSectionInputSchema,
+    GenerateChapterInputSchema,
     GenerateTextInputSchema,
     GrammarCheckInputSchema,
     HumanizeTextInputSchema,

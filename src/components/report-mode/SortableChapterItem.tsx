@@ -12,7 +12,8 @@ import type { Chapter } from '@/lib/models';
 import { useSortable } from '@dnd-kit/sortable';
 import {
   GripVertical,
-  PlusCircle
+  PlusCircle,
+  Sparkles
 } from 'lucide-react';
 import React from 'react';
 import { SortableSectionItem } from './SortableSectionItem';
@@ -24,6 +25,7 @@ interface SortableChapterItemProps {
   index: number;
   chapterIndex: number;
   onGenerateSection: (sectionId: string) => void;
+  onGenerateChapter: (chapterId: string) => void; // New prop
   onAddSection: (chapterId: string) => void;
   activeMutationKey: string | null;
   isAnythingGenerating: boolean;
@@ -33,6 +35,7 @@ interface SortableChapterItemProps {
 export function SortableChapterItem({
   chapter,
   index,
+  onGenerateChapter, // Destructure new prop
   ...props
 }: SortableChapterItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
@@ -66,6 +69,16 @@ export function SortableChapterItem({
               </span>
             </div>
           </AccordionTrigger>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-2"
+            onClick={() => onGenerateChapter(chapter.id)}
+            disabled={props.isAnythingGenerating}
+          >
+            <Sparkles className="mr-2 h-4 w-4" />
+            Generate Chapter
+          </Button>
         </div>
         <AccordionContent>
           <div className="border-t px-4 py-4 space-y-4">
