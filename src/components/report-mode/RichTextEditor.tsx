@@ -6,23 +6,22 @@ import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
 import { editorExtensions } from '@/lib/tiptap-extensions';
 import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
 import { marked } from 'marked';
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 
+import { useBrowserSpeech } from '@/hooks';
+import { useEditorStore } from '@/hooks/core/use-editor-store';
 import {
   Bold,
   BookText,
   Brush,
   Italic,
   Languages,
-  List,
-  ListOrdered,
   Loader2,
-  Quote,
-  Sparkles,
+  Square,
   Strikethrough,
-  Table as TableIcon,
+  Volume2
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import {
@@ -33,7 +32,6 @@ import {
 } from '../ui/dropdown-menu';
 import { Separator } from '../ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { useEditorStore } from '@/hooks/core/use-editor-store';
 
 
 // Toolbar Component
@@ -45,13 +43,22 @@ interface SectionToolbarProps {
 
 const SectionToolbar = memo(function SectionToolbar({ editor, onTextUpdate, onWholeUpdate }: SectionToolbarProps) {
   const { t } = useLocalization();
-  const { isSpeaking } = useBrowserSpeech();
+  const { speak, stop, isSpeaking } = useBrowserSpeech();
   const { activeAiAction, isProcessing, handleAiAction, rewriteStyles } = useAiActions({
     editor,
     onTextUpdate,
     onWholeUpdate,
   });
 
+  function handleReadAloudClick() {
+    if (isSpeaking) {
+      stop();
+    } else {
+      const { from, to } = editor.state.selection;
+      const textToRead = editor.state.doc.textBetween(from, to) || editor.getText();
+      speak(textToRead);
+    }
+  }
   const formatButtons = [
     { action: () => editor.chain().focus().toggleBold().run(), isActive: editor.isActive('bold'), icon: Bold, label: t('builder.Section.tooltips.bold') },
     { action: () => editor.chain().focus().toggleItalic().run(), isActive: editor.isActive('italic'), icon: Italic, label: t('builder.Section.tooltips.italic') },
@@ -133,6 +140,15 @@ const SectionToolbar = memo(function SectionToolbar({ editor, onTextUpdate, onWh
           </DropdownMenuContent>
         </DropdownMenu>
 
+        {/* Utility Buttons */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8" onClick={handleReadAloudClick}>
+              {isSpeaking ? <Square className="h-4 w-4 text-red-500 fill-current" /> : <Volume2 className="h-4 w-4" />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent><p>{isSpeaking ? 'Stop Speaking' : t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
+        </Tooltip>
       </TooltipProvider>
     </div>
   )
@@ -151,13 +167,19 @@ interface RichTextEditorProps {
 function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const setActiveEditor = useEditorStore((state) => state.setActiveEditor);
   const uniqueId = React.useId();
+  // Ref to control whether the onUpdate hook should fire.
+  const shouldFireUpdate = useRef(true);
+
 
   const editor = useEditor({
     extensions: editorExtensions(uniqueId),
     content: marked.parse(content) as string,
     onUpdate: ({ editor }) => {
-      const markdown = turndownService.turndown(editor.getHTML());
-      onChange(markdown);
+      // Only call onChange if the update was not programmatic
+      if (shouldFireUpdate.current) {
+        const markdown = turndownService.turndown(editor.getHTML());
+        onChange(markdown);
+      }
     },
     onSelectionUpdate: ({ editor }) => {
       setActiveEditor(editor);
@@ -168,7 +190,7 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       },
       handlePaste(view, event) {
         const text = event.clipboardData?.getData('text/plain');
-        
+
         if (text && editor) {
           const html = marked.parse(text);
           // Create a transaction to first delete the selection, then insert the new content.
@@ -206,8 +228,14 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       const currentEditorMarkdown = turndownService.turndown(editor.getHTML());
       if (content !== currentEditorMarkdown) {
         const { from, to } = editor.state.selection;
+
+        // Temporarily disable the onUpdate handler
+        shouldFireUpdate.current = false;
         editor.commands.setContent(marked.parse(content) as string, false);
+        // Restore the previous selection
         editor.commands.setTextSelection({ from, to });
+        // Re-enable the onUpdate handler
+        shouldFireUpdate.current = true;
       }
     }
   }, [content, editor]);
