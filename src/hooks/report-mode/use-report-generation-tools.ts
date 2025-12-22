@@ -78,6 +78,11 @@ export function useReportGenerationTools() {
         toast({ title: "Chapter Created", description: `A new untitled chapter has been added.` });
     };
 
+    const handleAddSection = (chapterId: string) => {
+        updateProject(p => p.addSectionToChapter(chapterId, 'Untitled Section'));
+        toast({ title: "Section Added", description: `A new section has been added.` });
+    };
+
     const handleCreateFromToc = (tocText: string) => {
         if (!tocText.trim()) {
             toast({ title: "Table of Contents is empty", description: "Please paste the section titles into the text area.", variant: "destructive" });
@@ -169,9 +174,8 @@ export function useReportGenerationTools() {
         setIsGenerateTocOpen,
         onGenerateSection,
         handleAddChapter,
+        handleAddSection,
         handleCreateFromToc,
         handleDragEnd,
     };
 }
-
-    

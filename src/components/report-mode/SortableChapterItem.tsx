@@ -22,10 +22,9 @@ import { CSS } from '@dnd-kit/utilities';
 interface SortableChapterItemProps {
   chapter: Chapter;
   index: number;
-  onDeleteSection: (chapterId: string, sectionId: string) => void;
-  onDeleteChapter: (chapterId: string) => void;
   chapterIndex: number;
   onGenerateSection: (sectionId: string) => void;
+  onAddSection: (chapterId: string) => void;
   activeMutationKey: string | null;
   isAnythingGenerating: boolean;
   hasCreditsForSingleSection: boolean;
@@ -34,11 +33,10 @@ interface SortableChapterItemProps {
 export function SortableChapterItem({
   chapter,
   index,
-  onDeleteSection,
-  onDeleteChapter,
   ...props
 }: SortableChapterItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
+  const { updateProject } = useBuilderStore();
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -46,6 +44,10 @@ export function SortableChapterItem({
     zIndex: isDragging ? 2 : 0,
     position: 'relative',
   };
+
+  const handleDeleteSection = (chapterId: string, sectionId: string) => {
+    updateProject(p => p.removeSection(sectionId));
+  }
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
@@ -74,7 +76,7 @@ export function SortableChapterItem({
                   section={section}
                   index={sectionIndex}
                   chapterIndex={props.chapterIndex}
-                  onDelete={() => onDeleteSection(chapter.id, section.id)}
+                  onDelete={() => handleDeleteSection(chapter.id, section.id)}
                   onGenerate={() => props.onGenerateSection(section.id)}
                   isGenerating={props.activeMutationKey === section.id}
                   isAnythingGenerating={props.isAnythingGenerating}
@@ -82,6 +84,10 @@ export function SortableChapterItem({
                 />
               ))}
             </div>
+             <Button size="sm" variant="outline" onClick={() => props.onAddSection(chapter.id)} className="w-full">
+               <PlusCircle className="me-2 h-4 w-4" />
+               Add New Section
+             </Button>
           </div>
         </AccordionContent>
       </AccordionItem>

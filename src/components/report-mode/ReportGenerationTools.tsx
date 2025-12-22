@@ -58,6 +58,7 @@ export function GenerationTools() {
     setIsGenerateTocOpen,
     onGenerateSection,
     handleAddChapter,
+    handleAddSection,
     handleCreateFromToc,
     handleDragEnd,
   } = useReportGenerationTools();
@@ -121,6 +122,7 @@ export function GenerationTools() {
                         chapter={chapter}
                         index={chapterIndex}
                         key={chapter.id}
+                        onAddSection={handleAddSection}
                         onGenerateSection={onGenerateSection}
                         activeMutationKey={agentMutation.isPending ? agentMutation.variables as string : null}
                         isAnythingGenerating={agentMutation.isPending}
@@ -137,5 +139,3 @@ export function GenerationTools() {
     </>
   );
 };
-
-    
