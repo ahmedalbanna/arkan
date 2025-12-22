@@ -13,7 +13,7 @@ export function useProjectsPage() {
     const router = useRouter();
     const { toast } = useToast();
     const { projects, isLoading, isError, error, refetch, isRefetching } = useProjects();
-    const { loadProject, setIsCreateProjectOpen } = useBuilderStore();
+    const { loadProject } = useBuilderStore();
     const deleteMutation = useDeleteProject();
 
     const handleLoadProject = (project: Project) => {
@@ -26,7 +26,9 @@ export function useProjectsPage() {
     };
 
     const handleCreateNewProject = () => {
-        setIsCreateProjectOpen(true);
+        // This function is now handled by the dialog trigger in the component.
+        // If complex logic were needed, it would go here.
+        // For now, it's a placeholder if direct creation logic is needed from this hook.
     };
 
     return {

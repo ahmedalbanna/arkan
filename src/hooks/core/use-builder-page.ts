@@ -77,7 +77,7 @@ export function useBuilderPageLogic() {
   };
 
   const updateProjectName = useCallback((name: string) => {
-    updateProject(p => { p.name = name; });
+    updateProject(p => p.with({ name }));
   }, [updateProject]);
   
   const isLoadingProject = isClient && !projectFromStore && !!localStorage.getItem(LAST_PROJECT_ID_KEY);

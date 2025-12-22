@@ -43,15 +43,12 @@ export function useGuidelineEditor(itemKey: string) {
                 JSON.stringify(currentSection.guidelines) !== JSON.stringify(guidelines);
 
             if (hasChanged) {
-                updateProject(p => {
-                    const sec = p.getSection(itemKey);
-                    if (sec) {
-                        sec.agentId = selectedAgentId;
-                        sec.commandId = selectedCommandId; // Still here for legacy reasons
-                        sec.prompt = prompt;
-                        sec.guidelines = guidelines;
-                    }
-                });
+                updateProject(p => p.updateSection(itemKey, sec => sec.with({
+                    agentId: selectedAgentId,
+                    commandId: selectedCommandId,
+                    prompt: prompt,
+                    guidelines: guidelines
+                })));
             }
         }, 500); // 500ms debounce
 

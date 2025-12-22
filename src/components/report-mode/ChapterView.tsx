@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -14,12 +15,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLocalization } from '@/context/LocalizationContext';
-import { Chapter } from '@/lib/models';
+import { Chapter, SectionContext } from '@/lib/models';
 import { cn } from '@/lib/utils/cn';
 import { PlusCircle, Trash2, Wrench } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { SectionView } from './SectionView';
 import { ChapterToolsDialog } from "./ChapterToolsDialog";
+import type { SectionName } from "@/ai/schemas";
 
 interface ChapterViewProps {
   chapter: Chapter;
@@ -127,7 +129,7 @@ export function ChapterView({
             <div key={section.id} className="group relative mb-8 last:mb-0">
               <SectionView
                 chapterId={chapter.id}
-                sectionKey={section.id}
+                sectionKey={section.id as SectionName}
                 title={section.title}
                 content={section.content || ''}
                 onUpdate={onUpdateSection}

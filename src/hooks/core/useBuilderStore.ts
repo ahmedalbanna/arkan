@@ -7,103 +7,50 @@ import { localProjectService } from '@/services/local-project-service';
 import React from 'react';
 import { create } from 'zustand';
 
-// This type includes both the state and the actions for the store
 interface BuilderState {
     project: Project | null;
     hasUnsavedChanges: boolean;
     setHasUnsavedChanges: (hasChanges: boolean) => void;
-
-    // --- Project lifecycle actions ---
+    updateProject: (updater: (project: Project) => Project) => void;
     loadProject: (projectData: ProjectProperties) => void;
-    updateProject: (updater: (project: Project) => void) => void;
     newSession: () => void;
-
-    // --- UI and Session management actions ---
-    isSavePromptOpen: boolean;
-    setIsSavePromptOpen: (isOpen: boolean) => void;
-
-    // States for dialogs
-    newProjectName: string;
-    setNewProjectName: (name: string) => void;
-    newProjectDescription: string;
-    setNewProjectDescription: (desc: string) => void;
-    handleStartBuilding: (t: (key: string) => string, router: any) => void;
-    isCreateProjectOpen: boolean,
-    setIsCreateProjectOpen: (isOpen: boolean) => void;
-
-    // File upload logic
     fileInputRef: React.RefObject<HTMLInputElement>;
     handleUploadClick: () => void;
     onFileChange: (e: React.ChangeEvent<HTMLInputElement>, toast: any, t: any, router: any) => void;
+    isCreateProjectOpen: boolean;
+    setIsCreateProjectOpen: (isOpen: boolean) => void;
 }
 
-const createNewTemporaryProject = (): Project => {
-    const project = new Project({});
-    return project;
-};
+const createNewTemporaryProject = (): Project => new Project({});
 
-// The create function now returns the combined state and actions
 const useBuilderStore = create<BuilderState>((set, get) => {
-
     const fileInputRef = React.createRef<HTMLInputElement>();
 
-    // Initial state setup
     return {
         project: createNewTemporaryProject(),
         hasUnsavedChanges: false,
         setHasUnsavedChanges: (hasChanges) => set({ hasUnsavedChanges: hasChanges }),
-        isSavePromptOpen: false,
-        newProjectName: '',
-        newProjectDescription: '',
-        isCreateProjectOpen: false,
-        fileInputRef,
 
-        // --- Core Project Actions ---
         loadProject: (projectData) => {
-            const newProject = new Project({
-                ...projectData,
-                chapters: (projectData.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c as ChapterProperties))
-            });
+            const newProject = new Project(projectData);
             localStorage.setItem('lastActiveProjectId', newProject.id);
             set({ project: newProject, hasUnsavedChanges: false });
         },
+
         updateProject: (updater) => {
             set(state => {
                 if (!state.project) return {};
-                // Create a deep clone to ensure React detects the change.
-                const newProjectInstance = new Project(JSON.parse(JSON.stringify(state.project.toStateObject())));
-                updater(newProjectInstance);
-                return { project: newProjectInstance, hasUnsavedChanges: true };
+                const newProject = updater(state.project);
+                return { project: newProject, hasUnsavedChanges: true };
             });
         },
+
         newSession: () => {
             localStorage.removeItem('lastActiveProjectId');
             set({ project: createNewTemporaryProject(), hasUnsavedChanges: false });
         },
 
-        // --- Dialog State Actions ---
-        setIsSavePromptOpen: (isOpen) => set({ isSavePromptOpen: isOpen }),
-        setNewProjectName: (name) => set({ newProjectName: name }),
-        setNewProjectDescription: (desc) => set({ newProjectDescription: desc }),
-        setIsCreateProjectOpen: (isOpen) => set({ isCreateProjectOpen: isOpen }),
-
-        // --- Dialog Logic Actions ---
-        handleStartBuilding: async (t, router) => {
-            const { newProjectName, newProjectDescription, loadProject } = get();
-            if (!newProjectName && !newProjectDescription) return;
-
-            const newProjectData = {
-                name: newProjectName || t('projects.untitled'),
-                projectDescription: newProjectDescription,
-            };
-            const newProject = new Project(newProjectData);
-            await localProjectService.saveProject(newProject.toStateObject());
-            loadProject(newProject.toStateObject());
-            router.push('/builder');
-            set({ isCreateProjectOpen: false, newProjectName: '', newProjectDescription: '' });
-        },
-
-        // --- File Upload ---
+        fileInputRef,
         handleUploadClick: () => get().fileInputRef.current?.click(),
         onFileChange: (e, toast, t, router) => {
             const file = e.target.files?.[0];
@@ -126,10 +73,11 @@ const useBuilderStore = create<BuilderState>((set, get) => {
                 };
                 reader.readAsText(file);
             }
-            if (e.target) e.target.value = ''; // Reset file input
+            if (e.target) e.target.value = '';
         },
+        isCreateProjectOpen: false,
+        setIsCreateProjectOpen: (isOpen: boolean) => set({ isCreateProjectOpen: isOpen }),
     };
 });
-
 
 export { useBuilderStore };

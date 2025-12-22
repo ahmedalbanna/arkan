@@ -17,8 +17,9 @@ const formSchema = z.object({
   tone: z.string().optional(),
   targetLevel: z.string().optional(),
   targetReduction: z.number().optional(),
-  focusAreas: z.string().optional(), // Storing as string, will split later
+  focusAreas: z.array(z.string()).optional(), // Changed to array of strings
 });
+
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -58,14 +59,14 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
       tone: '',
       targetLevel: 'high-school',
       targetReduction: 20,
-      focusAreas: '',
+      focusAreas: [],
     },
   });
 
-  const mutation = useWritingTool('/api/writing-tools/manipulate-text', {
+  const mutation = useWritingTool('/api/writing-tools/text-stylist', {
     onSuccess: (data: any, variables) => {
-      const resultText = data.rewrittenText || JSON.stringify(data, null, 2);
-      const original = variables.textToManipulate;
+      const resultText = data.rewrittenText || data.editedText || data.enhancedText || data.conciseText || data.improvedText || JSON.stringify(data, null, 2);
+      const original = (variables as any).text;
       setDiff(computeDiff(original, resultText));
     },
     onError: (error) => {
@@ -97,44 +98,38 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     const fullContext = [contextSectionsContent, contextFilesContent].filter(Boolean).join('\n\n');
     const textWithContext = `${textToProcess}\n\n${fullContext ? `--- Additional Context ---\n${fullContext}`: ''}`;
 
-    let command = '';
+    let payload: any = { text: textWithContext };
+
     switch (manipulationType) {
         case 'rewrite':
-            command = `Rewrite this entire document in a ${formData.rewriteStyle || 'neutral'} style, preserving the chapter and section structure.`;
+            payload.style = formData.rewriteStyle || 'neutral';
             break;
         case 'summarize':
-            command = `Summarize this entire document to about ${compressionRatio}% of its original length, keeping the main chapter and section headings.`;
-            break;
+             payload.ratio = compressionRatio;
+             break;
         case 'style-editor':
-            command = `Improve the writing style of the context text.`;
-            if (formData.targetAudience) command += ` The target audience is ${formData.targetAudience}.`;
-            if (formData.tone) command += ` The desired tone is ${formData.tone}.`;
+            payload.targetAudience = formData.targetAudience;
+            payload.tone = formData.tone;
             break;
         case 'readability-enhancer':
-            command = `Enhance the readability of the context text. Target a ${formData.targetLevel || 'high-school'} reading level.`;
-            break;
+            payload.targetLevel = formData.targetLevel;
+             break;
         case 'conciseness-checker':
-             command = `Make the context text more concise, aiming for a ${formData.targetReduction || 20}% reduction in word count.`;
+             payload.targetReduction = formData.targetReduction;
              break;
         case 'clarity-advisor':
-            command = 'Improve the clarity of the context text.';
-            if (formData.focusAreas) {
-                command += ` Focus on these areas: ${formData.focusAreas}.`;
-            }
+            payload.focusAreas = formData.focusAreas;
             break;
-        default:
-            command = 'Improve the overall style and flow of this document.';
     }
     
-    mutation.mutate({ textToManipulate: textWithContext, command });
+    mutation.mutate(payload);
   };
   
   const isProcessing = mutation.isPending;
-  const resultData = mutation.data;
+  const resultData = mutation.data as any;
   let processedText = '';
   if (resultData) {
-      if ('rewrittenText' in (resultData as any)) processedText = (resultData as any).rewrittenText;
-      else if (typeof resultData === 'object') processedText = JSON.stringify(resultData, null, 2);
+      processedText = resultData.rewrittenText || resultData.summarizedText || resultData.editedText || resultData.enhancedText || resultData.conciseText || resultData.improvedText || JSON.stringify(resultData, null, 2);
   }
 
   const manipulationTypes: { value: ManipulationType; label: string }[] = [
@@ -156,9 +151,7 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     
     const newSectionTitle = `${chapter.title} - ${manipulationType.charAt(0).toUpperCase() + manipulationType.slice(1)}`;
 
-    updateProject(p => {
-      p.addSectionToChapter(chapter.id, newSectionTitle, processedText || '');
-    });
+    updateProject(p => p.addSectionToChapter(chapter!.id, newSectionTitle, processedText));
 
     toast({ title: 'Section Added', description: `"${newSectionTitle}" has been added to the chapter.` });
     onOpenChange(false);

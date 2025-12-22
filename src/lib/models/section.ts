@@ -100,7 +100,7 @@ export class Section {
         
         if (this.controls.tone) instructions.push(`The tone should be ${this.controls.tone}.`);
         if (this.controls.wordCount) instructions.push(`Aim for a word count of approximately ${this.controls.wordCount} words.`);
-    
+
         if (this.controls.outputStyle.diagram && this.controls.diagramType) {
             instructions.push(`The output must include a PlantUML diagram of type '${this.controls.diagramType}'.`);
         }
@@ -135,8 +135,8 @@ export class Section {
             instruction: this.buildInstructionText(), // Always build fresh on serialization
         };
     }
-
-    public toStateObject(): SectionProperties {
-        return this.toJSON();
+    
+    public with(props: Partial<Omit<SectionProperties, 'id'>>): Section {
+        return new Section({ ...this.toJSON(), ...props, id: this.id });
     }
 }

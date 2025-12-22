@@ -6,7 +6,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
+} from "@/components/ui/accordion";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +33,8 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useBuilderStore } from '@/hooks';
 import { Chapter, Section } from '@/lib/models';
 import { cn } from '@/lib/utils/cn';
+import { CSS } from '@dnd-kit/utilities';
+
 import {
   DndContext,
   closestCenter,
@@ -44,7 +46,6 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import {
   BookOpenText,
   GripVertical,
@@ -140,12 +141,7 @@ function SortableChapterItem({
 
   function handleTitleSave() {
     if (editedTitle.trim() && editedTitle !== chapter.title) {
-      updateProject(p => {
-        const chap = p.getChapter(chapter.id);
-        if (chap) {
-          chap.title = editedTitle.trim();
-        }
-      });
+        updateProject(p => p.updateChapter(chapter.id, c => c.with({ title: editedTitle.trim() })));
     }
     setIsEditing(false);
   };
@@ -245,7 +241,7 @@ function SortableChapterItem({
 
 export function GenerationTools() {
   const { t, locale } = useLocalization();
-  const { project, updateProject } = useBuilderStore(); // Directly use the store
+  const { project, updateProject } = useBuilderStore();
   const { data: sectionConfigs, isFetched: sectionsLoaded } = useSections();
   const { userProfile, refetchUser, firebaseUser } = useAuth();
   const queryClient = useQueryClient();
@@ -254,7 +250,7 @@ export function GenerationTools() {
   const [isGenerateTocOpen, setIsGenerateTocOpen] = useState(false);
 
   const agentMutation = useMutation({
-    mutationKey: ['generateReportSection'], // Static key
+    mutationKey: ['generateReportSection'], 
     mutationFn: async (sectionId: string) => {
       if (!project || !userProfile || !firebaseUser) throw new Error("Project or user not found.");
 
@@ -263,16 +259,9 @@ export function GenerationTools() {
 
       const token = await firebaseUser.getIdToken();
 
-      const controls = section.controls;
       const context = section.context;
 
-      let instructionText = `Please use a ${controls.tone || 'professional'} tone and aim for a word count of approximately ${controls.wordCount || 250} words. The complexity should be ${controls.complexity > 66 ? 'technical' : controls.complexity > 33 ? 'balanced' : 'simple'}.`;
-      if (controls.language && controls.language !== 'default') {
-        const langMap: Record<string, string> = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
-        instructionText += ` The output language must be ${langMap[controls.language] || 'English'}.`;
-      }
-
-      const otherSectionsContext: Record<string, string> = {};
+      let otherSectionsContext: Record<string, string> = {};
       Object.keys(context.sections || {}).forEach(key => {
         if (context.sections[key]) {
           const content = project.getSectionContent(key);
@@ -291,7 +280,7 @@ export function GenerationTools() {
         otherSections: otherSectionsContext,
         externalContext: externalContextFiles,
         guidelines: section.guidelines,
-        instructionText,
+        instructionText: section.instruction,
       };
 
       const result = await generateReportSectionApi(body, token);
@@ -302,14 +291,12 @@ export function GenerationTools() {
         throw new Error('Empty generation result');
       }
       
-      // The payload for the onSuccess callback
       return { sectionId: section.id, content };
     },
     onSuccess: (data) => {
-      // Update the project state with the new content
-      updateProject(p => p.updateSectionContent(data.sectionId, data.content));
-      refetchUser(); // Refetch user to update credits
-      toast({ title: 'Section Generated', description: 'The AI has generated the content for your section.' });
+        updateProject(p => p.updateSection(data.sectionId, s => s.with({ content: data.content })));
+        refetchUser();
+        toast({ title: 'Section Generated', description: 'The AI has generated the content for your section.' });
     },
     onError: (error: any) => {
       toast({ title: 'Generation error', description: error?.message || 'Failed to generate section', variant: 'destructive' });
@@ -329,9 +316,7 @@ export function GenerationTools() {
   };
 
   function handleAddSectionToChapter(chapterId: string) {
-    updateProject(p => {
-      p.addSectionToChapter(chapterId, "New Section");
-    });
+    updateProject(p => p.addSectionToChapter(chapterId, "New Section"));
   };
 
   function handleDeleteSection(chapterId: string, sectionId: string) {
@@ -352,63 +337,59 @@ export function GenerationTools() {
       });
       return;
     }
-
+  
     const lines = tocText.split('\n').map(line => line.trim()).filter(Boolean);
     let chaptersCreated = 0;
     let sectionsCreated = 0;
-
+  
     updateProject(p => {
-      p.chapters = []; // Clear existing chapters
-      let currentChapterId: string | null = null;
-      let chapterCounter = 1;
-
+      let newProject = p.with({ chapters: [] });
+      let currentChapter: Chapter | null = null;
+  
       lines.forEach(line => {
-        const isChapter = !line.match(/^s*d+.d+/); // If it doesn't look like "1.1", it's a chapter
-
+        const isChapter = !line.match(/^s*d+.d+/);
+  
         if (isChapter) {
           const chapterTitle = line.replace(/^d+.?s*/, '').trim();
           if (chapterTitle) {
-            currentChapterId = p.addChapter(chapterTitle);
+            newProject = newProject.addChapter(chapterTitle);
+            currentChapter = newProject.chapters[newProject.chapters.length - 1];
             chaptersCreated++;
-            chapterCounter++;
           }
-        } else if (currentChapterId) { // It's a section
+        } else if (currentChapter) {
           const sectionTitle = line.replace(/^d+.d+.?s*/, '').trim();
           if (sectionTitle) {
-            p.addCustomSection(currentChapterId, sectionTitle);
+            newProject = newProject.addSectionToChapter(currentChapter.id, sectionTitle);
             sectionsCreated++;
           }
         }
       });
+      return newProject;
     });
-
+  
     toast({
       title: "Structure Created",
       description: `Created ${chaptersCreated} chapters and ${sectionsCreated} sections.`,
     });
     setShowTocInput(false);
-  };
+  }
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
-
     if (!over) return;
-
     const activeId = active.id.toString();
     const overId = over.id.toString();
-
     if (activeId === overId) return;
 
     const isChapterDrag = project?.chapters?.some(c => c.id === activeId);
 
     if (isChapterDrag) {
       if (!project?.chapters?.some(c => c.id === overId)) return;
-
       updateProject(p => {
-        if (!p.chapters) return;
+        if (!p.chapters) return p;
         const oldIndex = p.chapters.findIndex(c => c.id === activeId);
         const newIndex = p.chapters.findIndex(c => c.id === overId);
-        p.updateChaptersOrder(arrayMove(p.chapters.map(c => c.id), oldIndex, newIndex));
+        return p.updateChaptersOrder(arrayMove(p.chapters.map(c => c.id), oldIndex, newIndex));
       });
     } else {
       const activeContainer = project?.chapters?.find(c => c.sections.some(s => s.id === activeId));
@@ -417,17 +398,13 @@ export function GenerationTools() {
       if (!activeContainer || !overContainer) return;
 
       if (activeContainer.id === overContainer.id) {
-        updateProject(p => {
-          const chapter = p.getChapter(activeContainer.id);
-          if (!chapter) return;
-          const oldIndex = chapter.sections.findIndex(s => s.id === activeId);
-          const newIndex = chapter.sections.findIndex(s => s.id === overId);
-          chapter.sections = arrayMove(chapter.sections, oldIndex, newIndex);
-        });
+        updateProject(p => p.updateChapter(activeContainer.id, c => {
+          const oldIndex = c.sections.findIndex(s => s.id === activeId);
+          const newIndex = c.sections.findIndex(s => s.id === overId);
+          return c.with({ sections: arrayMove([...c.sections], oldIndex, newIndex) });
+        }));
       } else {
-        updateProject(p => {
-          p.moveSectionToChapter(activeId, activeContainer.id, overContainer.id);
-        });
+        updateProject(p => p.moveSectionToChapter(activeId, activeContainer.id, overContainer.id));
       }
     }
   };

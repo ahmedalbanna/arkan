@@ -4,53 +4,68 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Chapter, ChapterProperties } from './chapter';
 import { ExternalContext, ExternalContextType } from './external-context';
-import { Section } from './section';
+import { Section, defaultControls, defaultContext } from './section';
+import { arrayMove } from '@dnd-kit/sortable';
+
 
 export interface ProjectProperties {
   id?: string;
   userId?: string;
   createdAt?: string;
   updatedAt?: string;
-  name?: string | undefined;
-  projectDescription?: string | undefined;
+  name?: string;
+  projectDescription?: string;
   chapters?: (Chapter | ChapterProperties)[];
-  externalContext?: ExternalContext[] | undefined;
+  externalContext?: ExternalContext[];
 }
 
 
-export class Project implements Required<ProjectProperties> {
-  public id: string;
-  public userId: string;
-  public createdAt: string;
-  public updatedAt: string;
-  public hasUnsavedChanges: boolean;
+export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
+  public readonly id: string;
+  public readonly userId: string | undefined;
+  public readonly createdAt: string;
+  public readonly updatedAt: string;
 
-  public name: string;
-  public projectDescription: string;
-  public chapters: Chapter[];
-  public externalContext: ExternalContext[];
+  public readonly name: string;
+  public readonly projectDescription: string;
+  public readonly chapters: readonly Chapter[];
+  public readonly externalContext: readonly ExternalContext[];
 
 
   constructor(props: ProjectProperties) {
-    this.id = props.id || uuidv4(); // Use UUID for new, unsaved projects
-    this.userId = props.userId || '';
+    this.id = props.id || uuidv4();
+    this.userId = props.userId;
     this.createdAt = props.createdAt || new Date().toISOString();
     this.updatedAt = props.updatedAt || new Date().toISOString();
     this.name = props.name || 'Untitled Project';
     this.projectDescription = props.projectDescription || 'Simple Project';
-    // Ensure chapters are instances of the Chapter class for consistent API
-    this.chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c as ChapterProperties));
+    this.chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c));
     this.externalContext = (props.externalContext || []).map(ctx => ({ ...ctx, id: ctx.id || uuidv4() }));
-    this.hasUnsavedChanges = !props.userId || false; // New projects are considered to have unsaved changes
+  }
+
+  public with(props: Partial<Omit<ProjectProperties, 'id'>>): Project {
+    return new Project({ ...this.toJSON(), ...props });
+  }
+
+  private generateUniqueId(baseName: string, collection: readonly { id: string }[], fallback: string = 'item'): string {
+    let baseId = baseName.toLowerCase().trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-');
+
+    if (!baseId) baseId = fallback;
+    let newId = baseId;
+    let counter = 1;
+    const existingIds = new Set(collection.map(item => item.id));
+    while (existingIds.has(newId)) {
+        newId = `${baseId}-${counter++}`;
+    }
+    return newId;
   }
 
   // --- Getters for derived state ---
-  get sections(): Section[] {
+  get sections(): readonly Section[] {
     return this.chapters.flatMap(c => c.sections);
-  }
-
-  get sectionsOrder(): string[] {
-    return this.sections.map(s => s.id);
   }
 
   public hasContent(): boolean {
@@ -60,11 +75,7 @@ export class Project implements Required<ProjectProperties> {
     return hasBasicInfo || hasChaptersWithContent || hasExternalContext;
   }
 
-  /**
-   * Converts the Project instance to a plain JSON object for serialization.
-   * This method is automatically used by `JSON.stringify`.
-   */
-  public toJSON(): Required<Omit<ProjectProperties, 'proposalContent'>> {
+  public toJSON(): ProjectProperties {
     return {
       id: this.id,
       userId: this.userId,
@@ -72,49 +83,51 @@ export class Project implements Required<ProjectProperties> {
       updatedAt: this.updatedAt,
       name: this.name,
       projectDescription: this.projectDescription,
-      chapters: this.chapters.map(c => c.toJSON()), // Serialize chapters
-      externalContext: this.externalContext,
+      chapters: this.chapters.map(c => c.toJSON()),
+      externalContext: [...this.externalContext],
     };
   }
 
-  public toStateObject(): Required<Omit<ProjectProperties, 'proposalContent'>> {
+  public toStateObject(): ProjectProperties {
     return this.toJSON();
   }
 
   // --- Chapter Methods ---
-  public addChapter(title?: string): string {
+  public addChapter(title?: string): Project {
     const chapterTitle = title || 'Untitled Chapter';
-    let baseId = chapterTitle.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
-    if (!baseId) baseId = 'chapter';
-
-    let newChapterId = baseId;
-    let counter = 1;
-    while (this.chapters.some(c => c.id === newChapterId)) {
-      newChapterId = `${baseId}-${counter}`;
-      counter++;
-    }
-
+    const newChapterId = this.generateUniqueId(chapterTitle, this.chapters, 'chapter');
     const newChapter = new Chapter({ id: newChapterId, title: chapterTitle, sections: [] });
-    this.chapters.push(newChapter);
-    return newChapterId;
+    return this.with({ chapters: [...this.chapters, newChapter] });
   }
 
-  public removeChapter(chapterId: string): void {
-    this.chapters = this.chapters.filter(c => c.id !== chapterId);
+  public removeChapter(chapterId: string): Project {
+    const newChapters = this.chapters.filter(c => c.id !== chapterId);
+    return this.with({ chapters: newChapters });
   }
 
   public getChapter(chapterId: string): Chapter | undefined {
     return this.chapters.find(c => c.id === chapterId);
   }
 
-  public updateChaptersOrder(newOrderIds: string[]): void {
+  public updateChaptersOrder(newOrderIds: string[]): Project {
     const newOrderedChapters = newOrderIds
       .map(id => this.chapters.find(c => c.id === id))
       .filter((c): c is Chapter => !!c);
-    this.chapters = newOrderedChapters;
+    return this.with({ chapters: newOrderedChapters });
   }
 
-  // --- Section Methods ---
+  private updateChapter(chapterId: string, updater: (chapter: Chapter) => Chapter): Project {
+    const chapterIndex = this.chapters.findIndex(c => c.id === chapterId);
+    if (chapterIndex === -1) return this;
+
+    const newChapters = [...this.chapters];
+    const updatedChapter = updater(newChapters[chapterIndex]);
+    newChapters[chapterIndex] = updatedChapter;
+
+    return this.with({ chapters: newChapters });
+  }
+  
+  // --- Section Methods (Delegation) ---
   public getSection(sectionId: string): Section | undefined {
     return this.sections.find(s => s.id === sectionId);
   }
@@ -123,186 +136,78 @@ export class Project implements Required<ProjectProperties> {
     return this.getSection(sectionId)?.content;
   }
 
-  public updateSectionContent(sectionId: string, newContent: string): void {
-    const section = this.getSection(sectionId);
-    if (section) {
-      section.content = newContent;
-    }
+  private findChapterForSection(sectionId: string): Chapter | undefined {
+    return this.chapters.find(c => c.getSection(sectionId));
   }
 
-  public updateSectionTitle(sectionId: string, newTitle: string): void {
-    const section = this.getSection(sectionId);
-    if (section) {
-      section.title = newTitle;
-    }
-  }
 
-  public addSectionToChapter(chapterId: string, title?: string): string | null {
-    const chapter = this.getChapter(chapterId);
-    if (!chapter) return null;
-
+  public addSectionToChapter(chapterId: string, title?: string, content?: string): Project {
     const sectionTitle = title || 'Untitled Section';
-    let baseId = sectionTitle.toLowerCase().trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-');
-    if (!baseId) baseId = 'section';
-
-    let newSectionId = baseId;
-    let counter = 1;
-    while (this.sections.some(s => s.id === newSectionId)) {
-      newSectionId = `${baseId}-${counter}`;
-      counter++;
-    }
-
-    const newSection = new Section({
-      id: newSectionId,
-      title: sectionTitle,
-      type: 'report',
-      content: '',
-      prompt: 'You are a helpful assistant. Write a section based on the user\'s instructions.',
-      guidelines: [],
-    });
-
-    chapter.addSection(newSection);
-    return newSectionId;
+    const newSectionId = this.generateUniqueId(sectionTitle, this.sections, 'section');
+    const newSection = new Section({ id: newSectionId, title: sectionTitle, type: 'report', content: content || '' });
+    return this.updateChapter(chapterId, c => c.addSection(newSection));
+  }
+  
+  public removeSection(sectionId: string): Project {
+    const chapter = this.findChapterForSection(sectionId);
+    if (!chapter) return this;
+    return this.updateChapter(chapter.id, c => c.removeSection(sectionId));
+  }
+  
+  public updateSection(sectionId: string, updater: (section: Section) => Section): Project {
+    const chapter = this.findChapterForSection(sectionId);
+    if (!chapter) return this;
+    return this.updateChapter(chapter.id, c => c.updateSection(sectionId, updater));
+  }
+  
+  public moveSectionUp(sectionId: string): Project {
+    const chapter = this.findChapterForSection(sectionId);
+    if (!chapter) return this;
+    return this.updateChapter(chapter.id, c => c.moveSectionUp(sectionId));
   }
 
-  public addSectionAtIndex(chapterId: string, index: number, title?: string): string | null {
-    const chapter = this.getChapter(chapterId);
-    if (!chapter) return null;
-
-    const sectionTitle = title || 'Untitled Section';
-    let baseId = sectionTitle.toLowerCase().trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-');
-    if (!baseId) baseId = 'section';
-
-    let newSectionId = baseId;
-    let counter = 1;
-    while (this.sections.some(s => s.id === newSectionId)) {
-      newSectionId = `${baseId}-${counter}`;
-      counter++;
-    }
-
-    const newSection = new Section({
-      id: newSectionId,
-      title: sectionTitle,
-      type: 'report',
-      content: '',
-      prompt: 'You are a helpful assistant. Write a section based on the user\'s instructions.',
-      guidelines: [],
-    });
-
-    chapter.sections.splice(index, 0, newSection);
-    return newSectionId;
+  public moveSectionDown(sectionId: string): Project {
+    const chapter = this.findChapterForSection(sectionId);
+    if (!chapter) return this;
+    return this.updateChapter(chapter.id, c => c.moveSectionDown(sectionId));
   }
 
-  public moveSectionUp(sectionId: string): void {
-    for (const chapter of this.chapters) {
-      const index = chapter.sections.findIndex(s => s.id === sectionId);
-      if (index > 0) {
-        const [section] = chapter.sections.splice(index, 1);
-        chapter.sections.splice(index - 1, 0, section);
-        this.updatedAt = new Date().toISOString();
-        this.hasUnsavedChanges = true;
-        return;
-      }
-    }
-  }
-
-  public moveSectionDown(sectionId: string): void {
-    for (const chapter of this.chapters) {
-      const index = chapter.sections.findIndex(s => s.id === sectionId);
-      if (index !== -1 && index < chapter.sections.length - 1) {
-        const [section] = chapter.sections.splice(index, 1);
-        chapter.sections.splice(index + 1, 0, section);
-        this.updatedAt = new Date().toISOString();
-        this.hasUnsavedChanges = true;
-        return;
-      }
-    }
-  }
-  public addCustomSection(chapterId: string, title: string): string | null {
-    const chapter = this.getChapter(chapterId);
-    if (!chapter) return null;
-
-    const baseId = title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
-    let newSectionId = baseId;
-    let counter = 1;
-    while (this.sections.some(s => s.id === newSectionId)) {
-      newSectionId = `${baseId}-${counter}`;
-      counter++;
-    }
-
-    const newSection = new Section({
-      id: newSectionId,
-      title: title,
-      type: 'report',
-      content: '',
-      prompt: `You are an expert technical writer. Write a comprehensive section on "${title}".`,
-      guidelines: [],
-    });
-
-    chapter.addSection(newSection);
-    return newSectionId;
-  }
-
-  public moveSectionToChapter(sectionId: string, fromChapterId: string, toChapterId: string, newIndex?: number): void {
+  public moveSectionToChapter(sectionId: string, fromChapterId: string, toChapterId: string, newIndex?: number): Project {
     const fromChapter = this.getChapter(fromChapterId);
     const toChapter = this.getChapter(toChapterId);
+    const section = this.getSection(sectionId);
 
-    if (!fromChapter || !toChapter) return;
+    if (!fromChapter || !toChapter || !section) return this;
 
-    const sectionIndex = fromChapter.sections.findIndex(s => s.id === sectionId);
-    if (sectionIndex === -1) return;
-
-    const [sectionToMove] = fromChapter.sections.splice(sectionIndex, 1);
-
-    if (newIndex !== undefined && newIndex >= 0 && newIndex <= toChapter.sections.length) {
-      toChapter.sections.splice(newIndex, 0, sectionToMove);
-    } else {
-      toChapter.sections.push(sectionToMove);
-    }
-  }
-
-
-  public removeSection(sectionId: string): void {
-    this.chapters.forEach(chapter => {
-      chapter.removeSection(sectionId);
+    const newFromChapter = fromChapter.removeSection(sectionId);
+    const newToChapter = toChapter.addSection(section);
+    
+    const finalChapters = this.chapters.map(c => {
+        if (c.id === fromChapterId) return newFromChapter;
+        if (c.id === toChapterId) return newToChapter;
+        return c;
     });
+
+    return this.with({ chapters: finalChapters });
   }
-
-  public updateSectionsOrder(chapterId: string, newOrder: string[]): void {
-    const chapter = this.getChapter(chapterId);
-    if (!chapter) return;
-
-    const newOrderedSections = newOrder.map(id => chapter.sections.find(s => s.id === id)).filter((s): s is Section => !!s);
-    chapter.sections = newOrderedSections;
-  }
-
-
 
   // --- External Context Methods ---
-  public addExternalContext(externalContext: Omit<ExternalContext, 'id'> & { id?: string }): void {
+  public addExternalContext(externalContext: Omit<ExternalContext, 'id'> & { id?: string }): Project {
     const newContext = { ...externalContext, id: externalContext.id || uuidv4() };
-    this.externalContext = [...(this.externalContext || []), newContext];
+    const newExternalContext = [...this.externalContext, newContext];
+    return this.with({ externalContext: newExternalContext });
   }
 
   public removeExternalContext(index: number): Project {
-    this.externalContext = (this.externalContext || []).filter((_, i) => i !== index);
-    return this;
-  }
-
-  public replaceExternalContext(index: number, newItem: ExternalContext): void {
-    if (!this.externalContext || !this.externalContext[index]) return;
-    this.externalContext[index] = newItem;
+    const newExternalContext = [...this.externalContext];
+    newExternalContext.splice(index, 1);
+    return this.with({ externalContext: newExternalContext });
   }
 
   public updateExternalContextType(index: number, type: ExternalContextType): Project {
-    if (!this.externalContext || !this.externalContext[index]) return this;
-    this.externalContext[index].type = type;
-    return this;
+    if (index < 0 || index >= this.externalContext.length) return this;
+    const newExternalContext = [...this.externalContext];
+    newExternalContext[index] = { ...newExternalContext[index], type };
+    return this.with({ externalContext: newExternalContext });
   }
 }

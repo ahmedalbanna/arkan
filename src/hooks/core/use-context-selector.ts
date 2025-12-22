@@ -39,16 +39,13 @@ export function useContextSelector(itemKey: string) {
         subKey: string,
         checked: boolean
     ) => {
-        updateProject(p => {
-            const sec = p.getSection(sectionId);
-            if (sec) {
-                const newContext = { ...sec.context };
-                const newDict = { ...(newContext[type] || {}) };
-                newDict[subKey] = checked;
-                newContext[type] = newDict;
-                sec.context = newContext;
-            }
-        });
+        updateProject(p => p.updateSection(sectionId, (sec) => {
+            const newContext = { ...sec.context };
+            const newDict = { ...(newContext[type] || {}) };
+            newDict[subKey] = checked;
+            newContext[type] = newDict;
+            return sec.with({ context: newContext });
+        }));
     }, [updateProject]);
 
     return {

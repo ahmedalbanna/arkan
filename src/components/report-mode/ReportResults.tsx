@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { SectionName } from '@/ai/schemas';
@@ -36,22 +37,19 @@ export function ReportResults() {
   } = useReportPaginator();
 
   function handleSectionUpdate(key: SectionName, value: string) {
-    updateProject(p => p.updateSectionContent(key, value));
+    updateProject(p => p.updateSection(key, s => s.with({ content: value })));
   };
 
   function handleSectionTitleUpdate(key: SectionName, newTitle: string) {
-    updateProject(p => p.updateSectionTitle(key, newTitle));
+    updateProject(p => p.updateSection(key, s => s.with({ title: newTitle })));
   };
 
   function handleChapterTitleUpdate(chapterId: string, newTitle: string) {
-    updateProject(p => {
-      const chap = p.getChapter(chapterId);
-      if (chap) chap.title = newTitle;
-    });
+    updateProject(p => p.updateChapter(chapterId, c => c.with({ title: newTitle })));
   };
 
   function handleAddSectionAtIndex(chapterId: string, index: number) {
-    updateProject(p => p.addSectionAtIndex(chapterId, index, 'New Section'));
+    updateProject(p => p.addSectionToChapter(chapterId, 'New Section', index));
   };
 
   function handleMoveSectionUp(sectionId: string) {
@@ -82,9 +80,7 @@ export function ReportResults() {
         });
         return;
     }
-    updateProject(p => {
-      p.addChapter(newChapterTitle);
-    });
+    updateProject(p => p.addChapter(newChapterTitle));
     setNewChapterTitle('');
     toast({
       title: "Chapter Created",

@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -40,12 +39,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         field: K,
         value: GenerationControlState[K]
     ) {
-        updateProject(p => {
-            const s = p.getSection(section.id);
-            if (s) {
-                s.controls = { ...s.controls, [field]: value };
-            }
-        });
+        updateProject(p => p.updateSection(section.id, s => s.with({ controls: { ...s.controls, [field]: value } })));
     };
 
     function handleOutputStyleChange(style: 'heading' | 'paragraph' | 'list' | 'table' | 'code' | 'diagram', checked: boolean) {
