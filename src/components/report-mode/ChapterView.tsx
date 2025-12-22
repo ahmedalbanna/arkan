@@ -14,14 +14,18 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useLocalization } from '@/context/LocalizationContext';
-import { Chapter, SectionContext } from '@/lib/models';
+import { Chapter } from '@/lib/models';
 import { cn } from '@/lib/utils/cn';
-import { PlusCircle, Trash2, Wrench } from 'lucide-react';
+import { Copy, PlusSquare, Speaker, Square, Trash2, Translate, Wrench } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { SectionView } from './SectionView';
 import { ChapterToolsDialog } from "./ChapterToolsDialog";
-import type { SectionName } from "@/ai/schemas";
+import { useChapterActions } from "@/hooks/report-mode/use-chapter-actions";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ChapterViewProps {
   chapter: Chapter;
@@ -46,11 +50,20 @@ export function ChapterView({
   onDeleteSection,
   onDeleteChapter,
 }: ChapterViewProps) {
-  const { t } = useLocalization();
   const [editedChapterTitle, setEditedChapterTitle] = useState(chapter.title);
-  const [isHovering, setIsHovering] = useState(false);
   const [isToolsOpen, setIsToolsOpen] = useState(false);
 
+  const {
+    t,
+    handleCopy,
+    handleDuplicate,
+    handleTranslate,
+    handleReadAloud,
+    isCopied,
+    isTranslating,
+    isSpeaking,
+    isDuplicating,
+  } = useChapterActions(chapter);
 
   useEffect(() => {
     setEditedChapterTitle(chapter.title);
@@ -68,8 +81,6 @@ export function ChapterView({
     }
   }
 
-  const hasSections = chapter.sections && chapter.sections.length > 0;
-
   return (
     <>
       <ChapterToolsDialog
@@ -78,8 +89,6 @@ export function ChapterView({
         chapter={chapter}
       />
       <div
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
         className="relative"
       >
         <div className="flex items-center gap-4 mb-6">
@@ -90,79 +99,80 @@ export function ChapterView({
             onKeyDown={handleChapterTitleKeyDown}
             className="w-full text-3xl font-bold text-primary font-headline border-0 focus-visible:ring-1 focus-visible:ring-offset-0 p-1 h-auto bg-transparent"
           />
-          <div className={cn("flex items-center gap-1 transition-opacity", isHovering ? "opacity-100" : "opacity-0")}>
-            <Button variant="outline" size="sm" onClick={() => setIsToolsOpen(true)}>
-              <Wrench className="h-4 w-4 mr-2" />
-              Chapter Tools
-            </Button>
-            {onDeleteChapter && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="h-9 w-9"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete this chapter?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete this chapter and all of its sections? This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => onDeleteChapter(chapter.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
+          <div className="flex items-center gap-1">
+             <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" onClick={handleCopy} disabled={isCopied}>
+                            <Copy className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>{t('Copy')}</p></TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" onClick={handleDuplicate} disabled={isDuplicating}>
+                            <PlusSquare className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>{t('Duplicate')}</p></TooltipContent>
+                </Tooltip>
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" onClick={handleTranslate} disabled={isTranslating}>
+                            <Translate className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>{t('Translate')}</p></TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" onClick={handleReadAloud}>
+                            {isSpeaking ? <Square className="h-4 w-4 text-red-500 fill-current" /> : <Speaker className="h-4 w-4" />}
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>{isSpeaking ? 'Stop' : 'Listen'}</p></TooltipContent>
+                </Tooltip>
+
+                <div className="h-6 w-px bg-border mx-1"></div>
+
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" onClick={() => setIsToolsOpen(true)}>
+                            <Wrench className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>Chapter Tools</p></TooltipContent>
+                </Tooltip>
+                {onDeleteChapter && (
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive hover:text-destructive hover:bg-destructive/10">
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent><p>Delete Chapter</p></TooltipContent>
+                        </Tooltip>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete this chapter?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                        Are you sure you want to delete this chapter and all of its sections? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => onDeleteChapter(chapter.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+                )}
+            </TooltipProvider>
           </div>
         </div>
-
-
-        {hasSections ? (
-          chapter.sections.map((section, index) => (
-            <div key={section.id} className="group relative mb-8 last:mb-0">
-              <SectionView
-                chapterId={chapter.id}
-                sectionKey={section.id as SectionName}
-                title={section.title}
-                content={section.content || ''}
-                onUpdate={onUpdateSection}
-                onTitleChange={onUpdateSectionTitle}
-                isFirst={index === 0}
-                isLast={index === chapter.sections.length - 1}
-                onMoveUp={() => onMoveSectionUp(section.id)}
-                onMoveDown={() => onMoveSectionDown(section.id)}
-                onDelete={() => onDeleteSection(section.id)}
-              />
-              <div className="absolute -bottom-4 left-0 right-0 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="w-full h-px bg-primary/20"></div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="absolute h-8 w-8 rounded-full bg-background hover:bg-muted"
-                  onClick={() => onAddSection(chapter.id, index + 1)}
-                >
-                  <PlusCircle className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="text-center py-20 border-2 border-dashed rounded-lg">
-            <h3 className="mt-4 text-lg font-semibold text-muted-foreground">This chapter is empty.</h3>
-            <p className="text-sm text-muted-foreground mb-4">Add a section to start building your report.</p>
-            <Button onClick={() => onAddSection(chapter.id, 0)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add First Section
-            </Button>
-          </div>
-        )}
       </div>
     </>
   );

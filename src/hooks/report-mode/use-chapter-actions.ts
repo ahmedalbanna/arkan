@@ -1,13 +1,15 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useWritingTool, useToast } from '@/hooks';
-import { useState, useMemo, useEffect } from 'react';
+import { useWritingTool, useToast, useBrowserSpeech } from '@/hooks';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { DiffPart, computeDiff } from '@/lib/utils/diff';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { Chapter, SectionContext, ManipulationType } from '@/lib/models';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const formSchema = z.object({
   rewriteStyle: z.string().optional(),
@@ -21,7 +23,8 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: boolean) => void) {
+export function useChapterActions(chapter: Chapter | null, onOpenChange?: (open: boolean) => void) {
+  const { t } = useLocalization();
   const { project, updateProject } = useBuilderStore();
   const { toast } = useToast();
   const [activeView, setActiveView] = useState<'result' | 'diff'>('result');
@@ -29,6 +32,15 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
   const [compressionRatio, setCompressionRatio] = useState(50);
   const [diff, setDiff] = useState<DiffPart[] | null>(null);
   const [context, setContext] = useState<SectionContext>({ sections: {}, externalContext: {} });
+  const [isCopied, setIsCopied] = useState(false);
+
+  const { speak, stop, isSpeaking } = useBrowserSpeech();
+  
+  const chapterContent = useMemo(() => {
+    if (!chapter) return '';
+    return chapter.sections.map(s => `# ${s.title}\n\n${s.content || ''}`).join('\n\n---\n\n');
+  }, [chapter]);
+
 
   // When the dialog opens (and chapter is available), default the context
   useEffect(() => {
@@ -43,11 +55,6 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     }
   }, [chapter]);
 
-
-  const chapterContent = useMemo(() => {
-    if (!chapter) return '';
-    return chapter.sections.map(s => `# ${s.title}\n\n${s.content || ''}`).join('\n\n---\n\n');
-  }, [chapter]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -71,6 +78,8 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
       toast({ title: 'Action Failed', description: error.message, variant: 'destructive' });
     }
   });
+  
+  const translateMutation = useWritingTool('/api/writing-tools/translate-text');
 
   const onSubmit = (formData: FormValues) => {
     const textToProcess = chapterContent;
@@ -152,10 +161,50 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     updateProject(p => p.addSectionToChapter(chapter.id, newSectionTitle, processedText));
 
     toast({ title: 'Section Added', description: `"${newSectionTitle}" has been added to the chapter.` });
-    onOpenChange(false);
+    if(onOpenChange) onOpenChange(false);
   };
 
+  const handleCopy = useCallback(() => {
+    if (!chapterContent) return;
+    navigator.clipboard.writeText(chapterContent).then(() => {
+        setIsCopied(true);
+        toast({ title: 'Chapter content copied!' });
+        setTimeout(() => setIsCopied(false), 2000);
+    });
+  }, [chapterContent, toast]);
+
+  const handleDuplicate = useCallback(() => {
+    if (!chapter) return;
+    updateProject(p => p.addChapter(`${chapter.title} (Copy)`, chapter.sections));
+    toast({ title: 'Chapter Duplicated' });
+  }, [chapter, updateProject, toast]);
+  
+  const handleTranslate = useCallback(() => {
+    if (!chapterContent) return;
+    const targetLang = /[\u0600-\u06FF]/.test(chapterContent) ? 'en' : 'ar';
+    translateMutation.mutate({ text: chapterContent, targetLang }, {
+        onSuccess: (data: any) => {
+            const translatedContent = data.text;
+            updateProject(p => p.addChapter(`${chapter.title} (Translated)`, [], translatedContent));
+            toast({ title: 'Chapter Translated', description: 'A new chapter with the translated content has been created.' });
+        },
+        onError: (error) => {
+            toast({ title: 'Translation Failed', description: error.message, variant: 'destructive' });
+        }
+    });
+  }, [chapterContent, chapter, translateMutation, updateProject, toast]);
+
+  const handleReadAloud = useCallback(() => {
+    if (!chapterContent) return;
+    if (isSpeaking) {
+        stop();
+    } else {
+        speak(chapterContent);
+    }
+  }, [chapterContent, isSpeaking, speak, stop]);
+
   return {
+    t,
     form,
     activeView,
     setActiveView,
@@ -172,5 +221,14 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange: (open: 
     handleApplyToNewSection,
     context,
     setContext,
+    // New actions
+    handleCopy,
+    handleDuplicate,
+    handleTranslate,
+    handleReadAloud,
+    isCopied,
+    isTranslating: translateMutation.isPending,
+    isSpeaking,
+    isDuplicating: false, // Placeholder, implement if async
   };
 }
