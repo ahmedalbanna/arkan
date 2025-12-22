@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
@@ -77,43 +78,32 @@ export function useReportGenerationTools() {
         toast({ title: "Chapter Created", description: `A new untitled chapter has been added.` });
     };
 
-    const handleAddSectionToChapter = (chapterId: string) => {
-        updateProject(p => p.addSectionToChapter(chapterId, "New Section"));
-    };
-
-    const handleDeleteSection = (chapterId: string, sectionId: string) => {
-        updateProject(p => p.updateChapter(chapterId, c => c.removeSection(sectionId)));
-    };
-
-    const handleDeleteChapter = (chapterId: string) => {
-        updateProject(p => p.removeChapter(chapterId));
-        toast({ title: "Chapter Deleted", description: 'The chapter has been removed from your project.' });
-    };
-
     const handleCreateFromToc = (tocText: string) => {
         if (!tocText.trim()) {
             toast({ title: "Table of Contents is empty", description: "Please paste the section titles into the text area.", variant: "destructive" });
             return;
         }
-        
+
         updateProject(p => {
-            let newProject = p.with({ chapters: [] });
+            let newProject = p.with({ chapters: [] }); // Clear existing chapters
             const lines = tocText.split('\n').map(line => line.trim()).filter(Boolean);
             let currentChapterId: string | null = null;
             let chaptersCreated = 0;
             let sectionsCreated = 0;
 
             lines.forEach(line => {
-                const isChapter = !line.match(/^\\s*\\d+\\.\\d+/);
+                const isSection = line.match(/^\s*\d+\.\d+/); // Matches "1.1", " 2.3 ", etc.
+                const isChapter = !isSection;
+
                 if (isChapter) {
-                    const chapterTitle = line.replace(/^\\d+\\.?\\s*/, '').trim();
+                    const chapterTitle = line.replace(/^\d+\.?\s*/, '').trim();
                     if (chapterTitle) {
                         newProject = newProject.addChapter(chapterTitle);
                         currentChapterId = newProject.chapters[newProject.chapters.length - 1].id;
                         chaptersCreated++;
                     }
                 } else if (currentChapterId) {
-                    const sectionTitle = line.replace(/^\\d+\\.\\d+\\.?\\s*/, '').trim();
+                    const sectionTitle = line.replace(/^\d+\.\d+\.?\s*/, '').trim();
                     if (sectionTitle) {
                         newProject = newProject.addSectionToChapter(currentChapterId, sectionTitle);
                         sectionsCreated++;
@@ -125,6 +115,7 @@ export function useReportGenerationTools() {
                 description: `Created ${chaptersCreated} chapters and ${sectionsCreated} sections.`,
             });
             setShowTocInput(false);
+            setNewChapterTitle('');
             return newProject;
         });
     };
@@ -180,8 +171,7 @@ export function useReportGenerationTools() {
         handleAddChapter,
         handleCreateFromToc,
         handleDragEnd,
-        handleDeleteSection,
-        handleDeleteChapter,
-        handleAddSectionToChapter,
     };
 }
+
+    

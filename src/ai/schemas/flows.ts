@@ -834,8 +834,13 @@ export const GenerateTocInputSchema = z.object({
 });
 export type GenerateTocInput = z.infer<typeof GenerateTocInputSchema>;
 
+const TocSectionSchema = z.object({
+    title: z.string(),
+    sections: z.array(z.string()),
+});
+
 export const GenerateTocOutputSchema = z.object({
-    tableOfContents: z.array(z.string()).describe('A list of suggested section titles for the table of contents.'),
+    tableOfContents: z.array(TocSectionSchema).describe('A list of suggested chapters, each with a title and a list of section titles.'),
 });
 export type GenerateTocOutput = z.infer<typeof GenerateTocOutputSchema>;
 
@@ -903,3 +908,5 @@ export const AIFlowInputSchema = z.discriminatedUnion("flow", [
 ]);
 
 export type AIFlowInput = z.infer<typeof AIFlowInputSchema>;
+
+    

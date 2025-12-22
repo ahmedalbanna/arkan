@@ -29,20 +29,22 @@ export function GenerateTocDialog({ isOpen, onOpenChange }: GenerateTocDialogPro
 
     function handleApplyToc() {
         if (!results) return;
-        
-        const newProject = project?.with({ chapters: [] });
-        if (!newProject) return;
 
-        let projectWithChapters = newProject;
-        results.tableOfContents.forEach(title => {
-            projectWithChapters = projectWithChapters.addChapter(title);
+        updateProject(p => {
+            let newProject = p.with({ chapters: [] }); // Start with a clean slate
+            results.tableOfContents.forEach(chapterData => {
+                newProject = newProject.addChapter(chapterData.title);
+                const newChapterId = newProject.chapters[newProject.chapters.length - 1].id;
+                chapterData.sections.forEach(sectionTitle => {
+                    newProject = newProject.addSectionToChapter(newChapterId, sectionTitle);
+                });
+            });
+            return newProject;
         });
-
-        updateProject(() => projectWithChapters);
 
         toast({
             title: 'Table of Contents Applied',
-            description: `${results.tableOfContents.length} chapters have been created.`,
+            description: `${results.tableOfContents.length} chapters and their sections have been created.`,
         });
         onOpenChange(false);
     }
@@ -53,7 +55,7 @@ export function GenerateTocDialog({ isOpen, onOpenChange }: GenerateTocDialogPro
                 <DialogHeader>
                     <DialogTitle>Generate Table of Contents with AI</DialogTitle>
                     <DialogDescription>
-                        The AI will analyze your project description to suggest a logical chapter structure for your report.
+                        The AI will analyze your project description to suggest a logical chapter and section structure for your report.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="py-4 space-y-4">
@@ -75,17 +77,22 @@ export function GenerateTocDialog({ isOpen, onOpenChange }: GenerateTocDialogPro
 
                     {(mutation.isPending || results) && (
                         <div className="space-y-2">
-                            <Label>Suggested Chapters</Label>
+                            <Label>Suggested Structure</Label>
                             <ScrollArea className="h-48 rounded-md border p-4 bg-muted/50">
                                 {mutation.isPending ? (
                                     <div className="flex items-center justify-center h-full">
                                         <Loader2 className="h-6 w-6 animate-spin text-primary" />
                                     </div>
                                 ) : (
-                                    <ul className="space-y-2">
-                                        {results?.tableOfContents.map((item, index) => (
-                                            <li key={index} className="text-sm p-2 rounded-md bg-background">
-                                                {index + 1}. {item}
+                                    <ul className="space-y-3">
+                                        {results?.tableOfContents.map((chapter, chapterIndex) => (
+                                            <li key={chapterIndex}>
+                                                <p className="font-semibold">{chapterIndex + 1}. {chapter.title}</p>
+                                                <ul className="pl-6 mt-1 space-y-1 list-disc list-inside text-sm text-muted-foreground">
+                                                    {chapter.sections.map((section, sectionIndex) => (
+                                                        <li key={sectionIndex}>{section}</li>
+                                                    ))}
+                                                </ul>
                                             </li>
                                         ))}
                                     </ul>
@@ -108,3 +115,5 @@ export function GenerateTocDialog({ isOpen, onOpenChange }: GenerateTocDialogPro
         </Dialog>
     );
 }
+
+    

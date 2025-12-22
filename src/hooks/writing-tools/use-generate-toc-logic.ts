@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { useWritingTool } from './use-writing-tool';
 import { useToast } from '@/hooks/util/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
+import { GenerateTocOutputSchema } from '@/ai/schemas';
 
 const generateTocSchema = z.object({
   projectDescription: z.string().min(10, 'Project description must be at least 10 characters.'),
@@ -42,6 +43,8 @@ export function useGenerateTocLogic() {
     form,
     mutation,
     onSubmit,
-    results: mutation.data as { tableOfContents: string[] } | null,
+    results: mutation.data as z.infer<typeof GenerateTocOutputSchema> | null,
   };
 }
+
+    

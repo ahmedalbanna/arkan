@@ -22,10 +22,10 @@ const generateTocPrompt = ai.definePrompt({
 
 **Instructions:**
 1.  Analyze the project Description to understand its core components, objectives, and scope.
-2.  Generate a list of relevant section titles for a detailed report.
-3.  The list should be ordered logically, starting from an introduction and ending with a conclusion.
-4.  Include standard sections like 'System Analysis', 'System Design', and 'Conclusion'.
-5.  Do not include any numbering or bullet points in the output, just the section titles.
+2.  Generate a list of relevant **chapters**.
+3.  For each chapter, generate a list of 3-5 relevant **section** titles.
+4.  The output must be an array of objects, where each object has a 'title' (for the chapter) and a 'sections' (an array of strings for the section titles).
+5.  Include standard report chapters like 'Introduction', 'System Analysis', 'Conclusion', etc., but tailor the sections within them to the project description.
 `,
   config: {
     temperature: 0.4,
@@ -51,3 +51,5 @@ export async function generateToc(input: GenerateTocInput): Promise<GenerateTocO
   }
   return generateTocFlow(validation.data);
 }
+
+    

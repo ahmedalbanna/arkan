@@ -60,9 +60,6 @@ export function GenerationTools() {
     handleAddChapter,
     handleCreateFromToc,
     handleDragEnd,
-    handleDeleteSection,
-    handleDeleteChapter,
-    handleAddSectionToChapter,
   } = useReportGenerationTools();
 
 
@@ -99,7 +96,7 @@ export function GenerationTools() {
                 id="toc-master-input"
                 value={newChapterTitle}
                 onChange={(e) => setNewChapterTitle(e.target.value)}
-                placeholder={"1. Chapter One\n1.1. Section One\n2. Chapter Two..."}
+                placeholder={"1. Chapter One\n  1.1. Section One\n2. Chapter Two..."}
                 className="flex-grow resize-none"
                 rows={5}
               />
@@ -118,16 +115,12 @@ export function GenerationTools() {
             <ScrollArea className="flex-grow">
               <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
-                  <Accordion type="single" collapsible className="w-full space-y-4">
+                  <Accordion type="multiple" className="w-full space-y-2">
                     {(project?.chapters || []).map((chapter, chapterIndex) => (
                       <SortableChapterItem
                         chapter={chapter}
                         index={chapterIndex}
                         key={chapter.id}
-                        onAddSection={handleAddSectionToChapter}
-                        onDeleteSection={handleDeleteSection}
-                        onDeleteChapter={handleDeleteChapter}
-                        chapterIndex={chapterIndex}
                         onGenerateSection={onGenerateSection}
                         activeMutationKey={agentMutation.isPending ? agentMutation.variables as string : null}
                         isAnythingGenerating={agentMutation.isPending}
@@ -144,3 +137,5 @@ export function GenerationTools() {
     </>
   );
 };
+
+    
