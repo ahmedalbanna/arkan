@@ -19,12 +19,12 @@ import { SortableSectionItem } from './SortableSectionItem';
 import { CSS } from '@dnd-kit/utilities';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 import { Checkbox } from "../ui/checkbox";
+import { Label } from "../ui/label";
 
 
 interface SortableChapterItemProps {
   chapter: Chapter;
   index: number;
-  chapterIndex: number;
   onGenerateSection: (sectionId: string) => void;
   onGenerateChapter: (chapterId: string) => void;
   onAddSection: (chapterId: string) => void;
@@ -40,13 +40,13 @@ export function SortableChapterItem({
   chapter,
   index,
   onGenerateChapter,
+  onAddSection,
   selectedSections,
   onSectionSelect,
   onSelectAll,
   ...props
 }: SortableChapterItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
-  const { updateProject } = useBuilderStore();
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -76,50 +76,24 @@ export function SortableChapterItem({
               </span>
             </div>
           </AccordionTrigger>
-          <div className="flex items-center gap-2 ml-2">
-            <TooltipProvider>
-               <Tooltip>
-                 <TooltipTrigger asChild>
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        id={`select-all-${chapter.id}`}
-                        checked={isAllSelected}
-                        onCheckedChange={(checked) => onSelectAll(!!checked)}
-                      />
-                       <label htmlFor={`select-all-${chapter.id}`} className="text-xs text-muted-foreground">Select All</label>
-                    </div>
-                 </TooltipTrigger>
-                 <TooltipContent>Select all sections in this chapter for generation.</TooltipContent>
-               </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  {/* Wrap button in div to allow tooltip even when disabled */}
-                  <div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onGenerateChapter(chapter.id)}
-                      disabled={props.isAnythingGenerating || !canGenerateChapter}
-                    >
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Generate Chapter
-                    </Button>
-                  </div>
-                </TooltipTrigger>
-                {!canGenerateChapter && <TooltipContent>Please select at least 3 sections to generate a chapter.</TooltipContent>}
-              </Tooltip>
-            </TooltipProvider>
-          </div>
         </div>
         <AccordionContent>
           <div className="border-t px-4 py-4 space-y-4">
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id={`select-all-${chapter.id}`}
+                checked={isAllSelected}
+                onCheckedChange={(checked) => onSelectAll(!!checked)}
+              />
+              <Label htmlFor={`select-all-${chapter.id}`} className="font-semibold text-sm">Select All Sections</Label>
+            </div>
             <div className="w-full space-y-2">
               {chapter.sections.map((section, sectionIndex) => (
                 <SortableSectionItem
                   key={section.id}
                   section={section}
                   index={sectionIndex}
-                  chapterIndex={props.chapterIndex}
+                  chapterIndex={index}
                   onGenerate={() => props.onGenerateSection(section.id)}
                   isGenerating={props.activeMutationKey === section.id}
                   isAnythingGenerating={props.isAnythingGenerating}
@@ -129,10 +103,29 @@ export function SortableChapterItem({
                 />
               ))}
             </div>
-             <Button size="sm" variant="outline" onClick={() => props.onAddSection(chapter.id)} className="w-full">
+             <Button size="sm" variant="outline" onClick={() => onAddSection(chapter.id)} className="w-full">
                <PlusCircle className="me-2 h-4 w-4" />
                Add New Section
              </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => onGenerateChapter(chapter.id)}
+                      disabled={props.isAnythingGenerating || !canGenerateChapter}
+                      className="w-full"
+                    >
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Generate Full Chapter
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                {!canGenerateChapter && <TooltipContent>Please select at least 3 sections to generate a chapter.</TooltipContent>}
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </AccordionContent>
       </AccordionItem>
