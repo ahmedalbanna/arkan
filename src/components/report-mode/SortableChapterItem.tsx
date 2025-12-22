@@ -1,7 +1,7 @@
+
 'use client';
 
 import {
-  Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
@@ -22,7 +22,6 @@ import { CSS } from '@dnd-kit/utilities';
 interface SortableChapterItemProps {
   chapter: Chapter;
   index: number;
-  onAddSection: (chapterId: string) => void;
   onDeleteSection: (chapterId: string, sectionId: string) => void;
   onDeleteChapter: (chapterId: string) => void;
   chapterIndex: number;
@@ -35,7 +34,6 @@ interface SortableChapterItemProps {
 export function SortableChapterItem({
   chapter,
   index,
-  onAddSection,
   onDeleteSection,
   onDeleteChapter,
   ...props
@@ -69,7 +67,7 @@ export function SortableChapterItem({
         </div>
         <AccordionContent>
           <div className="border-t px-4 py-4 space-y-4">
-            <Accordion type="single" collapsible className="w-full space-y-2">
+            <div className="w-full space-y-2">
               {chapter.sections.map((section, sectionIndex) => (
                 <SortableSectionItem
                   key={section.id}
@@ -83,11 +81,7 @@ export function SortableChapterItem({
                   hasCredits={props.hasCreditsForSingleSection}
                 />
               ))}
-            </Accordion>
-            <Button size="sm" variant="outline" onClick={() => onAddSection(chapter.id)} className="w-full">
-              <PlusCircle className="me-2 h-4 w-4" />
-              Add New Section
-            </Button>
+            </div>
           </div>
         </AccordionContent>
       </AccordionItem>
