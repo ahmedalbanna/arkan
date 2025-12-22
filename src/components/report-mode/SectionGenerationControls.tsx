@@ -82,6 +82,9 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                     const diagramLabel = diagramTypes.find(d => d.value === controls.diagramType)?.label || controls.diagramType;
                     return `a ${diagramLabel}`;
                 }
+                if (key === 'code' && controls.programmingLanguage) {
+                    return `a ${controls.programmingLanguage} code block`;
+                }
                 return key;
             });
         
@@ -170,6 +173,18 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                     </div>
                 </div>
             </div>
+
+            {controls.outputStyle.code && (
+                <div className="space-y-2 pl-6 border-l-2 ml-2">
+                    <Label htmlFor={`programmingLanguage-${section.id}`}>Programming Language</Label>
+                    <Input 
+                        id={`programmingLanguage-${section.id}`}
+                        value={controls.programmingLanguage || ''}
+                        onChange={(e) => handleControlChange('programmingLanguage', e.target.value)}
+                        placeholder="e.g., JavaScript, Python"
+                    />
+                </div>
+            )}
 
             {controls.outputStyle.diagram && (
                 <div className="space-y-2 pl-6 border-l-2 ml-2">
