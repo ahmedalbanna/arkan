@@ -4,17 +4,6 @@
 import {
   Accordion
 } from "@/components/ui/accordion";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -23,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useReportGenerationTools } from '@/hooks/report-mode/use-report-generation-tools';
 import {
@@ -63,6 +51,9 @@ export function GenerationTools() {
     handleAddSection,
     handleCreateFromToc,
     handleDragEnd,
+    selectedSectionsForChapterGen,
+    handleSectionSelectionToggle,
+    handleSelectAllSectionsInChapter,
   } = useReportGenerationTools();
 
 
@@ -130,6 +121,9 @@ export function GenerationTools() {
                         activeMutationKey={agentMutation.isPending ? agentMutation.variables as string : null}
                         isAnythingGenerating={agentMutation.isPending || chapterMutation.isPending}
                         hasCreditsForSingleSection={!!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1}
+                        selectedSections={selectedSectionsForChapterGen[chapter.id] || new Set()}
+                        onSectionSelect={(sectionId) => handleSectionSelectionToggle(chapter.id, sectionId)}
+                        onSelectAll={(select) => handleSelectAllSectionsInChapter(chapter.id, select)}
                       />
                     ))}
                   </Accordion>
