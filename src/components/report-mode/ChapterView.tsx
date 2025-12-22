@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Chapter } from '@/lib/models';
 import { cn } from '@/lib/utils/cn';
-import { Copy, PlusSquare, Speaker, Square, Trash2, Translate, Wrench } from 'lucide-react';
+import { Copy, PlusSquare, Speaker, Square, Trash2, Languages, Wrench } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { ChapterToolsDialog } from "./ChapterToolsDialog";
 import { useChapterActions } from "@/hooks/report-mode/use-chapter-actions";
@@ -120,7 +120,7 @@ export function ChapterView({
                  <Tooltip>
                     <TooltipTrigger asChild>
                         <Button variant="ghost" size="icon" onClick={handleTranslate} disabled={isTranslating}>
-                            <Translate className="h-4 w-4" />
+                            <Languages className="h-4 w-4" />
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent><p>{t('Translate')}</p></TooltipContent>
