@@ -55,46 +55,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         });
     }
 
-    const instructionPreview = useMemo(() => {
-        const parts: string[] = [];
-        
-        parts.push(`a ${controls.tone} tone`);
-
-        if (controls.complexity < 33) parts.push('simple complexity');
-        else if (controls.complexity > 66) parts.push('technical complexity');
-        else parts.push('balanced complexity');
-
-        if (controls.wordCount && parseInt(controls.wordCount) > 0) {
-            parts.push(`a word count of approximately ${controls.wordCount} words`);
-        }
-        
-        const langMap: Record<string, string> = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
-        if (controls.language && controls.language !== 'default') {
-            parts.push(`and the output language must be ${langMap[controls.language] || 'the default'}`);
-        }
-
-        const sentenceStart = `Please use ${parts.join(', ')}.`;
-
-        const formatParts = Object.entries(controls.outputStyle)
-            .filter(([, value]) => value)
-            .map(([key]) => {
-                if (key === 'diagram' && controls.diagramType) {
-                    const diagramLabel = diagramTypes.find(d => d.value === controls.diagramType)?.label || controls.diagramType;
-                    return `a ${diagramLabel}`;
-                }
-                if (key === 'code' && controls.programmingLanguage) {
-                    return `a ${controls.programmingLanguage} code block`;
-                }
-                return key;
-            });
-        
-        let formatSentence = '';
-        if (formatParts.length > 0) {
-            formatSentence = ` The output should be formatted as ${formatParts.join(', ')}.`;
-        }
-
-        return sentenceStart + formatSentence;
-    }, [controls]);
+    const instructionPreview = section.buildInstructionText();
 
     return (
         <div className="space-y-6">

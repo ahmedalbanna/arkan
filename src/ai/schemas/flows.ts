@@ -1,4 +1,5 @@
 
+
 import { z } from 'zod';
 import { BaseContextFileSchema, BaseControlsSchema, BaseExternalContextSchema, BaseGenerationSchema, BasePromptSchema, BaseTextInputSchema, BaseTopicInputSchema, BaseWebSearchSchema } from './base-schemas';
 import {
@@ -453,9 +454,10 @@ export const GenerateSectionInputSchema = z
             .describe(
                 "A map of previously generated text sections and other textual context (like the proposal or plan). The key is the item's name and the value is the markdown/JSON content.",
             ),
+        instructionText: z.string().optional().describe('A dynamically generated instruction string based on UI controls.'),
     })
     .merge(BaseExternalContextSchema)
-    .merge(BaseControlsSchema)
+    .merge(BaseControlsSchema);
 
 
 export type GenerateSectionInput = z.infer<typeof GenerateSectionInputSchema>;

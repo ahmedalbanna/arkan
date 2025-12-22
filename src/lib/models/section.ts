@@ -32,12 +32,12 @@ export interface SectionProperties {
     prompt?: string;
     guidelines?: string[];
     agentId?: string | null;
-    commandId?: string | null;
+    commandId?: string | null; // Deprecated but kept for safety
     // Generation controls are now part of the section
     controls?: GenerationControlState;
     // Context selection is now part of the section
     context?: SectionContext;
-
+    instruction?: string;
 }
 
 export const defaultControls: GenerationControlState = {
@@ -68,6 +68,7 @@ export class Section {
     public commandId?: string | null;
     public controls: GenerationControlState;
     public context: SectionContext;
+    public instruction: string;
 
 
 
@@ -82,7 +83,41 @@ export class Section {
         this.commandId = props.commandId || null;
         this.controls = { ...defaultControls, ...props.controls };
         this.context = { ...defaultContext, ...props.context };
+        this.instruction = props.instruction || this.buildInstructionText();
 
+    }
+
+    public buildInstructionText(): string {
+        let instructions: string[] = [];
+        const formalityMap: { [key: number]: string } = { 0: 'very informal and casual', 33: 'balanced and neutral', 67: 'formal and professional', 100: 'very formal and academic' };
+        const complexityMap: { [key: number]: string } = { 0: 'very simple and easy to understand', 33: 'clear and straightforward', 67: 'detailed and technical', 100: 'highly complex and expert-level' };
+    
+        const formality = this.controls.formality > 67 ? formalityMap[100] : this.controls.formality > 33 ? formalityMap[67] : this.controls.formality > 0 ? formalityMap[33] : formalityMap[0];
+        instructions.push(`The formality should be ${formality}.`);
+    
+        const complexity = this.controls.complexity > 67 ? complexityMap[100] : this.controls.complexity > 33 ? complexityMap[67] : this.controls.complexity > 0 ? complexityMap[33] : complexityMap[0];
+        instructions.push(`The complexity should be ${complexity}.`);
+        
+        if (this.controls.tone) instructions.push(`The tone should be ${this.controls.tone}.`);
+        if (this.controls.wordCount) instructions.push(`Aim for a word count of approximately ${this.controls.wordCount} words.`);
+    
+        if (this.controls.outputStyle.diagram && this.controls.diagramType) {
+            instructions.push(`The output must include a PlantUML diagram of type '${this.controls.diagramType}'.`);
+        }
+        if (this.controls.outputStyle.code && this.controls.programmingLanguage) {
+            instructions.push(`The code blocks should be in ${this.controls.programmingLanguage}.`);
+        }
+    
+        if (this.controls.language && this.controls.language !== 'default') {
+            const langMap: Record<string, string> = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
+            instructions.push(`The output language must be ${langMap[this.controls.language] || 'English'}.`);
+        }
+    
+        const enabledStyles = Object.entries(this.controls.outputStyle).filter(([, value]) => value).map(([key]) => key);
+        if (enabledStyles.length > 0) instructions.push(`The output should primarily include the following elements: ${enabledStyles.join(', ')}.`);
+    
+        
+        return instructions.join(' ');
     }
 
     public toJSON(): SectionProperties {
@@ -97,7 +132,7 @@ export class Section {
             commandId: this.commandId,
             controls: this.controls,
             context: this.context,
-
+            instruction: this.buildInstructionText(), // Always build fresh on serialization
         };
     }
 
