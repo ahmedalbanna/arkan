@@ -13,6 +13,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { ContextSelector } from './SectionContextSelector';
 import { SectionGenerationControls } from './SectionGenerationControls';
 import { GuidelineEditor } from './SectionGuidelineEditor';
+import { Checkbox } from '../ui/checkbox';
 
 
 export function SectionAccordionItem({
@@ -25,7 +26,8 @@ export function SectionAccordionItem({
     handleProps,
     index,
     chapterIndex,
-    onDelete,
+    isSelected,
+    onSelect,
 }: {
     itemKey: string,
     section: Section,
@@ -36,7 +38,8 @@ export function SectionAccordionItem({
     handleProps?: any,
     index: number,
     chapterIndex: number,
-    onDelete: () => void;
+    isSelected: boolean,
+    onSelect: () => void;
 }) {
     const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
@@ -54,7 +57,13 @@ export function SectionAccordionItem({
     return (
         <AccordionItem value={itemKey} key={itemKey} className="bg-background border rounded-lg">
             <div className="flex items-center px-4 py-2">
-                <AccordionTrigger className="flex-1 hover:no-underline py-0">
+                 <div className="flex items-center gap-2" onClick={(e) => { e.stopPropagation(); onSelect(); }}>
+                    <Checkbox
+                        checked={isSelected}
+                        aria-label={`Select section ${section.title}`}
+                    />
+                </div>
+                <AccordionTrigger className="flex-1 hover:no-underline py-0 ml-2">
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                         {handleProps && (
                             <div {...handleProps} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
@@ -21,21 +20,52 @@ export function useReportGenerationTools() {
     const [newChapterTitle, setNewChapterTitle] = useState('');
     const [showTocInput, setShowTocInput] = useState(false);
     const [isGenerateTocOpen, setIsGenerateTocOpen] = useState(false);
+    const [selectedSectionsForChapterGen, setSelectedSectionsForChapterGen] = useState<Record<string, Set<string>>>({});
+
+    const handleSectionSelectionToggle = (chapterId: string, sectionId: string) => {
+        setSelectedSectionsForChapterGen(prev => {
+            const newSelection = { ...prev };
+            if (!newSelection[chapterId]) {
+                newSelection[chapterId] = new Set();
+            }
+            if (newSelection[chapterId].has(sectionId)) {
+                newSelection[chapterId].delete(sectionId);
+            } else {
+                newSelection[chapterId].add(sectionId);
+            }
+            return newSelection;
+        });
+    };
+
+    const handleSelectAllSectionsInChapter = (chapterId: string, select: boolean) => {
+        setSelectedSectionsForChapterGen(prev => {
+            const newSelection = { ...prev };
+            const chapter = project?.getChapter(chapterId);
+            if (select && chapter) {
+                newSelection[chapterId] = new Set(chapter.sections.map(s => s.id));
+            } else {
+                newSelection[chapterId] = new Set();
+            }
+            return newSelection;
+        });
+    };
 
     const chapterMutation = useMutation({
         mutationKey: ['generateChapterContent'],
         mutationFn: async (chapterId: string) => {
+            const selectedIds = selectedSectionsForChapterGen[chapterId];
             if (!project || !userProfile || !firebaseUser) throw new Error("Project or user not found.");
+            if (!selectedIds || selectedIds.size < 3) {
+                 toast({ title: 'Not Enough Sections', description: 'Please select at least 3 sections to generate a chapter.', variant: 'destructive' });
+                 throw new Error('Not enough sections selected.');
+            }
             const chapter = project.getChapter(chapterId);
             if (!chapter) throw new Error("Chapter not found.");
-            if (chapter.sections.length === 0) {
-                toast({ title: 'Cannot Generate', description: 'This chapter has no sections. Please add sections first.', variant: 'destructive' });
-                throw new Error('Chapter has no sections.');
-            }
 
             const token = await firebaseUser.getIdToken();
+            const sectionsToGenerate = chapter.sections.filter(s => selectedIds.has(s.id));
 
-            const sectionInstructions = chapter.sections.map(section => {
+            const sectionInstructions = sectionsToGenerate.map(section => {
                 const contextSectionsContent = Object.keys(section.context.sections || {})
                     .filter(key => section.context.sections[key])
                     .map(key => {
@@ -72,22 +102,20 @@ export function useReportGenerationTools() {
         onSuccess: (data) => {
             updateProject(p => p.updateChapter(data.chapterId, c => {
                 const newSections = [...c.sections];
-                // This is a simplified approach: it replaces the content of all sections with the new content.
-                // A more advanced approach would parse the returned markdown and update section by section.
-                // For now, we'll put the whole content into the first section and clear others.
                 if (newSections.length > 0) {
-                    newSections[0] = newSections[0].with({ content: data.content });
-                    for (let i = 1; i < newSections.length; i++) {
-                        newSections[i] = newSections[i].with({ content: '' });
-                    }
+                    const firstSectionId = newSections[0].id;
+                    const updatedProject = p.updateSection(firstSectionId, s => s.with({ content: data.content }));
+                    return updatedProject.getChapter(data.chapterId)!;
                 }
-                return c.with({ sections: newSections });
+                return c;
             }));
             refetchUser();
-            toast({ title: 'Chapter Generated', description: 'The AI has generated the content for the entire chapter.' });
+            toast({ title: 'Chapter Generated', description: 'The AI has generated the content for the selected sections.' });
         },
         onError: (error: any) => {
-            toast({ title: 'Chapter Generation Error', description: error?.message || 'Failed to generate chapter content.', variant: 'destructive' });
+            if (error.message !== 'Not enough sections selected.') {
+                toast({ title: 'Chapter Generation Error', description: error?.message || 'Failed to generate chapter content.', variant: 'destructive' });
+            }
         }
     });
 
@@ -240,7 +268,7 @@ export function useReportGenerationTools() {
         t,
         project,
         agentMutation,
-        chapterMutation, // expose new mutation
+        chapterMutation,
         userProfile,
         newChapterTitle,
         setNewChapterTitle,
@@ -249,10 +277,13 @@ export function useReportGenerationTools() {
         isGenerateTocOpen,
         setIsGenerateTocOpen,
         onGenerateSection,
-        onGenerateChapter, // expose new handler
+        onGenerateChapter,
         handleAddChapter,
         handleAddSection,
         handleCreateFromToc,
         handleDragEnd,
+        selectedSectionsForChapterGen,
+        handleSectionSelectionToggle,
+        handleSelectAllSectionsInChapter,
     };
 }

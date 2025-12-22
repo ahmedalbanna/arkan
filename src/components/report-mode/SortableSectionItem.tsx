@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -15,18 +14,18 @@ interface SortableSectionItemProps {
   section: Section;
   index: number;
   chapterIndex: number;
-  onDelete: () => void;
   onGenerate: () => void;
   isGenerating: boolean;
   isAnythingGenerating: boolean;
   hasCredits: boolean;
+  isSelected: boolean;
+  onSelect: () => void;
 }
 
 export function SortableSectionItem({
   section,
   index,
   chapterIndex,
-  onDelete,
   ...props
 }: SortableSectionItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -47,7 +46,6 @@ export function SortableSectionItem({
         handleProps={{ ...listeners }}
         chapterIndex={chapterIndex}
         index={index}
-        onDelete={onDelete}
         {...props}
       />
     </div>
