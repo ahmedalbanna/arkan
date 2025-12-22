@@ -48,15 +48,19 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
   }
 
   public generateUniqueId(baseName: string, collection: readonly { id: string }[], fallback: string = 'item'): string {
-    let baseId = baseName.toLowerCase().trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-');
+    const sanitize = (name: string) => name.toLowerCase().trim()
+      .replace(/[^\w\s-]/g, '') // remove non-word chars
+      .replace(/\s+/g, '-')    // collapse whitespace to a single dash
+      .replace(/-+/g, '-');   // collapse dashes
 
+    let baseId = sanitize(baseName);
     if (!baseId) baseId = fallback;
+
+    const existingIds = new Set(collection.map(item => item.id));
+
     let newId = baseId;
     let counter = 1;
-    const existingIds = new Set(collection.map(item => item.id));
+    // Check for uniqueness and append a counter if necessary
     while (existingIds.has(newId)) {
         newId = `${baseId}-${counter++}`;
     }
