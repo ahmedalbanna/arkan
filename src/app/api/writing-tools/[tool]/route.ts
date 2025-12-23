@@ -68,7 +68,17 @@ const toolConfig = {
   'solve-assignments': { flow: solveAssignments, schema: SolveAssignmentsInputSchema, creditCost: 2 },
   'project-blueprint': { flow: generateProjectBlueprint, schema: GenerateProjectBlueprintInputSchema, creditCost: 3 },
   'generate-ui-description': { flow: generateUiDescription, schema: GenerateUIDescriptionInputSchema, creditCost: 2 },
-  'generate-chapter': { flow: generateChapterContent, schema: GenerateChapterInputSchema, creditCost: 2 }, // Added new flow
+  'generate-chapter': { flow: generateChapterContent, schema: GenerateChapterInputSchema, creditCost: 2 },
+  'generate-project-from-full-prompt': { 
+    flow: (data: { fullPrompt: string }) => {
+      // This is a special case. The flow logic is simple enough to be inlined.
+      // A more complex scenario might warrant its own flow file.
+      const { ai } = require('@/ai/genkit');
+      return ai.generate({ model: 'googleai/gemini-2.5-flash-lite', prompt: data.fullPrompt });
+    },
+    schema: z.object({ fullPrompt: z.string() }),
+    creditCost: 5, // Higher cost for a full project build
+  },
 };
 
 type ToolName = keyof typeof toolConfig;
@@ -108,3 +118,5 @@ export const POST = withAuth(async ({ request, user, params }) => {
     return handleApiError(error);
   }
 });
+
+    

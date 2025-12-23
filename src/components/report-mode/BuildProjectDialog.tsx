@@ -26,7 +26,7 @@ interface BuildProjectDialogProps {
   onOpenChange: (open: boolean) => void;
   project: Project | null;
   selectedChapters: string[];
-  finalProjectPrompt: string; // New prop for the full prompt
+  finalProjectPrompt: string; // Now receives the fully-formed prompt
   onGenerateProject: () => void;
   isLoading: boolean;
 }
@@ -145,3 +145,5 @@ export function BuildProjectDialog({
     </Dialog>
   );
 }
+
+    

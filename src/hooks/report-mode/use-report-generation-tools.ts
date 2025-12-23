@@ -178,7 +178,7 @@ ${fullContext || 'No context provided.'}
                 sectionInstructions: sectionInstructions,
             };
 
-            const result = await writingToolApi<any, { markdownContent: string }>('/api/writing-tools/generate-chapter', { data: body, token });
+            const result = await writingToolApi<any, { markdownContent: string }>('/api/writing-tools/writing-tools/generate-chapter', { data: body, token });
             return { chapterId, content: result.markdownContent };
         },
         onSuccess: (data) => {
@@ -431,3 +431,5 @@ ${fullContext || 'No context provided.'}
         finalProjectPrompt,
     };
 }
+
+    
