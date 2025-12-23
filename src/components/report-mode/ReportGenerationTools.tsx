@@ -26,7 +26,8 @@ import {
   ListPlus,
   PlusCircle,
   Sparkles,
-  Building
+  Building,
+  XCircle,
 } from 'lucide-react';
 import { GenerateTocDialog } from './GenerateTocDialog';
 import { SortableChapterItem } from './SortableChapterItem';
@@ -70,18 +71,19 @@ export function GenerationTools() {
     setIsBuildProjectDialogOpen,
     onGenerateProject,
     projectMutation,
+    // New state and handlers from the hook
+    isProjectBuildMode,
+    enterProjectBuildMode,
+    exitProjectBuildMode,
   } = useReportGenerationTools();
 
   const handleSelectAllChapters = (checked: boolean) => {
     const allChapterIds = project?.chapters.map(c => c.id) || [];
-    if (checked) {
-      allChapterIds.forEach(id => handleChapterSelectionToggle(id, true));
-    } else {
-      allChapterIds.forEach(id => handleChapterSelectionToggle(id, false));
-    }
+    allChapterIds.forEach(id => handleChapterSelectionToggle(id, checked));
   };
   
-  const isAllChaptersSelected = project?.chapters.length > 0 && selectedChaptersForProjectGen.size === project.chapters.length;
+  const isAllChaptersSelected = project && project.chapters.length > 0 && selectedChaptersForProjectGen.size === project.chapters.length;
+  const canBuildProject = project && project.chapters.length >= 2;
 
   return (
     <>
@@ -142,14 +144,16 @@ export function GenerationTools() {
           )}
 
           <div className="relative flex-grow flex flex-col min-h-0">
-            <div className="flex items-center gap-2 mb-2 p-2 border rounded-md bg-muted/30">
-              <Checkbox
-                id="select-all-chapters"
-                checked={isAllChaptersSelected}
-                onCheckedChange={handleSelectAllChapters}
-              />
-              <Label htmlFor="select-all-chapters" className="font-semibold text-sm">Select all chapters for project build</Label>
-            </div>
+            {isProjectBuildMode && (
+                <div className="flex items-center gap-2 mb-2 p-2 border rounded-md bg-muted/30">
+                <Checkbox
+                    id="select-all-chapters"
+                    checked={isAllChaptersSelected}
+                    onCheckedChange={(checked) => handleSelectAllChapters(!!checked)}
+                />
+                <Label htmlFor="select-all-chapters" className="font-semibold text-sm">Select all chapters for project build</Label>
+                </div>
+            )}
             <ScrollArea className="flex-grow">
               <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
@@ -161,6 +165,7 @@ export function GenerationTools() {
                         key={chapter.id}
                         isProjectSelected={selectedChaptersForProjectGen.has(chapter.id)}
                         onProjectSelectToggle={() => handleChapterSelectionToggle(chapter.id)}
+                        isProjectBuildMode={isProjectBuildMode}
                         onAddSection={handleAddSection}
                         onGenerateSection={onGenerateSection}
                         onGenerateChapter={onGenerateChapter}
@@ -170,7 +175,6 @@ export function GenerationTools() {
                         selectedSections={selectedSectionsForChapterGen[chapter.id] || new Set()}
                         onSectionSelect={(sectionId) => handleSectionSelectionToggle(chapter.id, sectionId)}
                         onSelectAll={(select) => handleSelectAllSectionsInChapter(chapter.id, select)}
-                        // Pass new props to the item component
                         isBuildMode={chapterInBuildMode === chapter.id}
                         onEnterBuildMode={() => handleEnterBuildMode(chapter.id)}
                         onCancelBuildMode={handleCancelBuildMode}
@@ -181,14 +185,30 @@ export function GenerationTools() {
               </DndContext>
             </ScrollArea>
              <div className="mt-4">
-              <Button 
-                className="w-full" 
-                onClick={() => setIsBuildProjectDialogOpen(true)}
-                disabled={selectedChaptersForProjectGen.size === 0 || projectMutation.isPending}
-              >
-                <Building className="mr-2 h-4 w-4" />
-                Build Project ({selectedChaptersForProjectGen.size} chapters selected)
-              </Button>
+                {isProjectBuildMode ? (
+                    <div className="flex gap-2">
+                        <Button onClick={exitProjectBuildMode} variant="secondary" className="w-full">
+                            <XCircle className="mr-2 h-4 w-4" /> Cancel
+                        </Button>
+                         <Button 
+                            className="w-full" 
+                            onClick={() => setIsBuildProjectDialogOpen(true)}
+                            disabled={selectedChaptersForProjectGen.size === 0 || projectMutation.isPending}
+                        >
+                            <Building className="mr-2 h-4 w-4" />
+                            Build Project ({selectedChaptersForProjectGen.size} selected)
+                        </Button>
+                    </div>
+                ) : canBuildProject && (
+                    <Button 
+                        className="w-full" 
+                        onClick={enterProjectBuildMode}
+                        disabled={projectMutation.isPending}
+                    >
+                        <Building className="mr-2 h-4 w-4" />
+                        Build Project
+                    </Button>
+                )}
             </div>
           </div>
         </CardContent>

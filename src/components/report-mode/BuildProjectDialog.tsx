@@ -15,7 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBuilderStore } from '@/hooks';
 import { Loader2, Building, AlertTriangle } from 'lucide-react';
 import type { Project } from '@/lib/models';
-import { Alert } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface BuildProjectDialogProps {
   isOpen: boolean;

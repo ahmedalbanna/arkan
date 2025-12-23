@@ -34,6 +34,27 @@ import { useBuilderStore } from "@/hooks";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 
+interface SortableChapterItemProps {
+    chapter: Chapter;
+    index: number;
+    onGenerateSection: (sectionId: string) => void;
+    onGenerateChapter: (chapterId: string) => void;
+    onAddSection: (chapterId: string) => void;
+    activeMutationKey: string | null;
+    isAnythingGenerating: boolean;
+    hasCreditsForSingleSection: boolean;
+    selectedSections: Set<string>;
+    onSectionSelect: (sectionId: string) => void;
+    onSelectAll: (select: boolean) => void;
+    isBuildMode: boolean;
+    onEnterBuildMode: () => void;
+    onCancelBuildMode: () => void;
+    isProjectBuildMode: boolean;
+    isProjectSelected: boolean;
+    onProjectSelectToggle: () => void;
+}
+
+
 interface ChapterBuildContextPreviewDialogProps {
   project: Project | null;
   chapter: Chapter;
@@ -192,6 +213,9 @@ export function SortableChapterItem({
   isBuildMode,
   onEnterBuildMode,
   onCancelBuildMode,
+  isProjectBuildMode,
+  isProjectSelected,
+  onProjectSelectToggle,
   ...props
 }: SortableChapterItemProps) {
   const { project } = useBuilderStore();
@@ -221,6 +245,14 @@ export function SortableChapterItem({
       />
       <AccordionItem value={chapter.id} className="bg-muted/30 border rounded-lg">
         <div className="flex items-center px-4 py-2">
+           {isProjectBuildMode && (
+             <div className="flex items-center gap-2 mr-2" onClick={(e) => { e.stopPropagation(); onProjectSelectToggle(); }}>
+                <Checkbox
+                    checked={isProjectSelected}
+                    aria-label={`Select chapter ${chapter.title}`}
+                />
+            </div>
+           )}
           <AccordionTrigger className="flex-1 hover:no-underline py-0">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {listeners && (

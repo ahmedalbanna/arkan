@@ -26,18 +26,25 @@ export function useReportGenerationTools() {
     const [chapterInBuildMode, setChapterInBuildMode] = useState<string | null>(null);
 
     const [selectedSectionsForChapterGen, setSelectedSectionsForChapterGen] = useState<Record<string, Set<string>>>({});
+    const [isProjectBuildMode, setIsProjectBuildMode] = useState(false);
 
     // New state for project-level build
     const [selectedChaptersForProjectGen, setSelectedChaptersForProjectGen] = useState<Set<string>>(new Set());
     const [isBuildProjectDialogOpen, setIsBuildProjectDialogOpen] = useState(false);
 
-    const handleChapterSelectionToggle = (chapterId: string) => {
+    const enterProjectBuildMode = () => setIsProjectBuildMode(true);
+    const exitProjectBuildMode = () => {
+        setIsProjectBuildMode(false);
+        setSelectedChaptersForProjectGen(new Set()); // Clear selection on exit
+    };
+
+    const handleChapterSelectionToggle = (chapterId: string, select: boolean) => {
         setSelectedChaptersForProjectGen(prev => {
             const newSelection = new Set(prev);
-            if (newSelection.has(chapterId)) {
-                newSelection.delete(chapterId);
-            } else {
+            if (select) {
                 newSelection.add(chapterId);
+            } else {
+                newSelection.delete(chapterId);
             }
             return newSelection;
         });
@@ -386,5 +393,8 @@ export function useReportGenerationTools() {
         handleChapterSelectionToggle,
         isBuildProjectDialogOpen,
         setIsBuildProjectDialogOpen,
+        isProjectBuildMode,
+        enterProjectBuildMode,
+        exitProjectBuildMode,
     };
 }
