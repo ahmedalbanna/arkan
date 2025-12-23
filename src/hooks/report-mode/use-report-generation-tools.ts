@@ -138,7 +138,7 @@ export function useReportGenerationTools() {
         }
     });
 
-    const agentMutation = useMutation({
+    const sectionMutation = useMutation({
         mutationKey: ['generateReportSection'],
         mutationFn: async (sectionId: string) => {
             if (!project || !userProfile || !firebaseUser) throw new Error("Project or user not found.");
@@ -187,7 +187,7 @@ export function useReportGenerationTools() {
     });
 
     const onGenerateSection = (sectionId: SectionName) => {
-        agentMutation.mutate(sectionId as string);
+        sectionMutation.mutate(sectionId as string);
     };
 
     const onGenerateChapter = (chapterId: string) => {
@@ -286,7 +286,7 @@ export function useReportGenerationTools() {
     return {
         t,
         project,
-        agentMutation,
+        sectionMutation,
         chapterMutation,
         userProfile,
         newChapterTitle,

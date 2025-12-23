@@ -37,7 +37,7 @@ export function GenerationTools() {
   const {
     t,
     project,
-    agentMutation,
+    sectionMutation,
     chapterMutation,
     userProfile,
     newChapterTitle,
@@ -126,8 +126,8 @@ export function GenerationTools() {
                         onAddSection={handleAddSection}
                         onGenerateSection={onGenerateSection}
                         onGenerateChapter={onGenerateChapter}
-                        activeMutationKey={agentMutation.isPending ? agentMutation.variables as string : null}
-                        isAnythingGenerating={agentMutation.isPending || chapterMutation.isPending}
+                        activeMutationKey={sectionMutation.isPending ? sectionMutation.variables as string : null}
+                        isAnythingGenerating={sectionMutation.isPending || chapterMutation.isPending}
                         hasCreditsForSingleSection={!!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1}
                         selectedSections={selectedSectionsForChapterGen[chapter.id] || new Set()}
                         onSectionSelect={(sectionId) => handleSectionSelectionToggle(chapter.id, sectionId)}
