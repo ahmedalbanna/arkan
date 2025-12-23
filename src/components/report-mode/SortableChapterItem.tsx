@@ -19,6 +19,7 @@ import {
   FileText,
   LinkIcon,
   StickyNote,
+  Code,
 } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { SortableSectionItem } from './SortableSectionItem';
@@ -33,25 +34,17 @@ import { useBuilderStore } from "@/hooks";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 
-interface SortableChapterItemProps {
+interface ChapterBuildContextPreviewDialogProps {
+  project: Project | null;
   chapter: Chapter;
-  index: number;
-  onGenerateSection: (sectionId: string) => void;
-  onGenerateChapter: (chapterId: string) => void;
-  onAddSection: (chapterId: string) => void;
-  activeMutationKey: string | null;
-  isAnythingGenerating: boolean;
-  hasCreditsForSingleSection: boolean;
-  selectedSections: Set<string>;
-  onSectionSelect: (sectionId: string) => void;
-  onSelectAll: (select: boolean) => void;
-  // New props for build mode
-  isBuildMode: boolean;
-  onEnterBuildMode: () => void;
-  onCancelBuildMode: () => void;
+  selectedSectionIds: Set<string>;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-function ChapterBuildContextPreviewDialog({ project, chapter, selectedSectionIds, isOpen, onOpenChange }: { project: Project | null, chapter: Chapter, selectedSectionIds: Set<string>, isOpen: boolean, onOpenChange: (open: boolean) => void }) {
+
+function ChapterBuildContextPreviewDialog({ project, chapter, selectedSectionIds, isOpen, onOpenChange }: ChapterBuildContextPreviewDialogProps) {
+  const [viewMode, setViewMode] = useState<'plan' | 'prompt'>('plan');
   const sectionsToPreview = chapter.sections.filter(s => selectedSectionIds.has(s.id));
 
   const getContextNames = (section: Section) => {
@@ -59,15 +52,69 @@ function ChapterBuildContextPreviewDialog({ project, chapter, selectedSectionIds
     const sectionContexts = Object.keys(section.context?.sections || {})
       .filter(key => section.context.sections[key])
       .map(key => project.getSection(key)?.title)
-      .filter(Boolean);
+      .filter(Boolean) as string[];
 
     const fileContexts = Object.keys(section.context?.externalContext || {})
       .filter(key => section.context.externalContext[key])
       .map(key => project.externalContext.find(f => f.id === key)?.fileName)
-      .filter(Boolean);
+      .filter(Boolean) as string[];
 
     return [...sectionContexts, ...fileContexts];
   };
+
+  const finalPrompt = useMemo(() => {
+    if (!project) return '';
+
+    const chapterTitle = chapter.title;
+    const sectionInstructions = sectionsToPreview.map(section => {
+      const contextSectionsContent = Object.keys(section.context.sections || {})
+        .filter(key => section.context.sections[key])
+        .map(key => {
+          const content = project.getSectionContent(key);
+          return `--- Context from Section: ${project.getSection(key)?.title} ---\n${content}`;
+        })
+        .join('\n\n');
+
+      const externalContextContent = (project.externalContext || [])
+        .filter(item => section.context.externalContext?.[item.id])
+        .map(file => `--- Context from File: ${file.fileName} ---\n${file.content}`)
+        .join('\n\n');
+      
+      const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\n\n');
+
+      return `
+---
+### Instructions for Section: "${section.title}"
+
+**Base Prompt:**
+${section.prompt}
+
+**Guidelines:**
+${section.guidelines && section.guidelines.length > 0 ? section.guidelines.map(g => `- ${g}`).join('\n') : '- No specific guidelines provided.'}
+
+**Additional Instructions:**
+${section.instruction}
+
+**Context:**
+${fullContext || 'No context provided.'}
+---
+      `;
+    }).join('');
+
+    return `You are an expert author and technical writer. Your task is to write the complete content for a chapter titled "${chapterTitle}".
+
+You will be given a list of sections to write for this chapter. For each section, you must follow its specific instructions, which include a base prompt, guidelines, and contextual information.
+
+Your final output must be a single markdown string. Each section must start with a level 2 markdown heading (e.g., '## Section Title'). Follow the order of the sections as provided in the instructions.
+
+**Chapter Title:**
+# ${chapterTitle}
+
+**Sections to Generate:**
+${sectionInstructions}
+`;
+  }, [project, chapter, sectionsToPreview]);
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -75,44 +122,58 @@ function ChapterBuildContextPreviewDialog({ project, chapter, selectedSectionIds
         <DialogHeader>
           <DialogTitle>Generation Plan Preview: {chapter.title}</DialogTitle>
           <DialogDescription>
-            This is the plan the AI will follow to generate your chapter based on the selected sections.
+            This is the plan the AI will follow. You can also view the exact final prompt that will be sent.
           </DialogDescription>
         </DialogHeader>
         <div className="flex-grow overflow-hidden border rounded-md">
-          <ScrollArea className="h-full">
-            <div className="p-4 space-y-4">
-              {sectionsToPreview.map(section => (
-                <Card key={section.id} className="bg-muted/50">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{section.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm">
-                    <div className="space-y-1">
-                      <h4 className="font-semibold flex items-center gap-2"><StickyNote className="w-4 h-4"/>Base Prompt</h4>
-                      <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic">"{section.prompt}"</p>
-                    </div>
-                     <div className="space-y-1">
-                      <h4 className="font-semibold">Instructions & Guidelines</h4>
-                       <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic">
-                        "{section.buildInstructionText()}"
-                        {section.guidelines && section.guidelines.length > 0 && ` Additional guidelines: ${section.guidelines.join(', ')}`}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                       <h4 className="font-semibold flex items-center gap-2"><LinkIcon className="w-4 h-4"/>Selected Context</h4>
-                       {getContextNames(section).length > 0 ? (
-                         <div className="flex flex-wrap gap-1">
-                          {getContextNames(section).map(name => <Badge variant="secondary" key={name}>{name}</Badge>)}
-                         </div>
-                       ) : (
-                         <p className="text-muted-foreground text-xs italic">No specific context selected for this section.</p>
-                       )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </ScrollArea>
+          {viewMode === 'plan' ? (
+            <ScrollArea className="h-full">
+              <div className="p-4 space-y-4">
+                {sectionsToPreview.map(section => (
+                  <Card key={section.id} className="bg-muted/50">
+                    <CardHeader>
+                      <CardTitle className="text-lg">{section.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3 text-sm">
+                      <div className="space-y-1">
+                        <h4 className="font-semibold flex items-center gap-2"><StickyNote className="w-4 h-4" />Base Prompt</h4>
+                        <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic">"{section.prompt}"</p>
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="font-semibold">Instructions & Guidelines</h4>
+                        <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic">
+                          "{section.instruction}"
+                          {section.guidelines && section.guidelines.length > 0 && ` Additional guidelines: ${section.guidelines.join(', ')}`}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="font-semibold flex items-center gap-2"><LinkIcon className="w-4 h-4" />Selected Context</h4>
+                        {getContextNames(section).length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {getContextNames(section).map(name => <Badge variant="secondary" key={name}>{name}</Badge>)}
+                          </div>
+                        ) : (
+                          <p className="text-muted-foreground text-xs italic">No specific context selected for this section.</p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </ScrollArea>
+          ) : (
+            <ScrollArea className="h-full">
+              <div className="p-4">
+                <MarkdownViewer content={`\`\`\`markdown\n${finalPrompt}\n\`\`\``} />
+              </div>
+            </ScrollArea>
+          )}
+
+        </div>
+        <div className="flex-shrink-0 pt-4 flex justify-end">
+          <Button variant="outline" onClick={() => setViewMode(viewMode === 'plan' ? 'prompt' : 'plan')}>
+            {viewMode === 'plan' ? <><Code className="mr-2 h-4 w-4" /> View Final Prompt</> : <><Eye className="mr-2 h-4 w-4" /> View Plan</>}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
@@ -151,7 +212,7 @@ export function SortableChapterItem({
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
-      <ChapterBuildContextPreviewDialog 
+      <ChapterBuildContextPreviewDialog
         project={project}
         chapter={chapter}
         selectedSectionIds={selectedSections}
@@ -210,7 +271,7 @@ export function SortableChapterItem({
               <PlusCircle className="me-2 h-4 w-4" />
               Add New Section
             </Button>
-            
+
             {isBuildMode ? (
               <div className="flex gap-2">
                 <Button onClick={onCancelBuildMode} variant="secondary" className="flex-1">
