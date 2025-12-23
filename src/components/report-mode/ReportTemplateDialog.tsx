@@ -19,6 +19,7 @@ import { Input } from '../ui/input';
 import { Search } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import type { ReportTemplateProperties } from '@/lib/types';
+import { Project, Chapter } from '@/lib/models'; // Import models
 
 interface ReportTemplateDialogProps {
   isOpen: boolean;
@@ -45,7 +46,7 @@ export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDia
   const { t } = useLocalization();
   const { data: templates, isLoading, isError, error } = useReportTemplates();
   const [searchQuery, setSearchQuery] = useState('');
-  const { updateProject } = useBuilderStore();
+  const { loadProject, project } = useBuilderStore();
   const { toast } = useToast();
 
   const filteredTemplates = useMemo(() => {
@@ -58,17 +59,16 @@ export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDia
   }, [templates, searchQuery]);
 
   const handleSelectTemplate = (template: ReportTemplateProperties) => {
-    updateProject(p => {
-      let newProject = p.with({ chapters: [] });
-      template.sectionIds.forEach(sectionId => {
-        // We assume the section definitions are available elsewhere
-        // For now, we'll create chapters based on a simple heuristic or a predefined mapping
-        // This part might need to be more sophisticated depending on how sections are structured
-        const sectionTitle = sectionId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        newProject = newProject.addChapter(sectionTitle);
-      });
-      return newProject;
+    if (!project) return;
+    
+    // Create a new Project instance based on the template
+    const newProject = new Project({
+      ...project.toJSON(), // Retain existing project properties like name, description
+      chapters: template.chapters.map(ch => new Chapter(ch)),
     });
+
+    loadProject(newProject.toJSON());
+
     toast({
       title: 'Template Applied',
       description: `Your project has been structured with the "${template.name}" template.`,

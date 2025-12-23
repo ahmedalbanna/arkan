@@ -1,19 +1,19 @@
-
+import { ChapterProperties } from './chapter';
 import { Template, type BaseTemplateProperties } from './template';
 
 // Corresponds to ReportGenerationTemplateSchema from the Zod schemas
 export interface ReportTemplateProperties extends BaseTemplateProperties {
-  sectionIds: string[];
+  chapters: ChapterProperties[];
   isDefault?: boolean;
 }
 
 export class ReportTemplate extends Template {
-  public sectionIds: string[];
+  public chapters: ChapterProperties[];
   public isDefault: boolean;
 
   constructor(props: ReportTemplateProperties) {
     super(props);
-    this.sectionIds = props.sectionIds;
+    this.chapters = props.chapters;
     this.isDefault = props.isDefault || false;
   }
 }
