@@ -1,5 +1,6 @@
 
 
+
 export * from './models/docxTemplate';
 export * from './models/pptxTemplate';
 export * from './models/project';
@@ -147,12 +148,26 @@ export type UpdatePresentationTemplateData = Partial<Omit<PresentationTemplatePr
 
 // Report Template Types
 export interface ReportTemplateProperties {
+  id: string;
+  name: string;
+  description: string;
+  isDefault?: boolean;
+  chapters: {
     id: string;
-    name: string;
-    description: string;
-    sectionIds: string[];
-    isDefault?: boolean;
+    title: string;
+    sections: {
+      id: string;
+      title: string;
+      type: 'report' | 'diagram' | 'presentation';
+      content?: string;
+      prompt?: string;
+      guidelines?: string[];
+      controls?: any; // Use a more specific type if possible
+      context?: any; // Use a more specific type if possible
+    }[];
+  }[];
 }
+
 
 export type CreateReportTemplateData = Omit<ReportTemplateProperties, 'id'> & { id: string };
 export type UpdateReportTemplateData = Partial<Omit<ReportTemplateProperties, 'id'>>;
