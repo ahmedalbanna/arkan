@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -50,7 +49,7 @@ Your final output must be a single markdown string. Each section must start with
 {{this.instructionText}}
 
 **Context:**
-{{this.context}}
+{{{this.context}}}
 ---
 {{/each}}
 `,

@@ -472,7 +472,7 @@ export type GenerateSectionOutput = z.infer<typeof GenerateSectionOutputSchema>;
 // generate-chapter-content.ts
 const SectionInstructionSchema = z.object({
     title: z.string().describe("The title of the section."),
-    prompt: z.string().describe("The base prompt for generating this section."),
+    prompt: z.string().optional().describe("The base prompt for generating this section."),
     guidelines: z.array(z.string()).optional().describe("Specific guidelines for this section."),
     instructionText: z.string().optional().describe("Dynamically generated instructions from UI controls."),
     context: z.string().optional().describe("All contextual information (from other sections, files, etc.) to be used for generating this section.")
@@ -876,13 +876,14 @@ export const GenerateUIDescriptionInputSchema = z.object({
 });
 export type GenerateUIDescriptionInput = z.infer<typeof GenerateUIDescriptionInputSchema>;
 
+
 export const GenerateUIDescriptionOutputSchema = z.object({
-    uiDescription: z.string().describe('The generated UI/UX description and workflow in markdown format.'),
+    uiDescription: z.string().describe('The generated UI/UX workflow description in markdown format.'),
 });
 export type GenerateUIDescriptionOutput = z.infer<typeof GenerateUIDescriptionOutputSchema>;
 
-// This must be at the end of the file after all other schemas are defined.
-export const AIFlowInputSchema = z.discriminatedUnion("flow", [
+// Define a union type for all possible inputs
+export const AIFlowInputSchema = z.union([
     ParaphraseInputSchema,
     SummarizeInputSchema,
     AiProofreadDocumentInputSchema,
@@ -905,7 +906,6 @@ export const AIFlowInputSchema = z.discriminatedUnion("flow", [
     IdeaGenerationInputSchema,
     GenerateQuizInputSchema,
     GenerateSectionInputSchema,
-    GenerateChapterInputSchema,
     GenerateTextInputSchema,
     GrammarCheckInputSchema,
     HumanizeTextInputSchema,
@@ -932,5 +932,3 @@ export const AIFlowInputSchema = z.discriminatedUnion("flow", [
 ]);
 
 export type AIFlowInput = z.infer<typeof AIFlowInputSchema>;
-
-    

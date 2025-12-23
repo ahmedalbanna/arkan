@@ -73,9 +73,9 @@ export function useReportGenerationTools() {
         mutationFn: async (chapterId: string) => {
             const selectedIds = selectedSectionsForChapterGen[chapterId];
             if (!project || !userProfile || !firebaseUser) throw new Error("Project or user not found.");
-            if (!selectedIds || selectedIds.size < 3) {
-                 toast({ title: 'Not Enough Sections', description: 'Please select at least 3 sections to generate a chapter.', variant: 'destructive' });
-                 throw new Error('Not enough sections selected.');
+            if (!selectedIds || selectedIds.size === 0) {
+                 toast({ title: 'No Sections Selected', description: 'Please select at least one section to build the chapter content.', variant: 'destructive' });
+                 throw new Error('No sections selected.');
             }
             const chapter = project.getChapter(chapterId);
             if (!chapter) throw new Error("Chapter not found.");
@@ -119,20 +119,20 @@ export function useReportGenerationTools() {
         },
         onSuccess: (data) => {
             updateProject(p => p.updateChapter(data.chapterId, c => {
-                const newSections = [...c.sections];
-                if (newSections.length > 0) {
-                    const firstSectionId = newSections[0].id;
-                    const updatedProject = p.updateSection(firstSectionId, s => s.with({ content: data.content }));
+                // When chapter content is generated, it replaces the content of the first selected section
+                const firstSelectedId = Array.from(selectedSectionsForChapterGen[data.chapterId] || [])[0];
+                if (firstSelectedId) {
+                    const updatedProject = p.updateSection(firstSelectedId, s => s.with({ content: data.content }));
                     return updatedProject.getChapter(data.chapterId)!;
                 }
                 return c;
             }));
             refetchUser();
-            toast({ title: 'Chapter Generated', description: 'The AI has generated the content for the selected sections.' });
+            toast({ title: 'Chapter Generated', description: 'The AI has generated the content for the chapter.' });
             handleCancelBuildMode(); // Exit build mode after successful generation
         },
         onError: (error: any) => {
-            if (error.message !== 'Not enough sections selected.') {
+            if (error.message !== 'No sections selected.') {
                 toast({ title: 'Chapter Generation Error', description: error?.message || 'Failed to generate chapter content.', variant: 'destructive' });
             }
         }
