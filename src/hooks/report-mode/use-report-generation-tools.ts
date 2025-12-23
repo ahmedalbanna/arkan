@@ -5,7 +5,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useBuilderStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { SectionName } from '@/ai/schemas';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import type { DragEndEvent } from '@dnd-kit/core';
@@ -38,13 +38,13 @@ export function useReportGenerationTools() {
         setSelectedChaptersForProjectGen(new Set()); // Clear selection on exit
     };
 
-    const handleChapterSelectionToggle = (chapterId: string, select: boolean) => {
+    const handleChapterSelectionToggle = (chapterId: string) => {
         setSelectedChaptersForProjectGen(prev => {
             const newSelection = new Set(prev);
-            if (select) {
-                newSelection.add(chapterId);
-            } else {
+            if (newSelection.has(chapterId)) {
                 newSelection.delete(chapterId);
+            } else {
+                newSelection.add(chapterId);
             }
             return newSelection;
         });
@@ -90,6 +90,47 @@ export function useReportGenerationTools() {
         }
         setChapterInBuildMode(null);
     };
+    
+    const finalProjectPrompt = useMemo(() => {
+        if (!project || selectedChaptersForProjectGen.size === 0) return '';
+    
+        const chaptersToGenerate = project.chapters.filter(c => selectedChaptersForProjectGen.has(c.id));
+    
+        const chapterInstructions = chaptersToGenerate.map(chapter => {
+            const sectionInstructions = chapter.sections.map(section => {
+                const contextSectionsContent = Object.keys(section.context.sections || {})
+                    .filter(key => section.context.sections[key])
+                    .map(key => `--- Context from Section: ${project.getSection(key)?.title} ---\n${project.getSectionContent(key)}`)
+                    .join('\n\n');
+    
+                const externalContextContent = (project.externalContext || [])
+                    .filter(item => section.context.externalContext?.[item.id])
+                    .map(file => `--- Context from File: ${file.fileName} ---\n${file.content}`)
+                    .join('\n\n');
+                
+                const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\n\n');
+    
+                return `
+---
+### Instructions for Section: "${section.title}"
+**Base Prompt:**
+${section.prompt}
+**Guidelines:**
+${section.guidelines && section.guidelines.length > 0 ? section.guidelines.map(g => `- ${g}`).join('\n') : '- No specific guidelines provided.'}
+**Additional Instructions:**
+${section.instruction}
+**Context:**
+${fullContext || 'No context provided.'}
+---
+                `;
+            }).join('');
+    
+            return `# Chapter: ${chapter.title}\n${sectionInstructions}`;
+        }).join('\n\n');
+    
+        return `You are an expert author. Your task is to write content for a project titled "${project.name}". You will be given instructions for several chapters. For each chapter, generate the content for all its sections based on their specific instructions.\n\n${chapterInstructions}`;
+    }, [project, selectedChaptersForProjectGen]);
+
 
     const chapterMutation = useMutation({
         mutationKey: ['generateChapterContent'],
@@ -170,21 +211,11 @@ export function useReportGenerationTools() {
             }
 
             const token = await firebaseUser.getIdToken();
-            const chaptersToGenerate = project.chapters.filter(c => selectedChaptersForProjectGen.has(c.id));
             
-            const chapterInstructions = chaptersToGenerate.map(chapter => {
-                const sectionInstructions = chapter.sections.map(section => {
-                    // Logic to gather context for each section
-                    const contextSectionsContent = Object.keys(section.context.sections || {}).filter(key => section.context.sections[key]).map(key => `...`).join('\n\n');
-                    return { title: section.title, prompt: section.prompt, context: contextSectionsContent };
-                });
-                return { chapterTitle: chapter.title, sectionInstructions };
-            });
-
+            // Re-use the finalProjectPrompt logic for the API call
             const body = {
-                flow: 'generate-project',
-                projectName: project.name,
-                chapterInstructions: chapterInstructions,
+                flow: 'generate-project-from-full-prompt',
+                fullPrompt: finalProjectPrompt,
             };
 
             const result = await writingToolApi<any, { chapters: { chapterTitle: string, markdownContent: string }[] }>('/api/writing-tools/generate-project-content', { data: body, token });
@@ -197,7 +228,7 @@ export function useReportGenerationTools() {
                     const chapterToUpdate = newProject.chapters.find(c => c.title === genChapter.chapterTitle);
                     if (chapterToUpdate) {
                         // This logic assumes the generated content is for the whole chapter
-                        // And places it in the first section.
+                        // And places it in the first section. This could be improved.
                         newProject = newProject.updateSection(chapterToUpdate.sections[0].id, s => s.with({ content: genChapter.markdownContent }));
                     }
                 });
@@ -206,6 +237,7 @@ export function useReportGenerationTools() {
             refetchUser();
             toast({ title: 'Project Built', description: 'Content for selected chapters has been generated.' });
             setIsBuildProjectDialogOpen(false);
+            exitProjectBuildMode();
         },
         onError: (error: any) => {
             toast({ title: 'Project Build Error', description: error?.message || 'Failed to build project content.', variant: 'destructive' });
@@ -396,5 +428,6 @@ export function useReportGenerationTools() {
         isProjectBuildMode,
         enterProjectBuildMode,
         exitProjectBuildMode,
+        finalProjectPrompt,
     };
 }
