@@ -20,23 +20,40 @@ export function useReportGenerationTools() {
     const [newChapterTitle, setNewChapterTitle] = useState('');
     const [showTocInput, setShowTocInput] = useState(false);
     const [isGenerateTocOpen, setIsGenerateTocOpen] = useState(false);
+
+    // New state to manage which chapter is in "build mode" for generation
+    const [chapterInBuildMode, setChapterInBuildMode] = useState<string | null>(null);
+
+    // State to track selected sections for chapter generation.
     const [selectedSectionsForChapterGen, setSelectedSectionsForChapterGen] = useState<Record<string, Set<string>>>({});
 
+    /**
+     * Toggles the selection of a single section within a chapter for bulk generation.
+     * @param chapterId - The ID of the chapter containing the section.
+     * @param sectionId - The ID of the section to toggle.
+     */
     const handleSectionSelectionToggle = (chapterId: string, sectionId: string) => {
         setSelectedSectionsForChapterGen(prev => {
             const newSelection = { ...prev };
             if (!newSelection[chapterId]) {
                 newSelection[chapterId] = new Set();
             }
-            if (newSelection[chapterId].has(sectionId)) {
-                newSelection[chapterId].delete(sectionId);
+            const chapterSelection = new Set(newSelection[chapterId]);
+            if (chapterSelection.has(sectionId)) {
+                chapterSelection.delete(sectionId);
             } else {
-                newSelection[chapterId].add(sectionId);
+                chapterSelection.add(sectionId);
             }
+            newSelection[chapterId] = chapterSelection;
             return newSelection;
         });
     };
 
+    /**
+     * Selects or deselects all sections within a given chapter.
+     * @param chapterId - The ID of the chapter.
+     * @param select - A boolean indicating whether to select (true) or deselect (false) all sections.
+     */
     const handleSelectAllSectionsInChapter = (chapterId: string, select: boolean) => {
         setSelectedSectionsForChapterGen(prev => {
             const newSelection = { ...prev };
@@ -48,6 +65,24 @@ export function useReportGenerationTools() {
             }
             return newSelection;
         });
+    };
+
+    /**
+     * Enters the "build mode" for a specific chapter, allowing section selection.
+     * @param chapterId - The ID of the chapter to put into build mode.
+     */
+    const handleEnterBuildMode = (chapterId: string) => {
+        setChapterInBuildMode(chapterId);
+    };
+
+    /**
+     * Cancels the "build mode", hiding checkboxes and clearing selections for that chapter.
+     */
+    const handleCancelBuildMode = () => {
+        if (chapterInBuildMode) {
+            setSelectedSectionsForChapterGen(prev => ({ ...prev, [chapterInBuildMode]: new Set() }));
+        }
+        setChapterInBuildMode(null);
     };
 
     const chapterMutation = useMutation({
@@ -111,6 +146,7 @@ export function useReportGenerationTools() {
             }));
             refetchUser();
             toast({ title: 'Chapter Generated', description: 'The AI has generated the content for the selected sections.' });
+            handleCancelBuildMode(); // Exit build mode after successful generation
         },
         onError: (error: any) => {
             if (error.message !== 'Not enough sections selected.') {
@@ -285,5 +321,9 @@ export function useReportGenerationTools() {
         selectedSectionsForChapterGen,
         handleSectionSelectionToggle,
         handleSelectAllSectionsInChapter,
+        // New state and handlers for build mode
+        chapterInBuildMode,
+        handleEnterBuildMode,
+        handleCancelBuildMode,
     };
 }

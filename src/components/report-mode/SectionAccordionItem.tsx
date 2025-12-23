@@ -7,13 +7,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import type { Section } from '@/lib/models';
-import { GripVertical, Link as LinkIcon, Loader2, SlidersHorizontal, Sparkles, StickyNote, Trash2 } from 'lucide-react';
+import { GripVertical, Link as LinkIcon, Loader2, SlidersHorizontal, Sparkles, StickyNote } from 'lucide-react';
 import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ContextSelector } from './SectionContextSelector';
 import { SectionGenerationControls } from './SectionGenerationControls';
 import { GuidelineEditor } from './SectionGuidelineEditor';
 import { Checkbox } from '../ui/checkbox';
+import { cn } from '@/lib/utils/cn';
 
 
 export function SectionAccordionItem({
@@ -28,6 +29,7 @@ export function SectionAccordionItem({
     chapterIndex,
     isSelected,
     onSelect,
+    isCheckboxVisible
 }: {
     itemKey: string,
     section: Section,
@@ -40,6 +42,7 @@ export function SectionAccordionItem({
     chapterIndex: number,
     isSelected: boolean,
     onSelect: () => void;
+    isCheckboxVisible: boolean;
 }) {
     const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
@@ -57,13 +60,15 @@ export function SectionAccordionItem({
     return (
         <AccordionItem value={itemKey} key={itemKey} className="bg-background border rounded-lg">
             <div className="flex items-center px-4 py-2">
-                 <div className="flex items-center gap-2" onClick={(e) => { e.stopPropagation(); onSelect(); }}>
-                    <Checkbox
-                        checked={isSelected}
-                        aria-label={`Select section ${section.title}`}
-                    />
-                </div>
-                <AccordionTrigger className="flex-1 hover:no-underline py-0 ml-2">
+                {isCheckboxVisible && (
+                    <div className="flex items-center gap-2" onClick={(e) => { e.stopPropagation(); onSelect(); }}>
+                        <Checkbox
+                            checked={isSelected}
+                            aria-label={`Select section ${section.title}`}
+                        />
+                    </div>
+                )}
+                <AccordionTrigger className={cn("flex-1 hover:no-underline py-0", isCheckboxVisible && "ml-2")}>
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                         {handleProps && (
                             <div {...handleProps} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">

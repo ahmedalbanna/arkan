@@ -54,6 +54,10 @@ export function GenerationTools() {
     selectedSectionsForChapterGen,
     handleSectionSelectionToggle,
     handleSelectAllSectionsInChapter,
+    // Destructure new state and handlers
+    chapterInBuildMode,
+    handleEnterBuildMode,
+    handleCancelBuildMode,
   } = useReportGenerationTools();
 
 
@@ -124,6 +128,10 @@ export function GenerationTools() {
                         selectedSections={selectedSectionsForChapterGen[chapter.id] || new Set()}
                         onSectionSelect={(sectionId) => handleSectionSelectionToggle(chapter.id, sectionId)}
                         onSelectAll={(select) => handleSelectAllSectionsInChapter(chapter.id, select)}
+                        // Pass new props to the item component
+                        isBuildMode={chapterInBuildMode === chapter.id}
+                        onEnterBuildMode={() => handleEnterBuildMode(chapter.id)}
+                        onCancelBuildMode={handleCancelBuildMode}
                       />
                     ))}
                   </Accordion>

@@ -20,6 +20,8 @@ interface SortableSectionItemProps {
   hasCredits: boolean;
   isSelected: boolean;
   onSelect: () => void;
+  // New prop to control checkbox visibility
+  isCheckboxVisible: boolean;
 }
 
 export function SortableSectionItem({

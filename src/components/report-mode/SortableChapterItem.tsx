@@ -6,13 +6,14 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from '@/components/ui/button';
-import { useBuilderStore } from '@/hooks';
 import type { Chapter } from '@/lib/models';
 import { useSortable } from '@dnd-kit/sortable';
 import {
   GripVertical,
   PlusCircle,
-  Sparkles
+  Sparkles,
+  XCircle,
+  Construction
 } from 'lucide-react';
 import React from 'react';
 import { SortableSectionItem } from './SortableSectionItem';
@@ -34,6 +35,10 @@ interface SortableChapterItemProps {
   selectedSections: Set<string>;
   onSectionSelect: (sectionId: string) => void;
   onSelectAll: (select: boolean) => void;
+  // New props for build mode
+  isBuildMode: boolean;
+  onEnterBuildMode: () => void;
+  onCancelBuildMode: () => void;
 }
 
 export function SortableChapterItem({
@@ -44,6 +49,9 @@ export function SortableChapterItem({
   selectedSections,
   onSectionSelect,
   onSelectAll,
+  isBuildMode,
+  onEnterBuildMode,
+  onCancelBuildMode,
   ...props
 }: SortableChapterItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
@@ -79,14 +87,18 @@ export function SortableChapterItem({
         </div>
         <AccordionContent>
           <div className="border-t px-4 py-4 space-y-4">
-            <div className="flex items-center gap-3">
-              <Checkbox
-                id={`select-all-${chapter.id}`}
-                checked={isAllSelected}
-                onCheckedChange={(checked) => onSelectAll(!!checked)}
-              />
-              <Label htmlFor={`select-all-${chapter.id}`} className="font-semibold text-sm">Select All Sections</Label>
-            </div>
+
+            {isBuildMode && (
+              <div className="flex items-center gap-3 p-2 rounded-md border bg-background">
+                <Checkbox
+                  id={`select-all-${chapter.id}`}
+                  checked={isAllSelected}
+                  onCheckedChange={(checked) => onSelectAll(!!checked)}
+                />
+                <Label htmlFor={`select-all-${chapter.id}`} className="font-semibold text-sm">Select All Sections</Label>
+              </div>
+            )}
+
             <div className="w-full space-y-2">
               {chapter.sections.map((section, sectionIndex) => (
                 <SortableSectionItem
@@ -100,32 +112,51 @@ export function SortableChapterItem({
                   hasCredits={props.hasCreditsForSingleSection}
                   isSelected={selectedSections.has(section.id)}
                   onSelect={() => onSectionSelect(section.id)}
+                  isCheckboxVisible={isBuildMode}
                 />
               ))}
             </div>
-             <Button size="sm" variant="outline" onClick={() => onAddSection(chapter.id)} className="w-full">
-               <PlusCircle className="me-2 h-4 w-4" />
-               Add New Section
-             </Button>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      onClick={() => onGenerateChapter(chapter.id)}
-                      disabled={props.isAnythingGenerating || !canGenerateChapter}
-                      className="w-full"
-                    >
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Generate Full Chapter
-                    </Button>
-                  </div>
-                </TooltipTrigger>
-                {!canGenerateChapter && <TooltipContent>Please select at least 3 sections to generate a chapter.</TooltipContent>}
-              </Tooltip>
-            </TooltipProvider>
+
+            <Button size="sm" variant="outline" onClick={() => onAddSection(chapter.id)} className="w-full">
+              <PlusCircle className="me-2 h-4 w-4" />
+              Add New Section
+            </Button>
+            
+            {isBuildMode ? (
+              <div className="flex gap-2">
+                <Button onClick={onCancelBuildMode} variant="secondary" className="w-full">
+                  <XCircle className="mr-2 h-4 w-4" /> Cancel
+                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="w-full">
+                        <Button
+                          onClick={() => onGenerateChapter(chapter.id)}
+                          disabled={props.isAnythingGenerating || !canGenerateChapter}
+                          className="w-full"
+                        >
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          Generate Chapter
+                        </Button>
+                      </div>
+                    </TooltipTrigger>
+                    {!canGenerateChapter && <TooltipContent>Please select at least 3 sections to generate a chapter.</TooltipContent>}
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            ) : (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={onEnterBuildMode}
+                disabled={props.isAnythingGenerating}
+                className="w-full"
+              >
+                <Construction className="mr-2 h-4 w-4" />
+                Build Chapter
+              </Button>
+            )}
           </div>
         </AccordionContent>
       </AccordionItem>
