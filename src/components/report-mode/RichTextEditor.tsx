@@ -189,23 +189,23 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
         class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif prose-p:text-[12px] prose-headings:text-[16px] prose-a:text-primary hover:prose-a:text-primary/90 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2',
       },
       handlePaste(view, event) {
-        const text = event.clipboardData?.getData('text/plain');
+        const html = event.clipboardData?.getData('text/html');
+        const plain = event.clipboardData?.getData('text/plain');
 
-        if (text && editor) {
-          const html = marked.parse(text);
-          // Create a transaction to first delete the selection, then insert the new content.
-          const { from, to } = view.state.selection;
-          const tr = view.state.tr.deleteRange(from, to);
-          view.dispatch(tr);
-
-          // Now insert the parsed HTML content.
-          // Using a small timeout can help ensure the view has updated before inserting.
-          setTimeout(() => {
+        if (html && editor) {
+            // If HTML content exists, paste it directly. Tiptap will sanitize it.
             editor.chain().focus().insertContent(html).run();
-          }, 10);
-          return true; // We've handled the paste
+            return true;
         }
-        return false; // Let the default paste handler take over
+
+        if (plain && editor) {
+            // If only plain text exists, treat it as markdown and parse it.
+            const parsedHtml = marked.parse(plain);
+            editor.chain().focus().insertContent(parsedHtml).run();
+            return true;
+        }
+
+        return false; // Let the default paste handler take over if all else fails.
       },
     },
     immediatelyRender: false,
