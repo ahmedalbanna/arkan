@@ -79,7 +79,7 @@ export function SortableChapterItem({
                   <GripVertical className="h-5 w-5" />
                 </div>
               )}
-              <span className="font-semibold truncate p-0 h-auto">
+              <span className="font-semibold truncate p-0 h-auto flex-1 text-left min-w-0">
                 {chapter.title}
               </span>
             </div>
