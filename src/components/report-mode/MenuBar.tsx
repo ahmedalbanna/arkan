@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEditorStore } from '@/hooks/core/use-editor-store';
@@ -213,6 +214,9 @@ export function MenuBar() {
         </Button>
         <Button onClick={() => { editor.chain().focus().setTextAlign('right').run(); setDirection('rtl'); }} variant={editor.isActive({ textAlign: 'right' }) ? 'secondary' : 'ghost'} size="icon" className="h-9 w-9 rounded-full">
           <AlignRight className="h-4 w-4" />
+        </Button>
+        <Button onClick={addMath} variant="ghost" size="icon" className="h-9 w-9 rounded-full">
+            <Sigma className="h-4 w-4" />
         </Button>
       </div>
     </div>
