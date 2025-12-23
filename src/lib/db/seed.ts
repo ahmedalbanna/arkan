@@ -6,6 +6,7 @@ import { templates as defaultDocxTemplates, type DocxTemplateKey } from '@/lib/d
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 import { defaultAgents, defaultAgentCategories } from './seed-data/agents';
+import { defaultReportTemplates } from './seed-data/report-templates';
 
 async function seed() {
     console.log("Starting Firestore seeding process...");
@@ -77,6 +78,16 @@ async function seed() {
             batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
         });
         console.log(`${Object.keys(defaultPptxTemplates).length} PPTX templates added to batch.`);
+
+        // --- Report Generation Templates ---
+        console.log("Preparing to seed Report Generation templates...");
+        const reportTemplateCollection = adminDb.collection('templates').doc('report').collection('items');
+        defaultReportTemplates.forEach(template => {
+            const docRef = reportTemplateCollection.doc(template.id);
+            batch.set(docRef, template);
+        });
+        console.log(`${defaultReportTemplates.length} Report Generation templates added to batch.`);
+
 
         // Commit all changes at once
         await batch.commit();
