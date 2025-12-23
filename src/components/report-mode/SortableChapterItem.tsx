@@ -7,7 +7,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from '@/components/ui/button';
-import type { Chapter } from '@/lib/models';
+import type { Chapter, Project, Section } from '@/lib/models';
 import { useSortable } from '@dnd-kit/sortable';
 import {
   GripVertical,
@@ -16,6 +16,9 @@ import {
   XCircle,
   Construction,
   Eye,
+  FileText,
+  LinkIcon,
+  StickyNote,
 } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { SortableSectionItem } from './SortableSectionItem';
@@ -26,6 +29,9 @@ import { Label } from "../ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
 import { ScrollArea } from "../ui/scroll-area";
 import { MarkdownViewer } from "../shared/MarkdownViewer";
+import { useBuilderStore } from "@/hooks";
+import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
+import { Badge } from "../ui/badge";
 
 interface SortableChapterItemProps {
   chapter: Chapter;
@@ -45,27 +51,66 @@ interface SortableChapterItemProps {
   onCancelBuildMode: () => void;
 }
 
-function ChapterBuildContextPreviewDialog({ chapter, selectedSectionIds, isOpen, onOpenChange }: { chapter: Chapter, selectedSectionIds: Set<string>, isOpen: boolean, onOpenChange: (open: boolean) => void }) {
-  const combinedContent = useMemo(() => {
-    return chapter.sections
-      .filter(s => selectedSectionIds.has(s.id))
-      .map(s => `## ${s.title}\n\n${s.content || '*No content yet.*'}`)
-      .join('\n\n---\n\n');
-  }, [chapter, selectedSectionIds]);
+function ChapterBuildContextPreviewDialog({ project, chapter, selectedSectionIds, isOpen, onOpenChange }: { project: Project | null, chapter: Chapter, selectedSectionIds: Set<string>, isOpen: boolean, onOpenChange: (open: boolean) => void }) {
+  const sectionsToPreview = chapter.sections.filter(s => selectedSectionIds.has(s.id));
+
+  const getContextNames = (section: Section) => {
+    if (!project) return [];
+    const sectionContexts = Object.keys(section.context?.sections || {})
+      .filter(key => section.context.sections[key])
+      .map(key => project.getSection(key)?.title)
+      .filter(Boolean);
+
+    const fileContexts = Object.keys(section.context?.externalContext || {})
+      .filter(key => section.context.externalContext[key])
+      .map(key => project.externalContext.find(f => f.id === key)?.fileName)
+      .filter(Boolean);
+
+    return [...sectionContexts, ...fileContexts];
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl h-[80vh] flex flex-col">
+      <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Context Preview: {chapter.title}</DialogTitle>
+          <DialogTitle>Generation Plan Preview: {chapter.title}</DialogTitle>
           <DialogDescription>
-            This is the combined content from the sections you selected. It will be used as context to generate the full chapter.
+            This is the plan the AI will follow to generate your chapter based on the selected sections.
           </DialogDescription>
         </DialogHeader>
         <div className="flex-grow overflow-hidden border rounded-md">
           <ScrollArea className="h-full">
-            <div className="p-6">
-              <MarkdownViewer content={combinedContent} />
+            <div className="p-4 space-y-4">
+              {sectionsToPreview.map(section => (
+                <Card key={section.id} className="bg-muted/50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">{section.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <div className="space-y-1">
+                      <h4 className="font-semibold flex items-center gap-2"><StickyNote className="w-4 h-4"/>Base Prompt</h4>
+                      <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic">"{section.prompt}"</p>
+                    </div>
+                     <div className="space-y-1">
+                      <h4 className="font-semibold">Instructions & Guidelines</h4>
+                       <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic">
+                        "{section.buildInstructionText()}"
+                        {section.guidelines && section.guidelines.length > 0 && ` Additional guidelines: ${section.guidelines.join(', ')}`}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                       <h4 className="font-semibold flex items-center gap-2"><LinkIcon className="w-4 h-4"/>Selected Context</h4>
+                       {getContextNames(section).length > 0 ? (
+                         <div className="flex flex-wrap gap-1">
+                          {getContextNames(section).map(name => <Badge variant="secondary" key={name}>{name}</Badge>)}
+                         </div>
+                       ) : (
+                         <p className="text-muted-foreground text-xs italic">No specific context selected for this section.</p>
+                       )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </ScrollArea>
         </div>
@@ -88,6 +133,7 @@ export function SortableChapterItem({
   onCancelBuildMode,
   ...props
 }: SortableChapterItemProps) {
+  const { project } = useBuilderStore();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
   const [isSummaryDialogOpen, setIsSummaryDialogOpen] = useState(false);
 
@@ -106,6 +152,7 @@ export function SortableChapterItem({
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <ChapterBuildContextPreviewDialog 
+        project={project}
         chapter={chapter}
         selectedSectionIds={selectedSections}
         isOpen={isSummaryDialogOpen}
@@ -170,7 +217,7 @@ export function SortableChapterItem({
                   <XCircle className="mr-2 h-4 w-4" /> Cancel
                 </Button>
                 <Button onClick={() => setIsSummaryDialogOpen(true)} variant="outline" className="flex-1" disabled={!hasSelection}>
-                  <Eye className="mr-2 h-4 w-4" /> Preview Context
+                  <Eye className="mr-2 h-4 w-4" /> Preview Plan
                 </Button>
                 <TooltipProvider>
                   <Tooltip>
