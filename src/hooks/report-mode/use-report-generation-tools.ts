@@ -25,57 +25,59 @@ export function useReportGenerationTools() {
     const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
     const [chapterInBuildMode, setChapterInBuildMode] = useState<string | null>(null);
 
-    const [selectedSectionsForChapterGen, setSelectedSectionsForChapterGen] = useState<Record<string, Set<string>>>({});
+    const [selectedSectionsForBuild, setSelectedSectionsForBuild] = useState<Set<string>>(new Set());
     const [isProjectBuildMode, setIsProjectBuildMode] = useState(false);
 
-    // New state for project-level build
-    const [selectedChaptersForProjectGen, setSelectedChaptersForProjectGen] = useState<Set<string>>(new Set());
     const [isBuildProjectDialogOpen, setIsBuildProjectDialogOpen] = useState(false);
 
     const enterProjectBuildMode = () => setIsProjectBuildMode(true);
     const exitProjectBuildMode = () => {
         setIsProjectBuildMode(false);
-        setSelectedChaptersForProjectGen(new Set()); // Clear selection on exit
+        setSelectedSectionsForBuild(new Set()); // Clear selection on exit
     };
 
-    const handleChapterSelectionToggle = (chapterId: string) => {
-        setSelectedChaptersForProjectGen(prev => {
+    const handleSectionSelectionToggle = (sectionId: string) => {
+        setSelectedSectionsForBuild(prev => {
             const newSelection = new Set(prev);
-            if (newSelection.has(chapterId)) {
-                newSelection.delete(chapterId);
+            if (newSelection.has(sectionId)) {
+                newSelection.delete(sectionId);
             } else {
-                newSelection.add(chapterId);
+                newSelection.add(sectionId);
             }
             return newSelection;
         });
     };
 
-    const handleSectionSelectionToggle = (chapterId: string, sectionId: string) => {
-        setSelectedSectionsForChapterGen(prev => {
-            const newSelection = { ...prev };
-            if (!newSelection[chapterId]) {
-                newSelection[chapterId] = new Set();
-            }
-            const chapterSelection = new Set(newSelection[chapterId]);
-            if (chapterSelection.has(sectionId)) {
-                chapterSelection.delete(sectionId);
-            } else {
-                chapterSelection.add(sectionId);
-            }
-            newSelection[chapterId] = chapterSelection;
+    const handleChapterSelectionToggle = (chapterId: string, select: boolean) => {
+        const chapter = project?.getChapter(chapterId);
+        if (!chapter) return;
+
+        setSelectedSectionsForBuild(prev => {
+            const newSelection = new Set(prev);
+            chapter.sections.forEach(section => {
+                if (select) {
+                    newSelection.add(section.id);
+                } else {
+                    newSelection.delete(section.id);
+                }
+            });
             return newSelection;
         });
     };
-
-    const handleSelectAllSectionsInChapter = (chapterId: string, select: boolean) => {
-        setSelectedSectionsForChapterGen(prev => {
-            const newSelection = { ...prev };
-            const chapter = project?.getChapter(chapterId);
-            if (select && chapter) {
-                newSelection[chapterId] = new Set(chapter.sections.map(s => s.id));
-            } else {
-                newSelection[chapterId] = new Set();
-            }
+    
+    const handleSelectAllChapters = (select: boolean) => {
+        if (!project) return;
+        setSelectedSectionsForBuild(prev => {
+            const newSelection = new Set(prev);
+            project.chapters.forEach(chapter => {
+                chapter.sections.forEach(section => {
+                    if (select) {
+                        newSelection.add(section.id);
+                    } else {
+                        newSelection.delete(section.id);
+                    }
+                });
+            });
             return newSelection;
         });
     };
@@ -85,19 +87,20 @@ export function useReportGenerationTools() {
     };
 
     const handleCancelBuildMode = () => {
-        if (chapterInBuildMode) {
-            setSelectedSectionsForChapterGen(prev => ({ ...prev, [chapterInBuildMode]: new Set() }));
-        }
         setChapterInBuildMode(null);
     };
     
     const finalProjectPrompt = useMemo(() => {
-        if (!project || selectedChaptersForProjectGen.size === 0) return '';
+        if (!project || selectedSectionsForBuild.size === 0) return '';
     
-        const chaptersToGenerate = project.chapters.filter(c => selectedChaptersForProjectGen.has(c.id));
+        const chaptersToGenerate = project.chapters.filter(c => 
+            c.sections.some(s => selectedSectionsForBuild.has(s.id))
+        );
     
         const chapterInstructions = chaptersToGenerate.map(chapter => {
-            const sectionInstructions = chapter.sections.map(section => {
+            const sectionsToGenerate = chapter.sections.filter(s => selectedSectionsForBuild.has(s.id));
+
+            const sectionInstructions = sectionsToGenerate.map(section => {
                 const contextSectionsContent = Object.keys(section.context.sections || {})
                     .filter(key => section.context.sections[key])
                     .map(key => `--- Context from Section: ${project.getSection(key)?.title} ---\n${project.getSectionContent(key)}`)
@@ -129,23 +132,25 @@ ${fullContext || 'No context provided.'}
         }).join('\n\n');
     
         return `You are an expert author. Your task is to write content for a project titled "${project.name}". You will be given instructions for several chapters. For each chapter, generate the content for all its sections based on their specific instructions.\n\n${chapterInstructions}`;
-    }, [project, selectedChaptersForProjectGen]);
+    }, [project, selectedSectionsForBuild]);
 
 
     const chapterMutation = useMutation({
         mutationKey: ['generateChapterContent'],
         mutationFn: async (chapterId: string) => {
-            const selectedIds = selectedSectionsForChapterGen[chapterId];
             if (!project || !userProfile || !firebaseUser) throw new Error("Project or user not found.");
-            if (!selectedIds || selectedIds.size === 0) {
+            
+            const chapter = project.getChapter(chapterId);
+            if (!chapter) throw new Error("Chapter not found.");
+            
+            const sectionsToGenerate = chapter.sections.filter(s => selectedSectionsForBuild.has(s.id));
+
+            if (sectionsToGenerate.length === 0) {
                  toast({ title: 'No Sections Selected', description: 'Please select at least one section to build the chapter content.', variant: 'destructive' });
                  throw new Error('No sections selected.');
             }
-            const chapter = project.getChapter(chapterId);
-            if (!chapter) throw new Error("Chapter not found.");
 
             const token = await firebaseUser.getIdToken();
-            const sectionsToGenerate = chapter.sections.filter(s => selectedIds.has(s.id));
 
             const sectionInstructions = sectionsToGenerate.map(section => {
                 const contextSectionsContent = Object.keys(section.context.sections || {})
@@ -178,13 +183,12 @@ ${fullContext || 'No context provided.'}
                 sectionInstructions: sectionInstructions,
             };
 
-            const result = await writingToolApi<any, { markdownContent: string }>('/api/writing-tools/writing-tools/generate-chapter', { data: body, token });
+            const result = await writingToolApi<any, { markdownContent: string }>('/api/writing-tools/generate-chapter', { data: body, token });
             return { chapterId, content: result.markdownContent };
         },
         onSuccess: (data) => {
             updateProject(p => p.updateChapter(data.chapterId, c => {
-                // When chapter content is generated, it replaces the content of the first selected section
-                const firstSelectedId = Array.from(selectedSectionsForChapterGen[data.chapterId] || [])[0];
+                const firstSelectedId = Array.from(selectedSectionsForBuild || [])[0];
                 if (firstSelectedId) {
                     const updatedProject = p.updateSection(firstSelectedId, s => s.with({ content: data.content }));
                     return updatedProject.getChapter(data.chapterId)!;
@@ -193,7 +197,7 @@ ${fullContext || 'No context provided.'}
             }));
             refetchUser();
             toast({ title: 'Chapter Generated', description: 'The AI has generated the content for the chapter.' });
-            handleCancelBuildMode(); // Exit build mode after successful generation
+            handleCancelBuildMode();
         },
         onError: (error: any) => {
             if (error.message !== 'No sections selected.') {
@@ -202,17 +206,15 @@ ${fullContext || 'No context provided.'}
         }
     });
     
-    // New Project-level generation mutation
     const projectMutation = useMutation({
         mutationKey: ['generateProjectContent'],
         mutationFn: async () => {
-            if (!project || !firebaseUser || selectedChaptersForProjectGen.size === 0) {
-                throw new Error("No chapters selected for project generation.");
+            if (!project || !firebaseUser || selectedSectionsForBuild.size === 0) {
+                throw new Error("No sections selected for project generation.");
             }
 
             const token = await firebaseUser.getIdToken();
             
-            // Re-use the finalProjectPrompt logic for the API call
             const body = {
                 flow: 'generate-project-from-full-prompt',
                 fullPrompt: finalProjectPrompt,
@@ -227,8 +229,6 @@ ${fullContext || 'No context provided.'}
                 generatedChapters.forEach(genChapter => {
                     const chapterToUpdate = newProject.chapters.find(c => c.title === genChapter.chapterTitle);
                     if (chapterToUpdate) {
-                        // This logic assumes the generated content is for the whole chapter
-                        // And places it in the first section. This could be improved.
                         newProject = newProject.updateSection(chapterToUpdate.sections[0].id, s => s.with({ content: genChapter.markdownContent }));
                     }
                 });
@@ -413,16 +413,15 @@ ${fullContext || 'No context provided.'}
         handleAddSection,
         handleCreateFromToc,
         handleDragEnd,
-        selectedSectionsForChapterGen,
+        selectedSectionsForBuild,
         handleSectionSelectionToggle,
-        handleSelectAllSectionsInChapter,
+        handleChapterSelectionToggle,
+        handleSelectAllChapters,
         chapterInBuildMode,
         handleEnterBuildMode,
         handleCancelBuildMode,
         isTemplateDialogOpen,
         setIsTemplateDialogOpen,
-        selectedChaptersForProjectGen,
-        handleChapterSelectionToggle,
         isBuildProjectDialogOpen,
         setIsBuildProjectDialogOpen,
         isProjectBuildMode,
@@ -431,5 +430,3 @@ ${fullContext || 'No context provided.'}
         finalProjectPrompt,
     };
 }
-
-    

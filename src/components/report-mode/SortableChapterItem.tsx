@@ -47,8 +47,10 @@ interface SortableChapterItemProps {
     onEnterBuildMode: () => void;
     onCancelBuildMode: () => void;
     isProjectBuildMode: boolean;
-    isProjectSelected: boolean;
-    onProjectSelectToggle: () => void;
+    // For project build mode selection
+    selectedSections: Set<string>;
+    onSectionSelectToggle: (sectionId: string) => void;
+    onChapterSelectToggle: (chapterId: string, selectAll: boolean) => void;
 }
 
 
@@ -207,8 +209,9 @@ export function SortableChapterItem({
   onEnterBuildMode,
   onCancelBuildMode,
   isProjectBuildMode,
-  isProjectSelected,
-  onProjectSelectToggle,
+  selectedSections,
+  onSectionSelectToggle,
+  onChapterSelectToggle,
   ...props
 }: SortableChapterItemProps) {
   const { project } = useBuilderStore();
@@ -225,6 +228,17 @@ export function SortableChapterItem({
   const sectionsInChapter = chapter.sections;
   const canGenerateChapter = sectionsInChapter.length > 0;
 
+  const isAllSectionsSelected = useMemo(() => {
+    if (sectionsInChapter.length === 0) return false;
+    return sectionsInChapter.every(s => selectedSections.has(s.id));
+  }, [sectionsInChapter, selectedSections]);
+  
+  const isSomeSectionsSelected = useMemo(() => {
+    if (sectionsInChapter.length === 0) return false;
+    const hasSelected = sectionsInChapter.some(s => selectedSections.has(s.id));
+    return hasSelected && !isAllSectionsSelected;
+  }, [sectionsInChapter, selectedSections, isAllSectionsSelected]);
+
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <ChapterBuildContextPreviewDialog
@@ -236,10 +250,13 @@ export function SortableChapterItem({
       <AccordionItem value={chapter.id} className="bg-muted/30 border rounded-lg">
         <div className="flex items-center px-4 py-2">
            {isProjectBuildMode && (
-             <div className="flex items-center gap-2 mr-2" onClick={(e) => { e.stopPropagation(); onProjectSelectToggle(); }}>
+             <div className="flex items-center gap-2 mr-2">
                 <Checkbox
-                    checked={isProjectSelected}
-                    aria-label={`Select chapter ${chapter.title}`}
+                    id={`select-chapter-${chapter.id}`}
+                    checked={isAllSectionsSelected}
+                    data-state={isSomeSectionsSelected ? 'indeterminate' : isAllSectionsSelected ? 'checked' : 'unchecked'}
+                    onCheckedChange={(checked) => onChapterSelectToggle(chapter.id, !!checked)}
+                    aria-label={`Select all sections in chapter ${chapter.title}`}
                 />
             </div>
            )}
@@ -271,10 +288,10 @@ export function SortableChapterItem({
                   isGenerating={props.activeMutationKey === section.id}
                   isAnythingGenerating={props.isAnythingGenerating}
                   hasCredits={props.hasCreditsForSingleSection}
-                  // These props are no longer relevant for project build mode, but kept for chapter build mode
-                  isSelected={false} 
-                  onSelect={() => {}}
-                  isCheckboxVisible={isBuildMode}
+                  // Pass down selection state and handler
+                  isSelected={selectedSections.has(section.id)}
+                  onSelect={() => onSectionSelectToggle(section.id)}
+                  isCheckboxVisible={isBuildMode || isProjectBuildMode} // Show checkbox in both build modes
                 />
               ))}
             </div>
