@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -14,27 +15,15 @@ import { useBuilderStore } from '@/hooks';
  * A client component responsible for downloading the current project state.
  */
 export function DownloadProjectButton() {
-    // Select both the project and a boolean indicating if it has content.
-    // This ensures the component re-renders when the project's content changes.
     const { project } = useBuilderStore((state) => ({
         project: state.project,
     }));
 
-    // Use the new hasContent method from the Project model
     const hasContent = project?.hasContent() ?? false;
 
     function handleDownload() {
         if (!project) return;
-        const projectData = JSON.stringify(project.toStateObject(), null, 2);
-        const blob = new Blob([projectData], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        // Use a default name if project name is not set
-        const fileName = project.name ? project.name.replace(/\s+/g, '_') : 'untitled_project';
-        a.download = `${fileName}.arkan`;
-        a.click();
-        URL.revokeObjectURL(url);
+        project.downloadAsFile();
     }
 
     return (

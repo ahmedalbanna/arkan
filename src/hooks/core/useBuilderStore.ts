@@ -52,26 +52,18 @@ const useBuilderStore = create<BuilderState>((set, get) => {
 
         fileInputRef,
         handleUploadClick: () => get().fileInputRef.current?.click(),
-        onFileChange: (e, toast, t, router) => {
+        onFileChange: async (e, toast, t, router) => {
             const file = e.target.files?.[0];
             const { loadProject } = get();
             if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const projectData = JSON.parse(event.target?.result as string);
-                        if (projectData && typeof projectData === 'object' && ('name' in projectData)) {
-                            loadProject(projectData);
-                            toast({ title: t('builder.toasts.projectLoadedTitle'), description: t('builder.toasts.projectLoadedDesc', { projectName: projectData.name }) });
-                            router.push('/builder');
-                        } else {
-                            throw new Error(t('builder.errors.invalidProjectFile'));
-                        }
-                    } catch (err) {
-                        toast({ title: t('builder.toasts.loadFailedTitle'), description: (err as Error).message, variant: 'destructive' });
-                    }
-                };
-                reader.readAsText(file);
+                try {
+                    const newProject = await Project.fromFile(file);
+                    loadProject(newProject.toStateObject());
+                    toast({ title: t('builder.toasts.projectLoadedTitle'), description: t('builder.toasts.projectLoadedDesc', { projectName: newProject.name }) });
+                    router.push('/builder');
+                } catch (err) {
+                    toast({ title: t('builder.toasts.loadFailedTitle'), description: (err as Error).message, variant: 'destructive' });
+                }
             }
             if (e.target) e.target.value = '';
         },

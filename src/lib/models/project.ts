@@ -170,6 +170,49 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     return this.toJSON();
   }
 
+  // --- Import / Export Methods ---
+
+  /**
+   * Creates a Project instance from a file.
+   * @param file The file to read.
+   * @returns A promise that resolves to a new Project instance.
+   */
+  public static fromFile(file: File): Promise<Project> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const projectData = JSON.parse(event.target?.result as string);
+          if (projectData && typeof projectData === 'object' && ('name' in projectData)) {
+            resolve(new Project(projectData));
+          } else {
+            reject(new Error("Invalid project file structure."));
+          }
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.onerror = (err) => reject(err);
+      reader.readAsText(file);
+    });
+  }
+
+  /**
+   * Triggers a browser download of the current project state as a .arkan file.
+   */
+  public downloadAsFile(): void {
+    const projectData = JSON.stringify(this.toStateObject(), null, 2);
+    const blob = new Blob([projectData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const fileName = this.name ? this.name.replace(/\s+/g, '_') : 'untitled_project';
+    a.download = `${fileName}.arkan`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+
   // --- Chapter Methods ---
   public addChapter(title?: string): Project {
     const chapterTitle = title || 'Untitled Chapter';
