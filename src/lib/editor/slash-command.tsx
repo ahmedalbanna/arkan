@@ -3,7 +3,7 @@ import { Editor, Range, Extension } from '@tiptap/core';
 import { ReactRenderer } from '@tiptap/react';
 import Suggestion, { SuggestionOptions } from '@tiptap/suggestion';
 import tippy, { GetReferenceClientRect, Instance } from 'tippy.js';
-import { Heading1, Heading2, Heading3, Text, List, ListOrdered, Table, Image as ImageIcon, Code, Quote } from 'lucide-react';
+import { Heading1, Heading2, Heading3, Text, List, ListOrdered, Table, Image as ImageIcon, Code, Quote, GitGraph } from 'lucide-react';
 import CommandList from '@/components/editor/CommandList';
 
 const commandItems = [
@@ -16,6 +16,7 @@ const commandItems = [
   { title: 'Table', description: 'Insert a 2x2 table.', icon: <Table size={20} />, command: (editor: Editor) => editor.chain().focus().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run() },
   { title: 'Blockquote', description: 'A quote block.', icon: <Quote size={20} />, command: (editor: Editor) => editor.chain().focus().toggleBlockquote().run() },
   { title: 'Code Block', description: 'A block for code snippets.', icon: <Code size={20} />, command: (editor: Editor) => editor.chain().focus().toggleCodeBlock().run() },
+  { title: 'PlantUML Diagram', description: 'Embed a live PlantUML diagram.', icon: <GitGraph size={20} />, command: (editor: Editor) => editor.chain().focus().insertPlantUML().run() },
 ];
 
 const render = () => {

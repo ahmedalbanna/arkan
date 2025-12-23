@@ -14,6 +14,7 @@ import { handleFileDrop } from '@/lib/utils/drop-handler';
 import { handleFilePaste } from '@/lib/utils/paste-handler';
 import 'katex/dist/katex.min.css';
 import SlashCommand from './editor/slash-command';
+import PlantUML from './editor/plantUml-extension'; // Import the new extension
 
 export const editorExtensions = (uniqueId: string) => [
   StarterKit.configure({
@@ -33,6 +34,7 @@ export const editorExtensions = (uniqueId: string) => [
   TableHeader,
   TableCell,
   Katex.configure({}),
+  PlantUML, // Add the PlantUML extension
   FileHandler.configure({
     onDrop: (currentEditor, files) => {
       files.forEach(file => handleFileDrop(currentEditor, file));
