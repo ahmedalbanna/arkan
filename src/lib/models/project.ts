@@ -4,7 +4,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Chapter, ChapterProperties } from './chapter';
 import { ExternalContext, ExternalContextType } from './external-context';
-import { Section, defaultControls, defaultContext } from './section';
+import { Section } from './section';
 import { arrayMove } from '@dnd-kit/sortable';
 
 
@@ -56,11 +56,101 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     return this.chapters.flatMap(c => c.sections);
   }
 
+  get fullMarkdownContent(): string {
+    if (!this || !this.chapters) return '';
+    return this.chapters.map(chapter => {
+      const sectionsMarkdown = chapter.sections.map(section => `## ${section.title}\n\n${section.content || ''}`).join('\n\n');
+      return `# ${chapter.title}\n\n${sectionsMarkdown}`;
+    }).join('\n\n---\n\n');
+  }
+
   public hasContent(): boolean {
     const hasBasicInfo = !!this.name || !!this.projectDescription;
     const hasChaptersWithContent = this.chapters.some(c => c.title || c.sections.length > 0);
     const hasExternalContext = this.externalContext.length > 0;
     return hasBasicInfo || hasChaptersWithContent || hasExternalContext;
+  }
+
+  public withContentFromMarkdown(markdown: string): Project {
+    const lines = markdown.split('\n');
+    let currentChapterData: { title: string; sections: { title: string; content: string }[] } | null = null;
+    let currentSectionData: { title: string; content: string } | null = null;
+    let contentBuffer: string[] = [];
+    const newChaptersData: { title: string; sections: { title: string; content: string }[] }[] = [];
+
+    const flushContent = () => {
+        if (contentBuffer.length > 0 && currentSectionData) {
+            currentSectionData.content = contentBuffer.join('\n').trim();
+        }
+        contentBuffer = [];
+    };
+
+    const finalizeSection = () => {
+        flushContent();
+        if (currentSectionData && currentChapterData) {
+            currentChapterData.sections.push(currentSectionData);
+        }
+        currentSectionData = null;
+    }
+
+    const finalizeChapter = () => {
+        finalizeSection();
+        if (currentChapterData) {
+            newChaptersData.push(currentChapterData);
+        }
+        currentChapterData = null;
+    }
+
+    lines.forEach(line => {
+        const h1Match = line.match(/^#\s+(.*)/);
+        const h2Match = line.match(/^##\s+(.*)/);
+
+        if (h1Match) {
+            finalizeChapter();
+            currentChapterData = { title: h1Match[1].trim(), sections: [] };
+        } else if (h2Match) {
+            finalizeSection();
+            currentSectionData = { title: h2Match[1].trim(), content: '' };
+        } else {
+            contentBuffer.push(line);
+        }
+    });
+
+    finalizeChapter();
+
+    // Reconcile the new structure with the old one to preserve IDs
+    const finalChapters = newChaptersData.map((chData, index) => {
+        const oldChapter = this.chapters[index];
+        const chapterId = oldChapter?.id || this.generateUniqueId();
+        
+        const finalSections = chData.sections.map((secData, secIndex) => {
+            const oldSection = oldChapter?.sections[secIndex];
+            return new Section({
+                id: oldSection?.id || this.generateUniqueId(),
+                title: secData.title,
+                content: secData.content,
+                type: oldSection?.type || 'report',
+                controls: oldSection?.controls, 
+                context: oldSection?.context,
+                prompt: oldSection?.prompt,
+                guidelines: oldSection?.guidelines,
+                agentId: oldSection?.agentId,
+                commandId: oldSection?.commandId,
+            });
+        });
+
+        return new Chapter({
+            id: chapterId,
+            title: chData.title,
+            sections: finalSections
+        });
+    });
+    
+    if (finalChapters.length === 0 && this.chapters.length > 0 && markdown.trim() === '') {
+        return this;
+    }
+
+    return this.with({ chapters: finalChapters });
   }
 
   public toJSON(): ProjectProperties {

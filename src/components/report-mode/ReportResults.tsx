@@ -12,101 +12,9 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
-import { Project } from '@/lib/models';
 import { useEffect, useMemo, useState } from 'react';
 import { MenuBar } from './MenuBar';
 import RichTextEditor from './RichTextEditor';
-
-/**
- * Parses a single markdown string into a Project object's chapters and sections,
- * intelligently reusing existing IDs to maintain stability.
- * @param markdown The markdown string to parse.
- * @param existingProject The existing project to merge IDs from.
- * @returns A new Project instance with the parsed structure.
- */
-function parseMarkdownToProject(markdown: string, existingProject: Project): Project {
-    const lines = markdown.split('\n');
-    let currentChapterData: { title: string; sections: { title: string; content: string }[] } | null = null;
-    let currentSectionData: { title: string; content: string } | null = null;
-    let contentBuffer: string[] = [];
-    const newChaptersData: { title: string; sections: { title: string; content: string }[] }[] = [];
-
-    const flushContent = () => {
-        if (contentBuffer.length > 0 && currentSectionData) {
-            currentSectionData.content = contentBuffer.join('\n').trim();
-        }
-        contentBuffer = [];
-    };
-
-    const finalizeSection = () => {
-        flushContent();
-        if (currentSectionData && currentChapterData) {
-            currentChapterData.sections.push(currentSectionData);
-        }
-        currentSectionData = null;
-    }
-
-    const finalizeChapter = () => {
-        finalizeSection();
-        if (currentChapterData) {
-            newChaptersData.push(currentChapterData);
-        }
-        currentChapterData = null;
-    }
-
-    lines.forEach(line => {
-        const h1Match = line.match(/^#\s+(.*)/);
-        const h2Match = line.match(/^##\s+(.*)/);
-
-        if (h1Match) {
-            finalizeChapter();
-            currentChapterData = { title: h1Match[1].trim(), sections: [] };
-        } else if (h2Match) {
-            finalizeSection();
-            currentSectionData = { title: h2Match[1].trim(), content: '' };
-        } else {
-            contentBuffer.push(line);
-        }
-    });
-
-    finalizeChapter();
-
-    // Now, reconcile the new structure with the old one
-    const finalChapters = newChaptersData.map((chData, index) => {
-        const oldChapter = existingProject.chapters[index];
-        const chapterId = oldChapter?.id || existingProject.generateUniqueId();
-        
-        const finalSections = chData.sections.map((secData, secIndex) => {
-            const oldSection = oldChapter?.sections[secIndex];
-            return {
-                id: oldSection?.id || existingProject.generateUniqueId(),
-                title: secData.title,
-                content: secData.content,
-                type: 'report' as const,
-                // Preserve old controls and context if the section still exists
-                controls: oldSection?.controls, 
-                context: oldSection?.context,
-                prompt: oldSection?.prompt,
-                guidelines: oldSection?.guidelines,
-                agentId: oldSection?.agentId,
-                commandId: oldSection?.commandId,
-            };
-        });
-
-        return {
-            id: chapterId,
-            title: chData.title,
-            sections: finalSections
-        };
-    });
-    
-    // If the input was empty and resulted in no chapters, but the project had empty chapters, preserve them.
-    if (finalChapters.length === 0 && existingProject.chapters.length > 0 && markdown.trim() === '') {
-        return existingProject;
-    }
-
-    return existingProject.with({ chapters: finalChapters });
-}
 
 
 export function ReportResults() {
@@ -114,11 +22,7 @@ export function ReportResults() {
   const { project, updateProject } = useBuilderStore();
   
   const fullMarkdownContent = useMemo(() => {
-    if (!project || !project.chapters) return '';
-    return project.chapters.map(chapter => {
-      const sectionsMarkdown = chapter.sections.map(section => `## ${section.title}\n\n${section.content || ''}`).join('\n\n');
-      return `# ${chapter.title}\n\n${sectionsMarkdown}`;
-    }).join('\n\n---\n\n');
+    return project?.fullMarkdownContent || '';
   }, [project]);
   
   const [localMarkdown, setLocalMarkdown] = useState(fullMarkdownContent);
@@ -131,7 +35,8 @@ export function ReportResults() {
   function handleContentChange(markdown: string) {
     if (!project) return;
     setLocalMarkdown(markdown);
-    const updatedProject = parseMarkdownToProject(markdown, project);
+    // Use the new method on the Project instance to update its structure
+    const updatedProject = project.withContentFromMarkdown(markdown);
     // Directly update the store without causing a loop
     useBuilderStore.setState({ project: updatedProject, hasUnsavedChanges: true });
   }
