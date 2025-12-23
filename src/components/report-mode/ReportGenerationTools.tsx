@@ -25,12 +25,16 @@ import {
 import {
   ListPlus,
   PlusCircle,
-  Sparkles
+  Sparkles,
+  Building
 } from 'lucide-react';
 import { GenerateTocDialog } from './GenerateTocDialog';
 import { SortableChapterItem } from './SortableChapterItem';
 import { ScrollArea } from "../ui/scroll-area";
 import { ReportTemplateDialog } from "./ReportTemplateDialog";
+import { BuildProjectDialog } from "./BuildProjectDialog";
+import { Checkbox } from "../ui/checkbox";
+import { Label } from "../ui/label";
 
 
 export function GenerationTools() {
@@ -55,19 +59,43 @@ export function GenerationTools() {
     selectedSectionsForChapterGen,
     handleSectionSelectionToggle,
     handleSelectAllSectionsInChapter,
-    // Destructure new state and handlers
     chapterInBuildMode,
     handleEnterBuildMode,
     handleCancelBuildMode,
     isTemplateDialogOpen,
     setIsTemplateDialogOpen,
+    selectedChaptersForProjectGen,
+    handleChapterSelectionToggle,
+    isBuildProjectDialogOpen,
+    setIsBuildProjectDialogOpen,
+    onGenerateProject,
+    projectMutation,
   } = useReportGenerationTools();
 
+  const handleSelectAllChapters = (checked: boolean) => {
+    const allChapterIds = project?.chapters.map(c => c.id) || [];
+    if (checked) {
+      allChapterIds.forEach(id => handleChapterSelectionToggle(id, true));
+    } else {
+      allChapterIds.forEach(id => handleChapterSelectionToggle(id, false));
+    }
+  };
+  
+  const isAllChaptersSelected = project?.chapters.length > 0 && selectedChaptersForProjectGen.size === project.chapters.length;
 
   return (
     <>
       <GenerateTocDialog isOpen={isGenerateTocOpen} onOpenChange={setIsGenerateTocOpen} />
       <ReportTemplateDialog isOpen={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen} />
+      <BuildProjectDialog
+        isOpen={isBuildProjectDialogOpen}
+        onOpenChange={setIsBuildProjectDialogOpen}
+        project={project}
+        selectedChapters={Array.from(selectedChaptersForProjectGen)}
+        selectedSections={selectedSectionsForChapterGen}
+        onGenerateProject={onGenerateProject}
+        isLoading={projectMutation.isPending}
+      />
       <Card className="flex flex-col h-full">
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -114,6 +142,14 @@ export function GenerationTools() {
           )}
 
           <div className="relative flex-grow flex flex-col min-h-0">
+            <div className="flex items-center gap-2 mb-2 p-2 border rounded-md bg-muted/30">
+              <Checkbox
+                id="select-all-chapters"
+                checked={isAllChaptersSelected}
+                onCheckedChange={handleSelectAllChapters}
+              />
+              <Label htmlFor="select-all-chapters" className="font-semibold text-sm">Select all chapters for project build</Label>
+            </div>
             <ScrollArea className="flex-grow">
               <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
@@ -123,6 +159,8 @@ export function GenerationTools() {
                         chapter={chapter}
                         index={chapterIndex}
                         key={chapter.id}
+                        isProjectSelected={selectedChaptersForProjectGen.has(chapter.id)}
+                        onProjectSelectToggle={() => handleChapterSelectionToggle(chapter.id)}
                         onAddSection={handleAddSection}
                         onGenerateSection={onGenerateSection}
                         onGenerateChapter={onGenerateChapter}
@@ -142,6 +180,16 @@ export function GenerationTools() {
                 </SortableContext>
               </DndContext>
             </ScrollArea>
+             <div className="mt-4">
+              <Button 
+                className="w-full" 
+                onClick={() => setIsBuildProjectDialogOpen(true)}
+                disabled={selectedChaptersForProjectGen.size === 0 || projectMutation.isPending}
+              >
+                <Building className="mr-2 h-4 w-4" />
+                Build Project ({selectedChaptersForProjectGen.size} chapters selected)
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
