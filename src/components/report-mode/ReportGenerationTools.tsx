@@ -30,6 +30,7 @@ import {
 import { GenerateTocDialog } from './GenerateTocDialog';
 import { SortableChapterItem } from './SortableChapterItem';
 import { ScrollArea } from "../ui/scroll-area";
+import { ReportTemplateDialog } from "./ReportTemplateDialog";
 
 
 export function GenerationTools() {
@@ -58,12 +59,15 @@ export function GenerationTools() {
     chapterInBuildMode,
     handleEnterBuildMode,
     handleCancelBuildMode,
+    isTemplateDialogOpen,
+    setIsTemplateDialogOpen,
   } = useReportGenerationTools();
 
 
   return (
     <>
       <GenerateTocDialog isOpen={isGenerateTocOpen} onOpenChange={setIsGenerateTocOpen} />
+      <ReportTemplateDialog isOpen={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen} />
       <Card className="flex flex-col h-full">
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -75,8 +79,8 @@ export function GenerationTools() {
         </CardHeader>
         <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
           <div className="flex flex-col sm:flex-row gap-2">
-            <Button onClick={() => setShowTocInput(true)} variant="outline" className="w-full">
-              <ListPlus className="me-2 h-4 w-4" /> Import from Text
+             <Button onClick={() => setIsTemplateDialogOpen(true)} variant="outline" className="w-full">
+              <ListPlus className="me-2 h-4 w-4" /> Apply a Template
             </Button>
             <Button onClick={() => setIsGenerateTocOpen(true)} variant="outline" className="w-full">
               <Sparkles className="me-2 h-4 w-4" /> Generate with AI

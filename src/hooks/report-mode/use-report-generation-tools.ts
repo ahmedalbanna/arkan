@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
@@ -21,17 +22,11 @@ export function useReportGenerationTools() {
     const [showTocInput, setShowTocInput] = useState(false);
     const [isGenerateTocOpen, setIsGenerateTocOpen] = useState(false);
 
-    // New state to manage which chapter is in "build mode" for generation
+    const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
     const [chapterInBuildMode, setChapterInBuildMode] = useState<string | null>(null);
 
-    // State to track selected sections for chapter generation.
     const [selectedSectionsForChapterGen, setSelectedSectionsForChapterGen] = useState<Record<string, Set<string>>>({});
 
-    /**
-     * Toggles the selection of a single section within a chapter for bulk generation.
-     * @param chapterId - The ID of the chapter containing the section.
-     * @param sectionId - The ID of the section to toggle.
-     */
     const handleSectionSelectionToggle = (chapterId: string, sectionId: string) => {
         setSelectedSectionsForChapterGen(prev => {
             const newSelection = { ...prev };
@@ -49,11 +44,6 @@ export function useReportGenerationTools() {
         });
     };
 
-    /**
-     * Selects or deselects all sections within a given chapter.
-     * @param chapterId - The ID of the chapter.
-     * @param select - A boolean indicating whether to select (true) or deselect (false) all sections.
-     */
     const handleSelectAllSectionsInChapter = (chapterId: string, select: boolean) => {
         setSelectedSectionsForChapterGen(prev => {
             const newSelection = { ...prev };
@@ -67,17 +57,10 @@ export function useReportGenerationTools() {
         });
     };
 
-    /**
-     * Enters the "build mode" for a specific chapter, allowing section selection.
-     * @param chapterId - The ID of the chapter to put into build mode.
-     */
     const handleEnterBuildMode = (chapterId: string) => {
         setChapterInBuildMode(chapterId);
     };
 
-    /**
-     * Cancels the "build mode", hiding checkboxes and clearing selections for that chapter.
-     */
     const handleCancelBuildMode = () => {
         if (chapterInBuildMode) {
             setSelectedSectionsForChapterGen(prev => ({ ...prev, [chapterInBuildMode]: new Set() }));
@@ -325,5 +308,7 @@ export function useReportGenerationTools() {
         chapterInBuildMode,
         handleEnterBuildMode,
         handleCancelBuildMode,
+        isTemplateDialogOpen,
+        setIsTemplateDialogOpen,
     };
 }
