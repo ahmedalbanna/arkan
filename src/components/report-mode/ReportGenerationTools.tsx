@@ -57,9 +57,6 @@ export function GenerationTools() {
     handleAddSection,
     handleCreateFromToc,
     handleDragEnd,
-    selectedSectionsForChapterGen,
-    handleSectionSelectionToggle,
-    handleSelectAllSectionsInChapter,
     chapterInBuildMode,
     handleEnterBuildMode,
     handleCancelBuildMode,
@@ -71,10 +68,10 @@ export function GenerationTools() {
     setIsBuildProjectDialogOpen,
     onGenerateProject,
     projectMutation,
-    // New state and handlers from the hook
     isProjectBuildMode,
     enterProjectBuildMode,
     exitProjectBuildMode,
+    finalProjectPrompt,
   } = useReportGenerationTools();
 
   const handleSelectAllChapters = (checked: boolean) => {
@@ -94,7 +91,7 @@ export function GenerationTools() {
         onOpenChange={setIsBuildProjectDialogOpen}
         project={project}
         selectedChapters={Array.from(selectedChaptersForProjectGen)}
-        selectedSections={selectedSectionsForChapterGen}
+        finalProjectPrompt={finalProjectPrompt}
         onGenerateProject={onGenerateProject}
         isLoading={projectMutation.isPending}
       />
@@ -172,9 +169,6 @@ export function GenerationTools() {
                         activeMutationKey={sectionMutation.isPending ? sectionMutation.variables as string : null}
                         isAnythingGenerating={sectionMutation.isPending || chapterMutation.isPending}
                         hasCreditsForSingleSection={!!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1}
-                        selectedSections={selectedSectionsForChapterGen[chapter.id] || new Set()}
-                        onSectionSelect={(sectionId) => handleSectionSelectionToggle(chapter.id, sectionId)}
-                        onSelectAll={(select) => handleSelectAllSectionsInChapter(chapter.id, select)}
                         isBuildMode={chapterInBuildMode === chapter.id}
                         onEnterBuildMode={() => handleEnterBuildMode(chapter.id)}
                         onCancelBuildMode={handleCancelBuildMode}

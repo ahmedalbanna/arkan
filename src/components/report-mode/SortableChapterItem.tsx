@@ -43,9 +43,6 @@ interface SortableChapterItemProps {
     activeMutationKey: string | null;
     isAnythingGenerating: boolean;
     hasCreditsForSingleSection: boolean;
-    selectedSections: Set<string>;
-    onSectionSelect: (sectionId: string) => void;
-    onSelectAll: (select: boolean) => void;
     isBuildMode: boolean;
     onEnterBuildMode: () => void;
     onCancelBuildMode: () => void;
@@ -58,15 +55,14 @@ interface SortableChapterItemProps {
 interface ChapterBuildContextPreviewDialogProps {
   project: Project | null;
   chapter: Chapter;
-  selectedSectionIds: Set<string>;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 
-function ChapterBuildContextPreviewDialog({ project, chapter, selectedSectionIds, isOpen, onOpenChange }: ChapterBuildContextPreviewDialogProps) {
+function ChapterBuildContextPreviewDialog({ project, chapter, isOpen, onOpenChange }: ChapterBuildContextPreviewDialogProps) {
   const [viewMode, setViewMode] = useState<'plan' | 'prompt'>('plan');
-  const sectionsToPreview = chapter.sections.filter(s => selectedSectionIds.has(s.id));
+  const sectionsToPreview = chapter.sections;
 
   const getContextNames = (section: Section) => {
     if (!project) return [];
@@ -207,9 +203,6 @@ export function SortableChapterItem({
   index,
   onGenerateChapter,
   onAddSection,
-  selectedSections,
-  onSectionSelect,
-  onSelectAll,
   isBuildMode,
   onEnterBuildMode,
   onCancelBuildMode,
@@ -230,16 +223,13 @@ export function SortableChapterItem({
   };
 
   const sectionsInChapter = chapter.sections;
-  const isAllSelected = sectionsInChapter.length > 0 && sectionsInChapter.every(s => selectedSections.has(s.id));
-  const canGenerateChapter = (selectedSections?.size ?? 0) >= 1; // Changed to 1 to allow generation from single section
-  const hasSelection = (selectedSections?.size ?? 0) > 0;
+  const canGenerateChapter = sectionsInChapter.length > 0;
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <ChapterBuildContextPreviewDialog
         project={project}
         chapter={chapter}
-        selectedSectionIds={selectedSections}
         isOpen={isSummaryDialogOpen}
         onOpenChange={setIsSummaryDialogOpen}
       />
@@ -270,17 +260,6 @@ export function SortableChapterItem({
         <AccordionContent>
           <div className="border-t px-4 py-4 space-y-4">
 
-            {isBuildMode && (
-              <div className="flex items-center gap-3 p-2 rounded-md border bg-background">
-                <Checkbox
-                  id={`select-all-${chapter.id}`}
-                  checked={isAllSelected}
-                  onCheckedChange={(checked) => onSelectAll(!!checked)}
-                />
-                <Label htmlFor={`select-all-${chapter.id}`} className="font-semibold text-sm">Select All Sections</Label>
-              </div>
-            )}
-
             <div className="w-full space-y-2">
               {chapter.sections.map((section, sectionIndex) => (
                 <SortableSectionItem
@@ -292,8 +271,9 @@ export function SortableChapterItem({
                   isGenerating={props.activeMutationKey === section.id}
                   isAnythingGenerating={props.isAnythingGenerating}
                   hasCredits={props.hasCreditsForSingleSection}
-                  isSelected={selectedSections.has(section.id)}
-                  onSelect={() => onSectionSelect(section.id)}
+                  // These props are no longer relevant for project build mode, but kept for chapter build mode
+                  isSelected={false} 
+                  onSelect={() => {}}
                   isCheckboxVisible={isBuildMode}
                 />
               ))}
@@ -303,45 +283,6 @@ export function SortableChapterItem({
               <PlusCircle className="me-2 h-4 w-4" />
               Add New Section
             </Button>
-
-            {isBuildMode ? (
-              <div className="flex gap-2">
-                <Button onClick={onCancelBuildMode} variant="secondary" className="flex-1">
-                  <XCircle className="mr-2 h-4 w-4" /> Cancel
-                </Button>
-                <Button onClick={() => setIsSummaryDialogOpen(true)} variant="outline" className="flex-1" disabled={!hasSelection}>
-                  <Eye className="mr-2 h-4 w-4" /> Preview Plan
-                </Button>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="w-full flex-1">
-                        <Button
-                          onClick={() => onGenerateChapter(chapter.id)}
-                          disabled={props.isAnythingGenerating || !canGenerateChapter}
-                          className="w-full"
-                        >
-                          <Sparkles className="mr-2 h-4 w-4" />
-                          Generate Chapter
-                        </Button>
-                      </div>
-                    </TooltipTrigger>
-                    {!canGenerateChapter && <TooltipContent>Please select at least 1 section to generate a chapter.</TooltipContent>}
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            ) : (
-              <Button
-                variant="default"
-                size="sm"
-                onClick={onEnterBuildMode}
-                disabled={props.isAnythingGenerating}
-                className="w-full"
-              >
-                <Construction className="mr-2 h-4 w-4" />
-                Build Chapter
-              </Button>
-            )}
           </div>
         </AccordionContent>
       </AccordionItem>
