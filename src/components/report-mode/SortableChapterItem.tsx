@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -13,15 +14,18 @@ import {
   PlusCircle,
   Sparkles,
   XCircle,
-  Construction
+  Construction,
+  Eye,
 } from 'lucide-react';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { SortableSectionItem } from './SortableSectionItem';
 import { CSS } from '@dnd-kit/utilities';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
+import { ScrollArea } from "../ui/scroll-area";
+import { MarkdownViewer } from "../shared/MarkdownViewer";
 
 interface SortableChapterItemProps {
   chapter: Chapter;
@@ -41,6 +45,36 @@ interface SortableChapterItemProps {
   onCancelBuildMode: () => void;
 }
 
+function ChapterBuildContextPreviewDialog({ chapter, selectedSectionIds, isOpen, onOpenChange }: { chapter: Chapter, selectedSectionIds: Set<string>, isOpen: boolean, onOpenChange: (open: boolean) => void }) {
+  const combinedContent = useMemo(() => {
+    return chapter.sections
+      .filter(s => selectedSectionIds.has(s.id))
+      .map(s => `## ${s.title}\n\n${s.content || '*No content yet.*'}`)
+      .join('\n\n---\n\n');
+  }, [chapter, selectedSectionIds]);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl h-[80vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Context Preview: {chapter.title}</DialogTitle>
+          <DialogDescription>
+            This is the combined content from the sections you selected. It will be used as context to generate the full chapter.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex-grow overflow-hidden border rounded-md">
+          <ScrollArea className="h-full">
+            <div className="p-6">
+              <MarkdownViewer content={combinedContent} />
+            </div>
+          </ScrollArea>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
 export function SortableChapterItem({
   chapter,
   index,
@@ -55,6 +89,7 @@ export function SortableChapterItem({
   ...props
 }: SortableChapterItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
+  const [isSummaryDialogOpen, setIsSummaryDialogOpen] = useState(false);
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -65,10 +100,17 @@ export function SortableChapterItem({
 
   const sectionsInChapter = chapter.sections;
   const isAllSelected = sectionsInChapter.length > 0 && sectionsInChapter.every(s => selectedSections.has(s.id));
-  const canGenerateChapter = (selectedSections?.size ?? 0) >= 3;
+  const canGenerateChapter = (selectedSections?.size ?? 0) >= 1; // Changed to 1 to allow generation from single section
+  const hasSelection = (selectedSections?.size ?? 0) > 0;
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
+      <ChapterBuildContextPreviewDialog 
+        chapter={chapter}
+        selectedSectionIds={selectedSections}
+        isOpen={isSummaryDialogOpen}
+        onOpenChange={setIsSummaryDialogOpen}
+      />
       <AccordionItem value={chapter.id} className="bg-muted/30 border rounded-lg">
         <div className="flex items-center px-4 py-2">
           <AccordionTrigger className="flex-1 hover:no-underline py-0">
@@ -124,13 +166,16 @@ export function SortableChapterItem({
             
             {isBuildMode ? (
               <div className="flex gap-2">
-                <Button onClick={onCancelBuildMode} variant="secondary" className="w-full">
+                <Button onClick={onCancelBuildMode} variant="secondary" className="flex-1">
                   <XCircle className="mr-2 h-4 w-4" /> Cancel
+                </Button>
+                <Button onClick={() => setIsSummaryDialogOpen(true)} variant="outline" className="flex-1" disabled={!hasSelection}>
+                  <Eye className="mr-2 h-4 w-4" /> Preview Context
                 </Button>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="w-full">
+                      <div className="w-full flex-1">
                         <Button
                           onClick={() => onGenerateChapter(chapter.id)}
                           disabled={props.isAnythingGenerating || !canGenerateChapter}
@@ -141,7 +186,7 @@ export function SortableChapterItem({
                         </Button>
                       </div>
                     </TooltipTrigger>
-                    {!canGenerateChapter && <TooltipContent>Please select at least 3 sections to generate a chapter.</TooltipContent>}
+                    {!canGenerateChapter && <TooltipContent>Please select at least 1 section to generate a chapter.</TooltipContent>}
                   </Tooltip>
                 </TooltipProvider>
               </div>
