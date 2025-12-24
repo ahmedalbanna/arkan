@@ -31,7 +31,6 @@ import {
 } from 'lucide-react';
 import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
-import { ScrollArea } from "../ui/scroll-area";
 import { BuildProjectDialog } from "./BuildProjectDialog";
 import { GenerateTocDialog } from './GenerateTocDialog';
 import { ReportTemplateDialog } from "./ReportTemplateDialog";
@@ -138,6 +137,8 @@ export function GenerationTools() {
           )}
 
           <div className="relative flex-grow flex flex-col min-h-0">
+
+
             {isProjectBuildMode && (
               <div className="flex items-center gap-2 mb-2 p-2 border rounded-md bg-muted/30">
                 <Checkbox
@@ -148,8 +149,9 @@ export function GenerationTools() {
                 <Label htmlFor="select-all-chapters" className="font-semibold text-sm">Select all sections for project build</Label>
               </div>
             )}
-            <ScrollArea className="flex-grow">
+            <div className="flex-grow min-h-0 overflow-y-scroll h-fit">
               <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+
                 <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
                   <Accordion type="multiple" className="w-full space-y-2">
                     {(project?.chapters || []).map((chapter, chapterIndex) => (
@@ -174,8 +176,9 @@ export function GenerationTools() {
                     ))}
                   </Accordion>
                 </SortableContext>
+
               </DndContext>
-            </ScrollArea>
+            </div>
             <div className="mt-4">
               {isProjectBuildMode ? (
                 <div className="flex gap-2">
@@ -202,9 +205,11 @@ export function GenerationTools() {
                 </Button>
               )}
             </div>
+
           </div>
+
         </CardContent>
-      </Card>
+      </Card >
     </>
   );
 }

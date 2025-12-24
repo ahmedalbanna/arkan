@@ -1,18 +1,16 @@
 'use client';
 
 import { useAgentManager } from '@/hooks/use-agent-store';
-import { useFormContext } from 'react-hook-form';
 
 import { Combobox } from '@/components/ui/combobox';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '../ui/textarea';
 import { useGuidelineEditor } from '@/hooks';
-import { useEffect, useState } from 'react';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
 import { PlusCircle, Trash2 } from 'lucide-react';
-import { ScrollArea } from '../ui/scroll-area';
+import { useState } from 'react';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 
 interface GuidelineEditorProps {
     itemKey: string;
@@ -97,8 +95,8 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
 
             <div className="space-y-3">
                 <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.customGuidelines')}</Label>
-                 <div className="flex gap-2">
-                    <Input 
+                <div className="flex gap-2">
+                    <Input
                         value={newGuideline}
                         onChange={(e) => setNewGuideline(e.target.value)}
                         placeholder={t('builder.reportGenerator.addGuidelinePlaceholder')}
@@ -110,28 +108,28 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
                         }}
                     />
                     <Button type="button" onClick={handleAddGuideline} size="sm" variant="outline" className="shrink-0">
-                        <PlusCircle className="mr-2 h-4 w-4"/> Add
+                        <PlusCircle className="mr-2 h-4 w-4" /> Add
                     </Button>
                 </div>
                 {guidelines.length > 0 && (
-                     <ScrollArea className="h-24 w-full rounded-md border p-2">
-                        <div className="space-y-2">
-                            {guidelines.map((guideline, index) => (
-                                <div key={index} className="flex items-center justify-between text-sm p-2 bg-muted/50 rounded-md">
-                                    <span className="flex-1">{guideline}</span>
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-6 w-6"
-                                        onClick={() => removeGuideline(index)}
-                                    >
-                                        <Trash2 className="h-4 w-4 text-destructive" />
-                                    </Button>
-                                </div>
-                            ))}
-                        </div>
-                    </ScrollArea>
+
+                    <div className="space-y-2">
+                        {guidelines.map((guideline, index) => (
+                            <div key={index} className="flex items-center justify-between text-sm p-2 bg-muted/50 rounded-md">
+                                <span className="flex-1">{guideline}</span>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6"
+                                    onClick={() => removeGuideline(index)}
+                                >
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+
                 )}
             </div>
         </div>

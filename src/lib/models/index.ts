@@ -1,6 +1,8 @@
 
 
+export * from './agent';
 export * from './chapter';
+export * from './control-types';
 export * from './diagram';
 export * from './docxTemplate';
 export * from './external-context';
@@ -11,5 +13,4 @@ export * from './section';
 export * from './template';
 export * from './transaction';
 export * from './user';
-export * from './control-types';
 

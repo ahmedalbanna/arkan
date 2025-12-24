@@ -7,50 +7,44 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from '@/components/ui/button';
+import { useBuilderStore } from "@/hooks";
 import type { Chapter, Project, Section } from '@/lib/models';
 import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import {
-  GripVertical,
-  PlusCircle,
-  Sparkles,
-  XCircle,
-  Construction,
-  Eye,
-  FileText,
-  LinkIcon,
-  StickyNote,
   Code,
+  Eye,
+  GripVertical,
+  LinkIcon,
+  PlusCircle,
+  StickyNote
 } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import { SortableSectionItem } from './SortableSectionItem';
-import { CSS } from '@dnd-kit/utilities';
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '../ui/tooltip';
-import { Checkbox } from "../ui/checkbox";
-import { Label } from "../ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
-import { ScrollArea } from "../ui/scroll-area";
 import { MarkdownViewer } from "../shared/MarkdownViewer";
-import { useBuilderStore } from "@/hooks";
-import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Checkbox } from "../ui/checkbox";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
+import { ScrollArea } from "../ui/scroll-area";
+import { SortableSectionItem } from './SortableSectionItem';
 
 interface SortableChapterItemProps {
-    chapter: Chapter;
-    index: number;
-    onGenerateSection: (sectionId: string) => void;
-    onGenerateChapter: (chapterId: string) => void;
-    onAddSection: (chapterId: string) => void;
-    activeMutationKey: string | null;
-    isAnythingGenerating: boolean;
-    hasCreditsForSingleSection: boolean;
-    isBuildMode: boolean;
-    onEnterBuildMode: () => void;
-    onCancelBuildMode: () => void;
-    isProjectBuildMode: boolean;
-    // For project build mode selection
-    selectedSections: Set<string>;
-    onSectionSelectToggle: (sectionId: string) => void;
-    onChapterSelectToggle: (chapterId: string, selectAll: boolean) => void;
+  chapter: Chapter;
+  index: number;
+  onGenerateSection: (sectionId: string) => void;
+  onGenerateChapter: (chapterId: string) => void;
+  onAddSection: (chapterId: string) => void;
+  activeMutationKey: string | null;
+  isAnythingGenerating: boolean;
+  hasCreditsForSingleSection: boolean;
+  isBuildMode: boolean;
+  onEnterBuildMode: () => void;
+  onCancelBuildMode: () => void;
+  isProjectBuildMode: boolean;
+  // For project build mode selection
+  selectedSections: Set<string>;
+  onSectionSelectToggle: (sectionId: string) => void;
+  onChapterSelectToggle: (chapterId: string, selectAll: boolean) => void;
 }
 
 
@@ -98,7 +92,7 @@ function ChapterBuildContextPreviewDialog({ project, chapter, isOpen, onOpenChan
         .filter(item => section.context.externalContext?.[item.id])
         .map(file => `--- Context from File: ${file.fileName} ---\n${file.content}`)
         .join('\n\n');
-      
+
       const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\n\n');
 
       return `
@@ -146,40 +140,40 @@ ${sectionInstructions}
         </DialogHeader>
         <div className="flex-grow overflow-hidden border rounded-md">
           {viewMode === 'plan' ? (
-            <ScrollArea className="h-full">
-              <div className="p-4 space-y-4">
-                {sectionsToPreview.map(section => (
-                  <Card key={section.id} className="bg-muted/50">
-                    <CardHeader>
-                      <CardTitle className="text-lg">{section.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm">
-                      <div className="space-y-1">
-                        <h4 className="font-semibold flex items-center gap-2"><StickyNote className="w-4 h-4" />Base Prompt</h4>
-                        <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic">"{section.prompt}"</p>
-                      </div>
-                      <div className="space-y-1">
-                        <h4 className="font-semibold">Instructions & Guidelines</h4>
-                        <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic">
-                          "{section.instruction}"
-                          {section.guidelines && section.guidelines.length > 0 && ` Additional guidelines: ${section.guidelines.join(', ')}`}
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <h4 className="font-semibold flex items-center gap-2"><LinkIcon className="w-4 h-4" />Selected Context</h4>
-                        {getContextNames(section).length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {getContextNames(section).map(name => <Badge variant="secondary" key={name}>{name}</Badge>)}
-                          </div>
-                        ) : (
-                          <p className="text-muted-foreground text-xs italic">No specific context selected for this section.</p>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </ScrollArea>
+
+            <div className="p-4 space-y-4">
+              {sectionsToPreview.map(section => (
+                <Card key={section.id} className="bg-muted/50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">{section.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <div className="space-y-1">
+                      <h4 className="font-semibold flex items-center gap-2"><StickyNote className="w-4 h-4" />Base Prompt</h4>
+                      <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic">"{section.prompt}"</p>
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-semibold">Instructions & Guidelines</h4>
+                      <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic">
+                        "{section.instruction}"
+                        {section.guidelines && section.guidelines.length > 0 && ` Additional guidelines: ${section.guidelines.join(', ')}`}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-semibold flex items-center gap-2"><LinkIcon className="w-4 h-4" />Selected Context</h4>
+                      {getContextNames(section).length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {getContextNames(section).map(name => <Badge variant="secondary" key={name}>{name}</Badge>)}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-xs italic">No specific context selected for this section.</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
           ) : (
             <ScrollArea className="h-full">
               <div className="p-4">
@@ -232,7 +226,7 @@ export function SortableChapterItem({
     if (sectionsInChapter.length === 0) return false;
     return sectionsInChapter.every(s => selectedSections.has(s.id));
   }, [sectionsInChapter, selectedSections]);
-  
+
   const isSomeSectionsSelected = useMemo(() => {
     if (sectionsInChapter.length === 0) return false;
     const hasSelected = sectionsInChapter.some(s => selectedSections.has(s.id));
@@ -249,17 +243,17 @@ export function SortableChapterItem({
       />
       <AccordionItem value={chapter.id} className="bg-muted/30 border rounded-lg">
         <div className="flex items-center px-4 py-2">
-           {isProjectBuildMode && (
-             <div className="flex items-center gap-2 mr-2">
-                <Checkbox
-                    id={`select-chapter-${chapter.id}`}
-                    checked={isAllSectionsSelected}
-                    data-state={isSomeSectionsSelected ? 'indeterminate' : isAllSectionsSelected ? 'checked' : 'unchecked'}
-                    onCheckedChange={(checked) => onChapterSelectToggle(chapter.id, !!checked)}
-                    aria-label={`Select all sections in chapter ${chapter.title}`}
-                />
+          {isProjectBuildMode && (
+            <div className="flex items-center gap-2 mr-2">
+              <Checkbox
+                id={`select-chapter-${chapter.id}`}
+                checked={isAllSectionsSelected}
+                data-state={isSomeSectionsSelected ? 'indeterminate' : isAllSectionsSelected ? 'checked' : 'unchecked'}
+                onCheckedChange={(checked) => onChapterSelectToggle(chapter.id, !!checked)}
+                aria-label={`Select all sections in chapter ${chapter.title}`}
+              />
             </div>
-           )}
+          )}
           <AccordionTrigger className="flex-1 hover:no-underline py-0">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {listeners && (
