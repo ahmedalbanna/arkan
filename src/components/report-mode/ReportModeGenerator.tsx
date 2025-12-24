@@ -88,8 +88,8 @@ export default function ReportModeGenerator() {
     return (
 
 
-        <div className="pb-16 lg:pb-0 h-full">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="pb-16 lg:pb-0">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
                 {isMobile ? (
                     <>
                         {activeMobileView === 'generator' && <CollapsibleSidePanel

@@ -30,7 +30,7 @@ export function SidePanelContent({ panels, defaultActiveKey }: SidePanelContentP
 
   return (
     <div className="flex flex-row bg-background border rounded-r-lg">
-      <div className="flex flex-col gap-2 border-r p-2 h-screen">
+      <div className="flex flex-col gap-2 border-r p-2">
         <TooltipProvider>
           {panels.map((panel) => (
             <Tooltip key={panel.key} delayDuration={0}>

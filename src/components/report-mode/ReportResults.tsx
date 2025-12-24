@@ -68,8 +68,8 @@ export function ReportResults() {
         </div>
       </CardHeader>
 
-      <CardContent className=" flex-grow flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 min-h-0">
-        <ScrollArea className="flex-grow">
+      <CardContent className=" flex-grow  flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 min-h-0">
+        <ScrollArea className="flex-grow ">
           {renderContent()}
         </ScrollArea>
         <MenuBar />
