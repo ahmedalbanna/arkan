@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useToast } from '@/hooks';
-import { ExternalContext, ExternalContextType } from '@/lib/types';
+import { ExternalContextType } from '@/lib/types';
 import { cn } from '@/lib/utils/cn';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { AtomIcon, FileText, ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
@@ -71,13 +71,13 @@ function FileDropzone() {
             reader.onerror = () => console.log('file reading has failed');
             reader.onload = () => {
                 const binaryStr = reader.result as string;
-                updateProject(p => {
+                updateProject(p =>
                     p.addExternalContext({
                         fileName: file.name,
                         content: binaryStr,
                         type: 'context'
-                    });
-                });
+                    })
+                );
                 toast({ title: t('builder.files.toasts.fileAdded'), description: t('builder.files.toasts.fileAddedDesc').replace('{fileName}', file.name) });
             };
 
@@ -140,17 +140,17 @@ export function UploadManager() {
     const externalContext = project?.externalContext || [];
 
     function removeExternalContext(index: number) {
-        updateProject(p => { p.removeExternalContext(index); });
+        updateProject(p => p.removeExternalContext(index));
     }
 
     function updateExternalContextType(index: number, type: ExternalContextType) {
-        updateProject(p => { p.updateExternalContextType(index, type); });
+        updateProject(p => p.updateExternalContextType(index, type));
     }
 
     const fileTypes: ExternalContextType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
 
     return (
-        <Card className="h-full flex flex-col">
+        <Card className="flex flex-col">
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <CardTitle>{t('builder.files.fileManagerTitle')}</CardTitle>
@@ -179,50 +179,50 @@ export function UploadManager() {
                 {externalContext && externalContext.length > 0 && (
                     <div className="space-y-2 flex-grow flex flex-col min-h-0">
                         <h3 className="text-sm font-medium text-muted-foreground">{t('builder.files.toasts.uploadedContext')}</h3>
-                        <ScrollArea className="flex-grow border rounded-lg">
-                            <ul className="space-y-1 list-none p-2">
-                                {externalContext.map((item, index) => {
-                                    return (
-                                        <li key={item.id} className="flex items-center justify-between p-2 rounded-md hover:bg-muted transition-colors">
-                                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                                <span className="truncate font-medium text-sm" title={item.fileName}>{item.fileName}</span>
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <Select value={item.type} onValueChange={(value: ExternalContextType) => updateExternalContextType(index, value)}>
-                                                    <SelectTrigger className={cn("text-xs h-7 w-auto p-0 border-0 bg-transparent focus:ring-0", {
-                                                        'text-blue-800 dark:text-blue-200': item.type === 'context',
-                                                        'text-green-800 dark:text-green-200': item.type === 'example',
-                                                        'text-yellow-800 dark:text-yellow-200': item.type === 'question',
-                                                        'text-purple-800 dark:text-purple-200': item.type === 'textbook',
-                                                        'text-gray-800 dark:text-gray-200': item.type === 'guidelines',
-                                                    })}>
-                                                        <SelectValue asChild>
-                                                            <Badge variant="secondary" className={cn("capitalize cursor-pointer", {
-                                                                'bg-blue-100 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800': item.type === 'context',
-                                                                'bg-green-100 dark:bg-green-900/50 border-green-200 dark:border-green-800': item.type === 'example',
-                                                                'bg-yellow-100 dark:bg-yellow-900/50 border-yellow-200 dark:border-yellow-800': item.type === 'question',
-                                                                'bg-purple-100 dark:bg-purple-900/50 border-purple-200 dark:border-purple-800': item.type === 'textbook',
-                                                                'bg-gray-100 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600': item.type === 'guidelines',
-                                                            })}>
-                                                                {item.type}
-                                                            </Badge>
-                                                        </SelectValue>
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {fileTypes.map(type => (
-                                                            <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <ViewContextDialog item={item} />
-                                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeExternalContext(index)}><X className="h-4 w-4 text-destructive" /></Button>
-                                            </div>
-                                        </li>
-                                    )
-                                })}
-                            </ul>
-                        </ScrollArea>
+
+                        <ul className="space-y-1 list-none p-2">
+                            {externalContext.map((item, index) => {
+                                return (
+                                    <li key={item.id} className="flex items-center justify-between p-2 rounded-md hover:bg-muted transition-colors">
+                                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                                            <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                            <span className="truncate font-medium text-sm" title={item.fileName}>{item.fileName}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <Select value={item.type} onValueChange={(value: ExternalContextType) => updateExternalContextType(index, value)}>
+                                                <SelectTrigger className={cn("text-xs h-7 w-auto p-0 border-0 bg-transparent focus:ring-0", {
+                                                    'text-blue-800 dark:text-blue-200': item.type === 'context',
+                                                    'text-green-800 dark:text-green-200': item.type === 'example',
+                                                    'text-yellow-800 dark:text-yellow-200': item.type === 'question',
+                                                    'text-purple-800 dark:text-purple-200': item.type === 'textbook',
+                                                    'text-gray-800 dark:text-gray-200': item.type === 'guidelines',
+                                                })}>
+                                                    <SelectValue asChild>
+                                                        <Badge variant="secondary" className={cn("capitalize cursor-pointer", {
+                                                            'bg-blue-100 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800': item.type === 'context',
+                                                            'bg-green-100 dark:bg-green-900/50 border-green-200 dark:border-green-800': item.type === 'example',
+                                                            'bg-yellow-100 dark:bg-yellow-900/50 border-yellow-200 dark:border-yellow-800': item.type === 'question',
+                                                            'bg-purple-100 dark:bg-purple-900/50 border-purple-200 dark:border-purple-800': item.type === 'textbook',
+                                                            'bg-gray-100 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600': item.type === 'guidelines',
+                                                        })}>
+                                                            {item.type}
+                                                        </Badge>
+                                                    </SelectValue>
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {fileTypes.map(type => (
+                                                        <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <ViewContextDialog item={item} />
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeExternalContext(index)}><X className="h-4 w-4 text-destructive" /></Button>
+                                        </div>
+                                    </li>
+                                )
+                            })}
+                        </ul>
+
                     </div>
                 )}
             </CardContent>

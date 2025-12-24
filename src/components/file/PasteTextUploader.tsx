@@ -28,13 +28,11 @@ export function PasteTextUploader() {
             return;
         }
 
-        updateProject(project => {
-            project.addExternalContext({
-                fileName: `${fileName.trim()}.md`,
-                content: text,
-                type: 'context'
-            });
-        });
+        updateProject(p => p.addExternalContext({
+            fileName: `${fileName.trim()}.md`,
+            content: text,
+            type: 'context',
+        }));
 
         toast({
             title: t('builder.files.toasts.contextAddedToastTitle'),
