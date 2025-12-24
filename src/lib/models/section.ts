@@ -2,7 +2,7 @@
 'use client';
 
 import type { DiagramType } from '@/ai/schemas';
-import type { Tone, Language, OutputStyle } from './control-types';
+import type { Language, OutputStyle, Tone } from './control-types';
 import type { Project } from './project';
 
 export interface GenerationControlState {
@@ -91,13 +91,13 @@ export class Section {
         let instructions: string[] = [];
         const formalityMap: { [key: number]: string } = { 0: 'very informal and casual', 33: 'balanced and neutral', 67: 'formal and professional', 100: 'very formal and academic' };
         const complexityMap: { [key: number]: string } = { 0: 'very simple and easy to understand', 33: 'clear and straightforward', 67: 'detailed and technical', 100: 'highly complex and expert-level' };
-    
+
         const formality = this.controls.formality > 67 ? formalityMap[100] : this.controls.formality > 33 ? formalityMap[67] : this.controls.formality > 0 ? formalityMap[33] : formalityMap[0];
         instructions.push(`The formality should be ${formality}.`);
-    
+
         const complexity = this.controls.complexity > 67 ? complexityMap[100] : this.controls.complexity > 33 ? complexityMap[67] : this.controls.complexity > 0 ? complexityMap[33] : complexityMap[0];
         instructions.push(`The complexity should be ${complexity}.`);
-        
+
         if (this.controls.tone) instructions.push(`The tone should be ${this.controls.tone}.`);
         if (this.controls.wordCount) instructions.push(`Aim for a word count of approximately ${this.controls.wordCount} words.`);
 
@@ -107,16 +107,16 @@ export class Section {
         if (this.controls.outputStyle.code && this.controls.programmingLanguage) {
             instructions.push(`The code blocks should be in ${this.controls.programmingLanguage}.`);
         }
-    
+
         if (this.controls.language && this.controls.language !== 'default') {
             const langMap: Record<string, string> = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
             instructions.push(`The output language must be ${langMap[this.controls.language] || 'English'}.`);
         }
-    
+
         const enabledStyles = Object.entries(this.controls.outputStyle).filter(([, value]) => value).map(([key]) => key);
         if (enabledStyles.length > 0) instructions.push(`The output should primarily include the following elements: ${enabledStyles.join(', ')}.`);
-    
-        
+
+
         return instructions.join(' ');
     }
 
@@ -125,28 +125,28 @@ export class Section {
             .filter(key => this.context.sections[key])
             .map(key => {
                 const section = project.getSection(key);
-                return `--- Context from Section: ${section?.title} ---\n${section?.content || ''}`;
+                return `\n--- Context from Section: ${section?.title} ---\n\n${section?.content || ''}`;
             })
             .join('\n\n');
 
         const externalContextContent = (project.externalContext || [])
             .filter(item => this.context.externalContext?.[item.id])
-            .map(file => `--- Context from File: ${file.fileName} ---\n${file.content}`)
+            .map(file => `\n--- Context from File: ${file.fileName} ---\n\n${file.content}`)
             .join('\n\n');
-        
+
         const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\n\n');
 
         return `
 ---
 ### Instructions for Section: "${this.title}"
 **Base Prompt:**
-${this.prompt}
+${this.prompt}\n
 **Guidelines:**
-${this.guidelines && this.guidelines.length > 0 ? this.guidelines.map(g => `- ${g}`).join('\n') : '- No specific guidelines provided.'}
+${this.guidelines && this.guidelines.length > 0 ? this.guidelines.map(g => `- ${g}`).join('\n') : '- No specific guidelines provided.'} \n
 **Additional Instructions:**
-${this.instruction}
+${this.instruction}\n
 **Context:**
-${fullContext || 'No context provided.'}
+${fullContext || 'No context provided.'}\n
 ---
         `;
     }
@@ -166,7 +166,7 @@ ${fullContext || 'No context provided.'}
             instruction: this.buildInstructionText(), // Always build fresh on serialization
         };
     }
-    
+
     public with(props: Partial<Omit<SectionProperties, 'id'>>): Section {
         return new Section({ ...this.toJSON(), ...props, id: this.id });
     }

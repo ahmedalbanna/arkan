@@ -2,16 +2,12 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
-import { editorExtensions } from '@/lib/tiptap-extensions';
-import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
-import { marked } from 'marked';
-import React, { memo, useCallback, useEffect, useRef } from 'react';
-import TurndownService from 'turndown';
-import { gfm } from 'turndown-plugin-gfm';
-
 import { useBrowserSpeech } from '@/hooks';
 import { useEditorStore } from '@/hooks/core/use-editor-store';
+import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
+import { editorExtensions } from '@/lib/tiptap-extensions';
+import { processPlantUml } from '@/lib/utils/processPlantUml';
+import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
 import {
   Bold,
   BookText,
@@ -23,6 +19,10 @@ import {
   Strikethrough,
   Volume2
 } from 'lucide-react';
+import { marked } from 'marked';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
+import TurndownService from 'turndown';
+import { gfm } from 'turndown-plugin-gfm';
 import { Button } from '../ui/button';
 import {
   DropdownMenu,
@@ -32,6 +32,7 @@ import {
 } from '../ui/dropdown-menu';
 import { Separator } from '../ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+
 
 
 // Toolbar Component
@@ -188,21 +189,24 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       attributes: {
         class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif prose-p:text-[12px] prose-headings:text-[16px] prose-a:text-primary hover:prose-a:text-primary/90 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2',
       },
-      handlePaste(view, event) {
+      async handlePaste(view, event) {
         const html = event.clipboardData?.getData('text/html');
         const plain = event.clipboardData?.getData('text/plain');
 
         if (html && editor) {
-            // If HTML content exists, paste it directly. Tiptap will sanitize it.
-            editor.chain().focus().insertContent(html).run();
-            return true;
+          // If HTML content exists, paste it directly. Tiptap will sanitize it.
+          editor.chain().focus().insertContent(html).run();
+          return true;
         }
 
         if (plain && editor) {
-            // If only plain text exists, treat it as markdown and parse it.
-            const parsedHtml = marked.parse(plain);
-            editor.chain().focus().insertContent(parsedHtml).run();
-            return true;
+
+          // If PlantUML content is detected, process it.
+
+          // If only plain text exists, treat it as markdown and parse it.
+          const parsedHtml = marked.parse(await processPlantUml(plain) as unknown as string) as string;
+          editor.chain().focus().insertContent(parsedHtml).run();
+          return true;
         }
 
         return false; // Let the default paste handler take over if all else fails.

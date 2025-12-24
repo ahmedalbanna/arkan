@@ -23,19 +23,19 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import {
+  Building,
   ListPlus,
   PlusCircle,
   Sparkles,
-  Building,
   XCircle,
 } from 'lucide-react';
-import { GenerateTocDialog } from './GenerateTocDialog';
-import { SortableChapterItem } from './SortableChapterItem';
-import { ScrollArea } from "../ui/scroll-area";
-import { ReportTemplateDialog } from "./ReportTemplateDialog";
-import { BuildProjectDialog } from "./BuildProjectDialog";
 import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
+import { ScrollArea } from "../ui/scroll-area";
+import { BuildProjectDialog } from "./BuildProjectDialog";
+import { GenerateTocDialog } from './GenerateTocDialog';
+import { ReportTemplateDialog } from "./ReportTemplateDialog";
+import { SortableChapterItem } from './SortableChapterItem';
 
 
 export function GenerationTools() {
@@ -103,7 +103,7 @@ export function GenerationTools() {
         </CardHeader>
         <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
           <div className="flex flex-col sm:flex-row gap-2">
-             <Button onClick={() => setIsTemplateDialogOpen(true)} variant="outline" className="w-full">
+            <Button onClick={() => setIsTemplateDialogOpen(true)} variant="outline" className="w-full">
               <ListPlus className="me-2 h-4 w-4" /> Apply a Template
             </Button>
             <Button onClick={() => setIsGenerateTocOpen(true)} variant="outline" className="w-full">
@@ -139,14 +139,14 @@ export function GenerationTools() {
 
           <div className="relative flex-grow flex flex-col min-h-0">
             {isProjectBuildMode && (
-                <div className="flex items-center gap-2 mb-2 p-2 border rounded-md bg-muted/30">
+              <div className="flex items-center gap-2 mb-2 p-2 border rounded-md bg-muted/30">
                 <Checkbox
-                    id="select-all-chapters"
-                    checked={isAllChaptersSelected}
-                    onCheckedChange={(checked) => handleSelectAllChapters(!!checked)}
+                  id="select-all-chapters"
+                  checked={isAllChaptersSelected}
+                  onCheckedChange={(checked) => handleSelectAllChapters(!!checked)}
                 />
                 <Label htmlFor="select-all-chapters" className="font-semibold text-sm">Select all sections for project build</Label>
-                </div>
+              </div>
             )}
             <ScrollArea className="flex-grow">
               <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -176,31 +176,31 @@ export function GenerationTools() {
                 </SortableContext>
               </DndContext>
             </ScrollArea>
-             <div className="mt-4">
-                {isProjectBuildMode ? (
-                    <div className="flex gap-2">
-                        <Button onClick={exitProjectBuildMode} variant="secondary" className="w-full">
-                            <XCircle className="mr-2 h-4 w-4" /> Cancel
-                        </Button>
-                         <Button 
-                            className="w-full" 
-                            onClick={() => setIsBuildProjectDialogOpen(true)}
-                            disabled={selectedSectionsForBuild.size === 0 || projectMutation.isPending}
-                        >
-                            <Building className="mr-2 h-4 w-4" />
-                            Build Project ({selectedSectionsForBuild.size} selected)
-                        </Button>
-                    </div>
-                ) : canBuildProject && (
-                    <Button 
-                        className="w-full" 
-                        onClick={enterProjectBuildMode}
-                        disabled={projectMutation.isPending}
-                    >
-                        <Building className="mr-2 h-4 w-4" />
-                        Build Project
-                    </Button>
-                )}
+            <div className="mt-4">
+              {isProjectBuildMode ? (
+                <div className="flex gap-2">
+                  <Button onClick={exitProjectBuildMode} variant="secondary" className="w-full">
+                    <XCircle className="mr-2 h-4 w-4" /> Cancel
+                  </Button>
+                  <Button
+                    className="w-full"
+                    onClick={() => setIsBuildProjectDialogOpen(true)}
+                    disabled={selectedSectionsForBuild.size === 0 || projectMutation.isPending}
+                  >
+                    <Building className="mr-2 h-4 w-4" />
+                    Build Project ({selectedSectionsForBuild.size} selected)
+                  </Button>
+                </div>
+              ) : canBuildProject && (
+                <Button
+                  className="w-full"
+                  onClick={enterProjectBuildMode}
+                  disabled={projectMutation.isPending}
+                >
+                  <Building className="mr-2 h-4 w-4" />
+                  Build Project
+                </Button>
+              )}
             </div>
           </div>
         </CardContent>

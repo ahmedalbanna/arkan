@@ -1,3 +1,5 @@
+import { handleFileDrop } from '@/lib/utils/drop-handler';
+import { handleFilePaste } from '@/lib/utils/paste-handler';
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import Dropcursor from '@tiptap/extension-dropcursor';
 import { FileHandler } from '@tiptap/extension-file-handler';
@@ -9,16 +11,15 @@ import TableHeader from '@tiptap/extension-table-header';
 import TableRow from '@tiptap/extension-table-row';
 import TextAlign from '@tiptap/extension-text-align';
 import StarterKit from '@tiptap/starter-kit';
-import Katex from 'tiptap-katex';
-import { handleFileDrop } from '@/lib/utils/drop-handler';
-import { handleFilePaste } from '@/lib/utils/paste-handler';
 import 'katex/dist/katex.min.css';
-import SlashCommand from './editor/slash-command';
+import Katex from 'tiptap-katex';
 import PlantUML from './editor/plantUml-extension'; // Import the new extension
+import SlashCommand from './editor/slash-command';
 
 export const editorExtensions = (uniqueId: string) => [
   StarterKit.configure({
     // Future configurations can go here
+    codeBlock: { HTMLAttributes: { class: '' }, exitOnArrowDown: true, exitOnTripleEnter: true },
   }),
   Placeholder.configure({
     placeholder: 'Start writing, drag-and-drop files, or type / for commands...',
@@ -40,10 +41,15 @@ export const editorExtensions = (uniqueId: string) => [
       files.forEach(file => handleFileDrop(currentEditor, file));
       return true;
     },
-    onPaste: (currentEditor, files, htmlContent) => {
-      if (htmlContent) return false;
+    onPaste: async (currentEditor, files, htmlContent) => {
+      if (htmlContent) {
+        // Let the editor handle HTML paste
+        return false;
+      }
+
+
       files.forEach(file => handleFilePaste(currentEditor, file));
-      return true;
+      return files.length > 0;
     },
   }),
   SlashCommand,
