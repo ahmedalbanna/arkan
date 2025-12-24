@@ -84,10 +84,17 @@ export function useReportGenerationTools() {
 
     const handleEnterBuildMode = (chapterId: string) => {
         setChapterInBuildMode(chapterId);
+        // Pre-select all sections in this chapter when entering build mode for it
+        const chapter = project?.getChapter(chapterId);
+        if (chapter) {
+            const sectionIds = new Set(chapter.sections.map(s => s.id));
+            setSelectedSectionsForBuild(sectionIds);
+        }
     };
 
     const handleCancelBuildMode = () => {
         setChapterInBuildMode(null);
+        setSelectedSectionsForBuild(new Set()); // Clear selections
     };
     
     const finalProjectPrompt = useMemo(() => {

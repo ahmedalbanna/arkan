@@ -62,8 +62,10 @@ export function GenerationTools() {
     handleCancelBuildMode,
     isTemplateDialogOpen,
     setIsTemplateDialogOpen,
-    selectedChaptersForProjectGen,
+    selectedSectionsForBuild,
+    handleSectionSelectionToggle,
     handleChapterSelectionToggle,
+    handleSelectAllChapters,
     isBuildProjectDialogOpen,
     setIsBuildProjectDialogOpen,
     onGenerateProject,
@@ -74,13 +76,8 @@ export function GenerationTools() {
     finalProjectPrompt,
   } = useReportGenerationTools();
 
-  const handleSelectAllChapters = (checked: boolean) => {
-    const allChapterIds = project?.chapters.map(c => c.id) || [];
-    allChapterIds.forEach(id => handleChapterSelectionToggle(id, checked));
-  };
-  
-  const isAllChaptersSelected = project && project.chapters.length > 0 && selectedChaptersForProjectGen.size === project.chapters.length;
-  const canBuildProject = project && project.chapters.length >= 2;
+  const isAllChaptersSelected = project && project.chapters.length > 0 && selectedSectionsForBuild.size === project.sections.length;
+  const canBuildProject = project && project.chapters.length >= 1;
 
   return (
     <>
@@ -90,7 +87,7 @@ export function GenerationTools() {
         isOpen={isBuildProjectDialogOpen}
         onOpenChange={setIsBuildProjectDialogOpen}
         project={project}
-        selectedChapters={Array.from(selectedChaptersForProjectGen)}
+        selectedSections={selectedSectionsForBuild}
         finalProjectPrompt={finalProjectPrompt}
         onGenerateProject={onGenerateProject}
         isLoading={projectMutation.isPending}
@@ -148,7 +145,7 @@ export function GenerationTools() {
                     checked={isAllChaptersSelected}
                     onCheckedChange={(checked) => handleSelectAllChapters(!!checked)}
                 />
-                <Label htmlFor="select-all-chapters" className="font-semibold text-sm">Select all chapters for project build</Label>
+                <Label htmlFor="select-all-chapters" className="font-semibold text-sm">Select all sections for project build</Label>
                 </div>
             )}
             <ScrollArea className="flex-grow">
@@ -160,9 +157,6 @@ export function GenerationTools() {
                         chapter={chapter}
                         index={chapterIndex}
                         key={chapter.id}
-                        isProjectSelected={selectedChaptersForProjectGen.has(chapter.id)}
-                        onProjectSelectToggle={() => handleChapterSelectionToggle(chapter.id)}
-                        isProjectBuildMode={isProjectBuildMode}
                         onAddSection={handleAddSection}
                         onGenerateSection={onGenerateSection}
                         onGenerateChapter={onGenerateChapter}
@@ -172,6 +166,10 @@ export function GenerationTools() {
                         isBuildMode={chapterInBuildMode === chapter.id}
                         onEnterBuildMode={() => handleEnterBuildMode(chapter.id)}
                         onCancelBuildMode={handleCancelBuildMode}
+                        isProjectBuildMode={isProjectBuildMode}
+                        selectedSections={selectedSectionsForBuild}
+                        onSectionSelectToggle={handleSectionSelectionToggle}
+                        onChapterSelectToggle={handleChapterSelectionToggle}
                       />
                     ))}
                   </Accordion>
@@ -187,10 +185,10 @@ export function GenerationTools() {
                          <Button 
                             className="w-full" 
                             onClick={() => setIsBuildProjectDialogOpen(true)}
-                            disabled={selectedChaptersForProjectGen.size === 0 || projectMutation.isPending}
+                            disabled={selectedSectionsForBuild.size === 0 || projectMutation.isPending}
                         >
                             <Building className="mr-2 h-4 w-4" />
-                            Build Project ({selectedChaptersForProjectGen.size} selected)
+                            Build Project ({selectedSectionsForBuild.size} selected)
                         </Button>
                     </div>
                 ) : canBuildProject && (
@@ -209,4 +207,4 @@ export function GenerationTools() {
       </Card>
     </>
   );
-};
+}

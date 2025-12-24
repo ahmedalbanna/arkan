@@ -20,6 +20,7 @@ import { Badge } from '../ui/badge';
 import { useState, useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { MarkdownViewer } from '../shared/MarkdownViewer';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 interface BuildProjectDialogProps {
   isOpen: boolean;
