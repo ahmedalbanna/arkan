@@ -67,19 +67,8 @@ export function useReportGenerationTools() {
     
     const handleSelectAllChapters = (select: boolean) => {
         if (!project) return;
-        setSelectedSectionsForBuild(prev => {
-            const newSelection = new Set(prev);
-            project.chapters.forEach(chapter => {
-                chapter.sections.forEach(section => {
-                    if (select) {
-                        newSelection.add(section.id);
-                    } else {
-                        newSelection.delete(section.id);
-                    }
-                });
-            });
-            return newSelection;
-        });
+        const allSectionIds = new Set(project.sections.map(s => s.id));
+        setSelectedSectionsForBuild(select ? allSectionIds : new Set());
     };
 
     const handleEnterBuildMode = (chapterId: string) => {
@@ -98,48 +87,9 @@ export function useReportGenerationTools() {
     };
     
     const finalProjectPrompt = useMemo(() => {
-        if (!project || selectedSectionsForBuild.size === 0) return '';
-    
-        const chaptersToGenerate = project.chapters.filter(c => 
-            c.sections.some(s => selectedSectionsForBuild.has(s.id))
-        );
-    
-        const chapterInstructions = chaptersToGenerate.map(chapter => {
-            const sectionsToGenerate = chapter.sections.filter(s => selectedSectionsForBuild.has(s.id));
-
-            const sectionInstructions = sectionsToGenerate.map(section => {
-                const contextSectionsContent = Object.keys(section.context.sections || {})
-                    .filter(key => section.context.sections[key])
-                    .map(key => `--- Context from Section: ${project.getSection(key)?.title} ---\n${project.getSectionContent(key)}`)
-                    .join('\n\n');
-    
-                const externalContextContent = (project.externalContext || [])
-                    .filter(item => section.context.externalContext?.[item.id])
-                    .map(file => `--- Context from File: ${file.fileName} ---\n${file.content}`)
-                    .join('\n\n');
-                
-                const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\n\n');
-    
-                return `
----
-### Instructions for Section: "${section.title}"
-**Base Prompt:**
-${section.prompt}
-**Guidelines:**
-${section.guidelines && section.guidelines.length > 0 ? section.guidelines.map(g => `- ${g}`).join('\n') : '- No specific guidelines provided.'}
-**Additional Instructions:**
-${section.instruction}
-**Context:**
-${fullContext || 'No context provided.'}
----
-                `;
-            }).join('');
-    
-            return `# Chapter: ${chapter.title}\n${sectionInstructions}`;
-        }).join('\n\n');
-    
-        return `You are an expert author. Your task is to write content for a project titled "${project.name}". You will be given instructions for several chapters. For each chapter, generate the content for all its sections based on their specific instructions.\n\n${chapterInstructions}`;
-    }, [project, selectedSectionsForBuild]);
+        if (!project) return '';
+        return project.generateFinalPrompt(selectedSectionsForBuild);
+      }, [project, selectedSectionsForBuild]);
 
 
     const chapterMutation = useMutation({
@@ -194,14 +144,27 @@ ${fullContext || 'No context provided.'}
             return { chapterId, content: result.markdownContent };
         },
         onSuccess: (data) => {
-            updateProject(p => p.updateChapter(data.chapterId, c => {
-                const firstSelectedId = Array.from(selectedSectionsForBuild || [])[0];
-                if (firstSelectedId) {
-                    const updatedProject = p.updateSection(firstSelectedId, s => s.with({ content: data.content }));
-                    return updatedProject.getChapter(data.chapterId)!;
-                }
-                return c;
-            }));
+            updateProject(p => {
+                // Find the chapter to update
+                const chapterToUpdate = p.getChapter(data.chapterId);
+                if (!chapterToUpdate) return p;
+
+                // Find the first selected section within that chapter
+                const firstSelectedSection = chapterToUpdate.sections.find(s => selectedSectionsForBuild.has(s.id));
+                if (!firstSelectedSection) return p;
+                
+                // Update the content of the first selected section
+                let updatedProject = p.updateSection(firstSelectedSection.id, s => s.with({ content: data.content }));
+                
+                // Clear the content of all other selected sections in that chapter
+                chapterToUpdate.sections.forEach(s => {
+                    if (s.id !== firstSelectedSection.id && selectedSectionsForBuild.has(s.id)) {
+                        updatedProject = updatedProject.updateSection(s.id, sec => sec.with({ content: '' }));
+                    }
+                });
+                
+                return updatedProject;
+            });
             refetchUser();
             toast({ title: 'Chapter Generated', description: 'The AI has generated the content for the chapter.' });
             handleCancelBuildMode();

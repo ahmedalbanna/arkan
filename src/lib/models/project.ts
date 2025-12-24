@@ -71,6 +71,52 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     return hasBasicInfo || hasChaptersWithContent || hasExternalContext;
   }
 
+  public generateFinalPrompt(selectedSectionIds: Set<string>): string {
+    if (!selectedSectionIds || selectedSectionIds.size === 0) {
+      return '';
+    }
+  
+    const chaptersToGenerate = this.chapters.filter(c =>
+      c.sections.some(s => selectedSectionIds.has(s.id))
+    );
+  
+    const chapterInstructions = chaptersToGenerate.map(chapter => {
+      const sectionsToGenerate = chapter.sections.filter(s => selectedSectionIds.has(s.id));
+  
+      const sectionInstructions = sectionsToGenerate.map(section => {
+        const contextSectionsContent = Object.keys(section.context.sections || {})
+          .filter(key => section.context.sections[key])
+          .map(key => `--- Context from Section: ${this.getSection(key)?.title} ---\n${this.getSectionContent(key)}`)
+          .join('\n\n');
+  
+        const externalContextContent = (this.externalContext || [])
+          .filter(item => section.context.externalContext?.[item.id])
+          .map(file => `--- Context from File: ${file.fileName} ---\n${file.content}`)
+          .join('\n\n');
+  
+        const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\n\n');
+  
+        return `
+---
+### Instructions for Section: "${section.title}"
+**Base Prompt:**
+${section.prompt}
+**Guidelines:**
+${section.guidelines && section.guidelines.length > 0 ? section.guidelines.map(g => `- ${g}`).join('\n') : '- No specific guidelines provided.'}
+**Additional Instructions:**
+${section.instruction}
+**Context:**
+${fullContext || 'No context provided.'}
+---
+        `;
+      }).join('');
+  
+      return `# Chapter: ${chapter.title}\n${sectionInstructions}`;
+    }).join('\n\n');
+  
+    return `You are an expert author. Your task is to write content for a project titled "${this.name}". You will be given instructions for several chapters. For each chapter, generate the content for all its sections based on their specific instructions.\n\n${chapterInstructions}`;
+  }
+
   public withContentFromMarkdown(markdown: string): Project {
     const lines = markdown.split('\n');
     let currentChapterData: { title: string; sections: { title: string; content: string }[] } | null = null;
@@ -214,10 +260,10 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
 
 
   // --- Chapter Methods ---
-  public addChapter(title?: string): Project {
+  public addChapter(title?: string, sections: Section[] = []): Project {
     const chapterTitle = title || 'Untitled Chapter';
     const newChapterId = this.generateUniqueId();
-    const newChapter = new Chapter({ id: newChapterId, title: chapterTitle, sections: [] });
+    const newChapter = new Chapter({ id: newChapterId, title: chapterTitle, sections });
     return this.with({ chapters: [...this.chapters, newChapter] });
   }
 
