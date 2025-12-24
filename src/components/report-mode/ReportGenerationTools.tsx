@@ -92,7 +92,7 @@ export function GenerationTools() {
         onGenerateProject={onGenerateProject}
         isLoading={projectMutation.isPending}
       />
-      <Card className="flex flex-col h-full">
+      <Card className="flex flex-col">
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
@@ -101,7 +101,7 @@ export function GenerationTools() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
+        <CardContent className="flex-grow flex flex-col gap-4  max-h-screen ">
           <div className="flex flex-col sm:flex-row gap-2">
             <Button onClick={() => setIsTemplateDialogOpen(true)} variant="outline" className="w-full">
               <ListPlus className="me-2 h-4 w-4" /> Apply a Template
@@ -142,7 +142,7 @@ export function GenerationTools() {
               <div className="flex items-center gap-2 mb-2 p-2 border rounded-md bg-muted/30">
                 <Checkbox
                   id="select-all-chapters"
-                  checked={isAllChaptersSelected}
+                  checked={isAllChaptersSelected || false}
                   onCheckedChange={(checked) => handleSelectAllChapters(!!checked)}
                 />
                 <Label htmlFor="select-all-chapters" className="font-semibold text-sm">Select all sections for project build</Label>

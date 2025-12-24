@@ -20,17 +20,17 @@ import RichTextEditor from './RichTextEditor';
 export function ReportResults() {
   const { t } = useLocalization();
   const { project, updateProject } = useBuilderStore();
-  
+
   const fullMarkdownContent = useMemo(() => {
     return project?.fullMarkdownContent || '';
   }, [project]);
-  
+
   const [localMarkdown, setLocalMarkdown] = useState(fullMarkdownContent);
 
   useEffect(() => {
     setLocalMarkdown(fullMarkdownContent);
   }, [fullMarkdownContent]);
-  
+
 
   function handleContentChange(markdown: string) {
     if (!project) return;
@@ -43,37 +43,37 @@ export function ReportResults() {
 
   function renderContent() {
     return (
-        <A4Page>
-            <RichTextEditor
-              key={project?.id} // Re-mount editor when project changes
-              content={localMarkdown}
-              onChange={handleContentChange}
-            />
-        </A4Page>
+      <A4Page>
+        <RichTextEditor
+          key={project?.id} // Re-mount editor when project changes
+          content={localMarkdown}
+          onChange={handleContentChange}
+        />
+      </A4Page>
     );
   };
 
   return (
-    <Card className="h-full flex flex-col overflow-hidden">
-        <CardHeader>
-            <div className="flex justify-between items-center">
-                 <div>
-                    <CardTitle className="font-headline">
-                    {t('builder.reportGenerator.resultsTitle')}
-                    </CardTitle>
-                    <CardDescription>
-                    {t('builder.reportGenerator.resultsDesc')}
-                    </CardDescription>
-                </div>
-            </div>
-        </CardHeader>
-        
-        <CardContent className="flex-grow flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 min-h-0">
-            <ScrollArea className="flex-grow">
-              {renderContent()}
-            </ScrollArea>
-            <MenuBar />
-        </CardContent>
+    <Card className=" flex flex-col overflow-hidden">
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle className="font-headline">
+              {t('builder.reportGenerator.resultsTitle')}
+            </CardTitle>
+            <CardDescription>
+              {t('builder.reportGenerator.resultsDesc')}
+            </CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className=" flex-grow flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 min-h-0">
+        <ScrollArea className="flex-grow">
+          {renderContent()}
+        </ScrollArea>
+        <MenuBar />
+      </CardContent>
     </Card>
   );
 };

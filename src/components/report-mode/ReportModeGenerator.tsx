@@ -2,18 +2,18 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { BookOpenText, GitGraph, Search, UploadCloud, PenSquare, Edit, FileInput } from 'lucide-react';
+import { useMobile } from '@/hooks';
+import { cn } from '@/lib/utils/cn';
+import { BookOpenText, Edit, GitGraph, PenSquare, Search, UploadCloud } from 'lucide-react';
 import { Suspense, useState } from 'react';
-import { Skeleton } from '../ui/skeleton';
-import { ReportResults } from './ReportResults';
-import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
 import { UploadManager } from '../file/UploadManager';
-import { GenerationTools } from './ReportGenerationTools';
+import { Button } from '../ui/button';
+import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
+import { Skeleton } from '../ui/skeleton';
 import { AIResearcherTool } from '../writing-tools/AIResearcherTool';
 import { PlantUMLGeneratorTool } from '../writing-tools/PlantUMLGeneratorTool';
-import { useMobile } from '@/hooks';
-import { Button } from '../ui/button';
-import { cn } from '@/lib/utils/cn';
+import { GenerationTools } from './ReportGenerationTools';
+import { ReportResults } from './ReportResults';
 
 
 function ReportSkeleton() {
@@ -88,7 +88,7 @@ export default function ReportModeGenerator() {
     return (
 
 
-        <div className="pb-16 lg:pb-0">
+        <div className="pb-16 lg:pb-0 h-full">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
                 {isMobile ? (
                     <>
@@ -110,7 +110,7 @@ export default function ReportModeGenerator() {
                             defaultActiveKey="files"
                             className="lg:col-span-4 xl:col-span-4"
                         />
-                        <div className="lg:col-span-8 xl:col-span-8 h-full">
+                        <div className="lg:col-span-8 xl:col-span-8">
                             <Suspense fallback={<ReportSkeleton />}>
                                 <ReportResults />
                             </Suspense>

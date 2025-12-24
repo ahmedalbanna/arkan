@@ -14,7 +14,7 @@ const A4Page = ({ children, title, className }: A4PageProps) => {
     return (
         <div
             className={cn(
-                "relative group bg-background shadow-lg p-8 md:p-12 mx-auto my-4 w-full max-w-[210mm]",
+                "relative group bg-background shadow-lg p-8 md:p-12 mx-auto my-4  w-full max-w-[210mm] box-border border border-border/50 dark:border-border/30",
                 title ? "min-h-[297mm]" : "",
                 className,
             )}
