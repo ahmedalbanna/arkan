@@ -39,7 +39,10 @@ export async function getProxiedImageBuffer(imageUrl: string): Promise<ProxiedIm
     const proxiedUrl = `/api/proxy/convert?url=${encodeURIComponent(imageUrl)}`;
     const response = await fetch(proxiedUrl);
     if (!response.ok) {
-      console.warn(`[CLIENT] Failed to fetch proxied image from ${imageUrl}. Status: ${response.statusText}`);
+      console.warn(`[CLIENT] Failed to fetch proxied image from ${imageUrl}. Status: ${response.status} ${response.statusText}`);
+      if (response.status === 405) {
+        console.error("Method Not Allowed (405). Ensure your API route handles GET requests.");
+      }
       return null;
     }
     const contentType = response.headers.get('Content-Type') || 'image/png'; // Default to png

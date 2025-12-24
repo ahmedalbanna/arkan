@@ -1,39 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const EXTERNAL_API_ENDPOINT = 'http://185.190.140.93:9003/api/convert';
+export async function GET(request: NextRequest) {
+    const imageUrl = request.nextUrl.searchParams.get('url');
 
-export async function POST(request: NextRequest) {
+    if (!imageUrl) {
+        return new NextResponse('Missing URL parameter', { status: 400 });
+    }
+
     try {
-        let formData = await request.formData();
+        // Validate the URL to prevent potential security issues like SSRF.
+        const url = new URL(imageUrl);
 
-        let response = await fetch(EXTERNAL_API_ENDPOINT, {
-            method: 'POST',
-            body: formData,
+        // --- SECURITY-CRITICAL ---
+        // Restrict fetching to only allowed domains to prevent abuse.
+        const allowedDomains = ['www.plantuml.com'];
+        if (!allowedDomains.includes(url.hostname)) {
+            return new NextResponse(`Forbidden domain: ${url.hostname}`, { status: 403 });
+        }
+
+        const imageResponse = await fetch(url.toString(), {
+            headers: {
+                // Forward a user-agent to avoid being blocked by some services.
+                'User-Agent': request.headers.get('User-Agent') || 'Arkan-Image-Proxy/1.0',
+            },
         });
 
-        if (!response.ok) {
-            let errorText = await response.text();
-            // Forward the error from the external API to the client
-            return new NextResponse(errorText || 'An error occurred during conversion.', {
-                status: response.status,
-                statusText: response.statusText,
+        if (!imageResponse.ok) {
+            return new NextResponse(imageResponse.statusText, {
+                status: imageResponse.status,
             });
         }
 
-        let svg = await response.text();
+        const imageBuffer = await imageResponse.arrayBuffer();
+        const contentType = imageResponse.headers.get('Content-Type') || 'image/png';
 
-        // Return the successful SVG response
-        return new NextResponse(svg, {
+        // Create a new response with the image data and correct headers.
+        return new NextResponse(imageBuffer, {
             status: 200,
             headers: {
-                'Content-Type': 'image/svg+xml; charset=utf-8',
+                'Content-Type': contentType,
+                'Cache-Control': 'public, max-age=31536000, immutable', // Cache aggressively
             },
         });
     } catch (error) {
-        console.error('Proxy API error:', error);
-        if (error instanceof TypeError && error.message === 'fetch failed') {
-             return new NextResponse('The conversion service is currently unreachable. Please try again later.', { status: 503 }); // Service Unavailable
-        }
-        return new NextResponse('An internal server error occurred.', { status: 500 });
+        console.error('[API_PROXY] Error fetching image:', error);
+        return new NextResponse('Error fetching image', { status: 500 });
     }
 }

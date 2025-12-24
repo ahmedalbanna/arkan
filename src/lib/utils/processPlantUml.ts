@@ -8,7 +8,7 @@ export async function processPlantUml(markdown: string): Promise<string> {
   }
 
   const plantUmlRegex = /```plantuml([\s\S]*?)```/g;
-  const matches = markdown.matchAll(plantUmlRegex);
+  const matches = Array.from(markdown.matchAll(plantUmlRegex));
   let processedMarkdown = markdown;
 
   for (const match of matches) {
@@ -23,13 +23,19 @@ export async function processPlantUml(markdown: string): Promise<string> {
         // Fetch the image and convert to a data URI
         const proxiedImage = await getProxiedImageBuffer(imageUrl);
         if (proxiedImage) {
-          let base64String = '';
-          const bytes = new Uint8Array(proxiedImage.buffer);
-          const len = bytes.byteLength;
-          for (let i = 0; i < len; i++) {
-            base64String += String.fromCharCode(bytes[i]);
+          let base64String;
+          if (typeof Buffer !== 'undefined') {
+            base64String = Buffer.from(proxiedImage.buffer).toString('base64');
+          } else {
+            let binary = '';
+            const bytes = new Uint8Array(proxiedImage.buffer);
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+              binary += String.fromCharCode(bytes[i]);
+            }
+            base64String = btoa(binary);
           }
-          const dataUri = `data:${proxiedImage.contentType};base64,${btoa(base64String)}`;
+          const dataUri = `data:${proxiedImage.contentType};base64,${base64String}`;
           processedMarkdown = processedMarkdown.replace(match[0], `![Diagram](${dataUri})`);
         } else {
           console.warn(`Failed to fetch and embed PlantUML image for code:\n${plantUmlCode}`);
