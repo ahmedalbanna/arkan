@@ -60,7 +60,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     return this.chapters.map(chapter => {
       const sectionsMarkdown = chapter.sections.map(section => `## ${section.title}\n\n${section.content || ''}`).join('\n\n');
       return `# ${chapter.title}\n\n${sectionsMarkdown}`;
-    }).join('\n\n---\n\n');
+    }).join('\n\n');
   }
 
   public hasContent(): boolean {
@@ -100,98 +100,109 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     let chapterLevel = 1;
 
     // Dynamically determine chapter/section level
+    let maxLevelFound = 0;
     for (let i = 1; i <= 6; i++) {
         const hasLevel = lines.some(line => line.trim().startsWith('#'.repeat(i) + ' '));
         if (hasLevel) {
-            chapterLevel = i;
+            maxLevelFound = i;
             break;
         }
     }
+    chapterLevel = maxLevelFound || 1;
     const sectionLevel = chapterLevel + 1;
-
+    
     const chapterRegex = new RegExp(`^${'#'.repeat(chapterLevel)}\\s+(.*)`);
     const sectionRegex = new RegExp(`^${'#'.repeat(sectionLevel)}\\s+(.*)`);
 
+    type ParsedSection = { title: string; content: string };
+    type ParsedChapter = { title: string; sections: ParsedSection[] };
 
-    let currentChapterData: { title: string; sections: { title: string; content: string }[] } | null = null;
-    let currentSectionData: { title: string; content: string } | null = null;
+    let currentChapterData: ParsedChapter | null = null;
+    let currentSectionData: ParsedSection | null = null;
     let contentBuffer: string[] = [];
-    const newChaptersData: { title: string; sections: { title: string; content: string }[] }[] = [];
+    const newChaptersData: ParsedChapter[] = [];
 
     const flushContent = () => {
-      if (contentBuffer.length > 0 && currentSectionData) {
-        currentSectionData.content = contentBuffer.join('\n').trim();
-      }
-      contentBuffer = [];
+        if (contentBuffer.length > 0 && currentSectionData) {
+            currentSectionData.content = contentBuffer.join('\n').trim();
+        }
+        contentBuffer = [];
     };
 
     const finalizeSection = () => {
-      flushContent();
-      if (currentSectionData && currentChapterData) {
-        currentChapterData.sections.push(currentSectionData);
-      }
-      currentSectionData = null;
+        flushContent();
+        if (currentSectionData && currentChapterData) {
+            currentChapterData.sections.push(currentSectionData);
+        }
+        currentSectionData = null;
     }
 
     const finalizeChapter = () => {
-      finalizeSection();
-      if (currentChapterData) {
-        newChaptersData.push(currentChapterData);
-      }
-      currentChapterData = null;
+        finalizeSection();
+        if (currentChapterData) {
+            newChaptersData.push(currentChapterData);
+        }
+        currentChapterData = null;
     }
 
     lines.forEach(line => {
-      const chapterMatch = line.match(chapterRegex);
-      const sectionMatch = line.match(sectionRegex);
+        const chapterMatch = line.match(chapterRegex);
+        const sectionMatch = line.match(sectionRegex);
 
-      if (chapterMatch) {
-        finalizeChapter();
-        currentChapterData = { title: chapterMatch[1].trim(), sections: [] };
-      } else if (sectionMatch) {
-        finalizeSection();
-        currentSectionData = { title: sectionMatch[1].trim(), content: '' };
-      } else {
-        contentBuffer.push(line);
-      }
+        if (chapterMatch) {
+            finalizeChapter();
+            currentChapterData = { title: chapterMatch[1].trim(), sections: [] };
+        } else if (sectionMatch) {
+            finalizeSection();
+            currentSectionData = { title: sectionMatch[1].trim(), content: '' };
+        } else {
+            contentBuffer.push(line);
+        }
     });
 
     finalizeChapter();
-
-    // Reconcile the new structure with the old one to preserve IDs
-    const finalChapters = newChaptersData.map((chData, index) => {
-      const oldChapter = this.chapters[index];
-      const chapterId = oldChapter?.id || this.generateUniqueId();
-
-      const finalSections = chData.sections.map((secData, secIndex) => {
-        const oldSection = oldChapter?.sections[secIndex];
-        return new Section({
-          id: oldSection?.id || this.generateUniqueId(),
-          title: secData.title,
-          content: secData.content,
-          type: oldSection?.type || 'report',
-          controls: oldSection?.controls,
-          context: oldSection?.context,
-          prompt: oldSection?.prompt,
-          guidelines: oldSection?.guidelines,
-          agentId: oldSection?.agentId,
-          commandId: oldSection?.commandId,
-        });
-      });
-
-      return new Chapter({
-        id: chapterId,
-        title: chData.title,
-        sections: finalSections
-      });
-    });
-
-    if (finalChapters.length === 0 && this.chapters.length > 0 && markdown.trim() === '') {
-      return this;
+    
+    // --- Reconciliation Logic ---
+    // If the new structure is empty but the old one wasn't, it means all content was deleted.
+    if (newChaptersData.length === 0 && this.chapters.length > 0 && markdown.trim() === '') {
+        return this.with({ chapters: [] });
     }
 
+    const findOldChapter = (title: string) => this.chapters.find(c => c.title === title);
+    const findOldSection = (chapter: Chapter | undefined, title: string) => chapter?.sections.find(s => s.title === title);
+
+    const finalChapters = newChaptersData.map(parsedChapter => {
+        const oldChapter = findOldChapter(parsedChapter.title);
+        
+        const finalSections = parsedChapter.sections.map(parsedSection => {
+            const oldSection = findOldSection(oldChapter, parsedSection.title);
+
+            // If an old section with the same title exists, reuse its properties. Otherwise, create new.
+            return new Section({
+                id: oldSection?.id || uuidv4(),
+                title: parsedSection.title,
+                content: parsedSection.content,
+                // Preserve existing properties
+                type: oldSection?.type || 'report',
+                controls: oldSection?.controls,
+                context: oldSection?.context,
+                prompt: oldSection?.prompt,
+                guidelines: oldSection?.guidelines,
+                agentId: oldSection?.agentId,
+                commandId: oldSection?.commandId,
+            });
+        });
+
+        // If an old chapter with the same title exists, reuse its ID. Otherwise, create new.
+        return new Chapter({
+            id: oldChapter?.id || uuidv4(),
+            title: parsedChapter.title,
+            sections: finalSections,
+        });
+    });
+
     return this.with({ chapters: finalChapters });
-  }
+}
 
   public toJSON(): ProjectProperties {
     return {
