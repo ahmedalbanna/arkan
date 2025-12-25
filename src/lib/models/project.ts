@@ -70,18 +70,24 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     return hasBasicInfo || hasChaptersWithContent || hasExternalContext;
   }
 
+  /**
+   * Generates the final, complete prompt for the project based on a set of selected sections.
+   * This method delegates the prompt generation for each section to the Section class itself.
+   * @param selectedSectionIds - A Set of section IDs to include in the prompt.
+   * @returns A string representing the complete prompt for the AI.
+   */
   public generateFinalPrompt(selectedSectionIds: Set<string>): string {
     if (!selectedSectionIds || selectedSectionIds.size === 0) {
       return '';
     }
 
-    const chaptersToGenerate = this.chapters.filter(c =>
-      c.sections.some(s => selectedSectionIds.has(s.id))
-    );
+    const chaptersToGenerate = this.chapters
+      .map(c => c.with({ sections: c.sections.filter(s => selectedSectionIds.has(s.id)) }))
+      .filter(c => c.sections.length > 0);
 
     const chapterInstructions = chaptersToGenerate.map(chapter => {
-      const sectionsToGenerate = chapter.sections.filter(s => selectedSectionIds.has(s.id));
-      const sectionInstructions = sectionsToGenerate.map(section => section.buildFinalPrompt(this)).join('');
+      // Each section now generates its own detailed prompt
+      const sectionInstructions = chapter.sections.map(section => section.buildFinalPrompt(this)).join('');
       return `# Chapter: ${chapter.title}\n${sectionInstructions}`;
     }).join('\n\n');
 
@@ -213,6 +219,47 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
       reader.onerror = (err) => reject(err);
       reader.readAsText(file);
     });
+  }
+
+  /**
+   * Creates a new Project instance from a table of contents text.
+   * This centralizes the logic for parsing TOC text into a Project structure.
+   * @param tocText The string containing the table of contents.
+   * @param existingProject The existing project to merge properties from (like externalContext).
+   * @returns A new Project instance with the structured chapters and sections.
+   */
+  public static fromTableOfContents(tocText: string, existingProject?: Project): Project {
+    const lines = tocText.split('\n').map(line => line.trim()).filter(Boolean);
+    const newProject = new Project({
+      id: existingProject?.id,
+      name: existingProject?.name,
+      projectDescription: existingProject?.projectDescription,
+      externalContext: existingProject?.externalContext,
+    });
+    
+    let currentProject = newProject; // A mutable reference to build upon
+    let currentChapterId: string | null = null;
+    
+    lines.forEach(line => {
+      const isSection = line.match(/^\s*\d+\.\d+/);
+      const isChapter = !isSection;
+      
+      if (isChapter) {
+        const chapterTitle = line.replace(/^\d+\.?\s*/, '').trim();
+        if (chapterTitle) {
+          const newChapter = new Chapter({ title: chapterTitle });
+          currentProject = currentProject.with({ chapters: [...currentProject.chapters, newChapter] });
+          currentChapterId = newChapter.id;
+        }
+      } else if (currentChapterId) {
+        const sectionTitle = line.replace(/^\d+\.\d+\.?\s*/, '').trim();
+        if (sectionTitle) {
+          currentProject = currentProject.addSectionToChapter(currentChapterId, sectionTitle);
+        }
+      }
+    });
+
+    return currentProject;
   }
 
   /**

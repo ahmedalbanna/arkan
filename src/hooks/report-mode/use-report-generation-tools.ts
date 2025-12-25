@@ -87,9 +87,9 @@ export function useReportGenerationTools() {
     };
     
     const finalProjectPrompt = useMemo(() => {
-        if (!project) return '';
+        if (!project || selectedSectionsForBuild.size === 0) return '';
         return project.generateFinalPrompt(selectedSectionsForBuild);
-      }, [project, selectedSectionsForBuild]);
+    }, [project, selectedSectionsForBuild]);
 
 
     const chapterMutation = useMutation({
@@ -291,40 +291,20 @@ export function useReportGenerationTools() {
             return;
         }
 
-        updateProject(p => {
-            let newProject = p.with({ chapters: [] }); // Clear existing chapters
-            const lines = tocText.split('\n').map(line => line.trim()).filter(Boolean);
-            let currentChapterId: string | null = null;
-            let chaptersCreated = 0;
-            let sectionsCreated = 0;
+        if (project) {
+            const newProject = Project.fromTableOfContents(tocText, project);
+            const chaptersCreated = newProject.chapters.length;
+            const sectionsCreated = newProject.sections.length;
+            
+            updateProject(_ => newProject); // Directly set the new project
 
-            lines.forEach(line => {
-                const isSection = line.match(/^\s*\d+\.\d+/); // Matches "1.1", " 2.3 ", etc.
-                const isChapter = !isSection;
-
-                if (isChapter) {
-                    const chapterTitle = line.replace(/^\d+\.?\s*/, '').trim();
-                    if (chapterTitle) {
-                        newProject = newProject.addChapter(chapterTitle);
-                        currentChapterId = newProject.chapters[newProject.chapters.length - 1].id;
-                        chaptersCreated++;
-                    }
-                } else if (currentChapterId) {
-                    const sectionTitle = line.replace(/^\d+\.\d+\.?\s*/, '').trim();
-                    if (sectionTitle) {
-                        newProject = newProject.addSectionToChapter(currentChapterId, sectionTitle);
-                        sectionsCreated++;
-                    }
-                }
-            });
             toast({
                 title: "Structure Created",
                 description: `Created ${chaptersCreated} chapters and ${sectionsCreated} sections.`,
             });
             setShowTocInput(false);
             setNewChapterTitle('');
-            return newProject;
-        });
+        }
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
