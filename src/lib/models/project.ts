@@ -14,19 +14,40 @@ export interface ProjectProperties {
   updatedAt?: string;
   name?: string;
   projectDescription?: string;
+  // New metadata fields
+  projectType?: string;
+  specialization?: string;
+  studentName?: string;
+  studentId?: string;
+  country?: string;
+  city?: string;
+  university?: string;
+  supervisor?: string;
+  course?: string;
+  teamMembers?: string[];
   chapters?: readonly (Chapter | ChapterProperties)[];
   externalContext?: readonly ExternalContext[];
 }
 
 
-export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
+export class Project implements Required<Omit<ProjectProperties, 'userId' | 'projectDescription' | 'projectType' | 'specialization' | 'studentName' | 'studentId' | 'country' | 'city' | 'university' | 'supervisor' | 'course' | 'teamMembers'>> {
   public readonly id: string;
   public readonly userId: string | undefined;
   public readonly createdAt: string;
   public readonly updatedAt: string;
 
   public readonly name: string;
-  public readonly projectDescription: string;
+  public readonly projectDescription: string | undefined;
+  public readonly projectType: string | undefined;
+  public readonly specialization: string | undefined;
+  public readonly studentName: string | undefined;
+  public readonly studentId: string | undefined;
+  public readonly country: string | undefined;
+  public readonly city: string | undefined;
+  public readonly university: string | undefined;
+  public readonly supervisor: string | undefined;
+  public readonly course: string | undefined;
+  public readonly teamMembers: string[] | undefined;
   public readonly chapters: readonly Chapter[];
   public readonly externalContext: readonly ExternalContext[];
 
@@ -37,7 +58,17 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     this.createdAt = props.createdAt || new Date().toISOString();
     this.updatedAt = props.updatedAt || new Date().toISOString();
     this.name = props.name || 'Untitled Project';
-    this.projectDescription = props.projectDescription || 'Simple Project';
+    this.projectDescription = props.projectDescription;
+    this.projectType = props.projectType;
+    this.specialization = props.specialization;
+    this.studentName = props.studentName;
+    this.studentId = props.studentId;
+    this.country = props.country;
+    this.city = props.city;
+    this.university = props.university;
+    this.supervisor = props.supervisor;
+    this.course = props.course;
+    this.teamMembers = props.teamMembers;
     this.chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c));
     this.externalContext = (props.externalContext || []).map(ctx => ({ ...ctx, id: ctx.id || uuidv4() }));
   }
@@ -192,6 +223,16 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
       updatedAt: this.updatedAt,
       name: this.name,
       projectDescription: this.projectDescription,
+      projectType: this.projectType,
+      specialization: this.specialization,
+      studentName: this.studentName,
+      studentId: this.studentId,
+      country: this.country,
+      city: this.city,
+      university: this.university,
+      supervisor: this.supervisor,
+      course: this.course,
+      teamMembers: this.teamMembers,
       chapters: this.chapters.map(c => c.toJSON()),
       externalContext: [...this.externalContext],
     };

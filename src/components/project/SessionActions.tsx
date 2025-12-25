@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -7,14 +8,15 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Loader2, Save, Trash2, Upload } from 'lucide-react';
+import { Loader2, Save, Trash2, Upload, Settings, ChevronDown, FolderOpen, DownloadCloud, FileDown } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useSaveProject } from '@/hooks';
 import { useRouter } from 'next/navigation';
-import { DownloadProjectButton } from './DownloadProjectButton';
 import { ExportDialog } from './ExportDialog';
-import { BrowseProjectsDialog } from './BrowseProjectsDialog'; // Import the new component
+import { useState } from 'react';
+import { ProjectSettingsDialog } from './ProjectSettingsDialog';
 
 export function SessionActions() {
     const { t } = useLocalization();
@@ -28,6 +30,7 @@ export function SessionActions() {
     } = useBuilderStore();
 
     const { saveProject, isSaving } = useSaveProject();
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     function handleSave() {
         saveProject();
@@ -44,25 +47,30 @@ export function SessionActions() {
                     className="hidden"
                 />
 
-                <BrowseProjectsDialog /> 
+                <ProjectSettingsDialog isOpen={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
 
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={handleUploadClick}
-                            className="h-8 w-8 md:w-auto md:px-3"
-                        >
-                            <Upload className="h-4 w-4" />
-                            <span className="hidden md:inline ms-2">{t('builder.buttons.uploadProject')}</span>
+                {/* Project Actions Dropdown */}
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-8 md:w-auto md:px-3">
+                            <FolderOpen className="h-4 w-4 md:mr-2" />
+                            <span className="hidden md:inline">Project</span>
+                            <ChevronDown className="h-4 w-4 ml-1 hidden md:inline"/>
                         </Button>
-                    </TooltipTrigger>
-                    <TooltipContent className="md:hidden">
-                        <p>{t('builder.tooltips.uploadProject')}</p>
-                    </TooltipContent>
-                </Tooltip>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem onSelect={handleUploadClick}>
+                            <Upload className="mr-2 h-4 w-4" />
+                            <span>{t('builder.buttons.uploadProject')}</span>
+                        </DropdownMenuItem>
+                         <DropdownMenuItem onSelect={() => setIsSettingsOpen(true)}>
+                            <Settings className="mr-2 h-4 w-4" />
+                            <span>Project Settings</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
 
+                {/* Save Button */}
                 <Button
                     variant="default"
                     size="icon"
@@ -74,23 +82,49 @@ export function SessionActions() {
                     <span className="hidden md:inline ms-2">{t('projects.saveButton')}</span>
                 </Button>
 
-                <DownloadProjectButton />
-                
-                <ExportDialog />
+                 {/* Export/Download Dropdown */}
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-8 md:w-auto md:px-3">
+                             <DownloadCloud className="h-4 w-4 md:mr-2" />
+                             <span className="hidden md:inline">Export / Download</span>
+                             <ChevronDown className="h-4 w-4 ml-1 hidden md:inline"/>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <ExportDialog>
+                             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <FileDown className="mr-2 h-4 w-4" />
+                                <span>Export as DOCX/PPTX</span>
+                            </DropdownMenuItem>
+                        </ExportDialog>
+                        <DropdownMenuItem onSelect={() => document.getElementById('download-project-button')?.click()}>
+                            <Download className="mr-2 h-4 w-4" />
+                            <span>{t('builder.buttons.downloadProject')}</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
 
+                {/* Hidden download button */}
+                <div style={{ display: 'none' }}>
+                    <Button id="download-project-button" onClick={() => useBuilderStore.getState().project?.downloadAsFile()} />
+                </div>
+
+
+                {/* New Session Button */}
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button
                             variant="destructive"
                             size="icon"
                             onClick={() => newSession()}
-                            className="h-8 w-8 md:w-auto md:px-3"
+                            className="h-8 w-8"
                         >
                             <Trash2 className="h-4 w-4" />
-                            <span className="hidden md:inline ms-2">{t('builder.buttons.newSession')}</span>
+                            <span className="sr-only">{t('builder.buttons.newSession')}</span>
                         </Button>
                     </TooltipTrigger>
-                    <TooltipContent className="md:hidden">
+                    <TooltipContent>
                         <p>{t('builder.tooltips.newSession')}</p>
                     </TooltipContent>
                 </Tooltip>
@@ -98,3 +132,4 @@ export function SessionActions() {
         </TooltipProvider>
     );
 }
+
