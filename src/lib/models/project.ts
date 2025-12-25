@@ -97,6 +97,22 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
 
   public withContentFromMarkdown(markdown: string): Project {
     const lines = markdown.split('\n');
+    let chapterLevel = 1;
+
+    // Dynamically determine chapter/section level
+    for (let i = 1; i <= 6; i++) {
+        const hasLevel = lines.some(line => line.trim().startsWith('#'.repeat(i) + ' '));
+        if (hasLevel) {
+            chapterLevel = i;
+            break;
+        }
+    }
+    const sectionLevel = chapterLevel + 1;
+
+    const chapterRegex = new RegExp(`^${'#'.repeat(chapterLevel)}\\s+(.*)`);
+    const sectionRegex = new RegExp(`^${'#'.repeat(sectionLevel)}\\s+(.*)`);
+
+
     let currentChapterData: { title: string; sections: { title: string; content: string }[] } | null = null;
     let currentSectionData: { title: string; content: string } | null = null;
     let contentBuffer: string[] = [];
@@ -126,15 +142,15 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     }
 
     lines.forEach(line => {
-      const h1Match = line.match(/^#\s+(.*)/);
-      const h2Match = line.match(/^##\s+(.*)/);
+      const chapterMatch = line.match(chapterRegex);
+      const sectionMatch = line.match(sectionRegex);
 
-      if (h1Match) {
+      if (chapterMatch) {
         finalizeChapter();
-        currentChapterData = { title: h1Match[1].trim(), sections: [] };
-      } else if (h2Match) {
+        currentChapterData = { title: chapterMatch[1].trim(), sections: [] };
+      } else if (sectionMatch) {
         finalizeSection();
-        currentSectionData = { title: h2Match[1].trim(), content: '' };
+        currentSectionData = { title: sectionMatch[1].trim(), content: '' };
       } else {
         contentBuffer.push(line);
       }
