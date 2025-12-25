@@ -8,7 +8,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Loader2, Save, Trash2, Upload, Settings, ChevronDown, FolderOpen, DownloadCloud, FileDown } from 'lucide-react';
+import { Loader2, Save, Trash2, Upload, Settings, ChevronDown, FolderOpen, DownloadCloud, FileDown, Download } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 import { useLocalization } from '@/context/LocalizationContext';

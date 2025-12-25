@@ -17,7 +17,7 @@ import { useBuilderStore } from '@/hooks';
 import { Loader2, Save } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-
+import { zodResolver } from '@hookform/resolvers/zod';
 const settingsSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),
   projectDescription: z.string().optional(),
