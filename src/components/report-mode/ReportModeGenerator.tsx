@@ -4,7 +4,7 @@
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMobile } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
-import { BookOpenText, Edit, GitGraph, PenSquare, Search, UploadCloud } from 'lucide-react';
+import { BookOpenText, Edit, GitGraph, PenSquare, Search, UploadCloud, Settings } from 'lucide-react';
 import { Suspense, useState } from 'react';
 import { UploadManager } from '../file/UploadManager';
 import { Button } from '../ui/button';
@@ -14,6 +14,7 @@ import { AIResearcherTool } from '../writing-tools/AIResearcherTool';
 import { PlantUMLGeneratorTool } from '../writing-tools/PlantUMLGeneratorTool';
 import { GenerationTools } from './ReportGenerationTools';
 import { ReportResults } from './ReportResults';
+import { ProjectSettingsPanel } from '../project/ProjectSettingsPanel';
 
 
 function ReportSkeleton() {
@@ -59,6 +60,12 @@ export default function ReportModeGenerator() {
 
     const panels = [
         {
+            key: 'settings',
+            title: 'Project Settings',
+            icon: <Settings className="h-5 w-5" />,
+            content: <ProjectSettingsPanel />,
+        },
+        {
             key: 'files',
             title: t('builder.tabs.files'),
             icon: <UploadCloud className="h-5 w-5" />,
@@ -94,7 +101,7 @@ export default function ReportModeGenerator() {
                     <>
                         {activeMobileView === 'generator' && <CollapsibleSidePanel
                             panels={panels}
-                            defaultActiveKey="files"
+                            defaultActiveKey="settings"
                             className="lg:col-span-4 xl:col-span-4"
                         />}
                         {activeMobileView === 'result' && <div className="lg:col-span-8 xl:col-span-8 h-full">
@@ -107,7 +114,7 @@ export default function ReportModeGenerator() {
                     <>
                         <CollapsibleSidePanel
                             panels={panels}
-                            defaultActiveKey="files"
+                            defaultActiveKey="settings"
                             className="lg:col-span-4 xl:col-span-4"
                         />
                         <div className="lg:col-span-8 xl:col-span-8">

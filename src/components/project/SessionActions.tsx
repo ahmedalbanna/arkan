@@ -16,7 +16,6 @@ import { useBuilderStore, useSaveProject } from '@/hooks';
 import { useRouter } from 'next/navigation';
 import { ExportDialog } from './ExportDialog';
 import { useState } from 'react';
-import { ProjectSettingsDialog } from './ProjectSettingsDialog';
 
 export function SessionActions() {
     const { t } = useLocalization();
@@ -30,7 +29,6 @@ export function SessionActions() {
     } = useBuilderStore();
 
     const { saveProject, isSaving } = useSaveProject();
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     function handleSave() {
         saveProject();
@@ -47,8 +45,6 @@ export function SessionActions() {
                     className="hidden"
                 />
 
-                <ProjectSettingsDialog isOpen={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
-
                 {/* Project Actions Dropdown */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -62,10 +58,6 @@ export function SessionActions() {
                         <DropdownMenuItem onSelect={handleUploadClick}>
                             <Upload className="mr-2 h-4 w-4" />
                             <span>{t('builder.buttons.uploadProject')}</span>
-                        </DropdownMenuItem>
-                         <DropdownMenuItem onSelect={() => setIsSettingsOpen(true)}>
-                            <Settings className="mr-2 h-4 w-4" />
-                            <span>Project Settings</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -132,4 +124,3 @@ export function SessionActions() {
         </TooltipProvider>
     );
 }
-
