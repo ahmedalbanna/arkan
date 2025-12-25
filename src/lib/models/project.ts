@@ -70,31 +70,6 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     return hasBasicInfo || hasChaptersWithContent || hasExternalContext;
   }
 
-  /**
-   * Generates the final, complete prompt for the project based on a set of selected sections.
-   * This method delegates the prompt generation for each section to the Section class itself.
-   * @param selectedSectionIds - A Set of section IDs to include in the prompt.
-   * @returns A string representing the complete prompt for the AI.
-   */
-  public generateFinalPrompt(selectedSectionIds: Set<string>): string {
-    if (!selectedSectionIds || selectedSectionIds.size === 0) {
-      return '';
-    }
-
-    const chaptersToGenerate = this.chapters
-      .map(c => c.with({ sections: c.sections.filter(s => selectedSectionIds.has(s.id)) }))
-      .filter(c => c.sections.length > 0);
-
-    const chapterInstructions = chaptersToGenerate.map(chapter => {
-      // Each section now generates its own detailed prompt
-      const sectionInstructions = chapter.sections.map(section => section.buildFinalPrompt(this)).join('');
-      return `# Chapter: ${chapter.title}\n${sectionInstructions}`;
-    }).join('\n\n');
-
-    return `You are an expert author. Your task is to write content for a project titled "${this.name}". The project description is "${this.projectDescription}". You will be given instructions for several chapters. For each chapter, generate the content for all its sections based on their specific instructions.\n\n${chapterInstructions}`;
-  }
-
-
   public withContentFromMarkdown(markdown: string): Project {
     const lines = markdown.split('\n');
     let chapterLevel = 1;
@@ -163,26 +138,32 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     finalizeChapter();
     
     // --- Reconciliation Logic ---
-    // If the new structure is empty but the old one wasn't, it means all content was deleted.
     if (newChaptersData.length === 0 && this.chapters.length > 0 && markdown.trim() === '') {
         return this.with({ chapters: [] });
     }
 
-    const findOldChapter = (title: string) => this.chapters.find(c => c.title === title);
-    const findOldSection = (chapter: Chapter | undefined, title: string) => chapter?.sections.find(s => s.title === title);
+    const oldChapters = [...this.chapters];
+    const usedOldChapterIds = new Set<string>();
 
     const finalChapters = newChaptersData.map(parsedChapter => {
-        const oldChapter = findOldChapter(parsedChapter.title);
-        
-        const finalSections = parsedChapter.sections.map(parsedSection => {
-            const oldSection = findOldSection(oldChapter, parsedSection.title);
+        let oldChapter: Chapter | undefined = oldChapters.find(c => c.title === parsedChapter.title && !usedOldChapterIds.has(c.id));
+        if (oldChapter) {
+            usedOldChapterIds.add(oldChapter.id);
+        }
 
-            // If an old section with the same title exists, reuse its properties. Otherwise, create new.
+        const oldSections = oldChapter ? [...oldChapter.sections] : [];
+        const usedOldSectionIds = new Set<string>();
+
+        const finalSections = parsedChapter.sections.map(parsedSection => {
+            let oldSection: Section | undefined = oldSections.find(s => s.title === parsedSection.title && !usedOldSectionIds.has(s.id));
+            if(oldSection) {
+              usedOldSectionIds.add(oldSection.id);
+            }
+
             return new Section({
                 id: oldSection?.id || uuidv4(),
                 title: parsedSection.title,
                 content: parsedSection.content,
-                // Preserve existing properties
                 type: oldSection?.type || 'report',
                 controls: oldSection?.controls,
                 context: oldSection?.context,
@@ -193,7 +174,6 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
             });
         });
 
-        // If an old chapter with the same title exists, reuse its ID. Otherwise, create new.
         return new Chapter({
             id: oldChapter?.id || uuidv4(),
             title: parsedChapter.title,

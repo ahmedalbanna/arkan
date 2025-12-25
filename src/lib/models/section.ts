@@ -3,7 +3,6 @@
 
 import type { DiagramType } from '@/ai/schemas';
 import type { Language, OutputStyle, Tone } from './control-types';
-import type { Project } from './project';
 
 export interface GenerationControlState {
     formality: number;
@@ -118,37 +117,6 @@ export class Section {
 
 
         return instructions.join(' ');
-    }
-
-    public buildFinalPrompt(project: Project): string {
-        const contextSectionsContent = Object.keys(this.context.sections || {})
-            .filter(key => this.context.sections[key])
-            .map(key => {
-                const section = project.getSection(key);
-                return `\n--- Context from Section: ${section?.title} ---\n\n${section?.content || ''}`;
-            })
-            .join('\n\n');
-
-        const externalContextContent = (project.externalContext || [])
-            .filter(item => this.context.externalContext?.[item.id])
-            .map(file => `\n--- Context from File: ${file.fileName} ---\n\n${file.content}`)
-            .join('\n\n');
-
-        const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\n\n');
-
-        return `
----
-### Instructions for Section: "${this.title}"
-**Base Prompt:**
-${this.prompt}\n
-**Guidelines:**
-${this.guidelines && this.guidelines.length > 0 ? this.guidelines.map(g => `- ${g}`).join('\n') : '- No specific guidelines provided.'} \n
-**Additional Instructions:**
-${this.instruction}\n
-**Context:**
-${fullContext || 'No context provided.'}\n
----
-        `;
     }
 
     public toJSON(): SectionProperties {

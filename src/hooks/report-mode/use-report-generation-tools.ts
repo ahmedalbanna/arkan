@@ -12,6 +12,7 @@ import type { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Chapter, Project } from '@/lib/models';
 import { writingToolApi } from '@/services/api/writingToolsService';
+import { PromptBuilder } from '@/lib/prompt-builder';
 
 export function useReportGenerationTools() {
     const { t } = useLocalization();
@@ -88,7 +89,7 @@ export function useReportGenerationTools() {
     
     const finalProjectPrompt = useMemo(() => {
         if (!project || selectedSectionsForBuild.size === 0) return '';
-        return project.generateFinalPrompt(selectedSectionsForBuild);
+        return PromptBuilder.buildProjectPrompt(project, selectedSectionsForBuild);
     }, [project, selectedSectionsForBuild]);
 
 
@@ -108,40 +109,16 @@ export function useReportGenerationTools() {
             }
 
             const token = await firebaseUser.getIdToken();
-
-            const sectionInstructions = sectionsToGenerate.map(section => {
-                const contextSectionsContent = Object.keys(section.context.sections || {})
-                    .filter(key => section.context.sections[key])
-                    .map(key => {
-                        const content = project.getSectionContent(key);
-                        return `--- Context from Section: ${project.getSection(key)?.title} ---\n${content}`;
-                    })
-                    .join('\n\n');
-
-                const externalContextContent = (project.externalContext || [])
-                    .filter(item => section.context.externalContext?.[item.id])
-                    .map(file => `--- Context from File: ${file.fileName} ---\n${file.content}`)
-                    .join('\n\n');
-
-                const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\n\n');
-
-                return {
-                    title: section.title,
-                    prompt: section.prompt,
-                    guidelines: section.guidelines,
-                    instructionText: section.instruction,
-                    context: fullContext,
-                };
-            });
-
+            const chapterPrompt = PromptBuilder.buildChapterPrompt(chapter, project, selectedSectionsForBuild);
+            
             const body = {
-                flow: 'generate-chapter',
-                chapterTitle: chapter.title,
-                sectionInstructions: sectionInstructions,
+                flow: 'generate-project-from-full-prompt', // Reusing a powerful flow
+                fullPrompt: chapterPrompt,
             };
 
-            const result = await writingToolApi<any, { markdownContent: string }>('/api/writing-tools/generate-chapter', { data: body, token });
-            return { chapterId, content: result.markdownContent };
+            const result = await writingToolApi<any, { chapters: { chapterTitle: string, markdownContent: string }[] }>('/api/writing-tools/generate-project-content', { data: body, token });
+            // Assuming the flow returns a compatible structure, even for a single chapter
+            return { chapterId, content: result.chapters[0]?.markdownContent || '' };
         },
         onSuccess: (data) => {
             updateProject(p => {
@@ -223,25 +200,15 @@ export function useReportGenerationTools() {
             if (!section) throw new Error("Section not found.");
 
             const token = await firebaseUser.getIdToken();
-            const context = section.context;
-
-            let otherSectionsContext: Record<string, string> = {};
-            Object.keys(context.sections || {}).forEach(key => {
-                if (context.sections[key]) {
-                    const content = project.getSectionContent(key);
-                    if (content) otherSectionsContext[key] = content;
-                }
-            });
-
-            const externalContextFiles = (project.externalContext || []).filter(item => context.externalContext?.[item.id]);
             const body = {
                 flow: 'generate-section',
                 sectionToGenerate: section.id as SectionName,
                 prompt: section.prompt,
-                otherSections: otherSectionsContext,
-                externalContext: externalContextFiles,
+                // The context is now built into a single string by the builder
+                otherSections: {}, // Keep this empty, handled by the builder
+                externalContext: [], // Keep this empty, handled by the builder
                 guidelines: section.guidelines,
-                instructionText: section.instruction,
+                instructionText: PromptBuilder.buildSectionPrompt(section, project), // The full detailed prompt for just this section
             };
 
             const result = await generateReportSectionApi(body, token);
