@@ -28,7 +28,13 @@ export const editorExtensions = (uniqueId: string) => [
   BubbleMenuExtension.configure({
     pluginKey: uniqueId,
   }),
-  Image,
+  Image.configure({
+    allowBase64: true,
+    HTMLAttributes: {
+      class: 'tiptap-image',
+    },
+
+  }),
   Dropcursor,
   Table.configure({ resizable: true }),
   TableRow,

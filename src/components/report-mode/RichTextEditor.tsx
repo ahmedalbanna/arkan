@@ -6,7 +6,7 @@ import { useBrowserSpeech } from '@/hooks';
 import { useEditorStore } from '@/hooks/core/use-editor-store';
 import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
 import { editorExtensions } from '@/lib/tiptap-extensions';
-import { processPlantUml } from '@/lib/utils/processPlantUml';
+import { encode64 } from '@/lib/utils/encode64';
 import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
 import {
   Bold,
@@ -20,6 +20,7 @@ import {
   Volume2
 } from 'lucide-react';
 import { marked } from 'marked';
+import pako from "pako";
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
@@ -165,6 +166,23 @@ interface RichTextEditorProps {
   onChange: (markdown: string) => void;
 }
 
+
+
+export function processPlantUml(markdown: string): string {
+  if (typeof markdown !== 'string') {
+    return markdown;
+  }
+  return markdown.replace(/```plantuml([\s\S]*?)```/g, (match, plantUmlCode) => {
+    if (plantUmlCode.trim().startsWith('@startuml') && plantUmlCode.trim().endsWith('@enduml')) {
+      const utf8Encoder = new TextEncoder();
+      const compressed = pako.deflate(utf8Encoder.encode(plantUmlCode));
+      const encoded = encode64(compressed);
+      const imageUrl = `https://www.plantuml.com/plantuml/png/~1${encoded}`;
+      return `![Diagram](${imageUrl})`;
+    }
+    return match; // Return the original block if it's not a valid PlantUML
+  });
+}
 function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const setActiveEditor = useEditorStore((state) => state.setActiveEditor);
   const uniqueId = React.useId();
@@ -202,9 +220,15 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
         if (plain && editor) {
 
           // If PlantUML content is detected, process it.
-
+          if (plain.includes('@startuml') && plain.includes('@enduml')) {
+            const processed = await processPlantUml(plain);
+            if (processed) {
+              editor.chain().focus().insertContent(marked.parse(processed)).run();
+              return true;
+            }
+          }
           // If only plain text exists, treat it as markdown and parse it.
-          const parsedHtml = marked.parse(await processPlantUml(plain) as unknown as string) as string;
+          const parsedHtml = marked.parse(plain);
           editor.chain().focus().insertContent(parsedHtml).run();
           return true;
         }
@@ -213,6 +237,7 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       },
     },
     immediatelyRender: false,
+
   });
 
   const handleTextUpdate = useCallback((newText: string, from: number, to: number) => {

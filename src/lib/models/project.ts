@@ -5,7 +5,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { Chapter, ChapterProperties } from './chapter';
 import { ExternalContext, ExternalContextType } from './external-context';
 import { Section } from './section';
-import { arrayMove } from '@dnd-kit/sortable';
 
 
 export interface ProjectProperties {
@@ -75,20 +74,20 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     if (!selectedSectionIds || selectedSectionIds.size === 0) {
       return '';
     }
-  
+
     const chaptersToGenerate = this.chapters.filter(c =>
       c.sections.some(s => selectedSectionIds.has(s.id))
     );
-  
+
     const chapterInstructions = chaptersToGenerate.map(chapter => {
       const sectionsToGenerate = chapter.sections.filter(s => selectedSectionIds.has(s.id));
       const sectionInstructions = sectionsToGenerate.map(section => section.buildFinalPrompt(this)).join('');
       return `# Chapter: ${chapter.title}\n${sectionInstructions}`;
     }).join('\n\n');
-  
-    return `You are an expert author. Your task is to write content for a project titled "${this.name}". You will be given instructions for several chapters. For each chapter, generate the content for all its sections based on their specific instructions.\n\n${chapterInstructions}`;
+
+    return `You are an expert author. Your task is to write content for a project titled "${this.name}". The project description is "${this.projectDescription}". You will be given instructions for several chapters. For each chapter, generate the content for all its sections based on their specific instructions.\n\n${chapterInstructions}`;
   }
-  
+
 
   public withContentFromMarkdown(markdown: string): Project {
     const lines = markdown.split('\n');
@@ -98,75 +97,75 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     const newChaptersData: { title: string; sections: { title: string; content: string }[] }[] = [];
 
     const flushContent = () => {
-        if (contentBuffer.length > 0 && currentSectionData) {
-            currentSectionData.content = contentBuffer.join('\n').trim();
-        }
-        contentBuffer = [];
+      if (contentBuffer.length > 0 && currentSectionData) {
+        currentSectionData.content = contentBuffer.join('\n').trim();
+      }
+      contentBuffer = [];
     };
 
     const finalizeSection = () => {
-        flushContent();
-        if (currentSectionData && currentChapterData) {
-            currentChapterData.sections.push(currentSectionData);
-        }
-        currentSectionData = null;
+      flushContent();
+      if (currentSectionData && currentChapterData) {
+        currentChapterData.sections.push(currentSectionData);
+      }
+      currentSectionData = null;
     }
 
     const finalizeChapter = () => {
-        finalizeSection();
-        if (currentChapterData) {
-            newChaptersData.push(currentChapterData);
-        }
-        currentChapterData = null;
+      finalizeSection();
+      if (currentChapterData) {
+        newChaptersData.push(currentChapterData);
+      }
+      currentChapterData = null;
     }
 
     lines.forEach(line => {
-        const h1Match = line.match(/^#\s+(.*)/);
-        const h2Match = line.match(/^##\s+(.*)/);
+      const h1Match = line.match(/^#\s+(.*)/);
+      const h2Match = line.match(/^##\s+(.*)/);
 
-        if (h1Match) {
-            finalizeChapter();
-            currentChapterData = { title: h1Match[1].trim(), sections: [] };
-        } else if (h2Match) {
-            finalizeSection();
-            currentSectionData = { title: h2Match[1].trim(), content: '' };
-        } else {
-            contentBuffer.push(line);
-        }
+      if (h1Match) {
+        finalizeChapter();
+        currentChapterData = { title: h1Match[1].trim(), sections: [] };
+      } else if (h2Match) {
+        finalizeSection();
+        currentSectionData = { title: h2Match[1].trim(), content: '' };
+      } else {
+        contentBuffer.push(line);
+      }
     });
 
     finalizeChapter();
 
     // Reconcile the new structure with the old one to preserve IDs
     const finalChapters = newChaptersData.map((chData, index) => {
-        const oldChapter = this.chapters[index];
-        const chapterId = oldChapter?.id || this.generateUniqueId();
-        
-        const finalSections = chData.sections.map((secData, secIndex) => {
-            const oldSection = oldChapter?.sections[secIndex];
-            return new Section({
-                id: oldSection?.id || this.generateUniqueId(),
-                title: secData.title,
-                content: secData.content,
-                type: oldSection?.type || 'report',
-                controls: oldSection?.controls, 
-                context: oldSection?.context,
-                prompt: oldSection?.prompt,
-                guidelines: oldSection?.guidelines,
-                agentId: oldSection?.agentId,
-                commandId: oldSection?.commandId,
-            });
-        });
+      const oldChapter = this.chapters[index];
+      const chapterId = oldChapter?.id || this.generateUniqueId();
 
-        return new Chapter({
-            id: chapterId,
-            title: chData.title,
-            sections: finalSections
+      const finalSections = chData.sections.map((secData, secIndex) => {
+        const oldSection = oldChapter?.sections[secIndex];
+        return new Section({
+          id: oldSection?.id || this.generateUniqueId(),
+          title: secData.title,
+          content: secData.content,
+          type: oldSection?.type || 'report',
+          controls: oldSection?.controls,
+          context: oldSection?.context,
+          prompt: oldSection?.prompt,
+          guidelines: oldSection?.guidelines,
+          agentId: oldSection?.agentId,
+          commandId: oldSection?.commandId,
         });
+      });
+
+      return new Chapter({
+        id: chapterId,
+        title: chData.title,
+        sections: finalSections
+      });
     });
-    
+
     if (finalChapters.length === 0 && this.chapters.length > 0 && markdown.trim() === '') {
-        return this;
+      return this;
     }
 
     return this.with({ chapters: finalChapters });
@@ -266,12 +265,12 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
       .filter((c): c is Chapter => !!c);
     return this.with({ chapters: newOrderedChapters });
   }
-  
+
   // --- Section Methods (Delegation) ---
   public getSection(sectionId: string): Section | undefined {
     return this.sections.find(s => s.id === sectionId);
   }
-  
+
   public getSectionByTitle(title: string): Section | undefined {
     return this.sections.find(s => s.title === title);
   }
@@ -289,7 +288,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
     const sectionTitle = title || 'Untitled Section';
     const newSectionId = this.generateUniqueId();
     const newSection = new Section({ id: newSectionId, title: sectionTitle, type: 'report' });
-    
+
     return this.updateChapter(chapterId, c => {
       const newSections = [...c.sections];
       const finalIndex = (index === undefined || index < 0 || index > newSections.length) ? newSections.length : index;
@@ -297,19 +296,19 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
       return c.with({ sections: newSections });
     });
   }
-  
+
   public removeSection(sectionId: string): Project {
     const chapter = this.findChapterForSection(sectionId);
     if (!chapter) return this;
     return this.updateChapter(chapter.id, c => c.removeSection(sectionId));
   }
-  
+
   public updateSection(sectionId: string, updater: (section: Section) => Section): Project {
     const chapter = this.findChapterForSection(sectionId);
     if (!chapter) return this;
     return this.updateChapter(chapter.id, c => c.updateSection(sectionId, updater));
   }
-  
+
   public moveSectionUp(sectionId: string): Project {
     const chapter = this.findChapterForSection(sectionId);
     if (!chapter) return this;
@@ -331,11 +330,11 @@ export class Project implements Required<Omit<ProjectProperties, 'userId'>> {
 
     const newFromChapter = fromChapter.removeSection(sectionId);
     const newToChapter = toChapter.addSection(section);
-    
+
     const finalChapters = this.chapters.map(c => {
-        if (c.id === fromChapterId) return newFromChapter;
-        if (c.id === toChapterId) return newToChapter;
-        return c;
+      if (c.id === fromChapterId) return newFromChapter;
+      if (c.id === toChapterId) return newToChapter;
+      return c;
     });
 
     return this.with({ chapters: finalChapters });

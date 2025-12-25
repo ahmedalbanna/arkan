@@ -46,7 +46,7 @@ export function SidePanelContent({ panels, defaultActiveKey }: SidePanelContentP
           ))}
         </TooltipProvider>
       </div>
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-4 w-px">
         {activePanel?.content}
       </div>
     </div>
