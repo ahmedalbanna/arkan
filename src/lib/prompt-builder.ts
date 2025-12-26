@@ -42,24 +42,14 @@ export class PromptBuilder {
             .join('\n\n');
         
         const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\n\n');
-
-        const rulesSection = this.buildPromptSection('Mandatory Rules', section.rules);
-        const guidelinesSection = this.buildPromptSection('Guidelines', section.guidelines);
-        const contextPromptSection = this.buildPromptSection('Additional Context', section.contextPrompt);
-        const constraintsSection = this.buildPromptSection('Constraints (What to Avoid)', section.constraints);
+        
+        // Use the new dynamic instruction text from the section model
+        const instructionText = section.buildInstructionText();
 
         return `
 ### Instructions for Section: "${section.title}"
 
-**Base Prompt:**
-${section.prompt || 'You are a helpful assistant.'}\n
-${rulesSection}
-${guidelinesSection}
-${contextPromptSection}
-${constraintsSection}
-
-**Additional Instructions:**
-${section.instruction}\n
+${instructionText}
 
 **Provided Context from Other Project Items:**
 ${fullContext || 'No context provided from other items.'}

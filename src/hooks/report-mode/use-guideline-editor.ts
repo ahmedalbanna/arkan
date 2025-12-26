@@ -3,17 +3,14 @@
 import { useLocalization } from '@/context/LocalizationContext';
 import { useEffect, useMemo, useState } from 'react';
 import { useBuilderStore } from '../core/useBuilderStore';
-import { useAgentManager } from '../use-agent-store';
 
 export function useGuidelineEditor(itemKey: string) {
     const { t } = useLocalization();
     const { project, updateProject } = useBuilderStore();
-    const { agents } = useAgentManager();
 
     const section = useMemo(() => project?.getSection(itemKey), [project, itemKey]);
 
     // Local state for UI
-    const [prompt, setPrompt] = useState('');
     const [rules, setRules] = useState<string[]>([]);
     const [guidelines, setGuidelines] = useState<string[]>([]);
     const [contextPrompt, setContextPrompt] = useState<string[]>([]);
@@ -22,7 +19,6 @@ export function useGuidelineEditor(itemKey: string) {
     // Sync local state when the underlying section in the project store changes
     useEffect(() => {
         if (section) {
-            setPrompt(section.prompt || 'You are a helpful assistant. Write a section based on the user\'s instructions.');
             setRules(section.rules || []);
             setGuidelines(section.guidelines || []);
             setContextPrompt(section.contextPrompt || []);
@@ -40,7 +36,6 @@ export function useGuidelineEditor(itemKey: string) {
             if (!currentSection) return;
 
             const hasChanged =
-                currentSection.prompt !== prompt ||
                 JSON.stringify(currentSection.rules) !== JSON.stringify(rules) ||
                 JSON.stringify(currentSection.guidelines) !== JSON.stringify(guidelines) ||
                 JSON.stringify(currentSection.contextPrompt) !== JSON.stringify(contextPrompt) ||
@@ -49,7 +44,6 @@ export function useGuidelineEditor(itemKey: string) {
 
             if (hasChanged) {
                 updateProject(p => p.updateSection(itemKey, sec => sec.with({
-                    prompt: prompt,
                     rules: rules,
                     guidelines: guidelines,
                     contextPrompt: contextPrompt,
@@ -59,13 +53,12 @@ export function useGuidelineEditor(itemKey: string) {
         }, 500); // 500ms debounce
 
         return () => clearTimeout(handler);
-    }, [prompt, rules, guidelines, contextPrompt, constraints, itemKey, project, section, updateProject]);
+    }, [rules, guidelines, contextPrompt, constraints, itemKey, project, section, updateProject]);
 
     
     return {
         t,
         section, // Expose the section so the UI can check for its existence
-        prompt, setPrompt,
         rules, setRules,
         guidelines, setGuidelines,
         contextPrompt, setContextPrompt,

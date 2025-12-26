@@ -93,8 +93,15 @@ export class Section {
         this.context = { ...defaultContext, ...props.context };
         this.instruction = this.buildInstructionText();
     }
+    private buildPromptSection(title: string, items?: string[]): string {
+        if (!items || items.length === 0) {
+            return '';
+        }
+        return `\n**${title}:**\n${items.map(item => `- ${item}`).join('\n')}`;
+    }
 
     public buildInstructionText(): string {
+        
         let instructions: string[] = [];
         const formalityMap: { [key: number]: string } = { 0: 'very informal and casual', 33: 'balanced and neutral', 67: 'formal and professional', 100: 'very formal and academic' };
         const complexityMap: { [key: number]: string } = { 0: 'very simple and easy to understand', 33: 'clear and straightforward', 67: 'detailed and technical', 100: 'highly complex and expert-level' };
@@ -122,9 +129,14 @@ export class Section {
 
         const enabledStyles = Object.entries(this.controls.outputStyle).filter(([, value]) => value).map(([key]) => key);
         if (enabledStyles.length > 0) instructions.push(`The output should primarily include the following elements: ${enabledStyles.join(', ')}.`);
+        
+        const basePrompt = this.prompt || 'You are a helpful assistant.';
+        const rulesSection = this.buildPromptSection('Mandatory Rules', this.rules);
+        const guidelinesSection = this.buildPromptSection('Recommended Guidelines', this.guidelines);
+        const contextPromptSection = this.buildPromptSection('Context Information', this.contextPrompt);
+        const constraintsSection = this.buildPromptSection('Constraints / What to Avoid', this.constraints);
 
-
-        return instructions.join(' ');
+        return `${basePrompt}\n${rulesSection}\n${guidelinesSection}\n${contextPromptSection}\n${constraintsSection}\n\n**Additional Instructions:**\n${instructions.join(' ')}`.trim();
     }
 
     public toJSON(): SectionProperties {
