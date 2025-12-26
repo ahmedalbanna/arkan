@@ -28,8 +28,11 @@ export interface SectionProperties {
     type: SectionType;
     content?: string;
     // Agent-related properties are now part of the section itself
-    prompt?: string;
-    guidelines?: string[];
+    prompt?: string; // Main Task or Base Prompt
+    rules?: string[]; // New: Strict rules
+    guidelines?: string[]; // Existing
+    contextPrompt?: string[]; // New: Renamed for clarity from 'context'
+    constraints?: string[]; // New: Things to avoid
     agentId?: string | null;
     commandId?: string | null; // Deprecated but kept for safety
     // Generation controls are now part of the section
@@ -62,7 +65,10 @@ export class Section {
     public type: SectionType;
     public content?: string;
     public prompt?: string;
+    public rules?: string[];
     public guidelines?: string[];
+    public contextPrompt?: string[];
+    public constraints?: string[];
     public agentId?: string | null;
     public commandId?: string | null;
     public controls: GenerationControlState;
@@ -77,7 +83,10 @@ export class Section {
         this.type = props.type;
         this.content = props.content ?? '';
         this.prompt = props.prompt ?? 'You are a helpful assistant.';
+        this.rules = props.rules ?? [];
         this.guidelines = props.guidelines ?? [];
+        this.contextPrompt = props.contextPrompt ?? [];
+        this.constraints = props.constraints ?? [];
         this.agentId = props.agentId || null;
         this.commandId = props.commandId || null;
         this.controls = { ...defaultControls, ...props.controls };
@@ -125,7 +134,10 @@ export class Section {
             type: this.type,
             content: this.content,
             prompt: this.prompt,
+            rules: this.rules,
             guidelines: this.guidelines,
+            contextPrompt: this.contextPrompt,
+            constraints: this.constraints,
             agentId: this.agentId,
             commandId: this.commandId,
             controls: this.controls,

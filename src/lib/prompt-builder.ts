@@ -5,6 +5,13 @@ import { Chapter, Project, Section } from './models';
  * This centralizes the logic for how project data is translated into instructions for the AI.
  */
 export class PromptBuilder {
+    private static buildPromptSection(title: string, items?: string[]): string {
+        if (!items || items.length === 0) {
+            return '';
+        }
+        return `\n**${title}:**\n${items.map(item => `- ${item}`).join('\n')}`;
+    }
+
     /**
      * Builds a detailed prompt for a single section.
      * @param section - The Section object to build the prompt for.
@@ -36,16 +43,26 @@ export class PromptBuilder {
         
         const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\n\n');
 
+        const rulesSection = this.buildPromptSection('Mandatory Rules', section.rules);
+        const guidelinesSection = this.buildPromptSection('Guidelines', section.guidelines);
+        const contextPromptSection = this.buildPromptSection('Additional Context', section.contextPrompt);
+        const constraintsSection = this.buildPromptSection('Constraints (What to Avoid)', section.constraints);
+
         return `
 ### Instructions for Section: "${section.title}"
+
 **Base Prompt:**
-${section.prompt}\n
-**Guidelines:**
-${section.guidelines && section.guidelines.length > 0 ? section.guidelines.map(g => `- ${g}`).join('\n') : '- No specific guidelines provided.'} \n
+${section.prompt || 'You are a helpful assistant.'}\n
+${rulesSection}
+${guidelinesSection}
+${contextPromptSection}
+${constraintsSection}
+
 **Additional Instructions:**
 ${section.instruction}\n
-**Context:**
-${fullContext || 'No context provided.'}
+
+**Provided Context from Other Project Items:**
+${fullContext || 'No context provided from other items.'}
 ---
         `;
     }
@@ -86,7 +103,7 @@ ${fullContext || 'No context provided.'}
 
         if (!chapterPrompts) return '';
 
-        const teamMemberText = project.teamMembers?.join(', ');
+        const teamMemberNames = project.teamMembers?.join(', ');
 
         const metadataFields: { label: string; value: string | undefined }[] = [
             { label: 'Project Type', value: project.projectType },
@@ -94,7 +111,7 @@ ${fullContext || 'No context provided.'}
             { label: 'University', value: project.university },
             { label: 'Course', value: project.course },
             { label: 'Supervisor', value: project.supervisor },
-            { label: 'Team Members', value: teamMemberText },
+            { label: 'Team Members', value: teamMemberNames },
         ];
 
 
