@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -10,29 +10,22 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useBuilderStore, useToast } from '@/hooks';
-import { Loader2, UploadCloud, Trash2, PlusCircle } from 'lucide-react';
+import { Loader2, UploadCloud } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Label } from '../ui/label';
 
-const teamMemberSchema = z.object({
-  id: z.string().min(1, 'ID is required.'),
-  name: z.string().min(1, 'Name is required.'),
-});
-
 const settingsSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),
   projectDescription: z.string().optional(),
   projectType: z.string().optional(),
   specialization: z.string().optional(),
-  country: z.string().optional(),
-  city: z.string().optional(),
   university: z.string().optional(),
   supervisor: z.string().optional(),
   course: z.string().optional(),
-  teamMembers: z.array(teamMemberSchema).optional(),
+  teamMembers: z.string().optional(),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -50,18 +43,11 @@ export function ProjectSettingsPanel() {
       projectDescription: '',
       projectType: '',
       specialization: '',
-      country: '',
-      city: '',
       university: '',
       supervisor: '',
       course: '',
-      teamMembers: [],
+      teamMembers: '',
     }
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "teamMembers"
   });
 
   useEffect(() => {
@@ -71,12 +57,10 @@ export function ProjectSettingsPanel() {
         projectDescription: project.projectDescription || '',
         projectType: project.projectType || '',
         specialization: project.specialization || '',
-        country: project.country || '',
-        city: project.city || '',
         university: project.university || '',
         supervisor: project.supervisor || '',
         course: project.course || '',
-        teamMembers: project.teamMembers || [],
+        teamMembers: project.teamMembers?.join(', ') || '',
       });
       if (project.logoUrl) {
         setLogoPreview(project.logoUrl);
@@ -108,8 +92,11 @@ export function ProjectSettingsPanel() {
   };
 
   const onSubmit = (data: SettingsFormValues) => {
+    // Convert comma-separated string back to array for the model
+    const teamMembersArray = data.teamMembers?.split(',').map(name => name.trim()).filter(Boolean) || [];
+
     updateProject(p =>
-      p.with({ ...data }).generateCoverPageMarkdown()
+      p.with({ ...data, teamMembers: teamMembersArray }).generateCoverPageMarkdown()
     );
     setHasUnsavedChanges(true);
   };
@@ -121,7 +108,7 @@ export function ProjectSettingsPanel() {
       }
     });
     return () => subscription.unsubscribe();
-  }, [form, onSubmit]);
+  }, [form]);
 
   return (
     <Card className="h-full flex flex-col border-0 shadow-none">
@@ -173,51 +160,27 @@ export function ProjectSettingsPanel() {
                     <FormItem><FormLabel>Specialization</FormLabel><FormControl><Input {...field} placeholder="e.g., Artificial Intelligence" /></FormControl><FormMessage /></FormItem>
                   )} />
                 </div>
-                <FormField control={form.control} name="university" render={({ field }) => (
-                  <FormItem><FormLabel>University</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField control={form.control} name="university" render={({ field }) => (
+                        <FormItem><FormLabel>University</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="supervisor" render={({ field }) => (
+                        <FormItem><FormLabel>Supervisor</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                </div>
+
+                <FormField control={form.control} name="course" render={({ field }) => (
+                  <FormItem><FormLabel>Course</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField control={form.control} name="country" render={({ field }) => (
-                    <FormItem><FormLabel>Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                  <FormField control={form.control} name="city" render={({ field }) => (
-                    <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField control={form.control} name="supervisor" render={({ field }) => (
-                    <FormItem><FormLabel>Supervisor</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                  <FormField control={form.control} name="course" render={({ field }) => (
-                    <FormItem><FormLabel>Course</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                </div>
                 
                 <div className="space-y-2">
                   <Label>Team Members</Label>
-                  <div className="space-y-3">
-                    {fields.map((item, index) => (
-                      <div key={item.id} className="flex items-center gap-2 p-2 border rounded-md">
-                        <Input
-                          {...form.register(`teamMembers.${index}.name`)}
-                          placeholder="Member Name"
-                          className="flex-1"
-                        />
-                        <Input
-                          {...form.register(`teamMembers.${index}.id`)}
-                          placeholder="Member ID"
-                          className="w-24"
-                        />
-                        <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    ))}
-                    <Button type="button" variant="outline" size="sm" onClick={() => append({ id: '', name: '' })}>
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Add Team Member
-                    </Button>
-                  </div>
+                   <FormField control={form.control} name="teamMembers" render={({ field }) => (
+                    <FormItem>
+                      <FormControl><Textarea {...field} rows={2} placeholder="Enter names, separated by commas..." /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
                 </div>
 
               </div>

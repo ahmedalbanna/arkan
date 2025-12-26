@@ -26,7 +26,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
     if (!project) return null;
     const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    const teamMemberNames = project.teamMembers?.map(m => m.name).join(', ');
+    const teamMemberNames = project.teamMembers?.join(', ');
 
     return (
         <div className="relative bg-background shadow-lg mx-auto my-4 w-full max-w-[210mm] h-[297mm] box-border overflow-hidden p-12 flex flex-col">
@@ -41,11 +41,11 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                         <Image src={project.logoUrl} alt="Project Logo" layout="fill" objectFit="contain" />
                     </div>
                 )}
-                 <h1 className="text-5xl font-bold font-headline text-primary-foreground leading-tight">
+                 <h1 className="text-5xl font-bold font-headline text-primary leading-tight">
                     {project.name || 'Untitled Project'}
                 </h1>
                 {project.university && (
-                    <div className="inline-flex items-center gap-2 text-primary/80 mt-4">
+                    <div className="inline-flex items-center gap-2 text-muted-foreground mt-4">
                         <Landmark className="w-5 h-5" />
                         <p className="font-semibold text-lg tracking-wider">{project.university}</p>
                     </div>
@@ -72,7 +72,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
             <footer className="relative z-10 flex-shrink-0 pt-12">
                  {teamMemberNames && (
                     <div className="text-center mb-8">
-                        <h3 className="text-lg font-semibold text-muted-foreground">Team Members</h3>
+                        <h3 className="text-lg font-semibold text-muted-foreground">Submitted By</h3>
                         <p className="text-xl font-medium">{teamMemberNames}</p>
                     </div>
                  )}

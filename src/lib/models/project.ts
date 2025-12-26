@@ -8,11 +8,6 @@ import { ExternalContext, ExternalContextType } from './external-context';
 import { Section } from './section';
 
 
-export interface TeamMember {
-  id: string;
-  name: string;
-}
-
 export interface ProjectProperties {
   id?: string;
   userId?: string;
@@ -23,19 +18,17 @@ export interface ProjectProperties {
   logoUrl?: string; // Can now be a data URI
   projectType?: string;
   specialization?: string;
-  country?: string;
-  city?: string;
   university?: string;
   supervisor?: string;
   course?: string;
-  teamMembers?: TeamMember[];
+  teamMembers?: string[];
   chapters?: readonly (Chapter | ChapterProperties)[];
   externalContext?: readonly ExternalContext[];
   coverPageMarkdown?: string;
 }
 
 
-export class Project implements Required<Omit<ProjectProperties, 'userId' | 'projectDescription' | 'logoUrl' | 'projectType' | 'specialization' | 'country' | 'city' | 'university' | 'supervisor' | 'course' | 'teamMembers' | 'coverPageMarkdown'>> {
+export class Project implements Required<Omit<ProjectProperties, 'userId' | 'projectDescription' | 'logoUrl' | 'projectType' | 'specialization' | 'university' | 'supervisor' | 'course' | 'teamMembers' | 'coverPageMarkdown'>> {
   public readonly id: string;
   public readonly userId: string | undefined;
   public readonly createdAt: string;
@@ -46,12 +39,10 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
   public readonly logoUrl: string | undefined; // Can now be a data URI
   public readonly projectType: string | undefined;
   public readonly specialization: string | undefined;
-  public readonly country: string | undefined;
-  public readonly city: string | undefined;
   public readonly university: string | undefined;
   public readonly supervisor: string | undefined;
   public readonly course: string | undefined;
-  public readonly teamMembers: TeamMember[] | undefined;
+  public readonly teamMembers: string[] | undefined;
   public readonly chapters: readonly Chapter[];
   public readonly externalContext: readonly ExternalContext[];
   public readonly coverPageMarkdown: string | undefined;
@@ -67,8 +58,6 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
     this.logoUrl = props.logoUrl;
     this.projectType = props.projectType;
     this.specialization = props.specialization;
-    this.country = props.country;
-    this.city = props.city;
     this.university = props.university;
     this.supervisor = props.supervisor;
     this.course = props.course;
@@ -113,7 +102,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
       return `**${label}:** ${displayValue}\n`;
     };
 
-    const teamMemberNames = this.teamMembers?.map(m => m.name).join(', ');
+    const teamMemberNames = this.teamMembers?.join(', ');
 
     const content = `
 ${this.logoUrl ? `![Logo](${this.logoUrl})\n\n` : ''}
@@ -271,8 +260,6 @@ ${detail('Name', this.supervisor)}
       logoUrl: this.logoUrl,
       projectType: this.projectType,
       specialization: this.specialization,
-      country: this.country,
-      city: this.city,
       university: this.university,
       supervisor: this.supervisor,
       course: this.course,

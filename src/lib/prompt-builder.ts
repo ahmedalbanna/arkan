@@ -86,7 +86,7 @@ ${fullContext || 'No context provided.'}
 
         if (!chapterPrompts) return '';
 
-        const teamMemberText = project.teamMembers?.map(m => `${m.name} (ID: ${m.id})`).join(', ');
+        const teamMemberText = project.teamMembers?.join(', ');
 
         const metadataFields: { label: string; value: string | undefined }[] = [
             { label: 'Project Type', value: project.projectType },
@@ -94,8 +94,6 @@ ${fullContext || 'No context provided.'}
             { label: 'University', value: project.university },
             { label: 'Course', value: project.course },
             { label: 'Supervisor', value: project.supervisor },
-            { label: 'Country', value: project.country },
-            { label: 'City', value: project.city },
             { label: 'Team Members', value: teamMemberText },
         ];
 
