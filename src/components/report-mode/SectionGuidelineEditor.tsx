@@ -12,18 +12,18 @@ interface GuidelineEditorProps {
     itemKey: string;
 }
 
-const EditableList = ({ title, items, setItems, placeholder }: { title: string, items: string[], setItems: (items: string[]) => void, placeholder: string }) => {
+const EditableList = ({ title, items, onItemsChange, placeholder }: { title: string, items: string[], onItemsChange: (items: string[]) => void, placeholder: string }) => {
     const [newItem, setNewItem] = useState('');
 
     const handleAddItem = () => {
         if (newItem.trim()) {
-            setItems([...items, newItem.trim()]);
+            onItemsChange([...items, newItem.trim()]);
             setNewItem('');
         }
     };
     
     const handleRemoveItem = (index: number) => {
-        setItems(items.filter((_, i) => i !== index));
+        onItemsChange(items.filter((_, i) => i !== index));
     };
 
     return (
@@ -94,28 +94,28 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
             <EditableList
                 title="Rules (Mandatory)"
                 items={rules ?? []}
-                setItems={setRules}
+                onItemsChange={setRules}
                 placeholder="Add a strict rule the AI must follow..."
             />
             
             <EditableList
                 title="Guidelines (Recommendations)"
                 items={guidelines ?? []}
-                setItems={setGuidelines}
+                onItemsChange={setGuidelines}
                 placeholder="Add a guideline or suggestion..."
             />
 
             <EditableList
                 title="Context (Background Information)"
                 items={contextPrompt ?? []}
-                setItems={setContextPrompt}
+                onItemsChange={setContextPrompt}
                 placeholder="Add a piece of background context..."
             />
 
             <EditableList
                 title="Constraints (What to Avoid)"
                 items={constraints ?? []}
-                setItems={setConstraints}
+                onItemsChange={setConstraints}
                 placeholder="Add a constraint or what not to do..."
             />
         </div>
