@@ -3,7 +3,7 @@
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks/core/useBuilderStore';
 import { useMemo, useCallback } from 'react';
-import type { SectionContext } from '@/lib/models';
+import type { SectionContext, ExternalContextType } from '@/lib/models';
 
 export function useContextSelector(itemKey: string) {
     const { t } = useLocalization();
@@ -31,16 +31,22 @@ export function useContextSelector(itemKey: string) {
     }, [project?.sections]);
 
 
-    const toggleContextSelection = useCallback((
+    const handleContextChange = useCallback((
         sectionId: string,
-        type: keyof Omit<SectionContext, 'diagrams'>,
+        type: 'sections' | 'externalContext',
         subKey: string,
-        checked: boolean
+        value: ExternalContextType | false
     ) => {
         updateProject(p => p.updateSection(sectionId, (sec) => {
             const newContext = { ...sec.context };
             const newDict = { ...(newContext[type] || {}) };
-            newDict[subKey] = checked;
+            
+            if (value === false) {
+                delete newDict[subKey];
+            } else {
+                newDict[subKey] = value;
+            }
+            
             newContext[type] = newDict;
             return sec.with({ context: newContext });
         }));
@@ -49,7 +55,7 @@ export function useContextSelector(itemKey: string) {
     return {
         t,
         reportSections,
-        toggleContextSelection,
+        handleContextChange,
         currentSelection,
         sections: sectionsContent,
         externalContext: project?.externalContext || [],

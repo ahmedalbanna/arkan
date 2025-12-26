@@ -1,86 +1,120 @@
-
-
 'use client';
 
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { useContextSelector } from '@/hooks';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useBuilderStore } from '@/hooks/core/useBuilderStore';
+import { ExternalContextType } from '@/lib/models';
 import { cn } from '@/lib/utils/cn';
 import { BookCheck, FileText } from 'lucide-react';
+import { useMemo, useCallback } from 'react';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 interface ContextSelectorProps {
     itemKey: string;
 }
 
 export function ContextSelector({ itemKey }: ContextSelectorProps) {
-    const {
-        t,
-        reportSections,
-        toggleContextSelection,
-        currentSelection,
-        sections: generatedSectionsContent,
-        externalContext,
-    } = useContextSelector(itemKey);
+    const { t } = useLocalization();
+    const { project, updateProject } = useBuilderStore();
+
+    const section = useMemo(() => project?.getSection(itemKey), [project, itemKey]);
+
+    const currentSelection = useMemo(() => {
+        return section?.context || { sections: {}, externalContext: {} };
+    }, [section?.context]);
+
+    const reportSections = useMemo(() => {
+        if (!project?.sections) return [];
+        return project.sections
+            .filter(s => s.id !== itemKey)
+            .map(s => ({ id: s.id, title: s.title }));
+    }, [project?.sections, itemKey]);
+
+    const sectionsContent = useMemo(() => {
+        if (!project?.sections) return {};
+        return project.sections.reduce((acc, section) => {
+            acc[section.id] = section.content || '';
+            return acc;
+        }, {} as Record<string, string>);
+    }, [project?.sections]);
+
+    const contextTypes: ExternalContextType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
+
+    const handleContextChange = useCallback((
+        sectionId: string,
+        type: 'sections' | 'externalContext',
+        subKey: string,
+        value: ExternalContextType | false
+    ) => {
+        updateProject(p => p.updateSection(sectionId, (sec) => {
+            const newContext = { ...sec.context };
+            const newDict = { ...(newContext[type] || {}) };
+            
+            if (value === false) {
+                delete newDict[subKey];
+            } else {
+                newDict[subKey] = value;
+            }
+            
+            newContext[type] = newDict;
+            return sec.with({ context: newContext });
+        }));
+    }, [updateProject]);
+
+    const renderContextItem = (item: { id: string; title: string; content?: string | undefined; fileName?: string }, type: 'sections' | 'externalContext') => {
+        const isSelected = !!currentSelection[type]?.[item.id];
+        const selectedType = currentSelection[type]?.[item.id] || 'context';
+        const hasContent = type === 'sections' ? !!sectionsContent[item.id] : !!item.content;
+        const displayName = item.fileName || item.title;
+
+        return (
+            <div key={`${type}-${itemKey}-${item.id}`} className="flex items-center space-x-2 p-1 rounded-md hover:bg-muted/50">
+                <Checkbox
+                    id={`${type}-${itemKey}-${item.id}`}
+                    checked={isSelected}
+                    onCheckedChange={(checked) => handleContextChange(itemKey, type, item.id, checked ? 'context' : false)}
+                    disabled={type === 'sections' && !hasContent}
+                />
+                <Label htmlFor={`${type}-${itemKey}-${item.id}`} className={cn("text-sm font-normal flex-1 truncate", !hasContent && "text-muted-foreground/50")}>
+                    {displayName}
+                </Label>
+                {isSelected && (
+                    <Select
+                        value={selectedType}
+                        onValueChange={(value: ExternalContextType) => handleContextChange(itemKey, type, item.id, value)}
+                    >
+                        <SelectTrigger className="h-7 text-xs w-auto">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {contextTypes.map(ctxType => (
+                                <SelectItem key={ctxType} value={ctxType} className="capitalize">{ctxType}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
+            </div>
+        );
+    };
 
     return (
-
-        <div className=" space-y-4 pr-4">
+        <div className="space-y-4 pr-4">
             <div className="space-y-2">
                 <Label className="font-semibold">{t('builder.reportGenerator.ContextualSections')}</Label>
-
-                {/* Report Sections */}
-                {reportSections.map(section => (
-                    <div key={`ctx-s-${itemKey}-${section.id}`} className="flex items-center space-x-2">
-                        <Checkbox
-                            id={`context-section-${itemKey}-${section.id}`}
-                            checked={!!currentSelection.sections[section.id]}
-                            onCheckedChange={(checked) => toggleContextSelection(itemKey, 'sections', section.id, !!checked)}
-                            disabled={!generatedSectionsContent[section.id]}
-                        />
-                        <Label htmlFor={`context-section-${itemKey}-${section.id}`} className={cn("text-sm font-normal", !generatedSectionsContent[section.id] && "text-muted-foreground/50")}>
-                            <div className="flex items-center gap-2">
-                                <BookCheck className="h-4 w-4" />
-                                {section.title}
-                            </div>
-                        </Label>
-                    </div>
-                ))}
+                {reportSections.map(section => renderContextItem({ ...section, content: sectionsContent[section.id] }, 'sections'))}
                 {reportSections.length === 0 && (
                     <p className="text-xs text-muted-foreground pl-4">{t('builder.reportGenerator.noOtherSections')}</p>
                 )}
             </div>
 
-
-
-            {externalContext && externalContext.length > 0 && (
+            {project?.externalContext && project.externalContext.length > 0 && (
                 <div className="space-y-2 pt-2 border-t">
                     <Label className="font-semibold">{t('builder.reportGenerator.externalContext')}</Label>
-                    {externalContext.map((item) => (
-                        <div key={item.id} className="flex items-center space-x-2">
-                            <Checkbox
-                                id={`context-external-${itemKey}-${item.id}`}
-                                checked={!!currentSelection.externalContext?.[item.id]}
-                                onCheckedChange={(checked) => toggleContextSelection(itemKey, 'externalContext', item.id, !!checked)}
-                            />
-                            <Label htmlFor={`context-external-${itemKey}-${item.id}`} className="text-sm font-normal">
-                                <div className="flex items-center gap-2">
-                                    <FileText className="h-4 w-4" />
-                                    <span className="truncate">{item.fileName}</span>
-                                    <Badge variant="secondary" className={cn("text-xs capitalize", {
-                                        'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800': item.type === 'context',
-                                        'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200 border-green-200 dark:border-green-800': item.type === 'example',
-                                        'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800': item.type === 'question',
-                                        'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-800': item.type === 'textbook',
-                                        'bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600': item.type === 'guidelines',
-                                    })}>{item.type}</Badge>
-                                </div>
-                            </Label>
-                        </div>
-                    ))}
+                    {project.externalContext.map((item) => renderContextItem(item, 'externalContext'))}
                 </div>
             )}
         </div>
-
     );
 }

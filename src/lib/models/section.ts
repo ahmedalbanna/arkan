@@ -1,7 +1,6 @@
-
 'use client';
 
-import type { DiagramType } from '@/ai/schemas';
+import type { DiagramType, ExternalContextType } from '@/ai/schemas';
 import type { Language, OutputStyle, Tone } from './control-types';
 
 export interface GenerationControlState {
@@ -16,8 +15,8 @@ export interface GenerationControlState {
 }
 
 export interface SectionContext {
-    sections: Record<string, boolean>;
-    externalContext: Record<string, boolean>;
+    sections: Record<string, ExternalContextType>;
+    externalContext: Record<string, ExternalContextType>;
 }
 
 
