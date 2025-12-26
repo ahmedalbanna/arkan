@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -7,6 +8,11 @@ import { ExternalContext, ExternalContextType } from './external-context';
 import { Section } from './section';
 
 
+export interface TeamMember {
+  id: string;
+  name: string;
+}
+
 export interface ProjectProperties {
   id?: string;
   userId?: string;
@@ -14,25 +20,22 @@ export interface ProjectProperties {
   updatedAt?: string;
   name?: string;
   projectDescription?: string;
-  // New metadata fields
-  logoUrl?: string;
+  logoUrl?: string; // Can now be a data URI
   projectType?: string;
   specialization?: string;
-  studentName?: string;
-  studentId?: string;
   country?: string;
   city?: string;
   university?: string;
   supervisor?: string;
   course?: string;
-  teamMembers?: string[];
+  teamMembers?: TeamMember[];
   chapters?: readonly (Chapter | ChapterProperties)[];
   externalContext?: readonly ExternalContext[];
   coverPageMarkdown?: string;
 }
 
 
-export class Project implements Required<Omit<ProjectProperties, 'userId' | 'projectDescription' | 'logoUrl' |'projectType' | 'specialization' | 'studentName' | 'studentId' | 'country' | 'city' | 'university' | 'supervisor' | 'course' | 'teamMembers' | 'coverPageMarkdown'>> {
+export class Project implements Required<Omit<ProjectProperties, 'userId' | 'projectDescription' | 'logoUrl' | 'projectType' | 'specialization' | 'country' | 'city' | 'university' | 'supervisor' | 'course' | 'teamMembers' | 'coverPageMarkdown'>> {
   public readonly id: string;
   public readonly userId: string | undefined;
   public readonly createdAt: string;
@@ -40,17 +43,15 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
 
   public readonly name: string;
   public readonly projectDescription: string | undefined;
-  public readonly logoUrl: string | undefined;
+  public readonly logoUrl: string | undefined; // Can now be a data URI
   public readonly projectType: string | undefined;
   public readonly specialization: string | undefined;
-  public readonly studentName: string | undefined;
-  public readonly studentId: string | undefined;
   public readonly country: string | undefined;
   public readonly city: string | undefined;
   public readonly university: string | undefined;
   public readonly supervisor: string | undefined;
   public readonly course: string | undefined;
-  public readonly teamMembers: string[] | undefined;
+  public readonly teamMembers: TeamMember[] | undefined;
   public readonly chapters: readonly Chapter[];
   public readonly externalContext: readonly ExternalContext[];
   public readonly coverPageMarkdown: string | undefined;
@@ -66,17 +67,15 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
     this.logoUrl = props.logoUrl;
     this.projectType = props.projectType;
     this.specialization = props.specialization;
-    this.studentName = props.studentName;
-    this.studentId = props.studentId;
     this.country = props.country;
     this.city = props.city;
     this.university = props.university;
     this.supervisor = props.supervisor;
     this.course = props.course;
-    this.teamMembers = props.teamMembers;
+    this.teamMembers = props.teamMembers || [];
     this.chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c));
     this.externalContext = (props.externalContext || []).map(ctx => ({ ...ctx, id: ctx.id || uuidv4() }));
-    this.coverPageMarkdown = props.coverPageMarkdown || this.generateCoverPageMarkdown().content;
+    this.coverPageMarkdown = props.coverPageMarkdown || this.generateCoverPageMarkdown().coverPageMarkdown;
   }
 
   public with(props: Partial<Omit<ProjectProperties, 'id'>>): Project {
@@ -109,10 +108,12 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
 
   public generateCoverPageMarkdown(): Project {
     const detail = (label: string, value: string | string[] | undefined) => {
-        if (!value || value.length === 0) return '';
-        const displayValue = Array.isArray(value) ? value.join(', ') : value;
-        return `**${label}:** ${displayValue}\n`;
+      if (!value || value.length === 0) return '';
+      const displayValue = Array.isArray(value) ? value.join(', ') : value;
+      return `**${label}:** ${displayValue}\n`;
     };
+
+    const teamMemberNames = this.teamMembers?.map(m => m.name).join(', ');
 
     const content = `
 ${this.logoUrl ? `![Logo](${this.logoUrl})\n\n` : ''}
@@ -126,9 +127,7 @@ ${detail('Specialization', this.specialization)}
 ---
 
 **Submitted By:**
-${detail('Name', this.studentName)}
-${detail('ID', this.studentId)}
-${detail('Team', this.teamMembers)}
+${detail('Team', teamMemberNames)}
 
 **Supervised By:**
 ${detail('Name', this.supervisor)}
@@ -137,12 +136,11 @@ ${detail('Name', this.supervisor)}
     `.trim();
 
     return this.with({ coverPageMarkdown: content });
-}
+  }
 
   public withContentFromMarkdown(markdown: string): Project {
     const lines = markdown.split('\n');
-    
-    // Dynamically determine chapter/section level
+
     let chapterLevel = 0;
     for (let i = 1; i <= 6; i++) {
         const hasLevel = lines.some(line => line.trim().startsWith('#'.repeat(i) + ' '));
@@ -151,7 +149,6 @@ ${detail('Name', this.supervisor)}
             break;
         }
     }
-    // If no headings found, treat entire content as a single section in a single chapter
     if (chapterLevel === 0) {
         if (this.chapters.length > 0 && this.chapters[0].sections.length > 0) {
             const chapterId = this.chapters[0].id;
@@ -162,9 +159,9 @@ ${detail('Name', this.supervisor)}
              return this.with({ chapters: [newChapter] });
         }
     }
-    
+
     const sectionLevel = chapterLevel + 1;
-    
+
     const chapterRegex = new RegExp(`^${'#'.repeat(chapterLevel)}\\s+(.*)`);
     const sectionRegex = new RegExp(`^${'#'.repeat(sectionLevel)}\\s+(.*)`);
 
@@ -216,13 +213,12 @@ ${detail('Name', this.supervisor)}
 
     finalizeChapter();
 
-    // --- Reconciliation Logic ---
     const oldChapters = [...this.chapters];
     const usedOldChapterIds = new Set<string>();
 
     const finalChapters = newChaptersData.map(parsedChapter => {
         const potentialMatches = oldChapters.filter(c => c.title === parsedChapter.title && !usedOldChapterIds.has(c.id));
-        const oldChapter = potentialMatches[0]; // Simple match for now
+        const oldChapter = potentialMatches[0];
 
         if (oldChapter) {
             usedOldChapterIds.add(oldChapter.id);
@@ -263,6 +259,7 @@ ${detail('Name', this.supervisor)}
     return this.with({ chapters: finalChapters });
   }
 
+
   public toJSON(): ProjectProperties {
     return {
       id: this.id,
@@ -274,8 +271,6 @@ ${detail('Name', this.supervisor)}
       logoUrl: this.logoUrl,
       projectType: this.projectType,
       specialization: this.specialization,
-      studentName: this.studentName,
-      studentId: this.studentId,
       country: this.country,
       city: this.city,
       university: this.university,
@@ -322,14 +317,14 @@ ${detail('Name', this.supervisor)}
       projectDescription: existingProject?.projectDescription,
       externalContext: existingProject?.externalContext,
     });
-    
+
     let currentProject = newProject;
     let currentChapterId: string | null = null;
-    
+
     lines.forEach(line => {
       const isSection = line.match(/^\s*\d+\.\d+/);
       const isChapter = !isSection;
-      
+
       if (isChapter) {
         const chapterTitle = line.replace(/^\d+\.?\s*/, '').trim();
         if (chapterTitle) {

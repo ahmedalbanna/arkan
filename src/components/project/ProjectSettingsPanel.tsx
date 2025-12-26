@@ -1,7 +1,8 @@
 
+
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -9,126 +10,115 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useBuilderStore, useToast } from '@/hooks';
-import { Loader2, UploadCloud } from 'lucide-react';
+import { Loader2, UploadCloud, Trash2, PlusCircle } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
-import { projectKeys } from '@/lib/query-keys';
+import { Label } from '../ui/label';
+
+const teamMemberSchema = z.object({
+  id: z.string().min(1, 'ID is required.'),
+  name: z.string().min(1, 'Name is required.'),
+});
 
 const settingsSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),
   projectDescription: z.string().optional(),
   projectType: z.string().optional(),
   specialization: z.string().optional(),
-  studentName: z.string().optional(),
-  studentId: z.string().optional(),
   country: z.string().optional(),
   city: z.string().optional(),
   university: z.string().optional(),
   supervisor: z.string().optional(),
   course: z.string().optional(),
-  teamMembers: z.string().optional(), // Will be handled as a comma-separated string
+  teamMembers: z.array(teamMemberSchema).optional(),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
-async function uploadLogoApi(variables: { projectId: string; file: File; token: string }) {
-    const formData = new FormData();
-    formData.append('file', variables.file);
-
-    const response = await fetch(`/api/project/${variables.projectId}/upload-logo`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${variables.token}` },
-        body: formData,
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to upload logo.');
-    }
-    return response.json();
-}
-
 export function ProjectSettingsPanel() {
   const { project, updateProject, setHasUnsavedChanges } = useBuilderStore();
-  const { firebaseUser } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
-      name: '', projectDescription: '', projectType: '', specialization: '',
-      studentName: '', studentId: '', country: '', city: '',
-      university: '', supervisor: '', course: '', teamMembers: '',
+      name: '',
+      projectDescription: '',
+      projectType: '',
+      specialization: '',
+      country: '',
+      city: '',
+      university: '',
+      supervisor: '',
+      course: '',
+      teamMembers: [],
     }
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "teamMembers"
   });
 
   useEffect(() => {
     if (project) {
-        form.reset({
-            name: project.name || '',
-            projectDescription: project.projectDescription || '',
-            projectType: project.projectType || '',
-            specialization: project.specialization || '',
-            studentName: project.studentName || '',
-            studentId: project.studentId || '',
-            country: project.country || '',
-            city: project.city || '',
-            university: project.university || '',
-            supervisor: project.supervisor || '',
-            course: project.course || '',
-            teamMembers: project.teamMembers?.join(', ') || '',
-        });
-        if (project.logoUrl) {
-            setLogoPreview(project.logoUrl);
-        } else {
-            setLogoPreview(null);
-        }
+      form.reset({
+        name: project.name || '',
+        projectDescription: project.projectDescription || '',
+        projectType: project.projectType || '',
+        specialization: project.specialization || '',
+        country: project.country || '',
+        city: project.city || '',
+        university: project.university || '',
+        supervisor: project.supervisor || '',
+        course: project.course || '',
+        teamMembers: project.teamMembers || [],
+      });
+      if (project.logoUrl) {
+        setLogoPreview(project.logoUrl);
+      } else {
+        setLogoPreview(null);
+      }
     }
   }, [project, form]);
 
-  const logoUploadMutation = useMutation({
-    mutationFn: uploadLogoApi,
-    onSuccess: (data) => {
-        updateProject(p => p.with({ logoUrl: data.logoUrl }).generateCoverPageMarkdown());
-        setHasUnsavedChanges(true);
-        toast({ title: 'Logo Uploaded', description: 'Your project logo has been updated.' });
-        queryClient.invalidateQueries({ queryKey: projectKeys.detail(project?.id || '') });
-    },
-    onError: (error: Error) => {
-        toast({ title: 'Upload Failed', description: error.message, variant: 'destructive' });
-    }
-  });
-
   const handleLogoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && project && firebaseUser) {
-        setLogoPreview(URL.createObjectURL(file));
-        const token = await firebaseUser.getIdToken();
-        logoUploadMutation.mutate({ projectId: project.id, file, token });
+    if (file) {
+      setIsUploading(true);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUri = e.target?.result as string;
+        updateProject(p => p.with({ logoUrl: dataUri }).generateCoverPageMarkdown());
+        setLogoPreview(dataUri);
+        setHasUnsavedChanges(true);
+        toast({ title: 'Logo Updated', description: 'Your project logo has been updated locally.' });
+        setIsUploading(false);
+      };
+      reader.onerror = () => {
+        toast({ title: 'Upload Failed', description: 'Could not read the image file.', variant: 'destructive' });
+        setIsUploading(false);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   const onSubmit = (data: SettingsFormValues) => {
-    updateProject(p => p
-        .with({
-            ...data,
-            teamMembers: data.teamMembers ? data.teamMembers.split(',').map(s => s.trim()).filter(Boolean) : [],
-        })
-        .generateCoverPageMarkdown()
+    updateProject(p =>
+      p.with({ ...data }).generateCoverPageMarkdown()
     );
     setHasUnsavedChanges(true);
   };
 
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
-        if(type === 'change') {
-            form.handleSubmit(onSubmit)();
-        }
+      if (type === 'change') {
+        form.handleSubmit(onSubmit)();
+      }
     });
     return () => subscription.unsubscribe();
   }, [form, onSubmit]);
@@ -138,89 +128,102 @@ export function ProjectSettingsPanel() {
       <CardHeader>
         <CardTitle>Project Settings</CardTitle>
         <CardDescription>
-            Manage the metadata for your project. This information will automatically update the cover page.
+          Manage the metadata for your project. This information will automatically update the cover page.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden">
-          <Form {...form}>
-            <form className="space-y-4 h-full flex flex-col">
-              <ScrollArea className="flex-grow pr-4 -mr-4">
-                <div className="space-y-4">
-                    <div className="space-y-2">
-                        <Label>Project Logo</Label>
-                        <div className="relative flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary">
-                            <input
-                                type="file"
-                                accept="image/png, image/jpeg, image/svg+xml"
-                                onChange={handleLogoChange}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                disabled={logoUploadMutation.isPending}
-                            />
-                            {logoUploadMutation.isPending ? (
-                                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                            ) : logoPreview ? (
-                                <Image src={logoPreview} alt="Logo preview" layout="fill" objectFit="contain" className="p-2" />
-                            ) : (
-                                <div className="text-center text-muted-foreground">
-                                    <UploadCloud className="w-8 h-8 mx-auto" />
-                                    <p className="text-sm mt-1">Click to upload or drag & drop</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    <FormField control={form.control} name="name" render={({ field }) => (
-                    <FormItem><FormLabel>Project Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField control={form.control} name="projectDescription" render={({ field }) => (
-                    <FormItem><FormLabel>Project Description</FormLabel><FormControl><Textarea {...field} rows={3} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField control={form.control} name="projectType" render={({ field }) => (
-                            <FormItem><FormLabel>Project Type</FormLabel><FormControl><Input {...field} placeholder="e.g., Graduation Project, Research Paper" /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="specialization" render={({ field }) => (
-                            <FormItem><FormLabel>Specialization</FormLabel><FormControl><Input {...field} placeholder="e.g., Artificial Intelligence" /></FormControl><FormMessage /></FormItem>
-                        )} />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="studentName" render={({ field }) => (
-                        <FormItem><FormLabel>Student Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField control={form.control} name="studentId" render={({ field }) => (
-                        <FormItem><FormLabel>Student ID</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField control={form.control} name="country" render={({ field }) => (
-                            <FormItem><FormLabel>Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="city" render={({ field }) => (
-                            <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                    </div>
-                    <FormField control={form.control} name="university" render={({ field }) => (
-                    <FormItem><FormLabel>University</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="supervisor" render={({ field }) => (
-                        <FormItem><FormLabel>Supervisor</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField control={form.control} name="course" render={({ field }) => (
-                        <FormItem><FormLabel>Course</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    </div>
-                    <FormField control={form.control} name="teamMembers" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Team Members</FormLabel>
-                        <FormControl><Input {...field} placeholder="Separate names with commas" /></FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )} />
+        <Form {...form}>
+          <form className="space-y-4 h-full flex flex-col">
+            <ScrollArea className="flex-grow pr-4 -mr-4">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Project Logo</Label>
+                  <div className="relative flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary">
+                    <input
+                      type="file"
+                      accept="image/png, image/jpeg, image/svg+xml"
+                      onChange={handleLogoChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      disabled={isUploading}
+                    />
+                    {isUploading ? (
+                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    ) : logoPreview ? (
+                      <Image src={logoPreview} alt="Logo preview" layout="fill" objectFit="contain" className="p-2" />
+                    ) : (
+                      <div className="text-center text-muted-foreground">
+                        <UploadCloud className="w-8 h-8 mx-auto" />
+                        <p className="text-sm mt-1">Click to upload or drag & drop</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </ScrollArea>
-            </form>
-          </Form>
+
+                <FormField control={form.control} name="name" render={({ field }) => (
+                  <FormItem><FormLabel>Project Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="projectDescription" render={({ field }) => (
+                  <FormItem><FormLabel>Project Description</FormLabel><FormControl><Textarea {...field} rows={3} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField control={form.control} name="projectType" render={({ field }) => (
+                    <FormItem><FormLabel>Project Type</FormLabel><FormControl><Input {...field} placeholder="e.g., Graduation Project, Research Paper" /></FormControl><FormMessage /></FormItem>
+                  )} />
+                  <FormField control={form.control} name="specialization" render={({ field }) => (
+                    <FormItem><FormLabel>Specialization</FormLabel><FormControl><Input {...field} placeholder="e.g., Artificial Intelligence" /></FormControl><FormMessage /></FormItem>
+                  )} />
+                </div>
+                <FormField control={form.control} name="university" render={({ field }) => (
+                  <FormItem><FormLabel>University</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField control={form.control} name="country" render={({ field }) => (
+                    <FormItem><FormLabel>Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                  <FormField control={form.control} name="city" render={({ field }) => (
+                    <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField control={form.control} name="supervisor" render={({ field }) => (
+                    <FormItem><FormLabel>Supervisor</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                  <FormField control={form.control} name="course" render={({ field }) => (
+                    <FormItem><FormLabel>Course</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Team Members</Label>
+                  <div className="space-y-3">
+                    {fields.map((item, index) => (
+                      <div key={item.id} className="flex items-center gap-2 p-2 border rounded-md">
+                        <Input
+                          {...form.register(`teamMembers.${index}.name`)}
+                          placeholder="Member Name"
+                          className="flex-1"
+                        />
+                        <Input
+                          {...form.register(`teamMembers.${index}.id`)}
+                          placeholder="Member ID"
+                          className="w-24"
+                        />
+                        <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button type="button" variant="outline" size="sm" onClick={() => append({ id: '', name: '' })}>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Add Team Member
+                    </Button>
+                  </div>
+                </div>
+
+              </div>
+            </ScrollArea>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );

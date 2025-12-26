@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Project } from '@/lib/models';
@@ -24,6 +25,8 @@ const DetailRow: React.FC<{ label: string; value?: string | string[] }> = ({ lab
 export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
     if (!project) return null;
     const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    const teamMemberNames = project.teamMembers?.map(m => m.name).join(', ');
 
     return (
         <div className="relative bg-background shadow-lg mx-auto my-4 w-full max-w-[210mm] h-[297mm] box-border overflow-hidden p-12 flex flex-col">
@@ -67,10 +70,10 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
 
             {/* Footer */}
             <footer className="relative z-10 flex-shrink-0 pt-12">
-                 {project.teamMembers && project.teamMembers.length > 0 && (
+                 {teamMemberNames && (
                     <div className="text-center mb-8">
                         <h3 className="text-lg font-semibold text-muted-foreground">Team Members</h3>
-                        <p className="text-xl font-medium">{project.teamMembers.join(', ')}</p>
+                        <p className="text-xl font-medium">{teamMemberNames}</p>
                     </div>
                  )}
                  <div className="flex justify-between items-end text-sm text-muted-foreground">
