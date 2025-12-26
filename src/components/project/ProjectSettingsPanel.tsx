@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -12,6 +11,7 @@ import { useBuilderStore } from '@/hooks';
 import { Save } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { useEffect } from 'react';
 
 const settingsSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),
@@ -31,46 +31,67 @@ const settingsSchema = z.object({
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 export function ProjectSettingsPanel() {
-  const { project, updateProject, hasUnsavedChanges, setHasUnsavedChanges } = useBuilderStore();
+  const { project, updateProject, setHasUnsavedChanges } = useBuilderStore();
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
-    values: {
-      name: project?.name || '',
-      projectDescription: project?.projectDescription || '',
-      projectType: project?.projectType || '',
-      specialization: project?.specialization || '',
-      studentName: project?.studentName || '',
-      studentId: project?.studentId || '',
-      country: project?.country || '',
-      city: project?.city || '',
-      university: project?.university || '',
-      supervisor: project?.supervisor || '',
-      course: project?.course || '',
-      teamMembers: project?.teamMembers?.join(', ') || '',
-    },
   });
 
+  // Effect to reset the form whenever the project from the store changes
+  useEffect(() => {
+    if (project) {
+        form.reset({
+            name: project.name || '',
+            projectDescription: project.projectDescription || '',
+            projectType: project.projectType || '',
+            specialization: project.specialization || '',
+            studentName: project.studentName || '',
+            studentId: project.studentId || '',
+            country: project.country || '',
+            city: project.city || '',
+            university: project.university || '',
+            supervisor: project.supervisor || '',
+            course: project.course || '',
+            teamMembers: project.teamMembers?.join(', ') || '',
+        });
+    }
+  }, [project, form]);
+
+
   const onSubmit = (data: SettingsFormValues) => {
-    updateProject(p => p.with({
-      ...data,
-      teamMembers: data.teamMembers ? data.teamMembers.split(',').map(s => s.trim()).filter(Boolean) : [],
-    }));
-    // We can consider the save action as complete for the UI
-    setHasUnsavedChanges(false);
+    updateProject(p => p
+        .with({
+            ...data,
+            teamMembers: data.teamMembers ? data.teamMembers.split(',').map(s => s.trim()).filter(Boolean) : [],
+        })
+        // After updating metadata, regenerate the cover page markdown
+        .generateCoverPageMarkdown()
+    );
+    setHasUnsavedChanges(true); // Mark as having changes to trigger autosave
   };
+
+  // Automatically submit the form on any change to update the cover page in real-time
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+        if(type === 'change') {
+            form.handleSubmit(onSubmit)();
+        }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, onSubmit]);
+
 
   return (
     <Card className="h-full flex flex-col border-0 shadow-none">
       <CardHeader>
         <CardTitle>Project Settings</CardTitle>
         <CardDescription>
-            Manage the metadata for your project. This information will be used by the AI to generate more accurate content.
+            Manage the metadata for your project. This information will automatically update the cover page.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 h-full flex flex-col">
+            <form className="space-y-4 h-full flex flex-col">
               <ScrollArea className="flex-grow pr-4 -mr-4">
                 <div className="space-y-4">
                     <FormField control={form.control} name="name" render={({ field }) => (
@@ -123,11 +144,7 @@ export function ProjectSettingsPanel() {
                     )} />
                 </div>
               </ScrollArea>
-              <div className="flex-shrink-0 pt-4">
-                <Button type="submit" className="w-full" disabled={!form.formState.isDirty}>
-                    <Save className="mr-2 h-4 w-4" /> Save Settings
-                </Button>
-              </div>
+              {/* The save button is no longer necessary as changes are saved on edit */}
             </form>
           </Form>
       </CardContent>

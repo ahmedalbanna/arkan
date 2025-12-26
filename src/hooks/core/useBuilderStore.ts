@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Chapter, ChapterProperties } from '@/lib/models/chapter';
@@ -7,9 +6,13 @@ import { localProjectService } from '@/services/local-project-service';
 import React from 'react';
 import { create } from 'zustand';
 
+type ActiveView = 'cover-page' | 'report-content';
+
 interface BuilderState {
     project: Project | null;
+    activeView: ActiveView;
     hasUnsavedChanges: boolean;
+    setActiveView: (view: ActiveView) => void;
     setHasUnsavedChanges: (hasChanges: boolean) => void;
     updateProject: (updater: (project: Project) => Project) => void;
     loadProject: (projectData: ProjectProperties) => void;
@@ -28,13 +31,15 @@ const useBuilderStore = create<BuilderState>((set, get) => {
 
     return {
         project: createNewTemporaryProject(),
+        activeView: 'cover-page',
         hasUnsavedChanges: false,
+        setActiveView: (view) => set({ activeView: view }),
         setHasUnsavedChanges: (hasChanges) => set({ hasUnsavedChanges: hasChanges }),
 
         loadProject: (projectData) => {
             const newProject = new Project(projectData);
             localStorage.setItem('lastActiveProjectId', newProject.id);
-            set({ project: newProject, hasUnsavedChanges: false });
+            set({ project: newProject, hasUnsavedChanges: false, activeView: 'cover-page' });
         },
 
         updateProject: (updater) => {
@@ -47,7 +52,7 @@ const useBuilderStore = create<BuilderState>((set, get) => {
 
         newSession: () => {
             localStorage.removeItem('lastActiveProjectId');
-            set({ project: createNewTemporaryProject(), hasUnsavedChanges: false });
+            set({ project: createNewTemporaryProject(), hasUnsavedChanges: false, activeView: 'cover-page' });
         },
 
         fileInputRef,

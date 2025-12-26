@@ -1,6 +1,3 @@
-
-
-
 export * from './models/docxTemplate';
 export * from './models/pptxTemplate';
 export * from './models/project';
@@ -129,6 +126,7 @@ export interface UploadedFile {
 
 export type ExternalContextType = 'context' | 'example' | 'question' | 'textbook' | 'guidelines';
 export interface ExternalContext {
+    id: string;
     fileName: string;
     content: string;
     type: ExternalContextType;

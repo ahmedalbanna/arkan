@@ -1,4 +1,3 @@
-
 'use client';
 
 import A4Page from '@/components/shared/A4Page';
@@ -15,43 +14,36 @@ import { useBuilderStore } from '@/hooks';
 import { useEffect, useMemo, useState } from 'react';
 import { MenuBar } from './MenuBar';
 import RichTextEditor from './RichTextEditor';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BookCopy, BookOpenText } from 'lucide-react';
 
 
 export function ReportResults() {
   const { t } = useLocalization();
-  const { project, updateProject } = useBuilderStore();
+  const { project, updateProject, activeView, setActiveView } = useBuilderStore();
 
-  const fullMarkdownContent = useMemo(() => {
-    return project?.fullMarkdownContent || '';
-  }, [project]);
+  const [currentMarkdown, setCurrentMarkdown] = useState('');
 
-  const [localMarkdown, setLocalMarkdown] = useState(fullMarkdownContent);
-
+  // Effect to update local state when global state changes
   useEffect(() => {
-    setLocalMarkdown(fullMarkdownContent);
-  }, [fullMarkdownContent]);
-
+    if (project) {
+        if (activeView === 'cover-page') {
+            setCurrentMarkdown(project.coverPageMarkdown || '');
+        } else {
+            setCurrentMarkdown(project.fullMarkdownContent || '');
+        }
+    }
+  }, [project, activeView]);
 
   function handleContentChange(markdown: string) {
     if (!project) return;
-    setLocalMarkdown(markdown);
-    // Use the new method on the Project instance to update its structure
-    const updatedProject = project.withContentFromMarkdown(markdown);
-    // Directly update the store without causing a loop
-    useBuilderStore.setState({ project: updatedProject, hasUnsavedChanges: true });
+    setCurrentMarkdown(markdown);
+    if (activeView === 'cover-page') {
+        updateProject(p => p.with({ coverPageMarkdown: markdown }));
+    } else {
+        updateProject(p => p.withContentFromMarkdown(markdown));
+    }
   }
-
-  function renderContent() {
-    return (
-      <A4Page>
-        <RichTextEditor
-          key={project?.id} // Re-mount editor when project changes
-          content={localMarkdown}
-          onChange={handleContentChange}
-        />
-      </A4Page>
-    );
-  };
 
   return (
     <Card className=" flex flex-col overflow-hidden">
@@ -59,18 +51,30 @@ export function ReportResults() {
         <div className="flex justify-between items-center">
           <div>
             <CardTitle className="font-headline">
-              {t('builder.reportGenerator.resultsTitle')}
+              {activeView === 'cover-page' ? 'Cover Page' : t('builder.reportGenerator.resultsTitle')}
             </CardTitle>
             <CardDescription>
-              {t('builder.reportGenerator.resultsDesc')}
+              {activeView === 'cover-page' ? 'Edit your project\'s cover page.' : t('builder.reportGenerator.resultsDesc')}
             </CardDescription>
           </div>
+           <Tabs value={activeView} onValueChange={(v) => setActiveView(v as any)}>
+              <TabsList>
+                  <TabsTrigger value="cover-page"><BookCopy className="w-4 h-4 mr-2"/> Cover Page</TabsTrigger>
+                  <TabsTrigger value="report-content"><BookOpenText className="w-4 h-4 mr-2"/>Report Content</TabsTrigger>
+              </TabsList>
+          </Tabs>
         </div>
       </CardHeader>
 
       <CardContent className=" flex-grow  flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 min-h-0">
         <ScrollArea className="flex-grow ">
-          {renderContent()}
+          <A4Page>
+            <RichTextEditor
+              key={project?.id ? `${project.id}-${activeView}`: activeView} // Re-mount editor when view or project changes
+              content={currentMarkdown}
+              onChange={handleContentChange}
+            />
+          </A4Page>
         </ScrollArea>
         <MenuBar />
       </CardContent>

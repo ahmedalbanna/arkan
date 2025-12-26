@@ -1,4 +1,3 @@
-
 'use client';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -27,10 +26,11 @@ export interface ProjectProperties {
   teamMembers?: string[];
   chapters?: readonly (Chapter | ChapterProperties)[];
   externalContext?: readonly ExternalContext[];
+  coverPageMarkdown?: string;
 }
 
 
-export class Project implements Required<Omit<ProjectProperties, 'userId' | 'projectDescription' | 'projectType' | 'specialization' | 'studentName' | 'studentId' | 'country' | 'city' | 'university' | 'supervisor' | 'course' | 'teamMembers'>> {
+export class Project implements Required<Omit<ProjectProperties, 'userId' | 'projectDescription' | 'projectType' | 'specialization' | 'studentName' | 'studentId' | 'country' | 'city' | 'university' | 'supervisor' | 'course' | 'teamMembers' | 'coverPageMarkdown'>> {
   public readonly id: string;
   public readonly userId: string | undefined;
   public readonly createdAt: string;
@@ -50,6 +50,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
   public readonly teamMembers: string[] | undefined;
   public readonly chapters: readonly Chapter[];
   public readonly externalContext: readonly ExternalContext[];
+  public readonly coverPageMarkdown: string;
 
 
   constructor(props: ProjectProperties) {
@@ -71,6 +72,8 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
     this.teamMembers = props.teamMembers;
     this.chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c));
     this.externalContext = (props.externalContext || []).map(ctx => ({ ...ctx, id: ctx.id || uuidv4() }));
+    // If coverPageMarkdown is provided, use it, otherwise generate it.
+    this.coverPageMarkdown = props.coverPageMarkdown ?? this.generateCoverPageMarkdown(true);
   }
 
   public with(props: Partial<Omit<ProjectProperties, 'id'>>): Project {
@@ -100,6 +103,34 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
     const hasExternalContext = this.externalContext.length > 0;
     return hasBasicInfo || hasChaptersWithContent || hasExternalContext;
   }
+
+  public generateCoverPageMarkdown(isConstructorCall = false): Project | string {
+        const title = this.name || 'Untitled Project';
+        const student = this.studentName || 'Student Name';
+        const university = this.university || 'University Name';
+        const supervisor = this.supervisor || 'Supervisor Name';
+        const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        const markdown = `
+# ${title}
+<br><br><br><br>
+### A ${this.projectType || 'Project'}
+### By
+## ${student}
+### ${this.studentId || ''}
+<br><br><br>
+**${university}**
+*${this.course || ''}*
+<br><br>
+**Supervisor:** ${supervisor}
+<br><br><br><br><br><br>
+**${date}**
+`;
+        if (isConstructorCall) {
+            return markdown;
+        }
+        return this.with({ coverPageMarkdown: markdown });
+    }
 
   public withContentFromMarkdown(markdown: string): Project {
     const lines = markdown.split('\n');
@@ -235,6 +266,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
       teamMembers: this.teamMembers,
       chapters: this.chapters.map(c => c.toJSON()),
       externalContext: [...this.externalContext],
+      coverPageMarkdown: this.coverPageMarkdown,
     };
   }
 
