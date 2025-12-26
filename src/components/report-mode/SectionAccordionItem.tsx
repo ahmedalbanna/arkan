@@ -87,21 +87,21 @@ export function SectionAccordionItem({
             <AccordionContent>
                 <FormProvider {...form}>
                     <div className="border-t">
-                        <Tabs defaultValue="prompt" className="w-full">
+                        <Tabs defaultValue="controls" className="w-full">
                             <div className="px-4 pt-4">
                                 <TooltipProvider>
                                     <TabsList className="grid w-full grid-cols-3">
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <TabsTrigger value="prompt"><SlidersHorizontal className="h-4 w-4" /></TabsTrigger>
+                                                <TabsTrigger value="controls"><SlidersHorizontal className="h-4 w-4" /></TabsTrigger>
                                             </TooltipTrigger>
-                                            <TooltipContent><p>Prompt</p></TooltipContent>
+                                            <TooltipContent><p>Controls</p></TooltipContent>
                                         </Tooltip>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <TabsTrigger value="system"><StickyNote className="h-4 w-4" /></TabsTrigger>
+                                                <TabsTrigger value="prompt"><StickyNote className="h-4 w-4" /></TabsTrigger>
                                             </TooltipTrigger>
-                                            <TooltipContent><p>System</p></TooltipContent>
+                                            <TooltipContent><p>Edit Prompt</p></TooltipContent>
                                         </Tooltip>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
@@ -113,12 +113,11 @@ export function SectionAccordionItem({
                                 </TooltipProvider>
                             </div>
                             <div className="px-4">
-                                <TabsContent value="prompt" className="py-4 space-y-6">
-                                     <GuidelineEditor itemKey={itemKey} />
-                                     <SectionGenerationControls section={section} />
+                                <TabsContent value="controls" className="py-4 space-y-6">
+                                    <SectionGenerationControls section={section} />
                                 </TabsContent>
-                                 <TabsContent value="system" className="py-4">
-                                    <p className="text-center text-sm text-muted-foreground p-4">System-level configurations will be available here in the future.</p>
+                                <TabsContent value="prompt" className="py-4">
+                                     <GuidelineEditor itemKey={itemKey} />
                                 </TabsContent>
                                 <TabsContent value="context" className="py-4">
                                     <ContextSelector itemKey={itemKey} />
