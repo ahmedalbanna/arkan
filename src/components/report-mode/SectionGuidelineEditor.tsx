@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useGuidelineEditor } from '@/hooks';
+import { useGuidelineEditor } from '@/hooks/report-mode/use-guideline-editor';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../ui/button';
@@ -9,17 +8,17 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+import { Skeleton } from '../ui/skeleton';
 
-interface GuidelineEditorProps {
-    itemKey: string;
-}
-
-// Internal, correctly implemented EditableList component
-const EditableList = ({ title, placeholder, items, onItemsChange }: {
-    title: string;
-    placeholder: string;
+// A local, reusable component for managing an editable list of strings.
+const EditableList = ({
+    items,
+    onItemsChange,
+    placeholder,
+}: {
     items: string[];
     onItemsChange: (newItems: string[]) => void;
+    placeholder: string;
 }) => {
     const [newItem, setNewItem] = useState('');
 
@@ -76,9 +75,9 @@ const EditableList = ({ title, placeholder, items, onItemsChange }: {
 };
 
 
-export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
+export function GuidelineEditor({ itemKey }: { itemKey: string }) {
     const {
-        t,
+        section, // The hook now returns the section itself.
         prompt, setPrompt,
         rules, setRules,
         guidelines, setGuidelines,
@@ -86,6 +85,16 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
         constraints, setConstraints
     } = useGuidelineEditor(itemKey);
 
+    // If the section data is not yet available, show a loading state.
+    if (!section) {
+        return (
+            <div className="space-y-4">
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-4">
@@ -105,7 +114,6 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
                     <AccordionTrigger className="py-3 text-sm font-medium hover:no-underline">Mandatory Rules ({rules.length})</AccordionTrigger>
                     <AccordionContent className="border-t pt-4 pb-2">
                         <EditableList
-                            title="Mandatory Rules"
                             placeholder="Add a strict rule..."
                             items={rules}
                             onItemsChange={setRules}
@@ -115,8 +123,7 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
                 <AccordionItem value="guidelines" className="border rounded-md px-3">
                     <AccordionTrigger className="py-3 text-sm font-medium hover:no-underline">Recommended Guidelines ({guidelines.length})</AccordionTrigger>
                     <AccordionContent className="border-t pt-4 pb-2">
-                         <EditableList
-                            title="Recommended Guidelines"
+                        <EditableList
                             placeholder="Add a suggestion..."
                             items={guidelines}
                             onItemsChange={setGuidelines}
@@ -126,19 +133,17 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
                 <AccordionItem value="context" className="border rounded-md px-3">
                     <AccordionTrigger className="py-3 text-sm font-medium hover:no-underline">Context Information ({contextPrompt.length})</AccordionTrigger>
                     <AccordionContent className="border-t pt-4 pb-2">
-                         <EditableList
-                            title="Context Information"
+                        <EditableList
                             placeholder="Add background info..."
                             items={contextPrompt}
                             onItemsChange={setContextPrompt}
                         />
                     </AccordionContent>
                 </AccordionItem>
-                 <AccordionItem value="constraints" className="border rounded-md px-3">
+                <AccordionItem value="constraints" className="border rounded-md px-3">
                     <AccordionTrigger className="py-3 text-sm font-medium hover:no-underline">Constraints / What to Avoid ({constraints.length})</AccordionTrigger>
                     <AccordionContent className="border-t pt-4 pb-2">
-                         <EditableList
-                            title="Constraints"
+                        <EditableList
                             placeholder="Add something to avoid..."
                             items={constraints}
                             onItemsChange={setConstraints}

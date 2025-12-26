@@ -32,9 +32,11 @@ export function useGuidelineEditor(itemKey: string) {
 
     // Persist changes from the UI back to the global project store after a short delay
     useEffect(() => {
+        // Do not run the effect if the section is not yet loaded.
+        if (!section) return;
+
         const handler = setTimeout(() => {
-            if (!project) return;
-            const currentSection = project.getSection(itemKey);
+            const currentSection = project?.getSection(itemKey);
             if (!currentSection) return;
 
             const hasChanged =
@@ -57,16 +59,16 @@ export function useGuidelineEditor(itemKey: string) {
         }, 500); // 500ms debounce
 
         return () => clearTimeout(handler);
-    }, [prompt, rules, guidelines, contextPrompt, constraints, itemKey, project, updateProject]);
+    }, [prompt, rules, guidelines, contextPrompt, constraints, itemKey, project, section, updateProject]);
 
     
     return {
         t,
+        section, // Expose the section so the UI can check for its existence
         prompt, setPrompt,
         rules, setRules,
         guidelines, setGuidelines,
         contextPrompt, setContextPrompt,
         constraints, setConstraints,
-        section,
     };
 }
