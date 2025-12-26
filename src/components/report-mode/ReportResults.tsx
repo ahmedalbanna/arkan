@@ -31,6 +31,8 @@ export function ReportResults() {
     if (project) {
         if (activeView === 'report-content') {
             setCurrentMarkdown(project.fullMarkdownContent || '');
+        } else if (activeView === 'cover-page') {
+            setCurrentMarkdown(project.coverPageMarkdown || '');
         }
     }
   }, [project, activeView]);
@@ -39,11 +41,13 @@ export function ReportResults() {
     if (!project) return;
     if (activeView === 'report-content') {
         updateProject(p => p.withContentFromMarkdown(markdown));
+    } else if (activeView === 'cover-page') {
+        updateProject(p => p.with({ coverPageMarkdown: markdown }));
     }
   }
 
   return (
-    <Card className=" flex flex-col overflow-hidden">
+    <Card className="h-full flex flex-col overflow-hidden">
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
@@ -63,7 +67,7 @@ export function ReportResults() {
         </div>
       </CardHeader>
 
-      <CardContent className=" flex-grow  flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 min-h-0">
+      <CardContent className="flex-grow flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 min-h-0">
         <ScrollArea className="flex-grow ">
             {activeView === 'cover-page' ? (
                  <CoverPage project={project} />

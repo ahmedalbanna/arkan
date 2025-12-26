@@ -8,7 +8,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Loader2, Save, Trash2, Upload, FileDown, Search, FolderOpen } from 'lucide-react';
+import { Loader2, Save, Trash2, Upload, FileDown, Search, FolderOpen, Download } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useSaveProject } from '@/hooks';
 import { useRouter } from 'next/navigation';

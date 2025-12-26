@@ -205,7 +205,7 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     },
     editorProps: {
       attributes: {
-        class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif text-base prose-p:text-base prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/90 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2',
+        class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif text-base prose-p:text-base prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2',
       },
       async handlePaste(view, event) {
         const html = event.clipboardData?.getData('text/html');
@@ -269,9 +269,15 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     }
   }, [content, editor]);
 
+  const handleWrapperClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (editor && event.target === event.currentTarget) {
+        editor.chain().focus().run();
+    }
+  };
+
 
   return (
-    <div className="relative text-base">
+    <div className="relative text-base h-full">
       {editor && (
         <BubbleMenu
           editor={editor}
@@ -293,13 +299,14 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           )}
         </BubbleMenu>
       )}
-      <div className="rounded-b-lg p-4 min-h-[200px] relative transition-colors duration-300 focus-within:bg-muted/30">
-        <EditorContent editor={editor} />
+      <div 
+        className="rounded-b-lg p-4 min-h-[200px] h-full relative transition-colors duration-300"
+        onClick={handleWrapperClick}
+        >
+        <EditorContent editor={editor} className="h-full"/>
       </div>
     </div>
   );
 };
 
 export default RichTextEditor;
-
-    
