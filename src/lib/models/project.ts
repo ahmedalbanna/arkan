@@ -85,7 +85,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
     return this.chapters.map(chapter => {
       const sectionsMarkdown = chapter.sections.map(section => `## ${section.title}\n\n${section.content || ''}`).join('\n\n');
       return `# ${chapter.title}\n\n${sectionsMarkdown}`;
-    }).join('\n\n---\n\n');
+    }).join('\n\n\n\n');
   }
 
   public hasContent(): boolean {
