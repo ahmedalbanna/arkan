@@ -8,11 +8,15 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useBuilderStore } from '@/hooks';
-import { Save } from 'lucide-react';
+import { useBuilderStore, useToast } from '@/hooks';
+import { Loader2, UploadCloud } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import Image from 'next/image';
+import { projectKeys } from '@/lib/query-keys';
 
 const settingsSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),
@@ -31,28 +35,38 @@ const settingsSchema = z.object({
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
+async function uploadLogoApi(variables: { projectId: string; file: File; token: string }) {
+    const formData = new FormData();
+    formData.append('file', variables.file);
+
+    const response = await fetch(`/api/project/${variables.projectId}/upload-logo`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${variables.token}` },
+        body: formData,
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to upload logo.');
+    }
+    return response.json();
+}
+
 export function ProjectSettingsPanel() {
   const { project, updateProject, setHasUnsavedChanges } = useBuilderStore();
+  const { firebaseUser } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
-      name: '',
-      projectDescription: '',
-      projectType: '',
-      specialization: '',
-      studentName: '',
-      studentId: '',
-      country: '',
-      city: '',
-      university: '',
-      supervisor: '',
-      course: '',
-      teamMembers: '',
+      name: '', projectDescription: '', projectType: '', specialization: '',
+      studentName: '', studentId: '', country: '', city: '',
+      university: '', supervisor: '', course: '', teamMembers: '',
     }
   });
 
-  // Effect to reset the form whenever the project from the store changes
   useEffect(() => {
     if (project) {
         form.reset({
@@ -69,9 +83,35 @@ export function ProjectSettingsPanel() {
             course: project.course || '',
             teamMembers: project.teamMembers?.join(', ') || '',
         });
+        if (project.logoUrl) {
+            setLogoPreview(project.logoUrl);
+        } else {
+            setLogoPreview(null);
+        }
     }
   }, [project, form]);
 
+  const logoUploadMutation = useMutation({
+    mutationFn: uploadLogoApi,
+    onSuccess: (data) => {
+        updateProject(p => p.with({ logoUrl: data.logoUrl }).generateCoverPageMarkdown());
+        setHasUnsavedChanges(true);
+        toast({ title: 'Logo Uploaded', description: 'Your project logo has been updated.' });
+        queryClient.invalidateQueries({ queryKey: projectKeys.detail(project?.id || '') });
+    },
+    onError: (error: Error) => {
+        toast({ title: 'Upload Failed', description: error.message, variant: 'destructive' });
+    }
+  });
+
+  const handleLogoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && project && firebaseUser) {
+        setLogoPreview(URL.createObjectURL(file));
+        const token = await firebaseUser.getIdToken();
+        logoUploadMutation.mutate({ projectId: project.id, file, token });
+    }
+  };
 
   const onSubmit = (data: SettingsFormValues) => {
     updateProject(p => p
@@ -79,13 +119,11 @@ export function ProjectSettingsPanel() {
             ...data,
             teamMembers: data.teamMembers ? data.teamMembers.split(',').map(s => s.trim()).filter(Boolean) : [],
         })
-        // After updating metadata, regenerate the cover page markdown
         .generateCoverPageMarkdown()
     );
-    setHasUnsavedChanges(true); // Mark as having changes to trigger autosave
+    setHasUnsavedChanges(true);
   };
 
-  // Automatically submit the form on any change to update the cover page in real-time
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
         if(type === 'change') {
@@ -94,7 +132,6 @@ export function ProjectSettingsPanel() {
     });
     return () => subscription.unsubscribe();
   }, [form, onSubmit]);
-
 
   return (
     <Card className="h-full flex flex-col border-0 shadow-none">
@@ -109,6 +146,29 @@ export function ProjectSettingsPanel() {
             <form className="space-y-4 h-full flex flex-col">
               <ScrollArea className="flex-grow pr-4 -mr-4">
                 <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label>Project Logo</Label>
+                        <div className="relative flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary">
+                            <input
+                                type="file"
+                                accept="image/png, image/jpeg, image/svg+xml"
+                                onChange={handleLogoChange}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                disabled={logoUploadMutation.isPending}
+                            />
+                            {logoUploadMutation.isPending ? (
+                                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                            ) : logoPreview ? (
+                                <Image src={logoPreview} alt="Logo preview" layout="fill" objectFit="contain" className="p-2" />
+                            ) : (
+                                <div className="text-center text-muted-foreground">
+                                    <UploadCloud className="w-8 h-8 mx-auto" />
+                                    <p className="text-sm mt-1">Click to upload or drag & drop</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     <FormField control={form.control} name="name" render={({ field }) => (
                     <FormItem><FormLabel>Project Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
@@ -159,7 +219,6 @@ export function ProjectSettingsPanel() {
                     )} />
                 </div>
               </ScrollArea>
-              {/* The save button is no longer necessary as changes are saved on edit */}
             </form>
           </Form>
       </CardContent>

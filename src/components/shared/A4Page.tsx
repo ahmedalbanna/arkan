@@ -15,8 +15,7 @@ const A4Page = ({ children, title, className }: A4PageProps) => {
         <div
             className={cn(
                 "relative group bg-background shadow-lg p-8 md:p-12 mx-auto my-4 w-full max-w-[210mm] min-h-[297mm] box-border border border-border/50 dark:border-border/30",
-                title ? "min-h-[297mm]" : "",
-                className,
+                className
             )}
         >
             {title && <h2 className="text-2xl font-bold font-headline text-primary border-b pb-2 mb-6">{title}</h2>}

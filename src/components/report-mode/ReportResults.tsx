@@ -1,3 +1,4 @@
+
 'use client';
 
 import A4Page from '@/components/shared/A4Page';
@@ -11,11 +12,12 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MenuBar } from './MenuBar';
 import RichTextEditor from './RichTextEditor';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookCopy, BookOpenText } from 'lucide-react';
+import { CoverPage } from '../shared/CoverPage';
 
 
 export function ReportResults() {
@@ -27,9 +29,7 @@ export function ReportResults() {
   // Effect to update local state when global state changes
   useEffect(() => {
     if (project) {
-        if (activeView === 'cover-page') {
-            setCurrentMarkdown(project.coverPageMarkdown || '');
-        } else {
+        if (activeView === 'report-content') {
             setCurrentMarkdown(project.fullMarkdownContent || '');
         }
     }
@@ -37,10 +37,7 @@ export function ReportResults() {
 
   function handleContentChange(markdown: string) {
     if (!project) return;
-    setCurrentMarkdown(markdown);
-    if (activeView === 'cover-page') {
-        updateProject(p => p.with({ coverPageMarkdown: markdown }));
-    } else {
+    if (activeView === 'report-content') {
         updateProject(p => p.withContentFromMarkdown(markdown));
     }
   }
@@ -54,7 +51,7 @@ export function ReportResults() {
               {activeView === 'cover-page' ? 'Cover Page' : t('builder.reportGenerator.resultsTitle')}
             </CardTitle>
             <CardDescription>
-              {activeView === 'cover-page' ? 'Edit your project\'s cover page.' : t('builder.reportGenerator.resultsDesc')}
+              {activeView === 'cover-page' ? 'A preview of your project\'s cover page.' : t('builder.reportGenerator.resultsDesc')}
             </CardDescription>
           </div>
            <Tabs value={activeView} onValueChange={(v) => setActiveView(v as any)}>
@@ -68,15 +65,19 @@ export function ReportResults() {
 
       <CardContent className=" flex-grow  flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 min-h-0">
         <ScrollArea className="flex-grow ">
-          <A4Page>
-            <RichTextEditor
-              key={project?.id ? `${project.id}-${activeView}`: activeView} // Re-mount editor when view or project changes
-              content={currentMarkdown}
-              onChange={handleContentChange}
-            />
-          </A4Page>
+            {activeView === 'cover-page' ? (
+                 <CoverPage project={project} />
+            ) : (
+                <A4Page>
+                    <RichTextEditor
+                    key={project?.id ? `${project.id}-${activeView}`: activeView} // Re-mount editor when view or project changes
+                    content={currentMarkdown}
+                    onChange={handleContentChange}
+                    />
+                </A4Page>
+            )}
         </ScrollArea>
-        <MenuBar />
+        {activeView === 'report-content' && <MenuBar />}
       </CardContent>
     </Card>
   );

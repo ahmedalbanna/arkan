@@ -1,3 +1,4 @@
+
 'use client';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -14,6 +15,7 @@ export interface ProjectProperties {
   name?: string;
   projectDescription?: string;
   // New metadata fields
+  logoUrl?: string;
   projectType?: string;
   specialization?: string;
   studentName?: string;
@@ -30,7 +32,7 @@ export interface ProjectProperties {
 }
 
 
-export class Project implements Required<Omit<ProjectProperties, 'userId' | 'projectDescription' | 'projectType' | 'specialization' | 'studentName' | 'studentId' | 'country' | 'city' | 'university' | 'supervisor' | 'course' | 'teamMembers' | 'coverPageMarkdown'>> {
+export class Project implements Required<Omit<ProjectProperties, 'userId' | 'projectDescription' | 'logoUrl' |'projectType' | 'specialization' | 'studentName' | 'studentId' | 'country' | 'city' | 'university' | 'supervisor' | 'course' | 'teamMembers' | 'coverPageMarkdown'>> {
   public readonly id: string;
   public readonly userId: string | undefined;
   public readonly createdAt: string;
@@ -38,6 +40,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
 
   public readonly name: string;
   public readonly projectDescription: string | undefined;
+  public readonly logoUrl: string | undefined;
   public readonly projectType: string | undefined;
   public readonly specialization: string | undefined;
   public readonly studentName: string | undefined;
@@ -50,7 +53,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
   public readonly teamMembers: string[] | undefined;
   public readonly chapters: readonly Chapter[];
   public readonly externalContext: readonly ExternalContext[];
-  public readonly coverPageMarkdown: string;
+  public readonly coverPageMarkdown: string | undefined;
 
 
   constructor(props: ProjectProperties) {
@@ -60,6 +63,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
     this.updatedAt = props.updatedAt || new Date().toISOString();
     this.name = props.name || 'Untitled Project';
     this.projectDescription = props.projectDescription;
+    this.logoUrl = props.logoUrl;
     this.projectType = props.projectType;
     this.specialization = props.specialization;
     this.studentName = props.studentName;
@@ -72,8 +76,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
     this.teamMembers = props.teamMembers;
     this.chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c));
     this.externalContext = (props.externalContext || []).map(ctx => ({ ...ctx, id: ctx.id || uuidv4() }));
-    // If coverPageMarkdown is provided, use it, otherwise generate it.
-    this.coverPageMarkdown = props.coverPageMarkdown ?? this.generateCoverPageMarkdown(true);
+    this.coverPageMarkdown = props.coverPageMarkdown || this.generateCoverPageMarkdown().content;
   }
 
   public with(props: Partial<Omit<ProjectProperties, 'id'>>): Project {
@@ -94,7 +97,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
     return this.chapters.map(chapter => {
       const sectionsMarkdown = chapter.sections.map(section => `## ${section.title}\n\n${section.content || ''}`).join('\n\n');
       return `# ${chapter.title}\n\n${sectionsMarkdown}`;
-    }).join('\n\n');
+    }).join('\n\n---\n\n');
   }
 
   public hasContent(): boolean {
@@ -104,63 +107,77 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
     return hasBasicInfo || hasChaptersWithContent || hasExternalContext;
   }
 
-  public generateCoverPageMarkdown(isConstructorCall = false): Project | string {
-        const title = this.name || 'Untitled Project';
-        const student = this.studentName || 'Student Name';
-        const university = this.university || 'University Name';
-        const supervisor = this.supervisor || 'Supervisor Name';
-        const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  public generateCoverPageMarkdown(): Project {
+    const detail = (label: string, value: string | string[] | undefined) => {
+        if (!value || value.length === 0) return '';
+        const displayValue = Array.isArray(value) ? value.join(', ') : value;
+        return `**${label}:** ${displayValue}\n`;
+    };
 
-        const markdown = `
-# ${title}
-<br><br><br><br>
-### A ${this.projectType || 'Project'}
-### By
-## ${student}
-### ${this.studentId || ''}
-<br><br><br>
-**${university}**
-*${this.course || ''}*
-<br><br>
-**Supervisor:** ${supervisor}
-<br><br><br><br><br><br>
-**${date}**
-`;
-        if (isConstructorCall) {
-            return markdown;
-        }
-        return this.with({ coverPageMarkdown: markdown });
-    }
+    const content = `
+${this.logoUrl ? `![Logo](${this.logoUrl})\n\n` : ''}
+# ${this.name || 'Untitled Project'}
+
+${this.projectDescription || ''}
+
+${detail('Project Type', this.projectType)}
+${detail('Specialization', this.specialization)}
+
+---
+
+**Submitted By:**
+${detail('Name', this.studentName)}
+${detail('ID', this.studentId)}
+${detail('Team', this.teamMembers)}
+
+**Supervised By:**
+${detail('Name', this.supervisor)}
+
+**Date:** {currentDate}
+    `.trim();
+
+    return this.with({ coverPageMarkdown: content });
+}
 
   public withContentFromMarkdown(markdown: string): Project {
     const lines = markdown.split('\n');
-    let chapterLevel = 1;
-
+    
     // Dynamically determine chapter/section level
-    let maxLevelFound = 0;
+    let chapterLevel = 0;
     for (let i = 1; i <= 6; i++) {
         const hasLevel = lines.some(line => line.trim().startsWith('#'.repeat(i) + ' '));
         if (hasLevel) {
-            maxLevelFound = i;
+            chapterLevel = i;
             break;
         }
     }
-    chapterLevel = maxLevelFound || 1;
+    // If no headings found, treat entire content as a single section in a single chapter
+    if (chapterLevel === 0) {
+        if (this.chapters.length > 0 && this.chapters[0].sections.length > 0) {
+            const chapterId = this.chapters[0].id;
+            const sectionId = this.chapters[0].sections[0].id;
+            return this.updateSection(sectionId, s => s.with({ content: markdown }));
+        } else {
+             const newChapter = new Chapter({ title: this.name || 'Chapter 1', sections: [new Section({ id: uuidv4(), title: 'Content', type: 'report', content: markdown })] });
+             return this.with({ chapters: [newChapter] });
+        }
+    }
+    
     const sectionLevel = chapterLevel + 1;
     
     const chapterRegex = new RegExp(`^${'#'.repeat(chapterLevel)}\\s+(.*)`);
     const sectionRegex = new RegExp(`^${'#'.repeat(sectionLevel)}\\s+(.*)`);
 
-    type ParsedSection = { title: string; content: string };
-    type ParsedChapter = { title: string; sections: ParsedSection[] };
+    type ParsedSection = { title: string; content: string; originalLine: number };
+    type ParsedChapter = { title: string; sections: ParsedSection[]; originalLine: number };
 
+    const newChaptersData: ParsedChapter[] = [];
     let currentChapterData: ParsedChapter | null = null;
     let currentSectionData: ParsedSection | null = null;
     let contentBuffer: string[] = [];
-    const newChaptersData: ParsedChapter[] = [];
 
     const flushContent = () => {
-        if (contentBuffer.length > 0 && currentSectionData) {
+        if (currentSectionData) {
             currentSectionData.content = contentBuffer.join('\n').trim();
         }
         contentBuffer = [];
@@ -182,33 +199,31 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
         currentChapterData = null;
     }
 
-    lines.forEach(line => {
+    lines.forEach((line, index) => {
         const chapterMatch = line.match(chapterRegex);
         const sectionMatch = line.match(sectionRegex);
 
         if (chapterMatch) {
             finalizeChapter();
-            currentChapterData = { title: chapterMatch[1].trim(), sections: [] };
-        } else if (sectionMatch) {
+            currentChapterData = { title: chapterMatch[1].trim(), sections: [], originalLine: index };
+        } else if (sectionMatch && currentChapterData) {
             finalizeSection();
-            currentSectionData = { title: sectionMatch[1].trim(), content: '' };
+            currentSectionData = { title: sectionMatch[1].trim(), content: '', originalLine: index };
         } else {
             contentBuffer.push(line);
         }
     });
 
     finalizeChapter();
-    
-    // --- Reconciliation Logic ---
-    if (newChaptersData.length === 0 && this.chapters.length > 0 && markdown.trim() === '') {
-        return this.with({ chapters: [] });
-    }
 
+    // --- Reconciliation Logic ---
     const oldChapters = [...this.chapters];
     const usedOldChapterIds = new Set<string>();
 
     const finalChapters = newChaptersData.map(parsedChapter => {
-        let oldChapter: Chapter | undefined = oldChapters.find(c => c.title === parsedChapter.title && !usedOldChapterIds.has(c.id));
+        const potentialMatches = oldChapters.filter(c => c.title === parsedChapter.title && !usedOldChapterIds.has(c.id));
+        const oldChapter = potentialMatches[0]; // Simple match for now
+
         if (oldChapter) {
             usedOldChapterIds.add(oldChapter.id);
         }
@@ -217,9 +232,11 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
         const usedOldSectionIds = new Set<string>();
 
         const finalSections = parsedChapter.sections.map(parsedSection => {
-            let oldSection: Section | undefined = oldSections.find(s => s.title === parsedSection.title && !usedOldSectionIds.has(s.id));
-            if(oldSection) {
-              usedOldSectionIds.add(oldSection.id);
+            const potentialSectionMatches = oldSections.filter(s => s.title === parsedSection.title && !usedOldSectionIds.has(s.id));
+            const oldSection = potentialSectionMatches[0];
+
+            if (oldSection) {
+                usedOldSectionIds.add(oldSection.id);
             }
 
             return new Section({
@@ -244,7 +261,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
     });
 
     return this.with({ chapters: finalChapters });
-}
+  }
 
   public toJSON(): ProjectProperties {
     return {
@@ -254,6 +271,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
       updatedAt: this.updatedAt,
       name: this.name,
       projectDescription: this.projectDescription,
+      logoUrl: this.logoUrl,
       projectType: this.projectType,
       specialization: this.specialization,
       studentName: this.studentName,
@@ -276,11 +294,6 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
 
   // --- Import / Export Methods ---
 
-  /**
-   * Creates a Project instance from a file.
-   * @param file The file to read.
-   * @returns A promise that resolves to a new Project instance.
-   */
   public static fromFile(file: File): Promise<Project> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -301,13 +314,6 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
     });
   }
 
-  /**
-   * Creates a new Project instance from a table of contents text.
-   * This centralizes the logic for parsing TOC text into a Project structure.
-   * @param tocText The string containing the table of contents.
-   * @param existingProject The existing project to merge properties from (like externalContext).
-   * @returns A new Project instance with the structured chapters and sections.
-   */
   public static fromTableOfContents(tocText: string, existingProject?: Project): Project {
     const lines = tocText.split('\n').map(line => line.trim()).filter(Boolean);
     const newProject = new Project({
@@ -317,7 +323,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
       externalContext: existingProject?.externalContext,
     });
     
-    let currentProject = newProject; // A mutable reference to build upon
+    let currentProject = newProject;
     let currentChapterId: string | null = null;
     
     lines.forEach(line => {
@@ -327,9 +333,8 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
       if (isChapter) {
         const chapterTitle = line.replace(/^\d+\.?\s*/, '').trim();
         if (chapterTitle) {
-          const newChapter = new Chapter({ title: chapterTitle });
-          currentProject = currentProject.with({ chapters: [...currentProject.chapters, newChapter] });
-          currentChapterId = newChapter.id;
+          currentProject = currentProject.addChapter(chapterTitle);
+          currentChapterId = currentProject.chapters[currentProject.chapters.length - 1].id;
         }
       } else if (currentChapterId) {
         const sectionTitle = line.replace(/^\d+\.\d+\.?\s*/, '').trim();
@@ -342,9 +347,6 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
     return currentProject;
   }
 
-  /**
-   * Triggers a browser download of the current project state as a .arkan file.
-   */
   public downloadAsFile(): void {
     const projectData = JSON.stringify(this.toStateObject(), null, 2);
     const blob = new Blob([projectData], { type: 'application/json' });
@@ -434,6 +436,10 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
     const chapter = this.findChapterForSection(sectionId);
     if (!chapter) return this;
     return this.updateChapter(chapter.id, c => c.updateSection(sectionId, updater));
+  }
+
+  public updateSectionContent(sectionId: string, content: string): Project {
+    return this.updateSection(sectionId, s => s.with({ content }));
   }
 
   public moveSectionUp(sectionId: string): Project {
