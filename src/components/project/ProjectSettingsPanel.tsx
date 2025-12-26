@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -35,6 +36,20 @@ export function ProjectSettingsPanel() {
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
+    defaultValues: {
+      name: '',
+      projectDescription: '',
+      projectType: '',
+      specialization: '',
+      studentName: '',
+      studentId: '',
+      country: '',
+      city: '',
+      university: '',
+      supervisor: '',
+      course: '',
+      teamMembers: '',
+    }
   });
 
   // Effect to reset the form whenever the project from the store changes
