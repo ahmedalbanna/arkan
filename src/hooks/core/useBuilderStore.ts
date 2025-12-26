@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Chapter, ChapterProperties } from '@/lib/models/chapter';
