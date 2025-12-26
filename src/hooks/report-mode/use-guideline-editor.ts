@@ -3,6 +3,7 @@
 import { useLocalization } from '@/context/LocalizationContext';
 import { useEffect, useMemo, useState } from 'react';
 import { useBuilderStore } from '../core/useBuilderStore';
+import { Behavior } from '@/lib/models';
 
 export function useGuidelineEditor(itemKey: string) {
     const { t } = useLocalization();
@@ -11,18 +12,22 @@ export function useGuidelineEditor(itemKey: string) {
     const section = useMemo(() => project?.getSection(itemKey), [project, itemKey]);
 
     // Local state for UI
+    const [prompt, setPrompt] = useState('');
     const [rules, setRules] = useState<string[]>([]);
     const [guidelines, setGuidelines] = useState<string[]>([]);
     const [contextPrompt, setContextPrompt] = useState<string[]>([]);
     const [constraints, setConstraints] = useState<string[]>([]);
+    const [behaviors, setBehaviors] = useState<Behavior[]>([]);
 
     // Sync local state when the underlying section in the project store changes
     useEffect(() => {
         if (section) {
+            setPrompt(section.prompt || 'You are a helpful assistant.');
             setRules(section.rules || []);
             setGuidelines(section.guidelines || []);
             setContextPrompt(section.contextPrompt || []);
             setConstraints(section.constraints || []);
+            setBehaviors(section.behaviors || []);
         }
     }, [section]);
 
@@ -36,32 +41,38 @@ export function useGuidelineEditor(itemKey: string) {
             if (!currentSection) return;
 
             const hasChanged =
+                currentSection.prompt !== prompt ||
                 JSON.stringify(currentSection.rules) !== JSON.stringify(rules) ||
                 JSON.stringify(currentSection.guidelines) !== JSON.stringify(guidelines) ||
                 JSON.stringify(currentSection.contextPrompt) !== JSON.stringify(contextPrompt) ||
-                JSON.stringify(currentSection.constraints) !== JSON.stringify(constraints);
+                JSON.stringify(currentSection.constraints) !== JSON.stringify(constraints) ||
+                JSON.stringify(currentSection.behaviors) !== JSON.stringify(behaviors);
 
 
             if (hasChanged) {
                 updateProject(p => p.updateSection(itemKey, sec => sec.with({
-                    rules: rules,
-                    guidelines: guidelines,
-                    contextPrompt: contextPrompt,
-                    constraints: constraints,
+                    prompt,
+                    rules,
+                    guidelines,
+                    contextPrompt,
+                    constraints,
+                    behaviors,
                 })));
             }
         }, 500); // 500ms debounce
 
         return () => clearTimeout(handler);
-    }, [rules, guidelines, contextPrompt, constraints, itemKey, project, section, updateProject]);
+    }, [prompt, rules, guidelines, contextPrompt, constraints, behaviors, itemKey, project, section, updateProject]);
 
-    
+
     return {
         t,
         section, // Expose the section so the UI can check for its existence
+        prompt, setPrompt,
         rules, setRules,
         guidelines, setGuidelines,
         contextPrompt, setContextPrompt,
         constraints, setConstraints,
+        behaviors, setBehaviors,
     };
 }

@@ -19,6 +19,12 @@ export interface SectionContext {
     externalContext: Record<string, ExternalContextType>;
 }
 
+export type BehaviorType = 'behavior' | 'persona';
+
+export interface Behavior {
+    name: string;
+    type: BehaviorType;
+}
 
 export type SectionType = 'report' | 'diagram' | 'presentation';
 
@@ -33,6 +39,7 @@ export interface SectionProperties {
     guidelines?: string[]; // Existing
     contextPrompt?: string[]; // New: Renamed for clarity from 'context'
     constraints?: string[]; // New: Things to avoid
+    behaviors?: Behavior[]; // New: Behaviors and Personas
     agentId?: string | null;
     commandId?: string | null; // Deprecated but kept for safety
     // Generation controls are now part of the section
@@ -69,6 +76,7 @@ export class Section {
     public guidelines?: string[];
     public contextPrompt?: string[];
     public constraints?: string[];
+    public behaviors?: Behavior[];
     public agentId?: string | null;
     public commandId?: string | null;
     public controls: GenerationControlState;
@@ -87,6 +95,7 @@ export class Section {
         this.guidelines = props.guidelines ?? [];
         this.contextPrompt = props.contextPrompt ?? [];
         this.constraints = props.constraints ?? [];
+        this.behaviors = props.behaviors ?? [];
         this.agentId = props.agentId || null;
         this.commandId = props.commandId || null;
         this.controls = { ...defaultControls, ...props.controls };
@@ -101,11 +110,24 @@ export class Section {
     }
 
     public buildInstructionText(): string {
-        
-        let instructions: string[] = [];
+
+        const basePrompt = this.prompt || 'You are a helpful assistant.';
+        const rulesSection = this.buildPromptSection('Mandatory Rules', this.rules);
+        const guidelinesSection = this.buildPromptSection('Recommended Guidelines', this.guidelines);
+        const contextPromptSection = this.buildPromptSection('Context Information', this.contextPrompt);
+        const constraintsSection = this.buildPromptSection('Constraints / What to Avoid', this.constraints);
+
+        const personas = this.behaviors?.filter(b => b.type === 'persona').map(b => b.name);
+        const behaviors = this.behaviors?.filter(b => b.type === 'behavior').map(b => b.name);
+
+        const personaSection = this.buildPromptSection('Personas to Adopt', personas);
+        const behaviorSection = this.buildPromptSection('Behaviors to Follow', behaviors);
+
+
         const formalityMap: { [key: number]: string } = { 0: 'very informal and casual', 33: 'balanced and neutral', 67: 'formal and professional', 100: 'very formal and academic' };
         const complexityMap: { [key: number]: string } = { 0: 'very simple and easy to understand', 33: 'clear and straightforward', 67: 'detailed and technical', 100: 'highly complex and expert-level' };
 
+        let instructions: string[] = [];
         const formality = this.controls.formality > 67 ? formalityMap[100] : this.controls.formality > 33 ? formalityMap[67] : this.controls.formality > 0 ? formalityMap[33] : formalityMap[0];
         instructions.push(`The formality should be ${formality}.`);
 
@@ -129,14 +151,8 @@ export class Section {
 
         const enabledStyles = Object.entries(this.controls.outputStyle).filter(([, value]) => value).map(([key]) => key);
         if (enabledStyles.length > 0) instructions.push(`The output should primarily include the following elements: ${enabledStyles.join(', ')}.`);
-        
-        const basePrompt = this.prompt || 'You are a helpful assistant.';
-        const rulesSection = this.buildPromptSection('Mandatory Rules', this.rules);
-        const guidelinesSection = this.buildPromptSection('Recommended Guidelines', this.guidelines);
-        const contextPromptSection = this.buildPromptSection('Context Information', this.contextPrompt);
-        const constraintsSection = this.buildPromptSection('Constraints / What to Avoid', this.constraints);
 
-        return `${basePrompt}\n${rulesSection}\n${guidelinesSection}\n${contextPromptSection}\n${constraintsSection}\n\n**Additional Instructions:**\n${instructions.join(' ')}`.trim();
+        return `${basePrompt}\n${personaSection}\n${behaviorSection}\n${rulesSection}\n${guidelinesSection}\n${contextPromptSection}\n${constraintsSection}\n\n**Additional Instructions:**\n${instructions.join(' ')}`.trim();
     }
 
     public toJSON(): SectionProperties {
@@ -150,6 +166,7 @@ export class Section {
             guidelines: this.guidelines,
             contextPrompt: this.contextPrompt,
             constraints: this.constraints,
+            behaviors: this.behaviors,
             agentId: this.agentId,
             commandId: this.commandId,
             controls: this.controls,
