@@ -13,6 +13,7 @@ export interface GenerationControlState {
     wordCount: string;
     diagramType: DiagramType;
     programmingLanguage?: string;
+    tableCaption?: string;
 }
 
 export interface SectionContext {
@@ -55,6 +56,7 @@ export const defaultControls: GenerationControlState = {
     wordCount: '',
     diagramType: 'useCase',
     programmingLanguage: '',
+    tableCaption: '',
 };
 
 export const defaultContext: SectionContext = {
@@ -83,7 +85,7 @@ export class Section {
         this.title = props.title;
         this.type = props.type;
         this.content = props.content ?? '';
-        this.prompt = props.prompt ?? ''; // Default prompt is now an empty task
+        this.prompt = props.prompt ?? '';
         this.rules = props.rules ?? [];
         this.guidelines = props.guidelines ?? [];
         this.constraints = props.constraints ?? [];
@@ -92,7 +94,6 @@ export class Section {
         this.commandId = props.commandId || null;
         this.controls = { ...defaultControls, ...props.controls };
         this.context = { ...defaultContext, ...props.context };
-        // The 'system' property is now built dynamically, so we don't store it directly from props.
         this.system = this.buildSystemPrompt();
     }
 
@@ -124,6 +125,9 @@ export class Section {
         }
         if (this.controls.outputStyle.code && this.controls.programmingLanguage) {
             instructions.push(`The code blocks should be in ${this.controls.programmingLanguage}.`);
+        }
+        if (this.controls.outputStyle.table && this.controls.tableCaption) {
+            instructions.push(`If a table is generated, it must have the caption: "${this.controls.tableCaption}".`);
         }
 
         if (this.controls.language && this.controls.language !== 'default') {
@@ -165,7 +169,7 @@ export class Section {
             type: this.type,
             content: this.content,
             prompt: this.prompt,
-            system: this.buildSystemPrompt(), // Always build fresh on serialization
+            system: this.buildSystemPrompt(),
             rules: this.rules,
             guidelines: this.guidelines,
             constraints: this.constraints,

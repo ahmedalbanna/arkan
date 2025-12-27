@@ -129,6 +129,18 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                 </div>
             </div>
 
+            {controls.outputStyle.table && (
+                <div className="space-y-2 pl-6 border-l-2 ml-2">
+                    <Label htmlFor={`tableCaption-${section.id}`}>Table Caption (Optional)</Label>
+                    <Input
+                        id={`tableCaption-${section.id}`}
+                        value={controls.tableCaption || ''}
+                        onChange={(e) => handleControlChange('tableCaption', e.target.value)}
+                        placeholder="e.g., Q1 Financial Summary"
+                    />
+                </div>
+            )}
+
             {controls.outputStyle.code && (
                 <div className="space-y-2 pl-6 border-l-2 ml-2">
                     <Label htmlFor={`programmingLanguage-${section.id}`}>Programming Language</Label>
