@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { MarkdownViewer } from '../shared/MarkdownViewer';
 import { Code, Eye, Link as LinkIcon, StickyNote } from 'lucide-react';
 import type { Project, Chapter, Section } from '@/lib/models';
+import { PromptBuilder } from '@/lib/prompt-builder';
 
 interface ChapterBuildContextPreviewDialogProps {
   project: Project | null;
@@ -46,52 +47,9 @@ export function ChapterBuildContextPreviewDialog({ project, chapter, isOpen, onO
 
   const finalPrompt = useMemo(() => {
     if (!project) return '';
-
-    const chapterTitle = chapter.title;
-    const sectionInstructions = sectionsToPreview.map(section => {
-      const contextSectionsContent = Object.keys(section.context?.sections || {})
-        .filter(key => section.context?.sections[key])
-        .map(key => {
-          const content = project.getSectionContent(key);
-          return `--- Context from Section: ${project.getSection(key)?.title} ---\n${content}`;
-        })
-        .join('\n\n');
-
-      const externalContextContent = (project.externalContext || [])
-        .filter(item => section.context?.externalContext?.[item.id])
-        .map(file => `--- Context from File: ${file.fileName} ---\n${file.content}`)
-        .join('\n\n');
-
-      const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\n\n');
-
-      return `
----
-### Instructions for Section: "${section.title}"
-
-**Main Task:**
-${section.prompt}
-
-**System Instructions:**
-${section.system}
-
-**Context:**
-${fullContext || 'No context provided.'}
----
-      `;
-    }).join('');
-
-    return `You are an expert author and technical writer. Your task is to write the complete content for a chapter titled "${chapterTitle}".
-
-You will be given a list of sections to write for this chapter. For each section, you must follow its specific instructions, which include a main task, system instructions, and contextual information.
-
-Your final output must be a single markdown string. Each section must start with a level 2 markdown heading (e.g., '## Section Title'). Follow the order of the sections as provided in the instructions.
-
-**Chapter Title:**
-# ${chapterTitle}
-
-**Sections to Generate:**
-${sectionInstructions}
-`;
+    // We can just use all section IDs for the preview
+    const allSectionIds = new Set(sectionsToPreview.map(s => s.id));
+    return PromptBuilder.buildChapterPrompt(chapter, project, allSectionIds);
   }, [project, chapter, sectionsToPreview]);
 
 
@@ -115,12 +73,12 @@ ${sectionInstructions}
                   </CardHeader>
                   <CardContent className="space-y-3 text-sm">
                     <div className="space-y-1">
-                      <h4 className="font-semibold flex items-center gap-2"><StickyNote className="w-4 h-4" />Base Prompt</h4>
-                      <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic">"{section.prompt}"</p>
+                      <h4 className="font-semibold flex items-center gap-2"><StickyNote className="w-4 h-4" />Base Prompt / Main Task</h4>
+                      <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic">"{section.buildActionPrompt()}"</p>
                     </div>
-                    <div className="space-y-1">
-                      <h4 className="font-semibold">System Instructions</h4>
-                       <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic whitespace-pre-wrap">{section.system}</p>
+                     <div className="space-y-1">
+                        <h4 className="font-semibold flex items-center gap-2 text-xs"><StickyNote className="w-3 h-3" />System Instructions</h4>
+                        <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic whitespace-pre-wrap">{section.buildSystemPrompt()}</p>
                     </div>
                     <div className="space-y-1">
                       <h4 className="font-semibold flex items-center gap-2"><LinkIcon className="w-4 h-4" />Selected Context</h4>

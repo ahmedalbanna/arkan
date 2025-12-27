@@ -43,7 +43,7 @@ export class PromptBuilder {
         return `
 ### Instructions for Section: "${section.title}"
 
-**Main Task:**
+**Main Task & Controls:**
 ${actionPrompt}
 
 **System Instructions (Persona, Rules, Guidelines):**

@@ -94,7 +94,8 @@ export class Section {
         this.commandId = props.commandId || null;
         this.controls = { ...defaultControls, ...props.controls };
         this.context = { ...defaultContext, ...props.context };
-        this.system = props.system || this.buildSystemPrompt();
+        // The 'system' property is now built dynamically, so we don't store it directly from props.
+        this.system = this.buildSystemPrompt();
     }
 
     private buildPromptSection(title: string, items?: string[]): string {
@@ -102,21 +103,11 @@ export class Section {
         return `\n**${title}:**\n${items.map(item => `- ${item}`).join('\n')}`;
     }
 
+    /**
+     * Builds the main action prompt, including dynamic instructions from controls.
+     * This tells the AI *what* to do.
+     */
     public buildActionPrompt(): string {
-        return this.prompt;
-    }
-
-    public buildSystemPrompt(): string {
-        const personas = this.behaviors?.filter(b => b.type === 'persona').map(b => b.name);
-        const behaviors = this.behaviors?.filter(b => b.type === 'behavior').map(b => b.name);
-
-        const personaSection = this.buildPromptSection('Personas to Adopt', personas);
-        const behaviorSection = this.buildPromptSection('Behaviors to Follow', behaviors);
-        const rulesSection = this.buildPromptSection('Mandatory Rules', this.rules);
-        const guidelinesSection = this.buildPromptSection('Recommended Guidelines', this.guidelines);
-        const contextPromptSection = this.buildPromptSection('Context Information', this.contextPrompt);
-        const constraintsSection = this.buildPromptSection('Constraints / What to Avoid', this.constraints);
-
         const formalityMap: { [key: number]: string } = { 0: 'very informal and casual', 33: 'balanced and neutral', 67: 'formal and professional', 100: 'very formal and academic' };
         const complexityMap: { [key: number]: string } = { 0: 'very simple and easy to understand', 33: 'clear and straightforward', 67: 'detailed and technical', 100: 'highly complex and expert-level' };
 
@@ -144,9 +135,30 @@ export class Section {
 
         const enabledStyles = Object.entries(this.controls.outputStyle).filter(([, value]) => value).map(([key]) => key);
         if (enabledStyles.length > 0) instructions.push(`The output should primarily include the following elements: ${enabledStyles.join(', ')}.`);
+        
+        const additionalInstructions = `\n\n**Additional Instructions:**\n${instructions.join(' ')}`;
 
-        return `${this.prompt}\n${personaSection}\n${behaviorSection}\n${rulesSection}\n${guidelinesSection}\n${contextPromptSection}\n${constraintsSection}\n\n**Additional Instructions:**\n${instructions.join(' ')}`.trim();
+        return `${this.prompt}${additionalInstructions}`;
     }
+
+    /**
+     * Builds the system prompt, which defines the AI's persona, rules, and overarching guidelines.
+     * This tells the AI *how to be*.
+     */
+    public buildSystemPrompt(): string {
+        const personas = this.behaviors?.filter(b => b.type === 'persona').map(b => b.name);
+        const behaviors = this.behaviors?.filter(b => b.type === 'behavior').map(b => b.name);
+
+        const personaSection = this.buildPromptSection('Personas to Adopt', personas);
+        const behaviorSection = this.buildPromptSection('Behaviors to Follow', behaviors);
+        const rulesSection = this.buildPromptSection('Mandatory Rules', this.rules);
+        const guidelinesSection = this.buildPromptSection('Recommended Guidelines', this.guidelines);
+        const contextPromptSection = this.buildPromptSection('Context Information', this.contextPrompt);
+        const constraintsSection = this.buildPromptSection('Constraints / What to Avoid', this.constraints);
+
+        return `${personaSection}${behaviorSection}${rulesSection}${guidelinesSection}${contextPromptSection}${constraintsSection}`.trim();
+    }
+
 
     public toJSON(): SectionProperties {
         return {
@@ -170,7 +182,6 @@ export class Section {
 
     public with(props: Partial<Omit<SectionProperties, 'id'>>): Section {
         const newProps = { ...this.toJSON(), ...props, id: this.id };
-        const rebuiltSection = new Section(newProps);
-        return rebuiltSection.with({ system: rebuiltSection.buildSystemPrompt() });
+        return new Section(newProps);
     }
 }
