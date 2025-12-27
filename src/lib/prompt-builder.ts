@@ -5,13 +5,6 @@ import { Chapter, Project, Section } from './models';
  * This centralizes the logic for how project data is translated into instructions for the AI.
  */
 export class PromptBuilder {
-    private static buildPromptSection(title: string, items?: string[]): string {
-        if (!items || items.length === 0) {
-            return '';
-        }
-        return `\n**${title}:**\n${items.map(item => `- ${item}`).join('\n')}`;
-    }
-
     /**
      * Builds a detailed prompt for a single section.
      * @param section - The Section object to build the prompt for.
@@ -43,13 +36,18 @@ export class PromptBuilder {
         
         const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\n\n');
         
-        // Use the new dynamic instruction text from the section model
-        const instructionText = section.buildInstructionText();
+        // Use the new dynamic system prompt from the section model
+        const systemPrompt = section.system;
+        const mainTask = section.prompt;
 
         return `
 ### Instructions for Section: "${section.title}"
 
-${instructionText}
+**Main Task:**
+${mainTask}
+
+**System Instructions (Persona, Rules, Guidelines):**
+${systemPrompt}
 
 **Provided Context from Other Project Items:**
 ${fullContext || 'No context provided from other items.'}

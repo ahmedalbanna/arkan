@@ -33,20 +33,17 @@ export interface SectionProperties {
     title: string;
     type: SectionType;
     content?: string;
-    // Agent-related properties are now part of the section itself
-    prompt?: string; // Main Task or Base Prompt
-    rules?: string[]; // New: Strict rules
-    guidelines?: string[]; // Existing
-    contextPrompt?: string[]; // New: Renamed for clarity from 'context'
-    constraints?: string[]; // New: Things to avoid
-    behaviors?: Behavior[]; // New: Behaviors and Personas
+    prompt?: string;
+    system?: string; // New property for the constructed system prompt
+    rules?: string[];
+    guidelines?: string[];
+    contextPrompt?: string[];
+    constraints?: string[];
+    behaviors?: Behavior[];
     agentId?: string | null;
-    commandId?: string | null; // Deprecated but kept for safety
-    // Generation controls are now part of the section
+    commandId?: string | null;
     controls?: GenerationControlState;
-    // Context selection is now part of the section
     context?: SectionContext;
-    instruction?: string;
 }
 
 export const defaultControls: GenerationControlState = {
@@ -65,13 +62,13 @@ export const defaultContext: SectionContext = {
     externalContext: {},
 };
 
-
 export class Section {
     public id: string;
     public title: string;
     public type: SectionType;
     public content?: string;
     public prompt?: string;
+    public system: string; // This will hold the built system prompt
     public rules?: string[];
     public guidelines?: string[];
     public contextPrompt?: string[];
@@ -81,9 +78,6 @@ export class Section {
     public commandId?: string | null;
     public controls: GenerationControlState;
     public context: SectionContext;
-    public instruction: string;
-
-
 
     constructor(props: SectionProperties) {
         this.id = props.id;
@@ -100,8 +94,9 @@ export class Section {
         this.commandId = props.commandId || null;
         this.controls = { ...defaultControls, ...props.controls };
         this.context = { ...defaultContext, ...props.context };
-        this.instruction = this.buildInstructionText();
+        this.system = props.system || this.buildSystemPrompt();
     }
+
     private buildPromptSection(title: string, items?: string[]): string {
         if (!items || items.length === 0) {
             return '';
@@ -109,20 +104,16 @@ export class Section {
         return `\n**${title}:**\n${items.map(item => `- ${item}`).join('\n')}`;
     }
 
-    public buildInstructionText(): string {
-
-        const basePrompt = this.prompt || 'You are a helpful assistant.';
-        const rulesSection = this.buildPromptSection('Mandatory Rules', this.rules);
-        const guidelinesSection = this.buildPromptSection('Recommended Guidelines', this.guidelines);
-        const contextPromptSection = this.buildPromptSection('Context Information', this.contextPrompt);
-        const constraintsSection = this.buildPromptSection('Constraints / What to Avoid', this.constraints);
-
+    public buildSystemPrompt(): string {
         const personas = this.behaviors?.filter(b => b.type === 'persona').map(b => b.name);
         const behaviors = this.behaviors?.filter(b => b.type === 'behavior').map(b => b.name);
 
         const personaSection = this.buildPromptSection('Personas to Adopt', personas);
         const behaviorSection = this.buildPromptSection('Behaviors to Follow', behaviors);
-
+        const rulesSection = this.buildPromptSection('Mandatory Rules', this.rules);
+        const guidelinesSection = this.buildPromptSection('Recommended Guidelines', this.guidelines);
+        const contextPromptSection = this.buildPromptSection('Context Information', this.contextPrompt);
+        const constraintsSection = this.buildPromptSection('Constraints / What to Avoid', this.constraints);
 
         const formalityMap: { [key: number]: string } = { 0: 'very informal and casual', 33: 'balanced and neutral', 67: 'formal and professional', 100: 'very formal and academic' };
         const complexityMap: { [key: number]: string } = { 0: 'very simple and easy to understand', 33: 'clear and straightforward', 67: 'detailed and technical', 100: 'highly complex and expert-level' };
@@ -152,7 +143,7 @@ export class Section {
         const enabledStyles = Object.entries(this.controls.outputStyle).filter(([, value]) => value).map(([key]) => key);
         if (enabledStyles.length > 0) instructions.push(`The output should primarily include the following elements: ${enabledStyles.join(', ')}.`);
 
-        return `${basePrompt}\n${personaSection}\n${behaviorSection}\n${rulesSection}\n${guidelinesSection}\n${contextPromptSection}\n${constraintsSection}\n\n**Additional Instructions:**\n${instructions.join(' ')}`.trim();
+        return `${personaSection}\n${behaviorSection}\n${rulesSection}\n${guidelinesSection}\n${contextPromptSection}\n${constraintsSection}\n\n**Additional Instructions:**\n${instructions.join(' ')}`.trim();
     }
 
     public toJSON(): SectionProperties {
@@ -162,6 +153,7 @@ export class Section {
             type: this.type,
             content: this.content,
             prompt: this.prompt,
+            system: this.buildSystemPrompt(), // Always build fresh on serialization
             rules: this.rules,
             guidelines: this.guidelines,
             contextPrompt: this.contextPrompt,
@@ -171,11 +163,13 @@ export class Section {
             commandId: this.commandId,
             controls: this.controls,
             context: this.context,
-            instruction: this.buildInstructionText(), // Always build fresh on serialization
         };
     }
 
     public with(props: Partial<Omit<SectionProperties, 'id'>>): Section {
-        return new Section({ ...this.toJSON(), ...props, id: this.id });
+        // Rebuild system prompt if relevant properties change
+        const newProps = { ...this.toJSON(), ...props, id: this.id };
+        const rebuiltSection = new Section(newProps);
+        return rebuiltSection.with({ system: rebuiltSection.buildSystemPrompt() });
     }
 }
