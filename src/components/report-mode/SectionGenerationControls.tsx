@@ -12,7 +12,8 @@ import { Checkbox } from '../ui/checkbox';
 import type { Tone, Language, GenerationControlState, Section } from '@/lib/models';
 import { Card, CardContent, CardDescription, CardHeader } from '../ui/card';
 import { Info } from 'lucide-react';
-import { DiagramType, DiagramTypeSchema } from '@/ai/schemas';
+import { DiagramType, DiagramTypeSchema, ToneSchema } from '@/ai/schemas';
+import { Combobox } from '../ui/combobox';
 
 const diagramTypes = DiagramTypeSchema.options.map(value => {
     let label = '';
@@ -25,6 +26,12 @@ const diagramTypes = DiagramTypeSchema.options.map(value => {
     }
     return { value, label };
 });
+
+const toneOptions = ToneSchema.options.map(tone => ({
+    value: tone,
+    label: tone.charAt(0).toUpperCase() + tone.slice(1),
+}));
+
 
 export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
@@ -74,15 +81,13 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor={`tone-${section.id}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
-                    <Select value={controls.tone} onValueChange={(val) => handleControlChange('tone', val as Tone)}>
-                        <SelectTrigger id={`tone-${section.id}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="professional">{t('builder.reportGenerator.tool_tone_professional')}</SelectItem>
-                            <SelectItem value="academic">{t('builder.reportGenerator.tool_tone_academic')}</SelectItem>
-                            <SelectItem value="casual">{t('builder.reportGenerator.tool_tone_casual')}</SelectItem>
-                            <SelectItem value="persuasive">{t('builder.reportGenerator.tool_tone_persuasive')}</SelectItem>
-                        </SelectContent>
-                    </Select>
+                     <Combobox
+                        options={toneOptions}
+                        value={controls.tone}
+                        onChange={(value) => handleControlChange('tone', value as Tone)}
+                        placeholder={t('reportGenerator.tool_tone_placeholder')}
+                        searchPlaceholder='Search tones...'
+                    />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor={`language-${section.id}`}>Language</Label>
