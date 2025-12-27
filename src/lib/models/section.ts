@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { DiagramType, ExternalContextType } from '@/ai/schemas';
@@ -37,7 +38,6 @@ export interface SectionProperties {
     system?: string;
     rules?: string[];
     guidelines?: string[];
-    contextPrompt?: string[];
     constraints?: string[];
     behaviors?: Behavior[];
     agentId?: string | null;
@@ -71,7 +71,6 @@ export class Section {
     public system: string;
     public rules?: string[];
     public guidelines?: string[];
-    public contextPrompt?: string[];
     public constraints?: string[];
     public behaviors?: Behavior[];
     public agentId?: string | null;
@@ -87,7 +86,6 @@ export class Section {
         this.prompt = props.prompt ?? 'You are a helpful assistant.';
         this.rules = props.rules ?? [];
         this.guidelines = props.guidelines ?? [];
-        this.contextPrompt = props.contextPrompt ?? [];
         this.constraints = props.constraints ?? [];
         this.behaviors = props.behaviors ?? [];
         this.agentId = props.agentId || null;
@@ -153,10 +151,9 @@ export class Section {
         const behaviorSection = this.buildPromptSection('Behaviors to Follow', behaviors);
         const rulesSection = this.buildPromptSection('Mandatory Rules', this.rules);
         const guidelinesSection = this.buildPromptSection('Recommended Guidelines', this.guidelines);
-        const contextPromptSection = this.buildPromptSection('Context Information', this.contextPrompt);
         const constraintsSection = this.buildPromptSection('Constraints / What to Avoid', this.constraints);
 
-        return `${personaSection}${behaviorSection}${rulesSection}${guidelinesSection}${contextPromptSection}${constraintsSection}`.trim();
+        return `${personaSection}${behaviorSection}${rulesSection}${guidelinesSection}${constraintsSection}`.trim();
     }
 
 
@@ -170,7 +167,6 @@ export class Section {
             system: this.buildSystemPrompt(), // Always build fresh on serialization
             rules: this.rules,
             guidelines: this.guidelines,
-            contextPrompt: this.contextPrompt,
             constraints: this.constraints,
             behaviors: this.behaviors,
             agentId: this.agentId,
@@ -180,7 +176,7 @@ export class Section {
         };
     }
 
-    public with(props: Partial<Omit<SectionProperties, 'id'>>): Section {
+    public with(props: Partial<Omit<SectionProperties, 'id' | 'contextPrompt'>>): Section {
         const newProps = { ...this.toJSON(), ...props, id: this.id };
         return new Section(newProps);
     }

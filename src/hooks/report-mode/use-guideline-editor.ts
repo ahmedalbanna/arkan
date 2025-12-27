@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
@@ -15,7 +16,6 @@ export function useGuidelineEditor(itemKey: string) {
     const [prompt, setPrompt] = useState('');
     const [rules, setRules] = useState<string[]>([]);
     const [guidelines, setGuidelines] = useState<string[]>([]);
-    const [contextPrompt, setContextPrompt] = useState<string[]>([]);
     const [constraints, setConstraints] = useState<string[]>([]);
     const [behaviors, setBehaviors] = useState<Behavior[]>([]);
 
@@ -25,7 +25,6 @@ export function useGuidelineEditor(itemKey: string) {
             setPrompt(section.prompt || 'You are a helpful assistant.');
             setRules(section.rules || []);
             setGuidelines(section.guidelines || []);
-            setContextPrompt(section.contextPrompt || []);
             setConstraints(section.constraints || []);
             setBehaviors(section.behaviors || []);
         }
@@ -44,7 +43,6 @@ export function useGuidelineEditor(itemKey: string) {
                 currentSection.prompt !== prompt ||
                 JSON.stringify(currentSection.rules) !== JSON.stringify(rules) ||
                 JSON.stringify(currentSection.guidelines) !== JSON.stringify(guidelines) ||
-                JSON.stringify(currentSection.contextPrompt) !== JSON.stringify(contextPrompt) ||
                 JSON.stringify(currentSection.constraints) !== JSON.stringify(constraints) ||
                 JSON.stringify(currentSection.behaviors) !== JSON.stringify(behaviors);
 
@@ -54,7 +52,6 @@ export function useGuidelineEditor(itemKey: string) {
                     prompt,
                     rules,
                     guidelines,
-                    contextPrompt,
                     constraints,
                     behaviors,
                 })));
@@ -62,7 +59,7 @@ export function useGuidelineEditor(itemKey: string) {
         }, 500); // 500ms debounce
 
         return () => clearTimeout(handler);
-    }, [prompt, rules, guidelines, contextPrompt, constraints, behaviors, itemKey, project, section, updateProject]);
+    }, [prompt, rules, guidelines, constraints, behaviors, itemKey, project, section, updateProject]);
 
 
     return {
@@ -71,7 +68,6 @@ export function useGuidelineEditor(itemKey: string) {
         prompt, setPrompt,
         rules, setRules,
         guidelines, setGuidelines,
-        contextPrompt, setContextPrompt,
         constraints, setConstraints,
         behaviors, setBehaviors,
     };
