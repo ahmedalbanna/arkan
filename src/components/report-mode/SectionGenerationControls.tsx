@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { Label } from '@/components/ui/label';
@@ -13,7 +13,6 @@ import type { Tone, Language, GenerationControlState, Section } from '@/lib/mode
 import { Card, CardContent, CardDescription, CardHeader } from '../ui/card';
 import { Info } from 'lucide-react';
 import { DiagramType, DiagramTypeSchema, ToneSchema } from '@/ai/schemas';
-import { Combobox } from '../ui/combobox';
 
 const diagramTypes = DiagramTypeSchema.options.map(value => {
     let label = '';
@@ -37,6 +36,9 @@ export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
     const controls = section.controls;
+    
+    // State to manage custom tone input
+    const [isCustomTone, setIsCustomTone] = useState(() => !toneOptions.some(opt => opt.value === controls.tone));
 
     if (!controls) {
         return null; // Or a loading/default state
@@ -57,6 +59,26 @@ export function SectionGenerationControls({ section }: { section: Section }) {
     }
 
     const instructionPreview = section.buildActionPrompt();
+
+    const handleToneChange = (value: string) => {
+        if (value === 'custom') {
+            setIsCustomTone(true);
+            handleControlChange('tone', '' as Tone); // Clear the tone when switching to custom
+        } else {
+            setIsCustomTone(false);
+            handleControlChange('tone', value as Tone);
+        }
+    };
+    
+    const handleCustomToneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const customValue = e.target.value;
+        if (customValue === '') {
+            setIsCustomTone(false);
+            handleControlChange('tone', 'professional'); // Revert to default
+        } else {
+            handleControlChange('tone', customValue as Tone);
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -79,15 +101,28 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                 </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+                 <div className="space-y-2">
                     <Label htmlFor={`tone-${section.id}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
-                     <Combobox
-                        options={toneOptions}
-                        value={controls.tone}
-                        onChange={(value) => handleControlChange('tone', value as Tone)}
-                        placeholder={t('reportGenerator.tool_tone_placeholder')}
-                        searchPlaceholder='Search tones...'
-                    />
+                    {isCustomTone ? (
+                        <Input
+                            id={`tone-${section.id}`}
+                            value={controls.tone}
+                            onChange={handleCustomToneChange}
+                            placeholder="Enter custom tone..."
+                        />
+                    ) : (
+                        <Select value={controls.tone} onValueChange={handleToneChange}>
+                            <SelectTrigger id={`tone-${section.id}`}>
+                                <SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {toneOptions.map(opt => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                ))}
+                                <SelectItem value="custom">Custom...</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    )}
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor={`language-${section.id}`}>Language</Label>
