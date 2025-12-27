@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState } from 'react';
@@ -13,6 +12,7 @@ import type { Tone, Language, GenerationControlState, Section } from '@/lib/mode
 import { Card, CardContent, CardDescription, CardHeader } from '../ui/card';
 import { Info } from 'lucide-react';
 import { DiagramType, DiagramTypeSchema, ToneSchema } from '@/ai/schemas';
+import { Textarea } from '../ui/textarea';
 
 const diagramTypes = DiagramTypeSchema.options.map(value => {
     let label = '';
@@ -36,12 +36,14 @@ export function SectionGenerationControls({ section }: { section: Section }) {
     const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
     const controls = section.controls;
-    
-    // State to manage custom tone input
+
     const [isCustomTone, setIsCustomTone] = useState(() => !toneOptions.some(opt => opt.value === controls.tone));
+    const [isCustomLanguage, setIsCustomLanguage] = useState(() =>
+        !['default', 'en', 'ar', 'es', 'fr', 'de'].includes(controls.language)
+    );
 
     if (!controls) {
-        return null; // Or a loading/default state
+        return null;
     }
 
     function handleControlChange<K extends keyof GenerationControlState>(
@@ -63,20 +65,40 @@ export function SectionGenerationControls({ section }: { section: Section }) {
     const handleToneChange = (value: string) => {
         if (value === 'custom') {
             setIsCustomTone(true);
-            handleControlChange('tone', '' as Tone); // Clear the tone when switching to custom
+            handleControlChange('tone', '' as Tone);
         } else {
             setIsCustomTone(false);
             handleControlChange('tone', value as Tone);
         }
     };
-    
+
     const handleCustomToneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const customValue = e.target.value;
         if (customValue === '') {
             setIsCustomTone(false);
-            handleControlChange('tone', 'professional'); // Revert to default
+            handleControlChange('tone', 'professional');
         } else {
             handleControlChange('tone', customValue as Tone);
+        }
+    };
+
+    const handleLanguageChange = (value: string) => {
+        if (value === 'custom') {
+            setIsCustomLanguage(true);
+            handleControlChange('language', '' as Language);
+        } else {
+            setIsCustomLanguage(false);
+            handleControlChange('language', value as Language);
+        }
+    };
+
+    const handleCustomLanguageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const customValue = e.target.value;
+        if (customValue === '') {
+            setIsCustomLanguage(false);
+            handleControlChange('language', 'default');
+        } else {
+            handleControlChange('language', customValue as Language);
         }
     };
 
@@ -126,17 +148,27 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor={`language-${section.id}`}>Language</Label>
-                    <Select value={controls.language} onValueChange={(val) => handleControlChange('language', val as Language)}>
-                        <SelectTrigger id={`language-${section.id}`}><SelectValue placeholder="Select language..." /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="default">Default</SelectItem>
-                            <SelectItem value="en">English</SelectItem>
-                            <SelectItem value="ar">Arabic</SelectItem>
-                            <SelectItem value="es">Spanish</SelectItem>
-                            <SelectItem value="fr">French</SelectItem>
-                            <SelectItem value="de">German</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    {isCustomLanguage ? (
+                        <Input
+                            id={`language-${section.id}`}
+                            value={controls.language}
+                            onChange={handleCustomLanguageChange}
+                            placeholder="Enter language..."
+                        />
+                    ) : (
+                        <Select value={controls.language} onValueChange={handleLanguageChange}>
+                            <SelectTrigger id={`language-${section.id}`}><SelectValue placeholder="Select language..." /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="default">Default</SelectItem>
+                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="ar">Arabic</SelectItem>
+                                <SelectItem value="es">Spanish</SelectItem>
+                                <SelectItem value="fr">French</SelectItem>
+                                <SelectItem value="de">German</SelectItem>
+                                <SelectItem value="custom">Custom...</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    )}
                 </div>
             </div>
              <div className="space-y-2">
@@ -168,6 +200,19 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                     </div>
                 </div>
             </div>
+
+            {controls.outputStyle.heading && (
+                <div className="space-y-2 pl-6 border-l-2 ml-2">
+                    <Label htmlFor={`includedHeadings-${section.id}`}>Included Topics (one per line)</Label>
+                    <Textarea
+                        id={`includedHeadings-${section.id}`}
+                        value={(controls.includedHeadings || []).join('\n')}
+                        onChange={(e) => handleControlChange('includedHeadings', e.target.value.split('\n'))}
+                        placeholder="e.g., Key finding 1\nKey finding 2"
+                        rows={3}
+                    />
+                </div>
+            )}
 
             {controls.outputStyle.table && (
                 <div className="space-y-2 pl-6 border-l-2 ml-2">

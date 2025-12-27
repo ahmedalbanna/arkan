@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { DiagramType, ExternalContextType } from '@/ai/schemas';
@@ -14,6 +13,7 @@ export interface GenerationControlState {
     diagramType: DiagramType;
     programmingLanguage?: string;
     tableCaption?: string;
+    includedHeadings?: string[];
 }
 
 export interface SectionContext {
@@ -57,6 +57,7 @@ export const defaultControls: GenerationControlState = {
     diagramType: 'useCase',
     programmingLanguage: '',
     tableCaption: '',
+    includedHeadings: [],
 };
 
 export const defaultContext: SectionContext = {
@@ -102,10 +103,6 @@ export class Section {
         return `\n**${title}:**\n${items.map(item => `- ${item}`).join('\n')}`;
     }
 
-    /**
-     * Builds the main action prompt, including dynamic instructions from controls.
-     * This tells the AI *what* to do.
-     */
     public buildActionPrompt(): string {
         const formalityMap: { [key: number]: string } = { 0: 'very informal and casual', 33: 'balanced and neutral', 67: 'formal and professional', 100: 'very formal and academic' };
         const complexityMap: { [key: number]: string } = { 0: 'very simple and easy to understand', 33: 'clear and straightforward', 67: 'detailed and technical', 100: 'highly complex and expert-level' };
@@ -129,10 +126,12 @@ export class Section {
         if (this.controls.outputStyle.table && this.controls.tableCaption) {
             instructions.push(`If a table is generated, it must have the caption: "${this.controls.tableCaption}".`);
         }
+        if (this.controls.outputStyle.heading && this.controls.includedHeadings && this.controls.includedHeadings.length > 0) {
+            instructions.push(`The heading should cover the following topics: ${this.controls.includedHeadings.join(', ')}.`);
+        }
 
         if (this.controls.language && this.controls.language !== 'default') {
-            const langMap: Record<string, string> = { en: 'English', ar: 'Arabic', es: 'Spanish', fr: 'French', de: 'German' };
-            instructions.push(`The output language must be ${langMap[this.controls.language] || 'English'}.`);
+            instructions.push(`The output language must be ${this.controls.language}.`);
         }
 
         const enabledStyles = Object.entries(this.controls.outputStyle).filter(([, value]) => value).map(([key]) => key);
@@ -143,10 +142,6 @@ export class Section {
         return `${this.prompt}${additionalInstructions}`;
     }
 
-    /**
-     * Builds the system prompt, which defines the AI's persona, rules, and overarching guidelines.
-     * This tells the AI *how to be*.
-     */
     public buildSystemPrompt(): string {
         const basePersona = 'You are a helpful assistant.';
         const personas = this.behaviors?.filter(b => b.type === 'persona').map(b => b.name);
@@ -169,7 +164,7 @@ export class Section {
             type: this.type,
             content: this.content,
             prompt: this.prompt,
-            system: this.buildSystemPrompt(),
+            system: this.system,
             rules: this.rules,
             guidelines: this.guidelines,
             constraints: this.constraints,
@@ -181,7 +176,7 @@ export class Section {
         };
     }
 
-    public with(props: Partial<Omit<SectionProperties, 'id' | 'contextPrompt'>>): Section {
+    public with(props: Partial<Omit<SectionProperties, 'id'>>): Section {
         const newProps = { ...this.toJSON(), ...props, id: this.id };
         return new Section(newProps);
     }
