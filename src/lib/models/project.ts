@@ -21,6 +21,7 @@ export interface ProjectProperties {
   university?: string;
   supervisor?: string;
   course?: string;
+  educationalLevel?: string;
   teamMembers?: string[];
   chapters?: readonly (Chapter | ChapterProperties)[];
   externalContext?: readonly ExternalContext[];
@@ -28,7 +29,7 @@ export interface ProjectProperties {
 }
 
 
-export class Project implements Required<Omit<ProjectProperties, 'userId' | 'projectDescription' | 'logoUrl' | 'projectType' | 'specialization' | 'university' | 'supervisor' | 'course' | 'teamMembers' | 'coverPageMarkdown'>> {
+export class Project implements Required<Omit<ProjectProperties, 'userId' | 'projectDescription' | 'logoUrl' | 'projectType' | 'specialization' | 'university' | 'supervisor' | 'course' | 'educationalLevel' |'teamMembers' | 'coverPageMarkdown'>> {
   public readonly id: string;
   public readonly userId: string | undefined;
   public readonly createdAt: string;
@@ -42,6 +43,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
   public readonly university: string | undefined;
   public readonly supervisor: string | undefined;
   public readonly course: string | undefined;
+  public readonly educationalLevel: string | undefined;
   public readonly teamMembers: string[] | undefined;
   public readonly chapters: readonly Chapter[];
   public readonly externalContext: readonly ExternalContext[];
@@ -61,6 +63,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
     this.university = props.university;
     this.supervisor = props.supervisor;
     this.course = props.course;
+    this.educationalLevel = props.educationalLevel;
     this.teamMembers = props.teamMembers || [];
     this.chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c));
     this.externalContext = (props.externalContext || []).map(ctx => ({ ...ctx, id: ctx.id || uuidv4() }));
@@ -263,6 +266,7 @@ ${detail('Name', this.supervisor)}
       university: this.university,
       supervisor: this.supervisor,
       course: this.course,
+      educationalLevel: this.educationalLevel,
       teamMembers: this.teamMembers,
       chapters: this.chapters.map(c => c.toJSON()),
       externalContext: [...this.externalContext],

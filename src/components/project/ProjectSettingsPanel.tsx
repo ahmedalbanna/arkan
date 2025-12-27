@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -15,6 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 const settingsSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),
@@ -24,10 +26,76 @@ const settingsSchema = z.object({
   university: z.string().optional(),
   supervisor: z.string().optional(),
   course: z.string().optional(),
-  teamMembers: z.string().optional(),
+  educationalLevel: z.string().optional(),
+  teamMembers: z.string().optional(), // Keep as string for form, convert on submit
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
+
+const projectTypeOptions = ["Graduation Project", "Research Paper", "Business Proposal", "Software Documentation"];
+const specializationOptions = ["Artificial Intelligence", "Web Development", "Data Science", "Cybersecurity", "Marketing"];
+const educationalLevelOptions = ["Diploma", "Bachelor's Degree", "Master's Degree", "Doctorate"];
+
+function CustomSelect({
+  value,
+  onChange,
+  options,
+  placeholder,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  options: string[];
+  placeholder: string;
+}) {
+  const [isCustom, setIsCustom] = useState(() => value && !options.includes(value));
+
+  useEffect(() => {
+    if (value && !options.includes(value)) {
+      setIsCustom(true);
+    } else {
+      setIsCustom(false);
+    }
+  }, [value, options]);
+
+  const handleSelectChange = (newValue: string) => {
+    if (newValue === 'custom') {
+      setIsCustom(true);
+      onChange(''); // Clear the value when switching to custom input
+    } else {
+      setIsCustom(false);
+      onChange(newValue);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value);
+  };
+
+  if (isCustom) {
+    return (
+      <Input
+        value={value}
+        onChange={handleInputChange}
+        placeholder={`Enter custom ${placeholder.toLowerCase()}...`}
+        onBlur={(e) => { if (!e.target.value) setIsCustom(false); }}
+      />
+    );
+  }
+
+  return (
+    <Select value={value} onValueChange={handleSelectChange}>
+      <SelectTrigger>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map(option => (
+          <SelectItem key={option} value={option}>{option}</SelectItem>
+        ))}
+        <SelectItem value="custom">Custom...</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
 
 export function ProjectSettingsPanel() {
   const { project, updateProject, setHasUnsavedChanges } = useBuilderStore();
@@ -45,6 +113,7 @@ export function ProjectSettingsPanel() {
       university: '',
       supervisor: '',
       course: '',
+      educationalLevel: '',
       teamMembers: '',
     }
   });
@@ -59,6 +128,7 @@ export function ProjectSettingsPanel() {
         university: project.university || '',
         supervisor: project.supervisor || '',
         course: project.course || '',
+        educationalLevel: project.educationalLevel || '',
         teamMembers: project.teamMembers?.join(', ') || '',
       });
       if (project.logoUrl) {
@@ -91,9 +161,7 @@ export function ProjectSettingsPanel() {
   };
 
   const onSubmit = (data: SettingsFormValues) => {
-    // Convert comma-separated string back to array for the model
-    const teamMembersArray = data.teamMembers?.split(',').map(name => name.trim()).filter(Boolean) || [];
-
+    const teamMembersArray = data.teamMembers?.split(',').map(name => name.trim()).filter(Boolean);
     updateProject(p =>
       p.with({ ...data, teamMembers: teamMembersArray }).generateCoverPageMarkdown()
     );
@@ -103,11 +171,14 @@ export function ProjectSettingsPanel() {
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (type === 'change') {
-        form.handleSubmit(onSubmit)();
+        // Use a timeout to batch updates and avoid excessive re-renders
+        const timer = setTimeout(() => form.handleSubmit(onSubmit)(), 100);
+        return () => clearTimeout(timer);
       }
     });
     return () => subscription.unsubscribe();
-  }, [form]);
+  }, [form, onSubmit]);
+
 
   return (
     <Card className="h-full flex flex-col border-0 shadow-none">
@@ -153,10 +224,32 @@ export function ProjectSettingsPanel() {
                 )} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField control={form.control} name="projectType" render={({ field }) => (
-                    <FormItem><FormLabel>Project Type</FormLabel><FormControl><Input {...field} placeholder="e.g., Graduation Project, Research Paper" /></FormControl><FormMessage /></FormItem>
+                    <FormItem>
+                      <FormLabel>Project Type</FormLabel>
+                      <FormControl>
+                        <CustomSelect
+                          value={field.value || ''}
+                          onChange={field.onChange}
+                          options={projectTypeOptions}
+                          placeholder="Select or type project type"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )} />
                   <FormField control={form.control} name="specialization" render={({ field }) => (
-                    <FormItem><FormLabel>Specialization</FormLabel><FormControl><Input {...field} placeholder="e.g., Artificial Intelligence" /></FormControl><FormMessage /></FormItem>
+                    <FormItem>
+                      <FormLabel>Specialization</FormLabel>
+                      <FormControl>
+                        <CustomSelect
+                          value={field.value || ''}
+                          onChange={field.onChange}
+                          options={specializationOptions}
+                          placeholder="Select or type specialization"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )} />
                 </div>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -168,14 +261,30 @@ export function ProjectSettingsPanel() {
                     )} />
                 </div>
 
-                <FormField control={form.control} name="course" render={({ field }) => (
-                  <FormItem><FormLabel>Course</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField control={form.control} name="course" render={({ field }) => (
+                      <FormItem><FormLabel>Course</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                     <FormField control={form.control} name="educationalLevel" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Educational Level</FormLabel>
+                             <FormControl>
+                                <CustomSelect
+                                  value={field.value || ''}
+                                  onChange={field.onChange}
+                                  options={educationalLevelOptions}
+                                  placeholder="Select or type level"
+                                />
+                              </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                </div>
                 
                 <div className="space-y-2">
-                  <Label>Team Members</Label>
-                   <FormField control={form.control} name="teamMembers" render={({ field }) => (
+                  <FormField control={form.control} name="teamMembers" render={({ field }) => (
                     <FormItem>
+                      <FormLabel>Team Members</FormLabel>
                       <FormControl><Textarea {...field} rows={2} placeholder="Enter names, separated by commas..." /></FormControl>
                       <FormMessage />
                     </FormItem>
