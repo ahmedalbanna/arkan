@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -48,7 +49,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         });
     }
 
-    const instructionPreview = section.buildInstructionText();
+    const instructionPreview = section.buildActionPrompt();
 
     return (
         <div className="space-y-6">
@@ -167,7 +168,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="p-3 pt-0">
-                    <p className="text-xs italic text-muted-foreground">{instructionPreview}</p>
+                    <p className="text-xs italic text-muted-foreground whitespace-pre-wrap">{instructionPreview}</p>
                 </CardContent>
             </Card>
         </div>
