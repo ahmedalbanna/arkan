@@ -36,15 +36,15 @@ export class PromptBuilder {
         
         const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\n\n');
         
-        // Use the new dynamic system prompt from the section model
-        const systemPrompt = section.system;
-        const mainTask = section.prompt;
+        // Use the new dynamic system prompt and action prompt from the section model
+        const systemPrompt = section.buildSystemPrompt();
+        const actionPrompt = section.buildActionPrompt();
 
         return `
 ### Instructions for Section: "${section.title}"
 
 **Main Task:**
-${mainTask}
+${actionPrompt}
 
 **System Instructions (Persona, Rules, Guidelines):**
 ${systemPrompt}

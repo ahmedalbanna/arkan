@@ -4,14 +4,13 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGuidelineEditor } from '@/hooks/report-mode/use-guideline-editor';
 import { Behavior, BehaviorType } from '@/lib/models';
 import { Info, PlusCircle, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '../ui/badge';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select';
 
 // Reusable component for managing a list of strings
 interface EditableListProps {
@@ -74,7 +73,6 @@ const EditableList = ({ items, onItemsChange, placeholder }: EditableListProps) 
     </div>
   );
 };
-
 
 // New component for managing behaviors/personas
 interface BehaviorEditorProps {
@@ -167,7 +165,7 @@ export function GuidelineEditor({ itemKey }: { itemKey: string }) {
     );
   }
   
-  const instructionPreview = section.buildInstructionText();
+  const instructionPreview = section.buildSystemPrompt();
 
   return (
     <div className="space-y-4">
@@ -183,7 +181,7 @@ export function GuidelineEditor({ itemKey }: { itemKey: string }) {
         </CardContent>
       </Card>
 
-      <Accordion type="multiple" className="w-full space-y-2" defaultValue={['rules', 'guidelines']}>
+      <Accordion type="multiple" className="w-full space-y-2" defaultValue={['behaviors', 'rules', 'guidelines']}>
 
         <AccordionItem value="behaviors" className="border rounded-md px-3">
           <AccordionTrigger className="py-3 text-sm font-medium hover:no-underline">Behaviors & Personas ({behaviors.length})</AccordionTrigger>

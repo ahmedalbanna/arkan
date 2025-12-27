@@ -101,11 +101,11 @@ export function BuildProjectDialog({
                           <CardContent className="space-y-4 text-sm p-3 pt-0">
                             <div className="space-y-1">
                               <h4 className="font-semibold flex items-center gap-2 text-xs"><StickyNote className="w-3 h-3" />Base Prompt / Main Task</h4>
-                              <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic">"{section.prompt}"</p>
+                              <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic">"{section.buildActionPrompt()}"</p>
                             </div>
                             <div className="space-y-1">
                               <h4 className="font-semibold flex items-center gap-2 text-xs"><StickyNote className="w-3 h-3" />System Instructions</h4>
-                              <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic whitespace-pre-wrap">{section.system}</p>
+                              <p className="text-muted-foreground p-2 border bg-background rounded-md text-xs italic whitespace-pre-wrap">{section.buildSystemPrompt()}</p>
                             </div>
                             <div className="space-y-1">
                               <h4 className="font-semibold flex items-center gap-2 text-xs"><LinkIcon className="w-3 h-3" />Selected Context</h4>

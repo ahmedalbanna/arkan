@@ -34,7 +34,7 @@ export interface SectionProperties {
     type: SectionType;
     content?: string;
     prompt?: string;
-    system?: string; // New property for the constructed system prompt
+    system?: string;
     rules?: string[];
     guidelines?: string[];
     contextPrompt?: string[];
@@ -67,8 +67,8 @@ export class Section {
     public title: string;
     public type: SectionType;
     public content?: string;
-    public prompt?: string;
-    public system: string; // This will hold the built system prompt
+    public prompt: string;
+    public system: string;
     public rules?: string[];
     public guidelines?: string[];
     public contextPrompt?: string[];
@@ -98,10 +98,12 @@ export class Section {
     }
 
     private buildPromptSection(title: string, items?: string[]): string {
-        if (!items || items.length === 0) {
-            return '';
-        }
+        if (!items || items.length === 0) return '';
         return `\n**${title}:**\n${items.map(item => `- ${item}`).join('\n')}`;
+    }
+
+    public buildActionPrompt(): string {
+        return this.prompt;
     }
 
     public buildSystemPrompt(): string {
@@ -143,7 +145,7 @@ export class Section {
         const enabledStyles = Object.entries(this.controls.outputStyle).filter(([, value]) => value).map(([key]) => key);
         if (enabledStyles.length > 0) instructions.push(`The output should primarily include the following elements: ${enabledStyles.join(', ')}.`);
 
-        return `${personaSection}\n${behaviorSection}\n${rulesSection}\n${guidelinesSection}\n${contextPromptSection}\n${constraintsSection}\n\n**Additional Instructions:**\n${instructions.join(' ')}`.trim();
+        return `${this.prompt}\n${personaSection}\n${behaviorSection}\n${rulesSection}\n${guidelinesSection}\n${contextPromptSection}\n${constraintsSection}\n\n**Additional Instructions:**\n${instructions.join(' ')}`.trim();
     }
 
     public toJSON(): SectionProperties {
@@ -167,7 +169,6 @@ export class Section {
     }
 
     public with(props: Partial<Omit<SectionProperties, 'id'>>): Section {
-        // Rebuild system prompt if relevant properties change
         const newProps = { ...this.toJSON(), ...props, id: this.id };
         const rebuiltSection = new Section(newProps);
         return rebuiltSection.with({ system: rebuiltSection.buildSystemPrompt() });
