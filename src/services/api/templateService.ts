@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { CreatePresentationTemplateData, CreateReportTemplateData, DocxTemplateProperties, PptxTemplateProperties, PresentationTemplateProperties, ReportTemplateProperties, UpdatePresentationTemplateData, UpdateReportTemplateData } from '@/lib/types';

@@ -83,7 +83,7 @@ export class Section {
         this.title = props.title;
         this.type = props.type;
         this.content = props.content ?? '';
-        this.prompt = props.prompt ?? 'You are a helpful assistant.';
+        this.prompt = props.prompt ?? ''; // Default prompt is now an empty task
         this.rules = props.rules ?? [];
         this.guidelines = props.guidelines ?? [];
         this.constraints = props.constraints ?? [];
@@ -144,6 +144,7 @@ export class Section {
      * This tells the AI *how to be*.
      */
     public buildSystemPrompt(): string {
+        const basePersona = 'You are a helpful assistant.';
         const personas = this.behaviors?.filter(b => b.type === 'persona').map(b => b.name);
         const behaviors = this.behaviors?.filter(b => b.type === 'behavior').map(b => b.name);
 
@@ -153,7 +154,7 @@ export class Section {
         const guidelinesSection = this.buildPromptSection('Recommended Guidelines', this.guidelines);
         const constraintsSection = this.buildPromptSection('Constraints / What to Avoid', this.constraints);
 
-        return `${personaSection}${behaviorSection}${rulesSection}${guidelinesSection}${constraintsSection}`.trim();
+        return `${basePersona}${personaSection}${behaviorSection}${rulesSection}${guidelinesSection}${constraintsSection}`.trim();
     }
 
 

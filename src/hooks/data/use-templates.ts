@@ -23,7 +23,8 @@ import {
     updatePresentationTemplateApi,
     deletePresentationTemplateApi,
 } from '@/services/api/templateService';
-import type { DocxTemplateProperties, PptxTemplateProperties, ReportTemplateProperties, CreateReportTemplateData, UpdateReportTemplateData, PresentationTemplateProperties, CreatePresentationTemplateData, UpdatePresentationTemplateData } from '@/lib/types';
+import type { ReportTemplateProperties, CreateReportTemplateData, UpdateReportTemplateData, PresentationTemplateProperties, CreatePresentationTemplateData, UpdatePresentationTemplateData } from '@/lib/types';
+import type { DocxTemplateProperties, PptxTemplateProperties } from '@/lib/models';
 
 
 // ============================================================================
@@ -153,6 +154,7 @@ export function useReportTemplates() {
     return useQuery<ReportTemplateProperties[]>({
         queryKey: ['report-templates'],
         queryFn: fetchReportTemplatesApi,
+        staleTime: 1000 * 60 * 60, // 1 hour
     });
 }
 
