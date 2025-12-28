@@ -10,7 +10,7 @@ import type { SectionName } from '@/ai/schemas';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { Chapter, Project } from '@/lib/models';
+import { Chapter, Project, Section } from '@/lib/models';
 import { writingToolApi } from '@/services/api/writingToolsService';
 import { PromptBuilder } from '@/lib/prompt-builder';
 
@@ -203,7 +203,8 @@ export function useReportGenerationTools() {
             const body = {
                 flow: 'generate-section',
                 sectionToGenerate: section.id as SectionName,
-                prompt: section.prompt,
+                prompt: section.buildActionPrompt(), // Use the builder
+                system: section.buildSystemPrompt(), // Use the builder
                 // The context is now built into a single string by the builder
                 otherSections: {}, // Keep this empty, handled by the builder
                 externalContext: [], // Keep this empty, handled by the builder
@@ -281,33 +282,50 @@ export function useReportGenerationTools() {
         const overId = over.id.toString();
         if (activeId === overId) return;
 
-        const isChapterDrag = project.chapters?.some(c => c.id === activeId);
+        updateProject(p => {
+            const activeItem = p.findContentItem(activeId);
+            const overItem = p.findContentItem(overId);
 
-        if (isChapterDrag) {
-            if (!project.chapters?.some(c => c.id === overId)) return;
-            updateProject(p => {
-                const oldIndex = p.chapters.findIndex(c => c.id === activeId);
-                const newIndex = p.chapters.findIndex(c => c.id === overId);
-                return p.updateChaptersOrder(arrayMove(p.chapters.map(c => c.id), oldIndex, newIndex));
-            });
-        } else {
-             updateProject(p => {
-                const activeContainer = p.chapters?.find(c => c.sections.some(s => s.id === activeId));
-                const overContainer = p.chapters?.find(c => c.sections.some(s => s.id === overId)) || p.chapters?.find(c => c.id === overId);
+            if (!activeItem || !overItem) return p;
 
-                if (!activeContainer || !overContainer) return p;
+            // Scenario 1: Reordering items at the root level
+            if (activeItem.parentChapterId === null && overItem.parentChapterId === null) {
+                const oldIndex = p.content.findIndex(item => (typeof item !== 'string' && item.id === activeId));
+                const newIndex = p.content.findIndex(item => (typeof item !== 'string' && item.id === overId));
+                return p.with({ content: arrayMove([...p.content], oldIndex, newIndex) });
+            }
 
-                if (activeContainer.id === overContainer.id) {
-                    return p.updateChapter(activeContainer.id, c => {
-                        const oldIndex = c.sections.findIndex(s => s.id === activeId);
-                        const newIndex = c.sections.findIndex(s => s.id === overId);
-                        return c.with({ sections: arrayMove([...c.sections], oldIndex, newIndex) });
-                    });
-                } else {
-                    return p.moveSectionToChapter(activeId, activeContainer.id, overContainer.id);
-                }
-             });
-        }
+            // Scenario 2: Reordering sections within the same chapter
+            if (activeItem.parentChapterId && activeItem.parentChapterId === overItem.parentChapterId) {
+                return p.updateChapter(activeItem.parentChapterId, c => {
+                    const oldIndex = c.sections.findIndex(s => s.id === activeId);
+                    const newIndex = c.sections.findIndex(s => s.id === overId);
+                    return c.with({ sections: arrayMove([...c.sections], oldIndex, newIndex) });
+                });
+            }
+
+            // Scenario 3: Moving a section from one chapter to another
+            if (activeItem.parentChapterId && overItem.parentChapterId && activeItem.parentChapterId !== overItem.parentChapterId) {
+                return p.moveSectionToChapter(activeId, activeItem.parentChapterId, overItem.parentChapterId);
+            }
+            
+            // Scenario 4: Moving a section from a chapter to the root
+            if (activeItem.parentChapterId && overItem.parentChapterId === null) {
+                return p.moveSectionToRoot(activeId, activeItem.parentChapterId);
+            }
+            
+            // Scenario 5: Moving a root section into a chapter
+            if (activeItem.parentChapterId === null && activeItem.item instanceof Section && overItem.parentChapterId) {
+                return p.moveSectionToChapter(activeId, null, overItem.parentChapterId);
+            }
+            
+             // Scenario 6: Moving a root section into a chapter (dropping on chapter)
+            if (activeItem.parentChapterId === null && activeItem.item instanceof Section && overItem.item instanceof Chapter) {
+                return p.moveSectionToChapter(activeId, null, overItem.item.id);
+            }
+
+            return p; // No change if drag is invalid
+        });
     };
 
     return {
@@ -347,3 +365,5 @@ export function useReportGenerationTools() {
         finalProjectPrompt,
     };
 }
+
+    

@@ -35,6 +35,8 @@ import { BuildProjectDialog } from "./BuildProjectDialog";
 import { GenerateTocDialog } from './GenerateTocDialog';
 import { ReportTemplateDialog } from "./ReportTemplateDialog";
 import { SortableChapterItem } from './SortableChapterItem';
+import { Chapter, Section } from '@/lib/models';
+import { SortableSectionItem } from './SortableSectionItem';
 
 
 export function GenerationTools() {
@@ -75,8 +77,8 @@ export function GenerationTools() {
     finalProjectPrompt,
   } = useReportGenerationTools();
 
-  const isAllChaptersSelected = project && project.chapters.length > 0 && selectedSectionsForBuild.size === project.sections.length;
-  const canBuildProject = project && project.chapters.length >= 1;
+  const isAllSelected = project && project.sections.length > 0 && selectedSectionsForBuild.size === project.sections.length;
+  const canBuildProject = project && project.content.length > 0;
 
   return (
     <>
@@ -143,7 +145,7 @@ export function GenerationTools() {
               <div className="flex items-center gap-2 mb-2 p-2 border rounded-md bg-muted/30">
                 <Checkbox
                   id="select-all-chapters"
-                  checked={isAllChaptersSelected || false}
+                  checked={isAllSelected || false}
                   onCheckedChange={(checked) => handleSelectAllChapters(!!checked)}
                 />
                 <Label htmlFor="select-all-chapters" className="font-semibold text-sm">Select all sections for project build</Label>
@@ -152,28 +154,50 @@ export function GenerationTools() {
             <div className="flex-grow min-h-0 overflow-y-scroll h-fit">
               <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
 
-                <SortableContext items={(project?.chapters || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
+                <SortableContext items={(project?.content || []).map(c => typeof c === 'string' ? c : c.id)} strategy={verticalListSortingStrategy}>
                   <Accordion type="multiple" className="w-full space-y-2">
-                    {(project?.chapters || []).map((chapter, chapterIndex) => (
-                      <SortableChapterItem
-                        chapter={chapter}
-                        index={chapterIndex}
-                        key={chapter.id}
-                        onAddSection={handleAddSection}
-                        onGenerateSection={onGenerateSection}
-                        onGenerateChapter={onGenerateChapter}
-                        activeMutationKey={sectionMutation.isPending ? sectionMutation.variables as string : null}
-                        isAnythingGenerating={sectionMutation.isPending || chapterMutation.isPending}
-                        hasCreditsForSingleSection={!!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1}
-                        isBuildMode={chapterInBuildMode === chapter.id}
-                        onEnterBuildMode={() => handleEnterBuildMode(chapter.id)}
-                        onCancelBuildMode={handleCancelBuildMode}
-                        isProjectBuildMode={isProjectBuildMode}
-                        selectedSections={selectedSectionsForBuild}
-                        onSectionSelectToggle={handleSectionSelectionToggle}
-                        onChapterSelectToggle={handleChapterSelectionToggle}
-                      />
-                    ))}
+                    {(project?.content || []).map((item, index) => {
+                      if (item instanceof Chapter) {
+                        return (
+                          <SortableChapterItem
+                            chapter={item}
+                            index={index}
+                            key={item.id}
+                            onAddSection={handleAddSection}
+                            onGenerateSection={onGenerateSection}
+                            onGenerateChapter={onGenerateChapter}
+                            activeMutationKey={sectionMutation.isPending ? sectionMutation.variables as string : null}
+                            isAnythingGenerating={sectionMutation.isPending || chapterMutation.isPending}
+                            hasCreditsForSingleSection={!!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1}
+                            isBuildMode={chapterInBuildMode === item.id}
+                            onEnterBuildMode={() => handleEnterBuildMode(item.id)}
+                            onCancelBuildMode={handleCancelBuildMode}
+                            isProjectBuildMode={isProjectBuildMode}
+                            selectedSections={selectedSectionsForBuild}
+                            onSectionSelectToggle={handleSectionSelectionToggle}
+                            onChapterSelectToggle={handleChapterSelectionToggle}
+                          />
+                        )
+                      }
+                      if (item instanceof Section) {
+                         return (
+                          <SortableSectionItem
+                            key={item.id}
+                            section={item}
+                            index={index}
+                            chapterIndex={-1} // Indicate it's a root section
+                            onGenerate={() => onGenerateSection(item.id)}
+                            isGenerating={sectionMutation.isPending && sectionMutation.variables === item.id}
+                            isAnythingGenerating={sectionMutation.isPending || chapterMutation.isPending}
+                            hasCredits={!!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1}
+                            isSelected={selectedSectionsForBuild.has(item.id)}
+                            onSelect={() => handleSectionSelectionToggle(item.id)}
+                            isCheckboxVisible={isProjectBuildMode}
+                          />
+                        );
+                      }
+                      return null; // For strings or other types in the future
+                    })}
                   </Accordion>
                 </SortableContext>
 
@@ -213,3 +237,5 @@ export function GenerationTools() {
     </>
   );
 }
+
+    
