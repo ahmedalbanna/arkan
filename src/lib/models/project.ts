@@ -166,21 +166,28 @@ ${detail('Name', this.supervisor)}
 
     let chapterLevel = 0;
     for (let i = 1; i <= 6; i++) {
-        const hasLevel = lines.some(line => line.trim().startsWith('#'.repeat(i) + ' '));
-        if (hasLevel) {
-            chapterLevel = i;
-            break;
-        }
+      const hasLevel = lines.some(line => line.trim().startsWith('#'.repeat(i) + ' '));
+      if (hasLevel) {
+        chapterLevel = i;
+        break;
+      }
     }
+
+    // If no headings are found, treat the whole markdown as the content of a single section.
     if (chapterLevel === 0) {
-        if (this.chapters.length > 0 && this.chapters[0].sections.length > 0) {
-            const chapterId = this.chapters[0].id;
-            const sectionId = this.chapters[0].sections[0].id;
-            return this.updateSection(sectionId, s => s.with({ content: markdown }));
-        } else {
-             const newChapter = new Chapter({ title: this.name || 'Chapter 1', sections: [new Section({ id: uuidv4(), title: 'Content', type: 'report', content: markdown })] });
-             return this.with({ content: [newChapter] });
-        }
+      // If there's already a single section, update it. Otherwise, create one.
+      if (this.content.length === 1 && this.content[0] instanceof Section) {
+        const sectionId = this.content[0].id;
+        return this.updateSection(sectionId, s => s.with({ content: markdown }));
+      }
+      if (this.chapters.length > 0 && this.chapters[0].sections.length > 0) {
+        const chapterId = this.chapters[0].id;
+        const sectionId = this.chapters[0].sections[0].id;
+        return this.updateSection(sectionId, s => s.with({ content: markdown }));
+      } else {
+        const newSection = new Section({ id: uuidv4(), title: this.name || 'Content', type: 'report', content: markdown });
+        return this.with({ content: [newSection] });
+      }
     }
 
     const sectionLevel = chapterLevel + 1;
@@ -197,41 +204,41 @@ ${detail('Name', this.supervisor)}
     let contentBuffer: string[] = [];
 
     const flushContent = () => {
-        if (currentSectionData) {
-            currentSectionData.content = contentBuffer.join('\n').trim();
-        }
-        contentBuffer = [];
+      if (currentSectionData) {
+        currentSectionData.content = contentBuffer.join('\n').trim();
+      }
+      contentBuffer = [];
     };
 
     const finalizeSection = () => {
-        flushContent();
-        if (currentSectionData && currentChapterData) {
-            currentChapterData.sections.push(currentSectionData);
-        }
-        currentSectionData = null;
+      flushContent();
+      if (currentSectionData && currentChapterData) {
+        currentChapterData.sections.push(currentSectionData);
+      }
+      currentSectionData = null;
     }
 
     const finalizeChapter = () => {
-        finalizeSection();
-        if (currentChapterData) {
-            newChaptersData.push(currentChapterData);
-        }
-        currentChapterData = null;
+      finalizeSection();
+      if (currentChapterData) {
+        newChaptersData.push(currentChapterData);
+      }
+      currentChapterData = null;
     }
 
     lines.forEach((line, index) => {
-        const chapterMatch = line.match(chapterRegex);
-        const sectionMatch = line.match(sectionRegex);
+      const chapterMatch = line.match(chapterRegex);
+      const sectionMatch = line.match(sectionRegex);
 
-        if (chapterMatch) {
-            finalizeChapter();
-            currentChapterData = { title: chapterMatch[1].trim(), sections: [], originalLine: index };
-        } else if (sectionMatch && currentChapterData) {
-            finalizeSection();
-            currentSectionData = { title: sectionMatch[1].trim(), content: '', originalLine: index };
-        } else {
-            contentBuffer.push(line);
-        }
+      if (chapterMatch) {
+        finalizeChapter();
+        currentChapterData = { title: chapterMatch[1].trim(), sections: [], originalLine: index };
+      } else if (sectionMatch && currentChapterData) {
+        finalizeSection();
+        currentSectionData = { title: sectionMatch[1].trim(), content: '', originalLine: index };
+      } else {
+        contentBuffer.push(line);
+      }
     });
 
     finalizeChapter();
@@ -240,43 +247,43 @@ ${detail('Name', this.supervisor)}
     const usedOldChapterIds = new Set<string>();
 
     const finalChapters = newChaptersData.map(parsedChapter => {
-        const potentialMatches = oldChapters.filter(c => c.title === parsedChapter.title && !usedOldChapterIds.has(c.id));
-        const oldChapter = potentialMatches[0];
+      const potentialMatches = oldChapters.filter(c => c.title === parsedChapter.title && !usedOldChapterIds.has(c.id));
+      const oldChapter = potentialMatches[0];
 
-        if (oldChapter) {
-            usedOldChapterIds.add(oldChapter.id);
+      if (oldChapter) {
+        usedOldChapterIds.add(oldChapter.id);
+      }
+
+      const oldSections = oldChapter ? [...oldChapter.sections] : [];
+      const usedOldSectionIds = new Set<string>();
+
+      const finalSections = parsedChapter.sections.map(parsedSection => {
+        const potentialSectionMatches = oldSections.filter(s => s.title === parsedSection.title && !usedOldSectionIds.has(s.id));
+        const oldSection = potentialSectionMatches[0];
+
+        if (oldSection) {
+          usedOldSectionIds.add(oldSection.id);
         }
 
-        const oldSections = oldChapter ? [...oldChapter.sections] : [];
-        const usedOldSectionIds = new Set<string>();
-
-        const finalSections = parsedChapter.sections.map(parsedSection => {
-            const potentialSectionMatches = oldSections.filter(s => s.title === parsedSection.title && !usedOldSectionIds.has(s.id));
-            const oldSection = potentialSectionMatches[0];
-
-            if (oldSection) {
-                usedOldSectionIds.add(oldSection.id);
-            }
-
-            return new Section({
-                id: oldSection?.id || uuidv4(),
-                title: parsedSection.title,
-                content: parsedSection.content,
-                type: oldSection?.type || 'report',
-                controls: oldSection?.controls,
-                context: oldSection?.context,
-                prompt: oldSection?.prompt,
-                guidelines: oldSection?.guidelines,
-                agentId: oldSection?.agentId,
-                commandId: oldSection?.commandId,
-            });
+        return new Section({
+          id: oldSection?.id || uuidv4(),
+          title: parsedSection.title,
+          content: parsedSection.content,
+          type: oldSection?.type || 'report',
+          controls: oldSection?.controls,
+          context: oldSection?.context,
+          prompt: oldSection?.prompt,
+          guidelines: oldSection?.guidelines,
+          agentId: oldSection?.agentId,
+          commandId: oldSection?.commandId,
         });
+      });
 
-        return new Chapter({
-            id: oldChapter?.id || uuidv4(),
-            title: parsedChapter.title,
-            sections: finalSections,
-        });
+      return new Chapter({
+        id: oldChapter?.id || uuidv4(),
+        title: parsedChapter.title,
+        sections: finalSections,
+      });
     });
 
     return this.with({ content: finalChapters });
@@ -499,24 +506,38 @@ ${detail('Name', this.supervisor)}
     return this.updateChapter(chapter.id, c => c.moveSectionDown(sectionId));
   }
 
-  public moveSectionToChapter(sectionId: string, fromChapterId: string, toChapterId: string, newIndex?: number): Project {
-    const fromChapter = this.getChapter(fromChapterId);
+  public moveSectionToChapter(sectionId: string, fromChapterId: string | null, toChapterId: string): Project {
     const toChapter = this.getChapter(toChapterId);
     const section = this.getSection(sectionId);
 
-    if (!fromChapter || !toChapter || !section) return this;
+    if (!toChapter || !section) return this;
+
+    let projectAfterRemoval = this;
+    if (fromChapterId) {
+      const fromChapter = this.getChapter(fromChapterId);
+      if (fromChapter) {
+        projectAfterRemoval = this.updateChapter(fromChapterId, c => c.removeSection(sectionId));
+      }
+    } else {
+      projectAfterRemoval = this.with({ content: this.content.filter(item => !(item instanceof Section && item.id === sectionId)) });
+    }
+
+    const newToChapter = toChapter.addSection(section);
+    return projectAfterRemoval.updateChapter(toChapterId, () => newToChapter);
+  }
+
+  public moveSectionToRoot(sectionId: string, fromChapterId: string): Project {
+    const fromChapter = this.getChapter(fromChapterId);
+    const section = this.getSection(sectionId);
+
+    if (!fromChapter || !section) return this;
 
     const newFromChapter = fromChapter.removeSection(sectionId);
-    const newToChapter = toChapter.addSection(section);
+    const newProject = this.updateChapter(fromChapterId, () => newFromChapter);
 
-    const finalContent = this.content.map(c => {
-      if (c instanceof Chapter && c.id === fromChapterId) return newFromChapter;
-      if (c instanceof Chapter && c.id === toChapterId) return newToChapter;
-      return c;
-    });
-
-    return this.with({ content: finalContent });
+    return newProject.with({ content: [...newProject.content, section] });
   }
+
 
   // --- External Context Methods ---
   public addExternalContext(externalContext: Omit<ExternalContext, 'id'> & { id?: string }): Project {
@@ -538,5 +559,3 @@ ${detail('Name', this.supervisor)}
     return this.with({ externalContext: newExternalContext });
   }
 }
-
-    

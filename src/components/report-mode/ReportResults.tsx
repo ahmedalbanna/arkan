@@ -74,7 +74,7 @@ export function ReportResults() {
             ) : (
                 <A4Page>
                     <RichTextEditor
-                    key={project?.id ? `${project.id}-${activeView}`: activeView} // Re-mount editor when view or project changes
+                    key={`${project?.id}-${activeView}`} // Re-mount editor when view or project changes
                     content={currentMarkdown}
                     onChange={handleContentChange}
                     />
