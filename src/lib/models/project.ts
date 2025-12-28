@@ -174,10 +174,7 @@ ${detail('Name', this.supervisor)}
     }
 
     if (chapterLevel === 0) {
-        if (this.content.length === 1 && this.content[0] instanceof Section) {
-            return this.updateSection(this.content[0].id, s => s.with({ content: markdown }));
-        }
-        const newSection = new Section({ id: uuidv4(), title: this.name || 'Content', type: 'report', content: markdown });
+        const newSection = new Section({ id: uuidv4(), title: 'Content', type: 'report', content: markdown });
         return this.with({ content: [newSection] });
     }
 
@@ -186,18 +183,24 @@ ${detail('Name', this.supervisor)}
     const sectionRegex = new RegExp(`^${'#'.repeat(sectionLevel)}\\s+(.*)`);
 
     type ParsedSection = { title: string; content: string };
-    type ParsedChapter = { title: string; sections: ParsedSection[]; introContent: string };
+    type ParsedChapter = { title: string; sections: ParsedSection[] };
 
-    const newChaptersData: ParsedChapter[] = [];
+    const newContent: (Chapter | Section)[] = [];
     let currentChapter: ParsedChapter | null = null;
     let currentSection: ParsedSection | null = null;
     let contentBuffer: string[] = [];
+    let prefaceContent: string[] = [];
+    let firstChapterFound = false;
 
     const flushContent = () => {
         if (currentSection) {
             currentSection.content = contentBuffer.join('\n').trim();
         } else if (currentChapter) {
-            currentChapter.introContent = contentBuffer.join('\n').trim();
+            // Content between chapter and first section is an implicit intro section
+            const intro = contentBuffer.join('\n').trim();
+            if (intro) {
+                currentChapter.sections.unshift({ title: 'Introduction', content: intro });
+            }
         }
         contentBuffer = [];
     };
@@ -207,14 +210,15 @@ ${detail('Name', this.supervisor)}
         const sectionMatch = line.match(sectionRegex);
 
         if (chapterMatch) {
+            firstChapterFound = true;
             flushContent();
             if (currentSection && currentChapter) {
                 currentChapter.sections.push(currentSection);
             }
             if (currentChapter) {
-                newChaptersData.push(currentChapter);
+                newContent.push(new Chapter({ id: uuidv4(), title: currentChapter.title, sections: currentChapter.sections.map(s => new Section({ id: uuidv4(), ...s, type: 'report' })) }));
             }
-            currentChapter = { title: chapterMatch[1].trim(), sections: [], introContent: '' };
+            currentChapter = { title: chapterMatch[1].trim(), sections: [] };
             currentSection = null;
         } else if (sectionMatch && currentChapter) {
             flushContent();
@@ -223,7 +227,11 @@ ${detail('Name', this.supervisor)}
             }
             currentSection = { title: sectionMatch[1].trim(), content: '' };
         } else {
-            contentBuffer.push(line);
+            if (firstChapterFound) {
+                contentBuffer.push(line);
+            } else {
+                prefaceContent.push(line);
+            }
         }
     });
 
@@ -232,37 +240,21 @@ ${detail('Name', this.supervisor)}
         currentChapter.sections.push(currentSection);
     }
     if (currentChapter) {
-        newChaptersData.push(currentChapter);
+        newContent.push(new Chapter({ id: uuidv4(), title: currentChapter.title, sections: currentChapter.sections.map(s => new Section({ id: uuidv4(), ...s, type: 'report' })) }));
     }
-    
-    const finalChapters = newChaptersData.map(parsedChapter => {
-        let finalSections: Section[] = [];
-        if (parsedChapter.introContent) {
-            finalSections.push(new Section({
-                id: uuidv4(),
-                title: 'Introduction', // Or keep it untitled
-                type: 'report',
-                content: parsedChapter.introContent
-            }));
-        }
-        
-        parsedChapter.sections.forEach(parsedSection => {
-             finalSections.push(new Section({
-                id: uuidv4(),
-                title: parsedSection.title,
-                type: 'report',
-                content: parsedSection.content,
-            }));
-        });
-        
-        return new Chapter({
-            id: uuidv4(),
-            title: parsedChapter.title,
-            sections: finalSections,
-        });
-    });
 
-    return this.with({ content: finalChapters });
+    // Handle content before the first chapter
+    const preface = prefaceContent.join('\n').trim();
+    if (preface) {
+        newContent.unshift(new Section({ id: uuidv4(), title: 'Preface', type: 'report', content: preface }));
+    }
+
+    // If no chapters or sections were parsed but there's content, treat it as a single section.
+    if (newContent.length === 0 && markdown.trim()) {
+        newContent.push(new Section({ id: uuidv4(), title: this.name || 'Content', type: 'report', content: markdown }));
+    }
+
+    return this.with({ content: newContent });
   }
 
 
@@ -418,10 +410,20 @@ ${detail('Name', this.supervisor)}
     return this.getSection(sectionId)?.content;
   }
 
-  private findChapterForSection(sectionId: string): Chapter | undefined {
-    return this.chapters.find(c => c.getSection(sectionId));
+  public findContentItem(itemId: string): { item: ProjectContentItem, parentChapterId: string | null } | null {
+    for (const contentItem of this.content) {
+        if (typeof contentItem !== 'string' && contentItem.id === itemId) {
+            return { item: contentItem, parentChapterId: null };
+        }
+        if (contentItem instanceof Chapter) {
+            const section = contentItem.sections.find(s => s.id === itemId);
+            if (section) {
+                return { item: section, parentChapterId: contentItem.id };
+            }
+        }
+    }
+    return null;
   }
-
 
   public addSectionToChapter(chapterId: string, title: string, index?: number): Project {
     const sectionTitle = title || 'Untitled Section';
@@ -435,6 +437,11 @@ ${detail('Name', this.supervisor)}
       return c.with({ sections: newSections });
     });
   }
+
+  private findChapterForSection(sectionId: string): Chapter | undefined {
+    return this.chapters.find(c => c.getSection(sectionId));
+  }
+
 
   public removeSection(sectionId: string): Project {
     const chapter = this.findChapterForSection(sectionId);
