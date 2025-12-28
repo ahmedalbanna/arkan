@@ -5,15 +5,14 @@
 import { useState } from 'react';
 import { saveAs } from 'file-saver';
 import { toast } from './use-toast';
-import type { Section } from '@/lib/models';
+import type { Project, Section } from '@/lib/models';
 import { templates as docxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
 import { templates as pptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 import { ConversionOptions } from '@/lib/word-converter/types';
 import { convertMarkdownToPptx, PptxConversionOptions } from '@/lib/markdown-to-pptx-converter';
 
 interface DocxExportParams {
-    sections: Section[];
-    projectName: string;
+    project: Project;
     options: {
         template: DocxTemplateKey;
         pageNumbers: boolean;
@@ -21,8 +20,7 @@ interface DocxExportParams {
 }
 
 interface PptxExportParams {
-    sections: Section[];
-    projectName: string;
+    project: Project;
     options: {
         template: PptxTemplateKey;
         isRtl: boolean;
@@ -36,18 +34,16 @@ export function useExport() {
 
     /**
      * Exports a report as a DOCX file by calling the server-side API.
-     * @param params - An object containing the sections, project name, and export options.
+     * @param params - An object containing the project and export options.
      */
-    const exportReportDocx = async ({ sections, projectName, options }: DocxExportParams) => {
-        if (!sections || sections.length === 0) {
-            toast({ title: 'Export Canceled', description: 'No content selected to export.', variant: 'destructive' });
+    const exportReportDocx = async ({ project, options }: DocxExportParams) => {
+        if (!project.hasContent()) {
+            toast({ title: 'Export Canceled', description: 'No content available to export.', variant: 'destructive' });
             return;
         }
         setIsExporting(true);
         try {
-            const fullMarkdown = sections
-                .map(section => `# ${section.title}\n\n${section.content || ''}`)
-                .join('\n\n---\n\n');
+            const fullMarkdown = project.fullMarkdownContent;
 
             const templateStyles = docxTemplates[options.template] || docxTemplates.modern;
             
@@ -63,7 +59,7 @@ export function useExport() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     markdown: fullMarkdown,
-                    fileName: projectName.replace(/\s+/g, '_'),
+                    fileName: project.name.replace(/\s+/g, '_'),
                     options: apiOptions,
                 }),
             });
@@ -74,7 +70,7 @@ export function useExport() {
             }
 
             const blob = await response.blob();
-            saveAs(blob, `${projectName.replace(/\s+/g, '_')}_report.docx`);
+            saveAs(blob, `${project.name.replace(/\s+/g, '_')}_report.docx`);
 
             toast({ title: 'Export Successful', description: 'Report exported as DOCX.' });
         } catch (error) {
@@ -87,18 +83,16 @@ export function useExport() {
     
     /**
      * Exports a report as a PPTX file.
-     * @param params - An object containing the sections, project name, and export options.
+     * @param params - An object containing the project and export options.
      */
-    const exportPresentationPptx = async ({ sections, projectName, options }: PptxExportParams) => {
-        if (!sections || sections.length === 0) {
-            toast({ title: 'Export Canceled', description: 'No content selected to export.', variant: 'destructive' });
+    const exportPresentationPptx = async ({ project, options }: PptxExportParams) => {
+        if (!project.hasContent()) {
+            toast({ title: 'Export Canceled', description: 'No content available to export.', variant: 'destructive' });
             return;
         }
         setIsExporting(true);
         try {
-            const fullMarkdown = sections
-                .map(section => `# ${section.title}\n\n${section.content || ''}`)
-                .join('\n\n---\n\n');
+            const fullMarkdown = project.fullMarkdownContent;
 
             const templateStyles = pptxTemplates[options.template] || pptxTemplates.modern;
 
@@ -110,7 +104,7 @@ export function useExport() {
 
             await convertMarkdownToPptx(
                 fullMarkdown,
-                projectName.replace(/\s+/g, '_'),
+                project.name.replace(/\s+/g, '_'),
                 conversionOptions
             );
 
