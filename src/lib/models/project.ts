@@ -166,124 +166,100 @@ ${detail('Name', this.supervisor)}
 
     let chapterLevel = 0;
     for (let i = 1; i <= 6; i++) {
-      const hasLevel = lines.some(line => line.trim().startsWith('#'.repeat(i) + ' '));
-      if (hasLevel) {
-        chapterLevel = i;
-        break;
-      }
+        const hasLevel = lines.some(line => line.trim().startsWith('#'.repeat(i) + ' '));
+        if (hasLevel) {
+            chapterLevel = i;
+            break;
+        }
     }
 
-    // If no headings are found, treat the whole markdown as the content of a single section.
     if (chapterLevel === 0) {
-      // If there's already a single section, update it. Otherwise, create one.
-      if (this.content.length === 1 && this.content[0] instanceof Section) {
-        const sectionId = this.content[0].id;
-        return this.updateSection(sectionId, s => s.with({ content: markdown }));
-      }
-      if (this.chapters.length > 0 && this.chapters[0].sections.length > 0) {
-        const chapterId = this.chapters[0].id;
-        const sectionId = this.chapters[0].sections[0].id;
-        return this.updateSection(sectionId, s => s.with({ content: markdown }));
-      } else {
+        if (this.content.length === 1 && this.content[0] instanceof Section) {
+            return this.updateSection(this.content[0].id, s => s.with({ content: markdown }));
+        }
         const newSection = new Section({ id: uuidv4(), title: this.name || 'Content', type: 'report', content: markdown });
         return this.with({ content: [newSection] });
-      }
     }
 
     const sectionLevel = chapterLevel + 1;
-
     const chapterRegex = new RegExp(`^${'#'.repeat(chapterLevel)}\\s+(.*)`);
     const sectionRegex = new RegExp(`^${'#'.repeat(sectionLevel)}\\s+(.*)`);
 
-    type ParsedSection = { title: string; content: string; originalLine: number };
-    type ParsedChapter = { title: string; sections: ParsedSection[]; originalLine: number };
+    type ParsedSection = { title: string; content: string };
+    type ParsedChapter = { title: string; sections: ParsedSection[]; introContent: string };
 
     const newChaptersData: ParsedChapter[] = [];
-    let currentChapterData: ParsedChapter | null = null;
-    let currentSectionData: ParsedSection | null = null;
+    let currentChapter: ParsedChapter | null = null;
+    let currentSection: ParsedSection | null = null;
     let contentBuffer: string[] = [];
 
     const flushContent = () => {
-      if (currentSectionData) {
-        currentSectionData.content = contentBuffer.join('\n').trim();
-      }
-      contentBuffer = [];
+        if (currentSection) {
+            currentSection.content = contentBuffer.join('\n').trim();
+        } else if (currentChapter) {
+            currentChapter.introContent = contentBuffer.join('\n').trim();
+        }
+        contentBuffer = [];
     };
 
-    const finalizeSection = () => {
-      flushContent();
-      if (currentSectionData && currentChapterData) {
-        currentChapterData.sections.push(currentSectionData);
-      }
-      currentSectionData = null;
-    }
+    lines.forEach(line => {
+        const chapterMatch = line.match(chapterRegex);
+        const sectionMatch = line.match(sectionRegex);
 
-    const finalizeChapter = () => {
-      finalizeSection();
-      if (currentChapterData) {
-        newChaptersData.push(currentChapterData);
-      }
-      currentChapterData = null;
-    }
-
-    lines.forEach((line, index) => {
-      const chapterMatch = line.match(chapterRegex);
-      const sectionMatch = line.match(sectionRegex);
-
-      if (chapterMatch) {
-        finalizeChapter();
-        currentChapterData = { title: chapterMatch[1].trim(), sections: [], originalLine: index };
-      } else if (sectionMatch && currentChapterData) {
-        finalizeSection();
-        currentSectionData = { title: sectionMatch[1].trim(), content: '', originalLine: index };
-      } else {
-        contentBuffer.push(line);
-      }
+        if (chapterMatch) {
+            flushContent();
+            if (currentSection && currentChapter) {
+                currentChapter.sections.push(currentSection);
+            }
+            if (currentChapter) {
+                newChaptersData.push(currentChapter);
+            }
+            currentChapter = { title: chapterMatch[1].trim(), sections: [], introContent: '' };
+            currentSection = null;
+        } else if (sectionMatch && currentChapter) {
+            flushContent();
+            if (currentSection) {
+                currentChapter.sections.push(currentSection);
+            }
+            currentSection = { title: sectionMatch[1].trim(), content: '' };
+        } else {
+            contentBuffer.push(line);
+        }
     });
 
-    finalizeChapter();
-
-    const oldChapters = [...this.chapters];
-    const usedOldChapterIds = new Set<string>();
-
+    flushContent();
+    if (currentSection && currentChapter) {
+        currentChapter.sections.push(currentSection);
+    }
+    if (currentChapter) {
+        newChaptersData.push(currentChapter);
+    }
+    
     const finalChapters = newChaptersData.map(parsedChapter => {
-      const potentialMatches = oldChapters.filter(c => c.title === parsedChapter.title && !usedOldChapterIds.has(c.id));
-      const oldChapter = potentialMatches[0];
-
-      if (oldChapter) {
-        usedOldChapterIds.add(oldChapter.id);
-      }
-
-      const oldSections = oldChapter ? [...oldChapter.sections] : [];
-      const usedOldSectionIds = new Set<string>();
-
-      const finalSections = parsedChapter.sections.map(parsedSection => {
-        const potentialSectionMatches = oldSections.filter(s => s.title === parsedSection.title && !usedOldSectionIds.has(s.id));
-        const oldSection = potentialSectionMatches[0];
-
-        if (oldSection) {
-          usedOldSectionIds.add(oldSection.id);
+        let finalSections: Section[] = [];
+        if (parsedChapter.introContent) {
+            finalSections.push(new Section({
+                id: uuidv4(),
+                title: 'Introduction', // Or keep it untitled
+                type: 'report',
+                content: parsedChapter.introContent
+            }));
         }
-
-        return new Section({
-          id: oldSection?.id || uuidv4(),
-          title: parsedSection.title,
-          content: parsedSection.content,
-          type: oldSection?.type || 'report',
-          controls: oldSection?.controls,
-          context: oldSection?.context,
-          prompt: oldSection?.prompt,
-          guidelines: oldSection?.guidelines,
-          agentId: oldSection?.agentId,
-          commandId: oldSection?.commandId,
+        
+        parsedChapter.sections.forEach(parsedSection => {
+             finalSections.push(new Section({
+                id: uuidv4(),
+                title: parsedSection.title,
+                type: 'report',
+                content: parsedSection.content,
+            }));
         });
-      });
-
-      return new Chapter({
-        id: oldChapter?.id || uuidv4(),
-        title: parsedChapter.title,
-        sections: finalSections,
-      });
+        
+        return new Chapter({
+            id: uuidv4(),
+            title: parsedChapter.title,
+            sections: finalSections,
+        });
     });
 
     return this.with({ content: finalChapters });
