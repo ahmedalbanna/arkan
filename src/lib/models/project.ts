@@ -1,12 +1,14 @@
 
-
 'use client';
 
 import { v4 as uuidv4 } from 'uuid';
 import { Chapter, ChapterProperties } from './chapter';
 import { ExternalContext, ExternalContextType } from './external-context';
-import { Section } from './section';
+import { Section, SectionProperties } from './section';
 
+// Define the flexible content item type
+export type ProjectContentItem = Chapter | Section | string;
+export type ProjectContentItemProperties = ChapterProperties | SectionProperties | string;
 
 export interface ProjectProperties {
   id?: string;
@@ -15,7 +17,7 @@ export interface ProjectProperties {
   updatedAt?: string;
   name?: string;
   projectDescription?: string;
-  logoUrl?: string; // Can now be a data URI
+  logoUrl?: string;
   projectType?: string;
   specialization?: string;
   university?: string;
@@ -23,13 +25,13 @@ export interface ProjectProperties {
   course?: string;
   educationalLevel?: string;
   teamMembers?: string[];
-  chapters?: readonly (Chapter | ChapterProperties)[];
+  content?: readonly (ProjectContentItem | ProjectContentItemProperties)[]; // Changed from chapters
   externalContext?: readonly ExternalContext[];
   coverPageMarkdown?: string;
 }
 
 
-export class Project implements Required<Omit<ProjectProperties, 'userId' | 'projectDescription' | 'logoUrl' | 'projectType' | 'specialization' | 'university' | 'supervisor' | 'course' | 'educationalLevel' |'teamMembers' | 'coverPageMarkdown'>> {
+export class Project implements Required<Omit<ProjectProperties, 'userId' | 'projectDescription' | 'logoUrl' | 'projectType' | 'specialization' | 'university' | 'supervisor' | 'course' | 'educationalLevel' | 'teamMembers' | 'coverPageMarkdown'>> {
   public readonly id: string;
   public readonly userId: string | undefined;
   public readonly createdAt: string;
@@ -37,7 +39,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
 
   public readonly name: string;
   public readonly projectDescription: string | undefined;
-  public readonly logoUrl: string | undefined; // Can now be a data URI
+  public readonly logoUrl: string | undefined;
   public readonly projectType: string | undefined;
   public readonly specialization: string | undefined;
   public readonly university: string | undefined;
@@ -45,7 +47,7 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
   public readonly course: string | undefined;
   public readonly educationalLevel: string | undefined;
   public readonly teamMembers: string[] | undefined;
-  public readonly chapters: readonly Chapter[];
+  public readonly content: readonly ProjectContentItem[]; // Changed from chapters
   public readonly externalContext: readonly ExternalContext[];
   public readonly coverPageMarkdown: string | undefined;
 
@@ -65,7 +67,14 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
     this.course = props.course;
     this.educationalLevel = props.educationalLevel;
     this.teamMembers = props.teamMembers || [];
-    this.chapters = (props.chapters || []).map(c => c instanceof Chapter ? c : new Chapter(c));
+    // Handle instantiation of different content types
+    this.content = (props.content || []).map(c => {
+      if (typeof c === 'string') return c;
+      if (c instanceof Chapter || c instanceof Section) return c;
+      // Check if it's a chapter-like or section-like object
+      if ('sections' in c) return new Chapter(c as ChapterProperties);
+      return new Section(c as SectionProperties);
+    });
     this.externalContext = (props.externalContext || []).map(ctx => ({ ...ctx, id: ctx.id || uuidv4() }));
     this.coverPageMarkdown = props.coverPageMarkdown || this.generateCoverPageMarkdown().coverPageMarkdown;
   }
@@ -79,23 +88,45 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
   }
 
   // --- Getters for derived state ---
+  get chapters(): readonly Chapter[] {
+    return this.content.filter((item): item is Chapter => item instanceof Chapter);
+  }
+
   get sections(): readonly Section[] {
-    return this.chapters.flatMap(c => c.sections);
+    const allSections: Section[] = [];
+    this.content.forEach(item => {
+      if (item instanceof Section) {
+        allSections.push(item);
+      } else if (item instanceof Chapter) {
+        allSections.push(...item.sections);
+      }
+    });
+    return allSections;
   }
 
   get fullMarkdownContent(): string {
-    if (!this || !this.chapters) return '';
-    return this.chapters.map(chapter => {
-      const sectionsMarkdown = chapter.sections.map(section => `## ${section.title}\n\n${section.content || ''}`).join('\n\n');
-      return `# ${chapter.title}\n\n${sectionsMarkdown}`;
-    }).join('\n\n\n\n');
+    if (!this || !this.content) return '';
+    return this.content.map(item => {
+      if (typeof item === 'string') {
+        return item;
+      }
+      if (item instanceof Chapter) {
+        const sectionsMarkdown = item.sections.map(section => `## ${section.title}\n\n${section.content || ''}`).join('\n\n');
+        return `# ${item.title}\n\n${sectionsMarkdown}`;
+      }
+      // Standalone Section
+      if (item instanceof Section) {
+        return `# ${item.title}\n\n${item.content || ''}`;
+      }
+      return '';
+    }).join('\n\n---\n\n');
   }
 
   public hasContent(): boolean {
     const hasBasicInfo = !!this.name || !!this.projectDescription;
-    const hasChaptersWithContent = this.chapters.some(c => c.title || c.sections.length > 0);
+    const hasContentItems = this.content.length > 0;
     const hasExternalContext = this.externalContext.length > 0;
-    return hasBasicInfo || hasChaptersWithContent || hasExternalContext;
+    return hasBasicInfo || hasContentItems || hasExternalContext;
   }
 
   public generateCoverPageMarkdown(): Project {
@@ -148,7 +179,7 @@ ${detail('Name', this.supervisor)}
             return this.updateSection(sectionId, s => s.with({ content: markdown }));
         } else {
              const newChapter = new Chapter({ title: this.name || 'Chapter 1', sections: [new Section({ id: uuidv4(), title: 'Content', type: 'report', content: markdown })] });
-             return this.with({ chapters: [newChapter] });
+             return this.with({ content: [newChapter] });
         }
     }
 
@@ -248,7 +279,7 @@ ${detail('Name', this.supervisor)}
         });
     });
 
-    return this.with({ chapters: finalChapters });
+    return this.with({ content: finalChapters });
   }
 
 
@@ -268,7 +299,10 @@ ${detail('Name', this.supervisor)}
       course: this.course,
       educationalLevel: this.educationalLevel,
       teamMembers: this.teamMembers,
-      chapters: this.chapters.map(c => c.toJSON()),
+      content: this.content.map(c => {
+        if (typeof c === 'string') return c;
+        return c.toJSON(); // Assumes Chapter and Section have toJSON
+      }),
       externalContext: [...this.externalContext],
       coverPageMarkdown: this.coverPageMarkdown,
     };
@@ -351,12 +385,17 @@ ${detail('Name', this.supervisor)}
     const chapterTitle = title || 'Untitled Chapter';
     const newChapterId = this.generateUniqueId();
     const newChapter = new Chapter({ id: newChapterId, title: chapterTitle, sections });
-    return this.with({ chapters: [...this.chapters, newChapter] });
+    return this.with({ content: [...this.content, newChapter] });
   }
 
   public removeChapter(chapterId: string): Project {
-    const newChapters = this.chapters.filter(c => c.id !== chapterId);
-    return this.with({ chapters: newChapters });
+    const newContent = this.content.filter(item => {
+      if (item instanceof Chapter) {
+        return item.id !== chapterId;
+      }
+      return true; // Keep non-chapter items
+    });
+    return this.with({ content: newContent });
   }
 
   public getChapter(chapterId: string): Chapter | undefined {
@@ -364,21 +403,23 @@ ${detail('Name', this.supervisor)}
   }
 
   public updateChapter(chapterId: string, updater: (chapter: Chapter) => Chapter): Project {
-    const chapterIndex = this.chapters.findIndex(c => c.id === chapterId);
-    if (chapterIndex === -1) return this;
+    const contentIndex = this.content.findIndex(item => (item instanceof Chapter) && item.id === chapterId);
+    if (contentIndex === -1) return this;
+    
+    const newContent = [...this.content];
+    const updatedChapter = updater(newContent[contentIndex] as Chapter);
+    newContent[contentIndex] = updatedChapter;
 
-    const newChapters = [...this.chapters];
-    const updatedChapter = updater(newChapters[chapterIndex]);
-    newChapters[chapterIndex] = updatedChapter;
-
-    return this.with({ chapters: newChapters });
+    return this.with({ content: newContent });
   }
 
   public updateChaptersOrder(newOrderIds: string[]): Project {
     const newOrderedChapters = newOrderIds
       .map(id => this.chapters.find(c => c.id === id))
       .filter((c): c is Chapter => !!c);
-    return this.with({ chapters: newOrderedChapters });
+    // This is tricky with mixed content. For now, we only reorder chapters among themselves.
+    const otherContent = this.content.filter(item => !(item instanceof Chapter));
+    return this.with({ content: [...newOrderedChapters, ...otherContent] });
   }
 
   // --- Section Methods (Delegation) ---
@@ -414,14 +455,32 @@ ${detail('Name', this.supervisor)}
 
   public removeSection(sectionId: string): Project {
     const chapter = this.findChapterForSection(sectionId);
-    if (!chapter) return this;
-    return this.updateChapter(chapter.id, c => c.removeSection(sectionId));
+    if (chapter) {
+      return this.updateChapter(chapter.id, c => c.removeSection(sectionId));
+    }
+    // Handle standalone section
+    const newContent = this.content.filter(item => {
+      if (item instanceof Section) {
+        return item.id !== sectionId;
+      }
+      return true;
+    });
+    return this.with({ content: newContent });
   }
 
   public updateSection(sectionId: string, updater: (section: Section) => Section): Project {
     const chapter = this.findChapterForSection(sectionId);
-    if (!chapter) return this;
-    return this.updateChapter(chapter.id, c => c.updateSection(sectionId, updater));
+    if (chapter) {
+      return this.updateChapter(chapter.id, c => c.updateSection(sectionId, updater));
+    }
+    // Handle standalone section
+    const contentIndex = this.content.findIndex(item => (item instanceof Section) && item.id === sectionId);
+    if (contentIndex === -1) return this;
+
+    const newContent = [...this.content];
+    const updatedSection = updater(newContent[contentIndex] as Section);
+    newContent[contentIndex] = updatedSection;
+    return this.with({ content: newContent });
   }
 
   public updateSectionContent(sectionId: string, content: string): Project {
@@ -430,13 +489,13 @@ ${detail('Name', this.supervisor)}
 
   public moveSectionUp(sectionId: string): Project {
     const chapter = this.findChapterForSection(sectionId);
-    if (!chapter) return this;
+    if (!chapter) return this; // Only support moving within a chapter for now
     return this.updateChapter(chapter.id, c => c.moveSectionUp(sectionId));
   }
 
   public moveSectionDown(sectionId: string): Project {
     const chapter = this.findChapterForSection(sectionId);
-    if (!chapter) return this;
+    if (!chapter) return this; // Only support moving within a chapter for now
     return this.updateChapter(chapter.id, c => c.moveSectionDown(sectionId));
   }
 
@@ -450,13 +509,13 @@ ${detail('Name', this.supervisor)}
     const newFromChapter = fromChapter.removeSection(sectionId);
     const newToChapter = toChapter.addSection(section);
 
-    const finalChapters = this.chapters.map(c => {
-      if (c.id === fromChapterId) return newFromChapter;
-      if (c.id === toChapterId) return newToChapter;
+    const finalContent = this.content.map(c => {
+      if (c instanceof Chapter && c.id === fromChapterId) return newFromChapter;
+      if (c instanceof Chapter && c.id === toChapterId) return newToChapter;
       return c;
     });
 
-    return this.with({ chapters: finalChapters });
+    return this.with({ content: finalContent });
   }
 
   // --- External Context Methods ---
@@ -479,3 +538,5 @@ ${detail('Name', this.supervisor)}
     return this.with({ externalContext: newExternalContext });
   }
 }
+
+    
