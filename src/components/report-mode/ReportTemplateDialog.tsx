@@ -19,7 +19,7 @@ import { Input } from '../ui/input';
 import { Search } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import type { ReportTemplateProperties } from '@/lib/types';
-import { Project, Chapter } from '@/lib/models'; // Import models
+import { Project, Chapter, Section } from '@/lib/models'; // Import models
 
 interface ReportTemplateDialogProps {
   isOpen: boolean;
@@ -61,16 +61,26 @@ export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDia
   const handleSelectTemplate = (template: ReportTemplateProperties) => {
     if (!project) return;
     
-    // Ensure project is a class instance before calling toJSON()
+    // Ensure project is a class instance before calling toStateObject()
     const projectInstance = project instanceof Project ? project : new Project(project);
     
     // Create a new Project instance based on the template, preserving existing project properties
     const newProject = new Project({
-      ...projectInstance.toJSON(), // Retain existing project properties like name, description, and context
-      content: template.chapters.map(ch => new Chapter(ch)),
+      ...projectInstance.toStateObject(), // Retain existing project properties like name, description, and context
+      content: template.content.map(ch => {
+        const sections = ch.sections.map(s => new Section({
+          title: s.title,
+          type: s.type,
+          prompt: s.prompt,
+          behaviors: s.behaviors,
+          guidelines: s.guidelines,
+          controls: s.controls
+        }));
+        return new Chapter({ title: ch.title, sections });
+      }),
     });
 
-    loadProject(newProject.toJSON());
+    loadProject(newProject.toStateObject());
 
     toast({
       title: 'Template Applied',

@@ -1,4 +1,8 @@
 
+'use client';
+
+import { DocxStyleOptions } from './models';
+
 export * from './models/docxTemplate';
 export * from './models/pptxTemplate';
 export * from './models/project';
@@ -151,18 +155,15 @@ export interface ReportTemplateProperties {
   name: string;
   description: string;
   isDefault?: boolean;
-  chapters: {
-    id: string;
+  content: {
     title: string;
     sections: {
-      id: string;
       title: string;
       type: 'report' | 'diagram' | 'presentation';
-      content?: string;
-      prompt?: string;
+      prompt: string;
       guidelines?: string[];
+      behaviors?: { name: string; type: 'persona' | 'behavior' }[];
       controls?: any; // Use a more specific type if possible
-      context?: any; // Use a more specific type if possible
     }[];
   }[];
 }
