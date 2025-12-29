@@ -15,7 +15,6 @@ import { useBuilderStore } from '@/hooks';
 import { useEffect, useState } from 'react';
 import RichTextEditor from './RichTextEditor';
 import { CoverPage } from '../shared/CoverPage';
-import { ToolBar } from '@/lib/editor/ToolBar';
 
 
 export function ReportResults() {
@@ -62,7 +61,6 @@ export function ReportResults() {
                 />
             </A4Page>
         </ScrollArea>
-        <ToolBar />
       </CardContent>
     </Card>
   );
