@@ -1,160 +1,17 @@
-
 'use client';
 
-import { useLocalization } from '@/context/LocalizationContext';
-import { useBrowserSpeech } from '@/hooks';
 import { useEditorStore } from '@/hooks/core/use-editor-store';
-import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
-import { editorExtensions } from '@/lib/tiptap-extensions';
-import { encode64 } from '@/lib/utils/encode64';
-import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
-import {
-  Bold,
-  BookText,
-  Brush,
-  Italic,
-  Languages,
-  Loader2,
-  Square,
-  Strikethrough,
-  Volume2
-} from 'lucide-react';
+import { handleFileDrop } from '@/lib/utils/drop-handler';
+import { handleFilePaste, handleHtmlPaste, handlePlainPaste } from '@/lib/utils/paste-handler';
+import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react';
 import { marked } from 'marked';
-import pako from "pako";
-import React, { memo, useCallback, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
-import { Button } from '../ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { Separator } from '../ui/separator';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { editorExtensions } from '@/lib/tiptap-extensions';
+import { Button } from '@/components/ui/button';
+import { SectionToolbar } from '@/lib/editor/ToolBar';
 
-
-
-// Toolbar Component
-interface SectionToolbarProps {
-  editor: Editor;
-  onTextUpdate: (newText: string, from: number, to: number) => void;
-  onWholeUpdate: (newText: string) => void;
-}
-
-const SectionToolbar = memo(function SectionToolbar({ editor, onTextUpdate, onWholeUpdate }: SectionToolbarProps) {
-  const { t } = useLocalization();
-  const { speak, stop, isSpeaking } = useBrowserSpeech();
-  const { activeAiAction, isProcessing, handleAiAction, rewriteStyles } = useAiActions({
-    editor,
-    onTextUpdate,
-    onWholeUpdate,
-  });
-
-  function handleReadAloudClick() {
-    if (isSpeaking) {
-      stop();
-    } else {
-      const { from, to } = editor.state.selection;
-      const textToRead = editor.state.doc.textBetween(from, to) || editor.getText();
-      speak(textToRead);
-    }
-  }
-  const formatButtons = [
-    { action: () => editor.chain().focus().toggleBold().run(), isActive: editor.isActive('bold'), icon: Bold, label: t('builder.Section.tooltips.bold') },
-    { action: () => editor.chain().focus().toggleItalic().run(), isActive: editor.isActive('italic'), icon: Italic, label: t('builder.Section.tooltips.italic') },
-    { action: () => editor.chain().focus().toggleStrike().run(), isActive: editor.isActive('strike'), icon: Strikethrough, label: t('builder.Section.tooltips.strike') },
-  ];
-
-  const aiActionButtons = [
-    {
-      name: 'summarize',
-      icon: BookText,
-      label: t('builder.Section.aiActions.summarize'),
-    },
-    {
-      name: 'translate',
-      icon: Languages,
-      label: t('builder.Section.aiActions.translate'),
-    },
-  ];
-
-  return (
-    <div className="flex items-center gap-1 rounded-full border bg-gradient-to-r from-background/80 to-primary/5 backdrop-blur-md p-1 shadow-soft hover:shadow-glow transition-all duration-200"
-      onMouseDown={(e) => e.preventDefault()} // Prevent editor from losing focus
-    >
-      <TooltipProvider>
-        {/* Formatting Buttons */}
-        {formatButtons.map(({ action, isActive, icon: Icon, label }) => (
-          <Tooltip key={label}>
-            <TooltipTrigger asChild>
-              <Button
-                variant={isActive ? 'secondary' : 'ghost'}
-                size="icon"
-                className="rounded-full h-8 w-8"
-                onClick={action}
-              >
-                <Icon className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent><p>{label}</p></TooltipContent>
-          </Tooltip>
-        ))}
-
-        <Separator orientation="vertical" className="h-6 mx-1" />
-
-        {/* AI Action Buttons */}
-        {aiActionButtons.map(({ name, icon: Icon, label }) => (
-          <Tooltip key={name}>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full h-8 w-8"
-                onClick={() => handleAiAction(name as any)}
-                disabled={isProcessing}
-              >
-                {activeAiAction === name && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent><p>{label}</p></TooltipContent>
-          </Tooltip>
-        ))}
-
-        <DropdownMenu>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full h-8 w-8" disabled={isProcessing}>
-                  {activeAiAction === 'rewrite' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brush className="h-4 w-4" />}
-                </Button>
-              </DropdownMenuTrigger>
-            </TooltipTrigger>
-            <TooltipContent><p>{t('builder.Section.aiActions.rewrite')}</p></TooltipContent>
-          </Tooltip>
-          <DropdownMenuContent className="backdrop-blur-md bg-gradient-to-r from-background/90 to-primary/5 border shadow-soft">
-            {rewriteStyles.map(({ label, style }) => (
-              <DropdownMenuItem key={style} onSelect={() => handleAiAction('rewrite', { style })} disabled={isProcessing}>
-                {label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {/* Utility Buttons */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8" onClick={handleReadAloudClick}>
-              {isSpeaking ? <Square className="h-4 w-4 text-red-500 fill-current" /> : <Volume2 className="h-4 w-4" />}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent><p>{isSpeaking ? 'Stop Speaking' : t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    </div>
-  )
-});
 
 // Turndown Service Initialization
 const turndownService = new TurndownService({ headingStyle: 'atx' });
@@ -166,39 +23,20 @@ interface RichTextEditorProps {
   onChange: (markdown: string) => void;
 }
 
-
-
-export function processPlantUml(markdown: string): string {
-  if (typeof markdown !== 'string') {
-    return markdown;
-  }
-  return markdown.replace(/```plantuml([\s\S]*?)```/g, (match, plantUmlCode) => {
-    if (plantUmlCode.trim().startsWith('@startuml') && plantUmlCode.trim().endsWith('@enduml')) {
-      const utf8Encoder = new TextEncoder();
-      const compressed = pako.deflate(utf8Encoder.encode(plantUmlCode));
-      const encoded = encode64(compressed);
-      const imageUrl = `https://www.plantuml.com/plantuml/png/~1${encoded}`;
-      return `![Diagram](${imageUrl})`;
-    }
-    return match; // Return the original block if it's not a valid PlantUML
-  });
-}
 function RichTextEditor({ content, onChange }: RichTextEditorProps) {
-  const setActiveEditor = useEditorStore((state) => state.setActiveEditor);
+  const { setActiveEditor } = useEditorStore();
   const uniqueId = React.useId();
-  // Ref to control whether the onUpdate hook should fire.
-  const shouldFireUpdate = useRef(true);
-
+  
+  // Ref to track if the content update is from an external source vs. user typing
+  const isExternalUpdate = useRef(false);
 
   const editor = useEditor({
     extensions: editorExtensions(uniqueId),
     content: marked.parse(content) as string,
-    onUpdate: ({ editor }) => {
-      // Only call onChange if the update was not programmatic
-      if (shouldFireUpdate.current) {
-        const markdown = turndownService.turndown(editor.getHTML());
-        onChange(markdown);
-      }
+    onBlur: ({ editor }) => {
+      // When the user clicks away from the editor, sync the state.
+      const markdown = turndownService.turndown(editor.getHTML());
+      onChange(markdown);
     },
     onSelectionUpdate: ({ editor }) => {
       setActiveEditor(editor);
@@ -207,71 +45,76 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       attributes: {
         class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif text-base prose-p:text-base prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2',
       },
-      async handlePaste(view, event) {
+      handlePaste: (view, event, slice) => {
+        const pastedFiles = Array.from(event.clipboardData?.files || []);
+        if (editor && pastedFiles.length > 0) {
+          pastedFiles.forEach(file => handleFilePaste(editor, file));
+          return true; // We handled the paste
+        }
         const html = event.clipboardData?.getData('text/html');
         const plain = event.clipboardData?.getData('text/plain');
 
         if (html && editor) {
-          // If HTML content exists, paste it directly. Tiptap will sanitize it.
-          editor.chain().focus().insertContent(html).run();
-          return true;
+          handleHtmlPaste(editor, html);
+          return true; // We handled the paste
+        } else if (editor && plain) {
+          handlePlainPaste(editor, plain);
+          return true; // We handled the paste
         }
-
-        if (plain && editor) {
-
-          // If PlantUML content is detected, process it.
-          if (plain.includes('@startuml') && plain.includes('@enduml')) {
-            const processed = await processPlantUml(plain);
-            if (processed) {
-              editor.chain().focus().insertContent(marked.parse(processed)).run();
-              return true;
-            }
-          }
-          // If only plain text exists, treat it as markdown and parse it.
-          const parsedHtml = marked.parse(plain);
-          editor.chain().focus().insertContent(parsedHtml).run();
-          return true;
-        }
-
-        return false; // Let the default paste handler take over if all else fails.
+        return false; // Let Tiptap handle default paste
       },
+      handleDrop: (view, event, slice, moved) => {
+        const droppedFiles = Array.from(event.dataTransfer?.files || []);
+        if (editor && droppedFiles.length > 0) {
+            droppedFiles.forEach(file => handleFileDrop(editor, file));
+            return true; // We handled the drop
+        }
+        return false;
+      }
     },
     immediatelyRender: false,
-
   });
 
-  const handleTextUpdate = useCallback((newText: string, from: number, to: number) => {
-    if (!editor) return;
-    editor.chain().focus().insertContentAt({ from, to }, newText).run();
-  }, [editor]);
-
-  const handleWholeUpdate = useCallback((newText: string) => {
-    if (!editor) return;
-    const html = marked.parse(newText) as string;
-    editor.chain().focus().setContent(html).run();
-  }, [editor]);
-
-
+  // Effect to update editor content only when the external `content` prop changes.
   useEffect(() => {
     if (editor && !editor.isDestroyed) {
-      const currentEditorMarkdown = turndownService.turndown(editor.getHTML());
-      if (content !== currentEditorMarkdown) {
-        const { from, to } = editor.state.selection;
+      const editorMarkdown = turndownService.turndown(editor.getHTML());
 
-        // Temporarily disable the onUpdate handler
-        shouldFireUpdate.current = false;
+      // Only update if the external content is different from the editor's current content
+      if (content !== editorMarkdown) {
+        isExternalUpdate.current = true;
+        
+        const { from, to } = editor.state.selection;
         editor.commands.setContent(marked.parse(content) as string, false);
-        // Restore the previous selection
+        // Try to restore selection. This might not be perfect in all cases
+        // but is better than losing it completely.
         editor.commands.setTextSelection({ from, to });
-        // Re-enable the onUpdate handler
-        shouldFireUpdate.current = true;
+
+        // Use a timeout to reset the flag after the update has been processed.
+        setTimeout(() => {
+          isExternalUpdate.current = false;
+        }, 50);
       }
     }
   }, [content, editor]);
 
+  // This function is for the autosave hook to get the latest content
+  useEffect(() => {
+    (window as any).__getEditorContent = () => {
+        if (editor && !editor.isDestroyed) {
+            return turndownService.turndown(editor.getHTML());
+        }
+        return content; // Fallback to prop content
+    };
+    return () => {
+      delete (window as any).__getEditorContent;
+    };
+  }, [editor, content]);
+
+
   const handleWrapperClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (editor && event.target === event.currentTarget) {
-        editor.chain().focus().run();
+      editor.chain().focus().run();
     }
   };
 
@@ -284,6 +127,7 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           tippyOptions={{ duration: 100, placement: 'top' }}
           pluginKey={uniqueId}
         >
+          {/* BubbleMenu content will be added later */}
           {editor.isActive('table') ? (
             <div className="bg-background p-1 rounded-lg shadow-lg border flex gap-1">
               <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addColumnBefore().run()}>Add Col Before</Button>
@@ -293,17 +137,15 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           ) : (
             <SectionToolbar
               editor={editor}
-              onTextUpdate={handleTextUpdate}
-              onWholeUpdate={handleWholeUpdate}
             />
           )}
         </BubbleMenu>
       )}
-      <div 
+      <div
         className="rounded-b-lg p-4 min-h-[200px] h-full relative transition-colors duration-300"
         onClick={handleWrapperClick}
-        >
-        <EditorContent editor={editor} className="h-full"/>
+      >
+        <EditorContent editor={editor} className="h-full" />
       </div>
     </div>
   );

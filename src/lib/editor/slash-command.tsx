@@ -4,7 +4,7 @@ import { ReactRenderer } from '@tiptap/react';
 import Suggestion, { SuggestionOptions } from '@tiptap/suggestion';
 import tippy, { GetReferenceClientRect, Instance } from 'tippy.js';
 import { Heading1, Heading2, Heading3, Text, List, ListOrdered, Table, Image as ImageIcon, Code, Quote, GitGraph } from 'lucide-react';
-import CommandList from '@/components/editor/CommandList';
+import CommandList from './CommandList';
 
 const commandItems = [
   { title: 'Heading 1', description: 'Large section heading.', icon: <Heading1 size={20} />, command: (editor: Editor) => editor.chain().focus().toggleHeading({ level: 1 }).run() },
@@ -24,6 +24,13 @@ const render = () => {
   let popup: Instance[];
 
   return {
+    onBeforeStart(props: {editor: Editor; clientRect: GetReferenceClientRect}) {
+      if (!props.clientRect) return;
+      component = new ReactRenderer(CommandList, {
+        props: { ...props, items: commandItems, command: (item: any) => item.command(props.editor) },
+        editor: props.editor,
+      });
+    },
     onStart: (props: { editor: Editor; clientRect: GetReferenceClientRect }) => {
       component = new ReactRenderer(CommandList, {
         props: { ...props, items: commandItems, command: (item: any) => item.command(props.editor) },
@@ -41,6 +48,10 @@ const render = () => {
         trigger: 'manual',
         placement: 'bottom-start',
       });
+    },
+    onBeforeUpdate(props: { editor: Editor; clientRect: GetReferenceClientRect }) {
+      if (!props.clientRect) return;
+      popup[0].setProps({ getReferenceClientRect: props.clientRect });
     },
     onUpdate(props: { editor: Editor; clientRect: GetReferenceClientRect }) {
       component.updateProps({ ...props, items: commandItems, command: (item: any) => item.command(props.editor) });
@@ -76,7 +87,7 @@ const SlashCommand = Extension.create<Partial<SuggestionOptions>>({
           return commandItems.filter(item => item.title.toLowerCase().startsWith(query.toLowerCase()));
         },
         allow: ({ editor, range }) => editor.can().deleteRange(range),
-        render: render,
+        render: render as any || undefined,
       }),
     ];
   },

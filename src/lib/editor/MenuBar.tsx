@@ -21,8 +21,8 @@ import {
   Table as TableIcon,
   Upload
 } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 function handleFile(file: File, editor: Editor) {
   const reader = new FileReader();

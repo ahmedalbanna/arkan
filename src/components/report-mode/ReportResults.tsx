@@ -13,7 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { useEffect, useState } from 'react';
-import { MenuBar } from './MenuBar';
+import { MenuBar } from '@/lib/editor/MenuBar';
 import RichTextEditor from './RichTextEditor';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookCopy, BookOpenText } from 'lucide-react';

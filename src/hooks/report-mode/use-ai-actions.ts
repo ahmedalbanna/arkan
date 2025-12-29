@@ -1,22 +1,33 @@
 
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Editor } from '@tiptap/react';
 import { useWritingTool } from '@/hooks';
 import { useToast } from '@/hooks/util/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
+import { marked } from 'marked';
 
 interface AiActionsProps {
   editor: Editor | null;
-  onTextUpdate: (newText: string, from: number, to: number) => void;
-  onWholeUpdate: (newText: string) => void;
 }
 
-export function useAiActions({ editor, onTextUpdate, onWholeUpdate }: AiActionsProps) {
+export function useAiActions({ editor }: AiActionsProps) {
   const { t } = useLocalization();
   const [activeAiAction, setActiveAiAction] = useState<string | null>(null);
   const { toast } = useToast();
+
+  
+  const onTextUpdate = useCallback((newText: string, from: number, to: number) => {
+    if (!editor) return;
+    editor.chain().focus().insertContentAt({ from, to }, newText).run();
+  }, [editor]);
+
+  const onWholeUpdate = useCallback((newText: string) => {
+    if (!editor) return;
+    const html = marked.parse(newText) as string;
+    editor.chain().focus().setContent(html).run();
+  }, [editor]);
 
   const handleSuccess = (resultText: string) => {
     if (!editor) return;
@@ -44,10 +55,11 @@ export function useAiActions({ editor, onTextUpdate, onWholeUpdate }: AiActionsP
   });
 
   const translateMutation = useWritingTool('/api/writing-tools/translate-text', {
-    onSuccess: (data: any) => handleSuccess(data.translatedText),
+    onSuccess: (data: any) => handleSuccess(data.text),
     onError: handleError,
     onSettled: () => setActiveAiAction(null),
   });
+
 
   const isProcessing = aiActionMutation.isPending || translateMutation.isPending;
 

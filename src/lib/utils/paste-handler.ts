@@ -2,6 +2,8 @@
 'use client';
 
 import { Editor } from '@tiptap/react';
+import { editorPlantUml } from './processPlantUml';
+import { marked } from 'marked';
 
 /**
  * Handles pasting an image file into the Tiptap editor.
@@ -23,3 +25,29 @@ export const handleFilePaste = (editor: Editor, file: File) => {
   };
   reader.readAsDataURL(file);
 };
+
+export function handleHtmlPaste(editor:Editor, html:string) {
+  
+  if (html && editor) {
+    // If HTML content exists, paste it directly. Tiptap will sanitize it.
+    editor.chain().focus().insertContent(html).run();
+    return true;
+  }
+}
+export async function handlePlainPaste(editor:Editor, plain:string) {
+if (plain && editor) {
+
+  // If PlantUML content is detected, process it.
+  if (plain.includes('@startuml') && plain.includes('@enduml')) {
+    const processed = await editorPlantUml(plain);
+    if (processed) {
+      editor.chain().focus().insertContent(marked.parse(processed)).run();
+      return true;
+    }
+  }
+  // If only plain text exists, treat it as markdown and parse it.
+  const parsedHtml = marked.parse(plain);
+  editor.chain().focus().insertContent(parsedHtml).run();
+  return true;
+}
+}
