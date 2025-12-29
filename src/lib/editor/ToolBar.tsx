@@ -76,10 +76,10 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
   ];
 
   const blockButtons = [
-    { action: () => editor.chain().focus().toggleBulletList().run(), isActive: editor.isActive('bulletList'), icon: List, label: "Bulleted List" },
-    { action: () => editor.chain().focus().toggleOrderedList().run(), isActive: editor.isActive('orderedList'), icon: ListOrdered, label: "Numbered List" },
-    { action: () => editor.chain().focus().toggleBlockquote().run(), isActive: editor.isActive('blockquote'), icon: Quote, label: "Blockquote" },
-    { action: addTable, isActive: editor.isActive('table'), icon: TableIcon, label: "Table" },
+    { name: 'bulletList', action: () => editor.chain().focus().toggleBulletList().run(), isActive: editor.isActive('bulletList'), icon: List, label: "Bulleted List" },
+    { name: 'orderedList', action: () => editor.chain().focus().toggleOrderedList().run(), isActive: editor.isActive('orderedList'), icon: ListOrdered, label: "Numbered List" },
+    { name: 'blockquote', action: () => editor.chain().focus().toggleBlockquote().run(), isActive: editor.isActive('blockquote'), icon: Quote, label: "Blockquote" },
+    { name: 'table', action: addTable, isActive: editor.isActive('table'), icon: TableIcon, label: "Table" },
   ];
 
   const alignmentButtons = [
@@ -89,6 +89,8 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
   ];
 
   const CurrentAlignmentIcon = alignmentButtons.find(b => b.isActive)?.icon || AlignLeft;
+  const CurrentBlockIcon = blockButtons.find(b => b.isActive)?.icon || Square;
+
 
   const aiActionButtons = [
     { name: 'summarize', icon: BookText, label: t('builder.Section.aiActions.summarize') },
@@ -129,7 +131,7 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
                 <TooltipTrigger asChild>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
-                            <Square className="h-4 w-4" />
+                            <CurrentBlockIcon className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
                 </TooltipTrigger>
