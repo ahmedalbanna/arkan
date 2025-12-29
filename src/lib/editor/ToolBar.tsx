@@ -80,14 +80,15 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
     { action: () => editor.chain().focus().toggleOrderedList().run(), isActive: editor.isActive('orderedList'), icon: ListOrdered, label: "Numbered List" },
     { action: () => editor.chain().focus().toggleBlockquote().run(), isActive: editor.isActive('blockquote'), icon: Quote, label: "Blockquote" },
     { action: addTable, isActive: editor.isActive('table'), icon: TableIcon, label: "Table" },
-  ]
+  ];
 
   const alignmentButtons = [
-    { action: () => editor.chain().focus().setTextAlign('left').run(), isActive: editor.isActive({ textAlign: 'left' }), icon: AlignLeft, label: "Align Left" },
-    { action: () => editor.chain().focus().setTextAlign('center').run(), isActive: editor.isActive({ textAlign: 'center' }), icon: AlignCenter, label: "Align Center" },
-    { action: () => editor.chain().focus().setTextAlign('right').run(), isActive: editor.isActive({ textAlign: 'right' }), icon: AlignRight, label: "Align Right" },
-  ]
+    { name: 'left', action: () => editor.chain().focus().setTextAlign('left').run(), isActive: editor.isActive({ textAlign: 'left' }), icon: AlignLeft, label: "Align Left" },
+    { name: 'center', action: () => editor.chain().focus().setTextAlign('center').run(), isActive: editor.isActive({ textAlign: 'center' }), icon: AlignCenter, label: "Align Center" },
+    { name: 'right', action: () => editor.chain().focus().setTextAlign('right').run(), isActive: editor.isActive({ textAlign: 'right' }), icon: AlignRight, label: "Align Right" },
+  ];
 
+  const CurrentAlignmentIcon = alignmentButtons.find(b => b.isActive)?.icon || AlignLeft;
 
   const aiActionButtons = [
     { name: 'summarize', icon: BookText, label: t('builder.Section.aiActions.summarize') },
@@ -144,15 +145,27 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
             </DropdownMenuContent>
         </DropdownMenu>
 
-        <Separator orientation="vertical" className="h-6 mx-1" />
-
-        {alignmentButtons.map(({ action, isActive, icon: Icon, label }) => (
-           <Tooltip key={label}>
-            <TooltipTrigger asChild><Button variant={isActive ? 'secondary' : 'ghost'} size="icon" className="rounded-full h-8 w-8" onClick={action}><Icon className="h-4 w-4" /></Button></TooltipTrigger>
-            <TooltipContent><p>{label}</p></TooltipContent>
-          </Tooltip>
-        ))}
-
+        <DropdownMenu>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
+                            <CurrentAlignmentIcon className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent><p>Alignment</p></TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent>
+                {alignmentButtons.map(({ name, action, label, icon: Icon, isActive }) => (
+                    <DropdownMenuItem key={name} onSelect={action} className={isActive ? 'bg-accent' : ''}>
+                        <Icon className="mr-2 h-4 w-4" />
+                        <span>{label}</span>
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
+        
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         <DropdownMenu>
