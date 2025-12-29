@@ -64,7 +64,7 @@ export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDia
     // Create a new Project instance based on the template, preserving existing project properties
     const newProject = new Project({
       ...project.toJSON(), // Retain existing project properties like name, description, and context
-      chapters: template.chapters.map(ch => new Chapter(ch)),
+      content: template.chapters.map(ch => new Chapter(ch)),
     });
 
     loadProject(newProject.toJSON());
