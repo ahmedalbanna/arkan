@@ -55,10 +55,15 @@ export function SectionGenerationControls({ section }: { section: Section }) {
     };
 
     function handleOutputStyleChange(style: keyof GenerationControlState['outputStyle'], checked: boolean) {
-        handleControlChange('outputStyle', {
-            ...controls.outputStyle,
-            [style]: checked
-        });
+        updateProject(p => p.updateSection(section.id, s => s.with({
+            controls: {
+                ...s.controls,
+                outputStyle: {
+                    ...s.controls.outputStyle,
+                    [style]: checked
+                }
+            }
+        })));
     }
 
     const instructionPreview = section.buildActionPrompt();
@@ -208,10 +213,10 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             
             <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                    <Checkbox id={`include-citations-${section.id}`} checked={controls.includeCitations} onCheckedChange={(checked) => handleControlChange('includeCitations', !!checked)} />
+                    <Checkbox id={`include-citations-${section.id}`} checked={controls.outputStyle.includeCitations} onCheckedChange={(checked) => handleOutputStyleChange('includeCitations', !!checked)} />
                     <Label htmlFor={`include-citations-${section.id}`}>Include Citations</Label>
                 </div>
-                {controls.includeCitations && (
+                {controls.outputStyle.includeCitations && (
                      <div className="space-y-2 pl-6">
                         <Label htmlFor={`citationStyle-${section.id}`}>Citation Style</Label>
                         <Select value={controls.citationStyle} onValueChange={(val) => handleControlChange('citationStyle', val as any)}>
