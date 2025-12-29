@@ -1,4 +1,7 @@
 
+'use client';
+import { format } from "date-fns";
+
 // --- Types moved from types.ts ---
 
 export type UserRole = 'admin' | 'user'; // Removed team-specific roles
@@ -54,5 +57,13 @@ export class User {
     public getInitials(): string {
         if (!this.name) return '?';
         return this.name.split(' ').map(n => n[0]).join('').toUpperCase();
+    }
+    
+    /**
+     * Returns a formatted string for the creation date.
+     */
+    public getFormattedDate(): string {
+        if (!this.createdAt) return 'N/A';
+        return format(new Date(this.createdAt), 'd MMM yyyy');
     }
 }

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useGuidelineEditor } from '@/hooks/report-mode/use-guideline-editor';
+import { useGuidelineEditor } from '@/hooks/core/use-guideline-editor';
 import { Behavior, BehaviorType } from '@/lib/models';
 import { Info, PlusCircle, Trash2 } from 'lucide-react';
 import { useState } from 'react';
@@ -15,7 +15,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '.
 
 // Reusable component for managing a list of strings
 interface EditableListProps {
-  items: string[];
+  items: readonly string[];
   onItemsChange: (newItems: string[]) => void;
   placeholder: string;
 }
@@ -77,7 +77,7 @@ const EditableList = ({ items, onItemsChange, placeholder }: EditableListProps) 
 
 // New component for managing behaviors/personas
 interface BehaviorEditorProps {
-  items: Behavior[];
+  items: readonly Behavior[];
   onItemsChange: (newItems: Behavior[]) => void;
 }
 

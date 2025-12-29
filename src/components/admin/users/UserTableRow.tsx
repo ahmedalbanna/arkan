@@ -1,10 +1,10 @@
+
 'use client';
 
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, MessageSquare, Gift } from "lucide-react";
-import { format } from 'date-fns';
 import Link from 'next/link';
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
@@ -17,18 +17,15 @@ import { User, type UserProperties } from '@/lib/models'; // Import User class a
 import { GiftCreditsDialog } from "./GiftCreditsDialog";
 
 interface UserTableRowProps {
-    user: UserProperties; // Accept plain object
+    user: User;
 }
 
-export function UserTableRow({ user: userProps }: UserTableRowProps) {
+export function UserTableRow({ user }: UserTableRowProps) {
     const { t } = useLocalization();
     const queryClient = useQueryClient();
     const { firebaseUser, userProfile: adminProfile } = useAuth();
     const router = useRouter();
 
-    // Instantiate the User class from the plain object prop
-    const user = new User(userProps);
-    
     // Prefetch user profile on hover for a smoother navigation experience
     async function prefetchUser(userId: string) {
         if (!firebaseUser) return;
@@ -52,7 +49,7 @@ export function UserTableRow({ user: userProps }: UserTableRowProps) {
                 </Badge>
             </TableCell>
             <TableCell>{user.credits}</TableCell>
-            <TableCell>{user.createdAt ? format(new Date(user.createdAt), 'd MMM yyyy') : 'N/A'}</TableCell>
+            <TableCell>{user.getFormattedDate()}</TableCell>
             <TableCell className="text-right">
                <GiftCreditsDialog user={user} />
                <Button variant="ghost" size="icon">

@@ -4,7 +4,7 @@
 import { Chapter, ChapterProperties } from '@/lib/models/chapter';
 import { Project, type ProjectProperties } from '@/lib/models/project';
 import { localProjectService } from '@/services/local-project-service';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { create } from 'zustand';
 
 type ActiveView = 'cover-page' | 'report-content';
@@ -13,27 +13,47 @@ interface BuilderState {
     project: Project | null;
     activeView: ActiveView;
     hasUnsavedChanges: boolean;
+    isStoreInitialized: boolean;
+    initializeStore: () => void;
     setActiveView: (view: ActiveView) => void;
     setHasUnsavedChanges: (hasChanges: boolean) => void;
     updateProject: (updater: (project: Project) => Project) => void;
     loadProject: (projectData: ProjectProperties) => void;
     newSession: () => void;
-    fileInputRef: React.RefObject<HTMLInputElement>;
-    handleUploadClick: () => void;
-    onFileChange: (e: React.ChangeEvent<HTMLInputElement>, toast: any, t: any, router: any) => void;
-    isCreateProjectOpen: boolean;
-    setIsCreateProjectOpen: (isOpen: boolean) => void;
 }
 
 const createNewTemporaryProject = (): Project => new Project({});
 
 const useBuilderStore = create<BuilderState>((set, get) => {
-    const fileInputRef = React.createRef<HTMLInputElement>();
 
     return {
-        project: createNewTemporaryProject(),
+        project: null, // Start with null until initialized
         activeView: 'cover-page',
         hasUnsavedChanges: false,
+        isStoreInitialized: false,
+
+        initializeStore: () => {
+            if (get().isStoreInitialized) return;
+
+            const lastProjectId = localStorage.getItem('lastActiveProjectId');
+            if (lastProjectId) {
+                localProjectService.getProject(lastProjectId).then(projectData => {
+                    if (projectData) {
+                        set({ project: new Project(projectData), isStoreInitialized: true });
+                    } else {
+                        // Project not found, create a new one
+                        set({ project: createNewTemporaryProject(), isStoreInitialized: true });
+                    }
+                }).catch(() => {
+                    // Error loading, create a new one
+                    set({ project: createNewTemporaryProject(), isStoreInitialized: true });
+                });
+            } else {
+                // No last project, create a new one
+                set({ project: createNewTemporaryProject(), isStoreInitialized: true });
+            }
+        },
+
         setActiveView: (view) => set({ activeView: view }),
         setHasUnsavedChanges: (hasChanges) => set({ hasUnsavedChanges: hasChanges }),
 
@@ -47,35 +67,28 @@ const useBuilderStore = create<BuilderState>((set, get) => {
             set(state => {
                 if (!state.project) return {};
                 const newProject = updater(state.project);
+                localStorage.setItem('lastActiveProjectId', newProject.id);
                 return { project: newProject, hasUnsavedChanges: true };
             });
         },
 
         newSession: () => {
-            localStorage.removeItem('lastActiveProjectId');
-            set({ project: createNewTemporaryProject(), hasUnsavedChanges: false, activeView: 'cover-page' });
-        },
-
-        fileInputRef,
-        handleUploadClick: () => get().fileInputRef.current?.click(),
-        onFileChange: async (e, toast, t, router) => {
-            const file = e.target.files?.[0];
-            const { loadProject } = get();
-            if (file) {
-                try {
-                    const newProject = await Project.fromFile(file);
-                    loadProject(newProject.toStateObject());
-                    toast({ title: t('builder.toasts.projectLoadedTitle'), description: t('builder.toasts.projectLoadedDesc', { projectName: newProject.name }) });
-                    router.push('/builder');
-                } catch (err) {
-                    toast({ title: t('builder.toasts.loadFailedTitle'), description: (err as Error).message, variant: 'destructive' });
-                }
+            if (window.confirm('Are you sure you want to start a new session? Any unsaved changes will be lost.')) {
+                localStorage.removeItem('lastActiveProjectId');
+                set({ project: createNewTemporaryProject(), hasUnsavedChanges: false, activeView: 'cover-page' });
             }
-            if (e.target) e.target.value = '';
         },
-        isCreateProjectOpen: false,
-        setIsCreateProjectOpen: (isOpen: boolean) => set({ isCreateProjectOpen: isOpen }),
     };
 });
+
+// Custom hook to initialize the store on client mount
+export const useInitializeBuilderStore = () => {
+    const { initializeStore, isStoreInitialized } = useBuilderStore();
+    useEffect(() => {
+        initializeStore();
+    }, [initializeStore]);
+    return isStoreInitialized;
+};
+
 
 export { useBuilderStore };

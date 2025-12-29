@@ -16,7 +16,6 @@ export * from './core/useProjectsPage';
 
 export * from './core/use-report-paginator';
 
-export * from './core/use-builder-page';
 
 // Report Mode Hooks
 export * from './report-mode/use-ai-actions';

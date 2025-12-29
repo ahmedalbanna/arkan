@@ -14,18 +14,16 @@ import { useBuilderStore, useSaveProject } from '@/hooks';
 import { useRouter } from 'next/navigation';
 import { ExportDialog } from './ExportDialog';
 import { BrowseProjectsDialog } from './BrowseProjectsDialog';
+import { useRef } from 'react';
+import { Project } from '@/lib/models';
+import { useToast } from '@/hooks';
 
 export function SessionActions() {
     const { t } = useLocalization();
     const router = useRouter();
-    const {
-        fileInputRef,
-        handleUploadClick,
-        onFileChange,
-        hasUnsavedChanges,
-        newSession,
-        project
-    } = useBuilderStore();
+    const { project, hasUnsavedChanges, newSession, loadProject } = useBuilderStore();
+    const { toast } = useToast();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { saveProject, isSaving } = useSaveProject();
 
@@ -33,6 +31,25 @@ export function SessionActions() {
         saveProject();
     }
     
+    const handleUploadClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            try {
+                const newProject = await Project.fromFile(file);
+                loadProject(newProject.toStateObject());
+                toast({ title: t('builder.toasts.projectLoadedTitle'), description: t('builder.toasts.projectLoadedDesc', { projectName: newProject.name }) });
+                router.push('/builder');
+            } catch (err) {
+                toast({ title: t('builder.toasts.loadFailedTitle'), description: (err as Error).message, variant: 'destructive' });
+            }
+        }
+        if (e.target) e.target.value = '';
+    };
+
     const hasContent = project?.hasContent() ?? false;
 
     return (
@@ -41,7 +58,7 @@ export function SessionActions() {
                 <input
                     type="file"
                     ref={fileInputRef}
-                    onChange={(e) => onFileChange(e, t, router)}
+                    onChange={onFileChange}
                     accept=".arkan"
                     className="hidden"
                 />
@@ -76,30 +93,11 @@ export function SessionActions() {
                     <span className="hidden md:inline ms-2">{t('projects.saveButton')}</span>
                 </Button>
 
-                <ExportDialog>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                             <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-8 w-8 md:w-auto md:px-3"
-                                disabled={!hasContent}
-                            >
-                                <FileDown className="h-4 w-4" />
-                                <span className="hidden md:inline ms-2">Export</span>
-                            </Button>
-                        </TooltipTrigger>
-                         <TooltipContent>
-                            <p>Export as DOCX or PPTX</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </ExportDialog>
+                <ExportDialog />
                 
                  <Tooltip>
                     <TooltipTrigger asChild>
                         <div
-                            // The button is wrapped in a div to ensure the tooltip
-                            // shows even when the button is disabled.
                         >
                             <Button
                                 variant="outline"
