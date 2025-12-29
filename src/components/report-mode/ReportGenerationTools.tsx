@@ -38,6 +38,7 @@ import { ReportTemplateDialog } from "./ReportTemplateDialog";
 import { SortableChapterItem } from './SortableChapterItem';
 import { Chapter, Section } from '@/lib/models';
 import { SortableSectionItem } from './SortableSectionItem';
+import { ScrollArea } from "../ui/scroll-area";
 
 
 export function GenerationTools() {
@@ -97,7 +98,7 @@ export function GenerationTools() {
         onGenerateProject={onGenerateProject}
         isLoading={projectMutation.isPending}
       />
-      <Card className="flex flex-col">
+      <Card className="flex flex-col h-full">
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
@@ -106,7 +107,7 @@ export function GenerationTools() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="flex-grow flex flex-col gap-4  max-h-screen ">
+        <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
           <div className="flex flex-col sm:flex-row gap-2">
             <Button onClick={() => setIsTemplateDialogOpen(true)} variant="outline" className="w-full">
               <ListPlus className="me-2 h-4 w-4" /> Apply a Template
@@ -154,59 +155,59 @@ export function GenerationTools() {
                 <Label htmlFor="select-all-chapters" className="font-semibold text-sm">Select all sections for project build</Label>
               </div>
             )}
-            <div className="flex-grow min-h-0 overflow-y-scroll h-fit">
-              <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-
-                <SortableContext items={(project?.content || []).map(c => typeof c === 'string' ? c : c.id)} strategy={verticalListSortingStrategy}>
-                  <Accordion type="multiple" className="w-full space-y-2">
-                    {(project?.content || []).map((item, index) => {
-                      if (item instanceof Chapter) {
-                        return (
-                          <SortableChapterItem
-                            chapter={item}
-                            index={index}
-                            key={item.id}
-                            onAddSection={handleAddSection}
-                            onGenerateSection={onGenerateSection}
-                            onGenerateChapter={onGenerateChapter}
-                            activeMutationKey={sectionMutation.isPending ? sectionMutation.variables as string : null}
-                            isAnythingGenerating={sectionMutation.isPending || chapterMutation.isPending}
-                            hasCreditsForSingleSection={!!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1}
-                            isBuildMode={chapterInBuildMode === item.id}
-                            onEnterBuildMode={() => handleEnterBuildMode(item.id)}
-                            onCancelBuildMode={handleCancelBuildMode}
-                            isProjectBuildMode={isProjectBuildMode}
-                            selectedSections={selectedSectionsForBuild}
-                            onSectionSelectToggle={handleSectionSelectionToggle}
-                            onChapterSelectToggle={handleChapterSelectionToggle}
-                          />
-                        )
-                      }
-                      if (item instanceof Section) {
-                         return (
-                          <SortableSectionItem
-                            key={item.id}
-                            section={item}
-                            index={index}
-                            chapterIndex={-1} // Indicate it's a root section
-                            onGenerate={() => onGenerateSection(item.id)}
-                            isGenerating={sectionMutation.isPending && sectionMutation.variables === item.id}
-                            isAnythingGenerating={sectionMutation.isPending || chapterMutation.isPending}
-                            hasCredits={!!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1}
-                            isSelected={selectedSectionsForBuild.has(item.id)}
-                            onSelect={() => handleSectionSelectionToggle(item.id)}
-                            isCheckboxVisible={isProjectBuildMode}
-                          />
-                        );
-                      }
-                      return null; // For strings or other types in the future
-                    })}
-                  </Accordion>
-                </SortableContext>
-
-              </DndContext>
-            </div>
-            <div className="mt-4">
+            <ScrollArea className="flex-grow">
+              <div className="h-full pr-4">
+                <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                  <SortableContext items={(project?.content || []).map(c => typeof c === 'string' ? c : c.id)} strategy={verticalListSortingStrategy}>
+                    <Accordion type="multiple" className="w-full space-y-2">
+                      {(project?.content || []).map((item, index) => {
+                        if (item instanceof Chapter) {
+                          return (
+                            <SortableChapterItem
+                              chapter={item}
+                              index={index}
+                              key={item.id}
+                              onAddSection={handleAddSection}
+                              onGenerateSection={onGenerateSection}
+                              onGenerateChapter={onGenerateChapter}
+                              activeMutationKey={sectionMutation.isPending ? sectionMutation.variables as string : null}
+                              isAnythingGenerating={sectionMutation.isPending || chapterMutation.isPending}
+                              hasCreditsForSingleSection={!!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1}
+                              isBuildMode={chapterInBuildMode === item.id}
+                              onEnterBuildMode={() => handleEnterBuildMode(item.id)}
+                              onCancelBuildMode={handleCancelBuildMode}
+                              isProjectBuildMode={isProjectBuildMode}
+                              selectedSections={selectedSectionsForBuild}
+                              onSectionSelectToggle={handleSectionSelectionToggle}
+                              onChapterSelectToggle={handleChapterSelectionToggle}
+                            />
+                          )
+                        }
+                        if (item instanceof Section) {
+                          return (
+                            <SortableSectionItem
+                              key={item.id}
+                              section={item}
+                              index={index}
+                              chapterIndex={-1} // Indicate it's a root section
+                              onGenerate={() => onGenerateSection(item.id)}
+                              isGenerating={sectionMutation.isPending && sectionMutation.variables === item.id}
+                              isAnythingGenerating={sectionMutation.isPending || chapterMutation.isPending}
+                              hasCredits={!!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1}
+                              isSelected={selectedSectionsForBuild.has(item.id)}
+                              onSelect={() => handleSectionSelectionToggle(item.id)}
+                              isCheckboxVisible={isProjectBuildMode}
+                            />
+                          );
+                        }
+                        return null; // For strings or other types in the future
+                      })}
+                    </Accordion>
+                  </SortableContext>
+                </DndContext>
+              </div>
+            </ScrollArea>
+            <div className="mt-4 flex-shrink-0">
               {isProjectBuildMode ? (
                 <div className="flex gap-2">
                   <Button onClick={exitProjectBuildMode} variant="secondary" className="w-full">
