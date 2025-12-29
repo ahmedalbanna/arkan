@@ -95,7 +95,7 @@ export function BrowseProjectsDialog() {
                                             <CardHeader>
                                                 <CardTitle className="truncate">{project.name || "Untitled Project"}</CardTitle>
                                                 <CardDescription>
-                                                    Updated {formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}
+                                                    {project.updatedAt ? `Updated ${formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}` : 'Not updated recently'}
                                                 </CardDescription>
                                             </CardHeader>
                                             <CardContent className="flex-grow">
