@@ -29,6 +29,7 @@ import {
   Sparkles,
   XCircle,
 } from 'lucide-react';
+import { useMemo } from "react";
 import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
 import { BuildProjectDialog } from "./BuildProjectDialog";
@@ -77,7 +78,10 @@ export function GenerationTools() {
     finalProjectPrompt,
   } = useReportGenerationTools();
 
-  const isAllSelected = project && project.sections.length > 0 && selectedSectionsForBuild.size === project.sections.length;
+  const totalSelectableSections = project?.sections.length || 0;
+  const isAllSelected = useMemo(() => totalSelectableSections > 0 && selectedSectionsForBuild.size === totalSelectableSections, [totalSelectableSections, selectedSectionsForBuild]);
+  const isIndeterminate = useMemo(() => selectedSectionsForBuild.size > 0 && !isAllSelected, [selectedSectionsForBuild, isAllSelected]);
+
   const canBuildProject = project && project.content.length > 0;
 
   return (
@@ -139,14 +143,13 @@ export function GenerationTools() {
           )}
 
           <div className="relative flex-grow flex flex-col min-h-0">
-
-
             {isProjectBuildMode && (
               <div className="flex items-center gap-2 mb-2 p-2 border rounded-md bg-muted/30">
                 <Checkbox
                   id="select-all-chapters"
-                  checked={isAllSelected || false}
+                  checked={isAllSelected}
                   onCheckedChange={(checked) => handleSelectAllChapters(!!checked)}
+                  aria-checked={isIndeterminate ? 'mixed' : isAllSelected}
                 />
                 <Label htmlFor="select-all-chapters" className="font-semibold text-sm">Select all sections for project build</Label>
               </div>
@@ -237,5 +240,3 @@ export function GenerationTools() {
     </>
   );
 }
-
-    
