@@ -207,16 +207,24 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             </div>
             
             <div className="space-y-2">
-                <Label htmlFor={`citationStyle-${section.id}`}>Citation Style</Label>
-                <Select value={controls.citationStyle} onValueChange={(val) => handleControlChange('citationStyle', val as any)}>
-                    <SelectTrigger id={`citationStyle-${section.id}`}><SelectValue placeholder="Select citation style..." /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="APA7">APA 7th Edition</SelectItem>
-                        <SelectItem value="IEEE">IEEE</SelectItem>
-                        <SelectItem value="MLA">MLA</SelectItem>
-                        <SelectItem value="Chicago">Chicago</SelectItem>
-                    </SelectContent>
-                </Select>
+                <div className="flex items-center gap-2">
+                    <Checkbox id={`include-citations-${section.id}`} checked={controls.includeCitations} onCheckedChange={(checked) => handleControlChange('includeCitations', !!checked)} />
+                    <Label htmlFor={`include-citations-${section.id}`}>Include Citations</Label>
+                </div>
+                {controls.includeCitations && (
+                     <div className="space-y-2 pl-6">
+                        <Label htmlFor={`citationStyle-${section.id}`}>Citation Style</Label>
+                        <Select value={controls.citationStyle} onValueChange={(val) => handleControlChange('citationStyle', val as any)}>
+                            <SelectTrigger id={`citationStyle-${section.id}`}><SelectValue placeholder="Select citation style..." /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="APA7">APA 7th Edition</SelectItem>
+                                <SelectItem value="IEEE">IEEE</SelectItem>
+                                <SelectItem value="MLA">MLA</SelectItem>
+                                <SelectItem value="Chicago">Chicago</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                )}
             </div>
 
             {controls.outputStyle.heading && (

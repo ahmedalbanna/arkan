@@ -84,10 +84,6 @@ export class Section {
       systemPrompt += `\nMaintain a **${this.controls.tone}** tone throughout.`;
     }
 
-    if (this.controls.citationStyle) {
-      systemPrompt += `\nUse **${this.controls.citationStyle}** citation style strictly.`;
-    }
-
     const allRules = [
       ...this.rules,
       ...behaviorInstructions,
@@ -146,7 +142,7 @@ export class Section {
     if (this.controls.language && this.controls.language !== 'default') {
         instructions.push(`The output language must be ${this.controls.language}.`);
     }
-    if (this.controls.citationStyle) {
+    if (this.controls.includeCitations && this.controls.citationStyle) {
         instructions.push(`Use ${this.controls.citationStyle} citation style.`);
     }
 

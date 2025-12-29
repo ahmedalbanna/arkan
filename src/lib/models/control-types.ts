@@ -53,6 +53,7 @@ export const GenerationControlStateSchema = z.object({
   programmingLanguage: z.string().optional(),
   tableCaption: z.string().optional(),
   includedHeadings: z.array(z.string()).optional(),
+  includeCitations: z.boolean().optional(),
   citationStyle: z.enum(['APA7', 'IEEE', 'MLA', 'Chicago']).optional()
 });
 export type GenerationControlState = z.infer<typeof GenerationControlStateSchema>;
@@ -65,6 +66,7 @@ export const defaultControls: GenerationControlState = {
   outputStyle: { heading: true, paragraph: true, list: false, table: false, code: false, diagram: false, math: false },
   wordCount: '',
   diagramType: 'useCase',
+  includeCitations: false,
   citationStyle: 'IEEE'
 };
 
