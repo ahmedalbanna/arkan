@@ -1,22 +1,6 @@
 
 
-
-export * from './agent';
-// export * from './chapter';
-// export * from './control-types';
-export * from './diagram';
-export * from './docxTemplate';
-// export * from './external-context';
-export * from './pptxTemplate';
-// export * from './project';
-// export * from './reportTemplate';
-// export * from './section';
-export * from './template';
-export * from './transaction';
-export * from './user';
-
-
-// TEST MODELS
+'use client';
 
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
@@ -406,14 +390,6 @@ export class Project {
       return this.content.flatMap(c => c.sections);
   }
 
-  public findSection(id: string): { section: Section, chapterId: string } | null {
-      for (const chapter of this.content) {
-          const section = chapter.getSection(id);
-          if (section) return { section, chapterId: chapter.id };
-      }
-      return null;
-  }
-
   // --- Logic ---
 
   public addChapter(chapter: Chapter): Project {
@@ -551,7 +527,7 @@ export const createAIResearchTemplate = (): ProjectProperties => ({
                     title: "Model Architecture",
                     type: "report",
                     prompt: "Describe the neural network architecture in detail. Explain the choice of layers (e.g., Transformer blocks, CNN layers, Attention mechanisms). Use mathematical notation for the loss functions.",
-                    controls: { outputStyle: { math: true, paragraph: true, heading: true, list: false, table: false, code: false, diagram: false } },
+                    controls: { outputStyle: { math: true, paragraph: true, heading: true, list: false, table: false, code: false, diagram: false, } },
                     behaviors: [{ name: "AI Researcher", type: "persona" }]
                 },
                 {
@@ -602,3 +578,16 @@ export const getAvailableTemplates = () => [
     createAIResearchTemplate(),
     createGraduationProjectTemplate()
 ];
+
+
+// Export other models
+export * from './user';
+export * from './transaction';
+export * from './template';
+export * from './reportTemplate';
+export * from './pptxTemplate';
+export * from './docxTemplate';
+export * from './diagram';
+export * from './agent';
+export * from './control-types';
+export * from './external-context';
