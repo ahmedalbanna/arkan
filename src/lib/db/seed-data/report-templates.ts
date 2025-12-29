@@ -1,4 +1,3 @@
-
 import { defaultControls } from '@/lib/models';
 import type { ReportTemplateProperties } from '@/lib/types';
 
@@ -186,6 +185,58 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                     }
                 ]
             }
+        ]
+    },
+    {
+        id: 'graduation-project',
+        name: 'Graduation Project',
+        description: 'A standard template for university final year or graduation projects.',
+        chapters: [
+            { id: 'ch-grad-front', title: 'Front Matter', sections: [ { id: 'abstract', title: 'Abstract', type: 'report' }, { id: 'acknowledgment', title: 'Acknowledgment', type: 'report' } ] },
+            { id: 'ch-grad-intro', title: 'Chapter 1: Introduction', sections: [ { id: 'introduction', title: 'Introduction', type: 'report' }, { id: 'problem-statement', title: 'Problem Statement', type: 'report' }, { id: 'project-objectives', title: 'Project Objectives', type: 'report' }, { id: 'project-scope', title: 'Project Scope', type: 'report' } ] },
+            { id: 'ch-grad-lit-review', title: 'Chapter 2: Literature Review', sections: [ { id: 'literature-review', title: 'Literature Review', type: 'report' } ] },
+            { id: 'ch-grad-methodology', title: 'Chapter 3: Methodology & Design', sections: [ { id: 'system-analysis', title: 'System Analysis', type: 'report' }, { id: 'system-design', title: 'System Design', type: 'report' } ] },
+            { id: 'ch-grad-implementation', title: 'Chapter 4: Implementation & Testing', sections: [ { id: 'system-programming', title: 'Implementation Details', type: 'report' }, { id: 'system-testing', title: 'System Testing', type: 'report' } ] },
+            { id: 'ch-grad-results', title: 'Chapter 5: Results & Discussion', sections: [ { id: 'results', title: 'Results', type: 'report' }, { id: 'discussion', title: 'Discussion', type: 'report' } ] },
+            { id: 'ch-grad-conclusion', title: 'Chapter 6: Conclusion & Future Work', sections: [ { id: 'conclusion', title: 'Conclusion', type: 'report' }, { id: 'future-work', title: 'Future Work', type: 'report' } ] },
+            { id: 'ch-grad-back-matter', title: 'Back Matter', sections: [ { id: 'references', title: 'References', type: 'report' }, { id: 'appendices', title: 'Appendices', type: 'report' } ] }
+        ]
+    },
+    {
+        id: 'research-paper',
+        name: 'Research Paper',
+        description: 'A template following the standard IMRaD structure for academic research papers.',
+        chapters: [
+            { id: 'ch-rp-front', title: 'Front Matter', sections: [ { id: 'abstract', title: 'Abstract', type: 'report' } ] },
+            { id: 'ch-rp-intro', title: 'Introduction', sections: [ { id: 'introduction', title: 'Introduction', type: 'report' } ] },
+            { id: 'ch-rp-methods', title: 'Methods', sections: [ { id: 'methodology', title: 'Methodology', type: 'report' } ] },
+            { id: 'ch-rp-results', title: 'Results', sections: [ { id: 'results', title: 'Results', type: 'report' } ] },
+            { id: 'ch-rp-discussion', title: 'Discussion', sections: [ { id: 'discussion', title: 'Discussion', type: 'report' }, { id: 'conclusion', title: 'Conclusion', type: 'report' } ] },
+            { id: 'ch-rp-back', title: 'Back Matter', sections: [ { id: 'acknowledgment', title: 'Acknowledgments', type: 'report' }, { id: 'references', title: 'References', type: 'report' } ] }
+        ]
+    },
+    {
+        id: 'business-proposal',
+        name: 'Business Proposal',
+        description: 'A persuasive template designed for pitching a new product, service, or project to clients or stakeholders.',
+        chapters: [
+            { id: 'ch-bp-intro', title: 'Introduction', sections: [ { id: 'executive-summary', title: 'Executive Summary', type: 'report' }, { id: 'problem-statement', title: 'Problem Statement', type: 'report' } ] },
+            { id: 'ch-bp-solution', title: 'Proposed Solution', sections: [ { id: 'solution-overview', title: 'Solution Overview', type: 'report' }, { id: 'deliverables', title: 'Deliverables', type: 'report' }, { id: 'timeline', title: 'Timeline & Milestones', type: 'report' } ] },
+            { id: 'ch-bp-pricing', title: 'Pricing & Terms', sections: [ { id: 'pricing-structure', title: 'Pricing Structure', type: 'report' }, { id: 'terms-conditions', title: 'Terms & Conditions', type: 'report' } ] },
+            { id: 'ch-bp-about', title: 'About Us', sections: [ { id: 'company-overview', title: 'Company Overview', type: 'report' }, { id: 'case-studies', title: 'Case Studies / Testimonials', type: 'report' } ] },
+            { id: 'ch-bp-conclusion', title: 'Conclusion', sections: [ { id: 'call-to-action', title: 'Next Steps & Call to Action', type: 'report' } ] }
+        ]
+    },
+    {
+        id: 'software-documentation',
+        name: 'Software Documentation',
+        description: 'A comprehensive template for creating user manuals or technical documentation for a software product.',
+        chapters: [
+            { id: 'ch-sd-getting-started', title: 'Getting Started', sections: [ { id: 'introduction', title: 'Introduction', type: 'report' }, { id: 'installation-guide', title: 'Installation Guide', type: 'report' }, { id: 'quick-start-tutorial', title: 'Quick Start Tutorial', type: 'report' } ] },
+            { id: 'ch-sd-core-features', title: 'Core Features', sections: [ { id: 'feature-one', title: 'Feature A: Description & Usage', type: 'report' }, { id: 'feature-two', title: 'Feature B: Description & Usage', type: 'report' } ] },
+            { id: 'ch-sd-api-reference', title: 'API Reference', sections: [ { id: 'authentication-api', title: 'Authentication API', type: 'report' }, { id: 'endpoints-reference', title: 'Endpoints Reference', type: 'report' } ] },
+            { id: 'ch-sd-troubleshooting', title: 'Troubleshooting', sections: [ { id: 'faq', title: 'Frequently Asked Questions (FAQ)', type: 'report' }, { id: 'error-codes', title: 'Error Codes Guide', type: 'report' } ] },
+            { id: 'ch-sd-support', title: 'Support', sections: [ { id: 'contact-support', title: 'Contacting Support', type: 'report' } ] }
         ]
     }
 ];

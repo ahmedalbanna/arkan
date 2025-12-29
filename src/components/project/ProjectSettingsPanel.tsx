@@ -36,21 +36,22 @@ const projectTypeOptions = ["Graduation Project", "Research Paper", "Business Pr
 const specializationOptions = ["Artificial Intelligence", "Web Development", "Data Science", "Cybersecurity", "Marketing"];
 const educationalLevelOptions = ["Diploma", "Bachelor's Degree", "Master's Degree", "Doctorate"];
 
+
 function CustomSelect({
   value,
   onChange,
-  options,
+  options = [], // Add default empty array
   placeholder,
 }: {
   value: string;
   onChange: (value: string) => void;
-  options: string[];
+  options?: string[];
   placeholder: string;
 }) {
-  const [isCustom, setIsCustom] = useState(() => value && !options.includes(value));
+  const [isCustom, setIsCustom] = useState(() => value && !(options || []).includes(value));
 
   useEffect(() => {
-    if (value && !options.includes(value)) {
+    if (value && !(options || []).includes(value)) {
       setIsCustom(true);
     } else {
       setIsCustom(false);
