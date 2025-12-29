@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Chapter, ChapterProperties } from './chapter';
 import { ExternalContext, ExternalContextType } from './external-context';
 import { Section, SectionProperties } from './section';
+import { arrayMove } from '@dnd-kit/sortable';
 
 // Define the flexible content item type
 export type ProjectContentItem = Chapter | Section | string;
