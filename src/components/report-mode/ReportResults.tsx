@@ -13,9 +13,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { useEffect, useState } from 'react';
-import { MenuBar } from '@/lib/editor/MenuBar';
 import RichTextEditor from './RichTextEditor';
 import { CoverPage } from '../shared/CoverPage';
+import { ToolBar } from '@/lib/editor/ToolBar';
 
 
 export function ReportResults() {
@@ -62,7 +62,7 @@ export function ReportResults() {
                 />
             </A4Page>
         </ScrollArea>
-        <MenuBar />
+        <ToolBar />
       </CardContent>
     </Card>
   );

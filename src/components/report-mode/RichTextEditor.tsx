@@ -10,7 +10,7 @@ import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 import { editorExtensions } from '@/lib/tiptap-extensions';
 import { Button } from '@/components/ui/button';
-import { SectionToolbar } from '@/lib/editor/ToolBar';
+import { ContextualToolbar } from '@/lib/editor/ToolBar';
 
 
 // Turndown Service Initialization
@@ -127,7 +127,6 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           tippyOptions={{ duration: 100, placement: 'top' }}
           pluginKey={uniqueId}
         >
-          {/* BubbleMenu content will be added later */}
           {editor.isActive('table') ? (
             <div className="bg-background p-1 rounded-lg shadow-lg border flex gap-1">
               <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addColumnBefore().run()}>Add Col Before</Button>
@@ -135,7 +134,7 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
               <Button size="sm" variant="destructive" onClick={() => editor.chain().focus().deleteTable().run()}>Delete Table</Button>
             </div>
           ) : (
-            <SectionToolbar
+            <ContextualToolbar
               editor={editor}
             />
           )}

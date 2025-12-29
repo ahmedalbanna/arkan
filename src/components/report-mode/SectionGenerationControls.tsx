@@ -208,29 +208,14 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                         <Checkbox id={`output-math-${section.id}`} checked={controls.outputStyle.math} onCheckedChange={(checked) => handleOutputStyleChange('math', !!checked)} />
                         <Label htmlFor={`output-math-${section.id}`}>Math</Label>
                     </div>
+                    <div className="flex items-center gap-2">
+                    <Checkbox id={`include-citations-${section.id}`} checked={controls.outputStyle.includeCitations} onCheckedChange={(checked) => handleOutputStyleChange('includeCitations', !!checked)} />
+                    <Label htmlFor={`include-citations-${section.id}`}>Citations</Label>
+                </div>
                 </div>
             </div>
             
-            <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                    <Checkbox id={`include-citations-${section.id}`} checked={controls.outputStyle.includeCitations} onCheckedChange={(checked) => handleOutputStyleChange('includeCitations', !!checked)} />
-                    <Label htmlFor={`include-citations-${section.id}`}>Include Citations</Label>
-                </div>
-                {controls.outputStyle.includeCitations && (
-                     <div className="space-y-2 pl-6">
-                        <Label htmlFor={`citationStyle-${section.id}`}>Citation Style</Label>
-                        <Select value={controls.citationStyle} onValueChange={(val) => handleControlChange('citationStyle', val as any)}>
-                            <SelectTrigger id={`citationStyle-${section.id}`}><SelectValue placeholder="Select citation style..." /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="APA7">APA 7th Edition</SelectItem>
-                                <SelectItem value="IEEE">IEEE</SelectItem>
-                                <SelectItem value="MLA">MLA</SelectItem>
-                                <SelectItem value="Chicago">Chicago</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                )}
-            </div>
+
 
             {controls.outputStyle.heading && (
                 <div className="space-y-2 pl-6 border-l-2 ml-2">
@@ -282,6 +267,21 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                     </Select>
                 </div>
             )}
+
+{controls.outputStyle.includeCitations && (
+                     <div className="space-y-2 pl-6">
+                        <Label htmlFor={`citationStyle-${section.id}`}>Citation Style</Label>
+                        <Select value={controls.citationStyle} onValueChange={(val) => handleControlChange('citationStyle', val as any)}>
+                            <SelectTrigger id={`citationStyle-${section.id}`}><SelectValue placeholder="Select citation style..." /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="APA7">APA 7th Edition</SelectItem>
+                                <SelectItem value="IEEE">IEEE</SelectItem>
+                                <SelectItem value="MLA">MLA</SelectItem>
+                                <SelectItem value="Chicago">Chicago</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                )}
 
             <div className="space-y-2">
                 <Label htmlFor={`wordCount-${section.id}`}>{t('builder.reportGenerator.tool_word_count_label')}</Label>
