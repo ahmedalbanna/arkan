@@ -45,13 +45,13 @@ export function BuildProjectDialog({
   if (!project) return null;
 
   const chaptersToBuild = useMemo(() => {
-    return project.chapters
+    return project.content
       .map(c => ({
         ...c,
         sections: c.sections.filter(s => selectedSections.has(s.id))
       }))
       .filter(c => c.sections.length > 0);
-  }, [project.chapters, selectedSections]);
+  }, [project.content, selectedSections]);
 
   const getContextNames = (section: Section) => {
     if (!project) return [];

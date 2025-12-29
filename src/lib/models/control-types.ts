@@ -1,13 +1,76 @@
-export type OutputStyle = {
-  heading: boolean;
-  paragraph: boolean;
-  list: boolean;
-  table: boolean;
-  code: boolean;
-  diagram: boolean;
+
+'use client';
+
+import { z } from 'zod';
+
+// Enums for various control options
+export const ExternalContextTypeSchema = z.enum(['context', 'example', 'question', 'textbook', 'guidelines', 'dataset']);
+export type ExternalContextType = z.infer<typeof ExternalContextTypeSchema>;
+
+export const SectionTypeSchema = z.enum(['report', 'diagram', 'presentation', 'code', 'math']);
+export type SectionType = z.infer<typeof SectionTypeSchema>;
+
+export const ToneSchema = z.enum(['professional', 'academic', 'casual', 'persuasive', 'technical', 'explanatory']);
+export type Tone = z.infer<typeof ToneSchema>;
+
+export const LanguageSchema = z.enum(['default', 'en', 'ar', 'es', 'fr', 'de']);
+export type Language = z.infer<typeof LanguageSchema>;
+
+export const DiagramTypeSchema = z.enum(['useCase', 'class', 'sequence', 'activity', 'component', 'archimate', 'er', 'dfd', 'mindmap', 'gantt']);
+export type DiagramType = z.infer<typeof DiagramTypeSchema>;
+
+// Behaviors
+export const BehaviorTypeSchema = z.enum(['behavior', 'persona']);
+export type BehaviorType = z.infer<typeof BehaviorTypeSchema>;
+
+export const BehaviorSchema = z.object({
+  name: z.string(),
+  type: BehaviorTypeSchema,
+  description: z.string().optional()
+});
+export type Behavior = z.infer<typeof BehaviorSchema>;
+
+// Control State Schemas
+export const OutputStyleSchema = z.object({
+  heading: z.boolean(),
+  paragraph: z.boolean(),
+  list: z.boolean(),
+  table: z.boolean(),
+  code: z.boolean(),
+  diagram: z.boolean(),
+  math: z.boolean()
+});
+export type OutputStyle = z.infer<typeof OutputStyleSchema>;
+
+export const GenerationControlStateSchema = z.object({
+  formality: z.number().min(0).max(100),
+  complexity: z.number().min(0).max(100),
+  tone: ToneSchema,
+  language: LanguageSchema,
+  outputStyle: OutputStyleSchema,
+  wordCount: z.string().optional(),
+  diagramType: DiagramTypeSchema.optional(),
+  programmingLanguage: z.string().optional(),
+  tableCaption: z.string().optional(),
+  includedHeadings: z.array(z.string()).optional(),
+  citationStyle: z.enum(['APA7', 'IEEE', 'MLA', 'Chicago']).optional()
+});
+export type GenerationControlState = z.infer<typeof GenerationControlStateSchema>;
+
+export const defaultControls: GenerationControlState = {
+  formality: 70,
+  complexity: 50,
+  tone: 'professional',
+  language: 'default',
+  outputStyle: { heading: true, paragraph: true, list: false, table: false, code: false, diagram: false, math: false },
+  wordCount: '',
+  diagramType: 'useCase',
+  citationStyle: 'IEEE'
 };
 
-export type Tone = 'professional' | 'academic' | 'casual' | 'persuasive';
-export type Language = 'default' | 'en' | 'ar' | 'es' | 'fr' | 'de';
-
-export type ManipulationType = 'rewrite' | 'summarize' | 'style-editor' | 'readability-enhancer' | 'conciseness-checker' | 'clarity-advisor';
+// Context Definition
+export const SectionContextSchema = z.object({
+  sections: z.record(z.string(), ExternalContextTypeSchema), // sectionId -> Usage Type
+  externalContext: z.record(z.string(), ExternalContextTypeSchema) // externalContextId -> Usage Type
+});
+export type SectionContext = z.infer<typeof SectionContextSchema>;

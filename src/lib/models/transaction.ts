@@ -1,7 +1,6 @@
 
 'use client';
 
-
 export interface TransactionProperties {
     id: string; // Firestore document ID
     userId: string;

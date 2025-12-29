@@ -79,7 +79,7 @@ export function GenerationTools() {
     finalProjectPrompt,
   } = useReportGenerationTools();
 
-  const totalSelectableSections = project?.sections.length || 0;
+  const totalSelectableSections = project?.content.length || 0;
   const isAllSelected = useMemo(() => totalSelectableSections > 0 && selectedSectionsForBuild.size === totalSelectableSections, [totalSelectableSections, selectedSectionsForBuild]);
   const isIndeterminate = useMemo(() => selectedSectionsForBuild.size > 0 && !isAllSelected, [selectedSectionsForBuild, isAllSelected]);
 

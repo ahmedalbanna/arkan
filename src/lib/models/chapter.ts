@@ -1,82 +1,89 @@
 
 'use client';
 
-import { v4 as uuidv4 } from 'uuid';
 import { Section, type SectionProperties } from './section';
-import { arrayMove } from '@dnd-kit/sortable';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface ChapterProperties {
-    id: string;
-    title: string;
-    sections: readonly (Section | SectionProperties)[];
+  id?: string;
+  title: string;
+  sections?: (Section | SectionProperties)[];
 }
 
 export class Chapter {
-    public readonly id: string;
-    public readonly title: string;
-    public readonly sections: readonly Section[];
+  public readonly id: string;
+  public readonly title: string;
+  public readonly sections: readonly Section[];
 
-    constructor(props: Partial<Omit<ChapterProperties, 'sections'>> & { sections?: readonly (Section | SectionProperties)[] }) {
-        this.id = props.id || uuidv4();
-        this.title = props.title || 'Untitled Chapter';
-        this.sections = (props.sections || []).map(s => s instanceof Section ? s : new Section(s));
-    }
+  constructor(props: ChapterProperties) {
+    this.id = props.id || uuidv4();
+    this.title = props.title || 'Untitled Chapter';
+    this.sections = (props.sections || []).map(s => s instanceof Section ? s : new Section(s));
+  }
 
-    public with(props: Partial<Omit<ChapterProperties, 'id' | 'sections'>> & { sections?: readonly (Section | SectionProperties)[] }): Chapter {
-        return new Chapter({ ...this.toJSON(), ...props });
-    }
+  public with(props: Partial<ChapterProperties>): Chapter {
+    const sections = props.sections
+        ? props.sections.map(s => s instanceof Section ? s : new Section(s))
+        : this.sections;
 
-    public getSection(sectionId: string): Section | undefined {
-        return this.sections.find(s => s.id === sectionId);
-    }
-    
-    public addSection(section: Section): Chapter {
-        const newSections = [...this.sections, section];
-        return this.with({ sections: newSections });
-    }
+    return new Chapter({
+        id: this.id,
+        title: props.title ?? this.title,
+        sections: sections
+    });
+  }
 
-    public removeSection(sectionId: string): Chapter {
-        const newSections = this.sections.filter(s => s.id !== sectionId);
-        return this.with({ sections: newSections });
-    }
+  public getSection(id: string): Section | undefined {
+    return this.sections.find(s => s.id === id);
+  }
 
-    public updateSection(sectionId: string, updater: (section: Section) => Section): Chapter {
-        const sectionIndex = this.sections.findIndex(s => s.id === sectionId);
-        if (sectionIndex === -1) return this;
+  public addSection(section: Section, index?: number): Chapter {
+    const newSections = [...this.sections];
+    if (index !== undefined && index >= 0 && index <= newSections.length) {
+        newSections.splice(index, 0, section);
+    } else {
+        newSections.push(section);
+    }
+    return this.with({ sections: newSections });
+  }
 
-        const newSections = [...this.sections];
-        const updatedSection = updater(newSections[sectionIndex]);
-        newSections[sectionIndex] = updatedSection;
+  public removeSection(id: string): Chapter {
+    return this.with({ sections: this.sections.filter(s => s.id !== id) });
+  }
 
-        return this.with({ sections: newSections });
-    }
-    
-    public updateSectionsOrder(orderedIds: string[]): Chapter {
-        const newSections = orderedIds
-            .map(id => this.sections.find(s => s.id === id))
-            .filter((s): s is Section => !!s);
-        return this.with({ sections: newSections });
-    }
-    
-    public moveSectionUp(sectionId: string): Chapter {
-        const index = this.sections.findIndex(s => s.id === sectionId);
-        if (index <= 0) return this;
-        const newSections = arrayMove([...this.sections], index, index - 1);
-        return this.with({ sections: newSections });
-    }
+  public updateSection(id: string, updater: (s: Section) => Section): Chapter {
+    const idx = this.sections.findIndex(s => s.id === id);
+    if (idx === -1) return this;
+    const newSections = [...this.sections];
+    newSections[idx] = updater(newSections[idx]);
+    return this.with({ sections: newSections });
+  }
 
-    public moveSectionDown(sectionId: string): Chapter {
-        const index = this.sections.findIndex(s => s.id === sectionId);
-        if (index === -1 || index >= this.sections.length - 1) return this;
-        const newSections = arrayMove([...this.sections], index, index + 1);
-        return this.with({ sections: newSections });
-    }
+  public reorderSections(newOrderIds: string[]): Chapter {
+      // Create a map for O(1) lookup
+      const sectionMap = new Map(this.sections.map(s => [s.id, s]));
+      const newSections: Section[] = [];
 
-    public toJSON(): ChapterProperties {
-        return {
-            id: this.id,
-            title: this.title,
-            sections: this.sections.map(s => s.toJSON())
-        };
-    }
+      for (const id of newOrderIds) {
+          const s = sectionMap.get(id);
+          if (s) newSections.push(s);
+      }
+
+      // Keep any sections not in the newOrderIds at the end (safety mechanism)
+      this.sections.forEach(s => {
+          if (!newSections.find(ns => ns.id === s.id)) {
+              newSections.push(s);
+          }
+      });
+
+      return this.with({ sections: newSections });
+  }
+
+  public toJSON(): any {
+    return {
+      id: this.id,
+      title: this.title,
+      sections: this.sections.map(s => s.toJSON())
+    };
+  }
 }

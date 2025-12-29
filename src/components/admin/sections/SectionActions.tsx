@@ -24,7 +24,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Section } from '@/lib/models/section';
+import { Section } from '@/lib/models';
 
 interface SectionActionsProps {
   section: Section;

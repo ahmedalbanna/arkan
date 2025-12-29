@@ -1,24 +1,21 @@
 
 'use client';
-
 import { v4 as uuidv4 } from 'uuid';
-import { Chapter, ChapterProperties } from './chapter';
-import { ExternalContext, ExternalContextType } from './external-context';
-import { Section, SectionProperties } from './section';
+import { Chapter, type ChapterProperties } from './chapter';
+import { Section, type SectionProperties } from './section';
+import { ExternalContext } from './external-context';
 import { arrayMove } from '@dnd-kit/sortable';
+import type { Root as MdastRoot, RootContent } from 'mdast';
+import { getNodeText } from '../pptx-convert/ast-utils';
 
-// Define the flexible content item type
-export type ProjectContentItem = Chapter | Section | string;
-export type ProjectContentItemProperties = ChapterProperties | SectionProperties | string;
+// Flexible Type for Project Content - strictly enforcing structure now
+export type ProjectContent = readonly (Chapter | Section)[];
 
 export interface ProjectProperties {
   id?: string;
-  userId?: string;
-  createdAt?: string;
-  updatedAt?: string;
   name?: string;
+  description?: string;
   projectDescription?: string;
-  logoUrl?: string;
   projectType?: string;
   specialization?: string;
   university?: string;
@@ -26,101 +23,129 @@ export interface ProjectProperties {
   course?: string;
   educationalLevel?: string;
   teamMembers?: string[];
-  content?: readonly (ProjectContentItem | ProjectContentItemProperties)[]; // Changed from chapters
-  externalContext?: readonly ExternalContext[];
-  coverPageMarkdown?: string;
+  logoUrl?: string;
+  content?: (Chapter | Section | ChapterProperties | SectionProperties)[];
+  externalContext?: ExternalContext[];
+  meta?: {
+    author?: string;
+    version?: string;
+    created?: string;
+    updated?: string;
+  };
+  // Deprecated - will be removed in a future refactor
+  activeSectionId?: string;
 }
 
-
-export class Project implements Required<Omit<ProjectProperties, 'userId' | 'projectDescription' | 'logoUrl' | 'projectType' | 'specialization' | 'university' | 'supervisor' | 'course' | 'educationalLevel' | 'teamMembers' | 'coverPageMarkdown'>> {
+export class Project {
   public readonly id: string;
-  public readonly userId: string | undefined;
-  public readonly createdAt: string;
-  public readonly updatedAt: string;
-
   public readonly name: string;
-  public readonly projectDescription: string | undefined;
-  public readonly logoUrl: string | undefined;
-  public readonly projectType: string | undefined;
-  public readonly specialization: string | undefined;
-  public readonly university: string | undefined;
-  public readonly supervisor: string | undefined;
-  public readonly course: string | undefined;
-  public readonly educationalLevel: string | undefined;
-  public readonly teamMembers: string[] | undefined;
-  public readonly content: readonly ProjectContentItem[]; // Changed from chapters
+  public readonly description: string;
+  public readonly projectDescription?: string;
+  public readonly projectType?: string;
+  public readonly specialization?: string;
+  public readonly university?: string;
+  public readonly supervisor?: string;
+  public readonly course?: string;
+  public readonly educationalLevel?: string;
+  public readonly teamMembers?: string[];
+  public readonly logoUrl?: string;
+
+  public readonly content: ProjectContent;
   public readonly externalContext: readonly ExternalContext[];
-  public readonly coverPageMarkdown: string | undefined;
+  public readonly meta: Readonly<Required<NonNullable<ProjectProperties['meta']>>>;
+  public readonly activeSectionId?: string;
 
 
   constructor(props: ProjectProperties) {
     this.id = props.id || uuidv4();
-    this.userId = props.userId;
-    this.createdAt = props.createdAt || new Date().toISOString();
-    this.updatedAt = props.updatedAt || new Date().toISOString();
     this.name = props.name || 'Untitled Project';
+    this.description = props.description || '';
     this.projectDescription = props.projectDescription;
-    this.logoUrl = props.logoUrl;
     this.projectType = props.projectType;
     this.specialization = props.specialization;
     this.university = props.university;
     this.supervisor = props.supervisor;
     this.course = props.course;
     this.educationalLevel = props.educationalLevel;
-    this.teamMembers = props.teamMembers || [];
-    // Handle instantiation of different content types
+    this.teamMembers = props.teamMembers;
+    this.logoUrl = props.logoUrl;
+    this.activeSectionId = props.activeSectionId;
+
     this.content = (props.content || []).map(c => {
-      if (typeof c === 'string') return c;
-      if (c instanceof Chapter || c instanceof Section) return c;
-      // Check if it's a chapter-like or section-like object
-      if ('sections' in c) return new Chapter(c as ChapterProperties);
+      if (c instanceof Chapter || c instanceof Section) {
+        return c;
+      }
+      // Check if it has a 'sections' property to determine if it's a Chapter
+      if ('sections' in c) {
+        return new Chapter(c as ChapterProperties);
+      }
       return new Section(c as SectionProperties);
     });
-    this.externalContext = (props.externalContext || []).map(ctx => ({ ...ctx, id: ctx.id || uuidv4() }));
-    this.coverPageMarkdown = props.coverPageMarkdown || this.generateCoverPageMarkdown().coverPageMarkdown;
+    this.externalContext = (props.externalContext || []).map(ec => new ExternalContext(ec));
+
+    this.meta = {
+      author: props.meta?.author || 'User',
+      version: props.meta?.version || '1.0.0',
+      created: props.meta?.created || new Date().toISOString(),
+      updated: props.meta?.updated || new Date().toISOString()
+    };
   }
 
-  public with(props: Partial<Omit<ProjectProperties, 'id'>>): Project {
-    return new Project({ ...this.toJSON(), ...props });
+  public with(props: Partial<ProjectProperties>): Project {
+    const currentProps = this.toStateObject();
+    const newProps: ProjectProperties = {
+      ...currentProps,
+      ...props,
+      meta: { ...currentProps.meta, ...props.meta, updated: new Date().toISOString() }
+    };
+    return new Project(newProps);
   }
 
-  public generateUniqueId(): string {
-    return uuidv4();
+  // --- Derived State ---
+
+  get chapters(): Chapter[] {
+    return this.content.filter(item => item instanceof Chapter) as Chapter[];
   }
 
-  // --- Getters for derived state ---
-  get chapters(): readonly Chapter[] {
-    return this.content.filter((item): item is Chapter => item instanceof Chapter);
+  get sections(): Section[] {
+    return this.content.flatMap(item =>
+      item instanceof Chapter ? item.sections : [item]
+    );
   }
 
-  get sections(): readonly Section[] {
-    const allSections: Section[] = [];
-    this.content.forEach(item => {
-      if (item instanceof Section) {
-        allSections.push(item);
-      } else if (item instanceof Chapter) {
-        allSections.push(...item.sections);
-      }
-    });
-    return allSections;
-  }
-
-  get fullMarkdownContent(): string {
-    if (!this || !this.content) return '';
-    return this.content.map(item => {
-      if (typeof item === 'string') {
+  public getSection(id: string): Section | undefined {
+    for (const item of this.content) {
+      if (item instanceof Section && item.id === id) {
         return item;
       }
       if (item instanceof Chapter) {
-        const sectionsMarkdown = item.sections.map(section => `## ${section.title}\n\n${section.content || ''}`).join('\n\n');
-        return `# ${item.title}\n\n${sectionsMarkdown}`;
+        const found = item.getSection(id);
+        if (found) return found;
       }
-      // Standalone Section
-      if (item instanceof Section) {
-        return `# ${item.title}\n\n${item.content || ''}`;
+    }
+    return undefined;
+  }
+
+  public getChapter(id: string): Chapter | undefined {
+    return this.chapters.find(c => c.id === id);
+  }
+
+  public findContentItem(id: string): { item: Chapter | Section, parentChapterId: string | null } | null {
+    // Check root content
+    const rootItem = this.content.find(item => item.id === id);
+    if (rootItem) {
+      return { item: rootItem, parentChapterId: null };
+    }
+
+    // Check within chapters
+    for (const chapter of this.chapters) {
+      const section = chapter.getSection(id);
+      if (section) {
+        return { item: section, parentChapterId: chapter.id };
       }
-      return '';
-    }).join('\n\n---\n\n');
+    }
+
+    return null;
   }
 
   public hasContent(): boolean {
@@ -130,144 +155,123 @@ export class Project implements Required<Omit<ProjectProperties, 'userId' | 'pro
     return hasBasicInfo || hasContentItems || hasExternalContext;
   }
 
-  public generateCoverPageMarkdown(): Project {
-    const detail = (label: string, value: string | string[] | undefined) => {
-      if (!value || value.length === 0) return '';
-      const displayValue = Array.isArray(value) ? value.join(', ') : value;
-      return `**${label}:** ${displayValue}\n`;
-    };
+  // --- Logic ---
 
-    const teamMemberNames = this.teamMembers?.join(', ');
-
-    const content = `
-${this.logoUrl ? `![Logo](${this.logoUrl})\n\n` : ''}
-# ${this.name || 'Untitled Project'}
-
-${this.projectDescription || ''}
-
-${detail('Project Type', this.projectType)}
-${detail('Specialization', this.specialization)}
-
----
-
-**Submitted By:**
-${detail('Team', teamMemberNames)}
-
-**Supervised By:**
-${detail('Name', this.supervisor)}
-
-**Date:** {currentDate}
-    `.trim();
-
-    return this.with({ coverPageMarkdown: content });
+  public addChapter(title: string = "Untitled Chapter"): Project {
+    const newChapter = new Chapter({ title, sections: [] });
+    return this.with({ content: [...this.content, newChapter] });
   }
 
-  public withContentFromMarkdown(markdown: string): Project {
-    const lines = markdown.split('\n');
+  public addSectionToChapter(chapterId: string, sectionTitle: string): Project {
+    return this.updateChapter(chapterId, (chapter) =>
+        chapter.addSection(new Section({ title: sectionTitle, type: 'report' }))
+    );
+  }
 
-    let chapterLevel = 0;
-    for (let i = 1; i <= 6; i++) {
-        const hasLevel = lines.some(line => line.trim().startsWith('#'.repeat(i) + ' '));
-        if (hasLevel) {
-            chapterLevel = i;
-            break;
-        }
-    }
+  public updateChapter(id: string, updater: (c: Chapter) => Chapter): Project {
+    const idx = this.content.findIndex(c => c.id === id && c instanceof Chapter);
+    if (idx === -1) return this;
 
-    if (chapterLevel === 0) {
-        const newSection = new Section({ id: uuidv4(), title: 'Content', type: 'report', content: markdown });
-        return this.with({ content: [newSection] });
-    }
-
-    const sectionLevel = chapterLevel + 1;
-    const chapterRegex = new RegExp(`^${'#'.repeat(chapterLevel)}\\s+(.*)`);
-    const sectionRegex = new RegExp(`^${'#'.repeat(sectionLevel)}\\s+(.*)`);
-
-    type ParsedSection = { title: string; content: string };
-    type ParsedChapter = { title: string; sections: ParsedSection[] };
-
-    const newContent: (Chapter | Section)[] = [];
-    let currentChapter: ParsedChapter | null = null;
-    let currentSection: ParsedSection | null = null;
-    let contentBuffer: string[] = [];
-    let prefaceContent: string[] = [];
-    let firstChapterFound = false;
-
-    const flushContent = () => {
-        if (currentSection) {
-            currentSection.content = contentBuffer.join('\n').trim();
-        } else if (currentChapter) {
-            // Content between chapter and first section is an implicit intro section
-            const intro = contentBuffer.join('\n').trim();
-            if (intro) {
-                currentChapter.sections.unshift({ title: 'Introduction', content: intro });
-            }
-        }
-        contentBuffer = [];
-    };
-
-    lines.forEach(line => {
-        const chapterMatch = line.match(chapterRegex);
-        const sectionMatch = line.match(sectionRegex);
-
-        if (chapterMatch) {
-            firstChapterFound = true;
-            flushContent();
-            if (currentSection && currentChapter) {
-                currentChapter.sections.push(currentSection);
-            }
-            if (currentChapter) {
-                newContent.push(new Chapter({ id: uuidv4(), title: currentChapter.title, sections: currentChapter.sections.map(s => new Section({ id: uuidv4(), ...s, type: 'report' })) }));
-            }
-            currentChapter = { title: chapterMatch[1].trim(), sections: [] };
-            currentSection = null;
-        } else if (sectionMatch && currentChapter) {
-            flushContent();
-            if (currentSection) {
-                currentChapter.sections.push(currentSection);
-            }
-            currentSection = { title: sectionMatch[1].trim(), content: '' };
-        } else {
-            if (firstChapterFound) {
-                contentBuffer.push(line);
-            } else {
-                prefaceContent.push(line);
-            }
-        }
-    });
-
-    flushContent();
-    if (currentSection && currentChapter) {
-        currentChapter.sections.push(currentSection);
-    }
-    if (currentChapter) {
-        newContent.push(new Chapter({ id: uuidv4(), title: currentChapter.title, sections: currentChapter.sections.map(s => new Section({ id: uuidv4(), ...s, type: 'report' })) }));
-    }
-
-    // Handle content before the first chapter
-    const preface = prefaceContent.join('\n').trim();
-    if (preface) {
-        newContent.unshift(new Section({ id: uuidv4(), title: 'Preface', type: 'report', content: preface }));
-    }
-
-    // If no chapters or sections were parsed but there's content, treat it as a single section.
-    if (newContent.length === 0 && markdown.trim()) {
-        newContent.push(new Section({ id: uuidv4(), title: this.name || 'Content', type: 'report', content: markdown }));
-    }
+    const newContent = [...this.content];
+    const originalChapter = newContent[idx] as Chapter;
+    newContent[idx] = updater(originalChapter);
 
     return this.with({ content: newContent });
   }
 
+  public removeChapter(id: string): Project {
+    return this.with({ content: this.content.filter(c => c.id !== id) });
+  }
 
-  public toJSON(): ProjectProperties {
+  public updateSection(id: string, updater: (s: Section) => Section): Project {
+    let sectionFound = false;
+    const newContent = this.content.map(item => {
+      if (item instanceof Section && item.id === id) {
+        sectionFound = true;
+        return updater(item);
+      }
+      if (item instanceof Chapter) {
+        const originalSections = item.sections;
+        const updatedSections = item.sections.map(s => {
+          if (s.id === id) {
+            sectionFound = true;
+            return updater(s);
+          }
+          return s;
+        });
+        if (originalSections !== updatedSections) {
+          return item.with({ sections: updatedSections });
+        }
+      }
+      return item;
+    });
+
+    return sectionFound ? this.with({ content: newContent }) : this;
+  }
+
+  public updateSectionContent(sectionId: string, newMarkdown: string): Project {
+    return this.updateSection(sectionId, s => s.with({ content: newMarkdown }));
+  }
+
+  public addExternalContext(ctx: Omit<ExternalContext, 'id'>): Project {
+    const newCtx = new ExternalContext({ ...ctx, id: uuidv4() });
+    return this.with({ externalContext: [...this.externalContext, newCtx] });
+  }
+
+  public removeExternalContext(index: number): Project {
+    const newContext = [...this.externalContext];
+    newContext.splice(index, 1);
+    return this.with({ externalContext: newContext });
+  }
+
+  public updateExternalContextType(index: number, type: any): Project {
+    const newContext = [...this.externalContext];
+    const item = newContext[index];
+    if (item) {
+      newContext[index] = item.with({ type });
+    }
+    return this.with({ externalContext: newContext });
+  }
+
+  public generateCoverPageMarkdown(): Project {
+    const teamMemberText = this.teamMembers && this.teamMembers.length > 0 ? `\n\n**Submitted by:**\n${this.teamMembers.join(', ')}` : '';
+    const supervisorText = this.supervisor ? `\n\n**Supervisor:**\n${this.supervisor}` : '';
+    const universityText = this.university ? `\n\n**${this.university}**` : '';
+    
+    const coverContent = `
+# ${this.name || 'Untitled Project'}
+${this.projectDescription ? `\n*${this.projectDescription}*` : ''}
+${teamMemberText}
+${supervisorText}
+${universityText}
+\n\n{currentDate}
+    `.trim();
+
+    return this.updateSection('cover-page', s => s.with({ content: coverContent }));
+  }
+
+  public get fullMarkdownContent(): string {
+    return this.content.map(item => {
+      if (item instanceof Chapter) {
+        // Render chapter title only if it has sections
+        if (item.sections.length > 0) {
+            return `# ${item.title}\n\n${item.sections.map(s => `## ${s.title}\n\n${s.content || ''}`).join('\n\n')}`;
+        }
+        return '';
+      }
+      if (item instanceof Section) {
+        return `## ${item.title}\n\n${item.content || ''}`;
+      }
+      return '';
+    }).filter(Boolean).join('\n\n---\n\n');
+  }
+
+  public toStateObject(): ProjectProperties {
     return {
       id: this.id,
-      userId: this.userId,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
       name: this.name,
+      description: this.description,
       projectDescription: this.projectDescription,
-      logoUrl: this.logoUrl,
       projectType: this.projectType,
       specialization: this.specialization,
       university: this.university,
@@ -275,271 +279,43 @@ ${detail('Name', this.supervisor)}
       course: this.course,
       educationalLevel: this.educationalLevel,
       teamMembers: this.teamMembers,
-      content: this.content.map(c => {
-        if (typeof c === 'string') return c;
-        return c.toJSON(); // Assumes Chapter and Section have toJSON
-      }),
-      externalContext: [...this.externalContext],
-      coverPageMarkdown: this.coverPageMarkdown,
+      logoUrl: this.logoUrl,
+      content: this.content.map(c => c instanceof Chapter ? c.toJSON() : c.toJSON()),
+      externalContext: this.externalContext.map(ec => ec.toStateObject()),
+      meta: this.meta,
+      activeSectionId: this.activeSectionId,
     };
   }
 
-  public toStateObject(): ProjectProperties {
-    return this.toJSON();
-  }
-
-  // --- Import / Export Methods ---
-
   public static fromFile(file: File): Promise<Project> {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const projectData = JSON.parse(event.target?.result as string);
-          if (projectData && typeof projectData === 'object' && ('name' in projectData)) {
-            resolve(new Project(projectData));
-          } else {
-            reject(new Error("Invalid project file structure."));
-          }
-        } catch (err) {
-          reject(err);
-        }
-      };
-      reader.onerror = (err) => reject(err);
-      reader.readAsText(file);
-    });
-  }
-
-  public static fromTableOfContents(tocText: string, existingProject?: Project): Project {
-    const lines = tocText.split('\n').map(line => line.trim()).filter(Boolean);
-    const newProject = new Project({
-      id: existingProject?.id,
-      name: existingProject?.name,
-      projectDescription: existingProject?.projectDescription,
-      externalContext: existingProject?.externalContext,
-    });
-
-    let currentProject = newProject;
-    let currentChapterId: string | null = null;
-
-    lines.forEach(line => {
-      const isSection = line.match(/^\s*\d+\.\d+/);
-      const isChapter = !isSection;
-
-      if (isChapter) {
-        const chapterTitle = line.replace(/^\d+\.?\s*/, '').trim();
-        if (chapterTitle) {
-          currentProject = currentProject.addChapter(chapterTitle);
-          currentChapterId = currentProject.chapters[currentProject.chapters.length - 1].id;
-        }
-      } else if (currentChapterId) {
-        const sectionTitle = line.replace(/^\d+\.\d+\.?\s*/, '').trim();
-        if (sectionTitle) {
-          currentProject = currentProject.addSectionToChapter(currentChapterId, sectionTitle);
-        }
-      }
-    });
-
-    return currentProject;
-  }
-
-  public downloadAsFile(): void {
-    const projectData = JSON.stringify(this.toStateObject(), null, 2);
-    const blob = new Blob([projectData], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const fileName = this.name ? this.name.replace(/\s+/g, '_') : 'untitled_project';
-    a.download = `${fileName}.arkan`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-
-  // --- Chapter Methods ---
-  public addChapter(title?: string, sections: Section[] = []): Project {
-    const chapterTitle = title || 'Untitled Chapter';
-    const newChapterId = this.generateUniqueId();
-    const newChapter = new Chapter({ id: newChapterId, title: chapterTitle, sections });
-    return this.with({ content: [...this.content, newChapter] });
-  }
-
-  public removeChapter(chapterId: string): Project {
-    const newContent = this.content.filter(item => {
-      if (item instanceof Chapter) {
-        return item.id !== chapterId;
-      }
-      return true; // Keep non-chapter items
-    });
-    return this.with({ content: newContent });
-  }
-
-  public getChapter(chapterId: string): Chapter | undefined {
-    return this.chapters.find(c => c.id === chapterId);
-  }
-
-  public updateChapter(chapterId: string, updater: (chapter: Chapter) => Chapter): Project {
-    const contentIndex = this.content.findIndex(item => (item instanceof Chapter) && item.id === chapterId);
-    if (contentIndex === -1) return this;
-    
-    const newContent = [...this.content];
-    const updatedChapter = updater(newContent[contentIndex] as Chapter);
-    newContent[contentIndex] = updatedChapter;
-
-    return this.with({ content: newContent });
-  }
-
-  public updateChaptersOrder(newOrderIds: string[]): Project {
-    const newOrderedChapters = newOrderIds
-      .map(id => this.chapters.find(c => c.id === id))
-      .filter((c): c is Chapter => !!c);
-    // This is tricky with mixed content. For now, we only reorder chapters among themselves.
-    const otherContent = this.content.filter(item => !(item instanceof Chapter));
-    return this.with({ content: [...newOrderedChapters, ...otherContent] });
-  }
-
-  // --- Section Methods (Delegation) ---
-  public getSection(sectionId: string): Section | undefined {
-    return this.sections.find(s => s.id === sectionId);
-  }
-
-  public getSectionByTitle(title: string): Section | undefined {
-    return this.sections.find(s => s.title === title);
-  }
-
-  public getSectionContent(sectionId: string): string | undefined {
-    return this.getSection(sectionId)?.content;
-  }
-
-  public findContentItem(itemId: string): { item: ProjectContentItem, parentChapterId: string | null } | null {
-    for (const contentItem of this.content) {
-        if (typeof contentItem !== 'string' && contentItem.id === itemId) {
-            return { item: contentItem, parentChapterId: null };
-        }
-        if (contentItem instanceof Chapter) {
-            const section = contentItem.sections.find(s => s.id === itemId);
-            if (section) {
-                return { item: section, parentChapterId: contentItem.id };
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const json = JSON.parse(e.target?.result as string);
+                // Can add Zod validation here later
+                resolve(new Project(json as ProjectProperties));
+            } catch (err) {
+                reject(new Error("Invalid or corrupted project file."));
             }
-        }
-    }
-    return null;
-  }
-
-  public addSectionToChapter(chapterId: string, title: string, index?: number): Project {
-    const sectionTitle = title || 'Untitled Section';
-    const newSectionId = this.generateUniqueId();
-    const newSection = new Section({ id: newSectionId, title: sectionTitle, type: 'report' });
-
-    return this.updateChapter(chapterId, c => {
-      const newSections = [...c.sections];
-      const finalIndex = (index === undefined || index < 0 || index > newSections.length) ? newSections.length : index;
-      newSections.splice(finalIndex, 0, newSection);
-      return c.with({ sections: newSections });
+        };
+        reader.onerror = () => reject(new Error("Could not read the file."));
+        reader.readAsText(file);
     });
   }
 
-  private findChapterForSection(sectionId: string): Chapter | undefined {
-    return this.chapters.find(c => c.getSection(sectionId));
-  }
-
-
-  public removeSection(sectionId: string): Project {
-    const chapter = this.findChapterForSection(sectionId);
-    if (chapter) {
-      return this.updateChapter(chapter.id, c => c.removeSection(sectionId));
-    }
-    // Handle standalone section
-    const newContent = this.content.filter(item => {
-      if (item instanceof Section) {
-        return item.id !== sectionId;
+  public downloadAsFile() {
+      if (!this.hasContent()) {
+          console.warn("Attempted to download an empty project.");
+          return;
       }
-      return true;
-    });
-    return this.with({ content: newContent });
-  }
-
-  public updateSection(sectionId: string, updater: (section: Section) => Section): Project {
-    const chapter = this.findChapterForSection(sectionId);
-    if (chapter) {
-      return this.updateChapter(chapter.id, c => c.updateSection(sectionId, updater));
-    }
-    // Handle standalone section
-    const contentIndex = this.content.findIndex(item => (item instanceof Section) && item.id === sectionId);
-    if (contentIndex === -1) return this;
-
-    const newContent = [...this.content];
-    const updatedSection = updater(newContent[contentIndex] as Section);
-    newContent[contentIndex] = updatedSection;
-    return this.with({ content: newContent });
-  }
-
-  public updateSectionContent(sectionId: string, content: string): Project {
-    return this.updateSection(sectionId, s => s.with({ content }));
-  }
-
-  public moveSectionUp(sectionId: string): Project {
-    const chapter = this.findChapterForSection(sectionId);
-    if (!chapter) return this; // Only support moving within a chapter for now
-    return this.updateChapter(chapter.id, c => c.moveSectionUp(sectionId));
-  }
-
-  public moveSectionDown(sectionId: string): Project {
-    const chapter = this.findChapterForSection(sectionId);
-    if (!chapter) return this; // Only support moving within a chapter for now
-    return this.updateChapter(chapter.id, c => c.moveSectionDown(sectionId));
-  }
-
-  public moveSectionToChapter(sectionId: string, fromChapterId: string | null, toChapterId: string): Project {
-    const toChapter = this.getChapter(toChapterId);
-    const section = this.getSection(sectionId);
-
-    if (!toChapter || !section) return this;
-
-    let projectAfterRemoval = this;
-    if (fromChapterId) {
-      const fromChapter = this.getChapter(fromChapterId);
-      if (fromChapter) {
-        projectAfterRemoval = this.updateChapter(fromChapterId, c => c.removeSection(sectionId));
-      }
-    } else {
-      projectAfterRemoval = this.with({ content: this.content.filter(item => !(item instanceof Section && item.id === sectionId)) });
-    }
-
-    const newToChapter = toChapter.addSection(section);
-    return projectAfterRemoval.updateChapter(toChapterId, () => newToChapter);
-  }
-
-  public moveSectionToRoot(sectionId: string, fromChapterId: string): Project {
-    const fromChapter = this.getChapter(fromChapterId);
-    const section = this.getSection(sectionId);
-
-    if (!fromChapter || !section) return this;
-
-    const newFromChapter = fromChapter.removeSection(sectionId);
-    const newProject = this.updateChapter(fromChapterId, () => newFromChapter);
-
-    return newProject.with({ content: [...newProject.content, section] });
-  }
-
-
-  // --- External Context Methods ---
-  public addExternalContext(externalContext: Omit<ExternalContext, 'id'> & { id?: string }): Project {
-    const newContext = { ...externalContext, id: externalContext.id || uuidv4() };
-    const newExternalContext = [...this.externalContext, newContext];
-    return this.with({ externalContext: newExternalContext });
-  }
-
-  public removeExternalContext(index: number): Project {
-    const newExternalContext = [...this.externalContext];
-    newExternalContext.splice(index, 1);
-    return this.with({ externalContext: newExternalContext });
-  }
-
-  public updateExternalContextType(index: number, type: ExternalContextType): Project {
-    if (index < 0 || index >= this.externalContext.length) return this;
-    const newExternalContext = [...this.externalContext];
-    newExternalContext[index] = { ...newExternalContext[index], type };
-    return this.with({ externalContext: newExternalContext });
+      const jsonString = JSON.stringify(this.toStateObject(), null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${this.name.replace(/\s+/g, '_') || 'project'}.arkan`;
+      a.click();
+      URL.revokeObjectURL(url);
   }
 }

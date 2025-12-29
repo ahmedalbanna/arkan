@@ -1,11 +1,12 @@
 
 'use client';
 
-import { Chapter, ChapterProperties } from '@/lib/models/chapter';
-import { Project, type ProjectProperties } from '@/lib/models/project';
+import { Chapter, ChapterProperties } from '@/lib/models';
+import { Project, type ProjectProperties } from '@/lib/models';
 import { localProjectService } from '@/services/local-project-service';
 import React, { useEffect } from 'react';
 import { create } from 'zustand';
+import { parseMarkdownToContent } from '../util/useMarkdownParser';
 
 type ActiveView = 'cover-page' | 'report-content';
 
@@ -17,7 +18,8 @@ interface BuilderState {
     initializeStore: () => void;
     setActiveView: (view: ActiveView) => void;
     setHasUnsavedChanges: (hasChanges: boolean) => void;
-    updateProject: (updater: (project: Project) => Project) => void;
+    updateProject: (updater: (project: Project) => Project | ProjectProperties) => void;
+    setContentFromMarkdown: (markdown: string) => void;
     loadProject: (projectData: ProjectProperties) => void;
     newSession: () => void;
 }
@@ -66,8 +68,19 @@ const useBuilderStore = create<BuilderState>((set, get) => {
         updateProject: (updater) => {
             set(state => {
                 if (!state.project) return {};
-                const newProject = updater(state.project);
+                const result = updater(state.project);
+                // Ensure the result is always a Project instance
+                const newProject = result instanceof Project ? result : new Project(result);
                 localStorage.setItem('lastActiveProjectId', newProject.id);
+                return { project: newProject, hasUnsavedChanges: true };
+            });
+        },
+        
+        setContentFromMarkdown: (markdown: string) => {
+            set(state => {
+                if (!state.project) return {};
+                const newContent = parseMarkdownToContent(markdown, state.project.content);
+                const newProject = state.project.with({ content: newContent });
                 return { project: newProject, hasUnsavedChanges: true };
             });
         },

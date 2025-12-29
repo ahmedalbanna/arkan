@@ -61,9 +61,12 @@ export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDia
   const handleSelectTemplate = (template: ReportTemplateProperties) => {
     if (!project) return;
     
+    // Ensure project is a class instance before calling toJSON()
+    const projectInstance = project instanceof Project ? project : new Project(project);
+    
     // Create a new Project instance based on the template, preserving existing project properties
     const newProject = new Project({
-      ...project.toJSON(), // Retain existing project properties like name, description, and context
+      ...projectInstance.toJSON(), // Retain existing project properties like name, description, and context
       content: template.chapters.map(ch => new Chapter(ch)),
     });
 

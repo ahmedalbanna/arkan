@@ -20,7 +20,7 @@ import { CoverPage } from '../shared/CoverPage';
 
 export function ReportResults() {
   const { t } = useLocalization();
-  const { project, updateProject } = useBuilderStore();
+  const { project, setContentFromMarkdown } = useBuilderStore();
 
   const [currentMarkdown, setCurrentMarkdown] = useState('');
 
@@ -33,7 +33,7 @@ export function ReportResults() {
 
   function handleContentChange(markdown: string) {
     if (!project) return;
-    updateProject(p => p.withContentFromMarkdown(markdown));
+    setContentFromMarkdown(markdown);
   }
 
   return (

@@ -1,7 +1,7 @@
 
 'use client';
 import { app } from '@/lib/firebase/client-init';
-import type { ProjectProperties } from "@/lib/models/project";
+import type { ProjectProperties } from "@/lib/models";
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
 

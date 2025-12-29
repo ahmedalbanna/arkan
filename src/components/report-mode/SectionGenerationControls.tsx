@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState } from 'react';
@@ -53,7 +54,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         updateProject(p => p.updateSection(section.id, s => s.with({ controls: { ...s.controls, [field]: value } })));
     };
 
-    function handleOutputStyleChange(style: 'heading' | 'paragraph' | 'list' | 'table' | 'code' | 'diagram', checked: boolean) {
+    function handleOutputStyleChange(style: keyof GenerationControlState['outputStyle'], checked: boolean) {
         handleControlChange('outputStyle', {
             ...controls.outputStyle,
             [style]: checked
@@ -197,6 +198,10 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                     <div className="flex items-center gap-2">
                         <Checkbox id={`output-diagram-${section.id}`} checked={controls.outputStyle.diagram} onCheckedChange={(checked) => handleOutputStyleChange('diagram', !!checked)} />
                         <Label htmlFor={`output-diagram-${section.id}`}>Diagram</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Checkbox id={`output-math-${section.id}`} checked={controls.outputStyle.math} onCheckedChange={(checked) => handleOutputStyleChange('math', !!checked)} />
+                        <Label htmlFor={`output-math-${section.id}`}>Math</Label>
                     </div>
                 </div>
             </div>

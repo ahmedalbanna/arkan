@@ -19,7 +19,7 @@ import { z } from 'zod';
 
 import { useCreateSection, useUpdateSection } from '@/hooks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Section, type SectionProperties } from '@/lib/models/section';
+import { Section, type SectionProperties } from '@/lib/models';
 
 const SectionSchema = z.object({
   id: z.string().min(3, 'ID must be at least 3 characters'),

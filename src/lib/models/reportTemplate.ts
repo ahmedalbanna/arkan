@@ -1,4 +1,4 @@
-import { ChapterProperties } from './chapter';
+import { ChapterProperties } from '@/lib/models';
 import { Template, type BaseTemplateProperties } from './template';
 
 // Corresponds to ReportGenerationTemplateSchema from the Zod schemas

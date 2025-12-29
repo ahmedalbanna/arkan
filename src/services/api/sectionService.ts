@@ -1,7 +1,7 @@
 
 'use client';
 
-import { SectionProperties } from "@/lib/models/section";
+import { SectionProperties } from "@/lib/models";
 
 
 

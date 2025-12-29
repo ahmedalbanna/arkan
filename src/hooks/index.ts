@@ -1,5 +1,4 @@
 
-
 // Admin Hooks
 export * from './admin/use-admin-dashboard';
 export * from './admin/use-create-user-dialog';
@@ -63,3 +62,4 @@ export * from './util/use-mobile';
 export * from './util/use-sound';
 export * from './util/use-toast';
 export * from './util/useExport';
+export * from './util/useMarkdownParser';
