@@ -146,6 +146,9 @@ export class Section {
     if (this.controls.language && this.controls.language !== 'default') {
         instructions.push(`The output language must be ${this.controls.language}.`);
     }
+    if (this.controls.citationStyle) {
+        instructions.push(`Use ${this.controls.citationStyle} citation style.`);
+    }
 
     const enabledStyles = Object.entries(this.controls.outputStyle).filter(([, value]) => value).map(([key]) => key);
     if (enabledStyles.length > 0) instructions.push(`The output should primarily include the following elements: ${enabledStyles.join(', ')}.`);

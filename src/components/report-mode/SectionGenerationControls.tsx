@@ -205,6 +205,19 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                     </div>
                 </div>
             </div>
+            
+            <div className="space-y-2">
+                <Label htmlFor={`citationStyle-${section.id}`}>Citation Style</Label>
+                <Select value={controls.citationStyle} onValueChange={(val) => handleControlChange('citationStyle', val as any)}>
+                    <SelectTrigger id={`citationStyle-${section.id}`}><SelectValue placeholder="Select citation style..." /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="APA7">APA 7th Edition</SelectItem>
+                        <SelectItem value="IEEE">IEEE</SelectItem>
+                        <SelectItem value="MLA">MLA</SelectItem>
+                        <SelectItem value="Chicago">Chicago</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
 
             {controls.outputStyle.heading && (
                 <div className="space-y-2 pl-6 border-l-2 ml-2">

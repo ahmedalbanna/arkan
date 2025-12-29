@@ -278,7 +278,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         title: "Model Architecture",
                         type: "report",
                         prompt: "Describe the neural network architecture in detail. Explain the choice of layers (e.g., Transformer blocks, CNN layers, Attention mechanisms). Use mathematical notation for the loss functions.",
-                        controls: { outputStyle: { math: true, paragraph: true, heading: true, list: false, table: false, code: false, diagram: false, math: false } },
+                        controls: { outputStyle: { paragraph: true, heading: true, list: false, table: false, code: false, diagram: false, math: false } },
                         behaviors: [{ name: "AI Researcher", type: "persona" }]
                     },
                     {
