@@ -123,12 +123,26 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
 
         <Separator orientation="vertical" className="h-6 mx-1" />
         
-        {blockButtons.map(({ action, isActive, icon: Icon, label }) => (
-          <Tooltip key={label}>
-            <TooltipTrigger asChild><Button variant={isActive ? 'secondary' : 'ghost'} size="icon" className="rounded-full h-8 w-8" onClick={action}><Icon className="h-4 w-4" /></Button></TooltipTrigger>
-            <TooltipContent><p>{label}</p></TooltipContent>
-          </Tooltip>
-        ))}
+        <DropdownMenu>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
+                            <Square className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent><p>Block Formatting</p></TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent>
+                {blockButtons.map(({ action, label, icon: Icon, isActive }) => (
+                    <DropdownMenuItem key={label} onSelect={action} className={isActive ? 'bg-accent' : ''}>
+                        <Icon className="mr-2 h-4 w-4" />
+                        <span>{label}</span>
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
