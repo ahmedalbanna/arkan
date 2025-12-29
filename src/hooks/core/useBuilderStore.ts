@@ -38,7 +38,7 @@ const useBuilderStore = create<BuilderState>((set, get) => {
         setHasUnsavedChanges: (hasChanges) => set({ hasUnsavedChanges: hasChanges }),
 
         loadProject: (projectData) => {
-            const newProject = new Project(projectData);
+            const newProject = projectData instanceof Project ? projectData : new Project(projectData);
             localStorage.setItem('lastActiveProjectId', newProject.id);
             set({ project: newProject, hasUnsavedChanges: false, activeView: 'cover-page' });
         },

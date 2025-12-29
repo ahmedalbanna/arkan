@@ -20,6 +20,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useBuilderStore } from "@/hooks";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "../ui/skeleton";
+import { Project } from "@/lib/models";
 
 function ProjectListSkeleton() {
     return (
@@ -31,9 +32,40 @@ function ProjectListSkeleton() {
     )
 }
 
+interface ProjectCardProps {
+    project: Project;
+    onLoad: (project: Project) => void;
+    isLoading: boolean;
+}
+
+function ProjectCard({ project, onLoad, isLoading }: ProjectCardProps) {
+    return (
+        <Card className="flex flex-col">
+            <CardHeader>
+                <CardTitle className="truncate">{project.name || "Untitled Project"}</CardTitle>
+                <CardDescription>
+                    {project.updatedAt ? `Updated ${formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}` : 'Not updated recently'}
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-grow">
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                    {project.projectDescription || "No description."}
+                </p>
+            </CardContent>
+            <CardFooter>
+                <Button className="w-full" onClick={() => onLoad(project)} disabled={isLoading}>
+                    {isLoading ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <FileText className="me-2 h-4 w-4" />}
+                    {isLoading ? "Loading..." : "Load Project"}
+                </Button>
+            </CardFooter>
+        </Card>
+    );
+}
+
 export function BrowseProjectsDialog() {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [loadingProjectId, setLoadingProjectId] = useState<string | null>(null);
     const { projects, isLoading, isError, error } = useProjectsPage();
     const { loadProject } = useBuilderStore();
     const router = useRouter();
@@ -47,9 +79,13 @@ export function BrowseProjectsDialog() {
         );
     }, [projects, searchQuery]);
 
-    function handleLoadProject(project: any) {
+    async function handleLoadProject(project: Project) {
+        setLoadingProjectId(project.id);
+        // Simulate a small delay for better UX
+        await new Promise(resolve => setTimeout(resolve, 500));
         loadProject(project.toStateObject());
         setIsOpen(false);
+        setLoadingProjectId(null);
         router.push('/builder');
     }
 
@@ -91,25 +127,12 @@ export function BrowseProjectsDialog() {
                             ) : filteredProjects.length > 0 ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {filteredProjects.map(project => (
-                                        <Card key={project.id} className="flex flex-col">
-                                            <CardHeader>
-                                                <CardTitle className="truncate">{project.name || "Untitled Project"}</CardTitle>
-                                                <CardDescription>
-                                                    {project.updatedAt ? `Updated ${formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}` : 'Not updated recently'}
-                                                </CardDescription>
-                                            </CardHeader>
-                                            <CardContent className="flex-grow">
-                                                <p className="text-sm text-muted-foreground line-clamp-2">
-                                                    {project.projectDescription || "No description."}
-                                                </p>
-                                            </CardContent>
-                                            <CardFooter>
-                                                <Button className="w-full" onClick={() => handleLoadProject(project)}>
-                                                    <FileText className="me-2 h-4 w-4" />
-                                                    Load Project
-                                                </Button>
-                                            </CardFooter>
-                                        </Card>
+                                        <ProjectCard
+                                            key={project.id}
+                                            project={project}
+                                            onLoad={handleLoadProject}
+                                            isLoading={loadingProjectId === project.id}
+                                        />
                                     ))}
                                 </div>
                             ) : (
@@ -117,7 +140,7 @@ export function BrowseProjectsDialog() {
                                     <FolderOpen className="mx-auto h-12 w-12 text-muted-foreground" />
                                     <h3 className="mt-4 text-lg font-semibold">No Projects Found</h3>
                                     <p className="mt-2 text-sm text-muted-foreground">
-                                        Your search for "{searchQuery}" did not match any projects.
+                                        {searchQuery ? `Your search for "${searchQuery}" did not match any projects.` : `You don't have any saved projects yet.`}
                                     </p>
                                 </div>
                             )}
