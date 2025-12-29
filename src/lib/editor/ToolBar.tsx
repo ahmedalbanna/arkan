@@ -1,7 +1,6 @@
 
 'use client';
 
-import { useEditorStore } from '@/hooks/core/use-editor-store';
 import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
 import { useBrowserSpeech } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -12,7 +11,7 @@ import {
 import React, { memo } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -27,7 +26,6 @@ interface ContextualToolbarProps {
 
 const ContextualToolbar = memo(function ContextualToolbar({ editor }: ContextualToolbarProps) {
   const { t } = useLocalization();
-  const { setDirection } = useEditorStore();
   const { speak, stop, isSpeaking } = useBrowserSpeech();
   const { activeAiAction, isProcessing, handleAiAction, rewriteStyles } = useAiActions({ editor });
 
@@ -85,9 +83,9 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
   ]
 
   const alignmentButtons = [
-    { action: () => { editor.chain().focus().setTextAlign('left').run(); setDirection('ltr'); }, isActive: editor.isActive({ textAlign: 'left' }), icon: AlignLeft, label: "Align Left" },
-    { action: () => { editor.chain().focus().setTextAlign('center').run(); }, isActive: editor.isActive({ textAlign: 'center' }), icon: AlignCenter, label: "Align Center" },
-    { action: () => { editor.chain().focus().setTextAlign('right').run(); setDirection('rtl'); }, isActive: editor.isActive({ textAlign: 'right' }), icon: AlignRight, label: "Align Right" },
+    { action: () => editor.chain().focus().setTextAlign('left').run(), isActive: editor.isActive({ textAlign: 'left' }), icon: AlignLeft, label: "Align Left" },
+    { action: () => editor.chain().focus().setTextAlign('center').run(), isActive: editor.isActive({ textAlign: 'center' }), icon: AlignCenter, label: "Align Center" },
+    { action: () => editor.chain().focus().setTextAlign('right').run(), isActive: editor.isActive({ textAlign: 'right' }), icon: AlignRight, label: "Align Right" },
   ]
 
 
@@ -143,22 +141,37 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
-        {aiActionButtons.map(({ name, icon: Icon, label }) => (
-          <Tooltip key={name}>
-            <TooltipTrigger asChild><Button variant="ghost" size="icon" className="rounded-full h-8 w-8" onClick={() => handleAiAction(name as any)} disabled={isProcessing}>{activeAiAction === name && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />}</Button></TooltipTrigger>
-            <TooltipContent><p>{label}</p></TooltipContent>
-          </Tooltip>
-        ))}
-
         <DropdownMenu>
           <Tooltip>
-            <TooltipTrigger asChild><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="rounded-full h-8 w-8" disabled={isProcessing}>{activeAiAction === 'rewrite' && isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brush className="h-4 w-4" />}</Button></DropdownMenuTrigger></TooltipTrigger>
-            <TooltipContent><p>{t('builder.Section.aiActions.rewrite')}</p></TooltipContent>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full h-8 w-8" disabled={isProcessing}>
+                  {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brush className="h-4 w-4" />}
+                </Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent><p>{t('builder.Section.aiActions.title')}</p></TooltipContent>
           </Tooltip>
           <DropdownMenuContent className="backdrop-blur-md bg-gradient-to-r from-background/90 to-primary/5 border shadow-soft">
-            {rewriteStyles.map(({ label, style }) => (
-              <DropdownMenuItem key={style} onSelect={() => handleAiAction('rewrite', { style })} disabled={isProcessing}>{label}</DropdownMenuItem>
+            {aiActionButtons.map(({ name, icon: Icon, label }) => (
+              <DropdownMenuItem key={name} onSelect={() => handleAiAction(name as any)} disabled={isProcessing}>
+                <Icon className="mr-2 h-4 w-4" />
+                <span>{label}</span>
+              </DropdownMenuItem>
             ))}
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <Brush className="mr-2 h-4 w-4" />
+                <span>{t('builder.Section.aiActions.rewrite')}</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                {rewriteStyles.map(({ label, style }) => (
+                  <DropdownMenuItem key={style} onSelect={() => handleAiAction('rewrite', { style })} disabled={isProcessing}>
+                    {label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
           </DropdownMenuContent>
         </DropdownMenu>
 
