@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { getAuth, updateProfile } from 'firebase/auth';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -36,6 +38,13 @@ export default function SignupForm() {
   });
 
   const signupMutation = useSignup({
+    onSuccess: (userCredential) => {
+        // After auth user is created, update their display name
+        const auth = getAuth();
+        if (auth.currentUser) {
+            updateProfile(auth.currentUser, { displayName: form.getValues('name') });
+        }
+    },
     onError: (error: any) => {
       // The useSignup hook now handles toast for general errors.
       // We only need to set form-specific errors here.

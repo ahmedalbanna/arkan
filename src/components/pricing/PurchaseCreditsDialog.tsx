@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Gem, ShoppingCart, ArrowLeft, Banknote, AlertCircle, Copy, Check, UploadCloud, Loader2, PartyPopper } from 'lucide-react';
 import { useSubmitPaymentProof, usePublicSettings } from '@/hooks';
 import type { BankAccount } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Skeleton } from '../ui/skeleton';
 import { Label } from '../ui/label';

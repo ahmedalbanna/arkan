@@ -9,14 +9,15 @@ import {
   serviceLogoutUser,
   serviceSignupUser,
   forgotPasswordService,
-  sendPasswordResetEmailApi
+  sendPasswordResetEmailApi,
+  createOrUpdateUserProfileApi, // Import the new service
 } from '@/services/api/authService';
-import type { LoginCredentials, SignupCredentials } from '@/lib/types';
+import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
 import { useToast } from '@/hooks/util/use-toast';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
 import { useAuth } from '@/context/AuthContext';
 import { userKeys } from '@/lib/query-keys';
-import { getAuth, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
+import { getAuth, signInWithPhoneNumber, type ConfirmationResult, type User as FirebaseUser } from "firebase/auth";
 import { app } from '@/lib/firebase/client-init';
 import { useState } from 'react';
 
@@ -37,6 +38,32 @@ export function useLogin() {
   });
 }
 
+// Helper to create profile on first sign-in
+async function handleFirstSignIn(user: FirebaseUser) {
+    // Check if a profile already exists by trying to fetch it.
+    // We expect this to fail for a new user.
+    const token = await user.getIdToken();
+    try {
+        const existingProfile = await fetch('/api/users/' + user.uid, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (existingProfile.status === 404) {
+            // Profile doesn't exist, so create it.
+            const profileData: Partial<UserProfile> = {
+                id: user.uid,
+                name: user.displayName || `User ${user.uid.slice(0,6)}`,
+                email: user.email || '',
+            };
+            await createOrUpdateUserProfileApi(user.uid, profileData, token);
+        }
+    } catch (error) {
+        // Handle cases where the initial fetch fails for reasons other than 404
+        console.error("Error during first sign-in profile check:", error);
+    }
+}
+
+
 export function useGoogleSignIn() {
     const router = useRouter();
     const queryClient = useQueryClient();
@@ -44,10 +71,14 @@ export function useGoogleSignIn() {
 
     return useMutation({
         mutationFn: loginWithGoogle,
-        onSuccess: (user) => {
+        onSuccess: async (userCredential) => {
+            const isNewUser = userCredential.isNewUser;
+            if (isNewUser) {
+                await handleFirstSignIn(userCredential.user);
+            }
             queryClient.invalidateQueries({ queryKey: userKeys.all });
             router.push('/builder');
-            toast({ title: `Welcome, ${user.displayName}!` });
+            toast({ title: `Welcome, ${userCredential.user.displayName}!` });
         },
         onError: (error) => handleErrorUtility(error, "Google Sign-In Failed")
     });
@@ -80,6 +111,12 @@ export function usePhoneSignIn() {
         setError(null);
         try {
             const userCredential = await confirmationResult.confirm(otp);
+            // After successful OTP verification, handle first sign-in logic
+            const { getAdditionalUserInfo } = await import('firebase/auth');
+            const info = getAdditionalUserInfo(userCredential);
+            if (info?.isNewUser) {
+                await handleFirstSignIn(userCredential.user);
+            }
             queryClient.invalidateQueries({ queryKey: userKeys.all });
             router.push('/builder');
             toast({ title: `Welcome!` });
@@ -113,7 +150,18 @@ export function useSignup(options?: { onSuccess?: (data: any) => void }) {
     const { toast } = useToast();
 
     return useMutation({
-        mutationFn: (credentials: SignupCredentials) => serviceSignupUser(credentials),
+        mutationFn: async (credentials: SignupCredentials) => {
+            const userCredential = await serviceSignupUser(credentials);
+            const token = await userCredential.user.getIdToken();
+            const profileData: Partial<UserProfile> = {
+                id: userCredential.user.uid,
+                name: credentials.name,
+                email: credentials.email,
+            };
+            // After creating the auth user, create the profile in Firestore
+            await createOrUpdateUserProfileApi(userCredential.user.uid, profileData, token);
+            return userCredential;
+        },
         onSuccess: (data) => {
             toast({
                 title: "Account Created",

@@ -2,26 +2,28 @@
 'use client';
 
 import { auth } from '@/lib/firebase/client-init';
-import type { LoginCredentials, SignupCredentials } from '@/lib/types';
+import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
 import {
   GoogleAuthProvider,
+  getAdditionalUserInfo,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  type UserCredential
 } from "firebase/auth";
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 
 // --- Authentication Functions ---
 
-export async function loginWithEmail(credentials: LoginCredentials) {
+export async function loginWithEmail(credentials: LoginCredentials): Promise<UserCredential> {
   try {
-    const userCredential = await signInWithEmailAndPassword(
+    return await signInWithEmailAndPassword(
       auth,
       credentials.email,
       credentials.password
     );
-    return userCredential.user;
   } catch (error: any) {
     if (
       error.code === "auth/invalid-credential" ||
@@ -35,11 +37,12 @@ export async function loginWithEmail(credentials: LoginCredentials) {
   }
 }
 
-export async function loginWithGoogle() {
+export async function loginWithGoogle(): Promise<{user: UserCredential['user'], isNewUser: boolean}> {
   const provider = new GoogleAuthProvider();
   try {
     const result = await signInWithPopup(auth, provider);
-    return result.user;
+    const info = getAdditionalUserInfo(result);
+    return { user: result.user, isNewUser: !!info?.isNewUser };
   } catch (error: any) {
     throw new Error(error.message || "Google Sign-In failed.");
   }
@@ -55,18 +58,14 @@ export async function serviceLogoutUser() {
   return response.json();
 }
 
-export async function serviceSignupUser(credentials: SignupCredentials) {
-  const response = await fetch("/api/auth/signup", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(credentials),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw errorData;
-  }
-  return response.json();
+export async function serviceSignupUser(credentials: SignupCredentials): Promise<UserCredential> {
+    // This function now only creates the user in Firebase Auth.
+    // The profile creation is handled in the useSignup hook.
+    try {
+        return await createUserWithEmailAndPassword(auth, credentials.email, credentials.password);
+    } catch(error: any) {
+        throw error;
+    }
 }
 
 
@@ -86,4 +85,21 @@ export async function sendPasswordResetEmailApi(userId: string, token: string) {
     throw new Error(error.message || "Failed to send password reset email.");
   }
   return response.json();
+}
+
+/**
+ * Creates or updates a user profile document in Firestore.
+ * This is now the single source of truth for creating profiles.
+ */
+export async function createOrUpdateUserProfileApi(userId: string, data: Partial<UserProfile>, token: string): Promise<UserProfile> {
+    const response = await fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create or update user profile.');
+    }
+    return response.json();
 }

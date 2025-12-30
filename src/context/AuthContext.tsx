@@ -19,8 +19,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Handles setting/clearing the session cookie and ensuring user profile exists
-async function manageSessionAndProfile(user: FirebaseUser | null) {
+// Handles setting/clearing the session cookie.
+async function manageSession(user: FirebaseUser | null) {
   if (user) {
     const idToken = await user.getIdToken(true);
     // Set session cookie
@@ -29,23 +29,6 @@ async function manageSessionAndProfile(user: FirebaseUser | null) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ idToken }),
     });
-
-    // Ensure a user profile exists in Firestore.
-    // This is a good place to handle it centrally for all auth methods.
-    await fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}` // Pass token for verification
-      },
-      body: JSON.stringify({
-        uid: user.uid,
-        email: user.email,
-        name: user.displayName,
-        phoneNumber: user.phoneNumber,
-      })
-    });
-
   } else {
     // Clear session cookie
     await fetch('/api/auth/logout', {
@@ -90,7 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
-      await manageSessionAndProfile(user);
+      await manageSession(user);
       if (user) {
         // Invalidate and refetch immediately on auth change
         await queryClient.invalidateQueries({ queryKey: userKeys.profile(user.uid) });
