@@ -12,9 +12,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { Project, Section } from '@/lib/models';
+import type { Chapter, Project, Section } from '@/lib/models';
 import { AlertTriangle, Building, Code, Eye, Link as LinkIcon, Loader2, StickyNote } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { MarkdownViewer } from '../shared/MarkdownViewer';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Badge } from '../ui/badge';
@@ -24,8 +24,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 interface BuildProjectDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  project: Project | null;
-  selectedSections: Set<string>;
+  chaptersToBuild: Chapter[];
+  getContextNames: (section: Section) => string[];
   finalProjectPrompt: string;
   onGenerateProject: () => void;
   isLoading: boolean;
@@ -34,39 +34,15 @@ interface BuildProjectDialogProps {
 export function BuildProjectDialog({
   isOpen,
   onOpenChange,
-  project,
-  selectedSections,
+  chaptersToBuild,
+  getContextNames,
   finalProjectPrompt,
   onGenerateProject,
   isLoading,
 }: BuildProjectDialogProps) {
   const [viewMode, setViewMode] = useState<'plan' | 'prompt'>('plan');
 
-  if (!project) return null;
-
-  const chaptersToBuild = useMemo(() => {
-    return project.content
-      .map(c => ({
-        ...c,
-        sections: c.sections.filter(s => selectedSections.has(s.id))
-      }))
-      .filter(c => c.sections.length > 0);
-  }, [project.content, selectedSections]);
-
-  const getContextNames = (section: Section) => {
-    if (!project) return [];
-    const sectionContexts = Object.keys(section.context?.sections || {})
-      .filter(key => section.context.sections[key])
-      .map(key => project.getSection(key)?.title)
-      .filter(Boolean) as string[];
-
-    const fileContexts = Object.keys(section.context?.externalContext || {})
-      .filter(key => section.context.externalContext[key])
-      .map(key => project.externalContext.find(f => f.id === key)?.fileName)
-      .filter(Boolean) as string[];
-
-    return [...sectionContexts, ...fileContexts];
-  };
+  if (chaptersToBuild.length === 0) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -130,7 +106,7 @@ export function BuildProjectDialog({
           <TabsContent value="prompt" className="flex-1 overflow-hidden -mx-6 px-6">
             <ScrollArea className="h-full">
               <div className="p-4 border rounded-md bg-muted/50">
-                <MarkdownViewer content={finalProjectPrompt} />
+                <MarkdownViewer content={`\`\`\`markdown\n${finalProjectPrompt}\n\`\`\``} />
               </div>
             </ScrollArea>
           </TabsContent>
@@ -147,7 +123,7 @@ export function BuildProjectDialog({
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={onGenerateProject} disabled={isLoading || selectedSections.size === 0}>
+          <Button onClick={onGenerateProject} disabled={isLoading || chaptersToBuild.length === 0}>
             {isLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (

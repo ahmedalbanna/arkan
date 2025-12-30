@@ -92,6 +92,31 @@ export function useReportGenerationTools() {
         return PromptBuilder.buildProjectPrompt(project, selectedSectionsForBuild);
     }, [project, selectedSectionsForBuild]);
 
+    const getContextNames = (section: Section): string[] => {
+      if (!project) return [];
+      const sectionContexts = Object.keys(section.context?.sections || {})
+        .filter(key => section.context.sections[key])
+        .map(key => project.getSection(key)?.title)
+        .filter(Boolean) as string[];
+
+      const fileContexts = Object.keys(section.context?.externalContext || {})
+        .filter(key => section.context.externalContext[key])
+        .map(key => project.externalContext.find(f => f.id === key)?.fileName)
+        .filter(Boolean) as string[];
+
+      return [...sectionContexts, ...fileContexts];
+    };
+
+    const chaptersToBuild = useMemo(() => {
+      if (!project) return [];
+      return project.content
+        .map(c => ({
+          ...c,
+          sections: c.sections.filter(s => selectedSectionsForBuild.has(s.id))
+        }))
+        .filter(c => c.sections.length > 0);
+    }, [project, selectedSectionsForBuild]);
+
 
     const chapterMutation = useMutation({
         mutationKey: ['generateChapterContent'],
@@ -109,37 +134,39 @@ export function useReportGenerationTools() {
             }
 
             const token = await firebaseUser.getIdToken();
-            const chapterPrompt = PromptBuilder.buildChapterPrompt(chapter, project, selectedSectionsForBuild);
-            
             const body = {
-                flow: 'generate-project-from-full-prompt', // Reusing a powerful flow
-                fullPrompt: chapterPrompt,
+                flow: 'generate-chapter',
+                chapterTitle: chapter.title,
+                sectionInstructions: sectionsToGenerate.map(s => ({
+                  title: s.title,
+                  prompt: s.buildActionPrompt(),
+                  guidelines: s.guidelines,
+                  instructionText: PromptBuilder.buildSectionPrompt(s, project),
+                  context: getContextNames(s).join(', ')
+                }))
             };
 
-            const result = await writingToolApi<any, { chapters: { chapterTitle: string, markdownContent: string }[] }>('/api/writing-tools/generate-project-content', { data: body, token });
-            // Assuming the flow returns a compatible structure, even for a single chapter
-            return { chapterId, content: result.chapters[0]?.markdownContent || '' };
+            const result = await writingToolApi<any, { markdownContent: string }>(`/api/writing-tools/generate-chapter`, { data: body, token });
+            return { chapterId, content: result.markdownContent };
         },
         onSuccess: (data) => {
-            updateProject(p => {
-                // Find the chapter to update
-                const chapterToUpdate = p.getChapter(data.chapterId);
-                if (!chapterToUpdate) return p;
+            const chapter = project?.getChapter(data.chapterId);
+            if (!chapter) return;
+            const sections = chapter.sections.filter(s => selectedSectionsForBuild.has(s.id));
+            if (sections.length === 0) return;
 
-                // Find the first selected section within that chapter
-                const firstSelectedSection = chapterToUpdate.sections.find(s => selectedSectionsForBuild.has(s.id));
-                if (!firstSelectedSection) return p;
+            updateProject(p => {
+                let updatedProject = p;
+                const newContent = data.content;
                 
-                // Update the content of the first selected section
-                let updatedProject = p.updateSection(firstSelectedSection.id, s => s.with({ content: data.content }));
-                
-                // Clear the content of all other selected sections in that chapter
-                chapterToUpdate.sections.forEach(s => {
-                    if (s.id !== firstSelectedSection.id && selectedSectionsForBuild.has(s.id)) {
-                        updatedProject = updatedProject.updateSection(s.id, sec => sec.with({ content: '' }));
-                    }
-                });
-                
+                // Clear all selected sections first
+                for (const sec of sections) {
+                    updatedProject = updatedProject.updateSection(sec.id, s => s.with({ content: '' }));
+                }
+
+                // Put all content into the first selected section
+                updatedProject = updatedProject.updateSection(sections[0].id, s => s.with({ content: newContent }));
+
                 return updatedProject;
             });
             refetchUser();
@@ -167,7 +194,7 @@ export function useReportGenerationTools() {
                 fullPrompt: finalProjectPrompt,
             };
 
-            const result = await writingToolApi<any, { chapters: { chapterTitle: string, markdownContent: string }[] }>('/api/writing-tools/generate-project-content', { data: body, token });
+            const result = await writingToolApi<any, { chapters: { chapterTitle: string, markdownContent: string }[] }>(`/api/writing-tools/generate-project-from-full-prompt`, { data: body, token });
             return result.chapters;
         },
         onSuccess: (generatedChapters) => {
@@ -205,11 +232,10 @@ export function useReportGenerationTools() {
                 sectionToGenerate: section.id as SectionName,
                 prompt: section.buildActionPrompt(), // Use the builder
                 system: section.buildSystemPrompt(), // Use the builder
-                // The context is now built into a single string by the builder
-                otherSections: {}, // Keep this empty, handled by the builder
-                externalContext: [], // Keep this empty, handled by the builder
+                otherSections: {}, 
+                externalContext: [],
                 guidelines: section.guidelines,
-                instructionText: PromptBuilder.buildSectionPrompt(section, project), // The full detailed prompt for just this section
+                instructionText: PromptBuilder.buildSectionPrompt(section, project),
             };
 
             const result = await generateReportSectionApi(body, token);
@@ -306,14 +332,12 @@ export function useReportGenerationTools() {
 
             if (!activeItem || !overItem) return p;
 
-            // Scenario 1: Reordering items at the root level (chapters or root sections)
             if (activeItem.parentChapterId === null && overItem.parentChapterId === null) {
                 const oldIndex = p.content.findIndex(item => item.id === activeId);
                 const newIndex = p.content.findIndex(item => item.id === overId);
                 return p.with({ content: arrayMove([...p.content], oldIndex, newIndex) });
             }
 
-            // Scenario 2: Reordering sections within the same chapter
             if (activeItem.parentChapterId && activeItem.parentChapterId === overItem.parentChapterId) {
                 return p.updateChapter(activeItem.parentChapterId, c => {
                     const oldIndex = c.sections.findIndex(s => s.id === activeId);
@@ -321,11 +345,7 @@ export function useReportGenerationTools() {
                     return c.with({ sections: arrayMove([...c.sections], oldIndex, newIndex) });
                 });
             }
-
-            // Other scenarios (moving between chapters, etc.) would be added here
-            // For now, we keep it simple.
-
-            return p; // No change if drag is invalid for now
+            return p; 
         });
     };
 
@@ -364,5 +384,8 @@ export function useReportGenerationTools() {
         enterProjectBuildMode,
         exitProjectBuildMode,
         finalProjectPrompt,
+        // new properties for the dialog
+        chaptersToBuild,
+        getContextNames
     };
 }
