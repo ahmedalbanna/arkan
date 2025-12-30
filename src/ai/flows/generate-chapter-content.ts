@@ -7,26 +7,19 @@
 import { ai } from '@/ai/genkit';
 import { GenerateChapterInputSchema, GenerateChapterOutputSchema, type GenerateChapterInput, type GenerateChapterOutput } from '@/ai/schemas';
 
-const generateChapterFlow = ai.defineFlow({
-    name: 'generateChapterContentFlow',
-    inputSchema: GenerateChapterInputSchema,
-    outputSchema: GenerateChapterOutputSchema,
-}, async (input) => {
-    const { chapterTitle, sectionInstructions } = input;
-
-    const chapterPrompt = ai.definePrompt({
-        name: 'generateChapterContentPrompt',
-        input: { schema: GenerateChapterInputSchema },
-        output: { schema: GenerateChapterOutputSchema },
-        model: 'googleai/gemini-2.5-flash-lite',
-        prompt: `You are an expert author and technical writer. Your task is to write the complete content for a chapter titled "${chapterTitle}".
+const chapterPrompt = ai.definePrompt({
+    name: 'generateChapterContentPrompt',
+    input: { schema: GenerateChapterInputSchema },
+    output: { schema: GenerateChapterOutputSchema },
+    model: 'googleai/gemini-2.5-flash-lite',
+    prompt: `You are an expert author and technical writer. Your task is to write the complete content for a chapter titled "{{chapterTitle}}".
 
 You will be given a list of sections to write for this chapter. For each section, you must follow its specific instructions, which include a base prompt, guidelines, and contextual information.
 
 Your final output must be a single markdown string. Each section must start with a level 2 markdown heading (e.g., '## Section Title'). Follow the order of the sections as provided in the instructions.
 
 **Chapter Title:**
-# ${chapterTitle}
+# {{chapterTitle}}
 
 **Sections to Generate:**
 {{#each sectionInstructions}}
@@ -53,16 +46,23 @@ Your final output must be a single markdown string. Each section must start with
 ---
 {{/each}}
 `,
-        config: {
-            temperature: 0.5,
-            maxOutputTokens: 8192,
-        }
-    });
+    config: {
+        temperature: 0.5,
+        maxOutputTokens: 8192,
+    }
+});
 
+
+const generateChapterFlow = ai.defineFlow({
+    name: 'generateChapterContentFlow',
+    inputSchema: GenerateChapterInputSchema,
+    outputSchema: GenerateChapterOutputSchema,
+}, async (input) => {
+    
     const { output } = await chapterPrompt(input);
 
     if (!output) {
-        throw new Error(`The AI failed to generate a response for the chapter "${chapterTitle}". Please try again.`);
+        throw new Error(`The AI failed to generate a response for the chapter "${input.chapterTitle}". Please try again.`);
     }
 
     return output;

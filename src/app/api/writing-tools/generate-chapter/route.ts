@@ -1,7 +1,7 @@
 
 'use server';
 
-import { GenerateChapterInputSchema, GenerateChapterOutputSchema } from '@/ai/schemas/flows';
+import { GenerateChapterInputSchema } from '@/ai/schemas/flows';
 import { generateChapterContent } from '@/ai/flows/generate-chapter-content';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { deductCredit } from '@/services/credit-service';
@@ -22,14 +22,16 @@ export const POST = withAuth(async ({ request, user }) => {
 
     const result = await generateChapterContent(agentInput);
 
-    await deductCredit(user.id, 2);
+    // Deduct credits based on the number of sections being generated
+    const creditCost = agentInput.sectionInstructions.length;
+    await deductCredit(user.id, creditCost);
 
     await logGeneration({
         agentId: 'generate-chapter-content',
         userId: user.id,
         input: { chapterTitle: agentInput.chapterTitle, sectionCount: agentInput.sectionInstructions.length },
         output: { characterCount: result.markdownContent.length },
-        creditCost: 2,
+        creditCost: creditCost,
     });
 
     return createApiResponse(result, 200);
