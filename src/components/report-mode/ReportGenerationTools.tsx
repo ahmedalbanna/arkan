@@ -77,6 +77,8 @@ export function GenerationTools() {
     enterProjectBuildMode,
     exitProjectBuildMode,
     finalProjectPrompt,
+    chaptersToBuild,
+    getContextNames
   } = useReportGenerationTools();
 
   const totalSelectableSections = project?.content.reduce((acc, item) => acc + (item instanceof Chapter ? item.sections.length : 1), 0) || 0;
@@ -92,8 +94,8 @@ export function GenerationTools() {
       <BuildProjectDialog
         isOpen={isBuildProjectDialogOpen}
         onOpenChange={setIsBuildProjectDialogOpen}
-        project={project}
-        selectedSections={selectedSectionsForBuild}
+        chaptersToBuild={chaptersToBuild}
+        getContextNames={getContextNames}
         finalProjectPrompt={finalProjectPrompt}
         onGenerateProject={onGenerateProject}
         isLoading={projectMutation.isPending}

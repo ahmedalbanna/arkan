@@ -79,6 +79,7 @@ export function useReportGenerationTools() {
         if (chapter) {
             const sectionIds = new Set(chapter.sections.map(s => s.id));
             setSelectedSectionsForBuild(sectionIds);
+            setIsBuildProjectDialogOpen(true); // Open the dialog for chapter build
         }
     };
 
@@ -95,12 +96,12 @@ export function useReportGenerationTools() {
     const getContextNames = (section: Section): string[] => {
       if (!project) return [];
       const sectionContexts = Object.keys(section.context?.sections || {})
-        .filter(key => section.context.sections[key])
+        .filter(key => section.context.sections?.[key])
         .map(key => project.getSection(key)?.title)
         .filter(Boolean) as string[];
 
       const fileContexts = Object.keys(section.context?.externalContext || {})
-        .filter(key => section.context.externalContext[key])
+        .filter(key => section.context.externalContext?.[key])
         .map(key => project.externalContext.find(f => f.id === key)?.fileName)
         .filter(Boolean) as string[];
 
@@ -109,13 +110,18 @@ export function useReportGenerationTools() {
 
     const chaptersToBuild = useMemo(() => {
       if (!project) return [];
+      
+      if(chapterInBuildMode) {
+        const chapter = project.getChapter(chapterInBuildMode);
+        return chapter ? [chapter] : [];
+      }
+
+      // For full project build
       return project.content
-        .map(c => ({
-          ...c,
-          sections: c.sections.filter(s => selectedSectionsForBuild.has(s.id))
-        }))
+        .filter((item): item is Chapter => item instanceof Chapter)
+        .map(c => c.with({ sections: c.sections.filter(s => selectedSectionsForBuild.has(s.id))}))
         .filter(c => c.sections.length > 0);
-    }, [project, selectedSectionsForBuild]);
+    }, [project, selectedSectionsForBuild, chapterInBuildMode]);
 
 
     const chapterMutation = useMutation({
@@ -135,7 +141,6 @@ export function useReportGenerationTools() {
 
             const token = await firebaseUser.getIdToken();
             const body = {
-                flow: 'generate-chapter',
                 chapterTitle: chapter.title,
                 sectionInstructions: sectionsToGenerate.map(s => ({
                   title: s.title,
@@ -190,11 +195,19 @@ export function useReportGenerationTools() {
             const token = await firebaseUser.getIdToken();
             
             const body = {
-                flow: 'generate-project-from-full-prompt',
-                fullPrompt: finalProjectPrompt,
+                chapters: chaptersToBuild.map(c => ({
+                    chapterTitle: c.title,
+                    sectionInstructions: c.sections.map(s => ({
+                        title: s.title,
+                        prompt: s.buildActionPrompt(),
+                        guidelines: s.guidelines,
+                        instructionText: PromptBuilder.buildSectionPrompt(s, project),
+                        context: getContextNames(s).join(', ')
+                    }))
+                }))
             };
-
-            const result = await writingToolApi<any, { chapters: { chapterTitle: string, markdownContent: string }[] }>(`/api/writing-tools/generate-project-from-full-prompt`, { data: body, token });
+            
+            const result = await writingToolApi<any, { chapters: { chapterTitle: string, markdownContent: string }[] }>(`/api/generate/project`, { data: body, token });
             return result.chapters;
         },
         onSuccess: (generatedChapters) => {
@@ -203,7 +216,14 @@ export function useReportGenerationTools() {
                 generatedChapters.forEach(genChapter => {
                     const chapterToUpdate = newProject.chapters.find(c => c.title === genChapter.chapterTitle);
                     if (chapterToUpdate) {
-                        newProject = newProject.updateSection(chapterToUpdate.sections[0].id, s => s.with({ content: genChapter.markdownContent }));
+                        const sectionsToUpdate = chapterToUpdate.sections.filter(s => selectedSectionsForBuild.has(s.id));
+                        if(sectionsToUpdate.length > 0) {
+                            newProject = newProject.updateSection(sectionsToUpdate[0].id, s => s.with({ content: genChapter.markdownContent }));
+                            // Clear other sections that were part of the build
+                            for (let i = 1; i < sectionsToUpdate.length; i++) {
+                                newProject = newProject.updateSection(sectionsToUpdate[i].id, s => s.with({ content: '' }));
+                            }
+                        }
                     }
                 });
                 return newProject;
@@ -228,16 +248,13 @@ export function useReportGenerationTools() {
 
             const token = await firebaseUser.getIdToken();
             const body = {
-                flow: 'generate-section',
                 sectionToGenerate: section.id as SectionName,
                 prompt: section.buildActionPrompt(), // Use the builder
-                system: section.buildSystemPrompt(), // Use the builder
-                otherSections: {}, 
-                externalContext: [],
+                otherSections: section.getContextAsRecord(project),
+                externalContext: section.getExternalContextAsArray(project),
                 guidelines: section.guidelines,
                 instructionText: PromptBuilder.buildSectionPrompt(section, project),
             };
-
             const result = await generateReportSectionApi(body, token);
             const content = result?.[section.id] ?? Object.values(result || {})[0] as string | undefined;
             if (!content) {
