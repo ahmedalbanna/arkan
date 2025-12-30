@@ -13,7 +13,7 @@ import { useAuth } from '@/context/AuthContext';
 import { fetchTransactionsForReport } from '@/services';
 import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
-import { generateFinancialReportPdf } from '@/lib/utils/pdf-utils';
+import { convertMarkdownToPdf } from '@/lib/utils/pdf-utils';
 
 export function FinancialReportExporter() {
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
@@ -49,7 +49,7 @@ export function FinancialReportExporter() {
                 return;
             }
 
-            await generateFinancialReportPdf(transactions, dateRange);
+            await convertMarkdownToPdf(transactions, dateRange);
 
         } catch (error: any) {
             toast({

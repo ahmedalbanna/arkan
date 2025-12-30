@@ -1,4 +1,3 @@
-
 // src/lib/word-converter/ast-converter.ts
 
 import { getProxiedImageBuffer } from '@/lib/utils/ProxiedImage';
@@ -101,6 +100,7 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
       case 'html': {
         const orientationMatch = node.value.match(/<!--\s*orientation:\s*(landscape|portrait)\s*-->/);
         if (orientationMatch) {
+          // This is a directive, not content. Push a special object.
           docxObjects.push({
             _type: 'directive',
             name: 'orientation',
@@ -116,12 +116,15 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
           }));
           break;
         }
-
+        
+        // Correctly handle section breaks by pushing a directive
         const sectionBreakMatch = node.value.match(/<!--\s*section-break\s*-->/);
         if (sectionBreakMatch) {
-          docxObjects.push(new Paragraph({
-            pageBreakBefore: true,
-          }));
+          docxObjects.push({
+            _type: 'directive',
+            name: 'orientation',
+            value: 'portrait', // Default to portrait for the new section
+          });
           break;
         }
 
