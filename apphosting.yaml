@@ -1,7 +1,17 @@
 # Settings to manage and configure a Firebase App Hosting backend.
 # https://firebase.google.com/docs/app-hosting/configure
-
 runConfig:
-  # Increase this value if you'd like to automatically spin up
-  # more instances in response to increased traffic.
-  maxInstances: 10
+  # The region where your App Hosting backend is hosted.
+  # See https://firebase.google.com/docs/app-hosting/locations for a list of
+  # supported regions.
+  region: us-central1
+
+  # The CPU, memory, and concurrency settings for your backend.
+  # More information at https://firebase.google.com/docs/app-hosting/configure-backend
+  cpu: 1
+  memoryMiB: 512
+  concurrency: 80
+
+  # The minimum number of instances to keep running at all times.
+  # More information at https://firebase.google.com/docs/app-hosting/configure-backend#min-instances
+  minInstances: 0

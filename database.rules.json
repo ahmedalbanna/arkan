@@ -1,68 +1,69 @@
-
 {
   "rules": {
+    // Only authenticated users can access the database
+    ".read": "auth != null",
+    ".write": "auth != null",
+
     "jobs": {
       "$jobId": {
-        // This is a more secure rule. It requires that you add a `userId`
-        // property to your job object when creating it on the server.
-        // This ensures only the user who created the job can read its status.
-        ".read": "auth != null && root.child('jobs/' + $jobId + '/userId').val() === auth.uid",
+        // Only the user who created the job can read its status.
+        ".read": "root.child('jobs/' + $jobId + '/userId').val() === auth.uid",
         // Writes are only allowed from the server (Admin SDK).
         ".write": false
       }
     },
+    
     "notifications": {
       "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid",
-        // Add validation for the notification structure
+        // A user can only read and write to their own notifications path
+        ".read": "auth.uid === $uid",
+        ".write": "auth.uid === $uid",
         "$notificationId": {
-          ".validate": "newData.hasChildren(['title', 'message', 'createdAt', 'isRead']) && newData.child('createdAt').isString() && newData.child('isRead').isBoolean()"
-        }
-      },
-      ".indexOn": ["createdAt"]
-    },
-    "messages": {
-      "$conversationId": {
-        ".read": "auth != null && root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()",
-        ".write": "auth != null && root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()",
-        "$messageId": {
-          ".validate": "newData.hasChildren(['senderId', 'content', 'timestamp', 'role']) && newData.child('senderId').val() === auth.uid"
+          ".validate": "newData.hasChildren(['title', 'description', 'createdAt', 'isRead'])"
         }
       }
     },
+
     "userConversations": {
       "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid",
-        // A user can only add/remove conversation IDs.
-        // The value should be a boolean (e.g., true).
+        // A user can only manage their own list of conversation IDs
+        ".read": "auth.uid === $uid",
+        ".write": "auth.uid === $uid",
         "$conversationId": {
           ".validate": "newData.isBoolean()"
         }
       }
     },
+    
     "conversations": {
-        "$conversationId": {
-            ".read": "auth != null && root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()",
-            ".write": "auth != null && root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()",
-            // Add basic validation for the conversation structure
-            ".validate": "newData.hasChildren(['id', 'title', 'lastMessage', 'lastMessageTimestamp', 'participantIds']) && newData.child('id').val() === $conversationId"
-        },
-        ".indexOn": ["lastMessageTimestamp"]
+      "$conversationId": {
+        // A user can only access conversations they are a part of
+        ".read": "root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()",
+        ".write": "root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()"
+      }
     },
+
+    "messages": {
+      "$conversationId": {
+        // A user can only access messages in conversations they are a part of
+        ".read": "root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()",
+        ".write": "root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()",
+        "$messageId": {
+           // Messages can only be written by the sender
+          ".validate": "newData.hasChildren(['senderId', 'content', 'timestamp', 'role']) && newData.child('senderId').val() === auth.uid"
+        }
+      }
+    },
+
     "deviceTokens": {
       "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid",
-        // A user can only write string tokens for themselves.
+        // A user can only read/write their own device token
+        ".read": "auth.uid === $uid",
+        ".write": "auth.uid === $uid",
         "$token": {
           ".validate": "newData.isString()"
         }
       }
-    },
-    // Default deny all other reads/writes for security.
-    ".read": false,
-    ".write": false
+    }
   }
 }

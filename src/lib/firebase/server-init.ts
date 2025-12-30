@@ -4,30 +4,20 @@ import admin from 'firebase-admin';
 // This file should be imported only on the server-side.
 // It initializes the Firebase Admin SDK.
 
-// Check if the app is already initialized to prevent errors during hot-reloading in development.
 if (!admin.apps.length) {
   try {
-    // When deployed (e.g., on Vercel), GOOGLE_APPLICATION_CREDENTIALS will be set.
-    // For local development, we can fall back to the service account file.
-    if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-      admin.initializeApp({
-        credential: admin.credential.applicationDefault(),
-        databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      });
-      console.log("Firebase Admin SDK initialized using Application Default Credentials.");
-    } else {
-      // Fallback for local development
-      const serviceAccount = require('../../../docudec-firebase-adminsdk-2maa7-d07a19d3fc.json');
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || "https://docudec-default-rtdb.asia-southeast1.firebasedatabase.app",
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      });
-      console.log("Firebase Admin SDK initialized using local service account.");
-    }
+    // When deployed, GOOGLE_APPLICATION_CREDENTIALS will be set by the environment.
+    // This is the recommended and more secure approach.
+    admin.initializeApp({
+      credential: admin.credential.applicationDefault(),
+      databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    });
+    console.log("Firebase Admin SDK initialized using Application Default Credentials.");
   } catch (error: any) {
-    console.error("Firebase admin initialization error", error.stack);
+    console.error("Firebase admin initialization error. Ensure GOOGLE_APPLICATION_CREDENTIALS is set in your environment.", error.stack);
+    // Exit if Firebase Admin fails to initialize in a server environment
+    process.exit(1);
   }
 }
 

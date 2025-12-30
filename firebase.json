@@ -2,6 +2,24 @@
   "database": {
     "rules": "database.rules.json"
   },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "hosting": {
+    "source": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "frameworksBackend": {
+      "region": "us-central1"
+    }
+  },
   "emulators": {
     "auth": {
       "port": 9099
@@ -15,33 +33,12 @@
     "hosting": {
       "port": 5000
     },
-    "singleProjectMode": true,
     "storage": {
       "port": 9199
     },
     "ui": {
       "enabled": true
-    }
-  },
-  "firestore": {
-    "rules": "firestore.rules"
-  },
-  "hosting": {
-    "public": ".next",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "function": "nextjsApp"
-      }
-    ]
-  },
-  "storage": {
-    "rules": "storage.rules"
+    },
+    "singleProjectMode": true
   }
-
 }
