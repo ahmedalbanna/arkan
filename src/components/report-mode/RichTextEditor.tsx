@@ -13,7 +13,6 @@ import { editorExtensions } from '@/lib/tiptap-extensions';
 import { Button } from '@/components/ui/button';
 import { ContextualToolbar } from '@/lib/editor/ToolBar';
 import { useDebounce } from '@/hooks';
-import { useBuilderStore } from '@/hooks';
 
 // Turndown Service Initialization
 const turndownService = new TurndownService({ headingStyle: 'atx' });
@@ -34,10 +33,6 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: editorExtensions(uniqueId),
     content: marked.parse(content) as string,
-    onUpdate: ({ editor }) => {
-      const markdown = turndownService.turndown(editor.getHTML());
-      debouncedOnChange(markdown);
-    },
     onSelectionUpdate: ({ editor }) => {
       setActiveEditor(editor);
     },
@@ -75,17 +70,46 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     immediatelyRender: false,
   });
 
+  // Ref to track if there's a pending update from props
+  const isUpdatingFromProps = useRef(false);
+
+  // Effect to update editor content when the `content` prop changes
   useEffect(() => {
     if (editor && !editor.isDestroyed) {
       const currentEditorMarkdown = turndownService.turndown(editor.getHTML());
       if (content !== currentEditorMarkdown) {
+        isUpdatingFromProps.current = true;
         const { from, to } = editor.state.selection;
         editor.commands.setContent(marked.parse(content) as string, false);
         editor.commands.setTextSelection({ from, to });
+        // After setting content, immediately turn the flag off
+        // Use a timeout to ensure it happens after the transaction is fully applied
+        setTimeout(() => {
+          isUpdatingFromProps.current = false;
+        }, 0);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content]);
+  }, [content, editor]);
+  
+  // Effect to handle changes from the editor itself
+  useEffect(() => {
+    if (!editor) return;
+
+    const handleUpdate = () => {
+      // If the editor is being updated by props, don't trigger the onChange callback
+      if (isUpdatingFromProps.current) {
+        return;
+      }
+      const markdown = turndownService.turndown(editor.getHTML());
+      debouncedOnChange(markdown);
+    };
+
+    editor.on('update', handleUpdate);
+
+    return () => {
+      editor.off('update', handleUpdate);
+    };
+  }, [editor, debouncedOnChange]);
 
 
   const handleWrapperClick = (event: React.MouseEvent<HTMLDivElement>) => {

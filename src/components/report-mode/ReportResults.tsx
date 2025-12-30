@@ -20,13 +20,8 @@ export function ReportResults() {
   const { t } = useLocalization();
   const { project, setContentFromMarkdown } = useBuilderStore();
 
-  // The local state for markdown is no longer needed.
-  // We will now directly use `project.fullMarkdownContent` from the store.
-
-  function handleContentChange(markdown: string) {
-    if (!project) return;
-    setContentFromMarkdown(markdown);
-  }
+  // The handleContentChange function is no longer needed
+  // as the logic is now handled inside the RichTextEditor component.
 
   return (
     <Card className="h-full flex flex-col overflow-hidden">
@@ -48,10 +43,8 @@ export function ReportResults() {
             <CoverPage project={project} />
             <A4Page>
                 <RichTextEditor
-                // The key is removed to prevent re-mounting on every project change.
-                // The editor will now react to prop changes.
                 content={project?.fullMarkdownContent || ''}
-                onChange={handleContentChange}
+                onChange={setContentFromMarkdown}
                 />
             </A4Page>
         </ScrollArea>
