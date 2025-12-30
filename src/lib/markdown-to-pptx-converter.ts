@@ -29,7 +29,7 @@ export async function convertMarkdownToPptx(
     markdown: string,
     fileName: string,
     options: PptxConversionOptions = {},
-) {
+): Promise<Buffer | Blob> {
     const pptx = new PptxGenJS();
     const { styles = templates.modern.styles, isRtl = false, fonts = {}, includeToc = false } = options;
 
@@ -114,7 +114,11 @@ export async function convertMarkdownToPptx(
 
     await createSlidesWithContent(pptx, slidesContent, styles, { cover: COVER_MASTER, content: CONTENT_MASTER }, isRtl, fonts);
 
-    await pptx.writeFile({ fileName: `${fileName}.pptx` });
+    if (typeof window === 'undefined') {
+        return pptx.write('nodebuffer') as Promise<Buffer>;
+    } else {
+        return pptx.write('blob');
+    }
 }
 
 export async function convertMarkdownToPdf(
@@ -145,7 +149,7 @@ export async function convertMarkdownToPdf(
 
         const slideHtml = unified().use(rehypeStringify).stringify(file);
 
-        slidesHtml += `<div className="pdf-slide">${slideHtml}</div>`;
+        slidesHtml += `<div class="pdf-slide">${slideHtml}</div>`;
     }
 
     // Basic styling to make it look like slides

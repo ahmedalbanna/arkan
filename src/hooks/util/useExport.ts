@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState } from 'react';
@@ -9,7 +8,7 @@ import type { Project, Section } from '@/lib/models';
 import { templates as docxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
 import { templates as pptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 import { ConversionOptions } from '@/lib/word-converter/types';
-import { convertMarkdownToPptx, PptxConversionOptions } from '@/lib/markdown-to-pptx-converter';
+import { PptxConversionOptions } from '@/lib/markdown-to-pptx-converter';
 
 interface DocxExportParams {
     project: Project;
@@ -28,7 +27,6 @@ interface PptxExportParams {
     }
 }
 
-
 export function useExport() {
     const [isExporting, setIsExporting] = useState(false);
 
@@ -43,23 +41,20 @@ export function useExport() {
         }
         setIsExporting(true);
         try {
-            const fullMarkdown = project.fullMarkdownContent;
-
             const templateStyles = docxTemplates[options.template] || docxTemplates.modern;
             
             const apiOptions: ConversionOptions = {
                 styles: templateStyles.styles,
                 customStyles: templateStyles.customStyles,
                 pageNumbers: options.pageNumbers,
-                isRtl: false, // This could be another option in the UI
+                isRtl: false,
             };
 
             const response = await fetch('/api/export/docx', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    markdown: fullMarkdown,
-                    fileName: project.name.replace(/\s+/g, '_'),
+                    project: project.toStateObject(),
                     options: apiOptions,
                 }),
             });
@@ -82,7 +77,7 @@ export function useExport() {
     };
     
     /**
-     * Exports a report as a PPTX file.
+     * Exports a report as a PPTX file by calling the server-side API.
      * @param params - An object containing the project and export options.
      */
     const exportPresentationPptx = async ({ project, options }: PptxExportParams) => {
@@ -92,8 +87,6 @@ export function useExport() {
         }
         setIsExporting(true);
         try {
-            const fullMarkdown = project.fullMarkdownContent;
-
             const templateStyles = pptxTemplates[options.template] || pptxTemplates.modern;
 
             const conversionOptions: PptxConversionOptions = {
@@ -102,11 +95,22 @@ export function useExport() {
                 includeToc: options.includeToc,
             };
 
-            await convertMarkdownToPptx(
-                fullMarkdown,
-                project.name.replace(/\s+/g, '_'),
-                conversionOptions
-            );
+            const response = await fetch('/api/export/pptx', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    project: project.toStateObject(),
+                    options: conversionOptions,
+                }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to generate PPTX file on the server.');
+            }
+
+            const blob = await response.blob();
+            saveAs(blob, `${project.name.replace(/\s+/g, '_')}_presentation.pptx`);
 
             toast({ title: 'Export Successful', description: 'Presentation exported as PPTX.' });
         } catch (error) {

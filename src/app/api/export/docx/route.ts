@@ -5,38 +5,41 @@ import { z } from 'zod';
 import { convertMarkdownToWord } from '@/lib/markdown-to-word-converter';
 import type { ConversionOptions } from '@/lib/word-converter/types';
 import { templates } from '@/lib/docx-styles';
+import { Project, type ProjectProperties } from '@/lib/models';
 
 const exportSchema = z.object({
-  markdown: z.string().min(1, "Markdown content is required"),
-  fileName: z.string().min(1, "File name is required"),
+  project: z.any().refine(val => val && typeof val === 'object' && val.id, {
+    message: "A valid project object is required.",
+  }),
   options: z.custom<ConversionOptions>().optional().default({}),
 });
 
 export async function POST(req: NextRequest) {
   try {
-    let body = await req.json();
-    let validation = exportSchema.safeParse(body);
+    const body = await req.json();
+    const validation = exportSchema.safeParse(body);
 
     if (!validation.success) {
       return new NextResponse(JSON.stringify(validation.error.flatten()), { status: 400 });
     }
 
-    let { markdown, fileName, options } = validation.data;
+    const { project: projectData, options } = validation.data;
     
-    // Validate markdown content is not empty
+    // Re-hydrate the project model on the server to use its methods
+    const project = new Project(projectData as ProjectProperties);
+    const markdown = project.fullMarkdownContent;
+    const fileName = project.name.replace(/\s+/g, '_');
+
     if (!markdown.trim()) {
-      return new NextResponse(JSON.stringify({ message: 'Markdown content cannot be empty' }), { status: 400 });
+      return new NextResponse(JSON.stringify({ message: 'Project content is empty' }), { status: 400 });
     }
     
-    // The conversion function returns a Buffer/Blob when run on the server
-    let docxBuffer = await convertMarkdownToWord(markdown, fileName, options);
+    const docxBuffer = await convertMarkdownToWord(markdown, fileName, options);
 
     if (!docxBuffer) {
       return new NextResponse('Error creating DOCX file buffer.', { status: 500 });
     }
 
-    // Since Packer.toBuffer is used on server, we get a Buffer.
-    // NextResponse can handle Buffer directly.
     return new NextResponse(docxBuffer, {
       status: 200,
       headers: {
@@ -47,7 +50,7 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error('DOCX Export API Error:', error);
-    let errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new NextResponse(JSON.stringify({ message: 'Error converting to .docx file.', error: errorMessage }), { status: 500 });
   }
 }
