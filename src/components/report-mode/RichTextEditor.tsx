@@ -6,7 +6,7 @@ import { handleFileDrop } from '@/lib/utils/drop-handler';
 import { handleFilePaste, handleHtmlPaste, handlePlainPaste } from '@/lib/utils/paste-handler';
 import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react';
 import { marked } from 'marked';
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 import { editorExtensions } from '@/lib/tiptap-extensions';
@@ -28,17 +28,21 @@ function RichTextEditor({ content }: RichTextEditorProps) {
   const { setActiveEditor } = useEditorStore();
   const { setContentFromMarkdown } = useBuilderStore();
   const uniqueId = React.useId();
+  
+  const [editorMarkdown, setEditorMarkdown] = useState(content);
+  const debouncedEditorMarkdown = useDebounce(editorMarkdown, 1000);
 
-  const debouncedOnChange = useDebounce((markdown: string) => {
-    setContentFromMarkdown(markdown);
-  }, 1000); // 1-second debounce before updating the global store
+  useEffect(() => {
+    setContentFromMarkdown(debouncedEditorMarkdown);
+  }, [debouncedEditorMarkdown, setContentFromMarkdown]);
+
 
   const editor = useEditor({
     extensions: editorExtensions(uniqueId),
     content: marked.parse(content) as string,
     onUpdate: ({ editor }) => {
       const markdown = turndownService.turndown(editor.getHTML());
-      debouncedOnChange(markdown);
+      setEditorMarkdown(markdown);
     },
     onSelectionUpdate: ({ editor }) => {
       setActiveEditor(editor);
@@ -77,12 +81,10 @@ function RichTextEditor({ content }: RichTextEditorProps) {
     immediatelyRender: false,
   });
 
-  // Effect to update editor content when the external `content` prop changes.
-  // This is now simplified to only react to direct prop changes, not internal updates.
   useEffect(() => {
     if (editor && !editor.isDestroyed) {
-      const editorMarkdown = turndownService.turndown(editor.getHTML());
-      if (content !== editorMarkdown) {
+      const currentEditorMarkdown = turndownService.turndown(editor.getHTML());
+      if (content !== currentEditorMarkdown) {
         const { from, to } = editor.state.selection;
         editor.commands.setContent(marked.parse(content) as string, false);
         editor.commands.setTextSelection({ from, to });
