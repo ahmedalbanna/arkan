@@ -6,13 +6,14 @@ import { handleFileDrop } from '@/lib/utils/drop-handler';
 import { handleFilePaste, handleHtmlPaste, handlePlainPaste } from '@/lib/utils/paste-handler';
 import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react';
 import { marked } from 'marked';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 import { editorExtensions } from '@/lib/tiptap-extensions';
 import { Button } from '@/components/ui/button';
 import { ContextualToolbar } from '@/lib/editor/ToolBar';
-
+import { useDebounce } from '@/hooks';
+import { useBuilderStore } from '@/hooks';
 
 // Turndown Service Initialization
 const turndownService = new TurndownService({ headingStyle: 'atx' });
@@ -21,23 +22,23 @@ turndownService.use(gfm);
 // Main Editor Component
 interface RichTextEditorProps {
   content: string;
-  onChange: (markdown: string) => void;
 }
 
-function RichTextEditor({ content, onChange }: RichTextEditorProps) {
+function RichTextEditor({ content }: RichTextEditorProps) {
   const { setActiveEditor } = useEditorStore();
+  const { setContentFromMarkdown } = useBuilderStore();
   const uniqueId = React.useId();
-  
-  // Ref to track if the content update is from an external source vs. user typing
-  const isExternalUpdate = useRef(false);
+
+  const debouncedOnChange = useDebounce((markdown: string) => {
+    setContentFromMarkdown(markdown);
+  }, 1000); // 1-second debounce before updating the global store
 
   const editor = useEditor({
     extensions: editorExtensions(uniqueId),
     content: marked.parse(content) as string,
-    onBlur: ({ editor }) => {
-      // When the user clicks away from the editor, sync the state.
+    onUpdate: ({ editor }) => {
       const markdown = turndownService.turndown(editor.getHTML());
-      onChange(markdown);
+      debouncedOnChange(markdown);
     },
     onSelectionUpdate: ({ editor }) => {
       setActiveEditor(editor);
@@ -76,41 +77,19 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     immediatelyRender: false,
   });
 
-  // Effect to update editor content only when the external `content` prop changes.
+  // Effect to update editor content when the external `content` prop changes.
+  // This is now simplified to only react to direct prop changes, not internal updates.
   useEffect(() => {
     if (editor && !editor.isDestroyed) {
       const editorMarkdown = turndownService.turndown(editor.getHTML());
-
-      // Only update if the external content is different from the editor's current content
       if (content !== editorMarkdown) {
-        isExternalUpdate.current = true;
-        
         const { from, to } = editor.state.selection;
         editor.commands.setContent(marked.parse(content) as string, false);
-        // Try to restore selection. This might not be perfect in all cases
-        // but is better than losing it completely.
         editor.commands.setTextSelection({ from, to });
-
-        // Use a timeout to reset the flag after the update has been processed.
-        setTimeout(() => {
-          isExternalUpdate.current = false;
-        }, 50);
       }
     }
-  }, [content, editor]);
-
-  // This function is for the autosave hook to get the latest content
-  useEffect(() => {
-    (window as any).__getEditorContent = () => {
-        if (editor && !editor.isDestroyed) {
-            return turndownService.turndown(editor.getHTML());
-        }
-        return content; // Fallback to prop content
-    };
-    return () => {
-      delete (window as any).__getEditorContent;
-    };
-  }, [editor, content]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content]);
 
 
   const handleWrapperClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -125,13 +104,10 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       {editor && (
         <BubbleMenu
           editor={editor}
-          tippyOptions={{ duration: 100, placement: 'top' }}
+          tippyOptions={{ duration: 100, placement: 'top', onClose: () => false }}
           pluginKey={uniqueId}
           shouldShow={({ editor, from, to }) => {
-            // Logic to decide when to show the menu
-            // For example, show for any selection or when the cursor is on an empty line
-            const { empty } = editor.state.selection;
-            return !empty || (empty && editor.state.doc.resolve(from).parent.content.size === 0);
+            return !editor.state.selection.empty;
           }}
         >
           {editor.isActive('table') ? (
