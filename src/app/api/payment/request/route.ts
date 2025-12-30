@@ -1,9 +1,9 @@
 
 import { getStorage } from 'firebase-admin/storage';
-import { createTransaction } from '@/lib/db/queries';
 import { getDatabase } from 'firebase-admin/database';
 import { adminDb } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { createTransaction } from '@/services/transactionService';
 
 export const config = {
     api: {

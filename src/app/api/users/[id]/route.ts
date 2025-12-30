@@ -1,9 +1,9 @@
+
 import { z } from "zod";
-import { getUserProfile } from "@/lib/db/queries";
-import { adminAuth, adminDb } from '@/lib/firebase/server-init';
 import { revalidatePath } from "next/cache";
 import { withAuth, handleApiError, createApiResponse } from "@/lib/utils/api-utils";
-
+import { adminAuth, adminDb } from '@/lib/firebase/server-init';
+import { getUserProfile } from "@/services/userService";
 
 // GET a single user profile.
 export const GET = withAuth(async ({ params, user: requester }) => {

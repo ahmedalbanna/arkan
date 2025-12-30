@@ -1,10 +1,10 @@
 
 'use server';
 
-import { constructProjectFromTemplate } from '@/lib/db/queries';
 import { Project } from '@/lib/models';
 import type { ReportTemplateProperties } from '@/lib/types';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
+import { constructProjectFromTemplate } from '@/services/templateService';
 import { z } from 'zod';
 
 

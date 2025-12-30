@@ -1,7 +1,8 @@
+
 // src/app/api/admin/transactions/route.ts
-import { getTransactionsByStatus } from '@/lib/db/queries';
 import { z } from 'zod';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { getTransactionsByStatus } from '@/services/transactionService';
 
 const getTransactionsSchema = z.object({
   status: z.enum(['pending', 'verified', 'rejected']),

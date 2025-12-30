@@ -3,7 +3,6 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
 import { projectKeys } from '@/lib/query-keys';
 import { localProjectService } from '@/services/local-project-service';
 import type { ProjectProperties } from '@/lib/models';

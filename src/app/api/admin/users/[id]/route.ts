@@ -1,10 +1,9 @@
 
 import { z } from "zod";
-import { getUserProfile, deleteUser } from "@/lib/db/queries";
-import { adminDb } from '@/lib/firebase/server-init';
 import { revalidatePath } from "next/cache";
 import { withAuth, handleApiError, createApiResponse } from "@/lib/utils/api-utils";
-
+import { adminDb } from '@/lib/firebase/server-init';
+import { getUserProfile, deleteUser } from "@/services/userService";
 
 // GET a single user profile.
 export const GET = withAuth(async ({ params, user: requester, token }) => {
@@ -25,7 +24,6 @@ export const GET = withAuth(async ({ params, user: requester, token }) => {
         return handleApiError(error);
     }
 });
-
 
 const updateUserSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
@@ -64,7 +62,6 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
             await adminDb.collection("users").doc(userId).update(updateData);
         }
 
-
         revalidatePath(`/profile/${userId}`);
         revalidatePath('/admin/manage-users');
 
@@ -74,7 +71,6 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
         return handleApiError(error);
     }
 });
-
 
 export const DELETE = withAuth(async ({ params }) => {
     try {

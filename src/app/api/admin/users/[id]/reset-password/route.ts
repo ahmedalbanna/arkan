@@ -1,8 +1,8 @@
 
 'use server';
 
-import { getUserProfile } from '@/lib/db/queries';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { getUserProfile } from '@/services/userService';
 
 export const POST = withAuth(async ({ params }) => {
     try {
