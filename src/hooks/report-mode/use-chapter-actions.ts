@@ -4,12 +4,11 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useWritingTool, useToast, useBrowserSpeech } from '@/hooks';
+import { useWritingTool, useToast } from '@/hooks';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { DiffPart, computeDiff } from '@/lib/utils/diff';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { Chapter, SectionContext, ManipulationType } from '@/lib/models';
-import { useLocalization } from '@/context/LocalizationContext';
 
 const formSchema = z.object({
   rewriteStyle: z.string().optional(),
@@ -24,17 +23,13 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function useChapterActions(chapter: Chapter | null, onOpenChange?: (open: boolean) => void) {
-  const { t } = useLocalization();
-  const { project, updateProject } = useBuilderStore();
+  const { updateProject } = useBuilderStore();
   const { toast } = useToast();
   const [activeView, setActiveView] = useState<'result' | 'diff'>('result');
   const [manipulationType, setManipulationType] = useState<ManipulationType>('rewrite');
   const [compressionRatio, setCompressionRatio] = useState(50);
   const [diff, setDiff] = useState<DiffPart[] | null>(null);
   const [context, setContext] = useState<SectionContext>({ sections: {}, externalContext: {} });
-  const [isCopied, setIsCopied] = useState(false);
-
-  const { speak, stop, isSpeaking } = useBrowserSpeech();
   
   const chapterContent = useMemo(() => {
     if (!chapter) return '';
@@ -48,9 +43,8 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange?: (open:
       const defaultContext: SectionContext = { sections: {}, externalContext: {} };
       // Default all sections within this chapter to be selected
       chapter.sections.forEach(section => {
-        defaultContext.sections[section.id] = true;
+        defaultContext.sections[section.id] = 'context';
       });
-      // For now, we are not including external context by default.
       setContext(defaultContext);
     }
   }, [chapter]);
@@ -78,8 +72,6 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange?: (open:
       toast({ title: 'Action Failed', description: error.message, variant: 'destructive' });
     }
   });
-  
-  const translateMutation = useWritingTool('/api/writing-tools/translate-text');
 
   const onSubmit = (formData: FormValues) => {
     const textToProcess = chapterContent;
@@ -88,24 +80,7 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange?: (open:
         return;
     }
 
-    const contextSectionsContent = Object.keys(context.sections || {})
-        .filter(key => context.sections?.[key])
-        .map(key => {
-            const section = project?.getSection(key);
-            return `--- Context from Section: ${section?.title} ---\n${section?.content}`;
-        }).join('\n\n');
-
-    const contextFilesContent = Object.keys(context.externalContext || {})
-        .filter(key => context.externalContext?.[key])
-        .map(key => {
-            const file = project?.externalContext?.find(f => f.id === key);
-            return `--- Context from File: ${file?.fileName} ---\n${file?.content}`;
-        }).join('\n\n');
-    
-    const fullContext = [contextSectionsContent, contextFilesContent].filter(Boolean).join('\n\n');
-    const textWithContext = `${textToProcess}\n\n${fullContext ? `--- Additional Context ---\n${fullContext}`: ''}`;
-
-    let payload: any = { text: textWithContext };
+    let payload: any = { text: textToProcess };
 
     switch (manipulationType) {
         case 'rewrite':
@@ -164,47 +139,7 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange?: (open:
     if(onOpenChange) onOpenChange(false);
   };
 
-  const handleCopy = useCallback(() => {
-    if (!chapterContent) return;
-    navigator.clipboard.writeText(chapterContent).then(() => {
-        setIsCopied(true);
-        toast({ title: 'Chapter content copied!' });
-        setTimeout(() => setIsCopied(false), 2000);
-    });
-  }, [chapterContent, toast]);
-
-  const handleDuplicate = useCallback(() => {
-    if (!chapter) return;
-    updateProject(p => p.addChapter(`${chapter.title} (Copy)`, chapter.sections));
-    toast({ title: 'Chapter Duplicated' });
-  }, [chapter, updateProject, toast]);
-  
-  const handleTranslate = useCallback(() => {
-    if (!chapterContent) return;
-    const targetLang = /[\u0600-\u06FF]/.test(chapterContent) ? 'en' : 'ar';
-    translateMutation.mutate({ text: chapterContent, targetLang }, {
-        onSuccess: (data: any) => {
-            const translatedContent = data.text;
-            updateProject(p => p.addChapter(`${chapter.title} (Translated)`, [], translatedContent));
-            toast({ title: 'Chapter Translated', description: 'A new chapter with the translated content has been created.' });
-        },
-        onError: (error) => {
-            toast({ title: 'Translation Failed', description: error.message, variant: 'destructive' });
-        }
-    });
-  }, [chapterContent, chapter, translateMutation, updateProject, toast]);
-
-  const handleReadAloud = useCallback(() => {
-    if (!chapterContent) return;
-    if (isSpeaking) {
-        stop();
-    } else {
-        speak(chapterContent);
-    }
-  }, [chapterContent, isSpeaking, speak, stop]);
-
   return {
-    t,
     form,
     activeView,
     setActiveView,
@@ -221,14 +156,5 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange?: (open:
     handleApplyToNewSection,
     context,
     setContext,
-    // New actions
-    handleCopy,
-    handleDuplicate,
-    handleTranslate,
-    handleReadAloud,
-    isCopied,
-    isTranslating: translateMutation.isPending,
-    isSpeaking,
-    isDuplicating: false, // Placeholder, implement if async
   };
 }

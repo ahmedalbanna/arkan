@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useChapterActions } from '@/hooks/report-mode/use-chapter-actions';
-import { Chapter, SectionContext } from '@/lib/models';
+import { Chapter } from '@/lib/models';
 import { Loader2, Wand2, PlusCircle, Link as LinkIcon, Edit } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { Label } from '../ui/label';
@@ -23,60 +23,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Form } from '../ui/form';
 import { Badge } from '../ui/badge';
 import { Input } from '../ui/input';
-import { useBuilderStore } from '@/hooks';
-import { Checkbox } from '../ui/checkbox';
+import { SectionContextSelector } from './SectionContextSelector';
 
 interface ChapterToolsDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   chapter: Chapter | null;
-}
-
-function ContextSelector({
-  selectedContext,
-  onContextChange,
-  chapter, // Receive the current chapter to filter its sections
-}: {
-  selectedContext: SectionContext;
-  onContextChange: (newContext: SectionContext) => void;
-  chapter: Chapter | null;
-}) {
-
-  // Only show sections from the current chapter
-  const availableSections = chapter?.sections || [];
-
-  const toggleSelection = (key: string) => {
-    const newContext = { ...selectedContext };
-    if (!newContext.sections) {
-      newContext.sections = {};
-    }
-    newContext.sections[key] = !newContext.sections[key];
-    onContextChange(newContext);
-  };
-
-  return (
-    <ScrollArea className="h-96">
-      <div className="space-y-4">
-        {availableSections.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-semibold">Sections in this Chapter</h4>
-            {availableSections.map(section => (
-              <div key={section.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`ctx-sec-${section.id}`}
-                  checked={!!selectedContext.sections?.[section.id]}
-                  onCheckedChange={() => toggleSelection(section.id)}
-                />
-                <Label htmlFor={`ctx-sec-${section.id}`} className="font-normal">
-                  {section.title}
-                </Label>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </ScrollArea>
-  );
 }
 
 export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToolsDialogProps) {
@@ -209,7 +161,12 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
                   )}
                 </TabsContent>
                 <TabsContent value="context" className="flex-1 mt-4">
-                  <ContextSelector selectedContext={context} onContextChange={setContext} chapter={chapter} />
+                   <SectionContextSelector
+                        availableSections={chapter.sections}
+                        availableFiles={[]} // Assuming no external files for now
+                        selectedContext={context}
+                        onContextChange={setContext}
+                    />
                 </TabsContent>
               </Tabs>
             </div>
