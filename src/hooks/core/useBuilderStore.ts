@@ -7,6 +7,7 @@ import { localProjectService } from '@/services/local-project-service';
 import React, { useEffect } from 'react';
 import { create } from 'zustand';
 import { parseMarkdownToContent } from '../util/useMarkdownParser';
+import type { ExternalContext, ExternalContextProperties } from '@/lib/models';
 
 type ActiveView = 'cover-page' | 'report-content';
 
@@ -18,7 +19,7 @@ interface BuilderState {
     initializeStore: () => void;
     setActiveView: (view: ActiveView) => void;
     setHasUnsavedChanges: (hasChanges: boolean) => void;
-    updateProject: (updater: (project: Project) => Project | ProjectProperties) => void;
+    updateProject: (updater: (project: Project) => Project | void) => void;
     setContentFromMarkdown: (markdown: string) => void;
     loadProject: (projectData: ProjectProperties) => void;
     newSession: () => void;
@@ -68,9 +69,10 @@ const useBuilderStore = create<BuilderState>((set, get) => {
         updateProject: (updater) => {
             set(state => {
                 if (!state.project) return {};
-                const result = updater(state.project);
-                // Ensure the result is always a Project instance
-                const newProject = result instanceof Project ? result : new Project(result);
+                const currentProject = state.project;
+                const result = updater(currentProject);
+                // If the updater returns a new project instance, use it. Otherwise, assume it mutated the draft.
+                const newProject = result instanceof Project ? result : currentProject;
                 localStorage.setItem('lastActiveProjectId', newProject.id);
                 return { project: newProject, hasUnsavedChanges: true };
             });

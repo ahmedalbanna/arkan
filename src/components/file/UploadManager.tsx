@@ -1,30 +1,36 @@
 
 'use client';
 
-import { PdfPreview } from '@/components/file/PdfPreview';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useLocalization } from '@/context/LocalizationContext';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@/components/ui/dialog";
+import { useLocalization } from "@/context/LocalizationContext";
 import { useBuilderStore, useToast } from '@/hooks';
-import { ExternalContextType } from '@/lib/types';
-import { cn } from '@/lib/utils/cn';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { ExternalContextType } from '@/lib/models';
+import { cn } from "@/lib/utils/cn";
 import { AtomIcon, FileText, ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
-import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { Button } from "../ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Label } from "../ui/label";
+import { ScrollArea } from "../ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Textarea } from "../ui/textarea";
+import { Input } from "../ui/input";
+import { Badge } from "../ui/badge";
+import { PdfPreview } from './PdfPreview';
+import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
-import { PasteTextUploader } from './PasteTextUploader';
-interface UploadManagerProps {
+import { markdownComponents } from '@/lib/utils/markdown-styles';
 
-}
-
-function ViewContextDialog({ item }: { item: { fileName: string, content: string, type: ExternalContextType } }) {
+// Extracted ViewContextDialog component
+function ViewContextDialog({ item }: { item: { fileName: string, content: string } }) {
     const isDataUri = item.content.startsWith('data:');
     const isImage = isDataUri && item.content.startsWith('data:image');
     const isPdf = isDataUri && item.content.startsWith('data:application/pdf');
@@ -56,29 +62,29 @@ function ViewContextDialog({ item }: { item: { fileName: string, content: string
     )
 }
 
-function FileDropzone() {
+// Main UploadManager component
+export function UploadManager() {
     const { t } = useLocalization();
     const { toast } = useToast();
-    const { updateProject } = useBuilderStore();
+    const { project, updateProject } = useBuilderStore();
     const [isLoading, setIsLoading] = useState(false);
+    const [textInput, setTextInput] = useState('');
+    const [textFileName, setTextFileName] = useState('');
 
-    async function onDrop(acceptedFiles: File[]) {
+    const onDrop = useCallback((acceptedFiles: File[]) => {
         setIsLoading(true);
         for (const file of acceptedFiles) {
             const reader = new FileReader();
 
             reader.onabort = () => console.log('file reading was aborted');
-            reader.onerror = () => console.log('file reading has failed');
+            reader.onerror = () => {
+                console.log('file reading has failed');
+                toast({ title: t('builder.files.toasts.fileReadError'), description: t('builder.files.toasts.fileReadErrorDesc'), variant: 'destructive' });
+            };
             reader.onload = () => {
-                const binaryStr = reader.result as string;
-                updateProject(p =>
-                    p.addExternalContext({
-                        fileName: file.name,
-                        content: binaryStr,
-                        type: 'context'
-                    })
-                );
-                toast({ title: t('builder.files.toasts.fileAdded'), description: t('builder.files.toasts.fileAddedDesc').replace('{fileName}', file.name) });
+                const content = reader.result as string;
+                updateProject(p => p.addExternalContext({ fileName: file.name, content, type: 'context' }));
+                toast({ title: t('builder.files.toasts.fileAdded'), description: t('builder.files.toasts.fileAddedDesc', { fileName: file.name }) });
             };
 
             const isTextFile = file.type.startsWith('text/') || file.name.endsWith('.md');
@@ -89,7 +95,7 @@ function FileDropzone() {
             }
         }
         setIsLoading(false);
-    }
+    }, [updateProject, toast, t]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -106,57 +112,33 @@ function FileDropzone() {
         }
     });
 
-    return (
-        <Card
-            {...getRootProps()}
-            className={`border-2 border-dashed ${isDragActive ? 'border-primary bg-accent' : 'border-border'
-                } hover:border-primary/80 transition-colors cursor-pointer`}
-        >
-            <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                <input {...getInputProps()} />
-                {isLoading ? (
-                    <>
-                        <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                        <p className="mt-2 text-sm text-muted-foreground">{t('builder.files.toasts.processingFile')}</p>
-                    </>
-                ) : (
-                    <>
-                        <UploadCloud className="h-10 w-10 text-muted-foreground" />
-                        <p className="mt-2 text-sm font-semibold">
-                            {isDragActive ? t('builder.files.toasts.dropHere') : t('builder.files.dropzoneLabel')}
-                        </p>
-                        <p className="text-xs text-muted-foreground">{t('builder.files.dropzoneHint')}</p>
-                    </>
-                )}
-            </CardContent>
-        </Card>
-    );
-}
-
-export function UploadManager() {
-    const { t } = useLocalization();
-    const { project, updateProject } = useBuilderStore();
+    function handleAddPastedText() {
+        if (!textInput.trim() || !textFileName.trim()) {
+            toast({
+                title: t('builder.files.toasts.missingInfoToastTitle'),
+                description: t('builder.files.toasts.missingInfoToastDesc'),
+                variant: "destructive"
+            });
+            return;
+        }
+        updateProject(p => p.addExternalContext({
+            fileName: `${textFileName.trim()}.md`,
+            content: textInput,
+            type: 'context',
+        }));
+        toast({ title: t('builder.files.toasts.contextAddedToastTitle'), description: t('builder.files.toasts.contextAddedToastDesc', { fileName: `${textFileName.trim()}.md` }) });
+        setTextInput('');
+        setTextFileName('');
+    }
 
     const externalContext = project?.externalContext || [];
-
-    function removeExternalContext(index: number) {
-        updateProject(p => p.removeExternalContext(index));
-    }
-
-    function updateExternalContextType(index: number, type: ExternalContextType) {
-        updateProject(p => p.updateExternalContextType(index, type));
-    }
-
     const fileTypes: ExternalContextType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
 
     return (
-        <Card className="flex flex-col">
+        <Card className="flex flex-col h-full">
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <CardTitle>{t('builder.files.fileManagerTitle')}</CardTitle>
-                    <Button variant="ghost" size="icon" className="hidden lg:inline-flex">
-                        <AtomIcon className="h-5 w-5" />
-                    </Button>
                 </div>
                 <CardDescription>
                     {t('builder.files.fileManagerDesc')}
@@ -169,60 +151,60 @@ export function UploadManager() {
                         <TabsTrigger value="text">{t('builder.files.pasteTextTab')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="upload" className="mt-4">
-                        <FileDropzone />
+                        <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${isDragActive ? 'border-primary bg-accent' : 'border-border'}`}>
+                            <input {...getInputProps()} />
+                            {isLoading ? (
+                                <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
+                            ) : (
+                                <UploadCloud className="h-10 w-10 text-muted-foreground mx-auto" />
+                            )}
+                            <p className="mt-2 text-sm font-semibold">{isDragActive ? t('builder.files.toasts.dropHere') : t('builder.files.dropzoneLabel')}</p>
+                            <p className="text-xs text-muted-foreground">{t('builder.files.dropzoneHint')}</p>
+                        </div>
                     </TabsContent>
-                    <TabsContent value="text" className="mt-4">
-                        <PasteTextUploader />
+                    <TabsContent value="text" className="mt-4 space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="context-name">{t('builder.files.pasteText.titleLabel')}</Label>
+                            <Input id="context-name" placeholder={t('builder.files.pasteText.titlePlaceholder')} value={textFileName} onChange={(e) => setTextFileName(e.target.value)} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="context-text">{t('builder.files.pasteText.contentLabel')}</Label>
+                            <Textarea id="context-text" placeholder={t('builder.files.pasteText.contentPlaceholder')} value={textInput} onChange={(e) => setTextInput(e.target.value)} rows={6} />
+                        </div>
+                        <Button onClick={handleAddPastedText} disabled={!textInput.trim() || !textFileName.trim()} className="w-full">
+                            {t('builder.files.pasteText.addButton')}
+                        </Button>
                     </TabsContent>
                 </Tabs>
-
-                {externalContext && externalContext.length > 0 && (
-                    <div className="space-y-2 flex-grow flex flex-col min-h-0">
+                {externalContext.length > 0 && (
+                    <div className="space-y-2 flex-grow flex flex-col min-h-0 pt-4 border-t">
                         <h3 className="text-sm font-medium text-muted-foreground">{t('builder.files.toasts.uploadedContext')}</h3>
-
-                        <ul className="space-y-1 list-none p-2">
-                            {externalContext.map((item, index) => {
-                                return (
+                        <ScrollArea className="flex-grow">
+                            <ul className="space-y-1 list-none p-1">
+                                {externalContext.map((item, index) => (
                                     <li key={item.id} className="flex items-center justify-between p-2 rounded-md hover:bg-muted transition-colors">
                                         <div className="flex items-center gap-2 flex-1 min-w-0">
                                             <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                                             <span className="truncate font-medium text-sm" title={item.fileName}>{item.fileName}</span>
                                         </div>
                                         <div className="flex items-center gap-1">
-                                            <Select value={item.type} onValueChange={(value: ExternalContextType) => updateExternalContextType(index, value)}>
-                                                <SelectTrigger className={cn("text-xs h-7 w-auto p-0 border-0 bg-transparent focus:ring-0", {
-                                                    'text-blue-800 dark:text-blue-200': item.type === 'context',
-                                                    'text-green-800 dark:text-green-200': item.type === 'example',
-                                                    'text-yellow-800 dark:text-yellow-200': item.type === 'question',
-                                                    'text-purple-800 dark:text-purple-200': item.type === 'textbook',
-                                                    'text-gray-800 dark:text-gray-200': item.type === 'guidelines',
-                                                })}>
+                                            <Select value={item.type} onValueChange={(value: ExternalContextType) => updateProject(p => p.updateExternalContextType(index, value))}>
+                                                <SelectTrigger className="text-xs h-7 w-auto p-0 border-0 bg-transparent focus:ring-0">
                                                     <SelectValue asChild>
-                                                        <Badge variant="secondary" className={cn("capitalize cursor-pointer", {
-                                                            'bg-blue-100 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800': item.type === 'context',
-                                                            'bg-green-100 dark:bg-green-900/50 border-green-200 dark:border-green-800': item.type === 'example',
-                                                            'bg-yellow-100 dark:bg-yellow-900/50 border-yellow-200 dark:border-yellow-800': item.type === 'question',
-                                                            'bg-purple-100 dark:bg-purple-900/50 border-purple-200 dark:border-purple-800': item.type === 'textbook',
-                                                            'bg-gray-100 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600': item.type === 'guidelines',
-                                                        })}>
-                                                            {item.type}
-                                                        </Badge>
+                                                        <Badge variant="outline" className="capitalize cursor-pointer">{item.type}</Badge>
                                                     </SelectValue>
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {fileTypes.map(type => (
-                                                        <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
-                                                    ))}
+                                                    {fileTypes.map(type => <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>)}
                                                 </SelectContent>
                                             </Select>
                                             <ViewContextDialog item={item} />
-                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeExternalContext(index)}><X className="h-4 w-4 text-destructive" /></Button>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => updateProject(p => p.removeExternalContext(index))}><X className="h-4 w-4 text-destructive" /></Button>
                                         </div>
                                     </li>
-                                )
-                            })}
-                        </ul>
-
+                                ))}
+                            </ul>
+                        </ScrollArea>
                     </div>
                 )}
             </CardContent>
