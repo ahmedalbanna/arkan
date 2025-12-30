@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -14,11 +15,10 @@ import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
-import { Gem, ShoppingCart, ArrowLeft, Banknote, AlertCircle, Copy, Check, UploadCloud, Loader2 } from 'lucide-react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { fetchPublicSettings, submitPaymentProof } from '@/services';
-import type { PublicSettings, BankAccount } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Gem, ShoppingCart, ArrowLeft, Banknote, AlertCircle, Copy, Check, UploadCloud, Loader2, PartyPopper } from 'lucide-react';
+import { useSubmitPaymentProof, usePublicSettings } from '@/hooks';
+import type { BankAccount } from '@/lib/types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Skeleton } from '../ui/skeleton';
 import { Label } from '../ui/label';
@@ -26,6 +26,7 @@ import { Input } from '../ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { fileSchema } from '@/lib/types';
 
 const CREDIT_PRICE = 0.10; // $0.10 per credit
 
@@ -67,17 +68,6 @@ function AccountDetail({ label, value }: { label: string, value?: string }) {
   )
 }
 
-const fileSchema = z.object({
-  file: z
-    .any()
-    .refine((files) => files?.length == 1, 'File is required.')
-    .refine((files) => files?.[0]?.size <= 5 * 1024 * 1024, `Max file size is 5MB.`)
-    .refine(
-      (files) => ['image/jpeg', 'image/png', 'application/pdf'].includes(files?.[0]?.type),
-      'Invalid file type. Only JPG, PNG, and PDF are allowed.'
-    ),
-});
-
 type FileFormValues = z.infer<typeof fileSchema>;
 
 export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode }) {
@@ -89,38 +79,31 @@ export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode })
   const [credits, setCredits] = useState(100);
   const price = credits * CREDIT_PRICE;
 
-  const { data: settings, isLoading: isLoadingSettings, isError: isSettingsError } = useQuery<PublicSettings>({
-    queryKey: ['publicSettings'],
-    queryFn: fetchPublicSettings,
-    staleTime: 1000 * 60 * 60, // 1 hour
-  });
-
+  const { data: settings, isLoading: isLoadingSettings, isError: isSettingsError } = usePublicSettings();
+  
   const form = useForm<FileFormValues>({
     resolver: zodResolver(fileSchema),
   });
 
-  const mutation = useMutation({
-    mutationFn: submitPaymentProof,
+  const mutation = useSubmitPaymentProof({
     onSuccess: () => {
-      toast({
-        title: t('submitPayment.successTitle'),
-        description: t('submitPayment.successDescription'),
-      });
-      setIsOpen(false);
-      setStep(1);
+      setStep(3); // Go to success step
       form.reset();
     },
-    onError: (error: Error) => {
-      toast({
-        title: t('submitPayment.errorTitle'),
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
   });
 
   function handleContinue() {
     setStep(2);
+  }
+
+  function handleCloseAndReset() {
+    setIsOpen(false);
+    // Reset state after a short delay to allow the dialog to close smoothly
+    setTimeout(() => {
+        setStep(1);
+        setCredits(100);
+        form.reset();
+    }, 300);
   }
 
   async function onSubmit(data: FileFormValues) {
@@ -246,6 +229,18 @@ export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode })
               </form>
             </div>
           </>
+        )}
+        {step === 3 && (
+            <>
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2"><PartyPopper className="w-6 h-6 text-primary" />{t('submitPayment.successTitle')}</DialogTitle>
+                </DialogHeader>
+                <div className="py-8 text-center space-y-4">
+                    <p>{t('submitPayment.successDescription')}</p>
+                    <p className="text-sm text-muted-foreground">You will receive a notification once your credits have been added to your account.</p>
+                    <Button onClick={handleCloseAndReset} className="mt-4">Done</Button>
+                </div>
+            </>
         )}
       </DialogContent>
     </Dialog>

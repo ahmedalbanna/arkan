@@ -1,5 +1,6 @@
 
 
+// Admin Hooks
 export * from './api/adminService';
 export * from './api/analyticsService';
 export * from './api/authService';
@@ -10,7 +11,6 @@ export * from './api/documentProcessingService';
 export * from './api/evaluationService';
 export * from './api/featureService';
 export * from './api/generationLogService';
-export * from './api/paymentService';
 export * from './api/projectService';
 export * from './api/reportService';
 export * from './api/sectionService';

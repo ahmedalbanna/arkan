@@ -26,13 +26,13 @@ export * from './report-mode/use-report-generation-tools';
 export * from './data/use-analytics';
 export * from './data/use-features';
 export * from './data/use-notifications';
-export * from './data/use-payment';
+export * from './data/use-transactions';
 export * from './data/use-projects';
 export * from './data/use-sections';
 export * from './data/use-templates';
-export * from './data/use-transactions';
 export * from './data/use-users';
 export * from './data/use-agent-categories';
+export * from './data/use-settings';
 
 
 // Writing Tools Logic Hooks

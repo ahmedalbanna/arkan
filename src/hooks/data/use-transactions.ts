@@ -4,7 +4,7 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { transactionKeys } from '@/lib/query-keys';
-import { getTransactions, verifyPayment } from '@/services/api/transactionService';
+import { getTransactions, verifyPayment, submitPaymentProof } from '@/services/api/transactionService';
 import { toast } from '@/hooks/util/use-toast';
 import { Transaction, type TransactionProperties } from '@/lib/models/transaction';
 import { VerifyPaymentVariables } from '@/lib/types';
@@ -73,5 +73,26 @@ export function useUserTransactions() {
             return results.map((t: TransactionProperties) => new Transaction(t));
         },
         enabled: !authLoading && !!firebaseUser,
+    });
+}
+
+export function useSubmitPaymentProof(options?: { onSuccess?: () => void }) {
+    const { firebaseUser } = useAuth();
+    const queryClient = useQueryClient();
+    const { toast } = useToast();
+
+    return useMutation({
+        mutationFn: async (formData: FormData) => {
+            if (!firebaseUser) throw new Error("User not authenticated");
+            const token = await firebaseUser.getIdToken();
+            return submitPaymentProof({ formData, token });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
+            options?.onSuccess?.();
+        },
+        onError: (error: Error) => {
+            toast({ title: 'Submission Failed', description: error.message, variant: 'destructive' });
+        }
     });
 }

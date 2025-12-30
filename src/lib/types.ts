@@ -2,6 +2,7 @@
 'use client';
 
 import { DocxStyleOptions } from './models';
+import { z } from 'zod';
 
 export * from './models/docxTemplate';
 export * from './models/pptxTemplate';
@@ -112,6 +113,7 @@ export interface BankAccount {
 
 export interface PublicSettings {
     bankAccounts: BankAccount[];
+    newUserCredits: number;
 }
 
 export interface Feature {
@@ -171,3 +173,15 @@ export interface ReportTemplateProperties {
 
 export type CreateReportTemplateData = Omit<ReportTemplateProperties, 'id'> & { id: string };
 export type UpdateReportTemplateData = Partial<Omit<ReportTemplateProperties, 'id'>>;
+
+// Payment proof file schema
+export const fileSchema = z.object({
+  file: z
+    .any()
+    .refine((files) => files?.length == 1, 'File is required.')
+    .refine((files) => files?.[0]?.size <= 5 * 1024 * 1024, `Max file size is 5MB.`)
+    .refine(
+      (files) => ['image/jpeg', 'image/png', 'application/pdf'].includes(files?.[0]?.type),
+      'Invalid file type. Only JPG, PNG, and PDF are allowed.'
+    ),
+});
