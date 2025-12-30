@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,7 @@ interface OnboardingGuideProps {
   onComplete: () => void;
 }
 
-export default function OnboardingGuide({ isOpen, onOpenChange, onComplete }: OnboardingGuideProps) {
+export function OnboardingGuide({ isOpen, onOpenChange, onComplete }: OnboardingGuideProps) {
   const [step, setStep] = useState(0);
 
   const steps = useMemo(() => [
@@ -73,19 +74,19 @@ export default function OnboardingGuide({ isOpen, onOpenChange, onComplete }: On
     },
   ], []);
 
-  function handleNext() {
+  const handleNext = () => {
     if (step < steps.length - 1) {
       setStep(step + 1);
     } else {
       onComplete();
     }
-  }
+  };
 
-  function handlePrev() {
+  const handlePrev = () => {
     if (step > 0) {
       setStep(step - 1);
     }
-  }
+  };
 
   const currentStep = steps[step];
 
@@ -106,7 +107,7 @@ export default function OnboardingGuide({ isOpen, onOpenChange, onComplete }: On
             data-ai-hint={currentStep.dataAiHint}
           />
           <div className="p-6">
-            <DialogTitle className="text-2xl font.headline flex items-center gap-2">
+            <DialogTitle className="text-2xl font-headline flex items-center gap-2">
               {step === 0 ? <PartyPopper className="w-6 h-6 text-primary" /> : <Lightbulb className="w-6 h-6 text-primary" />}
               {currentStep.title}
             </DialogTitle>

@@ -1,90 +1,35 @@
-
 'use client';
 
-import OnboardingGuide from '@/components/auth/OnboardingGuide';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDistanceToNow } from 'date-fns';
-import { ar, enUS } from 'date-fns/locale';
-import { FileText, FolderKanban } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
-import { useBuilderStore, useInitializeBuilderStore } from '@/hooks/core/useBuilderStore';
+import { useBuilderPageLogic } from '@/hooks/core/use-builder-page';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { userKeys } from '@/lib/query-keys';
-
-
-function LoadingSkeleton() {
-  return (
-    <div className="space-y-4">
-      <Skeleton className="h-12 w-full" />
-      <Skeleton className="h-[calc(100vh-300px)] w-full" />
-    </div>
-  );
-}
+import { OnboardingGuide } from '@/components/onboarding/OnboardingGuide';
+import { BuilderPageSkeleton } from './loading';
 
 const SessionActions = dynamic(() => import('@/components/project/SessionActions').then(mod => mod.SessionActions), {
   ssr: false,
-  loading: () => <Skeleton className="h-8 w-[400px]" />,
+  loading: () => <div className="h-8 w-[400px] bg-muted rounded-md" />,
 });
-
 
 const ReportGenerator = dynamic(() => import('@/components/report-mode/ReportModeGenerator'), {
   ssr: false,
-  loading: () => <LoadingSkeleton />,
+  loading: () => <BuilderPageSkeleton />,
 });
 
-function GeneratePageContent() {
-  const { userProfile, firebaseUser, refetchUser } = useAuth();
-  const { project, updateProject } = useBuilderStore();
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const queryClient = useQueryClient();
-
-  // This hook ensures the store is initialized from localStorage on client-side mount
-  const isStoreInitialized = useInitializeBuilderStore();
-  
-  useEffect(() => {
-    if (userProfile && !userProfile.hasCompletedOnboarding) {
-      setShowOnboarding(true);
-    }
-  }, [userProfile]);
-
-  const onboardingMutation = useMutation({
-    mutationFn: async () => {
-      if (!firebaseUser) throw new Error('User not authenticated');
-      const token = await firebaseUser.getIdToken();
-      const response = await fetch(`/api/users/${firebaseUser.uid}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ hasCompletedOnboarding: true })
-      });
-      if (!response.ok) throw new Error('Failed to update onboarding status');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser!.uid) });
-      refetchUser();
-    },
-    onError: (error: Error) => console.error('Failed to mark onboarding as complete:', error),
-  });
-
-  const handleOnboardingComplete = () => {
-    setShowOnboarding(false);
-    if (userProfile && !userProfile.hasCompletedOnboarding) {
-      onboardingMutation.mutate();
-    }
-  };
-
-  const updateProjectName = (name: string) => {
-    updateProject(p => p.with({ name }));
-  };
+export default function GeneratePage() {
+  const {
+    showOnboarding,
+    setShowOnboarding,
+    handleOnboardingComplete,
+    project,
+    isStoreInitialized,
+    updateProjectName,
+  } = useBuilderPageLogic();
 
   // Show a loading skeleton until the store is initialized from local storage
-  if (!isStoreInitialized) {
-    return <LoadingSkeleton />;
+  if (!isStoreInitialized || !project) {
+    return <BuilderPageSkeleton />;
   }
 
   return (
@@ -99,9 +44,9 @@ function GeneratePageContent() {
               onChange={(e) => updateProjectName(e.target.value)}
               placeholder={'Untitled Project'}
             />
-            {project?.updatedAt && (
+            {project?.meta.updated && (
               <p className="text-xs text-muted-foreground pt-1">
-                Updated {formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}
+                Updated {formatDistanceToNow(new Date(project.meta.updated), { addSuffix: true })}
               </p>
             )}
           </div>
@@ -115,10 +60,4 @@ function GeneratePageContent() {
       </div>
     </div>
   );
-}
-
-export default function GeneratePage() {
-  return (
-    <GeneratePageContent />
-  )
 }
