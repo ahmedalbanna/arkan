@@ -3,24 +3,9 @@
 
 import Link from 'next/link';
 import {
-  Bell,
-  Home,
   Menu,
-  LayoutDashboard,
-  Users,
-  CreditCard,
-  Bot,
-  History,
-  PencilRuler,
-  Palette,
-  FileImage,
-  Settings,
-  SlidersHorizontal,
-  Workflow,
-  Library,
-  MessageSquare,
+  Home,
   ChevronDown,
-  Wrench,
 } from 'lucide-react';
 import { ReactNode, useEffect, useState } from 'react';
 import { usePathname, notFound } from 'next/navigation';
@@ -43,25 +28,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LanguageToggle } from '@/components/shared/LanguageToggle';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-
-interface NavLink {
-    href: string;
-    labelKey: string;
-    icon: React.ElementType;
-    children?: NavLink[];
-}
-
-const navConfig: NavLink[] = [
-    { href: '/admin/dashboard', labelKey: 'adminDashboard.pageTitle', icon: LayoutDashboard },
-    { href: '/admin/manage-users', labelKey: 'header.manageUsers', icon: Users },
-    { href: '/admin/manage-payments', labelKey: 'header.managePayments', icon: CreditCard },
-    { href: '/admin/manage-agents', labelKey: 'header.agentManager', icon: Bot },
-    { href: '/admin/manage-sections', labelKey: 'header.manageSections', icon: PencilRuler },
-    { href: '/admin/manage-features', labelKey: 'header.manageFeatures', icon: SlidersHorizontal },
-    { href: '/admin/manage-generations', labelKey: 'header.activityHistory', icon: History },
-    { href: '/admin/automations/builder', labelKey: 'header.automations', icon: Workflow },
-    { href: '/admin/settings', labelKey: 'header.adminSettings', icon: Settings },
-];
+import { navConfig, type NavLink } from '@/config/admin-nav';
 
 function AdminLayoutSkeleton() {
     return (

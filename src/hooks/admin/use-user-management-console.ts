@@ -5,6 +5,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { userKeys } from '@/lib/query-keys';
 import { fetchUsersApi } from '@/services/api/userService';
 import { useAuth } from '@/context/AuthContext';
+import { User } from '@/lib/models';
 
 const USERS_PER_PAGE = 10;
 
@@ -25,7 +26,12 @@ export function useUserManagementConsole() {
     queryFn: async ({ pageParam }) => {
       if (!firebaseUser) throw new Error("User not authenticated");
       const token = await firebaseUser.getIdToken();
-      return fetchUsersApi(USERS_PER_PAGE, pageParam, token);
+      const result = await fetchUsersApi(USERS_PER_PAGE, pageParam, token);
+      // Instantiate User objects
+      return {
+          ...result,
+          users: result.users.map(u => new User(u)),
+      };
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
