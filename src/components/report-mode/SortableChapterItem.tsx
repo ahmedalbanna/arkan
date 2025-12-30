@@ -7,7 +7,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from '@/components/ui/button';
-import { Chapter, Section } from '@/lib/models';
+import { Chapter } from '@/lib/models';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { Checkbox } from "../ui/checkbox";
-import { SortableSectionItem } from './SortableSectionItem';
+import { SectionAccordionItem } from './SectionAccordionItem';
 
 interface SortableChapterItemProps {
   chapter: Chapter;
@@ -106,7 +106,7 @@ export function SortableChapterItem({
 
             <div className="w-full space-y-2">
               {chapter.sections.map((section, sectionIndex) => (
-                <SortableSectionItem
+                <SectionAccordionItem
                   key={section.id}
                   section={section}
                   index={sectionIndex}
