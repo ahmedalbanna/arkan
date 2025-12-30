@@ -7,7 +7,6 @@ import {
   deleteUserApi,
   fetchUserProfileApi,
   updateUserApi,
-  fetchUsersApi,
   sendNotificationApi,
 } from '@/services/api/userService';
 import { User, type UserProfile } from '@/lib/models';
@@ -41,28 +40,6 @@ export function useUserProfile(userId: string) {
     },
     enabled: !!firebaseUser && !!userId,
   });
-}
-
-/**
- * Fetches a paginated list of all users.
- * Requires admin privileges.
- */
-export function useUsers(limit: number, lastVisibleId?: string) {
-    const { firebaseUser } = useAuth();
-    return useQuery({
-        queryKey: userKeys.list(lastVisibleId ? 1 : 0),
-        queryFn: async () => {
-             if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await getAuthenticatedToken(firebaseUser);
-            const result = await fetchUsersApi(limit, lastVisibleId, token);
-            // Instantiate User objects
-            return {
-                ...result,
-                users: result.users.map(u => new User(u)),
-            };
-        },
-        enabled: !!firebaseUser
-    })
 }
 
 

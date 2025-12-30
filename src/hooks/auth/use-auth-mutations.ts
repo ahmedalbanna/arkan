@@ -44,11 +44,9 @@ async function handleFirstSignIn(user: FirebaseUser) {
     // We expect this to fail for a new user.
     const token = await user.getIdToken();
     try {
-        const existingProfile = await fetch('/api/users/' + user.uid, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        const existingProfile = await fetchUserProfileApi(user.uid, token);
 
-        if (existingProfile.status === 404) {
+        if (!existingProfile) {
             // Profile doesn't exist, so create it.
             const profileData: Partial<UserProfile> = {
                 id: user.uid,

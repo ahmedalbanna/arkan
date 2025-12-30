@@ -13,6 +13,7 @@ import {
   type UserCredential
 } from "firebase/auth";
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { fetchUserProfileApi } from './userService';
 
 
 // --- Authentication Functions ---
