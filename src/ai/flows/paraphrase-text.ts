@@ -16,23 +16,15 @@ const styleDescriptions: Record<ParaphraseMode, string> = {
     simplify: "Rewrite the text to be simpler and easier to understand for a general audience.",
 };
 
-
-const paraphraseTextFlow = ai.defineFlow({
-    name: 'paraphraseTextFlow',
-    inputSchema: ParaphraseInputSchema,
-    outputSchema: ParaphraseOutputSchema,
-}, async (input) => {
-    const { text, mode } = input;
-
-    const paraphrasePrompt = ai.definePrompt({
-        name: 'paraphraseTextPrompt',
-        input: { schema: ParaphraseInputSchema },
-        output: { schema: ParaphraseOutputSchema },
-        model: 'googleai/gemini-2.5-flash-lite',
-        prompt: `You are an expert editor. Your task is to paraphrase the given text based on the selected mode. You must perfectly preserve all markdown formatting.
+const paraphrasePrompt = ai.definePrompt({
+    name: 'paraphraseTextPrompt',
+    input: { schema: ParaphraseInputSchema },
+    output: { schema: ParaphraseOutputSchema },
+    model: 'googleai/gemini-2.5-flash-lite',
+    prompt: `You are an expert editor. Your task is to paraphrase the given text based on the selected mode. You must perfectly preserve all markdown formatting.
 
 **Mode**: {{{mode}}}
-**Instruction**: ${styleDescriptions[mode]}
+**Instruction**: ${styleDescriptions[ParaphraseInputSchema.shape.mode.parse(undefined)]}
 
 **Original Text:**
 ---
@@ -40,9 +32,14 @@ const paraphraseTextFlow = ai.defineFlow({
 ---
 
 **Paraphrased Text:**`,
-    });
+});
 
-    const { output } = await paraphrasePrompt({ text, mode });
+const paraphraseTextFlow = ai.defineFlow({
+    name: 'paraphraseTextFlow',
+    inputSchema: ParaphraseInputSchema,
+    outputSchema: ParaphraseOutputSchema,
+}, async (input) => {
+    const { output } = await paraphrasePrompt(input);
     if (!output) {
         throw new Error("Failed to paraphrase text.");
     }

@@ -20,7 +20,6 @@ export function useWritingTool<TData = unknown, TVariables = Omit<AIFlowInput, '
   options?: Omit<UseMutationOptions<TData, Error, TVariables>, 'mutationFn'>
 ) {
   const { firebaseUser, refetchUser } = useAuth();
-  const toolName = endpoint.split('/').pop() || '';
 
   return useMutation<TData, Error, TVariables>({
     mutationFn: async (data: TVariables) => {
@@ -28,9 +27,8 @@ export function useWritingTool<TData = unknown, TVariables = Omit<AIFlowInput, '
         throw new Error('You must be logged in to use this feature.');
       }
       const token = await firebaseUser.getIdToken();
-      // Assume a default credit cost of 1 if not specified in the endpoint logic
-      // Automatically add the 'flow' property based on the endpoint.
-      const payload = { ...data, flow: toolName };
+      // The 'flow' property is no longer needed as each tool has its own endpoint
+      const payload = data;
       return writingToolApi<typeof payload, TData>(endpoint, { data: payload, token });
     },
     onSuccess: (data, variables, context) => {
