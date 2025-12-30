@@ -5,144 +5,152 @@ import { create } from 'zustand';
 import type { AgentProperties } from '@/lib/models';
 import { fetchAgentsApi, createAgentApi, updateAgentApi, deleteAgentApi } from '@/services/api/agentService';
 import { useAuth } from '@/context/AuthContext';
-import { useEffect } from 'react';
-import { getAuth } from 'firebase/auth';
-import { app } from '@/lib/firebase/client-init';
+import { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from './util/use-toast';
+import { agentKeys } from '@/lib/query-keys';
 
-interface AgentResponse {
-  prompt: string;
-  response: string;
-}
-
-type ResponseMap = Record<string, Record<string, AgentResponse[]>>;
 
 interface AgentState {
   agents: AgentProperties[];
-  selectedAgent: AgentProperties | null;
-  responses: ResponseMap;
-  isLoading: boolean;
-  error: string | null;
-  hasFetched: boolean; // Add a flag to track if initial fetch has happened
-  fetchAgents: (token: string) => Promise<void>;
+  selectedAgentId: string | null;
+  responses: Record<string, Record<string, { prompt: string; response: string }[]>>;
+  selectedCommandId: string | null;
   selectAgent: (agentId: string | null) => void;
-  setResponse: (agentId: string, commandId: string, response: AgentResponse) => void;
+  setSelectedCommandId: (commandId: string | null) => void;
+  setResponse: (agentId: string, commandId: string, response: { prompt: string; response: string }) => void;
   clearResponses: (agentId: string, commandId?: string) => void;
-  addAgent: (agent: AgentProperties) => void;
-  updateAgentInStore: (agent: AgentProperties) => void;
-  removeAgentFromStore: (agentId: string) => void;
 }
 
-const useAgentStore = create<AgentState>((set, get) => ({
-      agents: [],
-      selectedAgent: null,
-      responses: {},
-      isLoading: false, // Start with false, set to true only during fetch
-      error: null,
-      hasFetched: false, // Initialize as false
+const useAgentUIState = create<AgentState>((set) => ({
+  agents: [],
+  selectedAgentId: null,
+  responses: {},
+  selectedCommandId: null,
+  selectAgent: (agentId) => set({ selectedAgentId: agentId, selectedCommandId: null, responses: {} }),
+  setSelectedCommandId: (commandId) => set({ selectedCommandId: commandId }),
+  setResponse: (agentId, commandId, response) => set((state) => {
+    const newResponses = { ...state.responses };
+    if (!newResponses[agentId]) newResponses[agentId] = {};
+    if (!newResponses[agentId][commandId]) newResponses[agentId][commandId] = [];
+    newResponses[agentId][commandId].push(response);
+    return { responses: newResponses };
+  }),
+  clearResponses: (agentId, commandId) => set((state) => {
+    const newResponses = { ...state.responses };
+    if (newResponses[agentId]) {
+      if (commandId) delete newResponses[agentId][commandId];
+      else delete newResponses[agentId];
+    }
+    return { responses: newResponses };
+  }),
+}));
 
-      fetchAgents: async (token: string) => {
-        // Prevent re-fetching if already fetched or currently fetching
-        if (get().hasFetched || get().isLoading) {
-          return;
-        }
-        set({ isLoading: true, error: null });
-        try {
-          const agents = await fetchAgentsApi(token);
-          set({ agents, isLoading: false, hasFetched: true });
-        } catch (error: any) {
-          set({ error: error.message, isLoading: false, hasFetched: false });
-        }
-      },
-
-      selectAgent: (agentId) => {
-        const agent = get().agents.find(a => a.id === agentId);
-        set({ selectedAgent: agent || null });
-      },
-
-      setResponse: (agentId, commandId, response) => {
-        set(state => {
-          const newResponses = { ...state.responses };
-          if (!newResponses[agentId]) newResponses[agentId] = {};
-          if (!newResponses[agentId][commandId]) newResponses[agentId][commandId] = [];
-          newResponses[agentId][commandId].push(response);
-          return { responses: newResponses };
-        });
-      },
-
-      clearResponses: (agentId, commandId) => {
-        set(state => {
-            const newResponses = { ...state.responses };
-            if (newResponses[agentId]) {
-              if (commandId) {
-                delete newResponses[agentId][commandId];
-              } else {
-                delete newResponses[agentId];
-              }
-            }
-            return { responses: newResponses };
-        });
-      },
-      
-      addAgent: (agent) => set(state => ({ agents: [...state.agents, agent] })),
-
-      updateAgentInStore: (updatedAgent) => set(state => ({
-        agents: state.agents.map(a => a.id === updatedAgent.id ? updatedAgent : a),
-        selectedAgent: state.selectedAgent?.id === updatedAgent.id ? updatedAgent : state.selectedAgent
-      })),
-
-      removeAgentFromStore: (agentId) => set(state => ({
-        agents: state.agents.filter(a => a.id !== agentId),
-        selectedAgent: state.selectedAgent?.id === agentId ? null : state.selectedAgent
-      })),
-    })
-);
-
-// Initialize auth outside the hook to avoid re-declarations
-const auth = getAuth(app);
-
-// This custom hook is now primarily for interacting with the store's actions
-// and ensuring the initial data load happens correctly.
 export function useAgentManager() {
-    const store = useAgentStore();
+  const { firebaseUser } = useAuth();
+  const queryClient = useQueryClient();
+  const {
+    selectedAgentId,
+    selectAgent,
+    ...uiState
+  } = useAgentUIState();
 
-    useEffect(() => {
-        const loadInitialAgents = async () => {
-            const user = auth.currentUser;
-            if (user && !store.hasFetched) {
-                const token = await user.getIdToken();
-                await store.fetchAgents(token);
-            }
-        };
+  const { data: agents = [], isLoading, error } = useQuery({
+    queryKey: agentKeys.all,
+    queryFn: async () => {
+      if (!firebaseUser) throw new Error("Not authenticated");
+      const token = await firebaseUser.getIdToken();
+      return fetchAgentsApi(token);
+    },
+    enabled: !!firebaseUser,
+  });
 
-        loadInitialAgents();
-    }, [store.hasFetched, store.fetchAgents]);
+  useEffect(() => {
+    if (agents.length > 0 && !agents.find(a => a.id === selectedAgentId)) {
+      selectAgent(agents[0]?.id || null);
+    }
+  }, [agents, selectedAgentId, selectAgent]);
 
+  const selectedAgent = agents.find(a => a.id === selectedAgentId) || null;
 
-    const getToken = async () => {
-        const user = auth.currentUser;
-        if (!user) throw new Error("User not authenticated.");
-        return user.getIdToken();
-    };
+  const createMutation = useMutation({
+    mutationFn: async (data: Omit<AgentProperties, 'id'>) => {
+        if (!firebaseUser) throw new Error("Not authenticated");
+        const token = await firebaseUser.getIdToken();
+        return createAgentApi(data, token);
+    },
+    onSuccess: (newAgent) => {
+        queryClient.invalidateQueries({ queryKey: agentKeys.all });
+        selectAgent(newAgent.id);
+    }
+  });
 
-    const createAgent = async (data: Omit<AgentProperties, 'id'>) => {
-        const token = await getToken();
-        const newAgent = await createAgentApi(data as any, token);
-        store.addAgent(newAgent);
-        return newAgent;
-    };
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string, data: Partial<AgentProperties> }) => {
+      if (!firebaseUser) throw new Error("Not authenticated");
+      const token = await firebaseUser.getIdToken();
+      return updateAgentApi(id, data, token);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: agentKeys.all });
+    }
+  });
 
-    const updateAgent = async (id: string, data: Partial<AgentProperties>) => {
-        const token = await getToken();
-        const updatedAgent = await updateAgentApi(id, data, token);
-        store.updateAgentInStore(updatedAgent);
-        return updatedAgent;
-    };
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (!firebaseUser) throw new Error("Not authenticated");
+      const token = await firebaseUser.getIdToken();
+      return deleteAgentApi(id, token);
+    },
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: agentKeys.all });
+      if (selectedAgentId === id) {
+        selectAgent(null);
+      }
+    }
+  });
 
-    const deleteAgent = async (id: string) => {
-        const token = await getToken();
-        await deleteAgentApi(id, token);
-        store.removeAgentFromStore(id);
-    };
+  const createAgent = async (data: Omit<AgentProperties, 'id'> & { id: string }) => {
+    try {
+      const newAgent = await createMutation.mutateAsync(data);
+      toast({ title: "Agent Created", description: `"${newAgent.name}" has been created.` });
+      return newAgent;
+    } catch (error: any) {
+      toast({ title: "Creation Failed", description: error.message, variant: "destructive" });
+      throw error;
+    }
+  };
 
-    return { ...store, createAgent, updateAgent, deleteAgent };
+  const updateAgent = async (id: string, data: Partial<AgentProperties>) => {
+    try {
+      const updatedAgent = await updateMutation.mutateAsync({ id, data });
+      toast({ title: "Agent Updated", description: `"${updatedAgent.name}" has been updated.` });
+      return updatedAgent;
+    } catch (error: any) {
+      toast({ title: "Update Failed", description: error.message, variant: "destructive" });
+      throw error;
+    }
+  };
+
+  const deleteAgent = async (id: string) => {
+    try {
+      await deleteMutation.mutateAsync(id);
+      toast({ title: "Agent Deleted", description: "The agent has been removed." });
+    } catch (error: any) {
+      toast({ title: "Delete Failed", description: error.message, variant: "destructive" });
+      throw error;
+    }
+  };
+
+  return {
+    agents,
+    selectedAgent,
+    selectAgent,
+    isLoading,
+    error: error?.message || null,
+    createAgent,
+    updateAgent,
+    deleteAgent,
+    ...uiState,
+  };
 }

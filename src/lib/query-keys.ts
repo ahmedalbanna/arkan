@@ -1,5 +1,4 @@
 
-
 /**
  * Query Key Factories for React Query
  *
@@ -69,4 +68,8 @@ export const sectionKeys = {
   all: ['sections'] as const,
   lists: () => [...sectionKeys.all, 'list'] as const,
   detail: (id: string) => [...sectionKeys.all, 'detail', id] as const,
+};
+
+export const agentKeys = {
+  all: ['agents'] as const,
 };
