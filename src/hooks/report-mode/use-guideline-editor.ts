@@ -2,7 +2,7 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { Behavior } from '@/lib/models';
 
@@ -11,10 +11,6 @@ export function useGuidelineEditor(itemKey: string) {
     const { project, updateProject } = useBuilderStore();
 
     const section = useMemo(() => project?.getSection(itemKey), [project, itemKey]);
-
-    // This hook no longer uses local state that needs to be synced.
-    // It directly calls the global `updateProject` function for immutability and consistency.
-    // This prevents race conditions and simplifies the data flow.
 
     const setPrompt = (prompt: string) => {
         updateProject(p => p.updateSection(itemKey, s => s.with({ prompt })));
@@ -39,7 +35,6 @@ export function useGuidelineEditor(itemKey: string) {
     return {
         t,
         section, // Expose the section so the UI can check for its existence
-        // Directly use section properties in the component
         prompt: section?.prompt || '', setPrompt,
         rules: section?.rules || [], setRules,
         guidelines: section?.guidelines || [], setGuidelines,

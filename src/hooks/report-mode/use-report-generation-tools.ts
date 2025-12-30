@@ -7,88 +7,115 @@ import { useAuth } from '@/context/AuthContext';
 import { useMemo, useState } from 'react';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { Chapter, Project, Section } from '@/lib/models';
-import { PromptBuilder } from '@/lib/prompt-builder';
+import { Chapter, Section } from '@/lib/models';
+import { useAiActions } from './use-ai-actions';
 
 export function useReportGenerationTools() {
     const { t } = useLocalization();
     const { 
         project, 
         updateProject,
+    } = useBuilderStore();
+
+    const {
+        sectionMutation,
         chapterMutation,
         projectMutation,
-        onGenerateChapter,
-        onGenerateProject,
-        selectedSectionsForBuild,
-        handleChapterSelectionToggle,
-        handleSelectAllChapters,
-        handleSectionSelectionToggle,
-     } = useBuilderStore();
-    const { userProfile } = useAuth();
+        getContextNames
+    } = useAiActions();
     
     const [newChapterTitle, setNewChapterTitle] = useState('');
     const [showTocInput, setShowTocInput] = useState(false);
     const [isGenerateTocOpen, setIsGenerateTocOpen] = useState(false);
     const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
-    const [chapterInBuildMode, setChapterInBuildMode] = useState<string | null>(null);
+
+    // State for build modes
     const [isProjectBuildMode, setIsProjectBuildMode] = useState(false);
     const [isBuildProjectDialogOpen, setIsBuildProjectDialogOpen] = useState(false);
+    const [chapterInBuildMode, setChapterInBuildMode] = useState<string | null>(null);
+
+    // State for section selection
+    const [selectedSectionsForBuild, setSelectedSectionsForBuild] = useState<Set<string>>(new Set());
 
     const enterProjectBuildMode = () => setIsProjectBuildMode(true);
     const exitProjectBuildMode = () => {
         setIsProjectBuildMode(false);
-        handleSelectAllChapters(false);
+        setSelectedSectionsForBuild(new Set()); // Clear selection on exit
+    };
+    
+    const handleSectionSelectionToggle = (sectionId: string) => {
+        setSelectedSectionsForBuild(prev => {
+            const newSelection = new Set(prev);
+            if (newSelection.has(sectionId)) {
+                newSelection.delete(sectionId);
+            } else {
+                newSelection.add(sectionId);
+            }
+            return newSelection;
+        });
+    };
+
+    const handleChapterSelectionToggle = (chapterId: string, select: boolean) => {
+        const chapter = project?.getChapter(chapterId);
+        if (!chapter) return;
+
+        setSelectedSectionsForBuild(prev => {
+            const newSelection = new Set(prev);
+            chapter.sections.forEach(section => {
+                if (select) {
+                    newSelection.add(section.id);
+                } else {
+                    newSelection.delete(section.id);
+                }
+            });
+            return newSelection;
+        });
+    };
+    
+    const handleSelectAllChapters = (select: boolean) => {
+        if (!project) return;
+        const allSectionIds = new Set(project.sections.map(s => s.id));
+        setSelectedSectionsForBuild(select ? allSectionIds : new Set());
     };
 
     const handleEnterBuildMode = (chapterId: string) => {
         setChapterInBuildMode(chapterId);
         const chapter = project?.getChapter(chapterId);
         if (chapter) {
+            // Select all sections within this chapter when entering build mode for it
             const sectionIds = new Set(chapter.sections.map(s => s.id));
-            handleSelectAllChapters(false); // Clear previous selections
-            sectionIds.forEach(id => handleSectionSelectionToggle(id)); // Select all in chapter
+            setSelectedSectionsForBuild(sectionIds);
             setIsBuildProjectDialogOpen(true);
         }
     };
-
-    const handleCancelBuildMode = () => {
-        setChapterInBuildMode(null);
-        handleSelectAllChapters(false);
-    };
     
-    const finalProjectPrompt = useMemo(() => {
-        if (!project || !selectedSectionsForBuild || selectedSectionsForBuild.size === 0) return '';
-        return PromptBuilder.buildProjectPrompt(project, selectedSectionsForBuild);
-    }, [project, selectedSectionsForBuild]);
-
-    const getContextNames = (section: Section): string[] => {
-      if (!project) return [];
-      const sectionContexts = Object.keys(section.context?.sections || {})
-        .filter(key => section.context.sections?.[key])
-        .map(key => project.getSection(key)?.title)
-        .filter(Boolean) as string[];
-
-      const fileContexts = Object.keys(section.context?.externalContext || {})
-        .filter(key => section.context.externalContext?.[key])
-        .map(key => project.externalContext.find(f => f.id === key)?.fileName)
-        .filter(Boolean) as string[];
-
-      return [...sectionContexts, ...fileContexts];
+    const onGenerateProject = () => {
+        if (!project) return;
+        projectMutation.mutate(project, {
+            onSuccess: () => setIsBuildProjectDialogOpen(false),
+        });
     };
 
-    const chaptersToBuild = useMemo(() => {
-      if (!project) return [];
-      
-      if(chapterInBuildMode) {
-        const chapter = project.getChapter(chapterInBuildMode);
-        return chapter ? [chapter] : [];
-      }
+    const onGenerateChapter = (chapterId: string) => {
+        if (!project) return;
+        const chapter = project.getChapter(chapterId);
+        if (!chapter) return;
 
-      return project.content
-        .filter((item): item is Chapter => item instanceof Chapter)
-        .map(c => c.with({ sections: c.sections.filter(s => selectedSectionsForBuild?.has(s.id))}))
-        .filter(c => c.sections.length > 0);
-    }, [project, selectedSectionsForBuild, chapterInBuildMode]);
+        // Use the selected sections from the state
+        const sectionsToBuild = chapter.sections.filter(s => selectedSectionsForBuild.has(s.id));
+        if (sectionsToBuild.length === 0) {
+            toast({ title: 'No Sections Selected', description: 'Please select at least one section to build the chapter content.', variant: 'destructive' });
+            return;
+        }
+
+        chapterMutation.mutate({ chapter, project, sectionsToBuild }, {
+            onSuccess: () => {
+                setIsBuildProjectDialogOpen(false);
+                setChapterInBuildMode(null);
+                setSelectedSectionsForBuild(new Set());
+            }
+        });
+    };
 
     const handleAddChapter = () => {
         updateProject(p => p.addChapter());
@@ -170,20 +197,37 @@ export function useReportGenerationTools() {
         });
     };
 
+    const chaptersToBuild = useMemo(() => {
+        if (!project) return [];
+        
+        if(chapterInBuildMode) {
+            const chapter = project.getChapter(chapterInBuildMode);
+            if (!chapter) return [];
+            // When building a single chapter, ensure we only consider its selected sections
+            const relevantSections = chapter.sections.filter(s => selectedSectionsForBuild.has(s.id));
+            return [chapter.with({ sections: relevantSections })];
+        }
+  
+        // For full project build
+        return project.content
+          .filter((item): item is Chapter => item instanceof Chapter)
+          .map(c => c.with({ sections: c.sections.filter(s => selectedSectionsForBuild.has(s.id))}))
+          .filter(c => c.sections.length > 0);
+      }, [project, selectedSectionsForBuild, chapterInBuildMode]);
+
     return {
         t,
         project,
         chapterMutation,
         projectMutation,
         onGenerateProject,
-        userProfile,
+        onGenerateChapter,
         newChapterTitle,
         setNewChapterTitle,
         showTocInput,
         setShowTocInput,
         isGenerateTocOpen,
         setIsGenerateTocOpen,
-        onGenerateChapter,
         handleAddChapter,
         handleAddSection,
         handleCreateFromToc,
@@ -194,7 +238,6 @@ export function useReportGenerationTools() {
         handleSelectAllChapters,
         chapterInBuildMode,
         handleEnterBuildMode,
-        handleCancelBuildMode,
         isTemplateDialogOpen,
         setIsTemplateDialogOpen,
         isBuildProjectDialogOpen,
@@ -202,8 +245,7 @@ export function useReportGenerationTools() {
         isProjectBuildMode,
         enterProjectBuildMode,
         exitProjectBuildMode,
-        finalProjectPrompt,
         chaptersToBuild,
-        getContextNames
+        getContextNames,
     };
 }

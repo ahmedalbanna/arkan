@@ -1,5 +1,4 @@
 
-
 // Admin Hooks
 export * from './admin/use-admin-dashboard';
 export * from './admin/use-create-user-dialog';
@@ -9,19 +8,17 @@ export * from './auth/use-auth-mutations';
 
 // Core Builder Hooks
 export * from './core/use-context-selector';
-export * from './core/use-guideline-editor';
 export * from './core/useAutosave';
 export * from './core/useBuilderStore';
 export * from './core/useProjectsPage';
 export * from './core/useImageUpload';
 
-export * from './core/use-report-paginator';
-
-
 // Report Mode Hooks
 export * from './report-mode/use-ai-actions';
 export * from './report-mode/use-chapter-actions';
 export * from './report-mode/use-report-generation-tools';
+export * from './report-mode/use-guideline-editor';
+
 // Data Fetching Hooks
 export * from './data/use-analytics';
 export * from './data/use-features';
