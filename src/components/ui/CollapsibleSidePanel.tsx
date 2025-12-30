@@ -1,39 +1,62 @@
+'use client';
 
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMobile } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
-import { SidePanelContent, type PanelItem } from './SidePanelContent';
+import { useState, type ReactElement, type ReactNode } from 'react';
+
+export interface PanelItem {
+  key: string;
+  title: string;
+  icon: ReactElement;
+  content: ReactNode;
+}
 
 interface CollapsibleSidePanelProps {
-  /**
-   * An array of panel objects to display as tabs.
-   */
   panels: PanelItem[];
-  /**
-   * The key of the panel to be active by default. If not provided, the first panel is active.
-   */
   defaultActiveKey?: string;
-  /**
-   * Optional class name for the root container.
-   */
   className?: string;
 }
 
-/**
- * A side panel that displays multiple, switchable tool panels.
- */
 export function CollapsibleSidePanel({
   panels,
   defaultActiveKey,
   className,
 }: CollapsibleSidePanelProps) {
   const isMobile = useMobile();
+  const [activeKey, setActiveKey] = useState<string | undefined>(defaultActiveKey ?? panels[0]?.key);
+  const activePanel = panels.find((p) => p.key === activeKey);
+
+  if (!panels || panels.length === 0) {
+    return null;
+  }
+
   return (
     <div className={cn(
-      " self-start",
-      isMobile && "mb-16", // Add margin-bottom on mobile to avoid overlap with bottom nav
+      "self-start flex flex-row bg-background border rounded-lg",
+      isMobile && "mb-16",
       className
     )}>
-      <SidePanelContent panels={panels} defaultActiveKey={defaultActiveKey} />
+      <div className="flex flex-col gap-2 border-r p-2">
+        <TooltipProvider>
+          {panels.map((panel) => (
+            <Tooltip key={panel.key} delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button variant={activeKey === panel.key ? 'secondary' : 'ghost'} size="icon" onClick={() => setActiveKey(panel.key)} aria-label={panel.title}>
+                  {panel.icon}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>{panel.title}</p>
+              </TooltipContent>
+            </Tooltip>
+          ))}
+        </TooltipProvider>
+      </div>
+      <div className="flex-1 p-4 w-px">
+        {activePanel?.content}
+      </div>
     </div>
   );
 }
