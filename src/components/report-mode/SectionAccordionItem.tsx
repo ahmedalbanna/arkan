@@ -10,7 +10,7 @@ import { useBuilderStore } from '@/hooks';
 import type { Section } from '@/lib/models';
 import { GripVertical, Link as LinkIcon, Loader2, SlidersHorizontal, Sparkles, StickyNote } from 'lucide-react';
 import React from 'react';
-import { ContextSelector } from './SectionContextSelector';
+import { SectionContextSelector } from './SectionContextSelector';
 import { SectionGenerationControls } from './SectionGenerationControls';
 import { GuidelineEditor } from './SectionGuidelineEditor';
 import { Checkbox } from '../ui/checkbox';
@@ -18,12 +18,11 @@ import { cn } from '@/lib/utils/cn';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-// Simplified props, as the component now gets most data from hooks
 interface SectionAccordionItemProps {
     sectionId: string;
     chapterIndex: number;
     sectionIndex: number;
-    isProjectBuildMode: boolean; // Is the parent in project-build mode?
+    isProjectBuildMode: boolean;
 }
 
 export function SectionAccordionItem({
@@ -33,23 +32,24 @@ export function SectionAccordionItem({
     isProjectBuildMode,
 }: SectionAccordionItemProps) {
     const { t } = useLocalization();
-    // Fetch all necessary data and actions from the global store
     const { 
         project, 
-        sectionMutation, 
         onGenerateSection, 
+        sectionMutation,
         userProfile, 
         isAnythingGenerating,
         selectedSectionsForBuild,
         handleSectionSelectionToggle,
+        updateSection,
     } = useBuilderStore(state => ({
         project: state.project,
-        sectionMutation: state.sectionMutation,
         onGenerateSection: state.onGenerateSection,
+        sectionMutation: state.sectionMutation,
         userProfile: state.userProfile,
         isAnythingGenerating: state.sectionMutation.isPending || state.chapterMutation.isPending,
         selectedSectionsForBuild: state.selectedSectionsForBuild,
         handleSectionSelectionToggle: state.handleSectionSelectionToggle,
+        updateSection: state.updateSection,
     }));
 
     const section = project?.getSection(sectionId);
@@ -63,7 +63,7 @@ export function SectionAccordionItem({
         position: 'relative',
     };
     
-    if (!section) return null; // Or render a skeleton/error state
+    if (!section) return null;
 
     const isGenerating = sectionMutation.isPending && sectionMutation.variables === sectionId;
     const hasCredits = (userProfile?.credits ?? 0) >= 1;
@@ -131,13 +131,17 @@ export function SectionAccordionItem({
                             </div>
                             <div className="px-4">
                                 <TabsContent value="controls" className="py-4 space-y-6">
-                                    <SectionGenerationControls section={section} />
+                                    <SectionGenerationControls
+                                        section={section}
+                                        onControlChange={(field, value) => updateSection(sectionId, s => s.with({ controls: { ...s.controls, [field]: value }}))}
+                                        onOutputStyleChange={(style, checked) => updateSection(sectionId, s => s.with({ controls: { ...s.controls, outputStyle: { ...s.controls.outputStyle, [style]: checked } }}))}
+                                    />
                                 </TabsContent>
                                 <TabsContent value="prompt" className="py-4">
-                                     <GuidelineEditor sectionId={section.id} />
+                                     <GuidelineEditor itemKey={section.id} />
                                 </TabsContent>
                                 <TabsContent value="context" className="py-4">
-                                    <ContextSelector sectionId={section.id} />
+                                    <SectionContextSelector sectionId={section.id} />
                                 </TabsContent>
                             </div>
                         </Tabs>
