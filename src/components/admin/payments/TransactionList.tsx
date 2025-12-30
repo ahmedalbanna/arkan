@@ -2,7 +2,7 @@
 'use client';
 
 import { AlertCircle, Loader2 } from 'lucide-react';
-import { PendingPaymentCard } from './PendingPaymentCard';
+import { TransactionCard } from './TransactionCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Button } from '@/components/ui/button';
@@ -72,7 +72,7 @@ export function TransactionList({ status }: { status: TransactionStatus }) {
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {allTransactions.map((transaction: Transaction) => (
-                    <PendingPaymentCard key={transaction.id} transaction={transaction} />
+                    <TransactionCard key={transaction.id} transaction={transaction} />
                 ))}
             </div>
             {hasNextPage && (
