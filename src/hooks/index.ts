@@ -30,6 +30,8 @@ export * from './data/use-templates';
 export * from './data/use-users';
 export * from './data/use-agent-categories';
 export * from './data/use-settings';
+export * from './data/use-docx-templates';
+export * from './data/use-pptx-templates';
 
 
 // Writing Tools Logic Hooks

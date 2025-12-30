@@ -1,8 +1,8 @@
 
 'use client';
 
-import { DocxStyleOptions } from './models';
-import { z } from 'zod';
+// This file is being phased out in favor of co-locating types with their respective models.
+// New types should be added to the relevant files in `src/lib/models/`.
 
 export * from './models/docxTemplate';
 export * from './models/pptxTemplate';
@@ -175,6 +175,7 @@ export type CreateReportTemplateData = Omit<ReportTemplateProperties, 'id'> & { 
 export type UpdateReportTemplateData = Partial<Omit<ReportTemplateProperties, 'id'>>;
 
 // Payment proof file schema
+import { z } from 'zod';
 export const fileSchema = z.object({
   file: z
     .any()

@@ -6,14 +6,6 @@ import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import { toast } from '@/hooks/util/use-toast';
 import {
-    fetchDocxTemplatesApi,
-    updateDocxTemplateApi,
-    deleteDocxTemplateApi,
-    createDocxTemplateApi,
-    fetchPptxTemplatesApi,
-    updatePptxTemplateApi,
-    deletePptxTemplateApi,
-    createPptxTemplateApi,
     fetchReportTemplatesApi,
     createReportTemplateApi,
     updateReportTemplateApi,
@@ -24,129 +16,8 @@ import {
     deletePresentationTemplateApi,
     applyReportTemplateApi,
 } from '@/services/api/templateService';
-import type { ReportTemplateProperties, CreateReportTemplateData, UpdateReportTemplateData, PresentationTemplateProperties, CreatePresentationTemplateData, UpdatePresentationTemplateData, ProjectProperties } from '@/lib/types';
-import type { DocxTemplateProperties, PptxTemplateProperties } from '@/lib/models';
+import type { ReportTemplateProperties, CreateReportTemplateData, UpdateReportTemplateData, PresentationTemplateProperties, CreatePresentationTemplateData, UpdatePresentationTemplateData, ProjectProperties } from '@/lib/models';
 import { useBuilderStore } from '../core/useBuilderStore';
-
-
-// ============================================================================
-// DOCX TEMPLATES
-// ============================================================================
-
-export function useDocxStyles() {
-    const { data: templates, ...rest } = useQuery<Record<string, DocxTemplateProperties>>({
-        queryKey: ['docx-styles'],
-        queryFn: fetchDocxTemplatesApi,
-        staleTime: 1000 * 60 * 60, // 1 hour
-    });
-    return { templates: templates || {}, ...rest };
-}
-
-export function useUpdateDocxTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async ({ key, styles }: { key: string, styles: any }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return updateDocxTemplateApi(key, { styles }, token);
-        },
-        onSuccess: (data, { key }) => {
-            toast({ title: "Template Saved", description: `Style changes for "${key}" have been saved.` });
-            queryClient.invalidateQueries({ queryKey: ['docx-styles'] });
-        },
-        onError: (error: any) => toast({ title: "Save Failed", description: error.message, variant: 'destructive' }),
-    });
-}
-
-export function useDeleteDocxTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async (key: string) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return deleteDocxTemplateApi(key, token);
-        },
-        onSuccess: (data, key) => {
-            toast({ title: 'Template Deleted', description: `Template "${key}" has been deleted.` });
-            queryClient.invalidateQueries({ queryKey: ['docx-styles'] });
-        },
-        onError: (error: any) => toast({ title: 'Delete Failed', description: error.message, variant: 'destructive' }),
-    });
-}
-
-export function useCreateDocxTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async (data: { id: string, name: string, description: string }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return createDocxTemplateApi(data, token);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['docx-styles'] });
-        },
-    });
-}
-
-
-// ============================================================================
-// PPTX TEMPLATES
-// ============================================================================
-
-export function usePptxStyles() {
-    const { data: templates, ...rest } = useQuery<Record<string, PptxTemplateProperties>>({
-        queryKey: ['pptx-styles'],
-        queryFn: fetchPptxTemplatesApi,
-        staleTime: 1000 * 60 * 60,
-    });
-    return { templates: templates || {}, ...rest };
-}
-
-export function useUpdatePptxTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async ({ key, styles }: { key: string, styles: any }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return updatePptxTemplateApi(key, { styles }, token);
-        },
-        onSuccess: (data, { key }) => {
-            toast({ title: "Template Saved", description: `Style changes for "${key}" have been saved.` });
-            queryClient.invalidateQueries({ queryKey: ['pptx-styles'] });
-        },
-        onError: (error: any) => toast({ title: "Save Failed", description: error.message, variant: 'destructive' }),
-    });
-}
-
-export function useDeletePptxTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async (key: string) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return deletePptxTemplateApi(key, token);
-        },
-        onSuccess: (data, key) => {
-            toast({ title: 'Template Deleted', description: `Template "${key}" has been deleted.` });
-            queryClient.invalidateQueries({ queryKey: ['pptx-styles'] });
-        },
-        onError: (error: any) => toast({ title: 'Delete Failed', description: error.message, variant: 'destructive' }),
-    });
-}
-
-export function useCreatePptxTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async (data: { id: string; name: string; description: string }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return createPptxTemplateApi(data, token);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['pptx-styles'] });
-        },
-    });
-}
 
 // ============================================================================
 // REPORT GENERATION TEMPLATES

@@ -1,11 +1,10 @@
 
-
 'use client';
 
-import type { PptxStyleOptions, PptxTemplateProperties } from '@/lib/types';
+import type { PptxStyleOptions, PptxTemplateProperties } from '@/lib/models';
 
 
-export type PptxTemplateKey = 'modern' | 'dark' | 'professional' | string;
+export type PptxTemplateKey = keyof typeof templates;
 const modern: PptxStyleOptions = {
     background: { color: 'FFFFFF' },
     title: { fontFace: 'Calibri', fontSize: 28, bold: true, color: '363636', align: 'left', valign: 'middle' },
@@ -119,32 +118,26 @@ const professional: PptxStyleOptions = {
 };
 
 
-export const templates: Record<PptxTemplateKey, PptxTemplateProperties> = {
+export const templates: Record<PptxTemplateKey, Omit<PptxTemplateProperties, 'id'>> = {
     modern: {
-        id: 'modern',
         name: 'pptxTemplates.modern.name',
         styles: modern, // Use the PptxStyleOptions object directly
         description: 'pptxTemplates.modern.description',
         imageUrl: '',
         dataAiHint: 'presentation modern',
-        // No need for toPlainObject here, as it's a plain object literal
     },
     dark: {
-        id: 'dark',
         name: 'pptxTemplates.dark.name',
         styles: dark, // Use the PptxStyleOptions object directly
         description: 'pptxTemplates.dark.description',
         imageUrl: '',
         dataAiHint: 'presentation dark',
-        // No need for toPlainObject here, as it's a plain object literal
     },
     professional: {
-        id: 'professional',
         name: 'pptxTemplates.professional.name',
         styles: professional, // Use the PptxStyleOptions object directly
         description: 'pptxTemplates.professional.description',
         imageUrl: '',
         dataAiHint: 'presentation professional',
-        // No need for toPlainObject here, as it's a plain object literal
     },
 };

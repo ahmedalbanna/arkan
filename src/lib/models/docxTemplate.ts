@@ -1,18 +1,18 @@
 
-import { DocxStyleOptions } from '../types';
+import type { IStylesOptions } from 'docx';
 import { CustomStyles } from '../word-converter/types';
 import { Template, type BaseTemplateProperties } from './template';
 
 // Corresponds to DocxTemplateSchema
 export interface DocxTemplateProperties extends BaseTemplateProperties {
-  styles: DocxStyleOptions;
+  styles: IStylesOptions;
   imageUrl: string;
   dataAiHint: string;
   customStyles?: CustomStyles;
 }
 
 export class DocxTemplate extends Template {
-  public styles: DocxStyleOptions;
+  public styles: IStylesOptions;
   public imageUrl: string;
   public dataAiHint: string;
   public customStyles?: CustomStyles;
