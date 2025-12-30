@@ -36,19 +36,11 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
   const processListItems = async (listNode: List, level: number): Promise<Paragraph[]> => {
     const paragraphs: Paragraph[] = [];
     for (const listItem of listNode.children) {
-      // Check if this is a task list item (GFM extension)
-      // Task lists have a 'checked' property on list items
       const hasCheckedProperty = 'checked' in listItem;
 
       for (const itemContent of listItem.children) {
         if (itemContent.type === 'paragraph') {
           const children = await transformInlines(itemContent.children, footnoteIdMap, baseRunOptions, options);
-
-          // For task lists, prepend checkbox symbol
-          // if (hasCheckedProperty) {
-          //   const checkboxSymbol = isChecked ? '☑' : '☐';
-          //   children.unshift(new TextRun({ text: `${checkboxSymbol} `, ...baseRunOptions }));
-          // }
 
           paragraphs.push(new Paragraph({
             ...baseParagraphOptions,
@@ -60,7 +52,6 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
         } else if (itemContent.type === 'list') {
           paragraphs.push(...await processListItems(itemContent as List, level + 1));
         } else if (itemContent.type === 'blockquote') {
-          // Handle blockquotes within list items
           for (const blockContent of itemContent.children) {
             if (blockContent.type === 'paragraph') {
               const children = await transformInlines(blockContent.children, footnoteIdMap, baseRunOptions, options);
@@ -72,14 +63,13 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
             }
           }
         } else if (itemContent.type === 'code') {
-          // Handle code blocks within list items
           const codeFont = fonts.code || 'Courier New';
           const codeLines = itemContent.value.split('\n');
           const textRuns = codeLines.map((line, index) => {
             const textRun = new TextRun({
               text: line,
               font: { name: codeFont },
-              size: 18, // 9pt font for code (size is in half-points)
+              size: 18, 
             });
             return index < codeLines.length - 1 ? [textRun, new TextRun({ break: 1 })] : [textRun];
           }).flat();
@@ -109,7 +99,6 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
 
     switch (node.type) {
       case 'html': {
-        // Handle orientation directive
         const orientationMatch = node.value.match(/<!--\s*orientation:\s*(landscape|portrait)\s*-->/);
         if (orientationMatch) {
           docxObjects.push({
@@ -120,7 +109,6 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
           break;
         }
 
-        // Handle page break directive
         const pageBreakMatch = node.value.match(/<!--\s*page-break\s*-->/);
         if (pageBreakMatch) {
           docxObjects.push(new Paragraph({
@@ -129,7 +117,6 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
           break;
         }
 
-        // Handle section break directive
         const sectionBreakMatch = node.value.match(/<!--\s*section-break\s*-->/);
         if (sectionBreakMatch) {
           docxObjects.push(new Paragraph({
@@ -138,16 +125,12 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
           break;
         }
 
-        // For other HTML, try to extract meaningful content or skip
-        // Block-level HTML that's not a directive is typically ignored
-        // or could be rendered as plain text if needed
         const textContent = node.value
-          .replace(/<!--[\s\S]*?-->/g, '') // Remove HTML comments
-          .replace(/<[^>]*>/g, '') // Remove HTML tags
+          .replace(/<!--[\s\S]*?-->/g, '') 
+          .replace(/<[^>]*>/g, '') 
           .trim();
 
         if (textContent) {
-          // If there's extractable text, render it as a paragraph
           docxObjects.push(new Paragraph({
             ...baseParagraphOptions,
             children: [new TextRun(textContent)],
@@ -170,7 +153,6 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
 
         if (imageNode) {
           try {
-            // Skip invalid or empty URLs
             if (!imageNode.url || imageNode.url.trim() === '') {
               console.warn('Empty or invalid image URL detected, skipping...');
               docxObjects.push(new Paragraph({
@@ -184,9 +166,8 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
             let imageChildren;
             
             if (proxiedImage && proxiedImage.buffer && proxiedImage.buffer.byteLength > 0) {
-              // Calculate appropriate dimensions (max width: 550, maintain aspect ratio)
               const maxWidth = 550;
-              const defaultHeight = 400; // Default height, will be adjusted by aspect ratio
+              const defaultHeight = 400; 
               
               imageChildren = [new ImageRun({
                 data: proxiedImage.buffer,
@@ -194,7 +175,6 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
                   width: maxWidth,
                   height: defaultHeight,
                 },
-                type: 'png', // Default type, will be overridden by actual content type
               })];
               
               console.log(`Successfully processed image: ${imageNode.url}`);
@@ -210,7 +190,6 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
             });
             docxObjects.push(imageParagraph);
 
-            // Add caption if present
             if (captionText && captionText.trim()) {
               docxObjects.push(new Paragraph({
                 children: [
@@ -222,7 +201,7 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
                 style: "Caption",
                 alignment: AlignmentType.CENTER,
               }));
-              i++; // Skip the caption node in next iteration
+              i++;
             }
           } catch (e) {
             console.error("Failed to process block image", e);
@@ -273,7 +252,6 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
           i++;
         }
         try {
-          // Ensure we have table rows
           if (!node.children || node.children.length === 0) {
             console.warn('Empty table detected, skipping...');
             docxObjects.push(new Paragraph({
@@ -287,31 +265,19 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
               return new TableRow({
                 children: await Promise.all(row.children.map(async cell => {
                   try {
-                    // Table cells contain phrasing content (inline content)
-                    // Process all inline content in the cell
                     const children = await transformInlines(cell.children, footnoteIdMap, baseRunOptions, options);
-
-                    // Ensure at least one paragraph in the cell (even if empty)
                     const cellParagraph = new Paragraph({
                       ...baseParagraphOptions,
                       children: children.length > 0 ? children : [new TextRun('')],
                     });
-
                     return new TableCell({
                       children: [cellParagraph],
-                      margins: {
-                        top: 100,
-                        bottom: 100,
-                        left: 100,
-                        right: 100,
-                      },
+                      margins: { top: 100, bottom: 100, left: 100, right: 100 },
                     });
                   } catch (cellError) {
                     console.error('Error processing table cell:', cellError);
                     return new TableCell({
-                      children: [new Paragraph({
-                        children: [new TextRun('[Cell error]')],
-                      })],
+                      children: [new Paragraph({ children: [new TextRun('[Cell error]')] })],
                     });
                   }
                 })),
@@ -320,11 +286,7 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
             } catch (rowError) {
               console.error('Error processing table row:', rowError);
               return new TableRow({
-                children: [new TableCell({
-                  children: [new Paragraph({
-                    children: [new TextRun('[Row error]')],
-                  })],
-                })],
+                children: [new TableCell({ children: [new Paragraph({ children: [new TextRun('[Row error]')] })] })],
               });
             }
           }));
@@ -334,12 +296,9 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
             width: { size: 100, type: WidthType.PERCENTAGE },
             style: "CustomTableStyle",
             borders: {
-              top: { style: 'single', size: 1 },
-              bottom: { style: 'single', size: 1 },
-              left: { style: 'single', size: 1 },
-              right: { style: 'single', size: 1 },
-              insideHorizontal: { style: 'single', size: 1 },
-              insideVertical: { style: 'single', size: 1 },
+              top: { style: 'single', size: 1 }, bottom: { style: 'single', size: 1 },
+              left: { style: 'single', size: 1 }, right: { style: 'single', size: 1 },
+              insideHorizontal: { style: 'single', size: 1 }, insideVertical: { style: 'single', size: 1 },
             },
           }));
         } catch (tableError) {
@@ -359,7 +318,6 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
               style: 'Quote',
             }));
           } else if (content.type === 'heading') {
-            // Headings within blockquotes
             docxObjects.push(new Paragraph({
               ...baseParagraphOptions,
               children: await transformInlines(content.children, footnoteIdMap, baseRunOptions, options),
@@ -367,21 +325,13 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
               style: 'Quote',
             }));
           } else if (content.type === 'list') {
-            // Lists within blockquotes - create new paragraphs with Quote style
             const listParagraphs = await processListItems(content, 0);
-            // Note: We can't modify the style property after creation, so we need to recreate
-            // For now, the list will use its default style within the blockquote context
             docxObjects.push(...listParagraphs);
           } else if (content.type === 'code') {
-            // Code blocks within blockquotes
             const codeFont = fonts.code || 'Courier New';
             const codeLines = content.value.split('\n');
             const textRuns = codeLines.map((line, index) => {
-              const textRun = new TextRun({
-                text: line,
-                font: { name: codeFont },
-                size: 18,
-              });
+              const textRun = new TextRun({ text: line, font: { name: codeFont }, size: 18 });
               return index < codeLines.length - 1 ? [textRun, new TextRun({ break: 1 })] : [textRun];
             }).flat();
             docxObjects.push(new Paragraph({
@@ -393,82 +343,27 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
         }
         break;
       case 'thematicBreak':
-        docxObjects.push(new Paragraph({ // Treat horizontal rule as a page break
-          pageBreakBefore: true,
-        }));
+        docxObjects.push(new Paragraph({ pageBreakBefore: true }));
         break;
       case 'code': {
         const codeFont = fonts.code || 'Courier New';
         const codeLines = node.value.split('\n');
         const textRuns = codeLines.map((line, index) => {
-          const textRun = new TextRun({
-            text: line,
-            font: { name: codeFont },
-            size: 18, // 9pt font for code (size is in half-points)
-          });
+          const textRun = new TextRun({ text: line, font: { name: codeFont }, size: 18 });
           return index < codeLines.length - 1 ? [textRun, new TextRun({ break: 1 })] : [textRun];
         }).flat();
 
         docxObjects.push(new Paragraph({
-          ...customStyles.codeBlock, // Use styles from template
+          ...customStyles.codeBlock,
           children: textRuns,
         }));
         break;
       }
-      case 'definition': {
-        // Definition lists - render as structured paragraphs
-        // Definition node contains definition nodes, each with identifier and children
-        // Definition nodes are typically used for link/image definitions
-        // For now, we'll skip rendering them as they're usually reference definitions
-        // If you need to render definition lists, you'd need a different AST structure
-        break;
-      }
-      case 'yaml': {
-        // YAML frontmatter - typically skipped in document rendering
-        // but could be used for metadata if needed
-        // For now, we'll skip it as it's usually metadata
-        break;
-      }
       default: {
-        // Handle any unhandled node types gracefully
         console.warn(`Unhandled node type: ${(node as any).type}`);
-        // Try to extract text content if possible
-        if ('children' in node && Array.isArray((node as any).children)) {
-          try {
-            const textContent = extractTextFromNode(node as any);
-            if (textContent.trim()) {
-              docxObjects.push(new Paragraph({
-                ...baseParagraphOptions,
-                children: [new TextRun(textContent)],
-              }));
-            }
-          } catch (e) {
-            console.warn('Unable to process unknown node type:', node.type, e);
-            // Add fallback paragraph for unknown content
-            const nodeContent = extractTextFromNode(node);
-            if (nodeContent.trim()) {
-              docxObjects.push(new Paragraph({
-                children: [new TextRun(nodeContent)],
-              }));
-            }
-          }
-        }
         break;
       }
     }
   }
   return docxObjects;
-}
-
-/**
- * Helper function to extract text content from an unknown node type
- */
-function extractTextFromNode(node: any): string {
-  if (node.type === 'text') {
-    return node.value || '';
-  }
-  if (node.children && Array.isArray(node.children)) {
-    return node.children.map((child: any) => extractTextFromNode(child)).join('');
-  }
-  return '';
 }

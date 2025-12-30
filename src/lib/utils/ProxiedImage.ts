@@ -5,7 +5,6 @@ export interface ProxiedImage {
 
 /**
  * Fetches an image via a server-side proxy or handles data URLs to avoid CORS issues.
- * On the server, it fetches remote URLs directly.
  * @param imageUrl The original URL of the image to fetch.
  * @returns A promise that resolves to an object containing the image buffer and content type, or null on failure.
  */
@@ -16,18 +15,6 @@ export async function getProxiedImageBuffer(imageUrl: string): Promise<ProxiedIm
       const response = await fetch(imageUrl);
       if (!response.ok) {
         console.warn(`Failed to fetch data URL. Status: ${response.statusText}`);
-        return null;
-      }
-      const contentType = response.headers.get('Content-Type') || 'image/png';
-      const buffer = await response.arrayBuffer();
-      return { buffer, contentType };
-    }
-
-    // Server-side direct fetch for remote URLs
-    if (typeof window === 'undefined') {
-      const response = await fetch(imageUrl);
-      if (!response.ok) {
-        console.warn(`[SERVER] Failed to fetch direct image from ${imageUrl}. Status: ${response.statusText}`);
         return null;
       }
       const contentType = response.headers.get('Content-Type') || 'image/png';

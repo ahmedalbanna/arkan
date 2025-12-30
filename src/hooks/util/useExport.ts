@@ -47,7 +47,7 @@ export function useExport() {
                 styles: templateStyles.styles,
                 customStyles: templateStyles.customStyles,
                 pageNumbers: options.pageNumbers,
-                isRtl: false,
+                isRtl: false, // Defaulting to LTR for now
             };
 
             const response = await fetch('/api/export/docx', {

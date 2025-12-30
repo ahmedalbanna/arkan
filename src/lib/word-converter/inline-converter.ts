@@ -34,7 +34,6 @@ export async function transformInlines(
         break;
       case 'image':
         try {
-          // Skip invalid or empty URLs for inline images
           if (!node.url || node.url.trim() === '') {
             console.warn('Empty or invalid inline image URL detected, skipping...');
             runs.push(new TextRun({ text: `[Invalid image]` }));
@@ -45,12 +44,10 @@ export async function transformInlines(
           if (proxiedImage && proxiedImage.buffer && proxiedImage.buffer.byteLength > 0) {
             runs.push(new ImageRun({
               data: proxiedImage.buffer,
-              transformation: { width: 150, height: 100 }, // Smaller default for inline
-              type: 'png', // Default type
+              transformation: { width: 150, height: 100 },
             }));
             console.log(`Successfully processed inline image: ${node.url}`);
           } else {
-            // Fallback to alt text or URL
             const fallbackText = node.alt || '[Image]';
             runs.push(new TextRun({ text: fallbackText }));
           }
@@ -70,7 +67,6 @@ export async function transformInlines(
         break;
       }
       case 'inlineCode': {
-        // Apply the 'InlineCode' character style defined in the template
         runs.push(new TextRun({
           ...baseOptions,
           text: node.value,
@@ -86,15 +82,12 @@ export async function transformInlines(
         break;
       }
       case 'break': {
-        // Line break - add a line break to the text run
         runs.push(new TextRun({ ...baseOptions, break: 1 }));
         break;
       }
       case 'html': {
-        // Inline HTML - try to extract text content or render as plain text
-        // Remove HTML tags and decode entities if possible
         const textContent = node.value
-          .replace(/<[^>]*>/g, '') // Remove HTML tags
+          .replace(/<[^>]*>/g, '') 
           .replace(/&nbsp;/g, ' ')
           .replace(/&amp;/g, '&')
           .replace(/&lt;/g, '<')

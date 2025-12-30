@@ -92,20 +92,26 @@ export async function transformInlinesToPptxText(
 async function renderParagraph(slide: PptxGenJS.Slide, node: Paragraph, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}, footnoteIdMap: Map<string, number> = new Map(), x: number = layout.CONTENT_X, w: number = layout.CONTENT_WIDTH) {
     const imageNode = node.children.length === 1 && node.children[0].type === 'image' ? node.children[0] : null;
     if (imageNode) {
-        const proxiedImage = await getProxiedImageBuffer(imageNode.url);
-        if (proxiedImage) {
-            const base64Image = arrayBufferToBase64(proxiedImage.buffer);
-            slide.addImage({
-                data: `data:${proxiedImage.contentType};base64,${base64Image}`,
-                x: layout.IMAGE_X, y, w: layout.IMAGE_W, h: layout.IMAGE_H
-            });
-        } else {
+        try {
+            const proxiedImage = await getProxiedImageBuffer(imageNode.url);
+            if (proxiedImage) {
+                const base64Image = arrayBufferToBase64(proxiedImage.buffer);
+                slide.addImage({
+                    data: `data:${proxiedImage.contentType};base64,${base64Image}`,
+                    x: layout.IMAGE_X, y, w: layout.IMAGE_W, h: layout.IMAGE_H
+                });
+            } else {
+                throw new Error("Failed to load or proxy image buffer.");
+            }
+        } catch (error) {
+            console.error('Error processing image:', error);
             // If the image fails to load, add a placeholder with an error message.
-            slide.addText('Failed to load image.', {
+            slide.addText(`[Image Failed to Load: ${imageNode.alt || imageNode.url}]`, {
                 x: layout.IMAGE_X, y, w: layout.IMAGE_W, h: layout.IMAGE_H,
                 align: 'center',
                 valign: 'middle',
                 color: 'FF0000', // Red color for error
+                fontSize: 10,
             });
         }
     } else {
