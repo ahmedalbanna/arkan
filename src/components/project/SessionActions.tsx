@@ -21,13 +21,14 @@ interface SessionActionsProps {
     isSaving: boolean;
 }
 
-export function SessionActions({ saveProject, isSaving }: SessionActionsProps) {
+export function SessionActions({ isSaving }: SessionActionsProps) {
     const { t } = useLocalization();
     const router = useRouter();
     const { project, hasUnsavedChanges, newSession, loadProjectFromFile } = useBuilderStore();
-    
+    const { saveProjectMutation } = useSaveProject();
+
     const fileInputRef = useRef<HTMLInputElement>(null);
-    
+
     const handleUploadClick = () => {
         fileInputRef.current?.click();
     };
@@ -39,6 +40,11 @@ export function SessionActions({ saveProject, isSaving }: SessionActionsProps) {
             router.push('/builder');
         }
         if (e.target) e.target.value = '';
+    };
+
+    const handleSave = () => {
+        if (!project) return;
+        saveProjectMutation.mutate(project.toStateObject());
     };
 
     const hasContent = project?.hasContent() ?? false;
@@ -76,7 +82,7 @@ export function SessionActions({ saveProject, isSaving }: SessionActionsProps) {
                 <Button
                     variant="default"
                     size="icon"
-                    onClick={saveProject}
+                    onClick={handleSave}
                     disabled={!hasUnsavedChanges || isSaving}
                     className="h-8 w-8 md:w-auto md:px-3"
                 >
@@ -85,11 +91,10 @@ export function SessionActions({ saveProject, isSaving }: SessionActionsProps) {
                 </Button>
 
                 <ExportDialog />
-                
-                 <Tooltip>
+
+                <Tooltip>
                     <TooltipTrigger asChild>
-                        <div
-                        >
+                        <div>
                             <Button
                                 variant="outline"
                                 size="icon"
@@ -106,7 +111,6 @@ export function SessionActions({ saveProject, isSaving }: SessionActionsProps) {
                         <p>{t('builder.tooltips.downloadProject')}</p>
                     </TooltipContent>
                 </Tooltip>
-
 
                 <Tooltip>
                     <TooltipTrigger asChild>

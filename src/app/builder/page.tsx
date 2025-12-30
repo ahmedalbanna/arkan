@@ -9,7 +9,7 @@ import { OnboardingGuide } from '@/components/onboarding/OnboardingGuide';
 import { BuilderPageSkeleton } from './loading';
 import { useSaveProject } from '@/hooks';
 
-const SessionActions = dynamic(() => import('@/components/project/SessionActions').then(mod => mod.SessionActions), {
+const SessionActions = dynamic(() => import('@/components/project/SessionActions').then(mod => ({ default: mod.SessionActions })), {
   ssr: false,
   loading: () => <div className="h-8 w-[400px] bg-muted rounded-md" />,
 });
@@ -29,7 +29,7 @@ export default function GeneratePage() {
     updateProjectName,
   } = useBuilderPageLogic();
   
-  const { saveProject, isSaving } = useSaveProject();
+  const { isSaving } = useSaveProject();
 
   // Show a loading skeleton until the store is initialized from local storage
   if (!isStoreInitialized || !project) {
@@ -55,7 +55,7 @@ export default function GeneratePage() {
             )}
           </div>
           <div className="flex-none">
-            <SessionActions saveProject={saveProject} isSaving={isSaving} />
+            <SessionActions isSaving={isSaving} />
           </div>
         </div>
         <div className="flex flex-col flex-grow">
