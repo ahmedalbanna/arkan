@@ -10,9 +10,10 @@ import { Button } from '../ui/button';
 import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
 import { Skeleton } from '../ui/skeleton';
 
-// Dynamically import heavy components for code-splitting
+// Standardize all dynamic imports to handle named exports correctly.
+// The format `lazy(() => import('...').then(mod => ({ default: mod.ComponentName })))` is used.
 const ProjectSettingsPanel = lazy(() => import('../project/ProjectSettingsPanel').then(mod => ({ default: mod.ProjectSettingsPanel })));
-const UploadManager = lazy(() => import('../file/UploadManager').then(mod => mod.default));
+const UploadManager = lazy(() => import('../file/UploadManager').then(mod => ({ default: mod.UploadManager })));
 const GenerationTools = lazy(() => import('./ReportGenerationTools').then(mod => ({ default: mod.GenerationTools })));
 const AIResearcherTool = lazy(() => import('../writing-tools/AIResearcherTool').then(mod => ({ default: mod.AIResearcherTool })));
 const PlantUMLGeneratorTool = lazy(() => import('../writing-tools/PlantUMLGeneratorTool').then(mod => ({ default: mod.PlantUMLGeneratorTool })));
