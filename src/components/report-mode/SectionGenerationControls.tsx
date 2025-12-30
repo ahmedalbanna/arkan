@@ -1,9 +1,8 @@
 
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore } from '@/hooks';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -32,12 +31,21 @@ const toneOptions = ToneSchema.options.map(tone => ({
     label: tone.charAt(0).toUpperCase() + tone.slice(1),
 }));
 
+interface SectionGenerationControlsProps {
+  section: Section;
+  onControlChange: <K extends keyof GenerationControlState>(field: K, value: GenerationControlState[K]) => void;
+  onOutputStyleChange: (style: keyof GenerationControlState['outputStyle'], checked: boolean) => void;
+}
 
-export function SectionGenerationControls({ section }: { section: Section }) {
+export function SectionGenerationControls({
+    section,
+    onControlChange,
+    onOutputStyleChange,
+}: SectionGenerationControlsProps) {
     const { t } = useLocalization();
-    const { updateProject } = useBuilderStore();
     const controls = section.controls;
 
+    // UI state is now managed locally inside this component, which is fine for UI-only state
     const [isCustomTone, setIsCustomTone] = useState(() => !toneOptions.some(opt => opt.value === controls.tone));
     const [isCustomLanguage, setIsCustomLanguage] = useState(() =>
         !['default', 'en', 'ar', 'es', 'fr', 'de'].includes(controls.language)
@@ -47,34 +55,15 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         return null;
     }
 
-    function handleControlChange<K extends keyof GenerationControlState>(
-        field: K,
-        value: GenerationControlState[K]
-    ) {
-        updateProject(p => p.updateSection(section.id, s => s.with({ controls: { ...s.controls, [field]: value } })));
-    };
-
-    function handleOutputStyleChange(style: keyof GenerationControlState['outputStyle'], checked: boolean) {
-        updateProject(p => p.updateSection(section.id, s => s.with({
-            controls: {
-                ...s.controls,
-                outputStyle: {
-                    ...s.controls.outputStyle,
-                    [style]: checked
-                }
-            }
-        })));
-    }
-
     const instructionPreview = section.buildActionPrompt();
 
     const handleToneChange = (value: string) => {
         if (value === 'custom') {
             setIsCustomTone(true);
-            handleControlChange('tone', '' as Tone);
+            onControlChange('tone', '' as Tone);
         } else {
             setIsCustomTone(false);
-            handleControlChange('tone', value as Tone);
+            onControlChange('tone', value as Tone);
         }
     };
 
@@ -82,19 +71,19 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         const customValue = e.target.value;
         if (customValue === '') {
             setIsCustomTone(false);
-            handleControlChange('tone', 'professional');
+            onControlChange('tone', 'professional');
         } else {
-            handleControlChange('tone', customValue as Tone);
+            onControlChange('tone', customValue as Tone);
         }
     };
 
     const handleLanguageChange = (value: string) => {
         if (value === 'custom') {
             setIsCustomLanguage(true);
-            handleControlChange('language', '' as Language);
+            onControlChange('language', '' as Language);
         } else {
             setIsCustomLanguage(false);
-            handleControlChange('language', value as Language);
+            onControlChange('language', value as Language);
         }
     };
 
@@ -102,9 +91,9 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         const customValue = e.target.value;
         if (customValue === '') {
             setIsCustomLanguage(false);
-            handleControlChange('language', 'default');
+            onControlChange('language', 'default');
         } else {
-            handleControlChange('language', customValue as Language);
+            onControlChange('language', customValue as Language);
         }
     };
 
@@ -112,7 +101,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
         <div className="space-y-6">
             <div className="space-y-3">
                 <Label htmlFor={`formality-${section.id}`}>{t('builder.reportGenerator.tool_formality_label')}</Label>
-                <Slider id={`formality-${section.id}`} value={[controls.formality]} onValueChange={(val) => handleControlChange('formality', val[0])} max={100} step={1} />
+                <Slider id={`formality-${section.id}`} value={[controls.formality]} onValueChange={(val) => onControlChange('formality', val[0])} max={100} step={1} />
                 <div className="flex justify-between text-xs text-muted-foreground">
                     <span>{t('builder.reportGenerator.tool_formality_informal')}</span>
                     <span>{t('builder.reportGenerator.tool_formality_balanced')}</span>
@@ -121,7 +110,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             </div>
             <div className="space-y-3">
                 <Label htmlFor={`complexity-${section.id}`}>Complexity</Label>
-                <Slider id={`complexity-${section.id}`} value={[controls.complexity]} onValueChange={(val) => handleControlChange('complexity', val[0])} max={100} step={1} />
+                <Slider id={`complexity-${section.id}`} value={[controls.complexity]} onValueChange={(val) => onControlChange('complexity', val[0])} max={100} step={1} />
                 <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Simple</span>
                     <span>Balanced</span>
@@ -181,35 +170,35 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                 <Label>Output Format</Label>
                 <div className="flex items-center flex-wrap gap-4">
                     <div className="flex items-center gap-2">
-                        <Checkbox id={`output-heading-${section.id}`} checked={controls.outputStyle.heading} onCheckedChange={(checked) => handleOutputStyleChange('heading', !!checked)} />
+                        <Checkbox id={`output-heading-${section.id}`} checked={controls.outputStyle.heading} onCheckedChange={(checked) => onOutputStyleChange('heading', !!checked)} />
                         <Label htmlFor={`output-heading-${section.id}`}>Heading</Label>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Checkbox id={`output-paragraph-${section.id}`} checked={controls.outputStyle.paragraph} onCheckedChange={(checked) => handleOutputStyleChange('paragraph', !!checked)} />
+                        <Checkbox id={`output-paragraph-${section.id}`} checked={controls.outputStyle.paragraph} onCheckedChange={(checked) => onOutputStyleChange('paragraph', !!checked)} />
                         <Label htmlFor={`output-paragraph-${section.id}`}>Paragraph</Label>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Checkbox id={`output-list-${section.id}`} checked={controls.outputStyle.list} onCheckedChange={(checked) => handleOutputStyleChange('list', !!checked)} />
+                        <Checkbox id={`output-list-${section.id}`} checked={controls.outputStyle.list} onCheckedChange={(checked) => onOutputStyleChange('list', !!checked)} />
                         <Label htmlFor={`output-list-${section.id}`}>List</Label>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Checkbox id={`output-table-${section.id}`} checked={controls.outputStyle.table} onCheckedChange={(checked) => handleOutputStyleChange('table', !!checked)} />
+                        <Checkbox id={`output-table-${section.id}`} checked={controls.outputStyle.table} onCheckedChange={(checked) => onOutputStyleChange('table', !!checked)} />
                         <Label htmlFor={`output-table-${section.id}`}>Table</Label>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Checkbox id={`output-code-${section.id}`} checked={controls.outputStyle.code} onCheckedChange={(checked) => handleOutputStyleChange('code', !!checked)} />
+                        <Checkbox id={`output-code-${section.id}`} checked={controls.outputStyle.code} onCheckedChange={(checked) => onOutputStyleChange('code', !!checked)} />
                         <Label htmlFor={`output-code-${section.id}`}>Code</Label>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Checkbox id={`output-diagram-${section.id}`} checked={controls.outputStyle.diagram} onCheckedChange={(checked) => handleOutputStyleChange('diagram', !!checked)} />
+                        <Checkbox id={`output-diagram-${section.id}`} checked={controls.outputStyle.diagram} onCheckedChange={(checked) => onOutputStyleChange('diagram', !!checked)} />
                         <Label htmlFor={`output-diagram-${section.id}`}>Diagram</Label>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Checkbox id={`output-math-${section.id}`} checked={controls.outputStyle.math} onCheckedChange={(checked) => handleOutputStyleChange('math', !!checked)} />
+                        <Checkbox id={`output-math-${section.id}`} checked={controls.outputStyle.math} onCheckedChange={(checked) => onOutputStyleChange('math', !!checked)} />
                         <Label htmlFor={`output-math-${section.id}`}>Math</Label>
                     </div>
                     <div className="flex items-center gap-2">
-                    <Checkbox id={`include-citations-${section.id}`} checked={controls.outputStyle.includeCitations} onCheckedChange={(checked) => handleOutputStyleChange('includeCitations', !!checked)} />
+                    <Checkbox id={`include-citations-${section.id}`} checked={controls.outputStyle.includeCitations} onCheckedChange={(checked) => onOutputStyleChange('includeCitations', !!checked)} />
                     <Label htmlFor={`include-citations-${section.id}`}>Citations</Label>
                 </div>
                 </div>
@@ -223,7 +212,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                     <Textarea
                         id={`includedHeadings-${section.id}`}
                         value={(controls.includedHeadings || []).join('\n')}
-                        onChange={(e) => handleControlChange('includedHeadings', e.target.value.split('\n'))}
+                        onChange={(e) => onControlChange('includedHeadings', e.target.value.split('\n'))}
                         placeholder="e.g., Key finding 1\nKey finding 2"
                         rows={3}
                     />
@@ -236,7 +225,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                     <Input
                         id={`tableCaption-${section.id}`}
                         value={controls.tableCaption || ''}
-                        onChange={(e) => handleControlChange('tableCaption', e.target.value)}
+                        onChange={(e) => onControlChange('tableCaption', e.target.value)}
                         placeholder="e.g., Q1 Financial Summary"
                     />
                 </div>
@@ -248,7 +237,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
                     <Input 
                         id={`programmingLanguage-${section.id}`}
                         value={controls.programmingLanguage || ''}
-                        onChange={(e) => handleControlChange('programmingLanguage', e.target.value)}
+                        onChange={(e) => onControlChange('programmingLanguage', e.target.value)}
                         placeholder="e.g., JavaScript, Python"
                     />
                 </div>
@@ -257,7 +246,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
             {controls.outputStyle.diagram && (
                 <div className="space-y-2 pl-6 border-l-2 ml-2">
                     <Label htmlFor={`diagramType-${section.id}`}>Diagram Type</Label>
-                    <Select value={controls.diagramType} onValueChange={(val) => handleControlChange('diagramType', val as DiagramType)}>
+                    <Select value={controls.diagramType} onValueChange={(val) => onControlChange('diagramType', val as DiagramType)}>
                         <SelectTrigger id={`diagramType-${section.id}`}><SelectValue /></SelectTrigger>
                         <SelectContent>
                             {diagramTypes.map(type => (
@@ -271,7 +260,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
 {controls.outputStyle.includeCitations && (
                      <div className="space-y-2 pl-6">
                         <Label htmlFor={`citationStyle-${section.id}`}>Citation Style</Label>
-                        <Select value={controls.citationStyle} onValueChange={(val) => handleControlChange('citationStyle', val as any)}>
+                        <Select value={controls.citationStyle} onValueChange={(val) => onControlChange('citationStyle', val as any)}>
                             <SelectTrigger id={`citationStyle-${section.id}`}><SelectValue placeholder="Select citation style..." /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="APA7">APA 7th Edition</SelectItem>
@@ -285,7 +274,7 @@ export function SectionGenerationControls({ section }: { section: Section }) {
 
             <div className="space-y-2">
                 <Label htmlFor={`wordCount-${section.id}`}>{t('builder.reportGenerator.tool_word_count_label')}</Label>
-                <Input id={`wordCount-${section.id}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controls.wordCount} onChange={(e) => handleControlChange('wordCount', e.target.value)} />
+                <Input id={`wordCount-${section.id}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controls.wordCount} onChange={(e) => onControlChange('wordCount', e.target.value)} />
             </div>
 
             <Card className="bg-muted/50 border-dashed">

@@ -18,6 +18,7 @@ import { Checkbox } from '../ui/checkbox';
 import { cn } from '@/lib/utils/cn';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { GenerationControlState, Language, Tone } from '@/lib/models';
 
 
 export function SectionAccordionItem({
@@ -65,6 +66,26 @@ export function SectionAccordionItem({
             onGenerate();
         }
     }
+
+    function handleControlChange<K extends keyof GenerationControlState>(
+        field: K,
+        value: GenerationControlState[K]
+    ) {
+        updateProject(p => p.updateSection(section.id, s => s.with({ controls: { ...s.controls, [field]: value } })));
+    };
+
+    function handleOutputStyleChange(style: keyof GenerationControlState['outputStyle'], checked: boolean) {
+        updateProject(p => p.updateSection(section.id, s => s.with({
+            controls: {
+                ...s.controls,
+                outputStyle: {
+                    ...s.controls.outputStyle,
+                    [style]: checked
+                }
+            }
+        })));
+    }
+
 
     return (
         <div ref={setNodeRef} style={style} {...attributes}>
@@ -121,7 +142,11 @@ export function SectionAccordionItem({
                                 </div>
                                 <div className="px-4">
                                     <TabsContent value="controls" className="py-4 space-y-6">
-                                        <SectionGenerationControls section={section} />
+                                        <SectionGenerationControls 
+                                            section={section}
+                                            onControlChange={handleControlChange}
+                                            onOutputStyleChange={handleOutputStyleChange}
+                                        />
                                     </TabsContent>
                                     <TabsContent value="prompt" className="py-4">
                                          <GuidelineEditor itemKey={itemKey} />
