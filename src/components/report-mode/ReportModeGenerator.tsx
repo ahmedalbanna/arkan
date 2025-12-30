@@ -5,16 +5,18 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useMobile } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
 import { BookOpenText, Edit, GitGraph, PenSquare, Search, UploadCloud, Settings } from 'lucide-react';
-import { Suspense, useState } from 'react';
-import { UploadManager } from '../file/UploadManager';
+import { Suspense, lazy, useState } from 'react';
 import { Button } from '../ui/button';
 import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
 import { Skeleton } from '../ui/skeleton';
-import { AIResearcherTool } from '../writing-tools/AIResearcherTool';
-import { PlantUMLGeneratorTool } from '../writing-tools/PlantUMLGeneratorTool';
-import { GenerationTools } from './ReportGenerationTools';
-import { ReportResults } from './ReportResults';
-import { ProjectSettingsPanel } from '../project/ProjectSettingsPanel';
+
+// Dynamically import heavy components for code-splitting
+const ProjectSettingsPanel = lazy(() => import('../project/ProjectSettingsPanel').then(mod => ({ default: mod.ProjectSettingsPanel })));
+const UploadManager = lazy(() => import('../file/UploadManager').then(mod => mod.default));
+const GenerationTools = lazy(() => import('./ReportGenerationTools').then(mod => ({ default: mod.GenerationTools })));
+const AIResearcherTool = lazy(() => import('../writing-tools/AIResearcherTool').then(mod => ({ default: mod.AIResearcherTool })));
+const PlantUMLGeneratorTool = lazy(() => import('../writing-tools/PlantUMLGeneratorTool').then(mod => ({ default: mod.PlantUMLGeneratorTool })));
+const ReportResults = lazy(() => import('./ReportResults').then(mod => ({ default: mod.ReportResults })));
 
 
 function ReportSkeleton() {
@@ -93,38 +95,26 @@ export default function ReportModeGenerator() {
 
 
     return (
-
-
         <div className="pb-16 lg:pb-0">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-                {isMobile ? (
-                    <>
-                        {activeMobileView === 'generator' && <CollapsibleSidePanel
-                            panels={panels}
-                            defaultActiveKey="settings"
-                            className="lg:col-span-4 xl:col-span-4"
-                        />}
-                        {activeMobileView === 'result' && <div className="lg:col-span-8 xl:col-span-8 h-full">
-                            <Suspense fallback={<ReportSkeleton />}>
-                                <ReportResults />
-                            </Suspense>
-                        </div>}
-                    </>
-                ) : (
-                    <>
+            <Suspense fallback={<ReportSkeleton />}>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+                    <div className={cn(
+                        "lg:col-span-4 xl:col-span-4",
+                        isMobile && activeMobileView !== 'generator' && "hidden"
+                    )}>
                         <CollapsibleSidePanel
                             panels={panels}
                             defaultActiveKey="settings"
-                            className="lg:col-span-4 xl:col-span-4"
                         />
-                        <div className="lg:col-span-8 xl:col-span-8">
-                            <Suspense fallback={<ReportSkeleton />}>
-                                <ReportResults />
-                            </Suspense>
-                        </div>
-                    </>
-                )}
-            </div>
+                    </div>
+                    <div className={cn(
+                        "lg:col-span-8 xl:col-span-8",
+                        isMobile && activeMobileView !== 'result' && "hidden"
+                    )}>
+                        <ReportResults />
+                    </div>
+                </div>
+            </Suspense>
 
             {isMobile && <BottomNavBar activeView={activeMobileView} setActiveView={setActiveMobileView} />}
         </div>
