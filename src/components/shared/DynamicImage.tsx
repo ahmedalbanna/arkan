@@ -1,13 +1,12 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
-import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useQuery } from '@tanstack/react-query';
 
 interface DynamicImageProps {
+  src: string;
   alt: string;
   width: number;
   height: number;
@@ -15,61 +14,29 @@ interface DynamicImageProps {
   'data-ai-hint': string;
 }
 
-const imageQueryFn = async (prompt: string, token: string | null) => {
-    if (!prompt || !token) return null;
-    const response = await fetch('/api/generate/image', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ prompt }),
-    });
-    if (!response.ok) {
-        // Don't throw error, just return null to show placeholder
-        console.error("Failed to generate image for prompt:", prompt);
-        return null;
-    }
-    const data = await response.json();
-    return data.imageUrl;
-};
+/**
+ * A wrapper around the Next.js Image component that shows a skeleton loader
+ * while the image is loading. This is used for displaying template previews
+ * which are now static URLs.
+ */
+export default function DynamicImage({ src, alt, ...props }: DynamicImageProps) {
+  const [isLoading, setIsLoading] = useState(true);
 
-// IMPORTANT: This component is now deprecated for template previews, which use a stored imageUrl.
-// It is kept for other potential dynamic image needs in the application.
-export default function DynamicImage({ alt, 'data-ai-hint': dataAiHint, ...props }: DynamicImageProps) {
-  const { firebaseUser } = useAuth();
-  const [authToken, setAuthToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    const getToken = async () => {
-        if (firebaseUser) {
-            const token = await firebaseUser.getIdToken();
-            setAuthToken(token);
-        }
-    };
-    getToken();
-  }, [firebaseUser]);
-
-  const { data: imageUrl, isLoading } = useQuery({
-      queryKey: ['generated-image', dataAiHint],
-      queryFn: () => imageQueryFn(dataAiHint, authToken),
-      enabled: !!dataAiHint && !!authToken,
-      staleTime: Infinity, // Cache forever
-      gcTime: Infinity, // Cache forever
-      retry: false, // Don't retry on failure
-  });
-
-  const placeholderUrl = `https://placehold.co/${props.width}x${props.height}.png`;
-
-  if (isLoading || !imageUrl) {
-    return <Skeleton className={props.className} style={{ width: props.width, height: props.height }} />;
-  }
+  // Fallback to a placeholder if src is invalid
+  const imageUrl = src || `https://placehold.co/${props.width}x${props.height}.png`;
 
   return (
-    <Image
-      src={imageUrl || placeholderUrl}
-      alt={alt}
-      {...props}
-    />
+    <div className={props.className} style={{ width: props.width, height: props.height, position: 'relative' }}>
+      {isLoading && <Skeleton className="absolute inset-0" />}
+      <Image
+        src={imageUrl}
+        alt={alt}
+        {...props}
+        layout="fill"
+        objectFit="cover"
+        onLoad={() => setIsLoading(false)}
+        onError={() => setIsLoading(false)} // Stop loading on error to show placeholder or broken image icon
+      />
+    </div>
   );
 }
