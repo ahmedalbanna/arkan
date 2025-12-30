@@ -4,14 +4,10 @@
 import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useBuilderStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
-import type { SectionName } from '@/ai/schemas';
-import { generateReportSectionApi } from '@/services/api/reportService';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Chapter, Project, Section } from '@/lib/models';
-import { writingToolApi } from '@/services/api/writingToolsService';
 import { PromptBuilder } from '@/lib/prompt-builder';
 
 export function useReportGenerationTools() {
@@ -28,24 +24,20 @@ export function useReportGenerationTools() {
         handleSelectAllChapters,
         handleSectionSelectionToggle,
      } = useBuilderStore();
-    const { userProfile, refetchUser, firebaseUser } = useAuth();
-    const queryClient = useQueryClient();
+    const { userProfile } = useAuth();
+    
     const [newChapterTitle, setNewChapterTitle] = useState('');
     const [showTocInput, setShowTocInput] = useState(false);
     const [isGenerateTocOpen, setIsGenerateTocOpen] = useState(false);
-
     const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
     const [chapterInBuildMode, setChapterInBuildMode] = useState<string | null>(null);
-
     const [isProjectBuildMode, setIsProjectBuildMode] = useState(false);
-
     const [isBuildProjectDialogOpen, setIsBuildProjectDialogOpen] = useState(false);
 
     const enterProjectBuildMode = () => setIsProjectBuildMode(true);
     const exitProjectBuildMode = () => {
         setIsProjectBuildMode(false);
-        // Using the store's action to reset selection
-        useBuilderStore.setState({ selectedSectionsForBuild: new Set() });
+        handleSelectAllChapters(false);
     };
 
     const handleEnterBuildMode = (chapterId: string) => {
@@ -53,20 +45,19 @@ export function useReportGenerationTools() {
         const chapter = project?.getChapter(chapterId);
         if (chapter) {
             const sectionIds = new Set(chapter.sections.map(s => s.id));
-             // Using the store's action to set selection
-            useBuilderStore.setState({ selectedSectionsForBuild: sectionIds });
+            handleSelectAllChapters(false); // Clear previous selections
+            sectionIds.forEach(id => handleSectionSelectionToggle(id)); // Select all in chapter
             setIsBuildProjectDialogOpen(true);
         }
     };
 
     const handleCancelBuildMode = () => {
         setChapterInBuildMode(null);
-        // Using the store's action to reset selection
-        useBuilderStore.setState({ selectedSectionsForBuild: new Set() });
+        handleSelectAllChapters(false);
     };
     
     const finalProjectPrompt = useMemo(() => {
-        if (!project || selectedSectionsForBuild.size === 0) return '';
+        if (!project || !selectedSectionsForBuild || selectedSectionsForBuild.size === 0) return '';
         return PromptBuilder.buildProjectPrompt(project, selectedSectionsForBuild);
     }, [project, selectedSectionsForBuild]);
 
@@ -95,7 +86,7 @@ export function useReportGenerationTools() {
 
       return project.content
         .filter((item): item is Chapter => item instanceof Chapter)
-        .map(c => c.with({ sections: c.sections.filter(s => selectedSectionsForBuild.has(s.id))}))
+        .map(c => c.with({ sections: c.sections.filter(s => selectedSectionsForBuild?.has(s.id))}))
         .filter(c => c.sections.length > 0);
     }, [project, selectedSectionsForBuild, chapterInBuildMode]);
 

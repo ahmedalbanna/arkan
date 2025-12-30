@@ -45,7 +45,6 @@ export function GenerationTools() {
   const {
     t,
     project,
-    sectionMutation,
     chapterMutation,
     userProfile,
     newChapterTitle,
@@ -54,7 +53,6 @@ export function GenerationTools() {
     setShowTocInput,
     isGenerateTocOpen,
     setIsGenerateTocOpen,
-    onGenerateSection,
     onGenerateChapter,
     handleAddChapter,
     handleAddSection,
@@ -170,18 +168,7 @@ export function GenerationTools() {
                               index={index}
                               key={item.id}
                               onAddSection={handleAddSection}
-                              onGenerateSection={onGenerateSection}
-                              onGenerateChapter={onGenerateChapter}
-                              activeMutationKey={sectionMutation.isPending ? sectionMutation.variables as string : null}
-                              isAnythingGenerating={sectionMutation.isPending || chapterMutation.isPending}
-                              hasCreditsForSingleSection={!!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1}
-                              isBuildMode={chapterInBuildMode === item.id}
-                              onEnterBuildMode={() => handleEnterBuildMode(item.id)}
-                              onCancelBuildMode={handleCancelBuildMode}
                               isProjectBuildMode={isProjectBuildMode}
-                              selectedSections={selectedSectionsForBuild}
-                              onSectionSelectToggle={handleSectionSelectionToggle}
-                              onChapterSelectToggle={handleChapterSelectionToggle}
                             />
                           )
                         }
@@ -189,16 +176,10 @@ export function GenerationTools() {
                           return (
                             <SectionAccordionItem
                               key={item.id}
-                              section={item}
-                              index={index}
+                              sectionId={item.id}
+                              sectionIndex={index}
                               chapterIndex={-1} // Indicate it's a root section
-                              onGenerate={() => onGenerateSection(item.id)}
-                              isGenerating={sectionMutation.isPending && sectionMutation.variables === item.id}
-                              isAnythingGenerating={sectionMutation.isPending || chapterMutation.isPending}
-                              hasCredits={!!userProfile && userProfile.credits !== undefined && userProfile.credits >= 1}
-                              isSelected={selectedSectionsForBuild.has(item.id)}
-                              onSelect={() => handleSectionSelectionToggle(item.id)}
-                              isCheckboxVisible={isProjectBuildMode}
+                              isProjectBuildMode={isProjectBuildMode}
                             />
                           );
                         }
