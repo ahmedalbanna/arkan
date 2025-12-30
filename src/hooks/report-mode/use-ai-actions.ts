@@ -23,8 +23,8 @@ interface AiActionsProps {
 
 export function useAiActions({ editor }: AiActionsProps = {}) {
   const { t } = useLocalization();
-  const { updateProject, refetchUser } = useBuilderStore();
-  const { firebaseUser } = useAuth();
+  const { project, updateProject } = useBuilderStore();
+  const { firebaseUser, refetchUser } = useAuth();
   const [activeAiAction, setActiveAiAction] = useState<string | null>(null);
 
   const onTextUpdate = useCallback((newText: string, from: number, to: number) => {
@@ -72,19 +72,20 @@ export function useAiActions({ editor }: AiActionsProps = {}) {
   const sectionMutation = useMutation({
     mutationKey: ['generateReportSection'],
     mutationFn: async (sectionId: string) => {
-        if (!useBuilderStore.getState().project || !firebaseUser) throw new Error("Project or user not found.");
-        const project = useBuilderStore.getState().project!;
-        const section = project.getSection(sectionId);
+        const currentProject = useBuilderStore.getState().project;
+        if (!currentProject || !firebaseUser) throw new Error("Project or user not found.");
+        
+        const section = currentProject.getSection(sectionId);
         if (!section) throw new Error("Section not found.");
 
         const token = await firebaseUser.getIdToken();
         const body = {
             sectionToGenerate: section.id as SectionName,
             prompt: section.buildActionPrompt(),
-            otherSections: section.getContextAsRecord(project),
-            externalContext: section.getExternalContextAsArray(project),
+            otherSections: section.getContextAsRecord(currentProject),
+            externalContext: section.getExternalContextAsArray(currentProject),
             guidelines: section.guidelines,
-            instructionText: PromptBuilder.buildSectionPrompt(section, project),
+            instructionText: PromptBuilder.buildSectionPrompt(section, currentProject),
         };
         const result = await generateReportSectionApi(body, token);
         const content = result?.[section.id] ?? Object.values(result || {})[0] as string | undefined;
@@ -94,13 +95,15 @@ export function useAiActions({ editor }: AiActionsProps = {}) {
     onSuccess: (data) => {
         updateProject(p => p.updateSection(data.sectionId, s => s.with({ content: data.content })));
         refetchUser();
-        Toaster({ title: 'Section Generated', description: 'The AI has generated the content for your section.' });
+        // Individual toast is handled by the orchestrator (projectMutation)
     },
     onError: (error: any) => {
-        Toaster({ title: 'Generation error', description: error.message || 'Failed to generate section', variant: 'destructive' });
+        Toaster({ title: 'Section Generation Error', description: error.message || 'Failed to generate section', variant: 'destructive' });
+        // Propagate the error so the orchestrator can stop
+        throw error;
     },
   });
-
+  
   const getContextNames = (section: Section, project: Project): string[] => {
     const sectionContexts = Object.keys(section.context?.sections || {})
       .filter(key => section.context.sections?.[key])
@@ -151,14 +154,49 @@ export function useAiActions({ editor }: AiActionsProps = {}) {
 
   const projectMutation = useMutation({
     mutationKey: ['generateProjectContent'],
-    mutationFn: async (project: Project) => {
+    mutationFn: async ({ project, selectedSectionIds }: { project: Project; selectedSectionIds: Set<string> }) => {
       if (!firebaseUser) throw new Error("User not found.");
-      // This mutation needs to be updated to use `selectedSectionsForBuild` from the store
-      // For now, this is a placeholder.
-      return { chapters: [] };
+      if (selectedSectionIds.size === 0) {
+        throw new Error('No sections were selected for generation.');
+      }
+      
+      const totalSections = selectedSectionIds.size;
+      let generatedCount = 0;
+      let lastToastId: string | undefined;
+
+      for (const sectionId of selectedSectionIds) {
+        try {
+          await sectionMutation.mutateAsync(sectionId);
+          generatedCount++;
+          const toastMessage = `Generated ${generatedCount} of ${totalSections} sections...`;
+          if (lastToastId) {
+            Toaster.dismiss(lastToastId);
+          }
+          const { id } = Toaster({ title: 'Generation in Progress', description: toastMessage });
+          lastToastId = id;
+
+        } catch (error) {
+          // The error is already toasted by sectionMutation.onError, just rethrow to stop the loop.
+          throw new Error(`Failed at section ${project.getSection(sectionId)?.title || sectionId}. Process stopped.`);
+        }
+      }
+      if (lastToastId) {
+        Toaster.dismiss(lastToastId);
+      }
     },
-    onSuccess: () => {},
-    onError: () => {},
+    onSuccess: () => {
+      Toaster({
+        title: "Project Build Complete",
+        description: "All selected sections have been successfully generated.",
+      });
+    },
+    onError: (error: Error) => {
+      Toaster({
+        title: "Project Build Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
   
   const isProcessing = aiActionMutation.isPending || translateMutation.isPending;

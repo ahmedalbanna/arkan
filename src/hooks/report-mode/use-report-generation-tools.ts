@@ -91,8 +91,11 @@ export function useReportGenerationTools() {
     
     const onGenerateProject = () => {
         if (!project) return;
-        projectMutation.mutate(project, {
-            onSuccess: () => setIsBuildProjectDialogOpen(false),
+        projectMutation.mutate({ project, selectedSectionIds: selectedSectionsForBuild }, {
+            onSuccess: () => {
+                setIsBuildProjectDialogOpen(false);
+                exitProjectBuildMode();
+            },
         });
     };
 
