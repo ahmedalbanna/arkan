@@ -4,11 +4,11 @@
 import { useState } from 'react';
 import { saveAs } from 'file-saver';
 import { toast } from './use-toast';
-import type { Project, Section } from '@/lib/models';
+import type { Project } from '@/lib/models';
 import { templates as docxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
 import { templates as pptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 import { ConversionOptions } from '@/lib/word-converter/types';
-import { PptxConversionOptions } from '@/lib/markdown-to-pptx-converter';
+import { PptxConversionOptions, convertMarkdownToPptx } from '@/lib/markdown-to-pptx-converter';
 
 interface DocxExportParams {
     project: Project;
@@ -77,7 +77,7 @@ export function useExport() {
     };
     
     /**
-     * Exports a report as a PPTX file by calling the server-side API.
+     * Exports a report as a PPTX file by generating it on the client side.
      * @param params - An object containing the project and export options.
      */
     const exportPresentationPptx = async ({ project, options }: PptxExportParams) => {
@@ -95,21 +95,7 @@ export function useExport() {
                 includeToc: options.includeToc,
             };
 
-            const response = await fetch('/api/export/pptx', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    project: project.toStateObject(),
-                    options: conversionOptions,
-                }),
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Failed to generate PPTX file on the server.');
-            }
-
-            const blob = await response.blob();
+            const blob = await convertMarkdownToPptx(project.fullMarkdownContent, project.name, conversionOptions);
             saveAs(blob, `${project.name.replace(/\s+/g, '_')}_presentation.pptx`);
 
             toast({ title: 'Export Successful', description: 'Presentation exported as PPTX.' });
@@ -120,7 +106,6 @@ export function useExport() {
             setIsExporting(false);
         }
     };
-
 
     return {
         isExporting,
