@@ -1,7 +1,6 @@
-
 'use client';
 
-import { Chapter, ChapterProperties } from '@/lib/models';
+import { Chapter, ChapterProperties, Section, TocSection } from '@/lib/models';
 import { Project, type ProjectProperties } from '@/lib/models';
 import { localProjectService } from '@/services/local-project-service';
 import React, { useEffect } from 'react';
@@ -9,6 +8,7 @@ import { create } from 'zustand';
 import { parseMarkdownToContent } from '../util/useMarkdownParser';
 import type { ExternalContext, ExternalContextProperties } from '@/lib/models';
 import { toast } from '../util/use-toast';
+import { v4 as uuidv4 } from 'uuid';
 
 type ActiveView = 'cover-page' | 'report-content';
 
@@ -25,6 +25,7 @@ interface BuilderState {
     loadProject: (projectData: ProjectProperties) => void;
     loadProjectFromFile: (file: File) => Promise<void>;
     newSession: () => void;
+    applyTableOfContents: (tocData: TocSection[]) => void;
 }
 
 const createNewTemporaryProject = (): Project => new Project({});
@@ -96,6 +97,25 @@ const useBuilderStore = create<BuilderState>((set, get) => {
                 const newContent = parseMarkdownToContent(markdown, state.project.content);
                 const newProject = state.project.with({ content: newContent });
                 return { project: newProject, hasUnsavedChanges: true };
+            });
+        },
+        
+        applyTableOfContents: (tocData) => {
+            set(state => {
+                if (!state.project) return {};
+                let newProject = state.project.with({ content: [] }); // Start with a clean slate
+                tocData.forEach(chapterData => {
+                    let newChapter = new Chapter({ title: chapterData.title, sections: [] });
+                    chapterData.sections.forEach(sectionTitle => {
+                        newChapter = newChapter.addSection(new Section({ title: sectionTitle, type: 'report' }));
+                    });
+                    newProject = newProject.addChapter(newChapter);
+                });
+                return { project: newProject, hasUnsavedChanges: true };
+            });
+            toast({
+                title: 'Table of Contents Applied',
+                description: `${tocData.length} chapters and their sections have been created.`,
             });
         },
 

@@ -11,3 +11,4 @@ export * from './chapter';
 export * from './section';
 export * from './external-context';
 export * from './control-types';
+export * from './toc';

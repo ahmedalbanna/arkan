@@ -5,11 +5,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useBuilderStore } from '@/hooks';
+import { useBuilderStore, useToast } from '@/hooks';
 import { useGenerateTocLogic } from '@/hooks/writing-tools/use-generate-toc-logic';
 import { Loader2, Sparkles } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
-import { toast } from '@/hooks';
 import { useEffect } from 'react';
 
 interface GenerateTocDialogProps {
@@ -18,34 +17,18 @@ interface GenerateTocDialogProps {
 }
 
 export function GenerateTocDialog({ isOpen, onOpenChange }: GenerateTocDialogProps) {
-    const { project, updateProject } = useBuilderStore();
+    const { project, applyTableOfContents } = useBuilderStore();
     const { form, mutation, onSubmit, results } = useGenerateTocLogic();
 
     useEffect(() => {
-        if (project?.projectDescription) {
+        if (project?.projectDescription && isOpen) {
             form.setValue('projectDescription', project.projectDescription);
         }
     }, [project, form, isOpen]);
 
     function handleApplyToc() {
         if (!results) return;
-
-        updateProject(p => {
-            let newProject = p.with({ chapters: [] }); // Start with a clean slate
-            results.tableOfContents.forEach(chapterData => {
-                newProject = newProject.addChapter(chapterData.title);
-                const newChapterId = newProject.chapters[newProject.chapters.length - 1].id;
-                chapterData.sections.forEach(sectionTitle => {
-                    newProject = newProject.addSectionToChapter(newChapterId, sectionTitle);
-                });
-            });
-            return newProject;
-        });
-
-        toast({
-            title: 'Table of Contents Applied',
-            description: `${results.tableOfContents.length} chapters and their sections have been created.`,
-        });
+        applyTableOfContents(results.tableOfContents);
         onOpenChange(false);
     }
 
@@ -115,5 +98,3 @@ export function GenerateTocDialog({ isOpen, onOpenChange }: GenerateTocDialogPro
         </Dialog>
     );
 }
-
-    
