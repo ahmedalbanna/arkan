@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEditorStore } from '@/hooks/core/use-editor-store';
@@ -126,6 +127,12 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           editor={editor}
           tippyOptions={{ duration: 100, placement: 'top' }}
           pluginKey={uniqueId}
+          shouldShow={({ editor, from, to }) => {
+            // Logic to decide when to show the menu
+            // For example, show for any selection or when the cursor is on an empty line
+            const { empty } = editor.state.selection;
+            return !empty || (empty && editor.state.doc.resolve(from).parent.content.size === 0);
+          }}
         >
           {editor.isActive('table') ? (
             <div className="bg-background p-1 rounded-lg shadow-lg border flex gap-1">
