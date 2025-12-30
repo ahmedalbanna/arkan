@@ -1,5 +1,4 @@
 
-
 // Admin Hooks
 export * from './admin/use-admin-dashboard';
 export * from './admin/use-create-user-dialog';
@@ -56,6 +55,12 @@ export * from './writing-tools/use-summarizer-logic';
 export * from './writing-tools/use-text-stylist-logic';
 export * from './writing-tools/use-topic-explainer-logic';
 export * from './writing-tools/use-writing-tool';
+export * from './writing-tools/use-assignments-solver-logic';
+export * from './writing-tools/use-project-blueprint-logic';
+export * from './writing-tools/use-generate-toc-logic';
+export * from './writing-tools/use-image-to-pdf-logic';
+export * from './writing-tools/use-image-to-svg-logic';
+
 
 // Utility Hooks
 export * from './util/use-browser-speech';

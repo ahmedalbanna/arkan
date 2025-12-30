@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useCallback } from 'react';
@@ -7,7 +8,7 @@ import { useToast } from '@/hooks/util/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
 import { jsPDF } from 'jspdf';
 
-interface UploadedFile {
+export interface SortableFileType {
     id: string;
     file: File;
     preview: string;
@@ -17,7 +18,7 @@ interface UploadedFile {
 export function useImageToPdfLogic() {
     const { t } = useLocalization();
     const { toast } = useToast();
-    const [files, setFiles] = useState<UploadedFile[]>([]);
+    const [files, setFiles] = useState<SortableFileType[]>([]);
     const [isConverting, setIsConverting] = useState(false);
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -85,7 +86,7 @@ export function useImageToPdfLogic() {
                 const y = (pdfHeight - newHeight) / 2;
 
                 if (i > 0) pdf.addPage();
-                pdf.addImage(imgData, file.type, x, y, newWidth, newHeight);
+                pdf.addImage(imgData, file.type.split('/')[1].toUpperCase(), x, y, newWidth, newHeight);
             }
             pdf.save('converted_images.pdf');
             toast({

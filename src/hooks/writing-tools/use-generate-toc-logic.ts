@@ -13,6 +13,8 @@ const generateTocSchema = z.object({
   projectDescription: z.string().min(10, 'Project description must be at least 10 characters.'),
 });
 
+type FormValues = z.infer<typeof generateTocSchema>;
+
 export function useGenerateTocLogic() {
   const { t } = useLocalization();
   const { toast } = useToast();
@@ -27,14 +29,14 @@ export function useGenerateTocLogic() {
     },
   });
 
-  const form = useForm({
+  const form = useForm<FormValues>({
     resolver: zodResolver(generateTocSchema),
     defaultValues: {
       projectDescription: '',
     },
   });
 
-  const onSubmit = (data: z.infer<typeof generateTocSchema>) => {
+  const onSubmit = (data: FormValues) => {
     mutation.mutate(data);
   };
 
@@ -46,5 +48,3 @@ export function useGenerateTocLogic() {
     results: mutation.data as z.infer<typeof GenerateTocOutputSchema> | null,
   };
 }
-
-    
