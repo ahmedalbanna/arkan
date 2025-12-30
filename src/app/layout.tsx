@@ -90,8 +90,8 @@ const fontCairo = localFont({
 });
 
 // List of public paths that do not require authentication
-const PUBLIC_PATHS = ['/login', '/signup', '/forgot-password', '/design', '/docs', '/request'];
-const AUTH_PATHS = ['/login', '/signup', '/forgot-password'];
+const PUBLIC_PATHS = ['/login', '/signup', '/forgot-password', '/design', '/docs', '/request', '/phone-auth'];
+const AUTH_PATHS = ['/login', '/signup', '/forgot-password', '/phone-auth'];
 
 // This function runs on the server for every request
 async function handleAuthRedirects(pathname: string) {
