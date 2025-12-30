@@ -1,4 +1,3 @@
-
 // src/hooks/data/useSections.ts
 'use client';
 
@@ -9,7 +8,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/util/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/utils/authUtils';
-import type { Section, SectionProperties } from '@/lib/models';
+import { Section, type SectionProperties } from '@/lib/models';
 
 export function useSections() {
   const { firebaseUser } = useAuth();
@@ -18,7 +17,9 @@ export function useSections() {
     queryFn: async () => {
       if (!firebaseUser) throw new Error("User not authenticated");
       const token = await firebaseUser.getIdToken();
-      return fetchSectionsApi(token);
+      const sectionsData = await fetchSectionsApi(token);
+      // Instantiate Section objects
+      return sectionsData.map(s => new Section(s));
     },
     enabled: !!firebaseUser,
   });
