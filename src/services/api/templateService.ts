@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { CreatePresentationTemplateData, CreateReportTemplateData, DocxTemplateProperties, PptxTemplateProperties, PresentationTemplateProperties, ReportTemplateProperties, UpdatePresentationTemplateData, UpdateReportTemplateData } from '@/lib/types';
+import type { CreatePresentationTemplateData, CreateReportTemplateData, DocxTemplateProperties, PptxTemplateProperties, PresentationTemplateProperties, ProjectProperties, ReportTemplateProperties, UpdatePresentationTemplateData, UpdateReportTemplateData } from '@/lib/types';
 
 
 // ============================================================================
@@ -93,6 +93,24 @@ export async function fetchReportTemplatesApi(): Promise<ReportTemplatePropertie
     if (!response.ok) throw new Error('Failed to fetch report templates');
     return response.json();
 }
+
+export async function applyReportTemplateApi(variables: { project: ProjectProperties; template: ReportTemplateProperties; token: string }): Promise<ProjectProperties> {
+    const { project, template, token } = variables;
+    const response = await fetch('/api/templates/report/apply', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ project, template }),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to apply template.');
+    }
+    return response.json();
+}
+
 
 export async function createReportTemplateApi(data: CreateReportTemplateData, token: string): Promise<ReportTemplateProperties> {
     const response = await fetch('/api/admin/templates/report', {

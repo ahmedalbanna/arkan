@@ -7,6 +7,7 @@ import { ExternalContext } from './external-context';
 import { arrayMove } from '@dnd-kit/sortable';
 import type { Root as MdastRoot, RootContent } from 'mdast';
 import { getNodeText } from '../pptx-convert/ast-utils';
+import { type ReportTemplateProperties } from './reportTemplate';
 
 // Flexible Type for Project Content - strictly enforcing structure now
 export type ProjectContent = readonly (Chapter | Section)[];

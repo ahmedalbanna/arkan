@@ -22,9 +22,11 @@ import {
     createPresentationTemplateApi,
     updatePresentationTemplateApi,
     deletePresentationTemplateApi,
+    applyReportTemplateApi,
 } from '@/services/api/templateService';
-import type { ReportTemplateProperties, CreateReportTemplateData, UpdateReportTemplateData, PresentationTemplateProperties, CreatePresentationTemplateData, UpdatePresentationTemplateData } from '@/lib/types';
+import type { ReportTemplateProperties, CreateReportTemplateData, UpdateReportTemplateData, PresentationTemplateProperties, CreatePresentationTemplateData, UpdatePresentationTemplateData, ProjectProperties } from '@/lib/types';
 import type { DocxTemplateProperties, PptxTemplateProperties } from '@/lib/models';
+import { useBuilderStore } from '../core/useBuilderStore';
 
 
 // ============================================================================
@@ -157,6 +159,37 @@ export function useReportTemplates() {
         staleTime: 1000 * 60 * 60, // 1 hour
     });
 }
+
+export function useApplyReportTemplate(onSuccessCallback?: () => void) {
+    const { loadProject, project } = useBuilderStore();
+    const { firebaseUser } = useAuth();
+
+    const mutation = useMutation({
+        mutationFn: async (template: ReportTemplateProperties) => {
+            if (!project) throw new Error("No active project to apply the template to.");
+            const token = await getAuthenticatedToken(firebaseUser);
+            const projectData = project.toStateObject(); // Get plain object
+            return applyReportTemplateApi({ project: projectData, template, token });
+        },
+        onSuccess: (newProjectData) => {
+            loadProject(newProjectData);
+            toast({
+                title: 'Template Applied',
+                description: 'Your project has been structured with the selected template.',
+            });
+            onSuccessCallback?.();
+        },
+        onError: (error: any) => {
+            toast({ title: 'Failed to Apply Template', description: error.message, variant: 'destructive' });
+        }
+    });
+
+    return {
+        handleSelectTemplate: mutation.mutate,
+        isApplyingTemplate: mutation.isPending,
+    };
+}
+
 
 export function useCreateReportTemplate() {
     const queryClient = useQueryClient();

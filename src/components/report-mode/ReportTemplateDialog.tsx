@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useReportTemplates } from '@/hooks/data/use-templates';
+import { useApplyReportTemplate, useReportTemplates } from '@/hooks/data/use-templates';
 import { useBuilderStore, useToast } from '@/hooks';
 import { AlertCircle, FileText, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -19,14 +19,13 @@ import { Input } from '../ui/input';
 import { Search } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import type { ReportTemplateProperties } from '@/lib/types';
-import { Project, Chapter, Section } from '@/lib/models'; // Import models
 
 interface ReportTemplateDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-function TemplateCard({ template, onSelect }: { template: ReportTemplateProperties, onSelect: (template: ReportTemplateProperties) => void }) {
+function TemplateCard({ template, onSelect, isLoading }: { template: ReportTemplateProperties, onSelect: () => void, isLoading: boolean }) {
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader>
@@ -34,8 +33,8 @@ function TemplateCard({ template, onSelect }: { template: ReportTemplateProperti
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground min-h-[40px]">{template.description}</p>
-        <Button onClick={() => onSelect(template)} className="w-full mt-4">
-          Apply Template
+        <Button onClick={onSelect} className="w-full mt-4" disabled={isLoading}>
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin"/> : 'Apply Template'}
         </Button>
       </CardContent>
     </Card>
@@ -46,8 +45,13 @@ export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDia
   const { t } = useLocalization();
   const { data: templates, isLoading, isError, error } = useReportTemplates();
   const [searchQuery, setSearchQuery] = useState('');
-  const { loadProject, project } = useBuilderStore();
-  const { toast } = useToast();
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+
+  const {
+      handleSelectTemplate,
+      isApplyingTemplate,
+  } = useApplyReportTemplate(onOpenChange);
+
 
   const filteredTemplates = useMemo(() => {
     if (!templates) return [];
@@ -57,37 +61,6 @@ export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDia
         template.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [templates, searchQuery]);
-
-  const handleSelectTemplate = (template: ReportTemplateProperties) => {
-    if (!project) return;
-    
-    // Ensure project is a class instance before calling toStateObject()
-    const projectInstance = project instanceof Project ? project : new Project(project);
-    
-    // Create a new Project instance based on the template, preserving existing project properties
-    const newProject = new Project({
-      ...projectInstance.toStateObject(), // Retain existing project properties like name, description, and context
-      content: template.content.map(ch => {
-        const sections = ch.sections.map(s => new Section({
-          title: s.title,
-          type: s.type,
-          prompt: s.prompt,
-          behaviors: s.behaviors,
-          guidelines: s.guidelines,
-          controls: s.controls
-        }));
-        return new Chapter({ title: ch.title, sections });
-      }),
-    });
-
-    loadProject(newProject.toStateObject());
-
-    toast({
-      title: 'Template Applied',
-      description: `Your project has been structured with the "${template.name}" template.`,
-    });
-    onOpenChange(false);
-  };
 
 
   return (
@@ -122,7 +95,15 @@ export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDia
               ) : filteredTemplates.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredTemplates.map(template => (
-                    <TemplateCard key={template.id} template={template} onSelect={handleSelectTemplate} />
+                    <TemplateCard 
+                        key={template.id} 
+                        template={template} 
+                        onSelect={() => {
+                            setSelectedTemplateId(template.id);
+                            handleSelectTemplate(template);
+                        }} 
+                        isLoading={isApplyingTemplate && selectedTemplateId === template.id}
+                    />
                   ))}
                 </div>
               ) : (

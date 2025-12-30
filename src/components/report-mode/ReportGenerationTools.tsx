@@ -37,8 +37,8 @@ import { GenerateTocDialog } from './GenerateTocDialog';
 import { ReportTemplateDialog } from "./ReportTemplateDialog";
 import { SortableChapterItem } from './SortableChapterItem';
 import { Chapter, Section } from '@/lib/models';
-import { SortableSectionItem } from './SortableSectionItem';
 import { ScrollArea } from "../ui/scroll-area";
+import { SectionAccordionItem } from "./SectionAccordionItem";
 
 
 export function GenerationTools() {
@@ -185,7 +185,7 @@ export function GenerationTools() {
                         }
                         if (item instanceof Section) {
                           return (
-                            <SortableSectionItem
+                            <SectionAccordionItem
                               key={item.id}
                               section={item}
                               index={index}

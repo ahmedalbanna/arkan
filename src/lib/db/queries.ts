@@ -1,8 +1,9 @@
+
 'use server';
 import { adminAuth, adminDb } from '@/lib/firebase/server-init';
 import type { DocxTemplateProperties, PptxTemplateProperties, ReportTemplateProperties, UserProfile } from '@/lib/models';
 import { FieldValue } from 'firebase-admin/firestore';
-import { AgentProperties, TransactionProperties } from '../models';
+import { AgentProperties, Chapter, Project, Section, SectionProperties, TransactionProperties } from '../models';
 
 
 // === User Queries ===
@@ -238,6 +239,33 @@ export async function getAgent(agentId: string): Promise<AgentProperties | null>
         console.error(`Error fetching agent configuration for '${agentId}':`, error);
         return null;
     }
+}
+
+/**
+ * Constructs a new Project object's content from a template.
+ * @param template The report template containing section IDs.
+ * @returns A new Project object with content structured from the template.
+ */
+export async function constructProjectFromTemplate(template: ReportTemplateProperties): Promise<Project> {
+    const sectionIds = template.sectionIds || [];
+    if (sectionIds.length === 0) return new Project({});
+    
+    // Fetch all default sections from Firestore in one go
+    const sectionsSnapshot = await adminDb.collection('sections').get();
+    const allSections = new Map<string, SectionProperties>();
+    sectionsSnapshot.forEach(doc => {
+        allSections.set(doc.id, { id: doc.id, ...doc.data() } as SectionProperties);
+    });
+    
+    const newContent = sectionIds
+        .map(id => allSections.get(id))
+        .filter((sectionData): sectionData is SectionProperties => !!sectionData)
+        .map(sectionData => new Section(sectionData));
+
+    // Create a single chapter to hold all sections from the template
+    const chapter = new Chapter({ title: 'Generated Content', sections: newContent });
+
+    return new Project({ content: [chapter] });
 }
 
 
