@@ -17,39 +17,26 @@ import {
 import React, { useMemo } from 'react';
 import { Checkbox } from "../ui/checkbox";
 import { SectionAccordionItem } from './SectionAccordionItem';
+import { useBuilderStore } from "@/hooks";
 
 interface SortableChapterItemProps {
   chapter: Chapter;
   index: number;
-  onGenerateSection: (sectionId: string) => void;
-  onGenerateChapter: (chapterId: string) => void;
   onAddSection: (chapterId: string) => void;
-  activeMutationKey: string | null;
-  isAnythingGenerating: boolean;
-  hasCreditsForSingleSection: boolean;
-  isBuildMode: boolean;
-  onEnterBuildMode: () => void;
-  onCancelBuildMode: () => void;
-  isProjectBuildMode: boolean;
-  selectedSections: Set<string>;
-  onSectionSelectToggle: (sectionId: string) => void;
-  onChapterSelectToggle: (chapterId: string, selectAll: boolean) => void;
+  isProjectBuildMode: boolean; // Is the parent in project-build mode?
 }
 
 export function SortableChapterItem({
   chapter,
   index,
-  onGenerateChapter,
   onAddSection,
-  isBuildMode,
-  onEnterBuildMode,
-  onCancelBuildMode,
   isProjectBuildMode,
-  selectedSections,
-  onSectionSelectToggle,
-  onChapterSelectToggle,
-  ...props
 }: SortableChapterItemProps) {
+    const { selectedSectionsForBuild, handleChapterSelectionToggle } = useBuilderStore(state => ({
+        selectedSectionsForBuild: state.selectedSectionsForBuild,
+        handleChapterSelectionToggle: state.handleChapterSelectionToggle,
+    }));
+    
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
 
   const style: React.CSSProperties = {
@@ -62,15 +49,14 @@ export function SortableChapterItem({
   const sectionsInChapter = chapter.sections;
   const isAllSectionsSelected = useMemo(() => {
     if (sectionsInChapter.length === 0) return false;
-    return sectionsInChapter.every(s => selectedSections.has(s.id));
-  }, [sectionsInChapter, selectedSections]);
+    return sectionsInChapter.every(s => selectedSectionsForBuild.has(s.id));
+  }, [sectionsInChapter, selectedSectionsForBuild]);
 
   const isSomeSectionsSelected = useMemo(() => {
     if (sectionsInChapter.length === 0) return false;
-    const hasSelected = sectionsInChapter.some(s => selectedSections.has(s.id));
+    const hasSelected = sectionsInChapter.some(s => selectedSectionsForBuild.has(s.id));
     return hasSelected && !isAllSectionsSelected;
-  }, [sectionsInChapter, selectedSections, isAllSectionsSelected]);
-
+  }, [sectionsInChapter, selectedSectionsForBuild, isAllSectionsSelected]);
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
@@ -82,7 +68,7 @@ export function SortableChapterItem({
                 id={`select-chapter-${chapter.id}`}
                 checked={isAllSectionsSelected}
                 aria-checked={isSomeSectionsSelected ? 'mixed' : isAllSectionsSelected}
-                onCheckedChange={(checked) => onChapterSelectToggle(chapter.id, !!checked)}
+                onCheckedChange={(checked) => handleChapterSelectionToggle(chapter.id, !!checked)}
                 aria-label={`Select all sections in chapter ${chapter.title}`}
               />
             </div>
@@ -103,25 +89,17 @@ export function SortableChapterItem({
         </div>
         <AccordionContent>
           <div className="border-t px-4 py-4 space-y-4">
-
             <div className="w-full space-y-2">
               {chapter.sections.map((section, sectionIndex) => (
                 <SectionAccordionItem
                   key={section.id}
-                  section={section}
-                  index={sectionIndex}
+                  sectionId={section.id}
+                  sectionIndex={sectionIndex}
                   chapterIndex={index}
-                  onGenerate={() => props.onGenerateSection(section.id)}
-                  isGenerating={props.activeMutationKey === section.id}
-                  isAnythingGenerating={props.isAnythingGenerating}
-                  hasCredits={props.hasCreditsForSingleSection}
-                  isSelected={selectedSections.has(section.id)}
-                  onSelect={() => onSectionSelectToggle(section.id)}
-                  isCheckboxVisible={isBuildMode || isProjectBuildMode}
+                  isProjectBuildMode={isProjectBuildMode}
                 />
               ))}
             </div>
-
             <Button size="sm" variant="outline" onClick={() => onAddSection(chapter.id)} className="w-full">
               <PlusCircle className="me-2 h-4 w-4" />
               Add New Section

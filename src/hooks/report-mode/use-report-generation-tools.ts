@@ -16,7 +16,18 @@ import { PromptBuilder } from '@/lib/prompt-builder';
 
 export function useReportGenerationTools() {
     const { t } = useLocalization();
-    const { project, updateProject } = useBuilderStore();
+    const { 
+        project, 
+        updateProject,
+        chapterMutation,
+        projectMutation,
+        onGenerateChapter,
+        onGenerateProject,
+        selectedSectionsForBuild,
+        handleChapterSelectionToggle,
+        handleSelectAllChapters,
+        handleSectionSelectionToggle,
+     } = useBuilderStore();
     const { userProfile, refetchUser, firebaseUser } = useAuth();
     const queryClient = useQueryClient();
     const [newChapterTitle, setNewChapterTitle] = useState('');
@@ -26,7 +37,6 @@ export function useReportGenerationTools() {
     const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
     const [chapterInBuildMode, setChapterInBuildMode] = useState<string | null>(null);
 
-    const [selectedSectionsForBuild, setSelectedSectionsForBuild] = useState<Set<string>>(new Set());
     const [isProjectBuildMode, setIsProjectBuildMode] = useState(false);
 
     const [isBuildProjectDialogOpen, setIsBuildProjectDialogOpen] = useState(false);
@@ -34,58 +44,25 @@ export function useReportGenerationTools() {
     const enterProjectBuildMode = () => setIsProjectBuildMode(true);
     const exitProjectBuildMode = () => {
         setIsProjectBuildMode(false);
-        setSelectedSectionsForBuild(new Set()); // Clear selection on exit
-    };
-
-    const handleSectionSelectionToggle = (sectionId: string) => {
-        setSelectedSectionsForBuild(prev => {
-            const newSelection = new Set(prev);
-            if (newSelection.has(sectionId)) {
-                newSelection.delete(sectionId);
-            } else {
-                newSelection.add(sectionId);
-            }
-            return newSelection;
-        });
-    };
-
-    const handleChapterSelectionToggle = (chapterId: string, select: boolean) => {
-        const chapter = project?.getChapter(chapterId);
-        if (!chapter) return;
-
-        setSelectedSectionsForBuild(prev => {
-            const newSelection = new Set(prev);
-            chapter.sections.forEach(section => {
-                if (select) {
-                    newSelection.add(section.id);
-                } else {
-                    newSelection.delete(section.id);
-                }
-            });
-            return newSelection;
-        });
-    };
-    
-    const handleSelectAllChapters = (select: boolean) => {
-        if (!project) return;
-        const allSectionIds = new Set(project.sections.map(s => s.id));
-        setSelectedSectionsForBuild(select ? allSectionIds : new Set());
+        // Using the store's action to reset selection
+        useBuilderStore.setState({ selectedSectionsForBuild: new Set() });
     };
 
     const handleEnterBuildMode = (chapterId: string) => {
         setChapterInBuildMode(chapterId);
-        // Pre-select all sections in this chapter when entering build mode for it
         const chapter = project?.getChapter(chapterId);
         if (chapter) {
             const sectionIds = new Set(chapter.sections.map(s => s.id));
-            setSelectedSectionsForBuild(sectionIds);
-            setIsBuildProjectDialogOpen(true); // Open the dialog for chapter build
+             // Using the store's action to set selection
+            useBuilderStore.setState({ selectedSectionsForBuild: sectionIds });
+            setIsBuildProjectDialogOpen(true);
         }
     };
 
     const handleCancelBuildMode = () => {
         setChapterInBuildMode(null);
-        setSelectedSectionsForBuild(new Set()); // Clear selections
+        // Using the store's action to reset selection
+        useBuilderStore.setState({ selectedSectionsForBuild: new Set() });
     };
     
     const finalProjectPrompt = useMemo(() => {
@@ -116,175 +93,11 @@ export function useReportGenerationTools() {
         return chapter ? [chapter] : [];
       }
 
-      // For full project build
       return project.content
         .filter((item): item is Chapter => item instanceof Chapter)
         .map(c => c.with({ sections: c.sections.filter(s => selectedSectionsForBuild.has(s.id))}))
         .filter(c => c.sections.length > 0);
     }, [project, selectedSectionsForBuild, chapterInBuildMode]);
-
-
-    const chapterMutation = useMutation({
-        mutationKey: ['generateChapterContent'],
-        mutationFn: async (chapterId: string) => {
-            if (!project || !userProfile || !firebaseUser) throw new Error("Project or user not found.");
-            
-            const chapter = project.getChapter(chapterId);
-            if (!chapter) throw new Error("Chapter not found.");
-            
-            const sectionsToGenerate = chapter.sections.filter(s => selectedSectionsForBuild.has(s.id));
-
-            if (sectionsToGenerate.length === 0) {
-                 toast({ title: 'No Sections Selected', description: 'Please select at least one section to build the chapter content.', variant: 'destructive' });
-                 throw new Error('No sections selected.');
-            }
-
-            const token = await firebaseUser.getIdToken();
-            const body = {
-                chapterTitle: chapter.title,
-                sectionInstructions: sectionsToGenerate.map(s => ({
-                  title: s.title,
-                  prompt: s.buildActionPrompt(),
-                  guidelines: s.guidelines,
-                  instructionText: PromptBuilder.buildSectionPrompt(s, project),
-                  context: getContextNames(s).join(', ')
-                }))
-            };
-
-            const result = await writingToolApi<any, { markdownContent: string }>(`/api/writing-tools/generate-chapter`, { data: body, token });
-            return { chapterId, content: result.markdownContent };
-        },
-        onSuccess: (data) => {
-            const chapter = project?.getChapter(data.chapterId);
-            if (!chapter) return;
-            const sections = chapter.sections.filter(s => selectedSectionsForBuild.has(s.id));
-            if (sections.length === 0) return;
-
-            updateProject(p => {
-                let updatedProject = p;
-                const newContent = data.content;
-                
-                // Clear all selected sections first
-                for (const sec of sections) {
-                    updatedProject = updatedProject.updateSection(sec.id, s => s.with({ content: '' }));
-                }
-
-                // Put all content into the first selected section
-                updatedProject = updatedProject.updateSection(sections[0].id, s => s.with({ content: newContent }));
-
-                return updatedProject;
-            });
-            refetchUser();
-            toast({ title: 'Chapter Generated', description: 'The AI has generated the content for the chapter.' });
-            handleCancelBuildMode();
-        },
-        onError: (error: any) => {
-            if (error.message !== 'No sections selected.') {
-                toast({ title: 'Chapter Generation Error', description: error?.message || 'Failed to generate chapter content.', variant: 'destructive' });
-            }
-        }
-    });
-    
-    const projectMutation = useMutation({
-        mutationKey: ['generateProjectContent'],
-        mutationFn: async () => {
-            if (!project || !firebaseUser || selectedSectionsForBuild.size === 0) {
-                throw new Error("No sections selected for project generation.");
-            }
-
-            const token = await firebaseUser.getIdToken();
-            
-            const body = {
-                chapters: chaptersToBuild.map(c => ({
-                    chapterTitle: c.title,
-                    sectionInstructions: c.sections.map(s => ({
-                        title: s.title,
-                        prompt: s.buildActionPrompt(),
-                        guidelines: s.guidelines,
-                        instructionText: PromptBuilder.buildSectionPrompt(s, project),
-                        context: getContextNames(s).join(', ')
-                    }))
-                }))
-            };
-            
-            const result = await writingToolApi<any, { chapters: { chapterTitle: string, markdownContent: string }[] }>(`/api/generate/project`, { data: body, token });
-            return result.chapters;
-        },
-        onSuccess: (generatedChapters) => {
-            updateProject(p => {
-                let newProject = p;
-                generatedChapters.forEach(genChapter => {
-                    const chapterToUpdate = newProject.chapters.find(c => c.title === genChapter.chapterTitle);
-                    if (chapterToUpdate) {
-                        const sectionsToUpdate = chapterToUpdate.sections.filter(s => selectedSectionsForBuild.has(s.id));
-                        if(sectionsToUpdate.length > 0) {
-                            newProject = newProject.updateSection(sectionsToUpdate[0].id, s => s.with({ content: genChapter.markdownContent }));
-                            // Clear other sections that were part of the build
-                            for (let i = 1; i < sectionsToUpdate.length; i++) {
-                                newProject = newProject.updateSection(sectionsToUpdate[i].id, s => s.with({ content: '' }));
-                            }
-                        }
-                    }
-                });
-                return newProject;
-            });
-            refetchUser();
-            toast({ title: 'Project Built', description: 'Content for selected chapters has been generated.' });
-            setIsBuildProjectDialogOpen(false);
-            exitProjectBuildMode();
-        },
-        onError: (error: any) => {
-            toast({ title: 'Project Build Error', description: error?.message || 'Failed to build project content.', variant: 'destructive' });
-        }
-    });
-
-    const sectionMutation = useMutation({
-        mutationKey: ['generateReportSection'],
-        mutationFn: async (sectionId: string) => {
-            if (!project || !userProfile || !firebaseUser) throw new Error("Project or user not found.");
-
-            const section = project.getSection(sectionId);
-            if (!section) throw new Error("Section not found.");
-
-            const token = await firebaseUser.getIdToken();
-            const body = {
-                sectionToGenerate: section.id as SectionName,
-                prompt: section.buildActionPrompt(), // Use the builder
-                otherSections: section.getContextAsRecord(project),
-                externalContext: section.getExternalContextAsArray(project),
-                guidelines: section.guidelines,
-                instructionText: PromptBuilder.buildSectionPrompt(section, project),
-            };
-            const result = await generateReportSectionApi(body, token);
-            const content = result?.[section.id] ?? Object.values(result || {})[0] as string | undefined;
-            if (!content) {
-                toast({ title: 'Generation failed', description: `No content returned for section ${section.id}.`, variant: 'destructive' });
-                throw new Error('Empty generation result');
-            }
-            return { sectionId: section.id, content };
-        },
-        onSuccess: (data) => {
-            updateProject(p => p.updateSection(data.sectionId, s => s.with({ content: data.content })));
-            refetchUser();
-            toast({ title: 'Section Generated', description: 'The AI has generated the content for your section.' });
-        },
-        onError: (error: any) => {
-            toast({ title: 'Generation error', description: error?.message || 'Failed to generate section', variant: 'destructive' });
-        },
-    });
-
-    const onGenerateSection = (sectionId: SectionName) => {
-        sectionMutation.mutate(sectionId as string);
-    };
-
-    const onGenerateChapter = (chapterId: string) => {
-        chapterMutation.mutate(chapterId);
-    };
-
-    const onGenerateProject = () => {
-        projectMutation.mutate();
-    };
-
 
     const handleAddChapter = () => {
         updateProject(p => p.addChapter());
@@ -303,7 +116,7 @@ export function useReportGenerationTools() {
         }
 
         if (project) {
-            const newProject = project.with({ content: [] }); // Start with clean content
+            const newProject = project.with({ content: [] }); 
             const lines = tocText.split('\n').filter(line => line.trim() !== '');
             let currentChapter: Chapter | null = null;
     
@@ -369,7 +182,6 @@ export function useReportGenerationTools() {
     return {
         t,
         project,
-        sectionMutation,
         chapterMutation,
         projectMutation,
         onGenerateProject,
@@ -380,7 +192,6 @@ export function useReportGenerationTools() {
         setShowTocInput,
         isGenerateTocOpen,
         setIsGenerateTocOpen,
-        onGenerateSection,
         onGenerateChapter,
         handleAddChapter,
         handleAddSection,
@@ -401,7 +212,6 @@ export function useReportGenerationTools() {
         enterProjectBuildMode,
         exitProjectBuildMode,
         finalProjectPrompt,
-        // new properties for the dialog
         chaptersToBuild,
         getContextNames
     };
