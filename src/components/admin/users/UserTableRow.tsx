@@ -4,7 +4,7 @@
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, MessageSquare, Gift, KeyRound } from "lucide-react";
+import { Pencil, KeyRound } from "lucide-react";
 import Link from 'next/link';
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/util/use-toast";
 import { useLocalization } from "@/context/LocalizationContext";
 import { User } from '@/lib/models';
-import { GiftCreditsDialog } from "./GiftCreditsDialog";
+import { GiftCreditsDialog } from "../payments/GiftCreditsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useSendPasswordReset } from "@/hooks";
 

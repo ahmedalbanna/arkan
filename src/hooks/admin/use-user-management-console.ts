@@ -5,7 +5,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { userKeys } from '@/lib/query-keys';
 import { fetchUsersApi } from '@/services/api/userService';
 import { useAuth } from '@/context/AuthContext';
-import { User } from '@/lib/models';
+import { User } from '@/lib/models/user';
 
 const USERS_PER_PAGE = 10;
 

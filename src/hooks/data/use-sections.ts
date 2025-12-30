@@ -1,3 +1,4 @@
+
 // src/hooks/data/useSections.ts
 'use client';
 

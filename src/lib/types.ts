@@ -93,7 +93,7 @@ export interface TranslateVariables {
 export interface PresentationHistoryEntry {
     name: string;
     timestamp: number;
-    slides: any[]; // Adjust 'any' to a more specific slide type if available
+    slides: any[]; // Adjust 'any' to a more specific type if available
 }
 
 // Define types for better type safety

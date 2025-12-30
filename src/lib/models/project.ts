@@ -151,7 +151,10 @@ export class Project {
 
   public hasContent(): boolean {
     const hasBasicInfo = !!this.name || !!this.projectDescription;
-    const hasContentItems = this.content.length > 0;
+    const hasContentItems = this.content.some(item => 
+        (item instanceof Section && !!item.content) || 
+        (item instanceof Chapter && item.sections.some(s => !!s.content))
+    );
     const hasExternalContext = this.externalContext.length > 0;
     return hasBasicInfo || hasContentItems || hasExternalContext;
   }
@@ -163,9 +166,9 @@ export class Project {
     return this.with({ content: [...this.content, newChapter] });
   }
 
-  public addSectionToChapter(chapterId: string, sectionTitle: string): Project {
+  public addSectionToChapter(chapterId: string, sectionTitle: string, content?: string): Project {
     return this.updateChapter(chapterId, (chapter) =>
-        chapter.addSection(new Section({ title: sectionTitle, type: 'report' }))
+        chapter.addSection(new Section({ title: sectionTitle, type: 'report', content }))
     );
   }
 
