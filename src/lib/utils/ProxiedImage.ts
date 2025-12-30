@@ -22,19 +22,34 @@ export async function getProxiedImageBuffer(imageUrl: string): Promise<ProxiedIm
       return { buffer, contentType };
     }
 
-    // Client-side fetch via API proxy for remote URLs
-    const proxiedUrl = `/api/proxy/convert?url=${encodeURIComponent(imageUrl)}`;
-    const response = await fetch(proxiedUrl);
-    if (!response.ok) {
-      console.warn(`[CLIENT] Failed to fetch proxied image from ${imageUrl}. Status: ${response.status} ${response.statusText}`);
-      if (response.status === 405) {
-        console.error("Method Not Allowed (405). Ensure your API route handles GET requests.");
+    // Check if running on the server or client
+    if (typeof window === 'undefined') {
+      // Server-side: Fetch the image directly
+      console.log(`[SERVER] Fetching image directly: ${imageUrl}`);
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        console.warn(`[SERVER] Failed to fetch image directly from ${imageUrl}. Status: ${response.status} ${response.statusText}`);
+        return null;
       }
-      return null;
+      const contentType = response.headers.get('Content-Type') || 'image/png';
+      const buffer = await response.arrayBuffer();
+      return { buffer, contentType };
+
+    } else {
+      // Client-side: Use the API proxy
+      const proxiedUrl = `/api/proxy/convert?url=${encodeURIComponent(imageUrl)}`;
+      const response = await fetch(proxiedUrl);
+      if (!response.ok) {
+        console.warn(`[CLIENT] Failed to fetch proxied image from ${imageUrl}. Status: ${response.status} ${response.statusText}`);
+        if (response.status === 405) {
+          console.error("Method Not Allowed (405). Ensure your API route handles GET requests.");
+        }
+        return null;
+      }
+      const contentType = response.headers.get('Content-Type') || 'image/png'; // Default to png
+      const buffer = await response.arrayBuffer();
+      return { buffer, contentType };
     }
-    const contentType = response.headers.get('Content-Type') || 'image/png'; // Default to png
-    const buffer = await response.arrayBuffer();
-    return { buffer, contentType };
   } catch (error) {
     console.error(`Error fetching or processing image from ${imageUrl}:`, error);
     return null;

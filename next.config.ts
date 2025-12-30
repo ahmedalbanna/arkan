@@ -44,11 +44,6 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     turbo: {
-      resolveAlias: {
-        'react': 'react-18',
-        'react-dom': 'react-dom-18',
-      },
-
     },
     serverActions: { bodySizeLimit: '10mb' as SizeLimit },
 
