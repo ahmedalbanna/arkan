@@ -8,28 +8,25 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Loader2, Save, Trash2, Upload, FileDown, Search, FolderOpen, Download } from 'lucide-react';
+import { Loader2, Save, Trash2, Upload, Download } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useSaveProject } from '@/hooks';
 import { useRouter } from 'next/navigation';
 import { ExportDialog } from './ExportDialog';
 import { BrowseProjectsDialog } from './BrowseProjectsDialog';
 import { useRef } from 'react';
-import { Project } from '@/lib/models';
-import { useToast } from '@/hooks';
 
-export function SessionActions() {
+interface SessionActionsProps {
+    saveProject: () => void;
+    isSaving: boolean;
+}
+
+export function SessionActions({ saveProject, isSaving }: SessionActionsProps) {
     const { t } = useLocalization();
     const router = useRouter();
-    const { project, hasUnsavedChanges, newSession, loadProject } = useBuilderStore();
-    const { toast } = useToast();
+    const { project, hasUnsavedChanges, newSession, loadProjectFromFile } = useBuilderStore();
+    
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const { saveProject, isSaving } = useSaveProject();
-
-    function handleSave() {
-        saveProject();
-    }
     
     const handleUploadClick = () => {
         fileInputRef.current?.click();
@@ -38,14 +35,8 @@ export function SessionActions() {
     const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            try {
-                const newProject = await Project.fromFile(file);
-                loadProject(newProject.toStateObject());
-                toast({ title: t('builder.toasts.projectLoadedTitle'), description: t('builder.toasts.projectLoadedDesc', { projectName: newProject.name }) });
-                router.push('/builder');
-            } catch (err) {
-                toast({ title: t('builder.toasts.loadFailedTitle'), description: (err as Error).message, variant: 'destructive' });
-            }
+            await loadProjectFromFile(file);
+            router.push('/builder');
         }
         if (e.target) e.target.value = '';
     };
@@ -85,7 +76,7 @@ export function SessionActions() {
                 <Button
                     variant="default"
                     size="icon"
-                    onClick={handleSave}
+                    onClick={saveProject}
                     disabled={!hasUnsavedChanges || isSaving}
                     className="h-8 w-8 md:w-auto md:px-3"
                 >

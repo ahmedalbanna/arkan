@@ -1,3 +1,4 @@
+
 'use client';
 
 import { formatDistanceToNow } from 'date-fns';
@@ -6,8 +7,9 @@ import { useBuilderPageLogic } from '@/hooks/core/use-builder-page';
 import { Input } from '@/components/ui/input';
 import { OnboardingGuide } from '@/components/onboarding/OnboardingGuide';
 import { BuilderPageSkeleton } from './loading';
+import { useSaveProject } from '@/hooks';
 
-const SessionActions = dynamic(() => import('@/components/project/SessionActions').then(mod => mod.SessionActions), {
+const SessionActions = dynamic(() => import('@/components/project/SessionActions'), {
   ssr: false,
   loading: () => <div className="h-8 w-[400px] bg-muted rounded-md" />,
 });
@@ -26,6 +28,8 @@ export default function GeneratePage() {
     isStoreInitialized,
     updateProjectName,
   } = useBuilderPageLogic();
+  
+  const { saveProject, isSaving } = useSaveProject();
 
   // Show a loading skeleton until the store is initialized from local storage
   if (!isStoreInitialized || !project) {
@@ -51,7 +55,7 @@ export default function GeneratePage() {
             )}
           </div>
           <div className="flex-none">
-            <SessionActions />
+            <SessionActions saveProject={saveProject} isSaving={isSaving} />
           </div>
         </div>
         <div className="flex flex-col flex-grow">

@@ -8,6 +8,7 @@ import React, { useEffect } from 'react';
 import { create } from 'zustand';
 import { parseMarkdownToContent } from '../util/useMarkdownParser';
 import type { ExternalContext, ExternalContextProperties } from '@/lib/models';
+import { toast } from '../util/use-toast';
 
 type ActiveView = 'cover-page' | 'report-content';
 
@@ -22,6 +23,7 @@ interface BuilderState {
     updateProject: (updater: (project: Project) => Project | void) => void;
     setContentFromMarkdown: (markdown: string) => void;
     loadProject: (projectData: ProjectProperties) => void;
+    loadProjectFromFile: (file: File) => Promise<void>;
     newSession: () => void;
 }
 
@@ -64,6 +66,16 @@ const useBuilderStore = create<BuilderState>((set, get) => {
             const newProject = projectData instanceof Project ? projectData : new Project(projectData);
             localStorage.setItem('lastActiveProjectId', newProject.id);
             set({ project: newProject, hasUnsavedChanges: false, activeView: 'cover-page' });
+        },
+
+        loadProjectFromFile: async (file: File) => {
+            try {
+                const newProject = await Project.fromFile(file);
+                get().loadProject(newProject.toStateObject());
+                toast({ title: 'Project Loaded', description: `Successfully loaded "${newProject.name}".` });
+            } catch (err) {
+                 toast({ title: 'Load Failed', description: (err as Error).message, variant: 'destructive' });
+            }
         },
 
         updateProject: (updater) => {
