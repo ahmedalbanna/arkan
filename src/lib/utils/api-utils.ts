@@ -1,5 +1,5 @@
 
-import { getUserProfile } from '@/lib/db/queries';
+import { getUserProfile } from '@/services/userService';
 import { CustomFirebaseError, handleFirebaseError } from '@/lib/firebase/error';
 import { adminAuth } from '@/lib/firebase/server-init';
 import { NextResponse, type NextRequest } from 'next/server';

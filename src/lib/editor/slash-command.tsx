@@ -14,6 +14,13 @@ const commandItems = [
   { title: 'Bulleted List', description: 'A simple bulleted list.', icon: <List size={20} />, command: (editor: Editor) => editor.chain().focus().toggleBulletList().run() },
   { title: 'Numbered List', description: 'A list with ordered numbers.', icon: <ListOrdered size={20} />, command: (editor: Editor) => editor.chain().focus().toggleOrderedList().run() },
   { title: 'Table', description: 'Insert a 2x2 table.', icon: <Table size={20} />, command: (editor: Editor) => editor.chain().focus().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run() },
+  { title: 'Image', description: 'Insert an image.', icon: <ImageIcon size={20} />, command: (editor: Editor) => {
+      const url = window.prompt('Enter image URL');
+      if (url) {
+        editor.chain().focus().setImage({ src: url }).run();
+      }
+    } 
+  },
   { title: 'Blockquote', description: 'A quote block.', icon: <Quote size={20} />, command: (editor: Editor) => editor.chain().focus().toggleBlockquote().run() },
   { title: 'Code Block', description: 'A block for code snippets.', icon: <Code size={20} />, command: (editor: Editor) => editor.chain().focus().toggleCodeBlock().run() },
   { title: 'PlantUML Diagram', description: 'Embed a live PlantUML diagram.', icon: <GitGraph size={20} />, command: (editor: Editor) => editor.chain().focus().insertPlantUML().run() },
@@ -24,13 +31,6 @@ const render = () => {
   let popup: Instance[];
 
   return {
-    onBeforeStart(props: {editor: Editor; clientRect: GetReferenceClientRect}) {
-      if (!props.clientRect) return;
-      component = new ReactRenderer(CommandList, {
-        props: { ...props, items: commandItems, command: (item: any) => item.command(props.editor) },
-        editor: props.editor,
-      });
-    },
     onStart: (props: { editor: Editor; clientRect: GetReferenceClientRect }) => {
       component = new ReactRenderer(CommandList, {
         props: { ...props, items: commandItems, command: (item: any) => item.command(props.editor) },
@@ -48,10 +48,6 @@ const render = () => {
         trigger: 'manual',
         placement: 'bottom-start',
       });
-    },
-    onBeforeUpdate(props: { editor: Editor; clientRect: GetReferenceClientRect }) {
-      if (!props.clientRect) return;
-      popup[0].setProps({ getReferenceClientRect: props.clientRect });
     },
     onUpdate(props: { editor: Editor; clientRect: GetReferenceClientRect }) {
       component.updateProps({ ...props, items: commandItems, command: (item: any) => item.command(props.editor) });

@@ -2,8 +2,8 @@
 'use client';
 
 import { Editor } from '@tiptap/react';
-import mammoth from 'mammoth';
 import { marked } from 'marked';
+import mammoth from 'mammoth';
 
 /**
  * Handles dropping a file into the Tiptap editor.

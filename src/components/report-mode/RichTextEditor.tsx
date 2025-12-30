@@ -22,27 +22,21 @@ turndownService.use(gfm);
 // Main Editor Component
 interface RichTextEditorProps {
   content: string;
+  onChange: (markdown: string) => void;
 }
 
-function RichTextEditor({ content }: RichTextEditorProps) {
+function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const { setActiveEditor } = useEditorStore();
-  const { setContentFromMarkdown } = useBuilderStore();
   const uniqueId = React.useId();
   
-  const [editorMarkdown, setEditorMarkdown] = useState(content);
-  const debouncedEditorMarkdown = useDebounce(editorMarkdown, 1000);
-
-  useEffect(() => {
-    setContentFromMarkdown(debouncedEditorMarkdown);
-  }, [debouncedEditorMarkdown, setContentFromMarkdown]);
-
+  const debouncedOnChange = useDebounce(onChange, 1000);
 
   const editor = useEditor({
     extensions: editorExtensions(uniqueId),
     content: marked.parse(content) as string,
     onUpdate: ({ editor }) => {
       const markdown = turndownService.turndown(editor.getHTML());
-      setEditorMarkdown(markdown);
+      debouncedOnChange(markdown);
     },
     onSelectionUpdate: ({ editor }) => {
       setActiveEditor(editor);
