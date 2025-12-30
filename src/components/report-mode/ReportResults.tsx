@@ -12,7 +12,6 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
-import { useEffect, useState } from 'react';
 import RichTextEditor from './RichTextEditor';
 import { CoverPage } from '../shared/CoverPage';
 
@@ -21,14 +20,8 @@ export function ReportResults() {
   const { t } = useLocalization();
   const { project, setContentFromMarkdown } = useBuilderStore();
 
-  const [currentMarkdown, setCurrentMarkdown] = useState('');
-
-  // Effect to update local state when global state changes
-  useEffect(() => {
-    if (project) {
-      setCurrentMarkdown(project.fullMarkdownContent || '');
-    }
-  }, [project]);
+  // The local state for markdown is no longer needed.
+  // We will now directly use `project.fullMarkdownContent` from the store.
 
   function handleContentChange(markdown: string) {
     if (!project) return;
@@ -55,8 +48,9 @@ export function ReportResults() {
             <CoverPage project={project} />
             <A4Page>
                 <RichTextEditor
-                key={`${project?.id}-report-content`} // Re-mount editor when project changes
-                content={currentMarkdown}
+                // The key is removed to prevent re-mounting on every project change.
+                // The editor will now react to prop changes.
+                content={project?.fullMarkdownContent || ''}
                 onChange={handleContentChange}
                 />
             </A4Page>
