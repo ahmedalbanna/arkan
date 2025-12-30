@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useGuidelineEditor } from '@/hooks/core/use-guideline-editor';
+import { useGuidelineEditor } from '@/hooks/report-mode/use-guideline-editor';
 import { Behavior, BehaviorType } from '@/lib/models';
 import { Info, PlusCircle, Trash2 } from 'lucide-react';
 import { useState } from 'react';

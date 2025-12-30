@@ -12,63 +12,38 @@ export function useGuidelineEditor(itemKey: string) {
 
     const section = useMemo(() => project?.getSection(itemKey), [project, itemKey]);
 
-    // Local state for UI
-    const [prompt, setPrompt] = useState('');
-    const [rules, setRules] = useState<string[]>([]);
-    const [guidelines, setGuidelines] = useState<string[]>([]);
-    const [constraints, setConstraints] = useState<string[]>([]);
-    const [behaviors, setBehaviors] = useState<Behavior[]>([]);
+    // This hook no longer uses local state that needs to be synced.
+    // It directly calls the global `updateProject` function for immutability and consistency.
+    // This prevents race conditions and simplifies the data flow.
 
-    // Sync local state when the underlying section in the project store changes
-    useEffect(() => {
-        if (section) {
-            setPrompt(section.prompt || 'You are a helpful assistant.');
-            setRules(section.rules || []);
-            setGuidelines(section.guidelines || []);
-            setConstraints(section.constraints || []);
-            setBehaviors(section.behaviors || []);
-        }
-    }, [section]);
+    const setPrompt = (prompt: string) => {
+        updateProject(p => p.updateSection(itemKey, s => s.with({ prompt })));
+    };
 
-    // Persist changes from the UI back to the global project store after a short delay
-    useEffect(() => {
-        // Do not run the effect if the section is not yet loaded.
-        if (!section) return;
+    const setRules = (rules: string[]) => {
+        updateProject(p => p.updateSection(itemKey, s => s.with({ rules })));
+    };
 
-        const handler = setTimeout(() => {
-            const currentSection = project?.getSection(itemKey);
-            if (!currentSection) return;
+    const setGuidelines = (guidelines: string[]) => {
+        updateProject(p => p.updateSection(itemKey, s => s.with({ guidelines })));
+    };
 
-            const hasChanged =
-                currentSection.prompt !== prompt ||
-                JSON.stringify(currentSection.rules) !== JSON.stringify(rules) ||
-                JSON.stringify(currentSection.guidelines) !== JSON.stringify(guidelines) ||
-                JSON.stringify(currentSection.constraints) !== JSON.stringify(constraints) ||
-                JSON.stringify(currentSection.behaviors) !== JSON.stringify(behaviors);
+    const setConstraints = (constraints: string[]) => {
+        updateProject(p => p.updateSection(itemKey, s => s.with({ constraints })));
+    };
 
-
-            if (hasChanged) {
-                updateProject(p => p.updateSection(itemKey, sec => sec.with({
-                    prompt,
-                    rules,
-                    guidelines,
-                    constraints,
-                    behaviors,
-                })));
-            }
-        }, 500); // 500ms debounce
-
-        return () => clearTimeout(handler);
-    }, [prompt, rules, guidelines, constraints, behaviors, itemKey, project, section, updateProject]);
-
+    const setBehaviors = (behaviors: Behavior[]) => {
+        updateProject(p => p.updateSection(itemKey, s => s.with({ behaviors })));
+    };
 
     return {
         t,
         section, // Expose the section so the UI can check for its existence
-        prompt, setPrompt,
-        rules, setRules,
-        guidelines, setGuidelines,
-        constraints, setConstraints,
-        behaviors, setBehaviors,
+        // Directly use section properties in the component
+        prompt: section?.prompt || '', setPrompt,
+        rules: section?.rules || [], setRules,
+        guidelines: section?.guidelines || [], setGuidelines,
+        constraints: section?.constraints || [], setConstraints,
+        behaviors: section?.behaviors || [], setBehaviors,
     };
 }
