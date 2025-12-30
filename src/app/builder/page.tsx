@@ -9,7 +9,7 @@ import { OnboardingGuide } from '@/components/onboarding/OnboardingGuide';
 import { BuilderPageSkeleton } from './loading';
 import { useSaveProject } from '@/hooks';
 
-const SessionActions = dynamic(() => import('@/components/project/SessionActions'), {
+const SessionActions = dynamic(() => import('@/components/project/SessionActions').then(mod => mod.SessionActions), {
   ssr: false,
   loading: () => <div className="h-8 w-[400px] bg-muted rounded-md" />,
 });
