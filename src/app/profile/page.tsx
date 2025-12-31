@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
@@ -9,6 +10,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { UpdateProfileForm } from './UpdateProfileForm';
 import { ChangePasswordForm } from './ChangePasswordForm';
 import { ApiTokenView } from './ApiTokenView';
+import { ApiKeysForm } from './ApiKeysForm';
 
 function ProfileSkeleton() {
     return (
@@ -62,6 +64,7 @@ export default function ProfilePage() {
             </header>
 
             <UpdateProfileForm userProfile={userProfile} />
+            <ApiKeysForm userProfile={userProfile} />
             <ChangePasswordForm />
             <ApiTokenView />
 

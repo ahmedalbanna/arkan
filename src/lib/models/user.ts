@@ -17,6 +17,7 @@ export interface UserProfile {
     bio?: string;
     profilePictureUrl?: string;
     hasCompletedOnboarding?: boolean;
+    apiKeys?: Record<string, string>; // To store keys for services like 'gemini', 'chatgpt'
 }
 
 // TeamMember is no longer needed
@@ -37,6 +38,7 @@ export class User {
     public bio?: string;
     public profilePictureUrl?: string;
     public hasCompletedOnboarding?: boolean;
+    public apiKeys?: Record<string, string>;
 
     constructor(props: UserProperties) {
         this.id = props.id || '';
@@ -49,6 +51,7 @@ export class User {
         this.bio = props.bio;
         this.profilePictureUrl = props.profilePictureUrl;
         this.hasCompletedOnboarding = props.hasCompletedOnboarding;
+        this.apiKeys = props.apiKeys;
     }
 
     /**

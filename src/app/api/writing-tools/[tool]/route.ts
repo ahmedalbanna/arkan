@@ -35,6 +35,7 @@ import { translateText } from '@/ai/flows/translate-text';
 import { writeDocument } from '@/ai/flows/write-document';
 import { AIResearcherInputSchema, BiasCheckInputSchema, ClarityAdvisorInputSchema, ConcisenessCheckerInputSchema, DetectAIInputSchema, FactCheckInputSchema, FactRetrievalInputSchema, GenerateCitationInputSchema, GeneratePlantUMLInputSchema, GenerateProjectBlueprintInputSchema, GenerateQuizInputSchema, GenerateTocInputSchema, GenerateUIDescriptionInputSchema, GrammarCheckInputSchema, HumanizeTextInputSchema, IdeaGenerationInputSchema, LiteratureReviewInputSchema, ManipulateTextInputSchema, ParaphraseInputSchema, PlagiarismCheckInputSchema, QuestionAnsweringInputSchema, ReadabilityEnhancerInputSchema, RewriteTextInputSchema, SentenceStructureCheckInputSchema, SolveAssignmentsInputSchema, StyleEditorInputSchema, SummarizeInputSchema, SummarizeTextWithRatioInputSchema, TopicExplainerInputSchema, TranslateTextInputSchema, WriteDocumentInputSchema, GenerateChapterInputSchema } from '@/ai/schemas';
 import { z } from 'genkit';
+import { configureUserAi } from '@/ai/genkit';
 
 // Define a map for tool configurations
 const toolConfig = {
@@ -71,10 +72,8 @@ const toolConfig = {
   'generate-ui-description': { flow: generateUiDescription, schema: GenerateUIDescriptionInputSchema, creditCost: 2 },
   'generate-chapter': { flow: generateChapterContent, schema: GenerateChapterInputSchema, creditCost: 2 },
   'generate-project-from-full-prompt': { 
-    flow: (data: { fullPrompt: string }) => {
-      // This is a special case. The flow logic is simple enough to be inlined.
-      // A more complex scenario might warrant its own flow file.
-      const { ai } = require('@/ai/genkit');
+    flow: (data: { fullPrompt: string }, userApiKeys?: Record<string, string>) => {
+      const ai = configureUserAi(userApiKeys);
       return ai.generate({ model: 'googleai/gemini-2.5-flash-lite', prompt: data.fullPrompt });
     },
     schema: z.object({ fullPrompt: z.string() }),
@@ -101,7 +100,7 @@ export const POST = withAuth(async ({ request, user, params }) => {
       return handleApiError(validation.error);
     }
 
-    const result = await flow(validation.data as any);
+    const result = await flow(validation.data as any, user.apiKeys);
 
     await deductCredit(user.id, creditCost);
 
@@ -119,5 +118,3 @@ export const POST = withAuth(async ({ request, user, params }) => {
     return handleApiError(error);
   }
 });
-
-    

@@ -33,6 +33,7 @@ const adminUpdateUserSchema = z.object({
     credits: z.coerce.number().int().min(0).optional(),
     role: z.enum(['user', 'admin']).optional(),
     hasCompletedOnboarding: z.boolean().optional(),
+    apiKeys: z.record(z.string()).optional(),
 });
 
 const userUpdateSchema = z.object({
@@ -40,6 +41,7 @@ const userUpdateSchema = z.object({
     email: z.string().email('Invalid email address').optional(),
     bio: z.string().optional(),
     hasCompletedOnboarding: z.boolean().optional(),
+    apiKeys: z.record(z.string()).optional(),
 });
 
 
