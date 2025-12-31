@@ -45,10 +45,25 @@ export function useSaveProject() {
             return localProjectService.saveProject(projectData);
         },
         onSuccess: (savedProject) => {
-            toast({ title: 'Project Saved', description: 'Your changes have been saved locally.' });
-            setHasUnsavedChanges(false);
+            // Only show toast for manual saves, not autosaves, to reduce noise.
+            // A more sophisticated implementation could differentiate.
+            // toast({ title: 'Project Saved', description: 'Your changes have been saved locally.' });
+            
+            // Invalidate queries to refetch project lists
             queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
+            
+            // Update the specific project in the cache
             queryClient.setQueryData(projectKeys.detail(savedProject.id!), new Project(savedProject));
+
+            // Important: Check if there are new unsaved changes before setting this to false.
+            // This prevents race conditions where a user makes a change while an autosave is in flight.
+            const hasChangesMadeDuringSave = useBuilderStore.getState().hasUnsavedChanges;
+            const lastSavedTimestamp = new Date(savedProject.meta.updated || 0).getTime();
+            const currentProjectTimestamp = new Date(useBuilderStore.getState().project?.meta.updated || 0).getTime();
+
+            if (currentProjectTimestamp <= lastSavedTimestamp) {
+                setHasUnsavedChanges(false);
+            }
         },
         onError: (error) => {
             toast({ title: 'Error', description: `Failed to save project: ${error.message}`, variant: 'destructive' });
