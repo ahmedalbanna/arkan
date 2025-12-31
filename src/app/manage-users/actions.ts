@@ -4,7 +4,7 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { updateUser, deleteUser, getUserProfile } from '@/lib/db/queries';
+import { updateUser, deleteUser, getUserProfile } from '@/services/userService';
 import { cookies } from 'next/headers';
 import { adminAuth } from '@/lib/firebase/server-init';
 

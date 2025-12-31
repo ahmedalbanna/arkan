@@ -3,7 +3,7 @@ import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type DocxTemplateKey  } from '@/lib/docx-styles';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { z } from 'zod';
-import { createGenerativeTemplate } from '@/lib/db/queries';
+import { createGenerativeTemplate } from '@/services/userService';
 
 // This endpoint is public and does not require authentication
 // as all users need to be able to fetch the templates for exporting.

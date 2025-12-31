@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { getUserProfile } from '@/lib/db/queries';
+import { getUserProfile } from '@/services/userService';
 
 const getLogsQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(15),

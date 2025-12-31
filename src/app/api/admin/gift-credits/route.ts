@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { adminDb, adminRealtimeDb, adminAuth } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { FieldValue } from 'firebase-admin/firestore';
-import { getUserProfile } from '@/lib/db/queries';
+import { getUserProfile } from '@/services/userService';
 
 const giftCreditsSchema = z.object({
   userId: z.string().min(1, 'User ID is required.'),

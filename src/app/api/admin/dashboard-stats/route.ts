@@ -2,7 +2,7 @@
 
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
-import { getUserProfile } from '@/lib/db/queries';
+import { getUserProfile } from '@/services/userService';
 
 async function getSummaryCounts() {
     let [usersSnapshot, generationsSnapshot, pendingTransactionsSnapshot] = await Promise.all([

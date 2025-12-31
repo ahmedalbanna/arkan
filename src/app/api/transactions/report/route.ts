@@ -1,5 +1,5 @@
 
-import { getTransactionsByDateRange } from '@/lib/db/queries';
+import { getTransactionsByDateRange } from '@/services/userService';
 import { z } from 'zod';
 import { handleApiError, withAuth, createApiResponse } from '@/lib/utils/api-utils';
 

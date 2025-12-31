@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { resetUserPassword } from '@/lib/db/queries';
+import { resetUserPassword } from '@/services/userService';
 import { generateRandomPassword } from '@/lib/utils/randomPassword'; // Assuming a utility for password generation
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { NextRequest } from 'next/server';
