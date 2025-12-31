@@ -6,13 +6,12 @@ import { handleFileDrop } from '@/lib/utils/drop-handler';
 import { handleFilePaste, handleHtmlPaste, handlePlainPaste } from '@/lib/utils/paste-handler';
 import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react';
 import { marked } from 'marked';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 import { editorExtensions } from '@/lib/tiptap-extensions';
 import { Button } from '@/components/ui/button';
 import { ContextualToolbar } from '@/lib/editor/ToolBar';
-import { useDebounce } from '@/hooks';
 
 // Turndown Service Initialization
 const turndownService = new TurndownService({ headingStyle: 'atx' });
@@ -28,8 +27,6 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const { setActiveEditor } = useEditorStore();
   const uniqueId = React.useId();
   
-  const debouncedOnChange = useDebounce(onChange, 1000);
-
   const editor = useEditor({
     extensions: editorExtensions(uniqueId),
     content: marked.parse(content) as string,
@@ -91,25 +88,31 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     }
   }, [content, editor]);
   
-  // Effect to handle changes from the editor itself
+  // Effect to handle changes from the editor itself with debouncing
   useEffect(() => {
     if (!editor) return;
 
+    let debounceTimeout: NodeJS.Timeout;
+
     const handleUpdate = () => {
-      // If the editor is being updated by props, don't trigger the onChange callback
-      if (isUpdatingFromProps.current) {
-        return;
-      }
-      const markdown = turndownService.turndown(editor.getHTML());
-      debouncedOnChange(markdown);
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(() => {
+        // If the editor is being updated by props, don't trigger the onChange callback
+        if (isUpdatingFromProps.current) {
+          return;
+        }
+        const markdown = turndownService.turndown(editor.getHTML());
+        onChange(markdown);
+      }, 1000); // 1-second debounce delay
     };
 
     editor.on('update', handleUpdate);
 
     return () => {
       editor.off('update', handleUpdate);
+      clearTimeout(debounceTimeout);
     };
-  }, [editor, debouncedOnChange]);
+  }, [editor, onChange]);
 
 
   const handleWrapperClick = (event: React.MouseEvent<HTMLDivElement>) => {
