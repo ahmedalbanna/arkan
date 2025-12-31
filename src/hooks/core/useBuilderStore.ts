@@ -28,7 +28,6 @@ interface BuilderState {
     setActiveView: (view: ActiveView) => void;
     setHasUnsavedChanges: (hasChanges: boolean) => void;
     updateProject: (updater: (project: Project) => Project | void) => void;
-    updateSection: (sectionId: string, updater: (section: Section) => Section) => void;
     setContentFromMarkdown: (markdown: string) => void;
     loadProject: (projectData: ProjectProperties) => void;
     loadProjectFromFile: (file: File) => Promise<void>;
@@ -94,31 +93,22 @@ const useBuilderStore = create<BuilderState>((set, get) => {
                 // The updater can either return a new Project instance or mutate the draft
                 const newProject = result instanceof Project ? result : currentProject;
                 
-                // Always set a new timestamp and save to local storage
                 const finalProject = newProject.with({ meta: { ...newProject.meta, updated: new Date().toISOString() } });
-                localStorage.setItem('lastActiveProjectId', finalProject.id);
                 
                 return { project: finalProject, hasUnsavedChanges: true };
             });
         },
-
-        updateSection: (sectionId, updater) => {
-            get().updateProject(p => p.updateSection(sectionId, updater));
-        },
         
         setContentFromMarkdown: (markdown: string) => {
-            set(state => {
-                if (!state.project) return {};
-                const newContent = parseMarkdownToContent(markdown, state.project.content);
-                const newProject = state.project.with({ content: newContent });
-                return { project: newProject, hasUnsavedChanges: true };
+            get().updateProject(p => {
+                const newContent = parseMarkdownToContent(markdown, p.content);
+                return p.with({ content: newContent });
             });
         },
         
         applyTableOfContents: (tocData) => {
-            set(state => {
-                if (!state.project) return {};
-                let newProject = state.project.with({ content: [] }); // Start with clean content
+            get().updateProject(p => {
+                let newProject = p.with({ content: [] });
                 tocData.forEach(chapterData => {
                     let newChapter = new Chapter({ title: chapterData.title, sections: [] });
                     chapterData.sections.forEach(sectionTitle => {
@@ -126,8 +116,9 @@ const useBuilderStore = create<BuilderState>((set, get) => {
                     });
                     newProject = newProject.addChapter(newChapter);
                 });
-                return { project: newProject, hasUnsavedChanges: true };
+                return newProject;
             });
+
             toast({
                 title: 'Table of Contents Applied',
                 description: `${tocData.length} chapters and their sections have been created.`,

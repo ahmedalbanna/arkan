@@ -45,15 +45,7 @@ export function useSaveProject() {
             return localProjectService.saveProject(projectData);
         },
         onSuccess: (savedProject) => {
-            // Update the specific project in the cache to avoid a full refetch
             queryClient.setQueryData(projectKeys.detail(savedProject.id!), new Project(savedProject));
-
-            // Only invalidate the list if absolutely necessary, to prevent re-renders
-            // For autosave, this is generally not needed and can cause loops.
-            // A manual save action might invalidate this, but autosave shouldn't.
-            // queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
-
-            // Check if there are new unsaved changes before setting this to false.
             const hasChangesMadeDuringSave = useBuilderStore.getState().hasUnsavedChanges;
             const lastSavedTimestamp = new Date(savedProject.meta.updated || 0).getTime();
             const currentProjectTimestamp = new Date(useBuilderStore.getState().project?.meta.updated || 0).getTime();
