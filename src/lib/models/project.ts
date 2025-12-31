@@ -8,6 +8,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 import type { Root as MdastRoot, RootContent } from 'mdast';
 import { getNodeText } from '../pptx-convert/ast-utils';
 import { type ReportTemplateProperties } from './reportTemplate';
+import { generateFullMarkdownFromProject } from '../utils/markdown-generation';
 
 // Flexible Type for Project Content - strictly enforcing structure now
 export type ProjectContent = readonly (Chapter | Section)[];
@@ -254,20 +255,29 @@ ${universityText}
     return this.updateSection('cover-page', s => s.with({ content: coverContent }));
   }
 
-  public get fullMarkdownContent(): string {
-    return this.content.map(item => {
-      if (item instanceof Chapter) {
-        // Render chapter title only if it has sections
-        if (item.sections.length > 0) {
-            return `# ${item.title}\n\n${item.sections.map(s => `## ${s.title}\n\n${s.content || ''}`).join('\n\n')}`;
-        }
-        return '';
-      }
-      if (item instanceof Section) {
-        return `## ${item.title}\n\n${item.content || ''}`;
-      }
-      return '';
-    }).filter(Boolean).join('\n\n---\n\n');
+  public applyTemplate(template: ReportTemplateProperties, allSections: SectionProperties[]): Project {
+    if (!template.content) {
+      return this;
+    }
+    const allSectionsMap = new Map(allSections.map(s => [s.id, s]));
+    const newContent = template.content.map(chapterData => {
+        const sections = (chapterData.sections || []).map(sectionInfo => {
+            // Find the full section definition from the default list
+            const defaultSection = allSectionsMap.get(sectionInfo.id!);
+            // Create a new Section instance, merging template info with default info
+            return new Section({
+                ...defaultSection, // Start with defaults
+                ...sectionInfo,     // Override with template specifics
+            });
+        });
+        return new Chapter({ title: chapterData.title, sections: sections });
+    });
+    return this.with({ content: newContent });
+}
+
+  get fullMarkdownContent(): string {
+    // The client-side getter now uses the server-safe utility for consistency.
+    return generateFullMarkdownFromProject(this.toStateObject());
   }
 
   public toStateObject(): ProjectProperties {
@@ -284,11 +294,16 @@ ${universityText}
       educationalLevel: this.educationalLevel,
       teamMembers: this.teamMembers,
       logoUrl: this.logoUrl,
-      content: this.content.map(c => c instanceof Chapter ? c.toJSON() : c.toJSON()),
+      content: this.content.map(c => c.toJSON()),
       externalContext: this.externalContext.map(ec => ec.toStateObject()),
       meta: this.meta,
       activeSectionId: this.activeSectionId,
     };
+  }
+
+  // toJSON is now an alias for toStateObject for convenience
+  public toJSON(): ProjectProperties {
+      return this.toStateObject();
   }
 
   public static fromFile(file: File): Promise<Project> {

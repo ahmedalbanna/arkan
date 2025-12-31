@@ -1,3 +1,4 @@
+
 // src/lib/db/seed.ts
 import { defaultBankAccounts } from '@/lib/db/seed-data/bank-accounts';
 import { defaultFeatures } from '@/lib/db/seed-data/features';
@@ -84,7 +85,15 @@ async function seed() {
         const reportTemplateCollection = adminDb.collection('templates').doc('report').collection('items');
         defaultReportTemplates.forEach(template => {
             const docRef = reportTemplateCollection.doc(template.id);
-            batch.set(docRef, template);
+            // The new structure has `content` which holds chapters and sections
+            const { sectionIds, ...restOfTemplate } = template as any; // Cast to any to handle old structure
+            const templateData = { ...restOfTemplate };
+             if (sectionIds) {
+                // This logic can be removed if the old structure is fully deprecated.
+                // It's here for backward compatibility during transition.
+                console.warn(`Template "${template.id}" uses old 'sectionIds' format. Converting...`);
+            }
+            batch.set(docRef, templateData);
         });
         console.log(`${defaultReportTemplates.length} Report Generation templates added to batch.`);
 

@@ -14,10 +14,11 @@ import {
     createPresentationTemplateApi,
     updatePresentationTemplateApi,
     deletePresentationTemplateApi,
-    applyReportTemplateApi,
 } from '@/services/api/templateService';
-import type { ReportTemplateProperties, CreateReportTemplateData, UpdateReportTemplateData, PresentationTemplateProperties, CreatePresentationTemplateData, UpdatePresentationTemplateData, ProjectProperties } from '@/lib/models';
+import type { ReportTemplateProperties, CreateReportTemplateData, UpdateReportTemplateData, PresentationTemplateProperties, CreatePresentationTemplateData, UpdatePresentationTemplateData, ProjectProperties, SectionProperties } from '@/lib/models';
 import { useBuilderStore } from '../core/useBuilderStore';
+import { useState } from 'react';
+import { useSections } from './use-sections';
 
 // ============================================================================
 // REPORT GENERATION TEMPLATES
@@ -32,32 +33,32 @@ export function useReportTemplates() {
 }
 
 export function useApplyReportTemplate(onSuccessCallback?: () => void) {
-    const { loadProject, project } = useBuilderStore();
-    const { firebaseUser } = useAuth();
+    const { project, loadProject } = useBuilderStore();
+    const { data: allSections } = useSections();
+    const [isApplying, setIsApplying] = useState(false);
 
-    const mutation = useMutation({
-        mutationFn: async (template: ReportTemplateProperties) => {
-            if (!project) throw new Error("No active project to apply the template to.");
-            const token = await getAuthenticatedToken(firebaseUser);
-            const projectData = project.toStateObject(); // Get plain object
-            return applyReportTemplateApi({ project: projectData, template, token });
-        },
-        onSuccess: (newProjectData) => {
-            loadProject(newProjectData);
-            toast({
-                title: 'Template Applied',
-                description: 'Your project has been structured with the selected template.',
-            });
-            onSuccessCallback?.();
-        },
-        onError: (error: any) => {
-            toast({ title: 'Failed to Apply Template', description: error.message, variant: 'destructive' });
+    const handleSelectTemplate = (template: ReportTemplateProperties) => {
+        if (!project || !allSections) {
+            toast({ title: 'Error', description: 'Project or sections data not available.', variant: 'destructive' });
+            return;
         }
-    });
 
+        setIsApplying(true);
+        try {
+            const newProject = project.applyTemplate(template, allSections as SectionProperties[]);
+            loadProject(newProject.toStateObject());
+            toast({ title: "Template Applied", description: `Project structured with '${template.name}'.` });
+            onSuccessCallback?.();
+        } catch (error: any) {
+            toast({ title: 'Failed to Apply Template', description: error.message, variant: 'destructive' });
+        } finally {
+            setIsApplying(false);
+        }
+    };
+    
     return {
-        handleSelectTemplate: mutation.mutate,
-        isApplyingTemplate: mutation.isPending,
+        handleSelectTemplate,
+        isApplyingTemplate: isApplying,
     };
 }
 

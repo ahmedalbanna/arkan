@@ -4,11 +4,32 @@
 import { v4 as uuidv4 } from 'uuid';
 import {
   Behavior,
+  BehaviorSchema,
   defaultControls,
   GenerationControlState,
+  GenerationControlStateSchema,
   SectionContext,
+  SectionContextSchema,
   SectionType,
+  SectionTypeSchema,
 } from './control-types';
+import { z } from 'zod';
+
+export const SectionPropertiesSchema = z.object({
+  id: z.string().optional(),
+  title: z.string(),
+  type: SectionTypeSchema,
+  content: z.string().optional(),
+  prompt: z.string().optional(),
+  rules: z.array(z.string()).optional(),
+  guidelines: z.array(z.string()).optional(),
+  constraints: z.array(z.string()).optional(),
+  behaviors: z.array(BehaviorSchema).optional(),
+  controls: GenerationControlStateSchema.partial().optional(),
+  context: SectionContextSchema.partial().optional(),
+  metadata: z.record(z.any()).optional(),
+});
+
 
 export interface SectionProperties {
   id?: string;

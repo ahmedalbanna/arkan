@@ -1,11 +1,12 @@
+
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { convertMarkdownToWord } from '@/lib/markdown-to-word-converter';
 import type { ConversionOptions } from '@/lib/word-converter/types';
-import { templates } from '@/lib/docx-styles';
-import { Project, type ProjectProperties } from '@/lib/models';
+import { type ProjectProperties } from '@/lib/models';
+import { generateFullMarkdownFromProject } from '@/lib/utils/markdown-generation';
 
 const exportSchema = z.object({
   project: z.any().refine(val => val && typeof val === 'object' && val.id, {
@@ -25,10 +26,9 @@ export async function POST(req: NextRequest) {
 
     const { project: projectData, options } = validation.data;
     
-    // Re-hydrate the project model on the server to use its methods
-    const project = new Project(projectData as ProjectProperties);
-    const markdown = project.fullMarkdownContent;
-    const fileName = project.name.replace(/\s+/g, '_');
+    // Use the new server-safe utility function to generate markdown
+    const markdown = generateFullMarkdownFromProject(projectData as ProjectProperties);
+    const fileName = (projectData.name || 'Untitled').replace(/\s+/g, '_');
 
     if (!markdown.trim()) {
       return new NextResponse(JSON.stringify({ message: 'Project content is empty' }), { status: 400 });

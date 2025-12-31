@@ -4,43 +4,30 @@ import admin from 'firebase-admin';
 // This file should be imported only on the server-side.
 // It initializes the Firebase Admin SDK.
 
+// Check if the app is already initialized to prevent errors during hot-reloading in development.
 if (!admin.apps.length) {
   try {
-    const serviceAccount = {
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      // The private key must be properly formatted (replace \\n with \n)
-      privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-    };
-    
-    // Check if the essential service account variables are provided
-    if (serviceAccount.projectId && serviceAccount.clientEmail && serviceAccount.privateKey) {
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-            databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-            storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-            // The apiKey is crucial for some Admin SDK operations in a web context.
-            apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY, 
-        });
-        console.log("Firebase Admin SDK initialized using service account environment variables.");
-    } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-        // Fallback to application default credentials if the specific variables aren't set
-        admin.initializeApp({
-            credential: admin.credential.applicationDefault(),
-            databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-            storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-            apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-        });
-        console.log("Firebase Admin SDK initialized using Application Default Credentials.");
+    // When deployed (e.g., on Vercel), GOOGLE_APPLICATION_CREDENTIALS will be set.
+    // For local development, we can fall back to the service account file.
+    if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+      admin.initializeApp({
+        credential: admin.credential.applicationDefault(),
+        databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      });
+      console.log("Firebase Admin SDK initialized using Application Default Credentials.");
     } else {
-        throw new Error("Firebase Admin SDK credentials are not configured. Please set either FIREBASE_* environment variables or GOOGLE_APPLICATION_CREDENTIALS.");
+      // Fallback for local development
+      const serviceAccount = require('../../../docudec-firebase-adminsdk-2maa7-d07a19d3fc.json');
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || "https://docudec-default-rtdb.asia-southeast1.firebasedatabase.app",
+        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      });
+      console.log("Firebase Admin SDK initialized using local service account.");
     }
-
   } catch (error: any) {
-    console.error("Firebase admin initialization error:", error.stack);
-    // In a real production environment, you might want to handle this more gracefully
-    // than exiting the process, but for development, this makes configuration issues obvious.
-    process.exit(1);
+    console.error("Firebase admin initialization error", error.stack);
   }
 }
 

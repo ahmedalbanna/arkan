@@ -7,9 +7,10 @@ import { localProjectService } from '@/services/local-project-service';
 import React, { useEffect, useMemo } from 'react';
 import { create } from 'zustand';
 import { parseMarkdownToContent } from '../util/useMarkdownParser';
-import type { ExternalContext, ExternalContextProperties, SectionName } from '@/lib/models';
+import type { ExternalContext, ExternalContextProperties, ReportTemplateProperties, SectionName } from '@/lib/models';
 import { toast } from '../util/use-toast';
 import { v4 as uuidv4 } from 'uuid';
+import { defaultSections } from '@/lib/db/seed-data/sections';
 
 type ActiveView = 'cover-page' | 'report-content';
 
