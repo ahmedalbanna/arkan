@@ -95,14 +95,18 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     let debounceTimeout: NodeJS.Timeout;
 
     const handleUpdate = () => {
+      // If the editor is being updated by props, don't trigger the onChange callback
+      if (isUpdatingFromProps.current) {
+        return;
+      }
+
       clearTimeout(debounceTimeout);
       debounceTimeout = setTimeout(() => {
-        // If the editor is being updated by props, don't trigger the onChange callback
-        if (isUpdatingFromProps.current) {
-          return;
-        }
         const markdown = turndownService.turndown(editor.getHTML());
-        onChange(markdown);
+        // Only call onChange if the markdown has actually changed
+        if (markdown !== content) {
+          onChange(markdown);
+        }
       }, 1000); // 1-second debounce delay
     };
 
@@ -112,7 +116,7 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       editor.off('update', handleUpdate);
       clearTimeout(debounceTimeout);
     };
-  }, [editor, onChange]);
+  }, [editor, onChange, content]);
 
 
   const handleWrapperClick = (event: React.MouseEvent<HTMLDivElement>) => {
