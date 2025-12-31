@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect } from 'react';
@@ -23,22 +24,18 @@ export default function ManageAgentsPage() {
     } = useAgentManager();
     const { firebaseUser, isLoading: authIsLoading } = useAuth();
 
-    async function handleFetch() {
-        if (!firebaseUser) return;
-        try {
-            const token = await firebaseUser.getIdToken();
-            fetchAgents(token);
-        } catch (error) {
-            console.error("Error fetching token:", error);
-        }
+    function handleFetch() {
+        fetchAgents();
     }
 
-    useEffect(() => {
-        if (firebaseUser) {
-            handleFetch();
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [firebaseUser]);
+    // Initial fetch is handled by useQuery in the hook
+    // This effect is no longer needed
+    // useEffect(() => {
+    //     if (firebaseUser) {
+    //         handleFetch();
+    //     }
+    // // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [firebaseUser]);
 
     return (
         <>
@@ -66,7 +63,7 @@ export default function ManageAgentsPage() {
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>Refresh agent list from the database.</p>
+                            <p>Manually refresh the agent list from the server.</p>
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
@@ -82,11 +79,11 @@ export default function ManageAgentsPage() {
             )}
 
             <div className="flex-1 mt-4 border rounded-lg overflow-hidden h-[calc(100vh-220px)] bg-background">
-                {isLoading || authIsLoading ? (
+                {isLoading && !agents.length ? ( // Show skeleton only on initial hard load
                     <div className="flex h-full items-center justify-center">
                         <div className="text-center">
                             <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                            <p className="text-muted-foreground">Loading agents from database...</p>
+                            <p className="text-muted-foreground">Loading agents...</p>
                         </div>
                     </div>
                 ) : (

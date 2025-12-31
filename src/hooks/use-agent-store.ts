@@ -9,10 +9,11 @@ import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from './util/use-toast';
 import { agentKeys } from '@/lib/query-keys';
+import { getFromCache, saveToCache } from '@/lib/utils/cache';
 
+const AGENTS_CACHE_KEY = 'agents-list';
 
 interface AgentState {
-  agents: AgentProperties[];
   selectedAgentId: string | null;
   responses: Record<string, Record<string, { prompt: string; response: string }[]>>;
   selectedCommandId: string | null;
@@ -23,7 +24,6 @@ interface AgentState {
 }
 
 const useAgentUIState = create<AgentState>((set) => ({
-  agents: [],
   selectedAgentId: null,
   responses: {},
   selectedCommandId: null,
@@ -55,14 +55,22 @@ export function useAgentManager() {
     ...uiState
   } = useAgentUIState();
 
-  const { data: agents = [], isLoading, error } = useQuery({
+  const { data: agents = [], isLoading, error, refetch } = useQuery({
     queryKey: agentKeys.all,
     queryFn: async () => {
       if (!firebaseUser) throw new Error("Not authenticated");
       const token = await firebaseUser.getIdToken();
-      return fetchAgentsApi(token);
+      const fetchedAgents = await fetchAgentsApi(token);
+      saveToCache(AGENTS_CACHE_KEY, fetchedAgents);
+      return fetchedAgents;
+    },
+    initialData: () => {
+        // Try to get data from cache first
+        const cachedAgents = getFromCache<AgentProperties[]>(AGENTS_CACHE_KEY);
+        return cachedAgents;
     },
     enabled: !!firebaseUser,
+    staleTime: 1000 * 60 * 5, // Data is stale after 5 minutes
   });
 
   useEffect(() => {
@@ -141,6 +149,10 @@ export function useAgentManager() {
       throw error;
     }
   };
+  
+  const fetchAgents = () => {
+    refetch();
+  };
 
   return {
     agents,
@@ -151,6 +163,7 @@ export function useAgentManager() {
     createAgent,
     updateAgent,
     deleteAgent,
+    fetchAgents,
     ...uiState,
   };
 }

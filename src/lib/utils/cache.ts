@@ -1,20 +1,8 @@
 
 'use client';
 
-import type { DiagramType, SectionName } from '@/ai/schemas';
-
-const CACHE_PREFIX = 'arkan-api-cache-';
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-
-export type CacheResult =
-  | { type: 'section'; key: SectionName; content: string }
-  | {
-    type: 'diagram';
-    key: DiagramType;
-    plantUmlCode: string;
-    imageUrl: string;
-  };
-
+const CACHE_PREFIX = 'arkan-cache-';
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 interface CacheEntry<T> {
   timestamp: number;
@@ -35,11 +23,12 @@ export function getFromCache<T>(key: string): T | null {
     return parsed.data;
   } catch (error) {
     console.error('Failed to parse cache entry:', error);
+    localStorage.removeItem(`${CACHE_PREFIX}${key}`);
     return null;
   }
 }
 
-export function saveToCache<T>(key: string, data: T) {
+export function saveToCache<T>(key: string, data: T): void {
   if (typeof window === 'undefined') return;
   const entry: CacheEntry<T> = {
     timestamp: Date.now(),
@@ -49,16 +38,10 @@ export function saveToCache<T>(key: string, data: T) {
     localStorage.setItem(`${CACHE_PREFIX}${key}`, JSON.stringify(entry));
   } catch (error) {
     console.error('Failed to save to cache:', error);
-    // Handle potential storage full errors
   }
 }
 
-export async function generateCacheKey(data: object): Promise<string> {
-  const jsonString = JSON.stringify(data);
-  // Using SubtleCrypto for a more robust hash than simple string manipulation
-  const msgUint8 = new TextEncoder().encode(jsonString);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  return hashHex;
+export function invalidateCache(key: string): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(`${CACHE_PREFIX}${key}`);
 }
