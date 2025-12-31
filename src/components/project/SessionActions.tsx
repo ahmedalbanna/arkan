@@ -10,14 +10,14 @@ import {
 } from "@/components/ui/tooltip";
 import { Loader2, Save, Trash2, Upload, Download } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore, useSaveProject } from '@/hooks';
+import { useBuilderStore } from '@/hooks';
 import { useRouter } from 'next/navigation';
 import { ExportDialog } from './ExportDialog';
 import { BrowseProjectsDialog } from './BrowseProjectsDialog';
 import { useRef } from 'react';
+import { useSaveProject } from '@/hooks/data/use-projects';
 
 interface SessionActionsProps {
-    saveProject: () => void;
     isSaving: boolean;
 }
 

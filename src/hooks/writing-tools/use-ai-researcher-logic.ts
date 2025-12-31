@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -7,10 +8,7 @@ import { useWritingTool, useProjects, useToast } from '@/hooks';
 import type { AIResearcherOutput, LiteratureReviewOutput, QuestionAnsweringOutput, FactRetrievalOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMemo, useRef, useState, useEffect } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { addContextToProjectApi } from '@/services/api/projectService';
-import { useAuth } from '@/context/AuthContext';
-import { projectKeys } from '@/lib/query-keys';
+import { useBuilderStore } from '../core/useBuilderStore';
 
 export type ResearchMode = 'ai-researcher' | 'literature-review' | 'question-answering' | 'fact-retrieval';
 
@@ -133,52 +131,42 @@ function convertToMarkdown(
 
 export function useAddToProjectDialogLogic(researchMarkdown: string, researchTitle: string, onOpenChange: (open: boolean) => void) {
   const { t } = useLocalization();
-  const { data: projects, isLoading, isError } = useProjects();
-  const { firebaseUser } = useAuth();
-  const queryClient = useQueryClient();
+  const { updateProject } = useBuilderStore();
   const { toast } = useToast();
 
-  const mutation = useMutation({
-    mutationFn: async (variables: { projectId: string }) => {
-        if (!firebaseUser) throw new Error("Not authenticated");
-        const token = await firebaseUser.getIdToken();
+  const handleSelectProject = () => {
+    try {
         const fileName = `research_${researchTitle.slice(0, 20).replace(/\s/g, '_')}.md`;
-        return addContextToProjectApi({
-            projectId: variables.projectId,
-            contextFile: { fileName, content: researchMarkdown, type: 'context' },
-            token
-        });
-    },
-    onSuccess: (data, variables) => {
+        updateProject(p => p.addExternalContext({
+            fileName: fileName,
+            content: researchMarkdown,
+            type: 'context'
+        }));
         toast({
             title: t('writingTools.aiResearcher.toastContextAddedTitle'),
             description: t('writingTools.aiResearcher.toastContextAddedDesc', { researchTitle }),
         });
-        queryClient.invalidateQueries({ queryKey: projectKeys.detail(variables.projectId) });
         onOpenChange(false);
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
         toast({
             title: t('writingTools.aiResearcher.toastContextFailedTitle'),
             description: error.message,
             variant: 'destructive'
         });
     }
-  });
-
-  const handleSelectProject = (projectId: string) => {
-    mutation.mutate({ projectId });
   };
 
+  // The rest of the original hook is no longer needed as we're not selecting from a list of projects.
   return {
     t,
-    projects,
-    isLoading,
-    isError,
-    mutation,
+    projects: [], // Return empty array to satisfy component props
+    isLoading: false,
+    isError: false,
+    mutation: { isPending: false }, // Mock mutation state
     handleSelectProject,
   };
 }
+
 
 export function useAIResearcherLogic() {
   const { t } = useLocalization();
@@ -233,7 +221,7 @@ export function useAIResearcherLogic() {
   useEffect(() => {
     form.reset({ topic: '', question: '', factQuery: '', useWebSearch: false, requireSource: true, depth: 'comprehensive' });
     form.clearErrors();
-  }, [researchMode]);
+  }, [researchMode, form]);
 
   const onSubmit = (data: any) => {
     // Transform form data based on mode
@@ -300,3 +288,5 @@ export function useAIResearcherLogic() {
     getTitle,
   };
 }
+
+    

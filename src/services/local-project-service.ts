@@ -42,8 +42,8 @@ class LocalProjectService {
     const allProjects = await db.getAll(STORE_NAME);
     // Sort projects by updatedAt date in descending order
     return allProjects.sort((a, b) => {
-      const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
-      const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+      const dateA = a.meta?.updated ? new Date(a.meta.updated).getTime() : 0;
+      const dateB = b.meta?.updated ? new Date(b.meta.updated).getTime() : 0;
       return dateB - dateA;
     });
   }
@@ -57,7 +57,7 @@ class LocalProjectService {
     const db = await this.getDB();
     const projectToSave = {
       ...project,
-      updatedAt: new Date().toISOString(), // Always update timestamp on save
+      meta: { ...project.meta, updatedAt: new Date().toISOString() },
     };
     await db.put(STORE_NAME, projectToSave);
     return projectToSave;

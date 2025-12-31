@@ -7,7 +7,7 @@ import { useBuilderPageLogic } from '@/hooks/core/use-builder-page';
 import { Input } from '@/components/ui/input';
 import { OnboardingGuide } from '@/components/onboarding/OnboardingGuide';
 import { BuilderPageSkeleton } from './loading';
-import { useSaveProject } from '@/hooks';
+import { useAutosave } from '@/hooks/core/useAutosave';
 
 const SessionActions = dynamic(() => import('@/components/project/SessionActions').then(mod => ({ default: mod.SessionActions })), {
   ssr: false,
@@ -29,7 +29,7 @@ export default function GeneratePage() {
     updateProjectName,
   } = useBuilderPageLogic();
   
-  const { isSaving } = useSaveProject();
+  const { isSaving } = useAutosave();
 
   // Show a loading skeleton until the store is initialized from local storage
   if (!isStoreInitialized || !project) {

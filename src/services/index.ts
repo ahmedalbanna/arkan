@@ -20,8 +20,11 @@ export * from './api/transactionService';
 export * from './api/userService';
 export * from './api/writingToolsService';
 export * from './api/agentService';
+export * from './api/imageConversionService';
 
 export * from './credit-service';
 export * from './generation-service';
 export * from './local-project-service';
 export * from './templateService';
+
+    
