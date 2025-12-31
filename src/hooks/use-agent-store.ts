@@ -55,7 +55,7 @@ export function useAgentManager() {
     ...uiState
   } = useAgentUIState();
 
-  const { data: agents = [], isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: agentKeys.all,
     queryFn: async () => {
       if (!firebaseUser) throw new Error("Not authenticated");
@@ -72,6 +72,8 @@ export function useAgentManager() {
     enabled: !!firebaseUser,
     staleTime: 1000 * 60 * 5, // Data is stale after 5 minutes
   });
+
+  const agents = data || [];
 
   useEffect(() => {
     if (agents.length > 0 && !agents.find(a => a.id === selectedAgentId)) {
