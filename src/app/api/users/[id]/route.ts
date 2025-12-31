@@ -8,7 +8,7 @@ import { getUserProfile } from "@/services/userService";
 // GET a single user profile.
 export const GET = withAuth(async ({ params, user: requester }) => {
     try {
-        const { id: targetUserId } = await params;
+        const targetUserId = params.id;
 
         // Authorization check: either admin or self
         if (requester.role !== 'admin' && requester.id !== targetUserId) {

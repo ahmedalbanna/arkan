@@ -2,8 +2,9 @@
 'use server';
 
 import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
-import { adminAuth } from '@/lib/firebase/server-init';
+import { adminAuth, adminDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
+import type { UserProfile } from '@/lib/models';
 
 const signupSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -12,10 +13,8 @@ const signupSchema = z.object({
 });
 
 /**
- * API endpoint for creating a new user in Firebase Authentication.
- * This endpoint NO LONGER creates a Firestore user profile. That logic
- * has been moved to a separate user profile endpoint to ensure a single
- * source of truth for profile creation.
+ * API endpoint for creating a new user in Firebase Authentication and Firestore.
+ * This is now an atomic operation.
  */
 export async function POST(req: Request) {
     try {
@@ -26,15 +25,30 @@ export async function POST(req: Request) {
         }
         
         const { email, password, name } = validation.data;
+        const settings = (await adminDb.collection('settings').doc('defaults').get()).data();
+        const defaultCredits = settings?.newUserCredits ?? 10;
 
-        // Only create the auth user here.
+
+        // 1. Create the Firebase Auth user
         const userRecord = await adminAuth.createUser({
             email,
             password,
             displayName: name
         });
         
-        // Return only the basic user record. The client will handle creating the profile.
+        // 2. Create the corresponding Firestore profile
+        const userProfile: Omit<UserProfile, 'id'> = {
+            name,
+            email,
+            role: 'user',
+            credits: defaultCredits,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            hasCompletedOnboarding: false,
+        };
+
+        await adminDb.collection('users').doc(userRecord.uid).set(userProfile);
+
         return createApiResponse({ user: { uid: userRecord.uid, email: userRecord.email } }, 201);
 
     } catch (error: any) {

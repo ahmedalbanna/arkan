@@ -59,14 +59,24 @@ export async function serviceLogoutUser() {
   return response.json();
 }
 
+/**
+ * Signs up a new user via the dedicated API endpoint.
+ * This now handles both auth creation and profile creation in one go.
+ */
 export async function serviceSignupUser(credentials: SignupCredentials): Promise<UserCredential> {
-    // This function now only creates the user in Firebase Auth.
-    // The profile creation is handled in the useSignup hook.
-    try {
-        return await createUserWithEmailAndPassword(auth, credentials.email, credentials.password);
-    } catch(error: any) {
-        throw error;
+    const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials)
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Signup failed');
     }
+    // Signup is now just for creating the user; login is separate
+    // So we don't return the user credential directly, just a success indicator
+    // The user will be redirected to the login page
+    return response.json();
 }
 
 

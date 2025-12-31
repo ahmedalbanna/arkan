@@ -38,13 +38,6 @@ export default function SignupForm() {
   });
 
   const signupMutation = useSignup({
-    onSuccess: (userCredential) => {
-        // After auth user is created, update their display name
-        const auth = getAuth();
-        if (auth.currentUser) {
-            updateProfile(auth.currentUser, { displayName: form.getValues('name') });
-        }
-    },
     onError: (error: any) => {
       // The useSignup hook now handles toast for general errors.
       // We only need to set form-specific errors here.

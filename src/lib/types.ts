@@ -116,13 +116,6 @@ export interface PublicSettings {
     newUserCredits: number;
 }
 
-export interface Feature {
-    id: string;
-    name: string;
-    description: string;
-    isEnabled: boolean;
-}
-
 export interface UploadedFile {
     id: string;
     name: string;
