@@ -11,7 +11,7 @@ import {
     deleteDocxTemplateApi,
     createDocxTemplateApi,
     refreshTemplateImage,
-} from '@/services/api/templateService';
+} from '@/services';
 import type { DocxTemplateProperties } from '@/lib/models';
 
 export function useDocxStyles() {
