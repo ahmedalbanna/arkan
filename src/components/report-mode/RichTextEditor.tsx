@@ -1,6 +1,5 @@
 
 
-
 'use client';
 
 import { useEditorStore } from '@/hooks/core/use-editor-store';
@@ -21,39 +20,40 @@ turndownService.use(gfm);
 // Main Editor Component
 interface RichTextEditorProps {
   content: string;
+  onChange: (markdown: string) => void;
 }
 
-function RichTextEditor({ content }: RichTextEditorProps) {
+function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const { setActiveEditor } = useEditorStore();
-  const { setContentFromMarkdown } = useBuilderStore();
+  const debouncedContent = useDebounce(content, 500);
+  const bubbleMenuId = React.useId();
+
 
   const editor = useEditor({
     extensions: editorExtensions(React.useId()),
     content: marked.parse(content) as string,
     onUpdate: ({ editor }) => {
       const markdown = turndownService.turndown(editor.getHTML());
-      setContentFromMarkdown(markdown);
+      onChange(markdown);
     },
     onBlur: ({ editor }) => {
-      const markdown = turndownService.turndown(editor.getHTML());
-      setContentFromMarkdown(markdown);
+        const markdown = turndownService.turndown(editor.getHTML());
+        onChange(markdown);
     },
     editorProps: {
       attributes: {
         class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif text-base prose-p:text-base prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2',
       },
-      handlePaste: (view, event, slice) => {
+      handlePaste: async (view, event, slice) => {
         const text = event.clipboardData?.getData('text/plain');
         const html = event.clipboardData?.getData('text/html');
 
         if (html) {
-            handleHtmlPaste(editor!, html);
-            return true;
+            return await handleHtmlPaste(editor!, html);
         }
 
         if (text) {
-          handlePlainPaste(editor!, text);
-          return true;
+          return await handlePlainPaste(editor!, text);
         }
         
         return false;
@@ -66,9 +66,9 @@ function RichTextEditor({ content }: RichTextEditorProps) {
   useEffect(() => {
     if (editor && !editor.isDestroyed) {
       const editorMarkdown = turndownService.turndown(editor.getHTML());
-      if (content !== editorMarkdown) {
+      if (debouncedContent !== editorMarkdown) {
         const { from, to } = editor.state.selection;
-        editor.commands.setContent(marked.parse(content) as string, false);
+        editor.commands.setContent(marked.parse(debouncedContent) as string, false);
         // Restore cursor position after content is set
         if (editor.state.doc.content.size >= to) {
           editor.commands.setTextSelection({ from, to });
@@ -76,7 +76,7 @@ function RichTextEditor({ content }: RichTextEditorProps) {
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content]);
+  }, [debouncedContent]);
 
 
   // Set the global editor instance when it's created and destroy it on unmount
@@ -102,7 +102,7 @@ function RichTextEditor({ content }: RichTextEditorProps) {
         <BubbleMenu
           editor={editor}
           tippyOptions={{ duration: 100, placement: 'top', onClose: () => false }}
-          pluginKey={React.useId()}
+          pluginKey={bubbleMenuId}
           shouldShow={({ editor }) => !editor.state.selection.empty}
         >
           {editor.isActive('table') ? (
