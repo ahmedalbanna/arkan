@@ -61,7 +61,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         set(state => {
             if (!state.project) return {};
             const updatedProject = updater(state.project);
-            return { project: updatedProject, hasUnsavedChanges: true };
+            return { project: updatedProject }; // Removed hasUnsavedChanges: true, this will be handled by the component
         });
     },
 
@@ -120,12 +120,10 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     },
     
     setContentFromMarkdown: (markdown: string) => {
-        const editor = useEditorStore.getState().activeEditor;
-        if (editor && !editor.isDestroyed) {
-          const currentMarkdown = get().project?.fullMarkdownContent || '';
-          if (markdown !== currentMarkdown) {
-            get().updateProject(p => p.updateContentFromMarkdown(markdown));
-          }
+        const currentMarkdown = get().project?.fullMarkdownContent || '';
+        if (markdown !== currentMarkdown) {
+          get().updateProject(p => p.updateContentFromMarkdown(markdown));
+          set({ hasUnsavedChanges: true });
         }
     },
 }));

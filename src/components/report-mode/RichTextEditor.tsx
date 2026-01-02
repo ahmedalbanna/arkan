@@ -5,13 +5,13 @@
 import { useEditorStore } from '@/hooks/core/use-editor-store';
 import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react';
 import { marked } from 'marked';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/lib/tiptap-extensions';
 import { Button } from '@/components/ui/button';
 import { ContextualToolbar } from '@/lib/editor/ToolBar';
-import { useBuilderStore } from '@/hooks';
+import { useBuilderStore, useDebounce } from '@/hooks';
 
 // Turndown Service Initialization
 const turndownService = new TurndownService({ headingStyle: 'atx' });
@@ -23,25 +23,33 @@ interface RichTextEditorProps {
 }
 
 function RichTextEditor({ content }: RichTextEditorProps) {
-  const { activeEditor, setActiveEditor } = useEditorStore();
-  const { setContentFromMarkdown } = useBuilderStore();
+  const { setActiveEditor } = useEditorStore();
+  const { updateProject, setHasUnsavedChanges } = useBuilderStore();
   const uniqueId = React.useId();
-  
+
+  const handleContentUpdate = useCallback((newMarkdown: string) => {
+    // Only update if there's a meaningful change
+    if (newMarkdown !== useBuilderStore.getState().project?.fullMarkdownContent) {
+      updateProject(p => p.updateContentFromMarkdown(newMarkdown));
+      setHasUnsavedChanges(true);
+    }
+  }, [updateProject, setHasUnsavedChanges]);
+
   const editor = useEditor({
     extensions: editorExtensions(uniqueId),
     content: marked.parse(content) as string,
     onUpdate: ({ editor }) => {
-        const markdown = turndownService.turndown(editor.getHTML());
-        setContentFromMarkdown(markdown);
+      // This will now be debounced, see below
     },
-    onSelectionUpdate: ({ editor }) => {
-      setActiveEditor(editor);
+    onBlur: ({ editor }) => {
+      const markdown = turndownService.turndown(editor.getHTML());
+      handleContentUpdate(markdown);
     },
     editorProps: {
       attributes: {
         class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif text-base prose-p:text-base prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2',
       },
-       handlePaste: (view, event, slice) => {
+      handlePaste: (view, event, slice) => {
         const text = event.clipboardData?.getData('text/plain');
         const html = event.clipboardData?.getData('text/html');
 
@@ -61,18 +69,33 @@ function RichTextEditor({ content }: RichTextEditorProps) {
     immediatelyRender: false,
   });
 
-  // Effect to sync editor with global state when it changes externally
+  // Debounce the editor's HTML content
+  const debouncedHtml = useDebounce(editor?.getHTML() || '', 1000);
+
+  // Effect to sync editor with global state when it changes externally (e.g., loading a project)
   useEffect(() => {
     if (editor && !editor.isDestroyed) {
       const editorMarkdown = turndownService.turndown(editor.getHTML());
       if (content !== editorMarkdown) {
         const { from, to } = editor.state.selection;
         editor.commands.setContent(marked.parse(content) as string, false);
-        editor.commands.setTextSelection({ from, to });
+        // Restore cursor position after content is set
+        if (editor.state.doc.content.size >= to) {
+          editor.commands.setTextSelection({ from, to });
+        }
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content, editor]);
+  }, [content]); // Only run when the initial content prop changes
+
+  // Effect for debounced updates
+  useEffect(() => {
+    if (editor && !editor.isDestroyed) {
+      const markdown = turndownService.turndown(debouncedHtml);
+      handleContentUpdate(markdown);
+    }
+  }, [debouncedHtml, editor, handleContentUpdate]);
+
 
   // Set the global editor instance when it's created and destroy it on unmount
   useEffect(() => {
