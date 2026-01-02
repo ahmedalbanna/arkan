@@ -46,7 +46,7 @@ function RichTextEditor({ content }: RichTextEditorProps) {
         const html = event.clipboardData?.getData('text/html');
 
         if (html) {
-            handleHtmlPaste(view.state.tr.doc.type.schema.nodeFromJSON(slice.content.toJSON()), html);
+            handleHtmlPaste(editor!, html);
             return true;
         }
 

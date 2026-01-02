@@ -1,21 +1,36 @@
 
+
 import React from 'react';
 import { Editor, Range, Extension } from '@tiptap/core';
 import { ReactRenderer } from '@tiptap/react';
 import Suggestion, { SuggestionOptions } from '@tiptap/suggestion';
 import tippy, { GetReferenceClientRect, Instance } from 'tippy.js';
-import { Heading1, Heading2, Heading3, Text, List, ListOrdered, Table, Image as ImageIcon, Code, Quote, GitGraph, Wand2 } from 'lucide-react';
+import { Heading1, Heading2, Heading3, Text, List, ListOrdered, Table, Image as ImageIcon, Code, Quote, GitGraph, Wand2, ListTree } from 'lucide-react';
 import CommandList from './CommandList';
 
-const commandItems = [
-  { title: 'Heading 1', description: 'Large section heading.', icon: <Heading1 size={20} />, command: (editor: Editor) => editor.chain().focus().toggleHeading({ level: 1 }).run() },
-  { title: 'Heading 2', description: 'Medium section heading.', icon: <Heading2 size={20} />, command: (editor: Editor) => editor.chain().focus().toggleHeading({ level: 2 }).run() },
-  { title: 'Heading 3', description: 'Small section heading.', icon: <Heading3 size={20} />, command: (editor: Editor) => editor.chain().focus().toggleHeading({ level: 3 }).run() },
-  { title: 'Paragraph', description: 'Plain text.', icon: <Text size={20} />, command: (editor: Editor) => editor.chain().focus().setParagraph().run() },
-  { title: 'Bulleted List', description: 'A simple bulleted list.', icon: <List size={20} />, command: (editor: Editor) => editor.chain().focus().toggleBulletList().run() },
-  { title: 'Numbered List', description: 'A list with ordered numbers.', icon: <ListOrdered size={20} />, command: (editor: Editor) => editor.chain().focus().toggleOrderedList().run() },
-  { title: 'Table', description: 'Insert a 2x2 table.', icon: <Table size={20} />, command: (editor: Editor) => editor.chain().focus().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run() },
-  { title: 'Image', description: 'Insert an image from a URL.', icon: <ImageIcon size={20} />, command: (editor: Editor) => {
+const getCommandItems = (editor: Editor) => [
+  { title: 'Table of Contents', description: 'Generate a TOC from headings.', icon: <ListTree size={20} />, command: () => {
+      const headings: { level: number; text: string }[] = [];
+      editor.state.doc.forEach(node => {
+        if (node.type.name === 'heading') {
+          headings.push({
+            level: node.attrs.level,
+            text: node.textContent,
+          });
+        }
+      });
+      const tocMarkdown = headings.map(h => `${'  '.repeat(h.level - 1)}- ${h.text}`).join('\n');
+      editor.chain().focus().insertContent(tocMarkdown).run();
+    } 
+  },
+  { title: 'Heading 1', description: 'Large section heading.', icon: <Heading1 size={20} />, command: () => editor.chain().focus().toggleHeading({ level: 1 }).run() },
+  { title: 'Heading 2', description: 'Medium section heading.', icon: <Heading2 size={20} />, command: () => editor.chain().focus().toggleHeading({ level: 2 }).run() },
+  { title: 'Heading 3', description: 'Small section heading.', icon: <Heading3 size={20} />, command: () => editor.chain().focus().toggleHeading({ level: 3 }).run() },
+  { title: 'Paragraph', description: 'Plain text.', icon: <Text size={20} />, command: () => editor.chain().focus().setParagraph().run() },
+  { title: 'Bulleted List', description: 'A simple bulleted list.', icon: <List size={20} />, command: () => editor.chain().focus().toggleBulletList().run() },
+  { title: 'Numbered List', description: 'A list with ordered numbers.', icon: <ListOrdered size={20} />, command: () => editor.chain().focus().toggleOrderedList().run() },
+  { title: 'Table', description: 'Insert a 2x2 table.', icon: <Table size={20} />, command: () => editor.chain().focus().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run() },
+  { title: 'Image', description: 'Insert an image from a URL.', icon: <ImageIcon size={20} />, command: () => {
       const url = window.prompt('Enter image URL');
       if (url) {
         editor.chain().focus().setImage({ src: url }).run();
@@ -26,13 +41,13 @@ const commandItems = [
     title: 'AI Image', 
     description: 'Generate an image with AI.', 
     icon: <Wand2 size={20} />, 
-    command: (editor: Editor) => {
+    command: () => {
         editor.chain().focus().insertAIImageGenerator().run();
     } 
   },
-  { title: 'Blockquote', description: 'A quote block.', icon: <Quote size={20} />, command: (editor: Editor) => editor.chain().focus().toggleBlockquote().run() },
-  { title: 'Code Block', description: 'A block for code snippets.', icon: <Code size={20} />, command: (editor: Editor) => editor.chain().focus().toggleCodeBlock().run() },
-  { title: 'PlantUML Diagram', description: 'Embed a live PlantUML diagram.', icon: <GitGraph size={20} />, command: (editor: Editor) => editor.chain().focus().insertPlantUML().run() },
+  { title: 'Blockquote', description: 'A quote block.', icon: <Quote size={20} />, command: () => editor.chain().focus().toggleBlockquote().run() },
+  { title: 'Code Block', description: 'A block for code snippets.', icon: <Code size={20} />, command: () => editor.chain().focus().toggleCodeBlock().run() },
+  { title: 'PlantUML Diagram', description: 'Embed a live PlantUML diagram.', icon: <GitGraph size={20} />, command: () => editor.chain().focus().insertPlantUML().run() },
 ];
 
 const render = () => {
@@ -41,6 +56,7 @@ const render = () => {
 
   return {
     onStart: (props: { editor: Editor; clientRect: GetReferenceClientRect }) => {
+      const commandItems = getCommandItems(props.editor);
       component = new ReactRenderer(CommandList, {
         props: { ...props, items: commandItems, command: (item: any) => item.command(props.editor) },
         editor: props.editor,
@@ -59,6 +75,7 @@ const render = () => {
       });
     },
     onUpdate(props: { editor: Editor; clientRect: GetReferenceClientRect }) {
+      const commandItems = getCommandItems(props.editor);
       component.updateProps({ ...props, items: commandItems, command: (item: any) => item.command(props.editor) });
       if (!props.clientRect) return;
       popup[0].setProps({ getReferenceClientRect: props.clientRect });
@@ -89,9 +106,16 @@ const SlashCommand = Extension.create<Partial<SuggestionOptions>>({
           props.command(editor, range);
         },
         items: ({ query }) => {
+          const commandItems = getCommandItems(this.editor);
           return commandItems.filter(item => item.title.toLowerCase().startsWith(query.toLowerCase()));
         },
-        allow: ({ editor, range }) => editor.can().deleteRange(range),
+        allow: ({ editor, range }) => {
+          // Don't show slash command inside code blocks
+          if (editor.isActive('codeBlock')) {
+            return false;
+          }
+          return editor.can().deleteRange(range);
+        },
         render: render as any || undefined,
       }),
     ];
