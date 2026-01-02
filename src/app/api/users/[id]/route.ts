@@ -8,7 +8,7 @@ import { getUserProfile } from "@/services/userService";
 // GET a single user profile.
 export const GET = withAuth(async ({ params, user: requester }) => {
     try {
-        const targetUserId = params.id;
+        const {id:targetUserId} = await params;
 
         // Authorization check: either admin or self
         if (requester.role !== 'admin' && requester.id !== targetUserId) {
@@ -48,7 +48,7 @@ const userUpdateSchema = z.object({
 // PUT (update) a user profile
 export const PUT = withAuth(async ({ request, params, user: requester }) => {
     try {
-        const userId = params.id;
+        const {id:userId} = await params;
         const body = await request.json();
         let validation;
 
