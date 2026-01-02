@@ -105,6 +105,9 @@ export function SortableChapterItem({
                   sectionId={section.id}
                   sectionIndex={sectionIndex}
                   chapterIndex={index}
+                  isProjectBuildMode={isProjectBuildMode}
+                  isSelected={selectedSectionsForBuild.has(section.id)}
+                  toggleSectionSelection={toggleSectionSelection}
                 />
               ))}
             </div>

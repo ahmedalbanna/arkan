@@ -23,20 +23,23 @@ interface SectionAccordionItemProps {
     sectionId: string;
     chapterIndex: number;
     sectionIndex: number;
+    isProjectBuildMode: boolean;
+    isSelected: boolean;
+    toggleSectionSelection: (sectionId: string) => void;
 }
 
 export function SectionAccordionItem({
     sectionId,
     chapterIndex,
     sectionIndex,
+    isProjectBuildMode,
+    isSelected,
+    toggleSectionSelection,
 }: SectionAccordionItemProps) {
     const { t } = useLocalization();
     const { 
         project, 
         userProfile, 
-        selectedSectionsForBuild,
-        toggleSectionSelection,
-        isProjectBuildMode
     } = useBuilderStore();
     
     const { generateSectionMutation } = useAiActions();
@@ -58,7 +61,6 @@ export function SectionAccordionItem({
     const isAnythingGenerating = generateSectionMutation?.isPending || useBuilderStore.getState().chapterMutation?.isPending || useBuilderStore.getState().projectMutation?.isPending;
     const hasCredits = (userProfile?.credits ?? 0) >= 1;
     const canGenerate = hasCredits && !isAnythingGenerating;
-    const isSelected = selectedSectionsForBuild.has(sectionId);
 
     function handleGenerateClick(e: React.MouseEvent) {
         e.stopPropagation();
