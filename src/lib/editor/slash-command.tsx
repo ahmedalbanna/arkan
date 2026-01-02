@@ -3,7 +3,7 @@ import { Editor, Range, Extension } from '@tiptap/core';
 import { ReactRenderer } from '@tiptap/react';
 import Suggestion, { SuggestionOptions } from '@tiptap/suggestion';
 import tippy, { GetReferenceClientRect, Instance } from 'tippy.js';
-import { Heading1, Heading2, Heading3, Text, List, ListOrdered, Table, Image as ImageIcon, Code, Quote, GitGraph } from 'lucide-react';
+import { Heading1, Heading2, Heading3, Text, List, ListOrdered, Table, Image as ImageIcon, Code, Quote, GitGraph, Wand2 } from 'lucide-react';
 import CommandList from './CommandList';
 
 const commandItems = [
@@ -14,10 +14,23 @@ const commandItems = [
   { title: 'Bulleted List', description: 'A simple bulleted list.', icon: <List size={20} />, command: (editor: Editor) => editor.chain().focus().toggleBulletList().run() },
   { title: 'Numbered List', description: 'A list with ordered numbers.', icon: <ListOrdered size={20} />, command: (editor: Editor) => editor.chain().focus().toggleOrderedList().run() },
   { title: 'Table', description: 'Insert a 2x2 table.', icon: <Table size={20} />, command: (editor: Editor) => editor.chain().focus().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run() },
-  { title: 'Image', description: 'Insert an image.', icon: <ImageIcon size={20} />, command: (editor: Editor) => {
+  { title: 'Image', description: 'Insert an image from a URL.', icon: <ImageIcon size={20} />, command: (editor: Editor) => {
       const url = window.prompt('Enter image URL');
       if (url) {
         editor.chain().focus().setImage({ src: url }).run();
+      }
+    } 
+  },
+  { 
+    title: 'AI Image', 
+    description: 'Generate an image with AI.', 
+    icon: <Wand2 size={20} />, 
+    command: (editor: Editor) => {
+      const promptText = window.prompt('Enter a prompt for the AI image:');
+      if (promptText) {
+        const seed = Math.floor(Math.random() * 10000000000);
+        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?width=512&height=512&nologo=true&seed=${seed}`;
+        editor.chain().focus().setImage({ src: url, alt: promptText }).run();
       }
     } 
   },
