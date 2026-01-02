@@ -12,25 +12,15 @@ interface BuilderState {
     project: Project | null;
     hasUnsavedChanges: boolean;
     isStoreInitialized: boolean;
-    selectedSectionsForBuild: Set<string>;
-    isProjectBuildMode: boolean;
     
     initializeStore: () => void;
     setHasUnsavedChanges: (hasChanges: boolean) => void;
     updateProject: (updater: (project: Project) => void | Project) => void;
-    updateSection: (sectionId: string, updater: (section: Section) => Section | void) => void;
     loadProject: (projectData: ProjectProperties) => void;
     loadProjectFromFile: (file: File) => Promise<void>;
     newSession: () => void;
     applyTableOfContents: (tocData: TocSection[]) => void;
     setContentFromMarkdown: (markdown: string) => void;
-
-    // Build mode state management
-    enterProjectBuildMode: () => void;
-    exitProjectBuildMode: () => void;
-    toggleSectionSelection: (sectionId: string) => void;
-    toggleChapterSelection: (chapterId: string, select: boolean) => void;
-    toggleSelectAll: (select: boolean) => void;
 }
 
 const createNewTemporaryProject = (): Project => new Project({});
@@ -39,8 +29,6 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     project: null,
     hasUnsavedChanges: false,
     isStoreInitialized: false,
-    selectedSectionsForBuild: new Set(),
-    isProjectBuildMode: false,
 
     initializeStore: () => {
         if (get().isStoreInitialized) return;
@@ -69,13 +57,6 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
             const result = updater(newProject);
             return { project: result instanceof Project ? result : newProject, hasUnsavedChanges: true };
         });
-    },
-
-    updateSection: (sectionId, updater) => {
-        get().updateProject(p => p.updateSection(sectionId, s => {
-            const result = updater(s);
-            return result || s;
-        }));
     },
 
     loadProject: (projectData) => {
@@ -120,40 +101,6 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
            return p.with({ content: parseMarkdownToContent(markdown, p.content) });
         });
     },
-
-    // Build Mode Actions
-    enterProjectBuildMode: () => set({ isProjectBuildMode: true }),
-    exitProjectBuildMode: () => set({ isProjectBuildMode: false, selectedSectionsForBuild: new Set() }),
-    toggleSectionSelection: (sectionId: string) => {
-        set(state => {
-            const newSelection = new Set(state.selectedSectionsForBuild);
-            if (newSelection.has(sectionId)) {
-                newSelection.delete(sectionId);
-            } else {
-                newSelection.add(sectionId);
-            }
-            return { selectedSectionsForBuild: newSelection };
-        });
-    },
-    toggleChapterSelection: (chapterId, select) => {
-        set(state => {
-            const chapter = state.project?.getChapter(chapterId);
-            if (!chapter) return {};
-            const newSelection = new Set(state.selectedSectionsForBuild);
-            chapter.sections.forEach(s => {
-                if (select) newSelection.add(s.id);
-                else newSelection.delete(s.id);
-            });
-            return { selectedSectionsForBuild: newSelection };
-        });
-    },
-    toggleSelectAll: (select) => {
-        set(state => {
-            if (!state.project) return {};
-            const allSectionIds = new Set(state.project.sections.map(s => s.id));
-            return { selectedSectionsForBuild: select ? allSectionIds : new Set() };
-        });
-    },
 }));
 
 export function useInitializeBuilderStore() {
@@ -170,3 +117,5 @@ export function useInitializeBuilderStore() {
 };
 
 export { useBuilderStore };
+
+    
