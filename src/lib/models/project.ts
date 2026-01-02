@@ -1,4 +1,5 @@
 
+
 'use client';
 import { v4 as uuidv4 } from 'uuid';
 import { Chapter, type ChapterProperties } from './chapter';
@@ -51,7 +52,7 @@ export class Project {
   public readonly teamMembers?: readonly string[];
   public readonly logoUrl?: string;
 
-  public readonly content: ProjectContent;
+  public content: ProjectContent; // Made mutable to be updated by store logic
   public readonly externalContext: readonly ExternalContext[];
   public readonly meta: Readonly<Required<NonNullable<ProjectProperties['meta']>>>;
   public readonly activeSectionId?: string;
@@ -130,6 +131,22 @@ export class Project {
    public getOtherSections(sectionId: string): readonly Section[] {
     return this.sections.filter(s => s.id !== sectionId);
   }
+
+  public findSection(id: string): { chapter: Chapter; section: Section; chapterIndex: number; sectionIndex: number } | null {
+    for (let i = 0; i < this.content.length; i++) {
+        const chapter = this.content[i];
+        if (chapter instanceof Chapter) {
+            for (let j = 0; j < chapter.sections.length; j++) {
+                const section = chapter.sections[j];
+                if (section.id === id) {
+                    return { chapter, section, chapterIndex: i, sectionIndex: j };
+                }
+            }
+        }
+    }
+    return null;
+  }
+
 
   public getChapter(id: string): Chapter | undefined {
     return this.chapters.find(c => c.id === id);

@@ -61,8 +61,9 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     updateProject: (updater) => {
         set(state => {
             if (!state.project) return {};
-            const newProject = state.project.with({}); // Create a new instance for immutability
-            updater(newProject); // This method is now expected to mutate the draft
+            // The 'with' method creates a new Project instance, ensuring immutability.
+            const newProject = state.project.with({});
+            updater(newProject);
             return { project: newProject, hasUnsavedChanges: true };
         });
     },
@@ -131,13 +132,17 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     },
     
     setContentFromMarkdown: (markdown: string) => {
-        const currentMarkdown = get().project?.fullMarkdownContent || '';
-        if (markdown !== currentMarkdown) {
-          get().updateProject(p => {
-              const newContent = parseMarkdownToContent(markdown, p.content);
-              p.content = newContent;
+        const currentProject = get().project;
+        if (!currentProject) return;
+
+        const currentMarkdown = currentProject.fullMarkdownContent;
+
+        if (markdown.trim() !== currentMarkdown.trim()) {
+          set(state => {
+            if (!state.project) return {};
+            const newProject = state.project.updateContentFromMarkdown(markdown);
+            return { project: newProject, hasUnsavedChanges: true };
           });
-          set({ hasUnsavedChanges: true });
         }
     },
 }));
