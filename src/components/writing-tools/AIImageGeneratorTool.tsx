@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Slider } from '@/components/ui/slider';
 import { useAIImageGeneratorLogic } from '@/hooks/writing-tools/use-ai-image-generator-logic';
-import { Download, Heart, Image as ImageIcon, Loader2, Sparkles } from 'lucide-react';
+import { Download, Heart, Image as ImageIcon, Loader2, Sparkles, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 
 export function AIImageGeneratorTool() {
@@ -57,22 +57,28 @@ export function AIImageGeneratorTool() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="seed">Seed Control</Label>
-              <Slider
-                id="seed"
-                min={0}
-                max={9999999999}
-                step={1}
-                value={[seedValue]}
-                onValueChange={(val) => setValue('seed', val[0])}
-                disabled={isLoading}
-              />
-              <Input
-                type="number"
-                value={seedValue}
-                onChange={(e) => setValue('seed', parseInt(e.target.value, 10))}
-                className="mt-2"
-                disabled={isLoading}
-              />
+              {seedValue !== undefined ? (
+                <>
+                  <Slider
+                    id="seed"
+                    min={0}
+                    max={9999999999}
+                    step={1}
+                    value={[seedValue]}
+                    onValueChange={(val) => setValue('seed', val[0])}
+                    disabled={isLoading}
+                  />
+                  <Input
+                    type="number"
+                    value={seedValue}
+                    onChange={(e) => setValue('seed', parseInt(e.target.value, 10))}
+                    className="mt-2"
+                    disabled={isLoading}
+                  />
+                </>
+              ) : (
+                <div className="text-sm text-muted-foreground">Loading seed...</div>
+              )}
             </div>
             <Button type="submit" disabled={isLoading} className="w-full">
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
@@ -119,8 +125,8 @@ export function AIImageGeneratorTool() {
                     <Image
                       src={item.url}
                       alt={item.prompt}
-                      width={item.width}
-                      height={item.height}
+                      width={item.width || 800}
+                      height={item.height || 600}
                       className="cursor-pointer object-cover aspect-square"
                       onClick={() => handleLoadFromHistory(item)}
                     />

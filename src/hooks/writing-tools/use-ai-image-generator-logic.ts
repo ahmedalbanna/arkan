@@ -12,7 +12,7 @@ const imageGeneratorSchema = z.object({
   prompt: z.string().min(1, 'Prompt is required.'),
   width: z.number().min(64).max(2048).default(800),
   height: z.number().min(64).max(2048).default(600),
-  seed: z.number().default(() => Math.floor(Math.random() * 10000000000)),
+  seed: z.number().optional(), // Make seed optional initially
 });
 
 type FormValues = z.infer<typeof imageGeneratorSchema>;
@@ -30,6 +30,24 @@ export function useAIImageGeneratorLogic() {
   const [isLoading, setIsLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [history, setHistory] = useState<HistoryItem[]>([]);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(imageGeneratorSchema),
+    defaultValues: {
+      prompt: 'Arkan Logo',
+      width: 800,
+      height: 600,
+      seed: undefined, // Initialize as undefined
+    },
+  });
+
+  useEffect(() => {
+    // Generate the seed only on the client side after hydration
+    if (form.getValues('seed') === undefined) {
+      form.setValue('seed', Math.floor(Math.random() * 10000000000));
+    }
+  }, [form]);
+
 
   useEffect(() => {
     try {
@@ -52,15 +70,6 @@ export function useAIImageGeneratorLogic() {
     }
   };
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(imageGeneratorSchema),
-    defaultValues: {
-      prompt: 'Arkan Logo',
-      width: 800,
-      height: 600,
-      seed: Math.floor(Math.random() * 10000000000),
-    },
-  });
 
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
