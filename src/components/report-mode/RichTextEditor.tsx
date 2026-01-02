@@ -30,7 +30,7 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
 
 
   const editor = useEditor({
-    extensions: editorExtensions(React.useId()),
+    extensions: editorExtensions(bubbleMenuId),
     content: marked.parse(content) as string,
     onUpdate: ({ editor }) => {
       const markdown = turndownService.turndown(editor.getHTML());

@@ -9,6 +9,7 @@ import { create } from 'zustand';
 import { toast } from '../util/use-toast';
 import { useEditorStore } from './use-editor-store';
 import { marked } from 'marked';
+import { parseMarkdownToContent } from '../util/useMarkdownParser';
 
 interface BuilderState {
     project: Project | null;
