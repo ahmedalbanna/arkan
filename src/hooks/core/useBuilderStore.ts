@@ -5,41 +5,25 @@ import { Chapter, Project, Section, TocSection, type ProjectProperties } from '@
 import { localProjectService } from '@/services/local-project-service';
 import { useEffect } from 'react';
 import { create } from 'zustand';
-import { useAuth } from '@/context/AuthContext';
 import { toast } from '../util/use-toast';
 import { parseMarkdownToContent } from '../util/useMarkdownParser';
-import { useMutation } from '@tanstack/react-query';
-import { generateReportSectionApi } from '@/services/api/reportService';
-import { useAiActions } from '../report-mode/use-ai-actions';
-import { writingToolApi } from '@/services/api/writingToolsService';
-import { PromptBuilder } from '@/lib/prompt-builder';
-import type { SectionName } from '@/ai/schemas';
-
-type ActiveView = 'cover-page' | 'report-content';
 
 interface BuilderState {
     project: Project | null;
     hasUnsavedChanges: boolean;
     isStoreInitialized: boolean;
-    sectionMutation: any; // Simplified for this example, consider a more specific type
-    chapterMutation: any;
-    projectMutation: any;
     selectedSectionsForBuild: Set<string>;
     isProjectBuildMode: boolean;
     
     initializeStore: () => void;
     setHasUnsavedChanges: (hasChanges: boolean) => void;
     updateProject: (updater: (project: Project) => void | Project) => void;
+    updateSection: (sectionId: string, updater: (section: Section) => Section | void) => void;
     loadProject: (projectData: ProjectProperties) => void;
     loadProjectFromFile: (file: File) => Promise<void>;
     newSession: () => void;
     applyTableOfContents: (tocData: TocSection[]) => void;
     setContentFromMarkdown: (markdown: string) => void;
-
-    // Actions moved from hooks
-    onGenerateSection: (sectionId: string) => void;
-    onGenerateChapter: (chapterId: string) => void;
-    onGenerateProject: () => void;
 
     // Build mode state management
     enterProjectBuildMode: () => void;
@@ -55,9 +39,6 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     project: null,
     hasUnsavedChanges: false,
     isStoreInitialized: false,
-    sectionMutation: null,
-    chapterMutation: null,
-    projectMutation: null,
     selectedSectionsForBuild: new Set(),
     isProjectBuildMode: false,
 
@@ -88,6 +69,13 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
             const result = updater(newProject);
             return { project: result instanceof Project ? result : newProject, hasUnsavedChanges: true };
         });
+    },
+
+    updateSection: (sectionId, updater) => {
+        get().updateProject(p => p.updateSection(sectionId, s => {
+            const result = updater(s);
+            return result || s;
+        }));
     },
 
     loadProject: (projectData) => {
@@ -133,30 +121,6 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         });
     },
 
-    // AI Actions
-    onGenerateSection: (sectionId: string) => {
-        const { sectionMutation } = get();
-        if (sectionMutation) {
-            sectionMutation.mutate(sectionId);
-        }
-    },
-    onGenerateChapter: (chapterId: string) => {
-        const { chapterMutation, project, selectedSectionsForBuild } = get();
-        if (chapterMutation && project) {
-            const chapter = project.getChapter(chapterId);
-            if (chapter) {
-                const sectionsToBuild = chapter.sections.filter(s => selectedSectionsForBuild.has(s.id));
-                chapterMutation.mutate({ chapter, project, sectionsToBuild });
-            }
-        }
-    },
-    onGenerateProject: () => {
-        const { projectMutation, project, selectedSectionsForBuild } = get();
-        if (projectMutation && project) {
-            projectMutation.mutate({ project, selectedSectionIds: selectedSectionsForBuild });
-        }
-    },
-
     // Build Mode Actions
     enterProjectBuildMode: () => set({ isProjectBuildMode: true }),
     exitProjectBuildMode: () => set({ isProjectBuildMode: false, selectedSectionsForBuild: new Set() }),
@@ -193,8 +157,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
 }));
 
 export function useInitializeBuilderStore() {
-    const { initializeStore, isStoreInitialized, project, updateProject } = useBuilderStore();
-    const { firebaseUser, refetchUser } = useAuth();
+    const { initializeStore, isStoreInitialized } = useBuilderStore();
     
     // Initialize the main store on mount
     useEffect(() => {
@@ -202,95 +165,6 @@ export function useInitializeBuilderStore() {
             initializeStore();
         }
     }, [initializeStore, isStoreInitialized]);
-
-    // This hook now also initializes the mutations and attaches them to the store.
-    // This is a bit of a workaround to get react-query hooks into a zustand store.
-    useEffect(() => {
-        // Since mutations can't be stored directly, we store an object that can call them.
-        useBuilderStore.setState({
-            sectionMutation: useMutation({
-                mutationKey: ['generateReportSection'],
-                mutationFn: async (sectionId: string) => {
-                    const currentProject = useBuilderStore.getState().project;
-                    if (!currentProject || !firebaseUser) throw new Error("Project or user not found.");
-                    
-                    const section = currentProject.getSection(sectionId);
-                    if (!section) throw new Error("Section not found.");
-            
-                    const token = await firebaseUser.getIdToken();
-                    const body = {
-                        sectionToGenerate: section.id as SectionName,
-                        prompt: section.buildActionPrompt(),
-                        otherSections: section.getContextAsRecord(currentProject),
-                        externalContext: section.getExternalContextAsArray(currentProject),
-                        guidelines: section.guidelines,
-                        instructionText: PromptBuilder.buildSectionPrompt(section, currentProject),
-                    };
-                    const result = await generateReportSectionApi(body, token);
-                    const content = result?.[section.id] ?? Object.values(result || {})[0] as string | undefined;
-                    if (!content) throw new Error('Empty generation result');
-                    return { sectionId: section.id, content };
-                },
-                onSuccess: (data) => {
-                    updateProject(p => p.updateSection(data.sectionId, s => s.with({ content: data.content })));
-                    refetchUser();
-                },
-                onError: (error: any) => {
-                    toast({ title: 'Section Generation Error', description: error.message || 'Failed to generate section', variant: 'destructive' });
-                    throw error;
-                },
-            }),
-            chapterMutation: useMutation({
-                 mutationKey: ['generateChapterContent'],
-                 mutationFn: async (variables: { chapter: Chapter, project: Project, sectionsToBuild: Section[] }) => {
-                    const { chapter, project, sectionsToBuild } = variables;
-                    if (!firebaseUser) throw new Error("User not found.");
-                    if (sectionsToBuild.length === 0) throw new Error('No sections selected.');
-            
-                    const token = await firebaseUser.getIdToken();
-                    const body = {
-                        chapterTitle: chapter.title,
-                        sectionInstructions: sectionsToBuild.map(s => ({
-                          title: s.title, prompt: s.buildActionPrompt(), guidelines: s.guidelines,
-                          instructionText: PromptBuilder.buildSectionPrompt(s, project), context: '' // Context handled differently now
-                        }))
-                    };
-            
-                    const result = await writingToolApi<any, { markdownContent: string }>(`/api/writing-tools/generate-chapter`, { data: body, token });
-                    return { chapterId: chapter.id, content: result.markdownContent, sectionsToBuild };
-                },
-                onSuccess: (data) => {
-                    updateProject(p => {
-                        let updatedProject = p;
-                        const parsedContent = parseMarkdownToContent(data.content, updatedProject.content);
-                        // This logic assumes the AI returns content for all sections in the correct order.
-                        const newChapter = parsedContent[0];
-                        if (newChapter instanceof Chapter) {
-                            updatedProject = updatedProject.updateChapter(data.chapterId, c => c.with({ sections: newChapter.sections }));
-                        }
-                        return updatedProject;
-                    });
-                    refetchUser();
-                    toast({ title: 'Chapter Generated', description: 'The AI has generated the content for the chapter.' });
-                },
-                onError: (error: any) => toast({ title: 'Chapter Generation Error', description: error.message, variant: 'destructive' })
-            }),
-            projectMutation: useMutation({
-                mutationKey: ['generateProjectContent'],
-                mutationFn: async ({ project, selectedSectionIds }: { project: Project; selectedSectionIds: Set<string> }) => {
-                    if (!firebaseUser) throw new Error("User not found.");
-                    if (selectedSectionIds.size === 0) throw new Error('No sections were selected for generation.');
-                    
-                    for (const sectionId of selectedSectionIds) {
-                        const sectionMutation = useBuilderStore.getState().sectionMutation;
-                        await sectionMutation.mutateAsync(sectionId);
-                    }
-                },
-                onSuccess: () => toast({ title: "Project Build Complete", description: "All selected sections have been successfully generated." }),
-                onError: (error: Error) => toast({ title: "Project Build Failed", description: error.message, variant: "destructive" }),
-            }),
-        });
-    }, [firebaseUser, isStoreInitialized, refetchUser, updateProject]);
 
     return isStoreInitialized;
 };

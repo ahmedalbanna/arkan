@@ -40,6 +40,7 @@ import { Chapter, Section } from '@/lib/models';
 import { ScrollArea } from "../ui/scroll-area";
 import { SectionAccordionItem } from "./SectionAccordionItem";
 import { useBuilderStore } from "@/hooks";
+import { useAiActions } from "@/hooks/report-mode/use-ai-actions";
 
 
 export function GenerationTools() {
@@ -67,8 +68,6 @@ export function GenerationTools() {
     exitProjectBuildMode,
     selectedSectionsForBuild,
     toggleSelectAll,
-    onGenerateProject,
-    projectMutation,
   } = useBuilderStore(state => ({
     project: state.project,
     isProjectBuildMode: state.isProjectBuildMode,
@@ -76,9 +75,10 @@ export function GenerationTools() {
     exitProjectBuildMode: state.exitProjectBuildMode,
     selectedSectionsForBuild: state.selectedSectionsForBuild,
     toggleSelectAll: state.toggleSelectAll,
-    onGenerateProject: state.onGenerateProject,
-    projectMutation: state.projectMutation,
   }));
+  
+  const { generateProjectMutation } = useAiActions();
+
 
   const totalSelectableSections = project?.sections.length || 0;
   const isAllSelected = useMemo(() => totalSelectableSections > 0 && selectedSectionsForBuild.size === totalSelectableSections, [totalSelectableSections, selectedSectionsForBuild]);
@@ -93,6 +93,14 @@ export function GenerationTools() {
       .map(c => c.with({ sections: c.sections.filter(s => selectedSectionsForBuild.has(s.id))}))
       .filter(c => c.sections.length > 0);
   }, [project, selectedSectionsForBuild]);
+  
+  function handleGenerateProject() {
+    if (project && selectedSectionsForBuild.size > 0) {
+      generateProjectMutation.mutate({ project, selectedSectionIds: selectedSectionsForBuild });
+      setIsBuildProjectDialogOpen(false); // Close dialog on confirm
+    }
+  }
+
 
   return (
     <>
@@ -102,8 +110,8 @@ export function GenerationTools() {
         isOpen={isBuildProjectDialogOpen}
         onOpenChange={setIsBuildProjectDialogOpen}
         chaptersToBuild={chaptersToBuild}
-        onGenerateProject={onGenerateProject}
-        isLoading={projectMutation?.isPending ?? false}
+        onGenerateProject={handleGenerateProject}
+        isLoading={generateProjectMutation.isPending}
       />
       <Card className="flex flex-col h-full">
         <CardHeader>
@@ -203,7 +211,7 @@ export function GenerationTools() {
                   <Button
                     className="w-full"
                     onClick={() => setIsBuildProjectDialogOpen(true)}
-                    disabled={selectedSectionsForBuild.size === 0 || projectMutation?.isPending}
+                    disabled={selectedSectionsForBuild.size === 0 || generateProjectMutation.isPending}
                   >
                     <Building className="mr-2 h-4 w-4" />
                     Build Project ({selectedSectionsForBuild.size} selected)
@@ -213,7 +221,7 @@ export function GenerationTools() {
                 <Button
                   className="w-full"
                   onClick={enterProjectBuildMode}
-                  disabled={projectMutation?.isPending}
+                  disabled={generateProjectMutation.isPending}
                 >
                   <Building className="mr-2 h-4 w-4" />
                   Build Project

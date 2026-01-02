@@ -16,6 +16,8 @@ import { Checkbox } from '../ui/checkbox';
 import { SectionContextSelector } from './SectionContextSelector';
 import { SectionGenerationControls } from './SectionGenerationControls';
 import { GuidelineEditor } from './SectionGuidelineEditor';
+import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
+
 
 interface SectionAccordionItemProps {
     sectionId: string;
@@ -31,13 +33,13 @@ export function SectionAccordionItem({
     const { t } = useLocalization();
     const { 
         project, 
-        onGenerateSection, 
-        sectionMutation,
         userProfile, 
         selectedSectionsForBuild,
         toggleSectionSelection,
         isProjectBuildMode
     } = useBuilderStore();
+    
+    const { generateSectionMutation } = useAiActions();
 
     const section = project?.getSection(sectionId);
     
@@ -52,8 +54,8 @@ export function SectionAccordionItem({
     
     if (!section) return null;
 
-    const isGenerating = sectionMutation?.isPending && sectionMutation.variables === sectionId;
-    const isAnythingGenerating = sectionMutation?.isPending || useBuilderStore.getState().chapterMutation?.isPending || useBuilderStore.getState().projectMutation?.isPending;
+    const isGenerating = generateSectionMutation?.isPending && generateSectionMutation.variables === sectionId;
+    const isAnythingGenerating = generateSectionMutation?.isPending || useBuilderStore.getState().chapterMutation?.isPending || useBuilderStore.getState().projectMutation?.isPending;
     const hasCredits = (userProfile?.credits ?? 0) >= 1;
     const canGenerate = hasCredits && !isAnythingGenerating;
     const isSelected = selectedSectionsForBuild.has(sectionId);
@@ -61,7 +63,7 @@ export function SectionAccordionItem({
     function handleGenerateClick(e: React.MouseEvent) {
         e.stopPropagation();
         if (canGenerate) {
-            onGenerateSection(sectionId);
+            generateSectionMutation.mutate(sectionId);
         }
     }
 
