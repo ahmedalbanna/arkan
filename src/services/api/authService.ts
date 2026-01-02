@@ -13,6 +13,7 @@ import {
   type UserCredential
 } from "firebase/auth";
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { apiService } from './apiService';
 import { fetchUserProfileApi } from './userService';
 
 
@@ -51,32 +52,19 @@ export async function loginWithGoogle(): Promise<{user: UserCredential['user'], 
 
 export async function serviceLogoutUser() {
   await signOut(auth);
-  const response = await fetch("/api/auth/logout", { method: "POST" });
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || "Logout failed.");
-  }
-  return response.json();
+  return apiService({ endpoint: '/api/auth/logout', method: 'POST' });
 }
 
 /**
  * Signs up a new user via the dedicated API endpoint.
  * This now handles both auth creation and profile creation in one go.
  */
-export async function serviceSignupUser(credentials: SignupCredentials): Promise<UserCredential> {
-    const response = await fetch('/api/auth/signup', {
+export async function serviceSignupUser(credentials: SignupCredentials) {
+    return apiService({
+        endpoint: '/api/auth/signup',
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials)
+        data: credentials
     });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Signup failed');
-    }
-    // Signup is now just for creating the user; login is separate
-    // So we don't return the user credential directly, just a success indicator
-    // The user will be redirected to the login page
-    return response.json();
 }
 
 
@@ -85,17 +73,11 @@ export async function forgotPasswordService(email: string) {
 }
 
 export async function sendPasswordResetEmailApi(userId: string, token: string) {
-  const response = await fetch(`/api/users/${userId}/reset-password`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  return apiService({
+    endpoint: `/api/users/${userId}/reset-password`,
+    method: 'POST',
+    token,
   });
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to send password reset email.");
-  }
-  return response.json();
 }
 
 /**
@@ -103,14 +85,10 @@ export async function sendPasswordResetEmailApi(userId: string, token: string) {
  * This is now the single source of truth for creating profiles.
  */
 export async function createOrUpdateUserProfileApi(userId: string, data: Partial<UserProfile>, token: string): Promise<UserProfile> {
-    const response = await fetch(`/api/users/${userId}`, {
+    return apiService({
+        endpoint: `/api/users/${userId}`,
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(data),
+        data,
+        token
     });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to create or update user profile.');
-    }
-    return response.json();
 }

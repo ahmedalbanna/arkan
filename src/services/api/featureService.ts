@@ -2,45 +2,29 @@
 'use client';
 
 import type { Feature, UpdateFeatureVariables } from '@/lib/types';
+import { apiService } from './apiService';
 
 /**
  * Fetches the list of all feature flags from the public API.
  * This does not require authentication.
- * @returns A promise that resolves to an array of Feature objects.
  */
 export async function fetchFeaturesApi(): Promise<Feature[]> {
-    const response = await fetch('/api/features');
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch features');
-    }
-    return response.json();
+    return apiService({ endpoint: '/api/features' });
 }
 
 /**
  * Updates a specific feature flag via the API.
  * Requires admin authentication.
- * @param variables - An object containing the featureId and the payload to update.
- * @param token - The authentication token for the user.
- * @returns A promise that resolves to the updated Feature object.
  */
 export async function updateFeatureApi(
     variables: UpdateFeatureVariables,
     token: string
 ): Promise<Feature> {
     const { featureId, payload } = variables;
-    const response = await fetch(`/api/admin/features/${featureId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
+    return apiService({
+      endpoint: `/api/admin/features/${featureId}`,
+      method: 'PUT',
+      data: payload,
+      token
     });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update feature.');
-    }
-    return response.json();
 }

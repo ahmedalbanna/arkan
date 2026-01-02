@@ -4,7 +4,7 @@
 import { AIFlowInput } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
-import { writingToolApi } from '@/services/api/writingToolsService';
+import { apiService } from '@/services/api/apiService'; // Use the new apiService
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 
 /**
@@ -24,14 +24,13 @@ export function useWritingTool<TData = unknown, TVariables = Omit<AIFlowInput, '
 
   return useMutation<TData, Error, TVariables>({
     mutationFn: async (data: TVariables) => {
-      if (!firebaseUser) {
-        throw new Error('You must be logged in to use this feature.');
-      }
-      const token = await firebaseUser.getIdToken();
-// Assume a default credit cost of 1 if not specified in the endpoint logic
-      // Automatically add the 'flow' property based on the endpoint.
-      const payload = { ...data, flow: toolName };
-      return writingToolApi<typeof payload, TData>(endpoint, { data: payload, token });
+      // Use apiService which handles auth and errors
+      return apiService({
+        endpoint,
+        method: 'POST',
+        data: { ...data, flow: toolName }, // Still useful to send flow name for logging
+        firebaseUser,
+      });
     },
     onSuccess: (data, variables, context) => {
       // Refetch user profile to update credit count in the UI

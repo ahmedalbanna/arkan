@@ -2,6 +2,7 @@
 'use client';
 
 import type { CitationStyle, DiagramTypeSchema, ParaphraseMode, SummarizeLength } from "@/ai/schemas";
+import { apiService } from "./apiService";
 import { z } from "zod";
 
 // Base types for form data
@@ -99,6 +100,7 @@ export interface GenerateProjectBlueprintVariables {
 
 /**
  * A generic API handler for all writing tools.
+ * It now uses the centralized apiService.
  * @param endpoint The specific API endpoint for the tool (e.g., '/api/writing-tools/summarize').
  * @param variables An object containing the request body and the auth token.
  * @returns A promise that resolves to the API response.
@@ -108,21 +110,10 @@ export async function writingToolApi<TRequest, TResponse>(
     variables: { data: TRequest; token: string }
 ): Promise<TResponse> {
     const { token, data } = variables;
-    const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(data),
+    return apiService({
+      endpoint,
+      method: 'POST',
+      data,
+      token
     });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || `API call to ${endpoint} failed.`);
-    }
-
-    return response.json();
 }
-
-    

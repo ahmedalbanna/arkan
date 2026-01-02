@@ -3,6 +3,7 @@
 
 import type { TransactionProperties } from '@/lib/models';
 import type { VerifyPaymentVariables } from '@/lib/types';
+import { apiService } from './apiService';
 
 export type TransactionStatus = 'pending' | 'verified' | 'rejected';
 interface FetchTransactionsParams {
@@ -14,9 +15,6 @@ interface FetchTransactionsParams {
 
 export async function getTransactions(params: FetchTransactionsParams): Promise<{ transactions: TransactionProperties[], hasNextPage: boolean, lastVisibleId?: string | null }> {
     const { token, status, limit, lastVisibleId } = params;
-    if (!token) {
-        throw new Error("Authentication token is required.");
-    }
 
     const queryParams = new URLSearchParams({
         status,
@@ -25,37 +23,20 @@ export async function getTransactions(params: FetchTransactionsParams): Promise<
 
     if (lastVisibleId) queryParams.append('lastVisibleId', lastVisibleId);
 
-    const response = await fetch(`/api/admin/transactions?${queryParams.toString()}`, {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
+    return apiService({
+      endpoint: `/api/admin/transactions?${queryParams.toString()}`,
+      token
     });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch transactions');
-    }
-    return await response.json();
 }
 
 
 export async function verifyPayment(variables: VerifyPaymentVariables, token: string) {
-    if (!token) {
-        throw new Error("Authentication token is required.");
-    }
-    const response = await fetch('/api/admin/payments/verify', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(variables),
+    return apiService({
+      endpoint: '/api/admin/payments/verify',
+      method: 'POST',
+      data: variables,
+      token
     });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to verify payment');
-    }
-    return await response.json();
 }
 
 interface FetchReportParams {
@@ -66,60 +47,30 @@ interface FetchReportParams {
 
 export async function fetchTransactionsForReport(params: FetchReportParams): Promise<TransactionProperties[]> {
     const { token, startDate, endDate } = params;
-    if (!token) {
-        throw new Error("Authentication token is required.");
-    }
     const queryParams = new URLSearchParams({ startDate, endDate });
-    const response = await fetch(`/api/admin/transactions/report?${queryParams.toString()}`, {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
+    return apiService({
+      endpoint: `/api/admin/transactions/report?${queryParams.toString()}`,
+      token
     });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch transaction report data');
-    }
-    return await response.json();
 }
 
 
 /**
  * Fetches the payment history for the currently authenticated user.
- * @param token The authentication token of the user.
- * @returns A promise that resolves to an array of TransactionData objects.
  */
 export async function fetchUserTransactions(token: string): Promise<TransactionProperties[]> {
-    if (!token) throw new Error("Authentication token is required.");
-    const response = await fetch('/api/transactions', {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch payment history');
-    }
-    return await response.json();
+    return apiService({ endpoint: '/api/transactions', token });
 }
 
 /**
  * Submits the payment proof form data to the backend API.
- * @param formData The FormData object containing the file and other details.
- * @param token The user's authentication token.
- * @returns A promise that resolves with the server's response.
  */
 export async function submitPaymentProof({ formData, token }: { formData: FormData, token: string }) {
-    if (!token) throw new Error("User not authenticated");
-
-    const response = await fetch('/api/payment/request', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        },
-        body: formData,
+    return apiService({
+      endpoint: '/api/payment/request',
+      method: 'POST',
+      data: formData,
+      token,
+      isFormData: true
     });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to submit request.');
-    }
-    return response.json();
 }
