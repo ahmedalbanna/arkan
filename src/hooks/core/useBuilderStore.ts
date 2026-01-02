@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Chapter, Project, Section, TocSection, type ProjectProperties } from '@/lib/models';
+import { Chapter, Project, Section, TocSection, type ProjectProperties, User } from '@/lib/models';
 import { localProjectService } from '@/services/local-project-service';
 import { useEffect } from 'react';
 import { create } from 'zustand';
@@ -9,10 +9,12 @@ import { toast } from '../util/use-toast';
 
 interface BuilderState {
     project: Project | null;
+    userProfile: User | null; // Add userProfile to the store state
     hasUnsavedChanges: boolean;
     isStoreInitialized: boolean;
     
     initializeStore: () => void;
+    setUserProfile: (userProfile: User | null) => void; // Action to set the user profile
     setHasUnsavedChanges: (hasChanges: boolean) => void;
     updateProject: (updater: (project: Project) => Project) => void;
     updateSection: (sectionId: string, updater: (section: Section) => Section) => void;
@@ -27,6 +29,7 @@ const createNewTemporaryProject = (): Project => new Project({});
 
 const useBuilderStore = create<BuilderState>((set, get) => ({
     project: null,
+    userProfile: null, // Initialize userProfile as null
     hasUnsavedChanges: false,
     isStoreInitialized: false,
     initializeStore: () => {
@@ -46,6 +49,8 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
             set({ project: createNewTemporaryProject(), isStoreInitialized: true });
         }
     },
+
+    setUserProfile: (userProfile) => set({ userProfile }), // Implement the setter
 
     setHasUnsavedChanges: (hasChanges) => set({ hasUnsavedChanges: hasChanges }),
 

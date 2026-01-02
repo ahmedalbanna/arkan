@@ -9,6 +9,7 @@ import { fetchUserProfileApi, subscribeToUserProfile } from '@/services';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { useBuilderStore } from '@/hooks';
 
 interface AuthContextType {
   firebaseUser: FirebaseUser | null;
@@ -41,15 +42,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [authIsLoading, setAuthIsLoading] = useState(true);
   const queryClient = useQueryClient();
+  const { setUserProfile } = useBuilderStore(); // Get setter from builder store
 
   useEffect(() => {
     if (firebaseUser?.uid) {
       const unsubscribe = subscribeToUserProfile(firebaseUser.uid, (user) => {
-        queryClient.setQueryData(userKeys.profile(firebaseUser.uid), user ? new User(user) : null);
+        const userInstance = user ? new User(user) : null;
+        queryClient.setQueryData(userKeys.profile(firebaseUser.uid), userInstance);
+        setUserProfile(userInstance); // Update builder store
       });
       return () => unsubscribe();
+    } else {
+      setUserProfile(null); // Clear on logout
     }
-  }, [firebaseUser, queryClient]);
+  }, [firebaseUser, queryClient, setUserProfile]);
 
   // Use React Query to get the user profile from the cache
   const { data: userProfile, isLoading: isProfileLoading } = useQuery<User | null>({
@@ -58,7 +64,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!firebaseUser) return null;
       const token = await getAuthenticatedToken(firebaseUser);
       const userProfileData = await fetchUserProfileApi(firebaseUser.uid, token);
-      return userProfileData ? new User(userProfileData) : null;
+      const userInstance = userProfileData ? new User(userProfileData) : null;
+      setUserProfile(userInstance); // Update builder store on fetch
+      return userInstance;
     },
     enabled: !!firebaseUser,
     staleTime: Infinity,
@@ -80,12 +88,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         // Clear all queries on logout
         queryClient.clear();
+        setUserProfile(null); // Clear builder store on logout
       }
       setAuthIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, [queryClient]);
+  }, [queryClient, setUserProfile]);
 
   return (
     <AuthContext.Provider value={{
