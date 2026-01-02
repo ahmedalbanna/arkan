@@ -12,37 +12,54 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { Chapter, Project, Section } from '@/lib/models';
+import { useBuilderStore } from '@/hooks';
+import type { Chapter, Section, Project } from '@/lib/models';
+import { PromptBuilder } from '@/lib/prompt-builder';
 import { AlertTriangle, Building, Code, Eye, Link as LinkIcon, Loader2, StickyNote } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { MarkdownViewer } from '../shared/MarkdownViewer';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Badge } from '../ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
+
 interface BuildProjectDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   chaptersToBuild: Chapter[];
-  getContextNames: (project: Project, section: Section) => string[];
-  finalProjectPrompt: string;
   onGenerateProject: () => void;
   isLoading: boolean;
-  project: Project;
 }
+
+function getContextNames(project: Project, section: Section): string[] {
+    if (!section) return [];
+    const context = section.context;
+    if (!context) return [];
+
+    const sectionNames = Object.keys(context.sections || {}).map(id => project.getSection(id)?.title || 'Untitled Section');
+    const fileNames = Object.keys(context.externalContext || {}).map(id => project.externalContext.find(f => f.id === id)?.fileName || 'Untitled File');
+
+    return [...sectionNames, ...fileNames];
+};
+
 
 export function BuildProjectDialog({
   isOpen,
   onOpenChange,
   chaptersToBuild,
-  getContextNames,
-  finalProjectPrompt,
   onGenerateProject,
   isLoading,
-  project,
 }: BuildProjectDialogProps) {
   const [viewMode, setViewMode] = useState<'plan' | 'prompt'>('plan');
+  const { project } = useBuilderStore();
+
+  const finalProjectPrompt = useMemo(() => {
+    if (!project || chaptersToBuild.length === 0) return '';
+    const allSelectedSections = new Set(chaptersToBuild.flatMap(c => c.sections.map(s => s.id)));
+    return PromptBuilder.buildProjectPrompt(project, allSelectedSections);
+  }, [project, chaptersToBuild]);
+  
 
   if (chaptersToBuild.length === 0) return null;
 
@@ -87,7 +104,7 @@ export function BuildProjectDialog({
                             </div>
                             <div className="space-y-1">
                               <h4 className="font-semibold flex items-center gap-2 text-xs"><LinkIcon className="w-3 h-3" />Selected Context</h4>
-                              {getContextNames(project, section).length > 0 ? (
+                              {project && getContextNames(project, section).length > 0 ? (
                                 <div className="flex flex-wrap gap-1">
                                   {getContextNames(project, section).map(name => <Badge variant="secondary" key={name}>{name}</Badge>)}
                                 </div>

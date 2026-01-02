@@ -7,29 +7,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
-import type { Section } from '@/lib/models';
-import { GripVertical, Link as LinkIcon, Loader2, SlidersHorizontal, Sparkles, StickyNote } from 'lucide-react';
-import React from 'react';
-import { SectionContextSelector } from './SectionContextSelector';
-import { SectionGenerationControls } from './SectionGenerationControls';
-import { GuidelineEditor } from './SectionGuidelineEditor';
-import { Checkbox } from '../ui/checkbox';
 import { cn } from '@/lib/utils/cn';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { GripVertical, Link as LinkIcon, Loader2, SlidersHorizontal, Sparkles, StickyNote } from 'lucide-react';
+import React from 'react';
+import { Checkbox } from '../ui/checkbox';
+import { SectionContextSelector } from './SectionContextSelector';
+import { SectionGenerationControls } from './SectionGenerationControls';
+import { GuidelineEditor } from './SectionGuidelineEditor';
 
 interface SectionAccordionItemProps {
     sectionId: string;
     chapterIndex: number;
     sectionIndex: number;
-    isProjectBuildMode: boolean;
 }
 
 export function SectionAccordionItem({
     sectionId,
     chapterIndex,
     sectionIndex,
-    isProjectBuildMode,
 }: SectionAccordionItemProps) {
     const { t } = useLocalization();
     const { 
@@ -37,20 +34,10 @@ export function SectionAccordionItem({
         onGenerateSection, 
         sectionMutation,
         userProfile, 
-        isAnythingGenerating,
         selectedSectionsForBuild,
-        handleSectionSelectionToggle,
-        updateSection,
-    } = useBuilderStore(state => ({
-        project: state.project,
-        onGenerateSection: state.onGenerateSection,
-        sectionMutation: state.sectionMutation,
-        userProfile: state.userProfile,
-        isAnythingGenerating: state.sectionMutation.isPending || state.chapterMutation.isPending,
-        selectedSectionsForBuild: state.selectedSectionsForBuild,
-        handleSectionSelectionToggle: state.handleSectionSelectionToggle,
-        updateSection: state.updateSection,
-    }));
+        toggleSectionSelection,
+        isProjectBuildMode
+    } = useBuilderStore();
 
     const section = project?.getSection(sectionId);
     
@@ -65,7 +52,8 @@ export function SectionAccordionItem({
     
     if (!section) return null;
 
-    const isGenerating = sectionMutation.isPending && sectionMutation.variables === sectionId;
+    const isGenerating = sectionMutation?.isPending && sectionMutation.variables === sectionId;
+    const isAnythingGenerating = sectionMutation?.isPending || useBuilderStore.getState().chapterMutation?.isPending || useBuilderStore.getState().projectMutation?.isPending;
     const hasCredits = (userProfile?.credits ?? 0) >= 1;
     const canGenerate = hasCredits && !isAnythingGenerating;
     const isSelected = selectedSectionsForBuild.has(sectionId);
@@ -82,7 +70,7 @@ export function SectionAccordionItem({
             <AccordionItem value={sectionId} key={sectionId} className="bg-background border rounded-lg">
                 <div className="flex items-center px-4 py-2">
                     {isProjectBuildMode && (
-                        <div className="flex items-center gap-2" onClick={(e) => { e.stopPropagation(); handleSectionSelectionToggle(sectionId); }}>
+                        <div className="flex items-center gap-2" onClick={(e) => { e.stopPropagation(); toggleSectionSelection(sectionId); }}>
                             <Checkbox
                                 checked={isSelected}
                                 aria-label={`Select section ${section.title}`}
@@ -131,11 +119,7 @@ export function SectionAccordionItem({
                             </div>
                             <div className="px-4">
                                 <TabsContent value="controls" className="py-4 space-y-6">
-                                    <SectionGenerationControls
-                                        section={section}
-                                        onControlChange={(field, value) => updateSection(sectionId, s => s.with({ controls: { ...s.controls, [field]: value }}))}
-                                        onOutputStyleChange={(style, checked) => updateSection(sectionId, s => s.with({ controls: { ...s.controls, outputStyle: { ...s.controls.outputStyle, [style]: checked } }}))}
-                                    />
+                                    <SectionGenerationControls section={section} />
                                 </TabsContent>
                                 <TabsContent value="prompt" className="py-4">
                                      <GuidelineEditor itemKey={section.id} />

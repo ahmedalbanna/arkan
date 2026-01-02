@@ -39,51 +39,60 @@ import { SortableChapterItem } from './SortableChapterItem';
 import { Chapter, Section } from '@/lib/models';
 import { ScrollArea } from "../ui/scroll-area";
 import { SectionAccordionItem } from "./SectionAccordionItem";
+import { useBuilderStore } from "@/hooks";
 
 
 export function GenerationTools() {
   const {
     t,
-    project,
-    chapterMutation,
-    userProfile,
     newChapterTitle,
     setNewChapterTitle,
     showTocInput,
     setShowTocInput,
     isGenerateTocOpen,
     setIsGenerateTocOpen,
-    onGenerateChapter,
     handleAddChapter,
-    handleAddSection,
     handleCreateFromToc,
     handleDragEnd,
-    chapterInBuildMode,
-    handleEnterBuildMode,
-    handleCancelBuildMode,
     isTemplateDialogOpen,
     setIsTemplateDialogOpen,
-    selectedSectionsForBuild,
-    handleSectionSelectionToggle,
-    handleChapterSelectionToggle,
-    handleSelectAllChapters,
     isBuildProjectDialogOpen,
     setIsBuildProjectDialogOpen,
-    onGenerateProject,
-    projectMutation,
+  } = useReportGenerationTools();
+
+  const { 
+    project,
     isProjectBuildMode,
     enterProjectBuildMode,
     exitProjectBuildMode,
-    finalProjectPrompt,
-    chaptersToBuild,
-    getContextNames
-  } = useReportGenerationTools();
+    selectedSectionsForBuild,
+    toggleSelectAll,
+    onGenerateProject,
+    projectMutation,
+  } = useBuilderStore(state => ({
+    project: state.project,
+    isProjectBuildMode: state.isProjectBuildMode,
+    enterProjectBuildMode: state.enterProjectBuildMode,
+    exitProjectBuildMode: state.exitProjectBuildMode,
+    selectedSectionsForBuild: state.selectedSectionsForBuild,
+    toggleSelectAll: state.toggleSelectAll,
+    onGenerateProject: state.onGenerateProject,
+    projectMutation: state.projectMutation,
+  }));
 
-  const totalSelectableSections = project?.content.reduce((acc, item) => acc + (item instanceof Chapter ? item.sections.length : 1), 0) || 0;
+  const totalSelectableSections = project?.sections.length || 0;
   const isAllSelected = useMemo(() => totalSelectableSections > 0 && selectedSectionsForBuild.size === totalSelectableSections, [totalSelectableSections, selectedSectionsForBuild]);
   const isIndeterminate = useMemo(() => selectedSectionsForBuild.size > 0 && !isAllSelected, [selectedSectionsForBuild, isAllSelected]);
 
   const canBuildProject = project && project.content.length > 0;
+
+  const chaptersToBuild = useMemo(() => {
+    if (!project) return [];
+    return project.content
+      .filter((item): item is Chapter => item instanceof Chapter)
+      .map(c => c.with({ sections: c.sections.filter(s => selectedSectionsForBuild.has(s.id))}))
+      .filter(c => c.sections.length > 0);
+  }, [project, selectedSectionsForBuild]);
 
   return (
     <>
@@ -93,10 +102,8 @@ export function GenerationTools() {
         isOpen={isBuildProjectDialogOpen}
         onOpenChange={setIsBuildProjectDialogOpen}
         chaptersToBuild={chaptersToBuild}
-        getContextNames={getContextNames}
-        finalProjectPrompt={finalProjectPrompt}
         onGenerateProject={onGenerateProject}
-        isLoading={projectMutation.isPending}
+        isLoading={projectMutation?.isPending ?? false}
       />
       <Card className="flex flex-col h-full">
         <CardHeader>
@@ -149,7 +156,7 @@ export function GenerationTools() {
                 <Checkbox
                   id="select-all-chapters"
                   checked={isAllSelected}
-                  onCheckedChange={(checked) => handleSelectAllChapters(!!checked)}
+                  onCheckedChange={(checked) => toggleSelectAll(!!checked)}
                   aria-checked={isIndeterminate ? 'mixed' : isAllSelected}
                 />
                 <Label htmlFor="select-all-chapters" className="font-semibold text-sm">Select all sections for project build</Label>
@@ -158,7 +165,7 @@ export function GenerationTools() {
             <ScrollArea className="flex-grow">
               <div className="h-full pr-4">
                 <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                  <SortableContext items={(project?.content || []).map(c => typeof c === 'string' ? c : c.id)} strategy={verticalListSortingStrategy}>
+                  <SortableContext items={(project?.content || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
                     <Accordion type="multiple" className="w-full space-y-2">
                       {(project?.content || []).map((item, index) => {
                         if (item instanceof Chapter) {
@@ -167,8 +174,6 @@ export function GenerationTools() {
                               chapter={item}
                               index={index}
                               key={item.id}
-                              onAddSection={handleAddSection}
-                              isProjectBuildMode={isProjectBuildMode}
                             />
                           )
                         }
@@ -178,12 +183,11 @@ export function GenerationTools() {
                               key={item.id}
                               sectionId={item.id}
                               sectionIndex={index}
-                              chapterIndex={-1} // Indicate it's a root section
-                              isProjectBuildMode={isProjectBuildMode}
+                              chapterIndex={-1}
                             />
                           );
                         }
-                        return null; // For strings or other types in the future
+                        return null;
                       })}
                     </Accordion>
                   </SortableContext>
@@ -199,7 +203,7 @@ export function GenerationTools() {
                   <Button
                     className="w-full"
                     onClick={() => setIsBuildProjectDialogOpen(true)}
-                    disabled={selectedSectionsForBuild.size === 0 || projectMutation.isPending}
+                    disabled={selectedSectionsForBuild.size === 0 || projectMutation?.isPending}
                   >
                     <Building className="mr-2 h-4 w-4" />
                     Build Project ({selectedSectionsForBuild.size} selected)
@@ -209,13 +213,14 @@ export function GenerationTools() {
                 <Button
                   className="w-full"
                   onClick={enterProjectBuildMode}
-                  disabled={projectMutation.isPending}
+                  disabled={projectMutation?.isPending}
                 >
                   <Building className="mr-2 h-4 w-4" />
                   Build Project
                 </Button>
               )}
-            </div>
+
+          </div>
 
           </div>
 

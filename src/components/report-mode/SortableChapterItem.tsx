@@ -22,19 +22,22 @@ import { useBuilderStore } from "@/hooks";
 interface SortableChapterItemProps {
   chapter: Chapter;
   index: number;
-  onAddSection: (chapterId: string) => void;
-  isProjectBuildMode: boolean; // Is the parent in project-build mode?
 }
 
 export function SortableChapterItem({
   chapter,
   index,
-  onAddSection,
-  isProjectBuildMode,
 }: SortableChapterItemProps) {
-    const { selectedSectionsForBuild, handleChapterSelectionToggle } = useBuilderStore(state => ({
+    const { 
+        isProjectBuildMode, 
+        selectedSectionsForBuild, 
+        toggleChapterSelection,
+        updateProject
+    } = useBuilderStore(state => ({
+        isProjectBuildMode: state.isProjectBuildMode,
         selectedSectionsForBuild: state.selectedSectionsForBuild,
-        handleChapterSelectionToggle: state.handleChapterSelectionToggle,
+        toggleChapterSelection: state.toggleChapterSelection,
+        updateProject: state.updateProject,
     }));
     
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
@@ -58,6 +61,10 @@ export function SortableChapterItem({
     return hasSelected && !isAllSectionsSelected;
   }, [sectionsInChapter, selectedSectionsForBuild, isAllSectionsSelected]);
 
+  const handleAddSection = (chapterId: string) => {
+    updateProject(p => p.addSectionToChapter(chapterId, 'Untitled Section'));
+  }
+
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <AccordionItem value={chapter.id} className="bg-muted/30 border rounded-lg">
@@ -68,7 +75,7 @@ export function SortableChapterItem({
                 id={`select-chapter-${chapter.id}`}
                 checked={isAllSectionsSelected}
                 aria-checked={isSomeSectionsSelected ? 'mixed' : isAllSectionsSelected}
-                onCheckedChange={(checked) => handleChapterSelectionToggle(chapter.id, !!checked)}
+                onCheckedChange={(checked) => toggleChapterSelection(chapter.id, !!checked)}
                 aria-label={`Select all sections in chapter ${chapter.title}`}
               />
             </div>
@@ -96,11 +103,10 @@ export function SortableChapterItem({
                   sectionId={section.id}
                   sectionIndex={sectionIndex}
                   chapterIndex={index}
-                  isProjectBuildMode={isProjectBuildMode}
                 />
               ))}
             </div>
-            <Button size="sm" variant="outline" onClick={() => onAddSection(chapter.id)} className="w-full">
+            <Button size="sm" variant="outline" onClick={() => handleAddSection(chapter.id)} className="w-full">
               <PlusCircle className="me-2 h-4 w-4" />
               Add New Section
             </Button>

@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader } from '../ui/card';
 import { Info } from 'lucide-react';
 import { DiagramType, DiagramTypeSchema, ToneSchema } from '@/ai/schemas';
 import { Textarea } from '../ui/textarea';
+import { useBuilderStore } from '@/hooks';
 
 const diagramTypes = DiagramTypeSchema.options.map(value => {
     let label = '';
@@ -33,19 +34,23 @@ const toneOptions = ToneSchema.options.map(tone => ({
 
 interface SectionGenerationControlsProps {
   section: Section;
-  onControlChange: <K extends keyof GenerationControlState>(field: K, value: GenerationControlState[K]) => void;
-  onOutputStyleChange: (style: keyof GenerationControlState['outputStyle'], checked: boolean) => void;
 }
 
 export function SectionGenerationControls({
     section,
-    onControlChange,
-    onOutputStyleChange,
 }: SectionGenerationControlsProps) {
     const { t } = useLocalization();
+    const { updateSection } = useBuilderStore();
     const controls = section.controls;
 
-    // UI state is now managed locally inside this component, which is fine for UI-only state
+    const onControlChange = <K extends keyof GenerationControlState>(field: K, value: GenerationControlState[K]) => {
+        updateSection(section.id, s => s.with({ controls: { ...s.controls, [field]: value }}));
+    }
+
+    const onOutputStyleChange = (style: keyof GenerationControlState['outputStyle'], checked: boolean) => {
+        updateSection(section.id, s => s.with({ controls: { ...s.controls, outputStyle: { ...s.controls.outputStyle, [style]: checked } }}));
+    }
+
     const [isCustomTone, setIsCustomTone] = useState(() => !toneOptions.some(opt => opt.value === controls.tone));
     const [isCustomLanguage, setIsCustomLanguage] = useState(() =>
         !['default', 'en', 'ar', 'es', 'fr', 'de'].includes(controls.language)
