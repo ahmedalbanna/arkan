@@ -16,6 +16,7 @@ import {
   FileQuestion,
   Fingerprint,
   GitGraph,
+  Image as ImageIcon,
   Images,
   Languages,
   LayoutTemplate,
@@ -64,6 +65,7 @@ export default function WritingToolsPage() {
     { name: t('writingTools.uiDescription.cardTitle'), icon: LayoutTemplate, href: '/writing-tools/generate-ui-description' },
     { name: t('writingTools.imageToPdf.cardTitle'), icon: Images, href: '/writing-tools/image-to-pdf' },
     { name: 'Image to SVG', icon: ImageUp, href: '/writing-tools/image-to-svg' },
+    { name: 'AI Image Generator', icon: ImageIcon, href: '/writing-tools/ai-image-generator' },
   ];
 
   return (

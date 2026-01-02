@@ -60,6 +60,7 @@ export * from './writing-tools/use-project-blueprint-logic';
 export * from './writing-tools/use-generate-toc-logic';
 export * from './writing-tools/use-image-to-pdf-logic';
 export * from './writing-tools/use-image-to-svg-logic';
+export * from './writing-tools/use-ai-image-generator-logic';
 
 
 // Utility Hooks
