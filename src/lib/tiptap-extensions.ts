@@ -20,6 +20,8 @@ import { marked } from 'marked';
 import mammoth from 'mammoth';
 import { editorPlantUml } from './utils/processPlantUml';
 import AIImageGeneratorNode from './editor/ai-image-generator-extension';
+import { Color } from '@tiptap/extension-color';
+import TextStyle from '@tiptap/extension-text-style';
 
 /**
  * Handles dropping a file into the Tiptap editor.
@@ -130,6 +132,8 @@ export const editorExtensions = (uniqueId: string) => [
   StarterKit.configure({
     codeBlock: { HTMLAttributes: { class: '' }, exitOnArrowDown: true, exitOnTripleEnter: true },
   }),
+  TextStyle,
+  Color,
   Placeholder.configure({
     placeholder: 'Start writing, drag-and-drop files, or type / for commands...',
   }),

@@ -7,15 +7,15 @@ import { useBrowserSpeech } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Editor } from '@tiptap/react';
 import {
-  AlignCenter, AlignLeft, AlignRight, Bold, BookText, Brush, Italic, Languages, List, ListOrdered, Loader2, Quote, Sigma, Square, Strikethrough, Table as TableIcon, Volume2
+  AlignCenter, AlignLeft, AlignRight, Bold, BookText, Brush, Italic, Languages, List, ListOrdered, Loader2, Quote, Sigma, Square, Strikethrough, Table as TableIcon, Volume2, Heading1, Heading2, Heading3, Pilcrow, Palette, Baseline
 } from 'lucide-react';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { EditorController } from './EditorController';
 
 // ============================================================================
 // 1. Contextual Toolbar (for BubbleMenu)
@@ -29,6 +29,7 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
   const { t } = useLocalization();
   const { speak, stop, isSpeaking } = useBrowserSpeech();
   const { isProcessing, handleAiAction, rewriteStyles } = useAiActions({ editor });
+  const controller = useMemo(() => new EditorController(editor), [editor]);
 
   function handleReadAloudClick() {
     if (isSpeaking) {
@@ -39,111 +40,82 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
       speak(textToRead);
     }
   }
-
-  function handleHeadingChange(value: string) {
-    if (value === 'p') {
-      editor.chain().focus().setParagraph().run();
-      return;
-    }
-    const level = parseInt(value.replace('h', '')) as 1 | 2 | 3 | 4 | 5 | 6;
-    editor.chain().focus().toggleHeading({ level }).run();
-  }
-
-  function getCurrentHeadingLevel() {
-    for (let i = 1; i <= 6; i++) {
-      if (editor.isActive('heading', { level: i as 1 | 2 | 3 | 4 | 5 | 6 })) {
-        return `h${i}`;
-      }
-    }
-    return 'p';
-  }
-
-  function addTable() {
-    editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
-  }
-
-  function addMath() {
-    const formula = window.prompt('Enter LaTeX formula');
-    if (formula) {
-      editor.chain().focus().insertContent(`<katex-component content="${formula}"></katex-component>`).run();
-    }
-  }
-
+  
+  const FONT_SIZES = [
+    { name: 'Small', value: '12pt' },
+    { name: 'Default', value: '' }, // Clears the font size
+    { name: 'Large', value: '18pt' },
+    { name: 'Extra Large', value: '24pt' },
+  ];
+  
+  const FONT_COLORS = [
+    { name: 'Default', value: '' }, // Clears the color
+    { name: 'Red', value: '#e03131' },
+    { name: 'Blue', value: '#1971c2' },
+    { name: 'Green', value: '#2f9e44' },
+    { name: 'Orange', value: '#f76707' },
+  ];
 
   const formatButtons = [
-    { action: () => editor.chain().focus().toggleBold().run(), isActive: editor.isActive('bold'), icon: Bold, label: t('builder.Section.tooltips.bold') },
-    { action: () => editor.chain().focus().toggleItalic().run(), isActive: editor.isActive('italic'), icon: Italic, label: t('builder.Section.tooltips.italic') },
-    { action: () => editor.chain().focus().toggleStrike().run(), isActive: editor.isActive('strike'), icon: Strikethrough, label: t('builder.Section.tooltips.strike') },
+    { action: () => controller.toggleBold(), isActive: controller.isBold(), icon: Bold, label: t('builder.Section.tooltips.bold') },
+    { action: () => controller.toggleItalic(), isActive: controller.isItalic(), icon: Italic, label: t('builder.Section.tooltips.italic') },
+    { action: () => controller.toggleStrike(), isActive: controller.isStrike(), icon: Strikethrough, label: t('builder.Section.tooltips.strike') },
   ];
-
-  const blockButtons = [
-    { name: 'bulletList', action: () => editor.chain().focus().toggleBulletList().run(), isActive: editor.isActive('bulletList'), icon: List, label: "Bulleted List" },
-    { name: 'orderedList', action: () => editor.chain().focus().toggleOrderedList().run(), isActive: editor.isActive('orderedList'), icon: ListOrdered, label: "Numbered List" },
-    { name: 'blockquote', action: () => editor.chain().focus().toggleBlockquote().run(), isActive: editor.isActive('blockquote'), icon: Quote, label: "Blockquote" },
-    { name: 'table', action: addTable, isActive: editor.isActive('table'), icon: TableIcon, label: "Table" },
+  
+  const headingOptions = [
+    { name: 'Paragraph', command: () => controller.setParagraph(), icon: Pilcrow, isActive: controller.isParagraph() },
+    { name: 'Heading 1', command: () => controller.toggleHeading(1), icon: Heading1, isActive: controller.isHeading(1) },
+    { name: 'Heading 2', command: () => controller.toggleHeading(2), icon: Heading2, isActive: controller.isHeading(2) },
+    { name: 'Heading 3', command: () => controller.toggleHeading(3), icon: Heading3, isActive: controller.isHeading(3) },
   ];
-
-  const alignmentButtons = [
-    { name: 'left', action: () => editor.chain().focus().setTextAlign('left').run(), isActive: editor.isActive({ textAlign: 'left' }), icon: AlignLeft, label: "Align Left" },
-    { name: 'center', action: () => editor.chain().focus().setTextAlign('center').run(), isActive: editor.isActive({ textAlign: 'center' }), icon: AlignCenter, label: "Align Center" },
-    { name: 'right', action: () => editor.chain().focus().setTextAlign('right').run(), isActive: editor.isActive({ textAlign: 'right' }), icon: AlignRight, label: "Align Right" },
-  ];
-
-  const CurrentAlignmentIcon = alignmentButtons.find(b => b.isActive)?.icon || AlignLeft;
-  const CurrentBlockIcon = blockButtons.find(b => b.isActive)?.icon || Square;
-
-
-  const aiActionButtons = [
-    { name: 'summarize', icon: BookText, label: t('builder.Section.aiActions.summarize') },
-    { name: 'translate', icon: Languages, label: t('builder.Section.aiActions.translate') },
-  ];
+  const CurrentHeadingIcon = headingOptions.find(h => h.isActive)?.icon || Pilcrow;
 
   return (
     <div
-      className="flex items-center gap-1 rounded-full border bg-gradient-to-r from-background/80 to-primary/5 backdrop-blur-md p-1 shadow-soft hover:shadow-glow transition-all duration-200"
+      className="flex items-center gap-1 rounded-lg border bg-gradient-to-r from-background/95 to-background/80 backdrop-blur-md p-1 shadow-lg transition-all duration-200"
       onMouseDown={(e) => e.preventDefault()}
     >
       <TooltipProvider>
-        <Select value={getCurrentHeadingLevel()} onValueChange={handleHeadingChange}>
-          <SelectTrigger aria-label="Select heading level" className="h-8 w-32 border-none bg-transparent focus:ring-0 focus:ring-offset-0">
-            <SelectValue placeholder="Paragraph" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="p">Paragraph</SelectItem>
-            <SelectItem value="h1">Heading 1</SelectItem>
-            <SelectItem value="h2">Heading 2</SelectItem>
-            <SelectItem value="h3">Heading 3</SelectItem>
-          </SelectContent>
-        </Select>
+        <DropdownMenu>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8"><CurrentHeadingIcon className="h-4 w-4" /></Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent><p>Text Style</p></TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent>
+            {headingOptions.map(opt => (
+              <DropdownMenuItem key={opt.name} onSelect={opt.command} className={opt.isActive ? 'bg-accent' : ''}>
+                <opt.icon className="mr-2 h-4 w-4" />
+                <span>{opt.name}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         {formatButtons.map(({ action, isActive, icon: Icon, label }) => (
           <Tooltip key={label}>
-            <TooltipTrigger asChild><Button variant={isActive ? 'secondary' : 'ghost'} size="icon" className="rounded-full h-8 w-8" onClick={action}><Icon className="h-4 w-4" /></Button></TooltipTrigger>
+            <TooltipTrigger asChild><Button variant={isActive ? 'secondary' : 'ghost'} size="icon" className="h-8 w-8" onClick={action}><Icon className="h-4 w-4" /></Button></TooltipTrigger>
             <TooltipContent><p>{label}</p></TooltipContent>
           </Tooltip>
         ))}
-
-        <Separator orientation="vertical" className="h-6 mx-1" />
         
+        <Separator orientation="vertical" className="h-6 mx-1" />
+
         <DropdownMenu>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
-                            <CurrentBlockIcon className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
+                    <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><Baseline className="h-5 w-5"/></Button></DropdownMenuTrigger>
                 </TooltipTrigger>
-                <TooltipContent><p>Block Formatting</p></TooltipContent>
+                <TooltipContent><p>Font Size</p></TooltipContent>
             </Tooltip>
             <DropdownMenuContent>
-                {blockButtons.map(({ action, label, icon: Icon, isActive }) => (
-                    <DropdownMenuItem key={label} onSelect={action} className={isActive ? 'bg-accent' : ''}>
-                        <Icon className="mr-2 h-4 w-4" />
-                        <span>{label}</span>
-                    </DropdownMenuItem>
+                {FONT_SIZES.map(size => (
+                    <DropdownMenuItem key={size.name} onSelect={() => controller.setFontSize(size.value)} className={controller.isFontSize(size.value) ? "bg-accent" : ""}>{size.name}</DropdownMenuItem>
                 ))}
             </DropdownMenuContent>
         </DropdownMenu>
@@ -151,19 +123,15 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
         <DropdownMenu>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
-                            <CurrentAlignmentIcon className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
+                    <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><Palette className="h-4 w-4"/></Button></DropdownMenuTrigger>
                 </TooltipTrigger>
-                <TooltipContent><p>Alignment</p></TooltipContent>
+                <TooltipContent><p>Text Color</p></TooltipContent>
             </Tooltip>
             <DropdownMenuContent>
-                {alignmentButtons.map(({ name, action, label, icon: Icon, isActive }) => (
-                    <DropdownMenuItem key={name} onSelect={action} className={isActive ? 'bg-accent' : ''}>
-                        <Icon className="mr-2 h-4 w-4" />
-                        <span>{label}</span>
+                {FONT_COLORS.map(color => (
+                    <DropdownMenuItem key={color.name} onSelect={() => controller.setColor(color.value)} className={controller.isColor(color.value) ? "bg-accent" : ""}>
+                        <div className="w-4 h-4 rounded-full border mr-2" style={{ backgroundColor: color.value || 'transparent' }}></div>
+                        {color.name}
                     </DropdownMenuItem>
                 ))}
             </DropdownMenuContent>
@@ -183,12 +151,8 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
             <TooltipContent><p>{t('builder.Section.aiActions.title')}</p></TooltipContent>
           </Tooltip>
           <DropdownMenuContent className="backdrop-blur-md bg-gradient-to-r from-background/90 to-primary/5 border shadow-soft">
-            {aiActionButtons.map(({ name, icon: Icon, label }) => (
-              <DropdownMenuItem key={name} onSelect={() => handleAiAction(name as any)} disabled={isProcessing}>
-                <Icon className="mr-2 h-4 w-4" />
-                <span>{label}</span>
-              </DropdownMenuItem>
-            ))}
+              <DropdownMenuItem onSelect={() => handleAiAction('summarize')} disabled={isProcessing}><BookText className="mr-2 h-4 w-4" /><span>{t('builder.Section.aiActions.summarize')}</span></DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => handleAiAction('translate')} disabled={isProcessing}><Languages className="mr-2 h-4 w-4" /><span>{t('builder.Section.aiActions.translate')}</span></DropdownMenuItem>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 <Brush className="mr-2 h-4 w-4" />
@@ -209,12 +173,6 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
           <TooltipTrigger asChild><Button variant="ghost" size="icon" className="rounded-full h-8 w-8" onClick={handleReadAloudClick}>{isSpeaking ? <Square className="h-4 w-4 text-red-500 fill-current" /> : <Volume2 className="h-4 w-4" />}</Button></TooltipTrigger>
           <TooltipContent><p>{isSpeaking ? 'Stop Speaking' : t('builder.Section.tooltips.readAloud')}</p></TooltipContent>
         </Tooltip>
-        
-        <Tooltip>
-            <TooltipTrigger asChild><Button onClick={addMath} variant="ghost" size="icon" className="h-8 w-8 rounded-full"><Sigma className="h-4 w-4" /></Button></TooltipTrigger>
-            <TooltipContent><p>Add Math Formula</p></TooltipContent>
-        </Tooltip>
-
       </TooltipProvider>
     </div>
   );

@@ -25,7 +25,7 @@ interface RichTextEditorProps {
 
 function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const { setActiveEditor } = useEditorStore();
-  const debouncedContent = useDebounce(content, 500);
+  const debouncedContent = useDebounce(content, 3000);
   const bubbleMenuId = React.useId();
 
 
