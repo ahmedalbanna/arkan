@@ -5,7 +5,6 @@ import { Node, mergeAttributes } from '@tiptap/core';
 import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { useDebounce } from '@/hooks';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -20,33 +19,15 @@ const AIImageGeneratorComponent = (props: any) => {
   const [imageUrl, setImageUrl] = useState(props.node.attrs.imageUrl || '');
   const [isLoading, setIsLoading] = useState(false);
 
-  const debouncedPrompt = useDebounce(prompt, 500);
-  const debouncedWidth = useDebounce(width, 500);
-  const debouncedHeight = useDebounce(height, 500);
-  const debouncedSeed = useDebounce(seed, 500);
-  
-  useEffect(() => {
-    props.updateAttributes({
-      prompt: debouncedPrompt,
-      width: debouncedWidth,
-      height: debouncedHeight,
-      seed: debouncedSeed,
-      imageUrl,
-    });
-  }, [debouncedPrompt, debouncedWidth, debouncedHeight, debouncedSeed, imageUrl, props]);
-
   const generateImage = () => {
     if (!prompt) return;
     setIsLoading(true);
     const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&nologo=poll&nofeed=yes&seed=${seed}`;
-    // Use a cache-busting parameter to ensure a fresh image is fetched
     const finalUrl = `${url}&v=${Date.now()}`;
     
-    // We set the image url and let the browser handle loading
     setImageUrl(finalUrl);
+    props.updateAttributes({ imageUrl: finalUrl }); // Update attribute on generation
 
-    // We can't reliably know when the external image has finished loading,
-    // so we'll just turn off the loader after a short delay.
     setTimeout(() => {
         setIsLoading(false);
     }, 1500);
@@ -58,21 +39,35 @@ const AIImageGeneratorComponent = (props: any) => {
         <h4 className="font-semibold flex items-center gap-2"><Wand2 className="h-5 w-5 text-primary" /> Generator Controls</h4>
         <div className="space-y-2">
             <Label htmlFor="prompt-input">Prompt</Label>
-            <Input id="prompt-input" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Image description..."/>
+            <Input id="prompt-input" value={prompt} onChange={(e) => {
+                setPrompt(e.target.value);
+                props.updateAttributes({ prompt: e.target.value });
+            }} placeholder="Image description..."/>
         </div>
         <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
                 <Label htmlFor="width-input">Width</Label>
-                <Input id="width-input" type="number" value={width} onChange={(e) => setWidth(parseInt(e.target.value, 10))}/>
+                <Input id="width-input" type="number" value={width} onChange={(e) => {
+                    const newWidth = parseInt(e.target.value, 10);
+                    setWidth(newWidth);
+                    props.updateAttributes({ width: newWidth });
+                }}/>
             </div>
             <div className="space-y-2">
                 <Label htmlFor="height-input">Height</Label>
-                <Input id="height-input" type="number" value={height} onChange={(e) => setHeight(parseInt(e.target.value, 10))}/>
+                <Input id="height-input" type="number" value={height} onChange={(e) => {
+                    const newHeight = parseInt(e.target.value, 10);
+                    setHeight(newHeight);
+                    props.updateAttributes({ height: newHeight });
+                }}/>
             </div>
         </div>
         <div className="space-y-2">
             <Label htmlFor="seed-slider">Seed: {seed}</Label>
-            <Slider id="seed-slider" min={0} max={9999999999} step={1} value={[seed]} onValueChange={(val) => setSeed(val[0])} />
+            <Slider id="seed-slider" min={0} max={9999999999} step={1} value={[seed]} onValueChange={(val) => {
+                setSeed(val[0]);
+                props.updateAttributes({ seed: val[0] });
+            }} />
         </div>
         <Button onClick={generateImage} disabled={isLoading}>
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4"/>}
@@ -143,4 +138,3 @@ const AIImageGeneratorNode = Node.create({
 });
 
 export default AIImageGeneratorNode;
-
