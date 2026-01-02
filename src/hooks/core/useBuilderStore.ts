@@ -19,7 +19,7 @@ interface BuilderState {
     initializeStore: () => void;
     setUserProfile: (userProfile: User | null) => void; // Action to set the user profile
     setHasUnsavedChanges: (hasChanges: boolean) => void;
-    updateProject: (updater: (project: Project) => Project) => void;
+    updateProject: (updater: (project: Project) => void) => void;
     updateSection: (sectionId: string, updater: (section: Section) => Section) => void;
     loadProject: (projectData: ProjectProperties) => void;
     loadProjectFromFile: (file: File) => Promise<void>;
@@ -60,13 +60,23 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     updateProject: (updater) => {
         set(state => {
             if (!state.project) return {};
-            const updatedProject = updater(state.project);
-            return { project: updatedProject }; // Removed hasUnsavedChanges: true, this will be handled by the component
+            const newProject = state.project.with({}); // Create a new instance for immutability
+            updater(newProject); // This method is now expected to mutate the draft
+            return { project: newProject, hasUnsavedChanges: true };
         });
     },
 
     updateSection: (sectionId, updater) => {
-        get().updateProject(p => p.updateSection(sectionId, updater));
+        get().updateProject(p => {
+           const section = p.getSection(sectionId);
+           if (section) {
+               const newSection = updater(section);
+               const chapter = p.findSection(sectionId)?.chapter;
+               if (chapter) {
+                    chapter.updateSection(sectionId, () => newSection);
+               }
+           }
+        });
     },
 
     loadProject: (projectData) => {
@@ -110,7 +120,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
                 const sections = chapterData.sections.map(sectionTitle => new Section({ title: sectionTitle, type: 'report' }));
                 return new Chapter({ title: chapterData.title, sections });
             });
-            return p.with({ content: newContent });
+            p.content = newContent;
         });
 
         toast({
@@ -122,7 +132,10 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     setContentFromMarkdown: (markdown: string) => {
         const currentMarkdown = get().project?.fullMarkdownContent || '';
         if (markdown !== currentMarkdown) {
-          get().updateProject(p => p.updateContentFromMarkdown(markdown));
+          get().updateProject(p => {
+              const newContent = parseMarkdownToContent(markdown, p.content);
+              p.content = newContent;
+          });
           set({ hasUnsavedChanges: true });
         }
     },

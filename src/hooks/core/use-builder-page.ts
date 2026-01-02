@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
@@ -52,7 +53,7 @@ export function useBuilderPageLogic() {
   };
 
   const updateProjectName = useCallback((name: string) => {
-    updateProject(p => p.with({ name }));
+    updateProject(p => { p.name = name; });
   }, [updateProject]);
 
   return {

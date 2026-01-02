@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { formatDistanceToNow } from 'date-fns';
@@ -7,7 +8,7 @@ import { useBuilderPageLogic } from '@/hooks/core/use-builder-page';
 import { Input } from '@/components/ui/input';
 import { OnboardingGuide } from '@/components/onboarding/OnboardingGuide';
 import { BuilderPageSkeleton } from './loading';
-import { useAutosave } from '@/hooks/core/useAutosave';
+import { useSaveProject } from '@/hooks';
 
 const SessionActions = dynamic(() => import('@/components/project/SessionActions').then(mod => ({ default: mod.SessionActions })), {
   ssr: false,
@@ -29,9 +30,9 @@ export default function GeneratePage() {
     updateProjectName,
   } = useBuilderPageLogic();
   
-  const { isSaving } = useAutosave();
+  const { isSaving } = useSaveProject();
 
-  // Show a loading skeleton until the store is initialized from local storage
+  // Show a loading skeleton until the store is initialized from localStorage
   if (!isStoreInitialized || !project) {
     return <BuilderPageSkeleton />;
   }

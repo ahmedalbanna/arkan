@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -37,7 +38,7 @@ const specializationOptions = ["Artificial Intelligence", "Web Development", "Da
 const educationalLevelOptions = ["Diploma", "Bachelor's Degree", "Master's Degree", "Doctorate"];
 
 export function ProjectSettingsPanel() {
-  const { project, updateProject, setHasUnsavedChanges } = useBuilderStore();
+  const { project, updateProject } = useBuilderStore();
   const { toast } = useToast();
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const { isUploading, handleFileUpload } = useImageUpload();
@@ -78,9 +79,11 @@ export function ProjectSettingsPanel() {
     const file = event.target.files?.[0];
     if (file) {
       handleFileUpload(file, (dataUri) => {
-        updateProject(p => p.with({ logoUrl: dataUri }).generateCoverPageMarkdown());
+        updateProject(p => {
+          p.logoUrl = dataUri;
+          p.generateCoverPageMarkdown()
+        });
         setLogoPreview(dataUri);
-        setHasUnsavedChanges(true);
       });
     }
   };
@@ -88,10 +91,10 @@ export function ProjectSettingsPanel() {
   const handleBlur = () => {
     form.handleSubmit((data) => {
       const teamMembersArray = data.teamMembers?.split(',').map(name => name.trim()).filter(Boolean);
-      updateProject(p =>
-        p.with({ ...data, teamMembers: teamMembersArray }).generateCoverPageMarkdown()
-      );
-      setHasUnsavedChanges(true);
+      updateProject(p => {
+        Object.assign(p, { ...data, teamMembers: teamMembersArray });
+        p.generateCoverPageMarkdown();
+      });
     })();
   };
 

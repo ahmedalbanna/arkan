@@ -18,28 +18,22 @@ export function useProjects() {
         queryKey: projectKeys.lists(),
         queryFn: async () => {
             if (!firebaseUser) return [];
-            // First, get local projects for optimistic UI
-            const localProjects = await localProjectService.getAllProjects();
-            
             // Then, fetch from server and merge
             try {
                 const token = await getAuthenticatedToken(firebaseUser);
                 const serverProjects = await fetchProjectsApi(token);
                 
-                // Merge local and server data, server is source of truth
-                const allProjectsMap = new Map<string, ProjectProperties>();
-                localProjects.forEach(p => allProjectsMap.set(p.id!, p));
-                serverProjects.forEach(p => allProjectsMap.set(p.id!, p));
-
-                const mergedProjects = Array.from(allProjectsMap.values());
+                const mergedProjects = serverProjects.map(p => new Project(p));
 
                 // Sync local db with server source of truth
-                mergedProjects.forEach(p => localProjectService.saveProject(p));
+                mergedProjects.forEach(p => localProjectService.saveProject(p.toStateObject()));
 
-                return mergedProjects.map(p => new Project(p));
+                return mergedProjects;
 
             } catch (e) {
                 console.warn("Could not sync with server, using local projects.", e);
+                 // First, get local projects for optimistic UI
+                const localProjects = await localProjectService.getAllProjects();
                 return localProjects.map(p => new Project(p));
             }
         },
@@ -56,52 +50,20 @@ export function useSaveProject() {
 
     const saveProjectMutation = useMutation({
         mutationFn: async (projectData: ProjectProperties) => {
-            // Step 1: Save to local DB first. This is fast and works offline.
-            const locallySavedProject = await localProjectService.saveProject(projectData);
-            
-            // Optimistically update the UI to show changes are "saved" locally.
-            queryClient.setQueryData(projectKeys.lists(), (oldData: Project[] | undefined) => {
-                const existing = oldData?.find(p => p.id === locallySavedProject.id);
-                if (existing) {
-                    return oldData!.map(p => p.id === locallySavedProject.id ? new Project(locallySavedProject) : p);
-                }
-                return [...(oldData || []), new Project(locallySavedProject)];
-            });
-            setHasUnsavedChanges(false);
-
-            // Step 2: Attempt to save to the server in the background.
-            if (navigator.onLine && firebaseUser) {
-                try {
-                    const token = await getAuthenticatedToken(firebaseUser);
-                    const serverSavedProject = await saveProjectApi(locallySavedProject, token);
-                    
-                    // Update cache with the server-confirmed data
-                    queryClient.setQueryData(projectKeys.detail(serverSavedProject.id!), new Project(serverSavedProject));
-                    
-                    return serverSavedProject;
-                } catch (serverError) {
-                    // The local save succeeded, but server sync failed.
-                    // The user's data is safe locally. We can notify them if needed.
-                    console.error("Server sync failed:", serverError);
-                    toast({ title: 'Offline Mode', description: 'Project saved locally. Will sync with the cloud when connection is restored.' });
-                    // Re-throw to let the mutation know it partially failed, but don't bother the user with a destructive toast.
-                    throw new Error("Server sync failed."); 
-                }
+            if (!navigator.onLine || !firebaseUser) {
+                toast({ title: 'Offline', description: 'You are offline. Please connect to the internet to save the project.', variant: 'destructive' });
+                throw new Error("User is offline.");
             }
-            
-            return locallySavedProject;
+            const token = await getAuthenticatedToken(firebaseUser);
+            return saveProjectApi(projectData, token);
         },
         onSuccess: (savedProject) => {
-             // Invalidate list to ensure it's fresh on next fetch
+            setHasUnsavedChanges(false);
             queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
+            toast({ title: 'Project Saved', description: `"${savedProject.name}" has been saved to the cloud.` });
         },
         onError: (error: any) => {
-            // Only show a destructive error toast if the *local* save fails, which is rare.
-            if (!error.message?.includes("Server sync failed")) {
-                toast({ title: 'Error', description: `Failed to save project locally: ${error.message}`, variant: 'destructive' });
-                // If local save fails, changes are still unsaved.
-                setHasUnsavedChanges(true);
-            }
+            toast({ title: 'Error', description: `Failed to save project: ${error.message}`, variant: 'destructive' });
         }
     });
 

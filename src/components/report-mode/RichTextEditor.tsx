@@ -1,5 +1,6 @@
 
 
+
 'use client';
 
 import { useEditorStore } from '@/hooks/core/use-editor-store';
@@ -24,26 +25,18 @@ interface RichTextEditorProps {
 
 function RichTextEditor({ content }: RichTextEditorProps) {
   const { setActiveEditor } = useEditorStore();
-  const { updateProject, setHasUnsavedChanges } = useBuilderStore();
-  const uniqueId = React.useId();
-
-  const handleContentUpdate = useCallback((newMarkdown: string) => {
-    // Only update if there's a meaningful change
-    if (newMarkdown !== useBuilderStore.getState().project?.fullMarkdownContent) {
-      updateProject(p => p.updateContentFromMarkdown(newMarkdown));
-      setHasUnsavedChanges(true);
-    }
-  }, [updateProject, setHasUnsavedChanges]);
+  const { setContentFromMarkdown } = useBuilderStore();
 
   const editor = useEditor({
-    extensions: editorExtensions(uniqueId),
+    extensions: editorExtensions(React.useId()),
     content: marked.parse(content) as string,
     onUpdate: ({ editor }) => {
-      // This will now be debounced, see below
+      const markdown = turndownService.turndown(editor.getHTML());
+      setContentFromMarkdown(markdown);
     },
     onBlur: ({ editor }) => {
       const markdown = turndownService.turndown(editor.getHTML());
-      handleContentUpdate(markdown);
+      setContentFromMarkdown(markdown);
     },
     editorProps: {
       attributes: {
@@ -69,9 +62,6 @@ function RichTextEditor({ content }: RichTextEditorProps) {
     immediatelyRender: false,
   });
 
-  // Debounce the editor's HTML content
-  const debouncedHtml = useDebounce(editor?.getHTML() || '', 1000);
-
   // Effect to sync editor with global state when it changes externally (e.g., loading a project)
   useEffect(() => {
     if (editor && !editor.isDestroyed) {
@@ -86,15 +76,7 @@ function RichTextEditor({ content }: RichTextEditorProps) {
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content]); // Only run when the initial content prop changes
-
-  // Effect for debounced updates
-  useEffect(() => {
-    if (editor && !editor.isDestroyed) {
-      const markdown = turndownService.turndown(debouncedHtml);
-      handleContentUpdate(markdown);
-    }
-  }, [debouncedHtml, editor, handleContentUpdate]);
+  }, [content]);
 
 
   // Set the global editor instance when it's created and destroy it on unmount
@@ -120,7 +102,7 @@ function RichTextEditor({ content }: RichTextEditorProps) {
         <BubbleMenu
           editor={editor}
           tippyOptions={{ duration: 100, placement: 'top', onClose: () => false }}
-          pluginKey={uniqueId}
+          pluginKey={React.useId()}
           shouldShow={({ editor }) => !editor.state.selection.empty}
         >
           {editor.isActive('table') ? (
