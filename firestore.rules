@@ -30,7 +30,7 @@ service cloud.firestore {
       allow create: if isUser(userId);
       // Allow users to update specific fields on their own profile.
       // Admins can update any field on any user's profile.
-      allow update: if (isUser(userId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'bio', 'profilePictureUrl', 'hasCompletedOnboarding', 'updatedAt']))
+      allow update: if (isUser(userId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'bio', 'profilePictureUrl', 'hasCompletedOnboarding', 'updatedAt', 'apiKeys']))
                     || isAdmin();
       // Only admins can delete users.
       allow delete: if isAdmin();
@@ -39,7 +39,7 @@ service cloud.firestore {
     // === PROJECTS ===
     match /projects/{projectId} {
       // Allow users to read, create, update, and delete their own projects.
-      allow read, write: if isAuth() && resource.data.userId == request.auth.uid;
+      allow read, write: if isAuth() && request.resource.data.meta.author == request.auth.uid;
       // Allow team members to read team projects.
       allow get: if isAuth() && resource.data.teamId in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teams;
     }

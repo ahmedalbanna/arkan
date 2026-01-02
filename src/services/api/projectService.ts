@@ -1,26 +1,30 @@
 
 'use client';
-import type { ProjectProperties, ExternalContextProperties } from "@/lib/models";
-import { localProjectService } from "../local-project-service";
 
-/**
- * Adds a context file to a project in the local database.
- * This is a client-side only operation.
- * @param projectId The ID of the project to update.
- * @param contextFile The context file to add.
- * @returns The updated project properties.
- */
-export async function addContextToProjectApi(variables: { projectId: string; contextFile: ExternalContextProperties, token?: string }): Promise<ProjectProperties> {
-    const { projectId, contextFile } = variables;
-    const project = await localProjectService.getProject(projectId);
-    if (!project) {
-        throw new Error('Project not found locally.');
-    }
-    const updatedContext = [...(project.externalContext || []), contextFile];
-    const updatedProject = { ...project, externalContext: updatedContext };
-    return localProjectService.saveProject(updatedProject);
+import type { ProjectProperties } from "@/lib/models";
+import { apiService } from "./apiService";
+
+export async function fetchProjectsApi(token: string): Promise<ProjectProperties[]> {
+    return apiService({ endpoint: '/api/projects', token });
 }
 
-export type { ProjectProperties };
+export async function fetchProjectByIdApi(id: string, token: string): Promise<ProjectProperties> {
+    return apiService({ endpoint: `/api/projects/${id}`, token });
+}
 
-    
+export async function saveProjectApi(data: ProjectProperties, token: string): Promise<ProjectProperties> {
+    return apiService({
+      endpoint: '/api/projects',
+      method: 'POST',
+      data,
+      token
+    });
+}
+
+export async function deleteProjectApi(id: string, token: string): Promise<{ message: string }> {
+    return apiService({
+      endpoint: `/api/projects/${id}`,
+      method: 'DELETE',
+      token
+    });
+}
