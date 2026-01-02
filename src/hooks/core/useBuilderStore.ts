@@ -1,16 +1,12 @@
 
 'use client';
 
-import { Chapter, ChapterProperties, Section, TocSection } from '@/lib/models';
-import { Project, type ProjectProperties } from '@/lib/models';
+import { Chapter, Project, Section, TocSection, type ProjectProperties } from '@/lib/models';
 import { localProjectService } from '@/services/local-project-service';
-import React, { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { create } from 'zustand';
-import { parseMarkdownToContent } from '../util/useMarkdownParser';
-import type { ExternalContext, ExternalContextProperties, ReportTemplateProperties, SectionName } from '@/lib/models';
 import { toast } from '../util/use-toast';
-import { v4 as uuidv4 } from 'uuid';
-import { defaultSections } from '@/lib/db/seed-data/sections';
+import { parseMarkdownToContent } from '../util/useMarkdownParser';
 
 type ActiveView = 'cover-page' | 'report-content';
 
@@ -19,7 +15,7 @@ interface BuilderState {
     activeView: ActiveView;
     hasUnsavedChanges: boolean;
     isStoreInitialized: boolean;
-    
+
     // UI State for creating a new project
     isCreateProjectOpen: boolean;
     setIsCreateProjectOpen: (isOpen: boolean) => void;
@@ -29,6 +25,7 @@ interface BuilderState {
     setActiveView: (view: ActiveView) => void;
     setHasUnsavedChanges: (hasChanges: boolean) => void;
     updateProject: (updater: (project: Project) => Project | void) => void;
+    updateSection: (sectionId: string, updater: (section: Section) => Section) => void;
     setContentFromMarkdown: (markdown: string) => void;
     loadProject: (projectData: ProjectProperties) => void;
     loadProjectFromFile: (file: File) => Promise<void>;
@@ -82,7 +79,7 @@ const useBuilderStore = create<BuilderState>((set, get) => {
                 get().loadProject(newProject.toStateObject());
                 toast({ title: 'Project Loaded', description: `Successfully loaded "${newProject.name}".` });
             } catch (err) {
-                 toast({ title: 'Load Failed', description: (err as Error).message, variant: 'destructive' });
+                toast({ title: 'Load Failed', description: (err as Error).message, variant: 'destructive' });
             }
         },
 
@@ -93,23 +90,32 @@ const useBuilderStore = create<BuilderState>((set, get) => {
                 const result = updater(currentProject);
                 // The updater can either return a new Project instance or mutate the draft
                 const newProject = result instanceof Project ? result : currentProject;
-                
+
+                // Always set a new timestamp and save to local storage
                 const finalProject = newProject.with({ meta: { ...newProject.meta, updated: new Date().toISOString() } });
-                
+                localStorage.setItem('lastActiveProjectId', finalProject.id);
+
                 return { project: finalProject, hasUnsavedChanges: true };
             });
         },
-        
+
+        updateSection: (sectionId, updater) => {
+            get().updateProject(p => p.updateSection(sectionId, updater));
+        },
+
         setContentFromMarkdown: (markdown: string) => {
-            get().updateProject(p => {
-                const newContent = parseMarkdownToContent(markdown, p.content);
-                return p.with({ content: newContent });
+            set(state => {
+                if (!state.project) return {};
+                const newContent = parseMarkdownToContent(markdown, state.project.content);
+                const newProject = state.project.with({ content: newContent });
+                return { project: newProject, hasUnsavedChanges: true };
             });
         },
-        
+
         applyTableOfContents: (tocData) => {
-            get().updateProject(p => {
-                let newProject = p.with({ content: [] });
+            set(state => {
+                if (!state.project) return {};
+                let newProject = state.project.with({ content: [] }); // Start with clean content
                 tocData.forEach(chapterData => {
                     let newChapter = new Chapter({ title: chapterData.title, sections: [] });
                     chapterData.sections.forEach(sectionTitle => {
@@ -117,9 +123,8 @@ const useBuilderStore = create<BuilderState>((set, get) => {
                     });
                     newProject = newProject.addChapter(newChapter);
                 });
-                return newProject;
+                return { project: newProject, hasUnsavedChanges: true };
             });
-
             toast({
                 title: 'Table of Contents Applied',
                 description: `${tocData.length} chapters and their sections have been created.`,
@@ -147,3 +152,4 @@ export const useInitializeBuilderStore = () => {
 
 // Re-export the store hook
 export { useBuilderStore };
+

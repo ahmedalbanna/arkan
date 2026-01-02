@@ -8,15 +8,14 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Loader2, Save, Trash2, Upload, Download, CheckCircle } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
-import { useRouter } from 'next/navigation';
-import { ExportDialog } from './ExportDialog';
-import { BrowseProjectsDialog } from './BrowseProjectsDialog';
-import { useRef } from 'react';
 import { useSaveProject } from '@/hooks/data/use-projects';
-import { cn } from '@/lib/utils/cn';
+import { Download, Loader2, Save, Trash2, Upload } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useRef } from 'react';
+import { BrowseProjectsDialog } from './BrowseProjectsDialog';
+import { ExportDialog } from './ExportDialog';
 
 interface SessionActionsProps {
     isSaving: boolean;
@@ -26,7 +25,8 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
     const { t } = useLocalization();
     const router = useRouter();
     const { project, hasUnsavedChanges, newSession, loadProjectFromFile } = useBuilderStore();
-    
+    const { saveProjectMutation } = useSaveProject();
+
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleUploadClick = () => {
@@ -42,31 +42,12 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
         if (e.target) e.target.value = '';
     };
 
-    const hasContent = project?.hasContent() ?? false;
-
-    const getSaveStatus = () => {
-        if (isSaving) {
-            return {
-                text: "Saving...",
-                icon: <Loader2 className="h-4 w-4 animate-spin" />,
-                variant: "secondary" as const
-            };
-        }
-        if (!hasUnsavedChanges) {
-            return {
-                text: "Saved",
-                icon: <CheckCircle className="h-4 w-4 text-green-500" />,
-                variant: "ghost" as const
-            };
-        }
-        return {
-            text: "Unsaved",
-            icon: <Save className="h-4 w-4 text-yellow-500" />,
-            variant: "secondary" as const
-        };
+    const handleSave = () => {
+        if (!project) return;
+        saveProjectMutation.mutate(project.toStateObject());
     };
 
-    const saveStatus = getSaveStatus();
+    const hasContent = project?.hasContent() ?? false;
 
     return (
         <TooltipProvider>
@@ -78,16 +59,6 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
                     accept=".arkan"
                     className="hidden"
                 />
-
-                <Button
-                    variant={saveStatus.variant}
-                    size="sm"
-                    disabled={isSaving}
-                    className={cn("h-8 w-28", !hasUnsavedChanges && !isSaving && "text-muted-foreground")}
-                >
-                    {saveStatus.icon}
-                    <span className="ms-2">{saveStatus.text}</span>
-                </Button>
 
                 <BrowseProjectsDialog />
 
@@ -107,6 +78,17 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
                         <p>{t('builder.tooltips.uploadProject')}</p>
                     </TooltipContent>
                 </Tooltip>
+
+                <Button
+                    variant="default"
+                    size="icon"
+                    onClick={handleSave}
+                    disabled={!hasUnsavedChanges || isSaving}
+                    className="h-8 w-8 md:w-auto md:px-3"
+                >
+                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    <span className="hidden md:inline ms-2">{t('projects.saveButton')}</span>
+                </Button>
 
                 <ExportDialog />
 
