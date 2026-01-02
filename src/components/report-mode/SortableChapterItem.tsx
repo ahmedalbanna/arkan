@@ -22,21 +22,23 @@ import { useBuilderStore } from "@/hooks";
 interface SortableChapterItemProps {
   chapter: Chapter;
   index: number;
+  isProjectBuildMode: boolean;
+  selectedSectionsForBuild: Set<string>;
+  toggleChapterSelection: (chapterId: string, select: boolean) => void;
+  toggleSectionSelection: (sectionId: string) => void;
 }
 
 export function SortableChapterItem({
   chapter,
   index,
+  isProjectBuildMode,
+  selectedSectionsForBuild,
+  toggleChapterSelection,
+  toggleSectionSelection,
 }: SortableChapterItemProps) {
     const { 
-        isProjectBuildMode, 
-        selectedSectionsForBuild, 
-        toggleChapterSelection,
         updateProject
     } = useBuilderStore(state => ({
-        isProjectBuildMode: state.isProjectBuildMode,
-        selectedSectionsForBuild: state.selectedSectionsForBuild,
-        toggleChapterSelection: state.toggleChapterSelection,
         updateProject: state.updateProject,
     }));
     

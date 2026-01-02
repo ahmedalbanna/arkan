@@ -57,12 +57,13 @@ export function GenerationTools() {
     setIsTemplateDialogOpen,
     isBuildProjectDialogOpen,
     setIsBuildProjectDialogOpen,
-    // State from local hook
     project,
     isProjectBuildMode,
     enterProjectBuildMode,
     exitProjectBuildMode,
     selectedSectionsForBuild,
+    toggleChapterSelection,
+    toggleSectionSelection,
     toggleSelectAll,
     onGenerateProject,
     projectMutation,
@@ -155,6 +156,10 @@ export function GenerationTools() {
                               chapter={item}
                               index={index}
                               key={item.id}
+                              isProjectBuildMode={isProjectBuildMode}
+                              selectedSectionsForBuild={selectedSectionsForBuild}
+                              toggleChapterSelection={toggleChapterSelection}
+                              toggleSectionSelection={toggleSectionSelection}
                             />
                           )
                         }
@@ -210,5 +215,3 @@ export function GenerationTools() {
     </>
   );
 }
-
-    
