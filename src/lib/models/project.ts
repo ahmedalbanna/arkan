@@ -127,6 +127,10 @@ export class Project {
     }
     return undefined;
   }
+   public getOtherSections(sectionId: string): Section[] {
+    return this.sections.filter(s => s.id !== sectionId);
+  }
+
 
   public getChapter(id: string): Chapter | undefined {
     return this.chapters.find(c => c.id === id);

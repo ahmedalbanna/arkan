@@ -25,10 +25,11 @@ interface BuildProjectDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   chaptersToBuild: Chapter[];
-  getContextNames: (section: Section) => string[];
+  getContextNames: (project: Project, section: Section) => string[];
   finalProjectPrompt: string;
   onGenerateProject: () => void;
   isLoading: boolean;
+  project: Project;
 }
 
 export function BuildProjectDialog({
@@ -39,6 +40,7 @@ export function BuildProjectDialog({
   finalProjectPrompt,
   onGenerateProject,
   isLoading,
+  project,
 }: BuildProjectDialogProps) {
   const [viewMode, setViewMode] = useState<'plan' | 'prompt'>('plan');
 
@@ -85,9 +87,9 @@ export function BuildProjectDialog({
                             </div>
                             <div className="space-y-1">
                               <h4 className="font-semibold flex items-center gap-2 text-xs"><LinkIcon className="w-3 h-3" />Selected Context</h4>
-                              {getContextNames(section).length > 0 ? (
+                              {getContextNames(project, section).length > 0 ? (
                                 <div className="flex flex-wrap gap-1">
-                                  {getContextNames(section).map(name => <Badge variant="secondary" key={name}>{name}</Badge>)}
+                                  {getContextNames(project, section).map(name => <Badge variant="secondary" key={name}>{name}</Badge>)}
                                 </div>
                               ) : (
                                 <p className="text-muted-foreground text-xs italic">No specific context selected for this section.</p>

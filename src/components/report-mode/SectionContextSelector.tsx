@@ -5,26 +5,28 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useContextSelector } from '@/hooks/core/use-context-selector';
+import { useBuilderStore } from '@/hooks/core/useBuilderStore';
 import { type SectionContext, type ExternalContextType } from '@/lib/models';
 import type { Section, ExternalContext } from '@/lib/models';
+import { useLocalization } from '@/context/LocalizationContext';
 
 interface ContextSelectorProps {
-    availableSections: Section[];
-    availableFiles: ExternalContext[];
-    selectedContext: SectionContext;
-    onContextChange: (newContext: SectionContext) => void;
+    sectionId: string;
 }
 
 const contextTypes: ExternalContextType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
 
-export function SectionContextSelector({
-    availableSections,
-    availableFiles,
-    selectedContext,
-    onContextChange
-}: ContextSelectorProps) {
-    const { t } = useContextSelector(''); // Pass dummy key, only t is used
+export function SectionContextSelector({ sectionId }: ContextSelectorProps) {
+    const { t } = useLocalization();
+    const { project, updateSection } = useBuilderStore(state => ({ 
+        project: state.project,
+        updateSection: state.updateSection 
+    }));
+
+    const availableSections = project?.getOtherSections(sectionId) || [];
+    const availableFiles = project?.externalContext || [];
+    const section = project?.getSection(sectionId);
+    const selectedContext = section?.context || { sections: {}, externalContext: {} };
 
     const handleToggle = (type: 'sections' | 'externalContext', id: string) => {
         const newContext = JSON.parse(JSON.stringify(selectedContext)); // Deep copy
@@ -35,13 +37,13 @@ export function SectionContextSelector({
         } else {
             target[id] = 'context'; // Default to 'context' when toggled on
         }
-        onContextChange(newContext);
+        updateSection(sectionId, (s) => s.with({ context: newContext }));
     };
 
     const handleTypeChange = (type: 'sections' | 'externalContext', id: string, newType: ExternalContextType) => {
         const newContext = JSON.parse(JSON.stringify(selectedContext));
         newContext[type][id] = newType;
-        onContextChange(newContext);
+        updateSection(sectionId, (s) => s.with({ context: newContext }));
     }
 
     return (

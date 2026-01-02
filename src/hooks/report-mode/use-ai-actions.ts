@@ -105,6 +105,7 @@ export function useAiActions({ editor }: AiActionsProps = {}) {
   });
   
   const getContextNames = (section: Section, project: Project): string[] => {
+    if (!section) return []; // Guard clause to prevent crash
     const sectionContexts = Object.keys(section.context?.sections || {})
       .filter(key => section.context.sections?.[key])
       .map(key => project.getSection(key)?.title)
