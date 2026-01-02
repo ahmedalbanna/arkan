@@ -6,7 +6,6 @@ import { localProjectService } from '@/services/local-project-service';
 import { useEffect } from 'react';
 import { create } from 'zustand';
 import { toast } from '../util/use-toast';
-import { parseMarkdownToContent } from '../util/useMarkdownParser';
 
 interface BuilderState {
     project: Project | null;
@@ -79,7 +78,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     },
 
     newSession: () => {
-        if (window.confirm('Are you sure you want to start a new session? Any unsaved changes will be lost.')) {
+        if (typeof window !== 'undefined' && window.confirm('Are you sure you want to start a new session? Any unsaved changes will be lost.')) {
             localStorage.removeItem('lastActiveProjectId');
             set({ project: createNewTemporaryProject(), hasUnsavedChanges: false });
         }
@@ -101,9 +100,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     },
     
     setContentFromMarkdown: (markdown: string) => {
-        get().updateProject(p => {
-           return p.with({ content: parseMarkdownToContent(markdown, p.content) });
-        });
+        get().updateProject(p => p.updateContentFromMarkdown(markdown));
     },
 }));
 
@@ -120,5 +117,3 @@ export function useInitializeBuilderStore() {
 };
 
 export { useBuilderStore };
-
-    

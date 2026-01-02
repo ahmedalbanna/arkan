@@ -2,16 +2,15 @@
 'use client';
 
 import { useEditorStore } from '@/hooks/core/use-editor-store';
-import { handleFileDrop } from '@/lib/utils/drop-handler';
-import { handleFilePaste, handleHtmlPaste, handlePlainPaste } from '@/lib/utils/paste-handler';
 import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react';
 import { marked } from 'marked';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 import { editorExtensions } from '@/lib/tiptap-extensions';
 import { Button } from '@/components/ui/button';
 import { ContextualToolbar } from '@/lib/editor/ToolBar';
+import { useBuilderStore } from '@/hooks';
 
 // Turndown Service Initialization
 const turndownService = new TurndownService({ headingStyle: 'atx' });
@@ -20,16 +19,17 @@ turndownService.use(gfm);
 // Main Editor Component
 interface RichTextEditorProps {
   content: string;
-  onChange: (markdown: string) => void;
 }
 
-function RichTextEditor({ content, onChange }: RichTextEditorProps) {
+function RichTextEditor({ content }: RichTextEditorProps) {
   const { setActiveEditor } = useEditorStore();
+  const { setContentFromMarkdown } = useBuilderStore();
   const uniqueId = React.useId();
-  
+  const [currentContent, setCurrentContent] = useState(content);
+
   const editor = useEditor({
     extensions: editorExtensions(uniqueId),
-    content: marked.parse(content) as string,
+    content: marked.parse(currentContent) as string,
     onSelectionUpdate: ({ editor }) => {
       setActiveEditor(editor);
     },
@@ -37,78 +37,41 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       attributes: {
         class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif text-base prose-p:text-base prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2',
       },
-      handlePaste: (view, event, slice) => {
-        const pastedFiles = Array.from(event.clipboardData?.files || []);
-        if (editor && pastedFiles.length > 0) {
-          pastedFiles.forEach(file => handleFilePaste(editor, file));
-          return true; // We handled the paste
-        }
-        const html = event.clipboardData?.getData('text/html');
-        const plain = event.clipboardData?.getData('text/plain');
-
-        if (html && editor) {
-          handleHtmlPaste(editor, html);
-          return true; // We handled the paste
-        } else if (editor && plain) {
-          handlePlainPaste(editor, plain);
-          return true; // We handled the paste
-        }
-        return false; // Let Tiptap handle default paste
-      },
-      handleDrop: (view, event, slice, moved) => {
-        const droppedFiles = Array.from(event.dataTransfer?.files || []);
-        if (editor && droppedFiles.length > 0) {
-            droppedFiles.forEach(file => handleFileDrop(editor, file));
-            return true; // We handled the drop
-        }
-        return false;
-      }
     },
     immediatelyRender: false,
   });
 
-  // Ref to track if there's a pending update from props
-  const isUpdatingFromProps = useRef(false);
-
-  // Effect to update editor content when the `content` prop changes
+  // Effect to update editor when external content changes
   useEffect(() => {
     if (editor && !editor.isDestroyed) {
-      const currentEditorMarkdown = turndownService.turndown(editor.getHTML());
-      if (content !== currentEditorMarkdown) {
-        isUpdatingFromProps.current = true;
+      const editorMarkdown = turndownService.turndown(editor.getHTML());
+      if (content !== editorMarkdown) {
+        // Only update if the external content is different
+        // from the editor's current content.
         const { from, to } = editor.state.selection;
         editor.commands.setContent(marked.parse(content) as string, false);
+        // Restore cursor position
         editor.commands.setTextSelection({ from, to });
-        // After setting content, immediately turn the flag off
-        // Use a timeout to ensure it happens after the transaction is fully applied
-        setTimeout(() => {
-          isUpdatingFromProps.current = false;
-        }, 0);
       }
     }
-  }, [content, editor]);
-  
-  // Effect to handle changes from the editor itself with debouncing
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content]);
+
+
+  // Effect to update the global store with debouncing
   useEffect(() => {
     if (!editor) return;
 
-    let debounceTimeout: NodeJS.Timeout;
-
     const handleUpdate = () => {
-      // If the editor is being updated by props, don't trigger the onChange callback
-      if (isUpdatingFromProps.current) {
-        return;
-      }
-
-      clearTimeout(debounceTimeout);
-      debounceTimeout = setTimeout(() => {
-        const markdown = turndownService.turndown(editor.getHTML());
-        // Only call onChange if the markdown has actually changed
-        if (markdown !== content) {
-          onChange(markdown);
-        }
-      }, 1000); // 1-second debounce delay
+      const markdown = turndownService.turndown(editor.getHTML());
+      setCurrentContent(markdown);
     };
+
+    const debounceTimeout = setTimeout(() => {
+      if (content !== currentContent) {
+        setContentFromMarkdown(currentContent);
+      }
+    }, 1000);
 
     editor.on('update', handleUpdate);
 
@@ -116,7 +79,7 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       editor.off('update', handleUpdate);
       clearTimeout(debounceTimeout);
     };
-  }, [editor, onChange, content]);
+  }, [editor, currentContent, content, setContentFromMarkdown]);
 
 
   const handleWrapperClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -133,9 +96,7 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           editor={editor}
           tippyOptions={{ duration: 100, placement: 'top', onClose: () => false }}
           pluginKey={uniqueId}
-          shouldShow={({ editor, from, to }) => {
-            return !editor.state.selection.empty;
-          }}
+          shouldShow={({ editor }) => !editor.state.selection.empty}
         >
           {editor.isActive('table') ? (
             <div className="bg-background p-1 rounded-lg shadow-lg border flex gap-1">
@@ -144,9 +105,7 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
               <Button size="sm" variant="destructive" onClick={() => editor.chain().focus().deleteTable().run()}>Delete Table</Button>
             </div>
           ) : (
-            <ContextualToolbar
-              editor={editor}
-            />
+            <ContextualToolbar editor={editor} />
           )}
         </BubbleMenu>
       )}

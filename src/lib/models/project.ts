@@ -7,6 +7,7 @@ import { ExternalContext, type ExternalContextProperties } from './external-cont
 import type { ReportTemplateProperties } from './reportTemplate';
 import { generateFullMarkdownFromProject } from '../utils/markdown-generation';
 import { arrayMove } from '@dnd-kit/sortable';
+import { parseMarkdownToContent } from '@/hooks/util/useMarkdownParser';
 
 // Flexible Type for Project Content - strictly enforcing structure now
 export type ProjectContent = readonly (Chapter | Section)[];
@@ -149,6 +150,11 @@ export class Project {
   }
 
   // --- Immutable Logic ---
+
+  public updateContentFromMarkdown(markdown: string): Project {
+    const newContent = parseMarkdownToContent(markdown, this.content);
+    return this.with({ content: newContent });
+  }
 
   public addChapter(title: string = "Untitled Chapter"): Project {
     const newChapter = new Chapter({ title, sections: [] });
@@ -313,6 +319,35 @@ ${universityText}
           }
       }
       return null;
+  }
+
+  public parseAndSetContentFromToc(tocText: string): ProjectContent {
+    const lines = tocText.split('\n').filter(line => line.trim() !== '');
+    const newContent: Chapter[] = [];
+    let currentChapter: Chapter | null = null;
+
+    lines.forEach(line => {
+        const isSection = line.trim().match(/^\d+\.\d+/); // e.g., 1.1, 2.3
+        const isChapter = line.trim().match(/^\d+\./);   // e.g., 1., 2.
+
+        if (isChapter && !isSection) {
+            if (currentChapter) {
+                newContent.push(currentChapter);
+            }
+            const title = line.replace(/^\d+\.\s*/, '').trim();
+            currentChapter = new Chapter({ title, sections: [] });
+        } else if (currentChapter) {
+            const title = line.replace(/^\d+\.\d+\.?\s*|\s*-\s*/, '').trim();
+            const newSection = new Section({ title, type: 'report' });
+            currentChapter = currentChapter.addSection(newSection);
+        }
+    });
+
+    if (currentChapter) {
+        newContent.push(currentChapter);
+    }
+
+    return newContent;
   }
 
   // --- Serialization ---
