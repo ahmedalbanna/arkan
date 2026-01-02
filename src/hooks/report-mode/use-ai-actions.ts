@@ -117,6 +117,7 @@ export function useAiActions({ editor }: AiActionsProps = {}) {
 
         const token = await firebaseUser.getIdToken();
         const body = {
+            flow: 'generate-section',
             sectionToGenerate: section.id as SectionName,
             prompt: section.buildActionPrompt(),
             otherSections: section.getContextAsRecord(currentProject),

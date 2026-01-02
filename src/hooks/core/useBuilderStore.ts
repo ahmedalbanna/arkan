@@ -30,7 +30,6 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     project: null,
     hasUnsavedChanges: false,
     isStoreInitialized: false,
-
     initializeStore: () => {
         if (get().isStoreInitialized) return;
         const lastProjectId = localStorage.getItem('lastActiveProjectId');

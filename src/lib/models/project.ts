@@ -6,6 +6,7 @@ import { Section, type SectionProperties } from './section';
 import { ExternalContext, type ExternalContextProperties } from './external-context';
 import type { ReportTemplateProperties } from './reportTemplate';
 import { generateFullMarkdownFromProject } from '../utils/markdown-generation';
+import { arrayMove } from '@dnd-kit/sortable';
 
 // Flexible Type for Project Content - strictly enforcing structure now
 export type ProjectContent = readonly (Chapter | Section)[];
