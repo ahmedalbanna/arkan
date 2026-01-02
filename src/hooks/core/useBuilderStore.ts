@@ -16,6 +16,7 @@ interface BuilderState {
     initializeStore: () => void;
     setHasUnsavedChanges: (hasChanges: boolean) => void;
     updateProject: (updater: (project: Project) => void | Project) => void;
+    updateSection: (sectionId: string, updater: (section: Section) => Section) => void;
     loadProject: (projectData: ProjectProperties) => void;
     loadProjectFromFile: (file: File) => Promise<void>;
     newSession: () => void;
@@ -57,6 +58,10 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
             const result = updater(newProject);
             return { project: result instanceof Project ? result : newProject, hasUnsavedChanges: true };
         });
+    },
+
+    updateSection: (sectionId, updater) => {
+        get().updateProject(p => p.updateSection(sectionId, updater));
     },
 
     loadProject: (projectData) => {
