@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
@@ -27,7 +28,7 @@ interface ContextualToolbarProps {
 const ContextualToolbar = memo(function ContextualToolbar({ editor }: ContextualToolbarProps) {
   const { t } = useLocalization();
   const { speak, stop, isSpeaking } = useBrowserSpeech();
-  const { activeAiAction, isProcessing, handleAiAction, rewriteStyles } = useAiActions({ editor });
+  const { isProcessing, handleAiAction, rewriteStyles } = useAiActions({ editor });
 
   function handleReadAloudClick() {
     if (isSpeaking) {

@@ -1,10 +1,11 @@
 
+
 'use client';
 
 import { useEditorStore } from '@/hooks/core/use-editor-store';
 import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react';
 import { marked } from 'marked';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/lib/tiptap-extensions';
@@ -22,14 +23,17 @@ interface RichTextEditorProps {
 }
 
 function RichTextEditor({ content }: RichTextEditorProps) {
-  const { setActiveEditor } = useEditorStore();
+  const { activeEditor, setActiveEditor } = useEditorStore();
   const { setContentFromMarkdown } = useBuilderStore();
   const uniqueId = React.useId();
-  const [currentContent, setCurrentContent] = useState(content);
-
+  
   const editor = useEditor({
     extensions: editorExtensions(uniqueId),
-    content: marked.parse(currentContent) as string,
+    content: marked.parse(content) as string,
+    onUpdate: ({ editor }) => {
+        const markdown = turndownService.turndown(editor.getHTML());
+        setContentFromMarkdown(markdown);
+    },
     onSelectionUpdate: ({ editor }) => {
       setActiveEditor(editor);
     },
@@ -57,53 +61,35 @@ function RichTextEditor({ content }: RichTextEditorProps) {
     immediatelyRender: false,
   });
 
-  // Effect to update editor when external content changes
+  // Effect to sync editor with global state when it changes externally
   useEffect(() => {
     if (editor && !editor.isDestroyed) {
       const editorMarkdown = turndownService.turndown(editor.getHTML());
       if (content !== editorMarkdown) {
-        // Only update if the external content is different
-        // from the editor's current content.
         const { from, to } = editor.state.selection;
         editor.commands.setContent(marked.parse(content) as string, false);
-        // Restore cursor position
         editor.commands.setTextSelection({ from, to });
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content]);
+  }, [content, editor]);
 
-
-  // Effect to update the global store with debouncing
+  // Set the global editor instance when it's created and destroy it on unmount
   useEffect(() => {
-    if (!editor) return;
-
-    const handleUpdate = () => {
-      const markdown = turndownService.turndown(editor.getHTML());
-      setCurrentContent(markdown);
-    };
-
-    const debounceTimeout = setTimeout(() => {
-      if (content !== currentContent) {
-        setContentFromMarkdown(currentContent);
-      }
-    }, 1000);
-
-    editor.on('update', handleUpdate);
-
+    if (editor) {
+      setActiveEditor(editor);
+    }
     return () => {
-      editor.off('update', handleUpdate);
-      clearTimeout(debounceTimeout);
+      setActiveEditor(null);
+      editor?.destroy();
     };
-  }, [editor, currentContent, content, setContentFromMarkdown]);
-
+  }, [editor, setActiveEditor]);
 
   const handleWrapperClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (editor && event.target === event.currentTarget) {
       editor.chain().focus().run();
     }
   };
-
 
   return (
     <div className="relative text-base h-full">

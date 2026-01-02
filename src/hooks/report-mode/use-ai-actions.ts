@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useCallback, useMemo } from 'react';
@@ -16,16 +17,20 @@ import { PromptBuilder } from '@/lib/prompt-builder';
 import { writingToolApi } from '@/services/api/writingToolsService';
 import type { Chapter, Project, Section } from '@/lib/models';
 import { parseMarkdownToContent } from '../util/useMarkdownParser';
+import { useEditorStore } from '../core/use-editor-store';
 
 interface AiActionsProps {
   editor?: Editor | null;
 }
 
-export function useAiActions({ editor }: AiActionsProps = {}) {
+export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
   const { t } = useLocalization();
   const { toast } = useToast();
   const { firebaseUser, refetchUser } = useAuth();
   const { updateProject } = useBuilderStore();
+  const { activeEditor } = useEditorStore();
+  
+  const editor = initialEditor || activeEditor;
 
   const onTextUpdate = useCallback((newText: string, from: number, to: number) => {
     if (!editor) return;
@@ -219,5 +224,3 @@ export function useAiActions({ editor }: AiActionsProps = {}) {
     generateProjectMutation,
   };
 }
-
-    

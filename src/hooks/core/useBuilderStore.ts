@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Chapter, Project, Section, TocSection, type ProjectProperties, User } from '@/lib/models';
@@ -6,6 +7,8 @@ import { localProjectService } from '@/services/local-project-service';
 import { useEffect } from 'react';
 import { create } from 'zustand';
 import { toast } from '../util/use-toast';
+import { useEditorStore } from './use-editor-store';
+import { marked } from 'marked';
 
 interface BuilderState {
     project: Project | null;
@@ -70,6 +73,13 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         const newProject = projectData instanceof Project ? projectData : new Project(projectData);
         localStorage.setItem('lastActiveProjectId', newProject.id);
         set({ project: newProject, hasUnsavedChanges: false });
+
+        // Also update the editor content
+        const editor = useEditorStore.getState().activeEditor;
+        if (editor && !editor.isDestroyed) {
+          const html = marked.parse(newProject.fullMarkdownContent) as string;
+          editor.commands.setContent(html, false);
+        }
     },
 
     loadProjectFromFile: async (file: File) => {
@@ -86,6 +96,11 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         if (typeof window !== 'undefined' && window.confirm('Are you sure you want to start a new session? Any unsaved changes will be lost.')) {
             localStorage.removeItem('lastActiveProjectId');
             set({ project: createNewTemporaryProject(), hasUnsavedChanges: false });
+            // Also clear the editor
+            const editor = useEditorStore.getState().activeEditor;
+            if (editor && !editor.isDestroyed) {
+                editor.commands.clearContent();
+            }
         }
     },
 
@@ -105,7 +120,13 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     },
     
     setContentFromMarkdown: (markdown: string) => {
-        get().updateProject(p => p.updateContentFromMarkdown(markdown));
+        const editor = useEditorStore.getState().activeEditor;
+        if (editor && !editor.isDestroyed) {
+          const currentMarkdown = get().project?.fullMarkdownContent || '';
+          if (markdown !== currentMarkdown) {
+            get().updateProject(p => p.updateContentFromMarkdown(markdown));
+          }
+        }
     },
 }));
 

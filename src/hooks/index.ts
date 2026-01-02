@@ -1,4 +1,5 @@
 
+
 // Admin Hooks
 export * from './admin/use-admin-dashboard';
 export * from './admin/use-create-user-dialog';
@@ -10,6 +11,7 @@ export * from './auth/use-auth-mutations';
 export * from './core/use-context-selector';
 export * from './core/useAutosave';
 export * from './core/useBuilderStore';
+export * from './core/use-editor-store';
 export * from './core/useProjectsPage';
 export * from './core/useImageUpload';
 
