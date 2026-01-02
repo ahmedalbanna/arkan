@@ -25,14 +25,13 @@ import { editorPlantUml } from './utils/processPlantUml';
  * @param editor The Tiptap editor instance.
  */
 export const handleFileDrop = (editor: Editor, file: File) => {
-  const reader = new FileReader();
-
   if (!file || !file.name) {
     console.warn('File dropped without a name or content, skipping.');
     return;
   }
   
   const fileExtension = file.name.split('.').pop()?.toLowerCase();
+  const reader = new FileReader();
 
   reader.onload = (event) => {
     const content = event.target?.result;
@@ -95,27 +94,32 @@ export const handleFilePaste = (editor: Editor, file: File) => {
   reader.readAsDataURL(file);
 };
 
-export function handleHtmlPaste(editor:Editor, html:string) {
-  
+export async function handleHtmlPaste(editor:Editor, html:string) {
   if (html && editor) {
-    editor.chain().focus().insertContent(html).run();
+    editor.chain().focus().insertContent(html, {
+        parseOptions: {
+            preserveWhitespace: false,
+        },
+    }).run();
     return true;
   }
+  return false;
 }
-export async function handlePlainPaste(editor:Editor, plain:string) {
-if (plain && editor) {
 
-  if (plain.includes('@startuml') && plain.includes('@enduml')) {
-    const processed = await editorPlantUml(plain);
-    if (processed) {
-      editor.chain().focus().insertContent(marked.parse(processed)).run();
-      return true;
+export async function handlePlainPaste(editor:Editor, plain:string) {
+  if (plain && editor) {
+    if (plain.includes('@startuml') && plain.includes('@enduml')) {
+        const processed = await editorPlantUml(plain);
+        if (processed) {
+            editor.chain().focus().insertContent(marked.parse(processed) as string).run();
+            return true;
+        }
     }
+    const parsedHtml = marked.parse(plain) as string;
+    editor.chain().focus().insertContent(parsedHtml).run();
+    return true;
   }
-  const parsedHtml = marked.parse(plain);
-  editor.chain().focus().insertContent(parsedHtml).run();
-  return true;
-}
+  return false;
 }
 
 
@@ -151,6 +155,7 @@ export const editorExtensions = (uniqueId: string) => [
     },
     onPaste: async (currentEditor, files, htmlContent) => {
       if (htmlContent) {
+        // If HTML content is present, let Tiptap handle it or use a custom HTML handler
         return false;
       }
       files.forEach(file => handleFilePaste(currentEditor, file));

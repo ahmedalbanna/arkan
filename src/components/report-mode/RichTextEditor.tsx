@@ -7,7 +7,7 @@ import { marked } from 'marked';
 import React, { useEffect, useRef, useState } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
-import { editorExtensions } from '@/lib/tiptap-extensions';
+import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/lib/tiptap-extensions';
 import { Button } from '@/components/ui/button';
 import { ContextualToolbar } from '@/lib/editor/ToolBar';
 import { useBuilderStore } from '@/hooks';
@@ -36,6 +36,22 @@ function RichTextEditor({ content }: RichTextEditorProps) {
     editorProps: {
       attributes: {
         class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif text-base prose-p:text-base prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2',
+      },
+       handlePaste: (view, event, slice) => {
+        const text = event.clipboardData?.getData('text/plain');
+        const html = event.clipboardData?.getData('text/html');
+
+        if (html) {
+            handleHtmlPaste(view.state.tr.doc.type.schema.nodeFromJSON(slice.content.toJSON()), html);
+            return true;
+        }
+
+        if (text) {
+          handlePlainPaste(editor!, text);
+          return true;
+        }
+        
+        return false;
       },
     },
     immediatelyRender: false,
