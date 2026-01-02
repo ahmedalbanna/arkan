@@ -14,6 +14,8 @@ import {
   SectionTypeSchema,
 } from './control-types';
 import { z } from 'zod';
+import type { Project } from './project';
+import { PromptBuilder } from '../prompt-builder';
 
 export const SectionPropertiesSchema = z.object({
   id: z.string().optional(),
@@ -88,7 +90,7 @@ export class Section {
   }
 
   public with(props: Partial<SectionProperties>): Section {
-    return new Section({ ...this.toJSON(), ...props });
+    return new Section({ ...this.toStateObject(), ...props });
   }
 
   public buildSystemPrompt(): string {
@@ -174,9 +176,37 @@ export class Section {
     const additionalInstructions = `\n\n**Additional Instructions:**\n${instructions.join(' ')}`;
 
     return `${this.prompt}${additionalInstructions}`;
-}
+  }
 
-  public toJSON(): SectionProperties {
+  public getContextAsRecord(project: Project): Record<string, string> {
+      if (!this.context?.sections) return {};
+      const contextRecord: Record<string, string> = {};
+      for (const sectionId of Object.keys(this.context.sections)) {
+          const section = project.getSection(sectionId);
+          if (section?.content) {
+              contextRecord[section.title] = section.content;
+          }
+      }
+      return contextRecord;
+  }
+
+  public getExternalContextAsArray(project: Project): { fileName: string; content: string; type: string }[] {
+      if (!this.context?.externalContext) return [];
+      const externalContextArray = [];
+      for (const fileId of Object.keys(this.context.externalContext)) {
+          const file = project.externalContext?.find(f => f.id === fileId);
+          if (file) {
+              externalContextArray.push({
+                  fileName: file.fileName,
+                  content: file.content,
+                  type: this.context.externalContext[fileId]!,
+              });
+          }
+      }
+      return externalContextArray;
+  }
+
+  public toStateObject(): SectionProperties {
     return {
       id: this.id,
       title: this.title,
@@ -191,5 +221,9 @@ export class Section {
       context: this.context,
       metadata: this.metadata,
     };
+  }
+
+  public toJSON(): SectionProperties {
+    return this.toStateObject();
   }
 }

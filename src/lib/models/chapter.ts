@@ -22,14 +22,10 @@ export class Chapter {
   }
 
   public with(props: Partial<ChapterProperties>): Chapter {
-    const sections = props.sections
-        ? props.sections.map(s => s instanceof Section ? s : new Section(s))
-        : this.sections;
-
     return new Chapter({
-        id: this.id,
-        title: props.title ?? this.title,
-        sections: sections
+      id: this.id,
+      title: props.title ?? this.title,
+      sections: props.sections ? props.sections.map(s => s instanceof Section ? s : new Section(s)) : this.sections,
     });
   }
 
@@ -59,31 +55,15 @@ export class Chapter {
     return this.with({ sections: newSections });
   }
 
-  public reorderSections(newOrderIds: string[]): Chapter {
-      // Create a map for O(1) lookup
-      const sectionMap = new Map(this.sections.map(s => [s.id, s]));
-      const newSections: Section[] = [];
-
-      for (const id of newOrderIds) {
-          const s = sectionMap.get(id);
-          if (s) newSections.push(s);
-      }
-
-      // Keep any sections not in the newOrderIds at the end (safety mechanism)
-      this.sections.forEach(s => {
-          if (!newSections.find(ns => ns.id === s.id)) {
-              newSections.push(s);
-          }
-      });
-
-      return this.with({ sections: newSections });
-  }
-
-  public toJSON(): any {
+  public toStateObject(): ChapterProperties {
     return {
       id: this.id,
       title: this.title,
-      sections: this.sections.map(s => s.toJSON())
+      sections: this.sections.map(s => s.toStateObject())
     };
+  }
+
+  public toJSON(): any {
+    return this.toStateObject();
   }
 }

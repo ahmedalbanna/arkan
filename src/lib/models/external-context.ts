@@ -17,7 +17,7 @@ export class ExternalContext implements ExternalContextProperties {
     public readonly fileName: string;
     public readonly content: string;
     public readonly type: ExternalContextType;
-    public readonly metadata: Record<string, any>;
+    public readonly metadata: Readonly<Record<string, any>>;
 
     constructor(props: ExternalContextProperties) {
         this.id = props.id || uuidv4();
@@ -42,5 +42,9 @@ export class ExternalContext implements ExternalContextProperties {
             type: this.type,
             metadata: this.metadata,
         };
+    }
+
+    public toJSON(): ExternalContextProperties {
+        return this.toStateObject();
     }
 }

@@ -3,11 +3,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Chapter, type ChapterProperties } from './chapter';
 import { Section, type SectionProperties } from './section';
-import { ExternalContext } from './external-context';
-import { arrayMove } from '@dnd-kit/sortable';
-import type { Root as MdastRoot, RootContent } from 'mdast';
-import { getNodeText } from '../pptx-convert/ast-utils';
-import { type ReportTemplateProperties } from './reportTemplate';
+import { ExternalContext, type ExternalContextProperties } from './external-context';
+import type { ReportTemplateProperties } from './reportTemplate';
 import { generateFullMarkdownFromProject } from '../utils/markdown-generation';
 
 // Flexible Type for Project Content - strictly enforcing structure now
@@ -49,7 +46,7 @@ export class Project {
   public readonly supervisor?: string;
   public readonly course?: string;
   public readonly educationalLevel?: string;
-  public readonly teamMembers?: string[];
+  public readonly teamMembers?: readonly string[];
   public readonly logoUrl?: string;
 
   public readonly content: ProjectContent;
@@ -78,7 +75,7 @@ export class Project {
         return c;
       }
       // Check if it has a 'sections' property to determine if it's a Chapter
-      if ('sections' in c) {
+      if ('sections' in c && Array.isArray(c.sections)) {
         return new Chapter(c as ChapterProperties);
       }
       return new Section(c as SectionProperties);
@@ -105,11 +102,11 @@ export class Project {
 
   // --- Derived State ---
 
-  get chapters(): Chapter[] {
+  get chapters(): readonly Chapter[] {
     return this.content.filter(item => item instanceof Chapter) as Chapter[];
   }
 
-  get sections(): Section[] {
+  get sections(): readonly Section[] {
     return this.content.flatMap(item =>
       item instanceof Chapter ? item.sections : [item]
     );
@@ -127,31 +124,13 @@ export class Project {
     }
     return undefined;
   }
-   public getOtherSections(sectionId: string): Section[] {
+
+   public getOtherSections(sectionId: string): readonly Section[] {
     return this.sections.filter(s => s.id !== sectionId);
   }
 
-
   public getChapter(id: string): Chapter | undefined {
     return this.chapters.find(c => c.id === id);
-  }
-
-  public findContentItem(id: string): { item: Chapter | Section, parentChapterId: string | null } | null {
-    // Check root content
-    const rootItem = this.content.find(item => item.id === id);
-    if (rootItem) {
-      return { item: rootItem, parentChapterId: null };
-    }
-
-    // Check within chapters
-    for (const chapter of this.chapters) {
-      const section = chapter.getSection(id);
-      if (section) {
-        return { item: section, parentChapterId: chapter.id };
-      }
-    }
-
-    return null;
   }
 
   public hasContent(): boolean {
@@ -164,7 +143,11 @@ export class Project {
     return hasBasicInfo || hasContentItems || hasExternalContext;
   }
 
-  // --- Logic ---
+  get fullMarkdownContent(): string {
+    return generateFullMarkdownFromProject(this.toStateObject());
+  }
+
+  // --- Immutable Logic ---
 
   public addChapter(title: string = "Untitled Chapter"): Project {
     const newChapter = new Chapter({ title, sections: [] });
@@ -222,7 +205,7 @@ export class Project {
     return this.updateSection(sectionId, s => s.with({ content: newMarkdown }));
   }
 
-  public addExternalContext(ctx: Omit<ExternalContext, 'id'>): Project {
+  public addExternalContext(ctx: Omit<ExternalContextProperties, 'id'>): Project {
     const newCtx = new ExternalContext({ ...ctx, id: uuidv4() });
     return this.with({ externalContext: [...this.externalContext, newCtx] });
   }
@@ -266,24 +249,73 @@ ${universityText}
     const allSectionsMap = new Map(allSections.map(s => [s.id, s]));
     const newContent = template.content.map(chapterData => {
         const sections = (chapterData.sections || []).map(sectionInfo => {
-            // Find the full section definition from the default list
             const defaultSection = allSectionsMap.get(sectionInfo.id!);
-            // Create a new Section instance, merging template info with default info
             return new Section({
-                ...defaultSection, // Start with defaults
-                ...sectionInfo,     // Override with template specifics
+                ...defaultSection,
+                ...sectionInfo,
             });
         });
         return new Chapter({ title: chapterData.title, sections: sections });
     });
     return this.with({ content: newContent });
-}
-
-  get fullMarkdownContent(): string {
-    // The client-side getter now uses the server-safe utility for consistency.
-    return generateFullMarkdownFromProject(this.toStateObject());
   }
 
+  public moveContentItem(activeId: string, overId: string): Project {
+    const contentArray = [...this.content];
+    let activeIndex = -1;
+    let overIndex = -1;
+
+    // Check root content
+    activeIndex = contentArray.findIndex(item => item.id === activeId);
+    overIndex = contentArray.findIndex(item => item.id === overId);
+
+    if (activeIndex !== -1 && overIndex !== -1) {
+        return this.with({ content: arrayMove(contentArray, activeIndex, overIndex) });
+    }
+
+    // If not in root, it must be a section within a chapter
+    const { chapter: activeChapter, index: activeSectionIndex } = this.findSectionWithParent(activeId) || {};
+    const { chapter: overChapter, index: overSectionIndex } = this.findSectionWithParent(overId) || {};
+
+    if (activeChapter && overChapter && activeSectionIndex !== -1 && overSectionIndex !== -1) {
+        if (activeChapter.id === overChapter.id) {
+            // Reordering within the same chapter
+            const newSections = arrayMove([...activeChapter.sections], activeSectionIndex, overSectionIndex);
+            return this.updateChapter(activeChapter.id, c => c.with({ sections: newSections }));
+        } else {
+            // Moving section between chapters
+            const newContent = [...this.content];
+            const sourceChapterIndex = newContent.findIndex(c => c.id === activeChapter.id);
+            const destChapterIndex = newContent.findIndex(c => c.id === overChapter.id);
+
+            const sourceChapter = newContent[sourceChapterIndex] as Chapter;
+            let destChapter = newContent[destChapterIndex] as Chapter;
+
+            const [movedSection] = sourceChapter.sections.splice(activeSectionIndex, 1);
+            destChapter.sections.splice(overSectionIndex, 0, movedSection);
+
+            newContent[sourceChapterIndex] = sourceChapter.with({ sections: [...sourceChapter.sections] });
+            newContent[destChapterIndex] = destChapter.with({ sections: [...destChapter.sections] });
+
+            return this.with({ content: newContent });
+        }
+    }
+
+    return this; // Return original if move is not possible
+  }
+
+  private findSectionWithParent(sectionId: string): { chapter: Chapter; index: number } | null {
+      for (const chapter of this.chapters) {
+          const index = chapter.sections.findIndex(s => s.id === sectionId);
+          if (index !== -1) {
+              return { chapter, index };
+          }
+      }
+      return null;
+  }
+
+  // --- Serialization ---
+  
   public toStateObject(): ProjectProperties {
     return {
       id: this.id,
@@ -296,7 +328,7 @@ ${universityText}
       supervisor: this.supervisor,
       course: this.course,
       educationalLevel: this.educationalLevel,
-      teamMembers: this.teamMembers,
+      teamMembers: this.teamMembers ? [...this.teamMembers] : undefined,
       logoUrl: this.logoUrl,
       content: this.content.map(c => c.toJSON()),
       externalContext: this.externalContext.map(ec => ec.toStateObject()),
@@ -305,10 +337,11 @@ ${universityText}
     };
   }
 
-  // toJSON is now an alias for toStateObject for convenience
   public toJSON(): ProjectProperties {
       return this.toStateObject();
   }
+
+  // --- Static Methods ---
 
   public static fromFile(file: File): Promise<Project> {
     return new Promise((resolve, reject) => {
@@ -316,7 +349,6 @@ ${universityText}
         reader.onload = (e) => {
             try {
                 const json = JSON.parse(e.target?.result as string);
-                // Can add Zod validation here later
                 resolve(new Project(json as ProjectProperties));
             } catch (err) {
                 reject(new Error("Invalid or corrupted project file."));

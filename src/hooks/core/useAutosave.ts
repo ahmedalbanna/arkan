@@ -7,7 +7,7 @@ import { useSaveProject } from '../data/use-projects';
 import { useDebounce } from '../util/use-debounce';
 import { useBuilderStore } from './useBuilderStore';
 
-export function useAutosave(delay = 2000) {
+export function useAutosave(delay = 200000) {
     const { hasUnsavedChanges, project } = useBuilderStore();
     const { saveProjectMutation } = useSaveProject();
 

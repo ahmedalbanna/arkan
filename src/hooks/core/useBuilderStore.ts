@@ -15,7 +15,7 @@ interface BuilderState {
     
     initializeStore: () => void;
     setHasUnsavedChanges: (hasChanges: boolean) => void;
-    updateProject: (updater: (project: Project) => void | Project) => void;
+    updateProject: (updater: (project: Project) => Project) => void;
     updateSection: (sectionId: string, updater: (section: Section) => Section) => void;
     loadProject: (projectData: ProjectProperties) => void;
     loadProjectFromFile: (file: File) => Promise<void>;
@@ -54,9 +54,8 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     updateProject: (updater) => {
         set(state => {
             if (!state.project) return {};
-            const newProject = new Project(state.project.toStateObject());
-            const result = updater(newProject);
-            return { project: result instanceof Project ? result : newProject, hasUnsavedChanges: true };
+            const updatedProject = updater(state.project);
+            return { project: updatedProject, hasUnsavedChanges: true };
         });
     },
 
@@ -89,10 +88,11 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
 
     applyTableOfContents: (tocData) => {
         get().updateProject(p => {
-            p.content = tocData.map(chapterData => {
+            const newContent = tocData.map(chapterData => {
                 const sections = chapterData.sections.map(sectionTitle => new Section({ title: sectionTitle, type: 'report' }));
                 return new Chapter({ title: chapterData.title, sections });
             });
+            return p.with({ content: newContent });
         });
 
         toast({
@@ -111,7 +111,6 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
 export function useInitializeBuilderStore() {
     const { initializeStore, isStoreInitialized } = useBuilderStore();
     
-    // Initialize the main store on mount
     useEffect(() => {
         if (!isStoreInitialized) {
             initializeStore();
