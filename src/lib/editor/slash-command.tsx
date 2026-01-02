@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Editor, Range, Extension } from '@tiptap/core';
 import { ReactRenderer } from '@tiptap/react';
@@ -26,12 +27,7 @@ const commandItems = [
     description: 'Generate an image with AI.', 
     icon: <Wand2 size={20} />, 
     command: (editor: Editor) => {
-      const promptText = window.prompt('Enter a prompt for the AI image:');
-      if (promptText) {
-        const seed = Math.floor(Math.random() * 10000000000);
-        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?width=512&height=512&nologo=true&seed=${seed}`;
-        editor.chain().focus().setImage({ src: url, alt: promptText }).run();
-      }
+        editor.chain().focus().insertAIImageGenerator().run();
     } 
   },
   { title: 'Blockquote', description: 'A quote block.', icon: <Quote size={20} />, command: (editor: Editor) => editor.chain().focus().toggleBlockquote().run() },

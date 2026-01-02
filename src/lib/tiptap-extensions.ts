@@ -1,3 +1,4 @@
+
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import Dropcursor from '@tiptap/extension-dropcursor';
 import { FileHandler } from '@tiptap/extension-file-handler';
@@ -17,6 +18,7 @@ import SlashCommand from './editor/slash-command';
 import { marked } from 'marked';
 import mammoth from 'mammoth';
 import { editorPlantUml } from './utils/processPlantUml';
+import AIImageGeneratorNode from './editor/ai-image-generator-extension';
 
 /**
  * Handles dropping a file into the Tiptap editor.
@@ -148,6 +150,7 @@ export const editorExtensions = (uniqueId: string) => [
   TableCell,
   Katex.configure({}),
   PlantUML,
+  AIImageGeneratorNode,
   FileHandler.configure({
     onDrop: (currentEditor, files) => {
       files.forEach(file => handleFileDrop(currentEditor, file));
