@@ -13,10 +13,9 @@ export function generateFullMarkdownFromProject(projectData: ProjectProperties):
     // Type guard to check if the item is a chapter
     if ('sections' in item && Array.isArray(item.sections)) {
       const chapter = item as ChapterProperties;
-      if (chapter.sections && chapter.sections.length > 0) {
-        return `# ${chapter.title}\n\n${chapter.sections.map(s => `## ${s.title}\n\n${s.content || ''}`).join('\n\n')}`;
-      }
-      return `# ${chapter.title}`; // Render chapter title even if no sections
+      const chapterTitle = `# ${chapter.title}`;
+      const sectionsContent = chapter.sections.map(s => `## ${s.title}\n\n${s.content || ''}`).join('\n\n');
+      return `${chapterTitle}\n\n${sectionsContent}`;
     }
     // Assumes it's a section
     const section = item as SectionProperties;
