@@ -32,9 +32,11 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
 
     const handleContentChange = (field: keyof Project, value: string) => {
         updateProject(p => {
-            (p as any)[field] = value;
-             if (field === 'teamMembers') {
-                (p as any)[field] = value.split(',').map(s => s.trim());
+            const sanitizedValue = value.replace(/<br>/g, '\n').replace(/&nbsp;/g, ' ').replace(/<[^>]+>/g, '');
+            if (field === 'teamMembers') {
+                (p as any)[field] = sanitizedValue.split(',').map(s => s.trim());
+            } else {
+                (p as any)[field] = sanitizedValue;
             }
             p.generateCoverPageMarkdown();
         });
@@ -45,7 +47,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
         return (
             <ContentEditable
                 html={Array.isArray(value) ? value.join(', ') : value}
-                onChange={(e) => handleContentChange(field, e.target.value)}
+                onBlur={(e) => handleContentChange(field, e.target.innerHTML)}
                 placeholder={placeholder}
                 className={cn("outline-none focus:bg-primary/5 focus:shadow-inner p-1 rounded-md", className)}
                 tagName={isTextarea ? 'div' : 'p'}
@@ -68,7 +70,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                 )}
                 <ContentEditable
                     html={project.name || ''}
-                    onChange={(e) => handleContentChange('name', e.target.value)}
+                    onBlur={(e) => handleContentChange('name', e.target.innerHTML)}
                     placeholder="Untitled Project"
                     className="text-5xl font-bold font-headline text-primary leading-tight outline-none focus:bg-primary/5 focus:shadow-inner p-2 rounded-md"
                     tagName="h1"
