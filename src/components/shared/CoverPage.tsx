@@ -5,6 +5,9 @@ import { Project } from '@/lib/models';
 import { Landmark } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
+import ContentEditable from 'react-contenteditable';
+import { useBuilderStore } from '@/hooks';
+import { cn } from '@/lib/utils/cn';
 
 interface CoverPageProps {
     project: Project | null;
@@ -22,10 +25,33 @@ const DetailRow: React.FC<{ label: string; value?: string | string[] }> = ({ lab
 };
 
 export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
+    const { updateProject } = useBuilderStore();
+
     if (!project) return null;
     const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    const teamMemberNames = project.teamMembers?.join(', ');
+    const handleContentChange = (field: keyof Project, value: string) => {
+        updateProject(p => {
+            (p as any)[field] = value;
+             if (field === 'teamMembers') {
+                (p as any)[field] = value.split(',').map(s => s.trim());
+            }
+            p.generateCoverPageMarkdown();
+        });
+    };
+
+    const EditableField = ({ field, placeholder, className, isTextarea = false }: { field: keyof Project, placeholder: string, className: string, isTextarea?: boolean }) => {
+        const value = project[field] as string || '';
+        return (
+            <ContentEditable
+                html={Array.isArray(value) ? value.join(', ') : value}
+                onChange={(e) => handleContentChange(field, e.target.value)}
+                placeholder={placeholder}
+                className={cn("outline-none focus:bg-primary/5 focus:shadow-inner p-1 rounded-md", className)}
+                tagName={isTextarea ? 'div' : 'p'}
+            />
+        );
+    };
 
     return (
         <div className="relative bg-background shadow-lg mx-auto my-4 w-full max-w-[210mm] h-[297mm] box-border overflow-hidden p-12 flex flex-col">
@@ -40,45 +66,46 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                         <Image src={project.logoUrl} alt="Project Logo" layout="fill" objectFit="contain" />
                     </div>
                 )}
-                 <h1 className="text-5xl font-bold font-headline text-primary leading-tight">
-                    {project.name || 'Untitled Project'}
-                </h1>
-                {project.university && (
-                    <div className="inline-flex items-center gap-2 text-muted-foreground mt-4">
-                        <Landmark className="w-5 h-5" />
-                        <p className="font-semibold text-lg tracking-wider">{project.university}</p>
-                    </div>
-                )}
+                <ContentEditable
+                    html={project.name || ''}
+                    onChange={(e) => handleContentChange('name', e.target.value)}
+                    placeholder="Untitled Project"
+                    className="text-5xl font-bold font-headline text-primary leading-tight outline-none focus:bg-primary/5 focus:shadow-inner p-2 rounded-md"
+                    tagName="h1"
+                />
+                 <div className="inline-flex items-center gap-2 text-muted-foreground mt-4">
+                    <Landmark className="w-5 h-5" />
+                     <EditableField field="university" placeholder="University Name" className="font-semibold text-lg tracking-wider" />
+                </div>
             </header>
 
             {/* Main Content (Centered) */}
             <main className="relative z-10 flex-grow flex items-center justify-center text-center">
                  <div className="max-w-2xl">
-                    {project.projectDescription && (
-                        <p className="text-2xl text-muted-foreground leading-relaxed italic">
-                            &ldquo;{project.projectDescription}&rdquo;
-                        </p>
-                    )}
+                    <EditableField
+                        field="projectDescription"
+                        placeholder="Project Description..."
+                        className="text-2xl text-muted-foreground leading-relaxed italic"
+                        isTextarea={true}
+                    />
                     <div className="mt-8 flex justify-center gap-x-8 gap-y-2 text-lg">
-                        {project.projectType && <span className="font-medium">{project.projectType}</span>}
-                        {project.specialization && <span className="text-muted-foreground">|</span>}
-                        {project.specialization && <span className="font-medium">{project.specialization}</span>}
+                        <EditableField field="projectType" placeholder="Project Type" className="font-medium" />
+                        <span className="text-muted-foreground">|</span>
+                        <EditableField field="specialization" placeholder="Specialization" className="font-medium" />
                     </div>
                  </div>
             </main>
 
             {/* Footer */}
             <footer className="relative z-10 flex-shrink-0 pt-12">
-                 {teamMemberNames && (
-                    <div className="text-center mb-8">
-                        <h3 className="text-lg font-semibold text-muted-foreground">Submitted By</h3>
-                        <p className="text-xl font-medium">{teamMemberNames}</p>
-                    </div>
-                 )}
+                 <div className="text-center mb-8">
+                    <h3 className="text-lg font-semibold text-muted-foreground">Submitted By</h3>
+                    <EditableField field="teamMembers" placeholder="Team Members, separated by commas" className="text-xl font-medium" />
+                </div>
                  <div className="flex justify-between items-end text-sm text-muted-foreground">
                     <div>
-                        <p className="font-bold">{project.supervisor || 'Supervisor Name'}</p>
-                        <p>{project.course || 'Course Name'}</p>
+                        <EditableField field="supervisor" placeholder="Supervisor Name" className="font-bold" />
+                        <EditableField field="course" placeholder="Course Name" className="" />
                     </div>
                     <p>{currentDate}</p>
                  </div>
