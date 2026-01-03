@@ -11,23 +11,30 @@ import {
 } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore } from '@/hooks';
+import { useBuilderStore, useGenerateTocLogic } from '@/hooks';
 import RichTextEditor from './RichTextEditor';
 import { CoverPage } from '../shared/CoverPage';
 import { Button } from '../ui/button';
-import { ListTree } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { ListTree, Loader2 } from 'lucide-react';
 import ContentEditable from 'react-contenteditable';
 import { cn } from '@/lib/utils/cn';
+import { useEffect } from 'react';
 
 export function ReportResults() {
   const { t } = useLocalization();
   const { project, setContentFromMarkdown, updateProject } = useBuilderStore();
+  const { form, mutation: generateTocMutation } = useGenerateTocLogic();
 
+  useEffect(() => {
+    if (project?.projectDescription) {
+      form.setValue('projectDescription', project.projectDescription);
+    }
+  }, [project?.projectDescription, form]);
+  
   const handleGenerateToc = () => {
     if (project) {
-      updateProject(p => p.generateTableOfContents());
+        // The useGenerateTocLogic hook now handles updating the store on success.
+        generateTocMutation.mutate({ projectDescription: project.projectDescription || '' });
     }
   };
   
@@ -60,9 +67,9 @@ export function ReportResults() {
             <CoverPage project={project} />
 
             <div className="flex justify-center my-4">
-              <Button onClick={handleGenerateToc} variant="outline">
-                <ListTree className="mr-2 h-4 w-4" />
-                Generate Table of Contents
+              <Button onClick={handleGenerateToc} variant="outline" disabled={generateTocMutation.isPending}>
+                {generateTocMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ListTree className="mr-2 h-4 w-4" />}
+                {tocMarkdown ? 'Regenerate Table of Contents' : 'Generate Table of Contents'}
               </Button>
             </div>
             
@@ -88,4 +95,3 @@ export function ReportResults() {
     </Card>
   );
 };
-
