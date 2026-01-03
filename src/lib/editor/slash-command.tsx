@@ -110,11 +110,13 @@ const SlashCommand = Extension.create<Partial<SuggestionOptions>>({
           return commandItems.filter(item => item.title.toLowerCase().startsWith(query.toLowerCase()));
         },
         allow: ({ editor, range }) => {
-          // Don't show slash command inside code blocks
-          if (editor.isActive('codeBlock')) {
-            return false;
-          }
-          return editor.can().deleteRange(range);
+            const $from = editor.state.selection.$from;
+            const isAtStart = $from.parentOffset === 0;
+            const isAnEmptyLine = !$from.parent.textContent;
+            
+            // Allow if it's the beginning of a line and either the line is empty
+            // OR the user has just typed the '/' character.
+            return isAtStart && (isAnEmptyLine || editor.state.doc.textBetween(range.from, range.to) === '/');
         },
         render: render as any || undefined,
       }),
