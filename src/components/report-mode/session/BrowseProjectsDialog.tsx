@@ -12,14 +12,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Search, Loader2, AlertCircle, FileText, FolderOpen } from "lucide-react";
 import { useProjectsPage } from "@/hooks/core/useProjectsPage";
-import { Input } from "../ui/input";
+import { Input } from "../../ui/input";
 import { useState, useMemo } from "react";
-import { ScrollArea } from "../ui/scroll-area";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import { ScrollArea } from "../../ui/scroll-area";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { useBuilderStore } from "@/hooks";
 import { useRouter } from "next/navigation";
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "../../ui/skeleton";
 import { Project } from "@/lib/models";
 
 function ProjectListSkeleton() {

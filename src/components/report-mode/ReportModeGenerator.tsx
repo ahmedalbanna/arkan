@@ -11,12 +11,12 @@ import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
 import { Skeleton } from '../ui/skeleton';
 
 // Correctly handle named exports for React.lazy
-const ProjectSettingsPanel = lazy(() => import('../project/ProjectSettingsPanel').then(mod => ({ default: mod.ProjectSettingsPanel })));
+const ProjectSettingsPanel = lazy(() => import('./settings/ProjectSettingsPanel'));
 const UploadManager = lazy(() => import('../file/UploadManager'));
-const GenerationTools = lazy(() => import('./generation-tools').then(mod => ({ default: mod.default })));
-const AIResearcherTool = lazy(() => import('../writing-tools/AIResearcherTool').then(mod => ({ default: mod.AIResearcherTool })));
-const PlantUMLGeneratorTool = lazy(() => import('../writing-tools/PlantUMLGeneratorTool').then(mod => ({ default: mod.PlantUMLGeneratorTool })));
-const ReportResults = lazy(() => import('./ReportResults').then(mod => ({ default: mod.default })));
+const GenerationTools = lazy(() => import('./generation-tools'));
+const AIResearcherTool = lazy(() => import('../writing-tools/AIResearcherTool'));
+const PlantUMLGeneratorTool = lazy(() => import('../writing-tools/PlantUMLGeneratorTool'));
+const ReportResults = lazy(() => import('./ReportResults'));
 
 
 function ReportSkeleton() {

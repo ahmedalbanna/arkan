@@ -11,12 +11,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useBuilderStore, useToast } from '@/hooks';
 import { Loader2, UploadCloud } from 'lucide-react';
-import { ScrollArea } from '../ui/scroll-area';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { ScrollArea } from '../../ui/scroll-area';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Label } from '../ui/label';
-import { CustomSelect } from '../ui/CustomSelect';
+import { Label } from '../../ui/label';
+import { CustomSelect } from '../../ui/CustomSelect';
 import { useImageUpload } from '@/hooks/core/useImageUpload';
 
 const settingsSchema = z.object({
@@ -37,7 +37,7 @@ const projectTypeOptions = ["Graduation Project", "Research Paper", "Business Pr
 const specializationOptions = ["Artificial Intelligence", "Web Development", "Data Science", "Cybersecurity", "Marketing"];
 const educationalLevelOptions = ["Diploma", "Bachelor's Degree", "Master's Degree", "Doctorate"];
 
-export function ProjectSettingsPanel() {
+export default function ProjectSettingsPanel() {
   const { project, updateProject } = useBuilderStore();
   const { toast } = useToast();
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
