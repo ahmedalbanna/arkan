@@ -11,6 +11,7 @@ import { gfm } from 'turndown-plugin-gfm';
 import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/lib/tiptap-extensions';
 import { Button } from '@/components/ui/button';
 import { ContextualToolbar } from '@/lib/editor/ToolBar';
+import { cn } from '@/lib/utils/cn';
 
 // Turndown Service Initialization
 const turndownService = new TurndownService({ headingStyle: 'atx' });
@@ -20,9 +21,10 @@ turndownService.use(gfm);
 interface RichTextEditorProps {
   content: string;
   onChange: (markdown: string) => void;
+  editorClassName?: string;
 }
 
-function RichTextEditor({ content, onChange }: RichTextEditorProps) {
+function RichTextEditor({ content, onChange, editorClassName }: RichTextEditorProps) {
   const { setActiveEditor } = useEditorStore();
   const bubbleMenuId = React.useId();
 
@@ -50,7 +52,7 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     },
     editorProps: {
       attributes: {
-        class: 'prose dark:prose-invert max-w-none focus:outline-none font-serif text-base prose-p:text-base prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2',
+        class: cn('prose dark:prose-invert max-w-none focus:outline-none font-serif text-base prose-p:text-base prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2', editorClassName),
       },
       handlePaste: async (view, event, slice) => {
         const text = event.clipboardData?.getData('text/plain');

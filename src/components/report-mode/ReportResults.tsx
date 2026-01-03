@@ -19,6 +19,7 @@ import { ListTree, Loader2 } from 'lucide-react';
 import ContentEditable from 'react-contenteditable';
 import { cn } from '@/lib/utils/cn';
 import { useEffect } from 'react';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
 
 export function ReportResults() {
   const { t } = useLocalization();
@@ -38,8 +39,7 @@ export function ReportResults() {
     }
   };
   
-  const handleTocChange = (evt: React.FocusEvent<HTMLDivElement>) => {
-    const newMarkdown = evt.currentTarget.innerText;
+  const handleTocChange = (newMarkdown: string) => {
     updateProject(p => {
         p.tableOfContentsMarkdown = newMarkdown;
     });
@@ -75,11 +75,10 @@ export function ReportResults() {
             
             {tocMarkdown && (
               <A4Page title="Table of Contents">
-                 <ContentEditable
-                    html={tocMarkdown.replace(/\n/g, '<br>')}
-                    onBlur={handleTocChange}
-                    className={cn("prose dark:prose-invert max-w-none outline-none focus:bg-primary/5 focus:shadow-inner p-1 rounded-md", 'whitespace-pre-wrap')}
-                    tagName="div"
+                 <RichTextEditor
+                    content={tocMarkdown}
+                    onChange={handleTocChange}
+                    editorClassName="prose-h1:text-xl prose-h1:font-bold prose-h2:text-base prose-h2:font-semibold prose-p:text-base prose-p:ml-4"
                   />
               </A4Page>
             )}
