@@ -1,5 +1,7 @@
 
 
+'use client';
+
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
 import Dropcursor from '@tiptap/extension-dropcursor';
 import { FileHandler } from '@tiptap/extension-file-handler';
