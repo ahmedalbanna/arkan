@@ -18,7 +18,7 @@ export default function GenerateTocPage() {
 
   const handleCopy = () => {
     if (results) {
-      const tocText = results.tableOfContents.join('\n');
+      const tocText = results.tableOfContents.map(c => `# ${c.title}\n${c.sections.map(s => `## ${s}`).join('\n')}`).join('\n\n');
       navigator.clipboard.writeText(tocText).then(() => {
         setIsCopied(true);
         toast({ title: 'Copied to clipboard!' });
@@ -83,10 +83,15 @@ export default function GenerateTocPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
                 ) : (
-                  <ul className="space-y-2">
-                    {results?.tableOfContents.map((item, index) => (
-                      <li key={index} className="text-sm p-2 rounded-md bg-background">
-                        {item}
+                  <ul className="space-y-3">
+                    {results?.tableOfContents.map((chapter, index) => (
+                      <li key={index} className="text-sm">
+                        <p className="font-semibold">{index + 1}. {chapter.title}</p>
+                        <ul className="pl-6 list-disc list-inside text-muted-foreground">
+                            {chapter.sections.map((section, sIndex) => (
+                                <li key={sIndex}>{section}</li>
+                            ))}
+                        </ul>
                       </li>
                     ))}
                   </ul>

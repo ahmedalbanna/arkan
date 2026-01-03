@@ -37,7 +37,30 @@ const generateTocFlow = ai.defineFlow({
   inputSchema: GenerateTocInputSchema,
   outputSchema: GenerateTocOutputSchema,
 }, async (input) => {
-  const { output } = await generateTocPrompt(input);
+  // Using hardcoded data for testing as requested.
+  // A real API call would look like this:
+  // const { output } = await generateTocPrompt(input);
+  const output: GenerateTocOutput = {
+    tableOfContents: [
+        {
+            title: "Introduction",
+            sections: ["Background", "Problem Statement", "Project Objectives"]
+        },
+        {
+            title: "Literature Review",
+            sections: ["Existing Solutions", "Technology Stack Analysis", "Identified Gaps"]
+        },
+        {
+            title: "System Design",
+            sections: ["Architecture", "Data Model", "User Interface Design"]
+        },
+        {
+            title: "Conclusion",
+            sections: ["Summary of Findings", "Future Work"]
+        }
+    ]
+  };
+
   if (!output) {
     throw new Error('Table of Contents generation failed to produce an output.');
   }

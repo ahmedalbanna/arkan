@@ -346,7 +346,7 @@ export type GenerateDiagramOutput = z.infer<typeof GenerateDiagramOutputSchema>;
 // generate-plantuml.ts
 export const GeneratePlantUMLInputSchema = z.object({
     flow: z.literal('generate-plantuml'),
-    text: z.string().describe("A detailed text description of the diagram to be generated."),
+    description: z.string().describe("A detailed text description of the diagram to be generated."),
     diagramType: DiagramTypeSchema.describe("The type of PlantUML diagram to generate."),
 });
 export type GeneratePlantUMLInput = z.infer<typeof GeneratePlantUMLInputSchema>;
