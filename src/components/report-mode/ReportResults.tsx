@@ -16,12 +16,11 @@ import RichTextEditor from './RichTextEditor';
 import { CoverPage } from '../shared/CoverPage';
 import { Button } from '../ui/button';
 import { ListTree, Loader2 } from 'lucide-react';
-import ContentEditable from 'react-contenteditable';
-import { cn } from '@/lib/utils/cn';
 import { useEffect } from 'react';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { Chapter } from '@/lib/models';
 
-export function ReportResults() {
+
+export default function ReportResults() {
   const { t } = useLocalization();
   const { project, setContentFromMarkdown, updateProject } = useBuilderStore();
   const { form, mutation: generateTocMutation } = useGenerateTocLogic();
@@ -34,7 +33,6 @@ export function ReportResults() {
   
   const handleGenerateToc = () => {
     if (project) {
-        // The useGenerateTocLogic hook now handles updating the store on success.
         generateTocMutation.mutate({ projectDescription: project.projectDescription || '' });
     }
   };
@@ -45,7 +43,25 @@ export function ReportResults() {
     });
   }
 
-  const tocMarkdown = project?.tableOfContentsMarkdown || '';
+  // Dynamically generate TOC from project structure
+  const tocMarkdown = useMemo(() => {
+    if (!project || project.content.length === 0) return '';
+    
+    let markdown = '';
+    project.content.forEach((item) => {
+      if (item instanceof Chapter) {
+        markdown += `# ${item.title}\n`;
+        item.sections.forEach((section) => {
+          markdown += `  - ${section.title}\n`;
+        });
+      } else { // It's a top-level section
+        markdown += `# ${item.title}\n`;
+      }
+      markdown += '\n';
+    });
+    return markdown.trim();
+  }, [project]);
+  
 
   return (
     <Card className="h-full flex flex-col overflow-hidden">
@@ -73,7 +89,7 @@ export function ReportResults() {
               </Button>
             </div>
             
-            {tocMarkdown && (
+            {(tocMarkdown || generateTocMutation.isPending) && (
               <A4Page title="Table of Contents">
                  <RichTextEditor
                     content={tocMarkdown}
