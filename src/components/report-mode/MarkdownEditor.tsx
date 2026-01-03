@@ -18,14 +18,14 @@ const turndownService = new TurndownService({ headingStyle: 'atx' });
 turndownService.use(gfm);
 
 // Main Editor Component
-interface RichTextEditorProps {
+interface MarkdownEditorProps {
   content: string;
   onChange: (markdown: string) => void;
   editorClassName?: string;
   isToc?: boolean;
 }
 
-function RichTextEditor({ content, onChange, editorClassName, isToc = false }: RichTextEditorProps) {
+function MarkdownEditor({ content, onChange, editorClassName, isToc = false }: MarkdownEditorProps) {
   const { setActiveEditor } = useEditorStore();
   const bubbleMenuId = React.useId();
 
@@ -138,4 +138,4 @@ function RichTextEditor({ content, onChange, editorClassName, isToc = false }: R
   );
 };
 
-export default RichTextEditor;
+export default MarkdownEditor;

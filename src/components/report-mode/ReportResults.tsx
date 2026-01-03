@@ -13,7 +13,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore, useGenerateTocLogic } from '@/hooks';
-import RichTextEditor from './RichTextEditor';
+import MarkdownEditor from './MarkdownEditor';
 import { CoverPage } from '../shared/CoverPage';
 import { Button } from '../ui/button';
 import { ListTree, Loader2 } from 'lucide-react';
@@ -111,17 +111,18 @@ export default function ReportResults() {
             
             {(project && project.content.length > 0) && (
               <A4Page title="Table of Contents">
-                 <RichTextEditor
+                 <MarkdownEditor
                     key={`toc-editor-${project.id}`}
                     content={tocMarkdown}
                     onChange={handleTocChange}
                     isToc={true}
+                    editorClassName="prose-h1:text-xl prose-h1:font-bold prose-ul:list-none prose-ul:pl-0 prose-li:pl-6 prose-p:text-base"
                   />
               </A4Page>
             )}
 
             <A4Page>
-                <RichTextEditor
+                <MarkdownEditor
                     key={`content-editor-${project.id}`}
                     content={project?.fullMarkdownContent || ''}
                     onChange={setContentFromMarkdown}
