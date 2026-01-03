@@ -26,6 +26,7 @@ export interface ProjectProperties {
   educationalLevel?: string;
   teamMembers?: string[];
   logoUrl?: string;
+  universityLogoUrl?: string; // Add this line
   content?: (Chapter | Section | ChapterProperties | SectionProperties)[];
   externalContext?: ExternalContext[];
   meta?: {
@@ -51,6 +52,7 @@ export class Project {
   public readonly educationalLevel?: string;
   public readonly teamMembers?: readonly string[];
   public readonly logoUrl?: string;
+  public readonly universityLogoUrl?: string;
 
   public content: ProjectContent; // Made mutable to be updated by store logic
   public readonly externalContext: readonly ExternalContext[];
@@ -71,6 +73,7 @@ export class Project {
     this.educationalLevel = props.educationalLevel;
     this.teamMembers = props.teamMembers;
     this.logoUrl = props.logoUrl;
+    this.universityLogoUrl = props.universityLogoUrl;
     this.activeSectionId = props.activeSectionId;
 
     this.content = (props.content || []).map(c => {
@@ -383,6 +386,7 @@ ${universityText}
       educationalLevel: this.educationalLevel,
       teamMembers: this.teamMembers ? [...this.teamMembers] : undefined,
       logoUrl: this.logoUrl,
+      universityLogoUrl: this.universityLogoUrl,
       content: this.content.map(c => c.toJSON()),
       externalContext: this.externalContext.map(ec => ec.toStateObject()),
       meta: this.meta,

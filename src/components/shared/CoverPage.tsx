@@ -21,10 +21,15 @@ interface CoverPageProps {
 const EditableField = ({ field, placeholder, className, isTextarea = false, project, handleContentChange }: { field: keyof Project, placeholder: string, className: string, isTextarea?: boolean, project: Project, handleContentChange: (field: keyof Project, value: string) => void }) => {
     const value = project[field] as string | string[] || '';
     const displayValue = Array.isArray(value) ? value.join(', ') : value;
+
+    const onBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+        handleContentChange(field, e.currentTarget.innerHTML);
+    };
+
     return (
         <ContentEditable
             html={displayValue}
-            onBlur={(e) => handleContentChange(field, e.currentTarget.innerHTML)}
+            onBlur={onBlur}
             data-placeholder={placeholder}
             className={cn("outline-none focus:bg-primary/5 focus:shadow-inner p-1 rounded-md empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground empty:before:opacity-60", className)}
             tagName={isTextarea ? 'div' : 'p'}
@@ -34,8 +39,10 @@ const EditableField = ({ field, placeholder, className, isTextarea = false, proj
 
 export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
     const { updateProject } = useBuilderStore();
-    const { isUploading, handleFileUpload } = useImageUpload();
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const { isUploading: isMainLogoUploading, handleFileUpload: handleMainLogoUpload } = useImageUpload();
+    const { isUploading: isUniLogoUploading, handleFileUpload: handleUniLogoUpload } = useImageUpload();
+    const mainLogoInputRef = useRef<HTMLInputElement>(null);
+    const uniLogoInputRef = useRef<HTMLInputElement>(null);
     const [frameStyle, setFrameStyle] = useState<'professional' | 'academic' | 'creative'>('professional');
 
     if (!project) return null;
@@ -45,11 +52,13 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
     const handleContentChange = (field: keyof Project, value: string) => {
         const sanitizedValue = value.replace(/<br>/g, '\n').replace(/&nbsp;/g, ' ').replace(/<[^>]+>/g, '');
         updateProject(p => {
+            const props: Partial<Project> = {};
             if (field === 'teamMembers') {
-                (p as any)[field] = sanitizedValue.split(',').map(s => s.trim());
+                (props as any)[field] = sanitizedValue.split(',').map(s => s.trim()).filter(Boolean);
             } else {
-                (p as any)[field] = sanitizedValue;
+                (props as any)[field] = sanitizedValue;
             }
+            Object.assign(p, props);
         });
     };
     
@@ -59,18 +68,21 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
              p.meta.updated = new Date(sanitizedValue).toISOString();
          });
     };
-
-    const handleLogoPlaceholderClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    
+    const handleMainLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            handleFileUpload(file, (dataUri) => {
-                updateProject(p => { 
-                    p.logoUrl = dataUri;
-                });
+            handleMainLogoUpload(file, (dataUri) => {
+                updateProject(p => { p.logoUrl = dataUri; });
+            });
+        }
+    };
+    
+    const handleUniLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            handleUniLogoUpload(file, (dataUri) => {
+                updateProject(p => { p.universityLogoUrl = dataUri; });
             });
         }
     };
@@ -108,17 +120,17 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                 ) : (
                     <div 
                         className="relative w-32 h-32 mb-6 border-2 border-dashed rounded-lg flex flex-col items-center justify-center text-muted-foreground cursor-pointer hover:border-primary hover:text-primary transition-colors"
-                        onClick={handleLogoPlaceholderClick}
+                        onClick={() => mainLogoInputRef.current?.click()}
                     >
                         <input
                             type="file"
-                            ref={fileInputRef}
-                            onChange={handleLogoChange}
+                            ref={mainLogoInputRef}
+                            onChange={handleMainLogoChange}
                             accept="image/png, image/jpeg, image/svg+xml"
                             className="hidden"
-                            disabled={isUploading}
+                            disabled={isMainLogoUploading}
                         />
-                        {isUploading ? (
+                        {isMainLogoUploading ? (
                             <Loader2 className="w-8 h-8 animate-spin" />
                         ) : (
                            <>
@@ -130,7 +142,23 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                 )}
                 <EditableField field="name" placeholder="Untitled Project" className="text-5xl font-bold font-headline text-primary leading-tight" project={project} handleContentChange={handleContentChange} />
                  <div className="inline-flex items-center gap-2 text-muted-foreground mt-4">
-                    <Landmark className="w-5 h-5" />
+                    {project.universityLogoUrl ? (
+                        <div className="relative w-8 h-8 flex-shrink-0">
+                            <Image src={project.universityLogoUrl} alt="University Logo" layout="fill" objectFit="contain" />
+                        </div>
+                    ) : (
+                        <div className="relative w-8 h-8 flex-shrink-0 border-2 border-dashed rounded-md flex items-center justify-center cursor-pointer hover:border-primary" onClick={() => uniLogoInputRef.current?.click()}>
+                             <input
+                                type="file"
+                                ref={uniLogoInputRef}
+                                onChange={handleUniLogoChange}
+                                accept="image/png, image/jpeg, image/svg+xml"
+                                className="hidden"
+                                disabled={isUniLogoUploading}
+                            />
+                            {isUniLogoUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Landmark className="w-5 h-5 text-muted-foreground/50" />}
+                        </div>
+                    )}
                      <EditableField field="university" placeholder="University Name" className="font-semibold text-lg tracking-wider" project={project} handleContentChange={handleContentChange} />
                 </div>
             </header>
