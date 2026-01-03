@@ -15,15 +15,15 @@ import { cn } from "@/lib/utils/cn";
 import { AtomIcon, FileText, ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Button } from "../ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { Label } from "../ui/label";
-import { ScrollArea } from "../ui/scroll-area";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Textarea } from "../ui/textarea";
-import { Input } from "../ui/input";
-import { Badge } from "../ui/badge";
+import { Button } from "../../ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../ui/card";
+import { Label } from "../../ui/label";
+import { ScrollArea } from "../../ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
+import { Textarea } from "../../ui/textarea";
+import { Input } from "../../ui/input";
+import { Badge } from "../../ui/badge";
 import { PdfPreview } from './PdfPreview';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
@@ -63,7 +63,7 @@ function ViewContextDialog({ item }: { item: { fileName: string, content: string
 }
 
 // Main UploadManager component
-export function UploadManager() {
+export default function UploadManager() {
     const { t } = useLocalization();
     const { toast } = useToast();
     const { project, updateProject } = useBuilderStore();

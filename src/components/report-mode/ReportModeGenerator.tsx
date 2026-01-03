@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
@@ -18,7 +19,7 @@ import { SessionActions } from '@/components/report-mode/session/SessionActions'
 
 // Dynamic imports with proper default export handling
 const ProjectSettingsPanel = lazy(() => import('./settings/ProjectSettingsPanel').then(module => ({ default: module.default })));
-const UploadManager = lazy(() => import('../file/UploadManager').then(module => ({ default: module.default })));
+const FileManager = lazy(() => import('./file-manager').then(module => ({ default: module.default })));
 const GenerationTools = lazy(() => import('./generation-tools').then(module => ({ default: module.default })));
 const AIResearcherTool = lazy(() => import('../writing-tools/AIResearcherTool').then(module => ({ default: module.AIResearcherTool })));
 const PlantUMLGeneratorTool = lazy(() => import('../writing-tools/PlantUMLGeneratorTool').then(module => ({ default: module.PlantUMLGeneratorTool })));
@@ -88,7 +89,7 @@ export default function ReportModeGenerator() {
             key: 'files',
             title: t('builder.tabs.files'),
             icon: <UploadCloud className="h-5 w-5" />,
-            content: <UploadManager />,
+            content: <FileManager />,
         },
         {
             key: 'generate',

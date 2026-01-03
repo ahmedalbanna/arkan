@@ -118,7 +118,6 @@ export default function AnalystAgent() {
 
         updateProject(p => {
             p.addExternalContext({
-                id: '', // Will be assigned by the model
                 fileName: fileName,
                 content: markdownResult,
                 type: 'context'
