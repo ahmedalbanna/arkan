@@ -2,12 +2,15 @@
 'use client';
 
 import { Project } from '@/lib/models';
-import { Landmark } from 'lucide-react';
+import { Landmark, UploadCloud } from 'lucide-react';
 import Image from 'next/image';
-import React from 'react';
+import React, { useRef } from 'react';
 import ContentEditable from 'react-contenteditable';
 import { useBuilderStore } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
+import { useImageUpload } from '@/hooks/core/useImageUpload';
+import { Loader2 } from 'lucide-react';
+
 
 interface CoverPageProps {
     project: Project | null;
@@ -26,15 +29,16 @@ const DetailRow: React.FC<{ label: string; value?: string | string[] }> = ({ lab
 
 export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
     const { updateProject } = useBuilderStore();
+    const { isUploading, handleFileUpload } = useImageUpload();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     if (!project) return null;
     
-    // Use a default date but allow it to be editable.
     const currentDate = project.meta.updated ? new Date(project.meta.updated).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
     const handleContentChange = (field: keyof Project, value: string) => {
+        const sanitizedValue = value.replace(/<br>/g, '\n').replace(/&nbsp;/g, ' ').replace(/<[^>]+>/g, '');
         updateProject(p => {
-            const sanitizedValue = value.replace(/<br>/g, '\n').replace(/&nbsp;/g, ' ').replace(/<[^>]+>/g, '');
             if (field === 'teamMembers') {
                 (p as any)[field] = sanitizedValue.split(',').map(s => s.trim());
             } else {
@@ -43,10 +47,9 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
         });
     };
     
-    // A new handler specifically for the date. We can enhance this later.
     const handleDateChange = (value: string) => {
+         const sanitizedValue = value.replace(/<br>/g, '\n').replace(/&nbsp;/g, ' ').replace(/<[^>]+>/g, '');
          updateProject(p => {
-            const sanitizedValue = value.replace(/<br>/g, '\n').replace(/&nbsp;/g, ' ').replace(/<[^>]+>/g, '');
              p.meta.updated = new Date(sanitizedValue).toISOString();
          });
     };
@@ -65,6 +68,21 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
         );
     };
 
+    const handleLogoPlaceholderClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            handleFileUpload(file, (dataUri) => {
+                updateProject(p => { 
+                    p.logoUrl = dataUri;
+                });
+            });
+        }
+    };
+
     return (
         <div className="relative bg-background shadow-lg mx-auto my-4 w-full max-w-[210mm] h-[297mm] box-border overflow-hidden p-12 flex flex-col">
             {/* Decorative elements */}
@@ -73,9 +91,31 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
 
             {/* Header */}
             <header className="relative z-10 text-center flex flex-col items-center pt-8 pb-12 flex-shrink-0">
-                {project.logoUrl && (
+                 {project.logoUrl ? (
                     <div className="relative w-32 h-32 mb-6">
                         <Image src={project.logoUrl} alt="Project Logo" layout="fill" objectFit="contain" />
+                    </div>
+                ) : (
+                    <div 
+                        className="relative w-32 h-32 mb-6 border-2 border-dashed rounded-lg flex flex-col items-center justify-center text-muted-foreground cursor-pointer hover:border-primary hover:text-primary transition-colors"
+                        onClick={handleLogoPlaceholderClick}
+                    >
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleLogoChange}
+                            accept="image/png, image/jpeg, image/svg+xml"
+                            className="hidden"
+                            disabled={isUploading}
+                        />
+                        {isUploading ? (
+                            <Loader2 className="w-8 h-8 animate-spin" />
+                        ) : (
+                           <>
+                             <UploadCloud className="w-8 h-8 mb-2"/>
+                             <span className="text-xs text-center">Upload Logo</span>
+                           </>
+                        )}
                     </div>
                 )}
                 <EditableField field="name" placeholder="Untitled Project" className="text-5xl font-bold font-headline text-primary leading-tight" />
