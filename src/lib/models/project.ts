@@ -26,7 +26,7 @@ export interface ProjectProperties {
   educationalLevel?: string;
   teamMembers?: string[];
   logoUrl?: string;
-  universityLogoUrl?: string; // Add this line
+  universityLogoUrl?: string;
   content?: (Chapter | Section | ChapterProperties | SectionProperties)[];
   externalContext?: ExternalContext[];
   meta?: {
@@ -35,6 +35,7 @@ export interface ProjectProperties {
     created?: string;
     updated?: string;
   };
+  tableOfContentsMarkdown?: string; // To store the generated TOC
   // Deprecated - will be removed in a future refactor
   activeSectionId?: string;
 }
@@ -53,6 +54,7 @@ export class Project {
   public readonly teamMembers?: readonly string[];
   public readonly logoUrl?: string;
   public readonly universityLogoUrl?: string;
+  public tableOfContentsMarkdown?: string;
 
   public content: ProjectContent; // Made mutable to be updated by store logic
   public readonly externalContext: readonly ExternalContext[];
@@ -75,6 +77,7 @@ export class Project {
     this.logoUrl = props.logoUrl;
     this.universityLogoUrl = props.universityLogoUrl;
     this.activeSectionId = props.activeSectionId;
+    this.tableOfContentsMarkdown = props.tableOfContentsMarkdown;
 
     this.content = (props.content || []).map(c => {
       if (c instanceof Chapter || c instanceof Section) {
@@ -170,6 +173,17 @@ export class Project {
   }
 
   // --- Immutable Logic ---
+  
+  public generateTableOfContents(): Project {
+    let toc = '## Table of Contents\n\n';
+    this.chapters.forEach((chapter, chapterIndex) => {
+      toc += `${chapterIndex + 1}. **${chapter.title}**\n`;
+      chapter.sections.forEach((section, sectionIndex) => {
+        toc += `   ${chapterIndex + 1}.${sectionIndex + 1}. ${section.title}\n`;
+      });
+    });
+    return this.with({ tableOfContentsMarkdown: toc });
+  }
 
   public updateContentFromMarkdown(markdown: string): Project {
     const newContent = parseMarkdownToContent(markdown, this.content);
@@ -387,6 +401,7 @@ ${universityText}
       teamMembers: this.teamMembers ? [...this.teamMembers] : undefined,
       logoUrl: this.logoUrl,
       universityLogoUrl: this.universityLogoUrl,
+      tableOfContentsMarkdown: this.tableOfContentsMarkdown,
       content: this.content.map(c => c.toJSON()),
       externalContext: this.externalContext.map(ec => ec.toStateObject()),
       meta: this.meta,
