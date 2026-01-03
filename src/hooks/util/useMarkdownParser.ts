@@ -50,7 +50,6 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
       }
 
       if (currentChapter) {
-        // This is an update, so we find and replace
         const sectionIndex = currentChapter.sections.findIndex(s => s.id === currentSection!.id);
         if (sectionIndex !== -1) {
             currentChapter = currentChapter.updateSection(currentSection.id, () => currentSection!);
@@ -58,8 +57,13 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
             currentChapter = currentChapter.addSection(currentSection);
         }
       } else {
-        // This case for top-level sections is now less likely
-        newContent.push(currentSection);
+        // This case handles top-level sections that are not under a chapter
+        const existingIndex = newContent.findIndex(item => item.id === currentSection!.id);
+        if(existingIndex !== -1) {
+          newContent[existingIndex] = currentSection;
+        } else {
+          newContent.push(currentSection);
+        }
       }
     }
     accumulatedContent = [];
@@ -78,57 +82,66 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
     currentChapter = null;
   };
   
-  // Handle content before the first heading as an "Introduction" section if it exists
   const firstHeadingIndex = ast.children.findIndex(node => node.type === 'heading');
-  if (firstHeadingIndex > 0 || (firstHeadingIndex === -1 && ast.children.length > 0)) {
-    const introContentNodes = ast.children.slice(0, firstHeadingIndex === -1 ? undefined : firstHeadingIndex);
-    const introMarkdown = unified().use(remarkGfm).use(remarkStringify).stringify({ type: 'root', children: introContentNodes }).trim();
-    
-    if (introMarkdown) {
-        let introSection = findExistingSection('Introduction') || new Section({ title: 'Introduction', type: 'report' });
-        introSection = introSection.with({ content: introMarkdown });
-        newContent.push(introSection);
-    }
+  const contentBeforeFirstHeading = (firstHeadingIndex === -1 ? ast.children : ast.children.slice(0, firstHeadingIndex));
+  const introMarkdown = unified().use(remarkGfm).use(remarkStringify).stringify({ type: 'root', children: contentBeforeFirstHeading }).trim();
+
+  if (introMarkdown) {
+      let introSection = findExistingSection('Introduction') || new Section({ title: 'Introduction', type: 'report' });
+      introSection = introSection.with({ content: introMarkdown });
+      newContent.push(introSection);
   }
 
+  if (firstHeadingIndex !== -1) {
+    for (let i = firstHeadingIndex; i < ast.children.length; i++) {
+      const node = ast.children[i];
 
-  for (let i = firstHeadingIndex === -1 ? ast.children.length : firstHeadingIndex; i < ast.children.length; i++) {
-    const node = ast.children[i];
-
-    if (node.type === 'heading') {
-      const title = getNodeText(node).trim();
-      
-      if (node.depth === 1) { // It's a Chapter
-        flushChapter();
-        const existingChapter = findExistingChapter(title);
-        currentChapter = new Chapter({ id: existingChapter?.id, title: title, sections: existingChapter?.sections || [] });
-        currentSection = null; // Reset section when a new chapter starts
-      } else { // It's a Section
-        flushSection(); // Finalize previous section
-        const existingSection = findExistingSection(title);
+      if (node.type === 'heading') {
+        const title = getNodeText(node).trim();
         
-        currentSection = new Section({
-            id: existingSection?.id,
-            title: title,
-            type: existingSection?.type || 'report',
-            controls: existingSection?.controls,
-            prompt: existingSection?.prompt,
-            rules: existingSection?.rules,
-            guidelines: existingSection?.guidelines,
-            constraints: existingSection?.constraints,
-            behaviors: existingSection?.behaviors,
-            context: existingSection?.context,
-            content: existingSection?.content, // carry over old content until it's updated
-        });
+        if (node.depth === 1) { // It's a Chapter
+          flushChapter();
+          const existingChapter = findExistingChapter(title);
+          currentChapter = new Chapter({ id: existingChapter?.id, title: title, sections: existingChapter?.sections || [] });
+          currentSection = null; // Reset section when a new chapter starts
+        } else { // It's a Section
+          flushSection(); 
+          const existingSection = findExistingSection(title);
+          
+          // If we are not inside a chapter, create a default one for this section
+          if (!currentChapter) {
+            currentChapter = new Chapter({ title: 'General', sections: [] });
+          }
+          
+          currentSection = new Section({
+              id: existingSection?.id,
+              title: title,
+              type: existingSection?.type || 'report',
+              controls: existingSection?.controls,
+              prompt: existingSection?.prompt,
+              rules: existingSection?.rules,
+              guidelines: existingSection?.guidelines,
+              constraints: existingSection?.constraints,
+              behaviors: existingSection?.behaviors,
+              context: existingSection?.context,
+              content: existingSection?.content,
+          });
+        }
+      } else if (node.type === 'thematicBreak' || (node.type === 'html' && node.value.includes('slide-break'))) {
+          // Slide breaks in markdown might signify a new section without a heading.
+          // For now, we'll treat them as simple separators within content.
+          if (currentSection) {
+            accumulatedContent.push(node);
+          }
+      } else {
+        if (currentSection) {
+            accumulatedContent.push(node);
+        } else if (currentChapter) {
+            // Content directly under a chapter, create an implicit section.
+            currentSection = new Section({ title: `${currentChapter.title} Content`, type: 'report' });
+            accumulatedContent.push(node);
+        }
       }
-    } else if (node.type === 'thematicBreak') {
-        // --- is also used for slide breaks, but here we treat it as a section break within a chapter if needed.
-        // Or simply ignore it as we structure by headings.
-        continue;
-    } 
-    else {
-      // It's content for the current section
-      accumulatedContent.push(node);
     }
   }
 
