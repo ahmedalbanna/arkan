@@ -18,6 +18,8 @@ import { Button } from '../ui/button';
 import { ListTree } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
+import ContentEditable from 'react-contenteditable';
+import { cn } from '@/lib/utils/cn';
 
 export function ReportResults() {
   const { t } = useLocalization();
@@ -28,6 +30,13 @@ export function ReportResults() {
       updateProject(p => p.generateTableOfContents());
     }
   };
+  
+  const handleTocChange = (evt: React.FocusEvent<HTMLDivElement>) => {
+    const newMarkdown = evt.currentTarget.innerText;
+    updateProject(p => {
+        p.tableOfContentsMarkdown = newMarkdown;
+    });
+  }
 
   const tocMarkdown = project?.tableOfContentsMarkdown || '';
 
@@ -59,7 +68,12 @@ export function ReportResults() {
             
             {tocMarkdown && (
               <A4Page title="Table of Contents">
-                <ReactMarkdown components={markdownComponents}>{tocMarkdown}</ReactMarkdown>
+                 <ContentEditable
+                    html={tocMarkdown.replace(/\n/g, '<br>')}
+                    onBlur={handleTocChange}
+                    className={cn("prose dark:prose-invert max-w-none outline-none focus:bg-primary/5 focus:shadow-inner p-1 rounded-md", 'whitespace-pre-wrap')}
+                    tagName="div"
+                  />
               </A4Page>
             )}
 
@@ -74,3 +88,4 @@ export function ReportResults() {
     </Card>
   );
 };
+
