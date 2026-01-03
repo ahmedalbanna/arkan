@@ -16,7 +16,7 @@ import RichTextEditor from './RichTextEditor';
 import { CoverPage } from '../shared/CoverPage';
 import { Button } from '../ui/button';
 import { ListTree, Loader2 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Chapter } from '@/lib/models';
 
 
