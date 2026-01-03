@@ -17,11 +17,11 @@ import type { Chapter, Section, Project } from '@/lib/models';
 import { PromptBuilder } from '@/lib/prompt-builder';
 import { AlertTriangle, Building, Code, Eye, Link as LinkIcon, Loader2, StickyNote } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { MarkdownViewer } from '../shared/MarkdownViewer';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import { Badge } from '../ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { MarkdownViewer } from '../../shared/MarkdownViewer';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../ui/accordion';
+import { Badge } from '../../ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 
 
 interface BuildProjectDialogProps {

@@ -15,7 +15,7 @@ import {
   PlusCircle,
 } from 'lucide-react';
 import React, { useMemo } from 'react';
-import { Checkbox } from "../ui/checkbox";
+import { Checkbox } from "../../ui/checkbox";
 import { SectionAccordionItem } from './SectionAccordionItem';
 import { useBuilderStore } from "@/hooks";
 

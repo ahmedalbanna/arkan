@@ -30,18 +30,18 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useMemo } from "react";
-import { Checkbox } from "../ui/checkbox";
-import { Label } from "../ui/label";
-import { BuildProjectDialog } from "./BuildProjectDialog";
-import { GenerateTocDialog } from './GenerateTocDialog';
-import { ReportTemplateDialog } from "./ReportTemplateDialog";
+import { Checkbox } from "../../ui/checkbox";
+import { Label } from "../../ui/label";
+import { BuildProjectDialog } from "../dialogs/BuildProjectDialog";
+import { GenerateTocDialog } from '../dialogs/GenerateTocDialog';
+import { ReportTemplateDialog } from "../dialogs/ReportTemplateDialog";
 import { SortableChapterItem } from './SortableChapterItem';
 import { Chapter, Section } from '@/lib/models';
-import { ScrollArea } from "../ui/scroll-area";
+import { ScrollArea } from "../../ui/scroll-area";
 import { SectionAccordionItem } from "./SectionAccordionItem";
 
 
-export function GenerationTools() {
+export default function GenerationTools() {
   const {
     t,
     newChapterTitle,
@@ -170,6 +170,9 @@ export function GenerationTools() {
                               sectionId={item.id}
                               sectionIndex={index}
                               chapterIndex={-1}
+                              isProjectBuildMode={isProjectBuildMode}
+                              isSelected={selectedSectionsForBuild.has(item.id)}
+                              toggleSectionSelection={toggleSectionSelection}
                             />
                           );
                         }

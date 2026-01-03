@@ -12,10 +12,10 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Link as LinkIcon, Loader2, SlidersHorizontal, Sparkles, StickyNote } from 'lucide-react';
 import React from 'react';
-import { Checkbox } from '../ui/checkbox';
-import { SectionContextSelector } from './SectionContextSelector';
-import { SectionGenerationControls } from './SectionGenerationControls';
-import { GuidelineEditor } from './SectionGuidelineEditor';
+import { Checkbox } from '../../ui/checkbox';
+import { SectionContextSelector } from '../section-controls/SectionContextSelector';
+import { SectionGenerationControls } from '../section-controls/SectionGenerationControls';
+import { GuidelineEditor } from '../section-controls/SectionGuidelineEditor';
 import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
 
 

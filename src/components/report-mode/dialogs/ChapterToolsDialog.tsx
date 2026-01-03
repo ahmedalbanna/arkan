@@ -12,18 +12,18 @@ import { Button } from '@/components/ui/button';
 import { useChapterActions } from '@/hooks/report-mode/use-chapter-actions';
 import { Chapter } from '@/lib/models';
 import { Loader2, Wand2, PlusCircle, Link as LinkIcon, Edit } from 'lucide-react';
-import { ScrollArea } from '../ui/scroll-area';
-import { Label } from '../ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Slider } from '../ui/slider';
+import { ScrollArea } from '../../ui/scroll-area';
+import { Label } from '../../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
+import { Slider } from '../../ui/slider';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
-import { DiffView } from '../shared/DiffView';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Form } from '../ui/form';
-import { Badge } from '../ui/badge';
-import { Input } from '../ui/input';
-import { SectionContextSelector } from './SectionContextSelector';
+import { DiffView } from '../../shared/DiffView';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
+import { Form } from '../../ui/form';
+import { Badge } from '../../ui/badge';
+import { Input } from '../../ui/input';
+import { SectionContextSelector } from '../section-controls/SectionContextSelector';
 
 interface ChapterToolsDialogProps {
   isOpen: boolean;
@@ -111,7 +111,7 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
                       <div className="space-y-4">
                           <div className="space-y-2">
                               <Label>Target Audience</Label>
-                              <Input {...form.register('targetAudience')} placeholder="e.g., general public" />
+                              <Input {...form.register('targetAudience')} placeholder="e.g., general public, academics" />
                           </div>
                           <div className="space-y-2">
                               <Label>Desired Tone</Label>

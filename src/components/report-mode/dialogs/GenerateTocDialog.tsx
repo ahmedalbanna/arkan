@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -8,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useBuilderStore, useToast } from '@/hooks';
 import { useGenerateTocLogic } from '@/hooks/writing-tools/use-generate-toc-logic';
 import { Loader2, Sparkles } from 'lucide-react';
-import { ScrollArea } from '../ui/scroll-area';
+import { ScrollArea } from '../../ui/scroll-area';
 import { useEffect } from 'react';
 
 interface GenerateTocDialogProps {
