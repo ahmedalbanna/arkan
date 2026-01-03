@@ -9,9 +9,6 @@ import ContentEditable from 'react-contenteditable';
 import { useBuilderStore } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
 import { useImageUpload } from '@/hooks/core/useImageUpload';
-import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
-import { Tooltip, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { TooltipContent } from '@radix-ui/react-tooltip';
 
 interface CoverPageProps {
     project: Project | null;
@@ -35,14 +32,12 @@ const EditableField: React.FC<{
     );
 };
 
-
 export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
     const { updateProject } = useBuilderStore();
     const { isUploading: isMainLogoUploading, handleFileUpload: handleMainLogoUpload } = useImageUpload();
     const { isUploading: isUniLogoUploading, handleFileUpload: handleUniLogoUpload } = useImageUpload();
     const mainLogoInputRef = useRef<HTMLInputElement>(null);
     const uniLogoInputRef = useRef<HTMLInputElement>(null);
-    const [frameStyle, setFrameStyle] = useState<'professional' | 'academic' | 'creative'>('professional');
 
     if (!project) return null;
     
@@ -86,6 +81,21 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
         }
     };
     
+    const getFrameStyle = () => {
+        switch (project.projectType) {
+            case 'Graduation Project':
+            case 'Research Paper':
+                return 'academic';
+            case 'Business Proposal':
+            case 'Software Documentation':
+                return 'professional';
+            default:
+                return 'creative';
+        }
+    };
+
+    const frameStyle = getFrameStyle();
+
     const frameClasses = {
         professional: 'border-primary/20',
         academic: 'border-double border-primary/50',
@@ -133,7 +143,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                         )}
                     </div>
                 )}
-                <EditableField html={project.name} onBlur={(e) => handleContentChange('name', e.currentTarget.innerHTML)} placeholder="Untitled Project" className="text-5xl font-bold font-headline text-primary leading-tight" project={project} handleContentChange={handleContentChange} />
+                <EditableField html={project.name} onBlur={(e) => handleContentChange('name', e.currentTarget.innerHTML)} placeholder="Untitled Project" className="text-5xl font-bold font-headline text-primary leading-tight" />
                  <div className="inline-flex items-center gap-2 text-muted-foreground mt-4">
                     {project.universityLogoUrl ? (
                         <div className="relative w-8 h-8 flex-shrink-0 cursor-pointer" onClick={() => uniLogoInputRef.current?.click()}>
@@ -146,7 +156,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                             {isUniLogoUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Landmark className="w-5 h-5 text-muted-foreground/50" />}
                         </div>
                     )}
-                     <EditableField html={project.university || ''} onBlur={(e) => handleContentChange('university', e.currentTarget.innerHTML)} placeholder="University Name" className="font-semibold text-lg tracking-wider" project={project} handleContentChange={handleContentChange} />
+                     <EditableField html={project.university || ''} onBlur={(e) => handleContentChange('university', e.currentTarget.innerHTML)} placeholder="University Name" className="font-semibold text-lg tracking-wider" />
                 </div>
             </header>
 
@@ -158,13 +168,11 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                         placeholder="Project Description..."
                         className="text-2xl text-muted-foreground leading-relaxed italic"
                         tagName="div"
-                        project={project}
-                        handleContentChange={handleContentChange}
                     />
                     <div className="mt-8 flex justify-center gap-x-8 gap-y-2 text-lg">
-                        <EditableField html={project.educationalLevel || ''} onBlur={(e) => handleContentChange('educationalLevel', e.currentTarget.innerHTML)} placeholder="Educational Level" className="font-medium" project={project} handleContentChange={handleContentChange} />
+                        <EditableField html={project.educationalLevel || ''} onBlur={(e) => handleContentChange('educationalLevel', e.currentTarget.innerHTML)} placeholder="Educational Level" className="font-medium" />
                         <span className="text-muted-foreground">|</span>
-                        <EditableField html={project.specialization || ''} onBlur={(e) => handleContentChange('specialization', e.currentTarget.innerHTML)} placeholder="Specialization" className="font-medium" project={project} handleContentChange={handleContentChange} />
+                        <EditableField html={project.specialization || ''} onBlur={(e) => handleContentChange('specialization', e.currentTarget.innerHTML)} placeholder="Specialization" className="font-medium" />
                     </div>
                  </div>
             </main>
@@ -172,12 +180,12 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
             <footer className="relative z-10 flex-shrink-0 pt-12">
                  <div className="text-center mb-8">
                     <h3 className="text-lg font-semibold text-muted-foreground">Submitted By</h3>
-                    <EditableField html={Array.isArray(project.teamMembers) ? project.teamMembers.join(', ') : ''} onBlur={(e) => handleContentChange('teamMembers', e.currentTarget.innerHTML)} placeholder="Team Members, separated by commas" className="text-xl font-medium" project={project} handleContentChange={handleContentChange} />
+                    <EditableField html={Array.isArray(project.teamMembers) ? project.teamMembers.join(', ') : ''} onBlur={(e) => handleContentChange('teamMembers', e.currentTarget.innerHTML)} placeholder="Team Members, separated by commas" className="text-xl font-medium" />
                 </div>
                  <div className="flex justify-between items-end text-sm text-muted-foreground">
                     <div>
-                        <EditableField html={project.supervisor || ''} onBlur={(e) => handleContentChange('supervisor', e.currentTarget.innerHTML)} placeholder="Supervisor Name" className="font-bold" project={project} handleContentChange={handleContentChange} />
-                        <EditableField html={project.course || ''} onBlur={(e) => handleContentChange('course', e.currentTarget.innerHTML)} placeholder="Course Name" className="" project={project} handleContentChange={handleContentChange} />
+                        <EditableField html={project.supervisor || ''} onBlur={(e) => handleContentChange('supervisor', e.currentTarget.innerHTML)} placeholder="Supervisor Name" className="font-bold" />
+                        <EditableField html={project.course || ''} onBlur={(e) => handleContentChange('course', e.currentTarget.innerHTML)} placeholder="Course Name" className="" />
                     </div>
                     <ContentEditable
                         html={currentDate}
@@ -187,33 +195,6 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                     />
                  </div>
             </footer>
-
-            <div className="absolute top-4 right-4 z-20">
-                <TooltipProvider>
-                    <ToggleGroup type="single" defaultValue="professional" value={frameStyle} onValueChange={(value) => value && setFrameStyle(value as any)}>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <ToggleGroupItem value="professional" aria-label="Professional Frame"><Frame /></ToggleGroupItem>
-                            </TooltipTrigger>
-                            <TooltipContent><p>Professional</p></TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <ToggleGroupItem value="academic" aria-label="Academic Frame"><Frame /></ToggleGroupItem>
-                            </TooltipTrigger>
-                            <TooltipContent><p>Academic</p></TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <ToggleGroupItem value="creative" aria-label="Creative Frame"><Frame /></ToggleGroupItem>
-                            </TooltipTrigger>
-                            <TooltipContent><p>Creative</p></TooltipContent>
-                        </Tooltip>
-                    </ToggleGroup>
-                </TooltipProvider>
-            </div>
         </div>
     );
 };
-
-    
