@@ -189,9 +189,12 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                             <Image src={project.universityLogoUrl} alt="University Logo" layout="fill" objectFit="contain" />
                         </div>
                     ) : (
-                        <div className="relative w-8 h-8 flex-shrink-0 border-2 border-dashed rounded-md flex items-center justify-center cursor-pointer hover:border-primary" onClick={() => uniLogoInputRef.current?.click()}>
-                             <input type="file" ref={uniLogoInputRef} onChange={handleUniLogoChange} accept="image/png, image/jpeg, image/svg+xml" className="hidden" disabled={isUniLogoUploading} />
-                            {isUniLogoUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Landmark className="w-5 h-5 text-muted-foreground/50" />}
+                        <div 
+                            className="relative w-8 h-8 flex-shrink-0 border-2 border-dashed rounded-md flex items-center justify-center cursor-pointer hover:border-primary text-muted-foreground/50 hover:text-primary"
+                            onClick={() => uniLogoInputRef.current?.click()}
+                        >
+                            <input type="file" ref={uniLogoInputRef} onChange={handleUniLogoChange} accept="image/png, image/jpeg, image/svg+xml" className="hidden" disabled={isUniLogoUploading} />
+                            {isUniLogoUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Landmark className="w-5 h-5" />}
                         </div>
                     )}
                      <EditableField html={project.university || ''} onBlur={(e) => handleContentChange('university', e.currentTarget.innerHTML)} placeholder="University Name" className="font-semibold text-lg tracking-wider" />
@@ -212,7 +215,10 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
 
             <footer className="relative z-10 flex-shrink-0 pt-12">
                  <div className="text-center mb-8">
-                    <h3 className="text-lg font-semibold text-muted-foreground">Submitted By</h3>
+                    <EditableField html={project.educationalLevel || ''} onBlur={(e) => handleContentChange('educationalLevel', e.currentTarget.innerHTML)} placeholder="Educational Level" className="text-lg font-medium text-muted-foreground" />
+                    <div className="text-sm text-muted-foreground">in</div>
+                    <EditableField html={project.specialization || ''} onBlur={(e) => handleContentChange('specialization', e.currentTarget.innerHTML)} placeholder="Specialization" className="text-xl font-semibold" />
+                    <h3 className="text-lg font-semibold text-muted-foreground mt-4">Submitted By</h3>
                     <EditableField html={Array.isArray(project.teamMembers) ? project.teamMembers.join(', ') : ''} onBlur={(e) => handleContentChange('teamMembers', e.currentTarget.innerHTML)} placeholder="Team Members, separated by commas" className="text-xl font-medium" />
                 </div>
                  <div className="flex justify-between items-end text-sm text-muted-foreground">
