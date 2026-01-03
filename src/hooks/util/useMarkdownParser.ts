@@ -43,10 +43,10 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
 
   const flushSection = () => {
     if (currentSection) {
-      const sectionMarkdown = unified().use(remarkGfm).use(remarkStringify).stringify({ type: 'root', children: accumulatedContent }).trim();
+      const sectionMarkdown = isToc ? currentSection.content : unified().use(remarkGfm).use(remarkStringify).stringify({ type: 'root', children: accumulatedContent }).trim();
       
       // Only update content if it has changed and we are not in TOC mode
-      if (!isToc && sectionMarkdown !== currentSection.content) {
+      if (sectionMarkdown !== currentSection.content) {
         currentSection = currentSection.with({ content: sectionMarkdown });
       }
 
@@ -108,7 +108,7 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
             context: existingSection?.context,
         });
       }
-    } else if (node.type === 'list' && currentChapter) {
+    } else if (node.type === 'list' && currentChapter && isToc) {
         // Handle sections listed under a chapter
         for (const listItem of node.children) {
             if (listItem.type === 'listItem') {
@@ -133,7 +133,7 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
             }
         }
     } else {
-      if (currentSection && !isToc) {
+      if (currentSection) {
         accumulatedContent.push(node);
       }
     }

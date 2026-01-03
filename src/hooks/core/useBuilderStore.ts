@@ -143,7 +143,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         if (incomingMarkdown.trim() !== currentProject.fullMarkdownContent.trim()) {
           set(state => {
             if (!state.project) return {};
-            const newContent = parseMarkdownToContent(incomingMarkdown, state.project.content);
+            const newContent = parseMarkdownToContent(incomingMarkdown, state.project.content, false);
             const newProject = state.project.with({ content: newContent });
             return { project: newProject, hasUnsavedChanges: true };
           });

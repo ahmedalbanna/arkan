@@ -18,44 +18,48 @@ import { CoverPage } from '../shared/CoverPage';
 import { Button } from '../ui/button';
 import { ListTree, Loader2 } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
-import { Chapter } from '@/lib/models';
+import { Chapter, TocSection } from '@/lib/models';
 import { parseMarkdownToContent } from '@/hooks/util/useMarkdownParser';
 
 
 export default function ReportResults() {
   const { t } = useLocalization();
-  const { project, setContentFromMarkdown, updateProject } = useBuilderStore();
+  const { project, updateProject, setContentFromMarkdown, applyTableOfContents } = useBuilderStore();
   const { form, mutation: generateTocMutation, results: tocResults } = useGenerateTocLogic();
 
   // Effect to automatically generate TOC if project description exists but TOC is empty
   useEffect(() => {
-    if (project?.projectDescription && !project.tableOfContentsMarkdown) {
+    if (project?.projectDescription && project.content.length === 0) {
       form.setValue('projectDescription', project.projectDescription);
+      // Automatically trigger generation if description is present and content is empty
+      // onSubmit({ projectDescription: project.projectDescription });
     }
-  }, [project?.projectDescription, project?.tableOfContentsMarkdown, form]);
+  }, [project?.projectDescription, project?.content.length, form]);
 
   useEffect(() => {
     if (tocResults?.tableOfContents) {
-        const tocMarkdown = tocResults.tableOfContents.map(chapter => 
-            `# ${chapter.title}\n${chapter.sections.map(section => `  - ${section}`).join('\n')}`
-        ).join('\n\n');
-        handleTocChange(tocMarkdown);
+        applyTableOfContents(tocResults.tableOfContents);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tocResults]);
   
   const handleGenerateToc = () => {
     if (project && project.projectDescription) {
-        generateTocMutation.mutate({ projectDescription: project.projectDescription });
+        form.handleSubmit(onSubmit)();
     }
+  };
+
+  const onSubmit = (data: {projectDescription: string}) => {
+    generateTocMutation.mutate(data);
   };
   
   const handleTocChange = (newMarkdown: string) => {
     updateProject(p => {
         if (!p) return;
-        // Pass true for isToc to indicate only structure should be parsed
+        // When TOC changes, we parse it to update the *structure* of the project content.
+        // We pass `true` for isToc to indicate only structure should be parsed, preserving content.
         const newContent = parseMarkdownToContent(newMarkdown, p.content, true);
-        p.content = newContent; // Directly mutate the draft
+        p.content = newContent;
     });
   }
 
@@ -108,9 +112,9 @@ export default function ReportResults() {
             {(project && project.content.length > 0) && (
               <A4Page title="Table of Contents">
                  <RichTextEditor
+                    key={`toc-editor-${project.id}`}
                     content={tocMarkdown}
                     onChange={handleTocChange}
-                    editorClassName="prose-h1:text-xl prose-h1:font-bold prose-ul:list-none prose-ul:pl-0 prose-li:pl-6 prose-p:text-base"
                     isToc={true}
                   />
               </A4Page>
@@ -118,8 +122,9 @@ export default function ReportResults() {
 
             <A4Page>
                 <RichTextEditor
-                content={project?.fullMarkdownContent || ''}
-                onChange={setContentFromMarkdown}
+                    key={`content-editor-${project.id}`}
+                    content={project?.fullMarkdownContent || ''}
+                    onChange={setContentFromMarkdown}
                 />
             </A4Page>
         </ScrollArea>
