@@ -134,12 +134,14 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         const currentProject = get().project;
         if (!currentProject) return;
 
-        const currentMarkdown = currentProject.fullMarkdownContent;
+        // Ensure markdown is a string before trimming
+        const incomingMarkdown = typeof markdown === 'string' ? markdown : '';
+        const currentMarkdown = currentProject.fullMarkdownContent || '';
 
-        if (markdown.trim() !== currentMarkdown.trim()) {
+        if (incomingMarkdown.trim() !== currentMarkdown.trim()) {
           set(state => {
             if (!state.project) return {};
-            const newProject = state.project.updateContentFromMarkdown(markdown);
+            const newProject = state.project.updateContentFromMarkdown(incomingMarkdown);
             return { project: newProject, hasUnsavedChanges: true };
           });
         }
