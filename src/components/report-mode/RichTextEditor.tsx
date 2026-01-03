@@ -11,7 +11,6 @@ import { gfm } from 'turndown-plugin-gfm';
 import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/lib/tiptap-extensions';
 import { Button } from '@/components/ui/button';
 import { ContextualToolbar } from '@/lib/editor/ToolBar';
-import { useDebounce } from '@/hooks';
 
 // Turndown Service Initialization
 const turndownService = new TurndownService({ headingStyle: 'atx' });
@@ -27,7 +26,16 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const { setActiveEditor } = useEditorStore();
   const bubbleMenuId = React.useId();
 
-  const debouncedOnChange = useDebounce(onChange, 500);
+  // Correctly debounce the onChange function
+  const debouncedOnChange = useCallback((markdown: string) => {
+    const handler = setTimeout(() => {
+      onChange(markdown);
+    }, 500); // 500ms delay
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [onChange]);
 
   const editor = useEditor({
     extensions: editorExtensions(bubbleMenuId),
