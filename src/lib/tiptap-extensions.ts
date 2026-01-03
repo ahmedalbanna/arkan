@@ -178,8 +178,7 @@ export const editorExtensions = (uniqueId: string) => [
 // Special configuration for the Table of Contents editor
 export const tocEditorExtensions = (uniqueId: string) => [
   StarterKit.configure({
-    // Only allow headings and lists, disable paragraphs and other blocks
-    paragraph: false,
+    // Disable most features, but keep paragraph as the default block
     blockquote: false,
     codeBlock: false,
     hardBreak: false,
