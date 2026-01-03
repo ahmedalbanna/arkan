@@ -25,7 +25,6 @@ interface RichTextEditorProps {
 
 function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const { setActiveEditor } = useEditorStore();
-  const debouncedContent = useDebounce(content, 3000);
   const bubbleMenuId = React.useId();
 
 
@@ -64,19 +63,20 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
 
   // Effect to sync editor with global state when it changes externally (e.g., loading a project)
   useEffect(() => {
-    if (editor && !editor.isDestroyed) {
+    if (editor && !editor.isDestroyed && content) {
       const editorMarkdown = turndownService.turndown(editor.getHTML());
-      if (debouncedContent !== editorMarkdown) {
+      // Only update if the content is different to avoid loops
+      if (content !== editorMarkdown) {
         const { from, to } = editor.state.selection;
-        editor.commands.setContent(marked.parse(debouncedContent) as string, false);
-        // Restore cursor position after content is set
+        editor.commands.setContent(marked.parse(content) as string, false);
+        // Try to restore cursor position if it's a valid range
         if (editor.state.doc.content.size >= to) {
           editor.commands.setTextSelection({ from, to });
         }
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedContent]);
+  }, [content]); // This effect should ONLY run when the external `content` prop changes.
 
 
   // Set the global editor instance when it's created and destroy it on unmount

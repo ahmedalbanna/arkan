@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Chapter, Project, Section, TocSection, type ProjectProperties, User } from '@/lib/models';
