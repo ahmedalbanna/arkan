@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Node, mergeAttributes } from '@tiptap/core';
@@ -113,6 +114,14 @@ const AIImageGeneratorComponent = (props: any) => {
     </NodeViewWrapper>
   );
 };
+
+declare module '@tiptap/core' {
+    interface Commands<ReturnType> {
+      aiImageGenerator: {
+        insertAIImageGenerator: (options?: { prompt?: string }) => ReturnType;
+      };
+    }
+}
 
 const AIImageGeneratorNode = Node.create({
   name: 'aiImageGenerator',
