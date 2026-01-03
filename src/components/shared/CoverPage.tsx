@@ -2,14 +2,13 @@
 'use client';
 
 import { Project } from '@/lib/models';
-import { Landmark, UploadCloud, Frame } from 'lucide-react';
+import { Landmark, UploadCloud, Frame, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import React, { useRef, useState } from 'react';
 import ContentEditable from 'react-contenteditable';
 import { useBuilderStore } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
 import { useImageUpload } from '@/hooks/core/useImageUpload';
-import { Loader2 } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import { Tooltip, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { TooltipContent } from '@radix-ui/react-tooltip';
@@ -18,24 +17,24 @@ interface CoverPageProps {
     project: Project | null;
 }
 
-const EditableField = ({ field, placeholder, className, isTextarea = false, project, handleContentChange }: { field: keyof Project, placeholder: string, className: string, isTextarea?: boolean, project: Project, handleContentChange: (field: keyof Project, value: string) => void }) => {
-    const value = project[field] as string | string[] || '';
-    const displayValue = Array.isArray(value) ? value.join(', ') : value;
-
-    const onBlur = (e: React.FocusEvent<HTMLDivElement>) => {
-        handleContentChange(field, e.currentTarget.innerHTML);
-    };
-
+const EditableField: React.FC<{
+  html: string;
+  onBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
+  placeholder: string;
+  className: string;
+  tagName?: 'p' | 'div';
+}> = ({ html, onBlur, placeholder, className, tagName = 'p' }) => {
     return (
         <ContentEditable
-            html={displayValue}
+            html={html}
             onBlur={onBlur}
             data-placeholder={placeholder}
             className={cn("outline-none focus:bg-primary/5 focus:shadow-inner p-1 rounded-md empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground empty:before:opacity-60", className)}
-            tagName={isTextarea ? 'div' : 'p'}
+            tagName={tagName}
         />
     );
 };
+
 
 export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
     const { updateProject } = useBuilderStore();
@@ -114,7 +113,8 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
 
             <header className="relative z-10 text-center flex flex-col items-center pt-8 pb-12 flex-shrink-0">
                  {project.logoUrl ? (
-                    <div className="relative w-32 h-32 mb-6">
+                    <div className="relative w-32 h-32 mb-6 cursor-pointer" onClick={() => mainLogoInputRef.current?.click()}>
+                         <input type="file" ref={mainLogoInputRef} onChange={handleMainLogoChange} accept="image/png, image/jpeg, image/svg+xml" className="hidden" disabled={isMainLogoUploading} />
                         <Image src={project.logoUrl} alt="Project Logo" layout="fill" objectFit="contain" />
                     </div>
                 ) : (
@@ -122,14 +122,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                         className="relative w-32 h-32 mb-6 border-2 border-dashed rounded-lg flex flex-col items-center justify-center text-muted-foreground cursor-pointer hover:border-primary hover:text-primary transition-colors"
                         onClick={() => mainLogoInputRef.current?.click()}
                     >
-                        <input
-                            type="file"
-                            ref={mainLogoInputRef}
-                            onChange={handleMainLogoChange}
-                            accept="image/png, image/jpeg, image/svg+xml"
-                            className="hidden"
-                            disabled={isMainLogoUploading}
-                        />
+                        <input type="file" ref={mainLogoInputRef} onChange={handleMainLogoChange} accept="image/png, image/jpeg, image/svg+xml" className="hidden" disabled={isMainLogoUploading} />
                         {isMainLogoUploading ? (
                             <Loader2 className="w-8 h-8 animate-spin" />
                         ) : (
@@ -140,43 +133,38 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                         )}
                     </div>
                 )}
-                <EditableField field="name" placeholder="Untitled Project" className="text-5xl font-bold font-headline text-primary leading-tight" project={project} handleContentChange={handleContentChange} />
+                <EditableField html={project.name} onBlur={(e) => handleContentChange('name', e.currentTarget.innerHTML)} placeholder="Untitled Project" className="text-5xl font-bold font-headline text-primary leading-tight" project={project} handleContentChange={handleContentChange} />
                  <div className="inline-flex items-center gap-2 text-muted-foreground mt-4">
                     {project.universityLogoUrl ? (
-                        <div className="relative w-8 h-8 flex-shrink-0">
+                        <div className="relative w-8 h-8 flex-shrink-0 cursor-pointer" onClick={() => uniLogoInputRef.current?.click()}>
+                            <input type="file" ref={uniLogoInputRef} onChange={handleUniLogoChange} accept="image/png, image/jpeg, image/svg+xml" className="hidden" disabled={isUniLogoUploading} />
                             <Image src={project.universityLogoUrl} alt="University Logo" layout="fill" objectFit="contain" />
                         </div>
                     ) : (
                         <div className="relative w-8 h-8 flex-shrink-0 border-2 border-dashed rounded-md flex items-center justify-center cursor-pointer hover:border-primary" onClick={() => uniLogoInputRef.current?.click()}>
-                             <input
-                                type="file"
-                                ref={uniLogoInputRef}
-                                onChange={handleUniLogoChange}
-                                accept="image/png, image/jpeg, image/svg+xml"
-                                className="hidden"
-                                disabled={isUniLogoUploading}
-                            />
+                             <input type="file" ref={uniLogoInputRef} onChange={handleUniLogoChange} accept="image/png, image/jpeg, image/svg+xml" className="hidden" disabled={isUniLogoUploading} />
                             {isUniLogoUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Landmark className="w-5 h-5 text-muted-foreground/50" />}
                         </div>
                     )}
-                     <EditableField field="university" placeholder="University Name" className="font-semibold text-lg tracking-wider" project={project} handleContentChange={handleContentChange} />
+                     <EditableField html={project.university || ''} onBlur={(e) => handleContentChange('university', e.currentTarget.innerHTML)} placeholder="University Name" className="font-semibold text-lg tracking-wider" project={project} handleContentChange={handleContentChange} />
                 </div>
             </header>
 
             <main className="relative z-10 flex-grow flex items-center justify-center text-center">
                  <div className="max-w-2xl">
                     <EditableField
-                        field="projectDescription"
+                        html={project.projectDescription || ''}
+                        onBlur={(e) => handleContentChange('projectDescription', e.currentTarget.innerHTML)}
                         placeholder="Project Description..."
                         className="text-2xl text-muted-foreground leading-relaxed italic"
-                        isTextarea={true}
+                        tagName="div"
                         project={project}
                         handleContentChange={handleContentChange}
                     />
                     <div className="mt-8 flex justify-center gap-x-8 gap-y-2 text-lg">
-                        <EditableField field="educationalLevel" placeholder="Educational Level" className="font-medium" project={project} handleContentChange={handleContentChange} />
+                        <EditableField html={project.educationalLevel || ''} onBlur={(e) => handleContentChange('educationalLevel', e.currentTarget.innerHTML)} placeholder="Educational Level" className="font-medium" project={project} handleContentChange={handleContentChange} />
                         <span className="text-muted-foreground">|</span>
-                        <EditableField field="specialization" placeholder="Specialization" className="font-medium" project={project} handleContentChange={handleContentChange} />
+                        <EditableField html={project.specialization || ''} onBlur={(e) => handleContentChange('specialization', e.currentTarget.innerHTML)} placeholder="Specialization" className="font-medium" project={project} handleContentChange={handleContentChange} />
                     </div>
                  </div>
             </main>
@@ -184,12 +172,12 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
             <footer className="relative z-10 flex-shrink-0 pt-12">
                  <div className="text-center mb-8">
                     <h3 className="text-lg font-semibold text-muted-foreground">Submitted By</h3>
-                    <EditableField field="teamMembers" placeholder="Team Members, separated by commas" className="text-xl font-medium" project={project} handleContentChange={handleContentChange} />
+                    <EditableField html={Array.isArray(project.teamMembers) ? project.teamMembers.join(', ') : ''} onBlur={(e) => handleContentChange('teamMembers', e.currentTarget.innerHTML)} placeholder="Team Members, separated by commas" className="text-xl font-medium" project={project} handleContentChange={handleContentChange} />
                 </div>
                  <div className="flex justify-between items-end text-sm text-muted-foreground">
                     <div>
-                        <EditableField field="supervisor" placeholder="Supervisor Name" className="font-bold" project={project} handleContentChange={handleContentChange} />
-                        <EditableField field="course" placeholder="Course Name" className="" project={project} handleContentChange={handleContentChange} />
+                        <EditableField html={project.supervisor || ''} onBlur={(e) => handleContentChange('supervisor', e.currentTarget.innerHTML)} placeholder="Supervisor Name" className="font-bold" project={project} handleContentChange={handleContentChange} />
+                        <EditableField html={project.course || ''} onBlur={(e) => handleContentChange('course', e.currentTarget.innerHTML)} placeholder="Course Name" className="" project={project} handleContentChange={handleContentChange} />
                     </div>
                     <ContentEditable
                         html={currentDate}
@@ -227,3 +215,5 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
         </div>
     );
 };
+
+    
