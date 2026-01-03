@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import A4Page from '@/components/shared/A4Page';
@@ -94,7 +95,8 @@ export default function ReportResults() {
                  <RichTextEditor
                     content={tocMarkdown}
                     onChange={handleTocChange}
-                    editorClassName="prose-h1:text-xl prose-h1:font-bold prose-h2:text-base prose-h2:font-semibold prose-p:text-base prose-p:ml-4"
+                    editorClassName="prose-h1:text-xl prose-h1:font-bold prose-ul:list-none prose-ul:pl-0 prose-li:pl-6 prose-p:text-base"
+                    isToc={true} // New prop to enforce TOC structure
                   />
               </A4Page>
             )}
@@ -110,3 +112,4 @@ export default function ReportResults() {
     </Card>
   );
 };
+

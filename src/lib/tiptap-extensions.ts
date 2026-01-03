@@ -174,3 +174,27 @@ export const editorExtensions = (uniqueId: string) => [
   }),
   SlashCommand,
 ];
+
+// Special configuration for the Table of Contents editor
+export const tocEditorExtensions = (uniqueId: string) => [
+  StarterKit.configure({
+    // Only allow headings and lists, disable paragraphs and other blocks
+    paragraph: false,
+    blockquote: false,
+    codeBlock: false,
+    hardBreak: false,
+    horizontalRule: false,
+    heading: {
+      levels: [1, 2, 3], // Allow only up to H3 for structure
+    },
+    bulletList: {},
+    orderedList: {},
+    listItem: {},
+  }),
+  Placeholder.configure({
+    placeholder: 'Add chapters (# Title) and sections (- Section)',
+  }),
+  BubbleMenuExtension.configure({
+    pluginKey: uniqueId,
+  }),
+];

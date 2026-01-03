@@ -8,7 +8,7 @@ import { marked } from 'marked';
 import React, { useCallback, useEffect } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
-import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/lib/tiptap-extensions';
+import { editorExtensions, handleHtmlPaste, handlePlainPaste, tocEditorExtensions } from '@/lib/tiptap-extensions';
 import { Button } from '@/components/ui/button';
 import { ContextualToolbar } from '@/lib/editor/ToolBar';
 import { cn } from '@/lib/utils/cn';
@@ -22,9 +22,10 @@ interface RichTextEditorProps {
   content: string;
   onChange: (markdown: string) => void;
   editorClassName?: string;
+  isToc?: boolean;
 }
 
-function RichTextEditor({ content, onChange, editorClassName }: RichTextEditorProps) {
+function RichTextEditor({ content, onChange, editorClassName, isToc = false }: RichTextEditorProps) {
   const { setActiveEditor } = useEditorStore();
   const bubbleMenuId = React.useId();
 
@@ -40,7 +41,7 @@ function RichTextEditor({ content, onChange, editorClassName }: RichTextEditorPr
   }, [onChange]);
 
   const editor = useEditor({
-    extensions: editorExtensions(bubbleMenuId),
+    extensions: isToc ? tocEditorExtensions(bubbleMenuId) : editorExtensions(bubbleMenuId),
     content: marked.parse(content) as string,
     onUpdate: ({ editor }) => {
       const markdown = turndownService.turndown(editor.getHTML());
