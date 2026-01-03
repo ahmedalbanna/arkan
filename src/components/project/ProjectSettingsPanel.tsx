@@ -81,7 +81,6 @@ export function ProjectSettingsPanel() {
       handleFileUpload(file, (dataUri) => {
         updateProject(p => {
           p.logoUrl = dataUri;
-          p.generateCoverPageMarkdown();
         });
         setLogoPreview(dataUri);
       });
@@ -89,13 +88,10 @@ export function ProjectSettingsPanel() {
   };
 
   const handleBlur = () => {
-    // This function will be triggered when a field loses focus.
-    // We get the current form data and update the project state.
     const data = form.getValues();
     const teamMembersArray = data.teamMembers?.split(',').map(name => name.trim()).filter(Boolean);
     updateProject(p => {
       Object.assign(p, { ...data, teamMembers: teamMembersArray });
-      p.generateCoverPageMarkdown();
     });
   };
 
