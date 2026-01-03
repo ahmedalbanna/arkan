@@ -19,32 +19,46 @@ import { Button } from '../ui/button';
 import { ListTree, Loader2 } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import { Chapter } from '@/lib/models';
+import { parseMarkdownToContent } from '@/hooks/util/useMarkdownParser';
 
 
 export default function ReportResults() {
   const { t } = useLocalization();
   const { project, setContentFromMarkdown, updateProject } = useBuilderStore();
-  const { form, mutation: generateTocMutation } = useGenerateTocLogic();
+  const { form, mutation: generateTocMutation, results: tocResults } = useGenerateTocLogic();
 
+  // Effect to automatically generate TOC if project description exists but TOC is empty
   useEffect(() => {
-    if (project?.projectDescription) {
+    if (project?.projectDescription && !project.tableOfContentsMarkdown) {
       form.setValue('projectDescription', project.projectDescription);
     }
-  }, [project?.projectDescription, form]);
+  }, [project?.projectDescription, project?.tableOfContentsMarkdown, form]);
+
+  useEffect(() => {
+    if (tocResults?.tableOfContents) {
+        const tocMarkdown = tocResults.tableOfContents.map(chapter => 
+            `# ${chapter.title}\n${chapter.sections.map(section => `  - ${section}`).join('\n')}`
+        ).join('\n\n');
+        handleTocChange(tocMarkdown);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tocResults]);
   
   const handleGenerateToc = () => {
-    if (project) {
-        generateTocMutation.mutate({ projectDescription: project.projectDescription || '' });
+    if (project && project.projectDescription) {
+        generateTocMutation.mutate({ projectDescription: project.projectDescription });
     }
   };
   
   const handleTocChange = (newMarkdown: string) => {
     updateProject(p => {
-        p.tableOfContentsMarkdown = newMarkdown;
+        if (!p) return;
+        const newContent = parseMarkdownToContent(newMarkdown, p.content);
+        p.content = newContent; // Directly mutate the draft
     });
   }
 
-  // Dynamically generate TOC from project structure
+  // Dynamically generate TOC markdown from the project structure
   const tocMarkdown = useMemo(() => {
     if (!project || project.content.length === 0) return '';
     
@@ -55,7 +69,7 @@ export default function ReportResults() {
         item.sections.forEach((section) => {
           markdown += `  - ${section.title}\n`;
         });
-      } else { // It's a top-level section
+      } else { // It's a top-level section without a chapter
         markdown += `# ${item.title}\n`;
       }
       markdown += '\n';
@@ -84,19 +98,19 @@ export default function ReportResults() {
             <CoverPage project={project} />
 
             <div className="flex justify-center my-4">
-              <Button onClick={handleGenerateToc} variant="outline" disabled={generateTocMutation.isPending}>
+              <Button onClick={handleGenerateToc} variant="outline" disabled={generateTocMutation.isPending || !project?.projectDescription}>
                 {generateTocMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ListTree className="mr-2 h-4 w-4" />}
-                {tocMarkdown ? 'Regenerate Table of Contents' : 'Generate Table of Contents'}
+                {project && project.content.length > 0 ? 'Regenerate Table of Contents' : 'Generate Table of Contents'}
               </Button>
             </div>
             
-            {(tocMarkdown || generateTocMutation.isPending) && (
+            {(project && project.content.length > 0) && (
               <A4Page title="Table of Contents">
                  <RichTextEditor
                     content={tocMarkdown}
                     onChange={handleTocChange}
                     editorClassName="prose-h1:text-xl prose-h1:font-bold prose-ul:list-none prose-ul:pl-0 prose-li:pl-6 prose-p:text-base"
-                    isToc={true} // New prop to enforce TOC structure
+                    isToc={true}
                   />
               </A4Page>
             )}
@@ -112,4 +126,3 @@ export default function ReportResults() {
     </Card>
   );
 };
-

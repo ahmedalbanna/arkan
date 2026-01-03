@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Chapter, Project, Section, TocSection, type ProjectProperties, User } from '@/lib/models';
@@ -136,12 +137,14 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
 
         // Ensure markdown is a string before trimming
         const incomingMarkdown = typeof markdown === 'string' ? markdown : '';
-        const currentMarkdown = currentProject.fullMarkdownContent || '';
-
-        if (incomingMarkdown.trim() !== currentMarkdown.trim()) {
+        
+        // This check prevents infinite loops but might be too simplistic if only whitespace changes matter.
+        // For now, it's a safe guard.
+        if (incomingMarkdown.trim() !== currentProject.fullMarkdownContent.trim()) {
           set(state => {
             if (!state.project) return {};
-            const newProject = state.project.updateContentFromMarkdown(incomingMarkdown);
+            const newContent = parseMarkdownToContent(incomingMarkdown, state.project.content);
+            const newProject = state.project.with({ content: newContent });
             return { project: newProject, hasUnsavedChanges: true };
           });
         }
