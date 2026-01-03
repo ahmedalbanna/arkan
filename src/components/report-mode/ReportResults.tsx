@@ -53,7 +53,8 @@ export default function ReportResults() {
   const handleTocChange = (newMarkdown: string) => {
     updateProject(p => {
         if (!p) return;
-        const newContent = parseMarkdownToContent(newMarkdown, p.content);
+        // Pass true for isToc to indicate only structure should be parsed
+        const newContent = parseMarkdownToContent(newMarkdown, p.content, true);
         p.content = newContent; // Directly mutate the draft
     });
   }

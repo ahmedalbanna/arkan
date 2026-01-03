@@ -12,13 +12,14 @@ import { getNodeText } from '@/lib/pptx-convert/ast-utils';
 
 /**
  * Parses a markdown string and converts it into a structured array of Chapter and Section objects.
- * This function is now more intelligent, handling hierarchy and preserving existing IDs.
+ * This function is now more intelligent, handling hierarchy and preserving existing IDs and content.
  *
  * @param markdown The raw markdown string to parse.
  * @param existingContent The current project content to preserve IDs and properties.
+ * @param isToc Only parse structure (headings, lists), ignore other content.
  * @returns An array of Chapter and Section objects.
  */
-export function parseMarkdownToContent(markdown: string, existingContent: ProjectContent): ProjectContent {
+export function parseMarkdownToContent(markdown: string, existingContent: ProjectContent, isToc: boolean = false): ProjectContent {
   const ast = unified().use(remarkParse).use(remarkGfm).parse(markdown) as MdastRoot;
   const newContent: ProjectContent = [];
   let currentChapter: Chapter | null = null;
@@ -35,7 +36,7 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
     }
     return undefined;
   };
-  
+
   const findExistingChapter = (title: string): Chapter | undefined => {
     return existingContent.find(item => item instanceof Chapter && item.title === title) as Chapter | undefined;
   };
@@ -44,8 +45,8 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
     if (currentSection) {
       const sectionMarkdown = unified().use(remarkGfm).use(remarkStringify).stringify({ type: 'root', children: accumulatedContent }).trim();
       
-      // Only update content if it has changed
-      if (sectionMarkdown !== currentSection.content) {
+      // Only update content if it has changed and we are not in TOC mode
+      if (!isToc && sectionMarkdown !== currentSection.content) {
         currentSection = currentSection.with({ content: sectionMarkdown });
       }
 
@@ -57,7 +58,6 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
             currentChapter = currentChapter.addSection(currentSection);
         }
       } else {
-        // This case handles top-level sections that are not under a chapter
         const existingIndex = newContent.findIndex(item => item.id === currentSection!.id);
         if(existingIndex !== -1) {
           newContent[existingIndex] = currentSection;
@@ -70,7 +70,7 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
   };
 
   const flushChapter = () => {
-    flushSection(); // Finalize the last section of the chapter
+    flushSection();
     if (currentChapter) {
         const chapterIndex = newContent.findIndex(c => c.id === currentChapter!.id);
         if(chapterIndex !== -1) {
@@ -81,66 +81,60 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
     }
     currentChapter = null;
   };
-  
-  const firstHeadingIndex = ast.children.findIndex(node => node.type === 'heading');
-  const contentBeforeFirstHeading = (firstHeadingIndex === -1 ? ast.children : ast.children.slice(0, firstHeadingIndex));
-  const introMarkdown = unified().use(remarkGfm).use(remarkStringify).stringify({ type: 'root', children: contentBeforeFirstHeading }).trim();
 
-  if (introMarkdown) {
-      let introSection = findExistingSection('Introduction') || new Section({ title: 'Introduction', type: 'report' });
-      introSection = introSection.with({ content: introMarkdown });
-      newContent.push(introSection);
-  }
-
-  if (firstHeadingIndex !== -1) {
-    for (let i = firstHeadingIndex; i < ast.children.length; i++) {
-      const node = ast.children[i];
-
-      if (node.type === 'heading') {
-        const title = getNodeText(node).trim();
-        
-        if (node.depth === 1) { // It's a Chapter
-          flushChapter();
-          const existingChapter = findExistingChapter(title);
-          currentChapter = new Chapter({ id: existingChapter?.id, title: title, sections: existingChapter?.sections || [] });
-          currentSection = null; // Reset section when a new chapter starts
-        } else { // It's a Section
-          flushSection(); 
-          const existingSection = findExistingSection(title);
-          
-          // If we are not inside a chapter, create a default one for this section
-          if (!currentChapter) {
-            currentChapter = new Chapter({ title: 'General', sections: [] });
-          }
-          
-          currentSection = new Section({
-              id: existingSection?.id,
-              title: title,
-              type: existingSection?.type || 'report',
-              controls: existingSection?.controls,
-              prompt: existingSection?.prompt,
-              rules: existingSection?.rules,
-              guidelines: existingSection?.guidelines,
-              constraints: existingSection?.constraints,
-              behaviors: existingSection?.behaviors,
-              context: existingSection?.context,
-              content: existingSection?.content,
-          });
+  // Process all nodes in the AST
+  for (const node of ast.children) {
+    if (node.type === 'heading') {
+      const title = getNodeText(node).trim();
+      if (node.depth === 1) { // Chapter
+        flushChapter();
+        const existingChapter = findExistingChapter(title);
+        currentChapter = new Chapter({ id: existingChapter?.id, title: title, sections: existingChapter?.sections || [] });
+        currentSection = null; // Reset section when a new chapter starts
+      } else { // Section
+        flushSection();
+        const existingSection = findExistingSection(title);
+        currentSection = new Section({
+            id: existingSection?.id,
+            title: title,
+            type: existingSection?.type || 'report',
+            content: existingSection?.content, // Preserve existing content
+            controls: existingSection?.controls,
+            prompt: existingSection?.prompt,
+            rules: existingSection?.rules,
+            guidelines: existingSection?.guidelines,
+            constraints: existingSection?.constraints,
+            behaviors: existingSection?.behaviors,
+            context: existingSection?.context,
+        });
+      }
+    } else if (node.type === 'list' && currentChapter) {
+        // Handle sections listed under a chapter
+        for (const listItem of node.children) {
+            if (listItem.type === 'listItem') {
+                const sectionTitle = getNodeText(listItem).trim();
+                flushSection();
+                const existingSection = findExistingSection(sectionTitle);
+                currentSection = new Section({
+                    id: existingSection?.id,
+                    title: sectionTitle,
+                    type: existingSection?.type || 'report',
+                    content: existingSection?.content,
+                    controls: existingSection?.controls,
+                    prompt: existingSection?.prompt,
+                    rules: existingSection?.rules,
+                    guidelines: existingSection?.guidelines,
+                    constraints: existingSection?.constraints,
+                    behaviors: existingSection?.behaviors,
+                    context: existingSection?.context,
+                });
+                flushSection(); // Immediately add the section
+                currentSection = null;
+            }
         }
-      } else if (node.type === 'thematicBreak' || (node.type === 'html' && node.value.includes('slide-break'))) {
-          // Slide breaks in markdown might signify a new section without a heading.
-          // For now, we'll treat them as simple separators within content.
-          if (currentSection) {
-            accumulatedContent.push(node);
-          }
-      } else {
-        if (currentSection) {
-            accumulatedContent.push(node);
-        } else if (currentChapter) {
-            // Content directly under a chapter, create an implicit section.
-            currentSection = new Section({ title: `${currentChapter.title} Content`, type: 'report' });
-            accumulatedContent.push(node);
-        }
+    } else {
+      if (currentSection && !isToc) {
+        accumulatedContent.push(node);
       }
     }
   }
