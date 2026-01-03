@@ -28,7 +28,9 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
     const { updateProject } = useBuilderStore();
 
     if (!project) return null;
-    const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    
+    // Use a default date but allow it to be editable.
+    const currentDate = project.meta.updated ? new Date(project.meta.updated).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
     const handleContentChange = (field: keyof Project, value: string) => {
         updateProject(p => {
@@ -38,18 +40,26 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
             } else {
                 (p as any)[field] = sanitizedValue;
             }
-            p.generateCoverPageMarkdown();
         });
+    };
+    
+    // A new handler specifically for the date. We can enhance this later.
+    const handleDateChange = (value: string) => {
+         updateProject(p => {
+            const sanitizedValue = value.replace(/<br>/g, '\n').replace(/&nbsp;/g, ' ').replace(/<[^>]+>/g, '');
+             p.meta.updated = new Date(sanitizedValue).toISOString();
+         });
     };
 
     const EditableField = ({ field, placeholder, className, isTextarea = false }: { field: keyof Project, placeholder: string, className: string, isTextarea?: boolean }) => {
-        const value = project[field] as string || '';
+        const value = project[field] as string | string[] || '';
+        const displayValue = Array.isArray(value) ? value.join(', ') : value;
         return (
             <ContentEditable
-                html={Array.isArray(value) ? value.join(', ') : value}
+                html={displayValue}
                 onBlur={(e) => handleContentChange(field, e.target.innerHTML)}
-                placeholder={placeholder}
-                className={cn("outline-none focus:bg-primary/5 focus:shadow-inner p-1 rounded-md", className)}
+                data-placeholder={placeholder}
+                className={cn("outline-none focus:bg-primary/5 focus:shadow-inner p-1 rounded-md empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground empty:before:opacity-60", className)}
                 tagName={isTextarea ? 'div' : 'p'}
             />
         );
@@ -68,13 +78,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                         <Image src={project.logoUrl} alt="Project Logo" layout="fill" objectFit="contain" />
                     </div>
                 )}
-                <ContentEditable
-                    html={project.name || ''}
-                    onBlur={(e) => handleContentChange('name', e.target.innerHTML)}
-                    placeholder="Untitled Project"
-                    className="text-5xl font-bold font-headline text-primary leading-tight outline-none focus:bg-primary/5 focus:shadow-inner p-2 rounded-md"
-                    tagName="h1"
-                />
+                <EditableField field="name" placeholder="Untitled Project" className="text-5xl font-bold font-headline text-primary leading-tight" />
                  <div className="inline-flex items-center gap-2 text-muted-foreground mt-4">
                     <Landmark className="w-5 h-5" />
                      <EditableField field="university" placeholder="University Name" className="font-semibold text-lg tracking-wider" />
@@ -109,7 +113,12 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                         <EditableField field="supervisor" placeholder="Supervisor Name" className="font-bold" />
                         <EditableField field="course" placeholder="Course Name" className="" />
                     </div>
-                    <p>{currentDate}</p>
+                    <ContentEditable
+                        html={currentDate}
+                        onBlur={(e) => handleDateChange(e.target.innerHTML)}
+                        className="outline-none focus:bg-primary/5 focus:shadow-inner p-1 rounded-md"
+                        tagName="p"
+                    />
                  </div>
             </footer>
         </div>
