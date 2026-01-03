@@ -27,17 +27,18 @@ function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const { setActiveEditor } = useEditorStore();
   const bubbleMenuId = React.useId();
 
+  const debouncedOnChange = useDebounce(onChange, 500);
 
   const editor = useEditor({
     extensions: editorExtensions(bubbleMenuId),
     content: marked.parse(content) as string,
     onUpdate: ({ editor }) => {
       const markdown = turndownService.turndown(editor.getHTML());
-      onChange(markdown);
+      debouncedOnChange(markdown);
     },
     onBlur: ({ editor }) => {
-        const markdown = turndownService.turndown(editor.getHTML());
-        onChange(markdown);
+      const markdown = turndownService.turndown(editor.getHTML());
+      onChange(markdown); // Force immediate update on blur
     },
     editorProps: {
       attributes: {
