@@ -2,13 +2,15 @@
 'use client';
 
 import { Project } from '@/lib/models';
-import { Landmark, UploadCloud, Frame, Loader2 } from 'lucide-react';
+import { Landmark, UploadCloud, Frame, Loader2, Book, Building, Brush } from 'lucide-react';
 import Image from 'next/image';
 import React, { useRef, useState } from 'react';
 import ContentEditable from 'react-contenteditable';
 import { useBuilderStore } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
 import { useImageUpload } from '@/hooks/core/useImageUpload';
+import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface CoverPageProps {
     project: Project | null;
@@ -120,6 +122,42 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                  </>
             )}
 
+            <div className="absolute top-4 right-4 z-20">
+                <TooltipProvider>
+                    <ToggleGroup 
+                        type="single" 
+                        defaultValue={project.projectType} 
+                        onValueChange={(value) => { if(value) handleContentChange('projectType', value)}}
+                        className="bg-background/50 border rounded-lg p-1 backdrop-blur-sm"
+                    >
+                         <Tooltip>
+                            <TooltipTrigger asChild>
+                                <ToggleGroupItem value="Business Proposal" aria-label="Professional style">
+                                    <Building className="h-5 w-5" />
+                                </ToggleGroupItem>
+                            </TooltipTrigger>
+                            <TooltipContent><p>Professional</p></TooltipContent>
+                        </Tooltip>
+                         <Tooltip>
+                            <TooltipTrigger asChild>
+                                <ToggleGroupItem value="Research Paper" aria-label="Academic style">
+                                    <Book className="h-5 w-5" />
+                                </ToggleGroupItem>
+                            </TooltipTrigger>
+                            <TooltipContent><p>Academic</p></TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <ToggleGroupItem value="Creative" aria-label="Creative style">
+                                    <Brush className="h-5 w-5" />
+                                </ToggleGroupItem>
+                            </TooltipTrigger>
+                            <TooltipContent><p>Creative</p></TooltipContent>
+                        </Tooltip>
+                    </ToggleGroup>
+                </TooltipProvider>
+            </div>
+
 
             <header className="relative z-10 text-center flex flex-col items-center pt-8 pb-12 flex-shrink-0">
                  {project.logoUrl ? (
@@ -169,11 +207,6 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                         className="text-2xl text-muted-foreground leading-relaxed italic"
                         tagName="div"
                     />
-                    <div className="mt-8 flex justify-center gap-x-8 gap-y-2 text-lg">
-                        <EditableField html={project.educationalLevel || ''} onBlur={(e) => handleContentChange('educationalLevel', e.currentTarget.innerHTML)} placeholder="Educational Level" className="font-medium" />
-                        <span className="text-muted-foreground">|</span>
-                        <EditableField html={project.specialization || ''} onBlur={(e) => handleContentChange('specialization', e.currentTarget.innerHTML)} placeholder="Specialization" className="font-medium" />
-                    </div>
                  </div>
             </main>
 

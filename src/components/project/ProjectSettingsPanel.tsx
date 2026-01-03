@@ -152,20 +152,20 @@ export function ProjectSettingsPanel() {
                       <FormMessage />
                     </FormItem>
                   )} />
-                  <FormField control={form.control} name="specialization" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Specialization</FormLabel>
-                      <FormControl>
-                        <CustomSelect
-                          value={field.value || ''}
-                          onChange={(value) => { field.onChange(value); handleBlur(); }}
-                          options={specializationOptions}
-                          placeholder="Select or type specialization"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
+                   <FormField control={form.control} name="educationalLevel" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Educational Level</FormLabel>
+                             <FormControl>
+                                <CustomSelect
+                                  value={field.value || ''}
+                                  onChange={(value) => { field.onChange(value); handleBlur(); }}
+                                  options={educationalLevelOptions}
+                                  placeholder="Select or type level"
+                                />
+                              </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
                 </div>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="university" render={({ field }) => (
@@ -180,20 +180,20 @@ export function ProjectSettingsPanel() {
                     <FormField control={form.control} name="course" render={({ field }) => (
                       <FormItem><FormLabel>Course</FormLabel><FormControl><Input {...field} onBlur={handleBlur} /></FormControl><FormMessage /></FormItem>
                     )} />
-                     <FormField control={form.control} name="educationalLevel" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Educational Level</FormLabel>
-                             <FormControl>
-                                <CustomSelect
-                                  value={field.value || ''}
-                                  onChange={(value) => { field.onChange(value); handleBlur(); }}
-                                  options={educationalLevelOptions}
-                                  placeholder="Select or type level"
-                                />
-                              </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )} />
+                     <FormField control={form.control} name="specialization" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Specialization</FormLabel>
+                      <FormControl>
+                        <CustomSelect
+                          value={field.value || ''}
+                          onChange={(value) => { field.onChange(value); handleBlur(); }}
+                          options={specializationOptions}
+                          placeholder="Select or type specialization"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
                 </div>
                 
                 <div className="space-y-2">
