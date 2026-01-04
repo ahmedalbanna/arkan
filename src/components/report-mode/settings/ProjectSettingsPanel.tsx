@@ -168,6 +168,34 @@ export default function ProjectSettingsPanel() {
     { value: 'Blog Post', label: 'Blog Post' },
   ];
 
+  const specializationOptions = [
+    { value: 'Physics', label: 'Physics' },
+    { value: 'Chemistry', label: 'Chemistry' },
+    { value: 'Biology', label: 'Biology' },
+    { value: 'Mathematics', label: 'Mathematics' },
+    { value: 'Psychology', label: 'Psychology' },
+    { value: 'Sociology', label: 'Sociology' },
+    { value: 'Economics', label: 'Economics' },
+    { value: 'Political Science', label: 'Political Science' },
+    { value: 'History', label: 'History' },
+    { value: 'Literature', label: 'Literature' },
+    { value: 'Philosophy', label: 'Philosophy' },
+    { value: 'Business Management', label: 'Business Management' },
+    { value: 'Marketing', label: 'Marketing' },
+    { value: 'Law', label: 'Law' },
+    { value: 'Medicine', label: 'Medicine' },
+    { value: 'Nursing', label: 'Nursing' },
+    { value: 'Computer Science', label: 'Computer Science' },
+    { value: 'Engineering', label: 'Engineering' },
+    { value: 'Education', label: 'Education' },
+    { value: 'Environmental Science', label: 'Environmental Science' },
+    { value: 'Communication Studies', label: 'Communication Studies' },
+    { value: 'Art & Design', label: 'Art & Design' },
+    { value: 'Music', label: 'Music' },
+    { value: 'Geography', label: 'Geography' },
+    { value: 'Linguistics', label: 'Linguistics' },
+  ];
+
   const educationalLevelOptions = [
       { value: 'High School', label: 'High School' },
       { value: 'Undergraduate (First Year)', label: 'Undergraduate (First Year)' },
@@ -177,6 +205,14 @@ export default function ProjectSettingsPanel() {
       { value: 'Doctoral', label: 'Doctoral' },
       { value: 'Post-Doctoral', label: 'Post-Doctoral' },
       { value: 'Professional', label: 'Professional' },
+  ];
+
+  const universityOptions = [
+      { value: "King Saud University", label: "King Saud University" },
+      { value: "Umm Al-Qura University", label: "Umm Al-Qura University" },
+      { value: "Islamic University of Madinah", label: "Islamic University of Madinah" },
+      { value: "Imam Muhammad ibn Saud Islamic University", label: "Imam Muhammad ibn Saud Islamic University" },
+      { value: "King Fahd University of Petroleum and Minerals", label: "King Fahd University of Petroleum and Minerals" }
   ];
 
   return (
@@ -221,11 +257,50 @@ export default function ProjectSettingsPanel() {
                   )}
                 />
 
-                <FormField control={form.control} name="specialization" render={({ field }) => (
-                    <FormItem><FormLabel>Specialization</FormLabel><FormControl>
-                        <Input {...field} onBlur={handleBlur} placeholder="e.g., Artificial Intelligence, Web Development" />
-                    </FormControl><FormMessage /></FormItem>
-                )} />
+                <FormField
+                    control={form.control}
+                    name="specialization"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Specialization</FormLabel>
+                            <FormControl>
+                                <CustomSelect
+                                    value={field.value || ''}
+                                    onChange={(value) => {
+                                        field.onChange(value);
+                                        handleBlur();
+                                    }}
+                                    options={specializationOptions}
+                                    placeholder="e.g., Artificial Intelligence, Web Development"
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                
+                <FormField
+                    control={form.control}
+                    name="university"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>University</FormLabel>
+                            <FormControl>
+                                <CustomSelect
+                                    value={field.value || ''}
+                                    onChange={(value) => {
+                                        field.onChange(value);
+                                        handleBlur();
+                                    }}
+                                    options={universityOptions}
+                                    placeholder="e.g., King Saud University"
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
                 <FormField
                     control={form.control}
                     name="educationalLevel"
