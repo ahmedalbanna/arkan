@@ -102,25 +102,6 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
 
                 <ExportDialog />
 
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <div>
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => project?.downloadAsFile()}
-                                disabled={!hasContent}
-                                className="h-8 w-8 md:w-auto md:px-3"
-                            >
-                                <Download className="h-4 w-4" />
-                                <span className="hidden md:inline ms-2">Download</span>
-                            </Button>
-                        </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>{t('builder.tooltips.downloadProject')}</p>
-                    </TooltipContent>
-                </Tooltip>
             </div>
         </TooltipProvider>
     );
