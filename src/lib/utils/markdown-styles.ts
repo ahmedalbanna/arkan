@@ -20,8 +20,8 @@ export const markdownComponents: { [key: string]: React.ElementType } = {
     // This is the key change to prevent nesting block elements inside <p>
     // `react-markdown` sometimes wraps other block elements in a <p> internally.
     // We check if the first child is a known block-level custom component. If so, we render it directly.
-    if (node && node.children.length === 1 && node.children[0].tagName === 'pre') {
-      return React.createElement(React.Fragment, props);
+    if (node && node.children.length === 1 && ['pre', 'table', 'blockquote'].includes(node.children[0].tagName)) {
+      return React.createElement(React.Fragment, props, props.children);
     }
     return React.createElement('p', { className: "mb-4 leading-relaxed", ...props });
   },
@@ -51,5 +51,3 @@ export const markdownComponents: { [key: string]: React.ElementType } = {
   th: ({ node, ...props }) => React.createElement('th', { className: "px-4 py-3 text-left align-middle font-semibold text-foreground border border-border", ...props }),
   td: ({ node, ...props }) => React.createElement('td', { className: "px-4 py-3 align-middle border border-border", ...props }),
 };
-
-    
