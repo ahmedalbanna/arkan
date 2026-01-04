@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
-import { useGuidelineEditor } from '@/hooks/core/use-guideline-editor';
+import { useGuidelineEditor } from '@/hooks/report-mode/use-guideline-editor';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -46,8 +47,8 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
         <Label htmlFor={`prompt-${itemKey}`}>{t('builder.reportGenerator.tool_prompt_label')}</Label>
         <Textarea
           id={`prompt-${itemKey}`}
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
+          defaultValue={prompt}
+          onBlur={(e) => setPrompt(e.target.value)}
           rows={4}
         />
       </div>

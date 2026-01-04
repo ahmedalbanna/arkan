@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Badge } from '@/components/ui/badge';
@@ -75,8 +76,8 @@ export function SectionGenerationControls({ section }: SectionGenerationControls
             <div className="space-y-2">
                 <Label>{t('builder.reportGenerator.tool_word_count_label')}</Label>
                 <Input
-                    value={section.controls.wordCount}
-                    onChange={(e) => handleControlChange('wordCount', e.target.value)}
+                    defaultValue={section.controls.wordCount}
+                    onBlur={(e) => handleControlChange('wordCount', e.target.value)}
                     placeholder={t('builder.reportGenerator.tool_word_count_placeholder')}
                     type="number"
                 />
