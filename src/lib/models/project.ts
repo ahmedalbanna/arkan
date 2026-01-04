@@ -202,6 +202,14 @@ export class Project {
 
   // --- Immutable Logic ---
   
+  /**
+   * Resets the project to its default empty state.
+   * @returns A new Project instance with default values.
+   */
+  public reset(): Project {
+    return new Project({});
+  }
+
   public generateTableOfContents(): Project {
     let toc = '## Table of Contents\n\n';
     this.chapters.forEach((chapter, chapterIndex) => {
@@ -213,7 +221,7 @@ export class Project {
     return this.with({ tableOfContentsMarkdown: toc });
   }
 
-  public updateContentFromMarkdown(markdown: string): Project {
+  public updateProjectFromMarkdown(markdown: string): Project {
     const newContent = parseMarkdownToContent(markdown, this.content);
     return this.with({ content: newContent });
   }
