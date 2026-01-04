@@ -12,7 +12,7 @@ import {
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { useSaveProject } from '@/hooks/data/use-projects';
-import { Download, Loader2, Save, Trash2, Upload } from 'lucide-react';
+import { Download, Loader2, PlusCircle, Save, Trash2, Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
 import { BrowseProjectsDialog } from './BrowseProjectsDialog';
@@ -60,6 +60,16 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
                     accept=".arkan"
                     className="hidden"
                 />
+
+                <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => newSession()}
+                    className="h-8 w-8 md:w-auto md:px-3"
+                >
+                    <PlusCircle className="h-4 w-4" />
+                    <span className="hidden md:inline ms-2">New Project</span>
+                </Button>
 
                 <BrowseProjectsDialog />
 
