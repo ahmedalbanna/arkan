@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,7 @@ import {
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { useSaveProject } from '@/hooks/data/use-projects';
-import { Download, Loader2, PlusCircle, Save, Trash2, Upload } from 'lucide-react';
+import { Download, Loader2, PlusCircle, Save, Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
 import { BrowseProjectsDialog } from './BrowseProjectsDialog';
@@ -120,23 +119,6 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
                     </TooltipTrigger>
                     <TooltipContent>
                         <p>{t('builder.tooltips.downloadProject')}</p>
-                    </TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            variant="destructive"
-                            size="icon"
-                            onClick={() => newSession()}
-                            className="h-8 w-8"
-                        >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">{t('builder.buttons.newSession')}</span>
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>{t('builder.tooltips.newSession')}</p>
                     </TooltipContent>
                 </Tooltip>
             </div>
