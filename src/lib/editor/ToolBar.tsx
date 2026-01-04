@@ -41,21 +41,6 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
     }
   }
   
-  const FONT_SIZES = [
-    { name: 'Small', value: '12pt' },
-    { name: 'Default', value: '' }, // Clears the font size
-    { name: 'Large', value: '18pt' },
-    { name: 'Extra Large', value: '24pt' },
-  ];
-  
-  const FONT_COLORS = [
-    { name: 'Default', value: '' }, // Clears the color
-    { name: 'Red', value: '#e03131' },
-    { name: 'Blue', value: '#1971c2' },
-    { name: 'Green', value: '#2f9e44' },
-    { name: 'Orange', value: '#f76707' },
-  ];
-
   const formatButtons = [
     { action: () => controller.toggleBold(), isActive: controller.isBold(), icon: Bold, label: t('builder.Section.tooltips.bold') },
     { action: () => controller.toggleItalic(), isActive: controller.isItalic(), icon: Italic, label: t('builder.Section.tooltips.italic') },
@@ -103,39 +88,6 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
             <TooltipContent><p>{label}</p></TooltipContent>
           </Tooltip>
         ))}
-        
-        <Separator orientation="vertical" className="h-6 mx-1" />
-
-        <DropdownMenu>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><Baseline className="h-5 w-5"/></Button></DropdownMenuTrigger>
-                </TooltipTrigger>
-                <TooltipContent><p>Font Size</p></TooltipContent>
-            </Tooltip>
-            <DropdownMenuContent>
-                {FONT_SIZES.map(size => (
-                    <DropdownMenuItem key={size.name} onSelect={() => controller.setFontSize(size.value)} className={controller.isFontSize(size.value) ? "bg-accent" : ""}>{size.name}</DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-        </DropdownMenu>
-
-        <DropdownMenu>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><Palette className="h-4 w-4"/></Button></DropdownMenuTrigger>
-                </TooltipTrigger>
-                <TooltipContent><p>Text Color</p></TooltipContent>
-            </Tooltip>
-            <DropdownMenuContent>
-                {FONT_COLORS.map(color => (
-                    <DropdownMenuItem key={color.name} onSelect={() => controller.setColor(color.value)} className={controller.isColor(color.value) ? "bg-accent" : ""}>
-                        <div className="w-4 h-4 rounded-full border mr-2" style={{ backgroundColor: color.value || 'transparent' }}></div>
-                        {color.name}
-                    </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-        </DropdownMenu>
         
         <Separator orientation="vertical" className="h-6 mx-1" />
 
