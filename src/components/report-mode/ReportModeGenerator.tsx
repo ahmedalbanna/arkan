@@ -5,7 +5,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useMobile } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
 import { BookOpenText, Edit, GitGraph, PenSquare, Search, UploadCloud, Settings } from 'lucide-react';
-import { Suspense, lazy, useState } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { Button } from '../ui/button';
 import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
 import { BuilderPageSkeleton } from '@/app/builder/loading';
@@ -18,12 +18,18 @@ import { SessionActions } from '@/components/report-mode/session/SessionActions'
 
 
 // Dynamic imports with proper default export handling
-const ProjectSettingsPanel = lazy(() => import('./settings/ProjectSettingsPanel').then(module => ({ default: module.default })));
-const FileManager = lazy(() => import('./file-manager').then(module => ({ default: module.default })));
-const GenerationTools = lazy(() => import('./generation-tools').then(module => ({ default: module.default })));
+const ProjectSettingsPanel = lazy(() => import('./settings/ProjectSettingsPanel'));
+const FileManager = lazy(() => import('./file-manager'));
+const GenerationTools = lazy(() => import('./generation-tools'));
 const AIResearcherTool = lazy(() => import('../writing-tools/AIResearcherTool').then(module => ({ default: module.AIResearcherTool })));
 const PlantUMLGeneratorTool = lazy(() => import('../writing-tools/PlantUMLGeneratorTool').then(module => ({ default: module.PlantUMLGeneratorTool })));
-const ReportResults = lazy(() => import('./ReportResults').then(module => ({ default: module.default })));
+const ReportResults = lazy(() => import('./ReportResults'));
+
+const MemoizedProjectSettingsPanel = React.memo(ProjectSettingsPanel);
+const MemoizedFileManager = React.memo(FileManager);
+const MemoizedGenerationTools = React.memo(GenerationTools);
+const MemoizedAIResearcherTool = React.memo(AIResearcherTool);
+const MemoizedPlantUMLGeneratorTool = React.memo(PlantUMLGeneratorTool);
 
 
 function ReportSkeleton() {
@@ -83,31 +89,31 @@ export default function ReportModeGenerator() {
             key: 'settings',
             title: 'Project Settings',
             icon: <Settings className="h-5 w-5" />,
-            content: <ProjectSettingsPanel />,
+            content: <MemoizedProjectSettingsPanel />,
         },
         {
             key: 'files',
             title: t('builder.tabs.files'),
             icon: <UploadCloud className="h-5 w-5" />,
-            content: <FileManager />,
+            content: <MemoizedFileManager />,
         },
         {
             key: 'generate',
             title: t('builder.reportGenerator.toolsTitle'),
             icon: <BookOpenText className="h-5 w-5" />,
-            content: <GenerationTools />,
+            content: <MemoizedGenerationTools />,
         },
         {
             key: 'research',
             title: t('writingTools.aiResearcher.pageTitle'),
             icon: <Search className="h-5 w-5" />,
-            content: <AIResearcherTool />,
+            content: <MemoizedAIResearcherTool />,
         },
         {
             key: 'diagram',
             title: t('builder.tabs.diagram'),
             icon: <GitGraph className="h-5 w-5" />,
-            content: <PlantUMLGeneratorTool />,
+            content: <MemoizedPlantUMLGeneratorTool />,
         },
     ];
 

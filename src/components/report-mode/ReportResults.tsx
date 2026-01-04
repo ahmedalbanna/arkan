@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import A4Page from '@/components/shared/A4Page';
@@ -17,12 +16,12 @@ import MarkdownEditor from './MarkdownEditor';
 import { CoverPage } from '../shared/CoverPage';
 import { Button } from '../ui/button';
 import { ListTree, Loader2 } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Chapter, TocSection } from '@/lib/models';
 import { parseMarkdownToContent } from '@/hooks/util/useMarkdownParser';
 
 
-export default function ReportResults() {
+const ReportResults = React.memo(function ReportResults() {
   const { t } = useLocalization();
   const { project, updateProject, setContentFromMarkdown, applyTableOfContents } = useBuilderStore();
   const { form, mutation: generateTocMutation, results: tocResults } = useGenerateTocLogic();
@@ -70,14 +69,14 @@ export default function ReportResults() {
     let markdown = '';
     project.content.forEach((item) => {
       if (item instanceof Chapter) {
-        markdown += `# ${item.title}\n`;
+        markdown += `# ${item.title}\\n`;
         item.sections.forEach((section) => {
-          markdown += `  - ${section.title}\n`;
+          markdown += `  - ${section.title}\\n`;
         });
       } else { // It's a top-level section without a chapter
-        markdown += `# ${item.title}\n`;
+        markdown += `# ${item.title}\\n`;
       }
-      markdown += '\n';
+      markdown += '\\n';
     });
     return markdown.trim();
   }, [project]);
@@ -132,4 +131,6 @@ export default function ReportResults() {
       </CardContent>
     </Card>
   );
-};
+});
+
+export default ReportResults;

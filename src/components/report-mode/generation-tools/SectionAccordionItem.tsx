@@ -28,7 +28,7 @@ interface SectionAccordionItemProps {
     toggleSectionSelection: (sectionId: string) => void;
 }
 
-export function SectionAccordionItem({
+const MemoizedSectionAccordionItem = React.memo(function SectionAccordionItem({
     sectionId,
     chapterIndex,
     sectionIndex,
@@ -159,4 +159,6 @@ export function SectionAccordionItem({
             </AccordionItem>
         </div>
     );
-}
+});
+
+export { MemoizedSectionAccordionItem as SectionAccordionItem };

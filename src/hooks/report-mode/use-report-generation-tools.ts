@@ -3,7 +3,7 @@
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useBuilderStore } from '@/hooks';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { useAiActions } from './use-ai-actions';
 
@@ -23,22 +23,22 @@ export function useReportGenerationTools() {
 
     const { generateProjectMutation } = useAiActions();
 
-    const enterProjectBuildMode = () => setIsProjectBuildMode(true);
-    const exitProjectBuildMode = () => {
+    const enterProjectBuildMode = useCallback(() => setIsProjectBuildMode(true), []);
+    const exitProjectBuildMode = useCallback(() => {
         setIsProjectBuildMode(false);
         setSelectedSectionsForBuild(new Set());
-    };
+    }, []);
 
-    const toggleSectionSelection = (sectionId: string) => {
+    const toggleSectionSelection = useCallback((sectionId: string) => {
         setSelectedSectionsForBuild(prev => {
             const newSelection = new Set(prev);
             if (newSelection.has(sectionId)) newSelection.delete(sectionId);
             else newSelection.add(sectionId);
             return newSelection;
         });
-    };
+    }, []);
 
-    const toggleChapterSelection = (chapterId: string, select: boolean) => {
+    const toggleChapterSelection = useCallback((chapterId: string, select: boolean) => {
         if (!project) return;
         const chapter = project.getChapter(chapterId);
         if (!chapter) return;
@@ -51,9 +51,9 @@ export function useReportGenerationTools() {
             });
             return newSelection;
         });
-    };
+    }, [project]);
     
-    const toggleSelectAll = (select: boolean) => {
+    const toggleSelectAll = useCallback((select: boolean) => {
         if (!project) return;
         if (select) {
             const allSectionIds = new Set(project.sections.map(s => s.id));
@@ -61,14 +61,14 @@ export function useReportGenerationTools() {
         } else {
             setSelectedSectionsForBuild(new Set());
         }
-    };
+    }, [project]);
 
-    const handleAddChapter = () => {
+    const handleAddChapter = useCallback(() => {
         updateProject(p => p.addChapter());
         toast({ title: "Chapter Created", description: `A new untitled chapter has been added.` });
-    };
+    }, [updateProject]);
 
-    const handleCreateFromToc = (tocText: string) => {
+    const handleCreateFromToc = useCallback((tocText: string) => {
         if (!tocText.trim()) {
             toast({ title: "Table of Contents is empty", description: "Please paste the section titles into the text area.", variant: "destructive" });
             return;
@@ -85,9 +85,9 @@ export function useReportGenerationTools() {
         });
         setShowTocInput(false);
         setNewChapterTitle('');
-    };
+    }, [updateProject]);
 
-    const handleDragEnd = (event: DragEndEvent) => {
+    const handleDragEnd = useCallback((event: DragEndEvent) => {
         const { active, over } = event;
         if (!over || !project) return;
         const activeId = active.id.toString();
@@ -95,7 +95,7 @@ export function useReportGenerationTools() {
         if (activeId === overId) return;
 
         updateProject(p => p.moveContentItem(activeId, overId));
-    };
+    }, [project, updateProject]);
 
     const chaptersToBuild = useMemo(() => {
         if (!project) return [];
@@ -104,12 +104,12 @@ export function useReportGenerationTools() {
           .filter(c => c.sections.length > 0);
     }, [project, selectedSectionsForBuild]);
 
-    const onGenerateProject = () => {
+    const onGenerateProject = useCallback(() => {
         if (project && selectedSectionsForBuild.size > 0) {
           generateProjectMutation.mutate({ project, selectedSectionIds: selectedSectionsForBuild });
           setIsBuildProjectDialogOpen(false); // Close dialog on confirm
         }
-      }
+    }, [project, selectedSectionsForBuild, generateProjectMutation]);
 
     return {
         t,
@@ -139,5 +139,3 @@ export function useReportGenerationTools() {
         chaptersToBuild,
     };
 }
-
-    
