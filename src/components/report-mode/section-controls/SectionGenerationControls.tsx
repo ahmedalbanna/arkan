@@ -10,6 +10,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import type { Language, OutputStyle, Section, Tone } from '@/lib/models';
 import { Input } from '@/components/ui/input';
+import { useState, useEffect } from 'react';
 
 interface SectionGenerationControlsProps {
     section: Section;
@@ -18,6 +19,15 @@ interface SectionGenerationControlsProps {
 export function SectionGenerationControls({ section }: SectionGenerationControlsProps) {
     const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
+    
+    // Local state for the controlled input
+    const [wordCount, setWordCount] = useState(section.controls.wordCount || '');
+
+    // Sync local state if the global state changes from another source
+    useEffect(() => {
+        setWordCount(section.controls.wordCount || '');
+    }, [section.controls.wordCount]);
+
 
     const handleControlChange = <K extends keyof Section['controls']>(
         key: K,
@@ -76,8 +86,9 @@ export function SectionGenerationControls({ section }: SectionGenerationControls
             <div className="space-y-2">
                 <Label>{t('builder.reportGenerator.tool_word_count_label')}</Label>
                 <Input
-                    defaultValue={section.controls.wordCount}
-                    onBlur={(e) => handleControlChange('wordCount', e.target.value)}
+                    value={wordCount}
+                    onChange={(e) => setWordCount(e.target.value)}
+                    onBlur={() => handleControlChange('wordCount', wordCount)}
                     placeholder={t('builder.reportGenerator.tool_word_count_placeholder')}
                     type="number"
                 />
