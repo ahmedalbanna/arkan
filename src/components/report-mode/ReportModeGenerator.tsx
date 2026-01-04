@@ -1,10 +1,9 @@
-
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMobile } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
-import { BookOpenText, Edit, GitGraph, PenSquare, Search, UploadCloud, Settings, LayoutTemplate } from 'lucide-react';
+import { BookOpenText, LayoutTemplate, Settings, UploadCloud } from 'lucide-react';
 import React, { Suspense, lazy, useState } from 'react';
 import { Button } from '../ui/button';
 import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
@@ -21,16 +20,12 @@ import { SessionActions } from '@/components/report-mode/session/SessionActions'
 const ProjectSettingsPanel = lazy(() => import('./settings/ProjectSettingsPanel'));
 const FileManager = lazy(() => import('./file-manager'));
 const GenerationTools = lazy(() => import('./generation-tools'));
-const AIResearcherTool = lazy(() => import('../writing-tools/AIResearcherTool').then(module => ({ default: module.AIResearcherTool })));
-const PlantUMLGeneratorTool = lazy(() => import('../writing-tools/PlantUMLGeneratorTool').then(module => ({ default: module.PlantUMLGeneratorTool })));
 const ReportResults = lazy(() => import('./ReportResults'));
 const ApplyTemplatePanel = lazy(() => import('./templates/ApplyTemplatePanel'));
 
 const MemoizedProjectSettingsPanel = React.memo(ProjectSettingsPanel);
 const MemoizedFileManager = React.memo(FileManager);
 const MemoizedGenerationTools = React.memo(GenerationTools);
-const MemoizedAIResearcherTool = React.memo(AIResearcherTool);
-const MemoizedPlantUMLGeneratorTool = React.memo(PlantUMLGeneratorTool);
 const MemoizedApplyTemplatePanel = React.memo(ApplyTemplatePanel);
 
 
@@ -55,16 +50,16 @@ function BottomNavBar({ activeView, setActiveView }: { activeView: 'generator' |
                 className={cn("flex flex-col items-center h-full w-full", activeView === 'generator' && "text-primary")}
                 onClick={() => setActiveView('generator')}
             >
-                <PenSquare className="h-5 w-5 mb-1" />
-                <span className="text-xs">Generator</span>
+                <Settings className="h-5 w-5 mb-1" />
+                <span className="text-xs">Setup</span>
             </Button>
             <Button
                 variant={activeView === 'result' ? 'secondary' : 'ghost'}
                 className={cn("flex flex-col items-center h-full w-full", activeView === 'result' && "text-primary")}
                 onClick={() => setActiveView('result')}
             >
-                <Edit className="h-5 w-5 mb-1" />
-                <span className="text-xs">Editor</span>
+                <BookOpenText className="h-5 w-5 mb-1" />
+                <span className="text-xs">Document</span>
             </Button>
         </div>
     );
@@ -91,38 +86,26 @@ export default function ReportModeGenerator() {
         {
             key: 'settings',
             title: 'Project Settings',
-            icon: <Settings className="h-5 w-5" />,
+            icon: <div className="h-5 w-5 flex items-center justify-center font-bold text-sm">1</div>,
             content: <MemoizedProjectSettingsPanel />,
         },
         {
             key: 'files',
             title: t('builder.tabs.files'),
-            icon: <UploadCloud className="h-5 w-5" />,
+            icon: <div className="h-5 w-5 flex items-center justify-center font-bold text-sm">2</div>,
             content: <MemoizedFileManager />,
         },
         {
             key: 'templates',
             title: 'Apply Template',
-            icon: <LayoutTemplate className="h-5 w-5" />,
+            icon: <div className="h-5 w-5 flex items-center justify-center font-bold text-sm">3</div>,
             content: <MemoizedApplyTemplatePanel />,
         },
         {
             key: 'generate',
             title: t('builder.reportGenerator.toolsTitle'),
-            icon: <BookOpenText className="h-5 w-5" />,
+            icon: <div className="h-5 w-5 flex items-center justify-center font-bold text-sm">4</div>,
             content: <MemoizedGenerationTools />,
-        },
-        {
-            key: 'research',
-            title: t('writingTools.aiResearcher.pageTitle'),
-            icon: <Search className="h-5 w-5" />,
-            content: <MemoizedAIResearcherTool />,
-        },
-        {
-            key: 'diagram',
-            title: t('builder.tabs.diagram'),
-            icon: <GitGraph className="h-5 w-5" />,
-            content: <MemoizedPlantUMLGeneratorTool />,
         },
     ];
 
