@@ -9,7 +9,7 @@ import { useWritingTool, useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const humanizerSchema = z.object({
-  text: z.string().min(50, 'Please enter at least 50 characters to humanize.'),
+  text: z.string().min(10, 'Please enter at least 10 characters to humanize.'),
 });
 
 type HumanizerFormValues = z.infer<typeof humanizerSchema>;
