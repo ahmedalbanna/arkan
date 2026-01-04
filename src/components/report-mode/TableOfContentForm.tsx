@@ -13,7 +13,7 @@ interface TableOfContentFormProps {
 }
 
 export function TableOfContentForm({ onFlip }: TableOfContentFormProps) {
-  const { project, updateProject, applyTableOfContents } = useBuilderStore();
+  const { project, applyTableOfContents } = useBuilderStore();
   const { toast } = useToast();
   const [tocText, setTocText] = useState('');
 

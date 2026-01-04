@@ -24,7 +24,7 @@ interface BuilderState {
     loadProject: (projectData: ProjectProperties) => void;
     loadProjectFromFile: (file: File) => Promise<void>;
     newSession: () => void;
-    applyTableOfContents: (tocData: TocSection[]) => void;
+    applyTableOfContents: (tocMarkdown: string) => void;
 }
 
 const createNewTemporaryProject = (): Project => new Project({});
@@ -106,18 +106,16 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         }
     },
 
-    applyTableOfContents: (tocData) => {
+    applyTableOfContents: (tocMarkdown: string) => {
         get().updateProject(p => {
-            const newContent = tocData.map(chapterData => {
-                const sections = chapterData.sections.map(sectionTitle => new Section({ title: sectionTitle, type: 'report' }));
-                return new Chapter({ title: chapterData.title, sections });
-            });
-            p.content = newContent;
+          if (!p) return;
+          const newContent = p.parseAndSetContentFromToc(tocMarkdown);
+          p.content = newContent;
         });
-
+    
         toast({
-            title: 'Table of Contents Applied',
-            description: `${tocData.length} chapters and their sections have been created.`,
+          title: 'Table of Contents Applied',
+          description: 'The project structure has been updated.',
         });
     },
 }));

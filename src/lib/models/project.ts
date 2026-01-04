@@ -389,19 +389,21 @@ ${universityText}
     let currentChapter: Chapter | null = null;
 
     lines.forEach(line => {
-        const isSection = line.trim().match(/^\d+\.\d+/); // e.g., 1.1, 2.3
-        const isChapter = line.trim().match(/^\d+\./);   // e.g., 1., 2.
+        const isSection = line.trim().match(/^\s*-\s/) || line.trim().match(/^\d+\.\d+/);
+        const isChapter = line.trim().startsWith('# ') || line.trim().match(/^\d+\./);
 
         if (isChapter && !isSection) {
             if (currentChapter) {
                 newContent.push(currentChapter);
             }
-            const title = line.replace(/^\d+\.\s*/, '').trim();
+            const title = line.replace(/^#\s*/, '').replace(/^\d+\.\s*/, '').trim();
             currentChapter = new Chapter({ title, sections: [] });
         } else if (currentChapter) {
-            const title = line.replace(/^\d+\.\d+\.?\s*|\s*-\s*/, '').trim();
-            const newSection = new Section({ title, type: 'report' });
-            currentChapter = currentChapter.addSection(newSection);
+            const title = line.replace(/^\s*-\s*/, '').replace(/^\d+\.\d+\.?\s*/, '').trim();
+            if (title) {
+                const newSection = new Section({ title, type: 'report' });
+                currentChapter = currentChapter.addSection(newSection);
+            }
         }
     });
 
