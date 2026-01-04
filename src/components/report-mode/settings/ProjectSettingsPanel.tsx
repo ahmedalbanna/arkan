@@ -180,13 +180,13 @@ export default function ProjectSettingsPanel() {
                       <FormLabel>Document Type</FormLabel>
                       <FormControl>
                         <CustomSelect
-                            value={field.value || ''}
-                            onChange={(value) => {
-                                field.onChange(value);
-                                handleBlur();
-                            }}
-                            options={documentTypeOptions}
-                            placeholder="e.g., Graduation Project"
+                          value={field.value || ''}
+                          onChange={(value) => {
+                            field.onChange(value);
+                            handleBlur();
+                          }}
+                          options={documentTypeOptions}
+                          placeholder="e.g., Graduation Project"
                         />
                       </FormControl>
                       <FormMessage />

@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react"
+import { Check, ChevronsUpDown } from "lucide-react"
 
 import { cn } from "@/lib/utils/cn"
 import { Button } from "@/components/ui/button"
@@ -21,63 +21,21 @@ import {
 import { ScrollArea } from "./scroll-area"
 
 interface ComboboxProps {
-    options: { value: string; label: string }[];
-    value: string | null;
-    onChange: (value: string) => void;
-    placeholder?: string;
-    searchPlaceholder?: string;
-    isLoading?: boolean;
-    allowCustomValue?: boolean;
+  options: { value: string; label: string }[];
+  value: string | null;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  searchPlaceholder?: string;
 }
 
-export function Combobox({ 
-    options, 
-    value, 
-    onChange, 
-    placeholder = "Select option...", 
-    searchPlaceholder = "Search...", 
-    isLoading = false,
-    allowCustomValue = false
+export function Combobox({
+  options,
+  value,
+  onChange,
+  placeholder = "Select option...",
+  searchPlaceholder = "Search...",
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState(value || '');
-
-  // Sync internal input value when the external value changes
-  React.useEffect(() => {
-    setInputValue(value || '');
-  }, [value]);
-
-  const handleSelect = (currentValue: string) => {
-    const newValue = currentValue === value ? "" : currentValue;
-    onChange(newValue);
-    setInputValue(newValue);
-    setOpen(false);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setInputValue(newValue);
-    if(allowCustomValue) {
-      onChange(newValue);
-    }
-  }
-
-  const displayedLabel = isLoading 
-    ? "Loading..." 
-    : value 
-        ? options.find((option) => option.value.toLowerCase() === value.toLowerCase())?.label || value
-        : placeholder;
-
-  if (allowCustomValue) {
-      return (
-          <Input
-              value={inputValue}
-              onChange={handleInputChange}
-              placeholder={placeholder}
-              list="combobox-options"
-          />
-      );
-  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -88,11 +46,7 @@ export function Combobox({
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {isLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <span className="truncate">{displayedLabel}</span>
-          )}
+          <span className="truncate">{value ? options.find((option) => option.value === value)?.label || value : placeholder}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -100,25 +54,28 @@ export function Combobox({
         <Command>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandEmpty>No options found.</CommandEmpty>
-           <ScrollArea className="h-72">
+          <ScrollArea className="h-72">
             <CommandGroup>
-                {options.map((option) => (
+              {options.map((option) => (
                 <CommandItem
-                    key={option.value}
-                    value={option.value}
-                    onSelect={handleSelect}
+                  key={option.value}
+                  value={option.value}
+                  onSelect={(currentValue) => {
+                    onChange(currentValue === value ? "" : currentValue)
+                    setOpen(false)
+                  }}
                 >
-                    <Check
+                  <Check
                     className={cn(
-                        "mr-2 h-4 w-4",
-                        value === option.value ? "opacity-100" : "opacity-0"
+                      "mr-2 h-4 w-4",
+                      value === option.value ? "opacity-100" : "opacity-0"
                     )}
-                    />
-                    {option.label}
+                  />
+                  {option.label}
                 </CommandItem>
-                ))}
+              ))}
             </CommandGroup>
-           </ScrollArea>
+          </ScrollArea>
         </Command>
       </PopoverContent>
     </Popover>

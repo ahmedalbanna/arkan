@@ -16,10 +16,6 @@ export function CustomSelect({
   options = [],
   placeholder,
 }: CustomSelectProps) {
-
-  // This component now uses the more advanced Combobox component internally.
-  // The logic for switching between a select and an input has been moved there
-  // to create a unified, searchable, and free-text-supporting dropdown.
   return (
     <Combobox
         options={options}
@@ -27,7 +23,6 @@ export function CustomSelect({
         onChange={onChange}
         placeholder={placeholder}
         searchPlaceholder="Search types..."
-        allowCustomValue={true} // This is the key change to allow free text
     />
   );
 }
