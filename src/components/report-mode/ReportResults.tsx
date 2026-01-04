@@ -14,7 +14,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import MarkdownEditor from './MarkdownEditor';
 import { CoverPage } from '../shared/CoverPage';
-import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo } from 'lucide-react';
+import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, PencilLine } from 'lucide-react';
 
 const ReportSteps = () => {
   const { t } = useLocalization();
@@ -32,7 +32,7 @@ const ReportSteps = () => {
     },
     {
       icon: <Bot className="h-6 w-6 text-primary" />,
-      title: "3. AI Generate with a Template",
+      title: "3. AI Generate Project Template",
       description: "Apply a pre-defined template to structure your report and generate content for all sections with a single click."
     },
     {
@@ -42,8 +42,8 @@ const ReportSteps = () => {
     },
     {
       icon: <BookOpenCheck className="h-6 w-6 text-primary" />,
-      title: "5. Generate and Review",
-      description: "Click 'Generate' on any section to have the AI write its content. The results will appear here for you to edit."
+      title: "5. View Chapter and Section",
+      description: "Generate content by clicking the 'Generate' button on any section and review the results as they appear in the editor."
     }
   ];
 
