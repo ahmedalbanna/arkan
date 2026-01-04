@@ -27,10 +27,57 @@ interface ComboboxProps {
     placeholder?: string;
     searchPlaceholder?: string;
     isLoading?: boolean;
+    allowCustomValue?: boolean;
 }
 
-export function Combobox({ options, value, onChange, placeholder = "Select option...", searchPlaceholder = "Search...", isLoading = false }: ComboboxProps) {
-  const [open, setOpen] = React.useState(false)
+export function Combobox({ 
+    options, 
+    value, 
+    onChange, 
+    placeholder = "Select option...", 
+    searchPlaceholder = "Search...", 
+    isLoading = false,
+    allowCustomValue = false
+}: ComboboxProps) {
+  const [open, setOpen] = React.useState(false);
+  const [inputValue, setInputValue] = React.useState(value || '');
+
+  // Sync internal input value when the external value changes
+  React.useEffect(() => {
+    setInputValue(value || '');
+  }, [value]);
+
+  const handleSelect = (currentValue: string) => {
+    const newValue = currentValue === value ? "" : currentValue;
+    onChange(newValue);
+    setInputValue(newValue);
+    setOpen(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    if(allowCustomValue) {
+      onChange(newValue);
+    }
+  }
+
+  const displayedLabel = isLoading 
+    ? "Loading..." 
+    : value 
+        ? options.find((option) => option.value.toLowerCase() === value.toLowerCase())?.label || value
+        : placeholder;
+
+  if (allowCustomValue) {
+      return (
+          <Input
+              value={inputValue}
+              onChange={handleInputChange}
+              placeholder={placeholder}
+              list="combobox-options"
+          />
+      );
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -44,9 +91,7 @@ export function Combobox({ options, value, onChange, placeholder = "Select optio
           {isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
-            value
-              ? options.find((option) => option.value === value)?.label
-              : placeholder
+            <span className="truncate">{displayedLabel}</span>
           )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -61,10 +106,7 @@ export function Combobox({ options, value, onChange, placeholder = "Select optio
                 <CommandItem
                     key={option.value}
                     value={option.value}
-                    onSelect={(currentValue) => {
-                        onChange(currentValue === value ? "" : currentValue)
-                        setOpen(false)
-                    }}
+                    onSelect={handleSelect}
                 >
                     <Check
                     className={cn(

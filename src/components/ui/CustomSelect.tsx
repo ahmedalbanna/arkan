@@ -1,13 +1,12 @@
+
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
-import { Input } from './input';
+import { Combobox } from './combobox';
 
 interface CustomSelectProps {
   value: string;
   onChange: (value: string) => void;
-  options?: string[];
+  options: { value: string; label: string }[];
   placeholder: string;
 }
 
@@ -17,58 +16,18 @@ export function CustomSelect({
   options = [],
   placeholder,
 }: CustomSelectProps) {
-  const [isCustom, setIsCustom] = useState(() => value && !options.includes(value));
 
-  useEffect(() => {
-    if (value && !options.includes(value)) {
-      setIsCustom(true);
-    } else {
-      setIsCustom(false);
-    }
-  }, [value, options]);
-
-  const handleSelectChange = (newValue: string) => {
-    if (newValue === 'custom') {
-      setIsCustom(true);
-      onChange(''); // Clear the value when switching to custom input
-    } else {
-      setIsCustom(false);
-      onChange(newValue);
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
-  };
-
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    if (!e.target.value && !options.includes(value)) {
-      setIsCustom(false);
-    }
-  };
-
-  if (isCustom) {
-    return (
-      <Input
-        value={value}
-        onChange={handleInputChange}
-        onBlur={handleBlur}
-        placeholder={`Enter custom ${placeholder.toLowerCase()}...`}
-      />
-    );
-  }
-
+  // This component now uses the more advanced Combobox component internally.
+  // The logic for switching between a select and an input has been moved there
+  // to create a unified, searchable, and free-text-supporting dropdown.
   return (
-    <Select value={value} onValueChange={handleSelectChange}>
-      <SelectTrigger>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map(option => (
-          <SelectItem key={option} value={option}>{option}</SelectItem>
-        ))}
-        <SelectItem value="custom">Custom...</SelectItem>
-      </SelectContent>
-    </Select>
+    <Combobox
+        options={options}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        searchPlaceholder="Search types..."
+        allowCustomValue={true} // This is the key change to allow free text
+    />
   );
 }

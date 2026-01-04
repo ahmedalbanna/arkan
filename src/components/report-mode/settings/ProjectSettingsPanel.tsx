@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
@@ -128,16 +127,6 @@ export default function ProjectSettingsPanel() {
     }
   }, [project, form]);
 
-  const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      handleFileUpload(file, (dataUri) => {
-        updateProject(p => { if(p) p.logoUrl = dataUri; return p; });
-        setLogoPreview(dataUri);
-      });
-    }
-  };
-
   const handleBlur = () => {
     const data = form.getValues();
     const updatePayload: Partial<ProjectProperties> = { ...data };
@@ -154,6 +143,15 @@ export default function ProjectSettingsPanel() {
 
   const { fields: behaviors, append: appendBehavior, remove: removeBehavior } = useFieldArray({ control: form.control, name: "behaviors" });
   
+  const documentTypeOptions = [
+    { value: 'Graduation Project', label: 'Graduation Project' },
+    { value: 'Research Paper', label: 'Research Paper' },
+    { value: 'Business Proposal', label: 'Business Proposal' },
+    { value: 'Software Documentation', label: 'Software Documentation' },
+    { value: 'Creative Story', label: 'Creative Story' },
+    { value: 'Blog Post', label: 'Blog Post' },
+  ];
+
   return (
     <Card className="h-full flex flex-col border-0 shadow-none">
       <CardHeader>
@@ -173,15 +171,29 @@ export default function ProjectSettingsPanel() {
                 <FormField control={form.control} name="projectDescription" render={({ field }) => (
                   <FormItem><FormLabel>Project Description</FormLabel><FormControl><Textarea {...field} rows={3} onBlur={handleBlur} /></FormControl><FormMessage /></FormItem>
                 )} />
-                <FormField control={form.control} name="projectType" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Project Type</FormLabel>
-                    <FormControl>
-                        <Input {...field} onBlur={handleBlur} placeholder="e.g., Graduation Project, Research Paper" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+                
+                <FormField
+                  control={form.control}
+                  name="projectType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Document Type</FormLabel>
+                      <FormControl>
+                        <CustomSelect
+                            value={field.value || ''}
+                            onChange={(value) => {
+                                field.onChange(value);
+                                handleBlur();
+                            }}
+                            options={documentTypeOptions}
+                            placeholder="e.g., Graduation Project"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField control={form.control} name="specialization" render={({ field }) => (
                     <FormItem><FormLabel>Specialization</FormLabel><FormControl>
                         <Input {...field} onBlur={handleBlur} placeholder="e.g., Artificial Intelligence, Web Development" />
