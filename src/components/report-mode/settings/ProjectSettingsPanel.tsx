@@ -168,6 +168,17 @@ export default function ProjectSettingsPanel() {
     { value: 'Blog Post', label: 'Blog Post' },
   ];
 
+  const educationalLevelOptions = [
+      { value: 'High School', label: 'High School' },
+      { value: 'Undergraduate (First Year)', label: 'Undergraduate (First Year)' },
+      { value: 'Undergraduate (Second/Third Year)', label: 'Undergraduate (Second/Third Year)' },
+      { value: 'Undergraduate (Final Year)', label: 'Undergraduate (Final Year)' },
+      { value: "Master's", label: "Master's" },
+      { value: 'Doctoral', label: 'Doctoral' },
+      { value: 'Post-Doctoral', label: 'Post-Doctoral' },
+      { value: 'Professional', label: 'Professional' },
+  ];
+
   return (
     <Card className="h-full flex flex-col border-0 shadow-none">
       <CardHeader>
@@ -215,11 +226,27 @@ export default function ProjectSettingsPanel() {
                         <Input {...field} onBlur={handleBlur} placeholder="e.g., Artificial Intelligence, Web Development" />
                     </FormControl><FormMessage /></FormItem>
                 )} />
-                <FormField control={form.control} name="educationalLevel" render={({ field }) => (
-                    <FormItem><FormLabel>Educational Level</FormLabel><FormControl>
-                        <Input {...field} onBlur={handleBlur} placeholder="e.g., Bachelor's Degree, PhD" />
-                    </FormControl><FormMessage /></FormItem>
-                )} />
+                <FormField
+                    control={form.control}
+                    name="educationalLevel"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Educational Level</FormLabel>
+                            <FormControl>
+                                <CustomSelect
+                                    value={field.value || ''}
+                                    onChange={(value) => {
+                                        field.onChange(value);
+                                        handleBlur();
+                                    }}
+                                    options={educationalLevelOptions}
+                                    placeholder="e.g., Bachelor's Degree, PhD"
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
 
                 <Card>
                     <CardHeader><CardTitle className="text-base">Global AI Settings</CardTitle></CardHeader>
