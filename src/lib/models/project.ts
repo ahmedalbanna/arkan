@@ -326,17 +326,16 @@ ${universityText}
     if (!template.content) {
       return this;
     }
-    const allSectionsMap = new Map(allSections.map(s => [s.id, s]));
+    
+    // Create new chapters and sections directly from the template's content definition.
     const newContent = template.content.map(chapterData => {
-        const sections = (chapterData.sections || []).map(sectionInfo => {
-            const defaultSection = allSectionsMap.get(sectionInfo.id!);
-            return new Section({
-                ...defaultSection,
-                ...sectionInfo,
-            });
-        });
-        return new Chapter({ title: chapterData.title, sections: sections });
+      const sections = (chapterData.sections || []).map(sectionInfo => {
+        // sectionInfo from the template is the source of truth
+        return new Section({ ...sectionInfo });
+      });
+      return new Chapter({ title: chapterData.title, sections: sections });
     });
+
     return this.with({ content: newContent });
   }
 
