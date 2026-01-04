@@ -117,7 +117,7 @@ export default function ProjectSettingsPanel() {
         supervisor: project.supervisor || '',
         course: project.course || '',
         educationalLevel: project.educationalLevel || '',
-        teamMembers: project.teamMembers?.join(', ') || '',
+        teamMembers: Array.isArray(project.teamMembers) ? project.teamMembers.join(', ') : '',
         language: project.language || 'default',
         complexity: project.complexity ?? 50,
         behaviors: project.behaviors ? [...project.behaviors] : [],
