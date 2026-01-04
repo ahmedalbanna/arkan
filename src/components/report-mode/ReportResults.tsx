@@ -1,4 +1,3 @@
-
 'use client';
 
 import { A4Page } from '@/components/shared/A4Page';
@@ -79,7 +78,6 @@ interface ReportResultsProps {
 const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
   const { t } = useLocalization();
   const { project, updateProjectFromMarkdown } = useBuilderStore();
-  const [isFlipped, setIsFlipped] = useState(false);
 
   const handleContentChange = (newMarkdown: string) => {
     updateProjectFromMarkdown(newMarkdown);
@@ -94,9 +92,9 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
             return <CoverPage project={project} />;
         case 'templates':
              return (
-                <div className="w-full h-full p-4">
-                    <TableOfContentForm onFlip={() => {}} />
-                </div>
+                <A4Page>
+                    <TableOfContentForm />
+                </A4Page>
             )
         case 'generate':
         default:
