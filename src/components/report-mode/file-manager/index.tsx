@@ -28,6 +28,7 @@ import { PdfPreview } from './PdfPreview';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
+import AnalystAgent from "./AnalystAgent";
 
 // Extracted ViewContextDialog component
 function ViewContextDialog({ item }: { item: { fileName: string, content: string } }) {
@@ -135,79 +136,93 @@ export default function UploadManager() {
     const fileTypes: ExternalContextType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
 
     return (
-        <Card className="flex flex-col h-full">
-            <CardHeader>
-                <div className="flex justify-between items-center">
-                    <CardTitle>{t('builder.files.fileManagerTitle')}</CardTitle>
-                </div>
-                <CardDescription>
-                    {t('builder.files.fileManagerDesc')}
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
-                <Tabs defaultValue="upload" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="upload">{t('builder.files.uploadFilesTab')}</TabsTrigger>
-                        <TabsTrigger value="text">{t('builder.files.pasteTextTab')}</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="upload" className="mt-4">
-                        <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${isDragActive ? 'border-primary bg-accent' : 'border-border'}`}>
-                            <input {...getInputProps()} />
-                            {isLoading ? (
-                                <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
-                            ) : (
-                                <UploadCloud className="h-10 w-10 text-muted-foreground mx-auto" />
-                            )}
-                            <p className="mt-2 text-sm font-semibold">{isDragActive ? t('builder.files.toasts.dropHere') : t('builder.files.dropzoneLabel')}</p>
-                            <p className="text-xs text-muted-foreground">{t('builder.files.dropzoneHint')}</p>
+        <Tabs defaultValue="files" className="h-full flex flex-col">
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="files">{t('builder.tabs.files')}</TabsTrigger>
+                <TabsTrigger value="analyst">
+                    <AtomIcon className="h-4 w-4 me-2"/>
+                    Analyst
+                </TabsTrigger>
+            </TabsList>
+            <TabsContent value="files" className="flex-grow flex flex-col min-h-0">
+                <Card className="flex flex-col h-full">
+                    <CardHeader>
+                        <div className="flex justify-between items-center">
+                            <CardTitle>{t('builder.files.fileManagerTitle')}</CardTitle>
                         </div>
-                    </TabsContent>
-                    <TabsContent value="text" className="mt-4 space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="context-name">{t('builder.files.pasteText.titleLabel')}</Label>
-                            <Input id="context-name" placeholder={t('builder.files.pasteText.titlePlaceholder')} value={textFileName} onChange={(e) => setTextFileName(e.target.value)} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="context-text">{t('builder.files.pasteText.contentLabel')}</Label>
-                            <Textarea id="context-text" placeholder={t('builder.files.pasteText.contentPlaceholder')} value={textInput} onChange={(e) => setTextInput(e.target.value)} rows={6} />
-                        </div>
-                        <Button onClick={handleAddPastedText} disabled={!textInput.trim() || !textFileName.trim()} className="w-full">
-                            {t('builder.files.pasteText.addButton')}
-                        </Button>
-                    </TabsContent>
-                </Tabs>
-                {externalContext.length > 0 && (
-                    <div className="space-y-2 flex-grow flex flex-col min-h-0 pt-4 border-t">
-                        <h3 className="text-sm font-medium text-muted-foreground">{t('builder.files.toasts.uploadedContext')}</h3>
-                        <ScrollArea className="flex-grow">
-                            <ul className="space-y-1 list-none p-1">
-                                {externalContext.map((item, index) => (
-                                    <li key={item.id} className="flex items-center justify-between p-2 rounded-md hover:bg-muted transition-colors">
-                                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                                            <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                            <span className="truncate font-medium text-sm" title={item.fileName}>{item.fileName}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <Select value={item.type} onValueChange={(value: ExternalContextType) => updateProject(p => p.updateExternalContextType(index, value))}>
-                                                <SelectTrigger className="text-xs h-7 w-auto p-0 border-0 bg-transparent focus:ring-0">
-                                                    <SelectValue asChild>
-                                                        <Badge variant="outline" className="capitalize cursor-pointer">{item.type}</Badge>
-                                                    </SelectValue>
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {fileTypes.map(type => <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
-                                            <ViewContextDialog item={item} />
-                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => updateProject(p => p.removeExternalContext(index))}><X className="h-4 w-4 text-destructive" /></Button>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </ScrollArea>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
+                        <CardDescription>
+                            {t('builder.files.fileManagerDesc')}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
+                        <Tabs defaultValue="upload" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="upload">{t('builder.files.uploadFilesTab')}</TabsTrigger>
+                                <TabsTrigger value="text">{t('builder.files.pasteTextTab')}</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="upload" className="mt-4">
+                                <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${isDragActive ? 'border-primary bg-accent' : 'border-border'}`}>
+                                    <input {...getInputProps()} />
+                                    {isLoading ? (
+                                        <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
+                                    ) : (
+                                        <UploadCloud className="h-10 w-10 text-muted-foreground mx-auto" />
+                                    )}
+                                    <p className="mt-2 text-sm font-semibold">{isDragActive ? t('builder.files.toasts.dropHere') : t('builder.files.dropzoneLabel')}</p>
+                                    <p className="text-xs text-muted-foreground">{t('builder.files.dropzoneHint')}</p>
+                                </div>
+                            </TabsContent>
+                            <TabsContent value="text" className="mt-4 space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="context-name">{t('builder.files.pasteText.titleLabel')}</Label>
+                                    <Input id="context-name" placeholder={t('builder.files.pasteText.titlePlaceholder')} value={textFileName} onChange={(e) => setTextFileName(e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="context-text">{t('builder.files.pasteText.contentLabel')}</Label>
+                                    <Textarea id="context-text" placeholder={t('builder.files.pasteText.contentPlaceholder')} value={textInput} onChange={(e) => setTextInput(e.target.value)} rows={6} />
+                                </div>
+                                <Button onClick={handleAddPastedText} disabled={!textInput.trim() || !textFileName.trim()} className="w-full">
+                                    {t('builder.files.pasteText.addButton')}
+                                </Button>
+                            </TabsContent>
+                        </Tabs>
+                        {externalContext.length > 0 && (
+                            <div className="space-y-2 flex-grow flex flex-col min-h-0 pt-4 border-t">
+                                <h3 className="text-sm font-medium text-muted-foreground">{t('builder.files.toasts.uploadedContext')}</h3>
+                                <ScrollArea className="flex-grow">
+                                    <ul className="space-y-1 list-none p-1">
+                                        {externalContext.map((item, index) => (
+                                            <li key={item.id} className="flex items-center justify-between p-2 rounded-md hover:bg-muted transition-colors">
+                                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                    <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                                    <span className="truncate font-medium text-sm" title={item.fileName}>{item.fileName}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <Select value={item.type} onValueChange={(value: ExternalContextType) => updateProject(p => p.updateExternalContextType(index, value))}>
+                                                        <SelectTrigger className="text-xs h-7 w-auto p-0 border-0 bg-transparent focus:ring-0">
+                                                            <SelectValue asChild>
+                                                                <Badge variant="outline" className="capitalize cursor-pointer">{item.type}</Badge>
+                                                            </SelectValue>
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {fileTypes.map(type => <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>)}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <ViewContextDialog item={item} />
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => updateProject(p => p.removeExternalContext(index))}><X className="h-4 w-4 text-destructive" /></Button>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </ScrollArea>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </TabsContent>
+            <TabsContent value="analyst" className="flex-grow min-h-0">
+                <AnalystAgent />
+            </TabsContent>
+        </Tabs>
     );
 }
