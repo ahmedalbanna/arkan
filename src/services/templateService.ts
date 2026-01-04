@@ -2,7 +2,19 @@
 
 'use server';
 
-// This service is now obsolete as the logic has been moved to the client-side `useBuilderStore`.
-// The file is kept to avoid breaking changes if it's referenced, but it can be safely deleted in a future cleanup.
+import { adminDb } from '@/lib/firebase/server-init';
 
-export {};
+export async function createGenerativeTemplate(templateType: 'docx' | 'pptx', id: string, data: any) {
+  const collectionRef = adminDb.collection('templates').doc(templateType).collection('styles');
+  const docRef = collectionRef.doc(id);
+  const doc = await docRef.get();
+
+  if (doc.exists) {
+    throw new Error(`A ${templateType} template with this ID already exists.`);
+  }
+
+  await docRef.set({ ...data, id, createdAt: new Date().toISOString() });
+  return { id, ...data };
+}
+
+// You can add more template-related server functions here in the future.

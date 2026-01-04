@@ -4,10 +4,8 @@ import type { NextConfig, SizeLimit } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: false, // Enable React strict mode for better development experience
   output: 'standalone',
-  swcMinify: true,
   typescript: {
     ignoreBuildErrors: true,
-
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -32,6 +30,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'image.pollinations.ai',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   async rewrites() {
@@ -43,15 +47,11 @@ const nextConfig: NextConfig = {
     ]
   },
   experimental: {
-    turbo: {
-    },
     serverActions: { bodySizeLimit: '10mb' as SizeLimit },
-
     useCache: true,
-    allowDevelopmentBuild: false,
-
-
-
+  },
+  turbopack: {
+    // Add any TurboPack specific configurations here if needed
   }
 };
 

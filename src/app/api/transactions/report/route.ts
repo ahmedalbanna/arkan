@@ -1,7 +1,7 @@
 
-import { getTransactionsByDateRange } from '@/services/userService';
 import { z } from 'zod';
 import { handleApiError, withAuth, createApiResponse } from '@/lib/utils/api-utils';
+import { getTransactionsByDateRange } from '@/services/transactionService';
 
 const getReportSchema = z.object({
   startDate: z.string().datetime(),
