@@ -23,7 +23,7 @@ const EditableField: React.FC<{
   onBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
   placeholder: string;
   className: string;
-  tagName?: 'p' | 'div';
+  tagName?: 'p' | 'div' | 'h1';
 }> = ({ html, onBlur, placeholder, className, tagName = 'p' }) => {
     return (
         <ContentEditable
@@ -72,7 +72,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
         const file = event.target.files?.[0];
         if (file) {
             handleMainLogoUpload(file, (dataUri) => {
-                updateProject(p => { p.logoUrl = dataUri; });
+                updateProject(p => { if(p) p.logoUrl = dataUri; return p; });
             });
         }
     };
@@ -186,7 +186,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                       )}
                   </div>
               )}
-              <EditableField html={project.name} onBlur={(e) => handleContentChange('name', e.currentTarget.innerHTML)} placeholder="Untitled Project" className="text-5xl font-bold font-headline text-primary leading-tight" />
+              <EditableField tagName="h1" html={project.name} onBlur={(e) => handleContentChange('name', e.currentTarget.innerHTML)} placeholder="Untitled Project" className="text-5xl font-bold font-headline text-primary leading-tight" />
                <div className="inline-flex items-center gap-2 text-muted-foreground mt-4">
                   {project.universityLogoUrl ? (
                       <div className="relative w-8 h-8 flex-shrink-0 cursor-pointer" onClick={() => uniLogoInputRef.current?.click()}>
