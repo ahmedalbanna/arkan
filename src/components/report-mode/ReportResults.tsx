@@ -1,3 +1,4 @@
+
 'use client';
 
 import { A4Page } from '@/components/shared/A4Page';
@@ -13,7 +14,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import MarkdownEditor from './MarkdownEditor';
 import { CoverPage } from '../shared/CoverPage';
-import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, PencilLine } from 'lucide-react';
+import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, PencilLine, FileText } from 'lucide-react';
 import { TableOfContentForm } from './TableOfContentForm';
 import { useState } from 'react';
 
@@ -95,7 +96,17 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
                 <A4Page>
                     <TableOfContentForm />
                 </A4Page>
-            )
+            );
+        case 'files':
+            return (
+                <A4Page>
+                    <div className="p-8 text-center text-muted-foreground h-full flex flex-col justify-center items-center">
+                        <FileText className="mx-auto h-16 w-16 mb-4" />
+                        <h3 className="text-xl font-semibold font-headline text-foreground">File Content Viewer</h3>
+                        <p>When you select a file from the manager, its content will be displayed here for review and analysis.</p>
+                    </div>
+                </A4Page>
+            );
         case 'generate':
         default:
              if (hasContent) {
