@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -53,7 +54,7 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
                 <div className="space-y-2 pl-4">
                   {sectionOptions.length > 0 ? (
                     sectionOptions.map((option) => (
-                      <div key={option.id} className="flex items-center space-x-2">
+                      <div key={`section-${option.id}`} className="flex items-center space-x-2">
                         <Checkbox
                           id={`context-sec-${sectionId}-${option.id}`}
                           checked={!!currentSelection.sections?.[option.id]}
@@ -76,7 +77,7 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
                 <div className="space-y-2 pl-4">
                   {fileOptions.length > 0 ? (
                     fileOptions.map((option) => (
-                      <div key={option.id} className="flex justify-between items-center">
+                      <div key={`file-${option.id}`} className="flex justify-between items-center">
                         <div className="flex items-center space-x-2">
                           <Checkbox
                             id={`context-file-${sectionId}-${option.id}`}
