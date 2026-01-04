@@ -143,9 +143,9 @@ export default function AnalystAgent() {
         toast({ title: t('builder.files.toasts.analysisSaved'), description: t('builder.files.toasts.analysisSavedDesc').replace('{fileName}', fileName) });
     }
 
-    const creditCost = 2;
+    const creditCost = 0;
     const isProcessing = analysisMutation.isPending;
-    const canAnalyze = !isProcessing && (userProfile?.credits ?? 0) >= creditCost;
+    const canAnalyze = true ;//!isProcessing && (userProfile?.credits ?? 0) >= creditCost;
 
     return (
         <Card className="h-full flex flex-col">

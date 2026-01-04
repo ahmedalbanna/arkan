@@ -55,7 +55,9 @@ export function useGenerateTocLogic() {
         const tocData = data.tableOfContents;
         if (tocData) {
             const markdown = formatTocToMarkdown(tocData);
-            updateProject(p => { p.tableOfContentsMarkdown = markdown; });
+            updateProject(p => { 
+                if(p) p.tableOfContentsMarkdown = markdown; 
+            });
             toast({ title: "Sample Table of Contents generated!" });
         }
     },
