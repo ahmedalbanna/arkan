@@ -20,5 +20,5 @@ export function generateFullMarkdownFromProject(projectData: ProjectProperties):
     // Assumes it's a section
     const section = item as SectionProperties;
     return `## ${section.title}\n\n${section.content || ''}`;
-  }).filter(Boolean).join('\n\n---\n\n');
+  }).filter(Boolean).join('\n\n<!-- slide-break -->\n\n');
 }
