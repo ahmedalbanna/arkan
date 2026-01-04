@@ -74,6 +74,7 @@ export default function ReportModeGenerator() {
     const { locale, t } = useLocalization();
     const isMobile = useMobile();
     const [activeMobileView, setActiveMobileView] = useState<'generator' | 'result'>('result');
+    const [activePanelKey, setActivePanelKey] = useState('settings');
 
     const {
         showOnboarding,
@@ -161,14 +162,15 @@ export default function ReportModeGenerator() {
                                 )}>
                                     <CollapsibleSidePanel
                                         panels={panels}
-                                        defaultActiveKey="settings"
+                                        activeKey={activePanelKey}
+                                        onActiveKeyChange={setActivePanelKey}
                                     />
                                 </div>
                                 <div className={cn(
                                     "lg:col-span-8 xl:col-span-8 h-full",
                                     isMobile && activeMobileView !== 'result' && "hidden"
                                 )}>
-                                    <ReportResults />
+                                    <ReportResults activePanelKey={activePanelKey} />
                                 </div>
                             </div>
                         </Suspense>

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMobile } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
-import { useState, type ReactElement, type ReactNode } from 'react';
+import { type ReactElement, type ReactNode } from 'react';
 
 export interface PanelItem {
   key: string;
@@ -16,17 +16,18 @@ export interface PanelItem {
 
 interface CollapsibleSidePanelProps {
   panels: PanelItem[];
-  defaultActiveKey?: string;
+  activeKey: string;
+  onActiveKeyChange: (key: string) => void;
   className?: string;
 }
 
 export function CollapsibleSidePanel({
   panels,
-  defaultActiveKey,
+  activeKey,
+  onActiveKeyChange,
   className,
 }: CollapsibleSidePanelProps) {
   const isMobile = useMobile();
-  const [activeKey, setActiveKey] = useState<string | undefined>(defaultActiveKey ?? panels[0]?.key);
   const activePanel = panels.find((p) => p.key === activeKey);
 
   if (!panels || panels.length === 0) {
@@ -44,7 +45,7 @@ export function CollapsibleSidePanel({
           {panels.map((panel) => (
             <Tooltip key={panel.key} delayDuration={0}>
               <TooltipTrigger asChild>
-                <Button variant={activeKey === panel.key ? 'secondary' : 'ghost'} size="icon" onClick={() => setActiveKey(panel.key)} aria-label={panel.title}>
+                <Button variant={activeKey === panel.key ? 'secondary' : 'ghost'} size="icon" onClick={() => onActiveKeyChange(panel.key)} aria-label={panel.title}>
                   {panel.icon}
                 </Button>
               </TooltipTrigger>

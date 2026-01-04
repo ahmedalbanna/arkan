@@ -15,6 +15,8 @@ import { useBuilderStore } from '@/hooks';
 import MarkdownEditor from './MarkdownEditor';
 import { CoverPage } from '../shared/CoverPage';
 import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, PencilLine } from 'lucide-react';
+import { TableOfContentForm } from './TableOfContentForm';
+import { useState } from 'react';
 
 const ReportSteps = () => {
   const { t } = useLocalization();
@@ -70,10 +72,14 @@ const ReportSteps = () => {
   )
 }
 
+interface ReportResultsProps {
+    activePanelKey: string;
+}
 
-const ReportResults = () => {
+const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
   const { t } = useLocalization();
   const { project, updateProjectFromMarkdown } = useBuilderStore();
+  const [isFlipped, setIsFlipped] = useState(false);
 
   const handleContentChange = (newMarkdown: string) => {
     updateProjectFromMarkdown(newMarkdown);
@@ -81,6 +87,37 @@ const ReportResults = () => {
   
   const fullContent = project?.fullMarkdownContent || '';
   const hasContent = project?.content && project.content.length > 0;
+
+  const renderContent = () => {
+    switch (activePanelKey) {
+        case 'settings':
+            return <CoverPage project={project} />;
+        case 'templates':
+             return (
+                <div className="w-full h-full p-4">
+                    <TableOfContentForm onFlip={() => {}} />
+                </div>
+            )
+        case 'generate':
+        default:
+             if (hasContent) {
+                 return (
+                    <A4Page>
+                        <MarkdownEditor
+                            key={project?.id}
+                            content={fullContent}
+                            onChange={handleContentChange}
+                        />
+                    </A4Page>
+                 )
+             }
+             return (
+                <div className="max-w-[210mm] mx-auto my-4">
+                    <ReportSteps />
+                </div>
+             )
+    }
+  }
 
   return (
     <Card className="h-full flex flex-col overflow-hidden">
@@ -100,20 +137,7 @@ const ReportResults = () => {
       <CardContent className="flex-grow flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 min-h-0">
           <ScrollArea className="flex-grow">
               <div className="py-4">
-                  <CoverPage project={project} />
-                  {hasContent ? (
-                      <A4Page>
-                          <MarkdownEditor
-                              key={project?.id}
-                              content={fullContent}
-                              onChange={handleContentChange}
-                          />
-                      </A4Page>
-                  ) : (
-                      <div className="max-w-[210mm] mx-auto my-4">
-                          <ReportSteps />
-                      </div>
-                  )}
+                  {renderContent()}
               </div>
           </ScrollArea>
       </CardContent>
