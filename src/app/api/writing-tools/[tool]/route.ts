@@ -110,7 +110,7 @@ function getSampleOutput(toolName: ToolName, input: any) {
     case 'plagiarism-checker':
         return {
             originalityScore: 85,
-            matches: [{ source: 'https://example.com', title: 'Example Article', summary: 'A portion of the text matches this source.', similarity: 15 }]
+            matches: [{ source: 'https://example.com/source-one', title: 'Example Source 1', summary: 'A small portion of the text about general concepts matches this source.', similarity: 15 }, { source: 'https://anotherexample.com/article', title: 'Another Article', summary: 'This article discusses a similar topic, leading to a minor overlap in phrasing.', similarity: 10 }]
         };
     case 'citation-generator':
         return { citations: [`Sample, A. (${new Date().getFullYear()}). Hardcoded citation example. Journal of Testing, 1(1), 1-10.`] };
