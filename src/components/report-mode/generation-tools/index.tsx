@@ -12,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import { useReportGenerationTools } from '@/hooks/report-mode/use-report-generation-tools';
 import {
   DndContext,
@@ -24,33 +23,22 @@ import {
 } from '@dnd-kit/sortable';
 import {
   Building,
-  ListPlus,
   PlusCircle,
-  Sparkles,
   XCircle,
 } from 'lucide-react';
 import { useMemo } from "react";
 import { Checkbox } from "../../ui/checkbox";
 import { Label } from "../../ui/label";
 import { BuildProjectDialog } from "../dialogs/BuildProjectDialog";
-import { GenerateTocDialog } from "../dialogs/GenerateTocDialog";
-import { SortableChapterItem } from './SortableChapterItem';
 import { Chapter, Section } from '@/lib/models';
 import { ScrollArea } from "../../ui/scroll-area";
 import { SectionAccordionItem } from "./SectionAccordionItem";
+import { SortableChapterItem } from "./SortableChapterItem";
 
 
 export default function GenerationTools() {
   const {
     t,
-    newChapterTitle,
-    setNewChapterTitle,
-    showTocInput,
-    setShowTocInput,
-    isGenerateTocOpen,
-    setIsGenerateTocOpen,
-    handleAddChapter,
-    handleCreateFromToc,
     handleDragEnd,
     isBuildProjectDialogOpen,
     setIsBuildProjectDialogOpen,
@@ -65,6 +53,7 @@ export default function GenerationTools() {
     onGenerateProject,
     projectMutation,
     chaptersToBuild,
+    handleAddChapter,
   } = useReportGenerationTools();
 
   const totalSelectableSections = project?.sections.length || 0;
@@ -75,7 +64,6 @@ export default function GenerationTools() {
 
   return (
     <>
-      <GenerateTocDialog isOpen={isGenerateTocOpen} onOpenChange={setIsGenerateTocOpen} />
       <BuildProjectDialog
         isOpen={isBuildProjectDialogOpen}
         onOpenChange={setIsBuildProjectDialogOpen}
@@ -93,38 +81,12 @@ export default function GenerationTools() {
           </div>
         </CardHeader>
         <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button onClick={() => setIsGenerateTocOpen(true)} variant="outline" className="w-full">
-              <Sparkles className="me-2 h-4 w-4" /> Generate with AI
-            </Button>
-          </div>
           <div className="flex gap-2">
             <Button onClick={handleAddChapter} variant="default" className="w-full">
               <PlusCircle className="me-2 h-4 w-4" /> Add Chapter
             </Button>
           </div>
-          {showTocInput && (
-            <div className="space-y-2 p-4 border rounded-lg bg-muted/50">
-              <label htmlFor="toc-master-input" className="text-sm font-medium">Paste Table of Contents</label>
-              <Textarea
-                id="toc-master-input"
-                value={newChapterTitle}
-                onChange={(e) => setNewChapterTitle(e.target.value)}
-                placeholder={"1. Chapter One\n  1.1. Section One\n2. Chapter Two..."}
-                className="flex-grow resize-none"
-                rows={5}
-              />
-              <div className='flex gap-2'>
-                <Button onClick={() => handleCreateFromToc(newChapterTitle)} size="sm" className="w-full">
-                  <ListPlus className="me-2 h-4 w-4" /> Create Structure
-                </Button>
-                <Button onClick={() => setShowTocInput(false)} size="sm" variant="secondary" className="w-full">
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          )}
-
+          
           <div className="relative flex-grow flex flex-col min-h-0">
             {isProjectBuildMode && (
               <div className="flex items-center gap-2 mb-2 p-2 border rounded-md bg-muted/30">

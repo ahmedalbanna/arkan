@@ -11,9 +11,6 @@ export function useReportGenerationTools() {
     const { t } = useLocalization();
     const { project, updateProject } = useBuilderStore();
 
-    const [newChapterTitle, setNewChapterTitle] = useState('');
-    const [showTocInput, setShowTocInput] = useState(false);
-    const [isGenerateTocOpen, setIsGenerateTocOpen] = useState(false);
     const [isBuildProjectDialogOpen, setIsBuildProjectDialogOpen] = useState(false);
 
     // Local state for build mode
@@ -67,25 +64,6 @@ export function useReportGenerationTools() {
         toast({ title: "Chapter Created", description: `A new untitled chapter has been added.` });
     }, [updateProject]);
 
-    const handleCreateFromToc = useCallback((tocText: string) => {
-        if (!tocText.trim()) {
-            toast({ title: "Table of Contents is empty", description: "Please paste the section titles into the text area.", variant: "destructive" });
-            return;
-        }
-
-        updateProject(p => {
-            if (!p) return;
-            return p.with({ content: p.parseAndSetContentFromToc(tocText) });
-        });
-        
-        toast({
-            title: "Structure Created",
-            description: `Created new chapters and sections from your input.`,
-        });
-        setShowTocInput(false);
-        setNewChapterTitle('');
-    }, [updateProject]);
-
     const handleDragEnd = useCallback((event: DragEndEvent) => {
         const { active, over } = event;
         if (!over || !project) return;
@@ -108,18 +86,11 @@ export function useReportGenerationTools() {
           generateProjectMutation.mutate({ project, selectedSectionIds: selectedSectionsForBuild });
           setIsBuildProjectDialogOpen(false); // Close dialog on confirm
         }
-    }, [project, selectedSectionsForBuild, generateProjectMutation]);
+    }, [project, selectedSectionsForBuild, generateProjectMutation, setIsBuildProjectDialogOpen]);
 
     return {
         t,
-        newChapterTitle,
-        setNewChapterTitle,
-        showTocInput,
-        setShowTocInput,
-        isGenerateTocOpen,
-        setIsGenerateTocOpen,
         handleAddChapter,
-        handleCreateFromToc,
         handleDragEnd,
         isBuildProjectDialogOpen,
         setIsBuildProjectDialogOpen,
