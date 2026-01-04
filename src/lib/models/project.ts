@@ -213,7 +213,7 @@ export class Project {
     return this.with({ tableOfContentsMarkdown: toc });
   }
 
-  public updateProjectFromMarkdown(markdown: string): Project {
+  public updateContentFromMarkdown(markdown: string): Project {
     const newContent = parseMarkdownToContent(markdown, this.content);
     return this.with({ content: newContent });
   }
