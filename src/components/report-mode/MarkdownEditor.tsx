@@ -8,7 +8,7 @@ import { marked } from 'marked';
 import React, { useCallback, useEffect } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
-import { editorExtensions, handleHtmlPaste, handlePlainPaste, tocEditorExtensions } from '@/lib/tiptap-extensions';
+import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/lib/tiptap-extensions';
 import { Button } from '@/components/ui/button';
 import { ContextualToolbar } from '@/lib/editor/ToolBar';
 import { cn } from '@/lib/utils/cn';
@@ -28,24 +28,9 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
   const { setActiveEditor } = useEditorStore();
   const bubbleMenuId = React.useId();
 
-  // Correctly debounce the onChange function
-  const debouncedOnChange = useCallback((markdown: string) => {
-    const handler = setTimeout(() => {
-      onChange(markdown);
-    }, 500); // 500ms delay
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [onChange]);
-
   const editor = useEditor({
     extensions: editorExtensions(bubbleMenuId),
     content: marked.parse(content) as string,
-    onUpdate: ({ editor }) => {
-      const markdown = turndownService.turndown(editor.getHTML());
-      debouncedOnChange(markdown);
-    },
     onBlur: ({ editor }) => {
       const markdown = turndownService.turndown(editor.getHTML());
       onChange(markdown); // Force immediate update on blur
