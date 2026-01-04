@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Chapter, Project, Section, TocSection, type ProjectProperties, User } from '@/lib/models';
@@ -20,7 +19,7 @@ interface BuilderState {
     initializeStore: () => void;
     setUserProfile: (userProfile: User | null) => void; // Action to set the user profile
     setHasUnsavedChanges: (hasChanges: boolean) => void;
-    updateProject: (updater: (project: Project) => void) => void;
+    updateProject: (updater: (project: Project) => void | Project) => void;
     updateProjectFromMarkdown: (markdown: string) => void;
     loadProject: (projectData: ProjectProperties) => void;
     loadProjectFromFile: (file: File) => Promise<void>;
@@ -61,9 +60,11 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         set(state => {
             if (!state.project) return {};
             // The 'with' method creates a new Project instance, ensuring immutability.
-            const newProject = state.project.with({});
-            updater(newProject);
-            return { project: newProject, hasUnsavedChanges: true };
+            const newProject = new Project(state.project.toStateObject());
+            const result = updater(newProject);
+            // If the updater returns a new Project instance, use it. Otherwise, use the mutated one.
+            const finalProject = result instanceof Project ? result : newProject;
+            return { project: finalProject, hasUnsavedChanges: true };
         });
     },
 
@@ -71,7 +72,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         set(state => {
             if (!state.project) return {};
             // Re-instantiate the project from its plain state to ensure methods are available
-            const projectInstance = new Project(state.project);
+            const projectInstance = new Project(state.project.toStateObject());
             const newProject = projectInstance.updateContentFromMarkdown(markdown);
             return { project: newProject, hasUnsavedChanges: true };
         });

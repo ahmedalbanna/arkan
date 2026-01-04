@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -44,45 +44,29 @@ export function SectionGenerationControls({
     const { updateProject } = useBuilderStore();
     const controls = section.controls;
 
-    const [wordCount, setWordCount] = useState(controls.wordCount || '');
-    const [isCustomTone, setIsCustomTone] = useState(() => !toneOptions.some(opt => opt.value === controls.tone));
-
-    useEffect(() => {
-        setWordCount(controls.wordCount || '');
-        setIsCustomTone(!toneOptions.some(opt => opt.value === controls.tone));
-    }, [controls]);
-
-    const handleControlChange = <K extends keyof GenerationControlState>(field: K, value: GenerationControlState[K]) => {
-        updateProject(p => p.updateSection(section.id, s => s.with({ controls: { ...s.controls, [field]: value } })));
-    };
-
-    const onOutputStyleChange = (style: keyof GenerationControlState['outputStyle'], checked: boolean) => {
-        updateProject(p => p.updateSection(section.id, s => s.with({ controls: { ...s.controls, outputStyle: { ...s.controls.outputStyle, [style]: checked } } })));
-    };
-
     if (!controls) {
         return null;
     }
 
-    const instructionPreview = section.buildActionPrompt();
-
+    const handleControlChange = <K extends keyof GenerationControlState>(field: K, value: GenerationControlState[K]) => {
+        updateProject(p => p.updateSection(section.id, s => s.with({ controls: { ...s.controls, [field]: value } })));
+    };
+    
+    const onOutputStyleChange = (style: keyof GenerationControlState['outputStyle'], checked: boolean) => {
+        updateProject(p => p.updateSection(section.id, s => s.with({ controls: { ...s.controls, outputStyle: { ...s.controls.outputStyle, [style]: checked } } })));
+    };
+    
     const handleToneChange = (value: string) => {
         if (value === 'custom') {
-            setIsCustomTone(true);
-            handleControlChange('tone', '' as Tone);
+            onControlChange('tone', '' as Tone);
         } else {
-            setIsCustomTone(false);
-            handleControlChange('tone', value as Tone);
+            onControlChange('tone', value as Tone);
         }
     };
     
-    const handleCustomToneBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-        // If the user clears the custom input, revert to the default select
-        if (e.target.value.trim() === '') {
-            setIsCustomTone(false);
-            handleControlChange('tone', 'professional');
-        }
-    }
+    const isCustomTone = !toneOptions.some(opt => opt.value === controls.tone);
+    
+    const instructionPreview = section.buildActionPrompt();
 
     return (
         <div className="space-y-6">
@@ -103,7 +87,9 @@ export function SectionGenerationControls({
                         id={`tone-${section.id}`}
                         value={controls.tone}
                         onChange={(e) => handleControlChange('tone', e.target.value as Tone)}
-                        onBlur={handleCustomToneBlur}
+                        onBlur={(e) => {
+                            if (e.target.value.trim() === '') handleControlChange('tone', 'professional');
+                        }}
                         placeholder="Enter custom tone..."
                     />
                 ) : (
@@ -205,9 +191,8 @@ export function SectionGenerationControls({
                     id={`wordCount-${section.id}`} 
                     type="text" 
                     placeholder={t('builder.reportGenerator.tool_word_count_placeholder')} 
-                    value={wordCount} 
-                    onChange={(e) => setWordCount(e.target.value)}
-                    onBlur={() => handleControlChange('wordCount', wordCount)}
+                    defaultValue={controls.wordCount || ''} 
+                    onBlur={(e) => handleControlChange('wordCount', e.target.value)}
                 />
             </div>
 
