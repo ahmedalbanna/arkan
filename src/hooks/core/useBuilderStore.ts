@@ -70,7 +70,9 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     updateProjectFromMarkdown: (markdown: string) => {
         set(state => {
             if (!state.project) return {};
-            const newProject = state.project.updateContentFromMarkdown(markdown);
+            // Re-instantiate the project from its plain state to ensure methods are available
+            const projectInstance = new Project(state.project);
+            const newProject = projectInstance.updateContentFromMarkdown(markdown);
             return { project: newProject, hasUnsavedChanges: true };
         });
     },
