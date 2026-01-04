@@ -62,15 +62,26 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
     });
   };
 
-  const aiActionMutation = useWritingTool('/api/writing-tools/manipulate-text', {
+  const aiActionMutation = useMutation({
+    mutationFn: async (variables: { textToManipulate: string; command: string; }) => {
+        // Hardcoded response for testing
+        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+        return { rewrittenText: `[Sample AI Response for: "${variables.command}"]\n\nThis is a hardcoded result for testing purposes. The original text was:\n"${variables.textToManipulate}"` };
+    },
     onSuccess: (data: any) => handleSuccess(data.rewrittenText),
     onError: handleError,
   });
 
-  const translateMutation = useWritingTool('/api/writing-tools/translate-text', {
-    onSuccess: (data: any) => handleSuccess(data.text),
-    onError: handleError,
+  const translateMutation = useMutation({
+      mutationFn: async (variables: { text: string; targetLang: string; }) => {
+          // Hardcoded response for testing
+          await new Promise(resolve => setTimeout(resolve, 500));
+          return { text: `[Translated to ${variables.targetLang}] This is a hardcoded translation for testing.` };
+      },
+      onSuccess: (data: any) => handleSuccess(data.text),
+      onError: handleError,
   });
+
 
   const isProcessing = aiActionMutation.isPending || translateMutation.isPending;
 
