@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEditorStore } from '@/hooks/core/use-editor-store';
@@ -21,10 +22,9 @@ interface MarkdownEditorProps {
   content: string;
   onChange: (markdown: string) => void;
   editorClassName?: string;
-  isToc?: boolean;
 }
 
-const MarkdownEditorComponent = ({ content, onChange, editorClassName, isToc = false }: MarkdownEditorProps) => {
+const MarkdownEditorComponent = ({ content, onChange, editorClassName }: MarkdownEditorProps) => {
   const { setActiveEditor } = useEditorStore();
   const bubbleMenuId = React.useId();
 
@@ -40,7 +40,7 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName, isToc = f
   }, [onChange]);
 
   const editor = useEditor({
-    extensions: isToc ? tocEditorExtensions(bubbleMenuId) : editorExtensions(bubbleMenuId),
+    extensions: editorExtensions(bubbleMenuId),
     content: marked.parse(content) as string,
     onUpdate: ({ editor }) => {
       const markdown = turndownService.turndown(editor.getHTML());

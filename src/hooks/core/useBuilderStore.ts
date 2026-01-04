@@ -21,7 +21,7 @@ interface BuilderState {
     setUserProfile: (userProfile: User | null) => void; // Action to set the user profile
     setHasUnsavedChanges: (hasChanges: boolean) => void;
     updateProject: (updater: (project: Project) => void) => void;
-    updateSectionContent: (sectionId: string, markdown: string) => void;
+    updateProjectFromMarkdown: (markdown: string) => void;
     loadProject: (projectData: ProjectProperties) => void;
     loadProjectFromFile: (file: File) => Promise<void>;
     newSession: () => void;
@@ -67,8 +67,12 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         });
     },
 
-    updateSectionContent: (sectionId: string, markdown: string) => {
-      get().updateProject(p => p.updateSectionContent(sectionId, markdown));
+    updateProjectFromMarkdown: (markdown: string) => {
+        set(state => {
+            if (!state.project) return {};
+            const newProject = state.project.updateContentFromMarkdown(markdown);
+            return { project: newProject, hasUnsavedChanges: true };
+        });
     },
 
     loadProject: (projectData) => {

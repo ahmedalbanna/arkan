@@ -119,6 +119,19 @@ export class Project {
       item instanceof Chapter ? item.sections : [item]
     );
   }
+  
+  get fullMarkdownContent(): string {
+    return this.content.map(item => {
+        if (item instanceof Chapter) {
+            const chapterContent = `# ${item.title}`;
+            const sectionsContent = item.sections.map(section => `## ${section.title}\n\n${section.content || ''}`).join('\n\n');
+            return `${chapterContent}\n\n${sectionsContent}`;
+        } else { // Top-level Section
+            return `# ${item.title}\n\n${item.content || ''}`;
+        }
+    }).join('\n\n<!-- slide-break -->\n\n');
+  }
+
 
   public getSection(id: string): Section | undefined {
     for (const item of this.content) {
