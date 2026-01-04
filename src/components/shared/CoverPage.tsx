@@ -11,7 +11,6 @@ import { cn } from '@/lib/utils/cn';
 import { useImageUpload } from '@/hooks/core/useImageUpload';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { TableOfContentForm } from '../report-mode/TableOfContentForm';
 import { Button } from '../ui/button';
 
 interface CoverPageProps {
@@ -42,7 +41,6 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
     const { isUploading: isUniLogoUploading, handleFileUpload: handleUniLogoUpload } = useImageUpload();
     const mainLogoInputRef = useRef<HTMLInputElement>(null);
     const uniLogoInputRef = useRef<HTMLInputElement>(null);
-    const [isFlipped, setIsFlipped] = useState(false);
 
     if (!project) return null;
     
@@ -64,7 +62,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
     const handleDateChange = (value: string) => {
          const sanitizedValue = value.replace(/<br>/g, '\n').replace(/&nbsp;/g, ' ').replace(/<[^>]+>/g, '');
          updateProject(p => {
-             p.meta.updated = new Date(sanitizedValue).toISOString();
+             if(p) p.meta.updated = new Date(sanitizedValue).toISOString();
          });
     };
     
@@ -81,7 +79,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
         const file = event.target.files?.[0];
         if (file) {
             handleUniLogoUpload(file, (dataUri) => {
-                updateProject(p => { p.universityLogoUrl = dataUri; });
+                updateProject(p => { if(p) p.universityLogoUrl = dataUri; });
             });
         }
     };
@@ -107,8 +105,8 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
         creative: 'border-dashed border-accent'
     };
 
-    const front = (
-      <div className={cn("relative bg-background shadow-lg w-full h-full box-border overflow-hidden p-12 flex flex-col border-4", frameClasses[frameStyle])}>
+    return (
+      <div className={cn("mx-auto my-4 w-full max-w-[210mm] min-h-[297mm] h-[297mm] relative bg-background shadow-lg box-border overflow-hidden p-12 flex flex-col border-4", frameClasses[frameStyle])}>
           {frameStyle === 'professional' && (
             <>
               <div className="absolute -top-24 -left-24 w-72 h-72 bg-primary/5 rounded-full filter blur-3xl"></div>
@@ -126,9 +124,6 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
           )}
 
           <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
-              <Button size="icon" variant="ghost" onClick={() => setIsFlipped(true)}>
-                  <BookCopy className="h-5 w-5" />
-              </Button>
               <TooltipProvider>
                   <ToggleGroup 
                       type="single" 
@@ -186,7 +181,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                       )}
                   </div>
               )}
-              <EditableField tagName="h1" html={project.name} onBlur={(e) => handleContentChange('name', e.currentTarget.innerHTML)} placeholder="Untitled Project" className="text-5xl font-bold font-headline text-primary leading-tight" />
+              <EditableField tagName="h1" html={project.name || ''} onBlur={(e) => handleContentChange('name', e.currentTarget.innerHTML)} placeholder="Untitled Project" className="text-5xl font-bold font-headline text-primary leading-tight" />
                <div className="inline-flex items-center gap-2 text-muted-foreground mt-4">
                   {project.universityLogoUrl ? (
                       <div className="relative w-8 h-8 flex-shrink-0 cursor-pointer" onClick={() => uniLogoInputRef.current?.click()}>
@@ -240,33 +235,5 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                </div>
           </footer>
       </div>
-    );
-    
-    const back = (
-      <div className={cn("relative bg-muted shadow-inner w-full h-full box-border overflow-hidden flex flex-col border-4", frameClasses[frameStyle])}>
-          <TableOfContentForm onFlip={() => setIsFlipped(false)} />
-      </div>
-    );
-
-    return (
-        <div className={cn("mx-auto my-4 w-full max-w-[210mm] min-h-[297mm] h-[297mm] [perspective:1000px]")}>
-             <div
-                className={cn(
-                'relative w-full h-full transition-transform duration-700',
-                '[transform-style:preserve-3d]',
-                isFlipped && '[transform:rotateY(180deg)]'
-                )}
-            >
-                {/* Front of the card */}
-                <div className="absolute w-full h-full [backface-visibility:hidden]">
-                    {front}
-                </div>
-
-                {/* Back of the card */}
-                <div className="absolute w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                    {back}
-                </div>
-            </div>
-        </div>
     );
 };
