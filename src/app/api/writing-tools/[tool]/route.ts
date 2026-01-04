@@ -147,7 +147,7 @@ export const POST = withAuth(async ({ request, user, params }) => {
     return handleApiError({ message: `Invalid tool: ${toolName}` }, 400);
   }
 
-  const { flow, schema, creditCost } = config;
+  const { schema } = config;
 
   try {
     const body = await request.json();
