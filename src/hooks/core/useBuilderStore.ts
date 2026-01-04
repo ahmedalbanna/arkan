@@ -95,14 +95,22 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     },
 
     newSession: () => {
-        if (typeof window !== 'undefined' && window.confirm('Are you sure you want to start a new session? Any unsaved changes will be lost.')) {
+        if (get().hasUnsavedChanges) {
+            if (typeof window !== 'undefined' && !window.confirm('Are you sure you want to start a new session? Any unsaved changes will be lost.')) {
+                return;
+            }
+        }
+        
+        const currentProject = get().project;
+        if (currentProject) {
+            set({ project: currentProject.reset(), hasUnsavedChanges: false });
             localStorage.removeItem('lastActiveProjectId');
-            set({ project: createNewTemporaryProject(), hasUnsavedChanges: false });
-            // Also clear the editor
+
             const editor = useEditorStore.getState().activeEditor;
             if (editor && !editor.isDestroyed) {
-                editor.commands.clearContent();
+                editor.commands.clearContent(true);
             }
+            toast({ title: 'New Project Started', description: 'Your workspace has been cleared.' });
         }
     },
 
