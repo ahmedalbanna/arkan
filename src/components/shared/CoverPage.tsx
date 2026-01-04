@@ -11,7 +11,6 @@ import { cn } from '@/lib/utils/cn';
 import { useImageUpload } from '@/hooks/core/useImageUpload';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { Flipper } from '../ui/flipper';
 import { TableOfContentForm } from '../report-mode/TableOfContentForm';
 import { Button } from '../ui/button';
 
@@ -250,8 +249,24 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
     );
 
     return (
-        <div className={cn("mx-auto my-4 w-full max-w-[210mm] h-[297mm]")}>
-            <Flipper front={front} back={back} isFlipped={isFlipped} />
+        <div className={cn("mx-auto my-4 w-full max-w-[210mm] min-h-[297mm] h-[297mm] [perspective:1000px]")}>
+             <div
+                className={cn(
+                'relative w-full h-full transition-transform duration-700',
+                '[transform-style:preserve-3d]',
+                isFlipped && '[transform:rotateY(180deg)]'
+                )}
+            >
+                {/* Front of the card */}
+                <div className="absolute w-full h-full [backface-visibility:hidden]">
+                    {front}
+                </div>
+
+                {/* Back of the card */}
+                <div className="absolute w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                    {back}
+                </div>
+            </div>
         </div>
     );
 };

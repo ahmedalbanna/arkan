@@ -8,13 +8,16 @@ interface A4PageProps {
     children: React.ReactNode;
     title?: string;
     className?: string;
+    viewMode?: 'single' | 'continuous';
 }
 
-const A4Page = ({ children, title, className }: A4PageProps) => {
+export const A4Page = ({ children, title, className, viewMode = 'single' }: A4PageProps) => {
     return (
         <div
             className={cn(
-                "relative group bg-background shadow-lg p-8 md:p-12 mx-auto my-4 w-full max-w-[210mm] min-h-[297mm] box-border border border-border/50 dark:border-border/30 flex flex-col",
+                "relative group bg-background p-8 md:p-12 mx-auto flex flex-col",
+                viewMode === 'single' && 'shadow-lg my-4 w-full max-w-[210mm] min-h-[297mm] box-border border border-border/50 dark:border-border/30',
+                viewMode === 'continuous' && 'w-full max-w-4xl shadow-none border-none',
                 className
             )}
         >
