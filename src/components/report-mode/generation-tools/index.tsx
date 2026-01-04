@@ -33,8 +33,7 @@ import { useMemo } from "react";
 import { Checkbox } from "../../ui/checkbox";
 import { Label } from "../../ui/label";
 import { BuildProjectDialog } from "../dialogs/BuildProjectDialog";
-import { GenerateTocDialog } from '../dialogs/GenerateTocDialog';
-import { ReportTemplateDialog } from "../dialogs/ReportTemplateDialog";
+import { GenerateTocDialog } from "../dialogs/GenerateTocDialog";
 import { SortableChapterItem } from './SortableChapterItem';
 import { Chapter, Section } from '@/lib/models';
 import { ScrollArea } from "../../ui/scroll-area";
@@ -53,8 +52,6 @@ export default function GenerationTools() {
     handleAddChapter,
     handleCreateFromToc,
     handleDragEnd,
-    isTemplateDialogOpen,
-    setIsTemplateDialogOpen,
     isBuildProjectDialogOpen,
     setIsBuildProjectDialogOpen,
     project,
@@ -79,7 +76,6 @@ export default function GenerationTools() {
   return (
     <>
       <GenerateTocDialog isOpen={isGenerateTocOpen} onOpenChange={setIsGenerateTocOpen} />
-      <ReportTemplateDialog isOpen={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen} />
       <BuildProjectDialog
         isOpen={isBuildProjectDialogOpen}
         onOpenChange={setIsBuildProjectDialogOpen}
@@ -98,9 +94,6 @@ export default function GenerationTools() {
         </CardHeader>
         <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
           <div className="flex flex-col sm:flex-row gap-2">
-            <Button onClick={() => setIsTemplateDialogOpen(true)} variant="outline" className="w-full">
-              <ListPlus className="me-2 h-4 w-4" /> Apply a Template
-            </Button>
             <Button onClick={() => setIsGenerateTocOpen(true)} variant="outline" className="w-full">
               <Sparkles className="me-2 h-4 w-4" /> Generate with AI
             </Button>
@@ -145,7 +138,7 @@ export default function GenerationTools() {
               </div>
             )}
             <ScrollArea className="flex-grow">
-              <div className="h-full pr-4">
+              <div className="h-full pr-4 -mr-4">
                 <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                   <SortableContext items={(project?.content || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
                     <Accordion type="multiple" className="w-full space-y-2">

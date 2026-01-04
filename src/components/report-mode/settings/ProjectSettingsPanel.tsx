@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useBuilderStore } from '@/hooks';
-import { Loader2, UploadCloud, Trash2 } from 'lucide-react';
+import { Loader2, UploadCloud, Trash2, X } from 'lucide-react';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
 import { useEffect, useState } from 'react';

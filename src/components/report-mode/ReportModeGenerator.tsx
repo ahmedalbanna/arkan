@@ -4,7 +4,7 @@
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMobile } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
-import { BookOpenText, Edit, GitGraph, PenSquare, Search, UploadCloud, Settings } from 'lucide-react';
+import { BookOpenText, Edit, GitGraph, PenSquare, Search, UploadCloud, Settings, LayoutTemplate } from 'lucide-react';
 import React, { Suspense, lazy, useState } from 'react';
 import { Button } from '../ui/button';
 import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
@@ -24,12 +24,14 @@ const GenerationTools = lazy(() => import('./generation-tools'));
 const AIResearcherTool = lazy(() => import('../writing-tools/AIResearcherTool').then(module => ({ default: module.AIResearcherTool })));
 const PlantUMLGeneratorTool = lazy(() => import('../writing-tools/PlantUMLGeneratorTool').then(module => ({ default: module.PlantUMLGeneratorTool })));
 const ReportResults = lazy(() => import('./ReportResults'));
+const ApplyTemplatePanel = lazy(() => import('./templates/ApplyTemplatePanel'));
 
 const MemoizedProjectSettingsPanel = React.memo(ProjectSettingsPanel);
 const MemoizedFileManager = React.memo(FileManager);
 const MemoizedGenerationTools = React.memo(GenerationTools);
 const MemoizedAIResearcherTool = React.memo(AIResearcherTool);
 const MemoizedPlantUMLGeneratorTool = React.memo(PlantUMLGeneratorTool);
+const MemoizedApplyTemplatePanel = React.memo(ApplyTemplatePanel);
 
 
 function ReportSkeleton() {
@@ -96,6 +98,12 @@ export default function ReportModeGenerator() {
             title: t('builder.tabs.files'),
             icon: <UploadCloud className="h-5 w-5" />,
             content: <MemoizedFileManager />,
+        },
+        {
+            key: 'templates',
+            title: 'Apply Template',
+            icon: <LayoutTemplate className="h-5 w-5" />,
+            content: <MemoizedApplyTemplatePanel />,
         },
         {
             key: 'generate',

@@ -11,14 +11,13 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useApplyReportTemplate, useReportTemplates } from '@/hooks/data/use-templates';
-import { useBuilderStore, useToast } from '@/hooks';
 import { AlertCircle, FileText, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Input } from '../../ui/input';
 import { Search } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import type { ReportTemplateProperties } from '@/lib/types';
+import type { ReportTemplateProperties } from '@/lib/models';
 
 interface ReportTemplateDialogProps {
   isOpen: boolean;

@@ -14,7 +14,6 @@ export function useReportGenerationTools() {
     const [newChapterTitle, setNewChapterTitle] = useState('');
     const [showTocInput, setShowTocInput] = useState(false);
     const [isGenerateTocOpen, setIsGenerateTocOpen] = useState(false);
-    const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
     const [isBuildProjectDialogOpen, setIsBuildProjectDialogOpen] = useState(false);
 
     // Local state for build mode
@@ -122,8 +121,6 @@ export function useReportGenerationTools() {
         handleAddChapter,
         handleCreateFromToc,
         handleDragEnd,
-        isTemplateDialogOpen,
-        setIsTemplateDialogOpen,
         isBuildProjectDialogOpen,
         setIsBuildProjectDialogOpen,
         project,
