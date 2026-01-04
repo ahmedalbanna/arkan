@@ -18,7 +18,7 @@ import Image from 'next/image';
 import { Label } from '../../ui/label';
 import { CustomSelect } from '../../ui/CustomSelect';
 import { useImageUpload } from '@/hooks/core/useImageUpload';
-import { LanguageSchema, BehaviorSchema, type Behavior } from '@/lib/models';
+import { LanguageSchema, BehaviorSchema, type Behavior, type ProjectProperties } from '@/lib/models';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Slider } from '../../ui/slider';
 import { Badge } from '../../ui/badge';
@@ -41,10 +41,6 @@ const settingsSchema = z.object({
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
-
-const projectTypeOptions = ["Graduation Project", "Research Paper", "Business Proposal", "Software Documentation"];
-const specializationOptions = ["Artificial Intelligence", "Web Development", "Data Science", "Cybersecurity", "Marketing"];
-const educationalLevelOptions = ["Diploma", "Bachelor's Degree", "Master's Degree", "Doctorate"];
 
 function TagInput({ label, value, onChange, placeholder }: { label: string; value: string[]; onChange: (value: string[]) => void; placeholder: string }) {
     const [inputValue, setInputValue] = useState('');
@@ -136,7 +132,7 @@ export default function ProjectSettingsPanel() {
     const file = event.target.files?.[0];
     if (file) {
       handleFileUpload(file, (dataUri) => {
-        updateProject(p => { p.logoUrl = dataUri; });
+        updateProject(p => { if(p) p.logoUrl = dataUri; return p; });
         setLogoPreview(dataUri);
       });
     }
@@ -151,7 +147,8 @@ export default function ProjectSettingsPanel() {
     }
 
     updateProject(p => {
-      Object.assign(p, updatePayload);
+      if(p) Object.assign(p, updatePayload);
+      return p;
     });
   };
 
@@ -170,14 +167,32 @@ export default function ProjectSettingsPanel() {
           <form className="space-y-4 h-full flex flex-col">
             <ScrollArea className="flex-grow pr-4 -mr-4">
               <div className="space-y-4">
-                {/* ... existing form fields ... */}
                 <FormField control={form.control} name="name" render={({ field }) => (
                   <FormItem><FormLabel>Project Name</FormLabel><FormControl><Input {...field} onBlur={handleBlur} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="projectDescription" render={({ field }) => (
                   <FormItem><FormLabel>Project Description</FormLabel><FormControl><Textarea {...field} rows={3} onBlur={handleBlur} /></FormControl><FormMessage /></FormItem>
                 )} />
-                {/* AI Behavior Section */}
+                <FormField control={form.control} name="projectType" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project Type</FormLabel>
+                    <FormControl>
+                        <Input {...field} onBlur={handleBlur} placeholder="e.g., Graduation Project, Research Paper" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="specialization" render={({ field }) => (
+                    <FormItem><FormLabel>Specialization</FormLabel><FormControl>
+                        <Input {...field} onBlur={handleBlur} placeholder="e.g., Artificial Intelligence, Web Development" />
+                    </FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="educationalLevel" render={({ field }) => (
+                    <FormItem><FormLabel>Educational Level</FormLabel><FormControl>
+                        <Input {...field} onBlur={handleBlur} placeholder="e.g., Bachelor's Degree, PhD" />
+                    </FormControl><FormMessage /></FormItem>
+                )} />
+
                 <Card>
                     <CardHeader><CardTitle className="text-base">Global AI Settings</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
@@ -250,16 +265,4 @@ export default function ProjectSettingsPanel() {
       </CardContent>
     </Card>
   );
-}
-
-// Minimalist copy of ProjectProperties for type safety
-interface ProjectProperties {
-    name: string;
-    projectDescription?: string;
-    teamMembers?: string[];
-    language?: string;
-    complexity?: number;
-    behaviors?: Behavior[];
-    rules?: string[];
-    constraints?: string[];
 }
