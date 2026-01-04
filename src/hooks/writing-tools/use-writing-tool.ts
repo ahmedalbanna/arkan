@@ -26,7 +26,7 @@ export function useWritingTool<TData = unknown, TVariables = Omit<AIFlowInput, '
     mutationFn: async (data: TVariables) => {
       // Use apiService which handles auth and errors
       return apiService({
-        endpoint,
+        endpoint, // The full endpoint is passed in now
         method: 'POST',
         data: { ...data, flow: toolName }, // Still useful to send flow name for logging
         firebaseUser,
