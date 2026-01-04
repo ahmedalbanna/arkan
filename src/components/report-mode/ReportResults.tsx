@@ -17,13 +17,13 @@ import { CoverPage } from '../shared/CoverPage';
 import { Button } from '../ui/button';
 import { ListTree, Loader2 } from 'lucide-react';
 import React, { useEffect, useMemo } from 'react';
-import { Chapter, TocSection } from '@/lib/models';
+import { Chapter, Section } from '@/lib/models';
 import { parseMarkdownToContent } from '@/hooks/util/useMarkdownParser';
 
 
 const ReportResults = React.memo(function ReportResults() {
   const { t } = useLocalization();
-  const { project, updateProject, setContentFromMarkdown, applyTableOfContents } = useBuilderStore();
+  const { project, updateProject, updateSectionContent } = useBuilderStore();
   const { form, mutation: generateTocMutation, results: tocResults } = useGenerateTocLogic();
 
   // Effect to automatically generate TOC if project description exists but TOC is empty
@@ -69,14 +69,14 @@ const ReportResults = React.memo(function ReportResults() {
     let markdown = '';
     project.content.forEach((item) => {
       if (item instanceof Chapter) {
-        markdown += `# ${item.title}\\n`;
+        markdown += `# ${item.title}\n`;
         item.sections.forEach((section) => {
-          markdown += `  - ${section.title}\\n`;
+          markdown += `  - ${section.title}\n`;
         });
       } else { // It's a top-level section without a chapter
-        markdown += `# ${item.title}\\n`;
+        markdown += `# ${item.title}\n`;
       }
-      markdown += '\\n';
+      markdown += '\n';
     });
     return markdown.trim();
   }, [project]);
@@ -120,13 +120,32 @@ const ReportResults = React.memo(function ReportResults() {
               </A4Page>
             )}
 
-            <A4Page>
-                <MarkdownEditor
-                    key={`content-editor-${project.id}`}
-                    content={project?.fullMarkdownContent || ''}
-                    onChange={setContentFromMarkdown}
-                />
-            </A4Page>
+            {project?.content.map(item => (
+                item instanceof Chapter ? (
+                    <React.Fragment key={item.id}>
+                        <A4Page title={item.title}>
+                            {item.sections.map(section => (
+                                <div key={section.id}>
+                                    <h2 className="text-2xl font-bold mt-6 mb-3 font-headline border-b pb-2">{section.title}</h2>
+                                    <MarkdownEditor
+                                        key={section.id}
+                                        content={section.content || ''}
+                                        onChange={(newMarkdown) => updateSectionContent(section.id, newMarkdown)}
+                                    />
+                                </div>
+                            ))}
+                        </A4Page>
+                    </React.Fragment>
+                ) : (
+                     <A4Page key={item.id} title={item.title}>
+                        <MarkdownEditor
+                            key={item.id}
+                            content={item.content || ''}
+                            onChange={(newMarkdown) => updateSectionContent(item.id, newMarkdown)}
+                        />
+                    </A4Page>
+                )
+            ))}
         </ScrollArea>
       </CardContent>
     </Card>

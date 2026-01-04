@@ -6,7 +6,6 @@ import { Chapter, type ChapterProperties } from './chapter';
 import { Section, type SectionProperties } from './section';
 import { ExternalContext, type ExternalContextProperties } from './external-context';
 import type { ReportTemplateProperties } from './reportTemplate';
-import { generateFullMarkdownFromProject } from '../utils/markdown-generation';
 import { arrayMove } from '@dnd-kit/sortable';
 import { parseMarkdownToContent } from '@/hooks/util/useMarkdownParser';
 
@@ -166,10 +165,6 @@ export class Project {
     );
     const hasExternalContext = this.externalContext.length > 0;
     return hasBasicInfo || hasContentItems || hasExternalContext;
-  }
-
-  get fullMarkdownContent(): string {
-    return generateFullMarkdownFromProject(this.toStateObject());
   }
 
   // --- Immutable Logic ---

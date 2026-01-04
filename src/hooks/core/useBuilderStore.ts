@@ -21,12 +21,11 @@ interface BuilderState {
     setUserProfile: (userProfile: User | null) => void; // Action to set the user profile
     setHasUnsavedChanges: (hasChanges: boolean) => void;
     updateProject: (updater: (project: Project) => void) => void;
-    updateSection: (sectionId: string, updater: (section: Section) => Section) => void;
+    updateSectionContent: (sectionId: string, markdown: string) => void;
     loadProject: (projectData: ProjectProperties) => void;
     loadProjectFromFile: (file: File) => Promise<void>;
     newSession: () => void;
     applyTableOfContents: (tocData: TocSection[]) => void;
-    setContentFromMarkdown: (markdown: string) => void;
 }
 
 const createNewTemporaryProject = (): Project => new Project({});
@@ -68,30 +67,14 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         });
     },
 
-    updateSection: (sectionId, updater) => {
-        get().updateProject(p => {
-           const section = p.getSection(sectionId);
-           if (section) {
-               const newSection = updater(section);
-               const chapter = p.findSection(sectionId)?.chapter;
-               if (chapter) {
-                    chapter.updateSection(sectionId, () => newSection);
-               }
-           }
-        });
+    updateSectionContent: (sectionId: string, markdown: string) => {
+      get().updateProject(p => p.updateSectionContent(sectionId, markdown));
     },
 
     loadProject: (projectData) => {
         const newProject = projectData instanceof Project ? projectData : new Project(projectData);
         localStorage.setItem('lastActiveProjectId', newProject.id);
         set({ project: newProject, hasUnsavedChanges: false });
-
-        // Also update the editor content
-        const editor = useEditorStore.getState().activeEditor;
-        if (editor && !editor.isDestroyed) {
-          const html = marked.parse(newProject.fullMarkdownContent) as string;
-          editor.commands.setContent(html, false);
-        }
     },
 
     loadProjectFromFile: async (file: File) => {
@@ -129,23 +112,6 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
             title: 'Table of Contents Applied',
             description: `${tocData.length} chapters and their sections have been created.`,
         });
-    },
-    
-    setContentFromMarkdown: (markdown: string) => {
-        const currentProject = get().project;
-        if (!currentProject) return;
-
-        // Ensure markdown is a string before trimming
-        const incomingMarkdown = typeof markdown === 'string' ? markdown : '';
-        
-        if (incomingMarkdown.trim() !== currentProject.fullMarkdownContent.trim()) {
-          set(state => {
-            if (!state.project) return {};
-            const newContent = parseMarkdownToContent(incomingMarkdown, state.project.content, false);
-            const newProject = state.project.with({ content: newContent });
-            return { project: newProject, hasUnsavedChanges: true };
-          });
-        }
     },
 }));
 
