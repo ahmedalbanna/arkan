@@ -33,45 +33,45 @@ import { clarityAdvisor, concisenessChecker, readabilityEnhancer, rewriteText, s
 import { topicExplainer } from '@/ai/flows/topic-explainer';
 import { translateText } from '@/ai/flows/translate-text';
 import { writeDocument } from '@/ai/flows/write-document';
-import { AIResearcherInputSchema, BiasCheckInputSchema, ClarityAdvisorInputSchema, ConcisenessCheckerInputSchema, DetectAIInputSchema, FactCheckInputSchema, FactRetrievalInputSchema, GenerateCitationInputSchema, GeneratePlantUMLInputSchema, GenerateProjectBlueprintInputSchema, GenerateQuizInputSchema, GenerateTocInputSchema, GenerateUIDescriptionInputSchema, GrammarCheckInputSchema, HumanizeTextInputSchema, IdeaGenerationInputSchema, LiteratureReviewInputSchema, ManipulateTextInputSchema, ParaphraseInputSchema, PlagiarismCheckInputSchema, QuestionAnsweringInputSchema, ReadabilityEnhancerInputSchema, RewriteTextInputSchema, SentenceStructureCheckInputSchema, SolveAssignmentsInputSchema, StyleEditorInputSchema, SummarizeInputSchema, SummarizeTextWithRatioInputSchema, TopicExplainerInputSchema, TranslateTextInputSchema, WriteDocumentInputSchema, GenerateChapterInputSchema } from '@/ai/schemas';
-import { z } from 'genkit';
+import { AIResearcherInputSchema, BiasCheckInputSchema, ClarityAdvisorInputSchema, ConcisenessCheckerInputSchema, DetectAIInputSchema, FactCheckInputSchema, FactRetrievalInputSchema, GenerateCitationInputSchema, GeneratePlantUMLInputSchema, GenerateProjectBlueprintInputSchema, GenerateQuizInputSchema, GenerateTocInputSchema, GenerateUIDescriptionInputSchema, GrammarCheckInputSchema, HumanizeTextInputSchema, IdeaGenerationInputSchema, LiteratureReviewInputSchema, ManipulateTextInputSchema, ParaphraseInputSchema, ParaphraseModeSchema, PlagiarismCheckInputSchema, QuestionAnsweringInputSchema, ReadabilityEnhancerInputSchema, RewriteTextInputSchema, SentenceStructureCheckInputSchema, SolveAssignmentsInputSchema, StyleEditorInputSchema, SummarizeInputSchema, SummarizeTextWithRatioInputSchema, TopicExplainerInputSchema, TranslateTextInputSchema, WriteDocumentInputSchema, GenerateChapterInputSchema } from '@/ai/schemas';
+import { z } from 'zod';
 import { configureUserAi } from '@/ai/genkit';
 import { generateImage } from '@/ai/flows/generate-image';
 
 // Define a map for tool configurations
 const toolConfig = {
-  'paraphrase': { flow: paraphraseText, schema: ParaphraseInputSchema, creditCost: 1 },
-  'summarize': { flow: summarizeText, schema: SummarizeInputSchema, creditCost: 1 },
-  'humanize': { flow: humanizeText, schema: HumanizeTextInputSchema, creditCost: 1 },
-  'ai-detector': { flow: detectAiContent, schema: DetectAIInputSchema, creditCost: 1 },
-  'grammar-checker': { flow: grammarCheck, schema: GrammarCheckInputSchema, creditCost: 1 },
-  'quiz-generator': { flow: generateQuiz, schema: GenerateQuizInputSchema, creditCost: 1 },
-  'fact-checker': { flow: factCheckText, schema: FactCheckInputSchema, creditCost: 2 },
-  'plagiarism-checker': { flow: plagiarismCheck, schema: PlagiarismCheckInputSchema, creditCost: 2 },
-  'citation-generator': { flow: generateCitation, schema: GenerateCitationInputSchema, creditCost: 1 },
-  'ai-researcher': { flow: aiResearcher, schema: AIResearcherInputSchema, creditCost: 2 },
-  'literature-review': { flow: generateLiteratureReview, schema: LiteratureReviewInputSchema, creditCost: 3 },
-  'question-answering': { flow: answerQuestion, schema: QuestionAnsweringInputSchema, creditCost: 1 },
-  'fact-retrieval': { flow: retrieveFact, schema: FactRetrievalInputSchema, creditCost: 1 },
-  'topic-explainer': { flow: topicExplainer, schema: TopicExplainerInputSchema, creditCost: 1 },
-  'generate-ideas': { flow: generateIdeas, schema: IdeaGenerationInputSchema, creditCost: 1 },
-  'write-document': { flow: writeDocument, schema: WriteDocumentInputSchema, creditCost: 3 },
-  'generate-plantuml': { flow: generatePlantUML, schema: GeneratePlantUMLInputSchema, creditCost: 1 },
-  'rewrite-text': { flow: rewriteText, schema: RewriteTextInputSchema, creditCost: 1 },
-  'summarize-with-ratio': { flow: summarizeTextWithRatio, schema: SummarizeTextWithRatioInputSchema, creditCost: 1 },
-  'style-editor': { flow: styleEditor, schema: StyleEditorInputSchema, creditCost: 1 },
-  'readability-enhancer': { flow: readabilityEnhancer, schema: ReadabilityEnhancerInputSchema, creditCost: 1 },
-  'conciseness-checker': { flow: concisenessChecker, schema: ConcisenessCheckerInputSchema, creditCost: 1 },
-  'clarity-advisor': { flow: clarityAdvisor, schema: ClarityAdvisorInputSchema, creditCost: 1 },
-  'manipulate-text': { flow: manipulateText, schema: ManipulateTextInputSchema, creditCost: 1 },
-  'generate-toc': { flow: generateToc, schema: GenerateTocInputSchema, creditCost: 1 },
-  'translate-text': { flow: translateText, schema: TranslateTextInputSchema, creditCost: 1 },
-  'bias-checker': { flow: biasCheckText, schema: BiasCheckInputSchema, creditCost: 1 },
-  'sentence-structure-checker': { flow: sentenceStructureCheck, schema: SentenceStructureCheckInputSchema, creditCost: 1 },
-  'solve-assignments': { flow: solveAssignments, schema: SolveAssignmentsInputSchema, creditCost: 2 },
-  'project-blueprint': { flow: generateProjectBlueprint, schema: GenerateProjectBlueprintInputSchema, creditCost: 3 },
-  'generate-ui-description': { flow: generateUiDescription, schema: GenerateUIDescriptionInputSchema, creditCost: 2 },
-  'generate-chapter': { flow: generateChapterContent, schema: GenerateChapterInputSchema, creditCost: 2 },
+  'paraphrase': { flow: paraphraseText, schema: ParaphraseInputSchema.pick({ text: true, mode: true }), creditCost: 1 },
+  'summarize': { flow: summarizeText, schema: SummarizeInputSchema.pick({ text: true, length: true }), creditCost: 1 },
+  'humanize': { flow: humanizeText, schema: HumanizeTextInputSchema.pick({ text: true }), creditCost: 1 },
+  'ai-detector': { flow: detectAiContent, schema: DetectAIInputSchema.pick({ text: true }), creditCost: 1 },
+  'grammar-checker': { flow: grammarCheck, schema: GrammarCheckInputSchema.pick({ text: true }), creditCost: 1 },
+  'quiz-generator': { flow: generateQuiz, schema: GenerateQuizInputSchema.pick({ text: true, numQuestions: true, questionType: true }), creditCost: 1 },
+  'fact-checker': { flow: factCheckText, schema: FactCheckInputSchema.pick({ text: true }), creditCost: 2 },
+  'plagiarism-checker': { flow: plagiarismCheck, schema: PlagiarismCheckInputSchema.pick({ text: true }), creditCost: 2 },
+  'citation-generator': { flow: generateCitation, schema: GenerateCitationInputSchema.pick({ sourceText: true, style: true }), creditCost: 1 },
+  'ai-researcher': { flow: aiResearcher, schema: AIResearcherInputSchema.pick({ topic: true, depth: true }), creditCost: 2 },
+  'literature-review': { flow: generateLiteratureReview, schema: LiteratureReviewInputSchema.pick({ topic: true, focusAreas: true, numberOfSources: true, timeRange: true }), creditCost: 3 },
+  'question-answering': { flow: answerQuestion, schema: QuestionAnsweringInputSchema.pick({ question: true, context: true, useWebSearch: true, maxSources: true }), creditCost: 1 },
+  'fact-retrieval': { flow: retrieveFact, schema: FactRetrievalInputSchema.pick({ factQuery: true, useWebSearch: true, requireSource: true }), creditCost: 1 },
+  'topic-explainer': { flow: topicExplainer, schema: TopicExplainerInputSchema.pick({ topic: true }), creditCost: 1 },
+  'generate-ideas': { flow: generateIdeas, schema: IdeaGenerationInputSchema.pick({ specialization: true, domain: true, region: true, circumstances: true, additionalContext: true }), creditCost: 1 },
+  'write-document': { flow: writeDocument, schema: WriteDocumentInputSchema.pick({ topic: true, documentType: true, knowledge: true, tableOfContents: true }), creditCost: 3 },
+  'generate-plantuml': { flow: generatePlantUML, schema: GeneratePlantUMLInputSchema.pick({ description: true, diagramType: true }), creditCost: 1 },
+  'rewrite-text': { flow: rewriteText, schema: RewriteTextInputSchema.pick({ text: true, style: true }), creditCost: 1 },
+  'summarize-with-ratio': { flow: summarizeTextWithRatio, schema: SummarizeTextWithRatioInputSchema.pick({ text: true, ratio: true }), creditCost: 1 },
+  'style-editor': { flow: styleEditor, schema: StyleEditorInputSchema.pick({ text: true, targetAudience: true, tone: true }), creditCost: 1 },
+  'readability-enhancer': { flow: readabilityEnhancer, schema: ReadabilityEnhancerInputSchema.pick({ text: true, targetLevel: true }), creditCost: 1 },
+  'conciseness-checker': { flow: concisenessChecker, schema: ConcisenessCheckerInputSchema.pick({ text: true, targetReduction: true }), creditCost: 1 },
+  'clarity-advisor': { flow: clarityAdvisor, schema: ClarityAdvisorInputSchema.pick({ text: true, focusAreas: true }), creditCost: 1 },
+  'manipulate-text': { flow: manipulateText, schema: ManipulateTextInputSchema.pick({ textToManipulate: true, command: true }), creditCost: 1 },
+  'generate-toc': { flow: generateToc, schema: GenerateTocInputSchema.pick({ projectDescription: true }), creditCost: 1 },
+  'translate-text': { flow: translateText, schema: TranslateTextInputSchema.pick({ text: true, targetLang: true }), creditCost: 1 },
+  'bias-checker': { flow: biasCheckText, schema: BiasCheckInputSchema.pick({ text: true }), creditCost: 1 },
+  'sentence-structure-checker': { flow: sentenceStructureCheck, schema: SentenceStructureCheckInputSchema.pick({ text: true }), creditCost: 1 },
+  'solve-assignments': { flow: solveAssignments, schema: SolveAssignmentsInputSchema.pick({ text: true }), creditCost: 2 },
+  'project-blueprint': { flow: generateProjectBlueprint, schema: GenerateProjectBlueprintInputSchema.omit({ flow: true }), creditCost: 3 },
+  'generate-ui-description': { flow: generateUiDescription, schema: GenerateUIDescriptionInputSchema.omit({ flow: true }), creditCost: 2 },
+  'generate-chapter': { flow: generateChapterContent, schema: GenerateChapterInputSchema.omit({ flow: true }), creditCost: 2 },
   'generate-project-from-full-prompt': { 
     flow: (data: { fullPrompt: string }, userApiKeys?: Record<string, string>) => {
       const ai = configureUserAi(userApiKeys);
@@ -84,70 +84,15 @@ const toolConfig = {
 
 type ToolName = keyof typeof toolConfig;
 
-function getSampleOutput(toolName: ToolName, input: any) {
-  switch (toolName) {
-    case 'paraphrase':
-      return { paraphrasedText: `This is a hardcoded paraphrased version of the original text in a ${input.mode} style.` };
-    case 'summarize':
-      return { summary: `This is a hardcoded ${input.length} summary of the provided text.` };
-    case 'humanize':
-      return { humanizedText: "This is a sample humanized text, designed to sound natural and less like it was generated by an AI. It uses varied sentence structures and a more conversational tone." };
-    case 'ai-detector':
-      return { score: 42, analysis: "The text shows some signs of AI generation, like uniform sentence length, but also contains enough variation to be considered likely human-written. This is a sample response." };
-    case 'grammar-checker':
-      return {
-        correctedText: input.text.replace(/eror/g, 'error').replace(/mistak/g, 'mistake'),
-        corrections: [{ original: 'eror', corrected: 'error', explanation: 'Spelling mistake.', type: 'spelling' }],
-        statistics: { total: 1, grammar: 0, spelling: 1, punctuation: 0 }
-      };
-    case 'quiz-generator':
-      return { questions: [{ type: 'multiple-choice', question: 'What is the capital of France (Sample)?', options: ['Paris', 'London', 'Berlin', 'Madrid'], answer: 'Paris' }] };
-    case 'fact-checker':
-        return {
-            claims: [{ statement: 'The sky is blue.', status: 'Verified', source: 'wikipedia.org', explanation: 'Based on Rayleigh scattering.' }],
-            originalityScore: 95
-        };
-    case 'plagiarism-checker':
-        return {
-            originalityScore: 85,
-            matches: [{ source: 'https://example.com/source-one', title: 'Example Source 1', summary: 'A small portion of the text about general concepts matches this source.', similarity: 15 }, { source: 'https://anotherexample.com/article', title: 'Another Article', summary: 'This article discusses a similar topic, leading to a minor overlap in phrasing.', similarity: 10 }]
-        };
-    case 'citation-generator':
-        return { citations: [`Sample, A. (${new Date().getFullYear()}). Hardcoded citation example. Journal of Testing, 1(1), 1-10.`] };
-    case 'ai-researcher':
-        return {
-            summary: "This is a sample research summary about '" + input.topic + "'.",
-            keyPoints: ["Key Point 1", "Key Point 2"],
-            sources: ["https://example.com/source1", "https://example.com/source2"]
-        };
-    case 'topic-explainer':
-        return { explanation: `# Explanation of ${input.topic}\n\nThis is a hardcoded explanation. It breaks down the topic into simple terms.` };
-    case 'generate-ideas':
-        return { markdown: `## Idea 1\n\nThis is a great idea based on your specialization in ${input.specialization}.` };
-    case 'write-document':
-        return { documentContent: `# ${input.topic}\n\nThis is a sample document about your topic.` };
-    case 'generate-plantuml':
-        return { plantUmlCode: '@startuml\nactor User\nUser -> System: Hardcoded Test\n@enduml', explanation: 'This is a sample diagram.' };
-    case 'solve-assignments':
-        return { solutions: `## Question 1\n\nThis is the sample solution to the first question.` };
-    case 'project-blueprint':
-        return { blueprint: `# Project Blueprint for ${input.projectName}\n\nThis is a hardcoded project blueprint.` };
-    case 'generate-ui-description':
-        return { uiDescription: `## Home Page\n- **Purpose**: To welcome users.\n- **Elements**: Welcome message, login button.` };
-    default:
-      return { message: `This is a hardcoded test response for the '${toolName}' tool.` };
-  }
-}
-
 export const POST = withAuth(async ({ request, user, params }) => {
-  const toolName = (await params).tool as ToolName;
+  const toolName = params.tool as ToolName;
 
   const config = toolConfig[toolName];
   if (!config) {
     return handleApiError({ message: `Invalid tool: ${toolName}` }, 400);
   }
 
-  const { schema } = config;
+  const { flow, schema, creditCost } = config;
 
   try {
     const body = await request.json();
@@ -156,20 +101,17 @@ export const POST = withAuth(async ({ request, user, params }) => {
       return handleApiError(validation.error);
     }
     
-    // Hardcoded response for testing
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-    const result = getSampleOutput(toolName, validation.data);
+    // Hardcoded response for testing is removed, now calling the actual flow.
+    await deductCredit(user.id, creditCost);
+    const result = await (flow as any)(validation.data, user.apiKeys);
 
-    // This part is now effectively skipped for testing, but kept for when you switch back
-    // const result = await flow(validation.data as any, user.apiKeys);
-    // await deductCredit(user.id, creditCost);
-    // await logGeneration({
-    //   agentId: toolName,
-    //   userId: user.id,
-    //   input: validation.data,
-    //   output: result,
-    //   creditCost: creditCost,
-    // });
+    await logGeneration({
+      agentId: toolName,
+      userId: user.id,
+      input: validation.data,
+      output: result,
+      creditCost: creditCost,
+    });
 
     return createApiResponse(result, 200);
 
