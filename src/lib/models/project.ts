@@ -1,5 +1,4 @@
 
-
 'use client';
 import { v4 as uuidv4 } from 'uuid';
 import { Chapter, type ChapterProperties } from './chapter';
@@ -8,6 +7,7 @@ import { ExternalContext, type ExternalContextProperties } from './external-cont
 import type { ReportTemplateProperties } from './reportTemplate';
 import { arrayMove } from '@dnd-kit/sortable';
 import { parseMarkdownToContent } from '@/hooks/util/useMarkdownParser';
+import { Language, Complexity, Behavior } from './control-types';
 
 // Flexible Type for Project Content - strictly enforcing structure now
 export type ProjectContent = readonly (Chapter | Section)[];
@@ -37,6 +37,12 @@ export interface ProjectProperties {
   tableOfContentsMarkdown?: string; // To store the generated TOC
   // Deprecated - will be removed in a future refactor
   activeSectionId?: string;
+  // New global settings
+  language?: Language;
+  complexity?: number; // 0-100
+  behaviors?: Behavior[];
+  rules?: string[];
+  constraints?: string[];
 }
 
 export class Project {
@@ -59,6 +65,13 @@ export class Project {
   public readonly externalContext: readonly ExternalContext[];
   public readonly meta: Readonly<Required<NonNullable<ProjectProperties['meta']>>>;
   public readonly activeSectionId?: string;
+
+  // New global settings
+  public readonly language?: Language;
+  public readonly complexity?: number;
+  public readonly behaviors?: readonly Behavior[];
+  public readonly rules?: readonly string[];
+  public readonly constraints?: readonly string[];
 
 
   constructor(props: ProjectProperties) {
@@ -96,6 +109,13 @@ export class Project {
       created: props.meta?.created || new Date().toISOString(),
       updated: props.meta?.updated || new Date().toISOString()
     };
+    
+    // Initialize new global settings
+    this.language = props.language || 'default';
+    this.complexity = props.complexity ?? 50;
+    this.behaviors = (props.behaviors || []).map(b => ({...b}));
+    this.rules = props.rules ? [...props.rules] : [];
+    this.constraints = props.constraints ? [...props.constraints] : [];
   }
 
   public with(props: Partial<ProjectProperties>): Project {
@@ -193,7 +213,7 @@ export class Project {
     return this.with({ tableOfContentsMarkdown: toc });
   }
 
-  public updateContentFromMarkdown(markdown: string): Project {
+  public updateProjectFromMarkdown(markdown: string): Project {
     const newContent = parseMarkdownToContent(markdown, this.content);
     return this.with({ content: newContent });
   }
@@ -414,6 +434,12 @@ ${universityText}
       externalContext: this.externalContext.map(ec => ec.toStateObject()),
       meta: this.meta,
       activeSectionId: this.activeSectionId,
+      // Add new fields
+      language: this.language,
+      complexity: this.complexity,
+      behaviors: this.behaviors ? [...this.behaviors] : [],
+      rules: this.rules ? [...this.rules] : [],
+      constraints: this.constraints ? [...this.constraints] : [],
     };
   }
 

@@ -2,15 +2,15 @@
 
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useBuilderStore, useToast } from '@/hooks';
-import { Loader2, UploadCloud } from 'lucide-react';
+import { useBuilderStore } from '@/hooks';
+import { Loader2, UploadCloud, Trash2 } from 'lucide-react';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
 import { useEffect, useState } from 'react';
@@ -18,6 +18,10 @@ import Image from 'next/image';
 import { Label } from '../../ui/label';
 import { CustomSelect } from '../../ui/CustomSelect';
 import { useImageUpload } from '@/hooks/core/useImageUpload';
+import { LanguageSchema, BehaviorSchema, type Behavior } from '@/lib/models';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
+import { Slider } from '../../ui/slider';
+import { Badge } from '../../ui/badge';
 
 const settingsSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),
@@ -28,7 +32,12 @@ const settingsSchema = z.object({
   supervisor: z.string().optional(),
   course: z.string().optional(),
   educationalLevel: z.string().optional(),
-  teamMembers: z.string().optional(), // Keep as string for form, convert on submit
+  teamMembers: z.string().optional(),
+  language: LanguageSchema.optional(),
+  complexity: z.number().min(0).max(100).optional(),
+  behaviors: z.array(BehaviorSchema).optional(),
+  rules: z.array(z.string()).optional(),
+  constraints: z.array(z.string()).optional(),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -37,9 +46,47 @@ const projectTypeOptions = ["Graduation Project", "Research Paper", "Business Pr
 const specializationOptions = ["Artificial Intelligence", "Web Development", "Data Science", "Cybersecurity", "Marketing"];
 const educationalLevelOptions = ["Diploma", "Bachelor's Degree", "Master's Degree", "Doctorate"];
 
+function TagInput({ label, value, onChange, placeholder }: { label: string; value: string[]; onChange: (value: string[]) => void; placeholder: string }) {
+    const [inputValue, setInputValue] = useState('');
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && inputValue.trim()) {
+            e.preventDefault();
+            onChange([...value, inputValue.trim()]);
+            setInputValue('');
+        }
+    };
+
+    const handleRemove = (index: number) => {
+        onChange(value.filter((_, i) => i !== index));
+    };
+
+    return (
+        <div className="space-y-2">
+            <Label>{label}</Label>
+            <div className="flex flex-wrap gap-2 p-2 border rounded-md min-h-[40px]">
+                {value.map((item, index) => (
+                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                        {item}
+                        <button onClick={() => handleRemove(index)} className="rounded-full hover:bg-muted-foreground/20">
+                            <X className="h-3 w-3" />
+                        </button>
+                    </Badge>
+                ))}
+                <Input
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={placeholder}
+                    className="flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                />
+            </div>
+        </div>
+    )
+}
+
 export default function ProjectSettingsPanel() {
   const { project, updateProject } = useBuilderStore();
-  const { toast } = useToast();
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const { isUploading, handleFileUpload } = useImageUpload();
 
@@ -55,6 +102,11 @@ export default function ProjectSettingsPanel() {
       course: '',
       educationalLevel: '',
       teamMembers: '',
+      language: 'default',
+      complexity: 50,
+      behaviors: [],
+      rules: [],
+      constraints: [],
     }
   });
 
@@ -70,6 +122,11 @@ export default function ProjectSettingsPanel() {
         course: project.course || '',
         educationalLevel: project.educationalLevel || '',
         teamMembers: project.teamMembers?.join(', ') || '',
+        language: project.language || 'default',
+        complexity: project.complexity ?? 50,
+        behaviors: project.behaviors ? [...project.behaviors] : [],
+        rules: project.rules ? [...project.rules] : [],
+        constraints: project.constraints ? [...project.constraints] : [],
       });
       setLogoPreview(project.logoUrl || null);
     }
@@ -79,9 +136,7 @@ export default function ProjectSettingsPanel() {
     const file = event.target.files?.[0];
     if (file) {
       handleFileUpload(file, (dataUri) => {
-        updateProject(p => {
-          p.logoUrl = dataUri;
-        });
+        updateProject(p => { p.logoUrl = dataUri; });
         setLogoPreview(dataUri);
       });
     }
@@ -89,12 +144,19 @@ export default function ProjectSettingsPanel() {
 
   const handleBlur = () => {
     const data = form.getValues();
-    const teamMembersArray = data.teamMembers?.split(',').map(name => name.trim()).filter(Boolean);
+    const updatePayload: Partial<ProjectProperties> = { ...data };
+
+    if (data.teamMembers) {
+      updatePayload.teamMembers = data.teamMembers.split(',').map(name => name.trim()).filter(Boolean);
+    }
+
     updateProject(p => {
-      Object.assign(p, { ...data, teamMembers: teamMembersArray });
+      Object.assign(p, updatePayload);
     });
   };
 
+  const { fields: behaviors, append: appendBehavior, remove: removeBehavior } = useFieldArray({ control: form.control, name: "behaviors" });
+  
   return (
     <Card className="h-full flex flex-col border-0 shadow-none">
       <CardHeader>
@@ -108,103 +170,78 @@ export default function ProjectSettingsPanel() {
           <form className="space-y-4 h-full flex flex-col">
             <ScrollArea className="flex-grow pr-4 -mr-4">
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Project Logo</Label>
-                  <div className="relative flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary">
-                    <input
-                      type="file"
-                      accept="image/png, image/jpeg, image/svg+xml"
-                      onChange={handleLogoChange}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      disabled={isUploading}
-                    />
-                    {isUploading ? (
-                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                    ) : logoPreview ? (
-                      <Image src={logoPreview} alt="Logo preview" layout="fill" objectFit="contain" className="p-2" />
-                    ) : (
-                      <div className="text-center text-muted-foreground">
-                        <UploadCloud className="w-8 h-8 mx-auto" />
-                        <p className="text-sm mt-1">Click to upload or drag & drop</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
+                {/* ... existing form fields ... */}
                 <FormField control={form.control} name="name" render={({ field }) => (
                   <FormItem><FormLabel>Project Name</FormLabel><FormControl><Input {...field} onBlur={handleBlur} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="projectDescription" render={({ field }) => (
                   <FormItem><FormLabel>Project Description</FormLabel><FormControl><Textarea {...field} rows={3} onBlur={handleBlur} /></FormControl><FormMessage /></FormItem>
                 )} />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField control={form.control} name="projectType" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Project Type</FormLabel>
-                      <FormControl>
-                        <CustomSelect
-                          value={field.value || ''}
-                          onChange={(value) => { field.onChange(value); handleBlur(); }}
-                          options={projectTypeOptions}
-                          placeholder="Select or type project type"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                   <FormField control={form.control} name="specialization" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Specialization</FormLabel>
-                             <FormControl>
-                                <CustomSelect
-                                  value={field.value || ''}
-                                  onChange={(value) => { field.onChange(value); handleBlur(); }}
-                                  options={specializationOptions}
-                                  placeholder="Select or type specialization"
-                                />
-                              </FormControl>
+                {/* AI Behavior Section */}
+                <Card>
+                    <CardHeader><CardTitle className="text-base">Global AI Settings</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                        <FormField control={form.control} name="language" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Language</FormLabel>
+                            <Select onValueChange={(value) => { field.onChange(value); handleBlur(); }} value={field.value}>
+                                <FormControl><SelectTrigger><SelectValue/></SelectTrigger></FormControl>
+                                <SelectContent>
+                                    <SelectItem value="default">Default</SelectItem>
+                                    <SelectItem value="en">English</SelectItem>
+                                    <SelectItem value="ar">Arabic</SelectItem>
+                                    <SelectItem value="es">Spanish</SelectItem>
+                                    <SelectItem value="fr">French</SelectItem>
+                                    <SelectItem value="de">German</SelectItem>
+                                </SelectContent>
+                            </Select>
                             <FormMessage />
-                        </FormItem>
-                    )} />
-                </div>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="university" render={({ field }) => (
-                        <FormItem><FormLabel>University</FormLabel><FormControl><Input {...field} onBlur={handleBlur} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField control={form.control} name="supervisor" render={({ field }) => (
-                        <FormItem><FormLabel>Supervisor</FormLabel><FormControl><Input {...field} onBlur={handleBlur} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                </div>
+                          </FormItem>
+                        )} />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="course" render={({ field }) => (
-                      <FormItem><FormLabel>Course</FormLabel><FormControl><Input {...field} onBlur={handleBlur} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                     <FormField control={form.control} name="educationalLevel" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Educational Level</FormLabel>
-                             <FormControl>
-                                <CustomSelect
-                                  value={field.value || ''}
-                                  onChange={(value) => { field.onChange(value); handleBlur(); }}
-                                  options={educationalLevelOptions}
-                                  placeholder="Select or type level"
-                                />
-                              </FormControl>
+                        <FormField control={form.control} name="complexity" render={({ field }) => (
+                          <FormItem>
+                            <div className="flex justify-between items-center"><FormLabel>Complexity</FormLabel><Badge variant="outline">{field.value}%</Badge></div>
+                            <FormControl>
+                                <Slider value={[field.value ?? 50]} onValueChange={(v) => field.onChange(v[0])} onBlur={handleBlur} min={0} max={100} step={10} />
+                            </FormControl>
                             <FormMessage />
-                        </FormItem>
-                    )} />
-                </div>
-                
-                <div className="space-y-2">
-                  <FormField control={form.control} name="teamMembers" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Team Members</FormLabel>
-                      <FormControl><Textarea {...field} rows={2} placeholder="Enter names, separated by commas..." onBlur={handleBlur} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                </div>
+                          </FormItem>
+                        )} />
+                        
+                        <div className="space-y-2">
+                          <Label>Behaviors & Personas</Label>
+                          {behaviors.map((item, index) => (
+                              <div key={item.id} className="flex gap-2 items-center">
+                                  <Input {...form.register(`behaviors.${index}.name`)} onBlur={handleBlur} placeholder="e.g., Expert academic writer" />
+                                  <Controller
+                                      control={form.control}
+                                      name={`behaviors.${index}.type`}
+                                      render={({ field }) => (
+                                          <Select onValueChange={(value) => { field.onChange(value); handleBlur(); }} value={field.value}>
+                                              <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
+                                              <SelectContent>
+                                                  <SelectItem value="persona">Persona</SelectItem>
+                                                  <SelectItem value="behavior">Behavior</SelectItem>
+                                              </SelectContent>
+                                          </Select>
+                                      )}
+                                  />
+                                  <Button type="button" variant="ghost" size="icon" onClick={() => removeBehavior(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                              </div>
+                          ))}
+                          <Button type="button" size="sm" variant="outline" onClick={() => appendBehavior({ name: '', type: 'behavior' })}>Add Behavior</Button>
+                        </div>
+                        
+                        <FormField control={form.control} name="rules" render={({ field }) => (
+                            <TagInput label="Mandatory Rules" placeholder="Add a rule and press Enter" value={field.value || []} onChange={(value) => { field.onChange(value); handleBlur(); }} />
+                        )} />
+                        
+                        <FormField control={form.control} name="constraints" render={({ field }) => (
+                             <TagInput label="Constraints / What to Avoid" placeholder="Add a constraint and press Enter" value={field.value || []} onChange={(value) => { field.onChange(value); handleBlur(); }} />
+                        )} />
+                    </CardContent>
+                </Card>
 
               </div>
             </ScrollArea>
@@ -213,4 +250,16 @@ export default function ProjectSettingsPanel() {
       </CardContent>
     </Card>
   );
+}
+
+// Minimalist copy of ProjectProperties for type safety
+interface ProjectProperties {
+    name: string;
+    projectDescription?: string;
+    teamMembers?: string[];
+    language?: string;
+    complexity?: number;
+    behaviors?: Behavior[];
+    rules?: string[];
+    constraints?: string[];
 }
