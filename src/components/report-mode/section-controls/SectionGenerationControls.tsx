@@ -58,9 +58,9 @@ export function SectionGenerationControls({
     
     const handleToneChange = (value: string) => {
         if (value === 'custom') {
-            onControlChange('tone', '' as Tone);
+            handleControlChange('tone', '' as Tone);
         } else {
-            onControlChange('tone', value as Tone);
+            handleControlChange('tone', value as Tone);
         }
     };
     
