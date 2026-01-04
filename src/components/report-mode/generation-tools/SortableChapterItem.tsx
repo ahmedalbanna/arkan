@@ -14,7 +14,7 @@ import {
   GripVertical,
   PlusCircle,
 } from 'lucide-react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { Checkbox } from "../../ui/checkbox";
 import { SectionAccordionItem } from './SectionAccordionItem';
 import { useBuilderStore } from "@/hooks";
@@ -28,14 +28,14 @@ interface SortableChapterItemProps {
   toggleSectionSelection: (sectionId: string) => void;
 }
 
-export function SortableChapterItem({
+const SortableChapterItemComponent = ({
   chapter,
   index,
   isProjectBuildMode,
   selectedSectionsForBuild,
   toggleChapterSelection,
   toggleSectionSelection,
-}: SortableChapterItemProps) {
+}: SortableChapterItemProps) => {
     const { 
         updateProject
     } = useBuilderStore(state => ({
@@ -63,9 +63,9 @@ export function SortableChapterItem({
     return hasSelected && !isAllSectionsSelected;
   }, [sectionsInChapter, selectedSectionsForBuild, isAllSectionsSelected]);
 
-  const handleAddSection = (chapterId: string) => {
+  const handleAddSection = useCallback((chapterId: string) => {
     updateProject(p => p.addSectionToChapter(chapterId, 'Untitled Section'));
-  }
+  }, [updateProject]);
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
@@ -121,3 +121,5 @@ export function SortableChapterItem({
     </div>
   );
 };
+
+export const SortableChapterItem = React.memo(SortableChapterItemComponent);
