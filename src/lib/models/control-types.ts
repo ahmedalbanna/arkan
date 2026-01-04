@@ -30,6 +30,21 @@ export const BehaviorSchema = z.object({
 });
 export type Behavior = z.infer<typeof BehaviorSchema>;
 
+// Citation Styles
+export const CitationStyleSchema = z.enum([
+    'APA7',
+    'MLA9',
+    'Chicago17',
+    'Harvard',
+    'IEEE',
+    'Vancouver',
+    'OSCOLA',
+    'AMA',
+    'ASA',
+    'Turabian'
+]);
+export type CitationStyle = z.infer<typeof CitationStyleSchema>;
+
 // Control State Schemas
 export const OutputStyleSchema = z.object({
   heading: z.boolean(),
@@ -54,7 +69,7 @@ export const GenerationControlStateSchema = z.object({
   programmingLanguage: z.string().optional(),
   tableCaption: z.string().optional(),
   includedHeadings: z.array(z.string()).optional(),
-  citationStyle: z.enum(['APA7', 'IEEE', 'MLA', 'Chicago']).optional()
+  citationStyle: CitationStyleSchema.optional()
 });
 export type GenerationControlState = z.infer<typeof GenerationControlStateSchema>;
 
@@ -75,7 +90,7 @@ export const defaultControls: GenerationControlState = {
   },
   wordCount: '',
   diagramType: 'useCase',
-  citationStyle: 'IEEE'
+  citationStyle: 'APA7'
 };
 
 // Context Definition

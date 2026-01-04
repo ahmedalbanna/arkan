@@ -37,6 +37,7 @@ const settingsSchema = z.object({
   behaviors: z.array(BehaviorSchema).optional(),
   rules: z.array(z.string()).optional(),
   constraints: z.array(z.string()).optional(),
+  citationStyle: z.string().optional(),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -102,6 +103,7 @@ export default function ProjectSettingsPanel() {
       behaviors: [],
       rules: [],
       constraints: [],
+      citationStyle: 'APA7',
     }
   });
 
@@ -122,6 +124,7 @@ export default function ProjectSettingsPanel() {
         behaviors: project.behaviors ? [...project.behaviors] : [],
         rules: project.rules ? [...project.rules] : [],
         constraints: project.constraints ? [...project.constraints] : [],
+        citationStyle: project.citationStyle || 'APA7',
       });
       setLogoPreview(project.logoUrl || null);
     }
@@ -144,58 +147,58 @@ export default function ProjectSettingsPanel() {
   const { fields: behaviors, append: appendBehavior, remove: removeBehavior } = useFieldArray({ control: form.control, name: "behaviors" });
   
   const documentTypeOptions = [
-    { value: 'Graduation Project', label: 'Graduation Project' },
-    { value: 'Research Paper', label: 'Research Paper' },
-    { value: 'Analytical Essay', label: 'Analytical Essay' },
-    { value: 'Argumentative Essay', label: 'Argumentative Essay' },
-    { value: 'Literature Review', label: 'Literature Review' },
-    { value: 'Case Study', label: 'Case Study' },
-    { value: 'Lab Report', label: 'Lab Report' },
-    { value: 'Research Proposal', label: 'Research Proposal' },
-    { value: 'Thesis Statement', label: 'Thesis Statement' },
-    { value: 'Dissertation Chapter', label: 'Dissertation Chapter' },
-    { value: 'Term Paper', label: 'Term Paper' },
-    { value: 'Critical Analysis', label: 'Critical Analysis' },
-    { value: 'Book Review', label: 'Book Review' },
-    { value: 'Article Summary', label: 'Article Summary' },
-    { value: 'Annotated Bibliography', label: 'Annotated Bibliography' },
-    { value: 'Position Paper', label: 'Position Paper' },
-    { value: 'Reflection Paper', label: 'Reflection Paper' },
-    { value: 'Technical Report', label: 'Technical Report' },
-    { value: 'Business Proposal', label: 'Business Proposal' },
-    { value: 'Software Documentation', label: 'Software Documentation' },
-    { value: 'Creative Story', label: 'Creative Story' },
-    { value: 'Blog Post', label: 'Blog Post' },
+      { value: 'Graduation Project', label: 'Graduation Project' },
+      { value: 'Research Paper', label: 'Research Paper' },
+      { value: 'Analytical Essay', label: 'Analytical Essay' },
+      { value: 'Argumentative Essay', label: 'Argumentative Essay' },
+      { value: 'Literature Review', label: 'Literature Review' },
+      { value: 'Case Study', label: 'Case Study' },
+      { value: 'Lab Report', label: 'Lab Report' },
+      { value: 'Research Proposal', label: 'Research Proposal' },
+      { value: 'Thesis Statement', label: 'Thesis Statement' },
+      { value: 'Dissertation Chapter', label: 'Dissertation Chapter' },
+      { value: 'Term Paper', label: 'Term Paper' },
+      { value: 'Critical Analysis', label: 'Critical Analysis' },
+      { value: 'Book Review', label: 'Book Review' },
+      { value: 'Article Summary', label: 'Article Summary' },
+      { value: 'Annotated Bibliography', label: 'Annotated Bibliography' },
+      { value: 'Position Paper', label: 'Position Paper' },
+      { value: 'Reflection Paper', label: 'Reflection Paper' },
+      { value: 'Technical Report', label: 'Technical Report' },
+      { value: 'Business Proposal', label: 'Business Proposal' },
+      { value: 'Software Documentation', label: 'Software Documentation' },
+      { value: 'Creative Story', label: 'Creative Story' },
+      { value: 'Blog Post', label: 'Blog Post' },
   ];
-
+  
   const specializationOptions = [
-    { value: 'Physics', label: 'Physics' },
-    { value: 'Chemistry', label: 'Chemistry' },
-    { value: 'Biology', label: 'Biology' },
-    { value: 'Mathematics', label: 'Mathematics' },
-    { value: 'Psychology', label: 'Psychology' },
-    { value: 'Sociology', label: 'Sociology' },
-    { value: 'Economics', label: 'Economics' },
-    { value: 'Political Science', label: 'Political Science' },
-    { value: 'History', label: 'History' },
-    { value: 'Literature', label: 'Literature' },
-    { value: 'Philosophy', label: 'Philosophy' },
-    { value: 'Business Management', label: 'Business Management' },
-    { value: 'Marketing', label: 'Marketing' },
-    { value: 'Law', label: 'Law' },
-    { value: 'Medicine', label: 'Medicine' },
-    { value: 'Nursing', label: 'Nursing' },
-    { value: 'Computer Science', label: 'Computer Science' },
-    { value: 'Engineering', label: 'Engineering' },
-    { value: 'Education', label: 'Education' },
-    { value: 'Environmental Science', label: 'Environmental Science' },
-    { value: 'Communication Studies', label: 'Communication Studies' },
-    { value: 'Art & Design', label: 'Art & Design' },
-    { value: 'Music', label: 'Music' },
-    { value: 'Geography', label: 'Geography' },
-    { value: 'Linguistics', label: 'Linguistics' },
+      { value: 'Physics', label: 'Physics' },
+      { value: 'Chemistry', label: 'Chemistry' },
+      { value: 'Biology', label: 'Biology' },
+      { value: 'Mathematics', label: 'Mathematics' },
+      { value: 'Psychology', label: 'Psychology' },
+      { value: 'Sociology', label: 'Sociology' },
+      { value: 'Economics', label: 'Economics' },
+      { value: 'Political Science', label: 'Political Science' },
+      { value: 'History', label: 'History' },
+      { value: 'Literature', label: 'Literature' },
+      { value: 'Philosophy', label: 'Philosophy' },
+      { value: 'Business Management', label: 'Business Management' },
+      { value: 'Marketing', label: 'Marketing' },
+      { value: 'Law', label: 'Law' },
+      { value: 'Medicine', label: 'Medicine' },
+      { value: 'Nursing', label: 'Nursing' },
+      { value: 'Computer Science', label: 'Computer Science' },
+      { value: 'Engineering', label: 'Engineering' },
+      { value: 'Education', label: 'Education' },
+      { value: 'Environmental Science', label: 'Environmental Science' },
+      { value: 'Communication Studies', label: 'Communication Studies' },
+      { value: 'Art & Design', label: 'Art & Design' },
+      { value: 'Music', label: 'Music' },
+      { value: 'Geography', label: 'Geography' },
+      { value: 'Linguistics', label: 'Linguistics' },
   ];
-
+  
   const educationalLevelOptions = [
       { value: 'High School', label: 'High School' },
       { value: 'Undergraduate (First Year)', label: 'Undergraduate (First Year)' },
@@ -213,6 +216,19 @@ export default function ProjectSettingsPanel() {
       { value: "Islamic University of Madinah", label: "Islamic University of Madinah" },
       { value: "Imam Muhammad ibn Saud Islamic University", label: "Imam Muhammad ibn Saud Islamic University" },
       { value: "King Fahd University of Petroleum and Minerals", label: "King Fahd University of Petroleum and Minerals" }
+  ];
+
+  const citationStyleOptions = [
+    { value: 'APA7', label: 'APA (7th Edition)' },
+    { value: 'MLA9', label: 'MLA (9th Edition)' },
+    { value: 'Chicago17', label: 'Chicago (17th Edition)' },
+    { value: 'Harvard', label: 'Harvard' },
+    { value: 'IEEE', label: 'IEEE' },
+    { value: 'Vancouver', label: 'Vancouver' },
+    { value: 'OSCOLA', label: 'OSCOLA (Legal)' },
+    { value: 'AMA', label: 'AMA' },
+    { value: 'ASA', label: 'ASA' },
+    { value: 'Turabian', label: 'Turabian' },
   ];
 
   return (
@@ -278,6 +294,28 @@ export default function ProjectSettingsPanel() {
                         </FormItem>
                     )}
                 />
+
+                <FormField
+                    control={form.control}
+                    name="educationalLevel"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Educational Level</FormLabel>
+                            <FormControl>
+                                <CustomSelect
+                                    value={field.value || ''}
+                                    onChange={(value) => {
+                                        field.onChange(value);
+                                        handleBlur();
+                                    }}
+                                    options={educationalLevelOptions}
+                                    placeholder="e.g., Bachelor's Degree, PhD"
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
                 
                 <FormField
                     control={form.control}
@@ -300,27 +338,27 @@ export default function ProjectSettingsPanel() {
                         </FormItem>
                     )}
                 />
-
+                
                 <FormField
-                    control={form.control}
-                    name="educationalLevel"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Educational Level</FormLabel>
-                            <FormControl>
-                                <CustomSelect
-                                    value={field.value || ''}
-                                    onChange={(value) => {
-                                        field.onChange(value);
-                                        handleBlur();
-                                    }}
-                                    options={educationalLevelOptions}
-                                    placeholder="e.g., Bachelor's Degree, PhD"
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
+                  control={form.control}
+                  name="citationStyle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Citation Style</FormLabel>
+                      <FormControl>
+                        <CustomSelect
+                          value={field.value || ''}
+                          onChange={(value) => {
+                            field.onChange(value);
+                            handleBlur();
+                          }}
+                          options={citationStyleOptions}
+                          placeholder="Select citation style..."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
 
                 <Card>

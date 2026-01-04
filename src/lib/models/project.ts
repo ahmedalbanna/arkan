@@ -43,6 +43,7 @@ export interface ProjectProperties {
   behaviors?: Behavior[];
   rules?: string[];
   constraints?: string[];
+  citationStyle?: string;
 }
 
 export class Project {
@@ -72,6 +73,7 @@ export class Project {
   public readonly behaviors?: readonly Behavior[];
   public readonly rules?: readonly string[];
   public readonly constraints?: readonly string[];
+  public readonly citationStyle?: string;
 
 
   constructor(props: ProjectProperties) {
@@ -116,6 +118,7 @@ export class Project {
     this.behaviors = (props.behaviors || []).map(b => ({...b}));
     this.rules = props.rules ? [...props.rules] : [];
     this.constraints = props.constraints ? [...props.constraints] : [];
+    this.citationStyle = props.citationStyle || 'APA7';
   }
 
   public with(props: Partial<ProjectProperties>): Project {
@@ -450,6 +453,7 @@ ${universityText}
       behaviors: this.behaviors ? [...this.behaviors] : [],
       rules: this.rules ? [...this.rules] : [],
       constraints: this.constraints ? [...this.constraints] : [],
+      citationStyle: this.citationStyle,
     };
   }
 
