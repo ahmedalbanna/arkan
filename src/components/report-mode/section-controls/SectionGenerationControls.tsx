@@ -14,7 +14,7 @@ import { Info } from 'lucide-react';
 import { DiagramType, DiagramTypeSchema, ToneSchema } from '@/ai/schemas';
 import { Textarea } from '../../ui/textarea';
 import { useBuilderStore } from '@/hooks';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '../../ui/badge';
 
 const diagramTypes = DiagramTypeSchema.options.map(value => {
     let label = '';
@@ -43,16 +43,13 @@ export function SectionGenerationControls({
     const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
     const controls = section.controls;
+
     const [wordCount, setWordCount] = useState(controls.wordCount || '');
     const [isCustomTone, setIsCustomTone] = useState(() => !toneOptions.some(opt => opt.value === controls.tone));
-    const [isCustomLanguage, setIsCustomLanguage] = useState(() =>
-        !['default', 'en', 'ar', 'es', 'fr', 'de'].includes(controls.language)
-    );
 
     useEffect(() => {
         setWordCount(controls.wordCount || '');
         setIsCustomTone(!toneOptions.some(opt => opt.value === controls.tone));
-        setIsCustomLanguage(!['default', 'en', 'ar', 'es', 'fr', 'de'].includes(controls.language));
     }, [controls]);
 
     const handleControlChange = <K extends keyof GenerationControlState>(field: K, value: GenerationControlState[K]) => {
@@ -72,44 +69,18 @@ export function SectionGenerationControls({
     const handleToneChange = (value: string) => {
         if (value === 'custom') {
             setIsCustomTone(true);
-            onControlChange('tone', '' as Tone);
+            handleControlChange('tone', '' as Tone);
         } else {
             setIsCustomTone(false);
-            onControlChange('tone', value as Tone);
+            handleControlChange('tone', value as Tone);
         }
     };
-
-    const handleCustomToneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const customValue = e.target.value;
-        onControlChange('tone', customValue as Tone);
-    };
     
-    const handleCustomToneBlur = () => {
-        if (controls.tone.trim() === '') {
+    const handleCustomToneBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        // If the user clears the custom input, revert to the default select
+        if (e.target.value.trim() === '') {
             setIsCustomTone(false);
-            onControlChange('tone', 'professional');
-        }
-    }
-
-    const handleLanguageChange = (value: string) => {
-        if (value === 'custom') {
-            setIsCustomLanguage(true);
-            onControlChange('language', '' as Language);
-        } else {
-            setIsCustomLanguage(false);
-            onControlChange('language', value as Language);
-        }
-    };
-
-    const handleCustomLanguageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const customValue = e.target.value;
-        onControlChange('language', customValue as Language);
-    };
-    
-    const handleCustomLanguageBlur = () => {
-        if(controls.language.trim() === '') {
-            setIsCustomLanguage(false);
-            onControlChange('language', 'default');
+            handleControlChange('tone', 'professional');
         }
     }
 
@@ -117,73 +88,39 @@ export function SectionGenerationControls({
         <div className="space-y-6">
             <div className="space-y-3">
                 <Label htmlFor={`formality-${section.id}`}>{t('builder.reportGenerator.tool_formality_label')}</Label>
-                <Slider id={`formality-${section.id}`} value={[controls.formality]} onValueChange={(val) => onControlChange('formality', val[0])} max={100} step={1} />
+                <Slider id={`formality-${section.id}`} value={[controls.formality]} onValueChange={(val) => handleControlChange('formality', val[0])} max={100} step={1} />
                 <div className="flex justify-between text-xs text-muted-foreground">
                     <span>{t('builder.reportGenerator.tool_formality_informal')}</span>
                     <span>{t('builder.reportGenerator.tool_formality_balanced')}</span>
                     <span>{t('builder.reportGenerator.tool_formality_formal')}</span>
                 </div>
             </div>
-            <div className="space-y-3">
-                <Label htmlFor={`complexity-${section.id}`}>Complexity</Label>
-                <Slider id={`complexity-${section.id}`} value={[controls.complexity]} onValueChange={(val) => onControlChange('complexity', val[0])} max={100} step={1} />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Simple</span>
-                    <span>Balanced</span>
-                    <span>Technical</span>
-                </div>
+            
+            <div className="space-y-2">
+                <Label htmlFor={`tone-${section.id}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
+                {isCustomTone ? (
+                    <Input
+                        id={`tone-${section.id}`}
+                        value={controls.tone}
+                        onChange={(e) => handleControlChange('tone', e.target.value as Tone)}
+                        onBlur={handleCustomToneBlur}
+                        placeholder="Enter custom tone..."
+                    />
+                ) : (
+                    <Select value={controls.tone} onValueChange={handleToneChange}>
+                        <SelectTrigger id={`tone-${section.id}`}>
+                            <SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {toneOptions.map(opt => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                            ))}
+                            <SelectItem value="custom">Custom...</SelectItem>
+                        </SelectContent>
+                    </Select>
+                )}
             </div>
-            <div className="grid grid-cols-2 gap-4">
-                 <div className="space-y-2">
-                    <Label htmlFor={`tone-${section.id}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
-                    {isCustomTone ? (
-                        <Input
-                            id={`tone-${section.id}`}
-                            value={controls.tone}
-                            onChange={handleCustomToneChange}
-                            onBlur={handleCustomToneBlur}
-                            placeholder="Enter custom tone..."
-                        />
-                    ) : (
-                        <Select value={controls.tone} onValueChange={handleToneChange}>
-                            <SelectTrigger id={`tone-${section.id}`}>
-                                <SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {toneOptions.map(opt => (
-                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                                ))}
-                                <SelectItem value="custom">Custom...</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    )}
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor={`language-${section.id}`}>Language</Label>
-                    {isCustomLanguage ? (
-                        <Input
-                            id={`language-${section.id}`}
-                            value={controls.language}
-                            onChange={handleCustomLanguageChange}
-                            onBlur={handleCustomLanguageBlur}
-                            placeholder="Enter language..."
-                        />
-                    ) : (
-                        <Select value={controls.language} onValueChange={handleLanguageChange}>
-                            <SelectTrigger id={`language-${section.id}`}><SelectValue placeholder="Select language..." /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="default">Default</SelectItem>
-                                <SelectItem value="en">English</SelectItem>
-                                <SelectItem value="ar">Arabic</SelectItem>
-                                <SelectItem value="es">Spanish</SelectItem>
-                                <SelectItem value="fr">French</SelectItem>
-                                <SelectItem value="de">German</SelectItem>
-                                <SelectItem value="custom">Custom...</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    )}
-                </div>
-            </div>
+
              <div className="space-y-2">
                 <Label>Output Format</Label>
                 <div className="flex items-center flex-wrap gap-4">
@@ -202,7 +139,7 @@ export function SectionGenerationControls({
                     <Textarea
                         id={`includedHeadings-${section.id}`}
                         defaultValue={(controls.includedHeadings || []).join('\n')}
-                        onBlur={(e) => onControlChange('includedHeadings', e.target.value.split('\n').filter(s => s.trim()))}
+                        onBlur={(e) => handleControlChange('includedHeadings', e.target.value.split('\n').filter(s => s.trim()))}
                         placeholder="e.g., Key finding 1\nKey finding 2"
                         rows={3}
                     />
@@ -215,7 +152,7 @@ export function SectionGenerationControls({
                     <Input
                         id={`tableCaption-${section.id}`}
                         defaultValue={controls.tableCaption || ''}
-                        onBlur={(e) => onControlChange('tableCaption', e.target.value)}
+                        onBlur={(e) => handleControlChange('tableCaption', e.target.value)}
                         placeholder="e.g., Q1 Financial Summary"
                     />
                 </div>
@@ -227,7 +164,7 @@ export function SectionGenerationControls({
                     <Input 
                         id={`programmingLanguage-${section.id}`}
                         defaultValue={controls.programmingLanguage || ''}
-                        onBlur={(e) => onControlChange('programmingLanguage', e.target.value)}
+                        onBlur={(e) => handleControlChange('programmingLanguage', e.target.value)}
                         placeholder="e.g., JavaScript, Python"
                     />
                 </div>
@@ -236,7 +173,7 @@ export function SectionGenerationControls({
             {controls.outputStyle.diagram && (
                 <div className="space-y-2 pl-6 border-l-2 ml-2">
                     <Label htmlFor={`diagramType-${section.id}`}>Diagram Type</Label>
-                    <Select value={controls.diagramType} onValueChange={(val) => onControlChange('diagramType', val as DiagramType)}>
+                    <Select value={controls.diagramType} onValueChange={(val) => handleControlChange('diagramType', val as DiagramType)}>
                         <SelectTrigger id={`diagramType-${section.id}`}><SelectValue /></SelectTrigger>
                         <SelectContent>
                             {diagramTypes.map(type => (
@@ -248,9 +185,9 @@ export function SectionGenerationControls({
             )}
 
             {controls.outputStyle.includeCitations && (
-                 <div className="space-y-2 pl-6 border-l-2 ml-2">
+                 <div className="space-y-2 pl-6">
                     <Label htmlFor={`citationStyle-${section.id}`}>Citation Style</Label>
-                    <Select value={controls.citationStyle} onValueChange={(val) => onControlChange('citationStyle', val as any)}>
+                    <Select value={controls.citationStyle} onValueChange={(val) => handleControlChange('citationStyle', val as any)}>
                         <SelectTrigger id={`citationStyle-${section.id}`}><SelectValue placeholder="Select citation style..." /></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="APA7">APA 7th Edition</SelectItem>
@@ -270,7 +207,7 @@ export function SectionGenerationControls({
                     placeholder={t('builder.reportGenerator.tool_word_count_placeholder')} 
                     value={wordCount} 
                     onChange={(e) => setWordCount(e.target.value)}
-                    onBlur={() => onControlChange('wordCount', wordCount)}
+                    onBlur={() => handleControlChange('wordCount', wordCount)}
                 />
             </div>
 
