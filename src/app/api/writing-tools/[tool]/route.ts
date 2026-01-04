@@ -92,7 +92,7 @@ export const POST = withAuth(async ({ request, user, params }) => {
     return handleApiError({ message: `Invalid tool: ${toolName}` }, 400);
   }
 
-  const { flow, schema, creditCost } = config;
+  const { schema, creditCost } = config;
 
   try {
     const body = await request.json();
@@ -100,11 +100,36 @@ export const POST = withAuth(async ({ request, user, params }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-    
-    // Hardcoded response for testing is removed, now calling the actual flow.
-    await deductCredit(user.id, creditCost);
-    const result = await (flow as any)(validation.data, user.apiKeys);
 
+    // Hardcoded responses for testing
+    let result: any;
+    switch (toolName) {
+      case 'paraphrase':
+        result = { paraphrasedText: `This is a hardcoded paraphrased version of your text in "${body.mode}" mode.` };
+        break;
+      case 'summarize':
+        result = { summary: `This is a hardcoded "${body.length}" summary of your text.` };
+        break;
+      case 'humanize':
+        result = { humanizedText: "This is a hardcoded humanized version of the AI's text, making it sound more natural." };
+        break;
+      case 'ai-detector':
+        result = { score: 75, analysis: 'Hardcoded Analysis: The text shows some signs of uniformity typical of AI generation.' };
+        break;
+      case 'grammar-checker':
+        result = { correctedText: body.text.replace(/teh/g, 'the'), corrections: [{ original: 'teh', corrected: 'the', explanation: 'Typo', type: 'spelling' }], statistics: { total: 1, grammar: 0, spelling: 1, punctuation: 0 }};
+        break;
+      case 'plagiarism-checker':
+        result = { originalityScore: 85, matches: [{ source: 'https://example.com', title: 'Example Article', summary: 'A similar phrase was found.', similarity: 15 }]};
+        break;
+      default:
+        // For other tools, return a generic mock response
+        result = { message: `This is a hardcoded test response for the '${toolName}' tool.` };
+        break;
+    }
+
+    // Still deduct credit and log generation even in test mode
+    await deductCredit(user.id, creditCost);
     await logGeneration({
       agentId: toolName,
       userId: user.id,
