@@ -2,14 +2,15 @@
 
 import { useBuilderStore, useToast } from '@/hooks';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { ListTree, Sparkles } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { GenerateTocDialog } from './dialogs/GenerateTocDialog';
+import { Label } from '../ui/label';
 
 export function TableOfContentForm() {
   const { project, applyTableOfContents, updateProject } = useBuilderStore();
+  const { toast } = useToast();
   const [tocText, setTocText] = useState('');
   const [isTocDialogOpen, setIsTocDialogOpen] = useState(false);
 
@@ -20,45 +21,58 @@ export function TableOfContentForm() {
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newText = e.target.value;
     setTocText(newText);
+    // Also update the store in real-time so other components can react if needed
     updateProject(p => {
-      p.tableOfContentsMarkdown = newText;
+      if(p) p.tableOfContentsMarkdown = newText;
     });
   };
 
   const handleApply = () => {
     if (!project) return;
-    applyTableOfContents(project.tableOfContentsMarkdown || '');
+    // Use the text from the state, which is synced with the textarea
+    applyTableOfContents(tocText);
+    toast({
+        title: 'Structure Applied',
+        description: 'The project content has been updated based on your Table of Contents.'
+    })
   };
 
   return (
     <>
       <GenerateTocDialog isOpen={isTocDialogOpen} onOpenChange={setIsTocDialogOpen} />
-      <Card className="h-full flex flex-col border-none shadow-none bg-transparent">
-          <CardHeader>
-              <CardTitle>Quick Table of Contents</CardTitle>
-              <CardDescription>
-                  Quickly structure your document. Use '#' for chapters and '-' for sections, or generate it with AI.
-              </CardDescription>
-          </CardHeader>
-          <CardContent className="flex-grow flex flex-col gap-4">
+      <div className="p-4 h-full flex flex-col">
+          <header className="mb-6 text-center">
+              <h1 className="text-2xl font-bold font-headline">Structure Your Document</h1>
+              <p className="text-muted-foreground">
+                  Manually define your Table of Contents using markdown, or generate one with AI.
+              </p>
+          </header>
+          
+          <div className="flex-grow flex flex-col gap-4">
+            <div className="space-y-2 flex-grow flex flex-col">
+              <Label htmlFor="toc-textarea" className="font-semibold">Table of Contents Markdown</Label>
               <Textarea
+                  id="toc-textarea"
                   value={tocText}
                   onChange={handleTextChange}
-                  className="flex-grow font-mono"
-                  placeholder={`# Chapter 1\n  - Section 1.1\n  - Section 1.2\n\n# Chapter 2\n  - Section 2.1`}
+                  className="flex-grow font-mono text-sm resize-none"
+                  placeholder={`# Chapter 1 Title\n  - Section 1.1 Title\n  - Section 1.2 Title\n\n# Chapter 2 Title\n  - Section 2.1 Title`}
               />
-               <div className="flex gap-2">
-                  <Button onClick={() => setIsTocDialogOpen(true)} variant="outline" className="w-full">
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Generate with AI
-                  </Button>
-                  <Button onClick={handleApply} className="w-full">
-                      <ListTree className="mr-2 h-4 w-4" />
-                      Apply Structure
-                  </Button>
-              </div>
-          </CardContent>
-      </Card>
+               <p className="text-xs text-muted-foreground">Use '#' for chapter titles and '-' for section titles.</p>
+            </div>
+              
+             <div className="flex flex-col sm:flex-row gap-2">
+                <Button onClick={() => setIsTocDialogOpen(true)} variant="outline" className="w-full">
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Generate with AI
+                </Button>
+                <Button onClick={handleApply} className="w-full">
+                    <ListTree className="mr-2 h-4 w-4" />
+                    Apply Structure
+                </Button>
+            </div>
+          </div>
+      </div>
     </>
   );
 }
