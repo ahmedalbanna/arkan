@@ -8,7 +8,7 @@ interface A4PageProps {
     children: React.ReactNode;
     title?: string;
     className?: string;
-    viewMode?: 'single' | 'continuous';
+    viewMode?: 'single' | 'continuous' | 'carousel';
 }
 
 export const A4Page = ({ children, title, className, viewMode = 'single' }: A4PageProps) => {
@@ -16,8 +16,10 @@ export const A4Page = ({ children, title, className, viewMode = 'single' }: A4Pa
         <div
             className={cn(
                 "relative group bg-background p-8 md:p-12 mx-auto flex flex-col",
-                viewMode === 'single' && 'shadow-lg my-4 w-full max-w-[210mm] min-h-[297mm] box-border border border-border/50 dark:border-border/30',
+                viewMode !== 'carousel' && 'shadow-lg my-4',
+                viewMode === 'single' && 'w-full max-w-[210mm] min-h-[297mm] box-border border border-border/50 dark:border-border/30',
                 viewMode === 'continuous' && 'w-full max-w-4xl shadow-none border-none',
+                viewMode === 'carousel' && 'w-full h-full shadow-lg box-border border border-border/50 dark:border-border/30',
                 className
             )}
         >
