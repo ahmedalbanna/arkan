@@ -20,14 +20,16 @@ interface CoverPageProps {
 const EditableField: React.FC<{
   html: string;
   onBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder: string;
   className: string;
   tagName?: 'p' | 'div' | 'h1';
-}> = ({ html, onBlur, placeholder, className, tagName = 'p' }) => {
+}> = ({ html, onBlur, onChange, placeholder, className, tagName = 'p' }) => {
     return (
         <ContentEditable
             html={html}
             onBlur={onBlur}
+            onChange={onChange}
             data-placeholder={placeholder}
             className={cn("outline-none focus:bg-primary/5 focus:shadow-inner p-1 rounded-md empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground empty:before:opacity-60", className)}
             tagName={tagName}
@@ -55,14 +57,14 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
             } else {
                 (props as any)[field] = sanitizedValue;
             }
-            Object.assign(p, props);
+            return p.with(props);
         });
     };
     
     const handleDateChange = (value: string) => {
          const sanitizedValue = value.replace(/<br>/g, '\n').replace(/&nbsp;/g, ' ').replace(/<[^>]+>/g, '');
          updateProject(p => {
-             if(p) p.meta.updated = new Date(sanitizedValue).toISOString();
+             return p.with({ meta: { ...p.meta, updated: new Date(sanitizedValue).toISOString() } });
          });
     };
     
@@ -70,7 +72,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
         const file = event.target.files?.[0];
         if (file) {
             handleMainLogoUpload(file, (dataUri) => {
-                updateProject(p => { if(p) p.logoUrl = dataUri; return p; });
+                updateProject(p => p.with({ logoUrl: dataUri }));
             });
         }
     };
@@ -79,7 +81,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
         const file = event.target.files?.[0];
         if (file) {
             handleUniLogoUpload(file, (dataUri) => {
-                updateProject(p => { if(p) p.universityLogoUrl = dataUri; });
+                updateProject(p => p.with({ universityLogoUrl: dataUri }));
             });
         }
     };
@@ -181,7 +183,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                       )}
                   </div>
               )}
-              <EditableField tagName="h1" html={project.name || ''} onBlur={(e) => handleContentChange('name', e.currentTarget.innerHTML)} placeholder="Untitled Project" className="text-5xl font-bold font-headline text-primary leading-tight" />
+              <EditableField tagName="h1" html={project.name || ''} onChange={() => {}} onBlur={(e) => handleContentChange('name', e.currentTarget.innerHTML)} placeholder="Untitled Project" className="text-5xl font-bold font-headline text-primary leading-tight" />
                <div className="inline-flex items-center gap-2 text-muted-foreground mt-4">
                   {project.universityLogoUrl ? (
                       <div className="relative w-8 h-8 flex-shrink-0 cursor-pointer" onClick={() => uniLogoInputRef.current?.click()}>
@@ -197,7 +199,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                           {isUniLogoUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Landmark className="w-5 h-5" />}
                       </div>
                   )}
-                   <EditableField html={project.university || ''} onBlur={(e) => handleContentChange('university', e.currentTarget.innerHTML)} placeholder="University Name" className="font-semibold text-lg tracking-wider" />
+                   <EditableField html={project.university || ''} onChange={() => {}} onBlur={(e) => handleContentChange('university', e.currentTarget.innerHTML)} placeholder="University Name" className="font-semibold text-lg tracking-wider" />
               </div>
           </header>
 
@@ -205,6 +207,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
                <div className="max-w-2xl">
                   <EditableField
                       html={project.projectDescription || ''}
+                      onChange={() => {}}
                       onBlur={(e) => handleContentChange('projectDescription', e.currentTarget.innerHTML)}
                       placeholder="Project Description..."
                       className="text-2xl text-muted-foreground leading-relaxed italic"
@@ -215,19 +218,20 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
 
           <footer className="relative z-10 flex-shrink-0 pt-12">
                <div className="text-center mb-8">
-                  <EditableField html={project.educationalLevel || ''} onBlur={(e) => handleContentChange('educationalLevel', e.currentTarget.innerHTML)} placeholder="Educational Level" className="text-lg font-medium text-muted-foreground" />
+                  <EditableField html={project.educationalLevel || ''} onChange={() => {}} onBlur={(e) => handleContentChange('educationalLevel', e.currentTarget.innerHTML)} placeholder="Educational Level" className="text-lg font-medium text-muted-foreground" />
                   <div className="text-sm text-muted-foreground">in</div>
-                  <EditableField html={project.specialization || ''} onBlur={(e) => handleContentChange('specialization', e.currentTarget.innerHTML)} placeholder="Specialization" className="text-xl font-semibold" />
+                  <EditableField html={project.specialization || ''} onChange={() => {}} onBlur={(e) => handleContentChange('specialization', e.currentTarget.innerHTML)} placeholder="Specialization" className="text-xl font-semibold" />
                   <h3 className="text-lg font-semibold text-muted-foreground mt-4">Submitted By</h3>
-                  <EditableField html={Array.isArray(project.teamMembers) ? project.teamMembers.join(', ') : ''} onBlur={(e) => handleContentChange('teamMembers', e.currentTarget.innerHTML)} placeholder="Team Members, separated by commas" className="text-xl font-medium" />
+                  <EditableField html={Array.isArray(project.teamMembers) ? project.teamMembers.join(', ') : ''} onChange={() => {}} onBlur={(e) => handleContentChange('teamMembers', e.currentTarget.innerHTML)} placeholder="Team Members, separated by commas" className="text-xl font-medium" />
               </div>
                <div className="flex justify-between items-end text-sm text-muted-foreground">
                   <div>
-                      <EditableField html={project.supervisor || ''} onBlur={(e) => handleContentChange('supervisor', e.currentTarget.innerHTML)} placeholder="Supervisor Name" className="font-bold" />
-                      <EditableField html={project.course || ''} onBlur={(e) => handleContentChange('course', e.currentTarget.innerHTML)} placeholder="Course Name" className="" />
+                      <EditableField html={project.supervisor || ''} onChange={() => {}} onBlur={(e) => handleContentChange('supervisor', e.currentTarget.innerHTML)} placeholder="Supervisor Name" className="font-bold" />
+                      <EditableField html={project.course || ''} onChange={() => {}} onBlur={(e) => handleContentChange('course', e.currentTarget.innerHTML)} placeholder="Course Name" className="" />
                   </div>
                   <ContentEditable
                       html={currentDate}
+                      onChange={() => {}}
                       onBlur={(e) => handleDateChange(e.currentTarget.innerHTML)}
                       className="outline-none focus:bg-primary/5 focus:shadow-inner p-1 rounded-md"
                       tagName="p"

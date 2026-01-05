@@ -22,7 +22,7 @@ export function CustomSelect({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        searchPlaceholder="Search types..."
+        searchPlaceholder="Search..."
     />
   );
 }

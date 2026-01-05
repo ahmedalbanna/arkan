@@ -132,15 +132,12 @@ export default function ProjectSettingsPanel() {
 
   const handleBlur = () => {
     const data = form.getValues();
-    const updatePayload: Partial<ProjectProperties> = { ...data };
-
-    if (data.teamMembers) {
-      updatePayload.teamMembers = data.teamMembers.split(',').map(name => name.trim()).filter(Boolean);
-    }
-
     updateProject(p => {
-      if(p) Object.assign(p, updatePayload);
-      return p;
+      const updatePayload: Partial<ProjectProperties> = { ...data };
+      if (data.teamMembers) {
+        updatePayload.teamMembers = data.teamMembers.split(',').map(name => name.trim()).filter(Boolean);
+      }
+      Object.assign(p, updatePayload);
     });
   };
 
