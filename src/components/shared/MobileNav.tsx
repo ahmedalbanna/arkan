@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Menu, LayoutDashboard, Users, CreditCard, Bot, History, PencilRuler, Palette, Settings, SlidersHorizontal } from 'lucide-react';
+import { Menu, LayoutDashboard, Users, CreditCard, Bot, History, PencilRuler, Palette, Settings, SlidersHorizontal, BookOpenCheck, HomeIcon, Wrench } from 'lucide-react';
 import Link from 'next/link';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAuth } from '@/context/AuthContext';
@@ -46,19 +46,24 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
     setIsOpen(false);
   }
 
-  function renderLinks(links: NavLink[], isMobile = false) {
+  const allNavLinks = [
+    ...navLinks,
+    { href: '/docs', label: 'header.documentation', icon: BookOpenCheck, auth: true as const },
+  ];
+
+  function renderLinks(links: NavLink[]) {
     return links
       .filter(link => link.auth === 'any' || (link.auth && firebaseUser))
       .map((link) => (
         <Button
           key={link.href}
           asChild
-          variant={pathname.startsWith(link.href) && link.href !== '/' || pathname === '/' && link.href === '/' ? 'secondary' : 'ghost'}
-          className={cn('font-headline', isMobile && 'w-full justify-start text-lg py-6')}
-          onClick={isMobile ? handleLinkClick : undefined}
+          variant={pathname === link.href ? 'secondary' : 'ghost'}
+          className="font-headline w-full justify-start text-lg py-6"
+          onClick={handleLinkClick}
         >
           <Link href={link.href}>
-            {isMobile && <link.icon className="ml-4 rtl:ml-0 rtl:mr-4 h-5 w-5" />}
+            <link.icon className="ml-4 rtl:ml-0 rtl:mr-4 h-5 w-5" />
             {t(link.label)}
           </Link>
         </Button>
@@ -77,7 +82,7 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
           <SheetTitle className="sr-only">{t('header.openMenu')}</SheetTitle>
           <ScrollArea className="flex-grow mt-8">
             <nav className="flex flex-col gap-4 pr-6">
-              {renderLinks(navLinks, true)}
+              {renderLinks(allNavLinks)}
               {userProfile?.role === 'admin' && (
                 <>
                   <div className="my-4 border-t"></div>
@@ -85,7 +90,7 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
                     <Button
                       key={link.href}
                       asChild
-                      variant="ghost"
+                      variant={pathname.startsWith(link.href) ? 'secondary' : 'ghost'}
                       className="font-headline w-full justify-start text-lg py-6"
                       onClick={handleLinkClick}
                     >

@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils/cn';
 import { HomeIcon, Wrench, SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LanguageToggle } from '@/components/shared/LanguageToggle';
@@ -19,9 +18,9 @@ import { UserProfileDropdown } from './UserProfileDropdown';
 import { NotificationDropdown } from './NotificationDropdown';
 
 const navLinks = [
-  { href: '/', label: 'header.home', icon: HomeIcon, auth: 'any' },
-  { href: '/builder', label: 'header.generateDocs', icon: SlidersHorizontal, auth: true },
-  { href: '/writing-tools', label: 'header.tools', icon: Wrench, auth: true },
+  { href: '/', label: 'header.home', icon: HomeIcon, auth: 'any' as const },
+  { href: '/builder', label: 'header.generateDocs', icon: SlidersHorizontal, auth: true as const },
+  { href: '/writing-tools', label: 'header.tools', icon: Wrench, auth: true as const },
 ];
 
 function NavLinks() {
@@ -87,23 +86,18 @@ function GuestActions() {
 export function Header() {
   const { t } = useLocalization();
   const { firebaseUser, isLoading } = useAuth();
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
+  
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-16 items-center px-4 justify-between">
+      <div className="container flex h-16 items-center px-4 justify-between max-w-screen-2xl">
         <div className="flex items-center gap-2">
           <MobileNav navLinks={navLinks} />
           <Link href="/" className="flex items-center gap-2 font-headline text-xl font-bold text-primary">
-            {isClient ? t('header.title') : <Skeleton className="h-6 w-20" />}
+            {t('header.title')}
           </Link>
         </div>
 
-        {isClient && <NavLinks />}
+        <NavLinks />
 
         <div className="flex items-center gap-2">
           {isLoading ? (
