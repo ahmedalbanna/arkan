@@ -1,5 +1,6 @@
 'use client';
 
+import { GenerateUIDescriptionInputSchema } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -7,16 +8,28 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useWritingTool, useToast } from '@/hooks';
+import { useToast, useWritingTool } from '@/hooks';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Check, Copy, Loader2, Sparkles } from 'lucide-react';
 import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { GenerateUIDescriptionInputSchema, GenerateUIDescriptionOutputSchema } from '@/ai/schemas';
-import type { z } from 'zod';
+import { Controller, useForm } from 'react-hook-form';
 import ReactMarkdown from 'react-markdown';
+import type { z } from 'zod';
 
+const GenerateUIDescriptionInputSchema: z.ZodObject<{
+  flow: z.ZodLiteral<"generate-ui-description">;
+  projectFeatures: z.ZodString;
+  designType: z.ZodEnum<["website", "mobile"]>;
+}, "strip", z.ZodTypeAny, {
+  flow: "generate-ui-description";
+  projectFeatures: string;
+  designType: "website" | "mobile";
+}, {
+  flow: "generate-ui-description";
+  projectFeatures: string;
+  designType: "website" | "mobile";
+}>
 type FormValues = z.infer<typeof GenerateUIDescriptionInputSchema>;
 
 export function GenerateUIDescriptionTool() {

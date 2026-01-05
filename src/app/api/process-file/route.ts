@@ -1,10 +1,10 @@
 'use server';
 
+import { imageToText } from '@/ai/flows/image-to-text';
+import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
-import { imageToText } from '@/ai/flows/image-to-text';
-import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
 
 const SUPPORTED_MIME_TYPES = [
     'application/pdf',
@@ -41,11 +41,17 @@ export const POST = withAuth(async ({ request, user }) => {
 
         if (file.type === 'application/pdf') {
             agentId = 'pdf-to-markdown';
-            result = await rewriteDocumentToMarkdown({ pdfDataUri: dataUri });
+            result = await rewriteDocumentToMarkdown({
+                pdfDataUri: dataUri,
+                flow: 'rewrite-document-to-markdown'
+            });
             markdownContent = 'markdown' in result ? result.markdown : '';
         } else if (file.type.startsWith('image/')) {
             agentId = 'image-to-text';
-            result = await imageToText({ imageDataUri: dataUri });
+            result = await imageToText({
+                imageDataUri: dataUri,
+                flow: 'image-to-text'
+            });
             markdownContent = 'text' in result ? result.text : '';
         } else {
             // For plain text or markdown, we just decode it.

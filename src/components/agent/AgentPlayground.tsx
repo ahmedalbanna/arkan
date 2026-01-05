@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CornerDownLeft, Loader2, Wand } from 'lucide-react';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -13,13 +13,13 @@ import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useAgentManager } from '@/hooks/use-agent-store';
-import type { Agent, Command } from '@/types/agent';
+import type { AgentProperties, Command } from '@/lib/models/agent';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from '../ui/use-toast';
 import { ResponseDisplay } from './ResponseDisplay';
 
 interface AgentPlaygroundProps {
-  agent: Agent | null;
+  agent: AgentProperties | null;
 }
 
 const formSchema = z.object({
@@ -65,7 +65,7 @@ function AgentPlayground({ agent }: AgentPlaygroundProps) {
     } else {
       form.reset({ commandId: '', userPrompt: '' });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agent, form.reset, setSelectedCommandId]);
 
   const mutation = useMutation({

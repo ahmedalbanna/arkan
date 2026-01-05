@@ -38,22 +38,23 @@ Provide detailed, actionable recommendations based on industry best practices an
         }
     });
 
-    const { output } = await blueprintPrompt({ 
-        projectName, 
-        projectType, 
-        description, 
-        targetAudience, 
-        complexity, 
-        features, 
-        techStack, 
-        budget, 
-        timeline 
+    const { output } = await blueprintPrompt({
+        flow: "generate-project-blueprint",
+        projectName,
+        projectType,
+        description,
+        targetAudience,
+        complexity,
+        features,
+        techStack,
+        budget,
+        timeline
     });
-    
+
     if (!output) {
         throw new Error("Failed to generate project blueprint.");
     }
-    
+
     return output;
 });
 

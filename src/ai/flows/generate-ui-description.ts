@@ -35,7 +35,7 @@ For each core feature, describe the necessary screens or pages. For each screen,
         }
     });
 
-    const { output } = await uiPrompt({ projectFeatures, designType });
+    const { output } = await uiPrompt({ flow: "generate-ui-description", projectFeatures, designType });
     if (!output) {
         throw new Error("Failed to generate UI description.");
     }

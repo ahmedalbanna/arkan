@@ -1,17 +1,17 @@
 
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useUpdateUser } from '@/hooks';
 import { UserProfile } from '@/lib/models';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Save } from 'lucide-react';
 import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const apiKeysSchema = z.object({
   gemini: z.string().optional(),
@@ -34,7 +34,7 @@ export function ApiKeysForm({ userProfile }: ApiKeysFormProps) {
       chatgpt: userProfile.apiKeys?.['chatgpt'] || '',
     },
   });
-  
+
   useEffect(() => {
     form.reset({
       gemini: userProfile.apiKeys?.['gemini'] || '',
@@ -44,8 +44,8 @@ export function ApiKeysForm({ userProfile }: ApiKeysFormProps) {
 
   const onSubmit = (data: ApiKeysFormValues) => {
     const apiKeys = {
-        gemini: data.gemini,
-        chatgpt: data.chatgpt,
+      gemini: data.gemini,
+      chatgpt: data.chatgpt,
     };
     updateUserMutation.mutate({ userId: userProfile.id, data: { apiKeys } });
   };

@@ -1,7 +1,6 @@
 
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -14,18 +13,19 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { useCreateSection, useUpdateSection } from '@/hooks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Section, type SectionProperties } from '@/lib/models';
+import { useCreateSection, useUpdateSection } from '@/hooks';
+import { Section } from '@/lib/models';
 
 const SectionSchema = z.object({
   id: z.string().min(3, 'ID must be at least 3 characters'),
   title: z.string().min(1, 'Title is required'),
-  type: z.enum(['report', 'diagram', 'presentation']),
+  type: z.enum(['code', 'presentation', 'math', 'diagram', 'report']),
 });
 
 type SectionFormData = z.infer<typeof SectionSchema>;
@@ -43,9 +43,9 @@ export function SectionFormDialog({ sectionToEdit, children }: SectionFormDialog
   const form = useForm<SectionFormData>({
     resolver: zodResolver(SectionSchema),
     defaultValues: sectionToEdit ? {
-        id: sectionToEdit.id,
-        title: sectionToEdit.title,
-        type: sectionToEdit.type,
+      id: sectionToEdit.id,
+      title: sectionToEdit.title,
+      type: sectionToEdit.type,
     } : {
       id: '',
       title: '',
@@ -87,7 +87,7 @@ export function SectionFormDialog({ sectionToEdit, children }: SectionFormDialog
             <Input id="title" {...form.register('title')} className="col-span-3" />
             {form.formState.errors.title && <p className="col-span-4 text-sm text-destructive text-right">{form.formState.errors.title.message}</p>}
           </div>
-          
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="type" className="text-right">Type</Label>
             <Select onValueChange={(value) => form.setValue('type', value as any)} defaultValue={form.getValues('type')}>
@@ -103,7 +103,7 @@ export function SectionFormDialog({ sectionToEdit, children }: SectionFormDialog
             {form.formState.errors.type && <p className="col-span-4 text-sm text-destructive text-right">{form.formState.errors.type.message}</p>}
           </div>
           <DialogFooter>
-             <Button type="button" variant="secondary" onClick={() => setIsOpen(false)}>Cancel</Button>
+            <Button type="button" variant="secondary" onClick={() => setIsOpen(false)}>Cancel</Button>
             <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
               {createMutation.isPending || updateMutation.isPending ? 'Saving...' : (sectionToEdit ? 'Save Changes' : 'Create')}
             </Button>
