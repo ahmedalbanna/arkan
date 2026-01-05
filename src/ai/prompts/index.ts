@@ -1,4 +1,5 @@
 
+
 import { ai } from '@/ai/genkit';
 import {
     AiProofreadDocumentInputSchema,
@@ -647,7 +648,7 @@ Original Text:
         prompt: `You are an expert editor. Your task is to paraphrase the given text based on the selected mode. You must perfectly preserve all markdown formatting.
 
 **Mode**: {{{mode}}}
-**Instruction**: ${styleDescriptions[ParaphraseInputSchema.shape.mode.parse(undefined)]}
+**Instruction**: {{{instruction}}}
 
 **Original Text:**
 ---

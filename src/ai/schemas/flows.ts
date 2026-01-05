@@ -1,5 +1,6 @@
 
 
+
 import { z } from 'zod';
 import { BaseContextFileSchema, BaseControlsSchema, BaseExternalContextSchema, BaseGenerationSchema, BasePromptSchema, BaseTextInputSchema, BaseTopicInputSchema, BaseWebSearchSchema } from './base-schemas';
 import {
@@ -33,6 +34,7 @@ import {
 export const ParaphraseInputSchema = BaseTextInputSchema.extend({
     flow: z.literal('paraphrase'),
     mode: ParaphraseModeSchema.describe('The desired style of the paraphrased text.'),
+    instruction: z.string().optional(), // Added for runtime prompt construction
 }).merge(BaseControlsSchema);
 export const ParaphraseOutputSchema = z.object({
     paraphrasedText: z.string().describe('The rewritten text, with original markdown formatting preserved.'),
