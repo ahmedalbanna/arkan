@@ -3,8 +3,8 @@
 
 import type { PptxStyleOptions, PptxTemplateProperties } from '@/lib/models';
 
+export type PptxTemplateKey = 'modern' | 'dark' | 'professional';
 
-export type PptxTemplateKey = keyof typeof templates;
 const modern: PptxStyleOptions = {
     background: { color: 'FFFFFF' },
     title: { fontFace: 'Calibri', fontSize: 28, bold: true, color: '363636', align: 'left', valign: 'middle' },

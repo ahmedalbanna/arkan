@@ -19,7 +19,10 @@ import type { TransactionProperties } from '@/lib/models';
 
 function formatTransactionsToMarkdown(transactions: TransactionProperties[], dateRange: DateRange): string {
     let markdown = `# Financial Report\n\n`;
-    markdown += `**Date Range:** ${format(dateRange.from!, "LLL dd, y")} - ${format(dateRange.to!, "LLL dd, y")}\n\n`;
+    if (dateRange.from && dateRange.to) {
+        markdown += `**Date Range:** ${format(dateRange.from, "LLL dd, y")} - ${format(dateRange.to, "LLL dd, y")}\n\n`;
+    }
+    
     markdown += `| Transaction ID | User Name | Plan | Amount | Status | Date |\n`;
     markdown += `|---|---|---|---|---|---|\n`;
 
@@ -74,6 +77,7 @@ export function FinancialReportExporter() {
             }
 
             const markdownReport = formatTransactionsToMarkdown(transactions, dateRange);
+            // The convertMarkdownToPdf now expects a string, so we pass the formatted markdown.
             await convertMarkdownToPdf(markdownReport, `Financial_Report_${format(new Date(), 'yyyy-MM-dd')}`);
 
         } catch (error: any) {

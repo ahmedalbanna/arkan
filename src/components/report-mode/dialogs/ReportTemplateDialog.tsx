@@ -8,6 +8,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useApplyReportTemplate, useReportTemplates } from '@/hooks/data/use-templates';
@@ -64,6 +65,15 @@ export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDia
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogTrigger asChild>
+        <Button
+            variant="outline"
+            className="w-full"
+        >
+          <FileText className="me-2 h-4 w-4" />
+          Apply Report Template
+        </Button>
+      </DialogTrigger>
       <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{t('manageTemplates.reportTitle')}</DialogTitle>

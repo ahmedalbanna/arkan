@@ -19,8 +19,7 @@ import {
     type ReportTemplateProperties,
     CreateReportTemplateSchema,
     UpdateReportTemplateSchema,
-    PptxTemplateProperties,
-    ReportTemplateChapterSchema
+    type PptxTemplateProperties,
 } from '@/lib/models';
 
 import { useBuilderStore } from '../core/useBuilderStore';
@@ -31,9 +30,10 @@ import { z } from 'zod';
 // Correctly infer types from Zod schemas
 type CreateReportTemplateData = z.infer<typeof CreateReportTemplateSchema>;
 type UpdateReportTemplateData = z.infer<typeof UpdateReportTemplateSchema>;
-type PresentationTemplateProperties = PptxTemplateProperties; // Assuming it's the same structure for now
-type CreatePresentationTemplateData = any; // Define properly if needed
-type UpdatePresentationTemplateData = any; // Define properly if needed
+
+// Dummy types for presentation templates as they are not fully defined
+type CreatePresentationTemplateData = any;
+type UpdatePresentationTemplateData = any;
 
 
 // ============================================================================
@@ -130,7 +130,7 @@ export function useDeleteReportTemplate() {
 // ============================================================================
 
 export function usePresentationTemplates() {
-    return useQuery<PresentationTemplateProperties[]>({
+    return useQuery<PptxTemplateProperties[]>({
         queryKey: ['presentation-templates'],
         queryFn: fetchPresentationTemplatesApi,
     });
