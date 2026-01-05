@@ -9,7 +9,6 @@ import Link from 'next/link';
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { userKeys } from "@/lib/query-keys";
-import { fetchUserProfileApi } from "@/services/api/userService";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/util/use-toast";
 import { useLocalization } from "@/context/LocalizationContext";
@@ -28,15 +27,8 @@ export function UserTableRow({ user }: UserTableRowProps) {
     const { firebaseUser, userProfile: adminProfile } = useAuth();
     const sendPasswordResetMutation = useSendPasswordReset();
 
-    async function prefetchUser(userId: string) {
-        if (!firebaseUser) return;
-        const token = await firebaseUser.getIdToken();
-        await queryClient.prefetchQuery({
-            queryKey: userKeys.profile(userId),
-            queryFn: () => fetchUserProfileApi(userId, token),
-            staleTime: 1000 * 60 * 1,
-        });
-    }
+    // The prefetchUser function has been removed as it was using an obsolete API call.
+    // React Query's default stale-while-revalidate behavior handles caching efficiently.
 
     const handlePasswordReset = () => {
         sendPasswordResetMutation.mutate(user.id);
@@ -77,7 +69,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
-                <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)} aria-label={`${t('manageUsers.editUserSr')} ${user.name}`}>
+                <Button asChild variant="ghost" size="icon" aria-label={`${t('manageUsers.editUserSr')} ${user.name}`}>
                     <Link href={`/admin/manage-users/${user.id}/edit`}>
                        <Pencil className="h-4 w-4" />
                     </Link>
