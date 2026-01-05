@@ -13,7 +13,7 @@ type SessionPlanFormValues = z.infer<typeof GenerateSessionPlanInputSchema>;
 export function useSessionPlanGeneratorLogic() {
   const [result, setResult] = useState<GenerateSessionPlanOutput | null>(null);
 
-  const mutation = useWritingTool<GenerateSessionPlanOutput, SessionPlanFormValues>('/api/writing-tools/generate-session-plan', {
+  const mutation = useWritingTool<GenerateSessionPlanOutput, SessionPlanFormValues>('generate-session-plan', {
     onSuccess: (data) => {
       setResult(data);
     },

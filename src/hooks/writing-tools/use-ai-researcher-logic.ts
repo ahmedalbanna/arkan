@@ -179,15 +179,15 @@ export function useAIResearcherLogic() {
   const getApiEndpoint = (mode: ResearchMode) => {
     switch (mode) {
       case 'ai-researcher':
-        return '/api/writing-tools/ai-researcher';
+        return 'ai-researcher';
       case 'literature-review':
-        return '/api/writing-tools/literature-review';
+        return 'literature-review';
       case 'question-answering':
-        return '/api/writing-tools/question-answering';
+        return 'question-answering';
       case 'fact-retrieval':
-        return '/api/writing-tools/fact-retrieval';
+        return 'fact-retrieval';
       default:
-        return '/api/writing-tools/ai-researcher';
+        return 'ai-researcher';
     }
   };
 
