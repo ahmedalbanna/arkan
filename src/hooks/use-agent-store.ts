@@ -3,23 +3,21 @@
 
 import { create } from 'zustand';
 import type { AgentProperties } from '@/lib/models';
-import { fetchAgentsApi, createAgentApi, updateAgentApi, deleteAgentApi } from '@/services/api/agentService';
-import { useAuth } from '@/context/AuthContext';
+import { getAgentsAction, createAgentAction, updateAgentAction, deleteAgentAction } from '@/app/actions/agentActions';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from './util/use-toast';
 import { agentKeys } from '@/lib/query-keys';
 import { getFromCache, saveToCache } from '@/lib/utils/cache';
+import { z } from 'zod';
+import { CreateAgentSchema, UpdateAgentSchema } from '@/lib/models';
 
 const AGENTS_CACHE_KEY = 'agents-list';
 
 interface AgentState {
   selectedAgentId: string | null;
   responses: Record<string, Record<string, { prompt: string; response: string }[]>>;
-  // Keeping selectedCommandId for now to avoid breaking other parts, but it's deprecated
-  selectedCommandId: string | null; 
   selectAgent: (agentId: string | null) => void;
-  setSelectedCommandId: (commandId: string | null) => void;
   setResponse: (agentId: string, commandId: string, response: { prompt: string; response: string }) => void;
   clearResponses: (agentId: string, commandId?: string) => void;
 }
@@ -27,9 +25,7 @@ interface AgentState {
 const useAgentUIState = create<AgentState>((set) => ({
   selectedAgentId: null,
   responses: {},
-  selectedCommandId: null,
-  selectAgent: (agentId) => set({ selectedAgentId: agentId, selectedCommandId: null, responses: {} }),
-  setSelectedCommandId: (commandId) => set({ selectedCommandId: commandId }),
+  selectAgent: (agentId) => set({ selectedAgentId: agentId, responses: {} }),
   setResponse: (agentId, commandId, response) => set((state) => {
     const newResponses = { ...state.responses };
     if (!newResponses[agentId]) newResponses[agentId] = {};
@@ -48,7 +44,6 @@ const useAgentUIState = create<AgentState>((set) => ({
 }));
 
 export function useAgentManager() {
-  const { firebaseUser } = useAuth();
   const queryClient = useQueryClient();
   const {
     selectedAgentId,
@@ -59,18 +54,11 @@ export function useAgentManager() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: agentKeys.all,
     queryFn: async () => {
-      if (!firebaseUser) throw new Error("Not authenticated");
-      const token = await firebaseUser.getIdToken();
-      const fetchedAgents = await fetchAgentsApi(token);
+      const fetchedAgents = await getAgentsAction();
       saveToCache(AGENTS_CACHE_KEY, fetchedAgents);
       return fetchedAgents;
     },
-    initialData: () => {
-        // Try to get data from cache first
-        const cachedAgents = getFromCache<AgentProperties[]>(AGENTS_CACHE_KEY);
-        return cachedAgents;
-    },
-    enabled: !!firebaseUser,
+    initialData: () => getFromCache<AgentProperties[]>(AGENTS_CACHE_KEY),
     staleTime: 1000 * 60 * 5, // Data is stale after 5 minutes
   });
 
@@ -85,35 +73,22 @@ export function useAgentManager() {
   const selectedAgent = agents.find(a => a.id === selectedAgentId) || null;
 
   const createMutation = useMutation({
-    mutationFn: async (data: Omit<AgentProperties, 'id'>) => {
-        if (!firebaseUser) throw new Error("Not authenticated");
-        const token = await firebaseUser.getIdToken();
-        // The API now expects the `id` in the body
-        return createAgentApi(data as any, token);
-    },
+    mutationFn: (data: z.infer<typeof CreateAgentSchema>) => createAgentAction(data),
     onSuccess: (newAgent) => {
-        queryClient.invalidateQueries({ queryKey: agentKeys.all });
-        selectAgent(newAgent.id);
+      queryClient.invalidateQueries({ queryKey: agentKeys.all });
+      selectAgent(newAgent.id);
     }
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string, data: Partial<AgentProperties> }) => {
-      if (!firebaseUser) throw new Error("Not authenticated");
-      const token = await firebaseUser.getIdToken();
-      return updateAgentApi(id, data, token);
-    },
+    mutationFn: ({ id, data }: { id: string, data: z.infer<typeof UpdateAgentSchema> }) => updateAgentAction(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: agentKeys.all });
     }
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      if (!firebaseUser) throw new Error("Not authenticated");
-      const token = await firebaseUser.getIdToken();
-      return deleteAgentApi(id, token);
-    },
+    mutationFn: (id: string) => deleteAgentAction(id),
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: agentKeys.all });
       if (selectedAgentId === id) {
@@ -122,7 +97,7 @@ export function useAgentManager() {
     }
   });
 
-  const createAgent = async (data: Omit<AgentProperties, 'id'> & { id: string }) => {
+  const createAgent = async (data: z.infer<typeof CreateAgentSchema>) => {
     try {
       const newAgent = await createMutation.mutateAsync(data);
       toast({ title: "Agent Created", description: `"${newAgent.name}" has been created.` });
