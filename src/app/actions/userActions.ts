@@ -85,9 +85,13 @@ export async function deductCredit(userId: string, creditsToDeduct: number): Pro
 
 export async function getUserProfileAction(userId: string): Promise<UserProfile | null> {
   const requester = await requireUser();
-  if (requester.role !== 'admin' && requester.id !== userId) throw new Error('Forbidden');
+  // A user can view their own profile, or an admin can view any profile.
+  if (requester.id !== userId && requester.role !== 'admin') {
+    throw new Error('Forbidden: You do not have permission to view this profile.');
+  }
   return getUserProfile(userId);
 }
+
 
 const adminUpdateUserSchema = z.object({
   name: z.string().min(1).optional(),
