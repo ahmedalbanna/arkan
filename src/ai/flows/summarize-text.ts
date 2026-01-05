@@ -16,19 +16,19 @@ const lengthDescriptions: Record<SummarizeLength, string> = {
 
 const summarizePrompt = ai.definePrompt({
     name: 'summarizeTextPrompt',
-    input: { schema: SummarizeInputSchema },
+    input: { schema: z.object({ text: z.string(), instruction: z.string() }) },
     output: { schema: SummarizeOutputSchema },
     model: 'googleai/gemini-2.5-flash-lite',
     prompt: `You are an expert summarizer. Your task is to read the provided text and generate a summary of the specified length.
 
-**Desired Length**: The summary should be ${lengthDescriptions[SummarizeInputSchema.shape.length.parse(undefined)]}
+**Desired Length**: The summary should be {{{instruction}}}
 
 **Original Text:**
 ---
 {{{text}}}
 ---
 
-**Summary:**`,
+**Summary:`,
     config: {
         temperature: 0.5,
     }
@@ -39,7 +39,9 @@ const summarizeTextFlow = ai.defineFlow({
     inputSchema: SummarizeInputSchema,
     outputSchema: SummarizeOutputSchema
 }, async (input) => {
-    const { output } = await summarizePrompt(input);
+    const instruction = lengthDescriptions[input.length] || lengthDescriptions.medium;
+    const { output } = await summarizePrompt({ ...input, instruction });
+
     if (!output) {
         throw new Error("Failed to summarize text.");
     }
@@ -54,3 +56,5 @@ export async function summarizeText(input: SummarizeInput): Promise<SummarizeOut
     }
     return summarizeTextFlow(validation.data);
 }
+
+      

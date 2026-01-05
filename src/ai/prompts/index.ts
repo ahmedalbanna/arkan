@@ -848,19 +848,19 @@ Please format your response as markdown with the following structure:
 
     summarize: ai.definePrompt({
         name: 'summarizeTextPrompt',
-        input: { schema: SummarizeInputSchema },
+        input: { schema: z.object({ text: z.string(), length: z.string(), instruction: z.string() }) },
         output: { schema: SummarizeOutputSchema },
         model: 'googleai/gemini-2.5-flash-lite',
         prompt: `You are an expert summarizer. Your task is to read the provided text and generate a summary of the specified length.
-
-**Desired Length**: The summary should be ${lengthDescriptions[SummarizeInputSchema.shape.length.parse(undefined)]}
-
-**Original Text:**
----
-{{{text}}}
----
-
-**Summary:**`,
+    
+    **Desired Length**: The summary should be {{{instruction}}}
+    
+    **Original Text:**
+    ---
+    {{{text}}}
+    ---
+    
+    **Summary:`,
         config: {
             temperature: 0.5,
         }
@@ -1449,3 +1449,6 @@ You MUST structure your document according to the following headings. Ensure eac
         }),
     }
 };
+
+
+      
