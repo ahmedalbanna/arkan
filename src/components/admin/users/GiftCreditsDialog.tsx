@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { giftCreditsAction } from '@/app/actions/adminActions';
 
 import {
   Dialog,
@@ -34,8 +35,8 @@ const giftCreditsSchema = z.object({
 
 type GiftCreditsFormValues = z.infer<typeof giftCreditsSchema>;
 
-async function giftCreditsApi(data: GiftCreditsFormValues & { userId: string }, token: string) {
-    const response = await fetch('/api/admin/gift-credits', {
+// Replaced with server action
+    // server action call handled below
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(data),
@@ -64,7 +65,7 @@ export function GiftCreditsDialog({ user }: GiftCreditsDialogProps) {
   const mutation = useMutation({
     mutationFn: (data: GiftCreditsFormValues) => {
         if (!firebaseUser) throw new Error("Admin not authenticated.");
-        return firebaseUser.getIdToken().then(token => giftCreditsApi({ ...data, userId: user.id }, token));
+        return giftCreditsAction({ ...data, userId: user.id });
     },
     onSuccess: (data) => {
         toast({ title: 'Credits Gifted', description: data.message });

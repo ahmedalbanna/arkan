@@ -11,7 +11,7 @@ import { marked } from 'marked';
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore } from '../core/useBuilderStore';
-import { generateReportSectionApi } from '@/services/api/reportService';
+import { generateReportSectionAction } from '@/app/actions/reportActions';
 import type { SectionName } from '@/ai/schemas';
 import { PromptBuilder } from '@/lib/prompt-builder';
 import { runWritingToolAction } from '@/app/actions/writingToolsActions';

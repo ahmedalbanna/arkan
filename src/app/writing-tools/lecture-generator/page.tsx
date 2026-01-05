@@ -78,8 +78,9 @@ export default function LectureGeneratorPage() {
 
         try {
             const token = await user.getIdToken();
-            const response = await fetch('/api/actions/create-lecture-unit', {
-                method: 'POST',
+            // Using server action instead of API
+            const result = await createLectureUnitAction(
+                /* server action */
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,

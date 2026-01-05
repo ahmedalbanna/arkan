@@ -4,8 +4,8 @@
 import { auth } from '@/lib/firebase/client-init';
 import { userKeys } from '@/lib/query-keys';
 import { User, type UserProfile } from '@/lib/models';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
-import { fetchUserProfileApi, subscribeToUserProfile } from '@/services';
+import { subscribeToUserProfile } from '@/services';
+import { getUserProfileAction } from '@/app/actions/userActions';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
@@ -62,8 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     queryKey: userKeys.profile(firebaseUser?.uid ?? ''),
     queryFn: async () => {
       if (!firebaseUser) return null;
-      const token = await getAuthenticatedToken(firebaseUser);
-      const userProfileData = await fetchUserProfileApi(firebaseUser.uid, token);
+      const userProfileData = await getUserProfileAction(firebaseUser.uid);
       const userInstance = userProfileData ? new User(userProfileData) : null;
       setUserProfile(userInstance); // Update builder store on fetch
       return userInstance;

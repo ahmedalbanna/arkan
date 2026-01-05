@@ -4,7 +4,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks';
 import type { AppSettings } from '@/lib/types';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { getPublicSettingsAction, updateSettingsAction } from '@/app/actions/settingsActions';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useFieldArray, useForm } from 'react-hook-form';
@@ -41,14 +41,14 @@ const settingsSchema = z.object({
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 // --- API Service Functions ---
-async function fetchSettings(): Promise<AppSettings> {
-    const response = await fetch('/api/admin/settings');
+// Use server actions instead of API
+    // replaced by action
     if (!response.ok) throw new Error('Failed to fetch settings');
     return response.json();
 }
 
-async function updateSettings(variables: { data: AppSettings, token: string }): Promise<AppSettings> {
-    const response = await fetch('/api/admin/settings', {
+// Use server actions instead of API
+    // replaced by action
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ export default function AdminSettingsPage() {
 
     const { data: settings, isLoading } = useQuery<AppSettings>({
         queryKey: ['settings'],
-        queryFn: fetchSettings,
+        queryFn: getPublicSettingsAction,
     });
 
     const form = useForm<SettingsFormValues>({

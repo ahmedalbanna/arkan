@@ -13,8 +13,6 @@ import {
   type UserCredential
 } from "firebase/auth";
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { apiService } from './apiService';
-import { fetchUserProfileApi } from './userService';
 
 
 // --- Authentication Functions ---
@@ -52,7 +50,7 @@ export async function loginWithGoogle(): Promise<{user: UserCredential['user'], 
 
 export async function serviceLogoutUser() {
   await signOut(auth);
-  return apiService({ endpoint: '/api/auth/logout', method: 'POST' });
+  await fetch('/api/auth/logout', { method: 'POST' });
 }
 
 /**
@@ -60,11 +58,16 @@ export async function serviceLogoutUser() {
  * This now handles both auth creation and profile creation in one go.
  */
 export async function serviceSignupUser(credentials: SignupCredentials) {
-    return apiService({
-        endpoint: '/api/auth/signup',
-        method: 'POST',
-        data: credentials
-    });
+  const res = await fetch('/api/auth/signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(credentials),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Signup failed');
+  }
+  return res.json();
 }
 
 

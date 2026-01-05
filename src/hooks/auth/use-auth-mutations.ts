@@ -11,7 +11,8 @@ import {
   forgotPasswordService,
 } from '@/services/api/authService';
 import { updateUserAction, resetPasswordAction } from '@/app/actions/userActions';
-import { fetchUserProfileApi } from '@/services/api/userService';
+// replaced by server actions
+import { getUserProfileAction } from '@/app/actions/userActions';
 import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
 import { useToast } from '@/hooks/util/use-toast';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
