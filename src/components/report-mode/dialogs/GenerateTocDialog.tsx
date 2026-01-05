@@ -11,26 +11,32 @@ import { useGenerateTocLogic } from '@/hooks/writing-tools/use-generate-toc-logi
 import { Loader2, Sparkles } from 'lucide-react';
 import { ScrollArea } from '../../ui/scroll-area';
 import { useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader } from '../../ui/card';
 
 interface GenerateTocDialogProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
+    onApply: (generatedMarkdown: string) => void;
 }
 
-export function GenerateTocDialog({ isOpen, onOpenChange }: GenerateTocDialogProps) {
-    const { project, applyTableOfContents } = useBuilderStore();
-    const { form, mutation, onSubmit, results } = useGenerateTocLogic();
+export function GenerateTocDialog({ isOpen, onOpenChange, onApply }: GenerateTocDialogProps) {
+    const { project } = useBuilderStore();
+    const { form, mutation, onSubmit, results, generatedMarkdown } = useGenerateTocLogic();
 
     useEffect(() => {
         if (project?.projectDescription && isOpen) {
             form.setValue('projectDescription', project.projectDescription);
         }
+        if (isOpen) {
+            // Reset state when dialog opens
+            form.reset({ projectDescription: project?.projectDescription || '', additionalInstructions: '' });
+        }
     }, [project, form, isOpen]);
 
-    function handleApplyToc() {
-        if (!results) return;
-        applyTableOfContents(results.tableOfContents);
-        onOpenChange(false);
+    function handleApplyAndClose() {
+        if (generatedMarkdown) {
+            onApply(generatedMarkdown);
+        }
     }
 
     return (
@@ -42,20 +48,27 @@ export function GenerateTocDialog({ isOpen, onOpenChange }: GenerateTocDialogPro
                         The AI will analyze your project description to suggest a logical chapter and section structure for your report.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="py-4 space-y-4">
+                <div className="py-4 space-y-4 max-h-[70vh] overflow-y-auto pr-2">
                     <form id="toc-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <Card>
+                            <CardHeader className="pb-2">
+                                <CardDescription>This information from your project settings will be used to generate the TOC.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="text-sm text-muted-foreground italic">
+                                <p><strong>Project Name:</strong> {project?.name}</p>
+                                <p><strong>Description:</strong> {project?.projectDescription || "No description provided."}</p>
+                            </CardContent>
+                        </Card>
+                        
                         <div>
-                            <Label htmlFor="project-description">Project Description</Label>
+                            <Label htmlFor="additional-instructions">Additional Instructions (Optional)</Label>
                             <Textarea
-                                id="project-description"
-                                {...form.register('projectDescription')}
-                                rows={6}
-                                placeholder="The AI will use your main project description to generate the TOC..."
+                                id="additional-instructions"
+                                {...form.register('additionalInstructions')}
+                                rows={3}
+                                placeholder="e.g., 'Ensure there are at least 5 chapters.' or 'Focus on the implementation details.'"
                                 disabled={mutation.isPending}
                             />
-                            {form.formState.errors.projectDescription && (
-                                <p className="text-sm text-destructive mt-1">{form.formState.errors.projectDescription.message}</p>
-                            )}
                         </div>
                     </form>
 
@@ -88,11 +101,11 @@ export function GenerateTocDialog({ isOpen, onOpenChange }: GenerateTocDialogPro
                 <DialogFooter>
                     <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
                     {results && (
-                        <Button type="button" onClick={handleApplyToc}>Apply to Project</Button>
+                        <Button type="button" onClick={handleApplyAndClose}>Apply to Project</Button>
                     )}
-                    <Button type="submit" form="toc-form" disabled={mutation.isPending || !form.formState.isValid}>
+                    <Button type="submit" form="toc-form" disabled={mutation.isPending}>
                         {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-                        Generate (1 Credit)
+                        Generate (0 Credits)
                     </Button>
                 </DialogFooter>
             </DialogContent>

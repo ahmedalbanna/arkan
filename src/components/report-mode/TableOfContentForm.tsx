@@ -40,7 +40,15 @@ export function TableOfContentForm() {
 
   return (
     <>
-      <GenerateTocDialog isOpen={isTocDialogOpen} onOpenChange={setIsTocDialogOpen} />
+      <GenerateTocDialog 
+        isOpen={isTocDialogOpen} 
+        onOpenChange={setIsTocDialogOpen} 
+        onApply={(generatedMarkdown) => {
+          setTocText(generatedMarkdown);
+          applyTableOfContents(generatedMarkdown);
+          setIsTocDialogOpen(false);
+        }}
+      />
       <div className="p-4 h-full flex flex-col">
           <header className="mb-6 text-center">
               <h1 className="text-2xl font-bold font-headline">Structure Your Document</h1>

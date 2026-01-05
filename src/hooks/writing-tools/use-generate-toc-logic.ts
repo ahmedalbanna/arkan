@@ -4,13 +4,19 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useWritingTool, useToast, useBuilderStore } from '@/hooks';
-import { useLocalization } from '@/context/LocalizationContext';
-import { GenerateTocOutputSchema, GenerateTocInputSchema } from '@/ai/schemas';
+import { useToast, useBuilderStore } from '@/hooks';
+import { GenerateTocOutputSchema } from '@/ai/schemas';
 import type { TocSection } from '@/lib/models';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
+import { useMemo } from 'react';
 
-type FormValues = z.infer<typeof GenerateTocInputSchema>;
+// Updated schema to include the optional additional instructions
+const formSchema = z.object({
+  projectDescription: z.string().min(10, 'Project description is required.'),
+  additionalInstructions: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 const formatTocToMarkdown = (toc: TocSection[]): string => {
     return toc.map(chapter => 
@@ -18,19 +24,16 @@ const formatTocToMarkdown = (toc: TocSection[]): string => {
     ).join('\n\n');
 };
 
-
 export function useGenerateTocLogic() {
-  const { t } = useLocalization();
   const { toast } = useToast();
-  const { updateProject } = useBuilderStore();
-  const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: async (data: FormValues): Promise<z.infer<typeof GenerateTocOutputSchema>> => {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
       // Hardcoded response for testing
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+      
+      console.log("Generating TOC with data:", data); // For debugging
+
       const hardcodedData: z.infer<typeof GenerateTocOutputSchema> = {
         tableOfContents: [
           {
@@ -48,18 +51,10 @@ export function useGenerateTocLogic() {
         ],
       };
       
-      console.log("Using hardcoded TOC data for testing:", hardcodedData);
       return hardcodedData;
     },
-    onSuccess: (data) => {
-        const tocData = data.tableOfContents;
-        if (tocData) {
-            const markdown = formatTocToMarkdown(tocData);
-            updateProject(p => { 
-                if(p) p.tableOfContentsMarkdown = markdown; 
-            });
-            toast({ title: "Sample Table of Contents generated!" });
-        }
+    onSuccess: () => {
+        toast({ title: "Sample Table of Contents generated!" });
     },
     onError: (error: Error) => {
       toast({
@@ -71,21 +66,25 @@ export function useGenerateTocLogic() {
   });
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(GenerateTocInputSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       projectDescription: '',
+      additionalInstructions: '',
     },
   });
 
   const onSubmit = (data: FormValues) => {
     mutation.mutate(data);
   };
+  
+  const results = mutation.data;
+  const generatedMarkdown = useMemo(() => (results ? formatTocToMarkdown(results.tableOfContents) : ''), [results]);
 
   return {
-    t,
     form,
     mutation,
     onSubmit,
-    results: mutation.data as z.infer<typeof GenerateTocOutputSchema> | null,
+    results,
+    generatedMarkdown,
   };
 }
