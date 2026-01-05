@@ -24,10 +24,9 @@ export function useUserManagementConsole() {
   } = useInfiniteQuery({
     queryKey: userKeys.lists(),
     queryFn: async ({ pageParam }) => {
-      if (!firebaseUser) throw new Error("User not authenticated");
-      const token = await firebaseUser.getIdToken();
+      // Server actions handle authentication, no need to pass a token
       const result = await listUsersAction({ limit: USERS_PER_PAGE, lastVisibleId: pageParam });
-      // Instantiate User objects
+      // Instantiate User objects to ensure class methods are available
       return {
           ...result,
           users: result.users.map(u => new User(u)),
