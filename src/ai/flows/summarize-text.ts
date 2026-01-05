@@ -50,6 +50,13 @@ const summarizeTextFlow = ai.defineFlow({
     return output;
 });
 
+export async function summarizeTextWithRatio(input: SummarizeInput): Promise<SummarizeOutput> {
+    const validation = SummarizeInputSchema.safeParse(input);
+    if (!validation.success) {
+        throw new Error(`Invalid input for summarizeText: ${validation.error.message}`);
+    }
+    return summarizeTextFlow(validation.data);
+}
 export async function summarizeText(input: SummarizeInput): Promise<SummarizeOutput> {
     const validation = SummarizeInputSchema.safeParse(input);
     if (!validation.success) {
@@ -57,4 +64,3 @@ export async function summarizeText(input: SummarizeInput): Promise<SummarizeOut
     }
     return summarizeTextFlow(validation.data);
 }
-

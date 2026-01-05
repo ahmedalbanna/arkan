@@ -1,16 +1,16 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
+import { processFileAction } from '@/app/actions/fileActions';
+import { useAuth } from '@/context/AuthContext';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useToast } from '@/hooks/util/use-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useCallback, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useWritingTool } from './use-writing-tool';
-import { useToast } from '@/hooks/util/use-toast';
-import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services/api/documentProcessingService';
-import { useDropzone } from 'react-dropzone';
-import { useLocalization } from '@/context/LocalizationContext';
 
 const detectorSchema = z.object({
   text: z.string().min(50, 'Please enter at least 50 characters for an accurate analysis.'),
@@ -46,7 +46,7 @@ export function useAIDetectorLogic() {
 
     try {
       const token = await firebaseUser.getIdToken();
-      const result = await processFileApi(formData, token);
+      const result = await processFileAction(formData);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.aiDetector.toastFileProcessed'), description: t('writingTools.aiDetector.toastFileExtracted', { fileName: file.name }) });
       refetchUser();

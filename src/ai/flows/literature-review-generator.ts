@@ -79,7 +79,7 @@ const literatureReviewFlow = ai.defineFlow({
   return output;
 });
 
-export async function generateLiteratureReview(input: LiteratureReviewInput): Promise<LiteratureReviewOutput> {
+export async function literatureReviewGenerator(input: LiteratureReviewInput): Promise<LiteratureReviewOutput> {
   const validation = LiteratureReviewInputSchema.safeParse(input);
   if (!validation.success) {
     throw new Error(`Invalid input for generateLiteratureReview: ${validation.error.message}`);

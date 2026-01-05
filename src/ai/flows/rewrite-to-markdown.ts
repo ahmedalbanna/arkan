@@ -10,7 +10,7 @@
 import { ai } from '@/ai/genkit';
 import { RewriteToMarkdownInputSchema, RewriteToMarkdownOutputSchema, type RewriteToMarkdownInput, type RewriteToMarkdownOutput } from '@/ai/schemas';
 
-export async function rewriteToMarkdown(input: RewriteToMarkdownInput): Promise<RewriteToMarkdownOutput> {
+export async function rewriteText(input: RewriteToMarkdownInput): Promise<RewriteToMarkdownOutput> {
   return rewriteToMarkdownFlow(input);
 }
 

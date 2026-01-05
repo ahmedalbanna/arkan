@@ -2,15 +2,15 @@
 'use client';
 
 import { auth } from '@/lib/firebase/client-init';
+import { User } from '@/lib/models';
 import { userKeys } from '@/lib/query-keys';
-import { User, type UserProfile } from '@/lib/models';
-import { subscribeToUserProfile } from '@/services';
+
+import { clearSessionCookieAction, setSessionCookieAction } from '@/app/actions/authActions';
 import { getUserProfileAction } from '@/app/actions/userActions';
+import { useBuilderStore } from '@/hooks';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { setSessionCookieAction, clearSessionCookieAction } from '@/app/actions/authActions';
-import { useBuilderStore } from '@/hooks';
 
 interface AuthContextType {
   firebaseUser: FirebaseUser | null;
@@ -37,18 +37,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
   const { setUserProfile } = useBuilderStore(); // Get setter from builder store
 
-  useEffect(() => {
-    if (firebaseUser?.uid) {
-      const unsubscribe = subscribeToUserProfile(firebaseUser.uid, (user) => {
-        const userInstance = user ? new User(user) : null;
-        queryClient.setQueryData(userKeys.profile(firebaseUser.uid), userInstance);
-        setUserProfile(userInstance); // Update builder store
-      });
-      return () => unsubscribe();
-    } else {
-      setUserProfile(null); // Clear on logout
-    }
-  }, [firebaseUser, queryClient, setUserProfile]);
+  // useEffect(() => {
+  //   if (firebaseUser?.uid) {
+  //     const unsubscribe = subscribeToUserProfile(firebaseUser.uid, (user) => {
+  //       const userInstance = user ? new User(user) : null;
+  //       queryClient.setQueryData(userKeys.profile(firebaseUser.uid), userInstance);
+  //       setUserProfile(userInstance); // Update builder store
+  //     });
+  //     return () => unsubscribe();
+  //   } else {
+  //     setUserProfile(null); // Clear on logout
+  //   }
+  // }, [firebaseUser, queryClient, setUserProfile]);
 
   // Use React Query to get the user profile from the cache
   const { data: userProfile, isLoading: isProfileLoading } = useQuery<User | null>({
@@ -109,3 +109,4 @@ export const useAuth = (): AuthContextType => {
 };
 
 export type { FirebaseUser };
+
