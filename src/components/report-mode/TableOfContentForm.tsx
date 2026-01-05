@@ -8,6 +8,8 @@ import { ListTree, Sparkles } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { GenerateTocDialog } from './dialogs/GenerateTocDialog';
 import { Label } from '../ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { MarkdownViewer } from '../shared/MarkdownViewer';
 
 export function TableOfContentForm() {
   const { project, applyTableOfContents, updateProject } = useBuilderStore();
@@ -58,17 +60,26 @@ export function TableOfContentForm() {
           </header>
           
           <div className="flex-grow flex flex-col gap-4">
-            <div className="space-y-2 flex-grow flex flex-col">
-              <Label htmlFor="toc-textarea" className="font-semibold">Table of Contents Markdown</Label>
-              <Textarea
-                  id="toc-textarea"
-                  value={tocText}
-                  onChange={handleTextChange}
-                  className="flex-grow font-mono text-sm resize-none"
-                  placeholder={`# Chapter 1 Title\n  - Section 1.1 Title\n  - Section 1.2 Title\n\n# Chapter 2 Title\n  - Section 2.1 Title`}
-              />
-               <p className="text-xs text-muted-foreground">Use '#' for chapter titles and '-' for section titles.</p>
-            </div>
+            <Tabs defaultValue="edit" className="flex-grow flex flex-col min-h-0">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="edit">Edit</TabsTrigger>
+                    <TabsTrigger value="view">View</TabsTrigger>
+                </TabsList>
+                <TabsContent value="edit" className="flex-grow flex flex-col space-y-2 mt-4">
+                    <Label htmlFor="toc-textarea" className="font-semibold">Table of Contents Markdown</Label>
+                    <Textarea
+                        id="toc-textarea"
+                        value={tocText}
+                        onChange={handleTextChange}
+                        className="flex-grow font-mono text-sm resize-none"
+                        placeholder={`# Chapter 1 Title\n  - Section 1.1 Title\n  - Section 1.2 Title\n\n# Chapter 2 Title\n  - Section 2.1 Title`}
+                    />
+                    <p className="text-xs text-muted-foreground">Use '#' for chapter titles and '-' for section titles.</p>
+                </TabsContent>
+                <TabsContent value="view" className="flex-grow mt-4 border rounded-md p-4 bg-muted/30">
+                     <MarkdownViewer content={tocText} />
+                </TabsContent>
+            </Tabs>
               
              <div className="flex flex-col sm:flex-row gap-2">
                 <Button onClick={() => setIsTocDialogOpen(true)} variant="outline" className="w-full">
