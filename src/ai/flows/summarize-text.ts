@@ -7,6 +7,7 @@
 
 import { ai } from '@/ai/genkit';
 import { SummarizeInputSchema, SummarizeLength, SummarizeOutputSchema, type SummarizeInput, type SummarizeOutput } from '@/ai/schemas';
+import z from 'zod';
 
 const lengthDescriptions: Record<SummarizeLength, string> = {
     short: "a single, concise paragraph.",
@@ -57,4 +58,3 @@ export async function summarizeText(input: SummarizeInput): Promise<SummarizeOut
     return summarizeTextFlow(validation.data);
 }
 
-      
