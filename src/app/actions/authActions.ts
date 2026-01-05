@@ -4,9 +4,12 @@
 import { cookies } from 'next/headers';
 import { adminAuth, adminDb } from '@/lib/firebase/server-init';
 import type { UserProfile, SignupCredentials } from '@/lib/models';
+import { getUserProfileAction } from './userActions';
 
 export async function setSessionCookieAction(idToken: string) {
-  if (!idToken) throw new Error('ID token is required');
+  if (!idToken) {
+    throw new Error('ID token is required');
+  }
   const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
   const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
   
@@ -17,7 +20,15 @@ export async function setSessionCookieAction(idToken: string) {
     path: '/',
     sameSite: 'lax',
   });
-  return { status: 'success' } as const;
+
+  // After setting the cookie, determine the redirect path based on user role
+  const decodedToken = await adminAuth.verifySessionCookie(sessionCookie);
+  const userProfile = await getUserProfileAction(decodedToken.uid);
+
+  if (userProfile?.role === 'admin') {
+    return { status: 'success', redirectPath: '/admin/dashboard' };
+  }
+  return { status: 'success', redirectPath: '/builder' };
 }
 
 export async function clearSessionCookieAction() {

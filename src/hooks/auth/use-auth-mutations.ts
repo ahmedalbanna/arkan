@@ -3,9 +3,9 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { signupAction, resetPasswordAction } from '@/app/actions/authActions';
+import { signupAction, resetPasswordAction, setSessionCookieAction } from '@/app/actions/authActions';
 import { getUserProfileAction, createUserAction } from '@/app/actions/userActions';
-import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
+import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/models';
 import { useToast } from '@/hooks/util/use-toast';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
 import { userKeys } from '@/lib/query-keys';
@@ -20,23 +20,17 @@ export function useLogin() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (credentials: LoginCredentials) => signInWithEmailAndPassword(getAuth(app), credentials.email, credentials.password),
-    onSuccess: async (userCredential) => {
-        const user = userCredential.user;
-        // After successful sign-in, fetch the user's profile to check their role
-        const userProfile = await getUserProfileAction(user.uid);
-        
-        queryClient.invalidateQueries({ queryKey: userKeys.profile(user.uid) });
-        queryClient.invalidateQueries({ queryKey: userKeys.lists() });
-        
+    mutationFn: async (credentials: LoginCredentials) => {
+      const userCredential = await signInWithEmailAndPassword(getAuth(app), credentials.email, credentials.password);
+      const idToken = await userCredential.user.getIdToken(true);
+      return setSessionCookieAction(idToken);
+    },
+    onSuccess: (data) => {
+      if (data.status === 'success') {
+        queryClient.invalidateQueries({ queryKey: userKeys.all });
         toast({ title: "Welcome back!" });
-
-        // Redirect based on the user's role
-        if (userProfile?.role === 'admin') {
-            router.push('/admin/dashboard');
-        } else {
-            router.push('/builder');
-        }
+        router.push(data.redirectPath);
+      }
     },
     onError: (error) => handleErrorUtility(error, "Login Failed")
   });
@@ -51,7 +45,7 @@ async function handleFirstSignIn(user: FirebaseUser) {
             email: user.email || `${user.uid}@example.com`,
             password: Math.random().toString(36).slice(-8), // Dummy password for social sign-in
         };
-        await createUserAction(signupData as any);
+        await signupAction(signupData as any);
     }
 }
 
@@ -62,28 +56,24 @@ export function useGoogleSignIn() {
     const { toast } = useToast();
 
     return useMutation({
-        mutationFn: () => {
+        mutationFn: async () => {
             const provider = new GoogleAuthProvider();
-            return signInWithPopup(getAuth(app), provider);
-        },
-        onSuccess: async (userCredential) => {
+            const userCredential = await signInWithPopup(getAuth(app), provider);
             const { getAdditionalUserInfo } = await import('firebase/auth');
             const info = getAdditionalUserInfo(userCredential);
-            const isNewUser = info?.isNewUser;
-            
-            if (isNewUser) {
+
+            if (info?.isNewUser) {
                 await handleFirstSignIn(userCredential.user);
             }
             
-            const userProfile = await getUserProfileAction(userCredential.user.uid);
-            
-            queryClient.invalidateQueries({ queryKey: userKeys.all });
-            toast({ title: `Welcome, ${userCredential.user.displayName}!` });
-
-            if (userProfile?.role === 'admin') {
-                router.push('/admin/dashboard');
-            } else {
-                router.push('/builder');
+            const idToken = await userCredential.user.getIdToken(true);
+            return setSessionCookieAction(idToken);
+        },
+        onSuccess: (data) => {
+            if (data.status === 'success') {
+                queryClient.invalidateQueries({ queryKey: userKeys.all });
+                toast({ title: `Welcome!` });
+                router.push(data.redirectPath);
             }
         },
         onError: (error) => handleErrorUtility(error, "Google Sign-In Failed")
@@ -122,9 +112,15 @@ export function usePhoneSignIn() {
             if (info?.isNewUser) {
                 await handleFirstSignIn(userCredential.user);
             }
-            queryClient.invalidateQueries({ queryKey: userKeys.all });
-            router.push('/builder');
-            toast({ title: `Welcome!` });
+            
+            const idToken = await userCredential.user.getIdToken(true);
+            const sessionData = await setSessionCookieAction(idToken);
+
+            if (sessionData.status === 'success') {
+                queryClient.invalidateQueries({ queryKey: userKeys.all });
+                toast({ title: `Welcome!` });
+                router.push(sessionData.redirectPath);
+            }
         } catch (err: any) {
             setError(err.message);
         } finally {
