@@ -6,6 +6,7 @@ import { z } from 'zod';
 const RunAgentInputSchema = z.object({
   systemPrompt: z.string().describe('The overall instruction/persona for the AI agent.'),
   userPrompt: z.string().describe('The user\'s specific request to the agent.'),
+  token: z.string().optional(), // Token is for server-side auth, not used in the AI prompt itself
 });
 
 export const runAgentFlow = ai.defineFlow(

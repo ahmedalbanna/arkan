@@ -14,3 +14,10 @@ export interface AgentProperties {
   createdAt?: string;
   updatedAt?: string;
 }
+
+// Add the missing Command type
+export interface Command {
+    id: string;
+    name: string;
+    prompt: string;
+}

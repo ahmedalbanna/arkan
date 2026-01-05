@@ -16,7 +16,8 @@ const AGENTS_CACHE_KEY = 'agents-list';
 interface AgentState {
   selectedAgentId: string | null;
   responses: Record<string, Record<string, { prompt: string; response: string }[]>>;
-  selectedCommandId: string | null;
+  // Keeping selectedCommandId for now to avoid breaking other parts, but it's deprecated
+  selectedCommandId: string | null; 
   selectAgent: (agentId: string | null) => void;
   setSelectedCommandId: (commandId: string | null) => void;
   setResponse: (agentId: string, commandId: string, response: { prompt: string; response: string }) => void;
@@ -87,7 +88,8 @@ export function useAgentManager() {
     mutationFn: async (data: Omit<AgentProperties, 'id'>) => {
         if (!firebaseUser) throw new Error("Not authenticated");
         const token = await firebaseUser.getIdToken();
-        return createAgentApi(data, token);
+        // The API now expects the `id` in the body
+        return createAgentApi(data as any, token);
     },
     onSuccess: (newAgent) => {
         queryClient.invalidateQueries({ queryKey: agentKeys.all });
