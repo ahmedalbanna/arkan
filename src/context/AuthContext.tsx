@@ -9,6 +9,7 @@ import { getUserProfileAction } from '@/app/actions/userActions';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { setSessionCookieAction, clearSessionCookieAction } from '@/app/actions/authActions';
 import { useBuilderStore } from '@/hooks';
 
 interface AuthContextType {
@@ -20,21 +21,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Handles setting/clearing the session cookie.
+// Handles setting/clearing the session cookie using server actions.
 async function manageSession(user: FirebaseUser | null) {
   if (user) {
     const idToken = await user.getIdToken(true);
-    // Set session cookie
-    await fetch('/api/auth/session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken }),
-    });
+    await setSessionCookieAction(idToken);
   } else {
-    // Clear session cookie
-    await fetch('/api/auth/logout', {
-      method: 'POST',
-    });
+    await clearSessionCookieAction();
   }
 }
 

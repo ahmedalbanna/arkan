@@ -13,6 +13,7 @@ import {
   type UserCredential
 } from "firebase/auth";
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { clearSessionCookieAction } from '@/app/actions/authActions';
 
 
 // --- Authentication Functions ---
@@ -50,7 +51,7 @@ export async function loginWithGoogle(): Promise<{user: UserCredential['user'], 
 
 export async function serviceLogoutUser() {
   await signOut(auth);
-  await fetch('/api/auth/logout', { method: 'POST' });
+  await clearSessionCookieAction();
 }
 
 /**
