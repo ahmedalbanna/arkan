@@ -15,22 +15,7 @@ import { Check, Copy, Loader2, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import ReactMarkdown from 'react-markdown';
-import type { z } from 'zod';
 
-const GenerateUIDescriptionInputSchema: z.ZodObject<{
-  flow: z.ZodLiteral<"generate-ui-description">;
-  projectFeatures: z.ZodString;
-  designType: z.ZodEnum<["website", "mobile"]>;
-}, "strip", z.ZodTypeAny, {
-  flow: "generate-ui-description";
-  projectFeatures: string;
-  designType: "website" | "mobile";
-}, {
-  flow: "generate-ui-description";
-  projectFeatures: string;
-  designType: "website" | "mobile";
-}>
-type FormValues = z.infer<typeof GenerateUIDescriptionInputSchema>;
 
 export function GenerateUIDescriptionTool() {
   const { t } = useLocalization();
