@@ -8,9 +8,8 @@ import { projectKeys } from '@/lib/query-keys';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
-import { fetchProjectsApi, saveProjectApi, deleteProjectApi } from '@/services/api/projectService';
 import { localProjectService } from '@/services/local-project-service';
+import { listProjectsAction, saveProjectAction, deleteProjectAction } from '@/app/actions/projectActions';
 
 export function useProjects() {
     const { firebaseUser } = useAuth();
@@ -20,19 +19,13 @@ export function useProjects() {
             if (!firebaseUser) return [];
             // Then, fetch from server and merge
             try {
-                const token = await getAuthenticatedToken(firebaseUser);
-                const serverProjects = await fetchProjectsApi(token);
-                
+                const serverProjects = await listProjectsAction();
                 const mergedProjects = serverProjects.map(p => new Project(p));
-
                 // Sync local db with server source of truth
                 mergedProjects.forEach(p => localProjectService.saveProject(p.toStateObject()));
-
                 return mergedProjects;
-
             } catch (e) {
                 console.warn("Could not sync with server, using local projects.", e);
-                 // First, get local projects for optimistic UI
                 const localProjects = await localProjectService.getAllProjects();
                 return localProjects.map(p => new Project(p));
             }
@@ -54,8 +47,7 @@ export function useSaveProject() {
                 toast({ title: 'Offline', description: 'You are offline. Please connect to the internet to save the project.', variant: 'destructive' });
                 throw new Error("User is offline.");
             }
-            const token = await getAuthenticatedToken(firebaseUser);
-            return saveProjectApi(projectData, token);
+            return saveProjectAction(projectData);
         },
         onSuccess: (savedProject) => {
             setHasUnsavedChanges(false);
@@ -84,8 +76,7 @@ export function useDeleteProject() {
             const localDelete = localProjectService.deleteProject(projectId);
             let serverDelete: Promise<any> | null = null;
             if (navigator.onLine && firebaseUser) {
-                const token = await getAuthenticatedToken(firebaseUser);
-                serverDelete = deleteProjectApi(projectId, token);
+                serverDelete = deleteProjectAction(projectId);
             }
             await Promise.all([localDelete, serverDelete]);
             return projectId;
