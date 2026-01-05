@@ -2,7 +2,7 @@
 
 import { adminAuth } from '@/lib/firebase/server-init';
 import { cookies } from 'next/headers';
-import { getUserProfile } from '@/services/userService';
+import { getUserProfile } from '@/app/actions/userActions';
 
 export async function requireUser() {
   const sessionCookie = (await cookies()).get('__session')?.value;

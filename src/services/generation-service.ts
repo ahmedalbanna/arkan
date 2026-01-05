@@ -1,9 +1,8 @@
 
-
 'use server';
 
 import { adminDb } from '@/lib/firebase/server-init';
-import { getUserProfile } from './userService';
+import { getUserProfile } from '@/app/actions/userActions';
 
 interface GenerationLog {
     agentId: string;

@@ -3,10 +3,74 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { adminAuth, adminDb } from '@/lib/firebase/server-init';
-import { getUserProfile, getPaginatedUsers, createUser, updateUser as updateUserSvc, deleteUser as deleteUserSvc } from '@/services/userService';
 import type { UserProfile } from '@/lib/models/user';
 import { requireUser, requireAdmin } from './_utils/auth';
 import { getStorage } from 'firebase-admin/storage';
+import { FieldValue } from 'firebase-admin/firestore';
+
+// ============================================================================
+// SERVER-SIDE USER SERVICE FUNCTIONS (Moved from services/userService.ts)
+// ============================================================================
+
+export async function getUserProfile(id: string): Promise<UserProfile | null> {
+    if (!id) return null;
+    const userDoc = await adminDb.collection('users').doc(id).get();
+    if (!userDoc.exists) {
+        return null;
+    }
+    const data = userDoc.data();
+    return { id: userDoc.id, ...data } as UserProfile;
+}
+
+export async function getPaginatedUsers({ limit, lastVisibleId }: { limit: number, lastVisibleId?: string }) {
+    let query = adminDb.collection('users')
+        .orderBy('createdAt', 'desc')
+        .limit(limit + 1); // Fetch one extra to check for hasNextPage
+
+    if (lastVisibleId) {
+        const lastDoc = await adminDb.collection('users').doc(lastVisibleId).get();
+        if (lastDoc.exists) {
+            query = query.startAfter(lastDoc);
+        }
+    }
+
+    const snapshot = await query.get();
+    const users = snapshot.docs.slice(0, limit).map(doc => ({ id: doc.id, ...doc.data() })) as UserProfile[];
+    const hasNextPage = snapshot.docs.length > limit;
+    const newLastVisibleId = hasNextPage ? snapshot.docs[snapshot.docs.length - 2].id : null;
+
+    return { users, hasNextPage, lastVisibleId: newLastVisibleId };
+}
+
+export async function deductUserCredits(userId: string, creditsToDeduct: number): Promise<number> {
+    const userRef = adminDb.collection('users').doc(userId);
+
+    return await adminDb.runTransaction(async (transaction) => {
+        const userDoc = await transaction.get(userRef);
+        if (!userDoc.exists) {
+            throw new Error("User not found");
+        }
+
+        const currentCredits = userDoc.data()?.credits ?? 0;
+
+        if (currentCredits < creditsToDeduct) {
+            throw { status: 402, message: "Insufficient credits. Please purchase more credits to continue." };
+        }
+
+        const newBalance = currentCredits - creditsToDeduct;
+        transaction.update(userRef, {
+            credits: newBalance,
+            updatedAt: new Date().toISOString()
+        });
+
+        return newBalance;
+    });
+}
+
+
+// ============================================================================
+// SERVER ACTIONS (for client-side consumption)
+// ============================================================================
 
 export async function getUserProfileAction(userId: string): Promise<UserProfile | null> {
   const requester = await requireUser();
@@ -48,7 +112,7 @@ export async function updateUserAction(userId: string, data: Partial<UserProfile
   }
 
   // Handle email update in Auth if present
-  if (parsed.email && parsed.email !== requester.email) {
+  if (parsed.email && parsed.email !== (await getUserProfile(userId))?.email) {
     await adminAuth.updateUser(userId, { email: parsed.email });
   }
 
@@ -63,7 +127,8 @@ export async function updateUserAction(userId: string, data: Partial<UserProfile
 
 export async function deleteUserAction(userId: string) {
   await requireAdmin();
-  await deleteUserSvc(userId);
+  await adminAuth.deleteUser(userId);
+  await adminDb.collection('users').doc(userId).delete();
   revalidatePath('/admin/manage-users');
   return { message: `User ${userId} deleted successfully` };
 }
@@ -84,17 +149,29 @@ const createUserSchema = z.object({
 });
 export async function createUserAction(data: z.infer<typeof createUserSchema>) {
   await requireAdmin();
-  const parsed = createUserSchema.parse(data);
-  return createUser(parsed);
+  const { email, password, ...profileData } = createUserSchema.parse(data);
+  const userRecord = await adminAuth.createUser({ email, password, displayName: profileData.name });
+
+  const newUserProfile: Omit<UserProfile, 'id'> = {
+    ...profileData,
+    email,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    hasCompletedOnboarding: false,
+  };
+
+  await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);
+  return { user: { uid: userRecord.uid, email: userRecord.email } };
 }
 
 export async function resetPasswordAction(userId: string) {
   await requireAdmin();
   const user = await getUserProfile(userId);
   if (!user?.email) throw new Error('User not found or has no email');
-  // Placeholder for sending a real reset email
-  console.log(`Password reset email would be sent to ${user.email}`);
-  return { message: `A password reset email has been sent to ${user.email}.` };
+  const link = await adminAuth.generatePasswordResetLink(user.email);
+  // In a real app, you would email this link to the user.
+  console.log(`Password reset link for ${user.email}: ${link}`);
+  return { message: `A password reset link has been generated for ${user.email}.` };
 }
 
 export async function uploadProfilePictureAction(formData: FormData) {
@@ -125,7 +202,6 @@ export async function sendNotificationAction(data: z.infer<typeof sendNotificati
   await requireAdmin();
   const parsed = sendNotificationSchema.parse(data);
   const admin = (await import('firebase-admin')).default;
-  // Save to RTDB
   const rtdb = admin.database();
   const ref = rtdb.ref(`notifications/${parsed.userId}`).push();
   await ref.set({
@@ -134,10 +210,8 @@ export async function sendNotificationAction(data: z.infer<typeof sendNotificati
     icon: 'bell',
     isRead: false,
     createdAt: new Date().toISOString(),
-    link: parsed.link || '/dashboard',
+    link: parsed.link || process.env.NEXT_PUBLIC_BASE_URL || '/',
   });
-  // Send push if token exists
-  const { adminDb } = await import('@/lib/firebase/server-init');
   const tokenDoc = await adminDb.collection('deviceTokens').doc(parsed.userId).get();
   if (!tokenDoc.exists) {
     return { messageId: 'No device token, notification saved to DB.' };

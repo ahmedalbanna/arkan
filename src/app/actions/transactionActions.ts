@@ -1,15 +1,74 @@
+
 'use server';
 
 import { z } from 'zod';
 import { requireAdmin, requireUser } from './_utils/auth';
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
-import { getTransactionsByStatus, getTransactionsByUserId, getTransactionsByDateRange, createTransaction } from '@/services/transactionService';
 import type { TransactionProperties } from '@/lib/models/transaction';
 import { FieldValue } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import { getDatabase } from 'firebase-admin/database';
 
 export type TransactionStatus = 'pending' | 'verified' | 'rejected';
+
+// ============================================================================
+// SERVER-SIDE TRANSACTION SERVICE FUNCTIONS
+// ============================================================================
+
+export async function createTransaction(data: Omit<TransactionProperties, 'createdAt' | 'id'>) {
+    const transactionRef = adminDb.collection('transactions').doc();
+    await transactionRef.set({
+        ...data,
+        createdAt: new Date().toISOString(),
+    });
+    return { id: transactionRef.id };
+}
+
+export async function getTransactionsByStatus({ status, limit, lastVisibleId }: { status: 'pending' | 'verified' | 'rejected', limit: number, lastVisibleId?: string }): Promise<{ transactions: TransactionProperties[], hasNextPage: boolean, lastVisibleId?: string | null }> {
+    let query = adminDb.collection('transactions')
+        .where('status', '==', status)
+        .orderBy('createdAt', 'desc')
+        .limit(limit + 1);
+
+    if (lastVisibleId) {
+        const lastDoc = await adminDb.collection('transactions').doc(lastVisibleId).get();
+        if (lastDoc.exists) {
+            query = query.startAfter(lastDoc);
+        }
+    }
+
+    const snapshot = await query.get();
+
+    const transactions = snapshot.docs.slice(0, limit).map(doc => ({ id: doc.id, ...doc.data() } as TransactionProperties));
+    const hasNextPage = snapshot.docs.length > limit;
+    const newLastVisibleId = hasNextPage && transactions.length > 0 ? transactions[transactions.length - 1].id : null;
+
+    return { transactions, hasNextPage, lastVisibleId: newLastVisibleId };
+}
+
+
+export async function getTransactionsByUserId(userId: string): Promise<TransactionProperties[]> {
+    const snapshot = await adminDb.collection('transactions')
+        .where('userId', '==', userId)
+        .orderBy('createdAt', 'desc')
+        .get();
+
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as TransactionProperties);
+}
+
+export async function getTransactionsByDateRange(startDate: string, endDate: string): Promise<TransactionProperties[]> {
+    const snapshot = await adminDb.collection('transactions')
+        .where('createdAt', '>=', startDate)
+        .where('createdAt', '<=', endDate)
+        .orderBy('createdAt', 'desc')
+        .get();
+
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as TransactionProperties);
+}
+
+// ============================================================================
+// SERVER ACTIONS (for client-side consumption)
+// ============================================================================
 
 export async function listTransactionsByStatusAction(params: { status: TransactionStatus; limit: number; lastVisibleId?: string }) {
   await requireAdmin();
@@ -53,7 +112,10 @@ export async function verifyPaymentAction(input: z.infer<typeof verifyPaymentSch
   if (status === 'verified') {
     await adminDb.runTransaction(async (t: any) => {
       const userRef = adminDb.collection('users').doc(userId);
-      t.update(userRef, { credits: FieldValue.increment(creditsToGrant) });
+      const userDoc = await t.get(userRef);
+      if (!userDoc.exists) throw new Error("User not found");
+      const currentCredits = userDoc.data()?.credits ?? 0;
+      t.update(userRef, { credits: currentCredits + creditsToGrant });
       t.update(transactionRef, {
         status: 'verified',
         adminNotes: adminNotes || 'Payment approved.',

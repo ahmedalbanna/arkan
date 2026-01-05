@@ -3,22 +3,14 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import {
-  loginWithEmail,
-  loginWithGoogle,
-  serviceLogoutUser,
-  serviceSignupUser,
-  forgotPasswordService,
-} from '@/services/api/authService';
-import { updateUserAction, resetPasswordAction } from '@/app/actions/userActions';
-// replaced by server actions
-import { getUserProfileAction } from '@/app/actions/userActions';
+import { signupAction, resetPasswordAction } from '@/app/actions/authActions';
+import { getUserProfileAction, updateUserAction } from '@/app/actions/userActions';
 import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
 import { useToast } from '@/hooks/util/use-toast';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
 import { useAuth } from '@/context/AuthContext';
 import { userKeys } from '@/lib/query-keys';
-import { getAuth, signInWithPhoneNumber, type ConfirmationResult, type User as FirebaseUser } from "firebase/auth";
+import { getAuth, signInWithPhoneNumber, type ConfirmationResult, type User as FirebaseUser, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, sendPasswordResetEmail } from "firebase/auth";
 import { app } from '@/lib/firebase/client-init';
 import { useState } from 'react';
 
@@ -29,7 +21,7 @@ export function useLogin() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (credentials: LoginCredentials) => loginWithEmail(credentials),
+    mutationFn: (credentials: LoginCredentials) => signInWithEmailAndPassword(getAuth(app), credentials.email, credentials.password),
     onSuccess: (user) => {
       queryClient.invalidateQueries({ queryKey: userKeys.all }); // Refetch user data
       router.push('/builder');
@@ -41,24 +33,15 @@ export function useLogin() {
 
 // Helper to create profile on first sign-in
 async function handleFirstSignIn(user: FirebaseUser) {
-    // Check if a profile already exists by trying to fetch it.
-    // We expect this to fail for a new user.
-    const token = await user.getIdToken();
-    try {
-        const existingProfile = await fetchUserProfileApi(user.uid, token);
+    const existingProfile = await getUserProfileAction(user.uid);
 
-        if (!existingProfile) {
-            // Profile doesn't exist, so create it.
-            const profileData: Partial<UserProfile> = {
-                id: user.uid,
-                name: user.displayName || `User ${user.uid.slice(0,6)}`,
-                email: user.email || '',
-            };
-            await updateUserAction(user.uid, profileData);
-        }
-    } catch (error) {
-        // Handle cases where the initial fetch fails for reasons other than 404
-        console.error("Error during first sign-in profile check:", error);
+    if (!existingProfile) {
+        // Profile doesn't exist, so create it.
+        const profileData: Partial<UserProfile> = {
+            name: user.displayName || `User ${user.uid.slice(0,6)}`,
+            email: user.email || '',
+        };
+        await updateUserAction(user.uid, profileData);
     }
 }
 
@@ -69,9 +52,15 @@ export function useGoogleSignIn() {
     const { toast } = useToast();
 
     return useMutation({
-        mutationFn: loginWithGoogle,
+        mutationFn: () => {
+            const provider = new GoogleAuthProvider();
+            return signInWithPopup(getAuth(app), provider);
+        },
         onSuccess: async (userCredential) => {
-            const isNewUser = userCredential.isNewUser;
+            const { getAdditionalUserInfo } = await import('firebase/auth');
+            const info = getAdditionalUserInfo(userCredential);
+            const isNewUser = info?.isNewUser;
+            
             if (isNewUser) {
                 await handleFirstSignIn(userCredential.user);
             }
@@ -110,7 +99,6 @@ export function usePhoneSignIn() {
         setError(null);
         try {
             const userCredential = await confirmationResult.confirm(otp);
-            // After successful OTP verification, handle first sign-in logic
             const { getAdditionalUserInfo } = await import('firebase/auth');
             const info = getAdditionalUserInfo(userCredential);
             if (info?.isNewUser) {
@@ -135,7 +123,7 @@ export function useLogout() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: serviceLogoutUser,
+    mutationFn: () => signOut(getAuth(app)),
     onSuccess: () => {
       queryClient.clear(); // Clear all user data from cache
       router.push('/login');
@@ -150,16 +138,7 @@ export function useSignup(options?: { onSuccess?: (data: any) => void }) {
 
     return useMutation({
         mutationFn: async (credentials: SignupCredentials) => {
-            const userCredential = await serviceSignupUser(credentials);
-            const token = await userCredential.user.getIdToken();
-            const profileData: Partial<UserProfile> = {
-                id: userCredential.user.uid,
-                name: credentials.name,
-                email: credentials.email,
-            };
-            // After creating the auth user, create the profile in Firestore
-            await updateUserAction(userCredential.user.uid, profileData);
-            return userCredential;
+            return signupAction(credentials);
         },
         onSuccess: (data) => {
             toast({
@@ -170,7 +149,6 @@ export function useSignup(options?: { onSuccess?: (data: any) => void }) {
             options?.onSuccess?.(data);
         },
         onError: (error) => {
-            // Error handling is now in the component to allow for form-specific errors
             handleErrorUtility(error, 'Signup Failed');
         }
     });
@@ -180,7 +158,7 @@ export function useForgotPassword() {
     const { toast } = useToast();
     const router = useRouter();
     return useMutation({
-        mutationFn: (email: string) => forgotPasswordService(email),
+        mutationFn: (email: string) => sendPasswordResetEmail(getAuth(app), email),
         onSuccess: () => {
             toast({
                 title: "Password Reset Email Sent",
@@ -194,12 +172,10 @@ export function useForgotPassword() {
 
 
 export function useSendPasswordReset() {
-  const { firebaseUser } = useAuth();
   const { toast } = useToast();
   return useMutation({
     mutationFn: async (userId: string) => {
-      if (!firebaseUser) throw new Error("Admin not authenticated.");
-      const token = await firebaseUser.getIdToken();
+      // Server action handles auth check
       return resetPasswordAction(userId);
     },
     onSuccess: (data) => {

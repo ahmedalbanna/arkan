@@ -2,24 +2,23 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createUserAction, deleteUserAction, getUserProfileAction, updateUserAction, sendNotificationAction } from '@/app/actions/userActions';
+import { 
+  createUserAction, 
+  deleteUserAction, 
+  getUserProfileAction, 
+  updateUserAction, 
+  sendNotificationAction 
+} from '@/app/actions/userActions';
 import { User, type UserProfile } from '@/lib/models';
 import { userKeys } from '@/lib/query-keys';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
-
 
 // ============================================================================
 // Query Hooks (for fetching data)
 // ============================================================================
 
-/**
- * Fetches a specific user's profile.
- * Requires authentication.
- * @param userId - The ID of the user to fetch.
- */
 export function useUserProfile(userId: string) {
   const { firebaseUser } = useAuth();
 
@@ -34,18 +33,12 @@ export function useUserProfile(userId: string) {
   });
 }
 
-
 // ============================================================================
 // Mutation Hooks (for creating, updating, deleting data)
 // ============================================================================
 
-/**
- * Mutation hook for creating a new user.
- * Requires admin privileges.
- */
 export function useCreateUser(options?: { onSuccess?: (data: any) => void }) {
   const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
   return useMutation({
     mutationFn: async (data: any) => {
       return createUserAction(data);
@@ -58,20 +51,14 @@ export function useCreateUser(options?: { onSuccess?: (data: any) => void }) {
   });
 }
 
-/**
- * Mutation hook for updating a user's profile.
- * Requires authentication. Admins can update any user, regular users can only update their own.
- */
 export function useUpdateUser() {
   const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
   return useMutation({
     mutationFn: async (variables: { userId: string; data: Partial<UserProfile> }) => {
       return updateUserAction(variables.userId, variables.data);
     },
     onSuccess: (data) => {
       toast({ title: 'Success', description: 'User profile has been successfully updated.' });
-      // Invalidate both the list and the specific user's detail query
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
       queryClient.invalidateQueries({ queryKey: userKeys.profile(data.id) });
     },
@@ -79,18 +66,13 @@ export function useUpdateUser() {
   });
 }
 
-/**
- * Mutation hook for deleting a user.
- * Requires admin privileges.
- */
 export function useDeleteUser() {
   const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
   return useMutation({
     mutationFn: async (userId: string) => {
       return deleteUserAction(userId);
     },
-    onSuccess: (data, userId) => {
+    onSuccess: (_, userId) => {
       toast({ title: "User Deleted", description: `User with ID ${userId} has been removed.` });
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
     },
@@ -98,12 +80,7 @@ export function useDeleteUser() {
   });
 }
 
-/**
- * Mutation hook for sending a notification to a user.
- * Requires admin privileges.
- */
 export function useSendNotification() {
-  const { firebaseUser } = useAuth();
   return useMutation({
     mutationFn: async (variables: {
       userId: string;
@@ -118,7 +95,6 @@ export function useSendNotification() {
     },
     onError: (error: any) => {
       let errorMessage = 'Failed to send notification.';
-      // We don't want to bother the admin with "token not found" errors, as they are common.
       if (error?.message && !error.message.includes('token not found')) {
         errorMessage = error.message;
       }
