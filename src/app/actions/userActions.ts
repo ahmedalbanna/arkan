@@ -38,7 +38,7 @@ export async function getPaginatedUsers({ limit, lastVisibleId }: { limit: numbe
     const snapshot = await query.get();
     const users = snapshot.docs.slice(0, limit).map(doc => ({ id: doc.id, ...doc.data() })) as UserProfile[];
     const hasNextPage = snapshot.docs.length > limit;
-    const newLastVisibleId = hasNextPage ? snapshot.docs[snapshot.docs.length - 2].id : null;
+    const newLastVisibleId = hasNextPage && users.length > 0 ? users[users.length - 1].id : null;
 
     return { users, hasNextPage, lastVisibleId: newLastVisibleId };
 }
@@ -173,16 +173,6 @@ export async function createUserAction(data: z.infer<typeof createUserSchema>) {
 
   await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);
   return { user: { uid: userRecord.uid, email: userRecord.email } };
-}
-
-export async function resetPasswordAction(userId: string) {
-  await requireAdmin();
-  const user = await getUserProfile(userId);
-  if (!user?.email) throw new Error('User not found or has no email');
-  const link = await adminAuth.generatePasswordResetLink(user.email);
-  // In a real app, you would email this link to the user.
-  console.log(`Password reset link for ${user.email}: ${link}`);
-  return { message: `A password reset link has been generated for ${user.email}.` };
 }
 
 export async function uploadProfilePictureAction(formData: FormData) {

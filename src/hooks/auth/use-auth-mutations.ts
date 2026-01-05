@@ -8,9 +8,8 @@ import { getUserProfileAction, createUserAction } from '@/app/actions/userAction
 import type { LoginCredentials, SignupCredentials } from '@/lib/types';
 import { useToast } from '@/hooks/util/use-toast';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
-import { useAuth } from '@/context/AuthContext';
 import { userKeys } from '@/lib/query-keys';
-import { getAuth, signInWithPhoneNumber, type ConfirmationResult, type User as FirebaseUser, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, sendPasswordResetEmail } from "firebase/auth";
+import { getAuth, signInWithPhoneNumber, type ConfirmationResult, type User as FirebaseUser, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
 import { app } from '@/lib/firebase/client-init';
 import { useState } from 'react';
 
@@ -36,12 +35,9 @@ async function handleFirstSignIn(user: FirebaseUser) {
     const existingProfile = await getUserProfileAction(user.uid);
     if (!existingProfile) {
         // Profile doesn't exist, so create it using the standard creation action.
-        // This ensures default credits and roles are set correctly.
         const signupData = {
             name: user.displayName || `User-${user.uid.slice(0, 5)}`,
             email: user.email || `${user.uid}@example.com`,
-            // This password is not used for social sign-in but fulfills the action's schema.
-            // It will be immediately overwritten by the social provider's auth method.
             password: Math.random().toString(36).slice(-8), 
         };
         await signupAction(signupData as SignupCredentials);
