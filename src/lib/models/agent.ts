@@ -1,5 +1,4 @@
 
-
 // New, simplified Agent structure for Firestore
 export interface AgentProperties {
   id: string;

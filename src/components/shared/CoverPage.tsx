@@ -5,7 +5,7 @@ import { Project } from '@/lib/models';
 import { Landmark, UploadCloud, Frame, Loader2, Book, Building, Brush, BookCopy } from 'lucide-react';
 import Image from 'next/image';
 import React, { useRef, useState } from 'react';
-import ContentEditable from 'react-contenteditable';
+import ContentEditable, { ContentEditableEvent } from 'react-contenteditable';
 import { useBuilderStore } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
 import { useImageUpload } from '@/hooks/core/useImageUpload';
@@ -20,7 +20,7 @@ interface CoverPageProps {
 const EditableField: React.FC<{
   html: string;
   onBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: ContentEditableEvent) => void;
   placeholder: string;
   className: string;
   tagName?: 'p' | 'div' | 'h1';

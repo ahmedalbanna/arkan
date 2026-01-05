@@ -1,5 +1,4 @@
 
-
 import { z } from 'zod';
 import { SectionPropertiesSchema } from './section';
 import { Template, type BaseTemplateProperties } from './template';
@@ -30,6 +29,10 @@ export const UpdateReportTemplateSchema = ReportTemplatePropertiesSchema.omit({ 
 // Corresponds to ReportGenerationTemplateSchema from the Zod schemas
 export interface ReportTemplateProperties extends BaseTemplateProperties {
   isDefault?: boolean;
+  content?: {
+    title: string;
+    sections: z.infer<typeof SectionPropertiesSchema>[];
+  }[];
 }
 
 export class ReportTemplate extends Template {

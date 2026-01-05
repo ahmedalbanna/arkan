@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { unified } from 'unified';
@@ -21,7 +20,7 @@ import { getNodeText } from '@/lib/pptx-convert/ast-utils';
  */
 export function parseMarkdownToContent(markdown: string, existingContent: ProjectContent, isToc: boolean = false): ProjectContent {
   const ast = unified().use(remarkParse).use(remarkGfm).parse(markdown) as MdastRoot;
-  const newContent: ProjectContent = [];
+  const newContent: (Chapter | Section)[] = [];
   let currentChapter: Chapter | null = null;
   let currentSection: Section | null = null;
   let accumulatedContent: RootContent[] = [];
@@ -60,7 +59,7 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
       } else {
         const existingIndex = newContent.findIndex(item => item.id === currentSection!.id);
         if(existingIndex !== -1) {
-          newContent[existingIndex] = currentSection;
+          (newContent as (Chapter | Section)[])[existingIndex] = currentSection;
         } else {
           newContent.push(currentSection);
         }
@@ -74,7 +73,7 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
     if (currentChapter) {
         const chapterIndex = newContent.findIndex(c => c.id === currentChapter!.id);
         if(chapterIndex !== -1) {
-            newContent[chapterIndex] = currentChapter;
+            (newContent as (Chapter | Section)[])[chapterIndex] = currentChapter;
         } else {
             newContent.push(currentChapter);
         }
@@ -89,7 +88,7 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
       if (node.depth === 1) { // Chapter
         flushChapter();
         const existingChapter = findExistingChapter(title);
-        currentChapter = new Chapter({ id: existingChapter?.id, title: title, sections: existingChapter?.sections || [] });
+        currentChapter = new Chapter({ id: existingChapter?.id, title: title, sections: existingChapter?.sections });
         currentSection = null; // Reset section when a new chapter starts
       } else { // Section
         flushSection();
@@ -101,10 +100,10 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
             content: existingSection?.content, // Preserve existing content
             controls: existingSection?.controls,
             prompt: existingSection?.prompt,
-            rules: existingSection?.rules,
-            guidelines: existingSection?.guidelines,
-            constraints: existingSection?.constraints,
-            behaviors: existingSection?.behaviors,
+            rules: Array.isArray(existingSection?.rules) ? [...existingSection.rules] : [],
+            guidelines: Array.isArray(existingSection?.guidelines) ? [...existingSection.guidelines] : [],
+            constraints: Array.isArray(existingSection?.constraints) ? [...existingSection.constraints] : [],
+            behaviors: Array.isArray(existingSection?.behaviors) ? [...existingSection.behaviors] : [],
             context: existingSection?.context,
         });
       }
@@ -122,10 +121,10 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
                     content: existingSection?.content,
                     controls: existingSection?.controls,
                     prompt: existingSection?.prompt,
-                    rules: existingSection?.rules,
-                    guidelines: existingSection?.guidelines,
-                    constraints: existingSection?.constraints,
-                    behaviors: existingSection?.behaviors,
+                    rules: existingSection?.rules ? [...existingSection.rules] : [],
+                    guidelines: existingSection?.guidelines ? [...existingSection.guidelines] : [],
+                    constraints: existingSection?.constraints ? [...existingSection.constraints] : [],
+                    behaviors: existingSection?.behaviors ? [...existingSection.behaviors] : [],
                     context: existingSection?.context,
                 });
                 flushSection(); // Immediately add the section

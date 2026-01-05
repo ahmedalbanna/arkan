@@ -17,7 +17,7 @@ import Image from 'next/image';
 import { Label } from '../../ui/label';
 import { CustomSelect } from '../../ui/CustomSelect';
 import { useImageUpload } from '@/hooks/core/useImageUpload';
-import { LanguageSchema, BehaviorSchema, type Behavior, type ProjectProperties } from '@/lib/models';
+import { LanguageSchema, BehaviorSchema, type Behavior, type ProjectProperties, CitationStyleSchema } from '@/lib/models';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Slider } from '../../ui/slider';
 import { Badge } from '../../ui/badge';
@@ -136,8 +136,10 @@ export default function ProjectSettingsPanel() {
       const updatePayload: Partial<ProjectProperties> = { ...data };
       if (data.teamMembers) {
         updatePayload.teamMembers = data.teamMembers.split(',').map(name => name.trim()).filter(Boolean);
+      } else {
+        updatePayload.teamMembers = [];
       }
-      Object.assign(p, updatePayload);
+      return p.with(updatePayload);
     });
   };
 

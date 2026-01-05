@@ -12,6 +12,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import type { ReportTemplateProperties } from '@/lib/models';
 import { MarkdownViewer } from '@/components/shared/MarkdownViewer';
 import { Label } from '@/components/ui/label';
+import { useBuilderStore } from '@/hooks';
 
 function TemplateCard({ template, onSelect }: { template: ReportTemplateProperties; onSelect: () => void }) {
   return (
@@ -26,7 +27,7 @@ function TemplateCard({ template, onSelect }: { template: ReportTemplateProperti
         <CardTitle className="text-base">{template.name}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-xs text-muted-foreground min-h-[40px] line-clamp-3">{template.description}</p>
+        <p className="text-sm text-muted-foreground min-h-[40px] line-clamp-3">{template.description}</p>
       </CardContent>
     </Card>
   );
@@ -36,7 +37,7 @@ function TemplatePreview({ template, onApply, onBack, isLoading }: { template: R
   const tocMarkdown = useMemo(() => {
     if (!template.content) return '';
     return template.content.map(chapter => 
-      `# ${chapter.title}\n${chapter.sections.map(section => `  - ${section.title}`).join('\n')}`
+      `# ${chapter.title}\n${(chapter.sections || []).map(section => `  - ${section.title}`).join('\n')}`
     ).join('\n\n');
   }, [template]);
 
@@ -66,6 +67,7 @@ export default function ApplyTemplatePanel() {
   const { data: templates, isLoading, isError, error } = useReportTemplates();
   const [searchQuery, setSearchQuery] = useState('');
   const [previewTemplate, setPreviewTemplate] = useState<ReportTemplateProperties | null>(null);
+  const { updateProject } = useBuilderStore();
 
   const { handleSelectTemplate, isApplyingTemplate } = useApplyReportTemplate(() => {
     setPreviewTemplate(null); // Go back to list after applying
@@ -79,12 +81,20 @@ export default function ApplyTemplatePanel() {
         template.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [templates, searchQuery]);
-
+  
   if (previewTemplate) {
     return (
       <TemplatePreview 
         template={previewTemplate}
-        onApply={() => handleSelectTemplate(previewTemplate)}
+        onApply={() => {
+            const tocMarkdown = previewTemplate.content?.map(chapter => 
+                `# ${chapter.title}\n${(chapter.sections || []).map(section => `  - ${section.title}`).join('\n')}`
+            ).join('\n\n');
+            if (tocMarkdown) {
+                updateProject(p => p.parseAndSetContentFromToc(tocMarkdown));
+            }
+            handleSelectTemplate(previewTemplate)
+        }}
         onBack={() => setPreviewTemplate(null)}
         isLoading={isApplyingTemplate}
       />

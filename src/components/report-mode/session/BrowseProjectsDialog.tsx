@@ -44,7 +44,7 @@ function ProjectCard({ project, onLoad, isLoading }: ProjectCardProps) {
             <CardHeader>
                 <CardTitle className="truncate">{project.name || "Untitled Project"}</CardTitle>
                 <CardDescription>
-                    {project.updatedAt ? `Updated ${formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}` : 'Not updated recently'}
+                    {project.meta.updated ? `Updated ${formatDistanceToNow(new Date(project.meta.updated), { addSuffix: true })}` : 'Not updated recently'}
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex-grow">

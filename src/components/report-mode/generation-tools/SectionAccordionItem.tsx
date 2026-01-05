@@ -42,7 +42,7 @@ const MemoizedSectionAccordionItem = React.memo(function SectionAccordionItem({
         userProfile, 
     } = useBuilderStore();
     
-    const { generateSectionMutation } = useAiActions();
+    const { generateSectionMutation, generateChapterMutation, generateProjectMutation } = useAiActions();
 
     const section = project?.getSection(sectionId);
     
@@ -58,7 +58,7 @@ const MemoizedSectionAccordionItem = React.memo(function SectionAccordionItem({
     if (!section) return null;
 
     const isGenerating = generateSectionMutation?.isPending && generateSectionMutation.variables === sectionId;
-    const isAnythingGenerating = generateSectionMutation?.isPending || useBuilderStore.getState().chapterMutation?.isPending || useBuilderStore.getState().projectMutation?.isPending;
+    const isAnythingGenerating = generateSectionMutation?.isPending || generateChapterMutation.isPending || generateProjectMutation.isPending;
     const hasCredits = (userProfile?.credits ?? 0) >= 1;
     const canGenerate = hasCredits && !isAnythingGenerating;
 

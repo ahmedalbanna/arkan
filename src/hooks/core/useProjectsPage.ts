@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
@@ -12,7 +13,7 @@ export function useProjectsPage() {
     const router = useRouter();
     const { toast } = useToast();
     const { projects, isLoading, isError, error, refetch, isRefetching } = useProjects();
-    const { loadProject, setIsCreateProjectOpen } = useBuilderStore();
+    const { loadProject } = useBuilderStore();
     const deleteMutation = useDeleteProject();
 
     const handleLoadProject = (project: Project) => {
@@ -25,7 +26,11 @@ export function useProjectsPage() {
     };
 
     const handleCreateNewProject = () => {
-        setIsCreateProjectOpen(true);
+        // This logic is now handled by the newSession method in the store
+        // which can be triggered from the UI.
+        const { newSession } = useBuilderStore.getState();
+        newSession();
+        router.push('/builder');
     };
 
     return {

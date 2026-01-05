@@ -7,7 +7,7 @@ import { ExternalContext, type ExternalContextProperties } from './external-cont
 import type { ReportTemplateProperties } from './reportTemplate';
 import { arrayMove } from '@dnd-kit/sortable';
 import { parseMarkdownToContent } from '@/hooks/util/useMarkdownParser';
-import { Language, Complexity, Behavior } from './control-types';
+import { Language, Behavior, CitationStyleSchema } from './control-types';
 
 // Flexible Type for Project Content - strictly enforcing structure now
 export type ProjectContent = readonly (Chapter | Section)[];
@@ -27,7 +27,7 @@ export interface ProjectProperties {
   logoUrl?: string;
   universityLogoUrl?: string;
   content?: (Chapter | Section | ChapterProperties | SectionProperties)[];
-  externalContext?: ExternalContext[];
+  externalContext?: ExternalContextProperties[];
   meta?: {
     author?: string;
     version?: string;
@@ -60,9 +60,9 @@ export class Project {
   public readonly teamMembers?: readonly string[];
   public readonly logoUrl?: string;
   public readonly universityLogoUrl?: string;
-  public tableOfContentsMarkdown?: string;
+  public readonly tableOfContentsMarkdown?: string;
 
-  public content: ProjectContent; // Made mutable to be updated by store logic
+  public readonly content: ProjectContent;
   public readonly externalContext: readonly ExternalContext[];
   public readonly meta: Readonly<Required<NonNullable<ProjectProperties['meta']>>>;
   public readonly activeSectionId?: string;
@@ -287,13 +287,13 @@ export class Project {
 
   public addExternalContext(ctx: Omit<ExternalContextProperties, 'id'>): Project {
     const newCtx = new ExternalContext({ ...ctx, id: uuidv4() });
-    return this.with({ externalContext: [...this.externalContext, newCtx] });
+    return this.with({ externalContext: [...this.externalContext.map(ec => ec.toStateObject()), newCtx.toStateObject()] });
   }
 
   public removeExternalContext(index: number): Project {
     const newContext = [...this.externalContext];
     newContext.splice(index, 1);
-    return this.with({ externalContext: newContext });
+    return this.with({ externalContext: newContext.map(ec => ec.toStateObject()) });
   }
 
   public updateExternalContextType(index: number, type: any): Project {
@@ -302,7 +302,7 @@ export class Project {
     if (item) {
       newContext[index] = item.with({ type });
     }
-    return this.with({ externalContext: newContext });
+    return this.with({ externalContext: newContext.map(ec => ec.toStateObject()) });
   }
 
   public generateCoverPageMarkdown(): Project {
@@ -370,11 +370,14 @@ ${universityText}
             const sourceChapter = newContent[sourceChapterIndex] as Chapter;
             let destChapter = newContent[destChapterIndex] as Chapter;
 
-            const [movedSection] = sourceChapter.sections.splice(activeSectionIndex, 1);
-            destChapter.sections.splice(overSectionIndex, 0, movedSection);
+            const [movedSection] = [...sourceChapter.sections].splice(activeSectionIndex, 1);
+            const newDestSections = [...destChapter.sections];
+            newDestSections.splice(overSectionIndex, 0, movedSection);
 
-            newContent[sourceChapterIndex] = sourceChapter.with({ sections: [...sourceChapter.sections] });
-            newContent[destChapterIndex] = destChapter.with({ sections: [...destChapter.sections] });
+            const newSourceSections = sourceChapter.sections.filter((_, i) => i !== activeSectionIndex);
+
+            (newContent[sourceChapterIndex] as Chapter) = sourceChapter.with({ sections: newSourceSections });
+            (newContent[destChapterIndex] as Chapter) = destChapter.with({ sections: newDestSections });
 
             return this.with({ content: newContent });
         }
@@ -442,7 +445,7 @@ ${universityText}
       logoUrl: this.logoUrl,
       universityLogoUrl: this.universityLogoUrl,
       tableOfContentsMarkdown: this.tableOfContentsMarkdown,
-      content: this.content.map(c => c.toJSON()),
+      content: this.content.map(c => c.toStateObject()),
       externalContext: this.externalContext.map(ec => ec.toStateObject()),
       meta: this.meta,
       activeSectionId: this.activeSectionId,
