@@ -72,23 +72,4 @@ export async function forgotPasswordService(email: string) {
   return sendPasswordResetEmail(auth, email);
 }
 
-export async function sendPasswordResetEmailApi(userId: string, token: string) {
-  return apiService({
-    endpoint: `/api/users/${userId}/reset-password`,
-    method: 'POST',
-    token,
-  });
-}
-
-/**
- * Creates or updates a user profile document in Firestore.
- * This is now the single source of truth for creating profiles.
- */
-export async function createOrUpdateUserProfileApi(userId: string, data: Partial<UserProfile>, token: string): Promise<UserProfile> {
-    return apiService({
-        endpoint: `/api/users/${userId}`,
-        method: 'PUT',
-        data,
-        token
-    });
-}
+// Deprecated: moved to server actions (resetPasswordAction, updateUserAction)

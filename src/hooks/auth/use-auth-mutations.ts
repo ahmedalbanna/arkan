@@ -9,9 +9,9 @@ import {
   serviceLogoutUser,
   serviceSignupUser,
   forgotPasswordService,
-  sendPasswordResetEmailApi,
-  createOrUpdateUserProfileApi, // Import the new service
 } from '@/services/api/authService';
+import { updateUserAction, resetPasswordAction } from '@/app/actions/userActions';
+import { fetchUserProfileApi } from '@/services/api/userService';
 import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
 import { useToast } from '@/hooks/util/use-toast';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
@@ -53,7 +53,7 @@ async function handleFirstSignIn(user: FirebaseUser) {
                 name: user.displayName || `User ${user.uid.slice(0,6)}`,
                 email: user.email || '',
             };
-            await createOrUpdateUserProfileApi(user.uid, profileData, token);
+            await updateUserAction(user.uid, profileData);
         }
     } catch (error) {
         // Handle cases where the initial fetch fails for reasons other than 404
@@ -157,7 +157,7 @@ export function useSignup(options?: { onSuccess?: (data: any) => void }) {
                 email: credentials.email,
             };
             // After creating the auth user, create the profile in Firestore
-            await createOrUpdateUserProfileApi(userCredential.user.uid, profileData, token);
+            await updateUserAction(userCredential.user.uid, profileData);
             return userCredential;
         },
         onSuccess: (data) => {
@@ -199,7 +199,7 @@ export function useSendPasswordReset() {
     mutationFn: async (userId: string) => {
       if (!firebaseUser) throw new Error("Admin not authenticated.");
       const token = await firebaseUser.getIdToken();
-      return sendPasswordResetEmailApi(userId, token);
+      return resetPasswordAction(userId);
     },
     onSuccess: (data) => {
       toast({

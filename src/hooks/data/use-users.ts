@@ -2,13 +2,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  createUserService,
-  deleteUserApi,
-  fetchUserProfileApi,
-  updateUserApi,
-  sendNotificationApi,
-} from '@/services/api/userService';
+import { createUserAction, deleteUserAction, getUserProfileAction, updateUserAction, sendNotificationAction } from '@/app/actions/userActions';
 import { User, type UserProfile } from '@/lib/models';
 import { userKeys } from '@/lib/query-keys';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
@@ -33,9 +27,7 @@ export function useUserProfile(userId: string) {
     queryKey: userKeys.profile(userId),
     queryFn: async () => {
       if (!firebaseUser) return null;
-      const token = await getAuthenticatedToken(firebaseUser);
-      const userProfile = await fetchUserProfileApi(userId, token);
-      // Instantiate the User class to include methods
+      const userProfile = await getUserProfileAction(userId);
       return userProfile ? new User(userProfile) : null;
     },
     enabled: !!firebaseUser && !!userId,
@@ -56,8 +48,7 @@ export function useCreateUser(options?: { onSuccess?: (data: any) => void }) {
   const { firebaseUser } = useAuth();
   return useMutation({
     mutationFn: async (data: any) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return createUserService(data, token);
+      return createUserAction(data);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
@@ -76,8 +67,7 @@ export function useUpdateUser() {
   const { firebaseUser } = useAuth();
   return useMutation({
     mutationFn: async (variables: { userId: string; data: Partial<UserProfile> }) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return updateUserApi(variables.userId, variables.data, token);
+      return updateUserAction(variables.userId, variables.data);
     },
     onSuccess: (data) => {
       toast({ title: 'Success', description: 'User profile has been successfully updated.' });
@@ -98,8 +88,7 @@ export function useDeleteUser() {
   const { firebaseUser } = useAuth();
   return useMutation({
     mutationFn: async (userId: string) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return deleteUserApi(userId, token);
+      return deleteUserAction(userId);
     },
     onSuccess: (data, userId) => {
       toast({ title: "User Deleted", description: `User with ID ${userId} has been removed.` });
@@ -122,8 +111,7 @@ export function useSendNotification() {
       body: string;
       link?: string;
     }) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return sendNotificationApi(variables, token);
+      return sendNotificationAction(variables);
     },
     onSuccess: () => {
       toast({ title: 'Notification Sent', description: 'The user has been notified of the changes.' });

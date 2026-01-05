@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore, useInitializeBuilderStore } from '@/hooks';
 import { userKeys } from '@/lib/query-keys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { updateUserAction } from '@/app/actions/userActions';
 import { useCallback, useEffect, useState } from 'react';
 
 export function useBuilderPageLogic() {
@@ -26,14 +27,7 @@ export function useBuilderPageLogic() {
   const onboardingMutation = useMutation({
     mutationFn: async () => {
       if (!firebaseUser) throw new Error('User not authenticated');
-      const token = await firebaseUser.getIdToken();
-      const response = await fetch(`/api/users/${firebaseUser.uid}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ hasCompletedOnboarding: true })
-      });
-      if (!response.ok) throw new Error('Failed to update onboarding status');
-      return response.json();
+      return updateUserAction(firebaseUser.uid, { hasCompletedOnboarding: true });
     },
     onSuccess: () => {
       // Refetch user data to get the updated onboarding status
