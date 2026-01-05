@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { signupAction, resetPasswordAction } from '@/app/actions/authActions';
 import { getUserProfileAction, createUserAction } from '@/app/actions/userActions';
-import type { LoginCredentials, SignupCredentials } from '@/lib/types';
+import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
 import { useToast } from '@/hooks/util/use-toast';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
 import { userKeys } from '@/lib/query-keys';
@@ -21,10 +21,22 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: (credentials: LoginCredentials) => signInWithEmailAndPassword(getAuth(app), credentials.email, credentials.password),
-    onSuccess: (user) => {
-      queryClient.invalidateQueries({ queryKey: userKeys.all }); // Refetch user data
-      router.push('/builder');
-      toast({ title: "Welcome back!" });
+    onSuccess: async (userCredential) => {
+        const user = userCredential.user;
+        // After successful sign-in, fetch the user's profile to check their role
+        const userProfile = await getUserProfileAction(user.uid);
+        
+        queryClient.invalidateQueries({ queryKey: userKeys.profile(user.uid) });
+        queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+        
+        toast({ title: "Welcome back!" });
+
+        // Redirect based on the user's role
+        if (userProfile?.role === 'admin') {
+            router.push('/admin/dashboard');
+        } else {
+            router.push('/builder');
+        }
     },
     onError: (error) => handleErrorUtility(error, "Login Failed")
   });
@@ -34,13 +46,12 @@ export function useLogin() {
 async function handleFirstSignIn(user: FirebaseUser) {
     const existingProfile = await getUserProfileAction(user.uid);
     if (!existingProfile) {
-        // Profile doesn't exist, so create it using the standard creation action.
         const signupData = {
             name: user.displayName || `User-${user.uid.slice(0, 5)}`,
             email: user.email || `${user.uid}@example.com`,
-            password: Math.random().toString(36).slice(-8), 
+            password: Math.random().toString(36).slice(-8), // Dummy password for social sign-in
         };
-        await signupAction(signupData as SignupCredentials);
+        await createUserAction(signupData as any);
     }
 }
 
@@ -63,9 +74,17 @@ export function useGoogleSignIn() {
             if (isNewUser) {
                 await handleFirstSignIn(userCredential.user);
             }
+            
+            const userProfile = await getUserProfileAction(userCredential.user.uid);
+            
             queryClient.invalidateQueries({ queryKey: userKeys.all });
-            router.push('/builder');
             toast({ title: `Welcome, ${userCredential.user.displayName}!` });
+
+            if (userProfile?.role === 'admin') {
+                router.push('/admin/dashboard');
+            } else {
+                router.push('/builder');
+            }
         },
         onError: (error) => handleErrorUtility(error, "Google Sign-In Failed")
     });
