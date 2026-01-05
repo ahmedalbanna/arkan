@@ -103,7 +103,7 @@ export class Project {
       }
       return new Section(c as SectionProperties);
     });
-    this.externalContext = (props.externalContext || []).map(ec => new ExternalContext(ec));
+    this.externalContext = (props.externalContext || []).map(ec => ec instanceof ExternalContext ? ec : new ExternalContext(ec));
 
     this.meta = {
       author: props.meta?.author || 'User',
@@ -356,7 +356,7 @@ ${universityText}
     const { chapter: activeChapter, index: activeSectionIndex } = this.findSectionWithParent(activeId) || {};
     const { chapter: overChapter, index: overSectionIndex } = this.findSectionWithParent(overId) || {};
 
-    if (activeChapter && overChapter && activeSectionIndex !== -1 && overSectionIndex !== -1) {
+    if (activeChapter && overChapter && activeSectionIndex > -1 && overSectionIndex > -1) {
         if (activeChapter.id === overChapter.id) {
             // Reordering within the same chapter
             const newSections = arrayMove([...activeChapter.sections], activeSectionIndex, overSectionIndex);
