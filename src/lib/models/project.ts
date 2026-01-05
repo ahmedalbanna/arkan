@@ -97,10 +97,11 @@ export class Project {
       if (c instanceof Chapter || c instanceof Section) {
         return c;
       }
-      // Check if it has a 'sections' property to determine if it's a Chapter
-      if ('sections' in c && Array.isArray(c.sections)) {
+      // Check if it's a plain object that looks like a Chapter
+      if (typeof c === 'object' && 'sections' in c && Array.isArray(c.sections)) {
         return new Chapter(c as ChapterProperties);
       }
+      // Assume it's a Section
       return new Section(c as SectionProperties);
     });
     this.externalContext = (props.externalContext || []).map(ec => ec instanceof ExternalContext ? ec : new ExternalContext(ec));
