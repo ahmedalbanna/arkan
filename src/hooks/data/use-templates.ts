@@ -15,10 +15,26 @@ import {
     updatePresentationTemplateApi,
     deletePresentationTemplateApi,
 } from '@/services/api/templateService';
-import type { ReportTemplateProperties, CreateReportTemplateData, UpdateReportTemplateData, PresentationTemplateProperties, CreatePresentationTemplateData, UpdatePresentationTemplateData, ProjectProperties, SectionProperties } from '@/lib/models';
+import {
+    type ReportTemplateProperties,
+    CreateReportTemplateSchema,
+    UpdateReportTemplateSchema,
+    PptxTemplateProperties,
+    ReportTemplateChapterSchema
+} from '@/lib/models';
+
 import { useBuilderStore } from '../core/useBuilderStore';
 import { useState } from 'react';
 import { useSections } from './use-sections';
+import { z } from 'zod';
+
+// Correctly infer types from Zod schemas
+type CreateReportTemplateData = z.infer<typeof CreateReportTemplateSchema>;
+type UpdateReportTemplateData = z.infer<typeof UpdateReportTemplateSchema>;
+type PresentationTemplateProperties = PptxTemplateProperties; // Assuming it's the same structure for now
+type CreatePresentationTemplateData = any; // Define properly if needed
+type UpdatePresentationTemplateData = any; // Define properly if needed
+
 
 // ============================================================================
 // REPORT GENERATION TEMPLATES
@@ -47,7 +63,9 @@ export function useApplyReportTemplate(onSuccessCallback?: () => void) {
         try {
             updateProject(p => p.applyTemplate(template, allSections || []));
             toast({ title: "Template Applied", description: `Project structured with '${template.name}'.` });
-            onSuccessCallback?.();
+            if (onSuccessCallback) {
+                onSuccessCallback();
+            }
         } catch (error: any) {
             toast({ title: 'Failed to Apply Template', description: error.message, variant: 'destructive' });
         } finally {

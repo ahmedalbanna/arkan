@@ -49,7 +49,7 @@ export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDia
   const {
       handleSelectTemplate,
       isApplyingTemplate,
-  } = useApplyReportTemplate(onOpenChange);
+  } = useApplyReportTemplate(() => onOpenChange(false));
 
 
   const filteredTemplates = useMemo(() => {

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -14,6 +15,29 @@ import { fetchTransactionsForReport } from '@/services';
 import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { convertMarkdownToPdf } from '@/lib/utils/pdf-utils';
+import type { TransactionProperties } from '@/lib/models';
+
+function formatTransactionsToMarkdown(transactions: TransactionProperties[], dateRange: DateRange): string {
+    let markdown = `# Financial Report\n\n`;
+    markdown += `**Date Range:** ${format(dateRange.from!, "LLL dd, y")} - ${format(dateRange.to!, "LLL dd, y")}\n\n`;
+    markdown += `| Transaction ID | User Name | Plan | Amount | Status | Date |\n`;
+    markdown += `|---|---|---|---|---|---|\n`;
+
+    let totalVerified = 0;
+    transactions.forEach(t => {
+        markdown += `| ${t.id.slice(0, 8)} | ${t.userName} | ${t.planName} | $${t.price.toFixed(2)} | ${t.status} | ${new Date(t.createdAt).toLocaleDateString()} |\n`;
+        if (t.status === 'verified') {
+            totalVerified += t.price;
+        }
+    });
+
+    markdown += `\n## Summary\n\n`;
+    markdown += `- **Total Transactions:** ${transactions.length}\n`;
+    markdown += `- **Total Verified Revenue:** $${totalVerified.toFixed(2)}\n`;
+
+    return markdown;
+}
+
 
 export function FinancialReportExporter() {
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
@@ -49,7 +73,8 @@ export function FinancialReportExporter() {
                 return;
             }
 
-            await convertMarkdownToPdf(transactions, dateRange);
+            const markdownReport = formatTransactionsToMarkdown(transactions, dateRange);
+            await convertMarkdownToPdf(markdownReport, `Financial_Report_${format(new Date(), 'yyyy-MM-dd')}`);
 
         } catch (error: any) {
             toast({
