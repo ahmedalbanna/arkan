@@ -2,6 +2,7 @@
 
 const API_ENDPOINT = '/api/svg-conversion';
 
+// Deprecated: use server action convertImageToSvgAction instead
 export async function convertImageToSvgApi(formData: FormData): Promise<string> {
     try {
         const response = await fetch(API_ENDPOINT, {

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { convertImageToSvgApi } from '@/services/api/imageConversionService';
+import { convertImageToSvgAction } from '@/app/actions/imageConversionActions';
 import { useToast } from '@/hooks/util/use-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
@@ -62,7 +62,7 @@ export function useImageToSvgLogic() {
   });
 
   const mutation = useMutation({
-    mutationFn: (formData: FormData) => convertImageToSvgApi(formData),
+    mutationFn: (formData: FormData) => convertImageToSvgAction(formData),
     onSuccess: (data) => {
       setSvgResult(data);
       toast({ title: 'Conversion Successful', description: 'Image has been converted to SVG.' });

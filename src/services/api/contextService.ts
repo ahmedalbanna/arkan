@@ -1,6 +1,8 @@
 
 'use client';
 
+// Deprecated: migrate to server action analyzeContextAction
+
 import type { AnalyzeContextOutput } from '@/ai/schemas';
 import type { ExternalContext } from '@/lib/types';
 

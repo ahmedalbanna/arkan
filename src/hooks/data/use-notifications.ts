@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { rtdb } from '@/lib/firebase/client-init';
 import { ref, onValue, off } from 'firebase/database';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { markNotificationsAsReadAction, clearNotificationsAction } from '@/app/actions/notificationActions';
 import type { Notification } from '@/lib/types';
 import { toast } from '@/hooks/util/use-toast';
 import { notificationKeys } from '@/lib/query-keys';
@@ -48,6 +49,7 @@ export function useNotifications() {
 }
 
 
+// Replaced with server actions
 async function markNotificationsAsReadApi(notificationIds: string[], token: string) {
     const response = await fetch('/api/notifications/mark-as-read', {
         method: 'POST',
@@ -65,6 +67,7 @@ async function markNotificationsAsReadApi(notificationIds: string[], token: stri
     return response.json();
 }
 
+// Replaced with server actions
 async function clearAllNotificationsApi(notificationIds: string[], token: string) {
     const response = await fetch('/api/notifications/clear', {
         method: 'POST',
@@ -90,7 +93,7 @@ export function useMarkNotificationsAsRead() {
         mutationFn: async (notificationIds: string[]) => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
-            return markNotificationsAsReadApi(notificationIds, token);
+            return markNotificationsAsReadAction(notificationIds);
         },
         onSuccess: () => {
              // Invalidate notifications to refetch.
@@ -116,7 +119,7 @@ export function useClearAllNotifications() {
         mutationFn: async (notificationIds: string[]) => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
-            return clearAllNotificationsApi(notificationIds, token);
+            return clearNotificationsAction(notificationIds);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: notificationKeys.lists() });

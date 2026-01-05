@@ -13,6 +13,7 @@ interface EvaluateReportApiVariables {
  * @param variables - An object containing the request body and the user's auth token.
  * @returns A promise that resolves to the structured evaluation output.
  */
+// Deprecated: use server action evaluateReportAction instead
 export async function evaluateReportApi(variables: EvaluateReportApiVariables): Promise<EvaluateReportOutput> {
     const response = await fetch('/api/evaluate-report', {
         method: 'POST',

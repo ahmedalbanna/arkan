@@ -3,7 +3,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks';
 import { app } from '@/lib/firebase/client-init';
-import { saveDeviceToken } from '@/services/api/deviceTokenService';
+import { saveDeviceTokenAction } from '@/app/actions/deviceTokenActions';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { useEffect, useState } from 'react';
 
@@ -23,7 +23,7 @@ export default function FirebaseMessagingProvider({ children }: { children: Reac
                         const currentToken = await getToken(messaging, { vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY });
                         if (currentToken) {
                             setToken(currentToken);
-                            await saveDeviceToken(firebaseUser.uid, currentToken);
+                            await saveDeviceTokenAction(currentToken);
                         } else {
                             console.log('No registration token available. Request permission to generate one.');
                         }
