@@ -3,7 +3,7 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks';
-import type { AppSettings } from '@/lib/types';
+import type { PublicSettings } from '@/lib/types';
 import { getPublicSettingsAction, updateSettingsAction } from '@/app/actions/settingsActions';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -40,37 +40,13 @@ const settingsSchema = z.object({
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
-// --- API Service Functions ---
-// Use server actions instead of API
-    // replaced by action
-    if (!response.ok) throw new Error('Failed to fetch settings');
-    return response.json();
-}
-
-// Use server actions instead of API
-    // replaced by action
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}`
-        },
-        body: JSON.stringify(variables.data),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update settings');
-    }
-    return response.json();
-}
-
 // --- Main Settings Page Component ---
 export default function AdminSettingsPage() {
     const { t } = useLocalization();
-    const { firebaseUser } = useAuth();
     const { toast } = useToast();
     const queryClient = useQueryClient();
 
-    const { data: settings, isLoading } = useQuery<AppSettings>({
+    const { data: settings, isLoading } = useQuery<PublicSettings>({
         queryKey: ['settings'],
         queryFn: getPublicSettingsAction,
     });
@@ -95,7 +71,7 @@ export default function AdminSettingsPage() {
     }, [settings, form]);
 
     const mutation = useMutation({
-        mutationFn: updateSettings,
+        mutationFn: updateSettingsAction,
         onSuccess: (data) => {
             queryClient.setQueryData(['settings'], data);
             toast({ title: t('adminSettings.successToastTitle'), description: t('adminSettings.successToastDesc') });
@@ -105,9 +81,8 @@ export default function AdminSettingsPage() {
         }
     });
 
-    const onSubmit = async (data: SettingsFormValues) => {
-        const token = await getAuthenticatedToken(firebaseUser);
-        mutation.mutate({ data, token });
+    const onSubmit = (data: SettingsFormValues) => {
+        mutation.mutate(data);
     };
 
     const addNewAccount = () => {
@@ -159,7 +134,7 @@ export default function AdminSettingsPage() {
                 </p>
             </div>
 
-            {!settings || settings.bankAccounts.length === 0 ? (
+            {!settings || (settings.bankAccounts && settings.bankAccounts.length === 0) ? (
                 <Alert variant="destructive" className="mb-6">
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription>
