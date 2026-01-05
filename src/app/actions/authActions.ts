@@ -4,7 +4,7 @@
 import { cookies } from 'next/headers';
 import { adminAuth, adminDb } from '@/lib/firebase/server-init';
 import type { UserProfile, SignupCredentials } from '@/lib/models';
-import { getUserProfileAction } from './userActions';
+import { getUserProfile } from './userActions';
 
 export async function setSessionCookieAction(idToken: string) {
   if (!idToken) {
@@ -23,7 +23,7 @@ export async function setSessionCookieAction(idToken: string) {
 
   // After setting the cookie, determine the redirect path based on user role
   const decodedToken = await adminAuth.verifySessionCookie(sessionCookie);
-  const userProfile = await getUserProfileAction(decodedToken.uid);
+  const userProfile = await getUserProfile(decodedToken.uid);
 
   if (userProfile?.role === 'admin') {
     return { status: 'success', redirectPath: '/admin/dashboard' };

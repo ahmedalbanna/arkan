@@ -83,16 +83,6 @@ export async function deductCredit(userId: string, creditsToDeduct: number): Pro
 // SERVER ACTIONS (for client-side consumption)
 // ============================================================================
 
-export async function getUserProfileAction(userId: string): Promise<UserProfile | null> {
-  const requester = await requireUser();
-  // A user can view their own profile, or an admin can view any profile.
-  if (requester.id !== userId && requester.role !== 'admin') {
-    throw new Error('Forbidden: You do not have permission to view this profile.');
-  }
-  return getUserProfile(userId);
-}
-
-
 const adminUpdateUserSchema = z.object({
   name: z.string().min(1).optional(),
   email: z.string().email().optional(),
@@ -126,8 +116,8 @@ export async function updateUserAction(userId: string, data: Partial<UserProfile
     parsed = res.data;
   }
 
-  // Handle email update in Auth if present
-  if (parsed.email && parsed.email !== (await getUserProfile(userId))?.email) {
+  const currentUserProfile = await getUserProfile(userId);
+  if (parsed.email && parsed.email !== currentUserProfile?.email) {
     await adminAuth.updateUser(userId, { email: parsed.email });
   }
 

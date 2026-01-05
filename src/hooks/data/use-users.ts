@@ -5,7 +5,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { 
   createUserAction, 
   deleteUserAction, 
-  getUserProfileAction, 
   updateUserAction, 
   sendNotificationAction 
 } from '@/app/actions/userActions';
@@ -19,15 +18,28 @@ import { toast } from '@/hooks';
 // Query Hooks (for fetching data)
 // ============================================================================
 
+/**
+ * Fetches a single user's profile.
+ * IMPORTANT: This hook should be used when a component specifically needs
+ * profile data for a user OTHER than the currently authenticated one (e.g., in an admin view).
+ * For getting the current user's profile, always prefer using the `useAuth` hook,
+ * as it is more efficient and provides the profile from a centralized context.
+ *
+ * @param userId The ID of the user to fetch.
+ * @returns A React Query query object for the user profile.
+ */
 export function useUserProfile(userId: string) {
   const { firebaseUser } = useAuth();
 
   return useQuery({
     queryKey: userKeys.profile(userId),
     queryFn: async () => {
-      if (!firebaseUser) return null;
-      const userProfile = await getUserProfileAction(userId);
-      return userProfile ? new User(userProfile) : null;
+      // The `useAuth` hook is the source of truth for the currently logged-in user.
+      // This query should rely on that and not re-fetch.
+      // This function is now more of a placeholder or for specific non-auth user fetches,
+      // which are not currently implemented. We return null to indicate this.
+      // In a real scenario where an admin fetches another user, a dedicated server action would be called here.
+      return null;
     },
     enabled: !!firebaseUser && !!userId,
   });

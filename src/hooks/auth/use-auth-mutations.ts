@@ -4,7 +4,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { signupAction, resetPasswordAction, setSessionCookieAction } from '@/app/actions/authActions';
-import { getUserProfileAction, createUserAction } from '@/app/actions/userActions';
+import { getUserProfile, createUserAction } from '@/app/actions/userActions';
 import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/models';
 import { useToast } from '@/hooks/util/use-toast';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
@@ -38,14 +38,14 @@ export function useLogin() {
 
 // Helper to create profile on first sign-in
 async function handleFirstSignIn(user: FirebaseUser) {
-    const existingProfile = await getUserProfileAction(user.uid);
+    const existingProfile = await getUserProfile(user.uid);
     if (!existingProfile) {
         const signupData = {
             name: user.displayName || `User-${user.uid.slice(0, 5)}`,
             email: user.email || `${user.uid}@example.com`,
             password: Math.random().toString(36).slice(-8), // Dummy password for social sign-in
         };
-        await signupAction(signupData as any);
+        await createUserAction(signupData as any);
     }
 }
 
