@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -5,6 +6,7 @@ import { File as FileIcon, LoaderCircle, Presentation } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { saveAs } from 'file-saver';
 
 import { PptxStyleOptionsSchema } from '@/ai/schemas/template-schemas';
 import { Button } from '@/components/ui/button';
@@ -195,12 +197,14 @@ This slide demonstrates how a very long paragraph will gracefully break across m
         themeStyles = templates[data.template].styles;
       }
 
-      await convertMarkdownToPptx(data.markdown, data.fileName, {
+      const blob = await convertMarkdownToPptx(data.markdown, data.fileName, {
         styles: themeStyles,
         title: data.fileName,
         isRtl: data.isRtl,
         includeToc: data.includeToc,
       });
+      saveAs(blob, `${data.fileName}.pptx`);
+
       toast({
         title: 'Conversion Successful',
         description: `Your file ${data.fileName}.pptx has been downloaded.`,

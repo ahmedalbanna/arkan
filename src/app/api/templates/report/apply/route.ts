@@ -1,11 +1,5 @@
-
-
-'use server';
-
-// This API route is now obsolete as the template application logic
-// has been moved to the client-side for better performance and simplicity.
-// The file is kept to avoid breaking changes if it's referenced, but it will not be used.
-
+// This file is now obsolete and can be safely deleted.
+// The logic has been moved to the client-side.
 import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
 
 export async function POST() {

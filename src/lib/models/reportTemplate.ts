@@ -34,12 +34,3 @@ export interface ReportTemplateProperties extends BaseTemplateProperties {
     sections: z.infer<typeof SectionPropertiesSchema>[];
   }[];
 }
-
-export class ReportTemplate extends Template {
-  public isDefault: boolean;
-
-  constructor(props: ReportTemplateProperties) {
-    super(props);
-    this.isDefault = props.isDefault || false;
-  }
-}

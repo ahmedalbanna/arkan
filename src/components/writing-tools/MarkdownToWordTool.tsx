@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -5,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { useState, type ComponentPropsWithoutRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { saveAs } from 'file-saver';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/util/use-toast';
 import { templates, type DocxTemplateKey } from '@/lib/docx-styles';
+import { convertMarkdownToWord } from '@/lib/markdown-to-word-converter';
 import dynamic from 'next/dynamic';
 
 const FileWord = dynamic<ComponentPropsWithoutRef<typeof Loader2>>(() => import('lucide-react').then((mod) => mod.FileText), { ssr: false });
@@ -53,32 +56,16 @@ export function MarkdownToWordTool() {
   async function onSubmit(data: MarkdownToWordFormValues) {
     setIsConverting(true);
     try {
+      const templateStyles = templates[data.template as DocxTemplateKey];
       const options = {
-        styles: templates[data.template as DocxTemplateKey].styles,
-        customStyles: templates[data.template as DocxTemplateKey].customStyles,
+        styles: templateStyles.styles,
+        customStyles: templateStyles.customStyles,
         pageNumbers: data.pageNumbers,
         coverPageMarkdown: data.addCoverPage ? data.coverPageMarkdown : undefined,
         isRtl: data.isRtl,
       };
 
-      const response = await fetch('/api/export/docx', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          markdown: data.markdown,
-          fileName: data.fileName,
-          options,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to generate DOCX file.');
-      }
-
-      const blob = await response.blob();
+      const blob = await convertMarkdownToWord(data.markdown, data.fileName, options);
       saveAs(blob, `${data.fileName}.docx`);
 
       toast({
@@ -101,7 +88,9 @@ export function MarkdownToWordTool() {
     <Card>
       <CardHeader>
         <CardTitle>Markdown to Word Converter</CardTitle>
-        <CardDescription>Easily convert your markdown documents into styled .docx files, with support for different page orientations.</CardDescription>
+        <CardDescription className="[&>code]:font-mono [&>code]:font-bold [&>code]:bg-gray-200 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded">
+          Easily convert your markdown documents into styled .docx files, with support for different page orientations.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
