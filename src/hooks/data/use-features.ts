@@ -2,7 +2,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchFeaturesApi, updateFeatureApi } from '@/services/api/featureService';
+import { fetchFeaturesAction, updateFeatureAction } from '@/app/actions/featureActions';
 import type { Feature } from '@/lib/types';
 import { toast } from '@/hooks/util/use-toast';
 import { useAuth } from '@/context/AuthContext';
@@ -14,7 +14,7 @@ import type { UpdateFeatureVariables } from '@/lib/types';
 export function useFeatures() {
     const { data: features, isPending: isLoading, isError, isFetched: isLoaded } = useQuery<Feature[]>({
         queryKey: featureKeys.lists(),
-        queryFn: fetchFeaturesApi,
+        queryFn: fetchFeaturesAction,
         staleTime: 1000 * 60 * 5, // 5 minutes
     });
 
@@ -28,8 +28,7 @@ export function useUpdateFeature() {
     return useMutation({
         mutationFn: async (variables: UpdateFeatureVariables) => {
             if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
-            return updateFeatureApi(variables, token);
+            return updateFeatureAction(variables.featureId, variables.payload);
         },
         // Optimistic update
         onMutate: async (newFeatureData) => {

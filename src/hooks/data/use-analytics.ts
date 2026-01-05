@@ -3,7 +3,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { analyticsKeys } from '@/lib/query-keys';
-import { fetchUserStats } from '@/services/api/analyticsService';
+import { getUserStatsAction } from '@/app/actions/analyticsActions';
 import { useAuth } from '@/context/AuthContext';
 
 export function useUserStats() {
@@ -12,8 +12,7 @@ export function useUserStats() {
         queryKey: analyticsKeys.userStats(firebaseUser?.uid ?? ''),
         queryFn: async () => {
             if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
-            return fetchUserStats(token);
+            return getUserStatsAction();
         },
         enabled: !!firebaseUser,
     });
