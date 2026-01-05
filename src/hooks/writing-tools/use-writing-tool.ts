@@ -6,27 +6,26 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
 import { runWritingToolAction } from '@/app/actions/writingToolsActions';
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
+import type { ToolName } from '@/app/actions/writingToolsActions';
 
 /**
  * A generic hook for calling AI writing tools.
  * It handles authentication, loading state, error handling, and credit deduction automatically.
  *
- @param tool The tool name (e.g., 'summarize', 'paraphrase').
+ * @param tool The tool name (e.g., 'summarize', 'paraphrase').
  * @param options Optional React Query mutation options.
  * @returns A React Query mutation object.
  */
 export function useWritingTool<TData = unknown, TVariables = Omit<AIFlowInput, 'flow'>>(
-  tool: string,
+  tool: ToolName,
   options?: Omit<UseMutationOptions<TData, Error, TVariables>, 'mutationFn'>
 ) {
   const { firebaseUser, refetchUser } = useAuth();
-  const toolName = tool;
 
   return useMutation<TData, Error, TVariables>({
     mutationFn: async (data: TVariables) => {
-      // Use apiService which handles auth and errors
-      // Call server action dispatcher by tool name extracted from endpoint
-      return runWritingToolAction(toolName as any, data as any);
+      // Server action handles authentication internally
+      return runWritingToolAction(tool, data as any);
     },
     onSuccess: (data, variables, context) => {
       // Refetch user profile to update credit count in the UI

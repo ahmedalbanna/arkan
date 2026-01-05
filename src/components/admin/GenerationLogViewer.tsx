@@ -1,10 +1,9 @@
-
 'use client';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { generationLogKeys } from '@/lib/query-keys';
-import { fetchGenerationLogs } from '@/services';
 import type { GenerationLog } from '@/services';
+import { getGenerationLogs } from '@/services/generation-service';
 import { AlertCircle, Eye, Loader2, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -50,7 +49,7 @@ function LogTableSkeleton() {
     );
 }
 
-function LogDetailView({ log }: { log: GenerationLog }) {
+function LogDetailView({ log }: { log: GenerationLog & { userName: string } }) {
     const { resolvedTheme } = useTheme();
 
     return (
@@ -111,9 +110,7 @@ export default function GenerationLogViewer() {
     } = useInfiniteQuery({
         queryKey: generationLogKeys.list({ agentId: debouncedAgentId, userId: debouncedUserId }),
         queryFn: async ({ pageParam }) => {
-            if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
-            return fetchGenerationLogs({ token, limit: LOGS_PER_PAGE, agentId: debouncedAgentId, userId: debouncedUserId, lastVisibleId: pageParam });
+            return getGenerationLogs({ limit: LOGS_PER_PAGE, agentId: debouncedAgentId, userId: debouncedUserId, lastVisibleId: pageParam });
         },
         initialPageParam: undefined as string | undefined,
         getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
@@ -200,7 +197,7 @@ export default function GenerationLogViewer() {
                                                         <Eye className="h-4 w-4" />
                                                     </Button>
                                                 </DialogTrigger>
-                                                <LogDetailView log={log} />
+                                                <LogDetailView log={log as any} />
                                             </Dialog>
                                         </TableCell>
                                     </TableRow>

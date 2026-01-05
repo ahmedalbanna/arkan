@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -23,8 +24,8 @@ import { topicExplainer } from '@/ai/flows/topic-explainer';
 import { generateIdeas } from '@/ai/flows/generate-ideas';
 import { writeDocument } from '@/ai/flows/write-document';
 import { generatePlantUML } from '@/ai/flows/generate-plantuml';
-import { rewriteText } from '@/ai/flows/rewrite-to-markdown';
-import { summarizeTextWithRatio } from '@/ai/flows/summarize-text';
+import { rewriteText } from '@/ai/flows/text-stylist';
+import { summarizeTextWithRatio } from '@/ai/flows/text-stylist';
 import { styleEditor, readabilityEnhancer, concisenessChecker, clarityAdvisor } from '@/ai/flows/text-stylist';
 import { manipulateText } from '@/ai/flows/manipulate-text';
 import { generateToc } from '@/ai/flows/generate-toc';
@@ -34,6 +35,7 @@ import { solveAssignments } from '@/ai/flows/solve-assignments';
 import { generateProjectBlueprint } from '@/ai/flows/generate-project-blueprint';
 import { generateUiDescription } from '@/ai/flows/generate-ui-description';
 import { generateChapterContent } from '@/ai/flows/generate-chapter-content';
+import { generateImage } from '@/ai/flows/generate-image';
 
 // Schemas
 import {
@@ -68,23 +70,24 @@ import {
   GenerateProjectBlueprintInputSchema,
   GenerateUIDescriptionInputSchema,
   GenerateChapterInputSchema,
+  GenerateImageInputSchema,
 } from '@/ai/schemas';
 
 const toolConfig = {
-  paraphrase: { flow: paraphraseText, schema: ParaphraseInputSchema.pick({ text: true, mode: true }), creditCost: 1 },
-  summarize: { flow: summarizeText, schema: SummarizeInputSchema.pick({ text: true, length: true }), creditCost: 1 },
-  humanize: { flow: humanizeText, schema: HumanizeTextInputSchema.pick({ text: true }), creditCost: 1 },
-  'ai-detector': { flow: detectAiContent, schema: DetectAIInputSchema.pick({ text: true }), creditCost: 1 },
-  'grammar-checker': { flow: grammarCheck, schema: GrammarCheckInputSchema.pick({ text: true }), creditCost: 1 },
-  'quiz-generator': { flow: generateQuiz, schema: GenerateQuizInputSchema.pick({ text: true, numQuestions: true, questionType: true }), creditCost: 1 },
-  'fact-checker': { flow: factCheckText, schema: FactCheckInputSchema.pick({ text: true }), creditCost: 2 },
-  'plagiarism-checker': { flow: plagiarismCheck, schema: PlagiarismCheckInputSchema.pick({ text: true }), creditCost: 2 },
-  'citation-generator': { flow: generateCitation, schema: GenerateCitationInputSchema.pick({ sourceText: true, style: true }), creditCost: 1 },
-  'ai-researcher': { flow: aiResearcher, schema: AIResearcherInputSchema.pick({ topic: true }).extend({ depth: z.any().optional() }), creditCost: 2 },
+  paraphrase: { flow: paraphraseText, schema: ParaphraseInputSchema, creditCost: 1 },
+  summarize: { flow: summarizeText, schema: SummarizeInputSchema, creditCost: 1 },
+  humanize: { flow: humanizeText, schema: HumanizeTextInputSchema, creditCost: 1 },
+  'ai-detector': { flow: detectAiContent, schema: DetectAIInputSchema, creditCost: 1 },
+  'grammar-checker': { flow: grammarCheck, schema: GrammarCheckInputSchema, creditCost: 1 },
+  'quiz-generator': { flow: generateQuiz, schema: GenerateQuizInputSchema, creditCost: 1 },
+  'fact-checker': { flow: factCheckText, schema: FactCheckInputSchema, creditCost: 2 },
+  'plagiarism-checker': { flow: plagiarismCheck, schema: PlagiarismCheckInputSchema, creditCost: 2 },
+  'citation-generator': { flow: generateCitation, schema: GenerateCitationInputSchema, creditCost: 1 },
+  'ai-researcher': { flow: aiResearcher, schema: AIResearcherInputSchema, creditCost: 2 },
   'literature-review': { flow: generateLiteratureReview, schema: LiteratureReviewInputSchema, creditCost: 3 },
-  'question-answering': { flow: answerQuestion, schema: QuestionAnsweringInputSchema.pick({ question: true, context: true, useWebSearch: true, maxSources: true }), creditCost: 1 },
-  'fact-retrieval': { flow: retrieveFact, schema: FactRetrievalInputSchema.pick({ factQuery: true, useWebSearch: true, requireSource: true }), creditCost: 1 },
-  'topic-explainer': { flow: topicExplainer, schema: TopicExplainerInputSchema.pick({ topic: true }), creditCost: 1 },
+  'question-answering': { flow: answerQuestion, schema: QuestionAnsweringInputSchema, creditCost: 1 },
+  'fact-retrieval': { flow: retrieveFact, schema: FactRetrievalInputSchema, creditCost: 1 },
+  'topic-explainer': { flow: topicExplainer, schema: TopicExplainerInputSchema, creditCost: 1 },
   'generate-ideas': { flow: generateIdeas, schema: IdeaGenerationInputSchema, creditCost: 1 },
   'write-document': { flow: writeDocument, schema: WriteDocumentInputSchema, creditCost: 3 },
   'generate-plantuml': { flow: generatePlantUML, schema: GeneratePlantUMLInputSchema, creditCost: 1 },
@@ -102,6 +105,7 @@ const toolConfig = {
   'project-blueprint': { flow: generateProjectBlueprint, schema: GenerateProjectBlueprintInputSchema, creditCost: 3 },
   'generate-ui-description': { flow: generateUiDescription, schema: GenerateUIDescriptionInputSchema, creditCost: 2 },
   'generate-chapter': { flow: generateChapterContent, schema: GenerateChapterInputSchema, creditCost: 2 },
+  'generate-image': { flow: generateImage, schema: GenerateImageInputSchema, creditCost: 5 },
 } as const;
 
 export type ToolName = keyof typeof toolConfig;
@@ -110,13 +114,29 @@ export async function runWritingToolAction(tool: ToolName, data: unknown) {
   const user = await requireUser();
   const config = toolConfig[tool];
   if (!config) throw new Error(`Invalid tool: ${tool}`);
-  const validation = config.schema.safeParse(data);
+  
+  // The 'flow' property needs to be added for Zod validation to work with discriminated unions
+  const dataWithFlow = { ...(data as object), flow: tool };
+
+  const validation = config.schema.safeParse(dataWithFlow);
   if (!validation.success) {
-    throw new Error('Validation failed');
+    // Re-throw Zod's formatted error for better debugging
+    throw validation.error;
   }
+  
   const input = validation.data as any;
+
   const result = await (config.flow as any)(input);
   await deductCredit(user.id, config.creditCost);
-  await logGeneration({ agentId: tool, userId: user.id, input, output: result, creditCost: config.creditCost });
+  
+  await logGeneration({ 
+    agentId: tool, 
+    userId: user.id, 
+    input, 
+    // Truncate image data for logging
+    output: tool === 'generate-image' ? { imageUrl: 'data:image/...;base64,...[TRUNCATED]' } : result, 
+    creditCost: config.creditCost 
+  });
+
   return result;
 }

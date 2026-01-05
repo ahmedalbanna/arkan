@@ -5,6 +5,9 @@ import { defaultFeatures } from '@/lib/db/seed-data/features';
 import { z } from 'zod';
 import { requireAdmin } from './_utils/auth';
 import type { Feature } from '@/lib/types';
+import { revalidateTag } from 'next/cache';
+
+const FEATURES_TAG = 'features';
 
 export async function fetchFeaturesAction(): Promise<Feature[]> {
   const featuresCollection = adminDb.collection('features');
@@ -27,5 +30,6 @@ export async function updateFeatureAction(featureId: string, payload: { isEnable
   if (!doc.exists) throw new Error('Feature not found.');
   await ref.update({ isEnabled });
   const updated = await ref.get();
+  revalidateTag(FEATURES_TAG);
   return { id: updated.id, ...(updated.data() as any) } as Feature;
 }

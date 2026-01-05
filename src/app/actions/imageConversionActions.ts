@@ -1,3 +1,4 @@
+
 'use server';
 
 const EXTERNAL_API_ENDPOINT = 'http://185.190.140.93:9003/api/convert';
@@ -8,5 +9,6 @@ export async function convertImageToSvgAction(formData: FormData): Promise<strin
     const errorText = await response.text();
     throw new Error(errorText || 'An error occurred during conversion.');
   }
-  return response.text();
+  const svgText = await response.text();
+  return svgText;
 }

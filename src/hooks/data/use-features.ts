@@ -1,14 +1,11 @@
 
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { fetchFeaturesAction, updateFeatureAction } from '@/app/actions/featureActions';
-import type { Feature } from '@/lib/types';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/util/use-toast';
-import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { featureKeys } from '@/lib/query-keys';
-import type { UpdateFeatureVariables } from '@/lib/types';
+import { fetchFeaturesAction, updateFeatureAction } from '@/app/actions/featureActions';
+import type { Feature, UpdateFeatureVariables } from '@/lib/types';
 
 
 export function useFeatures() {
@@ -23,11 +20,10 @@ export function useFeatures() {
 
 export function useUpdateFeature() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
 
     return useMutation({
         mutationFn: async (variables: UpdateFeatureVariables) => {
-            if (!firebaseUser) throw new Error("User not authenticated");
+            // Auth is handled by the server action
             return updateFeatureAction(variables.featureId, variables.payload);
         },
         // Optimistic update
