@@ -29,7 +29,7 @@ export function useProjectBlueprintLogic() {
   const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
 
-  const generateMutation = useWritingTool('/api/writing-tools/project-blueprint', {
+  const generateMutation = useWritingTool('project-blueprint', {
     onSuccess: (data: any) => {
         setBlueprint(data.blueprint);
         toast({ title: t('writingTools.projectBlueprint.successToast') });

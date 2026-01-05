@@ -18,7 +18,7 @@ export function useSentenceStructureCheckerLogic() {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
-  const mutation = useWritingTool('/api/writing-tools/sentence-structure-checker', {
+  const mutation = useWritingTool('sentence-structure-checker', {
     onError: (error) => {
       toast({ title: 'Structure Check Failed', description: error.message, variant: 'destructive' });
     }

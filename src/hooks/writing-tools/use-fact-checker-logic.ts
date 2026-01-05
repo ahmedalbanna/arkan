@@ -24,7 +24,7 @@ export function useFactCheckerLogic() {
   const { firebaseUser, refetchUser } = useAuth();
   const { toast } = useToast();
 
-  const mutation = useWritingTool('/api/writing-tools/fact-checker', {
+  const mutation = useWritingTool('fact-checker', {
     onError: (error) => {
       toast({ title: t('writingTools.factChecker.checkFailedTitle'), description: error.message, variant: 'destructive' });
     }

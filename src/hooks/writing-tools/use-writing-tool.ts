@@ -11,16 +11,16 @@ import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
  * A generic hook for calling AI writing tools.
  * It handles authentication, loading state, error handling, and credit deduction automatically.
  *
- * @param endpoint The specific API endpoint for the tool (e.g., '/api/writing-tools/summarize').
+ @param tool The tool name (e.g., 'summarize', 'paraphrase').
  * @param options Optional React Query mutation options.
  * @returns A React Query mutation object.
  */
 export function useWritingTool<TData = unknown, TVariables = Omit<AIFlowInput, 'flow'>>(
-  endpoint: string,
+  tool: string,
   options?: Omit<UseMutationOptions<TData, Error, TVariables>, 'mutationFn'>
 ) {
   const { firebaseUser, refetchUser } = useAuth();
-  const toolName = endpoint.split('/').pop() || '';
+  const toolName = tool;
 
   return useMutation<TData, Error, TVariables>({
     mutationFn: async (data: TVariables) => {

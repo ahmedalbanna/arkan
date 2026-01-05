@@ -25,7 +25,7 @@ export function useGrammarCheckerLogic() {
   const { firebaseUser, refetchUser } = useAuth();
   const { toast } = useToast();
 
-  const mutation = useWritingTool('/api/writing-tools/grammar-checker');
+  const mutation = useWritingTool('grammar-checker');
 
   const form = useForm<GrammarCheckFormValues>({
     resolver: zodResolver(grammarCheckSchema),

@@ -22,7 +22,7 @@ export function useCitationGeneratorLogic() {
   const [generatedCitations, setGeneratedCitations] = useState<string[]>([]);
   const [isCopied, setIsCopied] = useState(false);
 
-  const mutation = useWritingTool('/api/writing-tools/citation-generator', {
+  const mutation = useWritingTool('citation-generator', {
     onSuccess: (data: any) => {
       setGeneratedCitations(data.citations);
       toast({ title: t('writingTools.citationGenerator.toastSuccess') });

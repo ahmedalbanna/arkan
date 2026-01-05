@@ -23,7 +23,7 @@ export function GenerateUIDescriptionTool() {
   const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
 
-  const mutation = useWritingTool('/api/writing-tools/generate-ui-description', {
+  const mutation = useWritingTool('generate-ui-description', {
     onSuccess: (data: any) => {
       setGeneratedDescription(data.uiDescription);
       toast({ title: t('writingTools.uiDescription.successToast') });

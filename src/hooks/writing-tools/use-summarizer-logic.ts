@@ -26,7 +26,7 @@ export function useSummarizerLogic() {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
-  const summarizeMutation = useWritingTool('/api/writing-tools/summarize', {
+  const summarizeMutation = useWritingTool('summarize', {
     onSuccess: (data: any) => {
       setSummarizedText(data.summary);
       toast({ title: t('writingTools.summarizer.successToast') });

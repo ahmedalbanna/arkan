@@ -24,7 +24,7 @@ export function useAssignmentsSolverLogic() {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
-  const solveMutation = useWritingTool('/api/writing-tools/solve-assignments', {
+  const solveMutation = useWritingTool('solve-assignments', {
     onSuccess: (data: any) => {
       setSolvedAssignments(data.solutions);
       toast({ title: t('writingTools.assignmentsSolver.successToast') });

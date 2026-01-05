@@ -24,7 +24,7 @@ export function usePlagiarismCheckerLogic() {
   const { firebaseUser, refetchUser } = useAuth();
   const { toast } = useToast();
 
-  const mutation = useWritingTool('/api/writing-tools/plagiarism-checker', {
+  const mutation = useWritingTool('plagiarism-checker', {
     onError: (error) => {
       toast({ title: t('writingTools.plagiarismChecker.checkFailedTitle'), description: error.message, variant: 'destructive' });
     }

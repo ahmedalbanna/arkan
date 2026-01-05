@@ -22,7 +22,7 @@ export function useBiasCheckerLogic() {
   const { firebaseUser, refetchUser } = useAuth();
   const { toast } = useToast();
 
-  const mutation = useWritingTool('/api/writing-tools/bias-checker', {
+  const mutation = useWritingTool('bias-checker', {
     onError: (error) => {
       toast({ title: 'Bias Check Failed', description: error.message, variant: 'destructive' });
     }

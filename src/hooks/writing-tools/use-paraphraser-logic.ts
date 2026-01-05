@@ -26,7 +26,7 @@ export function useParaphraserLogic() {
   const { firebaseUser, refetchUser } = useAuth();
   const { toast } = useToast();
 
-  const paraphraseMutation = useWritingTool('/api/writing-tools/paraphrase');
+  const paraphraseMutation = useWritingTool('paraphrase');
 
   const form = useForm<ParaphraserFormValues>({
     resolver: zodResolver(paraphraserSchema),
