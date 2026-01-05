@@ -9,6 +9,8 @@ import { createUserAction } from './userActions';
 export async function setSessionCookieAction(idToken: string) {
   if (!idToken) throw new Error('ID token is required');
   const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
+  const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+  
   const store = cookies();
   store.set('__session', sessionCookie, {
     maxAge: expiresIn,
