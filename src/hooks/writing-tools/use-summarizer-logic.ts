@@ -7,9 +7,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services';
 import { useDropzone } from 'react-dropzone';
 import { useLocalization } from '@/context/LocalizationContext';
+import { processFileAction } from '@/app/actions/fileActions';
 
 const summarizerSchema = z.object({
   text: z.string().min(20, 'Please enter at least 20 characters to summarize.'),
@@ -55,7 +55,6 @@ export function useSummarizerLogic() {
     formData.append('file', file);
 
     try {
-      const token = await firebaseUser.getIdToken();
       const result = await processFileAction(formData);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.summarizer.processingFile'), description: `Text extracted from ${file.name}.` });

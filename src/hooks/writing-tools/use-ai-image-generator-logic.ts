@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/util/use-toast';
 import { v4 as uuidv4 } from 'uuid';
+import { runWritingToolAction } from '@/app/actions/writingToolsActions';
 
 const imageGeneratorSchema = z.object({
   prompt: z.string().min(1, 'Prompt is required.'),
@@ -22,8 +23,6 @@ interface HistoryItem extends FormValues {
   url: string;
   createdAt: string;
 }
-
-const API_BASE_URL = 'https://image.pollinations.ai/prompt/';
 
 export function useAIImageGeneratorLogic() {
   const { toast } = useToast();
@@ -75,12 +74,10 @@ export function useAIImageGeneratorLogic() {
     setIsLoading(true);
     setImageUrl('');
     try {
-      const url = `${API_BASE_URL}${encodeURIComponent(data.prompt)}?width=${data.width}&height=${data.height}&nologo=poll&nofeed=yes&seed=${data.seed}`;
-      
-      // We don't need to fetch and convert to blob if the browser can display the URL directly
-      // This also helps with downloading as we can just link to the URL
-      setImageUrl(url);
-
+      const result = await runWritingToolAction('generate-image', { prompt: data.prompt });
+      const { imageUrl: generatedUrl } = result as { imageUrl: string };
+      setImageUrl(generatedUrl);
+      form.setValue('seed', Math.floor(Math.random() * 10000000000)); // Regenerate seed for next time
     } catch (error) {
       console.error('Image generation failed:', error);
       toast({

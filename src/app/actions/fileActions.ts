@@ -1,10 +1,11 @@
+
 'use server';
 
 import { imageToText } from '@/ai/flows/image-to-text';
 import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
 import { requireUser } from './_utils/auth';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit } from './userActions';
+import { logGeneration } from './analyticsActions';
 
 const SUPPORTED_MIME_TYPES = [
   'application/pdf',

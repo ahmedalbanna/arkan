@@ -1,7 +1,89 @@
+
 'use server';
 
 import { adminDb } from '@/lib/firebase/server-init';
 import { requireAdmin, requireUser } from './_utils/auth';
+import { getUserProfile } from './userActions';
+
+// ============================================================================
+// GENERATION LOG SERVICE
+// ============================================================================
+
+interface GenerationLog {
+    agentId: string;
+    userId: string;
+    input: any;
+    output: any;
+    creditCost: number;
+    createdAt: string;
+}
+
+export async function logGeneration(logData: Omit<GenerationLog, 'createdAt'>): Promise<void> {
+    try {
+        const generationLog: GenerationLog = {
+            ...logData,
+            createdAt: new Date().toISOString(),
+        };
+        await adminDb.collection('agent_generations').add(generationLog);
+    } catch (error) {
+        console.error(`Failed to log generation for agent ${logData.agentId}:`, error);
+        // Do not re-throw to avoid failing the main user request
+    }
+}
+
+export interface GetLogsParams {
+    limit: number;
+    agentId?: string;
+    userId?: string;
+    lastVisibleId?: string;
+}
+
+export async function getGenerationLogs({ limit, agentId, userId, lastVisibleId }: GetLogsParams) {
+    let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = adminDb.collection('agent_generations');
+
+    if (agentId) {
+        query = query.where('agentId', '==', agentId);
+    }
+    if (userId) {
+        query = query.where('userId', '==', userId);
+    }
+
+    query = query.orderBy('createdAt', 'desc');
+
+    if (lastVisibleId) {
+        const lastDoc = await adminDb.collection('agent_generations').doc(lastVisibleId).get();
+        if (lastDoc.exists) {
+            query = query.startAfter(lastDoc);
+        }
+    }
+
+    const snapshot = await query.limit(limit + 1).get();
+
+    const logsPromises = snapshot.docs.slice(0, limit).map(async (doc) => {
+        const data = doc.data();
+        const userProfile = await getUserProfile(data.userId);
+        return {
+            id: doc.id,
+            userName: userProfile?.name || 'Unknown User',
+            ...data
+        };
+    });
+
+    const logs = await Promise.all(logsPromises);
+    const hasNextPage = snapshot.docs.length > limit;
+    const newLastVisibleId = hasNextPage && logs.length > 0 ? logs[logs.length - 1].id : null;
+
+    return {
+        logs,
+        hasNextPage,
+        lastVisibleId: newLastVisibleId,
+    };
+}
+
+
+// ============================================================================
+// DASHBOARD STATS ACTIONS
+// ============================================================================
 
 export interface DashboardStats {
   totalUsers: number;

@@ -3,8 +3,8 @@
 
 import { z } from 'zod';
 import { requireUser } from './_utils/auth';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit } from './userActions';
+import { logGeneration } from './analyticsActions';
 
 // Flows
 import { paraphraseText } from '@/ai/flows/paraphrase-text';
@@ -126,8 +126,9 @@ export async function runWritingToolAction(tool: ToolName, data: unknown) {
   
   const input = validation.data as any;
 
-  const result = await (config.flow as any)(input);
   await deductCredit(user.id, config.creditCost);
+
+  const result = await (config.flow as any)(input);
   
   await logGeneration({ 
     agentId: tool, 

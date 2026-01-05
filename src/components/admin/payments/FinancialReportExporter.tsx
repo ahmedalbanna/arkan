@@ -10,12 +10,11 @@ import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils/cn';
-import { useAuth } from '@/context/AuthContext';
-import { fetchTransactionsForReport } from '@/services';
 import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { convertMarkdownToPdf } from '@/lib/utils/pdf-utils';
 import type { TransactionProperties } from '@/lib/models';
+import { getTransactionsReportAction } from '@/app/actions/transactionActions';
 
 function formatTransactionsToMarkdown(transactions: TransactionProperties[], dateRange: DateRange): string {
     let markdown = `# Financial Report\n\n`;
@@ -45,12 +44,11 @@ function formatTransactionsToMarkdown(transactions: TransactionProperties[], dat
 export function FinancialReportExporter() {
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [isLoading, setIsLoading] = useState(false);
-    const { firebaseUser } = useAuth();
     const { toast } = useToast();
     const { t } = useLocalization();
 
     async function handleExport() {
-        if (!dateRange?.from || !dateRange?.to || !firebaseUser) {
+        if (!dateRange?.from || !dateRange?.to) {
             toast({
                 title: t('adminFinancialReport.missingInfoError'),
                 description: t('adminFinancialReport.missingInfoDesc'),
@@ -61,11 +59,9 @@ export function FinancialReportExporter() {
 
         setIsLoading(true);
         try {
-            const token = await firebaseUser.getIdToken();
-            const transactions = await fetchTransactionsForReport({
+            const transactions = await getTransactionsReportAction({
                 startDate: dateRange.from.toISOString(),
                 endDate: dateRange.to.toISOString(),
-                token,
             });
 
             if (transactions.length === 0) {
@@ -77,7 +73,6 @@ export function FinancialReportExporter() {
             }
 
             const markdownReport = formatTransactionsToMarkdown(transactions, dateRange);
-            // The convertMarkdownToPdf now expects a string, so we pass the formatted markdown.
             await convertMarkdownToPdf(markdownReport, `Financial_Report_${format(new Date(), 'yyyy-MM-dd')}`);
 
         } catch (error: any) {

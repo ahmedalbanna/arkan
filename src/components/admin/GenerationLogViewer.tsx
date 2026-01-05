@@ -1,9 +1,9 @@
+
 'use client';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { generationLogKeys } from '@/lib/query-keys';
-import type { GenerationLog } from '@/services';
-import { getGenerationLogs } from '@/services/generation-service';
+import { getGenerationLogs } from '@/app/actions/analyticsActions';
 import { AlertCircle, Eye, Loader2, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -23,6 +23,17 @@ import { useLocalization } from '@/context/LocalizationContext';
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
 const LOGS_PER_PAGE = 15;
+
+interface GenerationLog {
+    id: string;
+    agentId: string;
+    userId: string;
+    userName?: string;
+    input: any;
+    output: any;
+    creditCost: number;
+    createdAt: string;
+}
 
 function LogTableSkeleton() {
     return (
@@ -49,7 +60,7 @@ function LogTableSkeleton() {
     );
 }
 
-function LogDetailView({ log }: { log: GenerationLog & { userName: string } }) {
+function LogDetailView({ log }: { log: GenerationLog }) {
     const { resolvedTheme } = useTheme();
 
     return (

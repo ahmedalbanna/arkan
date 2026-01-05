@@ -1,9 +1,10 @@
+
 'use server';
 
 import { requireUser } from './_utils/auth';
 import { createLectureUnit } from '@/ai/flows/create-lecture-unit';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { deductCredit } from './userActions';
+import { logGeneration } from './analyticsActions';
 
 export async function createLectureUnitAction(body: any) {
   const user = await requireUser();

@@ -8,8 +8,8 @@ import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services';
 import type { BiasCheckOutput } from '@/ai/schemas';
+import { processFileAction } from '@/app/actions/fileActions';
 
 const biasCheckSchema = z.object({
   text: z.string().min(50, 'Please enter at least 50 characters for an accurate analysis.'),
@@ -47,7 +47,6 @@ export function useBiasCheckerLogic() {
     formData.append('file', file);
 
     try {
-      const token = await firebaseUser.getIdToken();
       const result = await processFileAction(formData);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: 'File Processed', description: `Text extracted from ${file.name}.` });

@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -9,7 +10,7 @@ import { getStorage } from 'firebase-admin/storage';
 import { FieldValue } from 'firebase-admin/firestore';
 
 // ============================================================================
-// SERVER-SIDE USER SERVICE FUNCTIONS (Moved from services/userService.ts)
+// SERVER-SIDE USER SERVICE FUNCTIONS
 // ============================================================================
 
 export async function getUserProfile(id: string): Promise<UserProfile | null> {
@@ -42,8 +43,18 @@ export async function getPaginatedUsers({ limit, lastVisibleId }: { limit: numbe
     return { users, hasNextPage, lastVisibleId: newLastVisibleId };
 }
 
-export async function deductUserCredits(userId: string, creditsToDeduct: number): Promise<number> {
+export async function deductCredit(userId: string, creditsToDeduct: number): Promise<number> {
     const userRef = adminDb.collection('users').doc(userId);
+
+    // Allows disabling credit deduction in development environments if needed
+    if (process.env.DEDUCT_CREDITS === 'false') {
+        const user = await getUserProfile(userId);
+        return user?.credits ?? 0;
+    };
+    if (creditsToDeduct === 0) {
+        const user = await getUserProfile(userId);
+        return user?.credits ?? 0;
+    };
 
     return await adminDb.runTransaction(async (transaction) => {
         const userDoc = await transaction.get(userRef);

@@ -8,9 +8,9 @@ import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services';
 import type { PlagiarismCheckOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
+import { processFileAction } from '@/app/actions/fileActions';
 
 const plagiarismSchema = z.object({
   text: z.string().min(50, 'Please enter at least 50 characters for an accurate analysis.'),
@@ -49,7 +49,6 @@ export function usePlagiarismCheckerLogic() {
     formData.append('file', file);
 
     try {
-      const token = await firebaseUser.getIdToken();
       const result = await processFileAction(formData);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.aiDetector.toastFileProcessed'), description: t('writingTools.aiDetector.toastFileExtracted', { fileName: file.name }) });

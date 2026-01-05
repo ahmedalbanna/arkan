@@ -9,8 +9,8 @@ import { useWritingTool, useToast } from '@/hooks';
 import { ParaphraseModeSchema } from '@/ai/schemas';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services';
 import { useLocalization } from '@/context/LocalizationContext';
+import { processFileAction } from '@/app/actions/fileActions';
 
 const paraphraserSchema = z.object({
   text: z.string().min(10, 'Please enter at least 10 characters to paraphrase.'),
@@ -47,7 +47,6 @@ export function useParaphraserLogic() {
     formData.append('file', file);
 
     try {
-      const token = await firebaseUser.getIdToken();
       const result = await processFileAction(formData);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.paraphraser.toastFileProcessed'), description: t('writingTools.paraphraser.toastFileProcessedDesc', { fileName: file.name }) });

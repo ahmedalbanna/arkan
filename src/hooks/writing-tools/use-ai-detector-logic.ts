@@ -45,7 +45,6 @@ export function useAIDetectorLogic() {
     formData.append('file', file);
 
     try {
-      const token = await firebaseUser.getIdToken();
       const result = await processFileAction(formData);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.aiDetector.toastFileProcessed'), description: t('writingTools.aiDetector.toastFileExtracted', { fileName: file.name }) });
