@@ -56,7 +56,7 @@ export function useSummarizerLogic() {
 
     try {
       const token = await firebaseUser.getIdToken();
-      const result = await processFileApi(formData, token);
+      const result = await processFileAction(formData);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.summarizer.processingFile'), description: `Text extracted from ${file.name}.` });
       refetchUser();

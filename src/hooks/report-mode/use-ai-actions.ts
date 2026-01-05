@@ -14,7 +14,7 @@ import { useBuilderStore } from '../core/useBuilderStore';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import type { SectionName } from '@/ai/schemas';
 import { PromptBuilder } from '@/lib/prompt-builder';
-import { writingToolApi } from '@/services/api/writingToolsService';
+import { runWritingToolAction } from '@/app/actions/writingToolsActions';
 import type { Chapter, Project, Section } from '@/lib/models';
 import { parseMarkdownToContent } from '../util/useMarkdownParser';
 import { useEditorStore } from '../core/use-editor-store';
@@ -180,7 +180,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
             }))
         };
 
-        const result = await writingToolApi<any, { markdownContent: string }>(`/api/writing-tools/generate-chapter`, { data: body, token });
+        const result = await runWritingToolAction('generate-chapter', body as any) as { markdownContent: string };
         return { chapterId, content: result.markdownContent };
     },
     onSuccess: (data) => {

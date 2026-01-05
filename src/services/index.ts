@@ -20,7 +20,6 @@ export * from './api/settingsService';
 export * from './api/templateService';
 export * from './api/transactionService';
 export * from './api/userService';
-export * from './api/writingToolsService';
 export * from './api/apiService'; // Export the new unified service
 
 export * from './credit-service';
