@@ -4,8 +4,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { signupAction, resetPasswordAction } from '@/app/actions/authActions';
-import { getUserProfileAction, updateUserAction } from '@/app/actions/userActions';
-import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
+import { getUserProfileAction, createUserAction } from '@/app/actions/userActions';
+import type { LoginCredentials, SignupCredentials } from '@/lib/types';
 import { useToast } from '@/hooks/util/use-toast';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
 import { useAuth } from '@/context/AuthContext';
@@ -34,14 +34,17 @@ export function useLogin() {
 // Helper to create profile on first sign-in
 async function handleFirstSignIn(user: FirebaseUser) {
     const existingProfile = await getUserProfileAction(user.uid);
-
     if (!existingProfile) {
-        // Profile doesn't exist, so create it.
-        const profileData: Partial<UserProfile> = {
-            name: user.displayName || `User ${user.uid.slice(0,6)}`,
-            email: user.email || '',
+        // Profile doesn't exist, so create it using the standard creation action.
+        // This ensures default credits and roles are set correctly.
+        const signupData = {
+            name: user.displayName || `User-${user.uid.slice(0, 5)}`,
+            email: user.email || `${user.uid}@example.com`,
+            // This password is not used for social sign-in but fulfills the action's schema.
+            // It will be immediately overwritten by the social provider's auth method.
+            password: Math.random().toString(36).slice(-8), 
         };
-        await updateUserAction(user.uid, profileData);
+        await signupAction(signupData as SignupCredentials);
     }
 }
 
