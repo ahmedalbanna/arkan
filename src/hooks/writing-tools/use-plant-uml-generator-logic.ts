@@ -5,7 +5,9 @@ import { useState, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useWritingTool, useToast } from '@/hooks';
+import { useToast } from '@/hooks';
+import { useMutation } from '@tanstack/react-query';
+import { generateDiagramAction } from '@/app/actions/diagramActions';
 import { DiagramTypeSchema } from '@/ai/schemas';
 import pako from 'pako';
 
@@ -44,7 +46,8 @@ export function usePlantUmlGeneratorLogic() {
   const [generatedCode, setGeneratedCode] = useState('');
   const [isCopied, setIsCopied] = useState(false);
 
-  const mutation = useWritingTool('/api/writing-tools/generate-plantuml', {
+  // Call server action directly
+  const mutation = useMutation({
     onSuccess: (data: any) => {
       setGeneratedCode(data.plantUmlCode);
       toast({ title: 'Diagram generated successfully!' });
@@ -60,7 +63,7 @@ export function usePlantUmlGeneratorLogic() {
   });
 
   const onSubmit = (data: FormValues) => {
-    mutation.mutate(data);
+    mutation.mutate(data as any, { mutationFn: () => generateDiagramAction({ description: data.text, diagramType: data.diagramType as any }) });
   };
 
   const handleCopy = () => {
