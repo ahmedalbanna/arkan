@@ -14,6 +14,7 @@ import {
 } from "firebase/auth";
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { clearSessionCookieAction } from '@/app/actions/authActions';
+import { signupAction } from '@/app/actions/signupActions';
 
 
 // --- Authentication Functions ---
@@ -59,16 +60,7 @@ export async function serviceLogoutUser() {
  * This now handles both auth creation and profile creation in one go.
  */
 export async function serviceSignupUser(credentials: SignupCredentials) {
-  const res = await fetch('/api/auth/signup', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(credentials),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'Signup failed');
-  }
-  return res.json();
+  return signupAction(credentials);
 }
 
 
