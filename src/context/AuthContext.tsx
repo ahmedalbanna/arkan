@@ -37,19 +37,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
   const { setUserProfile } = useBuilderStore(); // Get setter from builder store
 
-  // useEffect(() => {
-  //   if (firebaseUser?.uid) {
-  //     const unsubscribe = subscribeToUserProfile(firebaseUser.uid, (user) => {
-  //       const userInstance = user ? new User(user) : null;
-  //       queryClient.setQueryData(userKeys.profile(firebaseUser.uid), userInstance);
-  //       setUserProfile(userInstance); // Update builder store
-  //     });
-  //     return () => unsubscribe();
-  //   } else {
-  //     setUserProfile(null); // Clear on logout
-  //   }
-  // }, [firebaseUser, queryClient, setUserProfile]);
-
   // Use React Query to get the user profile from the cache
   const { data: userProfile, isLoading: isProfileLoading } = useQuery<User | null>({
     queryKey: userKeys.profile(firebaseUser?.uid ?? ''),
@@ -60,8 +47,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUserProfile(userInstance); // Update builder store on fetch
       return userInstance;
     },
-    enabled: !!firebaseUser,
-    staleTime: Infinity,
+    enabled: !!firebaseUser, // Only run this query when a firebaseUser is available
+    staleTime: Infinity, // The profile data is considered fresh until invalidated
   });
 
   const refetchUser = useCallback(() => {
@@ -75,11 +62,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setFirebaseUser(user);
       await manageSession(user);
       if (user) {
-        // Invalidate and refetch immediately on auth change
+        // Invalidate to ensure fresh data on login
         await queryClient.invalidateQueries({ queryKey: userKeys.profile(user.uid) });
       } else {
-        // Clear all queries on logout
-        queryClient.clear();
+        // On logout, clear all user-related data
+        queryClient.removeQueries({ queryKey: userKeys.all });
         setUserProfile(null); // Clear builder store on logout
       }
       setAuthIsLoading(false);
@@ -109,4 +96,3 @@ export const useAuth = (): AuthContextType => {
 };
 
 export type { FirebaseUser };
-
