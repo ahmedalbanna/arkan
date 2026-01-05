@@ -4,7 +4,7 @@
 import { AIFlowInput } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
-import { apiService } from '@/services/api/apiService'; // Use the new apiService
+import { runWritingToolAction } from '@/app/actions/writingToolsActions';
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 
 /**
@@ -25,12 +25,8 @@ export function useWritingTool<TData = unknown, TVariables = Omit<AIFlowInput, '
   return useMutation<TData, Error, TVariables>({
     mutationFn: async (data: TVariables) => {
       // Use apiService which handles auth and errors
-      return apiService({
-        endpoint, // The full endpoint is passed in now
-        method: 'POST',
-        data: { ...data, flow: toolName }, // Still useful to send flow name for logging
-        firebaseUser,
-      });
+      // Call server action dispatcher by tool name extracted from endpoint
+      return runWritingToolAction(toolName as any, data as any);
     },
     onSuccess: (data, variables, context) => {
       // Refetch user profile to update credit count in the UI
