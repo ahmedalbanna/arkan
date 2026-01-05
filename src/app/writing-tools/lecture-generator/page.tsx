@@ -10,6 +10,7 @@ import { type CreateLectureUnitOutput, type CreateLectureUnitInput } from '@/ai/
 import { useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import ReactMarkdown from 'react-markdown';
+import { createLectureUnitAction } from '@/app/actions/lectureActions';
 import remarkGfm from 'remark-gfm';
 import { SessionPlanDisplay } from '@/components/writing-tools/SessionPlanDisplay';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
@@ -77,28 +78,9 @@ export default function LectureGeneratorPage() {
         };
 
         try {
-            const token = await user.getIdToken();
-            // Using server action instead of API
-            const result = await createLectureUnitAction(
-                /* server action */
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify(input),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to generate lecture.');
-            }
-
-            const data: CreateLectureUnitOutput = await response.json();
+            const data: CreateLectureUnitOutput = await createLectureUnitAction(input);
             setResult(data);
-            toast({
-                title: "Generation Successful",
-                description: "Your lecture and practical session have been created.",
-            });
+            toast({ title: 'Generation Successful', description: 'Your lecture and practical session have been created.' });
         } catch (error) {
             console.error(error);
             toast({
