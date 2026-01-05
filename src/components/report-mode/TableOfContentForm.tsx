@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { MarkdownViewer } from '../shared/MarkdownViewer';
 
 export function TableOfContentForm() {
-  const { project, applyTableOfContents, updateProject } = useBuilderStore();
+  const { project, applyTableOfContents } = useBuilderStore();
   const { toast } = useToast();
   const [tocText, setTocText] = useState('');
   const [isTocDialogOpen, setIsTocDialogOpen] = useState(false);
@@ -21,18 +21,8 @@ export function TableOfContentForm() {
     setTocText(project?.tableOfContentsMarkdown || '');
   }, [project?.tableOfContentsMarkdown]);
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newText = e.target.value;
-    setTocText(newText);
-    // Also update the store in real-time so other components can react if needed
-    updateProject(p => {
-      if(p) p.tableOfContentsMarkdown = newText;
-    });
-  };
-
   const handleApply = () => {
     if (!project) return;
-    // Use the text from the state, which is synced with the textarea
     applyTableOfContents(tocText);
     toast({
         title: 'Structure Applied',
@@ -70,7 +60,7 @@ export function TableOfContentForm() {
                     <Textarea
                         id="toc-textarea"
                         value={tocText}
-                        onChange={handleTextChange}
+                        onChange={(e) => setTocText(e.target.value)}
                         className="flex-grow font-mono text-sm resize-none"
                         placeholder={`# Chapter 1 Title\n  - Section 1.1 Title\n  - Section 1.2 Title\n\n# Chapter 2 Title\n  - Section 2.1 Title`}
                     />

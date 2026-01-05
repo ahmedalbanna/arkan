@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useLocalization } from '@/context/LocalizationContext';
 import type { ReportTemplateProperties } from '@/lib/models';
 import { MarkdownViewer } from '@/components/shared/MarkdownViewer';
+import { Label } from '@/components/ui/label';
 
 function TemplateCard({ template, onSelect }: { template: ReportTemplateProperties; onSelect: () => void }) {
   return (
