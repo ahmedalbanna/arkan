@@ -3,27 +3,60 @@
 
 import { useMemo, useState } from 'react';
 import { useApplyReportTemplate, useReportTemplates } from '@/hooks/data/use-templates';
-import { AlertCircle, FileText, Loader2, Search } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertCircle, FileText, Loader2, Search, ArrowLeft } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useLocalization } from '@/context/LocalizationContext';
 import type { ReportTemplateProperties } from '@/lib/models';
+import { MarkdownViewer } from '@/components/shared/MarkdownViewer';
 
-function TemplateCard({ template, onSelect, isLoading }: { template: ReportTemplateProperties, onSelect: () => void, isLoading: boolean }) {
+function TemplateCard({ template, onSelect }: { template: ReportTemplateProperties; onSelect: () => void }) {
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card 
+      className="hover:shadow-md transition-shadow cursor-pointer"
+      onClick={onSelect}
+      onKeyDown={(e) => e.key === 'Enter' && onSelect()}
+      role="button"
+      tabIndex={0}
+    >
       <CardHeader className="pb-4">
         <CardTitle className="text-base">{template.name}</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-xs text-muted-foreground min-h-[40px] line-clamp-3">{template.description}</p>
-        <Button onClick={onSelect} className="w-full mt-4" size="sm" disabled={isLoading}>
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin"/> : 'Apply Template'}
-        </Button>
       </CardContent>
     </Card>
+  );
+}
+
+function TemplatePreview({ template, onApply, onBack, isLoading }: { template: ReportTemplateProperties; onApply: () => void; onBack: () => void; isLoading: boolean; }) {
+  const tocMarkdown = useMemo(() => {
+    if (!template.content) return '';
+    return template.content.map(chapter => 
+      `# ${chapter.title}\n${chapter.sections.map(section => `  - ${section.title}`).join('\n')}`
+    ).join('\n\n');
+  }, [template]);
+
+  return (
+    <div className="flex flex-col h-full">
+      <Button variant="ghost" size="sm" onClick={onBack} className="mb-4 self-start">
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Templates
+      </Button>
+      <CardHeader className="p-0 mb-2">
+        <CardTitle>{template.name}</CardTitle>
+        <CardDescription>{template.description}</CardDescription>
+      </CardHeader>
+      <Label className="text-sm font-semibold mt-4 mb-2">Template Structure</Label>
+      <ScrollArea className="flex-grow border rounded-md p-4 bg-muted/30 mb-4">
+        <MarkdownViewer content={tocMarkdown} />
+      </ScrollArea>
+      <Button onClick={onApply} disabled={isLoading} className="w-full">
+        {isLoading ? <Loader2 className="h-4 w-4 animate-spin"/> : 'Apply This Template'}
+      </Button>
+    </div>
   );
 }
 
@@ -31,9 +64,11 @@ export default function ApplyTemplatePanel() {
   const { t } = useLocalization();
   const { data: templates, isLoading, isError, error } = useReportTemplates();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<ReportTemplateProperties | null>(null);
 
-  const { handleSelectTemplate, isApplyingTemplate } = useApplyReportTemplate();
+  const { handleSelectTemplate, isApplyingTemplate } = useApplyReportTemplate(() => {
+    setPreviewTemplate(null); // Go back to list after applying
+  });
 
   const filteredTemplates = useMemo(() => {
     if (!templates) return [];
@@ -43,6 +78,17 @@ export default function ApplyTemplatePanel() {
         template.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [templates, searchQuery]);
+
+  if (previewTemplate) {
+    return (
+      <TemplatePreview 
+        template={previewTemplate}
+        onApply={() => handleSelectTemplate(previewTemplate)}
+        onBack={() => setPreviewTemplate(null)}
+        isLoading={isApplyingTemplate}
+      />
+    );
+  }
 
   return (
     <div className="h-full flex flex-col">
@@ -73,11 +119,7 @@ export default function ApplyTemplatePanel() {
                     <TemplateCard 
                         key={template.id} 
                         template={template} 
-                        onSelect={() => {
-                            setSelectedTemplateId(template.id);
-                            handleSelectTemplate(template);
-                        }} 
-                        isLoading={isApplyingTemplate && selectedTemplateId === template.id}
+                        onSelect={() => setPreviewTemplate(template)}
                     />
                   ))
               ) : (

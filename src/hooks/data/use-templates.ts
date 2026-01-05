@@ -33,20 +33,19 @@ export function useReportTemplates() {
 }
 
 export function useApplyReportTemplate(onSuccessCallback?: () => void) {
-    const { project, loadProject } = useBuilderStore();
+    const { project, updateProject } = useBuilderStore();
     const { data: allSections } = useSections();
     const [isApplying, setIsApplying] = useState(false);
 
     const handleSelectTemplate = (template: ReportTemplateProperties) => {
-        if (!project || !allSections) {
-            toast({ title: 'Error', description: 'Project or sections data not available.', variant: 'destructive' });
+        if (!project) {
+            toast({ title: 'Error', description: 'Project data not available.', variant: 'destructive' });
             return;
         }
 
         setIsApplying(true);
         try {
-            const newProject = project.applyTemplate(template, allSections as SectionProperties[]);
-            loadProject(newProject.toStateObject());
+            updateProject(p => p.applyTemplate(template, allSections || []));
             toast({ title: "Template Applied", description: `Project structured with '${template.name}'.` });
             onSuccessCallback?.();
         } catch (error: any) {
