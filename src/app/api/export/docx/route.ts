@@ -2,8 +2,7 @@
 'use server';
 
 import { convertMarkdownToWord } from '@/lib/markdown-to-word-converter';
-import { type ProjectProperties } from '@/lib/models';
-import { generateFullMarkdownFromProject } from '@/lib/utils/markdown-generation';
+import { Project, type ProjectProperties } from '@/lib/models';
 import type { ConversionOptions } from '@/lib/word-converter/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -26,9 +25,12 @@ export async function POST(req: NextRequest) {
 
     const { project: projectData, options } = validation.data;
 
-    // Use the new server-safe utility function to generate markdown
-    const markdown = generateFullMarkdownFromProject(projectData as ProjectProperties);
-    const fileName = (projectData.name || 'Untitled').replace(/\s+/g, '_');
+    // Instantiate a Project object to access its methods, like fullMarkdownContent.
+    const project = new Project(projectData as ProjectProperties);
+
+    // Use the reliable instance getter for the full markdown content.
+    const markdown = project.fullMarkdownContent;
+    const fileName = (project.name || 'Untitled').replace(/\s+/g, '_');
 
     if (!markdown.trim()) {
       return new NextResponse(JSON.stringify({ message: 'Project content is empty' }), { status: 400 });
