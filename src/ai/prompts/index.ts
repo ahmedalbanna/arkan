@@ -1385,7 +1385,7 @@ You MUST structure your document according to the following headings. Ensure eac
     }),
     generateDiagram: {
         usecase: ai.definePrompt({
-            name: `generateDiagramPrompt`,
+            name: `generateUseCaseDiagramPrompt`,
             system: `You are an expert systems analyst specializing in PlantUML. Your task is to generate a valid PlantUML use case diagram.
 - Identify actors from the user's description.
 - Identify use cases and group related ones within a system boundary rectangle.
@@ -1404,7 +1404,7 @@ You MUST structure your document according to the following headings. Ensure eac
             },
         }),
         class: ai.definePrompt({
-            name: `generateDiagramPrompt`,
+            name: `generateClassDiagramPrompt`,
             system: `You are an expert software architect. Your task is to generate a valid PlantUML class diagram.
 - Identify key classes, their attributes, and methods from the description.
 - Establish relationships (inheritance, association, aggregation) with correct cardinality.
@@ -1423,7 +1423,7 @@ You MUST structure your document according to the following headings. Ensure eac
             },
         }),
         sequence: ai.definePrompt({
-            name: `generateDiagramPrompt`,
+            name: `generateSequenceDiagramPrompt`,
             system: `You are an expert systems designer. Your task is to generate a valid PlantUML sequence diagram.
 - Illustrate the step-by-step interactions between objects or participants for a primary workflow.
 - Show the message order and use activation/deactivation boxes to represent object lifecycles.
@@ -1442,7 +1442,7 @@ You MUST structure your document according to the following headings. Ensure eac
             },
         }),
         activity: ai.definePrompt({
-            name: `generateDiagramPrompt`,
+            name: `generateActivityDiagramPrompt`,
             system: `You are a business process modeler. Your task is to generate a valid PlantUML activity diagram.
 - Define start and end points.
 - Map out the sequence of activities.
@@ -1462,7 +1462,7 @@ You MUST structure your document according to the following headings. Ensure eac
             },
         }),
         component: ai.definePrompt({
-            name: `generateDiagramPrompt`,
+            name: `generateComponentDiagramPrompt`,
             system: `You are a software architect. Your task is to generate a valid PlantUML component diagram.
 - Identify the main software components from the description.
 - Show dependencies between components using arrows.
@@ -1482,7 +1482,7 @@ You MUST structure your document according to the following headings. Ensure eac
             },
         }),
         archimate: ai.definePrompt({
-            name: `generateDiagramPrompt`,
+            name: `generateArchimateDiagramPrompt`,
             system: `You are an enterprise architect. Your task is to generate a valid ArchiMate diagram using PlantUML.
 - Focus on Business and Application layers.
 - Identify actors, roles, business functions, and application components.
@@ -1501,7 +1501,7 @@ You MUST structure your document according to the following headings. Ensure eac
             },
         }),
         er: ai.definePrompt({
-            name: `generateDiagramPrompt`,
+            name: `generateERDiagramPrompt`,
             system: `You are a database designer. Your task is to generate a valid PlantUML Entity-Relationship (ER) diagram.
 - Identify entities and their attributes.
 - Mark Primary Keys (PK) and Foreign Keys (FK).
@@ -1520,7 +1520,7 @@ You MUST structure your document according to the following headings. Ensure eac
             },
         }),
         dfd: ai.definePrompt({
-            name: `generateDiagramPrompt`,
+            name: `generateDFDDiagramPrompt`,
             system: `You are a systems analyst creating Data Flow Diagrams (DFDs) with PlantUML. Your task is to generate valid PlantUML code based on the user's description.
 - **IMPORTANT**: You MUST include the following skin parameters at the beginning of the diagram to style the elements correctly:
   \`\`\`plantuml

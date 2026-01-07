@@ -12,7 +12,7 @@ import { localProjectService } from '@/services/local-project-service';
 import { listProjectsAction, saveProjectAction, deleteProjectAction } from '@/app/actions/projectActions';
 
 export function useProjects() {
-    const { firebaseUser } = useAuth();
+    const { firebaseUser, isLoading: authLoading } = useAuth(); // Destructure isLoading as authLoading
     const { data, ...rest } = useQuery<Project[]>({
         queryKey: projectKeys.lists(),
         queryFn: async () => {
@@ -30,7 +30,7 @@ export function useProjects() {
                 return localProjects.map(p => new Project(p));
             }
         },
-        enabled: !!firebaseUser,
+        enabled: !authLoading && !!firebaseUser, // Make sure auth is loaded AND user exists
     });
 
     return { projects: data, ...rest };
@@ -92,3 +92,4 @@ export function useDeleteProject() {
         },
     });
 }
+

@@ -7,13 +7,13 @@ import { getUserStatsAction } from '@/app/actions/analyticsActions';
 import { useAuth } from '@/context/AuthContext';
 
 export function useUserStats() {
-    const { firebaseUser } = useAuth();
+    const { firebaseUser, isLoading: authLoading } = useAuth();
     return useQuery({
         queryKey: analyticsKeys.userStats(firebaseUser?.uid ?? ''),
         queryFn: async () => {
             if (!firebaseUser) throw new Error("User not authenticated");
             return getUserStatsAction();
         },
-        enabled: !!firebaseUser,
+        enabled: !authLoading && !!firebaseUser,
     });
 }
