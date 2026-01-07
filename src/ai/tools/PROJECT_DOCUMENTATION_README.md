@@ -335,7 +335,7 @@ Configure what formats to include:
 
 ### **Flow Example: projectDocumentationGenerator**
 
-```
+\`\`\`
 User Request
     ↓
 [Flow: projectDocumentationGenerator]
@@ -372,7 +372,7 @@ Step 6: generateArchitectureDiagramTool
     ↓
 Final: Combine all outputs
     └─ Return complete documentation package
-```
+\`\`\`
 
 ---
 
@@ -414,7 +414,7 @@ Final: Combine all outputs
 
 ### **For Technical Documentation**
 
-```typescript
+\`\`\`typescript
 {
   seniorityLevel: 'Senior',
   analysisDepth: 'Deep-Dive',
@@ -424,11 +424,11 @@ Final: Combine all outputs
   includeArchitecture: true,
   includeCodeMetrics: true,
 }
-```
+\`\`\`
 
 ### **For Executive Reports**
 
-```typescript
+\`\`\`typescript
 {
   seniorityLevel: 'Strategic Lead',
   analysisDepth: 'Surface',
@@ -438,11 +438,11 @@ Final: Combine all outputs
   includeMetrics: true,
   includeTimeline: true,
 }
-```
+\`\`\`
 
 ### **For Open Source README**
 
-```typescript
+\`\`\`typescript
 {
   template: 'comprehensive',
   includeBadges: true,
@@ -451,14 +451,14 @@ Final: Combine all outputs
   includeContributing: true,
   includeLicense: true,
 }
-```
+\`\`\`
 
 ---
 
 ## 🎯 Performance Tips
 
 1. **Use specific paths** - More specific project paths = faster analysis
-2. **Limit commit history** - Set `limitCommits` to 50-100 for faster processing
+2. **Limit commit history** - Set \`limitCommits\` to 50-100 for faster processing
 3. **Selective features** - Only enable needed features (e.g., skip architecture diagram if not needed)
 4. **Cache results** - Store analysis results for reuse
 5. **Batch operations** - Generate multiple documents in parallel
@@ -470,30 +470,30 @@ Final: Combine all outputs
 ### **Common Issues**
 
 **Issue: "Project structure not detected"**
-- Ensure `projectPath` points to project root
+- Ensure \`projectPath\` points to project root
 - Check file permissions
 - Verify package.json or equivalent exists
 
 **Issue: "No API endpoints found"**
-- Set correct `sourcePath` for API files
+- Set correct \`sourcePath\` for API files
 - Ensure files have proper JSDoc/TSDoc comments
-- Check file extensions match `filePatterns`
+- Check file extensions match \`filePatterns\`
 
 **Issue: "Git history analysis failed"**
-- Ensure `.git` directory exists
+- Ensure \`.git\` directory exists
 - Check git repository is initialized
 - Verify git is installed
 
 **Issue: "Low-quality output"**
-- Increase `analysisDepth` to 'Comprehensive' or 'Deep-Dive'
-- Provide more context in `projectDescription`
-- Add `customGuidelines` for specific requirements
+- Increase \`analysisDepth\` to 'Comprehensive' or 'Deep-Dive'
+- Provide more context in \`projectDescription\`
+- Add \`customGuidelines\` for specific requirements
 
 ---
 
 ## 📚 Examples Repository
 
-Check the `tools/USAGE_EXAMPLES.md` file for more detailed examples and patterns.
+Check the \`tools/USAGE_EXAMPLES.md\` file for more detailed examples and patterns.
 
 ---
 
@@ -501,11 +501,11 @@ Check the `tools/USAGE_EXAMPLES.md` file for more detailed examples and patterns
 
 This system is extensible! To add new flows:
 
-1. Create tool in `tools/` directory
-2. Define prompt in `prompts/` directory
-3. Create flow in `flows/` directory
-4. Export from respective `index.ts` files
-5. Register tools in `genkit.ts`
+1. Create tool in \`tools/\` directory
+2. Define prompt in \`prompts/\` directory
+3. Create flow in \`flows/\` directory
+4. Export from respective \`index.ts\` files
+5. Register tools in \`genkit.ts\`
 
 ---
 

@@ -208,7 +208,7 @@ export const MatchCitationsToReferencesToolOutputSchema = z.object({
 // ============================================================================
 
 export const AnalyzeDocumentQualityToolInputSchema = z.object({
-  text: z.string().min(1),
+  text: z.string().min(100, "Please enter at least 100 characters for a comprehensive analysis."),
   documentType: z.enum(['academic', 'business', 'technical', 'creative', 'general']).default('general'),
   checkGrammar: z.boolean().default(true),
   checkStructure: z.boolean().default(true),

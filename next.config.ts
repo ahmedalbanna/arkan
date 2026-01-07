@@ -48,16 +48,13 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  turbopack: {
+    // Add any TurboPack specific configurations here if needed
+  },
   experimental: {
-    turbo: {
-    },
     serverActions: { bodySizeLimit: '10mb' as SizeLimit },
-
     useCache: true,
     allowDevelopmentBuild: false,
-
-
-
   }
 };
 

@@ -273,7 +273,7 @@ API Format: {{format}}
    - Response schema
    
    **Example:**
-   ```
+   \`\`\`
    # Request
    curl -X {{method}} "{{../baseUrl}}{{path}}" \
      -H "Authorization: Bearer YOUR_TOKEN" \
@@ -281,7 +281,7 @@ API Format: {{format}}
    
    # Response
    (Include example response)
-   ```
+   \`\`\`
    {{/each}}
    {{else}}
    For each endpoint, include:

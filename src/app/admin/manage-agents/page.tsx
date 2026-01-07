@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect } from 'react';
@@ -12,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAuth } from '@/context/AuthContext';
+import { ProjectDocumentationDashboard } from '@/ai/components/dashboard/project-documentation-dashboard';
 
 export default function ManageAgentsPage() {
     const { t } = useLocalization();
@@ -78,26 +78,7 @@ export default function ManageAgentsPage() {
                 </Alert>
             )}
 
-            <div className="flex-1 mt-4 border rounded-lg overflow-hidden h-[calc(100vh-220px)] bg-background">
-                {isLoading && !agents.length ? ( // Show skeleton only on initial hard load
-                    <div className="flex h-full items-center justify-center">
-                        <div className="text-center">
-                            <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                            <p className="text-muted-foreground">Loading agents...</p>
-                        </div>
-                    </div>
-                ) : (
-                    <ResizablePanelGroup direction="horizontal" className="h-full">
-                        <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-                            <AgentList agents={agents} />
-                        </ResizablePanel>
-                        <ResizableHandle withHandle />
-                        <ResizablePanel defaultSize={75}>
-                            <AgentPlayground agent={selectedAgent} />
-                        </ResizablePanel>
-                    </ResizablePanelGroup>
-                )}
-            </div>
+            <ProjectDocumentationDashboard/>
         </>
     );
 };

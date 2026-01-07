@@ -16,21 +16,22 @@ import {
 } from '@/ai/tools/documentation-generation';
 import { analyzeProjectStructureTool } from '@/ai/tools/project-analysis';
 import { apiDocumentationPrompt } from '@/ai/prompts/project-documentation';
+import { z } from 'zod';
 
 // ==================== INPUT/OUTPUT SCHEMAS ====================
 
-const ApiDocGeneratorInputSchema = ai.z.object({
-  projectPath: ai.z.string().describe('Path to the project'),
-  sourcePath: ai.z.string().default('src/api').describe('Path to API source files'),
-  apiName: ai.z.string().describe('API name'),
-  apiVersion: ai.z.string().default('1.0.0').describe('API version'),
-  baseUrl: ai.z.string().optional().describe('API base URL'),
-  format: ai.z.enum(['rest', 'graphql', 'grpc']).default('rest').describe('API format'),
-  outputFormat: ai.z.enum(['markdown', 'openapi', 'html']).default('markdown').describe('Output format'),
-  includeExamples: ai.z.boolean().default(true).describe('Include code examples'),
-  includeAuthentication: ai.z.boolean().default(true).describe('Document authentication'),
-  language: ai.z.string().default('typescript').describe('Programming language'),
-  authMethod: ai.z.string().optional().describe('Authentication method (JWT, OAuth, API Key, etc.)'),
+const ApiDocGeneratorInputSchema = z.object({
+  projectPath: z.string().describe('Path to the project'),
+  sourcePath: z.string().default('src/api').describe('Path to API source files'),
+  apiName: z.string().describe('API name'),
+  apiVersion: z.string().default('1.0.0').describe('API version'),
+  baseUrl: z.string().optional().describe('API base URL'),
+  format: z.enum(['rest', 'graphql', 'grpc']).default('rest').describe('API format'),
+  outputFormat: z.enum(['markdown', 'openapi', 'html']).default('markdown').describe('Output format'),
+  includeExamples: z.boolean().default(true).describe('Include code examples'),
+  includeAuthentication: z.boolean().default(true).describe('Document authentication'),
+  language: z.string().default('typescript').describe('Programming language'),
+  authMethod: z.string().optional().describe('Authentication method (JWT, OAuth, API Key, etc.)'),
 });
 
 export const apiDocumentationGenerator = ai.defineFlow(

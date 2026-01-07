@@ -70,7 +70,7 @@ File: `prompts/project-documentation.ts` - 800+ lines
 
 ## 📁 File Structure Created
 
-```
+\`\`\`
 src/ai/
 ├── schemas/
 │   └── project-documentation.ts          ✅ NEW (600+ lines)
@@ -102,7 +102,7 @@ src/ai/
 
 components/dashboard/
 └── project-documentation-dashboard.tsx    ✅ NEW (400+ lines)
-```
+\`\`\`
 
 **Total New Code:** ~5,000+ lines of production-ready TypeScript
 
@@ -139,7 +139,7 @@ All 7 flows follow the **Flow → Prompts → Tools** architecture pattern
 ## 🚀 Usage Examples
 
 ### Quick Start
-```typescript
+\`\`\`typescript
 import { projectDocumentationGenerator } from '@/ai/flows';
 
 const docs = await projectDocumentationGenerator({
@@ -150,10 +150,10 @@ const docs = await projectDocumentationGenerator({
   includeAPIReference: true,
   template: 'comprehensive',
 });
-```
+\`\`\`
 
 ### Generate README
-```typescript
+\`\`\`typescript
 import { readmeGenerator } from '@/ai/flows';
 
 const readme = await readmeGenerator({
@@ -163,10 +163,10 @@ const readme = await readmeGenerator({
   template: 'comprehensive',
   includeBadges: true,
 });
-```
+\`\`\`
 
 ### Create Custom Prompts
-```typescript
+\`\`\`typescript
 import { advancedPromptArchitectTool } from '@/ai/tools';
 
 const prompt = await advancedPromptArchitectTool({
@@ -177,7 +177,7 @@ const prompt = await advancedPromptArchitectTool({
   analysisDepth: 'Deep-Dive',
   reasoningFramework: 'First Principles',
 });
-```
+\`\`\`
 
 ---
 
@@ -214,13 +214,13 @@ const prompt = await advancedPromptArchitectTool({
 
 ## 📚 Documentation
 
-1. **Main Guide:** `tools/PROJECT_DOCUMENTATION_README.md`
+1. **Main Guide:** \`tools/PROJECT_DOCUMENTATION_README.md\`
    - Complete usage guide
    - All 13 tools explained
    - Real-world examples
    - Best practices
 
-2. **Prompt Architect Guide:** `tools/ADVANCED_PROMPT_ARCHITECT_GUIDE.md`
+2. **Prompt Architect Guide:** \`tools/ADVANCED_PROMPT_ARCHITECT_GUIDE.md\`
    - Meta-tool documentation
    - 7 protocol layers explained
    - Advanced patterns

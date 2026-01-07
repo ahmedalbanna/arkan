@@ -5,7 +5,7 @@
  * reporting, and presentation generation system.
  */
 
-import { z } from 'genkit';
+import { z } from 'zod';
 
 // ==================== ENUMS & TYPES ====================
 
@@ -110,6 +110,7 @@ export const DocumentTemplateTypeSchema = z.enum([
   'business',
   'academic',
   'minimal',
+  'standard',
   'comprehensive'
 ]);
 export type DocumentTemplateType = z.infer<typeof DocumentTemplateTypeSchema>;

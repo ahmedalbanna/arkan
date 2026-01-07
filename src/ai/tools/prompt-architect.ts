@@ -12,6 +12,7 @@ import {
   type GeneratedPrompt,
   type ProjectData,
 } from '@/ai/schemas/project-documentation';
+import { z } from 'zod';
 
 // ==================== PROMPT GENERATION LOGIC ====================
 

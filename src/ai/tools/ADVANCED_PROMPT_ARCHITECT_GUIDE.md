@@ -61,7 +61,7 @@ Rules and constraints:
 
 ### **Basic Usage**
 
-```typescript
+\`\`\`typescript
 import { advancedPromptArchitectTool, generatePrompt } from '@/ai/tools';
 
 // Simple usage
@@ -75,11 +75,11 @@ const prompt = await advancedPromptArchitectTool({
 
 console.log(prompt.systemInstructions);
 console.log(prompt.userPrompt);
-```
+\`\`\`
 
 ### **Using as Function**
 
-```typescript
+\`\`\`typescript
 import { generatePrompt } from '@/ai/tools';
 
 const promptData = generatePrompt({
@@ -89,7 +89,7 @@ const promptData = generatePrompt({
   specialization: 'Cybersecurity',
   // ... more options
 });
-```
+\`\`\`
 
 ---
 
@@ -97,7 +97,7 @@ const promptData = generatePrompt({
 
 ### **Basic Project Information**
 
-```typescript
+\`\`\`typescript
 {
   projectName: string;              // Required: Project/document name
   projectDescription: string;       // Required: What to generate
@@ -106,11 +106,11 @@ const promptData = generatePrompt({
   projectType?: ProjectType;        // Optional: Project category
   documentType: string;             // Required: Type of document
 }
-```
+\`\`\`
 
 ### **Expertise & Context**
 
-```typescript
+\`\`\`typescript
 {
   specialization?: string;          // Domain expertise (e.g., "Cloud Architecture")
   educationalLevel?: string;        // Academic level if applicable
@@ -122,11 +122,11 @@ const promptData = generatePrompt({
   audienceLevel: AudienceLevel;     // Default: 'Professional'
   // Options: 'Beginner' | 'Student' | 'Professional' | 'Expert/Researcher' | 'Executive'
 }
-```
+\`\`\`
 
 ### **Cognitive Settings**
 
-```typescript
+\`\`\`typescript
 {
   analysisDepth: AnalysisDepth;     // Default: 'Comprehensive'
   // Options:
@@ -146,11 +146,11 @@ const promptData = generatePrompt({
   logicalFallacyCheck: boolean;     // Default: false
   // Audit for circular reasoning, straw man, false dilemma, etc.
 }
-```
+\`\`\`
 
 ### **Communication Style**
 
-```typescript
+\`\`\`typescript
 {
   communicationStyle: CommunicationStyle;  // Default: 'Technical'
   // Options:
@@ -168,11 +168,11 @@ const promptData = generatePrompt({
   language: string;                 // Default: 'en'
   // ISO language code: 'en', 'ar', 'es', etc.
 }
-```
+\`\`\`
 
 ### **Output Configuration**
 
-```typescript
+\`\`\`typescript
 {
   outputFormats: OutputFormatType[];  // Default: ['heading', 'paragraph']
   // Options:
@@ -191,11 +191,11 @@ const promptData = generatePrompt({
   tableCaption?: string;            // For table titles
   wordCount?: string;               // Target length
 }
-```
+\`\`\`
 
 ### **Quality & Constraints**
 
-```typescript
+\`\`\`typescript
 {
   complexity: number;               // Default: 50 (0-100 scale)
   
@@ -219,11 +219,11 @@ const promptData = generatePrompt({
   // - 'Strict (No Hallucination)': Only confirmed facts
   // - 'Creative Synthesis': Innovative combinations
 }
-```
+\`\`\`
 
 ### **Technical Guidance**
 
-```typescript
+\`\`\`typescript
 {
   toolLibraryGuidance?: string;     // Specific tool instructions
   // Example: "Use only official AWS SDK v3, avoid deprecated methods"
@@ -231,7 +231,7 @@ const promptData = generatePrompt({
   includedTopics?: string;          // Topics to cover (newline-separated)
   customGuidelines?: string;        // Additional custom instructions
 }
-```
+\`\`\`
 
 ---
 
@@ -239,7 +239,7 @@ const promptData = generatePrompt({
 
 ### **Example 1: Security Architecture Document**
 
-```typescript
+\`\`\`typescript
 const securityPrompt = await advancedPromptArchitectTool({
   // Identity
   projectName: 'Zero Trust Network Architecture',
@@ -290,11 +290,11 @@ const securityPrompt = await advancedPromptArchitectTool({
   outputVerification: true,
   successCriteria: 'Document can be used as implementation blueprint with zero ambiguity',
 });
-```
+\`\`\`
 
 ### **Example 2: Beginner Tutorial**
 
-```typescript
+\`\`\`typescript
 const tutorialPrompt = await advancedPromptArchitectTool({
   // Identity
   projectName: 'React Hooks for Beginners',
@@ -339,11 +339,11 @@ const tutorialPrompt = await advancedPromptArchitectTool({
   
   successCriteria: 'A complete beginner can build a functional React app with hooks after reading',
 });
-```
+\`\`\`
 
 ### **Example 3: Executive Business Report**
 
-```typescript
+\`\`\`typescript
 const executivePrompt = await advancedPromptArchitectTool({
   // Identity
   projectName: 'Q4 2024 Engineering Metrics Report',
@@ -396,11 +396,11 @@ Risk Assessment & Mitigation
   
   successCriteria: 'Executives can make strategic decisions based on this report alone',
 });
-```
+\`\`\`
 
 ### **Example 4: API Documentation for Developers**
 
-```typescript
+\`\`\`typescript
 const apiDocsPrompt = await advancedPromptArchitectTool({
   // Identity
   projectName: 'Payment Gateway API v3',
@@ -456,7 +456,7 @@ const apiDocsPrompt = await advancedPromptArchitectTool({
   outputVerification: true,
   successCriteria: 'Developer can integrate API successfully using only this documentation',
 });
-```
+\`\`\`
 
 ---
 
@@ -464,7 +464,7 @@ const apiDocsPrompt = await advancedPromptArchitectTool({
 
 ### **Pattern 1: Technical Deep Dive**
 
-```typescript
+\`\`\`typescript
 {
   seniorityLevel: 'Principal/Expert',
   analysisDepth: 'Deep-Dive',
@@ -475,13 +475,13 @@ const apiDocsPrompt = await advancedPromptArchitectTool({
   complexity: 85-95,
   outputVerification: true,
 }
-```
+\`\`\`
 
 **Use for:** Architecture reviews, research papers, technical RFCs
 
 ### **Pattern 2: Business Communication**
 
-```typescript
+\`\`\`typescript
 {
   seniorityLevel: 'Strategic Lead',
   analysisDepth: 'Surface',
@@ -491,13 +491,13 @@ const apiDocsPrompt = await advancedPromptArchitectTool({
   complexity: 30-40,
   formality: 'Very Formal',
 }
-```
+\`\`\`
 
 **Use for:** Executive reports, business cases, strategic proposals
 
 ### **Pattern 3: Educational Content**
 
-```typescript
+\`\`\`typescript
 {
   seniorityLevel: 'Senior',
   analysisDepth: 'Comprehensive',
@@ -508,13 +508,13 @@ const apiDocsPrompt = await advancedPromptArchitectTool({
   formality: 'Informal',
   tone: 'friendly and encouraging',
 }
-```
+\`\`\`
 
 **Use for:** Tutorials, courses, onboarding docs
 
 ### **Pattern 4: API/SDK Documentation**
 
-```typescript
+\`\`\`typescript
 {
   seniorityLevel: 'Senior',
   analysisDepth: 'Comprehensive',
@@ -525,7 +525,7 @@ const apiDocsPrompt = await advancedPromptArchitectTool({
   complexity: 50-65,
   mandatoryRules: ['Every endpoint has example', 'Include error handling'],
 }
-```
+\`\`\`
 
 **Use for:** API docs, SDK references, integration guides
 
@@ -536,28 +536,28 @@ const apiDocsPrompt = await advancedPromptArchitectTool({
 ### **Reasoning Framework Examples**
 
 #### **Chain of Thought**
-```typescript
+\`\`\`typescript
 reasoningFramework: 'Chain of Thought'
-```
+\`\`\`
 **Output style:** "Let me think through this step by step. First, we need to consider... This leads us to... Therefore, the conclusion is..."
 
 #### **First Principles**
-```typescript
+\`\`\`typescript
 reasoningFramework: 'First Principles'
-```
+\`\`\`
 **Output style:** "Let's break this down to fundamental truths: What do we know for certain? Starting from these foundations..."
 
 #### **Socratic**
-```typescript
+\`\`\`typescript
 reasoningFramework: 'Socratic'
-```
+\`\`\`
 **Output style:** "What problem are we solving? Why is this the right approach? How does this align with our goals?"
 
 ### **Logical Fallacy Checking**
 
-```typescript
+\`\`\`typescript
 logicalFallacyCheck: true
-```
+\`\`\`
 
 Enables self-audit for:
 - Circular reasoning
@@ -570,16 +570,16 @@ Enables self-audit for:
 
 ### **Knowledge Handling Modes**
 
-```typescript
+\`\`\`typescript
 // Strict mode - no hallucination
 knowledgeHandling: 'Strict (No Hallucination)'
-```
+\`\`\`
 **Behavior:** Only states confirmed facts, explicitly says "I don't have confirmed information" when uncertain
 
-```typescript
+\`\`\`typescript
 // Creative mode - innovative synthesis
 knowledgeHandling: 'Creative Synthesis'
-```
+\`\`\`
 **Behavior:** Combines knowledge from multiple domains for novel solutions, clearly distinguishes facts from hypotheses
 
 ---
@@ -587,19 +587,19 @@ knowledgeHandling: 'Creative Synthesis'
 ## 🎯 Best Practices
 
 ### **DO:**
-✅ Be specific with `projectDescription`  
-✅ Use `mandatoryRules` for critical requirements  
-✅ Match `audienceLevel` to your actual audience  
-✅ Provide `toolLibraryGuidance` for technical docs  
-✅ Enable `outputVerification` for high-stakes content  
-✅ Use `successCriteria` to define quality bar  
+✅ Be specific with \`projectDescription\`  
+✅ Use \`mandatoryRules\` for critical requirements  
+✅ Match \`audienceLevel\` to your actual audience  
+✅ Provide \`toolLibraryGuidance\` for technical docs  
+✅ Enable \`outputVerification\` for high-stakes content  
+✅ Use \`successCriteria\` to define quality bar  
 
 ### **DON'T:**
 ❌ Use vague descriptions  
 ❌ Mix audience levels (e.g., Executive + Deep-Dive)  
 ❌ Overcomplicate simple tasks  
-❌ Skip `constraints` for safety-critical docs  
-❌ Forget to specify `outputFormats`  
+❌ Skip \`constraints\` for safety-critical docs  
+❌ Forget to specify \`outputFormats\`  
 
 ---
 
@@ -607,7 +607,7 @@ knowledgeHandling: 'Creative Synthesis'
 
 ### **Generated Prompt Object**
 
-```typescript
+\`\`\`typescript
 {
   systemInstructions: string;    // AI behavior and capabilities
   userPrompt: string;            // Specific task instructions
@@ -617,11 +617,11 @@ knowledgeHandling: 'Creative Synthesis'
     estimatedTokens: number;     // Approximate token count
   }
 }
-```
+\`\`\`
 
 ### **Using Generated Prompts**
 
-```typescript
+\`\`\`typescript
 const { systemInstructions, userPrompt } = await advancedPromptArchitectTool({
   // ... config
 });
@@ -641,7 +641,7 @@ const completion = await openai.chat.completions.create({
     { role: 'user', content: userPrompt }
   ]
 });
-```
+\`\`\`
 
 ---
 
@@ -649,7 +649,7 @@ const completion = await openai.chat.completions.create({
 
 The Prompt Architect is used internally by all documentation flows:
 
-```typescript
+\`\`\`typescript
 // Example: How flows use it internally
 export const myCustomFlow = ai.defineFlow({
   name: 'myCustomFlow',
@@ -673,7 +673,7 @@ export const myCustomFlow = ai.defineFlow({
   
   return result.output;
 });
-```
+\`\`\`
 
 ---
 
@@ -686,11 +686,11 @@ The Prompt Architect generates prompts ranging from:
 - **Maximum:** ~2,500-3,500 tokens
 
 Token count increases with:
-- More `mandatoryRules` and `constraints`
-- Longer `toolLibraryGuidance`
-- More `outputFormats`
-- Higher `complexity` settings
-- `logicalFallacyCheck` enabled
+- More \`mandatoryRules\` and \`constraints\`
+- Longer \`toolLibraryGuidance\`
+- More \`outputFormats\`
+- Higher \`complexity\` settings
+- \`logicalFallacyCheck\` enabled
 
 ---
 

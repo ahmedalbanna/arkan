@@ -1,4 +1,3 @@
-
 'use client';
 
 import { DiagramTypeSchema } from '@/ai/schemas';
@@ -10,29 +9,7 @@ import pako from 'pako';
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-
-// Helper to encode the deflated PlantUML code for the PlantUML server
-function encode64(data: Uint8Array): string {
-  const B64_MAP = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
-  let r = '';
-  for (let i = 0; i < data.length; i += 3) {
-    const val1 = data[i];
-    const val2 = i + 1 < data.length ? data[i + 1] : 0;
-    const val3 = i + 2 < data.length ? data[i + 2] : 0;
-
-    const ch1 = val1 >> 2;
-    const ch2 = ((val1 & 3) << 4) | (val2 >> 4);
-    const ch3 = ((val2 & 15) << 2) | (val3 >> 6);
-    const ch4 = val3 & 63;
-
-    r += B64_MAP.charAt(ch1);
-    r += B64_MAP.charAt(ch2);
-    if (i + 1 < data.length) r += B64_MAP.charAt(ch3);
-    if (i + 2 < data.length) r += B64_MAP.charAt(ch4);
-  }
-  return r;
-}
-
+import { encode64 } from '@/lib/utils/encode64';
 
 const formSchema = z.object({
   text: z.string().min(10, 'Description must be at least 10 characters long.'),
@@ -47,8 +24,9 @@ export function usePlantUmlGeneratorLogic() {
   const [isCopied, setIsCopied] = useState(false);
 
   // Call server action directly
-  const mutation = useMutation({
-    onSuccess: (data: any) => {
+  const mutation = useMutation<any, Error, { description: string, diagramType: FormValues['diagramType'] }>({
+    mutationFn: (variables) => generateDiagramAction(variables),
+    onSuccess: (data) => {
       setGeneratedCode(data.plantUmlCode);
       toast({ title: 'Diagram generated successfully!' });
     },
@@ -63,7 +41,7 @@ export function usePlantUmlGeneratorLogic() {
   });
 
   const onSubmit = (data: FormValues) => {
-    mutation.mutate(data as any, { mutationFn: () => generateDiagramAction({ description: data.text, diagramType: data.diagramType as any }) });
+    mutation.mutate({ description: data.text, diagramType: data.diagramType });
   };
 
   const handleCopy = () => {

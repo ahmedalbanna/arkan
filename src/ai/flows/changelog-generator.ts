@@ -13,18 +13,19 @@ import {
   analyzeGitHistoryTool,
 } from '@/ai/tools/reporting-and-metrics';
 import { changelogPrompt } from '@/ai/prompts/project-documentation';
+import { z } from 'zod';
 
 // ==================== INPUT/OUTPUT SCHEMAS ====================
 
-const ChangelogGeneratorInputSchema = ai.z.object({
-  projectPath: ai.z.string().describe('Path to the git repository'),
-  projectName: ai.z.string().describe('Project name'),
-  version: ai.z.string().describe('Current version'),
-  releaseDate: ai.z.string().optional().describe('Release date (ISO format)'),
-  includeUnreleased: ai.z.boolean().default(true).describe('Include unreleased section'),
-  limitCommits: ai.z.number().default(100).describe('Number of commits to analyze'),
-  groupByType: ai.z.boolean().default(true).describe('Group changes by type (added, fixed, etc.)'),
-  sinceVersion: ai.z.string().optional().describe('Generate changelog since this version'),
+const ChangelogGeneratorInputSchema = z.object({
+  projectPath: z.string().describe('Path to the git repository'),
+  projectName: z.string().describe('Project name'),
+  version: z.string().describe('Current version'),
+  releaseDate: z.string().optional().describe('Release date (ISO format)'),
+  includeUnreleased: z.boolean().default(true).describe('Include unreleased section'),
+  limitCommits: z.number().default(100).describe('Number of commits to analyze'),
+  groupByType: z.boolean().default(true).describe('Group changes by type (added, fixed, etc.)'),
+  sinceVersion: z.string().optional().describe('Generate changelog since this version'),
 });
 
 export const changelogGenerator = ai.defineFlow(
