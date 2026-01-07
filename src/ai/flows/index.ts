@@ -452,3 +452,12 @@ export type {
     WriteDocumentOutput
 };
 
+// ==================== PROJECT DOCUMENTATION FLOWS ====================
+export { projectDocumentationGenerator } from './project-documentation-generator';
+export { projectReportGenerator } from './project-report-generator';
+export { presentationContentCreator } from './presentation-content-creator';
+export { readmeGenerator } from './readme-generator';
+export { apiDocumentationGenerator } from './api-documentation-generator';
+export { changelogGenerator } from './changelog-generator';
+export { technicalSpecificationWriter } from './technical-spec-writer';
+

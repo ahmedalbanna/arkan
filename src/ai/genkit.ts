@@ -6,7 +6,6 @@ import { genkit, GenkitError } from 'genkit';
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
 // Import professional writing tools
-import { professionalWritingTools } from './tools';
 
 // Default global AI instance (used for unauthenticated or fallback cases)
 export const ai = genkit({
@@ -14,7 +13,7 @@ export const ai = genkit({
     googleAI({ apiKey: GOOGLE_API_KEY }),
   ],
   // Register professional writing tools
-  tools: Object.values(professionalWritingTools),
+
 });
 
 /**
@@ -41,10 +40,10 @@ export function configureUserAi(userApiKeys?: Record<string, string>) {
   return genkit({
     plugins: [googleAI({ apiKey: apiKeyToUse })],
     // Register professional writing tools with user-specific instance
-    tools: Object.values(professionalWritingTools),
+    // tools: Object.values(professionalWritingTools),
   });
 }
 
 // Re-export tools for convenience
-export { professionalWritingTools } from './tools';
+export { professionalWritingTools, projectDocumentationTools, allTools } from './tools';
 
