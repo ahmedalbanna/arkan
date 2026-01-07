@@ -1,1 +1,1 @@
-export * from './schemas/index';
+export * from '../lib/schemas/index';
