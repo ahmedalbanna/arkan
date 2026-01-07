@@ -5,7 +5,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { GenerateChapterInputSchema, GenerateChapterOutputSchema, type GenerateChapterInput, type GenerateChapterOutput } from '@/ai/schemas';
+import { GenerateChapterInputSchema, GenerateChapterOutputSchema, type GenerateChapterInput, type GenerateChapterOutput } from '@/lib/schemas';
 
 const chapterPrompt = ai.definePrompt({
     name: 'generateChapterContentPrompt',

@@ -71,7 +71,7 @@ import {
   GenerateUIDescriptionInputSchema,
   GenerateChapterInputSchema,
   GenerateImageInputSchema,
-} from '@/ai/schemas';
+} from '@/lib/schemas';
 
 const toolConfig = {
   paraphrase: { flow: paraphraseText, schema: ParaphraseInputSchema, creditCost: 1 },

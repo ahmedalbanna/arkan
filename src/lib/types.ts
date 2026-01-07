@@ -16,7 +16,7 @@ export * from './models/user';
 export * as WordConverterTypes from './word-converter/types';
 
 // Re-export PptxStyleOptions from the schemas
-export type { PptxStyleOptions } from '@/ai/schemas/template-schemas';
+export type { PptxStyleOptions } from '@/lib/schemas/template-schemas';
 
 export interface HistoryEntry {
     id: string;

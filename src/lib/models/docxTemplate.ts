@@ -2,7 +2,7 @@
 import type { IStylesOptions } from 'docx';
 import { CustomStyles } from '../word-converter/types';
 import { Template, type BaseTemplateProperties } from './template';
-import { DocxTemplatePropertiesSchema } from '@/ai/schemas/template-schemas';
+import { DocxTemplatePropertiesSchema } from '@/lib/schemas/template-schemas';
 import { z } from 'zod';
 
 // The interface now infers from the Zod schema

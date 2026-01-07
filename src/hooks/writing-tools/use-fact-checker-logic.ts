@@ -9,7 +9,7 @@ import { useWritingTool, useToast } from '@/hooks';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { processFileApi } from '@/services';
-import type { FactCheckOutput } from '@/ai/schemas';
+import type { FactCheckOutput } from '@/lib/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const factCheckSchema = z.object({

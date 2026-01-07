@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
-import type { BiasCheckOutput } from '@/ai/schemas';
+import type { BiasCheckOutput } from '@/lib/schemas';
 import { processFileAction } from '@/app/actions/fileActions';
 
 const biasCheckSchema = z.object({

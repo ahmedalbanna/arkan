@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { GenerateTocInputSchema, GenerateTocOutputSchema, type GenerateTocInput, type GenerateTocOutput } from '@/ai/schemas';
+import { GenerateTocInputSchema, GenerateTocOutputSchema, type GenerateTocInput, type GenerateTocOutput } from '@/lib/schemas';
 
 const generateTocPrompt = ai.definePrompt({
   name: 'generateTocPrompt',

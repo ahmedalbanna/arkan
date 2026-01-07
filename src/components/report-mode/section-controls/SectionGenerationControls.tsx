@@ -11,7 +11,7 @@ import { Checkbox } from '../../ui/checkbox';
 import type { Tone, Language, GenerationControlState, Section } from '@/lib/models';
 import { Card, CardContent, CardDescription, CardHeader } from '../../ui/card';
 import { Info } from 'lucide-react';
-import { DiagramType, DiagramTypeSchema, ToneSchema } from '@/ai/schemas';
+import { DiagramType, DiagramTypeSchema, ToneSchema } from '@/lib/schemas';
 import { Textarea } from '../../ui/textarea';
 import { useBuilderStore } from '@/hooks';
 import { Badge } from '../../ui/badge';

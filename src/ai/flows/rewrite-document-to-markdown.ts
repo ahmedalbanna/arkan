@@ -8,7 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { RewriteDocumentInputSchema, RewriteDocumentOutputSchema, type RewriteDocumentInput, type RewriteDocumentOutput } from '@/ai/schemas';
+import { RewriteDocumentInputSchema, RewriteDocumentOutputSchema, type RewriteDocumentInput, type RewriteDocumentOutput } from '@/lib/schemas';
 
 // Define the prompt outside the flow definition
 const generateMarkdownPrompt = ai.definePrompt({

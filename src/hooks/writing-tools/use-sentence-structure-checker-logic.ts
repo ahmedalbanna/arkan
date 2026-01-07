@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
 import { useDropzone } from 'react-dropzone';
-import type { SentenceStructureCheckOutput } from '@/ai/schemas';
+import type { SentenceStructureCheckOutput } from '@/lib/schemas';
 
 const sentenceStructureSchema = z.object({
   text: z.string().min(50, 'Please enter at least 50 characters for an accurate analysis.'),

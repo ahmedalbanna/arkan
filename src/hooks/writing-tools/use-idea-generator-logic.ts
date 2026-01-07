@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
-import type { IdeaGenerationOutput } from '@/ai/schemas';
+import type { IdeaGenerationOutput } from '@/lib/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const ideaGeneratorSchema = z.object({

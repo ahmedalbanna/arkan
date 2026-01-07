@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { SentenceStructureCheckOutput, SentenceStructureIssue } from '@/ai/schemas';
+import type { SentenceStructureCheckOutput, SentenceStructureIssue } from '@/lib/schemas';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

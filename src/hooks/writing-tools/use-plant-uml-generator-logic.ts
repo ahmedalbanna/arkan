@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { useToast } from '@/hooks';
 import { useMutation } from '@tanstack/react-query';
 import { generateDiagramAction } from '@/app/actions/diagramActions';
-import { DiagramTypeSchema } from '@/ai/schemas';
+import { DiagramTypeSchema } from '@/lib/schemas';
 import pako from 'pako';
 
 // Helper to encode the deflated PlantUML code for the PlantUML server

@@ -5,7 +5,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { GenerateProjectBlueprintInputSchema, GenerateProjectBlueprintOutputSchema, type GenerateProjectBlueprintInput, type GenerateProjectBlueprintOutput } from '@/ai/schemas';
+import { GenerateProjectBlueprintInputSchema, GenerateProjectBlueprintOutputSchema, type GenerateProjectBlueprintInput, type GenerateProjectBlueprintOutput } from '@/lib/schemas';
 
 const generateProjectBlueprintFlow = ai.defineFlow({
     name: 'generateProjectBlueprintFlow',

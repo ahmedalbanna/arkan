@@ -12,7 +12,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { generateReportSectionAction } from '@/app/actions/reportActions';
-import type { SectionName } from '@/ai/schemas';
+import type { SectionName } from '@/lib/schemas';
 import { PromptBuilder } from '@/lib/prompt-builder';
 import { runWritingToolAction } from '@/app/actions/writingToolsActions';
 import type { Chapter, Project, Section } from '@/lib/models';

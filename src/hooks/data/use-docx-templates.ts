@@ -12,7 +12,7 @@ import {
 } from '@/app/actions/templateActions';
 import type { DocxTemplateProperties } from '@/lib/models';
 import { z } from 'zod';
-import { DocxTemplateSchema } from '@/ai/schemas/template-schemas';
+import { DocxTemplateSchema } from '@/lib/schemas/template-schemas';
 
 
 const UpdateDocxTemplateSchema = DocxTemplateSchema.pick({ styles: true });

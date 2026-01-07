@@ -1,7 +1,7 @@
 
 'use client';
 
-import { AIFlowInput } from '@/ai/schemas';
+import { AIFlowInput } from '@/lib/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
 import { runWritingToolAction } from '@/app/actions/writingToolsActions';

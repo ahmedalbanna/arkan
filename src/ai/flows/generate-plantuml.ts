@@ -7,7 +7,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { DiagramType, GeneratePlantUMLInputSchema, GeneratePlantUMLOutputSchema, type GeneratePlantUMLInput, type GeneratePlantUMLOutput } from '@/ai/schemas';
+import { DiagramType, GeneratePlantUMLInputSchema, GeneratePlantUMLOutputSchema, type GeneratePlantUMLInput, type GeneratePlantUMLOutput } from '@/lib/schemas';
 
 // Configuration map for each diagram type's prompts.
 const diagramPromptConfig: Record<DiagramType, { system: string; prompt: string }> = {

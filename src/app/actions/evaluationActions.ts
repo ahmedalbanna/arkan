@@ -1,6 +1,6 @@
 'use server';
 
-import type { EvaluateReportInput, EvaluateReportOutput } from '@/ai/schemas';
+import type { EvaluateReportInput, EvaluateReportOutput } from '@/lib/schemas';
 import { requireUser } from './_utils/auth';
 import { factCheckText } from '@/ai/flows/fact-checker';
 

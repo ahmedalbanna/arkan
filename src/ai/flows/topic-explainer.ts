@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { TopicExplainerInputSchema, TopicExplainerOutputSchema, type TopicExplainerInput, type TopicExplainerOutput } from '@/ai/schemas';
+import { TopicExplainerInputSchema, TopicExplainerOutputSchema, type TopicExplainerInput, type TopicExplainerOutput } from '@/lib/schemas';
 
 const topicExplainerPrompt = ai.definePrompt({
     name: 'topicExplainerPrompt',

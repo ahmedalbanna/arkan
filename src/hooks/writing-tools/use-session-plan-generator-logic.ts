@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { GenerateSessionPlanOutput, GenerateSessionPlanInputSchema } from '@/ai/schemas/lecture-generator';
+import { GenerateSessionPlanOutput, GenerateSessionPlanInputSchema } from '@/lib/schemas/lecture-generator';
 
 type SessionPlanFormValues = z.infer<typeof GenerateSessionPlanInputSchema>;
 

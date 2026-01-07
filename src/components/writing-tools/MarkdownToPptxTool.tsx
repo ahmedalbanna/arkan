@@ -8,7 +8,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { saveAs } from 'file-saver';
 
-import { PptxStyleOptionsSchema } from '@/ai/schemas/template-schemas';
+import { PptxStyleOptionsSchema } from '@/lib/schemas/template-schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';

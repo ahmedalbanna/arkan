@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
-import type { GeneratePresentationOutlineOutput } from '@/ai/schemas';
+import type { GeneratePresentationOutlineOutput } from '@/lib/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useState } from 'react';
 

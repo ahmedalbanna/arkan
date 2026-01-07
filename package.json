@@ -131,6 +131,8 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@genkit-ai/mcp": "^1.27.0",
+    "@modelcontextprotocol/sdk": "^1.25.1",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^16.0.0",
     "@types/file-saver": "^2.0.7",

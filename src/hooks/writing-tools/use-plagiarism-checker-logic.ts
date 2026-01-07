@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
-import type { PlagiarismCheckOutput } from '@/ai/schemas';
+import type { PlagiarismCheckOutput } from '@/lib/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { processFileAction } from '@/app/actions/fileActions';
 

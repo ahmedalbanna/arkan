@@ -1,7 +1,7 @@
 // src/ai/flows/__tests__/generate-report-section.test.ts
 import { generateReportSection } from '../generate-report-section';
 import { ai } from '@/ai/genkit';
-import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput } from '@/ai/schemas';
+import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput } from '@/lib/schemas';
 
 // Mock the entire genkit ai object
 jest.mock('@/ai/genkit', () => ({

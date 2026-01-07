@@ -8,7 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { TranslateTextInputSchema, TranslateTextOutputSchema, type TranslateTextInput, type TranslateTextOutput } from '@/ai/schemas';
+import { TranslateTextInputSchema, TranslateTextOutputSchema, type TranslateTextInput, type TranslateTextOutput } from '@/lib/schemas';
 
 export async function translateText(
   input: TranslateTextInput

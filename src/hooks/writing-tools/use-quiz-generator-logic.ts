@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useWritingTool, useToast } from '@/hooks';
-import { GenerateQuizInputSchema, type QuizQuestionSchema } from '@/ai/schemas';
+import { GenerateQuizInputSchema, type QuizQuestionSchema } from '@/lib/schemas';
 import type { z } from 'zod';
 
 type QuizFormValues = z.infer<typeof GenerateQuizInputSchema>;

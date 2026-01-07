@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { BiasCheckOutput, BiasIssue } from '@/ai/schemas';
+import type { BiasCheckOutput, BiasIssue } from '@/lib/schemas';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

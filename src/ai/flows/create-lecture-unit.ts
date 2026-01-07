@@ -16,7 +16,7 @@ import {
   CreateLectureUnitInputSchema,
   type CreateLectureUnitInput,
   type CreateLectureUnitOutput,
-} from '@/ai/schemas/lecture-generator';
+} from '@/lib/schemas/lecture-generator';
 import {
   generateTheoreticalLecture,
 } from '@/ai/flows/generate-theoretical-lecture';

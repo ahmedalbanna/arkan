@@ -10,7 +10,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { AiProofreadDocumentInputSchema, AiProofreadDocumentOutputSchema, type AiProofreadDocumentInput, type AiProofreadDocumentOutput } from '@/ai/schemas';
+import { AiProofreadDocumentInputSchema, AiProofreadDocumentOutputSchema, type AiProofreadDocumentInput, type AiProofreadDocumentOutput } from '@/lib/schemas';
 
 export async function aiProofreadDocument(input: AiProofreadDocumentInput): Promise<AiProofreadDocumentOutput> {
   return aiProofreadDocumentFlow(input);

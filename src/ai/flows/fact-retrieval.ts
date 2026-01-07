@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { FactRetrievalInputSchema, FactRetrievalOutputSchema, type FactRetrievalInput, type FactRetrievalOutput } from '@/ai/schemas';
+import { FactRetrievalInputSchema, FactRetrievalOutputSchema, type FactRetrievalInput, type FactRetrievalOutput } from '@/lib/schemas';
 
 const factRetrievalPrompt = ai.definePrompt({
     name: 'factRetrievalPrompt',

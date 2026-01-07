@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { GrammarCheckInputSchema, GrammarCheckOutputSchema, type GrammarCheckInput, type GrammarCheckOutput } from '@/ai/schemas';
+import { GrammarCheckInputSchema, GrammarCheckOutputSchema, type GrammarCheckInput, type GrammarCheckOutput } from '@/lib/schemas';
 
 const grammarCheckPrompt = ai.definePrompt({
   name: 'grammarCheckPrompt',
