@@ -6,10 +6,11 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 import {
   ProjectMetricsSchema,
   ProjectReportSchema,
+  GitHistorySchema,
 } from '@/ai/schemas/project-documentation';
 
 // ==================== TOOL 9: Calculate Project Metrics ====================
@@ -358,10 +359,80 @@ Return a JSON object with:
   }
 );
 
+
+// ==================== TOOL 4: Analyze Git History (Moved from project-analysis) ====================
+
+const AnalyzeGitHistoryInputSchema = z.object({
+  projectPath: z.string().describe('Path to the git repository'),
+  limitCommits: z.number().default(100).describe('Number of recent commits to analyze'),
+  analyzeContributors: z.boolean().default(true).describe('Analyze contributor statistics'),
+});
+
+export const analyzeGitHistoryTool = ai.defineTool(
+  {
+    name: 'analyzeGitHistory',
+    description: `Analyzes git repository history and contributor statistics.
+    
+    This tool examines commit history, contributor activity, branch structure,
+    and provides insights into project development patterns.
+    
+    Use this when you need to:
+    - Generate project reports
+    - Create contributor acknowledgments
+    - Analyze development activity
+    - Generate changelogs`,
+    inputSchema: AnalyzeGitHistoryInputSchema,
+    outputSchema: GitHistorySchema,
+  },
+  async (input) => {
+    const { projectPath, limitCommits, analyzeContributors } = input;
+
+    const prompt = `Analyze git history for repository at: ${projectPath}
+
+Instructions:
+1. Count total commits
+${analyzeContributors ? `2. Analyze contributors:
+   - Name and email
+   - Number of commits
+   - Lines added and deleted
+   - Sort by number of commits` : ''}
+3. Calculate commit frequency (daily average, weekly, monthly)
+4. List last ${limitCommits} commits with:
+   - Hash (short)
+   - Author
+   - Date
+   - Message
+   - Files changed count
+5. List all branches
+6. List all tags/releases
+7. Identify first and last commit dates
+
+Return a JSON object matching the GitHistory schema with:
+- totalCommits
+- contributors (array of contributor objects with stats)
+- commitFrequency (object with daily, weekly, monthly averages)
+- recentCommits (array of commit objects, limited to ${limitCommits})
+- branches (array of branch names)
+- tags (array of tag names)
+- firstCommit (ISO date string)
+- lastCommit (ISO date string)`;
+
+    const result = await ai.generate({
+      model: 'googleai/gemini-2.0-flash-exp',
+      prompt,
+      output: { schema: GitHistorySchema },
+    });
+
+    return result.output!;
+  }
+);
+
+
 // Export all reporting and metrics tools
 export const reportingAndMetricsTools = {
   calculateProjectMetrics: calculateProjectMetricsTool,
   generateStatusReport: generateStatusReportTool,
   createProgressTimeline: createProgressTimelineTool,
   generateArchitectureDiagram: generateArchitectureDiagramTool,
+  analyzeGitHistory: analyzeGitHistoryTool,
 };

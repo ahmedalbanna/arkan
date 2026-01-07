@@ -1,27 +1,27 @@
 /**
  * @fileOverview Project Documentation Generator Flow
- * 
+ *
  * Comprehensive flow for generating complete project documentation packages
  * including README, API docs, user guide, and architecture diagrams.
  */
 
 import { ai } from '@/ai/genkit';
+import { readmeGenerationPrompt } from '@/ai/prompts/project-documentation';
 import {
   ProjectDataSchema,
-  ReadmeOutputSchema,
-  type ProjectData,
+  ReadmeOutputSchema
 } from '@/ai/schemas/project-documentation';
+import {
+  createUserGuideTool,
+  generateAPIReferenceTool
+} from '@/ai/tools/documentation-generation';
 import {
   analyzeProjectStructureTool,
   extractDependenciesTool,
-  generateArchitectureDiagramTool,
 } from '@/ai/tools/project-analysis';
 import {
-  generateAPIReferenceTool,
-  createUserGuideTool,
-  generateTableOfContentsTool,
-} from '@/ai/tools/documentation-generation';
-import { readmeGenerationPrompt } from '@/ai/prompts/project-documentation';
+  generateArchitectureDiagramTool,
+} from '@/ai/tools/reporting-and-metrics';
 
 // ==================== INPUT/OUTPUT SCHEMAS ====================
 
@@ -91,7 +91,7 @@ export const projectDocumentationGenerator = ai.defineFlow(
     // Step 3: Generate README (if requested)
     if (includeREADME) {
       console.log('📝 Step 3/5: Generating README.md...');
-      
+
       const techStack = [
         ...dependencies.categories.ui,
         ...dependencies.categories.api,
@@ -116,7 +116,7 @@ export const projectDocumentationGenerator = ai.defineFlow(
     // Step 4: Generate API Reference (if requested)
     if (includeAPIReference) {
       console.log('🔌 Step 4/5: Generating API documentation...');
-      
+
       const apiDocs = await generateAPIReferenceTool({
         sourcePath: `${projectPath}/src`,
         format: 'markdown',
@@ -130,7 +130,7 @@ export const projectDocumentationGenerator = ai.defineFlow(
     // Step 5: Generate User Guide (if requested)
     if (includeUserGuide) {
       console.log('📖 Step 5/5: Generating user guide...');
-      
+
       const userGuide = await createUserGuideTool({
         projectPath,
         targetAudience: input.audienceLevel || 'Professional',
@@ -143,7 +143,7 @@ export const projectDocumentationGenerator = ai.defineFlow(
     // Step 6: Generate Architecture Diagram (if requested)
     if (includeArchitecture) {
       console.log('🏗️ Generating architecture diagram...');
-      
+
       const archDiagram = await generateArchitectureDiagramTool({
         projectPath,
         diagramType: input.diagramType || 'component',
@@ -156,7 +156,7 @@ export const projectDocumentationGenerator = ai.defineFlow(
 
     // Generate summary
     console.log('✅ Finalizing documentation package...');
-    
+
     const summary = await ai.generate({
       model: 'googleai/gemini-2.0-flash-exp',
       prompt: `Create a brief summary of the generated documentation package for ${projectName}.
@@ -175,27 +175,27 @@ Write a 2-3 sentence summary highlighting what was generated and its purpose.`,
 
     // Create full documentation package markdown
     const packageParts: string[] = [];
-    
+
     packageParts.push(`# ${projectName} - Complete Documentation Package\n`);
     packageParts.push(`Generated: ${new Date().toISOString()}\n`);
     packageParts.push(`---\n\n`);
-    
+
     if (results.readme) {
       packageParts.push(`## README.md\n\n${results.readme.fullContent}\n\n---\n\n`);
     }
-    
+
     if (results.apiDocumentation) {
       packageParts.push(`## API Documentation\n\n${results.apiDocumentation}\n\n---\n\n`);
     }
-    
+
     if (results.userGuide) {
       packageParts.push(`## User Guide\n\n${results.userGuide}\n\n---\n\n`);
     }
-    
+
     if (results.architectureDiagram) {
       packageParts.push(`## Architecture\n\n\`\`\`mermaid\n${results.architectureDiagram}\n\`\`\`\n\n---\n\n`);
     }
-    
+
     packageParts.push(`## Project Structure\n\n\`\`\`json\n${results.projectStructure}\n\`\`\`\n\n`);
     packageParts.push(`## Dependencies\n\n\`\`\`json\n${results.dependencies}\n\`\`\`\n`);
 
