@@ -454,6 +454,7 @@ export type {
 // ==================== PROJECT DOCUMENTATION FLOWS ====================
 export { projectDocumentationGenerator } from './project-documentation-generator';
 export { projectReportGenerator } from './project-report-generator';
+export { graduationProjectGenerator } from './graduation-project-generator';
 export { presentationContentCreator } from './presentation-content-creator';
 export { readmeGenerator } from './readme-generator';
 export { apiDocumentationGenerator } from './api-documentation-generator';

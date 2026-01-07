@@ -11,6 +11,7 @@ export { SolveAssignmentsInputSchema, SolveAssignmentsOutputSchema } from './flo
 export type { SolveAssignmentsInput, SolveAssignmentsOutput } from './flows';
 export * from './lecture-generator';
 export * from './template-schemas';
+export * from './graduation-project';
 export { GenerateUIDescriptionInputSchema, GenerateUIDescriptionOutputSchema } from './flows';
 export type { GenerateUIDescriptionInput, GenerateUIDescriptionOutput } from './flows';
 export * from './project-documentation';

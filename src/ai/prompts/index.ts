@@ -70,6 +70,9 @@ import {
 import { GenerateSessionPlanInputSchema, GenerateSessionPlanOutputSchema, GenerateTheoreticalLectureInputSchema, GenerateTheoreticalLectureOutputSchema } from '@/ai/schemas/lecture-generator';
 import { z } from 'zod';
 
+// Export graduation project prompts
+export * from './graduation-project';
+
 const styleDescriptions: Record<string, string> = {
     standard: "Provide a balanced rewrite that improves clarity while retaining the original meaning.",
     fluent: "Rewrite the text to sound more natural and fluent, as if written by a native speaker.",
