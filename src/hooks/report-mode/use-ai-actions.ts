@@ -131,7 +131,6 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
         const section = currentProject.getSection(sectionId);
         if (!section) throw new Error("Section not found.");
 
-        const token = await firebaseUser.getIdToken();
         const body = {
             flow: 'generate-section',
             sectionToGenerate: section.id as SectionName,
@@ -141,7 +140,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
             guidelines: section.guidelines,
             instructionText: PromptBuilder.buildSectionPrompt(section, currentProject),
         };
-        const result = await generateReportSectionApi(body, token);
+        const result = await generateReportSectionAction(body);
         const content = result?.[section.id] ?? Object.values(result || {})[0] as string | undefined;
         if (!content) throw new Error('Empty generation result');
         return { sectionId: section.id, content };
