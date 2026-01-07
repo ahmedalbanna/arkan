@@ -23,6 +23,7 @@
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
       # "vscodevim.vim"
+      # "google.gemini-cli-vscode-ide-companion"
     ];
     workspace = {
       onCreate = {
@@ -30,6 +31,15 @@
           "src/app/page.tsx"
         ];
       };
+      # onStart = {
+      #   run-server = "if [ -z \"\${GOOGLE_GENAI_API_KEY}\" ]; then \
+      #     echo 'No Gemini API key detected, enter a Gemini API key from https://aistudio.google.com/app/apikey:' && \
+      #     read -s GOOGLE_GENAI_API_KEY && \
+      #     echo 'You can also add to .idx/dev.nix to automatically add to your workspace'
+      #     export GOOGLE_GENAI_API_KEY; \
+      #     fi && \
+      #     npm run genkit:dev";
+      # };
     };
     # Enable previews and customize configuration
     previews = {
