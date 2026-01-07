@@ -1,7 +1,7 @@
 'use server';
 
 import { ai } from '@/ai/genkit';
-import { GenerateUIDescriptionInputSchema, GenerateUIDescriptionOutputSchema, type GenerateUIDescriptionInput, type GenerateUIDescriptionOutput } from '@/lib/schemas';
+import { GenerateUIDescriptionInputSchema, GenerateUIDescriptionOutputSchema, type GenerateUIDescriptionInput, type GenerateUIDescriptionOutput } from '@/ai/schemas';
 
 const uiDescriptionFlow = ai.defineFlow({
     name: 'generateUiDescriptionFlow',

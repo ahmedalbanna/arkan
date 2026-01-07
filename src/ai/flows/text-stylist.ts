@@ -20,7 +20,7 @@ import {
   type StyleEditorOutput,
   type SummarizeTextWithRatioInput,
   type SummarizeTextWithRatioOutput
-} from '@/lib/schemas';
+} from '@/ai/schemas';
 
 // --- Rewrite Text Flow ---
 

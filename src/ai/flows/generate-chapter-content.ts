@@ -5,7 +5,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { GenerateChapterInputSchema, GenerateChapterOutputSchema, type GenerateChapterInput, type GenerateChapterOutput } from '@/lib/schemas';
+import { GenerateChapterInputSchema, GenerateChapterOutputSchema, type GenerateChapterInput, type GenerateChapterOutput } from '@/ai/schemas';
 
 const chapterPrompt = ai.definePrompt({
     name: 'generateChapterContentPrompt',
@@ -58,7 +58,7 @@ const generateChapterFlow = ai.defineFlow({
     inputSchema: GenerateChapterInputSchema,
     outputSchema: GenerateChapterOutputSchema,
 }, async (input) => {
-    
+
     const { output } = await chapterPrompt(input);
 
     if (!output) {

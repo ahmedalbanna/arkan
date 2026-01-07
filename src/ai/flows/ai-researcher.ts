@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { AIResearcherInputSchema, AIResearcherOutputSchema, type AIResearcherInput, type AIResearcherOutput } from '@/lib/schemas';
+import { AIResearcherInputSchema, AIResearcherOutputSchema, type AIResearcherInput, type AIResearcherOutput } from '@/ai/schemas';
 
 const researcherPrompt = ai.definePrompt({
   name: 'aiResearcherPrompt',

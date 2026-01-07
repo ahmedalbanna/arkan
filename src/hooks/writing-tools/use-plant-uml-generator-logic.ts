@@ -1,15 +1,15 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useToast } from '@/hooks';
-import { useMutation } from '@tanstack/react-query';
+import { DiagramTypeSchema } from '@/ai/schemas';
 import { generateDiagramAction } from '@/app/actions/diagramActions';
-import { DiagramTypeSchema } from '@/lib/schemas';
+import { useToast } from '@/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import pako from 'pako';
+import { useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 // Helper to encode the deflated PlantUML code for the PlantUML server
 function encode64(data: Uint8Array): string {

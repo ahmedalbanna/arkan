@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { ImproveMarkdownInputSchema, ImproveMarkdownOutputSchema, type ImproveMarkdownInput, type ImproveMarkdownOutput } from '@/lib/schemas';
+import { ImproveMarkdownInputSchema, ImproveMarkdownOutputSchema, type ImproveMarkdownInput, type ImproveMarkdownOutput } from '@/ai/schemas';
 
 const improveMarkdownPrompt = ai.definePrompt({
   name: 'improveReportMarkdownPrompt',

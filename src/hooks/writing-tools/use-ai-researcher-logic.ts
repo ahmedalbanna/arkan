@@ -1,13 +1,13 @@
 
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useProjects, useToast } from '@/hooks';
-import type { AIResearcherOutput, LiteratureReviewOutput, QuestionAnsweringOutput, FactRetrievalOutput } from '@/lib/schemas';
+import type { AIResearcherOutput, FactRetrievalOutput, LiteratureReviewOutput, QuestionAnsweringOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useMemo, useRef, useState, useEffect } from 'react';
+import { useToast } from '@/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { useWritingTool } from './use-writing-tool';
 
@@ -137,23 +137,23 @@ export function useAddToProjectDialogLogic(researchMarkdown: string, researchTit
 
   const handleSelectProject = () => {
     try {
-        const fileName = `research_${researchTitle.slice(0, 20).replace(/\s/g, '_')}.md`;
-        updateProject(p => p.addExternalContext({
-            fileName: fileName,
-            content: researchMarkdown,
-            type: 'context'
-        }));
-        toast({
-            title: t('writingTools.aiResearcher.toastContextAddedTitle'),
-            description: t('writingTools.aiResearcher.toastContextAddedDesc', { researchTitle }),
-        });
-        onOpenChange(false);
+      const fileName = `research_${researchTitle.slice(0, 20).replace(/\s/g, '_')}.md`;
+      updateProject(p => p.addExternalContext({
+        fileName: fileName,
+        content: researchMarkdown,
+        type: 'context'
+      }));
+      toast({
+        title: t('writingTools.aiResearcher.toastContextAddedTitle'),
+        description: t('writingTools.aiResearcher.toastContextAddedDesc', { researchTitle }),
+      });
+      onOpenChange(false);
     } catch (error: any) {
-        toast({
-            title: t('writingTools.aiResearcher.toastContextFailedTitle'),
-            description: error.message,
-            variant: 'destructive'
-        });
+      toast({
+        title: t('writingTools.aiResearcher.toastContextFailedTitle'),
+        description: error.message,
+        variant: 'destructive'
+      });
     }
   };
 

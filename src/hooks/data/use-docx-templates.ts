@@ -1,18 +1,18 @@
 
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from '@/hooks/util/use-toast';
+import { DocxTemplateSchema } from '@/ai/schemas/template-schemas';
 import {
-    getDocxTemplatesAction,
     createDocxTemplateAction,
-    updateDocxTemplateAction,
     deleteDocxTemplateAction,
+    getDocxTemplatesAction,
     refreshTemplateImageAction,
+    updateDocxTemplateAction,
 } from '@/app/actions/templateActions';
+import { toast } from '@/hooks/util/use-toast';
 import type { DocxTemplateProperties } from '@/lib/models';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
-import { DocxTemplateSchema } from '@/lib/schemas/template-schemas';
 
 
 const UpdateDocxTemplateSchema = DocxTemplateSchema.pick({ styles: true });

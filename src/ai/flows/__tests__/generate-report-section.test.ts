@@ -1,7 +1,7 @@
 // src/ai/flows/__tests__/generate-report-section.test.ts
-import { generateReportSection } from '../generate-report-section';
 import { ai } from '@/ai/genkit';
-import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput } from '@/lib/schemas';
+import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput } from '@/ai/schemas';
+import { generateReportSection } from '../generate-report-section';
 
 // Mock the entire genkit ai object
 jest.mock('@/ai/genkit', () => ({
@@ -80,7 +80,7 @@ describe('generateReportSection Flow', () => {
   });
 
   it('should construct the system prompt correctly', async () => {
-     const mockInput: GenerateSectionInput = {
+    const mockInput: GenerateSectionInput = {
       flow: 'generate-section',
       sectionToGenerate: 'test-section',
       prompt: 'Base prompt for the section.',
@@ -92,7 +92,7 @@ describe('generateReportSection Flow', () => {
     mockPrompt.mockResolvedValue({ output: { sectionName: 'test-section', content: 'test' } });
 
     await generateReportSection(mockInput);
-    
+
     // Check the structure of the system prompt passed to definePrompt
     const definePromptArgs = (ai.definePrompt as jest.Mock).mock.calls[0][0];
     expect(definePromptArgs.system).toContain('Base prompt for the section.');

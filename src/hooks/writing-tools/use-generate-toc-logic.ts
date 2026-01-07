@@ -1,14 +1,14 @@
 
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useToast, useBuilderStore } from '@/hooks';
-import { GenerateTocOutputSchema } from '@/lib/schemas';
+import { GenerateTocOutputSchema } from '@/ai/schemas';
+import { useToast } from '@/hooks';
 import type { TocSection } from '@/lib/models';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 // Updated schema to include the optional additional instructions
 const formSchema = z.object({
@@ -19,9 +19,9 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const formatTocToMarkdown = (toc: TocSection[]): string => {
-    return toc.map(chapter => 
-        `# ${chapter.title}\n${chapter.sections.map(section => `  - ${section}`).join('\n')}`
-    ).join('\n\n');
+  return toc.map(chapter =>
+    `# ${chapter.title}\n${chapter.sections.map(section => `  - ${section}`).join('\n')}`
+  ).join('\n\n');
 };
 
 export function useGenerateTocLogic() {
@@ -31,7 +31,7 @@ export function useGenerateTocLogic() {
     mutationFn: async (data: FormValues): Promise<z.infer<typeof GenerateTocOutputSchema>> => {
       // Hardcoded response for testing
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
-      
+
       console.log("Generating TOC with data:", data); // For debugging
 
       const hardcodedData: z.infer<typeof GenerateTocOutputSchema> = {
@@ -50,11 +50,11 @@ export function useGenerateTocLogic() {
           },
         ],
       };
-      
+
       return hardcodedData;
     },
     onSuccess: () => {
-        toast({ title: "Sample Table of Contents generated!" });
+      toast({ title: "Sample Table of Contents generated!" });
     },
     onError: (error: Error) => {
       toast({
@@ -76,7 +76,7 @@ export function useGenerateTocLogic() {
   const onSubmit = (data: FormValues) => {
     mutation.mutate(data);
   };
-  
+
   const results = mutation.data;
   const generatedMarkdown = useMemo(() => (results ? formatTocToMarkdown(results.tableOfContents) : ''), [results]);
 

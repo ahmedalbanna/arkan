@@ -1,16 +1,15 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useWritingTool, useToast } from '@/hooks';
-import { useDropzone } from 'react-dropzone';
+import type { FactCheckOutput } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services';
-import type { FactCheckOutput } from '@/lib/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useToast, useWritingTool } from '@/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useCallback, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const factCheckSchema = z.object({
   text: z.string().min(50, 'Please enter at least 50 characters for an accurate analysis.'),

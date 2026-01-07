@@ -10,7 +10,7 @@
  */
 
 import { configureUserAi } from '@/ai/genkit';
-import { GenerateTextInputSchema, GenerateTextOutputSchema, type GenerateTextInput, type GenerateTextOutput } from '@/lib/schemas';
+import { GenerateTextInputSchema, GenerateTextOutputSchema, type GenerateTextInput, type GenerateTextOutput } from '@/ai/schemas';
 
 // Note: This flow now needs to be called with a user-specific AI instance.
 // The API route will handle creating this instance based on the user's stored keys.
@@ -40,6 +40,6 @@ Generated Text:`,
       return output!;
     }
   );
-  
+
   return generateTextFlow(input);
 }

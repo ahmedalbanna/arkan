@@ -16,7 +16,7 @@ export * from './models/user';
 export * as WordConverterTypes from './word-converter/types';
 
 // Re-export PptxStyleOptions from the schemas
-export type { PptxStyleOptions } from '@/lib/schemas/template-schemas';
+export type { PptxStyleOptions } from '@/ai/schemas/template-schemas';
 
 export interface HistoryEntry {
     id: string;
@@ -146,21 +146,21 @@ export type UpdatePresentationTemplateData = Partial<Omit<PresentationTemplatePr
 
 // Report Template Types
 export interface ReportTemplateProperties {
-  id: string;
-  name: string;
-  description: string;
-  isDefault?: boolean;
-  content: {
-    title: string;
-    sections: {
-      title: string;
-      type: 'report' | 'diagram' | 'presentation';
-      prompt: string;
-      guidelines?: string[];
-      behaviors?: { name: string; type: 'persona' | 'behavior' }[];
-      controls?: any; // Use a more specific type if possible
+    id: string;
+    name: string;
+    description: string;
+    isDefault?: boolean;
+    content: {
+        title: string;
+        sections: {
+            title: string;
+            type: 'report' | 'diagram' | 'presentation';
+            prompt: string;
+            guidelines?: string[];
+            behaviors?: { name: string; type: 'persona' | 'behavior' }[];
+            controls?: any; // Use a more specific type if possible
+        }[];
     }[];
-  }[];
 }
 
 
@@ -170,12 +170,12 @@ export type UpdateReportTemplateData = Partial<Omit<ReportTemplateProperties, 'i
 // Payment proof file schema
 import { z } from 'zod';
 export const fileSchema = z.object({
-  file: z
-    .any()
-    .refine((files) => files?.length == 1, 'File is required.')
-    .refine((files) => files?.[0]?.size <= 5 * 1024 * 1024, `Max file size is 5MB.`)
-    .refine(
-      (files) => ['image/jpeg', 'image/png', 'application/pdf'].includes(files?.[0]?.type),
-      'Invalid file type. Only JPG, PNG, and PDF are allowed.'
-    ),
+    file: z
+        .any()
+        .refine((files) => files?.length == 1, 'File is required.')
+        .refine((files) => files?.[0]?.size <= 5 * 1024 * 1024, `Max file size is 5MB.`)
+        .refine(
+            (files) => ['image/jpeg', 'image/png', 'application/pdf'].includes(files?.[0]?.type),
+            'Invalid file type. Only JPG, PNG, and PDF are allowed.'
+        ),
 });

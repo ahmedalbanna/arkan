@@ -5,7 +5,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { SolveAssignmentsInputSchema, SolveAssignmentsOutputSchema, type SolveAssignmentsInput, type SolveAssignmentsOutput } from '@/lib/schemas';
+import { SolveAssignmentsInputSchema, SolveAssignmentsOutputSchema, type SolveAssignmentsInput, type SolveAssignmentsOutput } from '@/ai/schemas';
 
 const solveAssignmentsFlow = ai.defineFlow({
     name: 'solveAssignmentsFlow',

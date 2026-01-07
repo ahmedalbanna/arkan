@@ -1,16 +1,16 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useWritingTool, useToast } from '@/hooks';
-import type { GrammarCheckOutput } from '@/lib/schemas';
-import { useDropzone } from 'react-dropzone';
+import type { GrammarCheckOutput } from '@/ai/schemas';
+import { processFileAction } from '@/app/actions/fileActions';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { processFileAction } from '@/app/actions/fileActions';
+import { useToast, useWritingTool } from '@/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useCallback, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const grammarCheckSchema = z.object({
   text: z.string().min(10, 'Please enter at least 10 characters to check.'),

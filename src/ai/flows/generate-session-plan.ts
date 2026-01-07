@@ -11,7 +11,7 @@ import {
   GenerateSessionPlanOutputSchema,
   type GenerateSessionPlanInput,
   type GenerateSessionPlanOutput,
-} from '@/lib/schemas/lecture-generator';
+} from '@/ai/schemas/lecture-generator';
 import { withRetry } from '@/lib/utils/ai-utils';
 
 const generateSessionPlanPrompt = ai.definePrompt({

@@ -1,77 +1,74 @@
 
 'use server';
 
-import { z } from 'zod';
 import { requireUser } from './_utils/auth';
-import { deductCredit } from './userActions';
 import { logGeneration } from './analyticsActions';
+import { deductCredit } from './userActions';
 
 // Flows
-import { paraphraseText } from '@/ai/flows/paraphrase-text';
-import { summarizeText } from '@/ai/flows/summarize-text';
-import { humanizeText } from '@/ai/flows/humanize-text';
-import { detectAiContent } from '@/ai/flows/detect-ai-content';
-import { grammarCheck } from '@/ai/flows/grammar-checker';
-import { generateQuiz } from '@/ai/flows/generate-quiz';
-import { factCheckText } from '@/ai/flows/fact-checker';
-import { plagiarismCheck } from '@/ai/flows/plagiarism-checker';
-import { generateCitation } from '@/ai/flows/generate-citation';
 import { aiResearcher } from '@/ai/flows/ai-researcher';
-import { literatureReviewGenerator as generateLiteratureReview } from '@/ai/flows/literature-review-generator';
-import { answerQuestion } from '@/ai/flows/question-answering';
+import { detectAiContent } from '@/ai/flows/detect-ai-content';
+import { factCheckText } from '@/ai/flows/fact-checker';
 import { retrieveFact } from '@/ai/flows/fact-retrieval';
-import { topicExplainer } from '@/ai/flows/topic-explainer';
+import { generateChapterContent } from '@/ai/flows/generate-chapter-content';
+import { generateCitation } from '@/ai/flows/generate-citation';
 import { generateIdeas } from '@/ai/flows/generate-ideas';
-import { writeDocument } from '@/ai/flows/write-document';
+import { generateImage } from '@/ai/flows/generate-image';
 import { generatePlantUML } from '@/ai/flows/generate-plantuml';
-import { rewriteText } from '@/ai/flows/text-stylist';
-import { summarizeTextWithRatio } from '@/ai/flows/text-stylist';
-import { styleEditor, readabilityEnhancer, concisenessChecker, clarityAdvisor } from '@/ai/flows/text-stylist';
-import { manipulateText } from '@/ai/flows/manipulate-text';
+import { generateProjectBlueprint } from '@/ai/flows/generate-project-blueprint';
+import { generateQuiz } from '@/ai/flows/generate-quiz';
 import { generateToc } from '@/ai/flows/generate-toc';
-import { translateText } from '@/ai/flows/translate-text';
+import { generateUiDescription } from '@/ai/flows/generate-ui-description';
+import { grammarCheck } from '@/ai/flows/grammar-checker';
+import { humanizeText } from '@/ai/flows/humanize-text';
+import { literatureReviewGenerator as generateLiteratureReview } from '@/ai/flows/literature-review-generator';
+import { manipulateText } from '@/ai/flows/manipulate-text';
+import { paraphraseText } from '@/ai/flows/paraphrase-text';
+import { plagiarismCheck } from '@/ai/flows/plagiarism-checker';
+import { answerQuestion } from '@/ai/flows/question-answering';
 import { sentenceStructureCheck } from '@/ai/flows/sentence-structure-checker';
 import { solveAssignments } from '@/ai/flows/solve-assignments';
-import { generateProjectBlueprint } from '@/ai/flows/generate-project-blueprint';
-import { generateUiDescription } from '@/ai/flows/generate-ui-description';
-import { generateChapterContent } from '@/ai/flows/generate-chapter-content';
-import { generateImage } from '@/ai/flows/generate-image';
+import { summarizeText } from '@/ai/flows/summarize-text';
+import { clarityAdvisor, concisenessChecker, readabilityEnhancer, rewriteText, styleEditor, summarizeTextWithRatio } from '@/ai/flows/text-stylist';
+import { topicExplainer } from '@/ai/flows/topic-explainer';
+import { translateText } from '@/ai/flows/translate-text';
+import { writeDocument } from '@/ai/flows/write-document';
 
 // Schemas
 import {
-  ParaphraseInputSchema,
-  SummarizeInputSchema,
-  HumanizeTextInputSchema,
-  DetectAIInputSchema,
-  GrammarCheckInputSchema,
-  GenerateQuizInputSchema,
-  FactCheckInputSchema,
-  PlagiarismCheckInputSchema,
-  GenerateCitationInputSchema,
   AIResearcherInputSchema,
-  LiteratureReviewInputSchema,
-  QuestionAnsweringInputSchema,
-  FactRetrievalInputSchema,
-  TopicExplainerInputSchema,
-  IdeaGenerationInputSchema,
-  WriteDocumentInputSchema,
-  GeneratePlantUMLInputSchema,
-  RewriteTextInputSchema,
-  SummarizeTextWithRatioInputSchema,
-  StyleEditorInputSchema,
-  ReadabilityEnhancerInputSchema,
-  ConcisenessCheckerInputSchema,
   ClarityAdvisorInputSchema,
-  ManipulateTextInputSchema,
+  ConcisenessCheckerInputSchema,
+  DetectAIInputSchema,
+  FactCheckInputSchema,
+  FactRetrievalInputSchema,
+  GenerateChapterInputSchema,
+  GenerateCitationInputSchema,
+  GenerateImageInputSchema,
+  GeneratePlantUMLInputSchema,
+  GenerateProjectBlueprintInputSchema,
+  GenerateQuizInputSchema,
   GenerateTocInputSchema,
-  TranslateTextInputSchema,
+  GenerateUIDescriptionInputSchema,
+  GrammarCheckInputSchema,
+  HumanizeTextInputSchema,
+  IdeaGenerationInputSchema,
+  LiteratureReviewInputSchema,
+  ManipulateTextInputSchema,
+  ParaphraseInputSchema,
+  PlagiarismCheckInputSchema,
+  QuestionAnsweringInputSchema,
+  ReadabilityEnhancerInputSchema,
+  RewriteTextInputSchema,
   SentenceStructureCheckInputSchema,
   SolveAssignmentsInputSchema,
-  GenerateProjectBlueprintInputSchema,
-  GenerateUIDescriptionInputSchema,
-  GenerateChapterInputSchema,
-  GenerateImageInputSchema,
-} from '@/lib/schemas';
+  StyleEditorInputSchema,
+  SummarizeInputSchema,
+  SummarizeTextWithRatioInputSchema,
+  TopicExplainerInputSchema,
+  TranslateTextInputSchema,
+  WriteDocumentInputSchema,
+} from '@/ai/schemas';
 
 const toolConfig = {
   paraphrase: { flow: paraphraseText, schema: ParaphraseInputSchema, creditCost: 1 },
@@ -114,7 +111,7 @@ export async function runWritingToolAction(tool: ToolName, data: unknown) {
   const user = await requireUser();
   const config = toolConfig[tool];
   if (!config) throw new Error(`Invalid tool: ${tool}`);
-  
+
   // The 'flow' property needs to be added for Zod validation to work with discriminated unions
   const dataWithFlow = { ...(data as object), flow: tool };
 
@@ -123,20 +120,20 @@ export async function runWritingToolAction(tool: ToolName, data: unknown) {
     // Re-throw Zod's formatted error for better debugging
     throw validation.error;
   }
-  
+
   const input = validation.data as any;
 
   await deductCredit(user.id, config.creditCost);
 
   const result = await (config.flow as any)(input);
-  
-  await logGeneration({ 
-    agentId: tool, 
-    userId: user.id, 
-    input, 
+
+  await logGeneration({
+    agentId: tool,
+    userId: user.id,
+    input,
     // Truncate image data for logging
-    output: tool === 'generate-image' ? { imageUrl: 'data:image/...;base64,...[TRUNCATED]' } : result, 
-    creditCost: config.creditCost 
+    output: tool === 'generate-image' ? { imageUrl: 'data:image/...;base64,...[TRUNCATED]' } : result,
+    creditCost: config.creditCost
   });
 
   return result;

@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { QuestionAnsweringInputSchema, QuestionAnsweringOutputSchema, type QuestionAnsweringInput, type QuestionAnsweringOutput } from '@/lib/schemas';
+import { QuestionAnsweringInputSchema, QuestionAnsweringOutputSchema, type QuestionAnsweringInput, type QuestionAnsweringOutput } from '@/ai/schemas';
 
 const questionAnsweringPrompt = ai.definePrompt({
   name: 'questionAnsweringPrompt',

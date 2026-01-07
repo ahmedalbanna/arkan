@@ -1,7 +1,7 @@
 
 'use client';
 
-import { DiagramTypeSchema } from '@/lib/schemas';
+import { DiagramTypeSchema } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';

@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { GenerateQuizInputSchema, GenerateQuizOutputSchema, type GenerateQuizInput, type GenerateQuizOutput } from '@/lib/schemas';
+import { GenerateQuizInputSchema, GenerateQuizOutputSchema, type GenerateQuizInput, type GenerateQuizOutput } from '@/ai/schemas';
 
 const multipleChoiceQuizPrompt = ai.definePrompt({
     name: 'multipleChoiceQuizPrompt',

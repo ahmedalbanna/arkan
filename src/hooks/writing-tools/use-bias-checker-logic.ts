@@ -1,15 +1,15 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useWritingTool, useToast } from '@/hooks';
-import { useDropzone } from 'react-dropzone';
-import { useAuth } from '@/context/AuthContext';
-import type { BiasCheckOutput } from '@/lib/schemas';
+import type { BiasCheckOutput } from '@/ai/schemas';
 import { processFileAction } from '@/app/actions/fileActions';
+import { useAuth } from '@/context/AuthContext';
+import { useToast, useWritingTool } from '@/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useCallback, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const biasCheckSchema = z.object({
   text: z.string().min(50, 'Please enter at least 50 characters for an accurate analysis.'),

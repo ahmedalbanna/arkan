@@ -12,7 +12,7 @@ import {
   ManipulateTextOutputSchema,
   type ManipulateTextInput,
   type ManipulateTextOutput,
-} from '@/lib/schemas';
+} from '@/ai/schemas';
 
 const prompt = ai.definePrompt({
   name: 'manipulateTextPrompt',

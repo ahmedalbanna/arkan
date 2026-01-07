@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { GenerateCitationInputSchema, GenerateCitationOutputSchema, type GenerateCitationInput, type GenerateCitationOutput } from '@/lib/schemas';
+import { GenerateCitationInputSchema, GenerateCitationOutputSchema, type GenerateCitationInput, type GenerateCitationOutput } from '@/ai/schemas';
 
 const generateCitationPrompt = ai.definePrompt({
   name: 'generateCitationPrompt',

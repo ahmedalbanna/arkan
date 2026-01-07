@@ -1,13 +1,13 @@
 
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useWritingTool, useToast } from '@/hooks';
-import type { GeneratePresentationOutlineOutput } from '@/lib/schemas';
+import type { GeneratePresentationOutlineOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useToast, useWritingTool } from '@/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const outlineSchema = z.object({
   prompt: z.string().min(10, 'Please provide a more detailed topic.'),

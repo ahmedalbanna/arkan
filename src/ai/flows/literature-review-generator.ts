@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { LiteratureReviewInputSchema, LiteratureReviewOutputSchema, type LiteratureReviewInput, type LiteratureReviewOutput } from '@/lib/schemas';
+import { LiteratureReviewInputSchema, LiteratureReviewOutputSchema, type LiteratureReviewInput, type LiteratureReviewOutput } from '@/ai/schemas';
 
 const literatureReviewPrompt = ai.definePrompt({
   name: 'literatureReviewPrompt',

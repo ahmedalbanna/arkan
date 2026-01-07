@@ -8,7 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/lib/schemas';
+import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/ai/schemas';
 
 export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
 
@@ -73,9 +73,9 @@ You have access to the following documents. Review them and use the most relevan
   });
 
   // Return a simple, hardcoded response for testing
-  const output = { 
-    sectionName: input.sectionToGenerate, 
-    content: `This is a placeholder test content for the section titled "${input.sectionToGenerate}". The AI flow is currently configured to return this static text for debugging and testing purposes.` 
+  const output = {
+    sectionName: input.sectionToGenerate,
+    content: `This is a placeholder test content for the section titled "${input.sectionToGenerate}". The AI flow is currently configured to return this static text for debugging and testing purposes.`
   };
   // const { output } = await reportSectionPrompt(input);
 

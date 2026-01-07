@@ -66,8 +66,8 @@ import {
     TranslateTextOutputSchema,
     WriteDocumentInputSchema,
     WriteDocumentOutputSchema
-} from '@/lib/schemas';
-import { GenerateSessionPlanInputSchema, GenerateSessionPlanOutputSchema, GenerateTheoreticalLectureInputSchema, GenerateTheoreticalLectureOutputSchema } from '@/lib/schemas/lecture-generator';
+} from '@/ai/schemas';
+import { GenerateSessionPlanInputSchema, GenerateSessionPlanOutputSchema, GenerateTheoreticalLectureInputSchema, GenerateTheoreticalLectureOutputSchema } from '@/ai/schemas/lecture-generator';
 import { z } from 'zod';
 
 const styleDescriptions: Record<string, string> = {

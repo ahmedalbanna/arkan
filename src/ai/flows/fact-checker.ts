@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { FactCheckInputSchema, FactCheckOutputSchema, type FactCheckInput, type FactCheckOutput } from '@/lib/schemas';
+import { FactCheckInputSchema, FactCheckOutputSchema, type FactCheckInput, type FactCheckOutput } from '@/ai/schemas';
 
 const factCheckPrompt = ai.definePrompt({
   name: 'factCheckPrompt',

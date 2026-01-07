@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { IdeaGenerationInputSchema, IdeaGenerationOutputSchema, type IdeaGenerationInput, type IdeaGenerationOutput } from '@/lib/schemas';
+import { IdeaGenerationInputSchema, IdeaGenerationOutputSchema, type IdeaGenerationInput, type IdeaGenerationOutput } from '@/ai/schemas';
 
 const generateIdeasPrompt = ai.definePrompt({
   name: 'generateIdeasPrompt',

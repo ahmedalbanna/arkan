@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { PlagiarismCheckInputSchema, PlagiarismCheckOutputSchema, type PlagiarismCheckInput, type PlagiarismCheckOutput } from '@/lib/schemas';
+import { PlagiarismCheckInputSchema, PlagiarismCheckOutputSchema, type PlagiarismCheckInput, type PlagiarismCheckOutput } from '@/ai/schemas';
 
 const plagiarismCheckPrompt = ai.definePrompt({
   name: 'plagiarismCheckPrompt',

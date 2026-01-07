@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { SummarizeInputSchema, SummarizeLength, SummarizeOutputSchema, type SummarizeInput, type SummarizeOutput } from '@/lib/schemas';
+import { SummarizeInputSchema, SummarizeLength, SummarizeOutputSchema, type SummarizeInput, type SummarizeOutput } from '@/ai/schemas';
 import z from 'zod';
 
 const lengthDescriptions: Record<SummarizeLength, string> = {

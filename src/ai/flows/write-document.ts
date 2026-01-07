@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { WriteDocumentInputSchema, WriteDocumentOutputSchema, type WriteDocumentInput, type WriteDocumentOutput } from '@/lib/schemas';
+import { WriteDocumentInputSchema, WriteDocumentOutputSchema, type WriteDocumentInput, type WriteDocumentOutput } from '@/ai/schemas';
 
 const universitySubjectMaterialPrompt = ai.definePrompt({
   name: 'universitySubjectMaterialPrompt',

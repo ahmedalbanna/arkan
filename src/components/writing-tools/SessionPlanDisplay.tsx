@@ -2,7 +2,7 @@
 'use client';
 
 
-import { GenerateSessionPlanOutput } from "@/lib/schemas/lecture-generator";
+import { GenerateSessionPlanOutput } from "@/ai/schemas/lecture-generator";
 import { MarkdownViewer } from "@/components/shared/MarkdownViewer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";

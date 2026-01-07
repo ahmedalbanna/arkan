@@ -1,12 +1,12 @@
 
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useWritingTool, useToast } from '@/hooks';
-import type { IdeaGenerationOutput } from '@/lib/schemas';
+import type { IdeaGenerationOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useToast, useWritingTool } from '@/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const ideaGeneratorSchema = z.object({
   specialization: z.string().min(5, 'Please provide your specialization.'),

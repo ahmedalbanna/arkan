@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { BiasCheckInputSchema, BiasCheckOutputSchema, type BiasCheckInput, type BiasCheckOutput } from '@/lib/schemas';
+import { BiasCheckInputSchema, BiasCheckOutputSchema, type BiasCheckInput, type BiasCheckOutput } from '@/ai/schemas';
 
 const biasCheckPrompt = ai.definePrompt({
   name: 'biasCheckPrompt',

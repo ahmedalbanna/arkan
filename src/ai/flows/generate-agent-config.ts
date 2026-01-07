@@ -2,7 +2,7 @@
 'use server';
 
 import { ai } from '@/ai/genkit';
-import { GenerateAgentConfigInputSchema, GenerateAgentConfigOutputSchema, type GenerateAgentConfigOutput } from '@/lib/schemas';
+import { GenerateAgentConfigInputSchema, GenerateAgentConfigOutputSchema, type GenerateAgentConfigOutput } from '@/ai/schemas';
 import { z } from 'zod';
 
 const generateAgentConfigPrompt = ai.definePrompt({

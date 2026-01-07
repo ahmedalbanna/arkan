@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
+import type { SentenceStructureCheckOutput } from '@/ai/schemas';
+import { useToast, useWritingTool } from '@/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useWritingTool, useToast } from '@/hooks';
+import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import type { SentenceStructureCheckOutput } from '@/lib/schemas';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const sentenceStructureSchema = z.object({
   text: z.string().min(50, 'Please enter at least 50 characters for an accurate analysis.'),
@@ -40,27 +40,27 @@ export function useSentenceStructureCheckerLogic() {
     if (!file) return;
 
     setIsUploading(true);
-    
-    try {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const result = event.target?.result as string;
-            onFileUpload(result);
-            setIsUploading(false);
-        };
-        reader.onerror = () => {
-            throw new Error("Error reading file.");
-        };
 
-        const isTextFile = file.type.startsWith('text/') || file.name.endsWith('.md');
-        if (isTextFile) {
-            reader.readAsText(file);
-        } else {
-             // For other file types like PDF, you might need a different processing step
-             // For now, we'll assume text-based for this tool.
-             toast({ title: 'Unsupported File', description: 'Please upload a text-based file (.txt, .md).', variant: 'destructive' });
-             setIsUploading(false);
-        }
+    try {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        onFileUpload(result);
+        setIsUploading(false);
+      };
+      reader.onerror = () => {
+        throw new Error("Error reading file.");
+      };
+
+      const isTextFile = file.type.startsWith('text/') || file.name.endsWith('.md');
+      if (isTextFile) {
+        reader.readAsText(file);
+      } else {
+        // For other file types like PDF, you might need a different processing step
+        // For now, we'll assume text-based for this tool.
+        toast({ title: 'Unsupported File', description: 'Please upload a text-based file (.txt, .md).', variant: 'destructive' });
+        setIsUploading(false);
+      }
     } catch (error: any) {
       toast({ title: 'File Processing Failed', description: error.message, variant: "destructive" });
       setIsUploading(false);
