@@ -16,7 +16,7 @@ console.log('📦 TEST 1: Checking Tool Exports');
 console.log('-'.repeat(70));
 
 try {
-  const tools = require('./tools');
+  const tools = require('../tools');
   
   const expectedTools = [
     'checkGrammarTool',
@@ -65,7 +65,7 @@ console.log('📦 TEST 2: Checking Flow Exports');
 console.log('-'.repeat(70));
 
 try {
-  const flows = require('./flows');
+  const flows = require('../flows');
   
   const expectedFlows = [
     // Universal flows
@@ -116,7 +116,7 @@ console.log('📦 TEST 3: Checking Prompt Exports');
 console.log('-'.repeat(70));
 
 try {
-  const prompts = require('./prompts');
+  const prompts = require('../prompts');
   
   console.log(`  ✓ Prompts module loaded`);
   
@@ -142,7 +142,7 @@ console.log('📦 TEST 4: Checking Flow Registry');
 console.log('-'.repeat(70));
 
 try {
-  const registry = require('./flows/flow-registry');
+  const registry = require('../flows/flow-registry');
   
   if (registry.flowRegistry) {
     const registryKeys = Object.keys(registry.flowRegistry);
@@ -200,7 +200,7 @@ const expectedFiles = [
 
 let allFilesExist = true;
 expectedFiles.forEach(file => {
-  const exists = fs.existsSync(file);
+  const exists = fs.existsSync(path.join(__dirname, '..', file));
   console.log(`  ${exists ? '✓' : '✗'} ${file}`);
   if (!exists) allFilesExist = false;
 });

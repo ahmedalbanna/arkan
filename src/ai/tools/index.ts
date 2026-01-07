@@ -79,7 +79,7 @@ export function getAvailableToolNames(): string[] {
  * Get a specific tool by name
  */
 export function getToolByName(name: string) {
-  return professionalWritingTools[name as keyof typeof professionalWritingTools];
+  return (professionalWritingTools as any)[name as keyof typeof professionalWritingTools];
 }
 
 // Default export for convenience

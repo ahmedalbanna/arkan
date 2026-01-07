@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Schemas for Professional Writing Tools
  * 
@@ -234,6 +235,155 @@ export const AnalyzeDocumentQualityToolOutputSchema = z.object({
   }),
 });
 
+// ============================================================================
+// ADVANCED FLOW SCHEMAS
+// ============================================================================
+
+export const AcademicLiteratureReviewInputSchema = z.object({
+  topic: z.string().min(10, 'Topic must be at least 10 characters').describe('The research topic for the literature review'),
+  keywords: z.union([z.string(), z.array(z.string())]).transform(val => typeof val === 'string' ? val.split(',').map(k => k.trim()).filter(Boolean) : val).refine(val => val.length > 0, { message: 'At least one keyword is required.' }),
+  citationStyle: z.enum(['APA', 'MLA', 'Chicago', 'Harvard', 'IEEE']).default('APA').describe('Citation style to use'),
+  focusAreas: z.union([z.string(), z.array(z.string())]).optional().transform(val => typeof val === 'string' ? val.split(',').map(k => k.trim()).filter(Boolean) : val),
+  minLength: z.number().min(500).default(800).describe('Minimum word count for the review'),
+  includeGaps: z.boolean().default(true).describe('Whether to identify research gaps'),
+});
+
+export const AcademicLiteratureReviewOutputSchema = z.object({
+  literatureReview: z.string().describe('The complete literature review text'),
+  structure: z.object({
+    introduction: z.string(),
+    mainBody: z.string(),
+    researchGaps: z.string().optional(),
+    conclusion: z.string(),
+  }).describe('Structured sections of the review'),
+  citations: z.object({
+    totalCitations: z.number(),
+    validCitations: z.number(),
+    citationIssues: z.array(z.string()),
+  }).describe('Citation validation results'),
+  qualityMetrics: z.object({
+    argumentStrength: z.enum(['strong', 'moderate', 'weak']),
+    logicalFlowScore: z.number().min(0).max(1),
+    recommendations: z.array(z.string()),
+  }).describe('Quality assessment metrics'),
+  metadata: z.object({
+    wordCount: z.number(),
+    citationCount: z.number(),
+    keyThemes: z.array(z.string()),
+  }),
+});
+
+export const AcademicPaperQualityCheckerInputSchema = z.object({
+  documentText: z.string().min(100, 'Document must be at least 100 characters'),
+  references: z.string().optional().describe('The reference list/bibliography section'),
+  citationStyle: z.enum(['APA', 'MLA', 'Chicago', 'Harvard', 'IEEE']).default('APA'),
+  documentType: z.enum(['research_paper', 'thesis', 'dissertation', 'essay', 'review_article']).default('research_paper'),
+  checkGrammar: z.boolean().default(true),
+  checkCitations: z.boolean().default(true),
+  checkStructure: z.boolean().default(true),
+  checkReadability: z.boolean().default(true),
+});
+
+export const AcademicPaperQualityCheckerOutputSchema = z.object({
+  overallScore: z.number().min(0).max(100).describe('Overall quality score'),
+  qualityLevel: z.enum(['excellent', 'good', 'fair', 'needs_improvement', 'poor']),
+
+  scores: z.object({
+    grammar: z.number().min(0).max(100).optional(),
+    citations: z.number().min(0).max(100).optional(),
+    structure: z.number().min(0).max(100).optional(),
+    readability: z.number().min(0).max(100).optional(),
+    argument: z.number().min(0).max(100).optional(),
+  }),
+
+  detailedAnalysis: z.object({
+    grammarAnalysis: z.object({
+      totalIssues: z.number(),
+      errorCount: z.number(),
+      warningCount: z.number(),
+      topIssues: z.array(z.string()),
+    }).optional(),
+
+    citationAnalysis: z.object({
+      totalCitations: z.number(),
+      validCitations: z.number(),
+      invalidCitations: z.number(),
+      citationIssues: z.array(z.string()),
+      referenceIssues: z.array(z.string()).optional(),
+      mismatches: z.object({
+        citedButNotInReferences: z.array(z.string()),
+        inReferencesButNotCited: z.array(z.string()),
+      }).optional(),
+    }).optional(),
+
+    structureAnalysis: z.object({
+      coherenceScore: z.number(),
+      transitionQuality: z.string(),
+      organizationIssues: z.array(z.string()),
+      argumentStrength: z.string(),
+    }).optional(),
+
+    readabilityAnalysis: z.object({
+      fleschScore: z.number(),
+      gradeLevel: z.number(),
+      readabilityLevel: z.string(),
+      suggestions: z.array(z.string()),
+    }).optional(),
+  }),
+
+  recommendations: z.object({
+    critical: z.array(z.string()).describe('Must fix before submission'),
+    important: z.array(z.string()).describe('Should fix for better quality'),
+    optional: z.array(z.string()).describe('Nice to have improvements'),
+  }),
+
+  summary: z.object({
+    strengths: z.array(z.string()),
+    weaknesses: z.array(z.string()),
+    readinessLevel: z.enum(['ready_to_submit', 'minor_revisions', 'major_revisions', 'needs_rewrite']),
+    estimatedRevisionTime: z.string(),
+  }),
+});
+
+
+export const ProfessionalDocumentWriterInputSchema = z.object({
+  documentType: z.enum(['business_report', 'proposal', 'white_paper', 'case_study', 'executive_summary']),
+  topic: z.string().min(10, 'Topic must be at least 10 characters'),
+  purpose: z.string().describe('The purpose/goal of the document'),
+  targetAudience: z.string().describe('Who will read this document'),
+  keyPoints: z.union([z.string(), z.array(z.string())]).transform(val => typeof val === 'string' ? val.split('\n').map(k => k.trim()).filter(Boolean) : val).refine(val => val.length > 0, { message: 'At least one key point is required.' }),
+  tone: z.enum(['professional', 'persuasive', 'neutral', 'authoritative']).default('professional'),
+  length: z.enum(['short', 'medium', 'long']).default('medium').describe('short: 500-1000 words, medium: 1000-2000, long: 2000+'),
+  includeExecutiveSummary: z.boolean().default(true),
+  includeRecommendations: z.boolean().default(true),
+  additionalContext: z.string().optional().describe('Any additional context or requirements'),
+});
+
+export const ProfessionalDocumentWriterOutputSchema = z.object({
+  document: z.string().describe('The complete professional document'),
+  structure: z.object({
+    executiveSummary: z.string().optional(),
+    introduction: z.string(),
+    mainSections: z.array(z.object({
+      title: z.string(),
+      content: z.string(),
+    })),
+    recommendations: z.string().optional(),
+    conclusion: z.string(),
+  }),
+  qualityMetrics: z.object({
+    structureScore: z.number().min(0).max(100),
+    flowScore: z.number().min(0).max(100),
+    toneAlignment: z.number().min(0).max(1).describe('How well the tone matches target'),
+    wordCount: z.number(),
+  }),
+  improvements: z.object({
+    applied: z.array(z.string()).describe('Improvements that were applied'),
+    suggestions: z.array(z.string()).describe('Additional suggestions for manual review'),
+  }),
+});
+
+
 // Type exports
 export type CheckGrammarToolInput = z.infer<typeof CheckGrammarToolInputSchema>;
 export type CheckGrammarToolOutput = z.infer<typeof CheckGrammarToolOutputSchema>;
@@ -257,3 +407,9 @@ export type MatchCitationsToReferencesToolInput = z.infer<typeof MatchCitationsT
 export type MatchCitationsToReferencesToolOutput = z.infer<typeof MatchCitationsToReferencesToolOutputSchema>;
 export type AnalyzeDocumentQualityToolInput = z.infer<typeof AnalyzeDocumentQualityToolInputSchema>;
 export type AnalyzeDocumentQualityToolOutput = z.infer<typeof AnalyzeDocumentQualityToolOutputSchema>;
+export type AcademicLiteratureReviewInput = z.infer<typeof AcademicLiteratureReviewInputSchema>;
+export type AcademicLiteratureReviewOutput = z.infer<typeof AcademicLiteratureReviewOutputSchema>;
+export type AcademicPaperQualityCheckerInput = z.infer<typeof AcademicPaperQualityCheckerInputSchema>;
+export type AcademicPaperQualityCheckerOutput = z.infer<typeof AcademicPaperQualityCheckerOutputSchema>;
+export type ProfessionalDocumentWriterInput = z.infer<typeof ProfessionalDocumentWriterInputSchema>;
+export type ProfessionalDocumentWriterOutput = z.infer<typeof ProfessionalDocumentWriterOutputSchema>;

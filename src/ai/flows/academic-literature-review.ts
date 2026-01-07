@@ -21,41 +21,7 @@ import {
   validateCitationsTool,
 } from '@/ai/tools';
 import { z } from 'genkit';
-
-// Input/Output Schemas
-export const AcademicLiteratureReviewInputSchema = z.object({
-  topic: z.string().min(10, 'Topic must be at least 10 characters').describe('The research topic for the literature review'),
-  keywords: z.array(z.string()).min(1).describe('Key research keywords to focus on'),
-  citationStyle: z.enum(['APA', 'MLA', 'Chicago', 'Harvard', 'IEEE']).default('APA').describe('Citation style to use'),
-  focusAreas: z.array(z.string()).optional().describe('Specific focus areas within the topic'),
-  minLength: z.number().min(500).default(800).describe('Minimum word count for the review'),
-  includeGaps: z.boolean().default(true).describe('Whether to identify research gaps'),
-});
-
-export const AcademicLiteratureReviewOutputSchema = z.object({
-  literatureReview: z.string().describe('The complete literature review text'),
-  structure: z.object({
-    introduction: z.string(),
-    mainBody: z.string(),
-    researchGaps: z.string().optional(),
-    conclusion: z.string(),
-  }).describe('Structured sections of the review'),
-  citations: z.object({
-    totalCitations: z.number(),
-    validCitations: z.number(),
-    citationIssues: z.array(z.string()),
-  }).describe('Citation validation results'),
-  qualityMetrics: z.object({
-    argumentStrength: z.enum(['strong', 'moderate', 'weak']),
-    logicalFlowScore: z.number().min(0).max(1),
-    recommendations: z.array(z.string()),
-  }).describe('Quality assessment metrics'),
-  metadata: z.object({
-    wordCount: z.number(),
-    citationCount: z.number(),
-    keyThemes: z.array(z.string()),
-  }),
-});
+import { AcademicLiteratureReviewInputSchema, AcademicLiteratureReviewOutputSchema } from '../tools/schemas';
 
 export type AcademicLiteratureReviewInput = z.infer<typeof AcademicLiteratureReviewInputSchema>;
 export type AcademicLiteratureReviewOutput = z.infer<typeof AcademicLiteratureReviewOutputSchema>;
@@ -267,7 +233,8 @@ Return the sections as separate strings.`
     // ========================================================================
     const wordCount = finalText.split(/\s+/).length;
     const citationCount = citationValidation.totalCitations;
-    const keyThemes = keywords;
+    const keyThemes = Array.isArray(keywords) ? keywords : [];
+
 
     // ========================================================================
     // Return Final Output
@@ -306,8 +273,8 @@ Return the sections as separate strings.`
  */
 function getCitationGuidelines(style: string): string {
   const guidelines: Record<string, string> = {
-    APA: '- In-text: (Author, Year) or (Author, Year, p. X) for quotes\n- Multiple authors: (Smith & Jones, 2020) or (Smith et al., 2020)',
-    MLA: '- In-text: (Author Page) or (Author)\n- Multiple authors: (Smith and Jones 20)',
+    APA: '- In-text: (Author, Year) or (Author, Year, p. X) for quotes\n- Multiple authors: (Smith & Jones, 2020) or (Smith et al., 2020) for 3+ authors',
+    MLA: '- In-text: (Author Page) or (Author)\n- Multiple authors: (Smith and Jones 20) or (Smith et al. 25)',
     Chicago: '- In-text: (Author Year, Page) or footnotes\n- Multiple authors: (Smith and Jones 2020)',
     Harvard: '- In-text: (Author Year) or (Author Year, p. X)\n- Multiple authors: (Smith and Jones 2020)',
     IEEE: '- In-text: [1], [2], [3] in numerical order\n- Multiple: [1]-[3] or [1, 5, 7]',

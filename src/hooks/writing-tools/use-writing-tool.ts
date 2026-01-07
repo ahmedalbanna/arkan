@@ -2,8 +2,8 @@
 'use client';
 
 import { AIFlowInput } from '@/ai/schemas';
-import type { ToolName } from '@/app/actions/writingToolsActions';
-import { runWritingToolAction } from '@/app/actions/writingToolsActions';
+import type { ToolName } from '@/app/actions/aiActions';
+import { runWritingToolAction } from '@/app/actions/aiActions';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';

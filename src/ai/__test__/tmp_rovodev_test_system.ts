@@ -14,7 +14,7 @@ import {
   academicLiteratureReview,
   academicPaperQualityChecker,
   professionalDocumentWriter,
-} from './flows';
+} from '../flows';
 
 import {
   checkGrammarTool,
@@ -23,7 +23,7 @@ import {
   analyzeDocumentStructureTool,
   professionalWritingTools,
   getAvailableToolNames,
-} from './tools';
+} from '../tools';
 
 // Test data
 const SAMPLE_TEXT = `

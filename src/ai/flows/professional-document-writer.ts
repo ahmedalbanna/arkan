@@ -21,44 +21,7 @@ import {
   checkLogicalFlowTool
 } from '@/ai/tools';
 import { z } from 'genkit';
-
-// Input/Output Schemas
-export const ProfessionalDocumentWriterInputSchema = z.object({
-  documentType: z.enum(['business_report', 'proposal', 'white_paper', 'case_study', 'executive_summary']),
-  topic: z.string().min(10, 'Topic must be at least 10 characters'),
-  purpose: z.string().describe('The purpose/goal of the document'),
-  targetAudience: z.string().describe('Who will read this document'),
-  keyPoints: z.array(z.string()).min(1).describe('Main points to cover'),
-  tone: z.enum(['professional', 'persuasive', 'neutral', 'authoritative']).default('professional'),
-  length: z.enum(['short', 'medium', 'long']).default('medium').describe('short: 500-1000 words, medium: 1000-2000, long: 2000+'),
-  includeExecutiveSummary: z.boolean().default(true),
-  includeRecommendations: z.boolean().default(true),
-  additionalContext: z.string().optional().describe('Any additional context or requirements'),
-});
-
-export const ProfessionalDocumentWriterOutputSchema = z.object({
-  document: z.string().describe('The complete professional document'),
-  structure: z.object({
-    executiveSummary: z.string().optional(),
-    introduction: z.string(),
-    mainSections: z.array(z.object({
-      title: z.string(),
-      content: z.string(),
-    })),
-    recommendations: z.string().optional(),
-    conclusion: z.string(),
-  }),
-  qualityMetrics: z.object({
-    structureScore: z.number().min(0).max(100),
-    flowScore: z.number().min(0).max(100),
-    toneAlignment: z.number().min(0).max(1).describe('How well the tone matches target'),
-    wordCount: z.number(),
-  }),
-  improvements: z.object({
-    applied: z.array(z.string()).describe('Improvements that were applied'),
-    suggestions: z.array(z.string()).describe('Additional suggestions for manual review'),
-  }),
-});
+import { ProfessionalDocumentWriterInputSchema, ProfessionalDocumentWriterOutputSchema } from '../tools/schemas';
 
 export type ProfessionalDocumentWriterInput = z.infer<typeof ProfessionalDocumentWriterInputSchema>;
 export type ProfessionalDocumentWriterOutput = z.infer<typeof ProfessionalDocumentWriterOutputSchema>;

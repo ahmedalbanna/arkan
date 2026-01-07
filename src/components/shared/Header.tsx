@@ -4,7 +4,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { cn } from '@/lib/utils/cn';
-import { HomeIcon, Wrench, SlidersHorizontal } from 'lucide-react';
+import { HomeIcon, Wrench, SlidersHorizontal, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ import { NotificationDropdown } from './NotificationDropdown';
 const navLinks = [
   { href: '/', label: 'header.home', icon: HomeIcon, auth: 'any' as const },
   { href: '/builder', label: 'header.generateDocs', icon: SlidersHorizontal, auth: true as const },
+  { href: '/ai', label: 'AI Studio', icon: Sparkles, auth: true as const },
   { href: '/writing-tools', label: 'header.tools', icon: Wrench, auth: true as const },
 ];
 
@@ -39,7 +40,7 @@ function NavLinks() {
             variant={pathname === link.href ? 'secondary' : 'ghost'}
             className="font-headline"
           >
-            <Link href={link.href}>{t(link.label)}</Link>
+            <Link href={link.href}>{link.href === '/ai' ? 'AI Studio' : t(link.label)}</Link>
           </Button>
         ))}
     </nav>

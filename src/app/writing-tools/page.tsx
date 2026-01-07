@@ -27,16 +27,22 @@ import {
   Repeat,
   Scale,
   Search,
+  ShieldCheck,
   SpellCheck,
   UserCheck,
   Workflow,
   ImageUp,
+  FileText,
+  Network,
+  Link2,
+  BookCopy,
 } from 'lucide-react';
 
 export default function WritingToolsPage() {
   const { t } = useLocalization();
 
   const tools = [
+    // Existing Tools
     { name: t('writingTools.cards.textStylist'), icon: PenSquare, href: '/writing-tools/text-stylist' },
     { name: t('writingTools.cards.documentWriter'), icon: FileEdit, href: '/writing-tools/document-writer' },
     { name: t('writingTools.cards.translator'), icon: Languages, href: '/writing-tools/translator' },
@@ -66,6 +72,11 @@ export default function WritingToolsPage() {
     { name: t('writingTools.imageToPdf.cardTitle'), icon: Images, href: '/writing-tools/image-to-pdf' },
     { name: 'Image to SVG', icon: ImageUp, href: '/writing-tools/image-to-svg' },
     { name: 'AI Image Generator', icon: ImageIcon, href: '/writing-tools/ai-image-generator' },
+    
+    // New Advanced Flow Tools
+    { name: 'Academic Literature Review', icon: BookCopy, href: '/writing-tools/academic-literature-review'},
+    { name: 'Academic Paper Quality Checker', icon: ShieldCheck, href: '/writing-tools/academic-paper-quality-checker'},
+    { name: 'Professional Document Writer', icon: FileText, href: '/writing-tools/professional-document-writer'},
   ];
 
   return (
@@ -80,8 +91,8 @@ export default function WritingToolsPage() {
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {tools.map((tool) => (
-          <AIToolCard key={tool.name} {...tool} />
+        {tools.sort((a,b) => a.name.localeCompare(b.name)).map((tool) => (
+          <AIToolCard key={tool.href} {...tool} />
         ))}
       </div>
     </div>
