@@ -306,6 +306,7 @@ export const GenerateAgentConfigOutputSchema = z.object({
     jsonStructure: z.any().optional().describe("If the user requested JSON output, provide a sample JSON object structure that the agent should return. It should be a simple but relevant example based on the user's prompt and any provided context. Otherwise, this field should be omitted."),
 });
 export type GenerateAgentConfigOutput = z.infer<typeof GenerateAgentConfigOutputSchema>;
+export type GenerateAgentConfigInput = z.infer<typeof GenerateAgentConfigInputSchema>;
 
 
 // generate-citation.ts
