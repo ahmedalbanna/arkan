@@ -1,14 +1,13 @@
 
 'use server';
 
+import { generatePlantUML, imageToText } from '@/ai/flows';
 import { z } from 'zod';
 import { requireUser } from './_utils/auth';
-import { generatePlantUML } from '@/ai/flows/generate-plantuml';
-import { imageToText } from '@/ai/flows/image-to-text';
-import { deductCredit } from './userActions';
 import { logGeneration } from './analyticsActions';
+import { deductCredit } from './userActions';
 
-const GenerateDiagramSchema = z.object({ description: z.string().min(1), diagramType: z.enum(['useCase','class','sequence','activity','component','archimate','er', 'dfd']) });
+const GenerateDiagramSchema = z.object({ description: z.string().min(1), diagramType: z.enum(['useCase', 'class', 'sequence', 'activity', 'component', 'archimate', 'er', 'dfd']) });
 
 export async function generateDiagramAction(data: z.infer<typeof GenerateDiagramSchema>) {
   const user = await requireUser();

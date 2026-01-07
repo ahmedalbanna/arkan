@@ -301,6 +301,36 @@ export const flowRegistry: Record<string, FlowMetadata> = {
     inputSchema: AiProofreadDocumentInputSchema,
     outputSchema: AiProofreadDocumentOutputSchema,
   },
+  clarityAdvisor: {
+    flowName: 'clarityAdvisor',
+    promptKey: 'clarityAdvisor',
+    inputSchema: ManipulateTextInputSchema,
+    outputSchema: ManipulateTextOutputSchema,
+  },
+  concisenessChecker: {
+    flowName: 'concisenessChecker',
+    promptKey: 'concisenessChecker',
+    inputSchema: ManipulateTextInputSchema,
+    outputSchema: ManipulateTextOutputSchema,
+  },
+  readabilityEnhancer: {
+    flowName: 'readabilityEnhancer',
+    promptKey: 'readabilityEnhancer',
+    inputSchema: ManipulateTextInputSchema,
+    outputSchema: ManipulateTextOutputSchema,
+  },
+  rewriteText: {
+    flowName: 'rewriteText',
+    promptKey: 'rewriteText',
+    inputSchema: ManipulateTextInputSchema,
+    outputSchema: ManipulateTextOutputSchema,
+  },
+  styleEditor: {
+    flowName: 'styleEditor',
+    promptKey: 'styleEditor',
+    inputSchema: ManipulateTextInputSchema,
+    outputSchema: ManipulateTextOutputSchema,
+  },
 
   // ============================================================================
   // CONTENT GENERATION FLOWS

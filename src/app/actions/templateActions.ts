@@ -1,17 +1,17 @@
 
 'use server';
 
-import { revalidateTag } from 'next/cache';
-import { z } from 'zod';
+import { generateImage } from '@/ai/flows';
 import { adminDb } from '@/lib/firebase/server-init';
 import {
-  DocxTemplatePropertiesSchema,
-  PptxTemplatePropertiesSchema,
-  ReportTemplatePropertiesSchema,
-  CreateReportTemplateSchema,
-  UpdateReportTemplateSchema,
+    CreateReportTemplateSchema,
+    DocxTemplatePropertiesSchema,
+    PptxTemplatePropertiesSchema,
+    ReportTemplatePropertiesSchema,
+    UpdateReportTemplateSchema,
 } from '@/lib/models';
-import { generateImage } from '@/ai/flows/generate-image';
+import { revalidateTag } from 'next/cache';
+import { z } from 'zod';
 
 // Revalidation Tags
 const DOCX_TEMPLATES_TAG = 'docx-templates';
@@ -161,18 +161,18 @@ export async function deleteReportTemplateAction(templateId: string) {
 // --- Shared Actions ---
 
 const RefreshImageSchema = z.object({
-  templateType: z.enum(['docx', 'pptx']),
-  templateId: z.string(),
-  prompt: z.string(),
+    templateType: z.enum(['docx', 'pptx']),
+    templateId: z.string(),
+    prompt: z.string(),
 });
 
 export async function refreshTemplateImageAction(data: z.infer<typeof RefreshImageSchema>) {
-  const validatedData = RefreshImageSchema.parse(data);
-  const result = await refreshTemplateImage(validatedData.templateType, validatedData.templateId, validatedData.prompt);
-  if (validatedData.templateType === 'docx') {
-    revalidateTag(DOCX_TEMPLATES_TAG);
-  } else {
-    revalidateTag(PPTX_TEMPLATES_TAG);
-  }
-  return result;
+    const validatedData = RefreshImageSchema.parse(data);
+    const result = await refreshTemplateImage(validatedData.templateType, validatedData.templateId, validatedData.prompt);
+    if (validatedData.templateType === 'docx') {
+        revalidateTag(DOCX_TEMPLATES_TAG);
+    } else {
+        revalidateTag(PPTX_TEMPLATES_TAG);
+    }
+    return result;
 }

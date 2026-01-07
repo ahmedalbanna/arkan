@@ -1,6 +1,6 @@
 'use server';
 
-import { factCheckText } from '@/ai/flows/fact-checker';
+import { factCheckText } from '@/ai/flows';
 import type { EvaluateReportInput, EvaluateReportOutput } from '@/ai/schemas';
 import { requireUser } from './_utils/auth';
 

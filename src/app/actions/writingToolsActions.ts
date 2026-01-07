@@ -1,38 +1,14 @@
 
 'use server';
 
+import { writeDocument } from '@/ai/flows';
 import { requireUser } from './_utils/auth';
 import { logGeneration } from './analyticsActions';
 import { deductCredit } from './userActions';
 
 // Flows
-import { aiResearcher } from '@/ai/flows/ai-researcher';
-import { detectAiContent } from '@/ai/flows/detect-ai-content';
-import { factCheckText } from '@/ai/flows/fact-checker';
-import { retrieveFact } from '@/ai/flows/fact-retrieval';
-import { generateChapterContent } from '@/ai/flows/generate-chapter-content';
-import { generateCitation } from '@/ai/flows/generate-citation';
-import { generateIdeas } from '@/ai/flows/generate-ideas';
-import { generateImage } from '@/ai/flows/generate-image';
-import { generatePlantUML } from '@/ai/flows/generate-plantuml';
-import { generateProjectBlueprint } from '@/ai/flows/generate-project-blueprint';
-import { generateQuiz } from '@/ai/flows/generate-quiz';
-import { generateToc } from '@/ai/flows/generate-toc';
-import { generateUiDescription } from '@/ai/flows/generate-ui-description';
-import { grammarCheck } from '@/ai/flows/grammar-checker';
-import { humanizeText } from '@/ai/flows/humanize-text';
-import { literatureReviewGenerator as generateLiteratureReview } from '@/ai/flows/literature-review-generator';
-import { manipulateText } from '@/ai/flows/manipulate-text';
-import { paraphraseText } from '@/ai/flows/paraphrase-text';
-import { plagiarismCheck } from '@/ai/flows/plagiarism-checker';
-import { answerQuestion } from '@/ai/flows/question-answering';
-import { sentenceStructureCheck } from '@/ai/flows/sentence-structure-checker';
-import { solveAssignments } from '@/ai/flows/solve-assignments';
-import { summarizeText } from '@/ai/flows/summarize-text';
-import { clarityAdvisor, concisenessChecker, readabilityEnhancer, rewriteText, styleEditor, summarizeTextWithRatio } from '@/ai/flows/text-stylist';
-import { topicExplainer } from '@/ai/flows/topic-explainer';
-import { translateText } from '@/ai/flows/translate-text';
-import { writeDocument } from '@/ai/flows/write-document';
+import { aiResearcher, answerQuestion, clarityAdvisor, concisenessChecker, detectAiContent, factCheckText, generateChapterContent, generateCitation, generateIdeas, generateImage, literatureReviewGenerator as generateLiteratureReview, generatePlantUML, generateProjectBlueprint, generateQuiz, generateToc, generateUiDescription, grammarCheck, humanizeText, manipulateText, paraphraseText, plagiarismCheck, readabilityEnhancer, retrieveFact, rewriteText, sentenceStructureCheck, solveAssignments, styleEditor, summarizeText, summarizeTextWithRatio, topicExplainer, translateText } from '@/ai/flows';
+
 
 // Schemas
 import {

@@ -1047,7 +1047,7 @@ Please format your response as markdown with the following structure:
         output: { schema: GenerateUIDescriptionOutputSchema },
         model: 'googleai/gemini-2.5-flash-lite',
         system: `You are a senior UI/UX designer and product manager. Your task is to take a list of project features and generate a comprehensive, screen-by-screen UI/UX workflow description for either a website or mobile app. The output must be well-structured markdown.`,
-        prompt: `Based on the following project features for a new ${GenerateUIDescriptionInputSchema.shape.designType.parse(undefined)}, generate a detailed UI/UX workflow.
+        prompt: `Based on the following project features for a new {{{designType}}}, generate a detailed UI/UX workflow.
 
 For each core feature, describe the necessary screens or pages. For each screen, detail its primary purpose and list the key UI elements (e.g., buttons, forms, navigation bars, content areas). Think about the user journey and how they will navigate between screens.
 

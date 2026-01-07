@@ -1,10 +1,10 @@
 
 'use server';
 
+import { generateReportSection } from '@/ai/flows';
 import { requireUser } from './_utils/auth';
-import { generateReportSection } from '@/ai/flows/generate-report-section';
-import { deductCredit } from './userActions';
 import { logGeneration } from './analyticsActions';
+import { deductCredit } from './userActions';
 
 export async function generateReportSectionAction(body: any) {
   const user = await requireUser();

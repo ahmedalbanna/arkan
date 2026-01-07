@@ -1,6 +1,6 @@
 'use server';
 
-import { analyzeContext } from '@/ai/flows/analyze-context';
+import { analyzeContext } from '@/ai/flows';
 import type { ExternalContext } from '@/lib/types';
 import { requireUser } from './_utils/auth';
 

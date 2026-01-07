@@ -178,7 +178,21 @@ export async function improveReportMarkdown(input: ImproveMarkdownInput): Promis
 export async function aiProofreadDocument(input: AiProofreadDocumentInput): Promise<AiProofreadDocumentOutput> {
     return executeFlow<AiProofreadDocumentInput, AiProofreadDocumentOutput>('aiProofreadDocument', input);
 }
-
+export async function concisenessChecker(input: any): Promise<any> {
+    return executeFlow('concisenessChecker', input);
+}
+export async function clarityAdvisor(input: any): Promise<any> {
+    return executeFlow('clarityAdvisor', input);
+}
+export async function readabilityEnhancer(input: any): Promise<any> {
+    return executeFlow('readabilityEnhancer', input);
+}
+export async function rewriteText(input: any): Promise<any> {
+    return executeFlow('rewriteText', input);
+}
+export async function styleEditor(input: any): Promise<any> {
+    return executeFlow('styleEditor', input);
+}
 // Content Generation
 export async function generateIdeas(input: IdeaGenerationInput): Promise<IdeaGenerationOutput> {
     return executeFlow<IdeaGenerationInput, IdeaGenerationOutput>('generateIdeas', input);
