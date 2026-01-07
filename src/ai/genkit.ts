@@ -5,9 +5,16 @@ import { genkit, GenkitError } from 'genkit';
 // SECURITY FIX: Do not hardcode API keys. Load from environment variables as a fallback.
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
+// Import professional writing tools
+import { professionalWritingTools } from './tools';
+
 // Default global AI instance (used for unauthenticated or fallback cases)
 export const ai = genkit({
-  plugins: [googleAI({ apiKey: GOOGLE_API_KEY })],
+  plugins: [
+    googleAI({ apiKey: GOOGLE_API_KEY }),
+  ],
+  // Register professional writing tools
+  tools: Object.values(professionalWritingTools),
 });
 
 /**
@@ -33,5 +40,11 @@ export function configureUserAi(userApiKeys?: Record<string, string>) {
 
   return genkit({
     plugins: [googleAI({ apiKey: apiKeyToUse })],
+    // Register professional writing tools with user-specific instance
+    tools: Object.values(professionalWritingTools),
   });
 }
+
+// Re-export tools for convenience
+export { professionalWritingTools } from './tools';
+
