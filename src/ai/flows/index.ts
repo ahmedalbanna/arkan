@@ -304,6 +304,75 @@ export async function generateAgentConfig(input: GenerateAgentConfigInput): Prom
     return executeFlow<GenerateAgentConfigInput, GenerateAgentConfigOutput>('generateAgentConfig', input);
 }
 
+// ============================================================================
+// ADVANCED PROFESSIONAL WRITING FLOWS (with Tools Integration)
+// ============================================================================
+
+// These flows use professional writing tools for enhanced quality control
+
+export async function academicLiteratureReview(input: {
+  topic: string;
+  keywords: string[];
+  citationStyle: 'APA' | 'MLA' | 'Chicago' | 'Harvard' | 'IEEE';
+  focusAreas?: string[];
+  minLength?: number;
+  includeGaps?: boolean;
+}): Promise<{
+  literatureReview: string;
+  structure: any;
+  citations: any;
+  qualityMetrics: any;
+  metadata: any;
+}> {
+  // Import the flow directly since it's not in the universal flow system
+  const { academicLiteratureReviewFlow } = await import('./academic-literature-review');
+  return academicLiteratureReviewFlow(input);
+}
+
+export async function academicPaperQualityChecker(input: {
+  documentText: string;
+  references?: string;
+  citationStyle: 'APA' | 'MLA' | 'Chicago' | 'Harvard' | 'IEEE';
+  documentType: 'research_paper' | 'thesis' | 'dissertation' | 'essay' | 'review_article';
+  checkGrammar?: boolean;
+  checkCitations?: boolean;
+  checkStructure?: boolean;
+  checkReadability?: boolean;
+}): Promise<{
+  overallScore: number;
+  qualityLevel: string;
+  scores: any;
+  detailedAnalysis: any;
+  recommendations: any;
+  summary: any;
+}> {
+  // Import the flow directly since it's not in the universal flow system
+  const { academicPaperQualityCheckerFlow } = await import('./academic-paper-quality-checker');
+  return academicPaperQualityCheckerFlow(input);
+}
+
+export async function professionalDocumentWriter(input: {
+  documentType: 'business_report' | 'proposal' | 'white_paper' | 'case_study' | 'executive_summary';
+  topic: string;
+  purpose: string;
+  targetAudience: string;
+  keyPoints: string[];
+  tone: 'professional' | 'persuasive' | 'neutral' | 'authoritative';
+  length: 'short' | 'medium' | 'long';
+  includeExecutiveSummary?: boolean;
+  includeRecommendations?: boolean;
+  additionalContext?: string;
+}): Promise<{
+  document: string;
+  structure: any;
+  qualityMetrics: any;
+  improvements: any;
+}> {
+  // Import the flow directly since it's not in the universal flow system
+  const { professionalDocumentWriterFlow } = await import('./professional-document-writer');
+  return professionalDocumentWriterFlow(input);
+}
+
 // Deprecated/Empty exports for backward compatibility
 export async function generateImage(input: any): Promise<any> {
     throw new Error('generateImage has been removed. Please use an alternative image generation service.');

@@ -90,7 +90,8 @@ import {
   GenerateTheoreticalLectureInputSchema,
   GenerateTheoreticalLectureOutputSchema,
 } from '@/ai/schemas/lecture-generator';
-import type { z } from 'zod';
+
+import { z } from 'zod';
 
 /**
  * Flow metadata structure
@@ -502,5 +503,75 @@ export const flowRegistry: Record<string, FlowMetadata> = {
     promptKey: 'agentConfig',
     inputSchema: GenerateAgentConfigInputSchema,
     outputSchema: GenerateAgentConfigOutputSchema,
+  },
+
+  // ============================================================================
+  // ADVANCED PROFESSIONAL WRITING FLOWS (with Tools integration)
+  // ============================================================================
+
+  academicLiteratureReview: {
+    flowName: 'academicLiteratureReview',
+    promptKey: 'literatureReview', // Uses existing prompt but with tools
+    inputSchema: z.object({
+      topic: z.string(),
+      keywords: z.array(z.string()),
+      citationStyle: z.enum(['APA', 'MLA', 'Chicago', 'Harvard', 'IEEE']),
+      focusAreas: z.array(z.string()).optional(),
+      minLength: z.number().optional(),
+      includeGaps: z.boolean().optional(),
+    }),
+    outputSchema: z.object({
+      literatureReview: z.string(),
+      structure: z.any(),
+      citations: z.any(),
+      qualityMetrics: z.any(),
+      metadata: z.any(),
+    }),
+  },
+
+  academicPaperQualityChecker: {
+    flowName: 'academicPaperQualityChecker',
+    promptKey: 'default', // Uses multiple tools, not a single prompt
+    inputSchema: z.object({
+      documentText: z.string(),
+      references: z.string().optional(),
+      citationStyle: z.enum(['APA', 'MLA', 'Chicago', 'Harvard', 'IEEE']),
+      documentType: z.enum(['research_paper', 'thesis', 'dissertation', 'essay', 'review_article']),
+      checkGrammar: z.boolean().optional(),
+      checkCitations: z.boolean().optional(),
+      checkStructure: z.boolean().optional(),
+      checkReadability: z.boolean().optional(),
+    }),
+    outputSchema: z.object({
+      overallScore: z.number(),
+      qualityLevel: z.string(),
+      scores: z.any(),
+      detailedAnalysis: z.any(),
+      recommendations: z.any(),
+      summary: z.any(),
+    }),
+  },
+
+  professionalDocumentWriter: {
+    flowName: 'professionalDocumentWriter',
+    promptKey: 'default', // Uses multiple prompts and tools
+    inputSchema: z.object({
+      documentType: z.enum(['business_report', 'proposal', 'white_paper', 'case_study', 'executive_summary']),
+      topic: z.string(),
+      purpose: z.string(),
+      targetAudience: z.string(),
+      keyPoints: z.array(z.string()),
+      tone: z.enum(['professional', 'persuasive', 'neutral', 'authoritative']),
+      length: z.enum(['short', 'medium', 'long']),
+      includeExecutiveSummary: z.boolean().optional(),
+      includeRecommendations: z.boolean().optional(),
+      additionalContext: z.string().optional(),
+    }),
+    outputSchema: z.object({
+      document: z.string(),
+      structure: z.any(),
+      qualityMetrics: z.any(),
+      improvements: z.any(),
+    }),
   },
 };
