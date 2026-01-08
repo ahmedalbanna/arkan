@@ -64,6 +64,17 @@ export {
   promptArchitectTools
 } from './prompt-architect';
 
+// Export Google search tools
+export {
+  googleSearchTool,
+  googleSearchTools,
+  searchWeb,
+  searchImages,
+  searchMaps,
+  searchShopping,
+  searchNews
+} from './google-search';
+
 // Aggregate all tools for easy registration
 import { citationsAndReferencesTools } from './citations-and-references';
 import { comprehensiveAnalysisTools } from './comprehensive-analysis';
@@ -73,6 +84,7 @@ import { grammarAndStyleTools } from './grammar-and-style';
 import { projectAnalysisTools } from './project-analysis';
 import { promptArchitectTools } from './prompt-architect';
 import { reportingAndMetricsTools } from './reporting-and-metrics';
+import { googleSearchTools } from './google-search';
 
 /**
  * All professional writing tools organized by category
@@ -109,11 +121,20 @@ export const projectDocumentationTools = {
 };
 
 /**
+ * Search and research tools
+ */
+export const searchAndResearchTools = {
+  // Google Search (1 tool)
+  ...googleSearchTools,
+};
+
+/**
  * All tools combined
  */
 export const allTools = {
   ...professionalWritingTools,
   ...projectDocumentationTools,
+  ...searchAndResearchTools,
 };
 
 /**

@@ -413,3 +413,88 @@ export type AcademicPaperQualityCheckerInput = z.infer<typeof AcademicPaperQuali
 export type AcademicPaperQualityCheckerOutput = z.infer<typeof AcademicPaperQualityCheckerOutputSchema>;
 export type ProfessionalDocumentWriterInput = z.infer<typeof ProfessionalDocumentWriterInputSchema>;
 export type ProfessionalDocumentWriterOutput = z.infer<typeof ProfessionalDocumentWriterOutputSchema>;
+
+// ============================================================================
+// GOOGLE SEARCH TOOLS SCHEMAS
+// ============================================================================
+
+export const GoogleSearchToolInputSchema = z.object({
+  query: z.string().min(1, 'Search query cannot be empty'),
+  searchType: z.enum(['web', 'images', 'maps', 'shopping', 'news']).default('web').describe('Type of Google search to perform'),
+  maxResults: z.number().min(1).max(20).default(10).describe('Maximum number of results to return'),
+  language: z.string().default('en').describe('Language code for search results (e.g., en, ar)'),
+  country: z.string().optional().describe('Country code for localized results (e.g., US, SA)'),
+  safeSearch: z.boolean().default(true).describe('Enable safe search filtering'),
+});
+
+export const SearchResultSchema = z.object({
+  title: z.string(),
+  url: z.string(),
+  snippet: z.string(),
+  displayUrl: z.string().optional(),
+  position: z.number().optional(),
+});
+
+export const ImageResultSchema = z.object({
+  title: z.string(),
+  url: z.string(),
+  thumbnailUrl: z.string(),
+  imageUrl: z.string(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+  source: z.string().optional(),
+});
+
+export const MapResultSchema = z.object({
+  name: z.string(),
+  address: z.string(),
+  rating: z.number().optional(),
+  reviewCount: z.number().optional(),
+  url: z.string(),
+  phone: z.string().optional(),
+  website: z.string().optional(),
+  category: z.string().optional(),
+});
+
+export const ShoppingResultSchema = z.object({
+  title: z.string(),
+  price: z.string(),
+  currency: z.string().optional(),
+  url: z.string(),
+  merchant: z.string(),
+  imageUrl: z.string().optional(),
+  rating: z.number().optional(),
+  reviewCount: z.number().optional(),
+});
+
+export const NewsResultSchema = z.object({
+  title: z.string(),
+  url: z.string(),
+  snippet: z.string(),
+  source: z.string(),
+  publishedDate: z.string().optional(),
+  imageUrl: z.string().optional(),
+});
+
+export const GoogleSearchToolOutputSchema = z.object({
+  searchType: z.enum(['web', 'images', 'maps', 'shopping', 'news']),
+  query: z.string(),
+  totalResults: z.number(),
+  results: z.array(z.union([
+    SearchResultSchema,
+    ImageResultSchema,
+    MapResultSchema,
+    ShoppingResultSchema,
+    NewsResultSchema,
+  ])),
+  searchTime: z.number().optional().describe('Search execution time in milliseconds'),
+  relatedSearches: z.array(z.string()).optional(),
+});
+
+export type GoogleSearchToolInput = z.infer<typeof GoogleSearchToolInputSchema>;
+export type GoogleSearchToolOutput = z.infer<typeof GoogleSearchToolOutputSchema>;
+export type SearchResult = z.infer<typeof SearchResultSchema>;
+export type ImageResult = z.infer<typeof ImageResultSchema>;
+export type MapResult = z.infer<typeof MapResultSchema>;
+export type ShoppingResult = z.infer<typeof ShoppingResultSchema>;
+export type NewsResult = z.infer<typeof NewsResultSchema>;
