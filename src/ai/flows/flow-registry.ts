@@ -81,6 +81,41 @@ import {
   TranslateTextOutputSchema,
   WriteDocumentInputSchema,
   WriteDocumentOutputSchema,
+  // Academic Writing Schemas (17 types)
+  ResearchPaperInputSchema,
+  ResearchPaperOutputSchema,
+  AnalyticalEssayInputSchema,
+  AnalyticalEssayOutputSchema,
+  ArgumentativeEssayInputSchema,
+  ArgumentativeEssayOutputSchema,
+  ComprehensiveLiteratureReviewInputSchema,
+  ComprehensiveLiteratureReviewOutputSchema,
+  CaseStudyInputSchema,
+  CaseStudyOutputSchema,
+  LabReportInputSchema,
+  LabReportOutputSchema,
+  ResearchProposalInputSchema,
+  ResearchProposalOutputSchema,
+  ThesisStatementInputSchema,
+  ThesisStatementOutputSchema,
+  DissertationChapterInputSchema,
+  DissertationChapterOutputSchema,
+  TermPaperInputSchema,
+  TermPaperOutputSchema,
+  CriticalAnalysisInputSchema,
+  CriticalAnalysisOutputSchema,
+  BookReviewInputSchema,
+  BookReviewOutputSchema,
+  ArticleSummaryInputSchema,
+  ArticleSummaryOutputSchema,
+  AnnotatedBibliographyInputSchema,
+  AnnotatedBibliographyOutputSchema,
+  PositionPaperInputSchema,
+  PositionPaperOutputSchema,
+  ReflectionPaperInputSchema,
+  ReflectionPaperOutputSchema,
+  TechnicalReportInputSchema,
+  TechnicalReportOutputSchema,
 } from '@/ai/schemas';
 import {
   GenerateSessionPlanInputSchema,
@@ -534,5 +569,128 @@ export const flowRegistry: Record<string, FlowMetadata> = {
     promptKey: 'default', // Uses multiple prompts and tools
     inputSchema: ProfessionalDocumentWriterInputSchema,
     outputSchema: ProfessionalDocumentWriterOutputSchema,
+  },
+
+  // ============================================================================
+  // ACADEMIC WRITING FLOWS (17 TYPES)
+  // ============================================================================
+
+  researchPaper: {
+    flowName: 'researchPaper',
+    promptKey: 'researchPaper',
+    inputSchema: ResearchPaperInputSchema,
+    outputSchema: ResearchPaperOutputSchema,
+  },
+
+  analyticalEssay: {
+    flowName: 'analyticalEssay',
+    promptKey: 'analyticalEssay',
+    inputSchema: AnalyticalEssayInputSchema,
+    outputSchema: AnalyticalEssayOutputSchema,
+  },
+
+  argumentativeEssay: {
+    flowName: 'argumentativeEssay',
+    promptKey: 'argumentativeEssay',
+    inputSchema: ArgumentativeEssayInputSchema,
+    outputSchema: ArgumentativeEssayOutputSchema,
+  },
+
+  comprehensiveLiteratureReview: {
+    flowName: 'comprehensiveLiteratureReview',
+    promptKey: 'comprehensiveLiteratureReview',
+    inputSchema: ComprehensiveLiteratureReviewInputSchema,
+    outputSchema: ComprehensiveLiteratureReviewOutputSchema,
+  },
+
+  caseStudy: {
+    flowName: 'caseStudy',
+    promptKey: 'caseStudy',
+    inputSchema: CaseStudyInputSchema,
+    outputSchema: CaseStudyOutputSchema,
+  },
+
+  labReport: {
+    flowName: 'labReport',
+    promptKey: 'labReport',
+    inputSchema: LabReportInputSchema,
+    outputSchema: LabReportOutputSchema,
+  },
+
+  researchProposal: {
+    flowName: 'researchProposal',
+    promptKey: 'researchProposal',
+    inputSchema: ResearchProposalInputSchema,
+    outputSchema: ResearchProposalOutputSchema,
+  },
+
+  thesisStatement: {
+    flowName: 'thesisStatement',
+    promptKey: 'thesisStatement',
+    inputSchema: ThesisStatementInputSchema,
+    outputSchema: ThesisStatementOutputSchema,
+  },
+
+  dissertationChapter: {
+    flowName: 'dissertationChapter',
+    promptKey: 'dissertationChapter',
+    inputSchema: DissertationChapterInputSchema,
+    outputSchema: DissertationChapterOutputSchema,
+  },
+
+  termPaper: {
+    flowName: 'termPaper',
+    promptKey: 'termPaper',
+    inputSchema: TermPaperInputSchema,
+    outputSchema: TermPaperOutputSchema,
+  },
+
+  criticalAnalysis: {
+    flowName: 'criticalAnalysis',
+    promptKey: 'criticalAnalysis',
+    inputSchema: CriticalAnalysisInputSchema,
+    outputSchema: CriticalAnalysisOutputSchema,
+  },
+
+  bookReview: {
+    flowName: 'bookReview',
+    promptKey: 'bookReview',
+    inputSchema: BookReviewInputSchema,
+    outputSchema: BookReviewOutputSchema,
+  },
+
+  articleSummary: {
+    flowName: 'articleSummary',
+    promptKey: 'articleSummary',
+    inputSchema: ArticleSummaryInputSchema,
+    outputSchema: ArticleSummaryOutputSchema,
+  },
+
+  annotatedBibliography: {
+    flowName: 'annotatedBibliography',
+    promptKey: 'annotatedBibliography',
+    inputSchema: AnnotatedBibliographyInputSchema,
+    outputSchema: AnnotatedBibliographyOutputSchema,
+  },
+
+  positionPaper: {
+    flowName: 'positionPaper',
+    promptKey: 'positionPaper',
+    inputSchema: PositionPaperInputSchema,
+    outputSchema: PositionPaperOutputSchema,
+  },
+
+  reflectionPaper: {
+    flowName: 'reflectionPaper',
+    promptKey: 'reflectionPaper',
+    inputSchema: ReflectionPaperInputSchema,
+    outputSchema: ReflectionPaperOutputSchema,
+  },
+
+  technicalReport: {
+    flowName: 'technicalReport',
+    promptKey: 'technicalReport',
+    inputSchema: TechnicalReportInputSchema,
+    outputSchema: TechnicalReportOutputSchema,
   },
 };

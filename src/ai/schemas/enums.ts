@@ -123,3 +123,61 @@ export type DirectQuestionType = z.infer<typeof DirectQuestionTypeSchema>;
 
 export const TrueFalseAnswerSchema = z.enum(['True', 'False']);
 export type TrueFalseAnswer = z.infer<typeof TrueFalseAnswerSchema>;
+
+// Academic Document Types
+export const AcademicDocumentTypeSchema = z.enum([
+  'research-paper',
+  'analytical-essay',
+  'argumentative-essay',
+  'literature-review',
+  'case-study',
+  'lab-report',
+  'research-proposal',
+  'thesis-statement',
+  'dissertation-chapter',
+  'term-paper',
+  'critical-analysis',
+  'book-review',
+  'article-summary',
+  'annotated-bibliography',
+  'position-paper',
+  'reflection-paper',
+  'technical-report',
+]);
+export type AcademicDocumentType = z.infer<typeof AcademicDocumentTypeSchema>;
+
+// Research Methodologies
+export const ResearchMethodologySchema = z.enum([
+  'qualitative',
+  'quantitative',
+  'mixed-methods',
+  'experimental',
+  'observational',
+  'case-study',
+  'literature-review',
+  'meta-analysis',
+]);
+export type ResearchMethodology = z.infer<typeof ResearchMethodologySchema>;
+
+// Academic Writing Styles
+export const AcademicStyleSchema = z.enum([
+  'apa',
+  'mla',
+  'chicago',
+  'harvard',
+  'ieee',
+]);
+export type AcademicStyle = z.infer<typeof AcademicStyleSchema>;
+
+// Document Sections for Academic Papers
+export const AcademicSectionSchema = z.enum([
+  'abstract',
+  'introduction',
+  'literature-review',
+  'methodology',
+  'results',
+  'discussion',
+  'conclusion',
+  'references',
+]);
+export type AcademicSection = z.infer<typeof AcademicSectionSchema>;

@@ -65,13 +65,50 @@ import {
     TranslateTextInputSchema,
     TranslateTextOutputSchema,
     WriteDocumentInputSchema,
-    WriteDocumentOutputSchema
+    WriteDocumentOutputSchema,
+    ResearchPaperInputSchema,
+    ResearchPaperOutputSchema,
+    AnalyticalEssayInputSchema,
+    AnalyticalEssayOutputSchema,
+    ArgumentativeEssayInputSchema,
+    ArgumentativeEssayOutputSchema,
+    ComprehensiveLiteratureReviewInputSchema,
+    ComprehensiveLiteratureReviewOutputSchema,
+    CaseStudyInputSchema,
+    CaseStudyOutputSchema,
+    LabReportInputSchema,
+    LabReportOutputSchema,
+    ResearchProposalInputSchema,
+    ResearchProposalOutputSchema,
+    ThesisStatementInputSchema,
+    ThesisStatementOutputSchema,
+    DissertationChapterInputSchema,
+    DissertationChapterOutputSchema,
+    TermPaperInputSchema,
+    TermPaperOutputSchema,
+    CriticalAnalysisInputSchema,
+    CriticalAnalysisOutputSchema,
+    BookReviewInputSchema,
+    BookReviewOutputSchema,
+    ArticleSummaryInputSchema,
+    ArticleSummaryOutputSchema,
+    AnnotatedBibliographyInputSchema,
+    AnnotatedBibliographyOutputSchema,
+    PositionPaperInputSchema,
+    PositionPaperOutputSchema,
+    ReflectionPaperInputSchema,
+    ReflectionPaperOutputSchema,
+    TechnicalReportInputSchema,
+    TechnicalReportOutputSchema,
 } from '@/ai/schemas';
 import { GenerateSessionPlanInputSchema, GenerateSessionPlanOutputSchema, GenerateTheoreticalLectureInputSchema, GenerateTheoreticalLectureOutputSchema } from '@/ai/schemas/lecture-generator';
 import { z } from 'zod';
 
 // Export graduation project prompts
 export * from './graduation-project';
+
+// Export academic writing prompts
+export * from './academic-writing';
 
 const styleDescriptions: Record<string, string> = {
     standard: "Provide a balanced rewrite that improves clarity while retaining the original meaning.",

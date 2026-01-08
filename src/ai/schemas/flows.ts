@@ -23,7 +23,11 @@ import {
     TargetLanaguage,
     TargetReadingLevelSchema,
     TrueFalseAnswerSchema,
-    TrueFalseTypeSchema
+    TrueFalseTypeSchema,
+    AcademicDocumentTypeSchema,
+    ResearchMethodologySchema,
+    AcademicStyleSchema,
+    AcademicSectionSchema,
 } from './enums';
 
 
@@ -885,6 +889,482 @@ export const GenerateUIDescriptionOutputSchema = z.object({
 });
 export type GenerateUIDescriptionOutput = z.infer<typeof GenerateUIDescriptionOutputSchema>;
 
+// ============================================================================
+// ACADEMIC WRITING FLOWS (17 TYPES)
+// ============================================================================
+
+// 1. Research Paper - ورقة بحثية
+export const ResearchPaperInputSchema = z.object({
+    flow: z.literal('research-paper'),
+    topic: z.string().min(5).describe('البحث موضوع'),
+    researchQuestion: z.string().min(10).describe('السؤال البحثي الرئيسي'),
+    methodology: ResearchMethodologySchema.describe('المنهجية البحثية'),
+    keywords: z.array(z.string()).min(3).max(10).describe('الكلمات المفتاحية'),
+    citationStyle: AcademicStyleSchema.default('apa').describe('نمط الاستشهاد'),
+    targetLength: z.number().min(3000).max(15000).default(5000).describe('الطول المستهدف بالكلمات'),
+    includeAbstract: z.boolean().default(true),
+    includeLiteratureReview: z.boolean().default(true),
+    targetAudience: z.string().optional().describe('الجمهور المستهدف'),
+});
+export const ResearchPaperOutputSchema = z.object({
+    title: z.string(),
+    abstract: z.string().optional(),
+    introduction: z.string(),
+    literatureReview: z.string().optional(),
+    methodology: z.string(),
+    results: z.string(),
+    discussion: z.string(),
+    conclusion: z.string(),
+    references: z.array(z.string()),
+    fullDocument: z.string().describe('الوثيقة الكاملة بصيغة markdown'),
+});
+export type ResearchPaperInput = z.infer<typeof ResearchPaperInputSchema>;
+export type ResearchPaperOutput = z.infer<typeof ResearchPaperOutputSchema>;
+
+// 2. Analytical Essay - مقال تحليلي
+export const AnalyticalEssayInputSchema = z.object({
+    flow: z.literal('analytical-essay'),
+    topic: z.string().min(5).describe('الموضوع المراد تحليله'),
+    mainArgument: z.string().min(20).describe('الحجة الرئيسية'),
+    keyComponents: z.array(z.string()).min(2).max(8).describe('المكونات الأساسية للتحليل'),
+    targetLength: z.number().min(800).max(5000).default(1500).describe('الطول المستهدف'),
+    citationStyle: AcademicStyleSchema.default('mla').describe('نمط الاستشهاد'),
+    analysisDepth: z.enum(['surface', 'moderate', 'deep']).default('moderate'),
+});
+export const AnalyticalEssayOutputSchema = z.object({
+    title: z.string(),
+    introduction: z.string(),
+    thesisStatement: z.string(),
+    bodyParagraphs: z.array(z.object({
+        topic: z.string(),
+        analysis: z.string(),
+        evidence: z.string(),
+    })),
+    conclusion: z.string(),
+    fullEssay: z.string().describe('المقال الكامل بصيغة markdown'),
+});
+export type AnalyticalEssayInput = z.infer<typeof AnalyticalEssayInputSchema>;
+export type AnalyticalEssayOutput = z.infer<typeof AnalyticalEssayOutputSchema>;
+
+// 3. Argumentative Essay - مقال جدلي
+export const ArgumentativeEssayInputSchema = z.object({
+    flow: z.literal('argumentative-essay'),
+    topic: z.string().min(5).describe('الموضوع الجدلي'),
+    position: z.string().min(20).describe('الموقف الذي تدافع عنه'),
+    mainArguments: z.array(z.string()).min(3).max(6).describe('الحجج الرئيسية'),
+    counterarguments: z.array(z.string()).min(1).max(4).describe('الحجج المضادة'),
+    evidence: z.array(z.string()).optional().describe('الأدلة الداعمة'),
+    targetLength: z.number().min(1000).max(5000).default(2000),
+    citationStyle: AcademicStyleSchema.default('apa'),
+    includeRebuttal: z.boolean().default(true).describe('تضمين الرد على الحجج المضادة'),
+});
+export const ArgumentativeEssayOutputSchema = z.object({
+    title: z.string(),
+    introduction: z.string(),
+    thesisStatement: z.string(),
+    arguments: z.array(z.object({
+        claim: z.string(),
+        evidence: z.string(),
+        reasoning: z.string(),
+    })),
+    counterargumentsSection: z.string().optional(),
+    rebuttal: z.string().optional(),
+    conclusion: z.string(),
+    fullEssay: z.string().describe('المقال الكامل بصيغة markdown'),
+});
+export type ArgumentativeEssayInput = z.infer<typeof ArgumentativeEssayInputSchema>;
+export type ArgumentativeEssayOutput = z.infer<typeof ArgumentativeEssayOutputSchema>;
+
+// 4. Literature Review - مراجعة أدبيات (already exists as LiteratureReviewInputSchema)
+// We'll create a more comprehensive version
+export const ComprehensiveLiteratureReviewInputSchema = z.object({
+    flow: z.literal('comprehensive-literature-review'),
+    topic: z.string().min(5).describe('موضوع المراجعة الأدبية'),
+    researchQuestions: z.array(z.string()).min(1).max(5).describe('الأسئلة البحثية'),
+    keywords: z.array(z.string()).min(3).max(15),
+    timeframe: z.string().optional().describe('الإطار الزمني للأدبيات (مثال: 2015-2024)'),
+    minimumSources: z.number().min(10).max(100).default(20),
+    citationStyle: AcademicStyleSchema.default('apa'),
+    includeGapAnalysis: z.boolean().default(true),
+    includeThematicAnalysis: z.boolean().default(true),
+});
+export const ComprehensiveLiteratureReviewOutputSchema = z.object({
+    introduction: z.string(),
+    thematicReview: z.array(z.object({
+        theme: z.string(),
+        summary: z.string(),
+        sources: z.array(z.string()),
+    })),
+    gapAnalysis: z.string().optional(),
+    conclusion: z.string(),
+    references: z.array(z.string()),
+    fullReview: z.string().describe('المراجعة الكاملة بصيغة markdown'),
+});
+export type ComprehensiveLiteratureReviewInput = z.infer<typeof ComprehensiveLiteratureReviewInputSchema>;
+export type ComprehensiveLiteratureReviewOutput = z.infer<typeof ComprehensiveLiteratureReviewOutputSchema>;
+
+// 5. Case Study - دراسة حالة
+export const CaseStudyInputSchema = z.object({
+    flow: z.literal('case-study'),
+    caseTitle: z.string().min(5).describe('عنوان الحالة'),
+    background: z.string().min(50).describe('خلفية الحالة'),
+    problem: z.string().min(30).describe('المشكلة أو التحدي'),
+    methodology: z.string().min(30).describe('منهجية الدراسة'),
+    dataCollectionMethods: z.array(z.string()).optional(),
+    targetLength: z.number().min(1500).max(8000).default(3000),
+    includeRecommendations: z.boolean().default(true),
+    citationStyle: AcademicStyleSchema.default('harvard'),
+});
+export const CaseStudyOutputSchema = z.object({
+    title: z.string(),
+    abstract: z.string(),
+    introduction: z.string(),
+    caseDescription: z.string(),
+    analysis: z.string(),
+    findings: z.array(z.string()),
+    discussion: z.string(),
+    recommendations: z.array(z.string()).optional(),
+    conclusion: z.string(),
+    references: z.array(z.string()),
+    fullCaseStudy: z.string().describe('دراسة الحالة الكاملة بصيغة markdown'),
+});
+export type CaseStudyInput = z.infer<typeof CaseStudyInputSchema>;
+export type CaseStudyOutput = z.infer<typeof CaseStudyOutputSchema>;
+
+// 6. Lab Report - تقرير مختبر
+export const LabReportInputSchema = z.object({
+    flow: z.literal('lab-report'),
+    experimentTitle: z.string().min(5).describe('عنوان التجربة'),
+    objective: z.string().min(20).describe('الهدف من التجربة'),
+    hypothesis: z.string().min(20).describe('الفرضية'),
+    materials: z.array(z.string()).min(3).describe('المواد والأدوات المستخدمة'),
+    procedure: z.array(z.string()).min(3).describe('خطوات التجربة'),
+    observations: z.string().min(50).describe('الملاحظات والبيانات'),
+    results: z.string().min(50).describe('النتائج'),
+    includeDiscussion: z.boolean().default(true),
+    citationStyle: AcademicStyleSchema.default('ieee'),
+});
+export const LabReportOutputSchema = z.object({
+    title: z.string(),
+    abstract: z.string(),
+    introduction: z.string(),
+    materialsAndMethods: z.string(),
+    results: z.string(),
+    discussion: z.string().optional(),
+    conclusion: z.string(),
+    references: z.array(z.string()),
+    fullReport: z.string().describe('التقرير الكامل بصيغة markdown'),
+});
+export type LabReportInput = z.infer<typeof LabReportInputSchema>;
+export type LabReportOutput = z.infer<typeof LabReportOutputSchema>;
+
+// 7. Research Proposal - مقترح بحثي
+export const ResearchProposalInputSchema = z.object({
+    flow: z.literal('research-proposal'),
+    researchTitle: z.string().min(10).describe('عنوان البحث المقترح'),
+    researchProblem: z.string().min(50).describe('مشكلة البحث'),
+    researchQuestions: z.array(z.string()).min(1).max(5),
+    objectives: z.array(z.string()).min(2).max(6),
+    methodology: ResearchMethodologySchema,
+    significance: z.string().min(50).describe('أهمية البحث'),
+    expectedOutcomes: z.array(z.string()).min(2),
+    timeline: z.string().optional().describe('الجدول الزمني'),
+    budget: z.string().optional().describe('الميزانية المقترحة'),
+    citationStyle: AcademicStyleSchema.default('apa'),
+});
+export const ResearchProposalOutputSchema = z.object({
+    title: z.string(),
+    abstract: z.string(),
+    introduction: z.string(),
+    literatureReview: z.string(),
+    researchDesign: z.string(),
+    methodology: z.string(),
+    expectedResults: z.string(),
+    significance: z.string(),
+    timeline: z.string().optional(),
+    budget: z.string().optional(),
+    references: z.array(z.string()),
+    fullProposal: z.string().describe('المقترح الكامل بصيغة markdown'),
+});
+export type ResearchProposalInput = z.infer<typeof ResearchProposalInputSchema>;
+export type ResearchProposalOutput = z.infer<typeof ResearchProposalOutputSchema>;
+
+// 8. Thesis Statement - أطروحة مركزية
+export const ThesisStatementInputSchema = z.object({
+    flow: z.literal('thesis-statement'),
+    topic: z.string().min(5).describe('الموضوع'),
+    position: z.string().min(20).describe('الموقف أو الرأي'),
+    mainPoints: z.array(z.string()).min(2).max(4).describe('النقاط الرئيسية'),
+    documentType: AcademicDocumentTypeSchema.describe('نوع الوثيقة'),
+    includeRationale: z.boolean().default(true).describe('تضمين التبرير'),
+});
+export const ThesisStatementOutputSchema = z.object({
+    thesisStatement: z.string().describe('الأطروحة المركزية'),
+    refinedVersions: z.array(z.string()).describe('نسخ محسنة بديلة'),
+    rationale: z.string().optional().describe('التبرير والشرح'),
+    strengths: z.array(z.string()),
+    suggestedImprovements: z.array(z.string()).optional(),
+});
+export type ThesisStatementInput = z.infer<typeof ThesisStatementInputSchema>;
+export type ThesisStatementOutput = z.infer<typeof ThesisStatementOutputSchema>;
+
+// 9. Dissertation Chapter - فصل أطروحة
+export const DissertationChapterInputSchema = z.object({
+    flow: z.literal('dissertation-chapter'),
+    chapterType: AcademicSectionSchema.describe('نوع الفصل'),
+    researchTopic: z.string().min(10).describe('موضوع البحث'),
+    chapterTitle: z.string().min(5).describe('عنوان الفصل'),
+    mainPoints: z.array(z.string()).min(3).max(10),
+    previousChaptersSummary: z.string().optional().describe('ملخص الفصول السابقة'),
+    targetLength: z.number().min(3000).max(15000).default(5000),
+    citationStyle: AcademicStyleSchema.default('apa'),
+    academicLevel: z.enum(['masters', 'phd']).default('masters'),
+});
+export const DissertationChapterOutputSchema = z.object({
+    chapterTitle: z.string(),
+    introduction: z.string(),
+    mainContent: z.string(),
+    subSections: z.array(z.object({
+        title: z.string(),
+        content: z.string(),
+    })),
+    conclusion: z.string(),
+    transitions: z.object({
+        fromPrevious: z.string(),
+        toNext: z.string(),
+    }),
+    references: z.array(z.string()),
+    fullChapter: z.string().describe('الفصل الكامل بصيغة markdown'),
+});
+export type DissertationChapterInput = z.infer<typeof DissertationChapterInputSchema>;
+export type DissertationChapterOutput = z.infer<typeof DissertationChapterOutputSchema>;
+
+// 10. Term Paper - بحث فصلي
+export const TermPaperInputSchema = z.object({
+    flow: z.literal('term-paper'),
+    courseName: z.string().min(3).describe('اسم المقرر'),
+    topic: z.string().min(5).describe('موضوع البحث'),
+    thesisStatement: z.string().min(20).describe('الأطروحة المركزية'),
+    mainArguments: z.array(z.string()).min(3).max(6),
+    requiredSources: z.number().min(5).max(30).default(10),
+    targetLength: z.number().min(2000).max(8000).default(3000),
+    citationStyle: AcademicStyleSchema.default('mla'),
+    includeAnnotatedBibliography: z.boolean().default(false),
+});
+export const TermPaperOutputSchema = z.object({
+    title: z.string(),
+    abstract: z.string(),
+    introduction: z.string(),
+    bodyContent: z.string(),
+    conclusion: z.string(),
+    references: z.array(z.string()),
+    annotatedBibliography: z.array(z.object({
+        citation: z.string(),
+        annotation: z.string(),
+    })).optional(),
+    fullPaper: z.string().describe('البحث الكامل بصيغة markdown'),
+});
+export type TermPaperInput = z.infer<typeof TermPaperInputSchema>;
+export type TermPaperOutput = z.infer<typeof TermPaperOutputSchema>;
+
+// 11. Critical Analysis - تحليل نقدي
+export const CriticalAnalysisInputSchema = z.object({
+    flow: z.literal('critical-analysis'),
+    workTitle: z.string().min(3).describe('عنوان العمل المراد تحليله'),
+    workType: z.enum(['book', 'article', 'research-paper', 'theory', 'artwork', 'film']),
+    author: z.string().min(2).describe('المؤلف'),
+    mainThesis: z.string().min(20).describe('الأطروحة الرئيسية للعمل'),
+    evaluationCriteria: z.array(z.string()).min(3).max(8).describe('معايير التقييم'),
+    targetLength: z.number().min(1000).max(5000).default(2000),
+    citationStyle: AcademicStyleSchema.default('chicago'),
+});
+export const CriticalAnalysisOutputSchema = z.object({
+    title: z.string(),
+    introduction: z.string(),
+    summary: z.string().describe('ملخص العمل'),
+    strengthsAnalysis: z.string(),
+    weaknessesAnalysis: z.string(),
+    methodologyEvaluation: z.string(),
+    contributionToField: z.string(),
+    conclusion: z.string(),
+    references: z.array(z.string()),
+    fullAnalysis: z.string().describe('التحليل الكامل بصيغة markdown'),
+});
+export type CriticalAnalysisInput = z.infer<typeof CriticalAnalysisInputSchema>;
+export type CriticalAnalysisOutput = z.infer<typeof CriticalAnalysisOutputSchema>;
+
+// 12. Book Review - مراجعة كتاب
+export const BookReviewInputSchema = z.object({
+    flow: z.literal('book-review'),
+    bookTitle: z.string().min(2).describe('عنوان الكتاب'),
+    author: z.string().min(2).describe('المؤلف'),
+    publicationYear: z.number().min(1900).max(2030),
+    genre: z.string().describe('النوع أو المجال'),
+    mainThemes: z.array(z.string()).min(2).max(6),
+    targetAudience: z.string().describe('الجمهور المستهدف للمراجعة'),
+    reviewLength: z.number().min(500).max(3000).default(1000),
+    includeRating: z.boolean().default(true),
+    citationStyle: AcademicStyleSchema.default('mla'),
+});
+export const BookReviewOutputSchema = z.object({
+    title: z.string(),
+    bibliographicInfo: z.string(),
+    introduction: z.string(),
+    summary: z.string(),
+    criticalEvaluation: z.string(),
+    strengths: z.array(z.string()),
+    weaknesses: z.array(z.string()),
+    recommendation: z.string(),
+    rating: z.number().min(1).max(5).optional(),
+    fullReview: z.string().describe('المراجعة الكاملة بصيغة markdown'),
+});
+export type BookReviewInput = z.infer<typeof BookReviewInputSchema>;
+export type BookReviewOutput = z.infer<typeof BookReviewOutputSchema>;
+
+// 13. Article Summary - ملخص مقال
+export const ArticleSummaryInputSchema = z.object({
+    flow: z.literal('article-summary'),
+    articleTitle: z.string().min(3).describe('عنوان المقال'),
+    author: z.string().min(2).describe('المؤلف'),
+    articleText: z.string().min(100).optional().describe('نص المقال (إذا كان متوفراً)'),
+    articleUrl: z.string().url().optional().describe('رابط المقال'),
+    summaryLength: z.enum(['brief', 'moderate', 'detailed']).default('moderate'),
+    includeKeyFindings: z.boolean().default(true),
+    includeMethodology: z.boolean().default(true),
+    citationStyle: AcademicStyleSchema.default('apa'),
+});
+export const ArticleSummaryOutputSchema = z.object({
+    title: z.string(),
+    bibliographicInfo: z.string(),
+    mainArgument: z.string(),
+    methodology: z.string().optional(),
+    keyFindings: z.array(z.string()).optional(),
+    conclusion: z.string(),
+    significance: z.string(),
+    fullSummary: z.string().describe('الملخص الكامل بصيغة markdown'),
+});
+export type ArticleSummaryInput = z.infer<typeof ArticleSummaryInputSchema>;
+export type ArticleSummaryOutput = z.infer<typeof ArticleSummaryOutputSchema>;
+
+// 14. Annotated Bibliography - ببليوغرافيا مشروحة
+export const AnnotatedBibliographyInputSchema = z.object({
+    flow: z.literal('annotated-bibliography'),
+    researchTopic: z.string().min(5).describe('موضوع البحث'),
+    sources: z.array(z.object({
+        title: z.string(),
+        author: z.string(),
+        year: z.number(),
+        type: z.enum(['book', 'journal-article', 'website', 'conference-paper', 'thesis']),
+        url: z.string().optional(),
+    })).min(5).max(50).describe('المصادر المراد شرحها'),
+    annotationLength: z.enum(['brief', 'moderate', 'detailed']).default('moderate'),
+    citationStyle: AcademicStyleSchema.default('apa'),
+    includeEvaluation: z.boolean().default(true),
+});
+export const AnnotatedBibliographyOutputSchema = z.object({
+    introduction: z.string(),
+    annotations: z.array(z.object({
+        citation: z.string(),
+        summary: z.string(),
+        evaluation: z.string().optional(),
+        relevance: z.string(),
+    })),
+    fullBibliography: z.string().describe('الببليوغرافيا المشروحة الكاملة بصيغة markdown'),
+});
+export type AnnotatedBibliographyInput = z.infer<typeof AnnotatedBibliographyInputSchema>;
+export type AnnotatedBibliographyOutput = z.infer<typeof AnnotatedBibliographyOutputSchema>;
+
+// 15. Position Paper - ورقة موقف
+export const PositionPaperInputSchema = z.object({
+    flow: z.literal('position-paper'),
+    issue: z.string().min(10).describe('القضية أو الموضوع'),
+    organizationOrEntity: z.string().min(2).describe('الجهة أو المنظمة'),
+    position: z.string().min(30).describe('الموقف الرسمي'),
+    supportingArguments: z.array(z.string()).min(3).max(8),
+    evidence: z.array(z.string()).min(2).describe('الأدلة الداعمة'),
+    counterpositions: z.array(z.string()).optional().describe('المواقف المعارضة'),
+    targetAudience: z.string().describe('الجمهور المستهدف'),
+    targetLength: z.number().min(1000).max(5000).default(2000),
+    citationStyle: AcademicStyleSchema.default('chicago'),
+});
+export const PositionPaperOutputSchema = z.object({
+    title: z.string(),
+    executiveSummary: z.string(),
+    introduction: z.string(),
+    backgroundContext: z.string(),
+    positionStatement: z.string(),
+    justification: z.string(),
+    addressingCounterarguments: z.string().optional(),
+    recommendations: z.array(z.string()),
+    conclusion: z.string(),
+    references: z.array(z.string()),
+    fullPaper: z.string().describe('ورقة الموقف الكاملة بصيغة markdown'),
+});
+export type PositionPaperInput = z.infer<typeof PositionPaperInputSchema>;
+export type PositionPaperOutput = z.infer<typeof PositionPaperOutputSchema>;
+
+// 16. Reflection Paper - ورقة تأملية
+export const ReflectionPaperInputSchema = z.object({
+    flow: z.literal('reflection-paper'),
+    experience: z.string().min(50).describe('التجربة أو الموضوع المراد التأمل فيه'),
+    courseOrContext: z.string().optional().describe('المقرر أو السياق'),
+    keyLearnings: z.array(z.string()).min(2).max(8).describe('التعلمات الرئيسية'),
+    personalInsights: z.array(z.string()).min(2).max(8).describe('الأفكار الشخصية'),
+    futureApplications: z.array(z.string()).optional().describe('التطبيقات المستقبلية'),
+    targetLength: z.number().min(500).max(3000).default(1000),
+    reflectionDepth: z.enum(['surface', 'moderate', 'deep']).default('moderate'),
+});
+export const ReflectionPaperOutputSchema = z.object({
+    title: z.string(),
+    introduction: z.string(),
+    experienceDescription: z.string(),
+    personalReflection: z.string(),
+    analysis: z.string(),
+    lessonsLearned: z.array(z.string()),
+    futureImplications: z.string(),
+    conclusion: z.string(),
+    fullPaper: z.string().describe('الورقة التأملية الكاملة بصيغة markdown'),
+});
+export type ReflectionPaperInput = z.infer<typeof ReflectionPaperInputSchema>;
+export type ReflectionPaperOutput = z.infer<typeof ReflectionPaperOutputSchema>;
+
+// 17. Technical Report - تقرير فني
+export const TechnicalReportInputSchema = z.object({
+    flow: z.literal('technical-report'),
+    projectTitle: z.string().min(5).describe('عنوان المشروع'),
+    projectType: z.enum(['software', 'hardware', 'engineering', 'research', 'analysis']),
+    objective: z.string().min(30).describe('الهدف'),
+    methodology: z.string().min(50).describe('المنهجية'),
+    technicalDetails: z.array(z.string()).min(3).describe('التفاصيل الفنية'),
+    results: z.string().min(50).describe('النتائج'),
+    includeDiagrams: z.boolean().default(true),
+    includeCodeExamples: z.boolean().default(false),
+    targetAudience: z.enum(['technical', 'non-technical', 'mixed']).default('technical'),
+    targetLength: z.number().min(2000).max(10000).default(4000),
+    citationStyle: AcademicStyleSchema.default('ieee'),
+});
+export const TechnicalReportOutputSchema = z.object({
+    title: z.string(),
+    abstract: z.string(),
+    introduction: z.string(),
+    background: z.string(),
+    methodology: z.string(),
+    technicalSpecifications: z.string(),
+    implementation: z.string(),
+    results: z.string(),
+    discussion: z.string(),
+    recommendations: z.array(z.string()),
+    conclusion: z.string(),
+    references: z.array(z.string()),
+    appendices: z.array(z.object({
+        title: z.string(),
+        content: z.string(),
+    })).optional(),
+    fullReport: z.string().describe('التقرير الفني الكامل بصيغة markdown'),
+});
+export type TechnicalReportInput = z.infer<typeof TechnicalReportInputSchema>;
+export type TechnicalReportOutput = z.infer<typeof TechnicalReportOutputSchema>;
+
 // Define a union type for all possible inputs
 export const AIFlowInputSchema = z.union([
     ParaphraseInputSchema,
@@ -932,6 +1412,23 @@ export const AIFlowInputSchema = z.union([
     EvaluateReportInputSchema,
     GenerateTocInputSchema,
     GenerateUIDescriptionInputSchema,
+    ResearchPaperInputSchema,
+    AnalyticalEssayInputSchema,
+    ArgumentativeEssayInputSchema,
+    ComprehensiveLiteratureReviewInputSchema,
+    CaseStudyInputSchema,
+    LabReportInputSchema,
+    ResearchProposalInputSchema,
+    ThesisStatementInputSchema,
+    DissertationChapterInputSchema,
+    TermPaperInputSchema,
+    CriticalAnalysisInputSchema,
+    BookReviewInputSchema,
+    ArticleSummaryInputSchema,
+    AnnotatedBibliographyInputSchema,
+    PositionPaperInputSchema,
+    ReflectionPaperInputSchema,
+    TechnicalReportInputSchema,
 ]);
 
 export type AIFlowInput = z.infer<typeof AIFlowInputSchema>;
