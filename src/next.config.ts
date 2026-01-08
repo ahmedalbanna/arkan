@@ -2,13 +2,16 @@
 import type { NextConfig, SizeLimit } from 'next';
 
 const nextConfig: NextConfig = {
-  reactStrictMode: false, // Enable React strict mode for better development experience
+  // SECURITY: React Strict Mode enabled for better development experience and bug detection
+  reactStrictMode: true,
   output: 'standalone',
+  
+  // SECURITY: Only ignore build errors in development, enforce in production
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: process.env.NODE_ENV === 'development',
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: process.env.NODE_ENV === 'development',
   },
   images: {
     remotePatterns: [
