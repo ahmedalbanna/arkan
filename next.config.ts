@@ -6,13 +6,13 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   
-  // SECURITY: Only ignore build errors in development, enforce in production
-  typescript: {
-    ignoreBuildErrors: process.env.NODE_ENV === 'development',
-  },
-  eslint: {
-    ignoreDuringBuilds: process.env.NODE_ENV === 'development',
-  },
+  // // SECURITY: Only ignore build errors in development, enforce in production
+  // typescript: {
+  //   ignoreBuildErrors: process.env.NODE_ENV === 'development',
+  // },
+  // eslint: {
+  //   ignoreDuringBuilds: process.env.NODE_ENV === 'development',
+  // },
   images: {
     remotePatterns: [
       {
@@ -56,7 +56,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     // Add any TurboPack specific configurations here if needed
     // Explicitly set the project root to resolve ambiguity and fix routing.
-    root: '.',
+    // root: '.',
   }
 };
 
