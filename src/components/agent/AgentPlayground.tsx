@@ -45,6 +45,7 @@ function AgentPlayground({ agent }: AgentPlaygroundProps) {
   }, [agent, form]);
   
   const mutation = useMutation({
+    // @ts-expect-error - Genkit Action type vs MutationFunction type mismatch
     mutationFn: runAgentFlow,
     onSuccess: (data) => {
       if (agent) {

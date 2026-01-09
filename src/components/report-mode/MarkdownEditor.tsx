@@ -39,6 +39,7 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
       attributes: {
         class: cn('prose dark:prose-invert max-w-none focus:outline-none font-serif text-base prose-p:text-base prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2', editorClassName),
       },
+      // @ts-expect-error - TipTap handlePaste return type mismatch
       handlePaste: async (view, event, slice): Promise<boolean> => {
         const text = event.clipboardData?.getData('text/plain');
         const html = event.clipboardData?.getData('text/html');
@@ -97,6 +98,7 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
       {editor && (
         <BubbleMenu
           editor={editor}
+          // @ts-expect-error - BubbleMenu tippyOptions onClose prop type mismatch
           tippyOptions={{ duration: 100, placement: 'top', onClose: () => false }}
           pluginKey={bubbleMenuId}
           shouldShow={({ editor }) => !editor.state.selection.empty}

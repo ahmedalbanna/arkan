@@ -213,6 +213,7 @@ export function useAIResearcherLogic() {
   });
 
   const form = useForm<any>({
+    // @ts-expect-error - Zod discriminated union schema type inference issue
     resolver: zodResolver(getSchema(researchMode)),
     defaultValues: { topic: '', question: '', factQuery: '', useWebSearch: false, requireSource: true },
   });

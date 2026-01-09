@@ -37,20 +37,7 @@ export default function SignupForm() {
     },
   });
 
-  const signupMutation = useSignup({
-    onError: (error: any) => {
-      // The useSignup hook now handles toast for general errors.
-      // We only need to set form-specific errors here.
-      if (error?.errors) {
-        Object.keys(error.errors).forEach((key) => {
-          form.setError(key as keyof SignupCredentials, {
-            type: 'server',
-            message: error.errors[key][0],
-          });
-        });
-      }
-    }
-  });
+  const signupMutation = useSignup();
 
   const googleSignInMutation = useGoogleSignIn();
 

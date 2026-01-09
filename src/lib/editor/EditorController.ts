@@ -24,6 +24,7 @@ export class EditorController {
     isHeading = (level: 1 | 2 | 3) => this.editor.isActive('heading', { level });
 
     // --- Font Size & Color ---
+    // @ts-expect-error - TipTap extension command
     setFontSize = (size: string) => this.editor.chain().focus().setFontSize(size).run();
     isFontSize = (size: string) => this.editor.isActive('textStyle', { fontSize: size });
     

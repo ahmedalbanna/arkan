@@ -69,7 +69,7 @@ export async function convertMarkdownToWord(
 
   const captionStyleExists = finalStyles.paragraphStyles!.some(style => style.id === 'Caption');
   if (!captionStyleExists) {
-    finalStyles.paragraphStyles!.push({
+    (finalStyles.paragraphStyles as any).push({
       id: 'Caption',
       name: 'Caption',
       basedOn: 'Normal',

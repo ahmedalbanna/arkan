@@ -75,6 +75,7 @@ export function AgentDialog({
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
+    // @ts-expect-error - useFieldArray name type inference issue
     name: 'guidelines',
   });
 

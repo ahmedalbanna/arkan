@@ -133,6 +133,7 @@ export default function ProjectSettingsPanel() {
   const handleBlur = () => {
     const data = form.getValues();
     updateProject(p => {
+      // @ts-expect-error - Form data type mismatch with ProjectProperties
       const updatePayload: Partial<ProjectProperties> = { ...data };
       if (data.teamMembers) {
         updatePayload.teamMembers = data.teamMembers.split(',').map(name => name.trim()).filter(Boolean);

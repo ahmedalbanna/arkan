@@ -12,7 +12,7 @@ import { useState } from 'react';
 import { useToast } from '@/hooks';
 
 export default function GenerateTocPage() {
-  const { t, form, mutation, onSubmit, results } = useGenerateTocLogic();
+  const { form, mutation, onSubmit, results } = useGenerateTocLogic();
   const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
 

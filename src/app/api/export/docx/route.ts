@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       return new NextResponse('Error creating DOCX file buffer.', { status: 500 });
     }
 
-    return new NextResponse(docxBuffer, {
+    return new NextResponse(docxBuffer as any, {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',

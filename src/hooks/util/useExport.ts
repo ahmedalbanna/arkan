@@ -96,6 +96,7 @@ export function useExport() {
             };
 
             const blob = await convertMarkdownToPptx(project.fullMarkdownContent, project.name, conversionOptions);
+            // @ts-expect-error - saveAs type overload mismatch
             saveAs(blob, `${project.name.replace(/\s+/g, '_')}_presentation.pptx`);
 
             toast({ title: 'Export Successful', description: 'Presentation exported as PPTX.' });

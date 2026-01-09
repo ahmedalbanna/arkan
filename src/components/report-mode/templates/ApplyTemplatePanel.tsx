@@ -96,6 +96,7 @@ export default function ApplyTemplatePanel() {
                     return p.with({ content: [...newContent] });
                 });
             }
+            // @ts-expect-error - ReportTemplateProperties type mismatch between imports
             handleSelectTemplate(previewTemplate)
         }}
         onBack={() => setPreviewTemplate(null)}

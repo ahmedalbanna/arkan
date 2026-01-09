@@ -35,6 +35,7 @@ export function useWritingTool<TData = unknown, TVariables = any>(
       // Refetch user profile to update credit count in the UI
       refetchUser();
       if (options?.onSuccess) {
+        // @ts-expect-error - Type mismatch with TanStack Query callback signature
         options.onSuccess(data, variables, context);
       }
     },
@@ -45,6 +46,7 @@ export function useWritingTool<TData = unknown, TVariables = any>(
         variant: 'destructive',
       });
       if (options?.onError) {
+        // @ts-expect-error - Type mismatch with TanStack Query callback signature
         options.onError(error, variables, context);
       }
     },

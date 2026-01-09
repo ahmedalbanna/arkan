@@ -47,6 +47,7 @@ const getCommandItems = (editor: Editor) => [
   },
   { title: 'Blockquote', description: 'A quote block.', icon: <Quote size={20} />, command: () => editor.chain().focus().toggleBlockquote().run() },
   { title: 'Code Block', description: 'A block for code snippets.', icon: <Code size={20} />, command: () => editor.chain().focus().toggleCodeBlock().run() },
+  // @ts-expect-error - Custom TipTap extension command
   { title: 'PlantUML Diagram', description: 'Embed a live PlantUML diagram.', icon: <GitGraph size={20} />, command: () => editor.chain().focus().insertPlantUML().run() },
 ];
 

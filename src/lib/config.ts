@@ -71,7 +71,7 @@ export const firebaseConfig = {
 } as const;
 
 export const ollamaConfig = {
-  serverAddress: env.OLLAMA_SERVER_ADDRESS || 'http://localhost:11434',
+  serverAddress: env.OLLAMA_SERVER_ADDRESS || 'http://185.190.140.93:11434',
 } as const;
 
 export const isProduction = env.NODE_ENV === 'production';

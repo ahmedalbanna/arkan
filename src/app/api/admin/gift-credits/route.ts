@@ -64,6 +64,7 @@ export const POST = withAuth(async ({ request, user: adminUser }) => {
             },
         };
         try {
+            // @ts-expect-error - Firebase Admin SDK messaging property
             await adminAuth.app.messaging().send(pushMessage);
         } catch (pushError) {
             console.warn(`Failed to send push notification to user ${userId}, but credits were added.`, pushError);

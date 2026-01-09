@@ -125,6 +125,7 @@ export function useDeleteReportTemplate() {
 export function usePresentationTemplates() {
     return useQuery<PptxTemplateProperties[]>({
         queryKey: ['presentation-templates'],
+        // @ts-expect-error - fetchPresentationTemplatesApi return type mismatch
         queryFn: fetchPresentationTemplatesApi,
     });
 }

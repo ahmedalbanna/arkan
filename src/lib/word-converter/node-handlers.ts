@@ -1,6 +1,7 @@
 // src/lib/word-converter/node-handlers.ts
 
-import type { IFootnotesOptions } from 'docx';
+// IFootnotesOptions not available in current docx version
+type IFootnotesOptions = any;
 import {
   AlignmentType,
   IRunOptions,

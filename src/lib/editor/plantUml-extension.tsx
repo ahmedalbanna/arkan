@@ -90,7 +90,7 @@ const PlantUML = Node.create({
       insertPlantUML: () => ({ commands }: any) => {
         return commands.insertContent('<plant-uml></plant-uml>');
       },
-    };
+    } as any;
   },
 });
 

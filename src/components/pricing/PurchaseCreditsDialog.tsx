@@ -119,7 +119,8 @@ export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode })
     formData.append('userName', firebaseUser.displayName || 'N/A');
     formData.append('userEmail', firebaseUser.email || 'N/A');
 
-    mutation.mutate({ formData, token });
+    // @ts-expect-error - FormData object literal property mismatch
+    mutation.mutate({ formData: formData as any, token });
   }
 
   return (

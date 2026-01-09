@@ -116,9 +116,9 @@ export async function convertMarkdownToPptx(
     await createSlidesWithContent(pptx, slidesContent, styles, { cover: COVER_MASTER, content: CONTENT_MASTER }, isRtl, fonts);
 
     if (typeof window === 'undefined') {
-        return pptx.write('nodebuffer') as Promise<Buffer>;
+        return pptx.write('nodebuffer' as any) as Promise<Buffer>;
     } else {
-        return pptx.write('blob');
+        return pptx.write('blob' as any) as Promise<Blob>;
     }
 }
 

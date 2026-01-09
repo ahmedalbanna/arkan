@@ -162,10 +162,7 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
                 </TabsContent>
                 <TabsContent value="context" className="flex-1 mt-4">
                    <SectionContextSelector
-                        availableSections={chapter.sections}
-                        availableFiles={[]} // Assuming no external files for now
-                        selectedContext={context}
-                        onContextChange={setContext}
+                        sectionId={chapter.id || ''}
                     />
                 </TabsContent>
               </Tabs>
