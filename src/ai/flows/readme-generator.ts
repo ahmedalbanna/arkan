@@ -19,22 +19,23 @@ import {
   formatCodeExamplesTool,
 } from '@/ai/tools/documentation-generation';
 import { readmeGenerationPrompt } from '@/ai/prompts/project-documentation';
+import { z } from 'zod';
 
 // ==================== INPUT/OUTPUT SCHEMAS ====================
 
-const ReadmeGeneratorInputSchema = ai.z.object({
-  projectPath: ai.z.string().describe('Path to the project directory'),
-  projectName: ai.z.string().describe('Project name'),
-  description: ai.z.string().describe('Project description'),
+const ReadmeGeneratorInputSchema = z.object({
+  projectPath: z.string().describe('Path to the project directory'),
+  projectName: z.string().describe('Project name'),
+  description: z.string().describe('Project description'),
   template: DocumentTemplateTypeSchema.default('comprehensive').describe('README template style'),
-  includeBadges: ai.z.boolean().default(true).describe('Include status badges'),
-  includeInstallation: ai.z.boolean().default(true).describe('Include installation section'),
-  includeUsageExamples: ai.z.boolean().default(true).describe('Include usage examples'),
-  includeContributing: ai.z.boolean().default(true).describe('Include contributing guidelines'),
-  includeLicense: ai.z.boolean().default(true).describe('Include license information'),
-  licenseType: ai.z.string().default('MIT').describe('License type'),
-  repositoryUrl: ai.z.string().optional().describe('GitHub/GitLab repository URL'),
-  authorName: ai.z.string().optional().describe('Author or organization name'),
+  includeBadges: z.boolean().default(true).describe('Include status badges'),
+  includeInstallation: z.boolean().default(true).describe('Include installation section'),
+  includeUsageExamples: z.boolean().default(true).describe('Include usage examples'),
+  includeContributing: z.boolean().default(true).describe('Include contributing guidelines'),
+  includeLicense: z.boolean().default(true).describe('Include license information'),
+  licenseType: z.string().default('MIT').describe('License type'),
+  repositoryUrl: z.string().optional().describe('GitHub/GitLab repository URL'),
+  authorName: z.string().optional().describe('Author or organization name'),
 });
 
 export const readmeGenerator = ai.defineFlow(

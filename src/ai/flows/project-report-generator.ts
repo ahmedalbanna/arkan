@@ -17,20 +17,21 @@ import {
   analyzeGitHistoryTool,
 } from '@/ai/tools/reporting-and-metrics';
 import { projectReportPrompt } from '@/ai/prompts/project-documentation';
+import { z } from 'zod';
 
 // ==================== INPUT/OUTPUT SCHEMAS ====================
 
-const ProjectReportInputSchema = ai.z.object({
-  projectPath: ai.z.string().describe('Path to the project'),
-  projectName: ai.z.string().describe('Project name'),
+const ProjectReportInputSchema = z.object({
+  projectPath: z.string().describe('Path to the project'),
+  projectName: z.string().describe('Project name'),
   reportPeriod: ReportPeriodSchema.describe('Reporting period'),
-  startDate: ai.z.string().optional().describe('Start date (ISO format) for custom period'),
-  endDate: ai.z.string().optional().describe('End date (ISO format) for custom period'),
-  includeMetrics: ai.z.boolean().default(true).describe('Include detailed metrics'),
-  includeTimeline: ai.z.boolean().default(true).describe('Include progress timeline'),
-  includeGitStats: ai.z.boolean().default(true).describe('Include git history analysis'),
-  targetAudience: ai.z.enum(['technical', 'executive', 'stakeholders']).default('stakeholders'),
-  format: ai.z.enum(['markdown', 'html', 'json']).default('markdown'),
+  startDate: z.string().optional().describe('Start date (ISO format) for custom period'),
+  endDate: z.string().optional().describe('End date (ISO format) for custom period'),
+  includeMetrics: z.boolean().default(true).describe('Include detailed metrics'),
+  includeTimeline: z.boolean().default(true).describe('Include progress timeline'),
+  includeGitStats: z.boolean().default(true).describe('Include git history analysis'),
+  targetAudience: z.enum(['technical', 'executive', 'stakeholders']).default('stakeholders'),
+  format: z.enum(['markdown', 'html', 'json']).default('markdown'),
 });
 
 export const projectReportGenerator = ai.defineFlow(
