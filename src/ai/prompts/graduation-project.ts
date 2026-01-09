@@ -5,7 +5,7 @@
  * These prompts follow academic standards and best practices.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import { z } from 'zod';
 
 // ==================== ABSTRACT PROMPT ====================
@@ -13,6 +13,7 @@ import { z } from 'zod';
 export const abstractPrompt = ai.definePrompt({
   name: 'abstractPrompt',
   description: 'Generate a professional academic abstract for a graduation project',
+  model: await getModel('quality'),
   input: {
     schema: z.object({
       title: z.string(),
@@ -72,6 +73,7 @@ Generate the abstract in a clear, professional academic style.`);
 export const introductionPrompt = ai.definePrompt({
   name: 'introductionPrompt',
   description: 'Generate comprehensive introduction chapter',
+  model: await getModel('quality'),
   input: {
     schema: z.object({
       title: z.string(),
@@ -152,6 +154,7 @@ Generate a well-structured, engaging introduction chapter.`);
 export const literatureReviewPrompt = ai.definePrompt({
   name: 'literatureReviewPrompt',
   description: 'Generate comprehensive literature review chapter',
+  model: await getModel('quality'),
   input: {
     schema: z.object({
       projectTitle: z.string(),
@@ -233,6 +236,7 @@ Generate a comprehensive, well-organized literature review.`);
 export const methodologyPrompt = ai.definePrompt({
   name: 'methodologyPrompt',
   description: 'Generate methodology chapter',
+  model: await getModel('quality'),
   input: {
     schema: z.object({
       projectTitle: z.string(),
@@ -342,6 +346,7 @@ Generate a clear, detailed methodology chapter.`);
 export const systemAnalysisPrompt = ai.definePrompt({
   name: 'systemAnalysisPrompt',
   description: 'Generate system analysis and requirements chapter',
+  model: await getModel('quality'),
   input: {
     schema: z.object({
       projectTitle: z.string(),
@@ -471,6 +476,7 @@ Generate a comprehensive, well-structured requirements chapter.`);
 export const systemDesignPrompt = ai.definePrompt({
   name: 'systemDesignPrompt',
   description: 'Generate system design and architecture chapter',
+  model: await getModel('quality'),
   input: {
     schema: z.object({
       projectTitle: z.string(),
@@ -655,6 +661,7 @@ Generate a comprehensive, well-justified system design chapter.`);
 export const implementationPrompt = ai.definePrompt({
   name: 'implementationPrompt',
   description: 'Generate implementation chapter',
+  model: await getModel('quality'),
   input: {
     schema: z.object({
       projectTitle: z.string(),
@@ -859,6 +866,7 @@ Generate a detailed, practical implementation chapter.`);
 export const testingPrompt = ai.definePrompt({
   name: 'testingPrompt',
   description: 'Generate testing and quality assurance chapter',
+  model: await getModel('quality'),
   input: {
     schema: z.object({
       projectTitle: z.string(),
@@ -1049,6 +1057,7 @@ Generate a comprehensive, data-driven testing chapter.`);
 export const resultsPrompt = ai.definePrompt({
   name: 'resultsPrompt',
   description: 'Generate results and evaluation chapter',
+  model: await getModel('quality'),
   input: {
     schema: z.object({
       projectTitle: z.string(),
@@ -1242,6 +1251,7 @@ Generate a comprehensive, evidence-based results chapter.`);
 export const discussionPrompt = ai.definePrompt({
   name: 'discussionPrompt',
   description: 'Generate discussion and analysis chapter',
+  model: await getModel('quality'),
   input: {
     schema: z.object({
       projectTitle: z.string(),
@@ -1423,6 +1433,7 @@ Generate a thoughtful, analytical discussion chapter.`);
 export const conclusionPrompt = ai.definePrompt({
   name: 'conclusionPrompt',
   description: 'Generate conclusion chapter',
+  model: await getModel('quality'),
   input: {
     schema: z.object({
       projectTitle: z.string(),
@@ -1572,6 +1583,7 @@ Generate a strong, conclusive ending chapter.`);
 export const recommendationsPrompt = ai.definePrompt({
   name: 'recommendationsPrompt',
   description: 'Generate future work and recommendations chapter',
+  model: await getModel('quality'),
   input: {
     schema: z.object({
       projectTitle: z.string(),
