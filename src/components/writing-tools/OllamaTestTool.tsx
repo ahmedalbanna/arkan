@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useOllamaTestTool } from '@/hooks/writing-tools/use-ollama-test-tool';
 import { Loader2, Server } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { ScrollArea } from '../ui/scroll-area';
 
 export function OllamaTestTool() {
   const { form, mutation, onSubmit, results } = useOllamaTestTool();
@@ -48,12 +49,14 @@ export function OllamaTestTool() {
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
                 ) : results ? (
-                  <div className="space-y-2">
-                    <div className="prose dark:prose-invert max-w-none text-sm">
-                      <ReactMarkdown>{results.response}</ReactMarkdown>
+                  <ScrollArea className="h-48">
+                    <div className="space-y-2">
+                      <div className="prose dark:prose-invert max-w-none text-sm">
+                        <ReactMarkdown>{results.response}</ReactMarkdown>
+                      </div>
+                      <p className="text-xs text-muted-foreground pt-2 border-t">Model: {results.model}</p>
                     </div>
-                    <p className="text-xs text-muted-foreground pt-2 border-t">Model: {results.model}</p>
-                  </div>
+                  </ScrollArea>
                 ) : (
                   <p className="text-center text-muted-foreground">No response received.</p>
                 )}

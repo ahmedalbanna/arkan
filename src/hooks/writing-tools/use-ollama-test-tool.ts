@@ -4,7 +4,8 @@
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useWritingTool, useToast } from '@/hooks';
+import { useToast } from '@/hooks';
+import { useMutation } from '@tanstack/react-query';
 
 const formSchema = z.object({
   prompt: z.string().min(1, "Prompt cannot be empty."),
@@ -15,7 +16,22 @@ type FormValues = z.infer<typeof formSchema>;
 export function useOllamaTestTool() {
   const { toast } = useToast();
 
-  const mutation = useWritingTool('ollama-test', {
+  const mutation = useMutation({
+    mutationFn: async (data: FormValues) => {
+      const response = await fetch('/api/writing-tools/ollama-test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || 'Failed to get response from Ollama server.');
+      }
+      return response.json();
+    },
     onSuccess: (data: any) => {
       toast({ title: 'Ollama Response Received', description: `Model: ${data.model}` });
     },
