@@ -5,7 +5,8 @@
  * of software projects.
  */
 
-import { ai, getModel } from '@/ai/genkit';
+import { getModel } from '@/ai/genkit';
+import type { Genkit } from 'genkit';
 import { z } from 'zod';
 import {
   ProjectStructureSchema,
@@ -21,7 +22,13 @@ const AnalyzeProjectStructureInputSchema = z.object({
   maxDepth: z.number().default(5).describe('Maximum directory depth to analyze'),
 });
 
-export const analyzeProjectStructureTool = ai.defineTool(
+/**
+ * Factory function to create project analysis tools
+ * @param ai - The Genkit AI instance
+ * @returns Object containing all project analysis tools
+ */
+export function createProjectAnalysisTools(ai: Genkit) {
+  const analyzeProjectStructureTool = ai.defineTool(
   {
     name: 'analyzeProjectStructure',
     description: `Analyzes the file and directory structure of a project. 
@@ -82,7 +89,7 @@ const ExtractDependenciesInputSchema = z.object({
   categorize: z.boolean().default(true).describe('Categorize dependencies by purpose'),
 });
 
-export const extractDependenciesTool = ai.defineTool(
+  const extractDependenciesTool = ai.defineTool(
   {
     name: 'extractDependencies',
     description: `Extracts and analyzes project dependencies from package.json or similar files.
@@ -143,7 +150,7 @@ const AnalyzeCodeComplexityInputSchema = z.object({
   includeMetrics: z.boolean().default(true).describe('Include advanced metrics (cyclomatic, halstead)'),
 });
 
-export const analyzeCodeComplexityTool = ai.defineTool(
+  const analyzeCodeComplexityTool = ai.defineTool(
   {
     name: 'analyzeCodeComplexity',
     description: `Analyzes code complexity metrics for the project.
@@ -199,9 +206,16 @@ Return a JSON object matching the CodeComplexity schema with:
   }
 );
 
-// Export all project analysis tools
-export const projectAnalysisTools = {
-  analyzeProjectStructure: analyzeProjectStructureTool,
-  extractDependencies: extractDependenciesTool,
-  analyzeCodeComplexity: analyzeCodeComplexityTool,
-};
+  // Return all tools
+  return {
+    analyzeProjectStructure: analyzeProjectStructureTool,
+    extractDependencies: extractDependenciesTool,
+    analyzeCodeComplexity: analyzeCodeComplexityTool,
+  };
+}
+
+// Export individual tools for backward compatibility
+export let analyzeProjectStructureTool: ReturnType<typeof createProjectAnalysisTools>['analyzeProjectStructure'];
+export let extractDependenciesTool: ReturnType<typeof createProjectAnalysisTools>['extractDependencies'];
+export let analyzeCodeComplexityTool: ReturnType<typeof createProjectAnalysisTools>['analyzeCodeComplexity'];
+export let projectAnalysisTools: ReturnType<typeof createProjectAnalysisTools>;

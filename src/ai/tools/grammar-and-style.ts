@@ -7,7 +7,8 @@
  * assessment, and word choice improvement capabilities using AI.
  */
 
-import { ai, getModel } from '@/ai/genkit';
+import { getModel } from '@/ai/genkit';
+import type { Genkit } from 'genkit';
 import {
   AnalyzeToneToolInputSchema,
   AnalyzeToneToolOutputSchema,
@@ -29,10 +30,16 @@ import {
 import { z } from 'zod';
 
 /**
- * Grammar Checker Tool
- * Analyzes text for grammar, spelling, punctuation, and capitalization issues.
+ * Factory function to create grammar and style tools
+ * @param ai - The Genkit AI instance
+ * @returns Object containing all grammar and style tools
  */
-export const checkGrammarTool = ai.defineTool(
+export function createGrammarAndStyleTools(ai: Genkit) {
+  /**
+   * Grammar Checker Tool
+   * Analyzes text for grammar, spelling, punctuation, and capitalization issues.
+   */
+  const checkGrammarTool = ai.defineTool(
   {
     name: 'checkGrammar',
     description: 'Analyzes text for grammar, spelling, punctuation, and capitalization errors. Returns detailed issues with suggestions for correction.',
@@ -74,11 +81,11 @@ Provide a comprehensive analysis with all issues found.`,
   }
 );
 
-/**
- * Tone Analyzer Tool
- * Analyzes the tone of text and provides suggestions for improvement.
- */
-export const analyzeToneTool = ai.defineTool(
+  /**
+   * Tone Analyzer Tool
+   * Analyzes the tone of text and provides suggestions for improvement.
+   */
+  const analyzeToneTool = ai.defineTool(
   {
     name: 'analyzeTone',
     description: 'Analyzes the tone of text (professional, casual, academic, persuasive, neutral) and provides suggestions for achieving the target tone.',
@@ -120,11 +127,11 @@ Provide:
   }
 );
 
-/**
- * Readability Checker Tool
- * Calculates readability scores and provides improvement suggestions.
- */
-export const checkReadabilityTool = ai.defineTool(
+  /**
+   * Readability Checker Tool
+   * Calculates readability scores and provides improvement suggestions.
+   */
+  const checkReadabilityTool = ai.defineTool(
   {
     name: 'checkReadability',
     description: 'Calculates readability metrics (Flesch Reading Ease, Flesch-Kincaid Grade Level) and provides suggestions to improve readability.',
@@ -164,11 +171,11 @@ Use standard readability formulas for calculation.`,
   }
 );
 
-/**
- * Word Choice Improvement Tool
- * Suggests better word choices to improve writing style.
- */
-export const improveWordChoiceTool = ai.defineTool(
+  /**
+   * Word Choice Improvement Tool
+   * Suggests better word choices to improve writing style.
+   */
+  const improveWordChoiceTool = ai.defineTool(
   {
     name: 'improveWordChoice',
     description: 'Analyzes text and suggests better word choices based on the desired style (concise, formal, vivid, simple).',
@@ -215,10 +222,18 @@ Focus on impactful changes that significantly improve the writing quality.`,
   }
 );
 
-// Export all tools
-export const grammarAndStyleTools = {
-  checkGrammar: checkGrammarTool,
-  analyzeTone: analyzeToneTool,
-  checkReadability: checkReadabilityTool,
-  improveWordChoice: improveWordChoiceTool,
-};
+  // Return all tools
+  return {
+    checkGrammar: checkGrammarTool,
+    analyzeTone: analyzeToneTool,
+    checkReadability: checkReadabilityTool,
+    improveWordChoice: improveWordChoiceTool,
+  };
+}
+
+// Export individual tools for backward compatibility
+export let checkGrammarTool: ReturnType<typeof createGrammarAndStyleTools>['checkGrammar'];
+export let analyzeToneTool: ReturnType<typeof createGrammarAndStyleTools>['analyzeTone'];
+export let checkReadabilityTool: ReturnType<typeof createGrammarAndStyleTools>['checkReadability'];
+export let improveWordChoiceTool: ReturnType<typeof createGrammarAndStyleTools>['improveWordChoice'];
+export let grammarAndStyleTools: ReturnType<typeof createGrammarAndStyleTools>;

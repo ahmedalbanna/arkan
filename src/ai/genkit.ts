@@ -1,6 +1,5 @@
 import { googleAI } from '@genkit-ai/googleai';
 import { genkit, GenkitError } from 'genkit';
-import { allTools } from './tools';
 
 // SECURITY FIX: Do not hardcode API keys. Load from environment variables as a fallback.
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
@@ -13,12 +12,53 @@ const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
  */
 export const MODEL_PROVIDER = (process.env.GENKIT_MODEL_PROVIDER || 'google') as 'google' | 'ollama';
 
+// Import tool factory functions
+import {
+  createGrammarAndStyleTools,
+  createDocumentStructureTools,
+  createCitationsAndReferencesTools,
+  createComprehensiveAnalysisTools,
+  createProjectAnalysisTools,
+  createDocumentationGenerationTools,
+  createReportingAndMetricsTools,
+  createPromptArchitectTools,
+  createGoogleSearchTools,
+} from './tools';
+
+// Create all tools first with a temporary AI instance
+const tempAi = genkit({
+  plugins: [googleAI({ apiKey: GOOGLE_API_KEY })],
+});
+
+const grammarTools = createGrammarAndStyleTools(tempAi);
+const documentTools = createDocumentStructureTools(tempAi);
+const citationTools = createCitationsAndReferencesTools(tempAi);
+const comprehensiveTools = createComprehensiveAnalysisTools(tempAi);
+const projectTools = createProjectAnalysisTools(tempAi);
+const documentationTools = createDocumentationGenerationTools(tempAi);
+const reportingTools = createReportingAndMetricsTools(tempAi);
+const promptTools = createPromptArchitectTools(tempAi);
+const searchTools = createGoogleSearchTools(tempAi);
+
+// Collect all tools
+const allToolsList = [
+  ...Object.values(grammarTools),
+  ...Object.values(documentTools),
+  ...Object.values(citationTools),
+  ...Object.values(comprehensiveTools),
+  ...Object.values(projectTools),
+  ...Object.values(documentationTools),
+  ...Object.values(reportingTools),
+  ...Object.values(promptTools),
+  ...Object.values(searchTools),
+];
+
 // Default global AI instance (used for unauthenticated or fallback cases)
 export const ai = genkit({
   plugins: [
     googleAI({ apiKey: GOOGLE_API_KEY }),
   ],
-  tools: Object.values(allTools),
+  tools: allToolsList,
 });
 
 /**
@@ -44,7 +84,7 @@ export function configureUserAi(userApiKeys?: Record<string, string>) {
 
   return genkit({
     plugins: [googleAI({ apiKey: apiKeyToUse })],
-    tools: Object.values(allTools),
+    tools: allToolsList,
   });
 }
 
@@ -107,4 +147,9 @@ export {
 } from './model-manager';
 
 // Re-export tools for convenience
-export { professionalWritingTools, projectDocumentationTools, allTools } from './tools';
+export { 
+  professionalWritingTools, 
+  projectDocumentationTools, 
+  searchAndResearchTools,
+  allTools 
+} from './tools';

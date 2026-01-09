@@ -5,7 +5,8 @@
  * Google Search, Google Images, Google Maps, Google Shopping, and Google News.
  */
 
-import { ai, getModel } from '@/ai/genkit';
+import { getModel } from '@/ai/genkit';
+import type { Genkit } from 'genkit';
 import {
   GoogleSearchToolInputSchema,
   GoogleSearchToolOutputSchema,
@@ -14,10 +15,16 @@ import {
 } from './schemas';
 
 /**
+ * Factory function to create googleSearchTools
+ * @param ai - The Genkit AI instance
+ * @returns Object containing all tools
+ */
+export function createGoogleSearchTools(ai: Genkit) {
+/**
  * Google Search Tool
  * Access real-time search results from Google including web, images, maps, shopping, and news.
  */
-export const googleSearchTool = ai.defineTool(
+  const googleSearchTool = ai.defineTool(
   {
     name: 'googleSearch',
     description: 'Access real-time search results from Google. Supports web search, image search, maps, shopping, and news. Returns structured results with titles, URLs, snippets, and metadata.',
@@ -91,6 +98,16 @@ Return the results in the exact schema format required, with proper typing for e
   }
 );
 
+  // Return the tool
+  return {
+    googleSearch: googleSearchTool,
+  };
+}
+
+// Export individual tools for backward compatibility
+export let googleSearchTool: ReturnType<typeof createGoogleSearchTools>["googleSearch"];
+export let googleSearchTools: ReturnType<typeof createGoogleSearchTools>;
+
 /**
  * Helper function to perform a web search
  */
@@ -118,7 +135,7 @@ export async function searchImages(query: string, maxResults: number = 10, langu
 }
 
 /**
- * Helper function to perform a maps search
+ * Helper function to perform a maps/local search
  */
 export async function searchMaps(query: string, maxResults: number = 10, country?: string) {
   return googleSearchTool({
@@ -157,10 +174,3 @@ export async function searchNews(query: string, maxResults: number = 10, languag
     safeSearch: true,
   });
 }
-
-/**
- * Export all Google search tools
- */
-export const googleSearchTools = {
-  googleSearch: googleSearchTool,
-};

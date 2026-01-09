@@ -5,7 +5,8 @@
  * generating status reports, and creating progress timelines.
  */
 
-import { ai, getModel } from '@/ai/genkit';
+import { getModel } from '@/ai/genkit';
+import type { Genkit } from 'genkit';
 import { z } from 'zod';
 import {
   ProjectMetricsSchema,
@@ -13,15 +14,21 @@ import {
   GitHistorySchema,
 } from '@/ai/schemas/project-documentation';
 
-// ==================== TOOL 9: Calculate Project Metrics ====================
+/**
+ * Factory function to create reporting and metrics tools
+ * @param ai - The Genkit AI instance
+ * @returns Object containing all reporting and metrics tools
+ */
+export function createReportingAndMetricsTools(ai: Genkit) {
+  // ==================== TOOL 9: Calculate Project Metrics ====================
 
-const CalculateProjectMetricsInputSchema = z.object({
-  projectPath: z.string().describe('Path to the project'),
-  includeTestCoverage: z.boolean().default(false).describe('Calculate test coverage'),
-  includeQualityMetrics: z.boolean().default(true).describe('Include code quality metrics'),
-});
+  const CalculateProjectMetricsInputSchema = z.object({
+    projectPath: z.string().describe('Path to the project'),
+    includeTestCoverage: z.boolean().default(false).describe('Calculate test coverage'),
+    includeQualityMetrics: z.boolean().default(true).describe('Include code quality metrics'),
+  });
 
-export const calculateProjectMetricsTool = ai.defineTool(
+  const calculateProjectMetricsTool = ai.defineTool(
   {
     name: 'calculateProjectMetrics',
     description: `Calculates comprehensive project metrics including LOC, files, coverage, and quality.
@@ -93,7 +100,7 @@ const GenerateStatusReportInputSchema = z.object({
   includeRecommendations: z.boolean().default(true).describe('Include improvement recommendations'),
 });
 
-export const generateStatusReportTool = ai.defineTool(
+  const generateStatusReportTool = ai.defineTool(
   {
     name: 'generateStatusReport',
     description: `Generates a comprehensive project status report for a given time period.
@@ -199,7 +206,7 @@ const ProgressTimelineSchema = z.object({
   summary: z.string(),
 });
 
-export const createProgressTimelineTool = ai.defineTool(
+  const createProgressTimelineTool = ai.defineTool(
   {
     name: 'createProgressTimeline',
     description: `Creates a visual timeline of project development progress.
@@ -288,7 +295,7 @@ const ArchitectureDiagramSchema = z.object({
   designPatterns: z.array(z.string()).optional(),
 });
 
-export const generateArchitectureDiagramTool = ai.defineTool(
+  const generateArchitectureDiagramTool = ai.defineTool(
   {
     name: 'generateArchitectureDiagram',
     description: `Generates architecture diagrams in Mermaid format from project structure.
@@ -368,7 +375,7 @@ const AnalyzeGitHistoryInputSchema = z.object({
   analyzeContributors: z.boolean().default(true).describe('Analyze contributor statistics'),
 });
 
-export const analyzeGitHistoryTool = ai.defineTool(
+  const analyzeGitHistoryTool = ai.defineTool(
   {
     name: 'analyzeGitHistory',
     description: `Analyzes git repository history and contributor statistics.
@@ -428,11 +435,20 @@ Return a JSON object matching the GitHistory schema with:
 );
 
 
-// Export all reporting and metrics tools
-export const reportingAndMetricsTools = {
-  calculateProjectMetrics: calculateProjectMetricsTool,
-  generateStatusReport: generateStatusReportTool,
-  createProgressTimeline: createProgressTimelineTool,
-  generateArchitectureDiagram: generateArchitectureDiagramTool,
-  analyzeGitHistory: analyzeGitHistoryTool,
-};
+  // Return all tools
+  return {
+    calculateProjectMetrics: calculateProjectMetricsTool,
+    generateStatusReport: generateStatusReportTool,
+    createProgressTimeline: createProgressTimelineTool,
+    generateArchitectureDiagram: generateArchitectureDiagramTool,
+    analyzeGitHistory: analyzeGitHistoryTool,
+  };
+}
+
+// Export individual tools for backward compatibility
+export let calculateProjectMetricsTool: ReturnType<typeof createReportingAndMetricsTools>['calculateProjectMetrics'];
+export let generateStatusReportTool: ReturnType<typeof createReportingAndMetricsTools>['generateStatusReport'];
+export let createProgressTimelineTool: ReturnType<typeof createReportingAndMetricsTools>['createProgressTimeline'];
+export let generateArchitectureDiagramTool: ReturnType<typeof createReportingAndMetricsTools>['generateArchitectureDiagram'];
+export let analyzeGitHistoryTool: ReturnType<typeof createReportingAndMetricsTools>['analyzeGitHistory'];
+export let reportingAndMetricsTools: ReturnType<typeof createReportingAndMetricsTools>;

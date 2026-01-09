@@ -5,7 +5,8 @@
  * API references, user guides, code examples, and table of contents.
  */
 
-import { ai, getModel } from '@/ai/genkit';
+import { getModel } from '@/ai/genkit';
+import type { Genkit } from 'genkit';
 import { z } from 'genkit';
 import {
   ApiDocumentationSchema,
@@ -21,7 +22,13 @@ const GenerateAPIReferenceInputSchema = z.object({
   language: z.string().default('typescript').describe('Programming language'),
 });
 
-export const generateAPIReferenceTool = ai.defineTool(
+/**
+ * Factory function to create documentation generation tools
+ * @param ai - The Genkit AI instance
+ * @returns Object containing all documentation generation tools
+ */
+export function createDocumentationGenerationTools(ai: Genkit) {
+  const generateAPIReferenceTool = ai.defineTool(
   {
     name: 'generateAPIReference',
     description: `Generates comprehensive API reference documentation from source code.
@@ -108,7 +115,7 @@ const UserGuideOutputSchema = z.object({
   fullContent: z.string(),
 });
 
-export const createUserGuideTool = ai.defineTool(
+  const createUserGuideTool = ai.defineTool(
   {
     name: 'createUserGuide',
     description: `Creates user-friendly guide documentation for end-users or developers.
@@ -181,7 +188,7 @@ const FormattedCodeSchema = z.object({
   bestPractices: z.array(z.string()).optional(),
 });
 
-export const formatCodeExamplesTool = ai.defineTool(
+  const formatCodeExamplesTool = ai.defineTool(
   {
     name: 'formatCodeExamples',
     description: `Formats and enhances code examples with comments and explanations.
@@ -250,7 +257,7 @@ const TableOfContentsSchema = z.object({
   })),
 });
 
-export const generateTableOfContentsTool = ai.defineTool(
+  const generateTableOfContentsTool = ai.defineTool(
   {
     name: 'generateTableOfContents',
     description: `Generates a table of contents from markdown content.
@@ -297,10 +304,18 @@ Return a JSON object with:
   }
 );
 
-// Export all documentation generation tools
-export const documentationGenerationTools = {
-  generateAPIReference: generateAPIReferenceTool,
-  createUserGuide: createUserGuideTool,
-  formatCodeExamples: formatCodeExamplesTool,
-  generateTableOfContents: generateTableOfContentsTool,
-};
+  // Return all tools
+  return {
+    generateAPIReference: generateAPIReferenceTool,
+    createUserGuide: createUserGuideTool,
+    formatCodeExamples: formatCodeExamplesTool,
+    generateTableOfContents: generateTableOfContentsTool,
+  };
+}
+
+// Export individual tools for backward compatibility
+export let generateAPIReferenceTool: ReturnType<typeof createDocumentationGenerationTools>['generateAPIReference'];
+export let createUserGuideTool: ReturnType<typeof createDocumentationGenerationTools>['createUserGuide'];
+export let formatCodeExamplesTool: ReturnType<typeof createDocumentationGenerationTools>['formatCodeExamples'];
+export let generateTableOfContentsTool: ReturnType<typeof createDocumentationGenerationTools>['generateTableOfContents'];
+export let documentationGenerationTools: ReturnType<typeof createDocumentationGenerationTools>;

@@ -5,7 +5,7 @@
  * for LLMs based on detailed project parameters and technical constraints.
  */
 
-import { ai } from '@/ai/genkit';
+import type { Genkit } from 'genkit';
 import {
   GeneratedPromptSchema,
   ProjectDataSchema,
@@ -185,7 +185,13 @@ Perform a post-generation self-audit:
 
 // ==================== GENKIT TOOL DEFINITION ====================
 
-export const advancedPromptArchitectTool = ai.defineTool(
+/**
+ * Factory function to create prompt architect tools
+ * @param ai - The Genkit AI instance
+ * @returns Object containing all prompt architect tools
+ */
+export function createPromptArchitectTools(ai: Genkit) {
+  const advancedPromptArchitectTool = ai.defineTool(
   {
     name: 'advancedPromptArchitect',
     description: `Advanced AI Prompt Architect - Generates sophisticated system instructions and user prompts for LLMs.
@@ -221,8 +227,13 @@ export const advancedPromptArchitectTool = ai.defineTool(
   }
 );
 
+  // Return all tools
+  return {
+    advancedPromptArchitect: advancedPromptArchitectTool,
+  };
+}
+
 // Export for use in flows
 export { generatePrompt };
-export const promptArchitectTools = {
-  advancedPromptArchitect: advancedPromptArchitectTool,
-};
+export let advancedPromptArchitectTool: ReturnType<typeof createPromptArchitectTools>['advancedPromptArchitect'];
+export let promptArchitectTools: ReturnType<typeof createPromptArchitectTools>;

@@ -15,56 +15,74 @@
  * 8. Prompt Architect: Advanced prompt generation for LLMs
  */
 
+import type { Genkit } from 'genkit';
+
 // Export all tool schemas
 export * from './schemas';
 
-// Export grammar and style tools
+// Import factory functions
+import { createGrammarAndStyleTools } from './grammar-and-style';
+import { createDocumentStructureTools } from './document-structure';
+import { createCitationsAndReferencesTools } from './citations-and-references';
+import { createComprehensiveAnalysisTools } from './comprehensive-analysis';
+import { createProjectAnalysisTools } from './project-analysis';
+import { createDocumentationGenerationTools } from './documentation-generation';
+import { createReportingAndMetricsTools } from './reporting-and-metrics';
+import { createPromptArchitectTools } from './prompt-architect';
+import { createGoogleSearchTools } from './google-search';
+
+// Re-export individual tools and tool groups
+export {
+  createGrammarAndStyleTools,
+  createDocumentStructureTools,
+  createCitationsAndReferencesTools,
+  createComprehensiveAnalysisTools,
+  createProjectAnalysisTools,
+  createDocumentationGenerationTools,
+  createReportingAndMetricsTools,
+  createPromptArchitectTools,
+  createGoogleSearchTools,
+};
+
+// Export tools from individual modules (will be initialized)
 export {
   analyzeToneTool, checkGrammarTool, checkReadabilityTool, grammarAndStyleTools, improveWordChoiceTool
 } from './grammar-and-style';
 
-// Export document structure tools
 export {
   analyzeArgumentStructureTool, analyzeDocumentStructureTool,
   checkLogicalFlowTool, documentStructureTools
 } from './document-structure';
 
-// Export citation and reference tools
 export {
   checkReferencesTool, citationsAndReferencesTools, matchCitationsToReferencesTool, validateCitationsTool
 } from './citations-and-references';
 
-// Export comprehensive analysis tool
 export {
   analyzeDocumentQualityTool,
   comprehensiveAnalysisTools
 } from './comprehensive-analysis';
 
-// Export project analysis tools
 export {
   analyzeCodeComplexityTool, analyzeProjectStructureTool,
   extractDependenciesTool, projectAnalysisTools
 } from './project-analysis';
 
-// Export documentation generation tools
 export {
   createUserGuideTool, documentationGenerationTools, formatCodeExamplesTool, generateAPIReferenceTool, generateTableOfContentsTool
 } from './documentation-generation';
 
-// Export reporting and metrics tools
 export {
   analyzeGitHistoryTool, calculateProjectMetricsTool, createProgressTimelineTool,
   generateArchitectureDiagramTool, generateStatusReportTool, reportingAndMetricsTools
 } from './reporting-and-metrics';
 
-// Export prompt architect tools
 export {
   advancedPromptArchitectTool,
   generatePrompt,
   promptArchitectTools
 } from './prompt-architect';
 
-// Export Google search tools
 export {
   googleSearchTool,
   googleSearchTools,
@@ -75,67 +93,89 @@ export {
   searchNews
 } from './google-search';
 
-// Aggregate all tools for easy registration
-import { citationsAndReferencesTools } from './citations-and-references';
-import { comprehensiveAnalysisTools } from './comprehensive-analysis';
-import { documentStructureTools } from './document-structure';
-import { documentationGenerationTools } from './documentation-generation';
-import { grammarAndStyleTools } from './grammar-and-style';
-import { projectAnalysisTools } from './project-analysis';
-import { promptArchitectTools } from './prompt-architect';
-import { reportingAndMetricsTools } from './reporting-and-metrics';
-import { googleSearchTools } from './google-search';
+// Import tool groups for aggregation
+import * as grammarTools from './grammar-and-style';
+import * as documentTools from './document-structure';
+import * as citationTools from './citations-and-references';
+import * as comprehensiveTools from './comprehensive-analysis';
+import * as projectTools from './project-analysis';
+import * as documentationTools from './documentation-generation';
+import * as reportingTools from './reporting-and-metrics';
+import * as promptTools from './prompt-architect';
+import * as searchTools from './google-search';
+
+/**
+ * Initialize all tools with the given AI instance
+ * This function must be called after creating the Genkit instance
+ */
+export function initializeAllTools(ai: Genkit) {
+  // Create all tools using factory functions
+  const grammar = createGrammarAndStyleTools(ai);
+  const document = createDocumentStructureTools(ai);
+  const citation = createCitationsAndReferencesTools(ai);
+  const comprehensive = createComprehensiveAnalysisTools(ai);
+  const project = createProjectAnalysisTools(ai);
+  const documentation = createDocumentationGenerationTools(ai);
+  const reporting = createReportingAndMetricsTools(ai);
+  const prompt = createPromptArchitectTools(ai);
+  const search = createGoogleSearchTools(ai);
+
+  // Assign to exported variables
+  Object.assign(grammarTools, grammar);
+  Object.assign(documentTools, document);
+  Object.assign(citationTools, citation);
+  Object.assign(comprehensiveTools, comprehensive);
+  Object.assign(projectTools, project);
+  Object.assign(documentationTools, documentation);
+  Object.assign(reportingTools, reporting);
+  Object.assign(promptTools, prompt);
+  Object.assign(searchTools, search);
+
+  // Update aggregated tool objects
+  Object.assign(professionalWritingTools, {
+    ...grammar,
+    ...document,
+    ...citation,
+    ...comprehensive,
+  });
+
+  Object.assign(projectDocumentationTools, {
+    ...project,
+    ...documentation,
+    ...reporting,
+    ...prompt,
+  });
+
+  Object.assign(searchAndResearchTools, {
+    ...search,
+  });
+
+  Object.assign(allTools, {
+    ...professionalWritingTools,
+    ...projectDocumentationTools,
+    ...searchAndResearchTools,
+  });
+}
 
 /**
  * All professional writing tools organized by category
  */
-export const professionalWritingTools = {
-  // Grammar & Style (4 tools)
-  ...grammarAndStyleTools,
-
-  // Document Structure (3 tools)
-  ...documentStructureTools,
-
-  // Citations & References (3 tools)
-  ...citationsAndReferencesTools,
-
-  // Comprehensive Analysis (1 tool)
-  ...comprehensiveAnalysisTools,
-};
+export const professionalWritingTools: Record<string, any> = {};
 
 /**
  * All project documentation tools
  */
-export const projectDocumentationTools = {
-  // Project Analysis (4 tools)
-  ...projectAnalysisTools,
-
-  // Documentation Generation (4 tools)
-  ...documentationGenerationTools,
-
-  // Reporting & Metrics (4 tools)
-  ...reportingAndMetricsTools,
-
-  // Prompt Architect (1 tool)
-  ...promptArchitectTools,
-};
+export const projectDocumentationTools: Record<string, any> = {};
 
 /**
  * Search and research tools
  */
-export const searchAndResearchTools = {
-  // Google Search (1 tool)
-  ...googleSearchTools,
-};
+export const searchAndResearchTools: Record<string, any> = {};
 
 /**
  * All tools combined
  */
-export const allTools = {
-  ...professionalWritingTools,
-  ...projectDocumentationTools,
-  ...searchAndResearchTools,
-};
+export const allTools: Record<string, any> = {};
 
 /**
  * Get a list of all available tool names

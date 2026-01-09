@@ -7,7 +7,8 @@
  * citation formatting according to various academic styles.
  */
 
-import { ai, getModel } from '@/ai/genkit';
+import { getModel } from '@/ai/genkit';
+import type { Genkit } from 'genkit';
 import {
   CheckReferencesToolInputSchema,
   CheckReferencesToolOutputSchema,
@@ -25,10 +26,16 @@ import {
 import { z } from 'zod';
 
 /**
+ * Factory function to create citationsAndReferencesTools
+ * @param ai - The Genkit AI instance
+ * @returns Object containing all tools
+ */
+export function createCitationsAndReferencesTools(ai: Genkit) {
+/**
  * Citation Validator Tool
  * Validates in-text citations according to specified citation style.
  */
-export const validateCitationsTool = ai.defineTool(
+  const validateCitationsTool = ai.defineTool(
   {
     name: 'validateCitations',
     description: 'Validates in-text citations according to the specified citation style (APA, MLA, Chicago, Harvard, IEEE). Identifies formatting errors and provides corrections.',
@@ -105,7 +112,7 @@ Be thorough and identify all citations, including those that may be incomplete o
  * Reference List Checker Tool
  * Validates reference list formatting according to specified citation style.
  */
-export const checkReferencesTool = ai.defineTool(
+  const checkReferencesTool = ai.defineTool(
   {
     name: 'checkReferences',
     description: 'Validates reference list or bibliography formatting according to the specified citation style. Checks for completeness, consistency, and proper formatting.',
@@ -191,7 +198,7 @@ Provide:
  * Citation-Reference Matcher Tool
  * Matches in-text citations with reference list entries and identifies mismatches.
  */
-export const matchCitationsToReferencesTool = ai.defineTool(
+  const matchCitationsToReferencesTool = ai.defineTool(
   {
     name: 'matchCitationsToReferences',
     description: 'Matches in-text citations with reference list entries. Identifies citations without corresponding references and references that are not cited.',
@@ -242,9 +249,16 @@ Be thorough in identifying author names, years, and reference numbers across dif
   }
 );
 
-// Export all tools
-export const citationsAndReferencesTools = {
+  // Return all tools
+  return {
   validateCitations: validateCitationsTool,
   checkReferences: checkReferencesTool,
   matchCitationsToReferences: matchCitationsToReferencesTool,
 };
+}
+
+// Export individual tools for backward compatibility
+export let validateCitationsTool: ReturnType<typeof createCitationsAndReferencesTools>["validateCitations"];
+export let checkReferencesTool: ReturnType<typeof createCitationsAndReferencesTools>["checkReferences"];
+export let matchCitationsToReferencesTool: ReturnType<typeof createCitationsAndReferencesTools>["matchCitationsToReferences"];
+export let citationsAndReferencesTools: ReturnType<typeof createCitationsAndReferencesTools>;

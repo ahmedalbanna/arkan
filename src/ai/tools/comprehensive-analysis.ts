@@ -7,7 +7,8 @@
  * of a document, including grammar, structure, citations, and readability.
  */
 
-import { ai, getModel } from '@/ai/genkit';
+import { getModel } from '@/ai/genkit';
+import type { Genkit } from 'genkit';
 import {
   AnalyzeDocumentQualityToolInputSchema,
   AnalyzeDocumentQualityToolOutputSchema,
@@ -17,10 +18,16 @@ import {
 import { z } from 'zod';
 
 /**
- * Comprehensive Document Quality Analyzer Tool
- * Provides a complete quality assessment combining grammar, structure, citations, and readability analysis.
+ * Factory function to create comprehensive analysis tools
+ * @param ai - The Genkit AI instance
+ * @returns Object containing all comprehensive analysis tools
  */
-export const analyzeDocumentQualityTool = ai.defineTool(
+export function createComprehensiveAnalysisTools(ai: Genkit) {
+  /**
+   * Comprehensive Document Quality Analyzer Tool
+   * Provides a complete quality assessment combining grammar, structure, citations, and readability analysis.
+   */
+  const analyzeDocumentQualityTool = ai.defineTool(
   {
     name: 'analyzeDocumentQuality',
     description: 'Provides comprehensive document quality analysis including grammar, structure, readability, and optionally citations. Returns an overall quality score with detailed breakdowns.',
@@ -103,7 +110,12 @@ Provide actionable, specific feedback that will help the writer improve the docu
   }
 );
 
-// Export the tool
-export const comprehensiveAnalysisTools = {
-  analyzeDocumentQuality: analyzeDocumentQualityTool,
-};
+  // Return all tools
+  return {
+    analyzeDocumentQuality: analyzeDocumentQualityTool,
+  };
+}
+
+// Export individual tools for backward compatibility
+export let analyzeDocumentQualityTool: ReturnType<typeof createComprehensiveAnalysisTools>['analyzeDocumentQuality'];
+export let comprehensiveAnalysisTools: ReturnType<typeof createComprehensiveAnalysisTools>;

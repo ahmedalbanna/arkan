@@ -7,7 +7,8 @@
  * and argument quality to help writers create well-organized content.
  */
 
-import { ai, getModel } from '@/ai/genkit';
+import { getModel } from '@/ai/genkit';
+import type { Genkit } from 'genkit';
 import {
   AnalyzeArgumentStructureToolInputSchema,
   AnalyzeArgumentStructureToolOutputSchema,
@@ -25,10 +26,16 @@ import {
 import { z } from 'zod';
 
 /**
- * Document Structure Analyzer Tool
- * Analyzes the overall structure, coherence, and organization of a document.
+ * Factory function to create document structure tools
+ * @param ai - The Genkit AI instance
+ * @returns Object containing all document structure tools
  */
-export const analyzeDocumentStructureTool = ai.defineTool(
+export function createDocumentStructureTools(ai: Genkit) {
+  /**
+   * Document Structure Analyzer Tool
+   * Analyzes the overall structure, coherence, and organization of a document.
+   */
+  const analyzeDocumentStructureTool = ai.defineTool(
   {
     name: 'analyzeDocumentStructure',
     description: 'Analyzes document structure including headings, paragraphs, sections, coherence, and transitions. Provides recommendations for improvement.',
@@ -88,11 +95,11 @@ Provide a comprehensive analysis including:
   }
 );
 
-/**
- * Logical Flow Checker Tool
- * Checks the logical flow and connections between ideas.
- */
-export const checkLogicalFlowTool = ai.defineTool(
+  /**
+   * Logical Flow Checker Tool
+   * Checks the logical flow and connections between ideas.
+   */
+  const checkLogicalFlowTool = ai.defineTool(
   {
     name: 'checkLogicalFlow',
     description: 'Analyzes the logical flow of ideas, identifies weak connections, missing transitions, topic shifts, and repetition.',
@@ -136,11 +143,11 @@ For each issue, provide:
   }
 );
 
-/**
- * Argument Structure Analyzer Tool
- * Analyzes the structure and strength of arguments in persuasive/academic writing.
- */
-export const analyzeArgumentStructureTool = ai.defineTool(
+  /**
+   * Argument Structure Analyzer Tool
+   * Analyzes the structure and strength of arguments in persuasive/academic writing.
+   */
+  const analyzeArgumentStructureTool = ai.defineTool(
   {
     name: 'analyzeArgumentStructure',
     description: 'Analyzes argument structure in persuasive or academic writing. Identifies thesis, claims, evidence, counterarguments, and evaluates argument strength.',
@@ -193,9 +200,16 @@ Provide a comprehensive analysis including:
   }
 );
 
-// Export all tools
-export const documentStructureTools = {
-  analyzeDocumentStructure: analyzeDocumentStructureTool,
-  checkLogicalFlow: checkLogicalFlowTool,
-  analyzeArgumentStructure: analyzeArgumentStructureTool,
-};
+  // Return all tools
+  return {
+    analyzeDocumentStructure: analyzeDocumentStructureTool,
+    checkLogicalFlow: checkLogicalFlowTool,
+    analyzeArgumentStructure: analyzeArgumentStructureTool,
+  };
+}
+
+// Export individual tools for backward compatibility
+export let analyzeDocumentStructureTool: ReturnType<typeof createDocumentStructureTools>['analyzeDocumentStructure'];
+export let checkLogicalFlowTool: ReturnType<typeof createDocumentStructureTools>['checkLogicalFlow'];
+export let analyzeArgumentStructureTool: ReturnType<typeof createDocumentStructureTools>['analyzeArgumentStructure'];
+export let documentStructureTools: ReturnType<typeof createDocumentStructureTools>;
