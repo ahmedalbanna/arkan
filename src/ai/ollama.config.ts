@@ -20,7 +20,7 @@ import { allTools } from './tools';
  */
 export const OLLAMA_CONFIG = {
   // Default Ollama server address
-  serverAddress: process.env.OLLAMA_SERVER_URL || 'https://11434-01kegbftgsxwkfgqv12wpvwprn.cloudspaces.litng.ai/',
+  serverAddress: process.env.OLLAMA_SERVER_URL || 'http://185.190.140.93:11434/',
   
   // Recommended models for 8GB RAM
   models: {
