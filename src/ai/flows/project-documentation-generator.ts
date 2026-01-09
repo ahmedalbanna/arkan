@@ -22,6 +22,12 @@ import {
 import {
   generateArchitectureDiagramTool,
 } from '@/ai/tools/reporting-and-metrics';
+import {
+  generateArchitectureDiagramTool,
+} from '@/ai/tools/reporting-and-metrics';
+import {
+  generateArchitectureDiagramTool,
+} from '@/ai/tools/reporting-and-metrics';
 
 // ==================== INPUT/OUTPUT SCHEMAS ====================
 

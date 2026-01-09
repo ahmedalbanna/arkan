@@ -49,14 +49,14 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  turbopack: {
+    // Explicitly set the project root to resolve ambiguity and fix routing.
+    root: '.',
+  },
   experimental: {
     serverActions: { bodySizeLimit: '10mb' as SizeLimit },
     useCache: true,
-  },
-  turbopack: {
-    // Add any TurboPack specific configurations here if needed
-    // Explicitly set the project root to resolve ambiguity and fix routing.
-    // root: '.',
+    allowDevelopmentBuild: false,
   }
 };
 
