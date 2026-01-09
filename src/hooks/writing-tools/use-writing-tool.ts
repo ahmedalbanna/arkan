@@ -20,11 +20,12 @@ export function useWritingTool<TData = unknown, TVariables = Omit<AIFlowInput, '
   tool: ToolName,
   options?: Omit<UseMutationOptions<TData, Error, TVariables>, 'mutationFn'>
 ) {
-  const { firebaseUser, refetchUser } = useAuth();
+  const { refetchUser } = useAuth();
 
   return useMutation<TData, Error, TVariables>({
+    // Correctly pass the server action as the mutation function.
+    // TanStack Query/React will handle invoking it.
     mutationFn: async (data: TVariables) => {
-      // Server action handles authentication internally
       return runWritingToolAction(tool, data as any);
     },
     onSuccess: (data, variables, context) => {

@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import {
@@ -76,6 +75,7 @@ const toolConfig = {
 export type ToolName = keyof typeof toolConfig;
 
 export async function runWritingToolAction(tool: ToolName, data: unknown) {
+  // Reinstate the call to requireUser to ensure security.
   const user = await requireUser();
   const config = toolConfig[tool];
   if (!config) {
@@ -96,6 +96,7 @@ export async function runWritingToolAction(tool: ToolName, data: unknown) {
   // For universal flows, we pass the tool name as the first argument.
   const isUniversalTool = config.flow === runUniveralWritingTool;
   
+  // No longer passing token, as Next.js handles the session context.
   const result = isUniversalTool
     ? await runUniveralWritingTool(tool as any, input)
     : await (config.flow as any)(input);
