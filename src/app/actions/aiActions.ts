@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import {
@@ -13,6 +14,7 @@ import {
   summarizeText,
   translateText,
 } from '@/ai/flows';
+import { ollamaTestFlow } from '@/ai/flows/ollama-example';
 
 // Import schemas for tools from their correct location
 import {
@@ -29,7 +31,7 @@ import {
   ValidateCitationsToolInputSchema,
   AcademicPaperQualityCheckerInputSchema,
   ProfessionalDocumentWriterInputSchema,
-  AcademicLiteratureReviewInputSchema
+  AcademicLiteratureReviewInputSchema,
 } from '@/ai/tools/schemas';
 
 import { logGeneration } from './analyticsActions';
@@ -38,6 +40,10 @@ import { requireUser } from './_utils/auth';
 import { z } from 'zod';
 // Corrected import: Changed to executeFlow and kept the alias
 import { executeFlow as runUniveralWritingTool } from '@/ai/flows';
+
+const OllamaTestInputSchema = z.object({
+  prompt: z.string().min(1),
+});
 
 const toolConfig = {
   // Professional Writing Tools
@@ -63,6 +69,7 @@ const toolConfig = {
   paraphrase: { flow: paraphraseText, schema: z.any(), creditCost: 1 },
   translate: { flow: translateText, schema: z.any(), creditCost: 1 },
   'ai-researcher': { flow: aiResearcher, schema: z.any(), creditCost: 2 },
+  'ollama-test': { flow: ollamaTestFlow, schema: OllamaTestInputSchema, creditCost: 0 },
   
 } as const;
 
