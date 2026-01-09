@@ -19,7 +19,7 @@ const summarizePrompt = ai.definePrompt({
     name: 'summarizeTextPrompt',
     input: { schema: z.object({ text: z.string(), instruction: z.string() }) },
     output: { schema: SummarizeOutputSchema },
-
+    model: 'ollama/gemma:2b',
     prompt: `You are an expert summarizer. Your task is to read the provided text and generate a summary of the specified length.
 
 **Desired Length**: The summary should be {{{instruction}}}
@@ -57,4 +57,3 @@ export async function summarizeText(input: SummarizeInput): Promise<SummarizeOut
     }
     return summarizeTextFlow(validation.data);
 }
-

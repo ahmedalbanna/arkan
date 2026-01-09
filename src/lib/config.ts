@@ -26,7 +26,7 @@ const envSchema = z.object({
   GOOGLE_GENAI_API_KEY: z.string().optional(), // Optional if using Firebase
   
   // Ollama Configuration
-  OLLAMA_SERVER_ADDRESS: z.string().url().optional().default('http://localhost:11434'),
+  OLLAMA_SERVER_ADDRESS: z.string().url().optional().default('http://185.190.140.93:11434'),
   
   // Node Environment
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
