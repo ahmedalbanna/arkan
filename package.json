@@ -87,6 +87,7 @@
     "firebase-admin": "13.4.0",
     "firebase-tools": "^15.1.0",
     "genkit": "^1.19.2",
+    "genkitx-ollama": "^1.27.0",
     "handlebars-loader": "^1.7.3",
     "html-to-docx": "^1.8.0",
     "html2canvas": "^1.4.1",
