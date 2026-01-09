@@ -6,6 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { z } from 'zod';
 
 // ==================== ABSTRACT PROMPT ====================
 
@@ -13,14 +14,14 @@ export const abstractPrompt = ai.definePrompt({
   name: 'abstractPrompt',
   description: 'Generate a professional academic abstract for a graduation project',
   input: {
-    schema: ai.z.object({
-      title: ai.z.string(),
-      projectType: ai.z.string(),
-      problemStatement: ai.z.string(),
-      objectives: ai.z.array(ai.z.string()),
-      methodology: ai.z.string(),
-      keyResults: ai.z.array(ai.z.string()).optional(),
-      keywords: ai.z.array(ai.z.string()),
+    schema: z.object({
+      title: z.string(),
+      projectType: z.string(),
+      problemStatement: z.string(),
+      objectives: z.array(z.string()),
+      methodology: z.string(),
+      keyResults: z.array(z.string()).optional(),
+      keywords: z.array(z.string()),
     }),
   },
 }, `You are an expert academic writer specializing in computer science and software engineering graduation projects.
@@ -72,14 +73,14 @@ export const introductionPrompt = ai.definePrompt({
   name: 'introductionPrompt',
   description: 'Generate comprehensive introduction chapter',
   input: {
-    schema: ai.z.object({
-      title: ai.z.string(),
-      projectType: ai.z.string(),
-      problemStatement: ai.z.string(),
-      motivation: ai.z.string().optional(),
-      objectives: ai.z.array(ai.z.string()),
-      scope: ai.z.string().optional(),
-      significance: ai.z.string().optional(),
+    schema: z.object({
+      title: z.string(),
+      projectType: z.string(),
+      problemStatement: z.string(),
+      motivation: z.string().optional(),
+      objectives: z.array(z.string()),
+      scope: z.string().optional(),
+      significance: z.string().optional(),
     }),
   },
 }, `You are an expert academic writer for computer science graduation projects.
@@ -152,12 +153,12 @@ export const literatureReviewPrompt = ai.definePrompt({
   name: 'literatureReviewPrompt',
   description: 'Generate comprehensive literature review chapter',
   input: {
-    schema: ai.z.object({
-      projectTitle: ai.z.string(),
-      projectType: ai.z.string(),
-      relatedWorkSummary: ai.z.string().optional(),
-      keywords: ai.z.array(ai.z.string()),
-      citationStyle: ai.z.string().default('IEEE'),
+    schema: z.object({
+      projectTitle: z.string(),
+      projectType: z.string(),
+      relatedWorkSummary: z.string().optional(),
+      keywords: z.array(z.string()),
+      citationStyle: z.string().default('IEEE'),
     }),
   },
 }, `You are an expert academic researcher specializing in computer science literature reviews.
@@ -233,13 +234,13 @@ export const methodologyPrompt = ai.definePrompt({
   name: 'methodologyPrompt',
   description: 'Generate methodology chapter',
   input: {
-    schema: ai.z.object({
-      projectTitle: ai.z.string(),
-      methodology: ai.z.string(),
-      programmingLanguages: ai.z.array(ai.z.string()),
-      frameworks: ai.z.array(ai.z.string()),
-      databases: ai.z.array(ai.z.string()).optional(),
-      tools: ai.z.array(ai.z.string()),
+    schema: z.object({
+      projectTitle: z.string(),
+      methodology: z.string(),
+      programmingLanguages: z.array(z.string()),
+      frameworks: z.array(z.string()),
+      databases: z.array(z.string()).optional(),
+      tools: z.array(z.string()),
     }),
   },
 }, `You are an expert in software development methodologies and research methods.
@@ -342,11 +343,11 @@ export const systemAnalysisPrompt = ai.definePrompt({
   name: 'systemAnalysisPrompt',
   description: 'Generate system analysis and requirements chapter',
   input: {
-    schema: ai.z.object({
-      projectTitle: ai.z.string(),
-      problemStatement: ai.z.string(),
-      functionalRequirements: ai.z.array(ai.z.string()),
-      nonFunctionalRequirements: ai.z.array(ai.z.string()).optional(),
+    schema: z.object({
+      projectTitle: z.string(),
+      problemStatement: z.string(),
+      functionalRequirements: z.array(z.string()),
+      nonFunctionalRequirements: z.array(z.string()).optional(),
     }),
   },
 }, `You are an expert systems analyst specializing in software requirements engineering.
@@ -471,12 +472,12 @@ export const systemDesignPrompt = ai.definePrompt({
   name: 'systemDesignPrompt',
   description: 'Generate system design and architecture chapter',
   input: {
-    schema: ai.z.object({
-      projectTitle: ai.z.string(),
-      projectType: ai.z.string(),
-      architectureType: ai.z.string().optional(),
-      databases: ai.z.array(ai.z.string()).optional(),
-      frameworks: ai.z.array(ai.z.string()),
+    schema: z.object({
+      projectTitle: z.string(),
+      projectType: z.string(),
+      architectureType: z.string().optional(),
+      databases: z.array(z.string()).optional(),
+      frameworks: z.array(z.string()),
     }),
   },
 }, `You are an expert software architect specializing in system design.
@@ -655,12 +656,12 @@ export const implementationPrompt = ai.definePrompt({
   name: 'implementationPrompt',
   description: 'Generate implementation chapter',
   input: {
-    schema: ai.z.object({
-      projectTitle: ai.z.string(),
-      programmingLanguages: ai.z.array(ai.z.string()),
-      frameworks: ai.z.array(ai.z.string()),
-      keyFeatures: ai.z.array(ai.z.string()),
-      implementationSummary: ai.z.string().optional(),
+    schema: z.object({
+      projectTitle: z.string(),
+      programmingLanguages: z.array(z.string()),
+      frameworks: z.array(z.string()),
+      keyFeatures: z.array(z.string()),
+      implementationSummary: z.string().optional(),
     }),
   },
 }, `You are an expert software developer specializing in implementation documentation.
@@ -827,7 +828,8 @@ For each major challenge:
 - **Analysis:** Root cause
 - **Solution:** How it was solved
 - **Outcome:** Result of solution
-- **Lesson Learned**
+- **Lesson Learned:** Key takeaway
+- **Applicability:** How lesson applies elsewhere
 
 ### 6.13 Version Control and Collaboration (1-2 paragraphs)
 - Git workflow used
@@ -858,10 +860,10 @@ export const testingPrompt = ai.definePrompt({
   name: 'testingPrompt',
   description: 'Generate testing and quality assurance chapter',
   input: {
-    schema: ai.z.object({
-      projectTitle: ai.z.string(),
-      testingApproach: ai.z.string().optional(),
-      testResults: ai.z.string().optional(),
+    schema: z.object({
+      projectTitle: z.string(),
+      testingApproach: z.string().optional(),
+      testResults: z.string().optional(),
     }),
   },
 }, `You are an expert in software testing and quality assurance.
@@ -1048,10 +1050,10 @@ export const resultsPrompt = ai.definePrompt({
   name: 'resultsPrompt',
   description: 'Generate results and evaluation chapter',
   input: {
-    schema: ai.z.object({
-      projectTitle: ai.z.string(),
-      keyFeatures: ai.z.array(ai.z.string()),
-      testResults: ai.z.string().optional(),
+    schema: z.object({
+      projectTitle: z.string(),
+      keyFeatures: z.array(z.string()),
+      testResults: z.string().optional(),
     }),
   },
 }, `You are an expert in presenting and analyzing project results.
@@ -1241,10 +1243,10 @@ export const discussionPrompt = ai.definePrompt({
   name: 'discussionPrompt',
   description: 'Generate discussion and analysis chapter',
   input: {
-    schema: ai.z.object({
-      projectTitle: ai.z.string(),
-      objectives: ai.z.array(ai.z.string()),
-      keyFindings: ai.z.array(ai.z.string()).optional(),
+    schema: z.object({
+      projectTitle: z.string(),
+      objectives: z.array(z.string()),
+      keyFindings: z.array(z.string()).optional(),
     }),
   },
 }, `You are an expert in critical analysis and academic discussion.
@@ -1422,10 +1424,10 @@ export const conclusionPrompt = ai.definePrompt({
   name: 'conclusionPrompt',
   description: 'Generate conclusion chapter',
   input: {
-    schema: ai.z.object({
-      projectTitle: ai.z.string(),
-      objectives: ai.z.array(ai.z.string()),
-      keyAchievements: ai.z.array(ai.z.string()).optional(),
+    schema: z.object({
+      projectTitle: z.string(),
+      objectives: z.array(z.string()),
+      keyAchievements: z.array(z.string()).optional(),
     }),
   },
 }, `You are an expert in academic writing and project conclusions.
@@ -1571,10 +1573,10 @@ export const recommendationsPrompt = ai.definePrompt({
   name: 'recommendationsPrompt',
   description: 'Generate future work and recommendations chapter',
   input: {
-    schema: ai.z.object({
-      projectTitle: ai.z.string(),
-      projectType: ai.z.string(),
-      currentLimitations: ai.z.array(ai.z.string()).optional(),
+    schema: z.object({
+      projectTitle: z.string(),
+      projectType: z.string(),
+      currentLimitations: z.array(z.string()).optional(),
     }),
   },
 }, `You are an expert in identifying research directions and system enhancements.

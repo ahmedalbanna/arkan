@@ -40,6 +40,7 @@ import {
     TechnicalReportInputSchema,
     TechnicalReportOutputSchema,
 } from '@/ai/schemas';
+import { z } from 'zod';
 
 export const academicWritingPrompts = {
     // 1. Research Paper - ورقة بحثية
