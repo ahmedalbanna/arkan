@@ -12,7 +12,7 @@ const generateIdeasPrompt = ai.definePrompt({
   name: 'generateIdeasPrompt',
   input: { schema: IdeaGenerationInputSchema },
   output: { schema: IdeaGenerationOutputSchema },
-  model: 'googleai/gemini-2.5-flash-lite',
+
   prompt: `You are an expert strategist and innovator. Your task is to generate creative and actionable ideas based on the user's provided context and format them as a single Markdown string.
 
 **User's Context:**

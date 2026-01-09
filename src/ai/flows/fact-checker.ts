@@ -12,7 +12,7 @@ const factCheckPrompt = ai.definePrompt({
   name: 'factCheckPrompt',
   input: { schema: FactCheckInputSchema },
   output: { schema: FactCheckOutputSchema },
-  model: 'googleai/gemini-2.5-flash-lite',
+
   prompt: `You are an expert fact-checker and research analyst. Your task is to analyze the following text, identify all verifiable claims, and determine their factual accuracy.
 
 **Your Process:**

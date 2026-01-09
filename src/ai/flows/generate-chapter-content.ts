@@ -11,7 +11,7 @@ const chapterPrompt = ai.definePrompt({
     name: 'generateChapterContentPrompt',
     input: { schema: GenerateChapterInputSchema },
     output: { schema: GenerateChapterOutputSchema },
-    model: 'googleai/gemini-2.5-flash-lite',
+
     prompt: `You are an expert author and technical writer. Your task is to write the complete content for a chapter titled "{{chapterTitle}}".
 
 You will be given a list of sections to write for this chapter. For each section, you must follow its specific instructions, which include a base prompt, guidelines, and contextual information.
@@ -58,7 +58,7 @@ const generateChapterFlow = ai.defineFlow({
     inputSchema: GenerateChapterInputSchema,
     outputSchema: GenerateChapterOutputSchema,
 }, async (input) => {
-    
+
     const { output } = await chapterPrompt(input);
 
     if (!output) {

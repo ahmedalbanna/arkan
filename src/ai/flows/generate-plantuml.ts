@@ -118,7 +118,7 @@ const generatePlantUMLFlow = ai.defineFlow({
     prompt: config.prompt,
     input: { schema: GeneratePlantUMLInputSchema },
     output: { schema: GeneratePlantUMLOutputSchema },
-    model: 'googleai/gemini-2.5-flash-lite',
+
     config: {
       temperature: 0.2, // Lower temperature for precise code generation
     },

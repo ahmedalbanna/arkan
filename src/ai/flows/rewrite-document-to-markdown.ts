@@ -15,7 +15,7 @@ const generateMarkdownPrompt = ai.definePrompt({
   name: 'generateMarkdownFromDocumentPrompt',
   input: { schema: RewriteDocumentInputSchema },
   output: { schema: RewriteDocumentOutputSchema },
-  model: 'googleai/gemini-2.5-flash-lite',
+
   prompt: `You are an expert document editor. Your task is to take the content of the provided PDF document and rewrite it into clean, well-structured markdown.
 
 Follow these guidelines:

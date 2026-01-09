@@ -12,7 +12,7 @@ const questionAnsweringPrompt = ai.definePrompt({
   name: 'questionAnsweringPrompt',
   input: { schema: QuestionAnsweringInputSchema },
   output: { schema: QuestionAnsweringOutputSchema },
-  model: 'googleai/gemini-2.5-flash-lite',
+
   prompt: `You are an expert question-answering assistant. Your task is to provide accurate, comprehensive answers to questions, using either provided context or web search capabilities.
 
 **Answering Strategy:**

@@ -18,7 +18,7 @@ const generateSessionPlanPrompt = ai.definePrompt({
   name: 'generateSessionPlanPrompt',
   input: { schema: GenerateSessionPlanInputSchema },
   output: { schema: GenerateSessionPlanOutputSchema },
-  model: 'googleai/gemini-2.5-flash-lite',
+
   prompt: `You are an expert instructional designer specializing in **transforming theoretical lecture material into engaging, practical training sessions.** Your primary goal is to bridge the gap between knowing and doing. You will create a hands-on session plan that allows participants to apply the concepts from the provided theoretical lecture.
 
 **Your Process:**

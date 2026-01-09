@@ -21,7 +21,7 @@ const paraphrasePrompt = ai.definePrompt({
     name: 'paraphraseTextPrompt',
     input: { schema: ParaphraseInputSchema },
     output: { schema: ParaphraseOutputSchema },
-    model: 'googleai/gemini-2.5-flash-lite',
+
     prompt: `You are an expert editor. Your task is to paraphrase the given text based on the selected mode. You must perfectly preserve all markdown formatting.
 
 **Mode**: {{{mode}}}

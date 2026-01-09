@@ -17,7 +17,7 @@ export const runAgentFlow = ai.defineFlow(
   },
   async ({ systemPrompt, userPrompt }) => {
     const llmResponse = await ai.generate({
-      model: 'googleai/gemini-2.5-flash-lite',
+
       prompt: userPrompt,
       system: systemPrompt,
       config: {

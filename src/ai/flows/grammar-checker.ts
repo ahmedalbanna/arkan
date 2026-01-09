@@ -12,7 +12,7 @@ const grammarCheckPrompt = ai.definePrompt({
   name: 'grammarCheckPrompt',
   input: { schema: GrammarCheckInputSchema },
   output: { schema: GrammarCheckOutputSchema },
-  model: 'googleai/gemini-2.5-flash-lite',
+
   prompt: `You are an expert English grammar, spelling, and punctuation checker. Your task is to analyze the following text, correct any errors, and provide a clear explanation for each correction.
 
 **Instructions:**

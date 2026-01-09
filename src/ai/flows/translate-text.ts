@@ -27,7 +27,7 @@ const translateTextFlow = ai.defineFlow(
       name: 'translateTextPrompt',
       input: { schema: TranslateTextInputSchema },
       output: { schema: TranslateTextOutputSchema },
-      model: 'googleai/gemini-2.5-flash-lite',
+
       prompt: `You are an expert translator. Your task is to translate the given text into the specified target language while perfectly preserving all markdown formatting.
 
 **CRITICAL INSTRUCTIONS:**

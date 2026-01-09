@@ -12,7 +12,7 @@ const topicExplainerPrompt = ai.definePrompt({
     name: 'topicExplainerPrompt',
     input: { schema: TopicExplainerInputSchema },
     output: { schema: TopicExplainerOutputSchema },
-    model: 'googleai/gemini-2.5-flash-lite',
+
     prompt: `You are an expert educator who excels at breaking down complex topics into simple, easy-to-understand explanations. Your task is to explain the following topic for a beginner.
 
 **Guidelines:**

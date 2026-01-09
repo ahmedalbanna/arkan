@@ -12,7 +12,7 @@ const factRetrievalPrompt = ai.definePrompt({
     name: 'factRetrievalPrompt',
     input: { schema: FactRetrievalInputSchema },
     output: { schema: FactRetrievalOutputSchema },
-    model: 'googleai/gemini-2.5-flash-lite',
+
     prompt: `You are an expert fact-checker and information retrieval specialist. Your task is to retrieve accurate, verifiable facts based on the user's query.
 
 **Your Process:**

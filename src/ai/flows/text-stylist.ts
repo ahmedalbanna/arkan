@@ -50,7 +50,7 @@ export async function rewriteText(input: RewriteTextInput): Promise<RewriteTextO
   const instruction = styleInstructions[input.style] || "Rewrite the text as requested.";
 
   const llmResponse = await ai.generate({
-    model: 'googleai/gemini-2.5-flash-lite',
+
     prompt: `You are an expert editor. Your task is to rewrite the following text based on the provided style instruction, preserving the core meaning and markdown formatting.
 Return only the rewritten text.
 
@@ -79,7 +79,7 @@ ${input.text}
 // --- Summarize Text with Ratio Flow ---
 export async function summarizeTextWithRatio(input: SummarizeTextWithRatioInput): Promise<SummarizeTextWithRatioOutput> {
   const llmResponse = await ai.generate({
-    model: 'googleai/gemini-2.5-flash-lite',
+
     prompt: `You are an expert summarizer. Your task is to read the provided text and generate a summary.
 The summary should be approximately ${input.ratio}% of the original text's length. Return only the summarized text.
 
@@ -108,7 +108,7 @@ export async function styleEditor(input: StyleEditorInput): Promise<StyleEditorO
   const toneContext = input.tone ? `Desired Tone: ${input.tone}. ` : '';
 
   const llmResponse = await ai.generate({
-    model: 'googleai/gemini-2.5-flash-lite',
+
     prompt: `You are an expert style editor. Your task is to improve the style of the following text while preserving its core meaning and markdown formatting.
 ${audienceContext}${toneContext}Focus on enhancing clarity, flow, word choice, sentence structure, and overall writing quality.
 
@@ -168,7 +168,7 @@ export async function readabilityEnhancer(input: ReadabilityEnhancerInput): Prom
     : '';
 
   const llmResponse = await ai.generate({
-    model: 'googleai/gemini-2.5-flash-lite',
+
     prompt: `You are an expert in text readability. Your task is to enhance the readability of the following text while preserving its core meaning and markdown formatting.
 ${levelContext}Focus on:
 - Simplifying complex sentences
@@ -243,7 +243,7 @@ export async function concisenessChecker(input: ConcisenessCheckerInput): Promis
   const originalWordCount = input.text.split(/\s+/).filter(word => word.length > 0).length;
 
   const llmResponse = await ai.generate({
-    model: 'googleai/gemini-2.5-flash-lite',
+
     prompt: `You are an expert at making text more concise. Your task is to make the following text more concise while preserving its core meaning and markdown formatting.
 ${reductionContext}Focus on:
 - Removing redundant words and phrases
@@ -314,7 +314,7 @@ export async function clarityAdvisor(input: ClarityAdvisorInput): Promise<Clarit
     : '';
 
   const llmResponse = await ai.generate({
-    model: 'googleai/gemini-2.5-flash-lite',
+
     prompt: `You are an expert clarity advisor. Your task is to analyze and improve the clarity of the following text while preserving its core meaning and markdown formatting.
 ${focusContext}Focus on:
 - Sentence structure and clarity

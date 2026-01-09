@@ -12,7 +12,7 @@ const literatureReviewPrompt = ai.definePrompt({
   name: 'literatureReviewPrompt',
   input: { schema: LiteratureReviewInputSchema },
   output: { schema: LiteratureReviewOutputSchema },
-  model: 'googleai/gemini-2.5-flash-lite',
+
   prompt: `You are an expert academic researcher specializing in literature reviews. Your task is to create a comprehensive, well-structured literature review on the given topic.
 
 **Your Process:**

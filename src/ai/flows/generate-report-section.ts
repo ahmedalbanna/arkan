@@ -20,7 +20,7 @@ You are also an expert analyst. Before you begin writing, you must first review 
     name: 'generateReportSectionPrompt', // Static name
     input: { schema: GenerateSectionInputSchema },
     output: { schema: GenerateSectionOutputSchema },
-    model: 'googleai/gemini-2.5-flash-lite',
+
     system: systemPrompt,
     prompt: `
 CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
@@ -73,9 +73,9 @@ You have access to the following documents. Review them and use the most relevan
   });
 
   // Return a simple, hardcoded response for testing
-  const output = { 
-    sectionName: input.sectionToGenerate, 
-    content: `This is a placeholder test content for the section titled "${input.sectionToGenerate}". The AI flow is currently configured to return this static text for debugging and testing purposes.` 
+  const output = {
+    sectionName: input.sectionToGenerate,
+    content: `This is a placeholder test content for the section titled "${input.sectionToGenerate}". The AI flow is currently configured to return this static text for debugging and testing purposes.`
   };
   // const { output } = await reportSectionPrompt(input);
 

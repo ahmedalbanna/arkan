@@ -14,7 +14,7 @@ const uiDescriptionFlow = ai.defineFlow({
         name: 'generateUiDescriptionPrompt',
         input: { schema: GenerateUIDescriptionInputSchema },
         output: { schema: GenerateUIDescriptionOutputSchema },
-        model: 'googleai/gemini-2.5-flash-lite',
+
         system: `You are a senior UI/UX designer and product manager. Your task is to take a list of project features and generate a comprehensive, screen-by-screen UI/UX workflow description for either a website or mobile app. The output must be well-structured markdown.`,
         prompt: `Based on the following project features for a new ${designType}, generate a detailed UI/UX workflow.
 

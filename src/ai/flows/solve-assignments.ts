@@ -18,7 +18,7 @@ const solveAssignmentsFlow = ai.defineFlow({
         name: 'solveAssignmentsPrompt',
         input: { schema: SolveAssignmentsInputSchema },
         output: { schema: SolveAssignmentsOutputSchema },
-        model: 'googleai/gemini-2.5-flash-lite',
+
         prompt: `You are an expert academic assistant specialized in solving assignments. Your task is to:
 
 1. Carefully analyze the provided text/document

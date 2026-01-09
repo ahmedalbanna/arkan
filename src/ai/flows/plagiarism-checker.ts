@@ -12,7 +12,7 @@ const plagiarismCheckPrompt = ai.definePrompt({
   name: 'plagiarismCheckPrompt',
   input: { schema: PlagiarismCheckInputSchema },
   output: { schema: PlagiarismCheckOutputSchema },
-  model: 'googleai/gemini-2.5-flash-lite',
+
   prompt: `You are an advanced plagiarism detection engine. Your task is to analyze the following text for originality and find real web sources for any matching content.
 
 **Your Process:**

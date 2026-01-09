@@ -12,7 +12,7 @@ const sentenceStructureCheckPrompt = ai.definePrompt({
   name: 'sentenceStructureCheckPrompt',
   input: { schema: SentenceStructureCheckInputSchema },
   output: { schema: SentenceStructureCheckOutputSchema },
-  model: 'googleai/gemini-2.5-flash-lite',
+
   prompt: `You are an expert writing analyst. Your task is to analyze the provided text for its sentence structure.
 
 **Analysis Process:**

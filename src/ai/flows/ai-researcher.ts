@@ -12,7 +12,7 @@ const researcherPrompt = ai.definePrompt({
   name: 'aiResearcherPrompt',
   input: { schema: AIResearcherInputSchema },
   output: { schema: AIResearcherOutputSchema },
-  model: 'googleai/gemini-2.5-flash-lite',
+
   prompt: `You are an expert research assistant with access to comprehensive knowledge. Your task is to conduct thorough, well-structured research on the given topic and provide a detailed report.
 
 **Research Depth Guidelines:**

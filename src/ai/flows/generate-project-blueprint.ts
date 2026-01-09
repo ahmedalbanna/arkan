@@ -18,7 +18,7 @@ const generateProjectBlueprintFlow = ai.defineFlow({
         name: 'projectBlueprintPrompt',
         input: { schema: GenerateProjectBlueprintInputSchema },
         output: { schema: GenerateProjectBlueprintOutputSchema },
-        model: 'googleai/gemini-2.5-flash-lite',
+
         system: `You are a senior software architect and project manager with 15+ years of experience. Your task is to create a comprehensive project blueprint for web or mobile application development based on the provided project details. The blueprint should outline the project overview, core features, technology stack recommendations, development phases, and best practices.`,
         prompt: `Generate a comprehensive project blueprint for the following project:
 

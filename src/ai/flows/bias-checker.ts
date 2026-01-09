@@ -12,7 +12,7 @@ const biasCheckPrompt = ai.definePrompt({
   name: 'biasCheckPrompt',
   input: { schema: BiasCheckInputSchema },
   output: { schema: BiasCheckOutputSchema },
-  model: 'googleai/gemini-2.5-flash-lite',
+
   prompt: `You are an expert in inclusive language and bias detection. Your task is to analyze the provided text and identify any language that may exhibit bias related to gender, race, age, ability, culture, or other stereotypes.
 
 **Analysis Process:**

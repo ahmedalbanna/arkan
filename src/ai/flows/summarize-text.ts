@@ -19,7 +19,7 @@ const summarizePrompt = ai.definePrompt({
     name: 'summarizeTextPrompt',
     input: { schema: z.object({ text: z.string(), instruction: z.string() }) },
     output: { schema: SummarizeOutputSchema },
-    model: 'googleai/gemini-2.5-flash-lite',
+
     prompt: `You are an expert summarizer. Your task is to read the provided text and generate a summary of the specified length.
 
 **Desired Length**: The summary should be {{{instruction}}}
