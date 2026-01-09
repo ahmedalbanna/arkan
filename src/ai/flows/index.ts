@@ -46,4 +46,6 @@ export * from './solve-assignments';
 export * from './generate-project-blueprint';
 export * from './generate-ui-description';
 export * from './generate-chapter-content';
+export * from './generate-chapter-content-rag';
+export * from './generate-report-section-rag';
     

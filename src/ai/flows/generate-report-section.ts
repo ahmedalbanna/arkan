@@ -66,6 +66,12 @@ You have access to the following documents. Review them and use the most relevan
 ---
 {{/each}}
 {{/if}}
+
+{{#if ragContext}}
+--- RAG RETRIEVED CONTEXT (Most Relevant Information) ---\n
+{{{ragContext}}}
+---
+{{/if}}
 `,
     config: {
       temperature: 0.3,
