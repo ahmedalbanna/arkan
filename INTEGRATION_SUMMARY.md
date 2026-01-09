@@ -1,3 +1,4 @@
+
 # 🎉 Ollama Integration - ملخص التكامل
 
 ## ✅ تم بنجاح!
@@ -36,11 +37,11 @@ const response = await ollamaAi.generate({
 
 ### 2. اختيار النموذج حسب المهمة
 ```typescript
-import { getModelForTask } from '@/ai/genkit';
+import { getModel } from '@/ai/genkit';
 
-const fastModel = getModelForTask('fast', 'ollama');      // llama3.2:1b
-const balancedModel = getModelForTask('balanced', 'ollama'); // gemma:2b
-const qualityModel = getModelForTask('quality', 'ollama');   // phi3:mini
+const fastModel = await getModel('fast', 'ollama');      // llama3.2:1b
+const balancedModel = await getModel('balanced', 'ollama'); // gemma:2b
+const qualityModel = await getModel('quality', 'ollama');   // phi3:mini
 ```
 
 ### 3. التبديل الهجين (Hybrid Mode)

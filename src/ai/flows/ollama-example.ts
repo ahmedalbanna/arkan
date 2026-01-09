@@ -1,3 +1,4 @@
+
 /**
  * Example Flow: Using Local Ollama Models
  * 
@@ -5,9 +6,8 @@
  * Optimized for systems with 8GB RAM.
  */
 
-import { ai } from '@/ai/genkit';
-import { ollamaAi, OLLAMA_CONFIG } from '@/ai/ollama.config';
-import { z } from 'genkit';
+import { ai, getModel } from '@/ai/genkit';
+import { z } from 'zod';
 
 /**
  * Input schema for the local generation flow
@@ -38,31 +38,14 @@ export const localTextGenerationFlow = ai.defineFlow(
     outputSchema: LocalGenerationOutputSchema,
   },
   async (input) => {
-    let aiInstance = ai;
-    let modelName = 'googleai/gemini-2.0-flash-lite';
-    let provider: 'google' | 'ollama' = 'google';
-
-    // Switch to Ollama if requested and available
-    if (input.useLocal) {
-      try {
-        const { checkOllamaAvailability } = await import('@/ai/ollama.config');
-        const isAvailable = await checkOllamaAvailability();
-        
-        if (isAvailable) {
-          aiInstance = ollamaAi;
-          modelName = OLLAMA_CONFIG.defaultModel;
-          provider = 'ollama';
-          console.log(`✓ Using local Ollama model: ${modelName}`);
-        } else {
-          console.warn('⚠ Ollama not available, using Google Gemini');
-        }
-      } catch (error) {
-        console.error('Error checking Ollama:', error);
-      }
-    }
+    
+    const provider: 'google' | 'ollama' = input.useLocal ? 'ollama' : 'google';
+    const modelName = await getModel('balanced', provider);
+    
+    console.log(`✓ Using ${provider} model: ${modelName}`);
 
     // Generate text
-    const response = await aiInstance.generate({
+    const response = await ai.generate({
       model: modelName,
       prompt: input.prompt,
       config: {
@@ -107,21 +90,9 @@ export const academicParagraphFlow = ai.defineFlow(
     outputSchema: AcademicParagraphOutputSchema,
   },
   async (input) => {
-    // Select AI instance
-    let aiInstance = ai;
-    let modelName = 'googleai/gemini-2.0-flash-lite';
-    let provider: 'google' | 'ollama' = 'google';
-
-    if (input.useLocal) {
-      const { checkOllamaAvailability } = await import('@/ai/ollama.config');
-      const isAvailable = await checkOllamaAvailability();
-      
-      if (isAvailable) {
-        aiInstance = ollamaAi;
-        modelName = OLLAMA_CONFIG.defaultModel;
-        provider = 'ollama';
-      }
-    }
+    // Select AI provider
+    const provider: 'google' | 'ollama' = input.useLocal ? 'ollama' : 'google';
+    const modelName = await getModel('quality', provider); // Use quality model for this task
 
     // Build prompt based on style
     const styleInstructions = {
@@ -146,7 +117,7 @@ Write the paragraph now:
 `.trim();
 
     // Generate with local or cloud model
-    const response = await aiInstance.generate({
+    const response = await ai.generate({
       model: modelName,
       prompt,
       config: {
@@ -190,20 +161,8 @@ export const paraphraseFlow = ai.defineFlow(
     outputSchema: ParaphraseOutputSchema,
   },
   async (input) => {
-    let aiInstance = ai;
-    let modelName = 'googleai/gemini-2.5-flash-lite';
-    let provider: 'google' | 'ollama' = 'google';
-
-    if (input.useLocal) {
-      const { checkOllamaAvailability } = await import('@/ai/ollama.config');
-      const isAvailable = await checkOllamaAvailability();
-      
-      if (isAvailable) {
-        aiInstance = ollamaAi;
-        modelName = OLLAMA_CONFIG.defaultModel;
-        provider = 'ollama';
-      }
-    }
+    const provider: 'google' | 'ollama' = input.useLocal ? 'ollama' : 'google';
+    const modelName = await getModel('fast', provider);
 
     const styleInstructions = {
       formal: 'Use formal language and professional tone.',
@@ -219,7 +178,7 @@ ${input.text}
 
 Paraphrased version:`;
 
-    const response = await aiInstance.generate({
+    const response = await ai.generate({
       model: modelName,
       prompt,
       config: {

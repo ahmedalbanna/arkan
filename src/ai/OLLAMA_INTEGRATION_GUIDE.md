@@ -1,3 +1,4 @@
+
 # دليل تكامل Ollama - تشغيل نماذج LLM محلياً
 
 ## 📋 نظرة عامة
@@ -135,16 +136,16 @@ console.log(response.text);
 ### مثال 2: اختيار النموذج حسب المهمة
 
 ```typescript
-import { getModelForTask } from '@/ai/genkit';
+import { getModel } from '@/ai/genkit';
 
 // للمهام السريعة (نموذج خفيف)
-const fastModel = getModelForTask('fast', 'ollama'); // llama3.2:1b
+const fastModel = await getModel('fast', 'ollama'); // llama3.2:1b
 
 // للاستخدام المتوازن (افتراضي)
-const balancedModel = getModelForTask('balanced', 'ollama'); // gemma:2b
+const balancedModel = await getModel('balanced', 'ollama'); // gemma:2b
 
 // لأفضل جودة (أبطأ)
-const qualityModel = getModelForTask('quality', 'ollama'); // phi3:mini
+const qualityModel = await getModel('quality', 'ollama'); // phi3:mini
 ```
 
 ### مثال 3: التبديل الديناميكي (Hybrid Mode)

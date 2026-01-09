@@ -1,3 +1,4 @@
+
 # 🚀 دليل البدء السريع - Ollama Integration
 
 ## ⚡ التثبيت السريع (5 دقائق)
@@ -89,16 +90,16 @@ console.log(`Model: ${result.model}, Provider: ${result.provider}`);
 ### مثال 3: اختيار النموذج ديناميكياً
 
 ```typescript
-import { getModelForTask } from '@/ai/genkit';
+import { getModel } from '@/ai/genkit';
 
 // للمهام السريعة
-const fastModel = getModelForTask('fast', 'ollama');
+const fastModel = await getModel('fast', 'ollama');
 
 // للاستخدام المتوازن (افتراضي)
-const balancedModel = getModelForTask('balanced', 'ollama');
+const balancedModel = await getModel('balanced', 'ollama');
 
 // لأفضل جودة
-const qualityModel = getModelForTask('quality', 'ollama');
+const qualityModel = await getModel('quality', 'ollama');
 ```
 
 ---

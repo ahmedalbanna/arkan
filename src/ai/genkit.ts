@@ -1,3 +1,4 @@
+
 import { googleAI } from '@genkit-ai/googleai';
 import { genkit, GenkitError } from 'genkit';
 
@@ -89,22 +90,6 @@ export function configureUserAi(userApiKeys?: Record<string, string>) {
 }
 
 /**
- * Get the appropriate model identifier based on provider and task
- * 
- * @deprecated Use getModelForTask from './model-manager' instead
- * @param task - Task type: 'fast' for quick responses, 'balanced' for general use, 'quality' for best results
- * @param provider - Model provider ('google' or 'ollama')
- * @returns Model identifier string
- */
-export async function getModelForTask(
-  task: 'fast' | 'balanced' | 'quality' = 'balanced',
-  provider: 'google' | 'ollama' = MODEL_PROVIDER
-): Promise<string> {
-  const { getModel } = await import('./model-manager');
-  return getModel(task, provider);
-}
-
-/**
  * Creates a hybrid AI instance that can switch between Google and Ollama
  * 
  * @param userApiKeys - User's API keys (for Google)
@@ -153,3 +138,15 @@ export {
   searchAndResearchTools,
   allTools 
 } from './tools';
+
+/**
+ * Get the appropriate model identifier based on provider and task
+ * @deprecated Use getModel from './model-manager' instead
+ */
+export async function getModelForTask(
+  task: 'fast' | 'balanced' | 'quality' = 'balanced',
+  provider: 'google' | 'ollama' = MODEL_PROVIDER
+): Promise<string> {
+  const { getModel } = await import('./model-manager');
+  return getModel(task, provider);
+}

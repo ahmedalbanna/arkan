@@ -1,3 +1,4 @@
+
 /**
  * Ollama Configuration for Local LLM Support
  * 
@@ -19,7 +20,7 @@ import { allTools } from './tools';
  */
 export const OLLAMA_CONFIG = {
   // Default Ollama server address
-  serverAddress: process.env.OLLAMA_SERVER_URL || 'https://11434-01kegbftgsxwkfgqv12wpvwprn.cloudspaces.litng.ai',
+  serverAddress: process.env.OLLAMA_SERVER_URL || 'https://11434-01kegbftgsxwkfgqv12wpvwprn.cloudspaces.litng.ai/',
   
   // Recommended models for 8GB RAM
   models: {
@@ -67,15 +68,23 @@ export function configureOllamaAi(modelName?: string) {
         models: [
           {
             name: selectedModel,
-            type: 'chat',
+            type: 'generate',
           },
+          // Add other ollama models you want to use here
+          { name: OLLAMA_CONFIG.models.primary.name, type: 'generate' },
+          { name: OLLAMA_CONFIG.models.lightweight.name, type: 'generate' },
+          { name: OLLAMA_CONFIG.models.medium.name, type: 'generate' },
         ],
         serverAddress: OLLAMA_CONFIG.serverAddress,
       }),
     ],
-    tools: Object.values(allTools),
+    tools: allToolsList,
   });
 }
+
+// Pre-initialize tool list for Ollama instance
+const { allTools: allToolsList } = require('./tools');
+
 
 /**
  * Standalone Ollama AI instance for local inference

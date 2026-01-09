@@ -1,3 +1,4 @@
+
 /**
  * Unified Model Manager for AI Operations
  * 
@@ -8,6 +9,7 @@
 
 import { ai } from './genkit';
 import type { ModelReference } from 'genkit';
+import { z } from 'zod';
 
 /**
  * Model quality tiers
@@ -53,7 +55,7 @@ interface ModelConfig {
 /**
  * Default model configuration
  */
-const MODEL_CONFIG: ModelConfig = {
+export const MODEL_REGISTRY: ModelConfig = {
   google: {
     fast: 'googleai/gemini-2.5-flash-lite',
     balanced: 'googleai/gemini-2.0-flash-lite',
@@ -71,7 +73,7 @@ const MODEL_CONFIG: ModelConfig = {
 /**
  * Task to quality mapping
  */
-const TASK_QUALITY_MAP: Record<TaskCategory, ModelQuality> = {
+export const TASK_QUALITY_MAP: Record<TaskCategory, ModelQuality> = {
   drafting: 'fast',
   writing: 'balanced',
   academic: 'quality',
@@ -140,29 +142,29 @@ export class ModelManager {
    */
   async getModel(
     quality: ModelQuality = 'balanced',
-    preferredProvider?: ModelProvider
+    provider?: ModelProvider
   ): Promise<string> {
-    const provider = preferredProvider || this.provider;
+    const effectiveProvider = provider || this.provider;
 
     // If provider is 'auto', check Ollama availability
-    if (provider === 'auto') {
+    if (effectiveProvider === 'auto') {
       const isOllamaAvailable = await this.checkOllamaAvailability();
-      const effectiveProvider = isOllamaAvailable ? 'ollama' : 'google';
-      return MODEL_CONFIG[effectiveProvider][quality];
+      const resolvedProvider = isOllamaAvailable ? 'ollama' : 'google';
+      return MODEL_REGISTRY[resolvedProvider][quality];
     }
 
     // If provider is 'ollama', check availability and fallback to Google
-    if (provider === 'ollama') {
+    if (effectiveProvider === 'ollama') {
       const isOllamaAvailable = await this.checkOllamaAvailability();
       if (!isOllamaAvailable) {
         console.warn('⚠️ Ollama not available, falling back to Google Gemini');
-        return MODEL_CONFIG.google[quality];
+        return MODEL_REGISTRY.google[quality];
       }
-      return MODEL_CONFIG.ollama[quality];
+      return MODEL_REGISTRY.ollama[quality];
     }
 
     // Default to Google
-    return MODEL_CONFIG.google[quality];
+    return MODEL_REGISTRY.google[quality];
   }
 
   /**
@@ -170,23 +172,22 @@ export class ModelManager {
    */
   async getModelForTask(
     task: TaskCategory,
-    preferredProvider?: ModelProvider
+    provider?: ModelProvider
   ): Promise<string> {
     const quality = TASK_QUALITY_MAP[task];
-    return this.getModel(quality, preferredProvider);
+    return this.getModel(quality, provider);
   }
 
   /**
    * Get AI instance with appropriate model
    */
   async getAIInstance(
-    quality: ModelQuality = 'balanced',
-    preferredProvider?: ModelProvider
+    provider?: ModelProvider
   ) {
-    const provider = preferredProvider || this.provider;
+    const effectiveProvider = provider || this.provider;
 
     // Check if we should use Ollama
-    if (provider === 'ollama' || provider === 'auto') {
+    if (effectiveProvider === 'ollama' || effectiveProvider === 'auto') {
       const isOllamaAvailable = await this.checkOllamaAvailability();
       
       if (isOllamaAvailable) {
@@ -212,8 +213,9 @@ export class ModelManager {
     quality?: ModelQuality;
     provider?: ModelProvider;
     config?: any;
+    output?: any;
   }) {
-    const { prompt, task, quality, provider, config } = options;
+    const { prompt, task, quality, provider, config, output } = options;
 
     // Determine model
     let model: string;
@@ -224,13 +226,14 @@ export class ModelManager {
     }
 
     // Get AI instance
-    const aiInstance = await this.getAIInstance(quality || 'balanced', provider);
+    const aiInstance = await this.getAIInstance(provider);
 
     // Generate
     return aiInstance.generate({
       model,
       prompt,
       config: config || {},
+      output: output
     });
   }
 }
@@ -275,24 +278,9 @@ export async function generateWithModel(options: {
   quality?: ModelQuality;
   provider?: ModelProvider;
   config?: any;
+  output?: any;
 }) {
   return getModelManager().generate(options);
-}
-
-/**
- * Legacy compatibility: Map old model strings to new system
- */
-export function mapLegacyModel(legacyModel: string): ModelQuality {
-  if (legacyModel.includes('flash-lite') || legacyModel.includes('2.5')) {
-    return 'fast';
-  }
-  if (legacyModel.includes('2.0-flash-lite')) {
-    return 'balanced';
-  }
-  if (legacyModel.includes('flash-exp') || legacyModel.includes('2.0-flash')) {
-    return 'quality';
-  }
-  return 'balanced'; // default
 }
 
 /**
@@ -301,7 +289,7 @@ export function mapLegacyModel(legacyModel: string): ModelQuality {
 export async function getAIInstance(
   provider?: ModelProvider
 ): Promise<typeof ai> {
-  return getModelManager().getAIInstance('balanced', provider);
+  return getModelManager().getAIInstance(provider);
 }
 
 /**
@@ -310,11 +298,6 @@ export async function getAIInstance(
 export async function isOllamaAvailable(): Promise<boolean> {
   return getModelManager().checkOllamaAvailability();
 }
-
-/**
- * Export model configuration for reference
- */
-export const MODEL_REGISTRY = MODEL_CONFIG;
 
 /**
  * Export task categories for reference
