@@ -8,6 +8,7 @@
  */
 
 import { ai, getModel } from '@/ai/genkit';
+import { OLLAMA_CONFIG } from '../ollama.config';
 import { z } from 'zod';
 
 /**
@@ -213,7 +214,8 @@ export const ollamaTestFlow = ai.defineFlow(
     outputSchema: OllamaTestOutputSchema,
   },
   async (input) => {
-    const modelName = await getModel('fast', 'ollama');
+    // Use the default model from the config for reliability
+    const modelName = OLLAMA_CONFIG.defaultModel;
 
     const response = await ai.generate({
       model: modelName,
