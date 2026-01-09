@@ -10,6 +10,7 @@ import {
   ProjectDataSchema,
   ReadmeOutputSchema,
   type ProjectData,
+  DocumentTemplateTypeSchema,
 } from '@/ai/schemas/project-documentation';
 import {
   analyzeProjectStructureTool,
@@ -25,7 +26,7 @@ import {
 } from '@/ai/tools/documentation-generation';
 import { readmeGenerationPrompt } from '@/ai/prompts/project-documentation';
 import { z } from 'zod';
-import { DocumentTemplateTypeSchema } from '@/ai/schemas';
+
 
 // ==================== INPUT/OUTPUT SCHEMAS ====================
 
