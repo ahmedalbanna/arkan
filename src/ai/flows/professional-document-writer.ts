@@ -14,7 +14,7 @@
  * 5. Polish final document
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import {
   analyzeDocumentStructureTool,
   analyzeToneTool,
@@ -68,7 +68,7 @@ export const professionalDocumentWriterFlow = ai.defineFlow(
             })),
           })
         },
-        model: 'googleai/gemini-2.0-flash-lite',
+        model: await getModel('balanced'), // Unified model selection
       },
       `You are an expert business writer. Create a detailed outline for the following document.
 
@@ -146,7 +146,7 @@ Create a structured outline with section names and key sub-points for each secti
           })
         },
         output: { schema: z.object({ fullDocument: z.string() }) },
-        model: 'googleai/gemini-2.0-flash-lite',
+        model: await getModel('balanced'), // Unified model selection
       },
       `You are an expert professional business writer. Write a complete ${documentType} based on the following requirements.
 
@@ -263,7 +263,7 @@ Write the complete professional document now with proper formatting and section 
             })
           },
           output: { schema: z.object({ refinedDocument: z.string() }) },
-          model: 'googleai/gemini-2.0-flash-lite',
+          model: await getModel('balanced'), // Unified model selection
         },
         `You are an expert editor. Refine the following professional document based on the feedback below.
 
@@ -340,7 +340,7 @@ Provide the refined document.`
             conclusion: z.string(),
           })
         },
-        model: 'googleai/gemini-2.0-flash-lite',
+        model: await getModel('fast'), // Unified model selection - fast for extraction
       },
       `Extract the main sections from the following document:
 

@@ -5,7 +5,7 @@
  * new features, system architecture, and design decisions.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import {
   TechnicalSpecificationSchema,
 } from '@/ai/schemas/project-documentation';
@@ -110,7 +110,7 @@ export const technicalSpecificationWriter = ai.defineFlow(
 
     // Generate comprehensive technical specification
     const finalSpec = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt: `Create a comprehensive technical specification document.
 
 Target Audience: ${targetAudience}

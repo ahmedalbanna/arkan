@@ -5,7 +5,7 @@
  * achievements, challenges, and recommendations.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import {
   ProjectReportSchema,
   ReportPeriodSchema,
@@ -119,7 +119,7 @@ export const projectReportGenerator = ai.defineFlow(
 
     // Combine all information
     const fullReport = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt: `Create a comprehensive ${reportPeriod} project report for ${projectName}.
 
 Target Audience: ${targetAudience}

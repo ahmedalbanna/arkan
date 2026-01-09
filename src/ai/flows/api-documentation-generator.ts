@@ -5,7 +5,7 @@
  * with examples, authentication details, and error handling.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import {
   ApiDocumentationSchema,
   CitationStyleSchema,
@@ -124,7 +124,7 @@ console.log(data);`;
 
     // Combine all documentation
     const finalDoc = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt: `Create comprehensive API documentation for ${apiName} v${apiVersion}.
 
 Base Documentation:

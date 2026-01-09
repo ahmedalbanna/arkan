@@ -5,7 +5,7 @@
  * demos, pitches, technical reviews, and status updates.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import {
   PresentationContentSchema,
   PresentationTypeSchema,
@@ -109,7 +109,7 @@ export const presentationContentCreator = ai.defineFlow(
 
     // Enhance with project-specific data
     const enhancedPresentation = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt: `Create detailed presentation slides for a ${presentationType} presentation.
 
 Project: ${projectName}

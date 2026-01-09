@@ -5,7 +5,7 @@
  * Google Search, Google Images, Google Maps, Google Shopping, and Google News.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import {
   GoogleSearchToolInputSchema,
   GoogleSearchToolOutputSchema,
@@ -34,7 +34,7 @@ export const googleSearchTool = ai.defineTool(
         name: 'googleSearchPrompt',
         input: { schema: GoogleSearchToolInputSchema },
         output: { schema: GoogleSearchToolOutputSchema },
-        model: 'googleai/gemini-2.0-flash-lite',
+        model: await getModel('balanced'),
         prompt: `You are a Google search engine simulator. Generate realistic search results based on the query provided.
 
 Search Query: {{query}}

@@ -5,7 +5,7 @@
  * of software projects.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import { z } from 'zod';
 import {
   ProjectStructureSchema,
@@ -65,7 +65,7 @@ Return a JSON object matching the ProjectStructure schema with:
 - projectType (one of: web_application, mobile_app, library, api, cli_tool, desktop_app, microservice, monorepo, other)`;
 
     const result = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt,
       output: { schema: ProjectStructureSchema },
     });
@@ -126,7 +126,7 @@ Return a JSON object matching the DependencyAnalysis schema with:
 - categories (object with arrays of package names)`;
 
     const result = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt,
       output: { schema: DependencyAnalysisSchema },
     });
@@ -190,7 +190,7 @@ Return a JSON object matching the CodeComplexity schema with:
 - maintainabilityIndex (0-100, optional)`;
 
     const result = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt,
       output: { schema: CodeComplexitySchema },
     });

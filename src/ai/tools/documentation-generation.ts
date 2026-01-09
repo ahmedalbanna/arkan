@@ -5,7 +5,7 @@
  * API references, user guides, code examples, and table of contents.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import { z } from 'genkit';
 import {
   ApiDocumentationSchema,
@@ -69,7 +69,7 @@ Return a JSON object matching the ApiDocumentation schema with:
 - fullContent (complete markdown documentation)`;
 
     const result = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt,
       output: { schema: ApiDocumentationSchema },
     });
@@ -156,7 +156,7 @@ Return a JSON object with:
 - fullContent (complete markdown guide)`;
 
     const result = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt,
       output: { schema: UserGuideOutputSchema },
     });
@@ -224,7 +224,7 @@ Return a JSON object with:
 - bestPractices (array of best practices, optional)`;
 
     const result = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt,
       output: { schema: FormattedCodeSchema },
     });
@@ -288,7 +288,7 @@ Return a JSON object with:
 - structure (array of heading objects with level, title, anchor)`;
 
     const result = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt,
       output: { schema: TableOfContentsSchema },
     });

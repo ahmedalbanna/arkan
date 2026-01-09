@@ -7,7 +7,7 @@
  * and argument quality to help writers create well-organized content.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import {
   AnalyzeArgumentStructureToolInputSchema,
   AnalyzeArgumentStructureToolOutputSchema,
@@ -48,7 +48,7 @@ export const analyzeDocumentStructureTool = ai.defineTool(
       name: 'documentStructureAnalyzerPrompt',
       input: { schema: AnalyzeDocumentStructureToolInputSchema },
       output: { schema: AnalyzeDocumentStructureToolOutputSchema },
-      model: 'googleai/gemini-2.0-flash-lite',
+      model: await getModel('balanced'),
       prompt: `You are an expert in document structure analysis. Analyze the structure and organization of the following document.
 
 Document to analyze:
@@ -104,7 +104,7 @@ export const checkLogicalFlowTool = ai.defineTool(
       name: 'logicalFlowCheckerPrompt',
       input: { schema: CheckLogicalFlowToolInputSchema },
       output: { schema: CheckLogicalFlowToolOutputSchema },
-      model: 'googleai/gemini-2.0-flash-lite',
+      model: await getModel('balanced'),
       prompt: `You are an expert in analyzing logical flow and coherence in writing. Analyze the logical flow of the following text.
 
 Text to analyze:
@@ -152,7 +152,7 @@ export const analyzeArgumentStructureTool = ai.defineTool(
       name: 'argumentStructureAnalyzerPrompt',
       input: { schema: AnalyzeArgumentStructureToolInputSchema },
       output: { schema: AnalyzeArgumentStructureToolOutputSchema },
-      model: 'googleai/gemini-2.0-flash-lite',
+      model: await getModel('balanced'),
       prompt: `You are an expert in analyzing argumentative writing. Analyze the argument structure of the following text.
 
 Text to analyze:

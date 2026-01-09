@@ -7,7 +7,7 @@
  * assessment, and word choice improvement capabilities using AI.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import {
   AnalyzeToneToolInputSchema,
   AnalyzeToneToolOutputSchema,
@@ -45,7 +45,7 @@ export const checkGrammarTool = ai.defineTool(
       name: 'grammarCheckerPrompt',
       input: { schema: CheckGrammarToolInputSchema },
       output: { schema: CheckGrammarToolOutputSchema },
-      model: 'googleai/gemini-2.0-flash-lite',
+      model: await getModel('balanced'),
       prompt: `You are an expert grammar checker. Analyze the following text for grammar, spelling, punctuation, and capitalization errors.
 
 For each issue found, provide:
@@ -90,7 +90,7 @@ export const analyzeToneTool = ai.defineTool(
       name: 'toneAnalyzerPrompt',
       input: { schema: AnalyzeToneToolInputSchema },
       output: { schema: AnalyzeToneToolOutputSchema },
-      model: 'googleai/gemini-2.0-flash-lite',
+      model: await getModel('balanced'),
       prompt: `You are an expert in analyzing writing tone. Analyze the tone of the following text.
 
 Text to analyze:
@@ -136,7 +136,7 @@ export const checkReadabilityTool = ai.defineTool(
       name: 'readabilityCheckerPrompt',
       input: { schema: CheckReadabilityToolInputSchema },
       output: { schema: CheckReadabilityToolOutputSchema },
-      model: 'googleai/gemini-2.0-flash-lite',
+      model: await getModel('balanced'),
       prompt: `You are an expert in readability analysis. Analyze the following text and calculate readability metrics.
 
 Text to analyze:
@@ -187,7 +187,7 @@ export const improveWordChoiceTool = ai.defineTool(
       name: 'wordChoiceImprovementPrompt',
       input: { schema: ImproveWordChoiceToolInputSchema },
       output: { schema: ImproveWordChoiceToolOutputSchema },
-      model: 'googleai/gemini-2.0-flash-lite',
+      model: await getModel('balanced'),
       prompt: `You are an expert editor specializing in word choice improvement. Analyze the following text and suggest better word choices.
 
 Text to analyze:

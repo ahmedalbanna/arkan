@@ -1,6 +1,6 @@
 'use server';
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import { z } from 'zod';
 
 const RunAgentInputSchema = z.object({
@@ -17,7 +17,7 @@ export const runAgentFlow = ai.defineFlow(
   },
   async ({ systemPrompt, userPrompt }) => {
     const llmResponse = await ai.generate({
-      model: 'googleai/gemini-2.5-flash-lite',
+      model: await getModel('fast'),
       prompt: userPrompt,
       system: systemPrompt,
       config: {

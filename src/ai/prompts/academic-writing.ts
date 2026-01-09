@@ -3,7 +3,7 @@
  * 17 specialized prompts for different types of academic writing
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import {
     ResearchPaperInputSchema,
     ResearchPaperOutputSchema,
@@ -47,7 +47,7 @@ export const academicWritingPrompts = {
         name: 'researchPaperPrompt',
         input: { schema: ResearchPaperInputSchema },
         output: { schema: ResearchPaperOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.7,
         },
@@ -86,7 +86,7 @@ export const academicWritingPrompts = {
         name: 'analyticalEssayPrompt',
         input: { schema: AnalyticalEssayInputSchema },
         output: { schema: AnalyticalEssayOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.7,
         },
@@ -122,7 +122,7 @@ export const academicWritingPrompts = {
         name: 'argumentativeEssayPrompt',
         input: { schema: ArgumentativeEssayInputSchema },
         output: { schema: ArgumentativeEssayOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.7,
         },
@@ -161,7 +161,7 @@ export const academicWritingPrompts = {
         name: 'comprehensiveLiteratureReviewPrompt',
         input: { schema: ComprehensiveLiteratureReviewInputSchema },
         output: { schema: ComprehensiveLiteratureReviewOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.7,
         },
@@ -199,7 +199,7 @@ export const academicWritingPrompts = {
         name: 'caseStudyPrompt',
         input: { schema: CaseStudyInputSchema },
         output: { schema: CaseStudyOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.7,
         },
@@ -238,7 +238,7 @@ export const academicWritingPrompts = {
         name: 'labReportPrompt',
         input: { schema: LabReportInputSchema },
         output: { schema: LabReportOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.6,
         },
@@ -277,7 +277,7 @@ export const academicWritingPrompts = {
         name: 'researchProposalPrompt',
         input: { schema: ResearchProposalInputSchema },
         output: { schema: ResearchProposalOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.7,
         },
@@ -320,7 +320,7 @@ export const academicWritingPrompts = {
         name: 'thesisStatementPrompt',
         input: { schema: ThesisStatementInputSchema },
         output: { schema: ThesisStatementOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.8,
         },
@@ -353,7 +353,7 @@ export const academicWritingPrompts = {
         name: 'dissertationChapterPrompt',
         input: { schema: DissertationChapterInputSchema },
         output: { schema: DissertationChapterOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.7,
         },
@@ -394,7 +394,7 @@ export const academicWritingPrompts = {
         name: 'termPaperPrompt',
         input: { schema: TermPaperInputSchema },
         output: { schema: TermPaperOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.7,
         },
@@ -431,7 +431,7 @@ export const academicWritingPrompts = {
         name: 'criticalAnalysisPrompt',
         input: { schema: CriticalAnalysisInputSchema },
         output: { schema: CriticalAnalysisOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.7,
         },
@@ -469,7 +469,7 @@ export const academicWritingPrompts = {
         name: 'bookReviewPrompt',
         input: { schema: BookReviewInputSchema },
         output: { schema: BookReviewOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.7,
         },
@@ -509,7 +509,7 @@ export const academicWritingPrompts = {
         name: 'articleSummaryPrompt',
         input: { schema: ArticleSummaryInputSchema },
         output: { schema: ArticleSummaryOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.6,
         },
@@ -546,7 +546,7 @@ export const academicWritingPrompts = {
         name: 'annotatedBibliographyPrompt',
         input: { schema: AnnotatedBibliographyInputSchema },
         output: { schema: AnnotatedBibliographyOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.6,
         },
@@ -579,7 +579,7 @@ export const academicWritingPrompts = {
         name: 'positionPaperPrompt',
         input: { schema: PositionPaperInputSchema },
         output: { schema: PositionPaperOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.7,
         },
@@ -620,7 +620,7 @@ export const academicWritingPrompts = {
         name: 'reflectionPaperPrompt',
         input: { schema: ReflectionPaperInputSchema },
         output: { schema: ReflectionPaperOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.8,
         },
@@ -657,7 +657,7 @@ export const academicWritingPrompts = {
         name: 'technicalReportPrompt',
         input: { schema: TechnicalReportInputSchema },
         output: { schema: TechnicalReportOutputSchema },
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         config: {
             temperature: 0.6,
         },

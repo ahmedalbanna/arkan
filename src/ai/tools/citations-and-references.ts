@@ -7,7 +7,7 @@
  * citation formatting according to various academic styles.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import {
   CheckReferencesToolInputSchema,
   CheckReferencesToolOutputSchema,
@@ -65,7 +65,7 @@ export const validateCitationsTool = ai.defineTool(
       name: 'citationValidatorPrompt',
       input: { schema: ValidateCitationsToolInputSchema },
       output: { schema: ValidateCitationsToolOutputSchema },
-      model: 'googleai/gemini-2.0-flash-lite',
+      model: await getModel('balanced'),
       prompt: `You are an expert in academic citation formats. Validate all in-text citations in the following text according to ${input.citationStyle} style.
 
 Text to analyze:
@@ -147,7 +147,7 @@ export const checkReferencesTool = ai.defineTool(
       name: 'referenceCheckerPrompt',
       input: { schema: CheckReferencesToolInputSchema },
       output: { schema: CheckReferencesToolOutputSchema },
-      model: 'googleai/gemini-2.0-flash-lite',
+      model: await getModel('balanced'),
       prompt: `You are an expert in academic reference formatting. Check the following reference list for proper formatting according to ${input.citationStyle} style.
 
 Reference list to analyze:
@@ -203,7 +203,7 @@ export const matchCitationsToReferencesTool = ai.defineTool(
       name: 'citationReferenceMatcherPrompt',
       input: { schema: MatchCitationsToReferencesToolInputSchema },
       output: { schema: MatchCitationsToReferencesToolOutputSchema },
-      model: 'googleai/gemini-2.0-flash-lite',
+      model: await getModel('balanced'),
       prompt: `You are an expert in academic citation analysis. Match in-text citations with reference list entries and identify any mismatches.
 
 Document text:

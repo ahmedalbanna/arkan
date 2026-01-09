@@ -5,7 +5,7 @@
  * Follows the Flow-Prompts-Tools pattern with all 12 chapters.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import { 
   GraduationProjectInputSchema, 
   GraduationProjectDocumentationSchema 
@@ -78,7 +78,7 @@ export const graduationProjectGenerator = ai.defineFlow(
       });
 
       const abstractGenerated = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         prompt: abstractResult.text,
       });
 
@@ -106,7 +106,7 @@ export const graduationProjectGenerator = ai.defineFlow(
       });
 
       const introGenerated = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         prompt: introResult.text,
       });
 
@@ -135,7 +135,7 @@ export const graduationProjectGenerator = ai.defineFlow(
       });
 
       const litReviewGenerated = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         prompt: litReviewResult.text,
       });
 
@@ -174,7 +174,7 @@ export const graduationProjectGenerator = ai.defineFlow(
       });
 
       const methodGenerated = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         prompt: methodResult.text,
       });
 
@@ -233,7 +233,7 @@ export const graduationProjectGenerator = ai.defineFlow(
       });
 
       const analysisGenerated = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         prompt: analysisResult.text,
       });
 
@@ -286,7 +286,7 @@ export const graduationProjectGenerator = ai.defineFlow(
       });
 
       const designGenerated = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         prompt: designResult.text,
       });
 
@@ -334,7 +334,7 @@ export const graduationProjectGenerator = ai.defineFlow(
       });
 
       const implGenerated = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         prompt: implResult.text,
       });
 
@@ -374,7 +374,7 @@ export const graduationProjectGenerator = ai.defineFlow(
       });
 
       const testGenerated = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         prompt: testResult.text,
       });
 
@@ -427,7 +427,7 @@ export const graduationProjectGenerator = ai.defineFlow(
       });
 
       const resultsGenerated = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         prompt: resultsResult.text,
       });
 
@@ -459,7 +459,7 @@ export const graduationProjectGenerator = ai.defineFlow(
       });
 
       const discussionGenerated = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         prompt: discussionResult.text,
       });
 
@@ -499,7 +499,7 @@ export const graduationProjectGenerator = ai.defineFlow(
       });
 
       const conclusionGenerated = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         prompt: conclusionResult.text,
       });
 
@@ -524,7 +524,7 @@ export const graduationProjectGenerator = ai.defineFlow(
       });
 
       const recsGenerated = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: await getModel('quality'),
         prompt: recsResult.text,
       });
 

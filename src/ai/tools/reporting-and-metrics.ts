@@ -5,7 +5,7 @@
  * generating status reports, and creating progress timelines.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import { z } from 'zod';
 import {
   ProjectMetricsSchema,
@@ -74,7 +74,7 @@ Return a JSON object matching the ProjectMetrics schema with all metrics organiz
 - activity (commitsLastWeek, commitsLastMonth, averageCommitSize, mergeRequestsOpen)`;
 
     const result = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt,
       output: { schema: ProjectMetricsSchema },
     });
@@ -169,7 +169,7 @@ Return a JSON object matching the ProjectReport schema with:
 - fullContent (complete markdown report)`;
 
     const result = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt,
       output: { schema: ProjectReportSchema },
     });
@@ -258,7 +258,7 @@ Return a JSON object with:
 - summary (text summary of project evolution)`;
 
     const result = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt,
       output: { schema: ProgressTimelineSchema },
     });
@@ -350,7 +350,7 @@ Return a JSON object with:
 - designPatterns (array of pattern names, optional)`;
 
     const result = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt,
       output: { schema: ArchitectureDiagramSchema },
     });
@@ -418,7 +418,7 @@ Return a JSON object matching the GitHistory schema with:
 - lastCommit (ISO date string)`;
 
     const result = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt,
       output: { schema: GitHistorySchema },
     });

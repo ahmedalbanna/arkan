@@ -5,7 +5,7 @@
  * with badges, installation instructions, and usage examples.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import {
   ReadmeOutputSchema,
   DocumentTemplateTypeSchema,
@@ -124,7 +124,7 @@ app.start();`;
 
     // Build comprehensive README
     const readmeContent = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt: `Create a professional README.md for ${projectName}.
 
 Base Content:

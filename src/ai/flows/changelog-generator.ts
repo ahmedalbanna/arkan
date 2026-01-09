@@ -5,7 +5,7 @@
  * the Keep a Changelog format.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import {
   ChangelogSchema,
 } from '@/ai/schemas/project-documentation';
@@ -101,7 +101,7 @@ export const changelogGenerator = ai.defineFlow(
 
     // Generate structured changelog
     const structuredChangelog = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt: `Generate a CHANGELOG.md for ${projectName} following Keep a Changelog format.
 
 Base Template:

@@ -5,7 +5,7 @@
  * including README, API docs, user guide, and architecture diagrams.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import {
   ProjectDataSchema,
   ReadmeOutputSchema,
@@ -160,7 +160,7 @@ export const projectDocumentationGenerator = ai.defineFlow(
     console.log('✅ Finalizing documentation package...');
     
     const summary = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: await getModel('quality'),
       prompt: `Create a brief summary of the generated documentation package for ${projectName}.
 
 Project Description: ${projectDescription}

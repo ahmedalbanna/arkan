@@ -14,7 +14,7 @@
  * 5. Return polished literature review
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getModel } from '@/ai/genkit';
 import {
   analyzeArgumentStructureTool,
   checkLogicalFlowTool,
@@ -54,7 +54,7 @@ export const academicLiteratureReviewFlow = ai.defineFlow(
         name: 'literatureReviewDraftPrompt',
         input: { schema: AcademicLiteratureReviewInputSchema },
         output: { schema: z.object({ draftText: z.string() }) },
-        model: 'googleai/gemini-2.0-flash-lite',
+        model: await getModel('balanced'),
       },
       `You are an expert academic researcher specializing in literature reviews.
 
@@ -155,7 +155,7 @@ Write the literature review now, including proper citations throughout.`
             })
           },
           output: { schema: z.object({ refinedText: z.string() }) },
-          model: 'googleai/gemini-2.0-flash-lite',
+          model: await getModel('balanced'),
         },
         `You are an expert academic editor. Refine the following literature review based on the feedback below.
 
@@ -217,7 +217,7 @@ Provide the refined literature review text.`
             conclusion: z.string(),
           })
         },
-        model: 'googleai/gemini-2.0-flash-lite',
+        model: await getModel('balanced'),
       },
       `Extract the main sections from the following literature review:
 
