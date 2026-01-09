@@ -18,7 +18,14 @@ import { MobileNav } from './MobileNav';
 import { UserProfileDropdown } from './UserProfileDropdown';
 import { NotificationDropdown } from './NotificationDropdown';
 
-const navLinks = [
+interface NavLink {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  auth: boolean | 'any';
+}
+
+const navLinks: NavLink[] = [
   { href: '/', label: 'header.home', icon: HomeIcon, auth: 'any' },
   { href: '/builder', label: 'header.generateDocs', icon: SlidersHorizontal, auth: true },
   { href: '/writing-tools', label: 'header.tools', icon: Wrench, auth: true },

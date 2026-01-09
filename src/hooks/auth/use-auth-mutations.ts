@@ -10,7 +10,8 @@ import {
   serviceSignupUser,
   forgotPasswordService,
   sendPasswordResetEmailApi,
-  createOrUpdateUserProfileApi, // Import the new service
+  createOrUpdateUserProfileApi,
+  fetchUserProfileApi, // Import the fetch service
 } from '@/services/api/authService';
 import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
 import { useToast } from '@/hooks/util/use-toast';

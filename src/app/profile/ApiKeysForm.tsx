@@ -43,9 +43,9 @@ export function ApiKeysForm({ userProfile }: ApiKeysFormProps) {
   }, [userProfile, form]);
 
   const onSubmit = (data: ApiKeysFormValues) => {
-    const apiKeys = {
-      gemini: data.gemini,
-      chatgpt: data.chatgpt,
+    const apiKeys: Record<string, string> = {
+      gemini: data.gemini || '',
+      chatgpt: data.chatgpt || '',
     };
     updateUserMutation.mutate({ userId: userProfile.id, data: { apiKeys } });
   };

@@ -41,7 +41,7 @@ const paraphraseTextFlow = ai.defineFlow({
     outputSchema: ParaphraseOutputSchema,
 }, async (input) => {
     const instruction = styleDescriptions[input.mode] || styleDescriptions.standard;
-    const { output } = await paraphrasePrompt({ ...input, instruction });
+    const { output } = await paraphrasePrompt({ text: input.text, mode: input.mode, instruction } as any);
     if (!output) {
         throw new Error("Failed to paraphrase text.");
     }

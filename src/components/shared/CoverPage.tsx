@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Project } from '@/lib/models';
+import { Project, type ProjectProperties } from '@/lib/models';
 import { Landmark, UploadCloud, Frame, Loader2, Book, Building, Brush, BookCopy } from 'lucide-react';
 import Image from 'next/image';
 import React, { useRef, useState } from 'react';
@@ -57,7 +57,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
             } else {
                 (props as any)[field] = sanitizedValue;
             }
-            return p.with(props);
+            return p.with(props as Partial<ProjectProperties>);
         });
     };
     

@@ -91,7 +91,10 @@ export default function ApplyTemplatePanel() {
                 `# ${chapter.title}\n${(chapter.sections || []).map(section => `  - ${section.title}`).join('\n')}`
             ).join('\n\n');
             if (tocMarkdown) {
-                updateProject(p => p.parseAndSetContentFromToc(tocMarkdown));
+                updateProject(p => {
+                    const newContent = p.parseAndSetContentFromToc(tocMarkdown);
+                    return p.with({ content: [...newContent] });
+                });
             }
             handleSelectTemplate(previewTemplate)
         }}

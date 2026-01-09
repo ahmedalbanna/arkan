@@ -1,6 +1,6 @@
 'use client';
 
-import { GenerateUIDescriptionInputSchema } from '@/ai/schemas';
+import { GenerateUIDescriptionInputSchema, type GenerateUIDescriptionInput } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -15,6 +15,8 @@ import { Check, Copy, Loader2, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import ReactMarkdown from 'react-markdown';
+
+type FormValues = GenerateUIDescriptionInput;
 
 
 export function GenerateUIDescriptionTool() {

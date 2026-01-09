@@ -161,7 +161,7 @@ export function AgentDialog({
                     <Input list="category-suggestions" {...field} placeholder="e.g., Report Generation" />
                   </FormControl>
                   <datalist id="category-suggestions">
-                    {categories.map(cat => <option key={cat.id} value={cat.name} />)}
+                    {categories.map((cat: any) => <option key={cat.id} value={cat.name} />)}
                   </datalist>
                   <FormMessage />
                 </FormItem>

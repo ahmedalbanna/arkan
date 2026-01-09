@@ -125,7 +125,7 @@ export default function AnalystAgent() {
         if (!firebaseUser) return;
         setMarkdownResult(null); // Clear previous markdown result
         const token = await firebaseUser.getIdToken();
-        analysisMutation.mutate({ prompt: data.prompt, contextFiles: externalContext, token });
+        analysisMutation.mutate({ prompt: data.prompt, contextFiles: [...externalContext], token });
     }
 
     function handleSaveAnalysis() {

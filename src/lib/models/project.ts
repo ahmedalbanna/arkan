@@ -227,7 +227,7 @@ export class Project {
 
   public updateProjectFromMarkdown(markdown: string): Project {
     const newContent = parseMarkdownToContent(markdown, this.content);
-    return this.with({ content: newContent });
+    return this.with({ content: [...newContent] });
   }
 
   public addChapter(title: string = "Untitled Chapter"): Project {
@@ -354,10 +354,12 @@ ${universityText}
     }
 
     // If not in root, it must be a section within a chapter
-    const { chapter: activeChapter, index: activeSectionIndex } = this.findSectionWithParent(activeId) || {};
-    const { chapter: overChapter, index: overSectionIndex } = this.findSectionWithParent(overId) || {};
+    const activeResult = this.findSectionWithParent(activeId);
+    const overResult = this.findSectionWithParent(overId);
 
-    if (activeChapter && overChapter && activeSectionIndex > -1 && overSectionIndex > -1) {
+    if (activeResult && overResult) {
+        const { chapter: activeChapter, index: activeSectionIndex } = activeResult;
+        const { chapter: overChapter, index: overSectionIndex } = overResult;
         if (activeChapter.id === overChapter.id) {
             // Reordering within the same chapter
             const newSections = arrayMove([...activeChapter.sections], activeSectionIndex, overSectionIndex);

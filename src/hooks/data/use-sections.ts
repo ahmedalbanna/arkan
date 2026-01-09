@@ -55,7 +55,9 @@ export function useUpdateSection() {
         onSuccess: (data) => {
             toast({ title: 'Section Updated', description: `Section "${data.title}" has been updated.` });
             queryClient.invalidateQueries({ queryKey: sectionKeys.lists() });
-            queryClient.invalidateQueries({ queryKey: sectionKeys.detail(data.id) });
+            if (data.id) {
+                queryClient.invalidateQueries({ queryKey: sectionKeys.detail(data.id) });
+            }
         },
         onError: (error: any) => {
             toast({ title: "Update Failed", description: error.message || 'Could not update section.', variant: "destructive" });

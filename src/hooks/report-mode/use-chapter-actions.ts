@@ -8,7 +8,9 @@ import { useWritingTool, useToast } from '@/hooks';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { DiffPart, computeDiff } from '@/lib/utils/diff';
 import { useBuilderStore } from '../core/useBuilderStore';
-import { Chapter, SectionContext, ManipulationType } from '@/lib/models';
+import { Chapter, SectionContext } from '@/lib/models';
+
+type ManipulationType = 'rewrite' | 'summarize' | 'style-editor' | 'readability-enhancer' | 'conciseness-checker' | 'clarity-advisor';
 
 const formSchema = z.object({
   rewriteStyle: z.string().optional(),

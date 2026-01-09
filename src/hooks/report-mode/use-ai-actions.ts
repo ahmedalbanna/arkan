@@ -15,7 +15,7 @@ import { generateReportSectionApi } from '@/services/api/reportService';
 import type { SectionName } from '@/ai/schemas';
 import { PromptBuilder } from '@/lib/prompt-builder';
 import { writingToolApi } from '@/services/api/writingToolsService';
-import type { Chapter, Project, Section } from '@/lib/models';
+import { Chapter, type Project, type Section } from '@/lib/models';
 import { parseMarkdownToContent } from '../util/useMarkdownParser';
 import { useEditorStore } from '../core/use-editor-store';
 
@@ -190,7 +190,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
             const newChapter = parsedContent[0]; // Assuming one chapter was generated
             if (newChapter instanceof Chapter) {
                 // This replaces the old sections with newly generated ones
-                return p.updateChapter(data.chapterId, c => c.with({ sections: newChapter.sections }));
+                return p.updateChapter(data.chapterId, c => c.with({ sections: [...newChapter.sections] }));
             }
             return p;
         });

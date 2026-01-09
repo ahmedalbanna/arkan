@@ -28,7 +28,7 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
   const { setActiveEditor } = useEditorStore();
   const bubbleMenuId = React.useId();
 
-  const editor = useEditor({
+  const editor: any = useEditor({
     extensions: editorExtensions(bubbleMenuId),
     content: marked.parse(content) as string,
     onBlur: ({ editor }) => {
@@ -39,7 +39,7 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
       attributes: {
         class: cn('prose dark:prose-invert max-w-none focus:outline-none font-serif text-base prose-p:text-base prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2', editorClassName),
       },
-      handlePaste: async (view, event, slice) => {
+      handlePaste: async (view, event, slice): Promise<boolean> => {
         const text = event.clipboardData?.getData('text/plain');
         const html = event.clipboardData?.getData('text/html');
 

@@ -26,7 +26,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Based on the provided context, draft a heartfelt and professional 'Acknowledgment' section. Thank the individuals, supervisors, and organizations that supported the training or research.",
                         behaviors: [{ name: 'professional writer', type: 'persona' }],
                         guidelines: ["Maintain a formal and appreciative tone.", "Mention specific roles like supervisors, team members, or company departments if context is available.", "Acknowledge the training institution or company by name."],
-                        controls: { ...defaultControls, formality: 90, tone: 'formal' },
+                        controls: { ...defaultControls, formality: 90, tone: 'professional' },
                     }
                 ]
             },

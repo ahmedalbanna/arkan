@@ -25,7 +25,7 @@ export class Chapter {
     return new Chapter({
       id: this.id,
       title: props.title ?? this.title,
-      sections: props.sections ? props.sections.map(s => s instanceof Section ? s : new Section(s)) : this.sections,
+      sections: props.sections ? props.sections.map(s => s instanceof Section ? s : new Section(s)) : [...this.sections],
     });
   }
 

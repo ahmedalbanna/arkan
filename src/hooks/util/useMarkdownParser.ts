@@ -88,7 +88,11 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
       if (node.depth === 1) { // Chapter
         flushChapter();
         const existingChapter = findExistingChapter(title);
-        currentChapter = new Chapter({ id: existingChapter?.id, title: title, sections: existingChapter?.sections });
+        currentChapter = new Chapter({ 
+          id: existingChapter?.id, 
+          title: title, 
+          sections: existingChapter?.sections ? [...existingChapter.sections] : []
+        });
         currentSection = null; // Reset section when a new chapter starts
       } else { // Section
         flushSection();

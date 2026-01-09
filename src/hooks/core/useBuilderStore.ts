@@ -116,9 +116,9 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
 
     applyTableOfContents: (tocMarkdown: string) => {
         get().updateProject(p => {
-          if (!p) return;
+          if (!p) return p;
           const newContent = p.parseAndSetContentFromToc(tocMarkdown);
-          p.content = newContent;
+          return p.with({ content: [...newContent] });
         });
     
         toast({

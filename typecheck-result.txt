@@ -1,0 +1,794 @@
+⚡ arkan-beta-stable ~/arkan npm run typecheck
+
+> nextn@0.1.0 typecheck
+> tsc --noEmit
+
+next.config.ts:56:5 - error TS2322: Type 'false' is not assignable to type 'true'.
+
+56     allowDevelopmentBuild: false,
+       ~~~~~~~~~~~~~~~~~~~~~
+
+src/ai/flows/__tests__/generate-report-section.test.ts:28:7 - error TS2353: Object literal may only specify known properties, and 'flow' does not exist in type '{ prompt: string; sectionToGenerate: string; guidelines?: string[] | undefined; otherSections?: Record<string, string> | undefined; externalContext?: { content: string; type: "context" | ... 3 more ... | "guidelines"; fileName: string; }[] | undefined; instructionText?: string | undefined; }'.
+
+28       flow: 'generate-section',
+         ~~~~
+
+src/ai/flows/__tests__/generate-report-section.test.ts:65:7 - error TS2353: Object literal may only specify known properties, and 'flow' does not exist in type '{ prompt: string; sectionToGenerate: string; guidelines?: string[] | undefined; otherSections?: Record<string, string> | undefined; externalContext?: { content: string; type: "context" | ... 3 more ... | "guidelines"; fileName: string; }[] | undefined; instructionText?: string | undefined; }'.
+
+65       flow: 'generate-section',
+         ~~~~
+
+src/ai/flows/__tests__/generate-report-section.test.ts:84:7 - error TS2353: Object literal may only specify known properties, and 'flow' does not exist in type '{ prompt: string; sectionToGenerate: string; guidelines?: string[] | undefined; otherSections?: Record<string, string> | undefined; externalContext?: { content: string; type: "context" | ... 3 more ... | "guidelines"; fileName: string; }[] | undefined; instructionText?: string | undefined; }'.
+
+84       flow: 'generate-section',
+         ~~~~
+
+src/ai/flows/generate-plantuml.ts:127:44 - error TS2353: Object literal may only specify known properties, and 'flow' does not exist in type '{ description: string; diagramType: "class" | "useCase" | "sequence" | "activity" | "component" | "archimate" | "er" | "dfd"; }'.
+
+127   const { output } = await diagramPrompt({ flow: "generate-plantuml", description, diagramType });
+                                               ~~~~
+
+src/ai/flows/generate-project-blueprint.ts:42:9 - error TS2353: Object literal may only specify known properties, and 'flow' does not exist in type '{ projectName: string; projectType: string; description: string; targetAudience: string; complexity: "Simple" | "Medium" | "Complex" | "Enterprise"; features: string; techStack?: string | undefined; budget?: string | undefined; timeline?: string | undefined; }'.
+
+42         flow: "generate-project-blueprint",
+           ~~~~
+
+src/ai/flows/generate-ui-description.ts:38:41 - error TS2353: Object literal may only specify known properties, and 'flow' does not exist in type '{ projectFeatures: string; designType: "website" | "mobile"; }'.
+
+38     const { output } = await uiPrompt({ flow: "generate-ui-description", projectFeatures, designType });
+                                           ~~~~
+
+src/ai/flows/manipulate-text.ts:43:39 - error TS2353: Object literal may only specify known properties, and 'flow' does not exist in type '{ textToManipulate: string; command: string; }'.
+
+43     const { output } = await prompt({ flow: "manipulate-text", textToManipulate, command });
+                                         ~~~~
+
+src/ai/flows/paraphrase-text.ts:44:59 - error TS2353: Object literal may only specify known properties, and 'instruction' does not exist in type '{ text: string; mode: "standard" | "fluent" | "formal" | "creative" | "simplify"; }'.
+
+44     const { output } = await paraphrasePrompt({ ...input, instruction });
+                                                             ~~~~~~~~~~~
+
+src/ai/flows/solve-assignments.ts:55:44 - error TS2353: Object literal may only specify known properties, and 'flow' does not exist in type '{ text: string; }'.
+
+55     const { output } = await solvePrompt({ flow: "solve-assignments", text });
+                                              ~~~~
+
+src/ai/flows/translate-text.ts:50:39 - error TS2353: Object literal may only specify known properties, and 'flow' does not exist in type '{ text: string; targetLang: string; }'.
+
+50     const { output } = await prompt({ flow: "translate-text", text, targetLang });
+                                         ~~~~
+
+src/app/admin/manage-users/[id]/edit/page.tsx:64:31 - error TS2322: Type '{ user: User; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'user' does not exist on type 'IntrinsicAttributes'.
+
+64                 <EditUserForm user={user} />
+                                 ~~~~
+
+src/app/admin/settings/page.tsx:6:15 - error TS2305: Module '"@/lib/types"' has no exported member 'AppSettings'.
+
+6 import type { AppSettings } from '@/lib/types';
+                ~~~~~~~~~~~
+
+src/app/api/admin/gift-credits/route.ts:67:33 - error TS2339: Property 'messaging' does not exist on type 'App'.
+
+67             await adminAuth.app.messaging().send(pushMessage);
+                                   ~~~~~~~~~
+
+src/app/api/export/docx/route.ts:45:29 - error TS2345: Argument of type 'Blob | Buffer<ArrayBufferLike>' is not assignable to parameter of type 'BodyInit | null | undefined'.
+  Type 'Buffer<ArrayBufferLike>' is not assignable to type 'BodyInit | null | undefined'.
+    Type 'Buffer<ArrayBufferLike>' is missing the following properties from type 'URLSearchParams': size, append, delete, get, and 2 more.
+
+45     return new NextResponse(docxBuffer, {
+                               ~~~~~~~~~~
+
+src/app/api/process-file/route.ts:46:17 - error TS2353: Object literal may only specify known properties, and 'flow' does not exist in type '{ pdfDataUri: string; }'.
+
+46                 flow: 'rewrite-document-to-markdown'
+                   ~~~~
+
+src/app/api/process-file/route.ts:53:17 - error TS2353: Object literal may only specify known properties, and 'flow' does not exist in type '{ imageDataUri: string; }'.
+
+53                 flow: 'image-to-text'
+                   ~~~~
+
+src/app/profile/ApiKeysForm.tsx:50:65 - error TS2322: Type '{ gemini: string | undefined; chatgpt: string | undefined; }' is not assignable to type 'Record<string, string>'.
+  Property 'gemini' is incompatible with index signature.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+
+50     updateUserMutation.mutate({ userId: userProfile.id, data: { apiKeys } });
+                                                                   ~~~~~~~
+
+  src/lib/models/user.ts:20:5
+    20     apiKeys?: Record<string, string>; // To store keys for services like 'gemini', 'chatgpt'
+           ~~~~~~~
+    The expected type comes from property 'apiKeys' which is declared here on type 'Partial<UserProfile>'
+
+src/app/writing-tools/generate-toc/page.tsx:15:11 - error TS2339: Property 't' does not exist on type '{ form: UseFormReturn<{ projectDescription: string; additionalInstructions?: string | undefined; }, any, { projectDescription: string; additionalInstructions?: string | undefined; }>; mutation: UseMutationResult<...>; onSubmit: (data: { ...; }) => void; results: { ...; } | undefined; generatedMarkdown: string; }'.
+
+15   const { t, form, mutation, onSubmit, results } = useGenerateTocLogic();
+             ~
+
+src/app/writing-tools/generate-toc/page.tsx:21:63 - error TS2339: Property 'title' does not exist on type 'string'.
+
+21       const tocText = results.tableOfContents.map(c => `# ${c.title}\n${c.sections.map(s => `## ${s}`).join('\n')}`).join('\n\n');
+                                                                 ~~~~~
+
+src/app/writing-tools/generate-toc/page.tsx:21:75 - error TS2339: Property 'sections' does not exist on type 'string'.
+
+21       const tocText = results.tableOfContents.map(c => `# ${c.title}\n${c.sections.map(s => `## ${s}`).join('\n')}`).join('\n\n');
+                                                                             ~~~~~~~~
+
+src/app/writing-tools/generate-toc/page.tsx:21:88 - error TS7006: Parameter 's' implicitly has an 'any' type.
+
+21       const tocText = results.tableOfContents.map(c => `# ${c.title}\n${c.sections.map(s => `## ${s}`).join('\n')}`).join('\n\n');
+                                                                                          ~
+
+src/app/writing-tools/generate-toc/page.tsx:89:76 - error TS2339: Property 'title' does not exist on type 'string'.
+
+89                         <p className="font-semibold">{index + 1}. {chapter.title}</p>
+                                                                              ~~~~~
+
+src/app/writing-tools/generate-toc/page.tsx:91:38 - error TS2339: Property 'sections' does not exist on type 'string'.
+
+91                             {chapter.sections.map((section, sIndex) => (
+                                        ~~~~~~~~
+
+src/app/writing-tools/generate-toc/page.tsx:91:52 - error TS7006: Parameter 'section' implicitly has an 'any' type.
+
+91                             {chapter.sections.map((section, sIndex) => (
+                                                      ~~~~~~~
+
+src/app/writing-tools/generate-toc/page.tsx:91:61 - error TS7006: Parameter 'sIndex' implicitly has an 'any' type.
+
+91                             {chapter.sections.map((section, sIndex) => (
+                                                               ~~~~~~
+
+src/components/admin/users/CreateCategoryDialog.tsx:9:41 - error TS2307: Cannot find module '@/hooks/admin/use-create-category-dialog' or its corresponding type declarations.
+
+9 import { useCreateCategoryDialog } from '@/hooks/admin/use-create-category-dialog';
+                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/components/agent/AgentPlayground.tsx:47:5 - error TS2322: Type 'Action<ZodObject<{ systemPrompt: ZodString; userPrompt: ZodString; token: ZodOptional<ZodString>; }, "strip", ZodTypeAny, { userPrompt: string; systemPrompt: string; token?: string | undefined; }, { ...; }>, ZodString, ZodTypeAny>' is not assignable to type 'MutationFunction<string, { userPrompt: string; systemPrompt: string; token?: string | undefined; } | undefined> | undefined'.
+  Type 'Action<ZodObject<{ systemPrompt: ZodString; userPrompt: ZodString; token: ZodOptional<ZodString>; }, "strip", ZodTypeAny, { userPrompt: string; systemPrompt: string; token?: string | undefined; }, { ...; }>, ZodString, ZodTypeAny>' is not assignable to type 'MutationFunction<string, { userPrompt: string; systemPrompt: string; token?: string | undefined; } | undefined>'.
+    Types of parameters 'options' and 'context' are incompatible.
+      Type 'MutationFunctionContext' has no properties in common with type 'ActionRunOptions<ZodTypeAny>'.
+
+47     mutationFn: runAgentFlow,
+       ~~~~~~~~~~
+
+  node_modules/@tanstack/query-core/build/modern/hydration-DksKBgQq.d.ts:1198:5
+    1198     mutationFn?: MutationFunction<TData, TVariables>;
+             ~~~~~~~~~~
+    The expected type comes from property 'mutationFn' which is declared here on type 'UseMutationOptions<string, Error, { userPrompt: string; systemPrompt: string; token?: string | undefined; } | undefined, unknown>'
+
+src/components/agent/AgentPlayground.tsx:115:20 - error TS2304: Cannot find name 'Textarea'.
+
+115                   <Textarea
+                       ~~~~~~~~
+
+src/components/auth/LoginForm.tsx:16:10 - error TS2305: Module '"@/lib/types"' has no exported member 'LoginCredentials'.
+
+16 import { LoginCredentials } from '@/lib/types';
+            ~~~~~~~~~~~~~~~~
+
+src/components/auth/SignupForm.tsx:41:5 - error TS2353: Object literal may only specify known properties, and 'onError' does not exist in type '{ onSuccess?: ((data: any) => void) | undefined; }'.
+
+41     onError: (error: any) => {
+       ~~~~~~~
+
+src/components/pricing/PurchaseCreditsDialog.tsx:122:23 - error TS2353: Object literal may only specify known properties, and 'formData' does not exist in type 'FormData'.
+
+122     mutation.mutate({ formData, token });
+                          ~~~~~~~~
+
+src/components/report-mode/MarkdownEditor.tsx:31:9 - error TS7022: 'editor' implicitly has type 'any' because it does not have a type annotation and is referenced directly or indirectly in its own initializer.
+
+31   const editor = useEditor({
+           ~~~~~~
+
+src/components/report-mode/MarkdownEditor.tsx:42:7 - error TS7023: 'handlePaste' implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.
+
+42       handlePaste: async (view, event, slice) => {
+         ~~~~~~~~~~~
+
+src/components/report-mode/MarkdownEditor.tsx:100:60 - error TS2353: Object literal may only specify known properties, and 'onClose' does not exist in type 'Partial<Props>'.
+
+100           tippyOptions={{ duration: 100, placement: 'top', onClose: () => false }}
+                                                               ~~~~~~~
+
+  node_modules/@tiptap/extension-bubble-menu/dist/bubble-menu-plugin.d.ts:26:5
+    26     tippyOptions?: Partial<Props>;
+           ~~~~~~~~~~~~
+    The expected type comes from property 'tippyOptions' which is declared here on type 'IntrinsicAttributes & Omit<Optional<BubbleMenuPluginProps, "pluginKey">, "editor" | "element"> & { editor: Editor | null; className?: string | undefined; children: ReactNode; updateDelay?: number | undefined; }'
+
+src/components/report-mode/dialogs/ChapterToolsDialog.tsx:165:25 - error TS2322: Type '{ availableSections: readonly Section[]; availableFiles: never[]; selectedContext: { externalContext: Record<string, "context" | "example" | "question" | "textbook" | "guidelines" | "dataset">; sections: Record<...>; }; onContextChange: Dispatch<...>; }' is not assignable to type 'IntrinsicAttributes & SectionContextSelectorProps'.
+  Property 'availableSections' does not exist on type 'IntrinsicAttributes & SectionContextSelectorProps'.
+
+165                         availableSections={chapter.sections}
+                            ~~~~~~~~~~~~~~~~~
+
+src/components/report-mode/dialogs/GenerateTocDialog.tsx:87:107 - error TS2339: Property 'title' does not exist on type 'string'.
+
+87                                                 <p className="font-semibold">{chapterIndex + 1}. {chapter.title}</p>
+                                                                                                             ~~~~~
+
+src/components/report-mode/dialogs/GenerateTocDialog.tsx:89:62 - error TS2339: Property 'sections' does not exist on type 'string'.
+
+89                                                     {chapter.sections.map((section, sectionIndex) => (
+                                                                ~~~~~~~~
+
+src/components/report-mode/dialogs/GenerateTocDialog.tsx:89:76 - error TS7006: Parameter 'section' implicitly has an 'any' type.
+
+89                                                     {chapter.sections.map((section, sectionIndex) => (
+                                                                              ~~~~~~~
+
+src/components/report-mode/dialogs/GenerateTocDialog.tsx:89:85 - error TS7006: Parameter 'sectionIndex' implicitly has an 'any' type.
+
+89                                                     {chapter.sections.map((section, sectionIndex) => (
+                                                                                       ~~~~~~~~~~~~
+
+src/components/report-mode/file-manager/AnalystAgent.tsx:128:56 - error TS4104: The type 'readonly ExternalContext[]' is 'readonly' and cannot be assigned to the mutable type 'any[]'.
+
+128         analysisMutation.mutate({ prompt: data.prompt, contextFiles: externalContext, token });
+                                                           ~~~~~~~~~~~~
+
+  src/components/report-mode/file-manager/AnalystAgent.tsx:90:57
+    90         mutationFn: async (variables: { prompt: string; contextFiles: any[]; token: string; }) => {
+                                                               ~~~~~~~~~~~~
+    The expected type comes from property 'contextFiles' which is declared here on type '{ prompt: string; contextFiles: any[]; token: string; }'
+
+src/components/report-mode/file-manager/PdfPreview.tsx:51:36 - error TS18047: 'pdf' is possibly 'null'.
+
+51                 const page = await pdf.getPage(currentPage);
+                                      ~~~
+
+src/components/report-mode/file-manager/PdfPreview.tsx:63:43 - error TS2345: Argument of type '{ canvasContext: CanvasRenderingContext2D; viewport: PageViewport; }' is not assignable to parameter of type 'RenderParameters'.
+  Property 'canvas' is missing in type '{ canvasContext: CanvasRenderingContext2D; viewport: PageViewport; }' but required in type 'RenderParameters'.
+
+63                         await page.render(renderContext).promise;
+                                             ~~~~~~~~~~~~~
+
+  node_modules/pdfjs-dist/types/src/display/api.d.ts:421:5
+    421     canvas: HTMLCanvasElement | null;
+            ~~~~~~
+    'canvas' is declared here.
+
+src/components/report-mode/settings/ProjectSettingsPanel.tsx:136:13 - error TS2322: Type '{ name: string; constraints?: string[] | undefined; projectType?: string | undefined; complexity?: number | undefined; specialization?: string | undefined; projectDescription?: string | undefined; ... 8 more ...; teamMembers?: string | undefined; }' is not assignable to type 'Partial<ProjectProperties>'.
+  Types of property 'teamMembers' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string[] | undefined'.
+      Type 'string' is not assignable to type 'string[]'.
+
+136       const updatePayload: Partial<ProjectProperties> = { ...data };
+                ~~~~~~~~~~~~~
+
+src/components/report-mode/templates/ApplyTemplatePanel.tsx:94:36 - error TS2322: Type 'ProjectContent' is not assignable to type 'void | Project'.
+  Type 'readonly (Section | Chapter)[]' is missing the following properties from type 'Project': id, name, description, content, and 30 more.
+
+94                 updateProject(p => p.parseAndSetContentFromToc(tocMarkdown));
+                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  src/hooks/core/useBuilderStore.ts:22:30
+    22     updateProject: (updater: (project: Project) => void | Project) => void;
+                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    The expected type comes from the return type of this signature.
+
+src/components/shared/CoverPage.tsx:60:27 - error TS2345: Argument of type 'Partial<Project>' is not assignable to parameter of type 'Partial<ProjectProperties>'.
+  Types of property 'teamMembers' are incompatible.
+    Type 'readonly string[] | undefined' is not assignable to type 'string[] | undefined'.
+      The type 'readonly string[]' is 'readonly' and cannot be assigned to the mutable type 'string[]'.
+
+60             return p.with(props);
+                             ~~~~~
+
+src/components/shared/Header.tsx:100:22 - error TS2322: Type '({ href: string; label: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; auth: string; } | { ...; })[]' is not assignable to type 'NavLink[]'.
+  Type '{ href: string; label: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; auth: string; } | { ...; }' is not assignable to type 'NavLink'.
+    Type '{ href: string; label: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; auth: string; }' is not assignable to type 'NavLink'.
+      Types of property 'auth' are incompatible.
+        Type 'string' is not assignable to type 'boolean | "any"'.
+
+100           <MobileNav navLinks={navLinks} />
+                         ~~~~~~~~
+
+  src/components/shared/MobileNav.tsx:39:43
+    39 export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
+                                                 ~~~~~~~~
+    The expected type comes from property 'navLinks' which is declared here on type 'IntrinsicAttributes & { navLinks: NavLink[]; }'
+
+src/components/sidebar/AgentDialog.tsx:78:5 - error TS2322: Type 'string' is not assignable to type 'never'.
+
+78     name: 'guidelines',
+       ~~~~
+
+  node_modules/react-hook-form/dist/types/fieldArray.d.ts:6:5
+    6     name: TFieldArrayName;
+          ~~~~
+    The expected type comes from property 'name' which is declared here on type 'UseFieldArrayProps<{ description: string; prompt: string; name: string; category: string; guidelines?: string[] | undefined; id?: string | undefined; }, never, "id", { description: string; prompt: string; name: string; category: string; guidelines?: string[] | undefined; id?: string | undefined; }>'
+
+src/components/sidebar/AgentDialog.tsx:164:37 - error TS7006: Parameter 'cat' implicitly has an 'any' type.
+
+164                     {categories.map(cat => <option key={cat.id} value={cat.name} />)}
+                                        ~~~
+
+src/components/ui/dropdown-menu.tsx:54:5 - error TS2322: Type '{ prefix?: string | undefined; translate?: "yes" | "no" | undefined; content?: string | undefined; popover?: "" | "auto" | "manual" | "hint" | undefined; title?: string | undefined; ... 289 more ...; onCloseAutoFocus: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & DropdownMenuSubContentProps & RefAttributes<HTMLDivElement>'.
+  Property 'onCloseAutoFocus' does not exist on type 'IntrinsicAttributes & DropdownMenuSubContentProps & RefAttributes<HTMLDivElement>'.
+
+54     onCloseAutoFocus={(e) => e.preventDefault()}
+       ~~~~~~~~~~~~~~~~
+
+src/components/ui/dropdown-menu.tsx:54:24 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+54     onCloseAutoFocus={(e) => e.preventDefault()}
+                          ~
+
+src/components/ui/menubar.tsx:80:5 - error TS2322: Type '{ prefix?: string | undefined; translate?: "yes" | "no" | undefined; content?: string | undefined; popover?: "" | "auto" | "manual" | "hint" | undefined; title?: string | undefined; ... 289 more ...; onCloseAutoFocus: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & MenubarSubContentProps & RefAttributes<HTMLDivElement>'.
+  Property 'onCloseAutoFocus' does not exist on type 'IntrinsicAttributes & MenubarSubContentProps & RefAttributes<HTMLDivElement>'.
+
+80     onCloseAutoFocus={(e) => e.preventDefault()}
+       ~~~~~~~~~~~~~~~~
+
+src/components/ui/menubar.tsx:80:24 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+80     onCloseAutoFocus={(e) => e.preventDefault()}
+                          ~
+
+src/components/writing-tools/GenerateUIDescriptionTool.tsx:36:24 - error TS2304: Cannot find name 'FormValues'.
+
+36   const form = useForm<FormValues>({
+                          ~~~~~~~~~~
+
+src/components/writing-tools/GenerateUIDescriptionTool.tsx:44:27 - error TS2304: Cannot find name 'FormValues'.
+
+44   function onSubmit(data: FormValues) {
+                             ~~~~~~~~~~
+
+src/components/writing-tools/MarkdownToWordTool.tsx:82:7 - error TS2686: 'saveAs' refers to a UMD global, but the current file is a module. Consider adding an import instead.
+
+82       saveAs(blob, `${data.fileName}.docx`);
+         ~~~~~~
+
+src/hooks/auth/use-auth-mutations.ts:15:15 - error TS2305: Module '"@/lib/types"' has no exported member 'LoginCredentials'.
+
+15 import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
+                 ~~~~~~~~~~~~~~~~
+
+src/hooks/auth/use-auth-mutations.ts:47:39 - error TS2304: Cannot find name 'fetchUserProfileApi'.
+
+47         const existingProfile = await fetchUserProfileApi(user.uid, token);
+                                         ~~~~~~~~~~~~~~~~~~~
+
+src/hooks/core/__tests__/useBuilderStore.test.ts:6:42 - error TS2304: Cannot find name 'ProjectProperties'.
+
+6 const createSoftwareDesignTemplate = (): ProjectProperties => ({
+                                           ~~~~~~~~~~~~~~~~~
+
+src/hooks/core/use-builder-page.ts:56:28 - error TS2540: Cannot assign to 'name' because it is a read-only property.
+
+56     updateProject(p => { p.name = name; });
+                              ~~~~
+
+src/hooks/core/useBuilderStore.ts:121:13 - error TS2540: Cannot assign to 'content' because it is a read-only property.
+
+121           p.content = newContent;
+                ~~~~~~~
+
+src/hooks/data/use-payment.ts:6:10 - error TS2305: Module '"@/services/api/paymentService"' has no exported member 'submitPaymentProof'.
+
+6 import { submitPaymentProof } from '@/services/api/paymentService';
+           ~~~~~~~~~~~~~~~~~~
+
+src/hooks/data/use-sections.ts:58:74 - error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+
+58             queryClient.invalidateQueries({ queryKey: sectionKeys.detail(data.id) });
+                                                                            ~~~~~~~
+
+src/hooks/data/use-templates.ts:64:58 - error TS2345: Argument of type 'Section[]' is not assignable to parameter of type 'SectionProperties[]'.
+  Type 'Section' is not assignable to type 'SectionProperties'.
+    Types of property 'rules' are incompatible.
+      The type 'readonly string[]' is 'readonly' and cannot be assigned to the mutable type 'string[]'.
+
+64             updateProject(p => p.applyTemplate(template, allSections || []));
+                                                            ~~~~~~~~~~~~~~~~~
+
+src/hooks/data/use-templates.ts:89:44 - error TS2345: Argument of type '{ description: string; name: string; id: string; content?: { title: string; sections: { type: "code" | "presentation" | "report" | "diagram" | "math"; title: string; content?: string | undefined; ... 8 more ...; behaviors?: { ...; }[] | undefined; }[]; }[] | undefined; isDefault?: boolean | undefined; }' is not assignable to parameter of type 'CreateReportTemplateData'.
+  Type '{ description: string; name: string; id: string; content?: { title: string; sections: { type: "code" | "presentation" | "report" | "diagram" | "math"; title: string; content?: string | undefined; ... 8 more ...; behaviors?: { ...; }[] | undefined; }[]; }[] | undefined; isDefault?: boolean | undefined; }' is not assignable to type 'Omit<ReportTemplateProperties, "id">'.
+    Types of property 'content' are incompatible.
+      Type '{ title: string; sections: { type: "code" | "presentation" | "report" | "diagram" | "math"; title: string; content?: string | undefined; context?: { externalContext?: Record<string, "context" | ... 4 more ... | "dataset"> | undefined; sections?: Record<...> | undefined; } | undefined; ... 7 more ...; behaviors?: { ....' is not assignable to type '{ title: string; sections: { title: string; type: "presentation" | "report" | "diagram"; prompt: string; guidelines?: string[] | undefined; behaviors?: { name: string; type: "behavior" | "persona"; }[] | undefined; controls?: any; }[]; }[]'.
+        Type 'undefined' is not assignable to type '{ title: string; sections: { title: string; type: "presentation" | "report" | "diagram"; prompt: string; guidelines?: string[] | undefined; behaviors?: { name: string; type: "behavior" | "persona"; }[] | undefined; controls?: any; }[]; }[]'.
+
+89             return createReportTemplateApi(data, token);
+                                              ~~~~
+
+src/hooks/data/use-templates.ts:102:56 - error TS2345: Argument of type '{ content?: { title: string; sections: { type: "code" | "presentation" | "report" | "diagram" | "math"; title: string; content?: string | undefined; context?: { externalContext?: Record<string, "context" | ... 4 more ... | "dataset"> | undefined; sections?: Record<...> | undefined; } | undefined; ... 7 more ...; beh...' is not assignable to parameter of type 'Partial<Omit<ReportTemplateProperties, "id">>'.
+  Types of property 'content' are incompatible.
+    Type '{ title: string; sections: { type: "code" | "presentation" | "report" | "diagram" | "math"; title: string; content?: string | undefined; context?: { externalContext?: Record<string, "context" | ... 4 more ... | "dataset"> | undefined; sections?: Record<...> | undefined; } | undefined; ... 7 more ...; behaviors?: { ....' is not assignable to type '{ title: string; sections: { title: string; type: "presentation" | "report" | "diagram"; prompt: string; guidelines?: string[] | undefined; behaviors?: { name: string; type: "behavior" | "persona"; }[] | undefined; controls?: any; }[]; }[] | undefined'.
+      Type '{ title: string; sections: { type: "code" | "presentation" | "report" | "diagram" | "math"; title: string; content?: string | undefined; context?: { externalContext?: Record<string, "context" | ... 4 more ... | "dataset"> | undefined; sections?: Record<...> | undefined; } | undefined; ... 7 more ...; behaviors?: { ....' is not assignable to type '{ title: string; sections: { title: string; type: "presentation" | "report" | "diagram"; prompt: string; guidelines?: string[] | undefined; behaviors?: { name: string; type: "behavior" | "persona"; }[] | undefined; controls?: any; }[]; }[]'.
+        Type '{ title: string; sections: { type: "code" | "presentation" | "report" | "diagram" | "math"; title: string; content?: string | undefined; context?: { externalContext?: Record<string, "context" | ... 4 more ... | "dataset"> | undefined; sections?: Record<...> | undefined; } | undefined; ... 7 more ...; behaviors?: { ....' is not assignable to type '{ title: string; sections: { title: string; type: "presentation" | "report" | "diagram"; prompt: string; guidelines?: string[] | undefined; behaviors?: { name: string; type: "behavior" | "persona"; }[] | undefined; controls?: any; }[]; }'.
+          Types of property 'sections' are incompatible.
+            Type '{ type: "code" | "presentation" | "report" | "diagram" | "math"; title: string; content?: string | undefined; context?: { externalContext?: Record<string, "context" | "example" | "question" | "textbook" | "guidelines" | "dataset"> | undefined; sections?: Record<...> | undefined; } | undefined; ... 7 more ...; behavi...' is not assignable to type '{ title: string; type: "presentation" | "report" | "diagram"; prompt: string; guidelines?: string[] | undefined; behaviors?: { name: string; type: "behavior" | "persona"; }[] | undefined; controls?: any; }[]'.
+              Type '{ type: "code" | "presentation" | "report" | "diagram" | "math"; title: string; content?: string | undefined; context?: { externalContext?: Record<string, "context" | "example" | "question" | "textbook" | "guidelines" | "dataset"> | undefined; sections?: Record<...> | undefined; } | undefined; ... 7 more ...; behavi...' is not assignable to type '{ title: string; type: "presentation" | "report" | "diagram"; prompt: string; guidelines?: string[] | undefined; behaviors?: { name: string; type: "behavior" | "persona"; }[] | undefined; controls?: any; }'.
+                Types of property 'type' are incompatible.
+                  Type '"code" | "presentation" | "report" | "diagram" | "math"' is not assignable to type '"presentation" | "report" | "diagram"'.
+                    Type '"code"' is not assignable to type '"presentation" | "report" | "diagram"'.
+
+102             return updateReportTemplateApi(templateId, data, token);
+                                                           ~~~~
+
+src/hooks/data/use-templates.ts:135:9 - error TS2769: No overload matches this call.
+  Overload 1 of 3, '(options: DefinedInitialDataOptions<PptxTemplateProperties[], Error, PptxTemplateProperties[], readonly unknown[]>, queryClient?: QueryClient | undefined): DefinedUseQueryResult<...>', gave the following error.
+    Type '() => Promise<PresentationTemplateProperties[]>' is not assignable to type 'QueryFunction<PptxTemplateProperties[], readonly unknown[]>'.
+      Type 'Promise<PresentationTemplateProperties[]>' is not assignable to type 'PptxTemplateProperties[] | Promise<PptxTemplateProperties[]>'.
+        Type 'Promise<PresentationTemplateProperties[]>' is not assignable to type 'Promise<PptxTemplateProperties[]>'.
+          Type 'PresentationTemplateProperties[]' is not assignable to type 'PptxTemplateProperties[]'.
+            Type 'PresentationTemplateProperties' is missing the following properties from type 'PptxTemplateProperties': styles, imageUrl, dataAiHint
+  Overload 2 of 3, '(options: UndefinedInitialDataOptions<PptxTemplateProperties[], Error, PptxTemplateProperties[], readonly unknown[]>, queryClient?: QueryClient | undefined): UseQueryResult<...>', gave the following error.
+    Type '() => Promise<PresentationTemplateProperties[]>' is not assignable to type 'unique symbol | QueryFunction<PptxTemplateProperties[], readonly unknown[], never> | undefined'.
+      Type '() => Promise<PresentationTemplateProperties[]>' is not assignable to type 'QueryFunction<PptxTemplateProperties[], readonly unknown[], never>'.
+        Type 'Promise<PresentationTemplateProperties[]>' is not assignable to type 'PptxTemplateProperties[] | Promise<PptxTemplateProperties[]>'.
+          Type 'Promise<PresentationTemplateProperties[]>' is not assignable to type 'Promise<PptxTemplateProperties[]>'.
+            Type 'PresentationTemplateProperties[]' is not assignable to type 'PptxTemplateProperties[]'.
+              Type 'PresentationTemplateProperties' is missing the following properties from type 'PptxTemplateProperties': styles, imageUrl, dataAiHint
+  Overload 3 of 3, '(options: UseQueryOptions<PptxTemplateProperties[], Error, PptxTemplateProperties[], readonly unknown[]>, queryClient?: QueryClient | undefined): UseQueryResult<...>', gave the following error.
+    Type '() => Promise<PresentationTemplateProperties[]>' is not assignable to type 'unique symbol | QueryFunction<PptxTemplateProperties[], readonly unknown[], never> | undefined'.
+      Type '() => Promise<PresentationTemplateProperties[]>' is not assignable to type 'QueryFunction<PptxTemplateProperties[], readonly unknown[], never>'.
+        Type 'Promise<PresentationTemplateProperties[]>' is not assignable to type 'PptxTemplateProperties[] | Promise<PptxTemplateProperties[]>'.
+          Type 'Promise<PresentationTemplateProperties[]>' is not assignable to type 'Promise<PptxTemplateProperties[]>'.
+            Type 'PresentationTemplateProperties[]' is not assignable to type 'PptxTemplateProperties[]'.
+              Type 'PresentationTemplateProperties' is missing the following properties from type 'PptxTemplateProperties': styles, imageUrl, dataAiHint
+
+135         queryFn: fetchPresentationTemplatesApi,
+            ~~~~~~~
+
+  node_modules/@tanstack/react-query/build/modern/queryOptions.d.ts:12:5
+    12     queryFn?: QueryFunction<TQueryFnData, TQueryKey>;
+           ~~~~~~~
+    The expected type comes from property 'queryFn' which is declared here on type 'DefinedInitialDataOptions<PptxTemplateProperties[], Error, PptxTemplateProperties[], readonly unknown[]>'
+  node_modules/@tanstack/query-core/build/modern/hydration-DksKBgQq.d.ts:614:5
+    614     queryFn?: QueryFunction<TQueryFnData, TQueryKey, TPageParam> | SkipToken;
+            ~~~~~~~
+    The expected type comes from property 'queryFn' which is declared here on type 'UndefinedInitialDataOptions<PptxTemplateProperties[], Error, PptxTemplateProperties[], readonly unknown[]>'
+  node_modules/@tanstack/query-core/build/modern/hydration-DksKBgQq.d.ts:614:5
+    614     queryFn?: QueryFunction<TQueryFnData, TQueryKey, TPageParam> | SkipToken;
+            ~~~~~~~
+    The expected type comes from property 'queryFn' which is declared here on type 'UseQueryOptions<PptxTemplateProperties[], Error, PptxTemplateProperties[], readonly unknown[]>'
+
+src/hooks/report-mode/use-ai-actions.ts:191:39 - error TS1361: 'Chapter' cannot be used as a value because it was imported using 'import type'.
+
+191             if (newChapter instanceof Chapter) {
+                                          ~~~~~~~
+
+  src/hooks/report-mode/use-ai-actions.ts:18:15
+    18 import type { Chapter, Project, Section } from '@/lib/models';
+                     ~~~~~~~
+    'Chapter' was imported here.
+
+src/hooks/report-mode/use-ai-actions.ts:193:70 - error TS4104: The type 'readonly Section[]' is 'readonly' and cannot be assigned to the mutable type '(Section | SectionProperties)[]'.
+
+193                 return p.updateChapter(data.chapterId, c => c.with({ sections: newChapter.sections }));
+                                                                         ~~~~~~~~
+
+  src/lib/models/chapter.ts:10:3
+    10   sections?: (Section | SectionProperties)[];
+         ~~~~~~~~
+    The expected type comes from property 'sections' which is declared here on type 'Partial<ChapterProperties>'
+
+src/hooks/report-mode/use-chapter-actions.ts:11:35 - error TS2305: Module '"@/lib/models"' has no exported member 'ManipulationType'.
+
+11 import { Chapter, SectionContext, ManipulationType } from '@/lib/models';
+                                     ~~~~~~~~~~~~~~~~
+
+src/hooks/util/useExport.ts:99:20 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(data: string | Blob, filename?: string | undefined, options?: FileSaverOptions | undefined): void', gave the following error.
+    Argument of type 'Blob | Buffer<ArrayBufferLike>' is not assignable to parameter of type 'string | Blob'.
+      Type 'Buffer<ArrayBufferLike>' is not assignable to type 'string | Blob'.
+        Type 'Buffer<ArrayBufferLike>' is missing the following properties from type 'Blob': size, type, arrayBuffer, bytes, and 2 more.
+  Overload 2 of 2, '(data: string | Blob, filename?: string | undefined, disableAutoBOM?: boolean | undefined): void', gave the following error.
+    Argument of type 'Blob | Buffer<ArrayBufferLike>' is not assignable to parameter of type 'string | Blob'.
+      Type 'Buffer<ArrayBufferLike>' is not assignable to type 'string | Blob'.
+        Type 'Buffer<ArrayBufferLike>' is missing the following properties from type 'Blob': size, type, arrayBuffer, bytes, and 2 more.
+
+99             saveAs(blob, `${project.name.replace(/\s+/g, '_')}_presentation.pptx`);
+                      ~~~~
+
+
+src/hooks/util/useMarkdownParser.ts:91:79 - error TS2322: Type 'readonly Section[] | undefined' is not assignable to type '(Section | SectionProperties)[] | undefined'.
+  The type 'readonly Section[]' is 'readonly' and cannot be assigned to the mutable type '(Section | SectionProperties)[]'.
+
+91         currentChapter = new Chapter({ id: existingChapter?.id, title: title, sections: existingChapter?.sections });
+                                                                                 ~~~~~~~~
+
+  src/lib/models/chapter.ts:10:3
+    10   sections?: (Section | SectionProperties)[];
+         ~~~~~~~~
+    The expected type comes from property 'sections' which is declared here on type 'ChapterProperties'
+
+src/hooks/writing-tools/use-ai-researcher-logic.ts:216:27 - error TS2345: Argument of type 'ZodObject<{ topic: ZodString; depth: ZodOptional<ZodEnum<["basic", "comprehensive", "in-depth"]>>; }, "strip", ZodTypeAny, { topic: string; depth?: "basic" | ... 2 more ... | undefined; }, { ...; }> | ZodObject<...> | ZodObject<...> | ZodObject<...>' is not assignable to parameter of type 'ZodType<{ topic: string; depth?: "basic" | "comprehensive" | "in-depth" | undefined; }, any, any>'.
+  Type 'ZodObject<{ question: ZodString; context: ZodOptional<ZodString>; useWebSearch: ZodDefault<ZodOptional<ZodBoolean>>; maxSources: ZodOptional<...>; }, "strip", ZodTypeAny, { ...; }, { ...; }>' is not assignable to type 'ZodType<{ topic: string; depth?: "basic" | "comprehensive" | "in-depth" | undefined; }, any, any>'.
+    Types of property '_type' are incompatible.
+      Property 'topic' is missing in type '{ question: string; useWebSearch: boolean; context?: string | undefined; maxSources?: number | undefined; }' but required in type '{ topic: string; depth?: "basic" | "comprehensive" | "in-depth" | undefined; }'.
+
+216     resolver: zodResolver(getSchema(researchMode)),
+                              ~~~~~~~~~~~~~~~~~~~~~~~
+
+  src/hooks/writing-tools/use-ai-researcher-logic.ts:16:3
+    16   topic: z.string().min(10, 'Please enter a more specific research topic.'),
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    'topic' is declared here.
+
+src/hooks/writing-tools/use-generate-toc-logic.ts:39:11 - error TS2322: Type '{ title: string; sections: string[]; }' is not assignable to type 'string'.
+
+39           {
+             ~
+40             title: "Chapter 1: Introduction (Sample)",
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+41             sections: ["1.1 Problem Statement", "1.2 Project Objectives", "1.3 Scope of Work"],
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+42           },
+   ~~~~~~~~~~~
+
+src/hooks/writing-tools/use-generate-toc-logic.ts:43:11 - error TS2322: Type '{ title: string; sections: string[]; }' is not assignable to type 'string'.
+
+43           {
+             ~
+44             title: "Chapter 2: System Analysis (Sample)",
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+45             sections: ["2.1 Functional Requirements", "2.2 Non-Functional Requirements", "2.3 User Stories"],
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+46           },
+   ~~~~~~~~~~~
+
+src/hooks/writing-tools/use-generate-toc-logic.ts:47:11 - error TS2322: Type '{ title: string; sections: string[]; }' is not assignable to type 'string'.
+
+47           {
+             ~
+48             title: "Chapter 3: Conclusion (Sample)",
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+49             sections: ["3.1 Final Summary", "3.2 Future Work"],
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+50           },
+   ~~~~~~~~~~~
+
+src/hooks/writing-tools/use-generate-toc-logic.ts:81:74 - error TS2345: Argument of type 'string[]' is not assignable to parameter of type '{ title: string; sections: string[]; }[]'.
+  Type 'string' is not assignable to type '{ title: string; sections: string[]; }'.
+
+81   const generatedMarkdown = useMemo(() => (results ? formatTocToMarkdown(results.tableOfContents) : ''), [results]);
+                                                                            ~~~~~~~~~~~~~~~~~~~~~~~
+
+src/hooks/writing-tools/use-presentation-outline-logic.ts:8:15 - error TS2305: Module '"@/ai/schemas"' has no exported member 'GeneratePresentationOutlineOutput'.
+
+8 import type { GeneratePresentationOutlineOutput } from '@/ai/schemas';
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/hooks/writing-tools/use-presentation-outline-logic.ts:45:58 - error TS7006: Parameter 'item' implicitly has an 'any' type.
+
+45     ? `# ${results.cover.title}\n\n${results.outline.map(item => `## ${item.title}\n${item.content}`).join('\n\n')}`
+                                                            ~~~~
+
+src/hooks/writing-tools/use-writing-tool.ts:4:10 - error TS2305: Module '"@/ai/schemas"' has no exported member 'AIFlowInput'.
+
+4 import { AIFlowInput } from '@/ai/schemas';
+           ~~~~~~~~~~~
+
+src/hooks/writing-tools/use-writing-tool.ts:39:17 - error TS2554: Expected 4 arguments, but got 3.
+
+39         options.onSuccess(data, variables, context);
+                   ~~~~~~~~~
+
+  node_modules/@tanstack/query-core/build/modern/hydration-DksKBgQq.d.ts:1201:87
+    1201     onSuccess?: (data: TData, variables: TVariables, onMutateResult: TOnMutateResult, context: MutationFunctionContext) => Promise<unknown> | unknown;
+                                                                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    An argument for 'context' was not provided.
+
+src/hooks/writing-tools/use-writing-tool.ts:49:17 - error TS2554: Expected 4 arguments, but got 3.
+
+49         options.onError(error, variables, context);
+                   ~~~~~~~
+
+  node_modules/@tanstack/query-core/build/modern/hydration-DksKBgQq.d.ts:1202:99
+    1202     onError?: (error: TError, variables: TVariables, onMutateResult: TOnMutateResult | undefined, context: MutationFunctionContext) => Promise<unknown> | unknown;
+                                                                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    An argument for 'context' was not provided.
+
+src/lib/db/seed-data/report-templates.ts:29:72 - error TS2322: Type '"formal"' is not assignable to type '"professional" | "casual" | "persuasive" | "academic" | "technical" | "explanatory" | undefined'.
+
+29                         controls: { ...defaultControls, formality: 90, tone: 'formal' },
+                                                                          ~~~~
+
+src/lib/db/seed-sections.ts:12:43 - error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+
+12     const docRef = sectionsCollection.doc(section.id);
+                                             ~~~~~~~~~~
+
+src/lib/db/seed.ts:31:51 - error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+
+31             const docRef = sectionsCollection.doc(section.id);
+                                                     ~~~~~~~~~~
+
+src/lib/editor/EditorController.ts:27:65 - error TS2339: Property 'setFontSize' does not exist on type 'ChainedCommands'.
+
+27     setFontSize = (size: string) => this.editor.chain().focus().setFontSize(size).run();
+                                                                   ~~~~~~~~~~~
+
+src/lib/editor/plantUml-extension.tsx:88:3 - error TS2322: Type '(this: { name: string; options: any; storage: any; editor: Editor; type: NodeType; parent: (() => Partial<RawCommands>) | undefined; }) => { insertPlantUML: () => ({ commands }: { ...; }) => any; }' is not assignable to type '(this: { name: string; options: any; storage: any; editor: Editor; type: NodeType; parent: (() => Partial<RawCommands>) | undefined; }) => Partial<RawCommands>'.
+  Type '{ insertPlantUML: () => ({ commands }: { commands: any; }) => any; }' has no properties in common with type 'Partial<RawCommands>'.
+
+88   addCommands() {
+     ~~~~~~~~~~~
+
+src/lib/editor/plantUml-extension.tsx:90:32 - error TS7031: Binding element 'commands' implicitly has an 'any' type.
+
+90       insertPlantUML: () => ({ commands }) => {
+                                  ~~~~~~~~
+
+src/lib/editor/slash-command.tsx:50:147 - error TS2339: Property 'insertPlantUML' does not exist on type 'ChainedCommands'.
+
+50   { title: 'PlantUML Diagram', description: 'Embed a live PlantUML diagram.', icon: <GitGraph size={20} />, command: () => editor.chain().focus().insertPlantUML().run() },
+                                                                                                                                                     ~~~~~~~~~~~~~~
+
+src/lib/markdown-to-pptx-converter.ts:119:27 - error TS2559: Type '"nodebuffer"' has no properties in common with type 'WriteProps'.
+
+119         return pptx.write('nodebuffer') as Promise<Buffer>;
+                              ~~~~~~~~~~~~
+
+src/lib/markdown-to-pptx-converter.ts:121:9 - error TS2322: Type 'string | ArrayBuffer | Uint8Array<ArrayBufferLike> | Blob' is not assignable to type 'Blob | Buffer<ArrayBufferLike>'.
+  Type 'string' is not assignable to type 'Blob | Buffer<ArrayBufferLike>'.
+
+121         return pptx.write('blob');
+            ~~~~~~
+
+src/lib/markdown-to-pptx-converter.ts:121:27 - error TS2559: Type '"blob"' has no properties in common with type 'WriteProps'.
+
+121         return pptx.write('blob');
+                              ~~~~~~
+
+src/lib/markdown-to-word-converter.ts:72:34 - error TS2339: Property 'push' does not exist on type 'readonly IParagraphStyleOptions[]'.
+
+72     finalStyles.paragraphStyles!.push({
+                                    ~~~~
+
+src/lib/models/__tests__/project.test.ts:7:42 - error TS2304: Cannot find name 'ProjectProperties'.
+
+7 const createSoftwareDesignTemplate = (): ProjectProperties => ({
+                                           ~~~~~~~~~~~~~~~~~
+
+src/lib/models/chapter.ts:28:7 - error TS4104: The type 'readonly Section[]' is 'readonly' and cannot be assigned to the mutable type '(Section | SectionProperties)[]'.
+
+28       sections: props.sections ? props.sections.map(s => s instanceof Section ? s : new Section(s)) : this.sections,
+         ~~~~~~~~
+
+  src/lib/models/chapter.ts:10:3
+    10   sections?: (Section | SectionProperties)[];
+         ~~~~~~~~
+    The expected type comes from property 'sections' which is declared here on type 'ChapterProperties'
+
+src/lib/models/project.ts:230:24 - error TS4104: The type 'ProjectContent' is 'readonly' and cannot be assigned to the mutable type '(ChapterProperties | Section | SectionProperties | Chapter)[]'.
+
+230     return this.with({ content: newContent });
+                           ~~~~~~~
+
+  src/lib/models/project.ts:29:3
+    29   content?: (Chapter | Section | ChapterProperties | SectionProperties)[];
+         ~~~~~~~
+    The expected type comes from property 'content' which is declared here on type 'Partial<ProjectProperties>'
+
+src/lib/models/project.ts:360:41 - error TS18048: 'activeSectionIndex' is possibly 'undefined'.
+
+360     if (activeChapter && overChapter && activeSectionIndex > -1 && overSectionIndex > -1) {
+                                            ~~~~~~~~~~~~~~~~~~
+
+src/lib/models/project.ts:360:68 - error TS18048: 'overSectionIndex' is possibly 'undefined'.
+
+360     if (activeChapter && overChapter && activeSectionIndex > -1 && overSectionIndex > -1) {
+                                                                       ~~~~~~~~~~~~~~~~
+
+src/lib/models/project.ts:363:72 - error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+
+363             const newSections = arrayMove([...activeChapter.sections], activeSectionIndex, overSectionIndex);
+                                                                           ~~~~~~~~~~~~~~~~~~
+
+src/lib/models/project.ts:374:71 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(start: number, deleteCount?: number | undefined): Section[]', gave the following error.
+    Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+  Overload 2 of 2, '(start: number, deleteCount: number, ...items: Section[]): Section[]', gave the following error.
+    Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+
+374             const [movedSection] = [...sourceChapter.sections].splice(activeSectionIndex, 1);
+                                                                          ~~~~~~~~~~~~~~~~~~
+
+
+src/lib/models/project.ts:376:36 - error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+
+376             newDestSections.splice(overSectionIndex, 0, movedSection);
+                                       ~~~~~~~~~~~~~~~~
+
+src/lib/pptx-styles.ts:4:15 - error TS2305: Module '"@/lib/models"' has no exported member 'PptxStyleOptions'.
+
+4 import type { PptxStyleOptions, PptxTemplateProperties } from '@/lib/models';
+                ~~~~~~~~~~~~~~~~
+
+src/lib/word-converter/node-handlers.ts:3:15 - error TS2305: Module '"docx"' has no exported member 'IFootnotesOptions'.
+
+3 import type { IFootnotesOptions } from 'docx';
+                ~~~~~~~~~~~~~~~~~
+
+src/services/api/authService.ts:5:15 - error TS2305: Module '"@/lib/types"' has no exported member 'LoginCredentials'.
+
+5 import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
+                ~~~~~~~~~~~~~~~~
+
+
+Found 104 errors in 64 files.
+
+Errors  Files
+     1  next.config.ts:56
+     3  src/ai/flows/__tests__/generate-report-section.test.ts:28
+     1  src/ai/flows/generate-plantuml.ts:127
+     1  src/ai/flows/generate-project-blueprint.ts:42
+     1  src/ai/flows/generate-ui-description.ts:38
+     1  src/ai/flows/manipulate-text.ts:43
+     1  src/ai/flows/paraphrase-text.ts:44
+     1  src/ai/flows/solve-assignments.ts:55
+     1  src/ai/flows/translate-text.ts:50
+     1  src/app/admin/manage-users/[id]/edit/page.tsx:64
+     1  src/app/admin/settings/page.tsx:6
+     1  src/app/api/admin/gift-credits/route.ts:67
+     1  src/app/api/export/docx/route.ts:45
+     2  src/app/api/process-file/route.ts:46
+     1  src/app/profile/ApiKeysForm.tsx:50
+     8  src/app/writing-tools/generate-toc/page.tsx:15
+     1  src/components/admin/users/CreateCategoryDialog.tsx:9
+     2  src/components/agent/AgentPlayground.tsx:47
+     1  src/components/auth/LoginForm.tsx:16
+     1  src/components/auth/SignupForm.tsx:41
+     1  src/components/pricing/PurchaseCreditsDialog.tsx:122
+     3  src/components/report-mode/MarkdownEditor.tsx:31
+     1  src/components/report-mode/dialogs/ChapterToolsDialog.tsx:165
+     4  src/components/report-mode/dialogs/GenerateTocDialog.tsx:87
+     1  src/components/report-mode/file-manager/AnalystAgent.tsx:128
+     2  src/components/report-mode/file-manager/PdfPreview.tsx:51
+     1  src/components/report-mode/settings/ProjectSettingsPanel.tsx:136
+     1  src/components/report-mode/templates/ApplyTemplatePanel.tsx:94
+     1  src/components/shared/CoverPage.tsx:60
+     1  src/components/shared/Header.tsx:100
+     2  src/components/sidebar/AgentDialog.tsx:78
+     2  src/components/ui/dropdown-menu.tsx:54
+     2  src/components/ui/menubar.tsx:80
+     2  src/components/writing-tools/GenerateUIDescriptionTool.tsx:36
+     1  src/components/writing-tools/MarkdownToWordTool.tsx:82
+     2  src/hooks/auth/use-auth-mutations.ts:15
+     1  src/hooks/core/__tests__/useBuilderStore.test.ts:6
+     1  src/hooks/core/use-builder-page.ts:56
+     1  src/hooks/core/useBuilderStore.ts:121
+     1  src/hooks/data/use-payment.ts:6
+     1  src/hooks/data/use-sections.ts:58
+     4  src/hooks/data/use-templates.ts:64
+     2  src/hooks/report-mode/use-ai-actions.ts:191
+     1  src/hooks/report-mode/use-chapter-actions.ts:11
+     1  src/hooks/util/useExport.ts:99
+     1  src/hooks/util/useMarkdownParser.ts:91
+     1  src/hooks/writing-tools/use-ai-researcher-logic.ts:216
+     4  src/hooks/writing-tools/use-generate-toc-logic.ts:39
+     2  src/hooks/writing-tools/use-presentation-outline-logic.ts:8
+     3  src/hooks/writing-tools/use-writing-tool.ts:4
+     1  src/lib/db/seed-data/report-templates.ts:29
+     1  src/lib/db/seed-sections.ts:12
+     1  src/lib/db/seed.ts:31
+     1  src/lib/editor/EditorController.ts:27
+     2  src/lib/editor/plantUml-extension.tsx:88
+     1  src/lib/editor/slash-command.tsx:50
+     3  src/lib/markdown-to-pptx-converter.ts:119
+     1  src/lib/markdown-to-word-converter.ts:72
+     1  src/lib/models/__tests__/project.test.ts:7
+     1  src/lib/models/chapter.ts:28
+     6  src/lib/models/project.ts:230
+     1  src/lib/pptx-styles.ts:4
+     1  src/lib/word-converter/node-handlers.ts:3
+     1  src/services/api/authService.ts:5
+⚡ arkan-beta-stable ~/arkan 

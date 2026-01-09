@@ -28,7 +28,7 @@ async function seed() {
         const sectionsCollection = adminDb.collection('sections');
         defaultSections.forEach(section => {
             const { ...sectionData } = section;
-            const docRef = sectionsCollection.doc(section.id);
+            const docRef = sectionsCollection.doc(section.id || 'unknown');
             batch.set(docRef, { ...sectionData });
         });
         console.log(`${defaultSections.length} Sections added to batch.`);

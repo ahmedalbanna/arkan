@@ -116,6 +116,15 @@ export interface PublicSettings {
     newUserCredits: number;
 }
 
+// Alias for PublicSettings (used in admin pages)
+export type AppSettings = PublicSettings;
+
+// Login credentials type (re-exported from authUtils)
+export interface LoginCredentials {
+    email: string;
+    password: string;
+}
+
 export interface UploadedFile {
     id: string;
     name: string;

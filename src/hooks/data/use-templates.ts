@@ -17,23 +17,16 @@ import {
 } from '@/services/api/templateService';
 import {
     type ReportTemplateProperties,
-    CreateReportTemplateSchema,
-    UpdateReportTemplateSchema,
     type PptxTemplateProperties,
-} from '@/lib/models';
+    type CreateReportTemplateData,
+    type UpdateReportTemplateData,
+    type CreatePresentationTemplateData,
+    type UpdatePresentationTemplateData,
+} from '@/lib/types';
 
 import { useBuilderStore } from '../core/useBuilderStore';
 import { useState } from 'react';
 import { useSections } from './use-sections';
-import { z } from 'zod';
-
-// Correctly infer types from Zod schemas
-type CreateReportTemplateData = z.infer<typeof CreateReportTemplateSchema>;
-type UpdateReportTemplateData = z.infer<typeof UpdateReportTemplateSchema>;
-
-// Dummy types for presentation templates as they are not fully defined
-type CreatePresentationTemplateData = any;
-type UpdatePresentationTemplateData = any;
 
 
 // ============================================================================
@@ -61,7 +54,7 @@ export function useApplyReportTemplate(onSuccessCallback?: () => void) {
 
         setIsApplying(true);
         try {
-            updateProject(p => p.applyTemplate(template, allSections || []));
+            updateProject(p => p.applyTemplate(template, (allSections || []).map(s => s.toStateObject())));
             toast({ title: "Template Applied", description: `Project structured with '${template.name}'.` });
             if (onSuccessCallback) {
                 onSuccessCallback();

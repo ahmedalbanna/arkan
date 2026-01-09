@@ -1,7 +1,6 @@
 
 'use client';
 
-import { AIFlowInput } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
 import { apiService } from '@/services/api/apiService'; // Use the new apiService
@@ -15,7 +14,7 @@ import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
  * @param options Optional React Query mutation options.
  * @returns A React Query mutation object.
  */
-export function useWritingTool<TData = unknown, TVariables = Omit<AIFlowInput, 'flow'>>(
+export function useWritingTool<TData = unknown, TVariables = any>(
   endpoint: string,
   options?: Omit<UseMutationOptions<TData, Error, TVariables>, 'mutationFn'>
 ) {

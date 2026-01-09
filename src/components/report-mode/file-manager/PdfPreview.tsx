@@ -46,6 +46,7 @@ export function PdfPreview({ fileUri }: PdfPreviewProps) {
     useEffect(() => {
         if (!pdf) return;
         async function renderPage() {
+            if (!pdf) return; // Additional null check for TypeScript
             setIsLoading(true);
             try {
                 const page = await pdf.getPage(currentPage);
@@ -56,11 +57,10 @@ export function PdfPreview({ fileUri }: PdfPreviewProps) {
                     if (context) {
                         canvas.height = viewport.height;
                         canvas.width = viewport.width;
-                        const renderContext = {
+                        await page.render({
                             canvasContext: context,
-                            viewport,
-                        };
-                        await page.render(renderContext).promise;
+                            viewport: viewport,
+                        } as any).promise;
                     }
                 }
             } catch (e: any) {

@@ -87,7 +87,7 @@ const PlantUML = Node.create({
 
   addCommands() {
     return {
-      insertPlantUML: () => ({ commands }) => {
+      insertPlantUML: () => ({ commands }: any) => {
         return commands.insertContent('<plant-uml></plant-uml>');
       },
     };

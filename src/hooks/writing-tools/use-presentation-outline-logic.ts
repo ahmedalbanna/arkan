@@ -5,7 +5,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
-import type { GeneratePresentationOutlineOutput } from '@/ai/schemas';
+// GeneratePresentationOutlineOutput type not yet defined in schemas
+type GeneratePresentationOutlineOutput = {
+  cover: { title: string };
+  outline: Array<{ title: string; content: string }>;
+};
 import { useLocalization } from '@/context/LocalizationContext';
 import { useState } from 'react';
 
@@ -42,7 +46,7 @@ export function usePresentationOutlineLogic() {
   const results = mutation.data as GeneratePresentationOutlineOutput | null;
 
   const textToCopy = results
-    ? `# ${results.cover.title}\n\n${results.outline.map(item => `## ${item.title}\n${item.content}`).join('\n\n')}`
+    ? `# ${results.cover.title}\n\n${results.outline.map((item: any) => `## ${item.title}\n${item.content}`).join('\n\n')}`
     : '';
 
   const handleCopy = () => {

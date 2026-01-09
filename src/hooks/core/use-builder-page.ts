@@ -53,7 +53,7 @@ export function useBuilderPageLogic() {
   };
 
   const updateProjectName = useCallback((name: string) => {
-    updateProject(p => { p.name = name; });
+    updateProject(p => p.with({ name }));
   }, [updateProject]);
 
   return {

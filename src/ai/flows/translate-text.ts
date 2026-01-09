@@ -47,7 +47,7 @@ const translateTextFlow = ai.defineFlow(
       }
     });
 
-    const { output } = await prompt({ flow: "translate-text", text, targetLang });
+    const { output } = await prompt({ text, targetLang });
     if (!output) {
       return { translatedText: '' };
     }

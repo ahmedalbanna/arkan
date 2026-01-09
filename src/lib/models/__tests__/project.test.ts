@@ -1,7 +1,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useBuilderStore } from '@/hooks';
-import { Project, Chapter, Section, defaultControls } from '@/lib/models';
+import { Project, Chapter, Section, defaultControls, type ProjectProperties } from '@/lib/models';
 
 // Mock function to create a software design template for testing
 const createSoftwareDesignTemplate = (): ProjectProperties => ({

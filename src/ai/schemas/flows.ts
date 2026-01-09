@@ -757,7 +757,10 @@ export const GenerateTocInputSchema = z.object({
 export type GenerateTocInput = z.infer<typeof GenerateTocInputSchema>;
 
 export const GenerateTocOutputSchema = z.object({
-    tableOfContents: z.array(z.string()).describe('A list of suggested section titles for the table of contents.'),
+    tableOfContents: z.array(z.object({
+        title: z.string().describe('Chapter title'),
+        sections: z.array(z.string()).describe('Section titles within the chapter'),
+    })).describe('A structured table of contents with chapters and sections.'),
 });
 export type GenerateTocOutput = z.infer<typeof GenerateTocOutputSchema>;
 
