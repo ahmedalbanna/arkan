@@ -5,7 +5,7 @@
  * graduation project documentation following academic standards.
  */
 
-import { z } from 'genkit';
+import { z } from 'zod';
 
 // ==================== ENUMS & CONSTANTS ====================
 

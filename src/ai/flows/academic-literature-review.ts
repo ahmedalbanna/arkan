@@ -20,7 +20,7 @@ import {
   checkLogicalFlowTool,
   validateCitationsTool,
 } from '@/ai/tools';
-import { z } from 'genkit';
+import { z } from 'zod';
 import { AcademicLiteratureReviewInputSchema, AcademicLiteratureReviewOutputSchema } from '../tools/schemas';
 
 export type AcademicLiteratureReviewInput = z.infer<typeof AcademicLiteratureReviewInputSchema>;

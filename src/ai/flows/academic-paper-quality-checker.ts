@@ -25,7 +25,7 @@ import {
   matchCitationsToReferencesTool,
   validateCitationsTool,
 } from '@/ai/tools';
-import { z } from 'genkit';
+import { z } from 'zod';
 import { AcademicPaperQualityCheckerInputSchema, AcademicPaperQualityCheckerOutputSchema } from '../tools/schemas';
 
 export type AcademicPaperQualityCheckerInput = z.infer<typeof AcademicPaperQualityCheckerInputSchema>;

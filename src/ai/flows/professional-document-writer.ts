@@ -20,7 +20,7 @@ import {
   analyzeToneTool,
   checkLogicalFlowTool
 } from '@/ai/tools';
-import { z } from 'genkit';
+import { z } from 'zod';
 import { ProfessionalDocumentWriterInputSchema, ProfessionalDocumentWriterOutputSchema } from '../tools/schemas';
 
 export type ProfessionalDocumentWriterInput = z.infer<typeof ProfessionalDocumentWriterInputSchema>;

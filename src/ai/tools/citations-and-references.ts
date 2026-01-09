@@ -22,6 +22,7 @@ import {
   type ValidateCitationsToolInput,
   type ValidateCitationsToolOutput,
 } from './schemas';
+import { z } from 'zod';
 
 /**
  * Citation Validator Tool

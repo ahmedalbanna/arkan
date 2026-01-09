@@ -14,6 +14,7 @@ import {
   type AnalyzeDocumentQualityToolInput,
   type AnalyzeDocumentQualityToolOutput,
 } from './schemas';
+import { z } from 'zod';
 
 /**
  * Comprehensive Document Quality Analyzer Tool

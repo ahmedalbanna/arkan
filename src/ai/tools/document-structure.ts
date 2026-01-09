@@ -22,6 +22,7 @@ import {
   type CheckLogicalFlowToolInput,
   type CheckLogicalFlowToolOutput,
 } from './schemas';
+import { z } from 'zod';
 
 /**
  * Document Structure Analyzer Tool

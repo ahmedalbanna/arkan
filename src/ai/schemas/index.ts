@@ -5,13 +5,9 @@
  */
 
 export * from './enums';
-export * from './flows';
 export * from './base-schemas';
-export { SolveAssignmentsInputSchema, SolveAssignmentsOutputSchema } from './flows';
-export type { SolveAssignmentsInput, SolveAssignmentsOutput } from './flows';
+export * from './flows';
 export * from './lecture-generator';
 export * from './template-schemas';
 export * from './graduation-project';
-export { GenerateUIDescriptionInputSchema, GenerateUIDescriptionOutputSchema } from './flows';
-export type { GenerateUIDescriptionInput, GenerateUIDescriptionOutput } from './flows';
 export * from './project-documentation';
