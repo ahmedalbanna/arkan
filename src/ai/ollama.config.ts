@@ -19,78 +19,35 @@ import { allTools } from './tools';
  * Ollama server configuration
  */
 export const OLLAMA_CONFIG = {
-  // Default Ollama server address
   serverAddress: process.env.OLLAMA_SERVER_URL || 'http://185.190.140.93:11434/',
   
-  // Recommended models for 8GB RAM
   models: {
-    // Primary model - Best balance for 8GB RAM
-    primary: {
-      name: 'gemma:2b',
-      displayName: 'Gemma 2B (Local)',
-      ramRequirement: '2-3GB',
-      useCase: 'General text generation, suitable for most tasks',
-    },
-    
-    // Lightweight alternative
-    lightweight: {
-      name: 'llama3.2:1b',
-      displayName: 'Llama 3.2 1B (Local)',
-      ramRequirement: '1-2GB',
-      useCase: 'Ultra-lightweight, fast responses',
-    },
-    
-    // Medium model (use with caution on 8GB)
-    medium: {
-      name: 'phi3:mini',
-      displayName: 'Phi-3 Mini (Local)',
-      ramRequirement: '3-4GB',
-      useCase: 'Better quality, slower on 8GB systems',
-    },
+    primary: { name: 'gemma:2b', displayName: 'Gemma 2B (Local)', ramRequirement: '2-3GB', useCase: 'General text generation' },
+    lightweight: { name: 'llama3.2:1b', displayName: 'Llama 3.2 1B (Local)', ramRequirement: '1-2GB', useCase: 'Ultra-lightweight, fast responses' },
+    medium: { name: 'phi3:mini', displayName: 'Phi-3 Mini (Local)', ramRequirement: '3-4GB', useCase: 'Better quality, slower on 8GB systems' },
   },
   
-  // Default model selection
   defaultModel: process.env.OLLAMA_DEFAULT_MODEL || 'gemma:2b',
 } as const;
 
 /**
- * Creates an Ollama-configured Genkit instance
- * 
- * @param modelName - The Ollama model to use (default: gemma:2b)
- * @returns Configured Genkit instance with Ollama support
+ * Pre-configured Genkit instance for Ollama.
+ * This instance is aware of ALL our supported local models, which is crucial.
  */
-export function configureOllamaAi(modelName?: string) {
-  const selectedModel = modelName || OLLAMA_CONFIG.defaultModel;
-  
-  return genkit({
-    plugins: [
-      ollama({
-        models: [
-          {
-            name: selectedModel,
-            type: 'generate',
-          },
-          // Add other ollama models you want to use here
-          { name: OLLAMA_CONFIG.models.primary.name, type: 'generate' },
-          { name: OLLAMA_CONFIG.models.lightweight.name, type: 'generate' },
-          { name: OLLAMA_CONFIG.models.medium.name, type: 'generate' },
-        ],
-        serverAddress: OLLAMA_CONFIG.serverAddress,
-      }),
-    ],
-    tools: allToolsList,
-  });
-}
+export const ollamaAi = genkit({
+  plugins: [
+    ollama({
+      models: [
+        { name: OLLAMA_CONFIG.models.primary.name, type: 'generate' },
+        { name: OLLAMA_CONFIG.models.lightweight.name, type: 'generate' },
+        { name: OLLAMA_CONFIG.models.medium.name, type: 'generate' },
+      ],
+      serverAddress: OLLAMA_CONFIG.serverAddress,
+    }),
+  ],
+  tools: allTools,
+});
 
-// Pre-initialize tool list for Ollama instance
-const { allTools: allToolsList } = require('./tools');
-
-
-/**
- * Standalone Ollama AI instance for local inference
- * Uses the default model (gemma:2b) optimized for 8GB RAM
- */
-export const ollamaAi = configureOllamaAi();
 
 /**
  * Model selector utility - returns appropriate model based on task

@@ -1,5 +1,4 @@
 
-
 /**
  * Example Flow: Using Local Ollama Models
  * 
@@ -8,7 +7,7 @@
  */
 
 import { ai, getModel } from '@/ai/genkit';
-import { OLLAMA_CONFIG } from '../ollama.config';
+import { ollamaAi, OLLAMA_CONFIG } from '../ollama.config';
 import { z } from 'zod';
 
 /**
@@ -46,8 +45,11 @@ export const localTextGenerationFlow = ai.defineFlow(
     
     console.log(`✓ Using ${provider} model: ${modelName}`);
 
+    // Use the correct AI instance based on the provider
+    const aiInstance = provider === 'ollama' ? ollamaAi : ai;
+    
     // Generate text
-    const response = await ai.generate({
+    const response = await aiInstance.generate({
       model: modelName,
       prompt: input.prompt,
       config: {
@@ -96,6 +98,8 @@ export const academicParagraphFlow = ai.defineFlow(
     const provider: 'google' | 'ollama' = input.useLocal ? 'ollama' : 'google';
     const modelName = await getModel('quality', provider); // Use quality model for this task
 
+    const aiInstance = provider === 'ollama' ? ollamaAi : ai;
+
     // Build prompt based on style
     const styleInstructions = {
       introduction: 'Write an engaging introduction paragraph that presents the topic and its importance.',
@@ -119,7 +123,7 @@ Write the paragraph now:
 `.trim();
 
     // Generate with local or cloud model
-    const response = await ai.generate({
+    const response = await aiInstance.generate({
       model: modelName,
       prompt,
       config: {
@@ -165,6 +169,7 @@ export const paraphraseFlow = ai.defineFlow(
   async (input) => {
     const provider: 'google' | 'ollama' = input.useLocal ? 'ollama' : 'google';
     const modelName = await getModel('fast', provider);
+    const aiInstance = provider === 'ollama' ? ollamaAi : ai;
 
     const styleInstructions = {
       formal: 'Use formal language and professional tone.',
@@ -180,7 +185,7 @@ ${input.text}
 
 Paraphrased version:`;
 
-    const response = await ai.generate({
+    const response = await aiInstance.generate({
       model: modelName,
       prompt,
       config: {
@@ -214,10 +219,10 @@ export const ollamaTestFlow = ai.defineFlow(
     outputSchema: OllamaTestOutputSchema,
   },
   async (input) => {
-    // Use the default model from the config for reliability
     const modelName = OLLAMA_CONFIG.defaultModel;
 
-    const response = await ai.generate({
+    // Use the dedicated ollamaAi instance
+    const response = await ollamaAi.generate({
       model: modelName,
       prompt: input.prompt,
     });
