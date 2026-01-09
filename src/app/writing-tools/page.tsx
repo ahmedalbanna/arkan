@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { AIToolCard } from '@/components/writing-tools/AIToolCard';
@@ -36,6 +37,7 @@ import {
   Network,
   Link2,
   BookCopy,
+  Server,
 } from 'lucide-react';
 
 export default function WritingToolsPage() {
@@ -77,6 +79,7 @@ export default function WritingToolsPage() {
     { name: 'Academic Literature Review', icon: BookCopy, href: '/writing-tools/academic-literature-review'},
     { name: 'Academic Paper Quality Checker', icon: ShieldCheck, href: '/writing-tools/academic-paper-quality-checker'},
     { name: 'Professional Document Writer', icon: FileText, href: '/writing-tools/professional-document-writer'},
+    { name: 'Ollama Server Test', icon: Server, href: '/writing-tools/ollama-test'},
   ];
 
   return (

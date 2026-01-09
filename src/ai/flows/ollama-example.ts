@@ -1,4 +1,5 @@
 
+
 /**
  * Example Flow: Using Local Ollama Models
  * 
@@ -192,6 +193,36 @@ Paraphrased version:`;
       paraphrased: response.text.trim(),
       model: modelName,
       provider,
+    };
+  }
+);
+
+const OllamaTestInputSchema = z.object({
+  prompt: z.string().min(1, "Prompt cannot be empty."),
+});
+
+const OllamaTestOutputSchema = z.object({
+  response: z.string(),
+  model: z.string(),
+});
+
+export const ollamaTestFlow = ai.defineFlow(
+  {
+    name: 'ollamaTestFlow',
+    inputSchema: OllamaTestInputSchema,
+    outputSchema: OllamaTestOutputSchema,
+  },
+  async (input) => {
+    const modelName = await getModel('fast', 'ollama');
+
+    const response = await ai.generate({
+      model: modelName,
+      prompt: input.prompt,
+    });
+
+    return {
+      response: response.text,
+      model: modelName,
     };
   }
 );
