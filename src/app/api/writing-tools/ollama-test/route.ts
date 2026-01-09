@@ -2,7 +2,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { ollamaTestFlow } from '@/ai/flows/ollama-example';
-import { runWritingToolAction } from '@/app/actions/aiActions';
 
 const inputSchema = z.object({
   prompt: z.string().min(1, 'Prompt cannot be empty.'),
@@ -20,9 +19,8 @@ export async function POST(request: Request) {
       );
     }
     
-    // We can use the existing server action for consistency and to ensure
-    // authentication and credit deduction (if any) are handled centrally.
-    const result = await runWritingToolAction('ollama-test', validation.data);
+    // Call the flow directly, bypassing the authenticated runWritingToolAction
+    const result = await ollamaTestFlow(validation.data);
 
     return NextResponse.json(result);
   } catch (error: any) {
