@@ -6,12 +6,18 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 import { BiasCheckInputSchema, BiasCheckOutputSchema, type BiasCheckInput, type BiasCheckOutput } from '@/ai/schemas';
 
 const biasCheckPrompt = ai.definePrompt({
   name: 'biasCheckPrompt',
   input: { schema: BiasCheckInputSchema },
   output: { schema: BiasCheckOutputSchema },
+  model: 'ollama/gemma:2b',
+  config: {
+    responseSchema: BiasCheckOutputSchema,
+    temperature: 0.3,
+  },
 
   prompt: `You are an expert in inclusive language and bias detection. Your task is to analyze the provided text and identify any language that may exhibit bias related to gender, race, age, ability, culture, or other stereotypes.
 
@@ -27,7 +33,8 @@ const biasCheckPrompt = ai.definePrompt({
 ---
 {{{text}}}
 ---
-`,
+
+**JSON Output:**`,
 });
 
 const biasCheckFlow = ai.defineFlow({
@@ -35,11 +42,30 @@ const biasCheckFlow = ai.defineFlow({
   inputSchema: BiasCheckInputSchema,
   outputSchema: BiasCheckOutputSchema,
 }, async (input) => {
-  const { output } = await biasCheckPrompt(input);
-  if (!output) {
-    throw new Error('Bias check failed to produce an output.');
+  try {
+    const { output } = await biasCheckPrompt(input);
+    
+    if (!output) {
+      throw new Error('No output received from the model.');
+    }
+
+    const validation = validateJsonOutput({
+      schema: BiasCheckOutputSchema,
+      output,
+      flowName: 'biasCheckFlow',
+      attemptRecovery: true,
+      enableLogging: true,
+    });
+
+    if (!validation.success) {
+      throw new Error(validation.error || 'Failed to validate output');
+    }
+
+    return validation.data!;
+  } catch (error) {
+    console.error('Error in biasCheckFlow:', error);
+    throw new Error(`biasCheck failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-  return output;
 });
 
 export async function biasCheckText(input: BiasCheckInput): Promise<BiasCheckOutput> {

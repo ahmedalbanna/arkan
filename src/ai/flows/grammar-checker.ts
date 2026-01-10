@@ -6,14 +6,38 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 import { GrammarCheckInputSchema, GrammarCheckOutputSchema, type GrammarCheckInput, type GrammarCheckOutput } from '@/ai/schemas';
 
 const grammarCheckPrompt = ai.definePrompt({
   name: 'grammarCheckPrompt',
   input: { schema: GrammarCheckInputSchema },
   output: { schema: GrammarCheckOutputSchema },
+  model: 'ollama/gemma:2b',
+  config: {
+    responseSchema: GrammarCheckOutputSchema,
+    temperature: 0.1, // Very low temp for accuracy
+  },
 
   prompt: `You are an expert English grammar, spelling, and punctuation checker. Your task is to analyze the following text, correct any errors, and provide a clear explanation for each correction.
+
+${getJsonPromptInstructions(`{
+  "correctedText": "The fully corrected text with preserved markdown",
+  "corrections": [
+    {
+      "original": "incorrect text",
+      "corrected": "correct text",
+      "explanation": "Why this was corrected",
+      "type": "grammar" | "spelling" | "punctuation"
+    }
+  ],
+  "statistics": {
+    "total": 5,
+    "grammar": 2,
+    "spelling": 2,
+    "punctuation": 1
+  }
+}`)}
 
 **Instructions:**
 1. Read the original text and identify ALL errors in three categories:
@@ -47,10 +71,8 @@ const grammarCheckPrompt = ai.definePrompt({
 ---
 {{{text}}}
 ---
-`,
-  config: {
-    temperature: 0.1, // Very low temp for accuracy
-  }
+
+**JSON Output:**`,
 });
 
 const grammarCheckFlow = ai.defineFlow({
@@ -58,23 +80,43 @@ const grammarCheckFlow = ai.defineFlow({
   inputSchema: GrammarCheckInputSchema,
   outputSchema: GrammarCheckOutputSchema,
 }, async (input) => {
-  const { output } = await grammarCheckPrompt(input);
-  if (!output) {
-    throw new Error("Grammar check failed.");
-  }
+  try {
+    const { output } = await grammarCheckPrompt(input);
+    
+    if (!output) {
+      throw new Error("No output received from the model.");
+    }
 
-  // Calculate statistics if not provided by the model
-  if (!output.statistics && output.corrections) {
-    const stats = {
-      total: output.corrections.length,
-      grammar: output.corrections.filter(c => c.type === 'grammar').length,
-      spelling: output.corrections.filter(c => c.type === 'spelling').length,
-      punctuation: output.corrections.filter(c => c.type === 'punctuation').length,
-    };
-    return { ...output, statistics: stats };
-  }
+    const validation = validateJsonOutput({
+      schema: GrammarCheckOutputSchema,
+      output,
+      flowName: 'grammarCheckFlow',
+      attemptRecovery: true,
+      enableLogging: true,
+    });
 
-  return output;
+    if (!validation.success) {
+      throw new Error(validation.error || 'Failed to validate output');
+    }
+
+    const result = validation.data!;
+
+    // Calculate statistics if not provided by the model
+    if (!result.statistics && result.corrections) {
+      const stats = {
+        total: result.corrections.length,
+        grammar: result.corrections.filter(c => c.type === 'grammar').length,
+        spelling: result.corrections.filter(c => c.type === 'spelling').length,
+        punctuation: result.corrections.filter(c => c.type === 'punctuation').length,
+      };
+      return { ...result, statistics: stats };
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Error in grammarCheckFlow:', error);
+    throw new Error(`Grammar check failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 });
 
 export async function grammarCheck(input: GrammarCheckInput): Promise<GrammarCheckOutput> {

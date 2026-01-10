@@ -6,12 +6,18 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 import { FactCheckInputSchema, FactCheckOutputSchema, type FactCheckInput, type FactCheckOutput } from '@/ai/schemas';
 
 const factCheckPrompt = ai.definePrompt({
   name: 'factCheckPrompt',
   input: { schema: FactCheckInputSchema },
   output: { schema: FactCheckOutputSchema },
+  model: 'ollama/gemma:2b',
+  config: {
+    responseSchema: FactCheckOutputSchema,
+    temperature: 0.3,
+  },
 
   prompt: `You are an expert fact-checker and research analyst. Your task is to analyze the following text, identify all verifiable claims, and determine their factual accuracy.
 
@@ -26,7 +32,8 @@ const factCheckPrompt = ai.definePrompt({
 ---
 {{{text}}}
 ---
-`,
+
+**JSON Output:**`,
 });
 
 const factCheckFlow = ai.defineFlow({
@@ -34,11 +41,30 @@ const factCheckFlow = ai.defineFlow({
   inputSchema: FactCheckInputSchema,
   outputSchema: FactCheckOutputSchema,
 }, async (input) => {
-  const { output } = await factCheckPrompt(input);
-  if (!output) {
-    throw new Error("Fact-checking failed to produce an output.");
+  try {
+    const { output } = await factCheckPrompt(input);
+    
+    if (!output) {
+      throw new Error('No output received from the model.');
+    }
+
+    const validation = validateJsonOutput({
+      schema: FactCheckOutputSchema,
+      output,
+      flowName: 'factCheckFlow',
+      attemptRecovery: true,
+      enableLogging: true,
+    });
+
+    if (!validation.success) {
+      throw new Error(validation.error || 'Failed to validate output');
+    }
+
+    return validation.data!;
+  } catch (error) {
+    console.error('Error in factCheckFlow:', error);
+    throw new Error(`factCheck failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-  return output;
 });
 
 export async function factCheckText(input: FactCheckInput): Promise<FactCheckOutput> {

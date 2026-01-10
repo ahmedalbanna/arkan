@@ -6,12 +6,18 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 import { SentenceStructureCheckInputSchema, SentenceStructureCheckOutputSchema, type SentenceStructureCheckInput, type SentenceStructureCheckOutput } from '@/ai/schemas';
 
 const sentenceStructureCheckPrompt = ai.definePrompt({
   name: 'sentenceStructureCheckPrompt',
   input: { schema: SentenceStructureCheckInputSchema },
   output: { schema: SentenceStructureCheckOutputSchema },
+  model: 'ollama/gemma:2b',
+  config: {
+    responseSchema: SentenceStructureOutputSchema,
+    temperature: 0.2,
+  },
 
   prompt: `You are an expert writing analyst. Your task is to analyze the provided text for its sentence structure.
 
@@ -35,7 +41,8 @@ const sentenceStructureCheckPrompt = ai.definePrompt({
 ---
 {{{text}}}
 ---
-`,
+
+**JSON Output:**`,
 });
 
 const sentenceStructureCheckFlow = ai.defineFlow({
@@ -43,11 +50,30 @@ const sentenceStructureCheckFlow = ai.defineFlow({
   inputSchema: SentenceStructureCheckInputSchema,
   outputSchema: SentenceStructureCheckOutputSchema,
 }, async (input) => {
-  const { output } = await sentenceStructureCheckPrompt(input);
-  if (!output) {
-    throw new Error('Sentence structure check failed to produce an output.');
+  try {
+    const { output } = await sentenceStructureCheckPrompt(input);
+    
+    if (!output) {
+      throw new Error('No output received from the model.');
+    }
+
+    const validation = validateJsonOutput({
+      schema: SentenceStructureCheckOutputSchema,
+      output,
+      flowName: 'sentenceStructureCheckFlow',
+      attemptRecovery: true,
+      enableLogging: true,
+    });
+
+    if (!validation.success) {
+      throw new Error(validation.error || 'Failed to validate output');
+    }
+
+    return validation.data!;
+  } catch (error) {
+    console.error('Error in sentenceStructureCheckFlow:', error);
+    throw new Error(`sentenceStructureCheck failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-  return output;
 });
 
 export async function sentenceStructureCheck(input: SentenceStructureCheckInput): Promise<SentenceStructureCheckOutput> {

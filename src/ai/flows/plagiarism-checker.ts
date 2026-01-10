@@ -6,12 +6,18 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 import { PlagiarismCheckInputSchema, PlagiarismCheckOutputSchema, type PlagiarismCheckInput, type PlagiarismCheckOutput } from '@/ai/schemas';
 
 const plagiarismCheckPrompt = ai.definePrompt({
   name: 'plagiarismCheckPrompt',
   input: { schema: PlagiarismCheckInputSchema },
   output: { schema: PlagiarismCheckOutputSchema },
+  model: 'ollama/gemma:2b',
+  config: {
+    responseSchema: PlagiarismCheckOutputSchema,
+    temperature: 0.3,
+  },
 
   prompt: `You are an advanced plagiarism detection engine. Your task is to analyze the following text for originality and find real web sources for any matching content.
 
@@ -28,7 +34,8 @@ const plagiarismCheckPrompt = ai.definePrompt({
 ---
 {{{text}}}
 ---
-`,
+
+**JSON Output:**`,
 });
 
 const plagiarismCheckFlow = ai.defineFlow({
@@ -36,11 +43,30 @@ const plagiarismCheckFlow = ai.defineFlow({
   inputSchema: PlagiarismCheckInputSchema,
   outputSchema: PlagiarismCheckOutputSchema,
 }, async (input) => {
-  const { output } = await plagiarismCheckPrompt(input);
-  if (!output) {
-    throw new Error('Plagiarism check failed to produce an output.');
+  try {
+    const { output } = await plagiarismCheckPrompt(input);
+    
+    if (!output) {
+      throw new Error('No output received from the model.');
+    }
+
+    const validation = validateJsonOutput({
+      schema: PlagiarismCheckOutputSchema,
+      output,
+      flowName: 'plagiarismCheckFlow',
+      attemptRecovery: true,
+      enableLogging: true,
+    });
+
+    if (!validation.success) {
+      throw new Error(validation.error || 'Failed to validate output');
+    }
+
+    return validation.data!;
+  } catch (error) {
+    console.error('Error in plagiarismCheckFlow:', error);
+    throw new Error(`plagiarismCheck failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-  return output;
 });
 
 export async function plagiarismCheck(input: PlagiarismCheckInput): Promise<PlagiarismCheckOutput> {
