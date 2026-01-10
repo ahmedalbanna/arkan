@@ -11,9 +11,21 @@ import { FactRetrievalInputSchema, FactRetrievalOutputSchema, type FactRetrieval
 const factRetrievalPrompt = ai.definePrompt({
     name: 'factRetrievalPrompt',
     input: { schema: FactRetrievalInputSchema },
-    output: { schema: FactRetrievalOutputSchema },
+    // No output schema - model returns plain JSON text
 
     prompt: `You are an expert fact-checker and information retrieval specialist. Your task is to retrieve accurate, verifiable facts based on the user's query.
+
+Output ONLY valid JSON in this format:
+{
+  "fact": "the retrieved fact",
+  "source": "https://...",
+  "sourceTitle": "source title",
+  "lastVerified": "verification date",
+  "confidence": "high" | "medium" | "low",
+  "relatedFacts": ["related fact 1", "related fact 2"]
+}
+
+Do NOT include any explanations or additional text outside the JSON.
 
 **Your Process:**
 1.  **Query Analysis:** Understand what specific fact or information is being requested.
@@ -59,11 +71,34 @@ const factRetrievalFlow = ai.defineFlow({
     inputSchema: FactRetrievalInputSchema,
     outputSchema: FactRetrievalOutputSchema,
 }, async (input) => {
-    const { output } = await factRetrievalPrompt(input);
-    if (!output) {
-        throw new Error('Fact Retrieval failed to produce an output.');
+    try {
+        const result = await factRetrievalPrompt(input);
+        if (!result) {
+            throw new Error('Fact Retrieval failed to produce an output.');
+        }
+
+        // Parse the JSON response
+        let output: FactRetrievalOutput;
+        try {
+            const jsonText = result.text || result.output || '';
+            output = JSON.parse(jsonText);
+        } catch (parseError) {
+            console.error('Failed to parse Fact Retrieval JSON:', parseError);
+            throw new Error('Fact Retrieval returned invalid JSON');
+        }
+
+        // Validate the parsed output
+        const validation = FactRetrievalOutputSchema.safeParse(output);
+        if (!validation.success) {
+            console.error('Fact Retrieval output validation failed:', validation.error);
+            throw new Error('Fact Retrieval output does not match expected structure');
+        }
+
+        return validation.data;
+    } catch (error) {
+        console.error('Error in factRetrievalFlow:', error);
+        throw new Error(`Fact Retrieval failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-    return output;
 });
 
 export async function retrieveFact(input: FactRetrievalInput): Promise<FactRetrievalOutput> {

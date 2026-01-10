@@ -11,9 +11,20 @@ import { QuestionAnsweringInputSchema, QuestionAnsweringOutputSchema, type Quest
 const questionAnsweringPrompt = ai.definePrompt({
   name: 'questionAnsweringPrompt',
   input: { schema: QuestionAnsweringInputSchema },
-  output: { schema: QuestionAnsweringOutputSchema },
+  // No output schema - model returns plain JSON text
 
   prompt: `You are an expert question-answering assistant. Your task is to provide accurate, comprehensive answers to questions, using either provided context or web search capabilities.
+
+Output ONLY valid JSON in this format:
+{
+  "answer": "comprehensive answer text",
+  "confidence": "high" | "medium" | "low",
+  "sources": [{"url": "...", "title": "...", "relevance": "..."}],
+  "contextUsed": true | false,
+  "additionalNotes": "any caveats or notes"
+}
+
+Do NOT include any explanations or additional text outside the JSON.
 
 **Answering Strategy:**
 - **Context Provided:** {{{context}}} (if provided, use as primary source)
@@ -66,11 +77,34 @@ const questionAnsweringFlow = ai.defineFlow({
   inputSchema: QuestionAnsweringInputSchema,
   outputSchema: QuestionAnsweringOutputSchema,
 }, async (input) => {
-  const { output } = await questionAnsweringPrompt(input);
-  if (!output) {
-    throw new Error('Question Answering failed to produce an output.');
+  try {
+    const result = await questionAnsweringPrompt(input);
+    if (!result) {
+      throw new Error('Question Answering failed to produce an output.');
+    }
+
+    // Parse the JSON response
+    let output: QuestionAnsweringOutput;
+    try {
+      const jsonText = result.text || result.output || '';
+      output = JSON.parse(jsonText);
+    } catch (parseError) {
+      console.error('Failed to parse Question Answering JSON:', parseError);
+      throw new Error('Question Answering returned invalid JSON');
+    }
+
+    // Validate the parsed output
+    const validation = QuestionAnsweringOutputSchema.safeParse(output);
+    if (!validation.success) {
+      console.error('Question Answering output validation failed:', validation.error);
+      throw new Error('Question Answering output does not match expected structure');
+    }
+
+    return validation.data;
+  } catch (error) {
+    console.error('Error in questionAnsweringFlow:', error);
+    throw new Error(`Question Answering failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-  return output;
 });
 
 export async function answerQuestion(input: QuestionAnsweringInput): Promise<QuestionAnsweringOutput> {

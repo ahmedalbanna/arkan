@@ -7,23 +7,26 @@
 
 import { ai } from '@/ai/genkit';
 import { AIResearcherInputSchema, AIResearcherOutputSchema, type AIResearcherInput, type AIResearcherOutput } from '@/ai/schemas';
-import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
+import { RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 
 const researcherPrompt = ai.definePrompt({
   name: 'aiResearcherPrompt',
   input: { schema: AIResearcherInputSchema },
-  output: { schema: AIResearcherOutputSchema },
+  // No output schema - model returns plain JSON text
   model: 'ollama/gemma:2b',
 
   prompt: `You are an expert research assistant with access to comprehensive knowledge. Your task is to conduct thorough, well-structured research on the given topic and provide a detailed report.
 
-${getJsonPromptInstructions(`{
+Output ONLY valid JSON in this format:
+{
   "summary": "comprehensive research summary",
   "keyPoints": ["point 1", "point 2", "..."],
   "sources": ["url1", "url2", "..."],
   "methodology": "research methodology description",
   "findings": ["finding 1", "finding 2", "..."]
-}`)}
+}
+
+Do NOT include any explanations or additional text outside the JSON.
 
 **Research Depth Guidelines:**
 - **Research Depth:** {{{depth}}}
@@ -78,26 +81,30 @@ const aiResearcherFlow = ai.defineFlow({
   outputSchema: AIResearcherOutputSchema,
 }, async (input) => {
   try {
-    const { output } = await researcherPrompt(input);
+    const result = await researcherPrompt(input);
     
-    if (!output) {
+    if (!result) {
       throw new Error('AI Researcher failed to produce an output.');
     }
 
-    // التحقق والتنظيف باستخدام الدالة المساعدة
-    const validationResult = validateJsonOutput({
-      schema: AIResearcherOutputSchema,
-      output,
-      flowName: 'aiResearcherFlow',
-      attemptRecovery: true,
-      enableLogging: true,
-    });
-
-    if (!validationResult.success) {
-      throw new Error(validationResult.error || 'Failed to validate research output');
+    // Parse the JSON response
+    let output: AIResearcherOutput;
+    try {
+      const jsonText = result.text || result.output || '';
+      output = JSON.parse(jsonText);
+    } catch (parseError) {
+      console.error('Failed to parse AI Researcher JSON:', parseError);
+      throw new Error('AI Researcher returned invalid JSON');
     }
 
-    return validationResult.data!;
+    // Validate the parsed output
+    const validation = AIResearcherOutputSchema.safeParse(output);
+    if (!validation.success) {
+      console.error('AI Researcher output validation failed:', validation.error);
+      throw new Error('AI Researcher output does not match expected structure');
+    }
+
+    return validation.data;
   } catch (error) {
     console.error('Error in aiResearcherFlow:', error);
     throw new Error(`AI Researcher failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
