@@ -21,6 +21,7 @@ import {
     checkLogicalFlowTool
 } from '@/ai/tools';
 import { z } from 'zod';
+import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 import { ProfessionalDocumentWriterInputSchema, ProfessionalDocumentWriterOutputSchema } from '../tools/schemas';
 
 export type ProfessionalDocumentWriterInput = z.infer<typeof ProfessionalDocumentWriterInputSchema>;
@@ -69,6 +70,9 @@ export const professionalDocumentWriterFlow = ai.defineFlow(
                     })
                 },
                 model: 'ollama/gemma:2b',
+                config: {
+                    temperature: RECOMMENDED_TEMPERATURES.BALANCED,
+                },
             },
             `You are an expert business writer. Create a detailed outline for the following document.
 
@@ -147,6 +151,9 @@ Create a structured outline with section names and key sub-points for each secti
                 },
                 output: { schema: z.object({ fullDocument: z.string() }) },
                 model: 'ollama/gemma:2b',
+                config: {
+                    temperature: RECOMMENDED_TEMPERATURES.BALANCED,
+                },
             },
             `You are an expert professional business writer. Write a complete ${documentType} based on the following requirements.
 
@@ -264,6 +271,9 @@ Write the complete professional document now with proper formatting and section 
                     },
                     output: { schema: z.object({ refinedDocument: z.string() }) },
                     model: 'ollama/gemma:2b',
+                    config: {
+                        temperature: RECOMMENDED_TEMPERATURES.BALANCED,
+                    },
                 },
                 `You are an expert editor. Refine the following professional document based on the feedback below.
 
@@ -341,6 +351,9 @@ Provide the refined document.`
                     })
                 },
                 model: 'ollama/gemma:2b',
+                config: {
+                    temperature: RECOMMENDED_TEMPERATURES.BALANCED,
+                },
             },
             `Extract the main sections from the following document:
 

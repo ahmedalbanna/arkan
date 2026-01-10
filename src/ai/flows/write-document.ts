@@ -7,14 +7,22 @@
 
 import { ai } from '@/ai/genkit';
 import { WriteDocumentInputSchema, WriteDocumentOutputSchema, type WriteDocumentInput, type WriteDocumentOutput } from '@/ai/schemas';
+import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 
 const universitySubjectMaterialPrompt = ai.definePrompt({
   name: 'universitySubjectMaterialPrompt',
   input: { schema: WriteDocumentInputSchema },
   output: { schema: WriteDocumentOutputSchema },
   model: 'ollama/gemma:2b',
+  config: {
+    responseSchema: WriteDocumentOutputSchema,
+    temperature: RECOMMENDED_TEMPERATURES.BALANCED,
+  },
   prompt: `You are an expert university lecturer with a talent for making complex topics simple and engaging for students. Your task is to create educational material for the given university-level subject.
-Your output must be a valid JSON object that adheres to the defined schema.
+
+${getJsonPromptInstructions(`{
+  "document": "Complete markdown document with headings, examples, and educational content"
+}`)}
 
 **Your Process:**
 1.  **Deconstruct the Request:** Fully understand the topic and any specific instructions.
@@ -41,7 +49,8 @@ You MUST structure your document according to the following headings. Ensure eac
 {{/each}}
 ---
 {{/if}}
-`,
+
+**JSON Output:**`,
 });
 
 const defaultWriteDocumentPrompt = ai.definePrompt({
@@ -49,8 +58,15 @@ const defaultWriteDocumentPrompt = ai.definePrompt({
   input: { schema: WriteDocumentInputSchema },
   output: { schema: WriteDocumentOutputSchema },
   model: 'ollama/gemma:2b',
+  config: {
+    responseSchema: WriteDocumentOutputSchema,
+    temperature: RECOMMENDED_TEMPERATURES.BALANCED,
+  },
   prompt: `You are an expert writer and researcher. Your task is to generate a complete, well-structured, and comprehensive document based on the user's request.
-Your output must be a valid JSON object that adheres to the defined schema.
+
+${getJsonPromptInstructions(`{
+  "document": "Complete markdown document with proper structure and formatting"
+}`)}
 
 **Topic:** {{{topic}}}
 **Document Type:** {{{documentType}}}
@@ -77,7 +93,8 @@ You MUST structure your document according to the following headings. Ensure eac
 3.  **Generate Content:** Write the full document, ensuring it is coherent, well-researched (if applicable), and adheres to the requested format and tone.
 4.  **Format as Markdown:** Use clear and consistent Markdown formatting for headings, lists, bold text, etc., to ensure readability.
 5.  **Return Only the Document:** Your final output must be only the complete markdown content of the document, inside the correct JSON structure.
-`,
+
+**JSON Output:**`,
 });
 
 const writeDocumentFlow = ai.defineFlow({
@@ -85,17 +102,43 @@ const writeDocumentFlow = ai.defineFlow({
   inputSchema: WriteDocumentInputSchema,
   outputSchema: WriteDocumentOutputSchema
 }, async (input) => {
-  let promptToUse;
-  if (input.documentType === 'university subject material') {
-    promptToUse = universitySubjectMaterialPrompt;
-  } else {
-    promptToUse = defaultWriteDocumentPrompt;
+  try {
+    let promptToUse;
+    if (input.documentType === 'university subject material') {
+      promptToUse = universitySubjectMaterialPrompt;
+    } else {
+      promptToUse = defaultWriteDocumentPrompt;
+    }
+    
+    const { output } = await promptToUse(input);
+    
+    if (!output) {
+      throw new Error("No output received from the model.");
+    }
+
+    const validation = validateJsonOutput({
+      schema: WriteDocumentOutputSchema,
+      output,
+      flowName: 'writeDocumentFlow',
+      attemptRecovery: true,
+      enableLogging: true,
+      fallbackFn: (rawOutput) => {
+        if (typeof rawOutput === 'string') {
+          return { document: rawOutput };
+        }
+        return null;
+      },
+    });
+
+    if (!validation.success) {
+      throw new Error(validation.error || 'Failed to validate output');
+    }
+
+    return validation.data!;
+  } catch (error) {
+    console.error('Error in writeDocumentFlow:', error);
+    throw new Error(`Document generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-  const { output } = await promptToUse(input);
-  if (!output) {
-    throw new Error("Document generation failed.");
-  }
-  return output;
 });
 
 export async function writeDocument(input: WriteDocumentInput): Promise<WriteDocumentOutput> {
