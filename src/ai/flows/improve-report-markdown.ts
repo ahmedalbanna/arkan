@@ -7,14 +7,22 @@
 
 import { ai } from '@/ai/genkit';
 import { ImproveMarkdownInputSchema, ImproveMarkdownOutputSchema, type ImproveMarkdownInput, type ImproveMarkdownOutput } from '@/ai/schemas';
+import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 
 const improveMarkdownPrompt = ai.definePrompt({
   name: 'improveReportMarkdownPrompt',
   input: { schema: ImproveMarkdownInputSchema },
   output: { schema: ImproveMarkdownOutputSchema },
   model: 'ollama/gemma:2b',
+  config: {
+    responseSchema: ImproveMarkdownOutputSchema,
+    temperature: RECOMMENDED_TEMPERATURES.PRECISE,
+  },
   prompt: `You are an expert technical editor and document formatter. A user has provided a full report in Markdown format and a set of instructions for how to improve it.
-Your output must be a valid JSON object that adheres to the defined schema.
+
+${getJsonPromptInstructions(`{
+  "improvedText": "Complete improved markdown document with all enhancements applied"
+}`)}
 
 Your tasks are to:
 1.  **Analyze the Instructions**: Carefully read the user's prompt to understand their goals (e.g., make it more formal, add a summary, remove specific sections, check for consistency).
@@ -30,7 +38,8 @@ Your tasks are to:
 **Original Markdown Document:**
 {{{text}}}
 ---
-`,
+
+**JSON Output:**`,
 });
 
 const improveReportMarkdownFlow = ai.defineFlow({
@@ -38,11 +47,36 @@ const improveReportMarkdownFlow = ai.defineFlow({
   inputSchema: ImproveMarkdownInputSchema,
   outputSchema: ImproveMarkdownOutputSchema
 }, async (input) => {
-  const { output } = await improveMarkdownPrompt(input);
-  if (!output) {
-    throw new Error('Failed to improve markdown.');
+  try {
+    const { output } = await improveMarkdownPrompt(input);
+    
+    if (!output) {
+      throw new Error('No output received from the model.');
+    }
+
+    const validation = validateJsonOutput({
+      schema: ImproveMarkdownOutputSchema,
+      output,
+      flowName: 'improveReportMarkdownFlow',
+      attemptRecovery: true,
+      enableLogging: true,
+      fallbackFn: (rawOutput) => {
+        if (typeof rawOutput === 'string') {
+          return { improvedText: rawOutput };
+        }
+        return null;
+      },
+    });
+
+    if (!validation.success) {
+      throw new Error(validation.error || 'Failed to validate output');
+    }
+
+    return validation.data!;
+  } catch (error) {
+    console.error('Error in improveReportMarkdownFlow:', error);
+    throw new Error(`Markdown improvement failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-  return output;
 });
 
 export async function improveReportMarkdown(input: ImproveMarkdownInput): Promise<ImproveMarkdownOutput> {

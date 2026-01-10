@@ -11,6 +11,7 @@
 import { ai } from '@/ai/genkit';
 import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/ai/schemas';
 import { retrieveContext } from '@/lib/rag/retrieval';
+import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 
 export interface GenerateSectionWithRAGInput extends GenerateSectionInput {
   projectId?: string;
@@ -59,9 +60,18 @@ ${ragContext ? 'IMPORTANT: You have access to RAG-retrieved context which contai
     input: { schema: GenerateSectionInputSchema },
     output: { schema: GenerateSectionOutputSchema },
     model: 'ollama/gemma:2b',
+    config: {
+      responseSchema: GenerateSectionOutputSchema,
+      temperature: RECOMMENDED_TEMPERATURES.BALANCED,
+    },
 
     system: systemPrompt,
     prompt: `
+${getJsonPromptInstructions(`{
+  "sectionName": "{{sectionToGenerate}}",
+  "content": "Complete section content in markdown format"
+}`)}
+
 CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
 
 {{#if guidelines}}
@@ -113,19 +123,42 @@ You have access to the following documents. Review them and use the most relevan
 {{/if}}
 
 Now, generate the section content based on all the context provided above. Synthesize the information from RAG context, project sections, diagrams, and external context to create a comprehensive, well-written section.
-`,
-    config: {
-      temperature: 0.3,
-    },
+
+**JSON Output:**`,
   });
 
   // 4. Generate content with RAG context
-  const { output } = await reportSectionPrompt(input);
+  try {
+    const { output } = await reportSectionPrompt(input);
 
-  if (!output) {
-    console.error(`AI failed to generate content for section: ${input.sectionToGenerate}`);
-    throw new Error(`The AI failed to generate a response for the '${input.sectionToGenerate}' section. Please try again.`);
+    if (!output) {
+      throw new Error('No output received from the model.');
+    }
+
+    const validation = validateJsonOutput({
+      schema: GenerateSectionOutputSchema,
+      output,
+      flowName: 'generateReportSectionRAG',
+      attemptRecovery: true,
+      enableLogging: true,
+      fallbackFn: (rawOutput) => {
+        if (typeof rawOutput === 'string') {
+          return {
+            sectionName: input.sectionToGenerate,
+            content: rawOutput,
+          };
+        }
+        return null;
+      },
+    });
+
+    if (!validation.success) {
+      throw new Error(validation.error || 'Failed to validate output');
+    }
+
+    return validation.data!;
+  } catch (error) {
+    console.error(`AI failed to generate content for section: ${input.sectionToGenerate}`, error);
+    throw new Error(`The AI failed to generate a response for the '${input.sectionToGenerate}' section: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-
-  return output;
 }
