@@ -15,7 +15,7 @@ const sentenceStructureCheckPrompt = ai.definePrompt({
   output: { schema: SentenceStructureCheckOutputSchema },
   model: 'ollama/gemma:2b',
   config: {
-    responseSchema: SentenceStructureOutputSchema,
+    responseSchema: SentenceStructureCheckOutputSchema,
     temperature: 0.2,
   },
 
