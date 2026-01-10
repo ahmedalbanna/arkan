@@ -21,7 +21,9 @@ export async function generateText(input: GenerateTextInput): Promise<GenerateTe
     name: 'generateTextPrompt',
     input: { schema: GenerateTextInputSchema },
     output: { schema: GenerateTextOutputSchema },
+    model: 'ollama/gemma:2b',
     prompt: `You are a writing assistant. Generate text based on the following prompt.
+Your output must be a valid JSON object that adheres to the defined schema.
 
 Prompt: {{{prompt}}}
 

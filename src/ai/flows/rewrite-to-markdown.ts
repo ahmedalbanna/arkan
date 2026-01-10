@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -25,8 +24,9 @@ const rewriteToMarkdownFlow = ai.defineFlow(
       name: 'rewriteToMarkdownPrompt',
       input: { schema: RewriteToMarkdownInputSchema },
       output: { schema: RewriteToMarkdownOutputSchema },
-
+      model: 'ollama/gemma:2b',
       prompt: `You are an expert document editor. Your task is to take a raw text input, which was extracted from a PDF, and rewrite it into clean, well-structured markdown.
+Your output must be a valid JSON object that adheres to the defined schema.
 
 Follow these guidelines:
 1.  **Structure**: Identify headings, subheadings, paragraphs, lists, and other structural elements from the raw text and format them correctly using markdown syntax (e.g., '#', '##', '-', '1.').
@@ -49,7 +49,6 @@ Raw Text Input:
     if (!output) {
       throw new Error('Failed to rewrite text to markdown.');
     }
-    output.markdown = output.markdown.replace(/---/g, '').trim();
     return output;
   }
 );

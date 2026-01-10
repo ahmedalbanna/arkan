@@ -12,15 +12,16 @@ const universitySubjectMaterialPrompt = ai.definePrompt({
   name: 'universitySubjectMaterialPrompt',
   input: { schema: WriteDocumentInputSchema },
   output: { schema: WriteDocumentOutputSchema },
-
+  model: 'ollama/gemma:2b',
   prompt: `You are an expert university lecturer with a talent for making complex topics simple and engaging for students. Your task is to create educational material for the given university-level subject.
+Your output must be a valid JSON object that adheres to the defined schema.
 
 **Your Process:**
 1.  **Deconstruct the Request:** Fully understand the topic and any specific instructions.
 2.  **Structure for Learning:** Create a logical flow that introduces concepts, provides clear explanations, defines key terms, and uses examples or analogies to aid understanding.
 3.  **Generate Content:** Write the full document. Ensure it is accurate, easy to follow, and suitable for a university student audience. Include sections for "Key Terms and Definitions" and a "Summary" at the end where appropriate.
 4.  **Format as Markdown:** Use clear and consistent Markdown for headings, lists, bold text, etc., to ensure readability.
-5.  **Return Only the Document:** Your final output must be only the complete markdown content of the document, with no additional commentary.
+5.  **Return Only the Document:** Your final output must be only the complete markdown content of the document, inside the correct JSON structure.
 
 **Topic:** {{{topic}}}
 **Document Type:** {{{documentType}}}
@@ -47,8 +48,9 @@ const defaultWriteDocumentPrompt = ai.definePrompt({
   name: 'defaultWriteDocumentPrompt',
   input: { schema: WriteDocumentInputSchema },
   output: { schema: WriteDocumentOutputSchema },
-
+  model: 'ollama/gemma:2b',
   prompt: `You are an expert writer and researcher. Your task is to generate a complete, well-structured, and comprehensive document based on the user's request.
+Your output must be a valid JSON object that adheres to the defined schema.
 
 **Topic:** {{{topic}}}
 **Document Type:** {{{documentType}}}
@@ -74,7 +76,7 @@ You MUST structure your document according to the following headings. Ensure eac
 2.  **Outline the Structure:** Create a logical outline for the document. If a Table of Contents is provided, you MUST use it as the primary structure. Otherwise, create your own logical structure.
 3.  **Generate Content:** Write the full document, ensuring it is coherent, well-researched (if applicable), and adheres to the requested format and tone.
 4.  **Format as Markdown:** Use clear and consistent Markdown formatting for headings, lists, bold text, etc., to ensure readability.
-5.  **Return Only the Document:** Your final output must be only the complete markdown content of the document, with no additional commentary.
+5.  **Return Only the Document:** Your final output must be only the complete markdown content of the document, inside the correct JSON structure.
 `,
 });
 
@@ -93,7 +95,6 @@ const writeDocumentFlow = ai.defineFlow({
   if (!output) {
     throw new Error("Document generation failed.");
   }
-  output.documentContent = output.documentContent.replace(/---/g, '').trim();
   return output;
 });
 

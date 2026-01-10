@@ -21,6 +21,7 @@ const summarizePrompt = ai.definePrompt({
     output: { schema: SummarizeOutputSchema },
     model: 'ollama/gemma:2b',
     prompt: `You are an expert summarizer. Your task is to read the provided text and generate a summary of the specified length.
+Your output must be a valid JSON object that adheres to the defined schema.
 
 **Desired Length**: The summary should be {{{instruction}}}
 
@@ -46,7 +47,7 @@ const summarizeTextFlow = ai.defineFlow({
     if (!output) {
         throw new Error("Failed to summarize text.");
     }
-    output.summary = output.summary.replace(/---/g, '').trim();
+    // No need to trim if the output is valid JSON
     return output;
 });
 

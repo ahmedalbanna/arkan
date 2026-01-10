@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -15,8 +14,9 @@ const generateMarkdownPrompt = ai.definePrompt({
   name: 'generateMarkdownFromDocumentPrompt',
   input: { schema: RewriteDocumentInputSchema },
   output: { schema: RewriteDocumentOutputSchema },
-
+  model: 'ollama/gemma:2b',
   prompt: `You are an expert document editor. Your task is to take the content of the provided PDF document and rewrite it into clean, well-structured markdown.
+Your output must be a valid JSON object that adheres to the defined schema.
 
 Follow these guidelines:
 1.  **Structure**: Analyze the PDF to understand the original layout. Identify headings, subheadings, paragraphs, lists, tables, and other structural elements, and format them correctly using markdown syntax (e.g., '#', '##', '-', '1.').
@@ -45,6 +45,5 @@ const rewriteDocumentFlow = ai.defineFlow(
     if (!output) {
       throw new Error('Failed to rewrite document to markdown.');
     }
-    output.markdown = output.markdown.replace(/---/g, '').trim();
     return output;
   });

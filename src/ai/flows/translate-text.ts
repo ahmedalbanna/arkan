@@ -28,11 +28,11 @@ const translateTextFlow = ai.defineFlow(
       output: { schema: TranslateTextOutputSchema },
       model: 'ollama/gemma:2b',
       prompt: `You are an expert translator. Your task is to translate the given text into the specified target language while perfectly preserving all markdown formatting.
+Your output must be a valid JSON object that adheres to the defined schema.
 
 **CRITICAL INSTRUCTIONS:**
 1.  **Preserve Markdown**: You MUST maintain the original markdown structure. Headings (e.g., '#', '##'), lists (e.g., '-', '1.'), bold text (e.g., '**text**'), italics, and any other markdown syntax must be kept intact in the translated output.
 2.  **Translate ONLY Content**: Only translate the textual content within the markdown. Do not translate markdown syntax.
-3.  **Return Only Translated Text**: Your final output should only be the translated text with its preserved markdown. Do not add any conversational text or explanations.
 
 **Target Language:** {{{targetLang}}}
 
@@ -50,9 +50,6 @@ const translateTextFlow = ai.defineFlow(
     if (!output) {
       return { translatedText: '' };
     }
-
-    const cleanedTranslatedText = output.translatedText.replace(/---/g, '').trim();
-
-    return { translatedText: cleanedTranslatedText };
+    return output;
   }
 );

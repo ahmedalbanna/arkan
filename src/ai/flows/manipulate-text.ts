@@ -19,7 +19,8 @@ const prompt = ai.definePrompt({
   input: { schema: ManipulateTextInputSchema },
   output: { schema: ManipulateTextOutputSchema },
   model: 'ollama/gemma:2b',
-  prompt: `You are an expert editor. A user has provided a piece of text and a command for how to change it. Your task is to follow the command and return only the rewritten text.
+  prompt: `You are an expert editor. A user has provided a piece of text and a command for how to change it. Your task is to follow the command and return the rewritten text.
+Your output must be a valid JSON object that adheres to the defined schema.
 
 Command: {{{command}}}
 

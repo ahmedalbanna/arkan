@@ -12,8 +12,9 @@ const topicExplainerPrompt = ai.definePrompt({
     name: 'topicExplainerPrompt',
     input: { schema: TopicExplainerInputSchema },
     output: { schema: TopicExplainerOutputSchema },
-
+    model: 'ollama/gemma:2b',
     prompt: `You are an expert educator who excels at breaking down complex topics into simple, easy-to-understand explanations. Your task is to explain the following topic for a beginner.
+Your output must be a valid JSON object that adheres to the defined schema.
 
 **Guidelines:**
 - Use analogies and simple language.
@@ -43,7 +44,6 @@ const topicExplainerFlow = ai.defineFlow({
     if (!output) {
         throw new Error("Failed to explain topic.");
     }
-    output.explanation = output.explanation.replace(/---/g, '').trim();
     return output;
 });
 

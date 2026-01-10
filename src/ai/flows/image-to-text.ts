@@ -13,8 +13,9 @@ const extractTextPrompt = ai.definePrompt({
   name: 'extractTextFromImagePrompt',
   input: { schema: ImageToTextInputSchema },
   output: { schema: ImageToTextOutputSchema },
-
+  model: 'ollama/gemma:2b',
   prompt: `You are an expert OCR (Optical Character Recognition) tool. Your task is to take the provided image and extract all text content from it.
+Your output must be a valid JSON object that adheres to the defined schema.
 
 Follow these guidelines:
 1.  **Structure**: Analyze the image to understand the layout. Preserve the original structure as much as possible, including headings, lists, and paragraphs.
@@ -39,7 +40,6 @@ const imageToTextFlow = ai.defineFlow(
     if (!output) {
       throw new Error("Text extraction failed.");
     }
-    output.text = output.text.replace(/---/g, '').trim();
     return output;
   }
 );
