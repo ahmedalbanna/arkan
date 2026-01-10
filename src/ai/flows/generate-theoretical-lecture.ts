@@ -13,14 +13,20 @@ import {
   type GenerateTheoreticalLectureOutput,
 } from '@/ai/schemas/lecture-generator';
 import { withRetry } from '@/lib/utils/ai-utils';
+import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 
 // Define the AI Prompt
 const generateTheoreticalLecturePrompt = ai.definePrompt({
   name: 'generateTheoreticalLecturePrompt',
   input: { schema: GenerateTheoreticalLectureInputSchema },
   output: { schema: GenerateTheoreticalLectureOutputSchema },
-  // Using a more powerful model for content generation
+  model: 'ollama/gemma:2b',
+  
   prompt: `You are an esteemed university professor and a leading expert in your field. Your task is to write a comprehensive, clear, and engaging theoretical lecture for the specified target audience.
+
+${getJsonPromptInstructions(`{
+  "lectureContent": "Complete lecture content in Markdown format with headings, examples, and explanations"
+}`)}
 
 **Your Process:**
 1.  **Analyze the Request:** Carefully review the provided 'lectureTopic', the list of 'subTopics' to cover, the 'targetAudience', and any 'professorNotes'.
@@ -55,7 +61,8 @@ const generateTheoreticalLecturePrompt = ai.definePrompt({
 {{/if}}
 `,
   config: {
-    temperature: 0.5, // Lower temperature for more factual, less creative writing
+    responseSchema: GenerateTheoreticalLectureOutputSchema,
+    temperature: RECOMMENDED_TEMPERATURES.BALANCED,
   }
 });
 
@@ -65,11 +72,38 @@ const generateTheoreticalLectureFlow = ai.defineFlow({
   inputSchema: GenerateTheoreticalLectureInputSchema,
   outputSchema: GenerateTheoreticalLectureOutputSchema
 }, async (input) => {
-  const { output } = await withRetry(() => generateTheoreticalLecturePrompt(input));
-  if (!output) {
-    throw new Error("Theoretical lecture generation failed to produce an output.");
+  try {
+    const { output } = await withRetry(() => generateTheoreticalLecturePrompt(input));
+    
+    if (!output) {
+      throw new Error("Theoretical lecture generation failed to produce an output.");
+    }
+
+    // التحقق والتنظيف باستخدام الدالة المساعدة
+    const validationResult = validateJsonOutput({
+      schema: GenerateTheoreticalLectureOutputSchema,
+      output,
+      flowName: 'generateTheoreticalLectureFlow',
+      attemptRecovery: true,
+      enableLogging: true,
+      // Fallback: إذا كان النص مباشرة بدون JSON
+      fallbackFn: (rawOutput) => {
+        if (typeof rawOutput === 'string') {
+          return { lectureContent: rawOutput };
+        }
+        return null;
+      },
+    });
+
+    if (!validationResult.success) {
+      throw new Error(validationResult.error || 'Failed to validate lecture output');
+    }
+
+    return validationResult.data!;
+  } catch (error) {
+    console.error('Error in generateTheoreticalLectureFlow:', error);
+    throw new Error(`Theoretical lecture generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-  return output;
 });
 
 // Define the server action

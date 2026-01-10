@@ -1094,3 +1094,139 @@ export const academicReviewRAGFlow = defineFlow(
 |**Embedder**|إنشاء الفهم الرياضي للنص.|عند بناء الفهرس (Indexing) وعندما يريد الـ Flow البحث (Querying).|
 |**Indexer**|بناء وتحديث قاعدة بيانات المتجهات.|يدوياً، عند إضافة وثائق جديدة، أو كجزء من عملية ETL للبيانات.|
 |**Retriever**|البحث عن السياق ذي الصلة.|داخل الـ Flow، قبل استدعاء نموذج اللغة الكبير، لتزويده بالمعلومات.|
+
+هذا سؤال مهم جداً عند العمل مع النماذج المحلية الصغيرة، لأن ضمان تنسيق المخرجات (Output Formatting) أمر بالغ الأهمية لأتمتة العمليات في Flow.
+
+نماذج Ollama، ومن ضمنها gemma:2b، تدعم توليد JSON بشكل ممتاز، ولكن بما أن gemma:2b نموذج صغير (Tiny LLM)، قد يحتاج إلى توجيه أكثر دقة لضمان النتيجة الصحيحة.
+
+هناك طريقتان رئيسيتان لإجبار Ollama/Gemma على الإخراج بصيغة JSON باستخدام Genkit:
+
+---
+
+## الطريقة 1: استخدام ميزة JSON Mode في Ollama (الأفضل والأكثر كفاءة)
+
+Ollama يدعم تمرير خيار format: json في استدعاء الـ API. عندما تستخدم Genkit موفر Ollama، يمكنك تفعيل هذا الخيار في إعدادات التوليد (Generation Configuration).
+
+### الخطوات في Genkit:
+
+#### الخطوة 1: تعريف الهيكل المطلوب (Schema)
+
+أولاً، يجب أن تعرف بالضبط شكل JSON الذي تتوقعه باستخدام Zod (مكتبة التحقق من المخططات المستخدمة في Genkit).
+
+لنفترض أنك تريد مراجعة أدبية في شكل JSON يتضمن العنوان والفقرة النصية والمراجع المستخدمة:
+
+codeTypeScript
+
+```
+import * as z from 'zod';
+
+const LiteratureReviewSchema = z.object({
+  title: z.string().describe("العنوان المقترح للمراجعة الأدبية."),
+  review_paragraph: z.string().describe("النص الأساسي للمراجعة الأدبية."),
+  references_used: z.array(z.string()).describe("قائمة العناوين التي تم استخدامها كمراجع."),
+});
+```
+
+#### الخطوة 2: استخدام responseSchema في generate
+
+داخل الـ Flow الخاص بك، عند استدعاء generate، يمكنك تمرير الـ Schema المطلوب. موفر Ollama في Genkit سيعرف تلقائياً كيفية تمرير format: json إلى Ollama API.
+
+codeTypeScript
+
+```
+// flow.ts
+import { generate } from '@genkit-ai/flow';
+import { gemma2b } from '@genkit-ai/ollama';
+import { LiteratureReviewSchema } from './schemas'; // استيراد الـ Schema
+
+const finalDraftResponse = await generate({
+  model: gemma2b, 
+  prompt: FINAL_DRAFT_PROMPT(topic, toolResult), 
+  config: {
+    // 1. تفعيل وضع JSON
+    responseSchema: LiteratureReviewSchema, 
+    // 2. توجيه إضافي للنماذج الصغيرة (اختياري لكن مفيد)
+    output: {
+      format: 'json', 
+      schema: LiteratureReviewSchema.passthrough(), // تأكيد التنسيق
+    }
+  },
+});
+
+// ستكون النتيجة الآن كائن TypeScript تم التحقق منه
+const reviewObject = finalDraftResponse.output; 
+console.log(reviewObject.review_paragraph);
+```
+
+**ملاحظة:** يضمن Genkit أن النص الذي يخرج من Ollama يتم تحويله وتحقق صحته (Validation) وفقاً للـ Schema قبل تمريره كـ output.
+
+---
+
+## الطريقة 2: استخدام التوجيه في الـ Prompt (Prompt Engineering)
+
+هذه الطريقة تقليدية وتعمل مع أي نموذج، وهي ضرورية لتدريب النموذج على إنتاج JSON قبل تفعيل ميزة json_mode الخاصة بالـ API.
+
+### الخطوات:
+
+#### الخطوة 1: تعديل الـ Prompt ليشمل تعليمات صارمة
+
+يجب أن تكون التعليمات واضحة ولا لبس فيها، مع تقديم مثال (Few-shot example) للهيكل المطلوب.
+
+codeTypeScript
+
+```
+const FINAL_DRAFT_PROMPT_JSON = (topic: string, searchResults: string) => ({
+  message: `باستخدام نتائج البحث الأكاديمي التالية:
+  ---
+  ${searchResults}
+  ---
+  مهمتك هي صياغة مراجعة أدبية حول الموضوع: "${topic}".
+
+  **يجب عليك الالتزام الصارم بما يلي:**
+  1. يجب أن يكون الإخراج بصيغة JSON فقط.
+  2. لا تقم بكتابة أي نص أو مقدمات قبل أو بعد كتلة JSON.
+  3. يجب أن يطابق هيكل JSON التالي:
+  
+  """
+  {
+    "title": "...",
+    "review_paragraph": "...",
+    "references_used": ["...", "..."]
+  }
+  """
+  `,
+});
+```
+
+#### الخطوة 2: استدعاء الـ Flow دون responseSchema (اختياري)
+
+إذا لم تستخدم responseSchema (الطريقة 1)، فإن الـ LLM سيخرج نص JSON الخام. ستحتاج إلى تحليل هذا النص يدوياً:
+
+codeTypeScript
+
+```
+const finalDraftResponse = await generate({
+  model: gemma2b, 
+  prompt: FINAL_DRAFT_PROMPT_JSON(topic, toolResult),
+});
+
+try {
+    // التحليل اليدوي للنص الخام
+    const jsonText = finalDraftResponse.text.trim();
+    const reviewObject = JSON.parse(jsonText);
+    console.log("Successfully parsed JSON.");
+} catch (e) {
+    console.error("Failed to parse JSON from LLM response:", e);
+    // التعامل مع الأخطاء (مثل محاولة تنظيف النص يدوياً إذا كان النموذج قد أضاف مقدمة)
+}
+```
+
+---
+
+## الخلاصة والتوصية
+
+**التوصية الأقوى:** **استخدم الطريقة 1 (Genkit responseSchema مع Ollama).**
+
+- **لماذا؟** لأنها تستخدم ميزات API الأصلية لـ Ollama لضمان مخرجات JSON بشكل أفضل وأكثر كفاءة (باستخدام JSON Mode الحقيقي)، و Genkit يتولى مهمة التحقق من الصحة والتحويل إلى كائن TypeScript لك.
+    
+- **دمج الطريقتين:** للحصول على أفضل النتائج مع نموذج صغير مثل gemma:2b، يفضل **دمج الطريقة 1** (استخدام responseSchema) **مع توجيهات واضحة في الـ Prompt** (الطريقة 2) لتقليل فرص انحراف النموذج عن التنسيق المطلوب.

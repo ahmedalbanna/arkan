@@ -6,6 +6,13 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
+
+// Configuration for all graduation project prompts
+const GRADUATION_PROJECT_CONFIG = {
+    model: 'ollama/gemma:2b',
+    temperature: RECOMMENDED_TEMPERATURES.BALANCED,
+};
 
 // ==================== ABSTRACT PROMPT ====================
 
@@ -22,6 +29,14 @@ export const abstractPrompt = ai.definePrompt({
             keyResults: ai.z.array(ai.z.string()).optional(),
             keywords: ai.z.array(ai.z.string()),
         }),
+    },
+    model: GRADUATION_PROJECT_CONFIG.model,
+    config: {
+        temperature: GRADUATION_PROJECT_CONFIG.temperature,
+    model: GRADUATION_PROJECT_CONFIG.model,
+    config: {
+        temperature: GRADUATION_PROJECT_CONFIG.temperature,
+    },
     },
 }, `You are an expert academic writer specializing in computer science and software engineering graduation projects.
 
@@ -81,6 +96,10 @@ export const introductionPrompt = ai.definePrompt({
             scope: ai.z.string().optional(),
             significance: ai.z.string().optional(),
         }),
+    model: GRADUATION_PROJECT_CONFIG.model,
+    config: {
+        temperature: GRADUATION_PROJECT_CONFIG.temperature,
+    },
     },
 }, `You are an expert academic writer for computer science graduation projects.
 
@@ -159,6 +178,10 @@ export const literatureReviewPrompt = ai.definePrompt({
             keywords: ai.z.array(ai.z.string()),
             citationStyle: ai.z.string().default('IEEE'),
         }),
+    model: GRADUATION_PROJECT_CONFIG.model,
+    config: {
+        temperature: GRADUATION_PROJECT_CONFIG.temperature,
+    },
     },
 }, `You are an expert academic researcher specializing in computer science literature reviews.
 
@@ -241,6 +264,10 @@ export const methodologyPrompt = ai.definePrompt({
             databases: ai.z.array(ai.z.string()).optional(),
             tools: ai.z.array(ai.z.string()),
         }),
+    model: GRADUATION_PROJECT_CONFIG.model,
+    config: {
+        temperature: GRADUATION_PROJECT_CONFIG.temperature,
+    },
     },
 }, `You are an expert in software development methodologies and research methods.
 
@@ -348,6 +375,10 @@ export const systemAnalysisPrompt = ai.definePrompt({
             functionalRequirements: ai.z.array(ai.z.string()),
             nonFunctionalRequirements: ai.z.array(ai.z.string()).optional(),
         }),
+    model: GRADUATION_PROJECT_CONFIG.model,
+    config: {
+        temperature: GRADUATION_PROJECT_CONFIG.temperature,
+    },
     },
 }, `You are an expert systems analyst specializing in software requirements engineering.
 
@@ -478,6 +509,10 @@ export const systemDesignPrompt = ai.definePrompt({
             databases: ai.z.array(ai.z.string()).optional(),
             frameworks: ai.z.array(ai.z.string()),
         }),
+    model: GRADUATION_PROJECT_CONFIG.model,
+    config: {
+        temperature: GRADUATION_PROJECT_CONFIG.temperature,
+    },
     },
 }, `You are an expert software architect specializing in system design.
 
@@ -662,6 +697,10 @@ export const implementationPrompt = ai.definePrompt({
             keyFeatures: ai.z.array(ai.z.string()),
             implementationSummary: ai.z.string().optional(),
         }),
+    model: GRADUATION_PROJECT_CONFIG.model,
+    config: {
+        temperature: GRADUATION_PROJECT_CONFIG.temperature,
+    },
     },
 }, `You are an expert software developer specializing in implementation documentation.
 
@@ -863,6 +902,10 @@ export const testingPrompt = ai.definePrompt({
             testingApproach: ai.z.string().optional(),
             testResults: ai.z.string().optional(),
         }),
+    model: GRADUATION_PROJECT_CONFIG.model,
+    config: {
+        temperature: GRADUATION_PROJECT_CONFIG.temperature,
+    },
     },
 }, `You are an expert in software testing and quality assurance.
 
@@ -1053,6 +1096,10 @@ export const resultsPrompt = ai.definePrompt({
             keyFeatures: ai.z.array(ai.z.string()),
             testResults: ai.z.string().optional(),
         }),
+    model: GRADUATION_PROJECT_CONFIG.model,
+    config: {
+        temperature: GRADUATION_PROJECT_CONFIG.temperature,
+    },
     },
 }, `You are an expert in presenting and analyzing project results.
 
@@ -1246,6 +1293,10 @@ export const discussionPrompt = ai.definePrompt({
             objectives: ai.z.array(ai.z.string()),
             keyFindings: ai.z.array(ai.z.string()).optional(),
         }),
+    model: GRADUATION_PROJECT_CONFIG.model,
+    config: {
+        temperature: GRADUATION_PROJECT_CONFIG.temperature,
+    },
     },
 }, `You are an expert in critical analysis and academic discussion.
 
@@ -1427,6 +1478,10 @@ export const conclusionPrompt = ai.definePrompt({
             objectives: ai.z.array(ai.z.string()),
             keyAchievements: ai.z.array(ai.z.string()).optional(),
         }),
+    model: GRADUATION_PROJECT_CONFIG.model,
+    config: {
+        temperature: GRADUATION_PROJECT_CONFIG.temperature,
+    },
     },
 }, `You are an expert in academic writing and project conclusions.
 
@@ -1576,6 +1631,10 @@ export const recommendationsPrompt = ai.definePrompt({
             projectType: ai.z.string(),
             currentLimitations: ai.z.array(ai.z.string()).optional(),
         }),
+    model: GRADUATION_PROJECT_CONFIG.model,
+    config: {
+        temperature: GRADUATION_PROJECT_CONFIG.temperature,
+    },
     },
 }, `You are an expert in identifying research directions and system enhancements.
 

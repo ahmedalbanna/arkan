@@ -24,6 +24,8 @@ import {
     GraduationProjectDocumentationSchema,
     GraduationProjectInputSchema
 } from '@/ai/schemas/graduation-project';
+import { validateJsonOutput, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
+import { z } from 'zod';
 
 // ==================== MAIN FLOW ====================
 

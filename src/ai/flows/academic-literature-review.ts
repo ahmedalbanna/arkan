@@ -22,6 +22,7 @@ import {
 } from '@/ai/tools';
 import { z } from 'zod';
 import { AcademicLiteratureReviewInputSchema, AcademicLiteratureReviewOutputSchema } from '../tools/schemas';
+import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 
 export type AcademicLiteratureReviewInput = z.infer<typeof AcademicLiteratureReviewInputSchema>;
 export type AcademicLiteratureReviewOutput = z.infer<typeof AcademicLiteratureReviewOutputSchema>;
@@ -49,14 +50,24 @@ export const academicLiteratureReviewFlow = ai.defineFlow(
         // ========================================================================
         console.log('STEP 1: Generating initial literature review draft...');
 
+        const draftOutputSchema = z.object({ draftText: z.string() });
+        
         const draftPrompt = ai.definePrompt(
             {
                 name: 'literatureReviewDraftPrompt',
                 input: { schema: AcademicLiteratureReviewInputSchema },
-                output: { schema: z.object({ draftText: z.string() }) },
+                output: { schema: draftOutputSchema },
                 model: 'ollama/gemma:2b',
+                config: {
+                    responseSchema: draftOutputSchema,
+                    temperature: RECOMMENDED_TEMPERATURES.BALANCED,
+                },
             },
             `You are an expert academic researcher specializing in literature reviews.
+
+${getJsonPromptInstructions(`{
+  "draftText": "Complete literature review text with introduction, body, gaps analysis, conclusion, and proper citations"
+}`)}
 
 **Task:** Write a comprehensive literature review on the following topic.
 
@@ -87,19 +98,38 @@ export const academicLiteratureReviewFlow = ai.defineFlow(
 5. Maintain critical and analytical tone
 6. Ensure logical flow between paragraphs
 
-**Important Citation Guidelines for ${citationStyle}:**
-${getCitationGuidelines(citationStyle)}
+**Important Citation Guidelines for {{citationStyle}}:**
+${getCitationGuidelines(citationStyle || 'APA')}
 
-Write the literature review now, including proper citations throughout.`
+**JSON Output:**`
         );
 
         const { output: draftOutput } = await draftPrompt(input);
 
-        if (!draftOutput?.draftText) {
-            throw new Error('Failed to generate literature review draft');
+        if (!draftOutput) {
+            throw new Error('Failed to generate literature review draft - no output');
         }
 
-        const draftText = draftOutput.draftText;
+        // التحقق والتنظيف
+        const draftValidation = validateJsonOutput({
+            schema: draftOutputSchema,
+            output: draftOutput,
+            flowName: 'academicLiteratureReview[draft]',
+            attemptRecovery: true,
+            enableLogging: true,
+            fallbackFn: (rawOutput) => {
+                if (typeof rawOutput === 'string') {
+                    return { draftText: rawOutput };
+                }
+                return null;
+            },
+        });
+
+        if (!draftValidation.success || !draftValidation.data?.draftText) {
+            throw new Error('Failed to generate valid literature review draft');
+        }
+
+        const draftText = draftValidation.data.draftText;
 
         // ========================================================================
         // STEP 2: Validate Citations
@@ -142,22 +172,31 @@ Write the literature review now, including proper citations throughout.`
         let finalText = draftText;
 
         if (hasIssues) {
+            const refinementOutputSchema = z.object({ refinedText: z.string() });
+            const refinementInputSchema = z.object({
+                originalText: z.string(),
+                citationIssues: z.array(z.string()),
+                argumentSuggestions: z.array(z.string()),
+                flowSuggestions: z.array(z.string()),
+                citationStyle: z.string(),
+            });
+            
             const refinementPrompt = ai.definePrompt(
                 {
                     name: 'literatureReviewRefinementPrompt',
-                    input: {
-                        schema: z.object({
-                            originalText: z.string(),
-                            citationIssues: z.array(z.string()),
-                            argumentSuggestions: z.array(z.string()),
-                            flowSuggestions: z.array(z.string()),
-                            citationStyle: z.string(),
-                        })
-                    },
-                    output: { schema: z.object({ refinedText: z.string() }) },
+                    input: { schema: refinementInputSchema },
+                    output: { schema: refinementOutputSchema },
                     model: 'ollama/gemma:2b',
+                    config: {
+                        responseSchema: refinementOutputSchema,
+                        temperature: RECOMMENDED_TEMPERATURES.PRECISE,
+                    },
                 },
                 `You are an expert academic editor. Refine the following literature review based on the feedback below.
+
+${getJsonPromptInstructions(`{
+  "refinedText": "Complete refined literature review text with all improvements applied"
+}`)}
 
 **Original Text:**
 {{originalText}}
@@ -184,7 +223,7 @@ Write the literature review now, including proper citations throughout.`
 4. Maintain the original content and ideas
 5. Keep the academic tone and critical analysis
 
-Provide the refined literature review text.`
+**JSON Output:**`
             );
 
             const { output: refinedOutput } = await refinementPrompt({
@@ -195,8 +234,31 @@ Provide the refined literature review text.`
                 citationStyle: citationStyle,
             });
 
-            if (refinedOutput?.refinedText) {
-                finalText = refinedOutput.refinedText;
+            if (!refinedOutput) {
+                console.warn('Refinement failed - no output, using original draft');
+                finalText = draftText;
+            } else {
+                // التحقق والتنظيف
+                const refinementValidation = validateJsonOutput({
+                    schema: refinementOutputSchema,
+                    output: refinedOutput,
+                    flowName: 'academicLiteratureReview[refinement]',
+                    attemptRecovery: true,
+                    enableLogging: true,
+                    fallbackFn: (rawOutput) => {
+                        if (typeof rawOutput === 'string') {
+                            return { refinedText: rawOutput };
+                        }
+                        return null;
+                    },
+                });
+
+                if (!refinementValidation.success || !refinementValidation.data?.refinedText) {
+                    console.warn('Refinement validation failed, using original draft');
+                    finalText = draftText;
+                } else {
+                    finalText = refinementValidation.data.refinedText;
+                }
             }
         }
 
@@ -205,28 +267,63 @@ Provide the refined literature review text.`
         // ========================================================================
         console.log('STEP 6: Extracting document structure...');
 
+        const structureOutputSchema = z.object({
+            introduction: z.string(),
+            mainBody: z.string(),
+            researchGaps: z.string().optional(),
+            conclusion: z.string(),
+        });
+        
         const structurePrompt = ai.definePrompt(
             {
                 name: 'extractStructurePrompt',
                 input: { schema: z.object({ text: z.string() }) },
-                output: {
-                    schema: z.object({
-                        introduction: z.string(),
-                        mainBody: z.string(),
-                        researchGaps: z.string().optional(),
-                        conclusion: z.string(),
-                    })
-                },
+                output: { schema: structureOutputSchema },
                 model: 'ollama/gemma:2b',
+                config: {
+                    responseSchema: structureOutputSchema,
+                    temperature: RECOMMENDED_TEMPERATURES.PRECISE,
+                },
             },
-            `Extract the main sections from the following literature review:
+            `You are a text analysis expert. Extract the main sections from the following literature review.
 
+${getJsonPromptInstructions(`{
+  "introduction": "Introduction section text",
+  "mainBody": "Main body section text",
+  "researchGaps": "Research gaps section text (optional)",
+  "conclusion": "Conclusion section text"
+}`)}
+
+**Literature Review Text:**
 {{text}}
 
-Return the sections as separate strings.`
+**Instructions:**
+1. Identify and extract the introduction section
+2. Extract the main body (all content between introduction and conclusion)
+3. If present, extract the research gaps section
+4. Extract the conclusion section
+5. Return each section as a separate string
+
+**JSON Output:`
         );
 
         const { output: structure } = await structurePrompt({ text: finalText });
+        
+        // التحقق والتنظيف
+        let validatedStructure = null;
+        if (structure) {
+            const structureValidation = validateJsonOutput({
+                schema: structureOutputSchema,
+                output: structure,
+                flowName: 'academicLiteratureReview[structure]',
+                attemptRecovery: true,
+                enableLogging: true,
+            });
+            
+            if (structureValidation.success) {
+                validatedStructure = structureValidation.data;
+            }
+        }
 
         // ========================================================================
         // STEP 7: Calculate Metadata
@@ -241,7 +338,7 @@ Return the sections as separate strings.`
         // ========================================================================
         return {
             literatureReview: finalText,
-            structure: structure || {
+            structure: validatedStructure || {
                 introduction: '',
                 mainBody: finalText,
                 conclusion: '',

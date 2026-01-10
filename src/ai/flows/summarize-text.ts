@@ -7,12 +7,13 @@
 
 import { ai } from '@/ai/genkit';
 import { SummarizeInputSchema, SummarizeLength, SummarizeOutputSchema, type SummarizeInput, type SummarizeOutput } from '@/ai/schemas';
+import { validateJsonOutput, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 import z from 'zod';
 
 const lengthDescriptions: Record<SummarizeLength, string> = {
-    short: "a single, concise paragraph.",
-    medium: "a few paragraphs, capturing the main points and key supporting details.",
-    long: "a detailed summary, covering all significant topics and arguments.",
+    short: "a single, concise paragraph (approximately 50-100 words).",
+    medium: "a few paragraphs, capturing the main points and key supporting details (approximately 150-300 words).",
+    long: "a detailed summary, covering all significant topics and arguments (approximately 400-600 words).",
 };
 
 const summarizePrompt = ai.definePrompt({
@@ -21,28 +22,31 @@ const summarizePrompt = ai.definePrompt({
     output: { schema: SummarizeOutputSchema },
     model: 'ollama/gemma:2b',
     config: {
-        // 1. تفعيل وضع JSON
-        responseSchema: SummarizeOutputSchema, 
-        // 2. توجيه إضافي للنماذج الصغيرة (اختياري لكن مفيد)
-        output: {
-          format: 'json', 
-          schema: SummarizeOutputSchema.passthrough(), // تأكيد التنسيق
-        }
-      },
-    prompt: `You are an expert summarizer. Your task is to read the provided text and generate a summary of the specified length.
-Your output must be a valid JSON object that adheres to the defined schema.
+        responseSchema: SummarizeOutputSchema,
+        temperature: RECOMMENDED_TEMPERATURES.PRECISE,
+    },
+    prompt: `You are a professional text summarizer. You MUST respond with ONLY a valid JSON object.
 
-**Desired Length**: The summary should be {{{instruction}}}
+**CRITICAL INSTRUCTIONS:**
+1. Your ENTIRE response must be a valid JSON object
+2. Do NOT include any text before or after the JSON
+3. Do NOT use markdown code blocks or backticks
+4. Follow this EXACT structure:
+{
+  "summary": "your summary text here"
+}
 
-**Original Text:**
+**Task:**
+- Read the text below carefully
+- Create a summary that is {{{instruction}}}
+- Output ONLY the JSON object with the "summary" field
+
+**Text to Summarize:**
 ---
 {{{text}}}
 ---
 
-**Summary:`,
-    config: {
-        temperature: 0.5,
-    }
+**JSON Output (remember: ONLY valid JSON, no extra text):**`,
 });
 
 const summarizeTextFlow = ai.defineFlow({
@@ -51,13 +55,39 @@ const summarizeTextFlow = ai.defineFlow({
     outputSchema: SummarizeOutputSchema
 }, async (input) => {
     const instruction = lengthDescriptions[input.length] || lengthDescriptions.medium;
-    const { output } = await summarizePrompt({ ...input, instruction });
+    
+    try {
+        const { output } = await summarizePrompt({ ...input, instruction });
 
-    if (!output) {
-        throw new Error("Failed to summarize text.");
+        if (!output) {
+            throw new Error("No output received from the model.");
+        }
+
+        // استخدام الدالة المساعدة للتحقق والتنظيف
+        const validationResult = validateJsonOutput({
+            schema: SummarizeOutputSchema,
+            output,
+            flowName: 'summarizeTextFlow',
+            attemptRecovery: true,
+            enableLogging: true,
+            // Fallback: إذا فشل كل شيء، استخدم النص كملخص
+            fallbackFn: (rawOutput) => {
+                if (typeof rawOutput === 'string') {
+                    return { summary: rawOutput };
+                }
+                return null;
+            },
+        });
+
+        if (!validationResult.success) {
+            throw new Error(validationResult.error || 'Failed to validate output');
+        }
+
+        return validationResult.data!;
+    } catch (error) {
+        console.error('Error in summarizeTextFlow:', error);
+        throw new Error(`Failed to summarize text: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-    // No need to trim if the output is valid JSON
-    return output;
 });
 
 export async function summarizeText(input: SummarizeInput): Promise<SummarizeOutput> {
@@ -65,5 +95,11 @@ export async function summarizeText(input: SummarizeInput): Promise<SummarizeOut
     if (!validation.success) {
         throw new Error(`Invalid input for summarizeText: ${validation.error.message}`);
     }
-    return summarizeTextFlow(validation.data);
+    
+    try {
+        return await summarizeTextFlow(validation.data);
+    } catch (error) {
+        console.error('Error in summarizeText:', error);
+        throw error;
+    }
 }

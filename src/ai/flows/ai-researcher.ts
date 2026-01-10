@@ -7,13 +7,23 @@
 
 import { ai } from '@/ai/genkit';
 import { AIResearcherInputSchema, AIResearcherOutputSchema, type AIResearcherInput, type AIResearcherOutput } from '@/ai/schemas';
+import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 
 const researcherPrompt = ai.definePrompt({
   name: 'aiResearcherPrompt',
   input: { schema: AIResearcherInputSchema },
   output: { schema: AIResearcherOutputSchema },
+  model: 'ollama/gemma:2b',
 
   prompt: `You are an expert research assistant with access to comprehensive knowledge. Your task is to conduct thorough, well-structured research on the given topic and provide a detailed report.
+
+${getJsonPromptInstructions(`{
+  "summary": "comprehensive research summary",
+  "keyPoints": ["point 1", "point 2", "..."],
+  "sources": ["url1", "url2", "..."],
+  "methodology": "research methodology description",
+  "findings": ["finding 1", "finding 2", "..."]
+}`)}
 
 **Research Depth Guidelines:**
 - **Research Depth:** {{{depth}}}
@@ -56,7 +66,8 @@ const researcherPrompt = ai.definePrompt({
 - Ensure all information is accurate and well-sourced
 `,
   config: {
-    temperature: 0.7,
+    responseSchema: AIResearcherOutputSchema,
+    temperature: RECOMMENDED_TEMPERATURES.BALANCED,
     maxOutputTokens: 4096,
   },
 });
@@ -66,11 +77,31 @@ const aiResearcherFlow = ai.defineFlow({
   inputSchema: AIResearcherInputSchema,
   outputSchema: AIResearcherOutputSchema,
 }, async (input) => {
-  const { output } = await researcherPrompt(input);
-  if (!output) {
-    throw new Error('AI Researcher failed to produce an output.');
+  try {
+    const { output } = await researcherPrompt(input);
+    
+    if (!output) {
+      throw new Error('AI Researcher failed to produce an output.');
+    }
+
+    // التحقق والتنظيف باستخدام الدالة المساعدة
+    const validationResult = validateJsonOutput({
+      schema: AIResearcherOutputSchema,
+      output,
+      flowName: 'aiResearcherFlow',
+      attemptRecovery: true,
+      enableLogging: true,
+    });
+
+    if (!validationResult.success) {
+      throw new Error(validationResult.error || 'Failed to validate research output');
+    }
+
+    return validationResult.data!;
+  } catch (error) {
+    console.error('Error in aiResearcherFlow:', error);
+    throw new Error(`AI Researcher failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-  return output;
 });
 
 export async function aiResearcher(input: AIResearcherInput): Promise<AIResearcherOutput> {
