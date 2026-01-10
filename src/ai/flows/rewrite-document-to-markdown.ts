@@ -13,10 +13,11 @@ import { RewriteDocumentInputSchema, RewriteDocumentOutputSchema, type RewriteDo
 const generateMarkdownPrompt = ai.definePrompt({
   name: 'generateMarkdownFromDocumentPrompt',
   input: { schema: RewriteDocumentInputSchema },
-  output: { schema: RewriteDocumentOutputSchema },
+  // No output schema - model returns plain text
   model: 'ollama/gemma:2b',
   prompt: `You are an expert document editor. Your task is to take the content of the provided PDF document and rewrite it into clean, well-structured markdown.
-Your output must be a valid JSON object that adheres to the defined schema.
+
+Output ONLY the markdown text. Do NOT wrap it in JSON or any other format.
 
 Follow these guidelines:
 1.  **Structure**: Analyze the PDF to understand the original layout. Identify headings, subheadings, paragraphs, lists, tables, and other structural elements, and format them correctly using markdown syntax (e.g., '#', '##', '-', '1.').
@@ -41,9 +42,19 @@ const rewriteDocumentFlow = ai.defineFlow(
     outputSchema: RewriteDocumentOutputSchema,
   },
   async (input) => {
-    const { output } = await generateMarkdownPrompt(input);
-    if (!output) {
+    const result = await generateMarkdownPrompt(input);
+    if (!result) {
       throw new Error('Failed to rewrite document to markdown.');
     }
+    
+    // Wrap the plain text in the expected output structure
+    const output: RewriteDocumentOutput = {
+      markdown: result.text || result.output || ''
+    };
+    
+    if (!output.markdown || output.markdown.trim().length === 0) {
+      throw new Error('Model returned empty markdown');
+    }
+    
     return output;
   });

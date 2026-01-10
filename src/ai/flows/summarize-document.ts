@@ -20,21 +20,17 @@ export async function summarizeDocument(input: SummarizeDocumentInput): Promise<
 const prompt = ai.definePrompt({
   name: 'summarizeDocumentPrompt',
   input: { schema: SummarizeDocumentInputSchema },
-  output: { schema: SummarizeDocumentOutputSchema },
+  // No output schema - model returns plain text
   model: 'ollama/gemma:2b',
   config: {
-    // 1. تفعيل وضع JSON
-    responseSchema: SummarizeDocumentOutputSchema, 
-    // 2. توجيه إضافي للنماذج الصغيرة (اختياري لكن مفيد)
-    output: {
-      format: 'json', 
-      schema: SummarizeDocumentOutputSchema.passthrough(), // تأكيد التنسيق
-    }
+    temperature: 0.3,
   },
   prompt: `You are an expert summarizer, able to distill the most important information from a document.
 
-  Please provide a concise summary of the following document:
-  {{media url=documentDataUri}}`,
+Output ONLY the summary text. Do NOT wrap it in JSON or any other format.
+
+Please provide a concise summary of the following document:
+{{media url=documentDataUri}}`,
 });
 
 const summarizeDocumentFlow = ai.defineFlow(
@@ -44,7 +40,20 @@ const summarizeDocumentFlow = ai.defineFlow(
     outputSchema: SummarizeDocumentOutputSchema,
   },
   async input => {
-    const { output } = await prompt(input);
-    return output!;
+    const result = await prompt(input);
+    if (!result) {
+      throw new Error('Failed to summarize document.');
+    }
+    
+    // Wrap the plain text in the expected output structure
+    const output: SummarizeDocumentOutput = {
+      summary: result.text || result.output || ''
+    };
+    
+    if (!output.summary || output.summary.trim().length === 0) {
+      throw new Error('Model returned empty summary');
+    }
+    
+    return output;
   }
 );

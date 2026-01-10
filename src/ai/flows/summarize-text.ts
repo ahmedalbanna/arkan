@@ -7,7 +7,7 @@
 
 import { ai } from '@/ai/genkit';
 import { SummarizeInputSchema, SummarizeLength, SummarizeOutputSchema, type SummarizeInput, type SummarizeOutput } from '@/ai/schemas';
-import { validateJsonOutput, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
+import { RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 import z from 'zod';
 
 const lengthDescriptions: Record<SummarizeLength, string> = {
@@ -19,34 +19,24 @@ const lengthDescriptions: Record<SummarizeLength, string> = {
 const summarizePrompt = ai.definePrompt({
     name: 'summarizeTextPrompt',
     input: { schema: z.object({ text: z.string(), instruction: z.string() }) },
-    output: { schema: SummarizeOutputSchema },
+    // No output schema - model returns plain text
     model: 'ollama/gemma:2b',
     config: {
-        responseSchema: SummarizeOutputSchema,
         temperature: RECOMMENDED_TEMPERATURES.PRECISE,
     },
-    prompt: `You are a professional text summarizer. You MUST respond with ONLY a valid JSON object.
+    prompt: `You are a professional text summarizer.
 
-**CRITICAL INSTRUCTIONS:**
-1. Your ENTIRE response must be a valid JSON object
-2. Do NOT include any text before or after the JSON
-3. Do NOT use markdown code blocks or backticks
-4. Follow this EXACT structure:
-{
-  "summary": "your summary text here"
-}
+Output ONLY the summary text. Do NOT wrap it in JSON or any other format.
 
 **Task:**
 - Read the text below carefully
 - Create a summary that is {{{instruction}}}
-- Output ONLY the JSON object with the "summary" field
+- Output ONLY the summary text
 
 **Text to Summarize:**
 ---
 {{{text}}}
----
-
-**JSON Output (remember: ONLY valid JSON, no extra text):**`,
+---`,
 });
 
 const summarizeTextFlow = ai.defineFlow({
@@ -57,33 +47,22 @@ const summarizeTextFlow = ai.defineFlow({
     const instruction = lengthDescriptions[input.length] || lengthDescriptions.medium;
     
     try {
-        const { output } = await summarizePrompt({ ...input, instruction });
+        const result = await summarizePrompt({ ...input, instruction });
 
-        if (!output) {
+        if (!result) {
             throw new Error("No output received from the model.");
         }
 
-        // استخدام الدالة المساعدة للتحقق والتنظيف
-        const validationResult = validateJsonOutput({
-            schema: SummarizeOutputSchema,
-            output,
-            flowName: 'summarizeTextFlow',
-            attemptRecovery: true,
-            enableLogging: true,
-            // Fallback: إذا فشل كل شيء، استخدم النص كملخص
-            fallbackFn: (rawOutput) => {
-                if (typeof rawOutput === 'string') {
-                    return { summary: rawOutput };
-                }
-                return null;
-            },
-        });
+        // Wrap the plain text in the expected output structure
+        const output: SummarizeOutput = {
+            summary: result.text || result.output || ''
+        };
 
-        if (!validationResult.success) {
-            throw new Error(validationResult.error || 'Failed to validate output');
+        if (!output.summary || output.summary.trim().length === 0) {
+            throw new Error('Model returned empty summary');
         }
 
-        return validationResult.data!;
+        return output;
     } catch (error) {
         console.error('Error in summarizeTextFlow:', error);
         throw new Error(`Failed to summarize text: ${error instanceof Error ? error.message : 'Unknown error'}`);

@@ -25,10 +25,11 @@ const translateTextFlow = ai.defineFlow(
     const prompt = ai.definePrompt({
       name: 'translateTextPrompt',
       input: { schema: TranslateTextInputSchema },
-      output: { schema: TranslateTextOutputSchema },
+      // No output schema - model returns plain text
       model: 'ollama/gemma:2b',
       prompt: `You are an expert translator. Your task is to translate the given text into the specified target language while perfectly preserving all markdown formatting.
-Your output must be a valid JSON object that adheres to the defined schema.
+
+Output ONLY the translated text with markdown preserved. Do NOT wrap it in JSON or any other format.
 
 **CRITICAL INSTRUCTIONS:**
 1.  **Preserve Markdown**: You MUST maintain the original markdown structure. Headings (e.g., '#', '##'), lists (e.g., '-', '1.'), bold text (e.g., '**text**'), italics, and any other markdown syntax must be kept intact in the translated output.
@@ -46,10 +47,20 @@ Your output must be a valid JSON object that adheres to the defined schema.
       }
     });
 
-    const { output } = await prompt({ text, targetLang });
-    if (!output) {
+    const result = await prompt({ text, targetLang });
+    if (!result) {
       return { translatedText: '' };
     }
+    
+    // Wrap the plain text in the expected output structure
+    const output: TranslateTextOutput = {
+      translatedText: result.text || result.output || ''
+    };
+    
+    if (!output.translatedText || output.translatedText.trim().length === 0) {
+      throw new Error('Model returned empty translation');
+    }
+    
     return output;
   }
 );
