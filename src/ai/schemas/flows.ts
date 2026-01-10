@@ -592,7 +592,7 @@ export const ManipulateTextInputSchema = z
 export type ManipulateTextInput = z.infer<typeof ManipulateTextInputSchema>;
 
 export const ManipulateTextOutputSchema = z.object({
-    rewrittenText: z.string().describe('The resulting text after applying the command.'),
+    manipulatedText: z.string().describe('The resulting text after applying the command.'),
 });
 export type ManipulateTextOutput = z.infer<typeof ManipulateTextOutputSchema>;
 
@@ -823,7 +823,7 @@ export const WriteDocumentInputSchema = z
 export type WriteDocumentInput = z.infer<typeof WriteDocumentInputSchema>;
 
 export const WriteDocumentOutputSchema = z.object({
-    documentContent: z.string().describe('The fully generated document content, formatted as markdown.'),
+    document: z.string().describe('The fully generated document content, formatted as markdown.'),
 });
 export type WriteDocumentOutput = z.infer<typeof WriteDocumentOutputSchema>;
 

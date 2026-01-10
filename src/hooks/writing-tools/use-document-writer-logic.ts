@@ -25,7 +25,7 @@ export function useDocumentWriterLogic() {
 
   const mutation = useWritingTool('/api/writing-tools/write-document', {
     onSuccess: (data: any) => {
-      setGeneratedContent(data.documentContent);
+      setGeneratedContent(data.document);
       toast({ title: 'Document generated successfully!' });
     },
   });

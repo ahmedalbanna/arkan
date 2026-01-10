@@ -13,31 +13,26 @@ import {
   type ManipulateTextInput,
   type ManipulateTextOutput,
 } from '@/ai/schemas';
-import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
+import { RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 
 const prompt = ai.definePrompt({
   name: 'manipulateTextPrompt',
   input: { schema: ManipulateTextInputSchema },
-  output: { schema: ManipulateTextOutputSchema },
+  // No output schema - model returns plain text
   model: 'ollama/gemma:2b',
   config: {
-    responseSchema: ManipulateTextOutputSchema,
     temperature: RECOMMENDED_TEMPERATURES.BALANCED,
   },
   prompt: `You are an expert editor. A user has provided a piece of text and a command for how to change it. Your task is to follow the command and return the rewritten text.
 
-${getJsonPromptInstructions(`{
-  "manipulatedText": "Your rewritten text based on the command"
-}`)}
+Output ONLY the rewritten text. Do NOT wrap it in JSON or any other format.
 
 **Command:** {{{command}}}
 
 **Original Text:**
 ---
 {{{textToManipulate}}}
----
-
-**JSON Output:**`,
+---`,
 });
 
 const manipulateTextFlow = ai.defineFlow(
@@ -48,31 +43,22 @@ const manipulateTextFlow = ai.defineFlow(
   },
   async ({ textToManipulate, command }) => {
     try {
-      const { output } = await prompt({ textToManipulate, command });
+      const result = await prompt({ textToManipulate, command });
       
-      if (!output) {
+      if (!result) {
         throw new Error('No output received from the model.');
       }
 
-      const validation = validateJsonOutput({
-        schema: ManipulateTextOutputSchema,
-        output,
-        flowName: 'manipulateTextFlow',
-        attemptRecovery: true,
-        enableLogging: true,
-        fallbackFn: (rawOutput) => {
-          if (typeof rawOutput === 'string') {
-            return { manipulatedText: rawOutput };
-          }
-          return null;
-        },
-      });
+      // Wrap the plain text in the expected output structure
+      const output: ManipulateTextOutput = {
+        manipulatedText: result.text || result.output || ''
+      };
 
-      if (!validation.success) {
-        throw new Error(validation.error || 'Failed to validate output');
+      if (!output.manipulatedText || output.manipulatedText.trim().length === 0) {
+        throw new Error('Model returned empty text');
       }
 
-      return validation.data!;
+      return output;
     } catch (error) {
       console.error('Error in manipulateTextFlow:', error);
       throw new Error(`Text manipulation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);

@@ -66,9 +66,9 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
     mutationFn: async (variables: { textToManipulate: string; command: string; }) => {
         // Hardcoded response for testing
         await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-        return { rewrittenText: `[Sample AI Response for: "${variables.command}"]\n\nThis is a hardcoded result for testing purposes. The original text was:\n"${variables.textToManipulate}"` };
+        return { manipulatedText: `[Sample AI Response for: "${variables.command}"]\n\nThis is a hardcoded result for testing purposes. The original text was:\n"${variables.textToManipulate}"` };
     },
-    onSuccess: (data: any) => handleSuccess(data.rewrittenText),
+    onSuccess: (data: any) => handleSuccess(data.manipulatedText),
     onError: handleError,
   });
 

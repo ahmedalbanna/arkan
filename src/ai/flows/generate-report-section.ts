@@ -19,11 +19,13 @@ You are also an expert analyst. Before you begin writing, you must first review 
   const reportSectionPrompt = ai.definePrompt({
     name: 'generateReportSectionPrompt', // Static name
     input: { schema: GenerateSectionInputSchema },
-    output: { schema: GenerateSectionOutputSchema },
-
+    // No output schema - model returns plain text
+    model: 'ollama/gemma:2b',
     system: systemPrompt,
     prompt: `
-CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
+Write the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
+
+Output ONLY the markdown content for this section. Do NOT wrap it in JSON or any other format. Just write the section content directly.
 
 {{#if guidelines}}
 --- Guidelines ---\n
@@ -78,14 +80,16 @@ You have access to the following documents. Review them and use the most relevan
     },
   });
 
-  // Return a simple, hardcoded response for testing
-  const output = {
+  // Call the AI and get plain text response
+  const result = await reportSectionPrompt(input);
+  
+  // Wrap the plain text in the expected output structure
+  const output: GenerateSectionOutput = {
     sectionName: input.sectionToGenerate,
-    content: `This is a placeholder test content for the section titled "${input.sectionToGenerate}". The AI flow is currently configured to return this static text for debugging and testing purposes.`
+    content: result.text || result.output || '' // Handle different response formats
   };
-  // const { output } = await reportSectionPrompt(input);
 
-  if (!output) {
+  if (!output.content || output.content.trim().length === 0) {
     console.error(`AI failed to generate content for section: ${input.sectionToGenerate}`);
     throw new Error(`The AI failed to generate a response for the '${input.sectionToGenerate}' section. Please try again.`);
   }

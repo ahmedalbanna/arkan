@@ -7,19 +7,19 @@
 
 import { ai } from '@/ai/genkit';
 import { HumanizeTextInputSchema, HumanizeTextOutputSchema, type HumanizeTextInput, type HumanizeTextOutput } from '@/ai/schemas';
-import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 
 const humanizeTextPrompt = ai.definePrompt({
   name: 'humanizeTextPrompt',
   input: { schema: HumanizeTextInputSchema },
-  output: { schema: HumanizeTextOutputSchema },
+  // No output schema - model returns plain text
   model: 'ollama/gemma:2b',
   config: {
-    responseSchema: HumanizeTextOutputSchema,
     temperature: 0.95, // High temperature for maximum creativity and variation
   },
 
   prompt: `You are a world-class editor and ghostwriter, a true linguistic chameleon whose specialty is subtlety and authenticity. Your expertise is in transforming robotic, AI-generated text into prose that is indistinguishable from authentic, high-quality human writing. Your primary goal is to rewrite the text to achieve the lowest possible AI-detection score by eliminating statistical patterns and injecting genuine, natural human variation.
+
+Output ONLY the humanized text. Do NOT wrap it in JSON or any other format.
 
 Rewrite the provided text to maximize its 'human' score by focusing on these principles:
 
@@ -33,14 +33,8 @@ Rewrite the provided text to maximize its 'human' score by focusing on these pri
 - **Maintain Formatting:** Keep the original markdown formatting intact (e.g., headings, lists, bold text).
 - **Final Check for AI Fingerprints:** Before concluding, review your rewritten text. Ask yourself: Does the informality feel forced? Are the analogies natural? Does it still sound a bit too perfect or uniform? Does it repeat the same concepts with similar phrasing? Are the section openings too predictable? Does it rely too heavily on bulleted lists for structure? If so, make one or two final tweaks to add a human touch of imperfection and variation.
 
-${getJsonPromptInstructions(`{
-  "humanizedText": "Your humanized version of the text with natural flow and authentic voice"
-}`)}
-
 **Original AI Text:**
-{{{text}}}
-
-**JSON Output:**`,
+{{{text}}}`,
 });
 
 const humanizeTextFlow = ai.defineFlow({
@@ -49,31 +43,22 @@ const humanizeTextFlow = ai.defineFlow({
   outputSchema: HumanizeTextOutputSchema,
 }, async (input) => {
   try {
-    const { output } = await humanizeTextPrompt(input);
+    const result = await humanizeTextPrompt(input);
     
-    if (!output) {
+    if (!result) {
       throw new Error("No output received from the model.");
     }
 
-    const validation = validateJsonOutput({
-      schema: HumanizeTextOutputSchema,
-      output,
-      flowName: 'humanizeTextFlow',
-      attemptRecovery: true,
-      enableLogging: true,
-      fallbackFn: (rawOutput) => {
-        if (typeof rawOutput === 'string') {
-          return { humanizedText: rawOutput };
-        }
-        return null;
-      },
-    });
+    // Wrap the plain text in the expected output structure
+    const output: HumanizeTextOutput = {
+      humanizedText: result.text || result.output || ''
+    };
 
-    if (!validation.success) {
-      throw new Error(validation.error || 'Failed to validate output');
+    if (!output.humanizedText || output.humanizedText.trim().length === 0) {
+      throw new Error('Model returned empty text');
     }
 
-    return validation.data!;
+    return output;
   } catch (error) {
     console.error('Error in humanizeTextFlow:', error);
     throw new Error(`Text humanization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);

@@ -21,7 +21,7 @@ import {
     checkLogicalFlowTool
 } from '@/ai/tools';
 import { z } from 'zod';
-import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
+import { RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 import { ProfessionalDocumentWriterInputSchema, ProfessionalDocumentWriterOutputSchema } from '../tools/schemas';
 
 export type ProfessionalDocumentWriterInput = z.infer<typeof ProfessionalDocumentWriterInputSchema>;
@@ -61,20 +61,18 @@ export const professionalDocumentWriterFlow = ai.defineFlow(
             {
                 name: 'documentOutlinePrompt',
                 input: { schema: ProfessionalDocumentWriterInputSchema },
-                output: {
-                    schema: z.object({
-                        outline: z.array(z.object({
-                            section: z.string(),
-                            keySubPoints: z.array(z.string()),
-                        })),
-                    })
-                },
+                // No output schema - model returns plain text
                 model: 'ollama/gemma:2b',
                 config: {
                     temperature: RECOMMENDED_TEMPERATURES.BALANCED,
                 },
             },
             `You are an expert business writer. Create a detailed outline for the following document.
+
+Output ONLY the outline in JSON format as follows:
+{"outline": [{"section": "Section Name", "keySubPoints": ["Point 1", "Point 2"]}]}
+
+Do NOT include any explanations or additional text.
 
 **Document Type:** {{documentType}}
 **Topic:** {{topic}}
@@ -103,13 +101,21 @@ ${includeRecommendations ? '- Include Recommendations section' : ''}
 Create a structured outline with section names and key sub-points for each section.`
         );
 
-        const { output: outlineOutput } = await outlinePrompt(input);
-
-        if (!outlineOutput?.outline) {
+        const outlineResult = await outlinePrompt(input);
+        
+        let outline;
+        try {
+            const outlineText = outlineResult.text || outlineResult.output || '';
+            const parsed = JSON.parse(outlineText);
+            outline = parsed.outline;
+        } catch (error) {
+            console.error('Failed to parse outline:', error);
             throw new Error('Failed to create document outline');
         }
 
-        const outline = outlineOutput.outline;
+        if (!outline) {
+            throw new Error('Failed to create document outline');
+        }
 
         // ========================================================================
         // STEP 2: Generate Full Document Content
@@ -149,13 +155,15 @@ Create a structured outline with section names and key sub-points for each secti
                         includeRecommendations: z.boolean(),
                     })
                 },
-                output: { schema: z.object({ fullDocument: z.string() }) },
+                // No output schema - model returns plain text
                 model: 'ollama/gemma:2b',
                 config: {
                     temperature: RECOMMENDED_TEMPERATURES.BALANCED,
                 },
             },
             `You are an expert professional business writer. Write a complete ${documentType} based on the following requirements.
+
+Output ONLY the markdown document. Do NOT wrap it in JSON or any other format.
 
 **Topic:** {{topic}}
 **Purpose:** {{purpose}}
@@ -197,7 +205,7 @@ Key points to cover:
 Write the complete professional document now with proper formatting and section headings.`
         );
 
-        const { output: contentOutput } = await contentPrompt({
+        const contentResult = await contentPrompt({
             documentType,
             topic,
             purpose,
@@ -210,11 +218,13 @@ Write the complete professional document now with proper formatting and section 
             includeRecommendations,
         });
 
-        if (!contentOutput?.fullDocument) {
+        const fullDocument = contentResult.text || contentResult.output || '';
+        
+        if (!fullDocument || fullDocument.trim().length === 0) {
             throw new Error('Failed to generate document content');
         }
 
-        let currentDocument = contentOutput.fullDocument;
+        let currentDocument = fullDocument;
 
         // ========================================================================
         // STEP 3: Quality Checks (Parallel)
@@ -269,13 +279,15 @@ Write the complete professional document now with proper formatting and section 
                             targetTone: z.string(),
                         })
                     },
-                    output: { schema: z.object({ refinedDocument: z.string() }) },
+                    // No output schema - model returns plain text
                     model: 'ollama/gemma:2b',
                     config: {
                         temperature: RECOMMENDED_TEMPERATURES.BALANCED,
                     },
                 },
                 `You are an expert editor. Refine the following professional document based on the feedback below.
+
+Output ONLY the refined document. Do NOT wrap it in JSON or any other format.
 
 **Original Document:**
 {{document}}
@@ -307,7 +319,7 @@ Write the complete professional document now with proper formatting and section 
 Provide the refined document.`
             );
 
-            const { output: refinedOutput } = await refinementPrompt({
+            const refinementResult = await refinementPrompt({
                 document: currentDocument,
                 structureIssues: structureAnalysis?.coherence.issues || [],
                 flowIssues: flowAnalysis?.issues.map(i => i.suggestion) || [],
@@ -315,8 +327,10 @@ Provide the refined document.`
                 targetTone: tone,
             });
 
-            if (refinedOutput?.refinedDocument) {
-                currentDocument = refinedOutput.refinedDocument;
+            const refinedDocument = refinementResult.text || refinementResult.output || '';
+            
+            if (refinedDocument && refinedDocument.trim().length > 0) {
+                currentDocument = refinedDocument;
                 appliedImprovements.push('Improved document structure and organization');
                 appliedImprovements.push('Enhanced logical flow and transitions');
                 appliedImprovements.push(`Adjusted tone to match ${tone} style`);
@@ -338,28 +352,26 @@ Provide the refined document.`
                         includeRecommendations: z.boolean(),
                     })
                 },
-                output: {
-                    schema: z.object({
-                        executiveSummary: z.string().optional(),
-                        introduction: z.string(),
-                        mainSections: z.array(z.object({
-                            title: z.string(),
-                            content: z.string(),
-                        })),
-                        recommendations: z.string().optional(),
-                        conclusion: z.string(),
-                    })
-                },
+                // No output schema - model returns plain text
                 model: 'ollama/gemma:2b',
                 config: {
                     temperature: RECOMMENDED_TEMPERATURES.BALANCED,
                 },
             },
-            `Extract the main sections from the following document:
+            `Extract the main sections from the following document and return as JSON.
+
+Output ONLY JSON in this format:
+{
+  "executiveSummary": "...",
+  "introduction": "...",
+  "mainSections": [{"title": "...", "content": "..."}],
+  "recommendations": "...",
+  "conclusion": "..."
+}
+
+Do NOT include any explanations or additional text.
 
 {{document}}
-
-Return each section separately with its title and content.
 
 Expected sections:
 ${includeExecutiveSummary ? '- Executive Summary' : ''}
@@ -369,11 +381,25 @@ ${includeRecommendations ? '- Recommendations' : ''}
 - Conclusion`
         );
 
-        const { output: structure } = await structureExtractionPrompt({
+        const structureResult = await structureExtractionPrompt({
             document: currentDocument,
             includeExecutiveSummary,
             includeRecommendations,
         });
+
+        let structure;
+        try {
+            const structureText = structureResult.text || structureResult.output || '';
+            structure = JSON.parse(structureText);
+        } catch (error) {
+            console.error('Failed to parse structure:', error);
+            // Fallback structure
+            structure = {
+                introduction: '',
+                mainSections: [],
+                conclusion: '',
+            };
+        }
 
         // ========================================================================
         // STEP 6: Calculate Metrics
