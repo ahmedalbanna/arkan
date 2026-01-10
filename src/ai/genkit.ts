@@ -1,7 +1,7 @@
 
 import { genkit } from 'genkit';
 import { ollama } from 'genkitx-ollama';
-import { ollamaConfig } from '@/lib/config';
+
 
 export const ai = genkit({
   plugins: [
@@ -12,7 +12,7 @@ export const ai = genkit({
           type: 'generate', // type: 'chat' | 'generate' | undefined
         },
       ],
-      serverAddress: ollamaConfig.serverAddress,
+      serverAddress:"http://185.190.140.93:11434",
     }),
   ],
 });

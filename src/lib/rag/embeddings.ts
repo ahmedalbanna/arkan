@@ -5,7 +5,7 @@
  * Ollama supports models like nomic-embed-text for generating embeddings.
  */
 
-import { ollamaConfig } from '@/lib/config';
+
 
 export interface EmbeddingResult {
   embedding: number[];
@@ -17,7 +17,7 @@ export interface EmbeddingResult {
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
-    const response = await fetch(`${ollamaConfig.serverAddress}/api/embeddings`, {
+    const response = await fetch(`http://185.190.140.93:11434/api/embeddings`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

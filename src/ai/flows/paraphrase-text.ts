@@ -18,7 +18,7 @@ const styleDescriptions: Record<ParaphraseMode, string> = {
 
 const paraphrasePrompt = ai.definePrompt({
     name: 'paraphraseTextPrompt',
-    input: { schema: ParaphraseInputSchema.extend({ instruction: z.string() }) },
+    input: { schema: ParaphraseInputSchema },
     output: { schema: ParaphraseOutputSchema },
     model: 'ollama/gemma:2b',
     prompt: `You are an expert editor. Your task is to paraphrase the given text based on the selected mode. You must perfectly preserve all markdown formatting.
@@ -41,10 +41,11 @@ const paraphraseTextFlow = ai.defineFlow({
     outputSchema: ParaphraseOutputSchema,
 }, async (input) => {
     const instruction = styleDescriptions[input.mode] || styleDescriptions.standard;
-    const { output } = await paraphrasePrompt({ text: input.text, mode: input.mode, instruction });
+    const { output } = await paraphrasePrompt({ text: input.text, mode: input.mode, instruction } as any);
     if (!output) {
         throw new Error("Failed to paraphrase text.");
     }
+    output.paraphrasedText = output.paraphrasedText.replace(/---/g, '').trim();
     return output;
 });
 

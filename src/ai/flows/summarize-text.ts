@@ -20,6 +20,15 @@ const summarizePrompt = ai.definePrompt({
     input: { schema: z.object({ text: z.string(), instruction: z.string() }) },
     output: { schema: SummarizeOutputSchema },
     model: 'ollama/gemma:2b',
+    config: {
+        // 1. تفعيل وضع JSON
+        responseSchema: SummarizeOutputSchema, 
+        // 2. توجيه إضافي للنماذج الصغيرة (اختياري لكن مفيد)
+        output: {
+          format: 'json', 
+          schema: SummarizeOutputSchema.passthrough(), // تأكيد التنسيق
+        }
+      },
     prompt: `You are an expert summarizer. Your task is to read the provided text and generate a summary of the specified length.
 Your output must be a valid JSON object that adheres to the defined schema.
 

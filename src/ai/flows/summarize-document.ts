@@ -21,7 +21,16 @@ const prompt = ai.definePrompt({
   name: 'summarizeDocumentPrompt',
   input: { schema: SummarizeDocumentInputSchema },
   output: { schema: SummarizeDocumentOutputSchema },
-
+  model: 'ollama/gemma:2b',
+  config: {
+    // 1. تفعيل وضع JSON
+    responseSchema: SummarizeDocumentOutputSchema, 
+    // 2. توجيه إضافي للنماذج الصغيرة (اختياري لكن مفيد)
+    output: {
+      format: 'json', 
+      schema: SummarizeDocumentOutputSchema.passthrough(), // تأكيد التنسيق
+    }
+  },
   prompt: `You are an expert summarizer, able to distill the most important information from a document.
 
   Please provide a concise summary of the following document:
