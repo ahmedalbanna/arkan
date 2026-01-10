@@ -6,16 +6,16 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
+import { getJsonPromptInstructions } from '@/ai/utils/json-output-validator';
 import { GrammarCheckInputSchema, GrammarCheckOutputSchema, type GrammarCheckInput, type GrammarCheckOutput } from '@/ai/schemas';
 
 const grammarCheckPrompt = ai.definePrompt({
   name: 'grammarCheckPrompt',
   input: { schema: GrammarCheckInputSchema },
-  output: { schema: GrammarCheckOutputSchema },
+  // No output schema - model returns plain JSON text
   model: 'ollama/gemma:2b',
   config: {
-    responseSchema: GrammarCheckOutputSchema,
+    // responseSchema removed
     temperature: 0.1, // Very low temp for accuracy
   },
 
@@ -81,38 +81,41 @@ const grammarCheckFlow = ai.defineFlow({
   outputSchema: GrammarCheckOutputSchema,
 }, async (input) => {
   try {
-    const { output } = await grammarCheckPrompt(input);
+    const result = await grammarCheckPrompt(input);
     
-    if (!output) {
+    if (!result) {
       throw new Error("No output received from the model.");
     }
 
-    const validation = validateJsonOutput({
-      schema: GrammarCheckOutputSchema,
-      output,
-      flowName: 'grammarCheckFlow',
-      attemptRecovery: true,
-      enableLogging: true,
-    });
-
-    if (!validation.success) {
-      throw new Error(validation.error || 'Failed to validate output');
+    let output: GrammarCheckOutput;
+    try {
+      const jsonText = result.text || result.output || '';
+      output = JSON.parse(jsonText);
+    } catch (parseError) {
+      console.error('Failed to parse Grammar Check JSON:', parseError);
+      throw new Error('Grammar Check returned invalid JSON');
     }
 
-    const result = validation.data!;
+    const validation = GrammarCheckOutputSchema.safeParse(output);
+    if (!validation.success) {
+      console.error('Grammar Check output validation failed:', validation.error);
+      throw new Error('Grammar Check output does not match expected structure');
+    }
+
+    const validatedResult = validation.data;
 
     // Calculate statistics if not provided by the model
-    if (!result.statistics && result.corrections) {
+    if (!validatedResult.statistics && validatedResult.corrections) {
       const stats = {
-        total: result.corrections.length,
-        grammar: result.corrections.filter(c => c.type === 'grammar').length,
-        spelling: result.corrections.filter(c => c.type === 'spelling').length,
-        punctuation: result.corrections.filter(c => c.type === 'punctuation').length,
+        total: validatedResult.corrections.length,
+        grammar: validatedResult.corrections.filter(c => c.type === 'grammar').length,
+        spelling: validatedResult.corrections.filter(c => c.type === 'spelling').length,
+        punctuation: validatedResult.corrections.filter(c => c.type === 'punctuation').length,
       };
-      return { ...result, statistics: stats };
+      return { ...validatedResult, statistics: stats };
     }
 
-    return result;
+    return validatedResult;
   } catch (error) {
     console.error('Error in grammarCheckFlow:', error);
     throw new Error(`Grammar check failed: ${error instanceof Error ? error.message : 'Unknown error'}`);

@@ -6,20 +6,26 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 import { PlagiarismCheckInputSchema, PlagiarismCheckOutputSchema, type PlagiarismCheckInput, type PlagiarismCheckOutput } from '@/ai/schemas';
 
 const plagiarismCheckPrompt = ai.definePrompt({
   name: 'plagiarismCheckPrompt',
   input: { schema: PlagiarismCheckInputSchema },
-  output: { schema: PlagiarismCheckOutputSchema },
+  // No output schema - model returns plain JSON text
   model: 'ollama/gemma:2b',
   config: {
-    responseSchema: PlagiarismCheckOutputSchema,
     temperature: 0.3,
   },
 
   prompt: `You are an advanced plagiarism detection engine. Your task is to analyze the following text for originality and find real web sources for any matching content.
+
+Output ONLY valid JSON in this format:
+{
+  "matches": [{"source": "https://...", "title": "...", "summary": "...", "similarity": 0-100}],
+  "originalityScore": 0-100
+}
+
+Do NOT include any explanations or additional text outside the JSON.
 
 **Your Process:**
 1.  **Analyze Content:** Carefully read the text and identify phrases, sentences, and ideas that may not be original.
@@ -33,9 +39,7 @@ const plagiarismCheckPrompt = ai.definePrompt({
 **Text to Analyze:**
 ---
 {{{text}}}
----
-
-**JSON Output:**`,
+---`,
 });
 
 const plagiarismCheckFlow = ai.defineFlow({
@@ -44,25 +48,30 @@ const plagiarismCheckFlow = ai.defineFlow({
   outputSchema: PlagiarismCheckOutputSchema,
 }, async (input) => {
   try {
-    const { output } = await plagiarismCheckPrompt(input);
+    const result = await plagiarismCheckPrompt(input);
     
-    if (!output) {
+    if (!result) {
       throw new Error('No output received from the model.');
     }
 
-    const validation = validateJsonOutput({
-      schema: PlagiarismCheckOutputSchema,
-      output,
-      flowName: 'plagiarismCheckFlow',
-      attemptRecovery: true,
-      enableLogging: true,
-    });
-
-    if (!validation.success) {
-      throw new Error(validation.error || 'Failed to validate output');
+    // Parse the JSON response
+    let output: PlagiarismCheckOutput;
+    try {
+      const jsonText = result.text || result.output || '';
+      output = JSON.parse(jsonText);
+    } catch (parseError) {
+      console.error('Failed to parse Plagiarism Check JSON:', parseError);
+      throw new Error('Plagiarism Check returned invalid JSON');
     }
 
-    return validation.data!;
+    // Validate the parsed output
+    const validation = PlagiarismCheckOutputSchema.safeParse(output);
+    if (!validation.success) {
+      console.error('Plagiarism Check output validation failed:', validation.error);
+      throw new Error('Plagiarism Check output does not match expected structure');
+    }
+
+    return validation.data;
   } catch (error) {
     console.error('Error in plagiarismCheckFlow:', error);
     throw new Error(`plagiarismCheck failed: ${error instanceof Error ? error.message : 'Unknown error'}`);

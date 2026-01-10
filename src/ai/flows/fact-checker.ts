@@ -6,16 +6,15 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 import { FactCheckInputSchema, FactCheckOutputSchema, type FactCheckInput, type FactCheckOutput } from '@/ai/schemas';
 
 const factCheckPrompt = ai.definePrompt({
   name: 'factCheckPrompt',
   input: { schema: FactCheckInputSchema },
-  output: { schema: FactCheckOutputSchema },
+  // No output schema - model returns plain JSON text
   model: 'ollama/gemma:2b',
   config: {
-    responseSchema: FactCheckOutputSchema,
+    // responseSchema removed
     temperature: 0.3,
   },
 
@@ -42,25 +41,28 @@ const factCheckFlow = ai.defineFlow({
   outputSchema: FactCheckOutputSchema,
 }, async (input) => {
   try {
-    const { output } = await factCheckPrompt(input);
+    const result = await factCheckPrompt(input);
     
-    if (!output) {
+    if (!result) {
       throw new Error('No output received from the model.');
     }
 
-    const validation = validateJsonOutput({
-      schema: FactCheckOutputSchema,
-      output,
-      flowName: 'factCheckFlow',
-      attemptRecovery: true,
-      enableLogging: true,
-    });
-
-    if (!validation.success) {
-      throw new Error(validation.error || 'Failed to validate output');
+    let output: FactCheckOutput;
+    try {
+      const jsonText = result.text || result.output || '';
+      output = JSON.parse(jsonText);
+    } catch (parseError) {
+      console.error('Failed to parse Fact Check JSON:', parseError);
+      throw new Error('Fact Check returned invalid JSON');
     }
 
-    return validation.data!;
+    const validation = FactCheckOutputSchema.safeParse(output);
+    if (!validation.success) {
+      console.error('Fact Check output validation failed:', validation.error);
+      throw new Error('Fact Check output does not match expected structure');
+    }
+
+    return validation.data;
   } catch (error) {
     console.error('Error in factCheckFlow:', error);
     throw new Error(`factCheck failed: ${error instanceof Error ? error.message : 'Unknown error'}`);

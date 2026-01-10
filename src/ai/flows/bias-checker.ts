@@ -6,20 +6,27 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 import { BiasCheckInputSchema, BiasCheckOutputSchema, type BiasCheckInput, type BiasCheckOutput } from '@/ai/schemas';
 
 const biasCheckPrompt = ai.definePrompt({
   name: 'biasCheckPrompt',
   input: { schema: BiasCheckInputSchema },
-  output: { schema: BiasCheckOutputSchema },
+  // No output schema - model returns plain JSON text
   model: 'ollama/gemma:2b',
   config: {
-    responseSchema: BiasCheckOutputSchema,
     temperature: 0.3,
   },
 
   prompt: `You are an expert in inclusive language and bias detection. Your task is to analyze the provided text and identify any language that may exhibit bias related to gender, race, age, ability, culture, or other stereotypes.
+
+Output ONLY valid JSON in this format:
+{
+  "issues": [{"phrase": "...", "type": "...", "explanation": "...", "alternative": "..."}],
+  "overallAssessment": "...",
+  "inclusivityScore": 0-100
+}
+
+Do NOT include any explanations or additional text outside the JSON.
 
 **Analysis Process:**
 1.  **Identify Biased Phrases:** Carefully read the text and identify specific words, phrases, or sentences that could be perceived as biased, non-inclusive, or stereotypical.
@@ -32,9 +39,7 @@ const biasCheckPrompt = ai.definePrompt({
 **Text to Analyze:**
 ---
 {{{text}}}
----
-
-**JSON Output:**`,
+---`,
 });
 
 const biasCheckFlow = ai.defineFlow({
@@ -43,25 +48,30 @@ const biasCheckFlow = ai.defineFlow({
   outputSchema: BiasCheckOutputSchema,
 }, async (input) => {
   try {
-    const { output } = await biasCheckPrompt(input);
+    const result = await biasCheckPrompt(input);
     
-    if (!output) {
+    if (!result) {
       throw new Error('No output received from the model.');
     }
 
-    const validation = validateJsonOutput({
-      schema: BiasCheckOutputSchema,
-      output,
-      flowName: 'biasCheckFlow',
-      attemptRecovery: true,
-      enableLogging: true,
-    });
-
-    if (!validation.success) {
-      throw new Error(validation.error || 'Failed to validate output');
+    // Parse the JSON response
+    let output: BiasCheckOutput;
+    try {
+      const jsonText = result.text || result.output || '';
+      output = JSON.parse(jsonText);
+    } catch (parseError) {
+      console.error('Failed to parse Bias Check JSON:', parseError);
+      throw new Error('Bias Check returned invalid JSON');
     }
 
-    return validation.data!;
+    // Validate the parsed output
+    const validation = BiasCheckOutputSchema.safeParse(output);
+    if (!validation.success) {
+      console.error('Bias Check output validation failed:', validation.error);
+      throw new Error('Bias Check output does not match expected structure');
+    }
+
+    return validation.data;
   } catch (error) {
     console.error('Error in biasCheckFlow:', error);
     throw new Error(`biasCheck failed: ${error instanceof Error ? error.message : 'Unknown error'}`);

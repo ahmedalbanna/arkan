@@ -6,16 +6,15 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 import { SentenceStructureCheckInputSchema, SentenceStructureCheckOutputSchema, type SentenceStructureCheckInput, type SentenceStructureCheckOutput } from '@/ai/schemas';
 
 const sentenceStructureCheckPrompt = ai.definePrompt({
   name: 'sentenceStructureCheckPrompt',
   input: { schema: SentenceStructureCheckInputSchema },
-  output: { schema: SentenceStructureCheckOutputSchema },
+  // No output schema - model returns plain JSON text
   model: 'ollama/gemma:2b',
   config: {
-    responseSchema: SentenceStructureCheckOutputSchema,
+    // responseSchema removed
     temperature: 0.2,
   },
 
@@ -51,25 +50,28 @@ const sentenceStructureCheckFlow = ai.defineFlow({
   outputSchema: SentenceStructureCheckOutputSchema,
 }, async (input) => {
   try {
-    const { output } = await sentenceStructureCheckPrompt(input);
+    const result = await sentenceStructureCheckPrompt(input);
     
-    if (!output) {
+    if (!result) {
       throw new Error('No output received from the model.');
     }
 
-    const validation = validateJsonOutput({
-      schema: SentenceStructureCheckOutputSchema,
-      output,
-      flowName: 'sentenceStructureCheckFlow',
-      attemptRecovery: true,
-      enableLogging: true,
-    });
-
-    if (!validation.success) {
-      throw new Error(validation.error || 'Failed to validate output');
+    let output: SentenceStructureCheckOutput;
+    try {
+      const jsonText = result.text || result.output || '';
+      output = JSON.parse(jsonText);
+    } catch (parseError) {
+      console.error('Failed to parse Sentence Structure Check JSON:', parseError);
+      throw new Error('Sentence Structure Check returned invalid JSON');
     }
 
-    return validation.data!;
+    const validation = SentenceStructureCheckOutputSchema.safeParse(output);
+    if (!validation.success) {
+      console.error('Sentence Structure Check output validation failed:', validation.error);
+      throw new Error('Sentence Structure Check output does not match expected structure');
+    }
+
+    return validation.data;
   } catch (error) {
     console.error('Error in sentenceStructureCheckFlow:', error);
     throw new Error(`sentenceStructureCheck failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
