@@ -62,7 +62,7 @@ export const professionalDocumentWriterFlow = ai.defineFlow(
                 name: 'documentOutlinePrompt',
                 input: { schema: ProfessionalDocumentWriterInputSchema },
                 // No output schema - model returns plain text
-                model: 'ollama/gemma:2b',
+                model: 'ollama/phi3:mini',
                 config: {
                     temperature: RECOMMENDED_TEMPERATURES.BALANCED,
                 },
@@ -156,7 +156,7 @@ Create a structured outline with section names and key sub-points for each secti
                     })
                 },
                 // No output schema - model returns plain text
-                model: 'ollama/gemma:2b',
+                model: 'ollama/phi3:mini',
                 config: {
                     temperature: RECOMMENDED_TEMPERATURES.BALANCED,
                 },
@@ -280,7 +280,7 @@ Write the complete professional document now with proper formatting and section 
                         })
                     },
                     // No output schema - model returns plain text
-                    model: 'ollama/gemma:2b',
+                    model: 'ollama/phi3:mini',
                     config: {
                         temperature: RECOMMENDED_TEMPERATURES.BALANCED,
                     },
@@ -353,7 +353,7 @@ Provide the refined document.`
                     })
                 },
                 // No output schema - model returns plain text
-                model: 'ollama/gemma:2b',
+                model: 'ollama/phi3:mini',
                 config: {
                     temperature: RECOMMENDED_TEMPERATURES.BALANCED,
                 },

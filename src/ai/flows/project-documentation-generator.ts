@@ -158,7 +158,7 @@ export const projectDocumentationGenerator = ai.defineFlow(
         console.log('✅ Finalizing documentation package...');
 
         const summary = await ai.generate({
-            model: 'ollama/gemma:2b',
+            model: 'ollama/phi3:mini',
             prompt: `Create a brief summary of the generated documentation package for ${projectName}.
 
 Project Description: ${projectDescription}

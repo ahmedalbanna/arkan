@@ -12,7 +12,7 @@ const biasCheckPrompt = ai.definePrompt({
   name: 'biasCheckPrompt',
   input: { schema: BiasCheckInputSchema },
   // No output schema - model returns plain JSON text
-  model: 'ollama/gemma:2b',
+  model: 'ollama/phi3:mini',
   config: {
     temperature: 0.3,
   },

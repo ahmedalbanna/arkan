@@ -13,7 +13,7 @@ const grammarCheckPrompt = ai.definePrompt({
   name: 'grammarCheckPrompt',
   input: { schema: GrammarCheckInputSchema },
   // No output schema - model returns plain JSON text
-  model: 'ollama/gemma:2b',
+  model: 'ollama/phi3:mini',
   config: {
     // responseSchema removed
     temperature: 0.1, // Very low temp for accuracy

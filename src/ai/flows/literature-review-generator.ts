@@ -13,7 +13,7 @@ const literatureReviewPrompt = ai.definePrompt({
   name: 'literatureReviewPrompt',
   input: { schema: LiteratureReviewInputSchema },
   output: { schema: LiteratureReviewOutputSchema },
-  model: 'ollama/gemma:2b',
+  model: 'ollama/llama3:8b',
 
   prompt: `You are an expert academic researcher specializing in literature reviews. Your task is to create a comprehensive, well-structured literature review on the given topic.
 

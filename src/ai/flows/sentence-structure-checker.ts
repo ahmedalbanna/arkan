@@ -12,7 +12,7 @@ const sentenceStructureCheckPrompt = ai.definePrompt({
   name: 'sentenceStructureCheckPrompt',
   input: { schema: SentenceStructureCheckInputSchema },
   // No output schema - model returns plain JSON text
-  model: 'ollama/gemma:2b',
+  model: 'ollama/phi3:mini',
   config: {
     // responseSchema removed
     temperature: 0.2,

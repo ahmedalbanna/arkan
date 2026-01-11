@@ -59,7 +59,7 @@ ${ragContext ? 'IMPORTANT: You have access to RAG-retrieved context which contai
     name: 'generateReportSectionPromptRAG',
     input: { schema: GenerateSectionInputSchema },
     output: { schema: GenerateSectionOutputSchema },
-    model: 'ollama/gemma:2b',
+    model: 'ollama/phi3:mini',
     config: {
       responseSchema: GenerateSectionOutputSchema,
       temperature: RECOMMENDED_TEMPERATURES.BALANCED,

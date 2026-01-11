@@ -20,7 +20,7 @@ You are also an expert analyst. Before you begin writing, you must first review 
     name: 'generateReportSectionPrompt', // Static name
     input: { schema: GenerateSectionInputSchema },
     // No output schema - model returns plain text
-    model: 'ollama/gemma:2b',
+    model: 'ollama/phi3:mini',
     system: systemPrompt,
     prompt: `
 Write the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
