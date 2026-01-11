@@ -36,13 +36,54 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Implement test execution with temporary flow config
-    // For now, return a placeholder
-    return NextResponse.json({
-      success: true,
-      message: 'Flow test execution not yet implemented',
-      note: 'Save the flow first, then use /api/flows/execute',
-    });
+    // Execute flow with temporary configuration
+    // Create a temporary flow name for testing
+    const tempFlowName = `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Import flow config service to create temporary flow
+    const { flowConfigService } = await import('@/services/flow-config-service');
+    
+    try {
+      // Create temporary flow (will be used for testing only)
+      const tempFlow = await flowConfigService.createFlow(
+        {
+          ...flowConfig,
+          name: tempFlowName,
+          status: 'draft' as const,
+        },
+        'test-user'
+      );
+
+      // Execute the test flow
+      const result = await dynamicFlowExecutor({
+        flowName: tempFlowName,
+        payload,
+        userId: 'test-user',
+        requestId: `test_${Date.now()}`,
+        enableTracing: true,
+      });
+
+      // Clean up temporary flow
+      await flowConfigService.deleteFlow(tempFlow.id);
+
+      return NextResponse.json({
+        success: true,
+        result,
+        message: 'Flow test completed successfully',
+      });
+    } catch (testError) {
+      // Try to clean up if flow was created
+      try {
+        const flows = await flowConfigService.listFlows({ name: tempFlowName });
+        if (flows.length > 0) {
+          await flowConfigService.deleteFlow(flows[0].id);
+        }
+      } catch (cleanupError) {
+        console.error('Failed to cleanup test flow:', cleanupError);
+      }
+
+      throw testError;
+    }
   } catch (error) {
     console.error('Error testing flow:', error);
     return NextResponse.json(

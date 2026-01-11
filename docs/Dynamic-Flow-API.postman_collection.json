@@ -1,0 +1,465 @@
+{
+  "info": {
+    "name": "Dynamic Flow System API",
+    "description": "Complete API collection for testing Dynamic Flow System endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "flowId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "promptId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "traceId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Flow Management",
+      "item": [
+        {
+          "name": "List All Flows",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/flows?status=active&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "flows"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active",
+                  "description": "Filter by status"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Maximum results"
+                }
+              ]
+            },
+            "description": "Get a list of all flows with optional filters"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Flow",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('flowId', response.flow.id);",
+                  "    pm.test('Flow created successfully', () => {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "        pm.expect(response.flow).to.have.property('id');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"test-flow-{{$timestamp}}\",\n  \"displayName\": \"Test Flow\",\n  \"description\": \"A test flow for API testing\",\n  \"category\": \"test\",\n  \"tags\": [\"test\", \"demo\"],\n  \"inputSchema\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"query\": {\n        \"type\": \"string\",\n        \"description\": \"User query\"\n      }\n    },\n    \"required\": [\"query\"]\n  },\n  \"outputSchema\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"result\": {\n        \"type\": \"string\"\n      }\n    }\n  },\n  \"steps\": [\n    {\n      \"id\": \"step1\",\n      \"name\": \"Retrieve Context\",\n      \"type\": \"retrieve\",\n      \"handler\": \"retrieve\",\n      \"inputMapping\": {\n        \"query\": \"$.input.query\",\n        \"topK\": 5,\n        \"minScore\": 0.5\n      },\n      \"outputMapping\": {\n        \"context\": \"$.context\",\n        \"sources\": \"$.sources\"\n      }\n    },\n    {\n      \"id\": \"step2\",\n      \"name\": \"Generate Response\",\n      \"type\": \"generate\",\n      \"handler\": \"generate\",\n      \"inputMapping\": {\n        \"prompt\": \"Answer the question using this context:\\n\\n{{context}}\\n\\nQuestion: {{$.input.query}}\",\n        \"model\": \"ollama/phi3:mini\",\n        \"temperature\": 0.7\n      },\n      \"outputMapping\": {\n        \"result\": \"$.text\"\n      }\n    },\n    {\n      \"id\": \"step3\",\n      \"name\": \"Format Output\",\n      \"type\": \"format\",\n      \"handler\": \"format\",\n      \"inputMapping\": {\n        \"data\": \"$.step2.result\",\n        \"format\": \"markdown\"\n      },\n      \"outputMapping\": {\n        \"formatted\": \"$.formatted\"\n      }\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/flows",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "flows"]
+            },
+            "description": "Create a new flow configuration"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Flow by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/flows/{{flowId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "flows", "{{flowId}}"]
+            },
+            "description": "Retrieve details of a specific flow"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Flow",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"Updated Test Flow\",\n  \"description\": \"Updated description\",\n  \"status\": \"active\",\n  \"versionMessage\": \"Updated via API\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/flows/{{flowId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "flows", "{{flowId}}"]
+            },
+            "description": "Update an existing flow"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Flow Versions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/flows/{{flowId}}/versions?limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "flows", "{{flowId}}", "versions"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get version history of a flow"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Flow",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/flows/{{flowId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "flows", "{{flowId}}"]
+            },
+            "description": "Delete (archive) a flow"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for managing flow configurations"
+    },
+    {
+      "name": "Prompt Management",
+      "item": [
+        {
+          "name": "List All Prompts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/prompts?status=active",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "prompts"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active"
+                }
+              ]
+            },
+            "description": "Get a list of all prompt templates"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Prompt",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('promptId', response.prompt.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"test-prompt-{{$timestamp}}\",\n  \"displayName\": \"Test Prompt\",\n  \"description\": \"A test prompt template\",\n  \"template\": \"You are a helpful assistant. {{instruction}}\\n\\nContext: {{context}}\\n\\nQuestion: {{query}}\",\n  \"variables\": [\"instruction\", \"context\", \"query\"],\n  \"category\": \"test\",\n  \"tags\": [\"test\", \"assistant\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/prompts",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "prompts"]
+            },
+            "description": "Create a new prompt template"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Prompt by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/prompts/{{promptId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "prompts", "{{promptId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Prompt",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"Updated Test Prompt\",\n  \"template\": \"Updated template: {{instruction}}\",\n  \"versionMessage\": \"Updated via API\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/prompts/{{promptId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "prompts", "{{promptId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Prompt",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/prompts/{{promptId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "prompts", "{{promptId}}"]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for managing prompt templates"
+    },
+    {
+      "name": "Tool Registry",
+      "item": [
+        {
+          "name": "List All Tools",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/tools?type=builtin&status=active",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "tools"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "builtin"
+                },
+                {
+                  "key": "status",
+                  "value": "active"
+                }
+              ]
+            },
+            "description": "Get a list of all registered tools"
+          },
+          "response": []
+        },
+        {
+          "name": "Register Tool",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"customTool\",\n  \"displayName\": \"Custom Tool\",\n  \"description\": \"A custom tool for testing\",\n  \"type\": \"custom\",\n  \"category\": \"custom\",\n  \"inputSchema\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"input\": {\n        \"type\": \"string\"\n      }\n    }\n  },\n  \"outputSchema\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"result\": {\n        \"type\": \"string\"\n      }\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/tools",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "tools"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tool by Name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/tools/checkGrammar",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "tools", "checkGrammar"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Execute Tool",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parameters\": {\n    \"text\": \"This are a test sentence with grammer error.\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/tools/checkGrammar/execute",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "tools", "checkGrammar", "execute"]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for tool registry management"
+    },
+    {
+      "name": "Flow Execution",
+      "item": [
+        {
+          "name": "Execute Flow",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.traceId) {",
+                  "        pm.environment.set('traceId', response.traceId);",
+                  "    }",
+                  "    pm.test('Flow executed successfully', () => {",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"flowName\": \"test-flow-{{$timestamp}}\",\n  \"payload\": {\n    \"query\": \"What is artificial intelligence?\"\n  },\n  \"userId\": \"test-user\",\n  \"enableTracing\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/flows/execute",
+              "host": ["{{baseUrl}}"],
+              "path": ["flows", "execute"]
+            },
+            "description": "Execute a flow with provided input"
+          },
+          "response": []
+        },
+        {
+          "name": "Test Flow",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"flowConfig\": {\n    \"name\": \"temp-test-flow\",\n    \"displayName\": \"Temporary Test Flow\",\n    \"steps\": [\n      {\n        \"id\": \"step1\",\n        \"name\": \"Format Test\",\n        \"type\": \"format\",\n        \"handler\": \"format\",\n        \"inputMapping\": {\n          \"data\": \"$.input.text\",\n          \"format\": \"text\",\n          \"transformation\": \"uppercase\"\n        },\n        \"outputMapping\": {\n          \"result\": \"$.formatted\"\n        }\n      }\n    ]\n  },\n  \"payload\": {\n    \"text\": \"hello world\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/flows/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["flows", "test"]
+            },
+            "description": "Test a flow configuration without saving"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for executing flows"
+    },
+    {
+      "name": "Monitoring",
+      "item": [
+        {
+          "name": "Get Execution Trace",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/traces/{{traceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "traces", "{{traceId}}"]
+            },
+            "description": "Get detailed execution trace for debugging"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for monitoring and tracing"
+    }
+  ]
+}
