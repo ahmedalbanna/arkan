@@ -1,0 +1,1336 @@
+{
+  "totalFlows": 55,
+  "analyzedFlows": 55,
+  "byComplexity": {
+    "simple": 16,
+    "medium": 30,
+    "complex": 9
+  },
+  "byPhase": {
+    "phase1": 16,
+    "phase2": 31,
+    "phase3": 8
+  },
+  "flows": [
+    {
+      "flowName": "academic-literature-review",
+      "filePath": "src/ai/flows/academic-literature-review.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "../tools/schemas",
+        "@/ai/utils/json-output-validator"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 5,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 5 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "academic-paper-quality-checker",
+      "filePath": "src/ai/flows/academic-paper-quality-checker.ts",
+      "complexity": "complex",
+      "estimatedSteps": 4,
+      "dependencies": [
+        "@/ai/genkit",
+        "../tools/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": true,
+      "promptsFound": 4,
+      "migrationPriority": "low",
+      "migrationPhase": 3,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "🔄 Convert loops to LOOP steps",
+        "⚠️ Set appropriate maxIterations",
+        "📚 Extract 4 prompts into templates",
+        "🧪 Migrate in pilot phase first",
+        "📊 Compare outputs carefully"
+      ],
+      "estimatedEffort": "4-8 hours"
+    },
+    {
+      "flowName": "ai-proofread-document",
+      "filePath": "src/ai/flows/ai-proofread-document.ts",
+      "complexity": "simple",
+      "estimatedSteps": 1,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": false,
+      "promptsFound": 2,
+      "migrationPriority": "high",
+      "migrationPhase": 1,
+      "recommendations": [
+        "✅ Good candidate for early migration",
+        "📝 Extract prompts into prompt templates",
+        "📚 Extract 2 prompts into templates"
+      ],
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "flowName": "ai-researcher",
+      "filePath": "src/ai/flows/ai-researcher.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas",
+        "@/ai/utils/json-output-validator"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 4,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 4 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "analyze-context",
+      "filePath": "src/ai/flows/analyze-context.ts",
+      "complexity": "simple",
+      "estimatedSteps": 1,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": false,
+      "promptsFound": 4,
+      "migrationPriority": "high",
+      "migrationPhase": 1,
+      "recommendations": [
+        "✅ Good candidate for early migration",
+        "📝 Extract prompts into prompt templates",
+        "📚 Extract 4 prompts into templates"
+      ],
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "flowName": "bias-checker",
+      "filePath": "src/ai/flows/bias-checker.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 4,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 4 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "create-lecture-unit",
+      "filePath": "src/ai/flows/create-lecture-unit.ts",
+      "complexity": "simple",
+      "estimatedSteps": 1,
+      "dependencies": [],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": false,
+      "promptsFound": 3,
+      "migrationPriority": "high",
+      "migrationPhase": 1,
+      "recommendations": [
+        "✅ Good candidate for early migration",
+        "📝 Extract prompts into prompt templates",
+        "📚 Extract 3 prompts into templates"
+      ],
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "flowName": "detect-ai-content",
+      "filePath": "src/ai/flows/detect-ai-content.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 4,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 4 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "dynamic-flow-executor",
+      "filePath": "src/ai/flows/dynamic-flow-executor.ts",
+      "complexity": "complex",
+      "estimatedSteps": 4,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/dynamic-flow/context-manager",
+        "@/ai/dynamic-flow/schema-validator",
+        "@/lib/models/flow-config"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": true,
+      "promptsFound": 9,
+      "migrationPriority": "low",
+      "migrationPhase": 3,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "🔄 Convert loops to LOOP steps",
+        "⚠️ Set appropriate maxIterations",
+        "📚 Extract 9 prompts into templates",
+        "🧪 Migrate in pilot phase first",
+        "📊 Compare outputs carefully"
+      ],
+      "estimatedEffort": "4-8 hours"
+    },
+    {
+      "flowName": "fact-checker",
+      "filePath": "src/ai/flows/fact-checker.ts",
+      "complexity": "simple",
+      "estimatedSteps": 1,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": false,
+      "promptsFound": 4,
+      "migrationPriority": "high",
+      "migrationPhase": 1,
+      "recommendations": [
+        "✅ Good candidate for early migration",
+        "📝 Extract prompts into prompt templates",
+        "📚 Extract 4 prompts into templates"
+      ],
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "flowName": "fact-retrieval",
+      "filePath": "src/ai/flows/fact-retrieval.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 4,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 4 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "generate-agent-config",
+      "filePath": "src/ai/flows/generate-agent-config.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 2,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 2 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "generate-chapter-content-rag",
+      "filePath": "src/ai/flows/generate-chapter-content-rag.ts",
+      "complexity": "complex",
+      "estimatedSteps": 3,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas",
+        "@/lib/rag/retrieval"
+      ],
+      "usesRAG": true,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": true,
+      "promptsFound": 7,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔍 Add RETRIEVE step for RAG context",
+        "⚙️ Configure collection and topK parameters",
+        "🔄 Convert loops to LOOP steps",
+        "⚠️ Set appropriate maxIterations",
+        "📚 Extract 7 prompts into templates",
+        "🧪 Migrate in pilot phase first",
+        "📊 Compare outputs carefully"
+      ],
+      "estimatedEffort": "4-8 hours"
+    },
+    {
+      "flowName": "generate-chapter-content",
+      "filePath": "src/ai/flows/generate-chapter-content.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 4,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 4 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "generate-citation",
+      "filePath": "src/ai/flows/generate-citation.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 3,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 3 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "generate-diagrams",
+      "filePath": "src/ai/flows/generate-diagrams.ts",
+      "complexity": "simple",
+      "estimatedSteps": 1,
+      "dependencies": [],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": false,
+      "promptsFound": 0,
+      "migrationPriority": "high",
+      "migrationPhase": 1,
+      "recommendations": [
+        "✅ Good candidate for early migration",
+        "📝 Extract prompts into prompt templates"
+      ],
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "flowName": "generate-ideas",
+      "filePath": "src/ai/flows/generate-ideas.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 3,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 3 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "generate-image",
+      "filePath": "src/ai/flows/generate-image.ts",
+      "complexity": "simple",
+      "estimatedSteps": 1,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": false,
+      "promptsFound": 1,
+      "migrationPriority": "high",
+      "migrationPhase": 1,
+      "recommendations": [
+        "✅ Good candidate for early migration",
+        "📝 Extract prompts into prompt templates"
+      ],
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "flowName": "generate-plantuml",
+      "filePath": "src/ai/flows/generate-plantuml.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 5,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 5 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "generate-project-blueprint",
+      "filePath": "src/ai/flows/generate-project-blueprint.ts",
+      "complexity": "simple",
+      "estimatedSteps": 1,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": false,
+      "promptsFound": 2,
+      "migrationPriority": "high",
+      "migrationPhase": 1,
+      "recommendations": [
+        "✅ Good candidate for early migration",
+        "📝 Extract prompts into prompt templates",
+        "📚 Extract 2 prompts into templates"
+      ],
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "flowName": "generate-quiz",
+      "filePath": "src/ai/flows/generate-quiz.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 4,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 4 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "generate-report-section-rag",
+      "filePath": "src/ai/flows/generate-report-section-rag.ts",
+      "complexity": "medium",
+      "estimatedSteps": 3,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas",
+        "@/lib/rag/retrieval",
+        "@/ai/utils/json-output-validator"
+      ],
+      "usesRAG": true,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 9,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔍 Add RETRIEVE step for RAG context",
+        "⚙️ Configure collection and topK parameters",
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 9 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "generate-report-section",
+      "filePath": "src/ai/flows/generate-report-section.ts",
+      "complexity": "simple",
+      "estimatedSteps": 1,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": false,
+      "promptsFound": 4,
+      "migrationPriority": "high",
+      "migrationPhase": 1,
+      "recommendations": [
+        "✅ Good candidate for early migration",
+        "📝 Extract prompts into prompt templates",
+        "📚 Extract 4 prompts into templates"
+      ],
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "flowName": "generate-session-plan",
+      "filePath": "src/ai/flows/generate-session-plan.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/lib/utils/ai-utils"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 3,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 3 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "generate-text",
+      "filePath": "src/ai/flows/generate-text.ts",
+      "complexity": "simple",
+      "estimatedSteps": 1,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas",
+        "@/ai/utils/json-output-validator"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": false,
+      "promptsFound": 3,
+      "migrationPriority": "high",
+      "migrationPhase": 1,
+      "recommendations": [
+        "✅ Good candidate for early migration",
+        "📝 Extract prompts into prompt templates",
+        "📚 Extract 3 prompts into templates"
+      ],
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "flowName": "generate-theoretical-lecture",
+      "filePath": "src/ai/flows/generate-theoretical-lecture.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/lib/utils/ai-utils",
+        "@/ai/utils/json-output-validator"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 5,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 5 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "generate-toc",
+      "filePath": "src/ai/flows/generate-toc.ts",
+      "complexity": "simple",
+      "estimatedSteps": 1,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas",
+        "@/ai/utils/json-output-validator"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": false,
+      "promptsFound": 5,
+      "migrationPriority": "high",
+      "migrationPhase": 1,
+      "recommendations": [
+        "✅ Good candidate for early migration",
+        "📝 Extract prompts into prompt templates",
+        "📚 Extract 5 prompts into templates"
+      ],
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "flowName": "generate-ui-description",
+      "filePath": "src/ai/flows/generate-ui-description.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 3,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 3 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "graduation-project-generator",
+      "filePath": "src/ai/flows/graduation-project-generator.ts",
+      "complexity": "complex",
+      "estimatedSteps": 16,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/utils/json-output-validator"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": true,
+      "promptsFound": 20,
+      "migrationPriority": "low",
+      "migrationPhase": 3,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "🔄 Convert loops to LOOP steps",
+        "⚠️ Set appropriate maxIterations",
+        "📚 Extract 20 prompts into templates",
+        "🧪 Migrate in pilot phase first",
+        "📊 Compare outputs carefully"
+      ],
+      "estimatedEffort": "4-8 hours"
+    },
+    {
+      "flowName": "grammar-checker",
+      "filePath": "src/ai/flows/grammar-checker.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/utils/json-output-validator",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 5,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 5 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "humanize-text",
+      "filePath": "src/ai/flows/humanize-text.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 4,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 4 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "image-to-text",
+      "filePath": "src/ai/flows/image-to-text.ts",
+      "complexity": "simple",
+      "estimatedSteps": 1,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": false,
+      "promptsFound": 3,
+      "migrationPriority": "high",
+      "migrationPhase": 1,
+      "recommendations": [
+        "✅ Good candidate for early migration",
+        "📝 Extract prompts into prompt templates",
+        "📚 Extract 3 prompts into templates"
+      ],
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "flowName": "improve-report-markdown",
+      "filePath": "src/ai/flows/improve-report-markdown.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas",
+        "@/ai/utils/json-output-validator"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 5,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 5 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "literature-review-generator",
+      "filePath": "src/ai/flows/literature-review-generator.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas",
+        "@/ai/utils/json-output-validator"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 5,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 5 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "manipulate-text",
+      "filePath": "src/ai/flows/manipulate-text.ts",
+      "complexity": "simple",
+      "estimatedSteps": 1,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/utils/json-output-validator"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": false,
+      "promptsFound": 3,
+      "migrationPriority": "high",
+      "migrationPhase": 1,
+      "recommendations": [
+        "✅ Good candidate for early migration",
+        "📝 Extract prompts into prompt templates",
+        "📚 Extract 3 prompts into templates"
+      ],
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "flowName": "paraphrase-text",
+      "filePath": "src/ai/flows/paraphrase-text.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas",
+        "@/ai/utils/json-output-validator"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 4,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 4 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "plagiarism-checker",
+      "filePath": "src/ai/flows/plagiarism-checker.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 4,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 4 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "presentation-content-creator",
+      "filePath": "src/ai/flows/presentation-content-creator.ts",
+      "complexity": "complex",
+      "estimatedSteps": 5,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/prompts/project-documentation"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": true,
+      "promptsFound": 12,
+      "migrationPriority": "low",
+      "migrationPhase": 3,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "🔄 Convert loops to LOOP steps",
+        "⚠️ Set appropriate maxIterations",
+        "📚 Extract 12 prompts into templates",
+        "🧪 Migrate in pilot phase first",
+        "📊 Compare outputs carefully"
+      ],
+      "estimatedEffort": "4-8 hours"
+    },
+    {
+      "flowName": "professional-document-writer",
+      "filePath": "src/ai/flows/professional-document-writer.ts",
+      "complexity": "complex",
+      "estimatedSteps": 4,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/utils/json-output-validator",
+        "../tools/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": true,
+      "promptsFound": 5,
+      "migrationPriority": "low",
+      "migrationPhase": 3,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "🔄 Convert loops to LOOP steps",
+        "⚠️ Set appropriate maxIterations",
+        "📚 Extract 5 prompts into templates",
+        "🧪 Migrate in pilot phase first",
+        "📊 Compare outputs carefully"
+      ],
+      "estimatedEffort": "4-8 hours"
+    },
+    {
+      "flowName": "project-documentation-generator",
+      "filePath": "src/ai/flows/project-documentation-generator.ts",
+      "complexity": "medium",
+      "estimatedSteps": 3,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/prompts/project-documentation"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 12,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 12 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "project-report-generator",
+      "filePath": "src/ai/flows/project-report-generator.ts",
+      "complexity": "complex",
+      "estimatedSteps": 3,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/prompts/project-documentation"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": true,
+      "promptsFound": 7,
+      "migrationPriority": "low",
+      "migrationPhase": 3,
+      "recommendations": [
+        "🔄 Convert loops to LOOP steps",
+        "⚠️ Set appropriate maxIterations",
+        "📚 Extract 7 prompts into templates",
+        "🧪 Migrate in pilot phase first",
+        "📊 Compare outputs carefully"
+      ],
+      "estimatedEffort": "4-8 hours"
+    },
+    {
+      "flowName": "question-answering",
+      "filePath": "src/ai/flows/question-answering.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 4,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 4 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "rewrite-document-to-markdown",
+      "filePath": "src/ai/flows/rewrite-document-to-markdown.ts",
+      "complexity": "simple",
+      "estimatedSteps": 1,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": false,
+      "promptsFound": 2,
+      "migrationPriority": "high",
+      "migrationPhase": 1,
+      "recommendations": [
+        "✅ Good candidate for early migration",
+        "📝 Extract prompts into prompt templates",
+        "📚 Extract 2 prompts into templates"
+      ],
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "flowName": "rewrite-to-markdown",
+      "filePath": "src/ai/flows/rewrite-to-markdown.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 2,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 2 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "run-agent-flow",
+      "filePath": "src/ai/flows/run-agent-flow.ts",
+      "complexity": "simple",
+      "estimatedSteps": 1,
+      "dependencies": [
+        "@/ai/genkit"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": false,
+      "promptsFound": 3,
+      "migrationPriority": "high",
+      "migrationPhase": 1,
+      "recommendations": [
+        "✅ Good candidate for early migration",
+        "📝 Extract prompts into prompt templates",
+        "📚 Extract 3 prompts into templates"
+      ],
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "flowName": "sentence-structure-checker",
+      "filePath": "src/ai/flows/sentence-structure-checker.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 4,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 4 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "solve-assignments",
+      "filePath": "src/ai/flows/solve-assignments.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 3,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 3 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "summarize-document",
+      "filePath": "src/ai/flows/summarize-document.ts",
+      "complexity": "simple",
+      "estimatedSteps": 1,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": false,
+      "promptsFound": 2,
+      "migrationPriority": "high",
+      "migrationPhase": 1,
+      "recommendations": [
+        "✅ Good candidate for early migration",
+        "📝 Extract prompts into prompt templates",
+        "📚 Extract 2 prompts into templates"
+      ],
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "flowName": "summarize-text",
+      "filePath": "src/ai/flows/summarize-text.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas",
+        "@/ai/utils/json-output-validator"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 4,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 4 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "technical-spec-writer",
+      "filePath": "src/ai/flows/technical-spec-writer.ts",
+      "complexity": "complex",
+      "estimatedSteps": 5,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/prompts/project-documentation"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": true,
+      "promptsFound": 12,
+      "migrationPriority": "low",
+      "migrationPhase": 3,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "🔄 Convert loops to LOOP steps",
+        "⚠️ Set appropriate maxIterations",
+        "📚 Extract 12 prompts into templates",
+        "🧪 Migrate in pilot phase first",
+        "📊 Compare outputs carefully"
+      ],
+      "estimatedEffort": "4-8 hours"
+    },
+    {
+      "flowName": "text-stylist",
+      "filePath": "src/ai/flows/text-stylist.ts",
+      "complexity": "complex",
+      "estimatedSteps": 10,
+      "dependencies": [
+        "@/ai/genkit"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": true,
+      "promptsFound": 12,
+      "migrationPriority": "low",
+      "migrationPhase": 3,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "🔄 Convert loops to LOOP steps",
+        "⚠️ Set appropriate maxIterations",
+        "📚 Extract 12 prompts into templates",
+        "🧪 Migrate in pilot phase first",
+        "📊 Compare outputs carefully"
+      ],
+      "estimatedEffort": "4-8 hours"
+    },
+    {
+      "flowName": "text-to-speech",
+      "filePath": "src/ai/flows/text-to-speech.ts",
+      "complexity": "simple",
+      "estimatedSteps": 1,
+      "dependencies": [],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": false,
+      "hasLoops": false,
+      "promptsFound": 0,
+      "migrationPriority": "high",
+      "migrationPhase": 1,
+      "recommendations": [
+        "✅ Good candidate for early migration",
+        "📝 Extract prompts into prompt templates"
+      ],
+      "estimatedEffort": "1-2 hours"
+    },
+    {
+      "flowName": "topic-explainer",
+      "filePath": "src/ai/flows/topic-explainer.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 3,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 3 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "translate-text",
+      "filePath": "src/ai/flows/translate-text.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 2,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 2 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    },
+    {
+      "flowName": "write-document",
+      "filePath": "src/ai/flows/write-document.ts",
+      "complexity": "medium",
+      "estimatedSteps": 2,
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas",
+        "@/ai/utils/json-output-validator"
+      ],
+      "usesRAG": false,
+      "usesTools": false,
+      "hasConditionals": true,
+      "hasLoops": false,
+      "promptsFound": 4,
+      "migrationPriority": "medium",
+      "migrationPhase": 2,
+      "recommendations": [
+        "🔀 Use CONDITION steps for branching logic",
+        "⚠️ Test both branches thoroughly",
+        "📚 Extract 4 prompts into templates"
+      ],
+      "estimatedEffort": "2-4 hours"
+    }
+  ],
+  "summary": [
+    "📊 Analysis Summary:",
+    "   Total Flows: 55",
+    "",
+    "   By Complexity:",
+    "   🟢 Simple: 16",
+    "   🟡 Medium: 30",
+    "   🔴 Complex: 9",
+    "",
+    "   By Migration Phase:",
+    "   Phase 1 (Simple): 16 flows",
+    "   Phase 2 (Medium): 31 flows",
+    "   Phase 3 (Complex): 8 flows",
+    "",
+    "   Total Estimated Effort: 168 hours"
+  ]
+}

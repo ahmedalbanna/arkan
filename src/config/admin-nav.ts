@@ -14,6 +14,9 @@ import {
     Activity,
     Upload,
     TestTube,
+    Zap,
+    FileText,
+    Wrench,
 } from 'lucide-react';
 
 export interface NavLink {
@@ -25,6 +28,9 @@ export interface NavLink {
 
 export const navConfig: NavLink[] = [
     { href: '/admin/dashboard', labelKey: 'adminDashboard.pageTitle', icon: LayoutDashboard },
+    { href: '/admin/flows', labelKey: 'Dynamic Flows', icon: Zap },
+    { href: '/admin/prompts', labelKey: 'Prompt Templates', icon: FileText },
+    { href: '/admin/tools', labelKey: 'Tool Registry', icon: Wrench },
     { href: '/admin/rag-monitor', labelKey: 'RAG Monitor', icon: Activity },
     { href: '/admin/document-indexer', labelKey: 'Document Indexer', icon: Upload },
     { href: '/admin/rag-tester', labelKey: 'RAG Query Tester', icon: TestTube },
