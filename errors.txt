@@ -1,248 +1,81 @@
- ○ Compiling /api/users/[id] ...
- ✓ Compiled /api/users/[id] in 1116ms
-Firebase Admin SDK initialized using Application Default Credentials.
- POST /api/auth/session 200 in 1327ms
-Firebase Admin SDK initialized using Application Default Credentials.
- GET /api/users/nR5tqFUzwhdm4ybpBObt25pJ6TI2 200 in 4855ms
- ○ Compiling /api/admin/settings ...
- GET /api/admin/settings 200 in 852ms
- ✓ Compiled /api/admin/settings in 1481ms
-Error listing tools: [Error [FirebaseError]: Missing or insufficient permissions.] {
-  code: 'permission-denied',
-  customData: undefined,
-  toString: [Function (anonymous)]
+⚡ arkan-beta-stable ~/arkan npm run week6:all    
+
+> nextn@0.1.0 week6:all
+> ./scripts/migration/run-week6.sh
+
+╔════════════════════════════════════════════════════════╗
+║   Week 6 Migration - Full Execution                   ║
+║   Dynamic Flow System                                  ║
+╚════════════════════════════════════════════════════════╝
+
+[INFO] Checking prerequisites...
+[SUCCESS] Prerequisites check passed
+
+[INFO] Creating output directory...
+[SUCCESS] Output directory ready
+
+[INFO] ═══════════════════════════════════════════════════════
+[INFO] Phase 1: Running Migration (25 flows)
+[INFO] ═══════════════════════════════════════════════════════
+
+nvm is not compatible with the "npm_config_prefix" environment variable: currently set to "/system/conda/node/nvm/versions/node/v22.14.0"
+Run `unset npm_config_prefix` to unset it.
+/settings/.noderc: line 31: npx: command not found
+[ERROR] Migration failed
+⚡ arkan-beta-stable ~/arkan npm run migrate:week6
+
+> nextn@0.1.0 migrate:week6
+> tsx scripts/migration/week6-migration-batch.ts
+
+/teamspace/studios/this_studio/arkan/node_modules/firebase-admin/lib/app/lifecycle.js:69
+            throw new error_1.FirebaseAppError(error_1.AppErrorCodes.NO_APP, errorMessage);
+                  ^
+
+FirebaseAppError: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+    at AppStore.getApp (/teamspace/studios/this_studio/arkan/node_modules/firebase-admin/lib/app/lifecycle.js:69:19)
+    at getApp (/teamspace/studios/this_studio/arkan/node_modules/firebase-admin/lib/app/lifecycle.js:109:36)
+    at getFirestore (/teamspace/studios/this_studio/arkan/node_modules/firebase-admin/lib/firestore/index.js:52:90)
+    at <anonymous> (/teamspace/studios/this_studio/arkan/scripts/migration/week6-migration-batch.ts:27:12)
+    at Object.<anonymous> (/teamspace/studios/this_studio/arkan/scripts/migration/week6-migration-batch.ts:507:1)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object.transformer (/teamspace/studios/this_studio/arkan/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1104)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14) {
+  errorInfo: {
+    code: 'app/no-app',
+    message: 'The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.'
+  },
+  codePrefix: 'app'
 }
-Error listing tools: Error [ToolServiceError]: Failed to list tools
-    at ToolRegistryService.listTools (src/services/tool-registry-service.ts:139:13)
-    at async GET (src/app/api/admin/tools/route.ts:30:19)
-  137 |     } catch (error) {
-  138 |       console.error('Error listing tools:', error);
-> 139 |       throw new ToolServiceError('Failed to list tools', error);
-      |             ^
-  140 |     }
-  141 |   }
-  142 | {
-  [cause]: [Error [FirebaseError]: Missing or insufficient permissions.] {
-    code: 'permission-denied',
-    customData: undefined,
-    toString: [Function (anonymous)]
-  }
+
+Node.js v22.14.0
+⚡ arkan-beta-stable ~/arkan npm run test:week6   
+
+> nextn@0.1.0 test:week6
+> tsx scripts/migration/week6-test-migrations.ts
+
+/teamspace/studios/this_studio/arkan/node_modules/firebase-admin/lib/app/lifecycle.js:69
+            throw new error_1.FirebaseAppError(error_1.AppErrorCodes.NO_APP, errorMessage);
+                  ^
+
+FirebaseAppError: The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.
+    at AppStore.getApp (/teamspace/studios/this_studio/arkan/node_modules/firebase-admin/lib/app/lifecycle.js:69:19)
+    at getApp (/teamspace/studios/this_studio/arkan/node_modules/firebase-admin/lib/app/lifecycle.js:109:36)
+    at getFirestore (/teamspace/studios/this_studio/arkan/node_modules/firebase-admin/lib/firestore/index.js:52:90)
+    at <anonymous> (/teamspace/studios/this_studio/arkan/scripts/migration/week6-test-migrations.ts:22:12)
+    at Object.<anonymous> (/teamspace/studios/this_studio/arkan/scripts/migration/week6-test-migrations.ts:385:1)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object.transformer (/teamspace/studios/this_studio/arkan/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1104)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14) {
+  errorInfo: {
+    code: 'app/no-app',
+    message: 'The default Firebase app does not exist. Make sure you call initializeApp() before using any of the Firebase services.'
+  },
+  codePrefix: 'app'
 }
- GET /api/admin/tools 500 in 3954ms
-Error listing tools: [Error [FirebaseError]: Missing or insufficient permissions.] {
-  code: 'permission-denied',
-  customData: undefined,
-  toString: [Function (anonymous)]
-}
-Error listing tools: Error [ToolServiceError]: Failed to list tools
-    at ToolRegistryService.listTools (src/services/tool-registry-service.ts:139:13)
-    at async GET (src/app/api/admin/tools/route.ts:30:19)
-  137 |     } catch (error) {
-  138 |       console.error('Error listing tools:', error);
-> 139 |       throw new ToolServiceError('Failed to list tools', error);
-      |             ^
-  140 |     }
-  141 |   }
-  142 | {
-  [cause]: [Error [FirebaseError]: Missing or insufficient permissions.] {
-    code: 'permission-denied',
-    customData: undefined,
-    toString: [Function (anonymous)]
-  }
-}
- GET /api/admin/tools 500 in 821ms
- ○ Compiling /admin/flows ...
- ✓ Compiled /admin/flows in 3.3s
- GET /admin/flows 200 in 3543ms
- ✓ Compiled /api/admin/flows in 416ms
-Error listing flows: [Error [FirebaseError]: Missing or insufficient permissions.] {
-  code: 'permission-denied',
-  customData: undefined,
-  toString: [Function (anonymous)]
-}
-Error listing flows: Error [FlowServiceError]: Failed to list flows
-    at FlowConfigService.listFlows (src/services/flow-config-service.ts:119:13)
-    at async GET (src/app/api/admin/flows/route.ts:33:19)
-  117 |     } catch (error) {
-  118 |       console.error('Error listing flows:', error);
-> 119 |       throw new FlowServiceError('Failed to list flows', error);
-      |             ^
-  120 |     }
-  121 |   }
-  122 | {
-  [cause]: [Error [FirebaseError]: Missing or insufficient permissions.] {
-    code: 'permission-denied',
-    customData: undefined,
-    toString: [Function (anonymous)]
-  }
-}
- GET /api/admin/flows 500 in 1225ms
-Error listing flows: [Error [FirebaseError]: Missing or insufficient permissions.] {
-  code: 'permission-denied',
-  customData: undefined,
-  toString: [Function (anonymous)]
-}
-Error listing flows: Error [FlowServiceError]: Failed to list flows
-    at FlowConfigService.listFlows (src/services/flow-config-service.ts:119:13)
-    at async GET (src/app/api/admin/flows/route.ts:33:19)
-  117 |     } catch (error) {
-  118 |       console.error('Error listing flows:', error);
-> 119 |       throw new FlowServiceError('Failed to list flows', error);
-      |             ^
-  120 |     }
-  121 |   }
-  122 | {
-  [cause]: [Error [FirebaseError]: Missing or insufficient permissions.] {
-    code: 'permission-denied',
-    customData: undefined,
-    toString: [Function (anonymous)]
-  }
-}
- GET /api/admin/flows 500 in 813ms
-Error creating flow: Error [ValidationError]: Flow validation failed
-    at FlowConfigService.createFlow (src/services/flow-config-service.ts:134:15)
-    at POST (src/app/api/admin/flows/route.ts:64:42)
-  132 |       const errors = validateFlowConfiguration(flow);
-  133 |       if (errors.length > 0) {
-> 134 |         throw new ValidationError('Flow validation failed', errors);
-      |               ^
-  135 |       }
-  136 |       
-  137 |       // Check if flow with same name already exists {
-  cause: undefined,
-  errors: [Array]
-}
-Error creating flow: Error [ValidationError]: Flow validation failed
-    at FlowConfigService.createFlow (src/services/flow-config-service.ts:134:15)
-    at POST (src/app/api/admin/flows/route.ts:64:42)
-  132 |       const errors = validateFlowConfiguration(flow);
-  133 |       if (errors.length > 0) {
-> 134 |         throw new ValidationError('Flow validation failed', errors);
-      |               ^
-  135 |       }
-  136 |       
-  137 |       // Check if flow with same name already exists {
-  cause: undefined,
-  errors: [Array]
-}
- POST /api/admin/flows 400 in 519ms
- ○ Compiling /admin/prompts ...
- ✓ Compiled /admin/prompts in 1820ms
- GET /admin/prompts 200 in 2003ms
- ✓ Compiled /api/admin/prompts in 373ms
-Error listing prompts: [Error [FirebaseError]: Missing or insufficient permissions.] {
-  code: 'permission-denied',
-  customData: undefined,
-  toString: [Function (anonymous)]
-}
-Error listing prompts: Error [PromptServiceError]: Failed to list prompts
-    at PromptManagementService.listPrompts (src/services/prompt-management-service.ts:120:13)
-    at async GET (src/app/api/admin/prompts/route.ts:30:21)
-  118 |     } catch (error) {
-  119 |       console.error('Error listing prompts:', error);
-> 120 |       throw new PromptServiceError('Failed to list prompts', error);
-      |             ^
-  121 |     }
-  122 |   }
-  123 | {
-  [cause]: [Error [FirebaseError]: Missing or insufficient permissions.] {
-    code: 'permission-denied',
-    customData: undefined,
-    toString: [Function (anonymous)]
-  }
-}
- GET /api/admin/prompts 500 in 1135ms
-Error listing prompts: [Error [FirebaseError]: Missing or insufficient permissions.] {
-  code: 'permission-denied',
-  customData: undefined,
-  toString: [Function (anonymous)]
-}
-Error listing prompts: Error [PromptServiceError]: Failed to list prompts
-    at PromptManagementService.listPrompts (src/services/prompt-management-service.ts:120:13)
-    at async GET (src/app/api/admin/prompts/route.ts:30:21)
-  118 |     } catch (error) {
-  119 |       console.error('Error listing prompts:', error);
-> 120 |       throw new PromptServiceError('Failed to list prompts', error);
-      |             ^
-  121 |     }
-  122 |   }
-  123 | {
-  [cause]: [Error [FirebaseError]: Missing or insufficient permissions.] {
-    code: 'permission-denied',
-    customData: undefined,
-    toString: [Function (anonymous)]
-  }
-}
- GET /api/admin/prompts 500 in 807ms
-Error creating prompt: Error [ValidationError]: Prompt validation failed
-    at PromptManagementService.createPrompt (src/services/prompt-management-service.ts:135:15)
-    at POST (src/app/api/admin/prompts/route.ts:60:50)
-  133 |       const errors = validatePromptConfiguration(prompt);
-  134 |       if (errors.length > 0) {
-> 135 |         throw new ValidationError('Prompt validation failed', errors);
-      |               ^
-  136 |       }
-  137 |
-  138 |       // Check if prompt with same name already exists {
-  cause: undefined,
-  errors: [Array]
-}
-Error creating prompt: Error [ValidationError]: Prompt validation failed
-    at PromptManagementService.createPrompt (src/services/prompt-management-service.ts:135:15)
-    at POST (src/app/api/admin/prompts/route.ts:60:50)
-  133 |       const errors = validatePromptConfiguration(prompt);
-  134 |       if (errors.length > 0) {
-> 135 |         throw new ValidationError('Prompt validation failed', errors);
-      |               ^
-  136 |       }
-  137 |
-  138 |       // Check if prompt with same name already exists {
-  cause: undefined,
-  errors: [Array]
-}
- POST /api/admin/prompts 400 in 578ms
- GET /admin/tools 200 in 234ms
-Error listing tools: [Error [FirebaseError]: Missing or insufficient permissions.] {
-  code: 'permission-denied',
-  customData: undefined,
-  toString: [Function (anonymous)]
-}
-Error listing tools: Error [ToolServiceError]: Failed to list tools
-    at ToolRegistryService.listTools (src/services/tool-registry-service.ts:139:13)
-    at async GET (src/app/api/admin/tools/route.ts:30:19)
-  137 |     } catch (error) {
-  138 |       console.error('Error listing tools:', error);
-> 139 |       throw new ToolServiceError('Failed to list tools', error);
-      |             ^
-  140 |     }
-  141 |   }
-  142 | {
-  [cause]: [Error [FirebaseError]: Missing or insufficient permissions.] {
-    code: 'permission-denied',
-    customData: undefined,
-    toString: [Function (anonymous)]
-  }
-}
- GET /api/admin/tools 500 in 672ms
-Error listing tools: [Error [FirebaseError]: Missing or insufficient permissions.] {
-  code: 'permission-denied',
-  customData: undefined,
-  toString: [Function (anonymous)]
-}
-Error listing tools: Error [ToolServiceError]: Failed to list tools
-    at ToolRegistryService.listTools (src/services/tool-registry-service.ts:139:13)
-    at async GET (src/app/api/admin/tools/route.ts:30:19)
-  137 |     } catch (error) {
-  138 |       console.error('Error listing tools:', error);
-> 139 |       throw new ToolServiceError('Failed to list tools', error);
-      |             ^
-  140 |     }
-  141 |   }
-  142 | {
-  [cause]: [Error [FirebaseError]: Missing or insufficient permissions.] {
-    code: 'permission-denied',
-    customData: undefined,
-    toString: [Function (anonymous)]
-  }
-}
- GET /api/admin/tools 500 in 685ms
+
+Node.js v22.14.0
+⚡ arkan-beta-stable ~/arkan 
