@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { useAuthContext } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 
 interface RetrievalState {
   isRetrieving: boolean;
@@ -20,7 +20,7 @@ interface RetrievalState {
 }
 
 export function useRAGRetrieval() {
-  const { user } = useAuthContext();
+  const { firebaseUser: user } = useAuth();
   const [state, setState] = useState<RetrievalState>({
     isRetrieving: false,
     error: null,

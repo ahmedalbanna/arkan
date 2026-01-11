@@ -58,3 +58,4 @@ acli.exe
 /.vscode/
 /public/
 package-lock.json
+/qdrant_storage/*

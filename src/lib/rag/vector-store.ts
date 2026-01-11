@@ -5,7 +5,7 @@
  * For production, consider using dedicated vector databases like Pinecone or Qdrant.
  */
 
-import { db } from '@/lib/firebase/server-init';
+import { adminDb as db } from '@/lib/firebase/server-init';
 import { collection, doc, setDoc, getDocs, query, where, Timestamp } from 'firebase/firestore';
 
 export interface DocumentChunk {
@@ -164,12 +164,45 @@ export class VectorStore {
   }
 }
 
-// Singleton instance
+// Singleton instances
 let vectorStoreInstance: VectorStore | null = null;
+let qdrantStoreInstance: any | null = null;
 
-export function getVectorStore(): VectorStore {
-  if (!vectorStoreInstance) {
-    vectorStoreInstance = new VectorStore();
+/**
+ * Vector Store Factory
+ * Creates the appropriate vector store based on configuration
+ */
+export function getVectorStore(): VectorStore | any {
+  const provider = process.env.VECTOR_STORE_PROVIDER || 'memory';
+
+  switch (provider) {
+    case 'qdrant':
+      if (!qdrantStoreInstance) {
+        // Lazy import to avoid loading Qdrant client if not needed
+        const { QdrantVectorStore } = require('./qdrant-adapter');
+        qdrantStoreInstance = new QdrantVectorStore({
+          url: process.env.QDRANT_URL || 'http://localhost:6333',
+          apiKey: process.env.QDRANT_API_KEY,
+          collectionName: process.env.QDRANT_COLLECTION_NAME || 'arkan_vectors',
+          vectorDimension: parseInt(process.env.EMBEDDING_DIMENSION || '768', 10),
+        });
+      }
+      return qdrantStoreInstance;
+
+    case 'memory':
+    case 'firestore':
+    default:
+      if (!vectorStoreInstance) {
+        vectorStoreInstance = new VectorStore();
+      }
+      return vectorStoreInstance;
   }
-  return vectorStoreInstance;
+}
+
+/**
+ * Reset vector store instance (useful for testing)
+ */
+export function resetVectorStore(): void {
+  vectorStoreInstance = null;
+  qdrantStoreInstance = null;
 }

@@ -124,5 +124,14 @@ service cloud.firestore {
     match /deviceTokens/{userId} {
         allow read, write: if isUser(userId);
     }
+    
+    // === INDEXED DOCUMENTS (RAG System) ===
+    // Admin-only collection for tracking uploaded documents
+    match /indexed_documents/{docId} {
+      // Only admins can read document tracking data
+      allow read: if isAdmin();
+      // Only admins (via server) can write
+      allow write: if isAdmin();
+    }
   }
 }

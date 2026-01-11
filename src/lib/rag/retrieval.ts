@@ -14,6 +14,9 @@ export interface RetrievalOptions {
   projectId?: string;
   userId?: string;
   includeTypes?: Array<'report' | 'reference' | 'context' | 'user_upload'>;
+  useCache?: boolean;
+  rerank?: boolean;
+  rerankStrategy?: 'cross-encoder' | 'bm25' | 'hybrid' | 'reciprocal-rank-fusion';
 }
 
 export interface RetrievalResult {
@@ -42,8 +45,21 @@ export async function retrieveContext(
   } = options;
 
   try {
-    // 1. Generate embedding for the query
-    const queryEmbedding = await generateEmbedding(query);
+    const { useCache = true, rerank = false, rerankStrategy = 'hybrid' } = options;
+
+    // Check cache first
+    if (useCache) {
+      const { getCacheManager } = await import('./cache');
+      const cache = getCacheManager().getSearchCache();
+      const cached = cache.getResults(query, { projectId, topK, minScore });
+      
+      if (cached) {
+        return cached;
+      }
+    }
+
+    // 1. Generate embedding for the query (with caching)
+    const queryEmbedding = await generateEmbedding(query, useCache);
 
     // 2. Search vector store for similar chunks
     const vectorStore = getVectorStore();
@@ -53,8 +69,8 @@ export async function retrieveContext(
       await vectorStore.loadProjectChunks(projectId);
     }
 
-    const searchResults = await vectorStore.search(queryEmbedding, {
-      topK,
+    let searchResults = await vectorStore.search(queryEmbedding, {
+      topK: rerank ? topK * 2 : topK, // Get more results if reranking
       minScore,
       filter: {
         projectId,
@@ -62,6 +78,16 @@ export async function retrieveContext(
         type: includeTypes?.[0], // Simple filter for now
       },
     });
+
+    // 2.5. Apply reranking if enabled
+    if (rerank && searchResults.length > 0) {
+      const { getReranker } = await import('./reranker');
+      const reranker = getReranker();
+      searchResults = await reranker.rerank(query, searchResults, {
+        strategy: rerankStrategy,
+        topK,
+      });
+    }
 
     // 3. Format results
     const sources = searchResults.map(result => ({
@@ -79,10 +105,19 @@ export async function retrieveContext(
       })
       .join('\n\n---\n\n');
 
-    return {
+    const result = {
       context,
       sources,
     };
+
+    // Cache the result
+    if (useCache) {
+      const { getCacheManager } = await import('./cache');
+      const cache = getCacheManager().getSearchCache();
+      cache.setResults(query, { projectId, topK, minScore }, result);
+    }
+
+    return result;
   } catch (error) {
     console.error('Error retrieving context:', error);
     

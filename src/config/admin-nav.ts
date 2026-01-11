@@ -11,6 +11,9 @@ import {
     Workflow,
     Settings,
     PenSquare,
+    Activity,
+    Upload,
+    TestTube,
 } from 'lucide-react';
 
 export interface NavLink {
@@ -22,6 +25,9 @@ export interface NavLink {
 
 export const navConfig: NavLink[] = [
     { href: '/admin/dashboard', labelKey: 'adminDashboard.pageTitle', icon: LayoutDashboard },
+    { href: '/admin/rag-monitor', labelKey: 'RAG Monitor', icon: Activity },
+    { href: '/admin/document-indexer', labelKey: 'Document Indexer', icon: Upload },
+    { href: '/admin/rag-tester', labelKey: 'RAG Query Tester', icon: TestTube },
     { href: '/admin/manage-users', labelKey: 'header.manageUsers', icon: Users },
     { href: '/admin/manage-payments', labelKey: 'header.managePayments', icon: CreditCard },
     { href: '/admin/manage-agents', labelKey: 'header.agentManager', icon: Bot },

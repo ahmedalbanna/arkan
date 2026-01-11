@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { useAuthContext } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 
 interface IndexingState {
   isIndexing: boolean;
@@ -15,7 +15,7 @@ interface IndexingState {
 }
 
 export function useRAGIndexing() {
-  const { user } = useAuthContext();
+  const { firebaseUser: user } = useAuth();
   const [state, setState] = useState<IndexingState>({
     isIndexing: false,
     error: null,

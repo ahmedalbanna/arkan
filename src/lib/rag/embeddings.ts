@@ -13,17 +13,30 @@ export interface EmbeddingResult {
 }
 
 /**
- * Generate embeddings using Ollama
+ * Generate embeddings using Ollama with caching
  */
-export async function generateEmbedding(text: string): Promise<number[]> {
+export async function generateEmbedding(text: string, useCache: boolean = true): Promise<number[]> {
+  const { RAGConfig } = await import('./config');
+  
+  // Check cache first
+  if (useCache) {
+    const { getCacheManager } = await import('./cache');
+    const cache = getCacheManager().getEmbeddingCache();
+    const cached = cache.getEmbedding(text);
+    
+    if (cached) {
+      return cached;
+    }
+  }
+  
   try {
-    const response = await fetch(`http://185.190.140.93:11434/api/embeddings`, {
+    const response = await fetch(`${RAGConfig.ollama.baseUrl}/api/embeddings`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'nomic-embed-text', // Ollama embedding model
+        model: RAGConfig.ollama.embeddingModel,
         prompt: text,
       }),
     });
@@ -33,7 +46,16 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     }
 
     const data = await response.json();
-    return data.embedding;
+    const embedding = data.embedding;
+    
+    // Cache the result
+    if (useCache) {
+      const { getCacheManager } = await import('./cache');
+      const cache = getCacheManager().getEmbeddingCache();
+      cache.setEmbedding(text, embedding);
+    }
+    
+    return embedding;
   } catch (error) {
     console.error('Error generating embedding:', error);
     throw new Error(`Failed to generate embedding: ${error instanceof Error ? error.message : 'Unknown error'}`);

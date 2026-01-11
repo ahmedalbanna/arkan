@@ -47,16 +47,23 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  webpack: (config, { isServer }) => {
+    // Fix for canvas in server-side rendering
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push({
+        canvas: 'canvas',
+        'pdf-parse': 'pdf-parse',
+      });
+    }
+    return config;
+  },
   experimental: {
     turbo: {
     },
     serverActions: { bodySizeLimit: '10mb' as SizeLimit },
-
     useCache: true,
     allowDevelopmentBuild: false,
-
-
-
   }
 };
 
