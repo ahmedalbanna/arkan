@@ -227,18 +227,21 @@ async function loadFlowConfiguration(flowName: string): Promise<FlowConfiguratio
 }
 
 /**
- * Execute a single step
- * TODO: Implement actual step execution
+ * Execute a single step using the appropriate handler
  */
 async function executeStep(
   step: FlowStep,
   input: Record<string, any>,
   context: ContextManager
 ): Promise<any> {
-  // Placeholder implementation
-  // Will be implemented in step-executor.ts
-  console.warn('executeStep is a placeholder - implement step handlers');
-  throw new Error('Step execution not yet implemented');
+  // Import step handlers dynamically
+  const { executeStep: executeStepHandler } = await import('@/ai/dynamic-flow/step-handlers');
+  
+  // Execute step using the imported handler
+  const result = await executeStepHandler(step, input, context);
+  
+  // Return just the output (metadata is captured in trace)
+  return result.output;
 }
 
 /**

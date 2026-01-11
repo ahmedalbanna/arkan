@@ -17,9 +17,9 @@ module.exports = {
     '^.+\\.(ts|tsx)$': 'ts-jest',
   },
   // By default, node_modules are not transformed by Jest.
-  // We need to transform ESM-only packages from the unified ecosystem.
+  // We need to transform ESM-only packages from the unified ecosystem and genkit.
   transformIgnorePatterns: [
-    '/node_modules/(?!(unified|remark-.*|rehype-.*|unist-.*|hast-.*|mdast-.*|micromark.*|vfile.*)/)',
+    '/node_modules/(?!(unified|remark-.*|rehype-.*|unist-.*|hast-.*|mdast-.*|micromark.*|vfile.*|genkit.*|genkitx-.*|@genkit-ai.*|dotprompt)/)',
   ],
   // Automatically clear mock calls and instances between every test
   clearMocks: true,
