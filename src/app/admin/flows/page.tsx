@@ -120,13 +120,13 @@ export default function AdminFlowsPage() {
   };
 
   const handleDuplicateFlow = async (flow: FlowConfiguration) => {
+    const { id, ...flowData } = flow;
     const duplicate = {
-      ...flow,
+      ...flowData,
       name: `${flow.name}-copy`,
       displayName: `${flow.displayName} (Copy)`,
       status: 'draft' as const,
     };
-    delete duplicate.id;
     
     try {
       const response = await fetch('/api/admin/flows', {

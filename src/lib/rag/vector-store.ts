@@ -6,7 +6,6 @@
  */
 
 import { adminDb as db } from '@/lib/firebase/server-init';
-import { collection, doc, setDoc, getDocs, query, where, Timestamp } from 'firebase/firestore';
 
 export interface DocumentChunk {
   id: string;
@@ -64,12 +63,12 @@ export class VectorStore {
 
     // Persist to Firestore
     try {
-      const docRef = doc(db, this.collectionName, chunk.id);
-      await setDoc(docRef, {
+      const docRef = db.collection(this.collectionName).doc(chunk.id);
+      await docRef.set({
         content: chunk.content,
         embedding: chunk.embedding || [],
         metadata: chunk.metadata,
-        createdAt: Timestamp.now(),
+        createdAt: new Date(),
       });
     } catch (error) {
       console.error('Error persisting chunk to Firestore:', error);
@@ -128,12 +127,11 @@ export class VectorStore {
    */
   async loadProjectChunks(projectId: string): Promise<void> {
     try {
-      const q = query(
-        collection(db, this.collectionName),
-        where('metadata.projectId', '==', projectId)
-      );
+      const snapshot = await db
+        .collection(this.collectionName)
+        .where('metadata.projectId', '==', projectId)
+        .get();
 
-      const snapshot = await getDocs(q);
       snapshot.forEach(doc => {
         const data = doc.data();
         const chunk: DocumentChunk = {

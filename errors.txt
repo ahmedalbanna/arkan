@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 ⚡ arkan-beta-stable ~/arkan npm run week6:all    
 
 > nextn@0.1.0 week6:all
@@ -79,3 +80,345 @@ FirebaseAppError: The default Firebase app does not exist. Make sure you call in
 
 Node.js v22.14.0
 ⚡ arkan-beta-stable ~/arkan 
+=======
+[{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/dynamic-flow/schema-validator.ts",
+	"owner": "typescript",
+	"code": "2739",
+	"severity": 8,
+	"message": "Type '{ path: never[]; message: string; }' is missing the following properties from type 'ValidationError': errors, name",
+	"source": "ts",
+	"startLineNumber": 96,
+	"startColumn": 18,
+	"endLineNumber": 99,
+	"endColumn": 10
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/dynamic-flow/schema-validator.ts",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type 'ZodObject<Record<string, ZodTypeAny>, \"strict\", ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>' is not assignable to type 'ZodObject<Record<string, ZodTypeAny>, \"strip\", ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>'.\n  The types of 'extend(...)._def' are incompatible between these types.\n    Type 'ZodObjectDef<{} & { [x: string]: any; }, \"strict\", ZodTypeAny>' is not assignable to type 'ZodObjectDef<{} & { [x: string]: any; }, \"strip\", ZodTypeAny>'.\n      Type '\"strict\"' is not assignable to type '\"strip\"'.",
+	"source": "ts",
+	"startLineNumber": 292,
+	"startColumn": 7,
+	"endLineNumber": 292,
+	"endColumn": 19
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/dynamic-flow/schema-validator.ts",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type '{ path: string[]; message: string; code: \"custom\" | \"unrecognized_keys\" | \"invalid_union\" | \"invalid_union_discriminator\" | \"invalid_arguments\" | \"invalid_return_type\" | \"invalid_string\" | ... 8 more ... | \"too_small\"; }[]' is not assignable to type 'ValidationError[]'.\n  Type '{ path: string[]; message: string; code: \"custom\" | \"unrecognized_keys\" | \"invalid_union\" | \"invalid_union_discriminator\" | \"invalid_arguments\" | \"invalid_return_type\" | \"invalid_string\" | ... 8 more ... | \"too_small\"; }' is missing the following properties from type 'ValidationError': errors, name",
+	"source": "ts",
+	"startLineNumber": 302,
+	"startColumn": 5,
+	"endLineNumber": 302,
+	"endColumn": 11
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/dynamic-flow/step-handlers.ts",
+	"owner": "typescript",
+	"code": "2678",
+	"severity": 8,
+	"message": "Type '\"retrieve\"' is not comparable to type 'StepType'.",
+	"source": "ts",
+	"startLineNumber": 50,
+	"startColumn": 12,
+	"endLineNumber": 50,
+	"endColumn": 22
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/dynamic-flow/step-handlers.ts",
+	"owner": "typescript",
+	"code": "2678",
+	"severity": 8,
+	"message": "Type '\"generate\"' is not comparable to type 'StepType'.",
+	"source": "ts",
+	"startLineNumber": 54,
+	"startColumn": 12,
+	"endLineNumber": 54,
+	"endColumn": 22
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/dynamic-flow/step-handlers.ts",
+	"owner": "typescript",
+	"code": "2678",
+	"severity": 8,
+	"message": "Type '\"tool\"' is not comparable to type 'StepType'.",
+	"source": "ts",
+	"startLineNumber": 58,
+	"startColumn": 12,
+	"endLineNumber": 58,
+	"endColumn": 18
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/dynamic-flow/step-handlers.ts",
+	"owner": "typescript",
+	"code": "2678",
+	"severity": 8,
+	"message": "Type '\"format\"' is not comparable to type 'StepType'.",
+	"source": "ts",
+	"startLineNumber": 62,
+	"startColumn": 12,
+	"endLineNumber": 62,
+	"endColumn": 20
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/dynamic-flow/step-handlers.ts",
+	"owner": "typescript",
+	"code": "6234",
+	"severity": 8,
+	"message": "This expression is not callable because it is a 'get' accessor. Did you mean to use it without '()'?\n  Type 'String' has no call signatures.",
+	"source": "ts",
+	"startLineNumber": 201,
+	"startColumn": 36,
+	"endLineNumber": 201,
+	"endColumn": 40
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/flows/dynamic-flow-executor.ts",
+	"owner": "typescript",
+	"code": "2345",
+	"severity": 8,
+	"message": "Argument of type 'unknown' is not assignable to parameter of type 'Error'.",
+	"source": "ts",
+	"startLineNumber": 173,
+	"startColumn": 49,
+	"endLineNumber": 173,
+	"endColumn": 54
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/flows/dynamic-flow-executor.ts",
+	"owner": "typescript",
+	"code": "2345",
+	"severity": 8,
+	"message": "Argument of type 'unknown' is not assignable to parameter of type 'Error'.",
+	"source": "ts",
+	"startLineNumber": 176,
+	"startColumn": 53,
+	"endLineNumber": 176,
+	"endColumn": 58
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/tool-registry.ts",
+	"owner": "typescript",
+	"code": "2741",
+	"severity": 8,
+	"message": "Property 'id' is missing in type '{ name: string; input: { text: string; }; expectedOutput: { errors: { message: string; position: number; }[]; score: number; suggestions: string[]; }; }' but required in type 'ToolExample'.",
+	"source": "ts",
+	"startLineNumber": 89,
+	"startColumn": 9,
+	"endLineNumber": 97,
+	"endColumn": 10,
+	"relatedInformation": [
+		{
+			"startLineNumber": 63,
+			"startColumn": 3,
+			"endLineNumber": 63,
+			"endColumn": 5,
+			"message": "'id' is declared here.",
+			"resource": "/teamspace/studios/this_studio/arkan/src/lib/models/tool-config.ts"
+		}
+	]
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/tools/index.ts",
+	"owner": "typescript",
+	"code": "2724",
+	"severity": 8,
+	"message": "'\"./google-search\"' has no exported member named 'googleSearchTool'. Did you mean 'googleSearchTools'?",
+	"source": "ts",
+	"startLineNumber": 69,
+	"startColumn": 5,
+	"endLineNumber": 69,
+	"endColumn": 21,
+	"relatedInformation": [
+		{
+			"startLineNumber": 1,
+			"startColumn": 14,
+			"endLineNumber": 1,
+			"endColumn": 31,
+			"message": "'googleSearchTools' is declared here.",
+			"resource": "/teamspace/studios/this_studio/arkan/src/ai/tools/google-search.ts"
+		}
+	]
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/tools/index.ts",
+	"owner": "typescript",
+	"code": "2305",
+	"severity": 8,
+	"message": "Module '\"./google-search\"' has no exported member 'searchImages'.",
+	"source": "ts",
+	"startLineNumber": 70,
+	"startColumn": 24,
+	"endLineNumber": 70,
+	"endColumn": 36
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/tools/index.ts",
+	"owner": "typescript",
+	"code": "2305",
+	"severity": 8,
+	"message": "Module '\"./google-search\"' has no exported member 'searchMaps'.",
+	"source": "ts",
+	"startLineNumber": 71,
+	"startColumn": 5,
+	"endLineNumber": 71,
+	"endColumn": 15
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/tools/index.ts",
+	"owner": "typescript",
+	"code": "2305",
+	"severity": 8,
+	"message": "Module '\"./google-search\"' has no exported member 'searchNews'.",
+	"source": "ts",
+	"startLineNumber": 71,
+	"startColumn": 17,
+	"endLineNumber": 71,
+	"endColumn": 27
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/tools/index.ts",
+	"owner": "typescript",
+	"code": "2305",
+	"severity": 8,
+	"message": "Module '\"./google-search\"' has no exported member 'searchShopping'.",
+	"source": "ts",
+	"startLineNumber": 71,
+	"startColumn": 29,
+	"endLineNumber": 71,
+	"endColumn": 43
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/tools/index.ts",
+	"owner": "typescript",
+	"code": "2305",
+	"severity": 8,
+	"message": "Module '\"./google-search\"' has no exported member 'searchWeb'.",
+	"source": "ts",
+	"startLineNumber": 71,
+	"startColumn": 45,
+	"endLineNumber": 71,
+	"endColumn": 54
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/ai/tools/index.ts",
+	"owner": "typescript",
+	"code": "2698",
+	"severity": 8,
+	"message": "Spread types may only be created from object types.",
+	"source": "ts",
+	"startLineNumber": 124,
+	"startColumn": 5,
+	"endLineNumber": 124,
+	"endColumn": 25
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/components/admin/tools/ToolRegistrationDialog.tsx",
+	"owner": "typescript",
+	"code": "2339",
+	"severity": 8,
+	"message": "Property 'config' does not exist on type 'Partial<ToolConfiguration>'.",
+	"source": "ts",
+	"startLineNumber": 210,
+	"startColumn": 34,
+	"endLineNumber": 210,
+	"endColumn": 40
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/components/admin/tools/ToolRegistrationDialog.tsx",
+	"owner": "typescript",
+	"code": "2353",
+	"severity": 8,
+	"message": "Object literal may only specify known properties, and 'config' does not exist in type 'Partial<ToolConfiguration>'.",
+	"source": "ts",
+	"startLineNumber": 213,
+	"startColumn": 25,
+	"endLineNumber": 213,
+	"endColumn": 31
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/components/admin/tools/ToolRegistrationDialog.tsx",
+	"owner": "typescript",
+	"code": "2339",
+	"severity": 8,
+	"message": "Property 'config' does not exist on type 'Partial<ToolConfiguration>'.",
+	"source": "ts",
+	"startLineNumber": 213,
+	"startColumn": 44,
+	"endLineNumber": 213,
+	"endColumn": 50
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/components/admin/tools/ToolRegistrationDialog.tsx",
+	"owner": "typescript",
+	"code": "2367",
+	"severity": 8,
+	"message": "This comparison appears to be unintentional because the types 'ToolType | undefined' and '\"built-in\"' have no overlap.",
+	"source": "ts",
+	"startLineNumber": 293,
+	"startColumn": 20,
+	"endLineNumber": 293,
+	"endColumn": 44
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/lib/middleware/auth-middleware.ts",
+	"owner": "typescript",
+	"code": "2339",
+	"severity": 8,
+	"message": "Property 'user' does not exist on type '{ authorized: true; user: AuthenticatedUser; } | { authorized: false; error: string; status: number; }'.\n  Property 'user' does not exist on type '{ authorized: false; error: string; status: number; }'.",
+	"source": "ts",
+	"startLineNumber": 354,
+	"startColumn": 48,
+	"endLineNumber": 354,
+	"endColumn": 52
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/lib/rag/cache.ts",
+	"owner": "typescript",
+	"code": "2345",
+	"severity": 8,
+	"message": "Argument of type 'string | undefined' is not assignable to parameter of type 'string'.\n  Type 'undefined' is not assignable to type 'string'.",
+	"source": "ts",
+	"startLineNumber": 78,
+	"startColumn": 25,
+	"endLineNumber": 78,
+	"endColumn": 33
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/lib/rag/retrieval.ts",
+	"owner": "typescript",
+	"code": "7006",
+	"severity": 8,
+	"message": "Parameter 'result' implicitly has an 'any' type.",
+	"source": "ts",
+	"startLineNumber": 93,
+	"startColumn": 39,
+	"endLineNumber": 93,
+	"endColumn": 45
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/lib/rag/retrieval.ts",
+	"owner": "typescript",
+	"code": "7006",
+	"severity": 8,
+	"message": "Parameter 'result' implicitly has an 'any' type.",
+	"source": "ts",
+	"startLineNumber": 102,
+	"startColumn": 13,
+	"endLineNumber": 102,
+	"endColumn": 19
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/lib/rag/retrieval.ts",
+	"owner": "typescript",
+	"code": "7006",
+	"severity": 8,
+	"message": "Parameter 'idx' implicitly has an 'any' type.",
+	"source": "ts",
+	"startLineNumber": 102,
+	"startColumn": 21,
+	"endLineNumber": 102,
+	"endColumn": 24
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/lib/rag/vector-store.ts",
+	"owner": "typescript",
+	"code": "2769",
+	"severity": 8,
+	"message": "No overload matches this call.\n  Overload 1 of 3, '(firestore: Firestore, path: string, ...pathSegments: string[]): DocumentReference<DocumentData, DocumentData>', gave the following error.\n    Argument of type 'FirebaseFirestore.Firestore' is not assignable to parameter of type 'import(\"/teamspace/studios/this_studio/arkan/node_modules/@firebase/firestore/dist/index\").Firestore'.\n      Type 'Firestore' is missing the following properties from type 'Firestore': type, app, toJSON\n  Overload 2 of 3, '(reference: CollectionReference<unknown, DocumentData>, path?: string | undefined, ...pathSegments: string[]): DocumentReference<unknown, DocumentData>', gave the following error.\n    Argument of type 'Firestore' is not assignable to parameter of type 'CollectionReference<unknown, DocumentData>'.\n      Type 'Firestore' is missing the following properties from type 'CollectionReference<unknown, DocumentData>': type, id, path, parent, and 3 more.\n  Overload 3 of 3, '(reference: DocumentReference<unknown, DocumentData>, path: string, ...pathSegments: string[]): DocumentReference<DocumentData, DocumentData>', gave the following error.\n    Argument of type 'Firestore' is not assignable to parameter of type 'DocumentReference<unknown, DocumentData>'.\n      Type 'Firestore' is missing the following properties from type 'DocumentReference<unknown, DocumentData>': converter, type, firestore, id, and 4 more.",
+	"source": "ts",
+	"startLineNumber": 67,
+	"startColumn": 26,
+	"endLineNumber": 67,
+	"endColumn": 28
+},{
+	"resource": "/teamspace/studios/this_studio/arkan/src/lib/rag/vector-store.ts",
+	"owner": "typescript",
+	"code": "2769",
+	"severity": 8,
+	"message": "No overload matches this call.\n  Overload 1 of 3, '(firestore: Firestore, path: string, ...pathSegments: string[]): CollectionReference<DocumentData, DocumentData>', gave the following error.\n    Argument of type 'FirebaseFirestore.Firestore' is not assignable to parameter of type 'import(\"/teamspace/studios/this_studio/arkan/node_modules/@firebase/firestore/dist/index\").Firestore'.\n      Type 'Firestore' is missing the following properties from type 'Firestore': type, app, toJSON\n  Overload 2 of 3, '(reference: CollectionReference<unknown, DocumentData>, path: string, ...pathSegments: string[]): CollectionReference<DocumentData, DocumentData>', gave the following error.\n    Argument of type 'Firestore' is not assignable to parameter of type 'CollectionReference<unknown, DocumentData>'.\n      Type 'Firestore' is missing the following properties from type 'CollectionReference<unknown, DocumentData>': type, id, path, parent, and 3 more.\n  Overload 3 of 3, '(reference: DocumentReference<unknown, DocumentData>, path: string, ...pathSegments: string[]): CollectionReference<DocumentData, DocumentData>', gave the following error.\n    Argument of type 'Firestore' is not assignable to parameter of type 'DocumentReference<unknown, DocumentData>'.\n      Type 'Firestore' is missing the following properties from type 'DocumentReference<unknown, DocumentData>': converter, type, firestore, id, and 4 more.",
+	"source": "ts",
+	"startLineNumber": 132,
+	"startColumn": 20,
+	"endLineNumber": 132,
+	"endColumn": 22
+}]
+>>>>>>> Stashed changes

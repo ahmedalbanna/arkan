@@ -60,8 +60,8 @@ export async function PUT(
     // TODO: Get authenticated user ID
     const userId = 'system'; // Replace with actual user ID from auth
 
-    const versionMessage = body.versionMessage;
-    delete body.versionMessage;
+    // Remove versionMessage if present (not used by current implementation)
+    const { versionMessage, ...updates } = body;
 
     const prompt = await promptManagementService.updatePrompt(
       params.promptId,

@@ -1,0 +1,66 @@
+[
+  {
+    "name": "citations-and-references",
+    "displayName": "Citations And References",
+    "description": "Tool for citations and references",
+    "category": "academic",
+    "inputSchema": {},
+    "outputSchema": {}
+  },
+  {
+    "name": "comprehensive-analysis",
+    "displayName": "Comprehensive Analysis",
+    "description": "Tool for comprehensive analysis",
+    "category": "analysis",
+    "inputSchema": {},
+    "outputSchema": {}
+  },
+  {
+    "name": "document-structure",
+    "displayName": "Document Structure",
+    "description": "Tool for document structure",
+    "category": "utility",
+    "inputSchema": {},
+    "outputSchema": {}
+  },
+  {
+    "name": "documentation-generation",
+    "displayName": "Documentation Generation",
+    "description": "Tool for documentation generation",
+    "category": "documentation",
+    "inputSchema": {},
+    "outputSchema": {}
+  },
+  {
+    "name": "grammar-and-style",
+    "displayName": "Grammar And Style",
+    "description": "Tool for grammar and style",
+    "category": "writing",
+    "inputSchema": {},
+    "outputSchema": {}
+  },
+  {
+    "name": "project-analysis",
+    "displayName": "Project Analysis",
+    "description": "Tool for project analysis",
+    "category": "analysis",
+    "inputSchema": {},
+    "outputSchema": {}
+  },
+  {
+    "name": "prompt-architect",
+    "displayName": "Prompt Architect",
+    "description": "Tool for prompt architect",
+    "category": "utility",
+    "inputSchema": {},
+    "outputSchema": {}
+  },
+  {
+    "name": "reporting-and-metrics",
+    "displayName": "Reporting And Metrics",
+    "description": "Tool for reporting and metrics",
+    "category": "utility",
+    "inputSchema": {},
+    "outputSchema": {}
+  }
+]

@@ -87,6 +87,7 @@ function registerGrammarAndStyleTools(registered: string[]): void {
       },
       examples: [
         {
+          id: 'grammar-example-1',
           name: 'Check basic grammar',
           input: { text: 'She go to the store yesterday.' },
           expectedOutput: {
@@ -702,30 +703,9 @@ function registerPromptArchitectTools(registered: string[]): void {
  * Register Search & Research Tools
  */
 function registerSearchAndResearchTools(registered: string[]): void {
-  if (tools.googleSearchTool) {
-    registerBuiltinTool({
-      name: 'googleSearch',
-      displayName: 'Google Search',
-      description: 'Performs Google searches and retrieves results',
-      category: 'search-research',
-      handler: async (params: any) => tools.googleSearchTool.call(params),
-      inputSchema: {
-        type: 'object',
-        properties: {
-          query: { type: 'string', description: 'Search query' },
-          limit: { type: 'number', description: 'Number of results' },
-        },
-        required: ['query'],
-      },
-      outputSchema: {
-        type: 'object',
-        properties: {
-          results: { type: 'array', items: { type: 'object' } },
-        },
-      },
-    });
-    registered.push('googleSearch');
-  }
+  // Google search tool is not yet implemented
+  // Will be added when googleSearchTool is exported from @/ai/tools
+  console.log('Search tools registration - googleSearchTool not yet available');
 }
 
 /**

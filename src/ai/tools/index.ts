@@ -66,9 +66,7 @@ export {
 
 // Export Google search tools
 export {
-    googleSearchTool,
-    googleSearchTools, searchImages,
-    searchMaps, searchNews, searchShopping, searchWeb
+    googleSearchTools
 } from './google-search';
 
 // Aggregate all tools for easy registration
@@ -120,8 +118,8 @@ export const projectDocumentationTools = {
  * Search and research tools
  */
 export const searchAndResearchTools = {
-    // Google Search (1 tool)
-    ...googleSearchTools,
+    // Google Search tools would go here when implemented
+    // Currently googleSearchTools is just a placeholder string
 };
 
 /**

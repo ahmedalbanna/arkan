@@ -1,0 +1,513 @@
+[
+  {
+    "name": "academic-literature-review",
+    "displayName": "Academic Literature Review",
+    "description": "@fileOverview Academic Literature Review Flow",
+    "category": "academic",
+    "tags": [
+      "academic"
+    ]
+  },
+  {
+    "name": "academic-paper-quality-checker",
+    "displayName": "Academic Paper Quality Checker",
+    "description": "@fileOverview Academic Paper Quality Checker Flow",
+    "category": "analysis",
+    "tags": [
+      "analysis"
+    ]
+  },
+  {
+    "name": "ai-proofread-document",
+    "displayName": "Ai Proofread Document",
+    "description": "@fileOverview An AI proofreading agent.",
+    "category": "general",
+    "tags": [
+      "general",
+      "ai"
+    ]
+  },
+  {
+    "name": "ai-researcher",
+    "displayName": "Ai Researcher",
+    "description": "@fileOverview An AI-powered research assistant with enhanced capabilities.",
+    "category": "general",
+    "tags": [
+      "general",
+      "ai"
+    ]
+  },
+  {
+    "name": "analyze-context",
+    "displayName": "Analyze Context",
+    "description": "@fileOverview An AI agent for analyzing a set of context files based on a user prompt",
+    "category": "general",
+    "tags": [
+      "general",
+      "text"
+    ]
+  },
+  {
+    "name": "bias-checker",
+    "displayName": "Bias Checker",
+    "description": "@fileOverview An AI agent for checking text for potential bias.",
+    "category": "analysis",
+    "tags": [
+      "analysis"
+    ]
+  },
+  {
+    "name": "create-lecture-unit",
+    "displayName": "Create Lecture Unit",
+    "description": "@fileOverview Orchestrates the generation of a complete lecture unit,",
+    "category": "general",
+    "tags": [
+      "general"
+    ]
+  },
+  {
+    "name": "detect-ai-content",
+    "displayName": "Detect Ai Content",
+    "description": "@fileOverview An AI agent for detecting AI-generated content.",
+    "category": "analysis",
+    "tags": [
+      "analysis",
+      "ai"
+    ]
+  },
+  {
+    "name": "dynamic-flow-executor",
+    "displayName": "Dynamic Flow Executor",
+    "description": "Dynamic Flow Executor",
+    "category": "general",
+    "tags": [
+      "general"
+    ]
+  },
+  {
+    "name": "fact-checker",
+    "displayName": "Fact Checker",
+    "description": "@fileOverview An AI agent for fact-checking claims within a text.",
+    "category": "analysis",
+    "tags": [
+      "analysis"
+    ]
+  },
+  {
+    "name": "fact-retrieval",
+    "displayName": "Fact Retrieval",
+    "description": "@fileOverview An AI agent for retrieving specific facts and information.",
+    "category": "general",
+    "tags": [
+      "general"
+    ]
+  },
+  {
+    "name": "generate-agent-config",
+    "displayName": "Generate Agent Config",
+    "description": "AI flow for generate agent config",
+    "category": "generation",
+    "tags": [
+      "generation"
+    ]
+  },
+  {
+    "name": "generate-chapter-content-rag",
+    "displayName": "Generate Chapter Content Rag",
+    "description": "@fileOverview RAG-Enhanced Chapter Content Generation",
+    "category": "generation",
+    "tags": [
+      "generation",
+      "rag"
+    ]
+  },
+  {
+    "name": "generate-chapter-content",
+    "displayName": "Generate Chapter Content",
+    "description": "@fileOverview An AI agent for generating content for a full chapter based on its sections.",
+    "category": "generation",
+    "tags": [
+      "generation"
+    ]
+  },
+  {
+    "name": "generate-citation",
+    "displayName": "Generate Citation",
+    "description": "@fileOverview An AI agent for generating academic citations.",
+    "category": "generation",
+    "tags": [
+      "generation"
+    ]
+  },
+  {
+    "name": "generate-diagrams",
+    "displayName": "Generate Diagrams",
+    "description": "AI flow for generate diagrams",
+    "category": "generation",
+    "tags": [
+      "generation"
+    ]
+  },
+  {
+    "name": "generate-ideas",
+    "displayName": "Generate Ideas",
+    "description": "@fileOverview An AI agent for brainstorming new ideas based on user-provided context.",
+    "category": "generation",
+    "tags": [
+      "generation"
+    ]
+  },
+  {
+    "name": "generate-image",
+    "displayName": "Generate Image",
+    "description": "@fileOverview An AI agent for generating images from a text prompt.",
+    "category": "generation",
+    "tags": [
+      "generation"
+    ]
+  },
+  {
+    "name": "generate-plantuml",
+    "displayName": "Generate Plantuml",
+    "description": "@fileOverview An AI agent for generating PlantUML code from a text description.",
+    "category": "generation",
+    "tags": [
+      "generation"
+    ]
+  },
+  {
+    "name": "generate-project-blueprint",
+    "displayName": "Generate Project Blueprint",
+    "description": "@fileOverview An AI agent for generating comprehensive project blueprints for applications and websites.",
+    "category": "generation",
+    "tags": [
+      "generation"
+    ]
+  },
+  {
+    "name": "generate-quiz",
+    "displayName": "Generate Quiz",
+    "description": "@fileOverview An AI agent for generating a quiz from a block of text.",
+    "category": "generation",
+    "tags": [
+      "generation"
+    ]
+  },
+  {
+    "name": "generate-report-section-rag",
+    "displayName": "Generate Report Section Rag",
+    "description": "@fileOverview RAG-Enhanced Report Section Generation",
+    "category": "generation",
+    "tags": [
+      "generation",
+      "rag"
+    ]
+  },
+  {
+    "name": "generate-report-section",
+    "displayName": "Generate Report Section",
+    "description": "@fileOverview A generic AI agent for generating any section of a project report.",
+    "category": "generation",
+    "tags": [
+      "generation"
+    ]
+  },
+  {
+    "name": "generate-session-plan",
+    "displayName": "Generate Session Plan",
+    "description": "@fileOverview An AI agent for creating practical, interactive session plans.",
+    "category": "generation",
+    "tags": [
+      "generation"
+    ]
+  },
+  {
+    "name": "generate-text",
+    "displayName": "Generate Text",
+    "description": "@fileOverview A text generation AI agent.",
+    "category": "generation",
+    "tags": [
+      "generation",
+      "text"
+    ]
+  },
+  {
+    "name": "generate-theoretical-lecture",
+    "displayName": "Generate Theoretical Lecture",
+    "description": "@fileOverview An AI agent for creating comprehensive theoretical lectures.",
+    "category": "generation",
+    "tags": [
+      "generation"
+    ]
+  },
+  {
+    "name": "generate-toc",
+    "displayName": "Generate Toc",
+    "description": "@fileOverview An AI agent for generating a table of contents from a project Description.",
+    "category": "generation",
+    "tags": [
+      "generation"
+    ]
+  },
+  {
+    "name": "generate-ui-description",
+    "displayName": "Generate Ui Description",
+    "description": "AI flow for generate ui description",
+    "category": "generation",
+    "tags": [
+      "generation"
+    ]
+  },
+  {
+    "name": "graduation-project-generator",
+    "displayName": "Graduation Project Generator",
+    "description": "@fileOverview Graduation Project Documentation Generator Flow",
+    "category": "academic",
+    "tags": [
+      "academic"
+    ]
+  },
+  {
+    "name": "grammar-checker",
+    "displayName": "Grammar Checker",
+    "description": "@fileOverview An AI agent for checking grammar and providing explanations.",
+    "category": "analysis",
+    "tags": [
+      "analysis"
+    ]
+  },
+  {
+    "name": "humanize-text",
+    "displayName": "Humanize Text",
+    "description": "@fileOverview An AI agent for making text sound more human-like.",
+    "category": "general",
+    "tags": [
+      "general",
+      "text"
+    ]
+  },
+  {
+    "name": "image-to-text",
+    "displayName": "Image To Text",
+    "description": "@fileOverview An AI agent for extracting text content from an image.",
+    "category": "general",
+    "tags": [
+      "general",
+      "text"
+    ]
+  },
+  {
+    "name": "improve-report-markdown",
+    "displayName": "Improve Report Markdown",
+    "description": "@fileOverview An AI agent for improving a full report provided in Markdown.",
+    "category": "reporting",
+    "tags": [
+      "reporting"
+    ]
+  },
+  {
+    "name": "literature-review-generator",
+    "displayName": "Literature Review Generator",
+    "description": "@fileOverview An AI agent for generating comprehensive literature reviews.",
+    "category": "general",
+    "tags": [
+      "general"
+    ]
+  },
+  {
+    "name": "manipulate-text",
+    "displayName": "Manipulate Text",
+    "description": "@fileOverview An AI agent for manipulating text based on commands.",
+    "category": "general",
+    "tags": [
+      "general",
+      "text"
+    ]
+  },
+  {
+    "name": "paraphrase-text",
+    "displayName": "Paraphrase Text",
+    "description": "@fileOverview An AI agent for paraphrasing text in different styles.",
+    "category": "processing",
+    "tags": [
+      "processing",
+      "text"
+    ]
+  },
+  {
+    "name": "plagiarism-checker",
+    "displayName": "Plagiarism Checker",
+    "description": "@fileOverview An AI agent for checking text for potential plagiarism.",
+    "category": "analysis",
+    "tags": [
+      "analysis"
+    ]
+  },
+  {
+    "name": "presentation-content-creator",
+    "displayName": "Presentation Content Creator",
+    "description": "@fileOverview Presentation Content Creator Flow",
+    "category": "general",
+    "tags": [
+      "general"
+    ]
+  },
+  {
+    "name": "professional-document-writer",
+    "displayName": "Professional Document Writer",
+    "description": "@fileOverview Professional Document Writer Flow",
+    "category": "general",
+    "tags": [
+      "general"
+    ]
+  },
+  {
+    "name": "project-documentation-generator",
+    "displayName": "Project Documentation Generator",
+    "description": "@fileOverview Project Documentation Generator Flow",
+    "category": "general",
+    "tags": [
+      "general"
+    ]
+  },
+  {
+    "name": "project-report-generator",
+    "displayName": "Project Report Generator",
+    "description": "@fileOverview Project Report Generator Flow",
+    "category": "reporting",
+    "tags": [
+      "reporting"
+    ]
+  },
+  {
+    "name": "question-answering",
+    "displayName": "Question Answering",
+    "description": "@fileOverview An AI agent for answering questions based on provided context or web search.",
+    "category": "general",
+    "tags": [
+      "general"
+    ]
+  },
+  {
+    "name": "rewrite-document-to-markdown",
+    "displayName": "Rewrite Document To Markdown",
+    "description": "@fileOverview An AI agent for rewriting a document (text and images) into structured markdown.",
+    "category": "general",
+    "tags": [
+      "general"
+    ]
+  },
+  {
+    "name": "rewrite-to-markdown",
+    "displayName": "Rewrite To Markdown",
+    "description": "@fileOverview An AI agent for rewriting raw text into structured markdown.",
+    "category": "general",
+    "tags": [
+      "general"
+    ]
+  },
+  {
+    "name": "run-agent-flow",
+    "displayName": "Run Agent Flow",
+    "description": "AI flow for run agent flow",
+    "category": "general",
+    "tags": [
+      "general"
+    ]
+  },
+  {
+    "name": "sentence-structure-checker",
+    "displayName": "Sentence Structure Checker",
+    "description": "@fileOverview An AI agent for analyzing the sentence structure of a text.",
+    "category": "analysis",
+    "tags": [
+      "analysis"
+    ]
+  },
+  {
+    "name": "solve-assignments",
+    "displayName": "Solve Assignments",
+    "description": "@fileOverview An AI agent for solving assignments by extracting questions and generating answers.",
+    "category": "general",
+    "tags": [
+      "general"
+    ]
+  },
+  {
+    "name": "summarize-document",
+    "displayName": "Summarize Document",
+    "description": "@fileOverview A document summarization AI agent.",
+    "category": "processing",
+    "tags": [
+      "processing"
+    ]
+  },
+  {
+    "name": "summarize-text",
+    "displayName": "Summarize Text",
+    "description": "@fileOverview An AI agent for summarizing text.",
+    "category": "processing",
+    "tags": [
+      "processing",
+      "text"
+    ]
+  },
+  {
+    "name": "technical-spec-writer",
+    "displayName": "Technical Spec Writer",
+    "description": "@fileOverview Technical Specification Writer Flow",
+    "category": "general",
+    "tags": [
+      "general"
+    ]
+  },
+  {
+    "name": "text-stylist",
+    "displayName": "Text Stylist",
+    "description": "@fileOverview AI agents for text manipulation: rewriting and summarizing.",
+    "category": "general",
+    "tags": [
+      "general",
+      "text"
+    ]
+  },
+  {
+    "name": "text-to-speech",
+    "displayName": "Text To Speech",
+    "description": "AI flow for text to speech",
+    "category": "general",
+    "tags": [
+      "general",
+      "text"
+    ]
+  },
+  {
+    "name": "topic-explainer",
+    "displayName": "Topic Explainer",
+    "description": "@fileOverview An AI agent for breaking down complex topics.",
+    "category": "general",
+    "tags": [
+      "general",
+      "ai"
+    ]
+  },
+  {
+    "name": "translate-text",
+    "displayName": "Translate Text",
+    "description": "@fileOverview An AI agent for translating text.",
+    "category": "general",
+    "tags": [
+      "general",
+      "text"
+    ]
+  },
+  {
+    "name": "write-document",
+    "displayName": "Write Document",
+    "description": "@fileOverview An AI agent for writing a full document from a topic.",
+    "category": "general",
+    "tags": [
+      "general"
+    ]
+  }
+]

@@ -170,10 +170,11 @@ export const dynamicFlowExecutor = ai.defineFlow(
             });
           }
           
-          const handled = await handleStepError(error, step, context, flowConfig);
+          const errorObj = error instanceof Error ? error : new Error(String(error));
+          const handled = await handleStepError(errorObj, step, context, flowConfig);
           
           if (!handled) {
-            throw new StepExecutionError(step.name, error);
+            throw new StepExecutionError(step.name, errorObj);
           }
         }
       }

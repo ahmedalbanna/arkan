@@ -164,15 +164,20 @@ export function StepEditor({
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label>Timeout (seconds)</Label>
-                    <p className="text-xs text-muted-foreground">Maximum execution time for this step</p>
+                    <p className="text-xs text-muted-foreground">Maximum execution time for this step (TOOL steps only)</p>
                   </div>
                   <Input
                     type="number"
                     className="w-24"
-                    value={editedStep.timeout || 30}
-                    onChange={(e) => updateStepField('timeout', parseInt(e.target.value))}
+                    value={(editedStep.config.type === 'TOOL' && editedStep.config.timeout) || 30}
+                    onChange={(e) => {
+                      if (editedStep.config.type === 'TOOL') {
+                        updateConfig({ timeout: parseInt(e.target.value) });
+                      }
+                    }}
                     min={1}
                     max={300}
+                    disabled={editedStep.config.type !== 'TOOL'}
                   />
                 </div>
 
@@ -186,8 +191,8 @@ export function StepEditor({
                   <Input
                     type="number"
                     className="w-24"
-                    value={editedStep.retries || 0}
-                    onChange={(e) => updateStepField('retries', parseInt(e.target.value))}
+                    value={editedStep.retryCount || 0}
+                    onChange={(e) => updateStepField('retryCount', parseInt(e.target.value))}
                     min={0}
                     max={5}
                   />
@@ -253,7 +258,7 @@ function GenerateStepEditor({
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>Prompt Template</Label>
-        <Select value={config.promptName} onValueChange={(value) => updateConfig({ promptName: value })}>
+        <Select value={config.promptId} onValueChange={(value) => updateConfig({ promptId: value })}>
           <SelectTrigger>
             <SelectValue placeholder="Select a prompt template" />
           </SelectTrigger>
@@ -301,23 +306,6 @@ function GenerateStepEditor({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label>Variables (JSON)</Label>
-        <Textarea
-          value={JSON.stringify(config.variables || {}, null, 2)}
-          onChange={(e) => {
-            try {
-              const variables = JSON.parse(e.target.value);
-              updateConfig({ variables });
-            } catch (err) {
-              // Invalid JSON, don't update
-            }
-          }}
-          placeholder='{"key": "{{context.value}}"}'
-          rows={4}
-          className="font-mono text-xs"
-        />
-      </div>
     </div>
   );
 }
@@ -342,11 +330,20 @@ function RetrieveStepEditor({
       </div>
 
       <div className="space-y-2">
-        <Label>Collection</Label>
+        <Label>Retriever Name</Label>
         <Input
-          value={config.collection || 'documents'}
-          onChange={(e) => updateConfig({ collection: e.target.value })}
-          placeholder="Collection name"
+          value={config.retrieverName || ''}
+          onChange={(e) => updateConfig({ retrieverName: e.target.value })}
+          placeholder="Retriever name"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Query Template</Label>
+        <Input
+          value={config.query || ''}
+          onChange={(e) => updateConfig({ query: e.target.value })}
+          placeholder="{{context.userQuery}}"
         />
       </div>
 
@@ -363,27 +360,16 @@ function RetrieveStepEditor({
         </div>
 
         <div className="space-y-2">
-          <Label>Similarity Threshold</Label>
+          <Label>Min Score</Label>
           <Input
             type="number"
-            value={config.threshold || 0.7}
-            onChange={(e) => updateConfig({ threshold: parseFloat(e.target.value) })}
+            value={config.minScore || 0.7}
+            onChange={(e) => updateConfig({ minScore: parseFloat(e.target.value) })}
             min={0}
             max={1}
             step={0.1}
           />
         </div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="space-y-0.5">
-          <Label>Enable Reranking</Label>
-          <p className="text-xs text-muted-foreground">Use reranking for better relevance</p>
-        </div>
-        <Switch
-          checked={config.rerank || false}
-          onCheckedChange={(checked) => updateConfig({ rerank: checked })}
-        />
       </div>
     </div>
   );
@@ -417,13 +403,13 @@ function ToolStepEditor({
       </div>
 
       <div className="space-y-2">
-        <Label>Tool Arguments (JSON)</Label>
+        <Label>Tool Parameters (JSON)</Label>
         <Textarea
-          value={JSON.stringify(config.arguments || {}, null, 2)}
+          value={JSON.stringify(config.parameters || {}, null, 2)}
           onChange={(e) => {
             try {
-              const args = JSON.parse(e.target.value);
-              updateConfig({ arguments: args });
+              const params = JSON.parse(e.target.value);
+              updateConfig({ parameters: params });
             } catch (err) {
               // Invalid JSON
             }
@@ -448,7 +434,7 @@ function FormatStepEditor({
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>Output Format</Label>
-        <Select value={config.format} onValueChange={(value) => updateConfig({ format: value as any })}>
+        <Select value={config.outputFormat} onValueChange={(value) => updateConfig({ outputFormat: value as any })}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
@@ -457,6 +443,7 @@ function FormatStepEditor({
             <SelectItem value="json">JSON</SelectItem>
             <SelectItem value="text">Plain Text</SelectItem>
             <SelectItem value="html">HTML</SelectItem>
+            <SelectItem value="xml">XML</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -487,8 +474,8 @@ function ConditionStepEditor({
       <div className="space-y-2">
         <Label>Condition Expression</Label>
         <Textarea
-          value={config.expression}
-          onChange={(e) => updateConfig({ expression: e.target.value })}
+          value={config.condition}
+          onChange={(e) => updateConfig({ condition: e.target.value })}
           placeholder="context.score > 0.8"
           rows={3}
           className="font-mono text-xs"
@@ -496,21 +483,13 @@ function ConditionStepEditor({
       </div>
 
       <div className="space-y-2">
-        <Label>True Branch (Next Step ID)</Label>
-        <Input
-          value={config.trueStepId || ''}
-          onChange={(e) => updateConfig({ trueStepId: e.target.value })}
-          placeholder="step-id-if-true"
-        />
+        <Label>True Branch Steps</Label>
+        <p className="text-xs text-muted-foreground">Steps are defined inline (not by ID reference)</p>
       </div>
 
       <div className="space-y-2">
-        <Label>False Branch (Next Step ID)</Label>
-        <Input
-          value={config.falseStepId || ''}
-          onChange={(e) => updateConfig({ falseStepId: e.target.value })}
-          placeholder="step-id-if-false"
-        />
+        <Label>False Branch Steps</Label>
+        <p className="text-xs text-muted-foreground">Steps are defined inline (not by ID reference)</p>
       </div>
     </div>
   );
@@ -526,10 +505,10 @@ function LoopStepEditor({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label>Items Expression</Label>
+        <Label>Items Source</Label>
         <Input
-          value={config.items}
-          onChange={(e) => updateConfig({ items: e.target.value })}
+          value={config.itemsSource}
+          onChange={(e) => updateConfig({ itemsSource: e.target.value })}
           placeholder="context.items"
         />
       </div>
@@ -537,19 +516,24 @@ function LoopStepEditor({
       <div className="space-y-2">
         <Label>Item Variable Name</Label>
         <Input
-          value={config.itemVar || 'item'}
-          onChange={(e) => updateConfig({ itemVar: e.target.value })}
+          value={config.itemVariable || 'item'}
+          onChange={(e) => updateConfig({ itemVariable: e.target.value })}
           placeholder="item"
         />
       </div>
 
       <div className="space-y-2">
-        <Label>Loop Body (Step ID)</Label>
+        <Label>Index Variable Name</Label>
         <Input
-          value={config.bodyStepId || ''}
-          onChange={(e) => updateConfig({ bodyStepId: e.target.value })}
-          placeholder="step-id-to-repeat"
+          value={config.indexVariable || 'index'}
+          onChange={(e) => updateConfig({ indexVariable: e.target.value })}
+          placeholder="index"
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Loop Body Steps</Label>
+        <p className="text-xs text-muted-foreground">Steps are defined inline (not by ID reference)</p>
       </div>
 
       <div className="space-y-2">

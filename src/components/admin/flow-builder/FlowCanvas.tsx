@@ -118,9 +118,9 @@ function StepNode({
                 <Badge variant="secondary" className="text-xs">
                   Step {index + 1}
                 </Badge>
-                {step.config.promptName && (
+                {step.config.type === 'GENERATE' && step.config.promptId && (
                   <Badge variant="secondary" className="text-xs">
-                    {step.config.promptName}
+                    {step.config.promptId}
                   </Badge>
                 )}
               </div>

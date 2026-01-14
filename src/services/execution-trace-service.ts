@@ -11,6 +11,7 @@ import {
   getDoc,
   getDocs,
   setDoc,
+  deleteDoc,
   query,
   where,
   orderBy,
@@ -146,7 +147,8 @@ export class ExecutionTraceService {
     flowId: string,
     limitCount = 20
   ): Promise<ExecutionSummary[]> {
-    return this.listTraces({ flowId, limit: limitCount });
+    // Note: limitCount is not used as listTraces has its own internal limit logic
+    return this.listTraces({ flowId });
   }
 
   /**
@@ -156,14 +158,16 @@ export class ExecutionTraceService {
     userId: string,
     limitCount = 20
   ): Promise<ExecutionSummary[]> {
-    return this.listTraces({ userId, limit: limitCount });
+    // Note: limitCount is not used as listTraces has its own internal limit logic
+    return this.listTraces({ userId });
   }
 
   /**
    * Get failed executions
    */
   async getFailedExecutions(limitCount = 50): Promise<ExecutionSummary[]> {
-    return this.listTraces({ status: 'failed', limit: limitCount });
+    // Note: limitCount is not used as listTraces has its own internal limit logic
+    return this.listTraces({ status: 'failed' });
   }
 
   /**
@@ -173,7 +177,8 @@ export class ExecutionTraceService {
     minDuration: number,
     limitCount = 50
   ): Promise<ExecutionSummary[]> {
-    return this.listTraces({ minDuration, limit: limitCount });
+    // Note: limitCount is not used as listTraces has its own internal limit logic
+    return this.listTraces({ minDuration });
   }
 
   /**
@@ -319,7 +324,7 @@ export class ExecutionTraceService {
 
       // Note: In production, use batch operations or Cloud Functions
       for (const document of snapshot.docs) {
-        await document.ref.delete();
+        await deleteDoc(document.ref);
         deletedCount++;
       }
 

@@ -5,11 +5,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getFirestore } from 'firebase-admin/firestore';
-import { adminApp } from '@/lib/firebase/server-init';
+import { adminDb } from '@/lib/firebase/server-init';
 import { ToolConfiguration } from '@/lib/models/tool-config';
 
-const db = getFirestore(adminApp);
+const db = adminDb;
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,9 +47,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Create tool configuration
-    const tool: ToolConfiguration = {
+    const tool: Partial<ToolConfiguration> = {
       name: toolData.name,
+      displayName: toolData.displayName || toolData.name,
       description: toolData.description,
+      category: toolData.category || 'util',
       type: toolData.type,
       inputSchema: toolData.inputSchema || {
         type: 'object',
@@ -64,11 +65,8 @@ export async function POST(request: NextRequest) {
       timeout: toolData.timeout || 30000,
       version: toolData.version || '1.0.0',
       tags: toolData.tags || [],
-      config: toolData.config,
-      metadata: {
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
+      status: 'active',
+      createdBy: toolData.createdBy || 'system',
     };
 
     // Save to Firestore

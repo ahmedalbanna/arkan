@@ -207,10 +207,10 @@ export function ToolRegistrationDialog({
                   <Label htmlFor="endpoint">API Endpoint</Label>
                   <Input
                     id="endpoint"
-                    value={(tool.config as any)?.endpoint || ''}
+                    value={tool.handler || ''}
                     onChange={(e) =>
                       updateTool({
-                        config: { ...(tool.config || {}), endpoint: e.target.value },
+                        handler: e.target.value,
                       })
                     }
                     placeholder="https://api.example.com/endpoint"
@@ -290,7 +290,7 @@ export function ToolRegistrationDialog({
                     'Import path to the tool function (e.g., @/tools/my-tool)'}
                   {tool.type === 'external' &&
                     'HTTP method and endpoint (e.g., POST /api/tool)'}
-                  {tool.type === 'built-in' && 'Built-in tools use predefined handlers'}
+                  {tool.type === 'builtin' && 'Built-in tools use predefined handlers'}
                 </p>
               </div>
 

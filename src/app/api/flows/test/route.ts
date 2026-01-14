@@ -74,9 +74,10 @@ export async function POST(request: NextRequest) {
     } catch (testError) {
       // Try to clean up if flow was created
       try {
-        const flows = await flowConfigService.listFlows({ name: tempFlowName });
-        if (flows.length > 0) {
-          await flowConfigService.deleteFlow(flows[0].id);
+        const flows = await flowConfigService.listFlows();
+        const testFlow = flows.find(f => f.name === tempFlowName);
+        if (testFlow) {
+          await flowConfigService.deleteFlow(testFlow.id);
         }
       } catch (cleanupError) {
         console.error('Failed to cleanup test flow:', cleanupError);

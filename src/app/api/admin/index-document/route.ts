@@ -78,15 +78,16 @@ async function extractTextFromDOCX(file: File): Promise<string> {
 }
 
 export async function POST(request: NextRequest) {
+  // Parse form data outside try block so it's available in catch
+  const formData = await request.formData();
+  const file = formData.get('file') as File | null;
+  const projectId = formData.get('projectId') as string;
+  const chunkSize = parseInt(formData.get('chunkSize') as string || '400');
+  const overlap = parseInt(formData.get('overlap') as string || '50');
+  const type = formData.get('type') as 'report' | 'reference' | 'context' | 'user_upload' || 'context';
+  const userId = formData.get('userId') as string | null;
+
   try {
-    // Parse form data
-    const formData = await request.formData();
-    const file = formData.get('file') as File | null;
-    const projectId = formData.get('projectId') as string;
-    const chunkSize = parseInt(formData.get('chunkSize') as string || '400');
-    const overlap = parseInt(formData.get('overlap') as string || '50');
-    const type = formData.get('type') as 'report' | 'reference' | 'context' | 'user_upload' || 'context';
-    const userId = formData.get('userId') as string | null;
 
     // Validate inputs
     if (!file) {
@@ -143,9 +144,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!result.success) {
-      console.error(`   ✗ Indexing failed: ${result.error}`);
+      const errorMessage = result.errors?.join(', ') || 'Indexing failed';
+      console.error(`   ✗ Indexing failed: ${errorMessage}`);
       return NextResponse.json(
-        { success: false, error: result.error || 'Indexing failed' },
+        { success: false, error: errorMessage },
         { status: 500 }
       );
     }

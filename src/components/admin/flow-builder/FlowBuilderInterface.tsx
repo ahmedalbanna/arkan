@@ -186,9 +186,9 @@ export function FlowBuilderInterface({
           {view === 'builder' ? (
             <FlowCanvas
               steps={flow.steps || []}
-              selectedStepId={selectedStepId}
+              selectedStepId={selectedStepId ?? undefined}
               onStepSelect={handleStepSelect}
-              onStepAdd={handleAddStep}
+              onStepAdd={(afterStepId) => handleAddStep('GENERATE', afterStepId)}
               onStepDelete={handleDeleteStep}
               onStepReorder={handleReorderStep}
             />

@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/firebase/server-init';
+import { adminAuth } from '@/lib/firebase/server-init';
 
 /**
  * User roles for authorization
@@ -52,7 +52,7 @@ export async function extractAuthToken(request: NextRequest): Promise<string | n
 export async function verifyAuthToken(token: string): Promise<AuthenticatedUser | null> {
   try {
     // Verify the Firebase ID token
-    const decodedToken = await auth.verifyIdToken(token);
+    const decodedToken = await adminAuth.verifyIdToken(token);
     
     // Get user role from custom claims or default to 'user'
     const role = (decodedToken.role as UserRole) || UserRole.USER;
@@ -210,7 +210,7 @@ export async function setUserRole(
   role: UserRole
 ): Promise<void> {
   try {
-    await auth.setCustomUserClaims(uid, { role });
+    await adminAuth.setCustomUserClaims(uid, { role });
   } catch (error) {
     console.error('Failed to set user role:', error);
     throw new Error('Failed to set user role');
@@ -222,7 +222,7 @@ export async function setUserRole(
  */
 export async function getUserByUid(uid: string) {
   try {
-    return await auth.getUser(uid);
+    return await adminAuth.getUser(uid);
   } catch (error) {
     console.error('Failed to get user:', error);
     return null;
@@ -333,6 +333,13 @@ export function withAdmin<T = any>(
     
     if (authResult instanceof NextResponse) {
       return authResult;
+    }
+    
+    if (!authResult.authorized) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: authResult.status }
+      );
     }
     
     return handler(request, { user: authResult.user, params: context?.params });

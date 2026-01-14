@@ -51,8 +51,10 @@ describe('Step Handlers', () => {
       const retrieveStep: FlowStep = {
         id: 'step1',
         name: 'Test Retrieve',
-        type: 'retrieve',
-        handler: 'retrieve',
+        type: 'RETRIEVE',
+        config: { type: 'RETRIEVE', retrieverName: 'test', query: 'test', topK: 5 },
+        inputSchema: {},
+        outputSchema: {},
         inputMapping: {},
         outputMapping: {},
       };
@@ -72,11 +74,11 @@ describe('Step Handlers', () => {
     });
 
     it('should throw error for unsupported step type', async () => {
-      const invalidStep: FlowStep = {
+      const invalidStep: any = {
         id: 'step1',
         name: 'Invalid Step',
         type: 'invalid' as any,
-        handler: 'invalid',
+        config: { type: 'GENERATE' } as any,
         inputMapping: {},
         outputMapping: {},
       };
@@ -90,8 +92,10 @@ describe('Step Handlers', () => {
       const formatStep: FlowStep = {
         id: 'step1',
         name: 'Format Step',
-        type: 'format',
-        handler: 'format',
+        type: 'FORMAT',
+        config: { type: 'FORMAT', outputFormat: 'json' },
+        inputSchema: {},
+        outputSchema: {},
         inputMapping: {},
         outputMapping: {},
       };
@@ -111,8 +115,10 @@ describe('Step Handlers', () => {
     const retrieveStep: FlowStep = {
       id: 'retrieve1',
       name: 'RAG Retrieval',
-      type: 'retrieve',
-      handler: 'retrieve',
+      type: 'RETRIEVE',
+      config: { type: 'RETRIEVE', retrieverName: 'test', query: 'test', topK: 5 },
+      inputSchema: {},
+      outputSchema: {},
       inputMapping: {},
       outputMapping: {},
     };
@@ -163,8 +169,10 @@ describe('Step Handlers', () => {
     const generateStep: FlowStep = {
       id: 'generate1',
       name: 'LLM Generation',
-      type: 'generate',
-      handler: 'generate',
+      type: 'GENERATE',
+      config: { type: 'GENERATE', promptId: 'test' },
+      inputSchema: {},
+      outputSchema: {},
       inputMapping: {},
       outputMapping: {},
     };
@@ -207,8 +215,10 @@ describe('Step Handlers', () => {
     const toolStep: FlowStep = {
       id: 'tool1',
       name: 'Tool Execution',
-      type: 'tool',
-      handler: 'tool',
+      type: 'TOOL',
+      config: { type: 'TOOL', toolName: 'test', parameters: {} },
+      inputSchema: {},
+      outputSchema: {},
       inputMapping: {},
       outputMapping: {},
     };
@@ -253,8 +263,10 @@ describe('Step Handlers', () => {
     const formatStep: FlowStep = {
       id: 'format1',
       name: 'Format Output',
-      type: 'format',
-      handler: 'format',
+      type: 'FORMAT',
+      config: { type: 'FORMAT', outputFormat: 'json' },
+      inputSchema: {},
+      outputSchema: {},
       inputMapping: {},
       outputMapping: {},
     };

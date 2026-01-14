@@ -47,19 +47,19 @@ export async function executeStep(
     let result: StepExecutionResult;
 
     switch (step.type) {
-      case 'retrieve':
+      case 'RETRIEVE':
         result = await executeRetrieveStep(step, input, context);
         break;
 
-      case 'generate':
+      case 'GENERATE':
         result = await executeGenerateStep(step, input, context);
         break;
 
-      case 'tool':
+      case 'TOOL':
         result = await executeToolStep(step, input, context);
         break;
 
-      case 'format':
+      case 'FORMAT':
         result = await executeFormatStep(step, input, context);
         break;
 
@@ -198,7 +198,7 @@ export async function executeGenerateStep(
     });
 
     // Extract text from response
-    const generatedText = response.text();
+    const generatedText = response.text;
 
     return {
       output: {

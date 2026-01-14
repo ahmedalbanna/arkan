@@ -473,13 +473,6 @@ src/
 - Integration: Fully integrated with Week 3 REST APIs
 - Additional: FlowList, FlowTester, StepLibrary, PromptTester components
 
-### Milestone 4: Migration Ready (End of Week 5)
-**Criteria**:
-- [ ] Migration scripts complete
-- [ ] 5 pilot flows migrated
-- [ ] Test infrastructure ready
-- [ ] Performance acceptable
-
 ### Milestone 4: Migration Ready (End of Week 5) ✅
 **Criteria**:
 - [x] Migration scripts complete (7 scripts, 4,787 lines)
@@ -494,6 +487,13 @@ src/
 - Success Rate: 100%
 - Validation: 0 errors, 0 warnings
 - Reports Generated: 6 comprehensive reports
+
+### Milestone 5: 50% Migrated (End of Week 6)
+**Criteria**:
+- [ ] 25+ flows migrated
+- [ ] All tests passing
+- [ ] Staging deployment stable
+- [ ] Performance metrics acceptable
 
 ### Milestone 6: 100% Migrated (End of Week 8)
 **Criteria**:

@@ -114,13 +114,13 @@ export default function AdminPromptsPage() {
   };
 
   const handleDuplicatePrompt = async (prompt: PromptConfiguration) => {
+    const { id, ...promptData } = prompt;
     const duplicate = {
-      ...prompt,
+      ...promptData,
       name: `${prompt.name}-copy`,
       displayName: `${prompt.displayName} (Copy)`,
       status: 'draft' as const,
     };
-    delete duplicate.id;
     
     try {
       const response = await fetch('/api/admin/prompts', {
@@ -146,7 +146,7 @@ export default function AdminPromptsPage() {
     }
   };
 
-  const handleTestPrompt = async (prompt: PromptConfiguration) => {
+  const handleTestPrompt = (prompt: Partial<PromptConfiguration>) => {
     toast({
       title: 'Test Prompt',
       description: 'Prompt testing feature coming soon',

@@ -96,7 +96,7 @@ export class SchemaValidator {
         errors: [{
           path: [],
           message: error instanceof Error ? error.message : 'Unknown validation error',
-        }],
+        } as unknown as ValidationError],
       };
     }
   }
@@ -285,14 +285,14 @@ export class SchemaValidator {
       }
     }
 
-    let objectSchema = z.object(shape);
+    let objectSchema: any = z.object(shape);
 
     // Handle additional properties
     if (schema.additionalProperties === false) {
       objectSchema = objectSchema.strict();
     }
 
-    return objectSchema;
+    return objectSchema as z.ZodType<any>;
   }
 
   /**
@@ -303,7 +303,7 @@ export class SchemaValidator {
       path: error.path.map(p => String(p)),
       message: error.message,
       code: error.code,
-    }));
+    } as ValidationError));
   }
 
   /**
