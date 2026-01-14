@@ -308,6 +308,8 @@ export function FlowBuilderCanvas({
             setShowConfigPanel(false);
             setSelectedNode(null);
           }}
+          allSteps={nodes.map((node) => node.data.step)}
+          flowConfig={flowConfig}
         />
       )}
 

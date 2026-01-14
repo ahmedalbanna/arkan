@@ -17,8 +17,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
-import { Save } from 'lucide-react';
+import { Save, GitBranch, Eye } from 'lucide-react';
 import type { FlowStep } from '@/lib/models/flow-config';
+import { MappingBuilder } from './MappingBuilder';
+import { DataFlowDiagram } from './DataFlowDiagram';
+import { VariableBrowser } from './VariableBrowser';
 
 // ============================================================================
 // Step Config Panel Component
@@ -28,10 +31,13 @@ interface StepConfigPanelProps {
   step: FlowStep;
   onUpdate: (step: FlowStep) => void;
   onClose: () => void;
+  allSteps?: FlowStep[];
+  flowConfig?: any;
 }
 
-export function StepConfigPanel({ step, onUpdate, onClose }: StepConfigPanelProps) {
+export function StepConfigPanel({ step, onUpdate, onClose, allSteps = [], flowConfig }: StepConfigPanelProps) {
   const [editedStep, setEditedStep] = useState<FlowStep>(step);
+  const [showDataFlow, setShowDataFlow] = useState(false);
 
   const handleSave = () => {
     onUpdate(editedStep);
@@ -332,59 +338,74 @@ export function StepConfigPanel({ step, onUpdate, onClose }: StepConfigPanelProp
 
           {/* Mapping Tab */}
           <TabsContent value="mapping" className="space-y-4">
-            <Card className="p-4 space-y-4">
-              <h3 className="font-semibold">Input Mapping</h3>
-              <p className="text-sm text-muted-foreground">
-                Map context variables to step inputs
-              </p>
-              <Textarea
-                value={JSON.stringify(editedStep.contextMapping?.input || {}, null, 2)}
-                onChange={(e) => {
-                  try {
-                    const mapping = JSON.parse(e.target.value);
-                    setEditedStep((prev) => ({
-                      ...prev,
-                      contextMapping: {
-                        ...prev.contextMapping,
-                        input: mapping,
-                      },
-                    }));
-                  } catch (err) {
-                    // Invalid JSON
-                  }
-                }}
-                placeholder='{"stepInput": "contextVariable"}'
-                rows={4}
-                className="font-mono text-sm"
-              />
-            </Card>
+            {/* Data Flow Visualization Toggle */}
+            <div className="flex justify-end mb-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDataFlow(!showDataFlow)}
+              >
+                <GitBranch className="w-4 h-4 mr-2" />
+                {showDataFlow ? 'Hide' : 'Show'} Data Flow
+              </Button>
+            </div>
 
-            <Card className="p-4 space-y-4">
-              <h3 className="font-semibold">Output Mapping</h3>
-              <p className="text-sm text-muted-foreground">
-                Map step outputs to context variables
-              </p>
-              <Textarea
-                value={JSON.stringify(editedStep.contextMapping?.output || {}, null, 2)}
-                onChange={(e) => {
-                  try {
-                    const mapping = JSON.parse(e.target.value);
+            {/* Data Flow Diagram */}
+            {showDataFlow && (
+              <DataFlowDiagram
+                steps={allSteps}
+                currentStepId={editedStep.id}
+              />
+            )}
+
+            {/* Layout: Side by Side */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Left: Variable Browser */}
+              <div className="lg:col-span-1">
+                <VariableBrowser
+                  steps={allSteps}
+                  currentStepId={editedStep.id}
+                  flowInputSchema={flowConfig?.inputSchema}
+                />
+              </div>
+
+              {/* Right: Mapping Builders */}
+              <div className="lg:col-span-2 space-y-4">
+                {/* Input Mapping */}
+                <MappingBuilder
+                  type="input"
+                  mappings={(editedStep as any).contextMapping?.input || {}}
+                  onChange={(mappings) => {
                     setEditedStep((prev) => ({
                       ...prev,
                       contextMapping: {
-                        ...prev.contextMapping,
-                        output: mapping,
+                        ...(prev as any).contextMapping,
+                        input: mappings,
                       },
-                    }));
-                  } catch (err) {
-                    // Invalid JSON
-                  }
-                }}
-                placeholder='{"stepOutput": "contextVariable"}'
-                rows={4}
-                className="font-mono text-sm"
-              />
-            </Card>
+                    } as FlowStep));
+                  }}
+                  stepId={editedStep.id}
+                  allSteps={allSteps.map(s => ({ id: s.id, name: s.name }))}
+                />
+
+                {/* Output Mapping */}
+                <MappingBuilder
+                  type="output"
+                  mappings={(editedStep as any).contextMapping?.output || {}}
+                  onChange={(mappings) => {
+                    setEditedStep((prev) => ({
+                      ...prev,
+                      contextMapping: {
+                        ...(prev as any).contextMapping,
+                        output: mappings,
+                      },
+                    } as FlowStep));
+                  }}
+                  stepId={editedStep.id}
+                  allSteps={allSteps.map(s => ({ id: s.id, name: s.name }))}
+                />
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 
