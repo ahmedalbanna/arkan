@@ -6,12 +6,50 @@ import { Chapter, Project, Section } from './models';
  */
 export class PromptBuilder {
     /**
+     * Builds project metadata context block that will be included in section prompts.
+     * @param project - The Project object containing metadata.
+     * @returns A formatted string with project information.
+     */
+    private static buildProjectMetadata(project: Project): string {
+        const teamMemberNames = project.teamMembers?.join(', ');
+
+        const metadataFields: { label: string; value: string | undefined }[] = [
+            { label: 'Project Name', value: project.name },
+            { label: 'Project Description', value: project.projectDescription },
+            { label: 'Project Type', value: project.projectType },
+            { label: 'Specialization', value: project.specialization },
+            { label: 'University', value: project.university },
+            { label: 'Course', value: project.course },
+            { label: 'Educational Level', value: project.educationalLevel },
+            { label: 'Supervisor', value: project.supervisor },
+            { label: 'Team Members', value: teamMemberNames },
+        ];
+
+        const metadataEntries = metadataFields
+            .filter(field => field.value && field.value.trim().length > 0)
+            .map(field => `- **${field.label}**: ${field.value}`)
+            .join('\n');
+
+        if (!metadataEntries) {
+            return '';
+        }
+
+        return `**PROJECT CONTEXT:**
+${metadataEntries}
+---
+`;
+    }
+
+    /**
      * Builds a detailed prompt for a single section.
      * @param section - The Section object to build the prompt for.
      * @param project - The entire Project object to resolve context references.
      * @returns A string containing the formatted prompt for the section.
      */
     public static buildSectionPrompt(section: Section, project: Project): string {
+        // Build project metadata context
+        const projectMetadata = this.buildProjectMetadata(project);
+        
         const contextSectionsContent = Object.entries(section.context?.sections || {})
             .map(([sectionId, type]) => {
                 const contextSection = project.getSection(sectionId);
@@ -42,6 +80,8 @@ export class PromptBuilder {
 
         return `
 ### Instructions for Section: "${section.title}"
+
+${projectMetadata}
 
 **Main Task & Controls:**
 ${actionPrompt}

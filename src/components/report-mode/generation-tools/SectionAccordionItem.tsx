@@ -90,6 +90,33 @@ const MemoizedSectionAccordionItem = React.memo(function SectionAccordionItem({
                         <span className="font-medium p-0 h-auto truncate">
                             {section.title}
                         </span>
+                        {(() => {
+                            const linkedSections = Object.keys(section.context?.sections || {}).length;
+                            const linkedFiles = Object.keys(section.context?.externalContext || {}).length;
+                            const totalContext = linkedSections + linkedFiles;
+                            
+                            if (totalContext > 0) {
+                                return (
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <div className="flex items-center gap-1 ml-2">
+                                                    <LinkIcon className="h-3.5 w-3.5 text-blue-500" />
+                                                    <span className="text-xs text-blue-500 font-medium">{totalContext}</span>
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top">
+                                                <div className="text-xs space-y-1">
+                                                    {linkedSections > 0 && <p>{linkedSections} linked section{linkedSections > 1 ? 's' : ''}</p>}
+                                                    {linkedFiles > 0 && <p>{linkedFiles} linked file{linkedFiles > 1 ? 's' : ''}</p>}
+                                                </div>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                );
+                            }
+                            return null;
+                        })()}
                     </div>
                 </AccordionTrigger>
             </div>

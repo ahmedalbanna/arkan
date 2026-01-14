@@ -337,7 +337,18 @@ ${universityText}
       return new Chapter({ title: chapterData.title, sections: sections });
     });
 
-    return this.with({ content: newContent });
+    // Apply project configuration from template if provided
+    const projectUpdates: Partial<ProjectProperties> = {
+      content: newContent,
+    };
+
+    if (template.projectType) projectUpdates.projectType = template.projectType;
+    if (template.specialization) projectUpdates.specialization = template.specialization;
+    if (template.university) projectUpdates.university = template.university;
+    if (template.course) projectUpdates.course = template.course;
+    if (template.educationalLevel) projectUpdates.educationalLevel = template.educationalLevel;
+
+    return this.with(projectUpdates);
   }
 
   public moveContentItem(activeId: string, overId: string): Project {
