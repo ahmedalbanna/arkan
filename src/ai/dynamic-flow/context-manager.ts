@@ -6,6 +6,51 @@
  * for dynamic flow execution.
  */
 
+import type { FlowConfiguration, StepResult } from '../../lib/models/flow-config';
+
+// ============================================================================
+// Types and Interfaces
+// ============================================================================
+
+export interface ExecutionContext {
+  id: string;
+  traceId: string;
+  input: any;
+  config: FlowConfiguration;
+  options: ExecutionOptions;
+  variables: Map<string, any>;
+  stepResults: Map<string, StepResult>;
+  metrics: {
+    successfulSteps: number;
+    failedSteps: number;
+    skippedSteps: number;
+    totalTokens: number;
+    totalCost: number;
+    cacheHits: number;
+    cacheMisses: number;
+  };
+  startTime: number;
+  lastStepTime?: number;
+}
+
+export interface ExecutionOptions {
+  timeout?: number;
+  userId?: string;
+  sessionId?: string;
+  dryRun?: boolean;
+  debug?: boolean;
+  variables?: Record<string, any>;
+}
+
+export interface ContextSnapshot {
+  id: string;
+  traceId: string;
+  timestamp: number;
+  variables: Record<string, any>;
+  stepResults: Array<{ stepId: string; status: string; output: any }>;
+  metrics: any;
+}
+
 /**
  * Context Manager class
  * Handles variable storage, retrieval, and template string resolution
@@ -14,11 +59,211 @@ export class ContextManager {
   private context: Map<string, any>;
   private readonly parentContext?: ContextManager;
   private readonly scopeStack: Map<string, any>[];
+  private contexts: Map<string, ExecutionContext> = new Map();
 
   constructor(initialContext: Record<string, any> = {}, parent?: ContextManager) {
     this.context = new Map(Object.entries(initialContext));
     this.parentContext = parent;
     this.scopeStack = [];
+  }
+
+  // ============================================================================
+  // Enhanced Context Management for Dynamic Flows
+  // ============================================================================
+
+  /**
+   * Initialize a new execution context
+   */
+  async initialize(params: {
+    input: any;
+    config: FlowConfiguration;
+    options: ExecutionOptions;
+    traceId: string;
+  }): Promise<ExecutionContext> {
+    const context: ExecutionContext = {
+      id: this.generateContextId(),
+      traceId: params.traceId,
+      input: params.input,
+      config: params.config,
+      options: params.options,
+      variables: new Map(),
+      stepResults: new Map(),
+      metrics: {
+        successfulSteps: 0,
+        failedSteps: 0,
+        skippedSteps: 0,
+        totalTokens: 0,
+        totalCost: 0,
+        cacheHits: 0,
+        cacheMisses: 0
+      },
+      startTime: Date.now()
+    };
+
+    // Initialize with any provided variables
+    if (params.options.variables) {
+      for (const [key, value] of Object.entries(params.options.variables)) {
+        context.variables.set(key, value);
+      }
+    }
+
+    this.contexts.set(context.id, context);
+    return context;
+  }
+
+  /**
+   * Update context with step results
+   */
+  async updateContext(
+    context: ExecutionContext,
+    step: any,
+    result: StepResult
+  ): Promise<void> {
+    // Store step result
+    context.stepResults.set(step.id, result);
+    context.lastStepTime = Date.now();
+
+    // Apply output mapping to context variables
+    if (step.contextMapping?.output && result.output) {
+      for (const [outputPath, contextVar] of Object.entries(step.contextMapping.output)) {
+        const value = this.extractValue(result.output, outputPath);
+        context.variables.set(contextVar, value);
+      }
+    }
+
+    // Update metrics
+    if (result.metrics) {
+      context.metrics.totalTokens += result.metrics.tokens || 0;
+      context.metrics.totalCost += result.metrics.cost || 0;
+
+      if (result.metrics.cacheHit) {
+        context.metrics.cacheHits++;
+      } else {
+        context.metrics.cacheMisses++;
+      }
+    }
+  }
+
+  /**
+   * Get variable value from context
+   */
+  getVariable(context: ExecutionContext, name: string): any {
+    // Check explicit variables first
+    if (context.variables.has(name)) {
+      return context.variables.get(name);
+    }
+
+    // Check input with path notation (input.fieldName)
+    if (name.startsWith('input.')) {
+      const path = name.substring(6);
+      return this.extractValue(context.input, path);
+    }
+
+    // Check step results with path notation (stepId.outputField)
+    if (name.includes('.')) {
+      const [stepId, ...pathParts] = name.split('.');
+      const stepResult = context.stepResults.get(stepId);
+      if (stepResult?.output) {
+        return this.extractValue(stepResult.output, pathParts.join('.'));
+      }
+    }
+
+    // Check for special variables
+    if (name === 'context.stepCount') {
+      return context.stepResults.size;
+    }
+    if (name === 'context.duration') {
+      return Date.now() - context.startTime;
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Set variable in context
+   */
+  setVariable(context: ExecutionContext, name: string, value: any): void {
+    context.variables.set(name, value);
+  }
+
+  /**
+   * Extract output from context
+   */
+  extractOutput(
+    context: ExecutionContext,
+    outputMapping?: Record<string, string>
+  ): any {
+    if (outputMapping) {
+      // Build output object from mapping
+      const output: any = {};
+      for (const [outputKey, contextPath] of Object.entries(outputMapping)) {
+        output[outputKey] = this.getVariable(context, contextPath);
+      }
+      return output;
+    }
+
+    // Default: return last step output
+    const lastStepResult = Array.from(context.stepResults.values()).pop();
+    return lastStepResult?.output || null;
+  }
+
+  /**
+   * Create context snapshot for debugging
+   */
+  snapshot(context: ExecutionContext): ContextSnapshot {
+    return {
+      id: context.id,
+      traceId: context.traceId,
+      timestamp: Date.now(),
+      variables: Object.fromEntries(context.variables),
+      stepResults: Array.from(context.stepResults.entries()).map(([id, result]) => ({
+        stepId: id,
+        status: result.status,
+        output: result.output
+      })),
+      metrics: { ...context.metrics }
+    };
+  }
+
+  /**
+   * Clean up context after execution
+   */
+  async cleanup(contextId: string): Promise<void> {
+    this.contexts.delete(contextId);
+  }
+
+  /**
+   * Extract value from object using path
+   */
+  private extractValue(obj: any, path: string): any {
+    if (!path) return obj;
+
+    const parts = path.split('.');
+    let current = obj;
+
+    for (const part of parts) {
+      // Handle array indices
+      const arrayMatch = part.match(/^(.+)\[(\d+)\]$/);
+      if (arrayMatch) {
+        const [, key, index] = arrayMatch;
+        current = current?.[key]?.[parseInt(index)];
+      } else {
+        current = current?.[part];
+      }
+
+      if (current === undefined) {
+        return undefined;
+      }
+    }
+
+    return current;
+  }
+
+  /**
+   * Generate unique context ID
+   */
+  private generateContextId(): string {
+    return `ctx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   // ============================================================================
