@@ -1,0 +1,87 @@
+{
+  "name": "paraphrase-text",
+  "version": 1,
+  "description": "An AI agent for paraphrasing text in different styles (standard, fluent, formal, creative, simplify)",
+  "category": "text-transformation",
+  "tags": ["paraphrase", "rewrite", "style", "simple"],
+  "isActive": true,
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "The text to paraphrase"
+      },
+      "mode": {
+        "type": "string",
+        "enum": ["standard", "fluent", "formal", "creative", "simplify"],
+        "description": "The paraphrasing style"
+      }
+    },
+    "required": ["text", "mode"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "paraphrasedText": {
+        "type": "string",
+        "description": "The paraphrased text"
+      }
+    },
+    "required": ["paraphrasedText"]
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "name": "Determine Style Instruction",
+      "type": "transform",
+      "config": {
+        "operation": "map",
+        "mapping": {
+          "standard": "Provide a balanced rewrite that improves clarity while retaining the original meaning.",
+          "fluent": "Rewrite the text to sound more natural and fluent, as if written by a native speaker.",
+          "formal": "Rewrite the text using a more formal, academic, and professional tone.",
+          "creative": "Rewrite the text in a more creative and engaging style, using vivid language.",
+          "simplify": "Rewrite the text to be simpler and easier to understand for a general audience."
+        },
+        "inputKey": "mode",
+        "outputKey": "instruction"
+      }
+    },
+    {
+      "id": "step_2",
+      "name": "Paraphrase Text",
+      "type": "generate",
+      "config": {
+        "model": "gemini-2.0-flash-exp",
+        "temperature": 0.9,
+        "maxTokens": 2048,
+        "systemPrompt": "You are an expert editor. Your task is to paraphrase the given text based on the selected mode. You must perfectly preserve all markdown formatting.\n\nOutput ONLY the paraphrased text. Do NOT wrap it in JSON or any other format.",
+        "userPromptTemplate": "**Mode**: {{mode}}\n**Instruction**: {{instruction}}\n\n**Original Text:**\n---\n{{text}}\n---",
+        "outputKey": "rawOutput"
+      }
+    },
+    {
+      "id": "step_3",
+      "name": "Clean Output",
+      "type": "transform",
+      "config": {
+        "operation": "replace",
+        "pattern": "---",
+        "replacement": "",
+        "inputKey": "rawOutput",
+        "outputKey": "paraphrasedText",
+        "trim": true
+      },
+      "outputMapping": {
+        "paraphrasedText": "{{paraphrasedText}}"
+      }
+    }
+  ],
+  "metadata": {
+    "migrationDate": "2026-01-14",
+    "sourceFile": "src/ai/flows/paraphrase-text.ts",
+    "migrationType": "pilot",
+    "originalComplexity": "simple"
+  }
+}

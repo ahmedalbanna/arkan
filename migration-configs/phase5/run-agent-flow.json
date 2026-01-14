@@ -1,0 +1,71 @@
+{
+  "name": "run-agent-flow",
+  "description": "Executes custom agent flows dynamically",
+  "category": "meta",
+  "tags": [
+    "agent",
+    "flow",
+    "execution",
+    "dynamic"
+  ],
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "agentId": {
+        "type": "string",
+        "description": "Agent ID to execute"
+      },
+      "input": {
+        "type": "object",
+        "description": "Input for the agent"
+      },
+      "parameters": {
+        "type": "object",
+        "description": "Execution parameters"
+      }
+    },
+    "required": [
+      "agentId",
+      "input"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Agent execution result"
+      }
+    },
+    "required": [
+      "result"
+    ]
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "name": "Execute Agent",
+      "type": "tool",
+      "config": {
+        "toolName": "executeAgent",
+        "parameters": {
+          "agentId": "{{agentId}}",
+          "input": "{{input}}",
+          "parameters": "{{parameters}}"
+        },
+        "outputKey": "result"
+      },
+      "outputMapping": {
+        "result": "{{result}}"
+      }
+    }
+  ],
+  "version": 1,
+  "isActive": true,
+  "metadata": {
+    "migrationDate": "2026-01-14T07:24:32.310Z",
+    "sourceFile": "src/ai/flows/run-agent-flow.ts",
+    "migrationType": "phase5",
+    "originalComplexity": "complex"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "name": "dynamic-flow-executor",
+  "description": "Core dynamic flow executor - executes flows from config",
+  "category": "meta",
+  "tags": [
+    "executor",
+    "dynamic",
+    "core",
+    "meta"
+  ],
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "flowName": {
+        "type": "string",
+        "description": "Flow name to execute"
+      },
+      "input": {
+        "type": "object",
+        "description": "Flow input data"
+      }
+    },
+    "required": [
+      "flowName",
+      "input"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "output": {
+        "type": "object",
+        "description": "Flow execution output"
+      }
+    },
+    "required": [
+      "output"
+    ]
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "name": "Execute Dynamic Flow",
+      "type": "tool",
+      "config": {
+        "toolName": "executeDynamicFlow",
+        "parameters": {
+          "flowName": "{{flowName}}",
+          "input": "{{input}}"
+        },
+        "outputKey": "output"
+      },
+      "outputMapping": {
+        "output": "{{output}}"
+      }
+    }
+  ],
+  "version": 1,
+  "isActive": true,
+  "metadata": {
+    "migrationDate": "2026-01-14T07:24:32.310Z",
+    "sourceFile": "src/ai/flows/dynamic-flow-executor.ts",
+    "migrationType": "phase5",
+    "originalComplexity": "complex"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "name": "project-report-generator",
+  "description": "Generates comprehensive project reports",
+  "category": "academic",
+  "tags": [
+    "project",
+    "report",
+    "documentation",
+    "academic"
+  ],
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "projectName": {
+        "type": "string",
+        "description": "Project name"
+      },
+      "projectDetails": {
+        "type": "string",
+        "description": "Project details"
+      },
+      "findings": {
+        "type": "string",
+        "description": "Key findings"
+      },
+      "reportType": {
+        "type": "string",
+        "description": "Type of report"
+      }
+    },
+    "required": [
+      "projectName",
+      "projectDetails"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "report": {
+        "type": "string",
+        "description": "Complete project report in markdown"
+      }
+    },
+    "required": [
+      "report"
+    ]
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "name": "Generate Project Report",
+      "type": "generate",
+      "config": {
+        "model": "gemini-2.0-flash-exp",
+        "temperature": 0.5,
+        "maxTokens": 8192,
+        "systemPrompt": "You are a project documentation specialist. Create comprehensive project reports with executive summary, methodology, findings, analysis, and recommendations. Output markdown format.",
+        "userPromptTemplate": "**Project:** {{projectName}}\n**Type:** {{reportType}}\n**Details:** {{projectDetails}}\n**Findings:** {{findings}}",
+        "outputKey": "report"
+      },
+      "outputMapping": {
+        "report": "{{report}}"
+      }
+    }
+  ],
+  "version": 1,
+  "isActive": true,
+  "metadata": {
+    "migrationDate": "2026-01-14T07:23:56.427Z",
+    "sourceFile": "src/ai/flows/project-report-generator.ts",
+    "migrationType": "phase4",
+    "originalComplexity": "complex"
+  }
+}

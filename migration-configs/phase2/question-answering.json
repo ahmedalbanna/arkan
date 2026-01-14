@@ -1,0 +1,67 @@
+{
+  "name": "question-answering",
+  "description": "Answers questions based on context",
+  "category": "analysis",
+  "tags": [
+    "qa",
+    "question",
+    "answer"
+  ],
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "question": {
+        "type": "string"
+      },
+      "context": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "question",
+      "context"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "answer": {
+        "type": "string"
+      },
+      "confidence": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "answer"
+    ]
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "name": "Answer Question",
+      "type": "generate",
+      "config": {
+        "model": "gemini-2.0-flash-exp",
+        "temperature": 0.3,
+        "maxTokens": 1024,
+        "outputFormat": "json",
+        "systemPrompt": "Answer question based on context. Return JSON with answer and confidence (0-100).",
+        "userPromptTemplate": "**Question:** {{question}}\n**Context:** {{context}}",
+        "outputKey": "result"
+      },
+      "outputMapping": {
+        "answer": "{{result.answer}}",
+        "confidence": "{{result.confidence}}"
+      }
+    }
+  ],
+  "version": 1,
+  "isActive": true,
+  "metadata": {
+    "migrationDate": "2026-01-14T07:15:10.839Z",
+    "sourceFile": "src/ai/flows/question-answering.ts",
+    "migrationType": "phase2",
+    "originalComplexity": "simple"
+  }
+}

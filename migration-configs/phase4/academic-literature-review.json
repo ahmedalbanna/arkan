@@ -1,0 +1,74 @@
+{
+  "name": "academic-literature-review",
+  "description": "Conducts comprehensive academic literature reviews",
+  "category": "academic",
+  "tags": [
+    "literature-review",
+    "research",
+    "academic",
+    "analysis"
+  ],
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "topic": {
+        "type": "string",
+        "description": "Research topic"
+      },
+      "scope": {
+        "type": "string",
+        "description": "Scope of review"
+      },
+      "keywords": {
+        "type": "string",
+        "description": "Search keywords"
+      },
+      "timeframe": {
+        "type": "string",
+        "description": "Time period to cover"
+      }
+    },
+    "required": [
+      "topic"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "review": {
+        "type": "object",
+        "description": "Literature review with sources and analysis"
+      }
+    },
+    "required": [
+      "review"
+    ]
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "name": "Conduct Literature Review",
+      "type": "generate",
+      "config": {
+        "model": "gemini-2.0-flash-exp",
+        "temperature": 0.4,
+        "maxTokens": 8192,
+        "outputFormat": "json",
+        "systemPrompt": "You are an academic researcher. Conduct a comprehensive literature review. Return JSON with 'introduction', 'themes', 'keyFindings', 'gaps', 'methodology', 'sources', and 'conclusion'.",
+        "userPromptTemplate": "**Topic:** {{topic}}\n**Scope:** {{scope}}\n**Keywords:** {{keywords}}\n**Timeframe:** {{timeframe}}",
+        "outputKey": "review"
+      },
+      "outputMapping": {
+        "review": "{{review}}"
+      }
+    }
+  ],
+  "version": 1,
+  "isActive": true,
+  "metadata": {
+    "migrationDate": "2026-01-14T07:23:56.424Z",
+    "sourceFile": "src/ai/flows/academic-literature-review.ts",
+    "migrationType": "phase4",
+    "originalComplexity": "complex"
+  }
+}

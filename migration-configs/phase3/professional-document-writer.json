@@ -1,0 +1,73 @@
+{
+  "name": "professional-document-writer",
+  "description": "Writes professional-grade documents",
+  "category": "document-generation",
+  "tags": [
+    "professional",
+    "business",
+    "document"
+  ],
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "documentType": {
+        "type": "string",
+        "description": "Type of document"
+      },
+      "audience": {
+        "type": "string",
+        "description": "Target audience"
+      },
+      "purpose": {
+        "type": "string",
+        "description": "Document purpose"
+      },
+      "content": {
+        "type": "string",
+        "description": "Key content points"
+      }
+    },
+    "required": [
+      "documentType",
+      "purpose"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "document": {
+        "type": "string",
+        "description": "Professional document"
+      }
+    },
+    "required": [
+      "document"
+    ]
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "name": "Write Professional Document",
+      "type": "generate",
+      "config": {
+        "model": "gemini-2.0-flash-exp",
+        "temperature": 0.6,
+        "maxTokens": 8192,
+        "systemPrompt": "You are a professional business writer. Create polished, professional documents with appropriate tone and structure. Output markdown format.",
+        "userPromptTemplate": "**Document Type:** {{documentType}}\n**Audience:** {{audience}}\n**Purpose:** {{purpose}}\n**Content:** {{content}}",
+        "outputKey": "document"
+      },
+      "outputMapping": {
+        "document": "{{document}}"
+      }
+    }
+  ],
+  "version": 1,
+  "isActive": true,
+  "metadata": {
+    "migrationDate": "2026-01-14T07:20:29.915Z",
+    "sourceFile": "src/ai/flows/professional-document-writer.ts",
+    "migrationType": "phase3",
+    "originalComplexity": "medium"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "name": "sentence-structure-checker",
+  "description": "Analyzes sentence structure quality",
+  "category": "analysis",
+  "tags": [
+    "sentence",
+    "structure",
+    "analysis"
+  ],
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "text"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "score": {
+        "type": "number"
+      },
+      "issues": {
+        "type": "array"
+      },
+      "suggestions": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "score"
+    ]
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "name": "Check Structure",
+      "type": "generate",
+      "config": {
+        "model": "gemini-2.0-flash-exp",
+        "temperature": 0.3,
+        "maxTokens": 2048,
+        "outputFormat": "json",
+        "systemPrompt": "Analyze sentence structure. Return JSON with score (0-100), issues array, and suggestions array.",
+        "userPromptTemplate": "{{text}}",
+        "outputKey": "result"
+      },
+      "outputMapping": {
+        "score": "{{result.score}}",
+        "issues": "{{result.issues}}",
+        "suggestions": "{{result.suggestions}}"
+      }
+    }
+  ],
+  "version": 1,
+  "isActive": true,
+  "metadata": {
+    "migrationDate": "2026-01-14T07:15:10.838Z",
+    "sourceFile": "src/ai/flows/sentence-structure-checker.ts",
+    "migrationType": "phase2",
+    "originalComplexity": "simple"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "name": "generate-chapter-content-rag",
+  "description": "Generates chapter content with RAG support",
+  "category": "rag-enhanced",
+  "tags": [
+    "rag",
+    "chapter",
+    "content",
+    "retrieval"
+  ],
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "chapterTitle": {
+        "type": "string",
+        "description": "Chapter title"
+      },
+      "topics": {
+        "type": "string",
+        "description": "Topics to cover"
+      },
+      "retrievalQuery": {
+        "type": "string",
+        "description": "Query for context retrieval"
+      }
+    },
+    "required": [
+      "chapterTitle",
+      "topics"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "chapter": {
+        "type": "string",
+        "description": "Complete chapter with RAG context"
+      }
+    },
+    "required": [
+      "chapter"
+    ]
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "name": "Retrieve Context",
+      "type": "retrieve",
+      "config": {
+        "query": "{{retrievalQuery}}",
+        "topK": 10,
+        "minScore": 0.6,
+        "outputKey": "ragContext"
+      }
+    },
+    {
+      "id": "step_2",
+      "name": "Generate Chapter",
+      "type": "generate",
+      "config": {
+        "model": "gemini-2.0-flash-exp",
+        "temperature": 0.7,
+        "maxTokens": 8192,
+        "systemPrompt": "You are a book author. Generate comprehensive chapter content using retrieved context. Include citations. Output markdown.",
+        "userPromptTemplate": "**Chapter:** {{chapterTitle}}\n**Topics:** {{topics}}\n\n**Retrieved Context:**\n{{ragContext}}",
+        "outputKey": "chapter"
+      },
+      "outputMapping": {
+        "chapter": "{{chapter}}"
+      }
+    }
+  ],
+  "version": 1,
+  "isActive": true,
+  "metadata": {
+    "migrationDate": "2026-01-14T07:24:32.308Z",
+    "sourceFile": "src/ai/flows/generate-chapter-content-rag.ts",
+    "migrationType": "phase5",
+    "originalComplexity": "complex"
+  }
+}

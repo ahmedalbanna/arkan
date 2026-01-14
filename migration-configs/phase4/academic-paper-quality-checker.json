@@ -1,0 +1,70 @@
+{
+  "name": "academic-paper-quality-checker",
+  "description": "Checks academic paper quality and provides feedback",
+  "category": "academic",
+  "tags": [
+    "quality",
+    "checker",
+    "academic",
+    "review"
+  ],
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "paperText": {
+        "type": "string",
+        "description": "Paper content to check"
+      },
+      "paperType": {
+        "type": "string",
+        "description": "Type of paper"
+      },
+      "criteria": {
+        "type": "string",
+        "description": "Quality criteria"
+      }
+    },
+    "required": [
+      "paperText"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "assessment": {
+        "type": "object",
+        "description": "Quality assessment report"
+      }
+    },
+    "required": [
+      "assessment"
+    ]
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "name": "Check Paper Quality",
+      "type": "generate",
+      "config": {
+        "model": "gemini-2.0-flash-exp",
+        "temperature": 0.3,
+        "maxTokens": 4096,
+        "outputFormat": "json",
+        "systemPrompt": "You are an academic reviewer. Assess paper quality comprehensively. Return JSON with 'overallScore', 'strengths', 'weaknesses', 'structureAnalysis', 'contentAnalysis', 'citationAnalysis', 'recommendations', and 'detailedFeedback'.",
+        "userPromptTemplate": "**Paper Type:** {{paperType}}\n**Criteria:** {{criteria}}\n\n**Paper Content:**\n{{paperText}}",
+        "outputKey": "assessment"
+      },
+      "outputMapping": {
+        "assessment": "{{assessment}}"
+      }
+    }
+  ],
+  "version": 1,
+  "isActive": true,
+  "metadata": {
+    "migrationDate": "2026-01-14T07:23:56.426Z",
+    "sourceFile": "src/ai/flows/academic-paper-quality-checker.ts",
+    "migrationType": "phase4",
+    "originalComplexity": "complex"
+  }
+}

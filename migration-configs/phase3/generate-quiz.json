@@ -1,0 +1,75 @@
+{
+  "name": "generate-quiz",
+  "description": "Generates quiz questions with answers",
+  "category": "education",
+  "tags": [
+    "quiz",
+    "assessment",
+    "education"
+  ],
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "topic": {
+        "type": "string",
+        "description": "Quiz topic"
+      },
+      "difficulty": {
+        "type": "string",
+        "enum": [
+          "easy",
+          "medium",
+          "hard"
+        ],
+        "description": "Difficulty level"
+      },
+      "questionCount": {
+        "type": "number",
+        "description": "Number of questions"
+      }
+    },
+    "required": [
+      "topic",
+      "questionCount"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "quiz": {
+        "type": "object",
+        "description": "Generated quiz with questions and answers"
+      }
+    },
+    "required": [
+      "quiz"
+    ]
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "name": "Generate Quiz",
+      "type": "generate",
+      "config": {
+        "model": "gemini-2.0-flash-exp",
+        "temperature": 0.7,
+        "maxTokens": 4096,
+        "outputFormat": "json",
+        "systemPrompt": "You are an expert educator. Generate a quiz with questions and answers. Return JSON with 'questions' array containing objects with 'question', 'options', 'correctAnswer', and 'explanation' fields.",
+        "userPromptTemplate": "**Topic:** {{topic}}\n**Difficulty:** {{difficulty}}\n**Number of Questions:** {{questionCount}}",
+        "outputKey": "quiz"
+      },
+      "outputMapping": {
+        "quiz": "{{quiz}}"
+      }
+    }
+  ],
+  "version": 1,
+  "isActive": true,
+  "metadata": {
+    "migrationDate": "2026-01-14T07:20:29.913Z",
+    "sourceFile": "src/ai/flows/generate-quiz.ts",
+    "migrationType": "phase3",
+    "originalComplexity": "medium"
+  }
+}

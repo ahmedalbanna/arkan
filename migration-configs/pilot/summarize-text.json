@@ -1,0 +1,72 @@
+{
+  "name": "summarize-text",
+  "version": 1,
+  "description": "An AI agent for summarizing text in different lengths (short, medium, long)",
+  "category": "text-transformation",
+  "tags": ["summarize", "summary", "condense", "simple"],
+  "isActive": true,
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "The text to summarize"
+      },
+      "length": {
+        "type": "string",
+        "enum": ["short", "medium", "long"],
+        "description": "Desired summary length"
+      }
+    },
+    "required": ["text", "length"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "summary": {
+        "type": "string",
+        "description": "The summarized text"
+      }
+    },
+    "required": ["summary"]
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "name": "Determine Length Instruction",
+      "type": "transform",
+      "config": {
+        "operation": "map",
+        "mapping": {
+          "short": "a single, concise paragraph (approximately 50-100 words).",
+          "medium": "a few paragraphs, capturing the main points and key supporting details (approximately 150-300 words).",
+          "long": "a detailed summary, covering all significant topics and arguments (approximately 400-600 words)."
+        },
+        "inputKey": "length",
+        "outputKey": "instruction"
+      }
+    },
+    {
+      "id": "step_2",
+      "name": "Summarize Text",
+      "type": "generate",
+      "config": {
+        "model": "gemini-2.0-flash-exp",
+        "temperature": 0.3,
+        "maxTokens": 2048,
+        "systemPrompt": "You are a professional text summarizer.\n\nOutput ONLY the summary text. Do NOT wrap it in JSON or any other format.",
+        "userPromptTemplate": "**Task:**\n- Read the text below carefully\n- Create a summary that is {{instruction}}\n- Output ONLY the summary text\n\n**Text to Summarize:**\n---\n{{text}}\n---",
+        "outputKey": "summary"
+      },
+      "outputMapping": {
+        "summary": "{{summary}}"
+      }
+    }
+  ],
+  "metadata": {
+    "migrationDate": "2026-01-14",
+    "sourceFile": "src/ai/flows/summarize-text.ts",
+    "migrationType": "pilot",
+    "originalComplexity": "simple"
+  }
+}

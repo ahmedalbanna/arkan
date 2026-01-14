@@ -1,0 +1,70 @@
+{
+  "name": "image-to-text",
+  "description": "Converts image content to text descriptions",
+  "category": "multimodal",
+  "tags": [
+    "image",
+    "ocr",
+    "description",
+    "vision"
+  ],
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "imageUrl": {
+        "type": "string",
+        "description": "Image URL or base64"
+      },
+      "extractionType": {
+        "type": "string",
+        "enum": [
+          "description",
+          "ocr",
+          "both"
+        ],
+        "description": "Type of extraction"
+      }
+    },
+    "required": [
+      "imageUrl"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "Extracted text or description"
+      }
+    },
+    "required": [
+      "text"
+    ]
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "name": "Extract Text from Image",
+      "type": "generate",
+      "config": {
+        "model": "gemini-2.0-flash-exp",
+        "temperature": 0.3,
+        "maxTokens": 2048,
+        "systemPrompt": "You are a vision AI. Extract text or describe image content accurately. Output plain text.",
+        "userPromptTemplate": "**Image:** {{imageUrl}}\n**Type:** {{extractionType}}",
+        "outputKey": "text"
+      },
+      "outputMapping": {
+        "text": "{{text}}"
+      }
+    }
+  ],
+  "version": 1,
+  "isActive": true,
+  "metadata": {
+    "migrationDate": "2026-01-14T07:24:32.309Z",
+    "sourceFile": "src/ai/flows/image-to-text.ts",
+    "migrationType": "phase5",
+    "originalComplexity": "complex"
+  }
+}

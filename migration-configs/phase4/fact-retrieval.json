@@ -1,0 +1,67 @@
+{
+  "name": "fact-retrieval",
+  "description": "Retrieves and verifies facts from context",
+  "category": "academic",
+  "tags": [
+    "fact",
+    "retrieval",
+    "verification",
+    "research"
+  ],
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "Fact query"
+      },
+      "context": {
+        "type": "string",
+        "description": "Context to search"
+      }
+    },
+    "required": [
+      "query",
+      "context"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "facts": {
+        "type": "object",
+        "description": "Retrieved facts with sources"
+      }
+    },
+    "required": [
+      "facts"
+    ]
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "name": "Retrieve Facts",
+      "type": "generate",
+      "config": {
+        "model": "gemini-2.0-flash-exp",
+        "temperature": 0.2,
+        "maxTokens": 2048,
+        "outputFormat": "json",
+        "systemPrompt": "You are a fact retrieval expert. Extract relevant facts from context. Return JSON with 'facts' array (each with 'fact', 'source', 'confidence'), 'summary', and 'relatedInfo'.",
+        "userPromptTemplate": "**Query:** {{query}}\n\n**Context:**\n{{context}}",
+        "outputKey": "facts"
+      },
+      "outputMapping": {
+        "facts": "{{facts}}"
+      }
+    }
+  ],
+  "version": 1,
+  "isActive": true,
+  "metadata": {
+    "migrationDate": "2026-01-14T07:23:56.427Z",
+    "sourceFile": "src/ai/flows/fact-retrieval.ts",
+    "migrationType": "phase4",
+    "originalComplexity": "complex"
+  }
+}
