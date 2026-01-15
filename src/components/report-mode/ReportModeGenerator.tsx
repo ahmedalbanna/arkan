@@ -1,33 +1,19 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useMobile } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
-import { BookOpenText, LayoutTemplate, Settings, UploadCloud } from 'lucide-react';
-import React, { Suspense, lazy, useState } from 'react';
+import { BookOpenText, Settings } from 'lucide-react';
+import React, { Suspense, lazy } from 'react';
 import { Button } from '../ui/button';
 import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
 import { BuilderPageSkeleton } from '@/app/builder/loading';
-import { useBuilderPageLogic } from '@/hooks/core/use-builder-page';
-import { useSaveProject } from '@/hooks';
 import { OnboardingGuide } from '@/components/onboarding/OnboardingGuide';
 import { Input } from '@/components/ui/input';
 import { formatDistanceToNow } from 'date-fns';
 import { SessionActions } from '@/components/report-mode/session/SessionActions';
+import { useReportGenerator } from '@/hooks/report-mode/useReportGenerator';
 
-
-// Dynamic imports with proper default export handling
-const ProjectSettingsPanel = lazy(() => import('./settings/ProjectSettingsPanel'));
-const FileManager = lazy(() => import('./file-manager'));
-const GenerationTools = lazy(() => import('./generation-tools'));
 const ReportResults = lazy(() => import('./ReportResults'));
-const ApplyTemplatePanel = lazy(() => import('./templates/ApplyTemplatePanel'));
-
-const MemoizedProjectSettingsPanel = React.memo(ProjectSettingsPanel);
-const MemoizedFileManager = React.memo(FileManager);
-const MemoizedGenerationTools = React.memo(GenerationTools);
-const MemoizedApplyTemplatePanel = React.memo(ApplyTemplatePanel);
-
 
 function ReportSkeleton() {
     return (
@@ -66,49 +52,23 @@ function BottomNavBar({ activeView, setActiveView }: { activeView: 'generator' |
 }
 
 export default function ReportModeGenerator() {
-    const { locale, t } = useLocalization();
-    const isMobile = useMobile();
-    const [activeMobileView, setActiveMobileView] = useState<'generator' | 'result'>('result');
-    const [activePanelKey, setActivePanelKey] = useState('settings');
-
     const {
+        locale,
+        isMobile,
+        activeMobileView,
+        setActiveMobileView,
+        activePanelKey,
+        setActivePanelKey,
         showOnboarding,
         setShowOnboarding,
         handleOnboardingComplete,
         project,
         isStoreInitialized,
         updateProjectName,
-    } = useBuilderPageLogic();
+        isSaving,
+        panels,
+    } = useReportGenerator();
     
-    const { isSaving } = useSaveProject();
-
-    const panels = [
-        {
-            key: 'settings',
-            title: 'Project Settings',
-            icon: <div className="h-5 w-5 flex items-center justify-center font-bold text-sm">1</div>,
-            content: <MemoizedProjectSettingsPanel />,
-        },
-        {
-            key: 'files',
-            title: t('builder.tabs.files'),
-            icon: <div className="h-5 w-5 flex items-center justify-center font-bold text-sm">2</div>,
-            content: <MemoizedFileManager />,
-        },
-        {
-            key: 'templates',
-            title: 'Apply Template',
-            icon: <div className="h-5 w-5 flex items-center justify-center font-bold text-sm">3</div>,
-            content: <MemoizedApplyTemplatePanel />,
-        },
-        {
-            key: 'generate',
-            title: t('builder.reportGenerator.toolsTitle'),
-            icon: <div className="h-5 w-5 flex items-center justify-center font-bold text-sm">4</div>,
-            content: <MemoizedGenerationTools />,
-        },
-    ];
-
     if (!isStoreInitialized || !project) {
         return <BuilderPageSkeleton />;
     }
