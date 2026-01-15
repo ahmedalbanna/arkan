@@ -51,8 +51,10 @@ export function useSaveProject() {
     const saveProjectMutation = useMutation({
         mutationFn: async (projectData: ProjectProperties) => {
             if (!navigator.onLine || !firebaseUser) {
-                toast({ title: 'Offline', description: 'You are offline. Please connect to the internet to save the project.', variant: 'destructive' });
-                throw new Error("User is offline.");
+                // If offline, save locally
+                const savedLocally = await localProjectService.saveProject(projectData);
+                toast({ title: 'Saved Locally', description: 'Your project has been saved to your device.' });
+                return savedLocally;
             }
             const token = await getAuthenticatedToken(firebaseUser);
             return saveProjectApi(projectData, token);
@@ -60,7 +62,9 @@ export function useSaveProject() {
         onSuccess: (savedProject) => {
             setHasUnsavedChanges(false);
             queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
-            toast({ title: 'Project Saved', description: `"${savedProject.name}" has been saved to the cloud.` });
+            if (navigator.onLine) {
+                toast({ title: 'Project Saved', description: `"${savedProject.name}" has been saved to the cloud.` });
+            }
         },
         onError: (error: any) => {
             toast({ title: 'Error', description: `Failed to save project: ${error.message}`, variant: 'destructive' });
@@ -101,3 +105,4 @@ export function useDeleteProject() {
         },
     });
 }
+

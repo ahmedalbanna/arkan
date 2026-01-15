@@ -9,13 +9,17 @@ if (!admin.apps.length) {
   try {
     // When deployed (e.g., on Vercel), GOOGLE_APPLICATION_CREDENTIALS will be set.
     // For local development, we can fall back to the service account file.
-    if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    if (process.env.FIREBASE_ADMIN_PRIVATE_KEY) {
       admin.initializeApp({
-        credential: admin.credential.applicationDefault(),
+        credential: admin.credential.cert({
+            projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+            privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY.replace(/\\n/g, '\n'),
+        }),
         databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
         storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
       });
-      console.log("Firebase Admin SDK initialized using Application Default Credentials.");
+      console.log("Firebase Admin SDK initialized using environment variables.");
     } else {
       // Fallback for local development
       const serviceAccount = require('../../../docudec-firebase-adminsdk-2maa7-d07a19d3fc.json');

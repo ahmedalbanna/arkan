@@ -1,6 +1,7 @@
 
 
 
+
 'use client';
 
 import { useCallback, useMemo } from 'react';
@@ -9,7 +10,7 @@ import { useWritingTool } from '@/hooks';
 import { useToast } from '@/hooks/util/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
 import { marked } from 'marked';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { generateReportSectionApi } from '@/services/api/reportService';
@@ -19,6 +20,7 @@ import { writingToolApi } from '@/services/api/writingToolsService';
 import { Chapter, type Project, type Section } from '@/lib/models';
 import { parseMarkdownToContent } from '../util/useMarkdownParser';
 import { useEditorStore } from '../core/use-editor-store';
+import { projectKeys } from '@/lib/query-keys';
 
 interface AiActionsProps {
   editor?: Editor | null;
@@ -30,6 +32,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
   const { firebaseUser, refetchUser } = useAuth();
   const { project, updateProject } = useBuilderStore();
   const { activeEditor } = useEditorStore();
+  const queryClient = useQueryClient();
   
   const editor = initialEditor || activeEditor;
 
@@ -147,8 +150,8 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
         // We don't need to process the response content here anymore.
         return generateReportSectionApi(body, token);
     },
-    onSuccess: () => {
-        // No longer need to manually update the store, as RTDB listener will handle it.
+    onSuccess: (data, sectionId) => {
+        queryClient.invalidateQueries({ queryKey: projectKeys.detail(project?.id || '') });
         refetchUser();
         toast({ title: 'Generation In Progress', description: 'The AI is generating your content. It will appear automatically when ready.' });
     },

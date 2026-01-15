@@ -64,18 +64,14 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
             const result = updater(newProject);
             // If the updater returns a new Project instance, use it. Otherwise, use the mutated one.
             const finalProject = result instanceof Project ? result : newProject;
+            localProjectService.saveProject(finalProject.toStateObject()); // Auto-save to local
+            localStorage.setItem('lastActiveProjectId', finalProject.id);
             return { project: finalProject, hasUnsavedChanges: true };
         });
     },
 
     updateProjectFromMarkdown: (markdown: string) => {
-        set(state => {
-            if (!state.project) return {};
-            // Re-instantiate the project from its plain state to ensure methods are available
-            const projectInstance = new Project(state.project.toStateObject());
-            const newProject = projectInstance.updateProjectFromMarkdown(markdown);
-            return { project: newProject, hasUnsavedChanges: true };
-        });
+        get().updateProject(p => p.updateProjectFromMarkdown(markdown));
     },
 
     loadProject: (projectData) => {
