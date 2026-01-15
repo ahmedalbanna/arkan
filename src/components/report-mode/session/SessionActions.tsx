@@ -46,6 +46,12 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
         if (!project) return;
         saveProjectMutation.mutate(project.toStateObject());
     };
+    
+    const handleDownload = () => {
+        if (project) {
+            project.downloadAsFile();
+        }
+    };
 
     const hasContent = project?.hasContent() ?? false;
 
@@ -99,6 +105,24 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
                     {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                     <span className="hidden md:inline ms-2">{t('projects.saveButton')}</span>
                 </Button>
+                
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={handleDownload}
+                            disabled={!hasContent}
+                            className="h-8 w-8 md:w-auto md:px-3"
+                        >
+                            <Download className="h-4 w-4" />
+                             <span className="hidden md:inline ms-2">{t('builder.buttons.downloadProject')}</span>
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>{t('builder.tooltips.downloadProject')}</p>
+                    </TooltipContent>
+                </Tooltip>
 
                 <ExportDialog />
 
