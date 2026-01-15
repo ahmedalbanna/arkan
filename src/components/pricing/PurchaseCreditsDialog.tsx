@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -245,19 +244,18 @@ export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode })
 
   async function onSubmit(data: FileFormValues) {
     if (!firebaseUser) return;
-    const token = await firebaseUser.getIdToken();
+    
     const formData = new FormData();
     formData.append('file', data.file[0]);
     formData.append('userId', firebaseUser.uid);
-    formData.append('planId', `custom-${credits}`);
-    formData.append('planName', `${credits} Credits`);
     formData.append('credits', credits.toString());
     formData.append('price', price.toFixed(2));
+    formData.append('planId', `custom-${credits}`);
+    formData.append('planName', `${credits} Credits`);
     formData.append('userName', firebaseUser.displayName || 'N/A');
     formData.append('userEmail', firebaseUser.email || 'N/A');
 
-    // @ts-expect-error - FormData object literal property mismatch
-    mutation.mutate({ formData: formData as any, token });
+    mutation.mutate(formData);
   }
 
   return (
