@@ -50,6 +50,7 @@ export async function createUser(data: Omit<UserProfile, 'id' | 'createdAt' | 'u
         bio: '',
         profilePictureUrl: '',
         hasCompletedOnboarding: false,
+        lastDailyCreditUpdate: new Date(0).toISOString(), // Set to epoch to ensure eligibility
     };
 
     await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);
@@ -86,17 +87,31 @@ export async function deductUserCredits(userId: string, creditsToDeduct: number)
             throw new Error("User not found");
         }
 
-        const currentCredits = userDoc.data()?.credits ?? 0;
+        const userData = userDoc.data() as UserProfile;
+        let currentCredits = userData.credits ?? 0;
+        const lastUpdate = userData.lastDailyCreditUpdate ? new Date(userData.lastDailyCreditUpdate).getTime() : 0;
+        const twentyFourHours = 24 * 60 * 60 * 1000;
+
+        const updates: { [key: string]: any } = {};
+
+        // Check if it's time for a daily credit refresh
+        if (Date.now() - lastUpdate > twentyFourHours) {
+            if (currentCredits < 10) {
+                currentCredits = 10;
+                updates.credits = currentCredits;
+            }
+            updates.lastDailyCreditUpdate = new Date().toISOString();
+        }
 
         if (currentCredits < creditsToDeduct) {
             throw { status: 402, message: "Insufficient credits. Please purchase more credits to continue." };
         }
 
         const newBalance = currentCredits - creditsToDeduct;
-        transaction.update(userRef, {
-            credits: newBalance,
-            updatedAt: new Date().toISOString()
-        });
+        updates.credits = newBalance;
+        updates.updatedAt = new Date().toISOString();
+        
+        transaction.update(userRef, updates);
 
         return newBalance;
     });
