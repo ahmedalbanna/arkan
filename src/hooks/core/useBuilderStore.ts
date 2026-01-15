@@ -7,8 +7,11 @@ import { useEffect } from 'react';
 import { create } from 'zustand';
 import { toast } from '../util/use-toast';
 import { useEditorStore } from './use-editor-store';
-import { marked } from 'marked';
 import { parseMarkdownToContent } from '../util/useMarkdownParser';
+import { getFirestore, onSnapshot, doc } from 'firebase/firestore';
+import { app } from '@/lib/firebase/client-init';
+import { useAuth } from '@/context/AuthContext';
+
 
 interface BuilderState {
     project: Project | null;
@@ -16,7 +19,7 @@ interface BuilderState {
     hasUnsavedChanges: boolean;
     isStoreInitialized: boolean;
     
-    initializeStore: () => void;
+    initializeStore: (userId: string) => () => void;
     setUserProfile: (userProfile: User | null) => void; // Action to set the user profile
     setHasUnsavedChanges: (hasChanges: boolean) => void;
     updateProject: (updater: (project: Project) => void | Project) => void;
@@ -34,21 +37,33 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     userProfile: null, // Initialize userProfile as null
     hasUnsavedChanges: false,
     isStoreInitialized: false,
-    initializeStore: () => {
-        if (get().isStoreInitialized) return;
+    initializeStore: (userId) => {
+        if (!userId) {
+            set({ project: createNewTemporaryProject(), isStoreInitialized: true });
+            return () => {};
+        }
+
+        const db = getFirestore(app);
+        const projectsRef = doc(db, 'users', userId); // Assuming projects are subcollection or field
+
+        // This is a placeholder. You'd need to adapt this to your actual data structure.
+        // For simplicity, let's assume the user doc has a 'projects' field or subcollection.
+        // The more robust way is to have a 'projects' collection and query by userId.
+        // Let's use a simplified listening logic. We will listen to the LAST active project.
         const lastProjectId = localStorage.getItem('lastActiveProjectId');
         if (lastProjectId) {
-            localProjectService.getProject(lastProjectId).then(projectData => {
-                if (projectData) {
-                    set({ project: new Project(projectData), isStoreInitialized: true });
+            const projectDocRef = doc(db, "projects", lastProjectId);
+            const unsubscribe = onSnapshot(projectDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    set({ project: new Project(docSnap.data() as ProjectProperties), isStoreInitialized: true });
                 } else {
-                    set({ project: createNewTemporaryProject(), isStoreInitialized: true });
+                     set({ project: createNewTemporaryProject(), isStoreInitialized: true });
                 }
-            }).catch(() => {
-                set({ project: createNewTemporaryProject(), isStoreInitialized: true });
             });
+            return unsubscribe;
         } else {
             set({ project: createNewTemporaryProject(), isStoreInitialized: true });
+            return () => {};
         }
     },
 
@@ -59,12 +74,11 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     updateProject: (updater) => {
         set(state => {
             if (!state.project) return {};
-            // The 'with' method creates a new Project instance, ensuring immutability.
             const newProject = new Project(state.project.toStateObject());
             const result = updater(newProject);
-            // If the updater returns a new Project instance, use it. Otherwise, use the mutated one.
             const finalProject = result instanceof Project ? result : newProject;
-            localProjectService.saveProject(finalProject.toStateObject()); // Auto-save to local
+            // The saving logic will now be handled by the useSaveProject hook which uses the API
+            // localProjectService.saveProject(finalProject.toStateObject()); 
             localStorage.setItem('lastActiveProjectId', finalProject.id);
             return { project: finalProject, hasUnsavedChanges: true };
         });
@@ -126,12 +140,14 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
 
 export function useInitializeBuilderStore() {
     const { initializeStore, isStoreInitialized } = useBuilderStore();
+    const { firebaseUser } = useAuth();
     
     useEffect(() => {
-        if (!isStoreInitialized) {
-            initializeStore();
+        if (firebaseUser && !isStoreInitialized) {
+            const unsubscribe = initializeStore(firebaseUser.uid);
+            return () => unsubscribe();
         }
-    }, [initializeStore, isStoreInitialized]);
+    }, [initializeStore, isStoreInitialized, firebaseUser]);
 
     return isStoreInitialized;
 };

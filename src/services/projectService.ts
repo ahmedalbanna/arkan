@@ -2,93 +2,99 @@
 
 'use server';
 
-import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
+import { adminDb } from '@/lib/firebase/server-init';
 import type { ProjectProperties } from '@/lib/models';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 
 /**
- * Saves a project to RTDB. If the project has an ID, it updates it.
- * Otherwise, it creates a new entry.
+ * Saves a project to Firestore. If the project has an ID, it updates it.
+ * Otherwise, it creates a new document.
  * @param projectData The project data to save.
  * @returns The saved project data with a confirmed ID and updated timestamp.
  */
 export async function saveProject(projectData: ProjectProperties): Promise<ProjectProperties> {
-  const db = adminRealtimeDb;
-  const userId = projectData.meta?.author;
-  if (!userId) {
-    throw new Error("Author ID is required to save a project.");
-  }
+  const collectionRef = adminDb.collection('projects');
   
-  const projectId = projectData.id || db.ref(`projects/${userId}`).push().key;
-  if (!projectId) {
-    throw new Error("Failed to generate a project ID.");
-  }
+  const projectId = projectData.id || collectionRef.doc().id;
+  const docRef = collectionRef.doc(projectId);
 
-  const docRef = db.ref(`projects/${userId}/${projectId}`);
-  
   const dataToSave = {
     ...projectData,
-    id: projectId,
+    id: projectId, // Ensure ID is part of the data
     meta: {
       ...projectData.meta,
-      updated: new Date().toISOString(),
+      updated: new Date().toISOString(), // Update timestamp
     }
   };
 
-  await docRef.set(dataToSave);
+  await docRef.set(dataToSave, { merge: true });
   return dataToSave;
 }
 
 /**
- * Fetches all projects for a given user from RTDB.
+ * Fetches all projects for a given user from Firestore.
  * @param userId The ID of the user whose projects to fetch.
  * @returns An array of project properties.
  */
 export async function getProjects(userId: string): Promise<ProjectProperties[]> {
-  const db = adminRealtimeDb;
-  const projectsRef = db.ref(`projects/${userId}`);
-  const snapshot = await projectsRef.orderByChild('meta/updated').get();
+  const snapshot = await adminDb.collection('projects')
+    .where('meta.author', '==', userId)
+    .orderBy('meta.updated', 'desc')
+    .get();
   
-  if (!snapshot.exists()) {
+  if (snapshot.empty) {
     return [];
   }
-
-  const projects: ProjectProperties[] = [];
-  snapshot.forEach(childSnapshot => {
-    projects.push(childSnapshot.val() as ProjectProperties);
-  });
   
-  // Firebase RTDB returns items in ascending order, so we reverse for descending
-  return projects.reverse();
+  return snapshot.docs.map(doc => doc.data() as ProjectProperties);
 }
 
+
 /**
- * Fetches a single project by its ID from RTDB.
+ * Fetches a single project by its ID from Firestore.
+ * Note: Does not check for user ownership. Do that in the API route.
  * @param projectId The ID of the project to fetch.
  * @returns The project properties or null if not found.
  */
 export async function getProject(userId: string, projectId: string): Promise<ProjectProperties | null> {
-  const db = adminRealtimeDb;
-  const projectRef = db.ref(`projects/${userId}/${projectId}`);
-  const snapshot = await projectRef.get();
-  
-  if (!snapshot.exists()) {
-    return null;
-  }
-  return snapshot.val() as ProjectProperties;
+    const docRef = adminDb.collection('projects').doc(projectId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) return null;
+
+    const data = doc.data() as ProjectProperties;
+
+    // Security check: ensure the project belongs to the user
+    if (data.meta?.author !== userId) {
+        throw new Error("Forbidden: User does not have access to this project.");
+    }
+
+    return data;
 }
 
+
 /**
- * Deletes a project from RTDB.
+ * Deletes a project from Firestore.
+ * Note: Does not check for user ownership. Do that in the API route.
  * @param projectId The ID of the project to delete.
  */
 export async function deleteProject(userId: string, projectId: string): Promise<void> {
-  const db = adminRealtimeDb;
-  const projectRef = db.ref(`projects/${userId}/${projectId}`);
-  await projectRef.remove();
+    const docRef = adminDb.collection('projects').doc(projectId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+        throw new Error("Project not found.");
+    }
+    const data = doc.data() as ProjectProperties;
+    if (data.meta?.author !== userId) {
+        throw new Error("Forbidden: User does not have access to delete this project.");
+    }
+
+    await docRef.delete();
 }
 
 /**
- * Updates the content of a specific section within a project in RTDB.
+ * Updates the content of a specific section within a project in Firestore.
  * @param userId The ID of the user who owns the project.
  * @param projectId The ID of the project.
  * @param sectionId The ID of the section to update.
@@ -96,44 +102,46 @@ export async function deleteProject(userId: string, projectId: string): Promise<
  * @returns A promise that resolves when the update is complete.
  */
 export async function updateProjectSectionContent(userId: string, projectId: string, sectionId: string, newContent: string): Promise<void> {
-    const db = adminRealtimeDb;
-    const projectRef = db.ref(`projects/${userId}/${projectId}`);
-    const projectSnapshot = await projectRef.get();
+  const projectRef = adminDb.collection('projects').doc(projectId);
 
-    if (!projectSnapshot.exists()) {
-        throw new Error(`Project with ID ${projectId} not found.`);
+  await adminDb.runTransaction(async (transaction) => {
+    const projectDoc = await transaction.get(projectRef);
+    if (!projectDoc.exists) {
+      throw new Error(`Project with ID ${projectId} not found.`);
     }
 
-    const projectData = projectSnapshot.val();
-    let sectionPath: string | null = null;
+    const projectData = projectDoc.data() as ProjectProperties;
 
-    // Find the path to the section
-    projectData.content?.forEach((chapter: any, chapterIndex: number) => {
-        chapter.sections?.forEach((section: any, sectionIndex: number) => {
-            if (section.id === sectionId) {
-                sectionPath = `content/${chapterIndex}/sections/${sectionIndex}/content`;
-            }
-        });
+    // Security check
+    if (projectData.meta?.author !== userId) {
+        throw new Error("Forbidden: User does not have access to modify this project.");
+    }
+
+    let sectionFound = false;
+    const updatedContent = projectData.content?.map(item => {
+        if ('sections' in item) { // It's a Chapter
+            const updatedSections = item.sections.map(sec => {
+                if (sec.id === sectionId) {
+                    sectionFound = true;
+                    return { ...sec, content: newContent };
+                }
+                return sec;
+            });
+            return { ...item, sections: updatedSections };
+        } else if (item.id === sectionId) { // It's a top-level Section
+            sectionFound = true;
+            return { ...item, content: newContent };
+        }
+        return item;
     });
 
-    if (!sectionPath) {
-        // Handle top-level sections if necessary
-        projectData.content?.forEach((item: any, index: number) => {
-            if (item.id === sectionId) {
-                sectionPath = `content/${index}/content`;
-            }
-        });
+    if (!sectionFound) {
+      throw new Error(`Section with ID ${sectionId} not found in project ${projectId}.`);
     }
 
-    if (!sectionPath) {
-        throw new Error(`Section with ID ${sectionId} not found in project ${projectId}.`);
-    }
-
-    // Update the specific section's content and the project's updated timestamp
-    const updates: { [key: string]: any } = {};
-    updates[sectionPath] = newContent;
-    updates['meta/updated'] = new Date().toISOString();
-
-    await projectRef.update(updates);
+    transaction.update(projectRef, {
+      content: updatedContent,
+      'meta.updated': new Date().toISOString(),
+    });
+  });
 }
-
