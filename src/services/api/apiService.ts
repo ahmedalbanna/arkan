@@ -1,3 +1,4 @@
+
 'use client';
 
 import { getAuthenticatedToken } from '@/lib/utils/authUtils';
