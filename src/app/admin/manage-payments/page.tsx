@@ -1,12 +1,9 @@
-
-'use client';
-
 import { PaymentVerificationConsole } from "@/components/admin/payments/PaymentVerificationConsole";
-import { useLocalization } from "@/context/LocalizationContext";
 import { CreditCard } from "lucide-react";
+import { getTranslator } from '@/lib/utils/i18n';
 
-export default function ManagePaymentsPage() {
-  const { t } = useLocalization();
+export default async function ManagePaymentsPage() {
+  const t = await getTranslator();
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-12">

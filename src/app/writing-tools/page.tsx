@@ -1,8 +1,4 @@
-
-'use client';
-
 import { AIToolCard } from '@/components/writing-tools/AIToolCard';
-import { useLocalization } from '@/context/LocalizationContext';
 import {
   BookCheck,
   BookOpenText,
@@ -32,9 +28,10 @@ import {
   Workflow,
   ImageUp,
 } from 'lucide-react';
+import { getTranslator } from '@/lib/utils/i18n';
 
-export default function WritingToolsPage() {
-  const { t } = useLocalization();
+export default async function WritingToolsPage() {
+  const t = await getTranslator();
 
   const tools = [
     { name: t('writingTools.cards.textStylist'), icon: PenSquare, href: '/writing-tools/text-stylist' },

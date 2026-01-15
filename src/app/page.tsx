@@ -1,10 +1,8 @@
-'use client';
-
 import HomePageContent from '@/components/home/HomePageContent';
 
+// This page is now a Server Component by default.
 export default function Home() {
-    // This component is now fully client-side.
-    // The featuredProjects data is no longer fetched on the server.
+    // Data fetching (if any) could happen here on the server.
     const featuredProjects: any[] = [];
 
     return (
