@@ -1,7 +1,6 @@
 'use client';
 
 import { useBuilderPageLogic } from '@/hooks/core/use-builder-page';
-import { useSaveProject } from '@/hooks/data/use-projects';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMobile } from '@/hooks/util/use-mobile';
 import React, { useState, useMemo, lazy } from 'react';
@@ -20,7 +19,6 @@ export function useReportGenerator() {
   const [activePanelKey, setActivePanelKey] = useState('settings');
 
   const builderPageLogic = useBuilderPageLogic();
-  const { isSaving } = useSaveProject();
 
   const panels = useMemo(() => [
     {
@@ -56,7 +54,6 @@ export function useReportGenerator() {
     setActiveMobileView,
     activePanelKey,
     setActivePanelKey,
-    isSaving,
     panels,
     t,
   };

@@ -43,11 +43,12 @@ export function useProjects() {
 
 export function useSaveProject() {
     const queryClient = useQueryClient();
-    const { setHasUnsavedChanges } = useBuilderStore();
+    const { setProjectStatus } = useBuilderStore();
     const { firebaseUser } = useAuth();
 
     const saveProjectMutation = useMutation({
         mutationFn: async (projectData: ProjectProperties) => {
+            setProjectStatus('saving');
             const updatedProjectData = {
                 ...projectData,
                 meta: { ...projectData.meta, updated: new Date().toISOString() },
@@ -72,7 +73,7 @@ export function useSaveProject() {
             }
         },
         onSuccess: (savedProject) => {
-            setHasUnsavedChanges(false);
+            setProjectStatus('idle');
             // Invalidate the list of projects to refetch it.
             queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
             
@@ -86,6 +87,7 @@ export function useSaveProject() {
             }
         },
         onError: (error: any) => {
+            setProjectStatus('dirty'); // Revert to dirty on error so user can try again
             toast({ title: 'Error', description: `Failed to save project: ${error.message}`, variant: 'destructive' });
         }
     });
