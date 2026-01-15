@@ -1,5 +1,6 @@
 
 
+
 'use client';
 
 import { useCallback, useMemo } from 'react';
@@ -27,7 +28,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
   const { t } = useLocalization();
   const { toast } = useToast();
   const { firebaseUser, refetchUser } = useAuth();
-  const { updateProject } = useBuilderStore();
+  const { project, updateProject } = useBuilderStore();
   const { activeEditor } = useEditorStore();
   
   const editor = initialEditor || activeEditor;
@@ -133,6 +134,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
 
         const token = await firebaseUser.getIdToken();
         const body = {
+            projectId: currentProject.id, // Add projectId to the request
             flow: 'generate-section',
             sectionToGenerate: section.id as SectionName,
             prompt: section.buildActionPrompt(),
@@ -141,14 +143,14 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
             guidelines: section.guidelines,
             instructionText: PromptBuilder.buildSectionPrompt(section, currentProject),
         };
-        const result = await generateReportSectionApi(body, token);
-        const content = result?.[section.id] ?? Object.values(result || {})[0] as string | undefined;
-        if (!content) throw new Error('Empty generation result');
-        return { sectionId: section.id, content };
+        // The API now handles saving and the client updates via real-time listeners.
+        // We don't need to process the response content here anymore.
+        return generateReportSectionApi(body, token);
     },
-    onSuccess: (data) => {
-        updateProject(p => p.updateSection(data.sectionId, s => s.with({ content: data.content })));
+    onSuccess: () => {
+        // No longer need to manually update the store, as RTDB listener will handle it.
         refetchUser();
+        toast({ title: 'Generation In Progress', description: 'The AI is generating your content. It will appear automatically when ready.' });
     },
     onError: (error: any) => {
         toast({ title: 'Section Generation Error', description: error.message || 'Failed to generate section', variant: 'destructive' });

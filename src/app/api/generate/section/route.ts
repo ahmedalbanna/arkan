@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { z } from 'zod';
@@ -8,46 +9,56 @@ import { logGeneration } from '@/services/generation-service'; // Assuming this 
 import type { SectionName } from '@/ai/schemas';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { GenerateSectionInputSchema } from '@/ai/schemas';
+import { updateProjectSectionContent } from '@/services/projectService';
+
+const SectionGenerationRequestSchema = GenerateSectionInputSchema.extend({
+    projectId: z.string().min(1, 'Project ID is required.'),
+});
+
 
 export const POST = withAuth(async ({ request, user }) => {
   try {
-    let body = await request.json();
-    let validation = GenerateSectionInputSchema.safeParse(body);
+    const body = await request.json();
+    const validation = SectionGenerationRequestSchema.safeParse(body);
 
     if (!validation.success) {
       return handleApiError(validation.error);
     }
 
-    let creditCost = 1;
+    const { projectId, ...agentInput } = validation.data;
+    const creditCost = 1;
+
+    // Deduct credit first to ensure the user has enough
     await deductCredit(user.id, creditCost);
 
-    let agentInput = validation.data;
-
-    // The AI flow is now called directly with all necessary data from the client.
-    let result = await generateReportSection(agentInput);
-
-    // Safeguard: ensure the AI returned the section we requested.
-    // If there's a mismatch, log a warning and normalize the returned key to the requested one.
-    if (result.sectionName !== agentInput.sectionToGenerate) {
-      // Log for debugging/monitoring
-      console.warn(
-        `Generation mismatch: requested '${agentInput.sectionToGenerate}' but generator returned '${result.sectionName}'. Normalizing output to requested key.`
-      );
+    // Call the AI flow to generate the section content
+    const result = await generateReportSection(agentInput);
+    
+    // Ensure the AI returned content for the requested section
+    const content = result?.[agentInput.sectionToGenerate] ?? Object.values(result || {})[0] as string | undefined;
+    if (!content) {
+      // Note: In a real-world scenario, you might want to refund the credit here.
+      throw new Error('AI generation returned empty content.');
     }
-
-    let transformedOutput = { [agentInput.sectionToGenerate]: result.content };
-
+    
+    // The key change: Save the generated content directly to the database
+    await updateProjectSectionContent(user.id, projectId, agentInput.sectionToGenerate, content);
+    
+    // Log the generation event
     await logGeneration({
-      agentId: agentInput.sectionToGenerate, // Log the section ID as the 'agent'
+      agentId: agentInput.sectionToGenerate,
       userId: user.id,
       input: agentInput,
-      output: transformedOutput,
+      output: { [agentInput.sectionToGenerate]: content },
       creditCost: creditCost,
     });
 
-    return createApiResponse(transformedOutput, 200);
+    // Return a success message instead of the content
+    // The client will get the update via its real-time subscription
+    return createApiResponse({ message: `Section '${agentInput.sectionToGenerate}' generated and saved successfully.` }, 200);
 
   } catch (error) {
     return handleApiError(error);
   }
 });
+

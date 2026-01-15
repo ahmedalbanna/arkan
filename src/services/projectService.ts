@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
@@ -85,3 +86,54 @@ export async function deleteProject(userId: string, projectId: string): Promise<
   const projectRef = db.ref(`projects/${userId}/${projectId}`);
   await projectRef.remove();
 }
+
+/**
+ * Updates the content of a specific section within a project in RTDB.
+ * @param userId The ID of the user who owns the project.
+ * @param projectId The ID of the project.
+ * @param sectionId The ID of the section to update.
+ * @param newContent The new markdown content for the section.
+ * @returns A promise that resolves when the update is complete.
+ */
+export async function updateProjectSectionContent(userId: string, projectId: string, sectionId: string, newContent: string): Promise<void> {
+    const db = adminRealtimeDb;
+    const projectRef = db.ref(`projects/${userId}/${projectId}`);
+    const projectSnapshot = await projectRef.get();
+
+    if (!projectSnapshot.exists()) {
+        throw new Error(`Project with ID ${projectId} not found.`);
+    }
+
+    const projectData = projectSnapshot.val();
+    let sectionPath: string | null = null;
+
+    // Find the path to the section
+    projectData.content?.forEach((chapter: any, chapterIndex: number) => {
+        chapter.sections?.forEach((section: any, sectionIndex: number) => {
+            if (section.id === sectionId) {
+                sectionPath = `content/${chapterIndex}/sections/${sectionIndex}/content`;
+            }
+        });
+    });
+
+    if (!sectionPath) {
+        // Handle top-level sections if necessary
+        projectData.content?.forEach((item: any, index: number) => {
+            if (item.id === sectionId) {
+                sectionPath = `content/${index}/content`;
+            }
+        });
+    }
+
+    if (!sectionPath) {
+        throw new Error(`Section with ID ${sectionId} not found in project ${projectId}.`);
+    }
+
+    // Update the specific section's content and the project's updated timestamp
+    const updates: { [key: string]: any } = {};
+    updates[sectionPath] = newContent;
+    updates['meta/updated'] = new Date().toISOString();
+
+    await projectRef.update(updates);
+}
+
