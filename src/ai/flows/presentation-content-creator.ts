@@ -109,7 +109,7 @@ export const presentationContentCreator = ai.defineFlow(
 
         // Enhance with project-specific data
         const enhancedPresentation = await ai.generate({
-            model: 'ollama/phi3:mini',
+            model: 'ollama/phi3:mini-4k',
             prompt: `Create detailed presentation slides for a ${presentationType} presentation.
 
 Project: ${projectName}

@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useCallback, useMemo } from 'react';
@@ -8,7 +6,7 @@ import { useWritingTool } from '@/hooks';
 import { useToast } from '@/hooks/util/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
 import { marked } from 'marked';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { generateReportSectionApi } from '@/services/api/reportService';
@@ -18,6 +16,7 @@ import { writingToolApi } from '@/services/api/writingToolsService';
 import { Chapter, type Project, type Section } from '@/lib/models';
 import { parseMarkdownToContent } from '../util/useMarkdownParser';
 import { useEditorStore } from '../core/use-editor-store';
+import { projectKeys } from '@/lib/query-keys';
 
 interface AiActionsProps {
   editor?: Editor | null;
@@ -27,8 +26,9 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
   const { t } = useLocalization();
   const { toast } = useToast();
   const { firebaseUser, refetchUser } = useAuth();
-  const { updateProject } = useBuilderStore();
+  const { project, updateProject } = useBuilderStore();
   const { activeEditor } = useEditorStore();
+  const queryClient = useQueryClient();
   
   const editor = initialEditor || activeEditor;
 
@@ -133,6 +133,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
 
         const token = await firebaseUser.getIdToken();
         const body = {
+            projectId: currentProject.id, // Add projectId to the request
             flow: 'generate-section',
             sectionToGenerate: section.id as SectionName,
             prompt: section.buildActionPrompt(),
@@ -141,14 +142,15 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
             guidelines: section.guidelines,
             instructionText: PromptBuilder.buildSectionPrompt(section, currentProject),
         };
-        const result = await generateReportSectionApi(body, token);
-        const content = result?.[section.id] ?? Object.values(result || {})[0] as string | undefined;
-        if (!content) throw new Error('Empty generation result');
-        return { sectionId: section.id, content };
+        // The API now handles saving and the client updates via real-time listeners.
+        // We don't need to process the response content here anymore.
+        return generateReportSectionApi(body, token);
     },
-    onSuccess: (data) => {
-        updateProject(p => p.updateSection(data.sectionId, s => s.with({ content: data.content })));
+    onSuccess: (data, sectionId) => {
+        updateProject(p => p.updateSection(sectionId, s => s.with({ content: data.content })));
+        queryClient.invalidateQueries({ queryKey: projectKeys.detail(project?.id || '') });
         refetchUser();
+        toast({ title: 'Generation In Progress', description: 'The AI is generating your content. It will appear automatically when ready.' });
     },
     onError: (error: any) => {
         toast({ title: 'Section Generation Error', description: error.message || 'Failed to generate section', variant: 'destructive' });

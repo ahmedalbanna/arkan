@@ -68,8 +68,8 @@ import { OLLAMA_MODELS, MODEL_BY_TASK } from '@/ai/genkit';
 
 // Direct model references
 OLLAMA_MODELS.GEMMA_2B      // 'ollama/gemma:2b'
-OLLAMA_MODELS.PHI3_MINI     // 'ollama/phi3:mini'
-OLLAMA_MODELS.LLAMA3_8B     // 'ollama/llama3:8b'
+OLLAMA_MODELS.PHI3_MINI     // 'ollama/phi3:mini-4k'
+OLLAMA_MODELS.LLAMA3_8B     // 'ollama/llama3.1:latest'
 
 // Task-based selection
 MODEL_BY_TASK.CONVERSION       // Gemma 2B

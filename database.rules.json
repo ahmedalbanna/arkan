@@ -1,21 +1,25 @@
 {
   "rules": {
-    // Only authenticated users can access the database
     ".read": "auth != null",
     ".write": "auth != null",
-
+    "users": {
+      "$uid": {
+        ".indexOn": ["email"]
+      }
+    },
+    "projects": {
+      "$uid": {
+        ".indexOn": "meta/updated"
+      }
+    },
     "jobs": {
       "$jobId": {
-        // Only the user who created the job can read its status.
         ".read": "root.child('jobs/' + $jobId + '/userId').val() === auth.uid",
-        // Writes are only allowed from the server (Admin SDK).
         ".write": false
       }
     },
-    
     "notifications": {
       "$uid": {
-        // A user can only read and write to their own notifications path
         ".read": "auth.uid === $uid",
         ".write": "auth.uid === $uid",
         "$notificationId": {
@@ -23,10 +27,8 @@
         }
       }
     },
-
     "userConversations": {
       "$uid": {
-        // A user can only manage their own list of conversation IDs
         ".read": "auth.uid === $uid",
         ".write": "auth.uid === $uid",
         "$conversationId": {
@@ -34,30 +36,24 @@
         }
       }
     },
-    
     "conversations": {
       "$conversationId": {
-        // A user can only access conversations they are a part of
         ".read": "root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()",
-        ".write": "root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()"
+        ".write": "root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()",
+        ".indexOn": ["updatedAt"]
       }
     },
-
     "messages": {
       "$conversationId": {
-        // A user can only access messages in conversations they are a part of
         ".read": "root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()",
         ".write": "root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()",
         "$messageId": {
-           // Messages can only be written by the sender
           ".validate": "newData.hasChildren(['senderId', 'content', 'timestamp', 'role']) && newData.child('senderId').val() === auth.uid"
         }
       }
     },
-
     "deviceTokens": {
       "$uid": {
-        // A user can only read/write their own device token
         ".read": "auth.uid === $uid",
         ".write": "auth.uid === $uid",
         "$token": {

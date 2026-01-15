@@ -119,7 +119,7 @@ export const projectReportGenerator = ai.defineFlow(
 
         // Combine all information
         const fullReport = await ai.generate({
-            model: 'ollama/llama3:8b',
+            model: 'ollama/llama3.1:latest',
             prompt: `Create a comprehensive ${reportPeriod} project report for ${projectName}.
 
 Target Audience: ${targetAudience}

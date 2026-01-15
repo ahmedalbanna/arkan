@@ -55,7 +55,7 @@ export async function generateChapterContentWithRAG(input: GenerateChapterWithRA
     name: 'generateChapterContentPromptRAG',
     input: { schema: GenerateChapterInputSchema },
     output: { schema: GenerateChapterOutputSchema },
-    model: 'ollama/phi3:mini',
+    model: 'ollama/phi3:mini-4k',
 
     prompt: `You are an expert author and technical writer. Your task is to write the complete content for a chapter titled "{{chapterTitle}}".
 

@@ -13,7 +13,7 @@ const researcherPrompt = ai.definePrompt({
   name: 'aiResearcherPrompt',
   input: { schema: AIResearcherInputSchema },
   // No output schema - model returns plain JSON text
-  model: 'ollama/llama3:8b',
+  model: 'ollama/llama3.1:latest',
 
   prompt: `You are an expert research assistant with access to comprehensive knowledge. Your task is to conduct thorough, well-structured research on the given topic and provide a detailed report.
 

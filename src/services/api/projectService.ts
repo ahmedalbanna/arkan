@@ -9,6 +9,8 @@ export async function fetchProjectsApi(token: string): Promise<ProjectProperties
 }
 
 export async function fetchProjectByIdApi(id: string, token: string): Promise<ProjectProperties> {
+    // Note: The backend getProject requires userId, but client-side doesn't know other user's IDs.
+    // This API call implies fetching the current user's project. The backend will use the authenticated user's ID.
     return apiService({ endpoint: `/api/projects/${id}`, token });
 }
 
