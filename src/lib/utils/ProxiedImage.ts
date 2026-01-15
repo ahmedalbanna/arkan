@@ -18,6 +18,13 @@ export async function getProxiedImageBuffer(imageUrl: string): Promise<ProxiedIm
         return null;
       }
       const contentType = response.headers.get('Content-Type') || 'image/png';
+      
+      // NEW: Check if the data URL actually contains image data
+      if (!contentType.startsWith('image/')) {
+          console.warn(`Data URL does not represent an image. Content-Type: ${contentType}`);
+          return null;
+      }
+
       const buffer = await response.arrayBuffer();
       return { buffer, contentType };
     }
@@ -25,6 +32,10 @@ export async function getProxiedImageBuffer(imageUrl: string): Promise<ProxiedIm
     // Check if running on the server or client
     if (typeof window === 'undefined') {
       // Server-side: Fetch the image directly
+      if (!imageUrl.startsWith('http')) {
+          console.warn(`[SERVER] Skipping non-absolute image URL: ${imageUrl}`);
+          return null;
+      }
       console.log(`[SERVER] Fetching image directly: ${imageUrl}`);
       const response = await fetch(imageUrl);
       if (!response.ok) {
@@ -32,6 +43,13 @@ export async function getProxiedImageBuffer(imageUrl: string): Promise<ProxiedIm
         return null;
       }
       const contentType = response.headers.get('Content-Type') || 'image/png';
+
+      // NEW: Check content type before returning buffer
+      if (!contentType.startsWith('image/')) {
+        console.warn(`[SERVER] Fetched resource is not an image. Content-Type: ${contentType}. URL: ${imageUrl}`);
+        return null;
+      }
+
       const buffer = await response.arrayBuffer();
       return { buffer, contentType };
 
@@ -46,7 +64,14 @@ export async function getProxiedImageBuffer(imageUrl: string): Promise<ProxiedIm
         }
         return null;
       }
-      const contentType = response.headers.get('Content-Type') || 'image/png'; // Default to png
+      const contentType = response.headers.get('Content-Type') || 'image/png';
+      
+      // NEW: Check content type before returning buffer
+      if (!contentType.startsWith('image/')) {
+        console.warn(`[CLIENT] Proxied resource is not an image. Content-Type: ${contentType}. URL: ${imageUrl}`);
+        return null;
+      }
+      
       const buffer = await response.arrayBuffer();
       return { buffer, contentType };
     }

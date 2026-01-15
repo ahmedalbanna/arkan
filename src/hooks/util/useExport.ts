@@ -1,10 +1,9 @@
-
 'use client';
 
 import { useState } from 'react';
 import { saveAs } from 'file-saver';
 import { toast } from './use-toast';
-import type { Project } from '@/lib/models';
+import type { Project, ProjectContent } from '@/lib/models';
 import { templates as docxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
 import { templates as pptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 import { ConversionOptions } from '@/lib/word-converter/types';
@@ -16,6 +15,7 @@ interface DocxExportParams {
         template: DocxTemplateKey;
         pageNumbers: boolean;
     };
+    selectedContent: ProjectContent;
 }
 
 interface PptxExportParams {
@@ -24,19 +24,32 @@ interface PptxExportParams {
         template: PptxTemplateKey;
         isRtl: boolean;
         includeToc: boolean;
-    }
+    };
+    selectedContent: ProjectContent;
 }
 
 export function useExport() {
     const [isExporting, setIsExporting] = useState(false);
 
+    const generateMarkdownFromContent = (content: ProjectContent) => {
+      return content.map(item => {
+        if ('sections' in item) { // Chapter
+            const chapterContent = `# ${item.title}`;
+            const sectionsContent = item.sections.map(section => `## ${section.title}\n\n${section.content || ''}`).join('\n\n');
+            return `${chapterContent}\n\n${sectionsContent}`;
+        } else { // Section
+            return `# ${item.title}\n\n${item.content || ''}`;
+        }
+      }).join('\n\n<!-- slide-break -->\n\n');
+    }
+
     /**
      * Exports a report as a DOCX file by calling the server-side API.
-     * @param params - An object containing the project and export options.
+     * @param params - An object containing the project, export options, and selected content.
      */
-    const exportReportDocx = async ({ project, options }: DocxExportParams) => {
-        if (!project.hasContent()) {
-            toast({ title: 'Export Canceled', description: 'No content available to export.', variant: 'destructive' });
+    const exportReportDocx = async ({ project, options, selectedContent }: DocxExportParams) => {
+        if (selectedContent.length === 0) {
+            toast({ title: 'Export Canceled', description: 'No content selected to export.', variant: 'destructive' });
             return;
         }
         setIsExporting(true);
@@ -50,11 +63,24 @@ export function useExport() {
                 isRtl: false, // Defaulting to LTR for now
             };
 
+            const markdownToExport = generateMarkdownFromContent(selectedContent);
+
+            // FIX: Append all footnote definitions to ensure references are resolved.
+            const fullMarkdown = project.fullMarkdownContent;
+            const footnoteRegex = /^\[\^.+?\]:.+$/gm;
+            const footnoteDefinitions = fullMarkdown.match(footnoteRegex);
+
+            let finalMarkdown = markdownToExport;
+            if (footnoteDefinitions) {
+                finalMarkdown += '\n\n' + footnoteDefinitions.join('\n');
+            }
+
             const response = await fetch('/api/export/docx', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     project: project.toStateObject(),
+                    markdown: finalMarkdown,
                     options: apiOptions,
                 }),
             });
@@ -78,11 +104,11 @@ export function useExport() {
     
     /**
      * Exports a report as a PPTX file by generating it on the client side.
-     * @param params - An object containing the project and export options.
+     * @param params - An object containing the project, export options, and selected content.
      */
-    const exportPresentationPptx = async ({ project, options }: PptxExportParams) => {
-        if (!project.hasContent()) {
-            toast({ title: 'Export Canceled', description: 'No content available to export.', variant: 'destructive' });
+    const exportPresentationPptx = async ({ project, options, selectedContent }: PptxExportParams) => {
+        if (selectedContent.length === 0) {
+            toast({ title: 'Export Canceled', description: 'No content selected to export.', variant: 'destructive' });
             return;
         }
         setIsExporting(true);
@@ -95,8 +121,19 @@ export function useExport() {
                 includeToc: options.includeToc,
             };
 
-            const blob = await convertMarkdownToPptx(project.fullMarkdownContent, project.name, conversionOptions);
-            // @ts-expect-error - saveAs type overload mismatch
+            const markdownToExport = generateMarkdownFromContent(selectedContent);
+
+            // FIX: Append all footnote definitions to ensure references are resolved.
+            const fullMarkdown = project.fullMarkdownContent;
+            const footnoteRegex = /^\[\^.+?\]:.+$/gm;
+            const footnoteDefinitions = fullMarkdown.match(footnoteRegex);
+
+            let finalMarkdown = markdownToExport;
+            if (footnoteDefinitions) {
+                finalMarkdown += '\n\n' + footnoteDefinitions.join('\n');
+            }
+
+            const blob = await convertMarkdownToPptx(finalMarkdown, project.name, conversionOptions);
             saveAs(blob, `${project.name.replace(/\s+/g, '_')}_presentation.pptx`);
 
             toast({ title: 'Export Successful', description: 'Presentation exported as PPTX.' });

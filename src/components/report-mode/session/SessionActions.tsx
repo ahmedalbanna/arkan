@@ -17,14 +17,10 @@ import { useRef } from 'react';
 import { BrowseProjectsDialog } from './BrowseProjectsDialog';
 import { ExportDialog } from './ExportDialog';
 
-interface SessionActionsProps {
-    isSaving: boolean;
-}
-
-export function SessionActions({ isSaving }: SessionActionsProps) {
+export function SessionActions() {
     const { t } = useLocalization();
     const router = useRouter();
-    const { project, hasUnsavedChanges, newSession, loadProjectFromFile } = useBuilderStore();
+    const { project, status, loadProjectFromFile, newSession } = useBuilderStore();
     const { saveProjectMutation } = useSaveProject();
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -54,6 +50,7 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
     };
 
     const hasContent = project?.hasContent() ?? false;
+    const isSaving = status === 'saving';
 
     return (
         <TooltipProvider>
@@ -99,7 +96,7 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
                     variant="default"
                     size="icon"
                     onClick={handleSave}
-                    disabled={!hasUnsavedChanges || isSaving}
+                    disabled={status !== 'dirty'}
                     className="h-8 w-8 md:w-auto md:px-3"
                 >
                     {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}

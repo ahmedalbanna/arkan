@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { formatDistanceToNow } from 'date-fns';
 import { SessionActions } from '@/components/report-mode/session/SessionActions';
 import { useReportGenerator } from '@/hooks/report-mode/useReportGenerator';
+import { useBeforeUnload } from '@/hooks/util/useBeforeUnload';
 
 const ReportResults = lazy(() => import('./ReportResults'));
 
@@ -65,10 +66,11 @@ export default function ReportModeGenerator() {
         project,
         isStoreInitialized,
         updateProjectName,
-        isSaving,
         panels,
     } = useReportGenerator();
     
+    useBeforeUnload();
+
     if (!isStoreInitialized || !project) {
         return <BuilderPageSkeleton />;
     }
@@ -92,7 +94,7 @@ export default function ReportModeGenerator() {
                         )}
                     </div>
                     <div className="flex-none">
-                        <SessionActions isSaving={isSaving} />
+                        <SessionActions />
                     </div>
                 </div>
                 <div className="flex flex-col flex-grow">

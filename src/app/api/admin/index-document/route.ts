@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
     
     const result = await indexDocument(text, {
       projectId: projectId.trim(),
-      userId: userId?.trim() || undefined,
+      userId: userId ? userId.trim() : undefined,
       sourceFile: file.name,
       type,
       chunkSize,
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
       const { recordIndexedDocument } = await import('@/services/document-tracking-service');
       await recordIndexedDocument({
         projectId: projectId.trim(),
-        userId: userId?.trim() || undefined,
+        userId: userId ? userId.trim() : undefined,
         sourceFile: file.name,
         chunksCount: result.chunksCreated,
         fileSize: file.size,
@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
           const { recordFailedIndexing } = await import('@/services/document-tracking-service');
           await recordFailedIndexing({
             projectId: projectId.trim(),
-            userId: userId?.trim() || undefined,
+            userId: userId ? userId.trim() : undefined,
             sourceFile: file.name,
             fileSize: file.size,
             type: type || 'context',

@@ -14,6 +14,7 @@ export * from './core/useBuilderStore';
 export * from './core/use-editor-store';
 export * from './core/useProjectsPage';
 export * from './core/useImageUpload';
+export * from './core/use-build-project';
 
 // Report Mode Hooks
 export * from './report-mode/use-ai-actions';
@@ -74,3 +75,5 @@ export * from './util/use-sound';
 export * from './util/use-toast';
 export * from './util/useExport';
 export * from './util/useMarkdownParser';
+export * from './util/useBeforeUnload';
+

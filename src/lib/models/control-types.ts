@@ -1,6 +1,4 @@
 
-'use client';
-
 import { z } from 'zod';
 
 // Enums for various control options

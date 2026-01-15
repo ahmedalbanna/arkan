@@ -1,5 +1,4 @@
 
-'use client';
 import { v4 as uuidv4 } from 'uuid';
 import { Chapter, type ChapterProperties } from './chapter';
 import { Section, type SectionProperties } from './section';

@@ -1,11 +1,10 @@
 
-
 'use client';
 
 import { useEditorStore } from '@/hooks/core/use-editor-store';
 import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react';
 import { marked } from 'marked';
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/lib/tiptap-extensions';
@@ -58,22 +57,25 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
     immediatelyRender: false,
   });
 
-  // Effect to sync editor with global state when it changes externally (e.g., loading a project)
+  // Effect to sync editor with global state when it changes externally (e.g., loading a project, AI generation)
   useEffect(() => {
     if (editor && !editor.isDestroyed && content) {
-      const editorMarkdown = turndownService.turndown(editor.getHTML());
-      // Only update if the content is different to avoid loops
-      if (content !== editorMarkdown) {
+      // Convert the incoming markdown prop to HTML
+      const newContentHTML = marked.parse(content) as string;
+      // Get the editor's current HTML
+      const currentEditorHTML = editor.getHTML();
+
+      // Only update if the HTML content is different. This is more reliable than comparing markdown strings.
+      if (newContentHTML !== currentEditorHTML) {
         const { from, to } = editor.state.selection;
-        editor.commands.setContent(marked.parse(content) as string, false);
+        editor.commands.setContent(newContentHTML, false);
         // Try to restore cursor position if it's a valid range
         if (editor.state.doc.content.size >= to) {
           editor.commands.setTextSelection({ from, to });
         }
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content]); // This effect should ONLY run when the external `content` prop changes.
+  }, [content, editor]); // Rerun when content prop or editor instance changes
 
 
   // Set the global editor instance when it's created and destroy it on unmount
@@ -98,7 +100,7 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
       {editor && (
         <BubbleMenu
           editor={editor}
-          // @ts-expect-error - BubbleMenu tippyOptions onClose prop type mismatch
+          // @ts-expect-error - BubbleMenu tippyOptions onClose prop mismatch
           tippyOptions={{ duration: 100, placement: 'top', onClose: () => false }}
           pluginKey={bubbleMenuId}
           shouldShow={({ editor }) => !editor.state.selection.empty}

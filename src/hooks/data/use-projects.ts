@@ -14,59 +14,80 @@ import { localProjectService } from '@/services/local-project-service';
 
 export function useProjects() {
     const { firebaseUser } = useAuth();
-    const { data, ...rest } = useQuery<Project[]>({
+    
+    return useQuery<Project[]>({
         queryKey: projectKeys.lists(),
         queryFn: async () => {
             if (!firebaseUser) return [];
-            // Then, fetch from server and merge
+            
             try {
                 const token = await getAuthenticatedToken(firebaseUser);
                 const serverProjects = await fetchProjectsApi(token);
+                const projects = serverProjects.map(p => new Project(p));
+
+                // Sync the local database with the server's source of truth.
+                await localProjectService.syncProjects(serverProjects);
                 
-                const mergedProjects = serverProjects.map(p => new Project(p));
-
-                // Sync local db with server source of truth
-                await localProjectService.syncProjects(mergedProjects.map(p => p.toStateObject()));
-
-                return mergedProjects;
-
-            } catch (e) {
-                console.warn("Could not sync with server, using local projects.", e);
-                 // First, get local projects for optimistic UI
+                return projects;
+            } catch (serverError) {
+                console.warn("Could not connect to server, attempting to load from local storage.", serverError);
+                // If server fetch fails, fall back to local storage
                 const localProjects = await localProjectService.getAllProjects();
                 return localProjects.map(p => new Project(p));
             }
         },
         enabled: !!firebaseUser,
+        staleTime: 1000 * 60 * 5, // 5 minutes
     });
-
-    return { projects: data, ...rest };
 }
 
 export function useSaveProject() {
     const queryClient = useQueryClient();
-    const { setHasUnsavedChanges } = useBuilderStore();
+    const { setProjectStatus } = useBuilderStore();
     const { firebaseUser } = useAuth();
 
     const saveProjectMutation = useMutation({
         mutationFn: async (projectData: ProjectProperties) => {
+            setProjectStatus('saving');
+            const updatedProjectData = {
+                ...projectData,
+                meta: { ...projectData.meta, updated: new Date().toISOString() },
+            };
+            
+            // Always save locally first for speed and offline capability
+            await localProjectService.saveProject(updatedProjectData);
+
             if (!navigator.onLine || !firebaseUser) {
-                // If offline, save locally
-                const savedLocally = await localProjectService.saveProject(projectData);
-                toast({ title: 'Saved Locally', description: 'Your project has been saved to your device.' });
-                return savedLocally;
+                // If offline, we've already saved locally.
+                return updatedProjectData;
             }
-            const token = await getAuthenticatedToken(firebaseUser);
-            return saveProjectApi(projectData, token);
+            
+            // If online, also save to server
+            try {
+                const token = await getAuthenticatedToken(firebaseUser);
+                return await saveProjectApi(updatedProjectData, token);
+            } catch (error) {
+                // If server save fails, the data is still safe locally.
+                console.error("Failed to save project to server, but it's saved locally.", error);
+                throw new Error("Failed to sync with server. Your work is saved locally.");
+            }
         },
         onSuccess: (savedProject) => {
-            setHasUnsavedChanges(false);
+            setProjectStatus('idle');
+            // Invalidate the list of projects to refetch it.
             queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
+            
+            // Also update the specific query for this project if it exists in the cache
+            queryClient.setQueryData(projectKeys.detail(savedProject.id!), new Project(savedProject));
+
             if (navigator.onLine) {
-                toast({ title: 'Project Saved', description: `"${savedProject.name}" has been saved to the cloud.` });
+                toast({ title: 'Project Saved', description: `"${savedProject.name}" has been saved.` });
+            } else {
+                toast({ title: 'Saved Locally', description: 'Project saved to your device. It will sync when you are back online.' });
             }
         },
         onError: (error: any) => {
+            setProjectStatus('dirty'); // Revert to dirty on error so user can try again
             toast({ title: 'Error', description: `Failed to save project: ${error.message}`, variant: 'destructive' });
         }
     });
@@ -105,4 +126,3 @@ export function useDeleteProject() {
         },
     });
 }
-

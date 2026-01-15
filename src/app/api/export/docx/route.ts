@@ -11,6 +11,7 @@ const exportSchema = z.object({
   project: z.any().refine(val => val && typeof val === 'object' && val.id, {
     message: "A valid project object is required.",
   }),
+  markdown: z.string().min(1, "Markdown content cannot be empty."), // Added markdown field
   options: z.custom<ConversionOptions>().optional().default({}),
 });
 
@@ -23,13 +24,10 @@ export async function POST(req: NextRequest) {
       return new NextResponse(JSON.stringify(validation.error.flatten()), { status: 400 });
     }
 
-    const { project: projectData, options } = validation.data;
+    const { project: projectData, markdown, options } = validation.data;
 
-    // Instantiate a Project object to access its methods, like fullMarkdownContent.
+    // Instantiate a Project object for metadata
     const project = new Project(projectData as ProjectProperties);
-
-    // Use the reliable instance getter for the full markdown content.
-    const markdown = project.fullMarkdownContent;
     const fileName = (project.name || 'Untitled').replace(/\s+/g, '_');
 
     if (!markdown.trim()) {
