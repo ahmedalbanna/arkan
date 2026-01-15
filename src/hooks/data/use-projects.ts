@@ -26,7 +26,7 @@ export function useProjects() {
                 const mergedProjects = serverProjects.map(p => new Project(p));
 
                 // Sync local db with server source of truth
-                mergedProjects.forEach(p => localProjectService.saveProject(p.toStateObject()));
+                await localProjectService.syncProjects(mergedProjects.map(p => p.toStateObject()));
 
                 return mergedProjects;
 
