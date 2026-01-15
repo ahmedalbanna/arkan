@@ -2,6 +2,14 @@
 {
   "indexes": [
     {
+      "collectionGroup": "projects",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "meta.author", "order": "ASCENDING" },
+        { "fieldPath": "meta.updated", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "indexed_documents",
       "queryScope": "COLLECTION",
       "fields": [

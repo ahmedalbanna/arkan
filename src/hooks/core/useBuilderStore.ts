@@ -8,10 +8,6 @@ import { create } from 'zustand';
 import { toast } from '../util/use-toast';
 import { useEditorStore } from './use-editor-store';
 import { parseMarkdownToContent } from '../util/useMarkdownParser';
-import { getFirestore, onSnapshot, doc } from 'firebase/firestore';
-import { app } from '@/lib/firebase/client-init';
-import { useAuth } from '@/context/AuthContext';
-
 
 interface BuilderState {
     project: Project | null;
@@ -19,7 +15,7 @@ interface BuilderState {
     hasUnsavedChanges: boolean;
     isStoreInitialized: boolean;
     
-    initializeStore: (userId: string) => () => void;
+    initializeStore: () => void;
     setUserProfile: (userProfile: User | null) => void; // Action to set the user profile
     setHasUnsavedChanges: (hasChanges: boolean) => void;
     updateProject: (updater: (project: Project) => void | Project) => void;
@@ -37,37 +33,28 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     userProfile: null, // Initialize userProfile as null
     hasUnsavedChanges: false,
     isStoreInitialized: false,
-    initializeStore: (userId) => {
-        if (!userId) {
-            set({ project: createNewTemporaryProject(), isStoreInitialized: true });
-            return () => {};
-        }
 
-        const db = getFirestore(app);
-        const projectsRef = doc(db, 'users', userId); // Assuming projects are subcollection or field
-
-        // This is a placeholder. You'd need to adapt this to your actual data structure.
-        // For simplicity, let's assume the user doc has a 'projects' field or subcollection.
-        // The more robust way is to have a 'projects' collection and query by userId.
-        // Let's use a simplified listening logic. We will listen to the LAST active project.
-        const lastProjectId = localStorage.getItem('lastActiveProjectId');
-        if (lastProjectId) {
-            const projectDocRef = doc(db, "projects", lastProjectId);
-            const unsubscribe = onSnapshot(projectDocRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    set({ project: new Project(docSnap.data() as ProjectProperties), isStoreInitialized: true });
-                } else {
-                     set({ project: createNewTemporaryProject(), isStoreInitialized: true });
-                }
-            });
-            return unsubscribe;
-        } else {
-            set({ project: createNewTemporaryProject(), isStoreInitialized: true });
-            return () => {};
-        }
+    initializeStore: () => {
+        if (get().isStoreInitialized) return;
+        
+        const load = async () => {
+            const lastProjectId = localStorage.getItem('lastActiveProjectId');
+            let projectToLoad: ProjectProperties | undefined;
+            if (lastProjectId) {
+                projectToLoad = await localProjectService.getProject(lastProjectId);
+            }
+            
+            if (projectToLoad) {
+                set({ project: new Project(projectToLoad), isStoreInitialized: true });
+            } else {
+                set({ project: createNewTemporaryProject(), isStoreInitialized: true });
+            }
+        };
+        
+        load();
     },
 
-    setUserProfile: (userProfile) => set({ userProfile }), // Implement the setter
+    setUserProfile: (userProfile) => set({ userProfile }),
 
     setHasUnsavedChanges: (hasChanges) => set({ hasUnsavedChanges: hasChanges }),
 
@@ -77,9 +64,11 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
             const newProject = new Project(state.project.toStateObject());
             const result = updater(newProject);
             const finalProject = result instanceof Project ? result : newProject;
-            // The saving logic will now be handled by the useSaveProject hook which uses the API
-            // localProjectService.saveProject(finalProject.toStateObject()); 
+            
+            // Save to local storage for persistence across reloads
+            localProjectService.saveProject(finalProject.toStateObject()); 
             localStorage.setItem('lastActiveProjectId', finalProject.id);
+
             return { project: finalProject, hasUnsavedChanges: true };
         });
     },
@@ -91,6 +80,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     loadProject: (projectData) => {
         const newProject = projectData instanceof Project ? projectData : new Project(projectData);
         localStorage.setItem('lastActiveProjectId', newProject.id);
+        localProjectService.saveProject(newProject.toStateObject()); // Also save to local DB on load
         set({ project: newProject, hasUnsavedChanges: false });
     },
 
@@ -113,7 +103,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         
         const currentProject = get().project;
         if (currentProject) {
-            set({ project: currentProject.reset(), hasUnsavedChanges: false });
+            set({ project: createNewTemporaryProject(), hasUnsavedChanges: false });
             localStorage.removeItem('lastActiveProjectId');
 
             const editor = useEditorStore.getState().activeEditor;
@@ -140,14 +130,12 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
 
 export function useInitializeBuilderStore() {
     const { initializeStore, isStoreInitialized } = useBuilderStore();
-    const { firebaseUser } = useAuth();
     
     useEffect(() => {
-        if (firebaseUser && !isStoreInitialized) {
-            const unsubscribe = initializeStore(firebaseUser.uid);
-            return () => unsubscribe();
+        if (!isStoreInitialized) {
+            initializeStore();
         }
-    }, [initializeStore, isStoreInitialized, firebaseUser]);
+    }, [initializeStore, isStoreInitialized]);
 
     return isStoreInitialized;
 };
