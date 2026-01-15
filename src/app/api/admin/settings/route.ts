@@ -14,9 +14,44 @@ const bankAccountSchema = z.object({
   }),
 });
 
+// Payment method schema for new flexible payment system
+const bankTransferDetailsSchema = z.object({
+  iban: z.string().optional(),
+  accountNumber: z.string().optional(),
+  swiftCode: z.string().optional(),
+  bankAddress: z.string().optional(),
+});
+
+const walletDetailsSchema = z.object({
+  provider: z.enum(['cac-bank', 'mobi-cash', 'yemen-mobile', 'mtn-mobile-money', 'you-telecom', 'aljazira-bank', 'tadhamon-bank', 'other']),
+  accountNumber: z.string(),
+  accountName: z.string(),
+  phoneNumber: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+const paymentMethodSchema = z.object({
+  id: z.string(),
+  type: z.enum(['bank', 'e-wallet', 'local-transfer', 'international-transfer']),
+  name: z.string(),
+  displayName: z.string(),
+  icon: z.string().optional(),
+  isActive: z.boolean(),
+  accountHolder: z.string().optional(),
+  currencies: z.object({
+    SAR: bankTransferDetailsSchema.optional(),
+    USD: bankTransferDetailsSchema.optional(),
+    YER: bankTransferDetailsSchema.optional(),
+  }).optional(),
+  wallet: walletDetailsSchema.optional(),
+  instructions: z.string().optional(),
+  processingTime: z.string().optional(),
+});
+
 const settingsSchema = z.object({
   newUserCredits: z.coerce.number().int().min(0),
   bankAccounts: z.array(bankAccountSchema).optional(),
+  paymentMethods: z.array(paymentMethodSchema).optional(),
 });
 
 

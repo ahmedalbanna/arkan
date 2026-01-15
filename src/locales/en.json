@@ -1736,4 +1736,28 @@
       }
     }
   }
+,
+  "payment": {
+    "selectMethod": "Select Payment Method",
+    "choosePreferred": "Choose your preferred payment method to complete your purchase",
+    "all": "All",
+    "ewallets": "E-Wallets",
+    "banks": "Banks",
+    "transfers": "Transfers",
+    "noMethods": "No payment methods available at the moment",
+    "accountNumber": "Account Number",
+    "accountName": "Account Name",
+    "phoneNumber": "Phone Number",
+    "accountHolder": "Account Holder",
+    "reference": "Reference Number",
+    "referenceNote": "Use this reference number when making your transfer",
+    "uploadFor": "Upload payment receipt for",
+    "credits": "credits",
+    "loadError": "Could not load payment information. Please try again later."
+  },
+  "common": {
+    "back": "Back",
+    "error": "Error",
+    "copied": "Copied"
+  }
 }

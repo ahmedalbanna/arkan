@@ -1,6 +1,7 @@
 
 // src/lib/db/seed.ts
 import { defaultBankAccounts } from '@/lib/db/seed-data/bank-accounts';
+import { defaultPaymentMethods } from '@/lib/db/seed-data/payment-methods';
 import { defaultFeatures } from '@/lib/db/seed-data/features';
 import { defaultSections } from '@/lib/db/seed-data/sections';
 import { templates as defaultDocxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
@@ -19,7 +20,8 @@ async function seed() {
         const settingsRef = adminDb.collection('settings').doc('defaults');
         batch.set(settingsRef, {
             newUserCredits: 10,
-            bankAccounts: defaultBankAccounts
+            bankAccounts: defaultBankAccounts,
+            paymentMethods: defaultPaymentMethods
         });
         console.log("Default settings added to batch.");
 
