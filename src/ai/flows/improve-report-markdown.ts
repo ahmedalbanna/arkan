@@ -13,7 +13,7 @@ const improveMarkdownPrompt = ai.definePrompt({
   name: 'improveReportMarkdownPrompt',
   input: { schema: ImproveMarkdownInputSchema },
   output: { schema: ImproveMarkdownOutputSchema },
-  model: 'ollama/phi3:mini',
+  model: 'ollama/phi3:mini-4k',
   config: {
     responseSchema: ImproveMarkdownOutputSchema,
     temperature: RECOMMENDED_TEMPERATURES.PRECISE,

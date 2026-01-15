@@ -57,7 +57,7 @@ export const academicLiteratureReviewFlow = ai.defineFlow(
                 name: 'literatureReviewDraftPrompt',
                 input: { schema: AcademicLiteratureReviewInputSchema },
                 output: { schema: draftOutputSchema },
-                model: 'ollama/llama3:8b',
+                model: 'ollama/llama3.1:latest',
                 config: {
                     responseSchema: draftOutputSchema,
                     temperature: RECOMMENDED_TEMPERATURES.BALANCED,
@@ -186,7 +186,7 @@ ${getCitationGuidelines(citationStyle || 'APA')}
                     name: 'literatureReviewRefinementPrompt',
                     input: { schema: refinementInputSchema },
                     output: { schema: refinementOutputSchema },
-                    model: 'ollama/llama3:8b',
+                    model: 'ollama/llama3.1:latest',
                     config: {
                         responseSchema: refinementOutputSchema,
                         temperature: RECOMMENDED_TEMPERATURES.PRECISE,
@@ -279,7 +279,7 @@ ${getJsonPromptInstructions(`{
                 name: 'extractStructurePrompt',
                 input: { schema: z.object({ text: z.string() }) },
                 output: { schema: structureOutputSchema },
-                model: 'ollama/llama3:8b',
+                model: 'ollama/llama3.1:latest',
                 config: {
                     responseSchema: structureOutputSchema,
                     temperature: RECOMMENDED_TEMPERATURES.PRECISE,

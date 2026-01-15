@@ -12,7 +12,7 @@ const plagiarismCheckPrompt = ai.definePrompt({
   name: 'plagiarismCheckPrompt',
   input: { schema: PlagiarismCheckInputSchema },
   // No output schema - model returns plain JSON text
-  model: 'ollama/phi3:mini',
+  model: 'ollama/phi3:mini-4k',
   config: {
     temperature: 0.3,
   },

@@ -68,7 +68,7 @@ export async function example2_taskSpecificSelection() {
 export async function example3_queuedExecution() {
   console.log('Example 3: Queue-Managed Execution\n');
 
-  const model = 'ollama/llama3:8b'; // High-memory model
+  const model = 'ollama/llama3.1:latest'; // High-memory model
   const requestId = generateRequestId();
 
   try {

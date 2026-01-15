@@ -22,11 +22,11 @@ export const ai = genkit({
           type: 'generate',
         },
         {
-          name: 'phi3:mini',
+          name: 'phi3:mini-4k',
           type: 'generate',
         },
         {
-          name: 'llama3:8b',
+          name: 'llama3.1:latest',
           type: 'generate',
         },
       ],
@@ -45,10 +45,10 @@ export const OLLAMA_MODELS = {
   GEMMA_2B: 'ollama/gemma:2b',
   
   // Strong reasoning and structured output
-  PHI3_MINI: 'ollama/phi3:mini',
+  PHI3_MINI: 'ollama/phi3:mini-4k',
   
   // High quality for complex academic tasks
-  LLAMA3_8B: 'ollama/llama3:8b',
+  LLAMA3_8B: 'ollama/llama3.1:latest',
 } as const;
 
 /**

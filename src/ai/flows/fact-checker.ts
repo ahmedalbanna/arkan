@@ -12,7 +12,7 @@ const factCheckPrompt = ai.definePrompt({
   name: 'factCheckPrompt',
   input: { schema: FactCheckInputSchema },
   // No output schema - model returns plain JSON text
-  model: 'ollama/phi3:mini',
+  model: 'ollama/phi3:mini-4k',
   config: {
     // responseSchema removed
     temperature: 0.3,

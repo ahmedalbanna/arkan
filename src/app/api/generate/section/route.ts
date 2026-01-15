@@ -35,7 +35,8 @@ export const POST = withAuth(async ({ request, user }) => {
     const result = await generateReportSection(agentInput);
     
     // Ensure the AI returned content for the requested section
-    const content = result?.[agentInput.sectionToGenerate] ?? Object.values(result || {})[0] as string | undefined;
+    const content = result?.content;
+    
     if (!content) {
       // Note: In a real-world scenario, you might want to refund the credit here.
       throw new Error('AI generation returned empty content.');
@@ -54,11 +55,10 @@ export const POST = withAuth(async ({ request, user }) => {
     });
 
     // Return a success message instead of the content
-    // The client will get the update via its real-time subscription
+    // The client will get the update via real-time subscription
     return createApiResponse({ message: `Section '${agentInput.sectionToGenerate}' generated and saved successfully.` }, 200);
 
   } catch (error) {
     return handleApiError(error);
   }
 });
-

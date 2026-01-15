@@ -9,6 +9,8 @@
 
 import { ai } from '@/ai/genkit';
 import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/ai/schemas';
+import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
+
 
 export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
 
@@ -19,13 +21,17 @@ You are also an expert analyst. Before you begin writing, you must first review 
   const reportSectionPrompt = ai.definePrompt({
     name: 'generateReportSectionPrompt', // Static name
     input: { schema: GenerateSectionInputSchema },
-    // No output schema - model returns plain text
-    model: 'ollama/phi3:mini',
+    output: { schema: GenerateSectionOutputSchema },
+    model: 'ollama/phi3:mini-4k',
+
     system: systemPrompt,
     prompt: `
-Write the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
+${getJsonPromptInstructions(`{
+  "sectionName": "{{sectionToGenerate}}",
+  "content": "Complete section content in markdown format"
+}`)}
 
-Output ONLY the markdown content for this section. Do NOT wrap it in JSON or any other format. Just write the section content directly.
+CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
 
 {{#if guidelines}}
 --- Guidelines ---\n
@@ -74,25 +80,45 @@ You have access to the following documents. Review them and use the most relevan
 {{{ragContext}}}
 ---
 {{/if}}
-`,
+
+**JSON Output:**`,
     config: {
-      temperature: 0.3,
+      responseSchema: GenerateSectionOutputSchema,
+      temperature: RECOMMENDED_TEMPERATURES.BALANCED,
     },
   });
 
-  // Call the AI and get plain text response
-  const result = await reportSectionPrompt(input);
-  
-  // Wrap the plain text in the expected output structure
-  const output: GenerateSectionOutput = {
-    sectionName: input.sectionToGenerate,
-    content: result.text || result.output || '' // Handle different response formats
-  };
+  try {
+    const { output } = await reportSectionPrompt(input);
 
-  if (!output.content || output.content.trim().length === 0) {
-    console.error(`AI failed to generate content for section: ${input.sectionToGenerate}`);
-    throw new Error(`The AI failed to generate a response for the '${input.sectionToGenerate}' section. Please try again.`);
+    if (!output) {
+      throw new Error('No output received from the model.');
+    }
+
+    const validation = validateJsonOutput({
+      schema: GenerateSectionOutputSchema,
+      output,
+      flowName: 'generateReportSection',
+      attemptRecovery: true,
+      enableLogging: true,
+      fallbackFn: (rawOutput) => {
+        if (typeof rawOutput === 'string') {
+          return {
+            sectionName: input.sectionToGenerate,
+            content: rawOutput,
+          };
+        }
+        return null;
+      },
+    });
+
+    if (!validation.success) {
+      throw new Error(validation.error || 'Failed to validate output');
+    }
+
+    return validation.data!;
+  } catch (error) {
+    console.error(`AI failed to generate content for section: ${input.sectionToGenerate}`, error);
+    throw new Error(`The AI failed to generate a response for the '${input.sectionToGenerate}' section: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-
-  return output;
 }

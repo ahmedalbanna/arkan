@@ -190,7 +190,7 @@ const model = selectModel({
   hasRAGContext: true,
   requiresDeepReasoning: true,
 });
-// Result: ollama/llama3:8b
+// Result: ollama/llama3.1:latest
 ```
 
 ### Pattern 2: Fast Real-time Chat
@@ -210,7 +210,7 @@ const model = selectModel({
   requiresStructuredOutput: true,
   taskComplexity: TaskComplexity.MODERATE,
 });
-// Result: ollama/phi3:mini
+// Result: ollama/phi3:mini-4k
 ```
 
 ### Pattern 4: Large Document Analysis
@@ -401,7 +401,7 @@ describe('Model Selection', () => {
 
   it('should select Llama 3 8B for academic tasks', () => {
     const model = selectModel({ isAcademic: true });
-    expect(model).toBe('ollama/llama3:8b');
+    expect(model).toBe('ollama/llama3.1:latest');
   });
 });
 ```

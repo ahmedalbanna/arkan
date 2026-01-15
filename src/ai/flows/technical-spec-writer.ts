@@ -110,7 +110,7 @@ export const technicalSpecificationWriter = ai.defineFlow(
 
         // Generate comprehensive technical specification
         const finalSpec = await ai.generate({
-            model: 'ollama/phi3:mini',
+            model: 'ollama/phi3:mini-4k',
             prompt: `Create a comprehensive technical specification document.
 
 Target Audience: ${targetAudience}
