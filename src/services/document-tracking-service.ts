@@ -45,7 +45,6 @@ export async function recordIndexedDocument(data: {
   try {
     const docRef = adminDb.collection(COLLECTION_NAME).doc();
     
-    // Base record object without userId
     const record: any = {
       projectId: data.projectId,
       sourceFile: data.sourceFile,
@@ -59,7 +58,7 @@ export async function recordIndexedDocument(data: {
       status: 'indexed',
     };
     
-    // Conditionally add userId only if it exists
+    // Conditionally add userId only if it's not undefined or null.
     if (data.userId) {
       record.userId = data.userId;
     }
@@ -89,7 +88,6 @@ export async function recordFailedIndexing(data: {
   try {
     const docRef = adminDb.collection(COLLECTION_NAME).doc();
     
-    // Base record object without userId
     const record: any = {
       projectId: data.projectId,
       sourceFile: data.sourceFile,
@@ -103,8 +101,8 @@ export async function recordFailedIndexing(data: {
       status: 'failed' as const,
       errorMessage: data.errorMessage,
     };
-
-    // Conditionally add userId only if it exists
+    
+    // Conditionally add userId only if it's not undefined or null.
     if (data.userId) {
       record.userId = data.userId;
     }
