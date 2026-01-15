@@ -56,6 +56,15 @@ const nextConfig: NextConfig = {
         'pdf-parse': 'pdf-parse',
       });
     }
+
+    // Exclude async_hooks from client-side bundle
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        async_hooks: false,
+      };
+    }
+    
     return config;
   },
   experimental: {
@@ -63,7 +72,7 @@ const nextConfig: NextConfig = {
     },
     serverActions: { bodySizeLimit: '10mb' as SizeLimit },
     useCache: true,
-    allowDevelopmentBuild: false,
+    allowDevelopmentBuild: true,
   }
 };
 

@@ -1,7 +1,3 @@
-
-
-
-
 'use client';
 
 import { useCallback, useMemo } from 'react';
@@ -151,6 +147,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
         return generateReportSectionApi(body, token);
     },
     onSuccess: (data, sectionId) => {
+        updateProject(p => p.updateSection(sectionId, s => s.with({ content: data.content })));
         queryClient.invalidateQueries({ queryKey: projectKeys.detail(project?.id || '') });
         refetchUser();
         toast({ title: 'Generation In Progress', description: 'The AI is generating your content. It will appear automatically when ready.' });

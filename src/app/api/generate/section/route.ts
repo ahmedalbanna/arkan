@@ -1,15 +1,14 @@
 
-
 'use server';
 
 import { z } from 'zod';
 import { generateReportSection } from '@/ai/flows/generate-report-section';
 import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service'; // Assuming this is server-side
-import type { SectionName } from '@/ai/schemas';
+import { logGeneration } from '@/services/generation-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { GenerateSectionInputSchema } from '@/ai/schemas';
 import { updateProjectSectionContent } from '@/services/projectService';
+import { executeWithQueue, generateRequestId, selectModel } from '@/ai';
 
 const SectionGenerationRequestSchema = GenerateSectionInputSchema.extend({
     projectId: z.string().min(1, 'Project ID is required.'),
@@ -31,10 +30,16 @@ export const POST = withAuth(async ({ request, user }) => {
     // Deduct credit first to ensure the user has enough
     await deductCredit(user.id, creditCost);
 
-    // Call the AI flow to generate the section content
-    const result = await generateReportSection(agentInput);
+    // Select the appropriate model and execute the generation flow with a queue
+    const model = selectModel({ flowName: 'generate-report-section' });
+    const result = await executeWithQueue(
+        generateRequestId(),
+        model,
+        'generate-report-section',
+        () => generateReportSection(agentInput)
+    );
     
-    // Ensure the AI returned content for the requested section
+    // Ensure the AI returned content
     const content = result?.content;
     
     if (!content) {
@@ -42,7 +47,7 @@ export const POST = withAuth(async ({ request, user }) => {
       throw new Error('AI generation returned empty content.');
     }
     
-    // The key change: Save the generated content directly to the database
+    // Save the generated content directly to the database
     await updateProjectSectionContent(user.id, projectId, agentInput.sectionToGenerate, content);
     
     // Log the generation event
@@ -54,8 +59,7 @@ export const POST = withAuth(async ({ request, user }) => {
       creditCost: creditCost,
     });
 
-    // Return a success message instead of the content
-    // The client will get the update via real-time subscription
+    // Return a success message. The client will get the update via real-time subscription.
     return createApiResponse({ message: `Section '${agentInput.sectionToGenerate}' generated and saved successfully.` }, 200);
 
   } catch (error) {
