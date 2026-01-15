@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -66,12 +65,22 @@ export function useExport() {
 
             const markdownToExport = generateMarkdownFromContent(selectedContent);
 
+            // FIX: Append all footnote definitions to ensure references are resolved.
+            const fullMarkdown = project.fullMarkdownContent;
+            const footnoteRegex = /^\[\^.+?\]:.+$/gm;
+            const footnoteDefinitions = fullMarkdown.match(footnoteRegex);
+
+            let finalMarkdown = markdownToExport;
+            if (footnoteDefinitions) {
+                finalMarkdown += '\n\n' + footnoteDefinitions.join('\n');
+            }
+
             const response = await fetch('/api/export/docx', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    project: project.toStateObject(), // Pass full project for metadata
-                    markdown: markdownToExport, // Pass only selected markdown
+                    project: project.toStateObject(),
+                    markdown: finalMarkdown,
                     options: apiOptions,
                 }),
             });
@@ -114,8 +123,17 @@ export function useExport() {
 
             const markdownToExport = generateMarkdownFromContent(selectedContent);
 
-            const blob = await convertMarkdownToPptx(markdownToExport, project.name, conversionOptions);
-            // @ts-expect-error - saveAs type overload mismatch
+            // FIX: Append all footnote definitions to ensure references are resolved.
+            const fullMarkdown = project.fullMarkdownContent;
+            const footnoteRegex = /^\[\^.+?\]:.+$/gm;
+            const footnoteDefinitions = fullMarkdown.match(footnoteRegex);
+
+            let finalMarkdown = markdownToExport;
+            if (footnoteDefinitions) {
+                finalMarkdown += '\n\n' + footnoteDefinitions.join('\n');
+            }
+
+            const blob = await convertMarkdownToPptx(finalMarkdown, project.name, conversionOptions);
             saveAs(blob, `${project.name.replace(/\s+/g, '_')}_presentation.pptx`);
 
             toast({ title: 'Export Successful', description: 'Presentation exported as PPTX.' });
