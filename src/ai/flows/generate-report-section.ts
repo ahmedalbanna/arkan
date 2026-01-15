@@ -8,7 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/ai/schemas';
+import { GenerateSectionInputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/ai/schemas';
 
 export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
 
@@ -81,8 +81,8 @@ You have access to the following documents. Review them and use the most relevan
   });
 
   // Call the AI and get plain text response
-  const result = await reportSectionPrompt(input);
-  
+  const result = { sectionName: input.sectionToGenerate, content: "this test result" };//await reportSectionPrompt(input);
+
   // Wrap the plain text in the expected output structure
   const output: GenerateSectionOutput = {
     sectionName: input.sectionToGenerate,

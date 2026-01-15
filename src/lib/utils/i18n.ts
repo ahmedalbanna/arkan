@@ -1,10 +1,10 @@
 'server-only';
 
-import { createInstance } from 'i18next';
-import { initReactI18next } from 'react-i18next/initReactI18next';
-import { cookies } from 'next/headers';
 import ar from '@/locales/ar.json';
 import en from '@/locales/en.json';
+import { createInstance } from 'i18next';
+import { cookies } from 'next/headers';
+import { initReactI18next } from 'react-i18next/initReactI18next';
 
 const resources = {
   en: { translation: en },
@@ -12,7 +12,7 @@ const resources = {
 };
 
 export async function getTranslator() {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const lng = cookieStore.get('locale')?.value || 'en';
 
   const i18n = createInstance();
@@ -24,6 +24,6 @@ export async function getTranslator() {
       lng,
       resources,
     });
-  
+
   return i18n.t;
 }
