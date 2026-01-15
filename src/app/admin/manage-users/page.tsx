@@ -1,12 +1,9 @@
-
-'use client';
-
 import UserManagementConsole from '@/components/admin/users/UserManagementConsole';
-import { useLocalization } from '@/context/LocalizationContext';
 import { Users } from 'lucide-react';
+import { getTranslator } from '@/lib/utils/i18n';
 
-export default function ManageUsersPage() {
-  const { t } = useLocalization();
+export default async function ManageUsersPage() {
+  const t = await getTranslator();
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-12">

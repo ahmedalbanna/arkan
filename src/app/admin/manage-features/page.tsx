@@ -1,12 +1,9 @@
-
-'use client';
-
 import FeatureManager from '@/components/admin/FeatureManager';
-import { useLocalization } from '@/context/LocalizationContext';
 import { SlidersHorizontal } from 'lucide-react';
+import { getTranslator } from '@/lib/utils/i18n';
 
-export default function ManageFeaturesPage() {
-  const { t } = useLocalization();
+export default async function ManageFeaturesPage() {
+  const t = await getTranslator();
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">

@@ -78,9 +78,10 @@ async function extractTextFromDOCX(file: File): Promise<string> {
 }
 
 export async function POST(request: NextRequest) {
+  let formData: FormData | null = null;
   try {
     // Parse form data
-    const formData = await request.formData();
+    formData = await request.formData();
     const file = formData.get('file') as File | null;
     const projectId = formData.get('projectId') as string;
     const chunkSize = parseInt(formData.get('chunkSize') as string || '400');
@@ -158,7 +159,7 @@ export async function POST(request: NextRequest) {
       const { recordIndexedDocument } = await import('@/services/document-tracking-service');
       await recordIndexedDocument({
         projectId: projectId.trim(),
-        userId: userId?.trim(),
+        userId: userId?.trim() || undefined,
         sourceFile: file.name,
         chunksCount: result.chunksCreated,
         fileSize: file.size,
@@ -186,21 +187,23 @@ export async function POST(request: NextRequest) {
     
     // Record failed indexing attempt
     try {
-      const file = formData.get('file') as File | null;
-      const projectId = formData.get('projectId') as string;
-      const type = formData.get('type') as string;
-      const userId = formData.get('userId') as string | null;
-      
-      if (file && projectId) {
-        const { recordFailedIndexing } = await import('@/services/document-tracking-service');
-        await recordFailedIndexing({
-          projectId: projectId.trim(),
-          userId: userId?.trim(),
-          sourceFile: file.name,
-          fileSize: file.size,
-          type: type || 'context',
-          errorMessage: error instanceof Error ? error.message : 'Unknown error',
-        });
+      if (formData) {
+        const file = formData.get('file') as File | null;
+        const projectId = formData.get('projectId') as string;
+        const type = formData.get('type') as string;
+        const userId = formData.get('userId') as string | null;
+        
+        if (file && projectId) {
+          const { recordFailedIndexing } = await import('@/services/document-tracking-service');
+          await recordFailedIndexing({
+            projectId: projectId.trim(),
+            userId: userId?.trim() || undefined,
+            sourceFile: file.name,
+            fileSize: file.size,
+            type: type || 'context',
+            errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          });
+        }
       }
     } catch (trackingError) {
       console.error('Failed to record error in tracking database:', trackingError);

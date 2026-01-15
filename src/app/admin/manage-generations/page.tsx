@@ -1,12 +1,9 @@
-
-'use client';
-
 import GenerationLogViewer from "@/components/admin/GenerationLogViewer";
-import { useLocalization } from "@/context/LocalizationContext";
 import { History } from "lucide-react";
+import { getTranslator } from '@/lib/utils/i18n';
 
-export default function ManageGenerationsPage() {
-  const { t } = useLocalization();
+export default async function ManageGenerationsPage() {
+  const t = await getTranslator();
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-12">

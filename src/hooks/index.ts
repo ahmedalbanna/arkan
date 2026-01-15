@@ -20,6 +20,7 @@ export * from './report-mode/use-ai-actions';
 export * from './report-mode/use-chapter-actions';
 export * from './report-mode/use-report-generation-tools';
 export * from './report-mode/use-guideline-editor';
+export * from './report-mode/useReportGenerator';
 
 // Data Fetching Hooks
 export * from './data/use-analytics';
@@ -73,4 +74,3 @@ export * from './util/use-sound';
 export * from './util/use-toast';
 export * from './util/useExport';
 export * from './util/useMarkdownParser';
-

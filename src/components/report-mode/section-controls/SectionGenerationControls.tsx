@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -10,11 +10,13 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '../../ui/checkbox';
 import type { Tone, Language, GenerationControlState, Section } from '@/lib/models';
 import { Card, CardContent, CardDescription, CardHeader } from '../../ui/card';
-import { Info } from 'lucide-react';
+import { Info, Eye } from 'lucide-react';
 import { DiagramType, DiagramTypeSchema, ToneSchema } from '@/ai/schemas';
 import { Textarea } from '../../ui/textarea';
 import { useBuilderStore } from '@/hooks';
 import { Badge } from '../../ui/badge';
+import { Button } from '../../ui/button';
+import { FullPromptPreviewDialog } from './FullPromptPreviewDialog';
 
 const diagramTypes = DiagramTypeSchema.options.map(value => {
     let label = '';
@@ -43,6 +45,7 @@ export function SectionGenerationControls({
     const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
     const controls = section.controls;
+    const [showFullPrompt, setShowFullPrompt] = useState(false);
 
     if (!controls) {
         return null;
@@ -197,16 +200,33 @@ export function SectionGenerationControls({
             </div>
 
             <Card className="bg-muted/50 border-dashed">
-                <CardHeader className="flex flex-row items-center gap-2 p-3">
-                    <Info className="w-4 h-4 text-muted-foreground"/>
-                    <CardDescription className="text-xs">
-                        {t('builder.reportGenerator.tool_instruction_preview')}
-                    </CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between p-3">
+                    <div className="flex items-center gap-2">
+                        <Info className="w-4 h-4 text-muted-foreground"/>
+                        <CardDescription className="text-xs">
+                            {t('builder.reportGenerator.tool_instruction_preview')}
+                        </CardDescription>
+                    </div>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowFullPrompt(true)}
+                        className="h-7 text-xs gap-1"
+                    >
+                        <Eye className="w-3 h-3" />
+                        Full Preview
+                    </Button>
                 </CardHeader>
                 <CardContent className="p-3 pt-0">
                     <p className="text-xs italic text-muted-foreground whitespace-pre-wrap">{instructionPreview}</p>
                 </CardContent>
             </Card>
+            
+            <FullPromptPreviewDialog
+                isOpen={showFullPrompt}
+                onOpenChange={setShowFullPrompt}
+                section={section}
+            />
         </div>
     );
 };

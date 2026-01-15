@@ -9,8 +9,12 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useContextSelector } from '@/hooks';
 import type { ExternalContextType } from '@/lib/models';
-import { FileText, Folder } from 'lucide-react';
-import { useMemo } from 'react';
+import { FileText, Folder, Copy } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useBuilderStore } from '@/hooks';
+import { useToast } from '@/hooks/util/use-toast';
 
 interface SectionContextSelectorProps {
   sectionId: string;
@@ -24,8 +28,45 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
     handleContextChange,
     currentSelection,
   } = useContextSelector(sectionId);
+  
+  const { project, updateProject } = useBuilderStore();
+  const { toast } = useToast();
+  const [selectedSourceSection, setSelectedSourceSection] = useState<string>('');
 
   const fileTypes: ExternalContextType[] = ['context', 'example', 'question', 'textbook'];
+  
+  // Get all sections except current one for copying context from
+  const otherSections = useMemo(() => {
+    return reportSections.filter(s => s.id !== sectionId && (
+      Object.keys(s.context?.sections || {}).length > 0 || 
+      Object.keys(s.context?.externalContext || {}).length > 0
+    ));
+  }, [reportSections, sectionId]);
+  
+  const handleCopyContext = () => {
+    if (!selectedSourceSection || !project) return;
+    
+    const sourceSection = project.getSection(selectedSourceSection);
+    if (!sourceSection) return;
+    
+    // Copy the context from source section to current section
+    updateProject(p => p.updateSection(sectionId, s => s.with({
+      context: {
+        sections: { ...sourceSection.context?.sections },
+        externalContext: { ...sourceSection.context?.externalContext }
+      }
+    })));
+    
+    const linkedCount = Object.keys(sourceSection.context?.sections || {}).length + 
+                       Object.keys(sourceSection.context?.externalContext || {}).length;
+    
+    toast({
+      title: 'Context Copied',
+      description: `Copied ${linkedCount} context link${linkedCount > 1 ? 's' : ''} from "${sourceSection.title}"`,
+    });
+    
+    setSelectedSourceSection('');
+  };
 
   const sectionOptions = useMemo(() => reportSections.map(s => ({
     id: s.id,
@@ -46,6 +87,39 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
         <CardDescription className="text-xs">{t('builder.reportGenerator.tool_context_desc')}</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
+        {otherSections.length > 0 && (
+          <div className="mb-4 p-3 border rounded-lg bg-muted/30">
+            <Label className="text-xs font-semibold mb-2 block">Quick Copy from Another Section</Label>
+            <div className="flex gap-2">
+              <Select value={selectedSourceSection} onValueChange={setSelectedSourceSection}>
+                <SelectTrigger className="h-8 text-xs flex-1">
+                  <SelectValue placeholder="Select section to copy from..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {otherSections.map(section => {
+                    const contextCount = Object.keys(section.context?.sections || {}).length + 
+                                       Object.keys(section.context?.externalContext || {}).length;
+                    return (
+                      <SelectItem key={section.id} value={section.id} className="text-xs">
+                        {section.title} ({contextCount} link{contextCount > 1 ? 's' : ''})
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handleCopyContext}
+                disabled={!selectedSourceSection}
+                className="h-8 gap-1"
+              >
+                <Copy className="h-3 w-3" />
+                Copy
+              </Button>
+            </div>
+          </div>
+        )}
         <ScrollArea className="h-72">
           <Accordion type="multiple" defaultValue={['sections', 'files']}>
             <AccordionItem value="sections">

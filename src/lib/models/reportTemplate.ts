@@ -16,6 +16,12 @@ export const ReportTemplatePropertiesSchema = z.object({
   description: z.string(),
   isDefault: z.boolean().optional(),
   content: z.array(ReportTemplateChapterSchema).optional(),
+  // Project configuration fields
+  projectType: z.string().optional(),
+  specialization: z.string().optional(),
+  university: z.string().optional(),
+  course: z.string().optional(),
+  educationalLevel: z.string().optional(),
 });
 
 
@@ -33,6 +39,12 @@ export interface ReportTemplateProperties extends BaseTemplateProperties {
     title: string;
     sections: z.infer<typeof SectionPropertiesSchema>[];
   }[];
+  // Project configuration fields
+  projectType?: string;
+  specialization?: string;
+  university?: string;
+  course?: string;
+  educationalLevel?: string;
 }
 
 export class ReportTemplate extends Template {

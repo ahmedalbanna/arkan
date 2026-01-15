@@ -1,12 +1,10 @@
-
-'use client';
-
 import Dashboard from '@/components/admin/dashboard/Dashboard';
-import { useLocalization } from '@/context/LocalizationContext';
 import { LayoutDashboard } from 'lucide-react';
+import { getTranslator } from '@/lib/utils/i18n';
 
-export default function DashboardPage() {
-  const { t } = useLocalization();
+// This page is now a Server Component by default.
+export default async function DashboardPage() {
+  const t = await getTranslator();
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-12">
@@ -19,6 +17,7 @@ export default function DashboardPage() {
           {t('adminDashboard.pageSubtitle')}
         </p>
       </div>
+      {/* The Dashboard component remains a Client Component, but the page itself is server-rendered. */}
       <Dashboard />
     </div>
   );

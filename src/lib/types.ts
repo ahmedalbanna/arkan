@@ -154,6 +154,8 @@ export type CreatePresentationTemplateData = Omit<PresentationTemplateProperties
 export type UpdatePresentationTemplateData = Partial<Omit<PresentationTemplateProperties, 'id'>>;
 
 // Report Template Types
+// Note: This is a duplicate of the interface in models/reportTemplate.ts
+// Keeping for backward compatibility with existing imports
 export interface ReportTemplateProperties {
   id: string;
   name: string;
@@ -170,6 +172,12 @@ export interface ReportTemplateProperties {
       controls?: any; // Use a more specific type if possible
     }[];
   }[];
+  // Project configuration fields
+  projectType?: string;
+  specialization?: string;
+  university?: string;
+  course?: string;
+  educationalLevel?: string;
 }
 
 
