@@ -265,6 +265,9 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
 
           const tableRows = await Promise.all(node.children.map(async (row, rowIndex) => {
             try {
+              if (!row.children || row.children.length === 0) {
+                return new TableRow({ children: [new TableCell({ children: [new Paragraph({ text: "" })] })] });
+              }
               return new TableRow({
                 children: await Promise.all(row.children.map(async cell => {
                   try {

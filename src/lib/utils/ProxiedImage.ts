@@ -25,6 +25,11 @@ export async function getProxiedImageBuffer(imageUrl: string): Promise<ProxiedIm
     // Check if running on the server or client
     if (typeof window === 'undefined') {
       // Server-side: Fetch the image directly
+      // ADDED CHECK: Only fetch absolute URLs on the server.
+      if (!imageUrl.startsWith('http')) {
+          console.warn(`[SERVER] Skipping non-absolute image URL: ${imageUrl}`);
+          return null;
+      }
       console.log(`[SERVER] Fetching image directly: ${imageUrl}`);
       const response = await fetch(imageUrl);
       if (!response.ok) {
