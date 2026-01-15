@@ -45,7 +45,7 @@ export async function recordIndexedDocument(data: {
   try {
     const docRef = adminDb.collection(COLLECTION_NAME).doc();
     
-    // Remove undefined values (Firestore doesn't allow them)
+    // Base record object without userId
     const record: any = {
       projectId: data.projectId,
       sourceFile: data.sourceFile,
@@ -59,7 +59,7 @@ export async function recordIndexedDocument(data: {
       status: 'indexed',
     };
     
-    // Only add userId if it's defined
+    // Conditionally add userId only if it exists
     if (data.userId) {
       record.userId = data.userId;
     }
@@ -89,7 +89,7 @@ export async function recordFailedIndexing(data: {
   try {
     const docRef = adminDb.collection(COLLECTION_NAME).doc();
     
-    // Remove undefined values
+    // Base record object without userId
     const record: any = {
       projectId: data.projectId,
       sourceFile: data.sourceFile,
@@ -103,8 +103,8 @@ export async function recordFailedIndexing(data: {
       status: 'failed' as const,
       errorMessage: data.errorMessage,
     };
-    
-    // Only add userId if it's defined
+
+    // Conditionally add userId only if it exists
     if (data.userId) {
       record.userId = data.userId;
     }
