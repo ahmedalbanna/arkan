@@ -1,4 +1,5 @@
 
+'use client';
 
 import React from 'react';
 import { Editor, Range, Extension } from '@tiptap/core';
@@ -104,7 +105,9 @@ const SlashCommand = Extension.create<Partial<SuggestionOptions>>({
         editor: this.editor,
         char: '/',
         command: ({ editor, range, props }) => {
-          props.command(editor, range);
+          // This is the fix: chain commands to first delete the trigger, then run the selected command.
+          editor.chain().focus().deleteRange(range).run();
+          props.command();
         },
         items: ({ query }) => {
           const commandItems = getCommandItems(this.editor);
