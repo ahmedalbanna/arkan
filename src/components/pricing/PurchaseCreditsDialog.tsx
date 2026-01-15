@@ -15,9 +15,9 @@ import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
-import { Gem, ShoppingCart, ArrowLeft, Banknote, AlertCircle, Copy, Check, UploadCloud, Loader2, PartyPopper } from 'lucide-react';
+import { Gem, ShoppingCart, ArrowLeft, Banknote, AlertCircle, Copy, Check, UploadCloud, Loader2, PartyPopper, Wallet, Building, Globe, Smartphone, CreditCard } from 'lucide-react';
 import { useSubmitPaymentProof, usePublicSettings } from '@/hooks';
-import type { BankAccount } from '@/lib/types';
+import type { BankAccount, PaymentMethod } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Skeleton } from '../ui/skeleton';
@@ -27,8 +27,26 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { fileSchema } from '@/lib/types';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const CREDIT_PRICE = 0.10; // $0.10 per credit
+
+// Icon helper function
+function getPaymentMethodIcon(type: string) {
+  switch (type) {
+    case 'e-wallet':
+      return <Wallet className="h-5 w-5" />;
+    case 'bank':
+      return <Building className="h-5 w-5" />;
+    case 'local-transfer':
+      return <Banknote className="h-5 w-5" />;
+    case 'international-transfer':
+      return <Globe className="h-5 w-5" />;
+    default:
+      return <CreditCard className="h-5 w-5" />;
+  }
+}
 
 function BankDetailsSkeleton() {
   return (
@@ -68,6 +86,112 @@ function AccountDetail({ label, value }: { label: string, value?: string }) {
   )
 }
 
+// Payment Method Card Component
+function PaymentMethodCard({ method, onSelect }: { method: PaymentMethod; onSelect: (method: PaymentMethod) => void }) {
+  const { t } = useLocalization();
+  
+  return (
+    <Card className="cursor-pointer hover:border-primary transition-all hover:shadow-md" onClick={() => onSelect(method)}>
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              {getPaymentMethodIcon(method.type)}
+            </div>
+            <div>
+              <CardTitle className="text-base">{method.displayName}</CardTitle>
+              <CardDescription className="text-xs">{method.name}</CardDescription>
+            </div>
+          </div>
+          {method.processingTime && (
+            <Badge variant="secondary" className="text-xs">
+              {method.processingTime}
+            </Badge>
+          )}
+        </div>
+      </CardHeader>
+    </Card>
+  );
+}
+
+// Selected Payment Details Component
+function PaymentMethodDetails({ method }: { method: PaymentMethod }) {
+  const { t } = useLocalization();
+  
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-3">
+          <div className="p-3 rounded-lg bg-primary/10 text-primary">
+            {getPaymentMethodIcon(method.type)}
+          </div>
+          <div>
+            <CardTitle className="text-lg">{method.displayName}</CardTitle>
+            <CardDescription>{method.name}</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* E-Wallet Details */}
+        {method.wallet && (
+          <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
+            <AccountDetail label={t('payment.accountNumber')} value={method.wallet.accountNumber} />
+            <AccountDetail label={t('payment.accountName')} value={method.wallet.accountName} />
+            {method.wallet.phoneNumber && (
+              <AccountDetail label={t('payment.phoneNumber')} value={method.wallet.phoneNumber} />
+            )}
+            {method.wallet.notes && (
+              <p className="text-xs text-muted-foreground mt-2 border-t pt-2">
+                💡 {method.wallet.notes}
+              </p>
+            )}
+          </div>
+        )}
+        
+        {/* Bank Transfer Details */}
+        {method.currencies && (
+          <div className="space-y-3">
+            {Object.entries(method.currencies).map(([currency, details]) => (
+              <div key={currency} className="p-4 bg-muted/50 rounded-lg space-y-2">
+                <h4 className="font-semibold text-sm flex items-center gap-2">
+                  <Badge variant="outline">{currency}</Badge>
+                </h4>
+                {details.accountNumber && (
+                  <AccountDetail label={t('payment.accountNumber')} value={details.accountNumber} />
+                )}
+                {details.iban && (
+                  <AccountDetail label="IBAN" value={details.iban} />
+                )}
+                {details.swiftCode && (
+                  <AccountDetail label="SWIFT Code" value={details.swiftCode} />
+                )}
+                {details.bankAddress && (
+                  <p className="text-xs text-muted-foreground">{details.bankAddress}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {method.accountHolder && (
+          <div className="pt-2 border-t">
+            <AccountDetail label={t('payment.accountHolder')} value={method.accountHolder} />
+          </div>
+        )}
+        
+        {/* Instructions */}
+        {method.instructions && (
+          <div className="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <p className="text-sm text-blue-900 dark:text-blue-100">
+              ℹ️ {method.instructions}
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 type FileFormValues = z.infer<typeof fileSchema>;
 
 export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode }) {
@@ -77,9 +201,13 @@ export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode })
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [credits, setCredits] = useState(100);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
   const price = credits * CREDIT_PRICE;
 
   const { data: settings, isLoading: isLoadingSettings, isError: isSettingsError } = usePublicSettings();
+  
+  // Get payment methods from settings (with fallback to legacy bankAccounts)
+  const paymentMethods = settings?.paymentMethods?.filter(m => m.isActive) || [];
   
   const form = useForm<FileFormValues>({
     resolver: zodResolver(fileSchema),
@@ -102,8 +230,17 @@ export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode })
     setTimeout(() => {
         setStep(1);
         setCredits(100);
+        setSelectedPaymentMethod(null);
         form.reset();
     }, 300);
+  }
+  
+  function handleSelectPaymentMethod(method: PaymentMethod) {
+    setSelectedPaymentMethod(method);
+  }
+  
+  function handleBackToMethods() {
+    setSelectedPaymentMethod(null);
   }
 
   async function onSubmit(data: FileFormValues) {
@@ -159,75 +296,131 @@ export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode })
         {step === 2 && (
           <>
             <DialogHeader>
-              <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="absolute top-3 left-3 flex items-center gap-1">
-                <ArrowLeft className="h-4 w-4" /> Back
+              <Button variant="ghost" size="sm" onClick={selectedPaymentMethod ? handleBackToMethods : () => setStep(1)} className="absolute top-3 left-3 flex items-center gap-1">
+                <ArrowLeft className="h-4 w-4" /> {t('common.back')}
               </Button>
-              <DialogTitle className="flex items-center gap-2 pt-8"><Banknote className="w-6 h-6 text-primary" />{t('submitPayment.pageTitle')}</DialogTitle>
-              <DialogDescription>{t('submitPayment.pageSubtitle')}</DialogDescription>
+              <DialogTitle className="flex items-center gap-2 pt-8"><Banknote className="w-6 h-6 text-primary" />{t('payment.selectMethod')}</DialogTitle>
+              <DialogDescription>{t('payment.choosePreferred')}</DialogDescription>
             </DialogHeader>
-            <div className="py-4 space-y-6 max-h-[60vh] overflow-y-auto px-1">
+            <div className="py-4 space-y-6 max-h-[70vh] overflow-y-auto px-1">
               {isLoadingSettings ? (
                 <BankDetailsSkeleton />
               ) : isSettingsError ? (
                 <Card className="border-destructive">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-destructive"><AlertCircle /> Error</CardTitle>
-                    <CardDescription>Could not load payment information. Please try again later.</CardDescription>
+                    <CardTitle className="flex items-center gap-2 text-destructive"><AlertCircle /> {t('common.error')}</CardTitle>
+                    <CardDescription>{t('payment.loadError')}</CardDescription>
                   </CardHeader>
                 </Card>
+              ) : !selectedPaymentMethod ? (
+                // Payment Method Selection
+                <Tabs defaultValue="all" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4 mb-4">
+                    <TabsTrigger value="all">{t('payment.all')}</TabsTrigger>
+                    <TabsTrigger value="e-wallet">
+                      <Wallet className="h-4 w-4 me-1" />
+                      {t('payment.ewallets')}
+                    </TabsTrigger>
+                    <TabsTrigger value="bank">
+                      <Building className="h-4 w-4 me-1" />
+                      {t('payment.banks')}
+                    </TabsTrigger>
+                    <TabsTrigger value="transfer">
+                      <Globe className="h-4 w-4 me-1" />
+                      {t('payment.transfers')}
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="all" className="space-y-3">
+                    {paymentMethods.map((method) => (
+                      <PaymentMethodCard key={method.id} method={method} onSelect={handleSelectPaymentMethod} />
+                    ))}
+                    {paymentMethods.length === 0 && (
+                      <p className="text-center text-muted-foreground py-8">{t('payment.noMethods')}</p>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="e-wallet" className="space-y-3">
+                    {paymentMethods.filter(m => m.type === 'e-wallet').map((method) => (
+                      <PaymentMethodCard key={method.id} method={method} onSelect={handleSelectPaymentMethod} />
+                    ))}
+                  </TabsContent>
+                  
+                  <TabsContent value="bank" className="space-y-3">
+                    {paymentMethods.filter(m => m.type === 'bank').map((method) => (
+                      <PaymentMethodCard key={method.id} method={method} onSelect={handleSelectPaymentMethod} />
+                    ))}
+                  </TabsContent>
+                  
+                  <TabsContent value="transfer" className="space-y-3">
+                    {paymentMethods.filter(m => m.type === 'local-transfer' || m.type === 'international-transfer').map((method) => (
+                      <PaymentMethodCard key={method.id} method={method} onSelect={handleSelectPaymentMethod} />
+                    ))}
+                  </TabsContent>
+                </Tabs>
               ) : (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="font-headline">{t('submitPayment.bankDetailsTitle')}</CardTitle>
-                    <CardDescription>{t('submitPayment.bankDetailsDescription')}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <Accordion type="multiple" className="w-full" defaultValue={settings?.bankAccounts.length === 1 ? ['item-0'] : []}>
-                      {settings?.bankAccounts?.map((account, index) => (
-                        <AccordionItem value={`item-${index}`} key={index}>
-                          <AccordionTrigger>{account.bankName}</AccordionTrigger>
-                          <AccordionContent className="space-y-3 pt-4">
-                            <AccountDetail label={t('submitPayment.accountHolderLabel')} value={account.accountHolder} />
-                            <AccountDetail label="SAR IBAN" value={account.currencies.SAR?.iban} />
-                            <AccountDetail label="USD IBAN" value={account.currencies.USD?.iban} />
-                            <AccountDetail label="YER Account" value={account.currencies.YER?.iban} />
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))}
-                    </Accordion>
-                    <p className="text-sm pt-4"><strong>{t('submitPayment.referenceLabel')}:</strong> {t('submitPayment.yourUserIdLabel')} ({firebaseUser?.uid || t('submitPayment.pleaseLogin')})</p>
-                  </CardContent>
-                </Card>
-              )}
+                // Selected Payment Method Details & Upload
+                <>
+                  <PaymentMethodDetails method={selectedPaymentMethod} />
+                  
+                  <Card className="border-dashed">
+                    <CardHeader>
+                      <CardTitle className="text-sm">{t('payment.reference')}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                        <span className="text-sm font-mono">{firebaseUser?.uid || t('submitPayment.pleaseLogin')}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => {
+                            if (firebaseUser?.uid) {
+                              navigator.clipboard.writeText(firebaseUser.uid);
+                              toast({ title: t('common.copied') });
+                            }
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {t('payment.referenceNote')}
+                      </p>
+                    </CardContent>
+                  </Card>
 
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{t('submitPayment.uploadReceiptTitle')}</CardTitle>
-                    <CardDescription>{t('submitPayment.selectedPlanDescription').replace('{planName}', `${credits} Credits`)}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <Label htmlFor="file">{t('submitPayment.proofLabel')}</Label>
-                      <Input
-                        id="file"
-                        type="file"
-                        accept="image/jpeg,image/png,application/pdf"
-                        className="file:text-primary file:font-semibold"
-                        disabled={mutation.isPending}
-                        {...form.register("file")}
-                      />
-                      {form.formState.errors.file && <p className="text-sm text-destructive">{form.formState.errors.file.message as string}</p>}
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button type="submit" disabled={mutation.isPending || isLoadingSettings} className="w-full">
-                      {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <UploadCloud className="me-2 h-4 w-4" />}
-                      {t('submitPayment.submitButton')}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </form>
+                  <form onSubmit={form.handleSubmit(onSubmit)}>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>{t('submitPayment.uploadReceiptTitle')}</CardTitle>
+                        <CardDescription>
+                          {t('payment.uploadFor')} {credits} {t('payment.credits')} (${price.toFixed(2)})
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <Label htmlFor="file">{t('submitPayment.proofLabel')}</Label>
+                          <Input
+                            id="file"
+                            type="file"
+                            accept="image/jpeg,image/png,application/pdf"
+                            className="file:text-primary file:font-semibold"
+                            disabled={mutation.isPending}
+                            {...form.register("file")}
+                          />
+                          {form.formState.errors.file && <p className="text-sm text-destructive">{form.formState.errors.file.message as string}</p>}
+                        </div>
+                      </CardContent>
+                      <CardFooter>
+                        <Button type="submit" disabled={mutation.isPending || isLoadingSettings} className="w-full">
+                          {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <UploadCloud className="me-2 h-4 w-4" />}
+                          {t('submitPayment.submitButton')}
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </form>
+                </>
+              )}
             </div>
           </>
         )}

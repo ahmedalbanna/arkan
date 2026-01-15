@@ -101,6 +101,60 @@ export interface CurrencyDetails {
     iban?: string;
 }
 
+// Payment method types
+export type PaymentMethodType = 'bank' | 'e-wallet' | 'local-transfer' | 'international-transfer';
+
+// E-Wallet provider types for Yemen
+export type YemenWalletProvider = 
+    | 'cac-bank'           // كاك بنك
+    | 'mobi-cash'          // موبي كاش
+    | 'yemen-mobile'       // يمن موبايل
+    | 'mtn-mobile-money'   // MTN Mobile Money
+    | 'you-telecom'        // يو تليكوم
+    | 'aljazira-bank'      // الجزيرة بنك
+    | 'tadhamon-bank'      // تضامن بنك
+    | 'other';             // أخرى
+
+export interface WalletDetails {
+    provider: YemenWalletProvider;
+    accountNumber: string;
+    accountName: string;
+    phoneNumber?: string;
+    notes?: string;
+}
+
+export interface BankTransferDetails {
+    iban?: string;
+    accountNumber?: string;
+    swiftCode?: string;
+    bankAddress?: string;
+}
+
+export interface PaymentMethod {
+    id: string;
+    type: PaymentMethodType;
+    name: string;
+    displayName: string;
+    icon?: string;
+    isActive: boolean;
+    
+    // For bank accounts
+    accountHolder?: string;
+    currencies?: {
+        SAR?: BankTransferDetails;
+        USD?: BankTransferDetails;
+        YER?: BankTransferDetails;
+    };
+    
+    // For e-wallets
+    wallet?: WalletDetails;
+    
+    // Additional info
+    instructions?: string;
+    processingTime?: string; // e.g., "فوري" or "1-2 أيام عمل"
+}
+
+// Legacy BankAccount interface - keeping for backward compatibility
 export interface BankAccount {
     bankName: string;
     accountHolder: string;
@@ -113,6 +167,7 @@ export interface BankAccount {
 
 export interface PublicSettings {
     bankAccounts: BankAccount[];
+    paymentMethods?: PaymentMethod[]; // New flexible payment methods
     newUserCredits: number;
 }
 
