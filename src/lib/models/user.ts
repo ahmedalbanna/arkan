@@ -1,5 +1,4 @@
 
-'use client';
 import { format } from "date-fns";
 
 // --- Types moved from types.ts ---
