@@ -1,4 +1,3 @@
-
 // src/lib/markdown-to-word-converter.ts
 
 import { processPlantUml } from '@/lib/utils/processPlantUml';
@@ -8,6 +7,10 @@ import {
   INumberingOptions,
   IStylesOptions,
   Packer,
+  Paragraph,
+  SimpleField,
+  Table,
+  TableOfContents,
 } from 'docx';
 import { Root } from 'mdast';
 import remarkGfm from 'remark-gfm';
@@ -17,6 +20,7 @@ import { convertAstToDocxObjects } from './word-converter/ast-converter';
 import { buildDocumentSections, prepareHeadersAndFooters } from './word-converter/document-builder';
 import { processFootnotes } from './word-converter/node-handlers';
 import { ConversionOptions, DocxObject } from './word-converter/types';
+import { Project, Chapter, ProjectContent } from './models';
 
 /**
  * Parses markdown, processes it, and creates an array of docx objects and footnotes.
@@ -48,19 +52,30 @@ const numbering: INumberingOptions = {
   ],
 };
 
+function generateMarkdownFromContent(content: ProjectContent): string {
+    if (!content) return '';
+    return content.map(item => {
+        if (item instanceof Chapter) { // Chapter
+            const chapterContent = `# ${item.title}`;
+            const sectionsContent = item.sections.map(section => `## ${section.title}\n\n${section.content || ''}`).join('\n\n');
+            return `${chapterContent}\n\n${sectionsContent}`;
+        } else { // Section
+            return `# ${item.title}\n\n${item.content || ''}`;
+        }
+    }).join('\n\n<!-- slide-break -->\n\n');
+}
+
 /**
- * Converts a markdown string to a styled .docx file and returns a Buffer.
- * Can be used on both client and server.
- * @param markdown The markdown content to convert.
- * @param fileName The name of the file to be saved (without extension).
- * @param options Optional styles and paper properties.
+ * Converts a Project object to a styled .docx file and returns a Buffer or Blob.
+ * This is the main server-side function for DOCX generation.
+ * @param project The Project instance to convert.
+ * @param options Optional conversion and content selection options.
  */
 export async function convertMarkdownToWord(
-  markdown: string,
-  fileName?: string,
-  options: ConversionOptions = {}
+  project: Project,
+  options: ConversionOptions & { selectedContent?: ProjectContent } = {}
 ): Promise<Buffer | Blob> {
-  const { styles, coverPageMarkdown } = options;
+  const { styles, selectedContent, coverPageMarkdown: explicitCoverPage } = options;
 
   const finalStyles: IStylesOptions = {
     ...styles,
@@ -83,7 +98,31 @@ export async function convertMarkdownToWord(
     });
   }
 
-  const { docxObjects, docxFootnotes } = await createDocxContent(markdown, options);
+  // Generate markdown from selected content, or full project if none selected
+  const contentToExport = selectedContent || project.content;
+  const markdown = generateMarkdownFromContent(contentToExport);
+  const fullProjectMarkdown = project.fullMarkdownContent; // For finding all footnotes
+  
+  // Append all footnote definitions from the full project to ensure they are resolved
+  const footnoteRegex = /^\[\^.+?\]:.+$/gm;
+  const footnoteDefinitions = fullProjectMarkdown.match(footnoteRegex);
+
+  let finalMarkdown = markdown;
+  if (footnoteDefinitions) {
+      finalMarkdown += '\n\n' + footnoteDefinitions.join('\n');
+  }
+
+  const { docxObjects, docxFootnotes } = await createDocxContent(finalMarkdown, options);
+
+  // Generate cover page markdown
+  const coverPageMarkdown = explicitCoverPage ?? `
+# ${project.name || 'Untitled Project'}
+${project.projectDescription ? `\n*${project.projectDescription}*` : ''}
+${project.teamMembers && project.teamMembers.length > 0 ? `\n\n**Submitted by:**\n${project.teamMembers.join(', ')}` : ''}
+${project.supervisor ? `\n\n**Supervisor:**\n${project.supervisor}` : ''}
+${project.university ? `\n\n**${project.university}**` : ''}
+\n\n${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+    `.trim();
 
   let coverPageDocxObjects: DocxObject[] = [];
   if (coverPageMarkdown && coverPageMarkdown.trim().length > 0) {

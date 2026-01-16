@@ -2,7 +2,7 @@
 'use server';
 
 import { convertMarkdownToWord } from '@/lib/markdown-to-word-converter';
-import { Project, type ProjectProperties } from '@/lib/models';
+import { Project, type ProjectProperties, Chapter, type ChapterProperties, Section, type SectionProperties } from '@/lib/models';
 import type { ConversionOptions } from '@/lib/word-converter/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -11,7 +11,7 @@ const exportSchema = z.object({
   project: z.any().refine(val => val && typeof val === 'object' && val.id, {
     message: "A valid project object is required.",
   }),
-  markdown: z.string().min(1, "Markdown content cannot be empty."), // Added markdown field
+  selectedContent: z.array(z.any()), // Array of ChapterProperties or SectionProperties
   options: z.custom<ConversionOptions>().optional().default({}),
 });
 
@@ -24,17 +24,19 @@ export async function POST(req: NextRequest) {
       return new NextResponse(JSON.stringify(validation.error.flatten()), { status: 400 });
     }
 
-    const { project: projectData, markdown, options } = validation.data;
+    const { project: projectData, selectedContent: selectedContentData, options } = validation.data;
 
-    // Instantiate a Project object for metadata
+    // Re-instantiate project and content from plain objects
     const project = new Project(projectData as ProjectProperties);
-    const fileName = (project.name || 'Untitled').replace(/\s+/g, '_');
+    const selectedContent = selectedContentData.map(item => {
+        if ('sections' in item) {
+            return new Chapter(item as ChapterProperties);
+        }
+        return new Section(item as SectionProperties);
+    });
 
-    if (!markdown.trim()) {
-      return new NextResponse(JSON.stringify({ message: 'Project content is empty' }), { status: 400 });
-    }
-
-    const docxBuffer = await convertMarkdownToWord(markdown, fileName, options);
+    // The main logic is now inside convertMarkdownToWord, which takes the project object
+    const docxBuffer = await convertMarkdownToWord(project, { ...options, selectedContent });
 
     if (!docxBuffer) {
       return new NextResponse('Error creating DOCX file buffer.', { status: 500 });
@@ -44,7 +46,7 @@ export async function POST(req: NextRequest) {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'Content-Disposition': `attachment; filename="${fileName}.docx"`,
+        'Content-Disposition': `attachment; filename="${project.name.replace(/\s+/g, '_') || 'document'}.docx"`,
       },
     });
 
