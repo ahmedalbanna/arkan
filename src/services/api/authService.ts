@@ -1,7 +1,9 @@
 
 'use client';
 
-import { auth } from '@/lib/firebase/client-init';
+import { initializeFirebase } from '@/firebase';
+
+const { auth } = initializeFirebase();
 import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
 import {
   GoogleAuthProvider,

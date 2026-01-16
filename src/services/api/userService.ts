@@ -2,7 +2,9 @@
 // src/services/user-service.ts
 'use client';
 
-import { app } from '@/lib/firebase/client-init';
+import { initializeFirebase } from '@/firebase';
+
+const { firebaseApp: app } = initializeFirebase();
 import type { UserProfile } from '@/lib/models/user';
 import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 import { apiService } from './apiService';

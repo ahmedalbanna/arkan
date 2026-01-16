@@ -21,7 +21,9 @@ import {
   Timestamp,
   type QueryConstraint
 } from '@firebase/firestore';
-import { db } from '../lib/firebase/client-init';
+import { initializeFirebase } from '@/firebase';
+
+const { firestore: db } = initializeFirebase();
 import type { PromptConfiguration, PromptStatus, PromptVersion } from '../lib/models/prompt-config';
 
 // ============================================================================

@@ -21,7 +21,9 @@ import {
   Timestamp,
   type QueryConstraint
 } from '@firebase/firestore';
-import { db } from '../lib/firebase/client-init';
+import { initializeFirebase } from '@/firebase';
+
+const { firestore: db } = initializeFirebase();
 import type { FlowConfiguration, FlowStatus, FlowVersion } from '../lib/models/flow-config';
 import { flowConfigCache } from '@/lib/cache/flow-config-cache';
 
