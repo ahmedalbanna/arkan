@@ -65,57 +65,70 @@ function generateMarkdownFromContent(content: ProjectContent): string {
     }).join('\n\n<!-- slide-break -->\n\n');
 }
 
-/**
- * Converts a Project object to a styled .docx file and returns a Buffer or Blob.
- * This is the main server-side function for DOCX generation.
- * @param project The Project instance to convert.
- * @param options Optional conversion and content selection options.
- */
+// Overload for Project object
 export async function convertMarkdownToWord(
   project: Project,
-  options: ConversionOptions & { selectedContent?: ProjectContent } = {}
+  options?: ConversionOptions & { selectedContent?: ProjectContent }
+): Promise<Buffer | Blob>;
+
+// Overload for markdown string
+export async function convertMarkdownToWord(
+  markdown: string,
+  fileName: string,
+  options?: ConversionOptions
+): Promise<Buffer | Blob>;
+
+/**
+ * Converts a Project object or a raw markdown string to a styled .docx file.
+ * This is the main server-side function for DOCX generation.
+ */
+export async function convertMarkdownToWord(
+  projectOrMarkdown: Project | string,
+  optionsOrFileName?: (ConversionOptions & { selectedContent?: ProjectContent }) | string,
+  optionsForMarkdown: ConversionOptions = {}
 ): Promise<Buffer | Blob> {
-  const { styles, selectedContent, coverPageMarkdown: explicitCoverPage } = options;
+  if (projectOrMarkdown instanceof Project) {
+    // Handle Project object
+    const project = projectOrMarkdown;
+    const options = (optionsOrFileName as (ConversionOptions & { selectedContent?: ProjectContent })) || {};
+    const { styles, selectedContent, coverPageMarkdown: explicitCoverPage } = options;
 
-  const finalStyles: IStylesOptions = {
-    ...styles,
-    paragraphStyles: [...(styles?.paragraphStyles || [])],
-  };
+    const finalStyles: IStylesOptions = {
+      ...styles,
+      paragraphStyles: [...(styles?.paragraphStyles || [])],
+    };
 
-  const captionStyleExists = finalStyles.paragraphStyles!.some(style => style.id === 'Caption');
-  if (!captionStyleExists) {
-    (finalStyles.paragraphStyles as any).push({
-      id: 'Caption',
-      name: 'Caption',
-      basedOn: 'Normal',
-      next: 'Normal',
-      quickFormat: true,
-      run: { size: 18, italics: true, color: '595959' }, // 9pt, Italic, Grey
-      paragraph: {
-        alignment: AlignmentType.CENTER,
-        spacing: { before: 120, after: 240 },
-      },
-    });
-  }
+    const captionStyleExists = finalStyles.paragraphStyles!.some(style => style.id === 'Caption');
+    if (!captionStyleExists) {
+      (finalStyles.paragraphStyles as any).push({
+        id: 'Caption',
+        name: 'Caption',
+        basedOn: 'Normal',
+        next: 'Normal',
+        quickFormat: true,
+        run: { size: 18, italics: true, color: '595959' },
+        paragraph: {
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 120, after: 240 },
+        },
+      });
+    }
 
-  // Generate markdown from selected content, or full project if none selected
-  const contentToExport = selectedContent || project.content;
-  const markdown = generateMarkdownFromContent(contentToExport);
-  const fullProjectMarkdown = project.fullMarkdownContent; // For finding all footnotes
-  
-  // Append all footnote definitions from the full project to ensure they are resolved
-  const footnoteRegex = /^\[\^.+?\]:.+$/gm;
-  const footnoteDefinitions = fullProjectMarkdown.match(footnoteRegex);
+    const contentToExport = selectedContent || project.content;
+    const markdown = generateMarkdownFromContent(contentToExport);
+    const fullProjectMarkdown = project.fullMarkdownContent;
 
-  let finalMarkdown = markdown;
-  if (footnoteDefinitions) {
+    const footnoteRegex = /^\[\^.+?\]:.+$/gm;
+    const footnoteDefinitions = fullProjectMarkdown.match(footnoteRegex);
+
+    let finalMarkdown = markdown;
+    if (footnoteDefinitions) {
       finalMarkdown += '\n\n' + footnoteDefinitions.join('\n');
-  }
+    }
 
-  const { docxObjects, docxFootnotes } = await createDocxContent(finalMarkdown, options);
+    const { docxObjects, docxFootnotes } = await createDocxContent(finalMarkdown, options);
 
-  // Generate cover page markdown
-  const coverPageMarkdown = explicitCoverPage ?? `
+    const coverPageMarkdown = explicitCoverPage ?? `
 # ${project.name || 'Untitled Project'}
 ${project.projectDescription ? `\n*${project.projectDescription}*` : ''}
 ${project.teamMembers && project.teamMembers.length > 0 ? `\n\n**Submitted by:**\n${project.teamMembers.join(', ')}` : ''}
@@ -124,27 +137,71 @@ ${project.university ? `\n\n**${project.university}**` : ''}
 \n\n${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
     `.trim();
 
-  let coverPageDocxObjects: DocxObject[] = [];
-  if (coverPageMarkdown && coverPageMarkdown.trim().length > 0) {
-    const { docxObjects: convertedCoverPageObjects } = await createDocxContent(coverPageMarkdown, options);
-    coverPageDocxObjects = convertedCoverPageObjects;
-  }
+    let coverPageDocxObjects: DocxObject[] = [];
+    if (coverPageMarkdown && coverPageMarkdown.trim().length > 0) {
+      const { docxObjects: convertedCoverPageObjects } = await createDocxContent(coverPageMarkdown, options);
+      coverPageDocxObjects = convertedCoverPageObjects;
+    }
 
-  const { headerConfiguration, footerConfiguration } = prepareHeadersAndFooters(options);
+    const { headerConfiguration, footerConfiguration } = prepareHeadersAndFooters(options);
+    const sections = await buildDocumentSections(docxObjects, coverPageDocxObjects, options, headerConfiguration, footerConfiguration);
 
-  const sections = await buildDocumentSections(docxObjects, coverPageDocxObjects, options, headerConfiguration, footerConfiguration);
+    const doc = new Document({
+      styles: finalStyles,
+      numbering: numbering,
+      footnotes: docxFootnotes,
+      sections: sections,
+    });
 
-  const doc = new Document({
-    styles: finalStyles,
-    numbering: numbering,
-    footnotes: docxFootnotes,
-    sections: sections,
-  });
-
-  // Use Packer.toBuffer on the server and Packer.toBlob on the client
-  if (typeof window === 'undefined') {
-    return Packer.toBuffer(doc);
+    if (typeof window === 'undefined') {
+      return Packer.toBuffer(doc);
+    } else {
+      return Packer.toBlob(doc);
+    }
   } else {
-    return Packer.toBlob(doc);
+    // Handle markdown string
+    const markdown = projectOrMarkdown;
+    const options = optionsForMarkdown || {};
+    const { styles } = options;
+
+    const finalStyles: IStylesOptions = {
+      ...styles,
+      paragraphStyles: [...(styles?.paragraphStyles || [])],
+    };
+
+    const captionStyleExists = finalStyles.paragraphStyles!.some(style => style.id === 'Caption');
+    if (!captionStyleExists) {
+        (finalStyles.paragraphStyles as any).push({
+            id: 'Caption',
+            name: 'Caption',
+            basedOn: 'Normal',
+            next: 'Normal',
+            quickFormat: true,
+            run: { size: 18, italics: true, color: '595959' },
+            paragraph: {
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 120, after: 240 },
+            },
+        });
+    }
+
+    const { docxObjects, docxFootnotes } = await createDocxContent(markdown, options);
+
+    const { headerConfiguration, footerConfiguration } = prepareHeadersAndFooters(options);
+    // When no project is provided, cover page objects are empty
+    const sections = await buildDocumentSections(docxObjects, [], options, headerConfiguration, footerConfiguration);
+
+    const doc = new Document({
+      styles: finalStyles,
+      numbering: numbering,
+      footnotes: docxFootnotes,
+      sections: sections,
+    });
+
+    if (typeof window === 'undefined') {
+      return Packer.toBuffer(doc);
+    } else {
+      return Packer.toBlob(doc);
+    }
   }
 }
