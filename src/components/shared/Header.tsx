@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
@@ -113,15 +112,23 @@ export function Header() {
         {isClient && <NavLinks />}
 
         <div className="flex items-center gap-2">
-          {isLoading ? (
+          {isClient ? (
+            isLoading ? (
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-8 w-8 rounded-full" />
+              </div>
+            ) : firebaseUser ? (
+              <AuthActions />
+            ) : (
+              <GuestActions />
+            )
+          ) : (
+            // Fallback skeleton for server-side rendering to prevent hydration mismatch
             <div className="flex items-center gap-2">
               <Skeleton className="h-8 w-20" />
               <Skeleton className="h-8 w-8 rounded-full" />
             </div>
-          ) : firebaseUser ? (
-            <AuthActions />
-          ) : (
-            <GuestActions />
           )}
 
           <div className="hidden md:flex">
