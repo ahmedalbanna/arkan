@@ -24,6 +24,7 @@ import { Form } from '../../ui/form';
 import { Badge } from '../../ui/badge';
 import { Input } from '../../ui/input';
 import { SectionContextSelector } from '../section-controls/SectionContextSelector';
+import { useAuth } from '@/context/AuthContext';
 
 interface ChapterToolsDialogProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ interface ChapterToolsDialogProps {
 }
 
 export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToolsDialogProps) {
+  const { isGuest } = useAuth();
   const {
     form,
     activeView,
@@ -208,7 +210,7 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
                       Apply to New Section
                   </Button>
                 )}
-                <Button form="chapter-tools-form" type="submit" disabled={isProcessing}>
+                <Button form="chapter-tools-form" type="submit" disabled={isProcessing || isGuest}>
                   {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Wand2 className="h-4 w-4 mr-2" />}
                   Apply Action
                 </Button>

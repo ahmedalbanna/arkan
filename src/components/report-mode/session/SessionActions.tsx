@@ -16,12 +16,14 @@ import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
 import { BrowseProjectsDialog } from './BrowseProjectsDialog';
 import { ExportDialog } from './ExportDialog';
+import { useAuth } from '@/context/AuthContext';
 
 export function SessionActions() {
     const { t } = useLocalization();
     const router = useRouter();
     const { project, status, loadProjectFromFile, newSession } = useBuilderStore();
     const { saveProjectMutation } = useSaveProject();
+    const { isGuest } = useAuth();
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -73,7 +75,7 @@ export function SessionActions() {
                     <span className="hidden md:inline ms-2">New Project</span>
                 </Button>
 
-                <BrowseProjectsDialog />
+                <BrowseProjectsDialog disabled={isGuest} />
 
                 <Tooltip>
                     <TooltipTrigger asChild>
@@ -96,7 +98,7 @@ export function SessionActions() {
                     variant="default"
                     size="icon"
                     onClick={handleSave}
-                    disabled={status !== 'dirty'}
+                    disabled={status !== 'dirty' || isGuest}
                     className="h-8 w-8 md:w-auto md:px-3"
                 >
                     {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}

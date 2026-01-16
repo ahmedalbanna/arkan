@@ -1,4 +1,6 @@
 
+'use client';
+
 import { format } from "date-fns";
 
 // --- Types moved from types.ts ---
@@ -17,6 +19,7 @@ export interface UserProfile {
     profilePictureUrl?: string;
     hasCompletedOnboarding?: boolean;
     apiKeys?: Record<string, string>; // To store keys for services like 'gemini', 'chatgpt'
+    lastDailyCreditUpdate?: string; // Timestamp for the last daily credit refresh
 }
 
 // TeamMember is no longer needed
@@ -38,6 +41,7 @@ export class User {
     public profilePictureUrl?: string;
     public hasCompletedOnboarding?: boolean;
     public apiKeys?: Record<string, string>;
+    public readonly lastDailyCreditUpdate?: string;
 
     constructor(props: UserProperties) {
         this.id = props.id || '';
@@ -51,6 +55,7 @@ export class User {
         this.profilePictureUrl = props.profilePictureUrl;
         this.hasCompletedOnboarding = props.hasCompletedOnboarding;
         this.apiKeys = props.apiKeys;
+        this.lastDailyCreditUpdate = props.lastDailyCreditUpdate;
     }
 
     /**

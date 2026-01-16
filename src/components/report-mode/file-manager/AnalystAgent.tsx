@@ -77,7 +77,7 @@ export default function AnalystAgent() {
     const { t } = useLocalization();
     const { project, updateProject } = useBuilderStore();
     const externalContext = project?.externalContext || [];
-    const { firebaseUser, refetchUser } = useAuth();
+    const { firebaseUser, refetchUser, isGuest } = useAuth();
     const { resolvedTheme } = useTheme();
     const [markdownResult, setMarkdownResult] = useState<string | null>(null);
 
@@ -145,7 +145,7 @@ export default function AnalystAgent() {
 
     const creditCost = 0;
     const isProcessing = analysisMutation.isPending;
-    const canAnalyze = true ;//!isProcessing && (userProfile?.credits ?? 0) >= creditCost;
+    const canAnalyze = !isGuest && !isProcessing && (firebaseUser?.uid ? (project?.meta?.author === firebaseUser.uid) : false)
 
     return (
         <Card className="h-full flex flex-col">
@@ -167,14 +167,14 @@ export default function AnalystAgent() {
                                             placeholder={t('builder.files.analystAgentPromptPlaceholder')}
                                             {...field}
                                             rows={4}
-                                            disabled={isProcessing}
+                                            disabled={isProcessing || isGuest}
                                         />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" disabled={!canAnalyze}>
+                        <Button type="submit" disabled={!canAnalyze || isGuest}>
                             {isProcessing ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Wand2 className="me-2 h-4 w-4" />}
                             {t('builder.files.analystAgentRunButton', { creditCost: creditCost })}
                         </Button>

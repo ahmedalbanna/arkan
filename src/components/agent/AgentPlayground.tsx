@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CornerDownLeft, Loader2, Wand } from 'lucide-react';
+import { CornerDownLeft, Loader2, Wand2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -31,7 +31,7 @@ type PlaygroundFormValues = z.infer<typeof formSchema>;
 
 function AgentPlayground({ agent }: AgentPlaygroundProps) {
   const { responses, setResponse } = useAgentManager();
-  const { firebaseUser } = useAuth();
+  const { firebaseUser, isGuest } = useAuth();
 
   const form = useForm<PlaygroundFormValues>({
     resolver: zodResolver(formSchema),
@@ -72,7 +72,7 @@ function AgentPlayground({ agent }: AgentPlaygroundProps) {
     return (
       <div className="flex h-full items-center justify-center bg-muted/30">
         <div className="text-center">
-          <Wand className="mx-auto h-12 w-12 text-muted-foreground" />
+          <Wand2 className="mx-auto h-12 w-12 text-muted-foreground" />
           <h2 className="mt-4 text-xl font-semibold">Select an Agent</h2>
           <p className="mt-1 text-muted-foreground">Choose an agent from the sidebar to start testing.</p>
         </div>
@@ -118,12 +118,12 @@ function AgentPlayground({ agent }: AgentPlaygroundProps) {
                     {...field}
                     placeholder={`Ask ${agent.name} to do something...`}
                     className="min-h-[80px] w-full resize-none pr-20"
-                    disabled={mutation.isPending}
+                    disabled={mutation.isPending || isGuest}
                   />
                 </FormItem>
               )}
             />
-             <Button type="submit" size="sm" className="absolute bottom-3 right-3" disabled={mutation.isPending}>
+             <Button type="submit" size="sm" className="absolute bottom-3 right-3" disabled={mutation.isPending || isGuest}>
               {mutation.isPending ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (

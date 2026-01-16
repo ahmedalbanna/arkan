@@ -62,7 +62,7 @@ function ProjectCard({ project, onLoad, isLoading }: ProjectCardProps) {
     );
 }
 
-export function BrowseProjectsDialog() {
+export function BrowseProjectsDialog({ disabled }: { disabled?: boolean }) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [loadingProjectId, setLoadingProjectId] = useState<string | null>(null);
@@ -92,7 +92,7 @@ export function BrowseProjectsDialog() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="icon" className="h-8 w-8 md:w-auto md:px-3">
+                <Button variant="outline" size="icon" className="h-8 w-8 md:w-auto md:px-3" disabled={disabled}>
                     <Search className="h-4 w-4" />
                     <span className="hidden md:inline ms-2">Browse</span>
                 </Button>

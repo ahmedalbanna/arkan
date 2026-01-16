@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
@@ -11,6 +10,7 @@ import { UpdateProfileForm } from './UpdateProfileForm';
 import { ChangePasswordForm } from './ChangePasswordForm';
 import { ApiTokenView } from './ApiTokenView';
 import { ApiKeysForm } from './ApiKeysForm';
+import { GuestProfilePage } from '@/components/auth/GuestProfilePage';
 
 function ProfileSkeleton() {
     return (
@@ -38,7 +38,7 @@ function ProfileSkeleton() {
 
 export default function ProfilePage() {
     const { t } = useLocalization();
-    const { userProfile, firebaseUser, isLoading } = useAuth();
+    const { userProfile, firebaseUser, isLoading, isGuest } = useAuth();
 
     if (isLoading) {
         return (
@@ -46,6 +46,10 @@ export default function ProfilePage() {
                 <ProfileSkeleton />
             </div>
         );
+    }
+
+    if (isGuest) {
+        return <GuestProfilePage />;
     }
 
     if (!userProfile || !firebaseUser) {

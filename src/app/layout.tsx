@@ -90,25 +90,30 @@ const fontCairo = localFont({
 });
 
 // List of public paths that do not require authentication
-const PUBLIC_PATHS = ['/login', '/signup', '/forgot-password', '/design', '/docs', '/request', '/phone-auth'];
+const PUBLIC_PATHS = ['/login', '/signup', '/forgot-password', '/docs', '/request', '/phone-auth'];
 const AUTH_PATHS = ['/login', '/signup', '/forgot-password', '/phone-auth'];
 
 // This function runs on the server for every request
 async function handleAuthRedirects(pathname: string) {
-  const sessionCookie = (await cookies()).get('__session')?.value;
-  let isAuthenticated = !!sessionCookie;
+  const cookieStoreInstance = cookies();
+  const sessionCookie = cookieStoreInstance.get('__session')?.value;
+  const guestCookie = cookieStoreInstance.get('__guest')?.value;
+  
+  const isAuthenticated = !!sessionCookie;
+  const isGuest = !!guestCookie;
 
   // If user is authenticated and tries to access an auth page, redirect them
   if (isAuthenticated && AUTH_PATHS.includes(pathname)) {
     redirect('/builder');
   }
 
-  // If user is not authenticated and tries to access a protected page, redirect them
+  // If user is not authenticated and not a guest, and tries to access a protected page, redirect them to login
   const isPublic = PUBLIC_PATHS.includes(pathname) || pathname === '/';
-  if (!isAuthenticated && !isPublic) {
+  if (!isAuthenticated && !isGuest && !isPublic) {
     redirect('/login');
   }
 }
+
 
 export default async function RootLayout({
   children,
