@@ -70,27 +70,21 @@ class LocalProjectService {
 
   /**
    * Syncs the local IndexedDB with a list of projects from the server.
-   * It adds or updates server projects and removes local projects that are not on the server.
+   * This is a "safe" sync that does not delete local-only projects.
    * @param serverProjects The list of projects from the server.
    */
-  public async syncProjects(serverProjects: ProjectProperties[]): Promise<void> {
+  public async syncWithServer(serverProjects: ProjectProperties[]): Promise<void> {
     const db = await this.getDB();
     const tx = db.transaction(STORE_NAME, 'readwrite');
     const store = tx.objectStore(STORE_NAME);
 
-    const localProjects = await store.getAll();
-    const serverProjectIds = new Set(serverProjects.map(p => p.id));
-    const localProjectIds = new Set(localProjects.map(p => p.id));
-
-    // Add or update projects from the server
-    for (const project of serverProjects) {
-      await store.put(project);
-    }
-
-    // Delete local projects that are no longer on the server
-    for (const localId of localProjectIds) {
-      if (localId && !serverProjectIds.has(localId)) {
-        await store.delete(localId);
+    for (const serverProject of serverProjects) {
+      if (serverProject.id) {
+        const localProject = await store.get(serverProject.id);
+        // If server project is newer, or if project doesn't exist locally, update/add it.
+        if (!localProject || new Date(serverProject.meta?.updated || 0) > new Date(localProject.meta?.updated || 0)) {
+          await store.put(serverProject);
+        }
       }
     }
     
