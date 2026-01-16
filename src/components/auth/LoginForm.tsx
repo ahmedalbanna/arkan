@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { handleErrorUtility } from '@/lib/utils/errorUtils';
 
 import { LoginCredentials } from '@/lib/types';
 
@@ -49,6 +50,18 @@ export default function LoginForm() {
     form.clearErrors("root.serverError");
     loginMutation.mutate(values);
   }
+
+  const handleGuestLogin = async () => {
+    try {
+      const response = await fetch('/api/auth/guest', { method: 'POST' });
+      if (!response.ok) {
+          throw new Error('Failed to start guest session.');
+      }
+      router.push('/builder');
+    } catch (error) {
+      handleErrorUtility(error, "Guest Login Failed");
+    }
+  };
 
   const isPending = loginMutation.isPending || googleSignInMutation.isPending;
   const formLevelError = form.formState.errors.root?.serverError;
@@ -106,6 +119,21 @@ export default function LoginForm() {
           <Phone className="me-2 h-4 w-4" />
           Sign in with Phone
         </Button>
+
+        <div className="relative my-2">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Or continue without an account
+            </span>
+          </div>
+        </div>
+        <Button variant="secondary" className="w-full" type="button" onClick={handleGuestLogin} disabled={isPending}>
+          Continue as Guest
+        </Button>
+
         <div className="mt-4 text-center text-sm">
           Don&apos;t have an account?{" "}
           <Link href="/signup" className="underline">

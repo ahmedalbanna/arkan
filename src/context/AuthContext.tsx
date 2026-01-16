@@ -15,6 +15,7 @@ interface AuthContextType {
   firebaseUser: FirebaseUser | null;
   userProfile: User | null;
   isLoading: boolean;
+  isGuest: boolean;
   refetchUser: () => void;
 }
 
@@ -31,7 +32,7 @@ async function manageSession(user: FirebaseUser | null) {
       body: JSON.stringify({ idToken }),
     });
   } else {
-    // Clear session cookie
+    // This API route is designed to clear both session and guest cookies
     await fetch('/api/auth/logout', {
       method: 'POST',
     });
@@ -41,6 +42,7 @@ async function manageSession(user: FirebaseUser | null) {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [authIsLoading, setAuthIsLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
   const queryClient = useQueryClient();
   const { setUserProfile } = useBuilderStore(); // Get setter from builder store
 
@@ -82,13 +84,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       await manageSession(user);
+
+      const guestCookieExists = typeof window !== 'undefined' && document.cookie.includes('__guest=true');
+
       if (user) {
-        // Invalidate and refetch immediately on auth change
+        setIsGuest(false);
+        if (guestCookieExists) {
+            document.cookie = '__guest=; Max-Age=-99999999; path=/;';
+        }
         await queryClient.invalidateQueries({ queryKey: userKeys.profile(user.uid) });
       } else {
-        // Clear all queries on logout
-        queryClient.clear();
-        setUserProfile(null); // Clear builder store on logout
+        setIsGuest(guestCookieExists);
+        if (!guestCookieExists) {
+            queryClient.clear();
+            setUserProfile(null);
+        }
       }
       setAuthIsLoading(false);
     });
@@ -96,13 +106,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, [queryClient, setUserProfile]);
 
-  return (
-    <AuthContext.Provider value={{
+  const value = {
       firebaseUser,
       userProfile: userProfile ?? null,
       isLoading: authIsLoading || (!!firebaseUser && isProfileLoading),
-      refetchUser
-    }}>
+      isGuest,
+      refetchUser,
+  };
+  
+  return (
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
