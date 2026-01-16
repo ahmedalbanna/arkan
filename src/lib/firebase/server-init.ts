@@ -1,34 +1,42 @@
-// src/lib/firebase/server-init.ts
 import admin from 'firebase-admin';
+import { firebaseAdminConfig } from '@/lib/config';
 
 // This file should be imported only on the server-side.
 // It initializes the Firebase Admin SDK.
 
-// Check if the app is already initialized to prevent errors during hot-reloading in development.
 if (!admin.apps.length) {
   try {
-    // When deployed (e.g., on Vercel), GOOGLE_APPLICATION_CREDENTIALS will be set.
-    // For local development, we can fall back to the service account file.
-    if (process.env.FIREBASE_ADMIN_PRIVATE_KEY) {
+    // Check if the essential admin config values are present
+    if (
+      firebaseAdminConfig.projectId &&
+      firebaseAdminConfig.clientEmail &&
+      firebaseAdminConfig.privateKey
+    ) {
       admin.initializeApp({
         credential: admin.credential.cert({
-            projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-            privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY.replace(/\\n/g, '\n'),
+          projectId: firebaseAdminConfig.projectId,
+          clientEmail: firebaseAdminConfig.clientEmail,
+          privateKey: firebaseAdminConfig.privateKey,
         }),
         databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
         storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
       });
       console.log("Firebase Admin SDK initialized using environment variables.");
     } else {
-      // Fallback for local development
-      const serviceAccount = require('../../../docudec-firebase-adminsdk-2maa7-d07a19d3fc.json');
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || "https://docudec-default-rtdb.asia-southeast1.firebasedatabase.app",
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      });
-      console.log("Firebase Admin SDK initialized using local service account.");
+      // Fallback for environments where service account file is used (e.g., local dev without .env)
+      // Note: This path might need adjustment based on your project structure.
+      // It's generally better to rely on environment variables.
+      try {
+        const serviceAccount = require('../../../docudec-firebase-adminsdk-2maa7-d07a19d3fc.json');
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+            storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        });
+        console.log("Firebase Admin SDK initialized using local service account file.");
+      } catch (fileError) {
+          console.error("Could not initialize Firebase Admin SDK. Environment variables are missing and the local service account file was not found.");
+      }
     }
   } catch (error: any) {
     console.error("Firebase admin initialization error", error.stack);
@@ -36,6 +44,6 @@ if (!admin.apps.length) {
 }
 
 // Export the initialized admin services.
-export const adminAuth = admin.auth();
-export const adminDb = admin.firestore();
-export const adminRealtimeDb = admin.database();
+export const adminAuth = admin.apps.length ? admin.auth() : {} as admin.auth.Auth;
+export const adminDb = admin.apps.length ? admin.firestore() : {} as admin.firestore.Firestore;
+export const adminRealtimeDb = admin.apps.length ? admin.database() : {} as admin.database.Database;
