@@ -95,7 +95,7 @@ const AUTH_PATHS = ['/login', '/signup', '/forgot-password', '/phone-auth'];
 
 // This function runs on the server for every request
 async function handleAuthRedirects(pathname: string) {
-  const cookieStoreInstance = cookies();
+  const cookieStoreInstance = await cookies();
   const sessionCookie = cookieStoreInstance.get('__session')?.value;
   const guestCookie = cookieStoreInstance.get('__guest')?.value;
   
