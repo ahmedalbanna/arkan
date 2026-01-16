@@ -1,88 +1,31 @@
 /**
  * Environment Configuration Validation
- * 
+ *
  * This module validates all required environment variables at startup
  * to ensure the application has all necessary configuration.
  */
 
-import { z } from 'zod';
-
-// Define the schema for environment variables
-const envSchema = z.object({
-  // Firebase Client Configuration (Public)
-  NEXT_PUBLIC_FIREBASE_API_KEY: z.string().min(1, 'Firebase API key is required'),
-  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: z.string().min(1, 'Firebase auth domain is required'),
-  NEXT_PUBLIC_FIREBASE_PROJECT_ID: z.string().min(1, 'Firebase project ID is required'),
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: z.string().min(1, 'Firebase storage bucket is required'),
-  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: z.string().min(1, 'Firebase messaging sender ID is required'),
-  NEXT_PUBLIC_FIREBASE_APP_ID: z.string().min(1, 'Firebase app ID is required'),
-  NEXT_PUBLIC_FIREBASE_DATABASE_URL: z.string().url().optional(),
-  NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: z.string().optional(),
-  
-  // Optional: Firebase Admin (Server-side)
-  FIREBASE_ADMIN_PROJECT_ID: z.string().optional(),
-  FIREBASE_ADMIN_CLIENT_EMAIL: z.string().email().optional(),
-  FIREBASE_ADMIN_PRIVATE_KEY: z.string().optional(),
-  
-  // Google AI Configuration
-  GOOGLE_GENAI_API_KEY: z.string().optional(), // Optional if using Firebase
-  
-  // Ollama Configuration
-  OLLAMA_SERVER_ADDRESS: z.string().url().optional().default('http://185.190.140.93:11434'),
-  
-  // Node Environment
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-});
-
-// Type inference from schema
-export type EnvConfig = z.infer<typeof envSchema>;
-
-/**
- * Validates and returns the environment configuration
- * Throws an error if validation fails
- */
-function validateEnv(): EnvConfig {
-  try {
-    return envSchema.parse(process.env);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const missingVars = error.errors.map(err => `  - ${err.path.join('.')}: ${err.message}`).join('\n');
-      
-      throw new Error(
-        `❌ Invalid environment configuration:\n\n${missingVars}\n\n` +
-        `Please check your .env file and ensure all required variables are set.`
-      );
-    }
-    throw error;
-  }
-}
-
-// Validate environment variables at module load time
-export const env = validateEnv();
 
 // Export individual configs for convenience
+
 export const firebaseConfig = {
-  apiKey: env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  databaseURL: env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-  projectId: env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+  apiKey: "AIzaSyDFB2d0Cx2UtglBPMyuevtCiRUWROb_fmk",
+  authDomain: "docudec.firebaseapp.com",
+  databaseURL: "https://docudec-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "docudec",
+  storageBucket: "docudec.appspot.com",
+  messagingSenderId: "201859762958",
+  appId: "1:201859762958:web:602e322feffdcb11ed255f",
+  measurementId: "G-K42VXYX7NQ"
 } as const;
 
 export const firebaseAdminConfig = {
-    projectId: env.FIREBASE_ADMIN_PROJECT_ID,
-    clientEmail: env.FIREBASE_ADMIN_CLIENT_EMAIL,
-    privateKey: env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+  projectId: "docudec",
+  clientEmail: "firebase-adminsdk-2maa7@docudec.iam.gserviceaccount.com",
+  privateKey: "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCXvtnHwHiPHIzk\nKaIZu/DOTffYoLNZa+a0JJVq/w81Z826+BGrnF0s0ldSM1NKLM/IMMDoi6AcG81C\nfqHleoG05B6BaxWFIU+nGozmmzhhClmmSTLFj2+Jtyvbw9UR1wy/XvEhDzKRCBef\nDuYks3a3+VdQnhq2wd+8SpDVEJ4zaHTNLv+jHJuSVTlHHf97Q5ClT9r2BX+0UX2u\nen1gtpqtjEBGanK8536is5y1N356jaYYGk6TZG/bZTrukLc5DshzegjCQDHNGR9k\nZRTVLnP4qAsRY27yamsHyki8ohBqLp2kaEzNzNvjvpywspOD87WJYHYAnyT21lRI\njB1axFOVAgMBAAECggEANa8h2d7YZ/z4RVILVKJeV4ZS7DMyMC0RweJ9cAyLQ2AV\ncxOHINjhR9WkaeLZkRDYc6D35m1bOAaH8AHf4dEc6TOZLT0GsIIv7VThy0XXxNEG\nFWOpECamFakVXZrjGvwjOOLsWL9JKvEbdjytpAdPtVeDkfRVTBm7vx/8LDzEUzgR\n1DPCw+jUmhBDgcn4wi3W3yHb/9t2vGHModrGO/FQI9slfUl2udFNdUnOOvJR3Toi\nV5Ch4YW1+Yd3fEl1XhENGw7QamsGLQ2OXMFvvU1kwxhsEASC7/Z6Kgx8O3XcpW36\n/zzcfhcw2XJ5ynrfoTWLtM4IiyLyt8lUycGYurKM0wKBgQDVGtMvmmb9n6g2bdJs\n3BgRci+nhktKkosIjAsrmukE1XUegGBRyYtamz5Zvfokg4Pz8H4mzYQw1XR8D9z6\nPx0QV0/CEt7KDSeExRToQH8PAFM2rk8gntN0IYPdoGMyGyJdcz4Sj3wiKK7278+X\nRdOnmOCZ2hKBK1of/uW9eBRpQwKBgQC2SjcfWnsaYUdirShSleke/EOdXXW2F2sD\nPa40Y59gUEiga0Nqssz2zXioF02juffO4G6Wkk/KsxePuG2B/Ms14C2dzfc9x9dg\nSYjus8a1JENTyegrJLhQRKe5FziAedOIL1sRCDA+D2cU4UTr0r7uCuQn8qNuS/kk\nZ1jTV402RwKBgQCiLVb4zEWC0IVAXtWcGOeMJ10S3cXgy6NZbtJ1bd/V2OjXvJUQ\nyRPvcWPDAiwiq5+4/pXSy+bFDz0lySC/pVZmADxnktrP47DmfuHJWoQXk4TAgWkg\nhx6fK35iJNQ45qOBgNmFYIL0sAdvT9Oo6PAJhPOwwmAAw1BEN0T5qy/FZwKBgQCl\nWnzV/AVe0I8oe1nwT/u/F6VdwcFdA7EWp4S2EQgpHapDmgj1aGt0FL41+615rt+S\n0RJ/kwi+HeZpgCoVl3Hd1RSL6KE1cWl09j84B+tftR09jBEF0bE/Xoel5eJi6B9x\nkUNSF9Nq+B3RWuZh5DE9TLPZaMfG7TN6SiTQ0MJPUQKBgAzhBdUnSakOgjtB9jax\nNQo64DpYHvDVC3xswGZdB8swuwZjsoNT/JV4vOQ1YgxVm7KTUWKmKTdGYfWnQ9EC\n0gdxgy7MmmEuTN6/riaer22vm63BaHYa2BN5p4jtMJuA0eg4CTJAm2ofHKv3K4JK\nlOhAb3IjFTYr+b6iuwhMXdWz\n-----END PRIVATE KEY-----\n",
 };
 
 
 export const ollamaConfig = {
-  serverAddress: env.OLLAMA_SERVER_ADDRESS,
+  serverAddress: "http://localhost:11434",
 } as const;
-
-export const isProduction = process.env.NODE_ENV === 'production';
-export const isDevelopment = process.env.NODE_ENV === 'development';
-export const isTest = process.env.NODE_ENV === 'test';

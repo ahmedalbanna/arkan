@@ -19,7 +19,9 @@ import { handleErrorUtility } from '@/lib/utils/errorUtils';
 import { useAuth } from '@/context/AuthContext';
 import { userKeys } from '@/lib/query-keys';
 import { getAuth, signInWithPhoneNumber, type ConfirmationResult, type User as FirebaseUser } from "firebase/auth";
-import { app } from '@/lib/firebase/client-init';
+import { initializeFirebase } from '@/firebase';
+
+const { firebaseApp: app } = initializeFirebase();
 import { useState } from 'react';
 
 

@@ -2,7 +2,9 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks';
-import { app } from '@/lib/firebase/client-init';
+import { initializeFirebase } from '@/firebase';
+
+const { firebaseApp: app } = initializeFirebase();
 import { saveDeviceToken } from '@/services/api/deviceTokenService';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { useEffect, useState } from 'react';

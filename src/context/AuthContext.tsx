@@ -1,7 +1,9 @@
 
 'use client';
 
-import { auth } from '@/lib/firebase/client-init';
+import { initializeFirebase } from '@/firebase';
+
+const { auth } = initializeFirebase();
 import { userKeys } from '@/lib/query-keys';
 import { User, type UserProfile } from '@/lib/models';
 import { getAuthenticatedToken } from '@/lib/utils/authUtils';

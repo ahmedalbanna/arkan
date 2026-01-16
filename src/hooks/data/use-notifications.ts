@@ -3,7 +3,11 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { rtdb } from '@/lib/firebase/client-init';
+import { getDatabase } from 'firebase/database';
+import { initializeFirebase } from '@/firebase';
+
+const { firebaseApp } = initializeFirebase();
+const rtdb = getDatabase(firebaseApp);
 import { ref, onValue, off } from 'firebase/database';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Notification } from '@/lib/types';
