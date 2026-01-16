@@ -1,0 +1,101 @@
+---
+description: "موارد متخصصة للذكاء الاصطناعي ومعالجة المستندات"
+globs: ["src/ai/**/*", "src/lib/**/*"]
+alwaysApply: true
+---
+
+# موارد متخصصة - الذكاء الاصطناعي ومعالجة المستندات
+
+## الذكاء الاصطناعي المتقدم
+
+### Genkit Framework
+- **Genkit Documentation**: https://firebase.google.com/docs/genkit
+- **Genkit Examples**: https://github.com/firebase/genkit
+- **Genkit Best Practices**: https://firebase.google.com/docs/genkit/best-practices
+- **Genkit Configuration**: https://firebase.google.com/docs/genkit/configuration
+
+### Google AI Models
+- **Gemini API**: https://ai.google.dev/docs
+- **Gemini Models**: https://ai.google.dev/docs/model_reference
+- **Gemini Safety**: https://ai.google.dev/docs/safety_setting
+- **Gemini Pricing**: https://ai.google.dev/docs/pricing
+
+### Prompt Engineering
+- **OpenAI Prompt Engineering**: https://platform.openai.com/docs/guides/prompt-engineering
+- **Prompt Design Patterns**: https://www.promptingguide.ai/techniques
+- **Context Management**: https://docs.anthropic.com/claude/docs/context-windows
+- **Few-shot Learning**: https://platform.openai.com/docs/guides/prompt-engineering/few-shot-prompting
+
+### AI Quality and Evaluation
+- **AI Evaluation Metrics**: https://docs.anthropic.com/claude/docs/evaluating-claude
+- **Quality Assessment**: https://platform.openai.com/docs/guides/evaluation
+- **Bias Detection**: https://ai.google.dev/docs/responsible_ai
+- **Performance Monitoring**: https://firebase.google.com/docs/perf-mon
+
+## معالجة المستندات
+
+### Office Documents
+- **Office Open XML**: https://docs.microsoft.com/en-us/openspecs/office_standards/ms-oe376/
+- **DOCX Format**: https://docs.microsoft.com/en-us/openspecs/office_standards/ms-docx/
+- **PPTX Format**: https://docs.microsoft.com/en-us/openspecs/office_standards/ms-pptx/
+- **Excel Format**: https://docs.microsoft.com/en-us/openspecs/office_standards/ms-xlsx/
+
+### PDF Processing
+- **PDF Standards**: https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_reference_1-7.pdf
+- **PDF.js Documentation**: https://mozilla.github.io/pdf.js/
+- **PDF Security**: https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_reference_1-7.pdf#page=1000
+- **PDF Forms**: https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_reference_1-7.pdf#page=1200
+
+### File Processing Libraries
+- **PptxGenJS Documentation**: https://gitbrent.github.io/PptxGenJS/
+- **DocX Documentation**: https://docx.js.org/
+- **jsPDF Documentation**: https://github.com/parallax/jsPDF
+- **File Upload Security**: https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload
+
+## الأمان والتحقق
+
+### Input Validation
+- **Zod Documentation**: https://zod.dev/
+- **Schema Validation**: https://zod.dev/docs/guides/schema-validation
+- **Error Handling**: https://zod.dev/docs/guides/error-handling
+- **Custom Validators**: https://zod.dev/docs/guides/custom-validators
+
+### File Security
+- **File Type Validation**: https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload
+- **Malware Detection**: https://docs.microsoft.com/en-us/windows/security/threat-protection/intelligence/suspicious-activity-overview
+- **Content Sanitization**: https://owasp.org/www-community/attacks/xss/
+- **Upload Limits**: https://firebase.google.com/docs/storage/security
+
+## الأداء والتحسين
+
+### AI Performance
+- **Model Optimization**: https://platform.openai.com/docs/guides/performance
+- **Caching Strategies**: https://firebase.google.com/docs/perf-mon
+- **Rate Limiting**: https://platform.openai.com/docs/guides/rate-limits
+- **Cost Optimization**: https://platform.openai.com/docs/guides/production-best-practices
+
+### Document Processing Performance
+- **Streaming**: https://nodejs.org/api/stream.html
+- **Memory Management**: https://nodejs.org/api/buffer.html
+- **Async Processing**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function
+- **Worker Threads**: https://nodejs.org/api/worker_threads.html
+
+## تعليمات متخصصة للوكيل
+
+### عند العمل مع الذكاء الاصطناعي
+1. استخدم أحدث نماذج Google AI المتاحة
+2. طبق أفضل ممارسات Prompt Engineering
+3. تحقق من جودة المخرجات باستخدام معايير متعددة
+4. استخدم نظام التحسين التكراري عند الحاجة
+
+### عند معالجة المستندات
+1. تحقق من صحة الملفات قبل المعالجة
+2. استخدم معالجة آمنة للمحتوى
+3. طبق حدود الحجم والوقت المناسبة
+4. وفر معالجة أخطاء شاملة
+
+### عند التعامل مع الأمان
+1. تحقق من صحة جميع المدخلات
+2. استخدم sanitization للمحتوى المستخدم
+3. طبق مبادئ الأمان من OWASP
+4. راقب الأداء والأمان باستمرار

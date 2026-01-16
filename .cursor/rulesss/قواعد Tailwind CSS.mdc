@@ -1,0 +1,33 @@
+---
+description: "قواعد Tailwind CSS"
+globs: ["*.tsx", "*.ts"]
+alwaysApply: true
+---
+
+# قواعد Tailwind CSS
+
+## استخدام الفئات
+- استخدم utility classes بدلاً من custom CSS
+- اجمع الفئات المتشابهة معاً
+- استخدم responsive prefixes (sm:, md:, lg:)
+- استخدم dark mode classes عند الحاجة
+
+## مثال التصميم المطلوب
+```tsx
+<div className="flex flex-col md:flex-row gap-4 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+  <div className="flex-1">
+    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+      العنوان
+    </h2>
+    <p className="text-gray-600 dark:text-gray-300">
+      النص الوصفي
+    </p>
+  </div>
+</div>
+```
+
+## أفضل الممارسات
+- استخدم CSS variables للقيم المخصصة
+- اجمع الفئات في ترتيب منطقي
+- استخدم @apply للأنماط المتكررة
+- تجنب الفئات المكررة
