@@ -2,7 +2,7 @@
 
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
-import { UpdateReportTemplateSchema } from '@/ai/schemas';
+import { UpdateReportTemplateSchema } from '@/lib/models';
 
 // GET a single report template
 export const GET = withAuth(async ({ params }) => {
@@ -55,6 +55,12 @@ export const DELETE = withAuth(async ({ params }) => {
         if (!id) {
             return handleApiError({ message: 'Template ID is required.' }, 400);
         }
+        
+        // Prevent deletion of default templates
+        if (['technical-report', 'simple-business-report'].includes(id)) {
+            return handleApiError({ message: 'Default templates cannot be deleted.' }, 403);
+        }
+        
         await adminDb.collection('templates').doc('report').collection('items').doc(id).delete();
         return createApiResponse({ message: 'Template deleted successfully.' }, 200);
     } catch (error) {
