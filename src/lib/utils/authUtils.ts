@@ -19,5 +19,6 @@ export const getAuthenticatedToken = async (firebaseUser: FirebaseUser | null): 
   if (!firebaseUser) {
     throw new Error("User not authenticated");
   }
-  return await firebaseUser.getIdToken();
+  // Force refresh the token to ensure it's not a cached, revoked token.
+  return await firebaseUser.getIdToken(true);
 };

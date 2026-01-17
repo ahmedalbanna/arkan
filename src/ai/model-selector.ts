@@ -9,7 +9,7 @@
  */
 
 import { OLLAMA_MODELS, MODEL_BY_TASK } from './genkit';
-import { FLOW_MODEL_MAPPING } from './model-mapping';
+import { FLOW_MODEL_MAPPING, getModelForFlow } from './model-mapping';
 
 /**
  * Task complexity levels
@@ -81,13 +81,6 @@ const MODEL_CHARACTERISTICS: Record<string, ModelCharacteristics> = {
     maxConcurrent: 1,
   },
 };
-
-/**
- * Get recommended model for a specific flow
- */
-export function getModelForFlow(flowName: string): string {
-  return FLOW_MODEL_MAPPING[flowName as keyof typeof FLOW_MODEL_MAPPING] || MODEL_BY_TASK.TEXT_GENERATION;
-}
 
 /**
  * Select model based on task complexity
@@ -218,14 +211,6 @@ export function canHandleConcurrentRequest(model: string, currentRequests: numbe
 export function getMaxConcurrentRequests(model: string): number {
   const characteristics = MODEL_CHARACTERISTICS[model];
   return characteristics?.maxConcurrent || 1;
-}
-
-/**
- * Estimate memory usage for a model
- */
-export function estimateMemoryUsage(model: string): number {
-  const characteristics = MODEL_CHARACTERISTICS[model];
-  return characteristics?.memoryUsage || 0;
 }
 
 /**

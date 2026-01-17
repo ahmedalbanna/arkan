@@ -8,8 +8,23 @@
 export * as schemas from './schemas';
 export * from './genkit';
 export * from './dev';
-export * from './model-mapping';
-export * from './model-selector';
+export { getModelForFlow, FLOW_MODEL_MAPPING, FLOWS_BY_CATEGORY } from './model-mapping';
+export {
+  TaskComplexity,
+  PerformancePriority,
+  selectModel,
+  selectModelByComplexity,
+  selectModelByPriority,
+  selectModelByTokenCount,
+  selectModelWithMetadata,
+  getModelCharacteristics,
+  compareModels,
+  canHandleConcurrentRequest,
+  getMaxConcurrentRequests,
+  getModelsSortedBy,
+  isModelSuitableForTask,
+  getFallbackModel,
+} from './model-selector';
 export * from './model-performance-monitor';
 export * from './model-request-queue';
 export * from './model-health-check';
