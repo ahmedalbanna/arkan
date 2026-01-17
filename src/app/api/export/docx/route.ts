@@ -3,7 +3,7 @@
 'use server';
 
 import { convertMarkdownToWord } from '@/lib/markdown-to-word-converter';
-import { Project, type ProjectProperties, Chapter, type ChapterProperties, Section, type SectionProperties } from '@/lib/models';
+import type { ProjectProperties } from '@/lib/models';
 import type { ConversionOptions } from '@/lib/word-converter/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -37,17 +37,19 @@ export async function POST(req: NextRequest) {
 
     if ('project' in validation.data) {
         // Handle project-based export
+        // Note: We pass the plain data objects instead of instantiating classes
+        // because Project/Chapter/Section are client components
         const { project: projectData, selectedContent: selectedContentData, options } = validation.data;
-        const project = new Project(projectData as ProjectProperties);
-        const selectedContent = selectedContentData.map(item => {
-            if ('sections' in item) {
-                return new Chapter(item as ChapterProperties);
-            }
-            return new Section(item as SectionProperties);
-        });
-
-        docxBuffer = await convertMarkdownToWord(project, { ...options, selectedContent });
-        fileName = `${project.name.replace(/\s+/g, '_') || 'document'}.docx`;
+        
+        // Pass data directly to converter - it will handle the conversion
+        docxBuffer = await convertMarkdownToWord(
+          projectData as any, 
+          { 
+            ...options, 
+            selectedContent: selectedContentData as any 
+          }
+        );
+        fileName = `${(projectData as ProjectProperties).name?.replace(/\s+/g, '_') || 'document'}.docx`;
 
     } else {
         // Handle direct markdown export

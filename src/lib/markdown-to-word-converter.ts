@@ -8,9 +8,13 @@ import {
   IStylesOptions,
   Packer,
   Paragraph,
-  SimpleField,
-  Table,
+  TextRun,
+  HeadingLevel,
+  BorderStyle,
+  ShadingType,
+  VerticalAlign,
   TableOfContents,
+  ImageRun,
 } from 'docx';
 import { Root } from 'mdast';
 import remarkGfm from 'remark-gfm';
@@ -52,22 +56,352 @@ const numbering: INumberingOptions = {
   ],
 };
 
-function generateMarkdownFromContent(content: ProjectContent): string {
-    if (!content) return '';
+function generateMarkdownFromContent(content: ProjectContent | any[]): string {
+    if (!content || !Array.isArray(content)) return '';
     return content.map(item => {
-        if (item instanceof Chapter) { // Chapter
-            const chapterContent = `# ${item.title}`;
-            const sectionsContent = item.sections.map(section => `## ${section.title}\n\n${section.content || ''}`).join('\n\n');
+        // Check if item has sections (Chapter-like)
+        if (item.sections && Array.isArray(item.sections)) {
+            const chapterContent = `# ${item.title || ''}`;
+            const sectionsContent = item.sections.map((section: any) => 
+                `## ${section.title || ''}\n\n${section.content || ''}`
+            ).join('\n\n');
             return `${chapterContent}\n\n${sectionsContent}`;
-        } else { // Section
-            return `# ${item.title}\n\n${item.content || ''}`;
+        } else { // Section-like
+            return `# ${item.title || ''}\n\n${item.content || ''}`;
         }
     }).join('\n\n<!-- slide-break -->\n\n');
 }
 
-// Overload for Project object
+/**
+ * Creates a professional cover page directly using docx API
+ * This provides better control over formatting than markdown conversion
+ */
+async function createProfessionalCoverPage(project: any, options: ConversionOptions): Promise<Paragraph[]> {
+    const coverPageElements: Paragraph[] = [];
+    const isArabic = /[\u0600-\u06FF]/.test(project.name || '');
+    
+    // Add top spacing (simulate vertical centering)
+    coverPageElements.push(
+        new Paragraph({ spacing: { before: 1440, after: 0 } }), // 1 inch
+        new Paragraph({ spacing: { before: 720, after: 0 } })   // 0.5 inch
+    );
+    
+    // University Logo (if available)
+    if (project.universityLogoUrl) {
+        try {
+            // Note: Image loading would need to be implemented based on URL
+            coverPageElements.push(
+                new Paragraph({
+                    alignment: AlignmentType.CENTER,
+                    spacing: { after: 480 },
+                    children: [
+                        new TextRun({ text: '[University Logo]', size: 20, color: '999999' })
+                    ]
+                })
+            );
+        } catch (error) {
+            console.warn('Failed to load university logo:', error);
+        }
+    }
+    
+    // Main Title - Large and Bold
+    coverPageElements.push(
+        new Paragraph({
+            text: project.name || 'Untitled Project',
+            heading: HeadingLevel.HEADING_1,
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 480, after: 360 },
+            border: {
+                bottom: {
+                    color: '4A90E2',
+                    space: 4,
+                    style: BorderStyle.SINGLE,
+                    size: 24
+                }
+            },
+            shading: {
+                type: ShadingType.CLEAR,
+                fill: 'F8F9FA'
+            },
+            bidirectional: isArabic
+        })
+    );
+    
+    // Project Description/Subtitle
+    if (project.projectDescription) {
+        coverPageElements.push(
+            new Paragraph({
+                text: project.projectDescription,
+                heading: HeadingLevel.HEADING_2,
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 240, after: 480 },
+                bidirectional: isArabic
+            })
+        );
+    }
+    
+    // Decorative line separator
+    coverPageElements.push(
+        new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 240, after: 240 },
+            border: {
+                top: { color: 'CCCCCC', space: 1, style: BorderStyle.SINGLE, size: 6 }
+            }
+        })
+    );
+    
+    // Project Metadata Section
+    const metadataItems: { label: string; value: string }[] = [];
+    
+    if (project.projectType) {
+        metadataItems.push({ 
+            label: isArabic ? 'نوع المشروع' : 'Project Type', 
+            value: project.projectType 
+        });
+    }
+    
+    if (project.specialization) {
+        metadataItems.push({ 
+            label: isArabic ? 'التخصص' : 'Specialization', 
+            value: project.specialization 
+        });
+    }
+    
+    // Add metadata as a styled box
+    if (metadataItems.length > 0) {
+        metadataItems.forEach(item => {
+            coverPageElements.push(
+                new Paragraph({
+                    alignment: AlignmentType.CENTER,
+                    spacing: { before: 120, after: 120 },
+                    bidirectional: isArabic,
+                    children: [
+                        new TextRun({
+                            text: `${item.label}: `,
+                            bold: true,
+                            size: 24,
+                            color: '2C3E50'
+                        }),
+                        new TextRun({
+                            text: item.value,
+                            size: 24,
+                            color: '34495E'
+                        })
+                    ]
+                })
+            );
+        });
+        
+        coverPageElements.push(
+            new Paragraph({ spacing: { before: 240, after: 240 } })
+        );
+    }
+    
+    // Team Members Section with Box Design
+    if (project.teamMembers && project.teamMembers.length > 0) {
+        coverPageElements.push(
+            new Paragraph({
+                text: isArabic ? 'إعداد الطلاب' : 'Prepared by',
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 360, after: 240 },
+                bidirectional: isArabic,
+                children: [
+                    new TextRun({
+                        text: isArabic ? 'إعداد الطلاب' : 'Prepared by',
+                        bold: true,
+                        size: 28,
+                        color: '1F4788',
+                        underline: { type: 'single' }
+                    })
+                ]
+            })
+        );
+        
+        project.teamMembers.forEach((member: string, index: number) => {
+            coverPageElements.push(
+                new Paragraph({
+                    alignment: AlignmentType.CENTER,
+                    spacing: { before: 160, after: 160 },
+                    bidirectional: isArabic,
+                    shading: {
+                        type: ShadingType.CLEAR,
+                        fill: index % 2 === 0 ? 'F8F9FA' : 'FFFFFF'
+                    },
+                    border: {
+                        left: { color: '4A90E2', space: 2, style: BorderStyle.SINGLE, size: 12 }
+                    },
+                    children: [
+                        new TextRun({
+                            text: member,
+                            size: 26,
+                            bold: true,
+                            color: '2C3E50'
+                        })
+                    ]
+                })
+            );
+        });
+        
+        coverPageElements.push(
+            new Paragraph({ spacing: { before: 360, after: 240 } })
+        );
+    }
+    
+    // Supervisor Section - Highlighted
+    if (project.supervisor) {
+        coverPageElements.push(
+            new Paragraph({
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 480, after: 240 },
+                bidirectional: isArabic,
+                children: [
+                    new TextRun({
+                        text: isArabic ? 'إشراف' : 'Supervised by',
+                        size: 24,
+                        bold: true,
+                        color: '7F8C8D'
+                    })
+                ]
+            }),
+            new Paragraph({
+                text: project.supervisor,
+                heading: HeadingLevel.HEADING_3,
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 120, after: 480 },
+                bidirectional: isArabic,
+                border: {
+                    top: { color: '4A90E2', space: 2, style: BorderStyle.SINGLE, size: 6 },
+                    bottom: { color: '4A90E2', space: 2, style: BorderStyle.SINGLE, size: 6 }
+                },
+                shading: {
+                    type: ShadingType.CLEAR,
+                    fill: 'E8F4F8'
+                }
+            })
+        );
+    }
+    
+    // Institution Information - Boxed Section
+    coverPageElements.push(
+        new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 480, after: 0 },
+            border: {
+                top: { color: '2C3E50', space: 2, style: BorderStyle.DOUBLE, size: 12 }
+            }
+        })
+    );
+    
+    if (project.university) {
+        coverPageElements.push(
+            new Paragraph({
+                text: project.university,
+                heading: HeadingLevel.HEADING_3,
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 360, after: 200 },
+                bidirectional: isArabic,
+                shading: {
+                    type: ShadingType.CLEAR,
+                    fill: 'F0F3F5'
+                }
+            })
+        );
+    }
+    
+    if (project.course) {
+        coverPageElements.push(
+            new Paragraph({
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 160, after: 160 },
+                bidirectional: isArabic,
+                children: [
+                    new TextRun({
+                        text: project.course,
+                        size: 26,
+                        bold: true,
+                        color: '34495E'
+                    })
+                ]
+            })
+        );
+    }
+    
+    if (project.educationalLevel) {
+        coverPageElements.push(
+            new Paragraph({
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 120, after: 360 },
+                bidirectional: isArabic,
+                children: [
+                    new TextRun({
+                        text: project.educationalLevel,
+                        size: 22,
+                        italics: true,
+                        color: '7F8C8D'
+                    })
+                ]
+            })
+        );
+    }
+    
+    // Date and Academic Year - Bottom Section
+    coverPageElements.push(
+        new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 480, after: 0 },
+            border: {
+                top: { color: '2C3E50', space: 2, style: BorderStyle.DOUBLE, size: 12 }
+            }
+        })
+    );
+    
+    const dateLocale = isArabic ? 'ar-SA' : 'en-US';
+    const formattedDate = new Date().toLocaleDateString(dateLocale, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    
+    const currentYear = new Date().getFullYear();
+    const academicYear = `${currentYear}-${currentYear + 1}`;
+    const yearLabel = isArabic ? 'العام الدراسي' : 'Academic Year';
+    
+    coverPageElements.push(
+        new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 360, after: 120 },
+            bidirectional: isArabic,
+            children: [
+                new TextRun({
+                    text: formattedDate,
+                    size: 24,
+                    bold: true,
+                    color: '2C3E50'
+                })
+            ]
+        }),
+        new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 120, after: 480 },
+            bidirectional: isArabic,
+            children: [
+                new TextRun({
+                    text: `${yearLabel} ${academicYear}`,
+                    size: 22,
+                    italics: true,
+                    color: '7F8C8D'
+                })
+            ]
+        })
+    );
+    
+    return coverPageElements;
+}
+
+// Overload for Project object or plain project data
 export async function convertMarkdownToWord(
-  project: Project,
+  project: Project | any,
   options?: ConversionOptions & { selectedContent?: ProjectContent }
 ): Promise<Buffer | Blob>;
 
@@ -79,11 +413,14 @@ export async function convertMarkdownToWord(
 ): Promise<Buffer | Blob>;
 
 /**
- * Converts a Project object or a raw markdown string to a styled .docx file.
+ * Converts a Project object (or plain project data) or a raw markdown string to a styled .docx file.
  * This is the main server-side function for DOCX generation.
+ * 
+ * Note: Accepts both Project instances and plain project data objects to support
+ * server-side rendering where client components cannot be instantiated.
  */
 export async function convertMarkdownToWord(
-  projectOrMarkdown: Project | string,
+  projectOrMarkdown: Project | any | string,
   optionsOrFileName?: (ConversionOptions & { selectedContent?: ProjectContent }) | string,
   optionsForMarkdown: ConversionOptions = {}
 ): Promise<Buffer | Blob> {
@@ -93,40 +430,39 @@ export async function convertMarkdownToWord(
       throw new Error('Input is required: provide either a Project object or markdown string');
     }
 
-    if (projectOrMarkdown instanceof Project) {
-      // Handle Project object
-      const project = projectOrMarkdown;
+    // Check if input is a Project-like object (either instance or plain object)
+    if (typeof projectOrMarkdown === 'object' && projectOrMarkdown !== null && 'content' in projectOrMarkdown) {
+      // Handle Project object or plain project data
+      const project = projectOrMarkdown as any;
       const options = (optionsOrFileName as (ConversionOptions & { selectedContent?: ProjectContent })) || {};
       const { styles, selectedContent, coverPageMarkdown: explicitCoverPage } = options;
+
+      const finalStyles: IStylesOptions = {
+        ...styles,
+        paragraphStyles: [...(styles?.paragraphStyles || [])],
+      };
+
+      const captionStyleExists = finalStyles.paragraphStyles!.some(style => style.id === 'Caption');
+      if (!captionStyleExists) {
+        (finalStyles.paragraphStyles as any).push({
+          id: 'Caption',
+          name: 'Caption',
+          basedOn: 'Normal',
+          next: 'Normal',
+          quickFormat: true,
+          run: { size: 18, italics: true, color: '595959' },
+          paragraph: {
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 120, after: 240 },
+          },
+        });
+      }
 
       // Validate project has content
       const contentToExport = selectedContent || project.content;
       if (!contentToExport || contentToExport.length === 0) {
         throw new Error('Project has no content to export');
       }
-
-    const finalStyles: IStylesOptions = {
-      ...styles,
-      paragraphStyles: [...(styles?.paragraphStyles || [])],
-    };
-
-    const captionStyleExists = finalStyles.paragraphStyles!.some(style => style.id === 'Caption');
-    if (!captionStyleExists) {
-      (finalStyles.paragraphStyles as any).push({
-        id: 'Caption',
-        name: 'Caption',
-        basedOn: 'Normal',
-        next: 'Normal',
-        quickFormat: true,
-        run: { size: 18, italics: true, color: '595959' },
-        paragraph: {
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 120, after: 240 },
-        },
-      });
-    }
-
-    const contentToExport = selectedContent || project.content;
     
     // Generate markdown safely
     let markdown: string;
@@ -165,109 +501,26 @@ export async function convertMarkdownToWord(
       throw new Error(`Failed to create DOCX content: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 
-    // Generate professional cover page with enhanced formatting
-    const coverPageParts: string[] = [];
-    
-    // Add vertical spacing at top for better presentation
-    coverPageParts.push('\n\n\n');
-    
-    // Add university logo if available (centered)
-    if (project.universityLogoUrl) {
-      coverPageParts.push(`![University Logo](${project.universityLogoUrl})\n<!-- caption: -->\n\n`);
-    }
-    
-    // Add main title with proper spacing - using H1 for prominence
-    coverPageParts.push(`# ${project.name || 'Untitled Project'}\n\n`);
-    
-    // Add project description/subtitle - using H2 for hierarchy
-    if (project.projectDescription) {
-      coverPageParts.push(`## ${project.projectDescription}\n\n`);
-    }
-    
-    // Add elegant horizontal separator
-    coverPageParts.push('\n---\n\n');
-    
-    // Add project metadata in a structured format
-    const metadata: string[] = [];
-    
-    if (project.projectType) {
-      metadata.push(`**نوع المشروع:** ${project.projectType}`);
-    }
-    if (project.specialization) {
-      metadata.push(`**التخصص:** ${project.specialization}`);
-    }
-    
-    if (metadata.length > 0) {
-      coverPageParts.push(metadata.join('  \n') + '\n\n');
-    }
-    
-    // Add team members section with better formatting
-    if (project.teamMembers && project.teamMembers.length > 0) {
-      coverPageParts.push(`\n**إعداد الطلاب:**\n\n`);
-      project.teamMembers.forEach(member => {
-        coverPageParts.push(`- **${member}**\n`);
-      });
-      coverPageParts.push('\n');
-    }
-    
-    // Add supervisor with emphasis
-    if (project.supervisor) {
-      coverPageParts.push(`**إشراف:**\n\n### ${project.supervisor}\n\n`);
-    }
-    
-    // Add another separator before institution info
-    coverPageParts.push('\n---\n\n');
-    
-    // Add institution information in a structured way
-    const institutionInfo: string[] = [];
-    
-    if (project.university) {
-      institutionInfo.push(`### ${project.university}`);
-    }
-    
-    if (project.course) {
-      institutionInfo.push(`**${project.course}**`);
-    }
-    
-    if (project.educationalLevel) {
-      institutionInfo.push(`*${project.educationalLevel}*`);
-    }
-    
-    if (institutionInfo.length > 0) {
-      coverPageParts.push(institutionInfo.join('  \n') + '\n\n');
-    }
-    
-    // Add final separator and formatted date
-    coverPageParts.push('\n---\n\n');
-    
-    // Format date in Arabic or English based on content
-    const isArabicContent = /[\u0600-\u06FF]/.test(project.name || '');
-    const dateLocale = isArabicContent ? 'ar-SA' : 'en-US';
-    const formattedDate = new Date().toLocaleDateString(dateLocale, { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-    
-    // Determine the year label based on language
-    const yearLabel = isArabicContent ? 'العام الدراسي' : 'Academic Year';
-    const currentYear = new Date().getFullYear();
-    const academicYear = `${currentYear}-${currentYear + 1}`;
-    
-    coverPageParts.push(`**${formattedDate}**\n\n`);
-    coverPageParts.push(`*${yearLabel} ${academicYear}*\n\n`);
-    
-    const coverPageMarkdown = explicitCoverPage ?? coverPageParts.join('');
-
-    // Generate cover page with error handling
+    // Generate professional cover page using direct docx API
     let coverPageDocxObjects: DocxObject[] = [];
-    if (coverPageMarkdown && coverPageMarkdown.trim().length > 0) {
+    
+    if (!explicitCoverPage) {
+      // Use the new professional cover page generator
       try {
-        const { docxObjects: convertedCoverPageObjects } = await createDocxContent(coverPageMarkdown, options);
+        const coverPageParagraphs = await createProfessionalCoverPage(project, options);
+        coverPageDocxObjects = coverPageParagraphs as any[];
+      } catch (error) {
+        console.error('Failed to generate professional cover page:', error);
+        // Fallback to empty cover page
+        coverPageDocxObjects = [];
+      }
+    } else {
+      // Use explicit cover page markdown if provided
+      try {
+        const { docxObjects: convertedCoverPageObjects } = await createDocxContent(explicitCoverPage, options);
         coverPageDocxObjects = convertedCoverPageObjects || [];
       } catch (error) {
-        console.error('Failed to generate cover page:', error);
-        // Continue without cover page rather than failing completely
+        console.error('Failed to generate cover page from markdown:', error);
         coverPageDocxObjects = [];
       }
     }
