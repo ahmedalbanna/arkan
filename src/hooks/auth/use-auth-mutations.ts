@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -192,6 +191,26 @@ export function useForgotPassword() {
         },
         onError: (error) => handleErrorUtility(error, "Password Reset Failed"),
     });
+}
+
+export function useForgotPasswordLoggedIn() {
+  const { firebaseUser } = useAuth();
+  const { toast } = useToast();
+  return useMutation({
+    mutationFn: async () => {
+      if (!firebaseUser?.email) {
+        throw new Error("No authenticated user email found.");
+      }
+      return forgotPasswordService(firebaseUser.email);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Password Reset Email Sent",
+        description: "Please check your inbox for instructions to reset your password.",
+      });
+    },
+    onError: (error) => handleErrorUtility(error, "Failed to send reset email"),
+  });
 }
 
 

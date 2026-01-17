@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Loader2, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
+import { useForgotPasswordLoggedIn } from '@/hooks/auth/use-auth-mutations';
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required.'),
@@ -61,6 +62,8 @@ export function ChangePasswordForm() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<Strength | null>(null);
 
+  const forgotPasswordMutation = useForgotPasswordLoggedIn();
+
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
     defaultValues: { currentPassword: '', newPassword: '' },
@@ -104,6 +107,10 @@ export function ChangePasswordForm() {
   const onSubmit = (data: PasswordFormValues) => {
     changePasswordMutation.mutate(data);
   };
+
+  const handleForgotPassword = () => {
+    forgotPasswordMutation.mutate();
+  };
   
   if (firebaseUser?.providerData.some(p => p.providerId !== 'password')) {
     return null;
@@ -123,7 +130,18 @@ export function ChangePasswordForm() {
               name="currentPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Current Password</FormLabel>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Current Password</FormLabel>
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="p-0 h-auto text-xs"
+                      onClick={handleForgotPassword}
+                      disabled={forgotPasswordMutation.isPending}
+                    >
+                      {forgotPasswordMutation.isPending ? 'Sending...' : 'Forgot your password?'}
+                    </Button>
+                  </div>
                   <div className="relative">
                     <FormControl>
                       <Input type={showCurrentPassword ? 'text' : 'password'} {...field} disabled={changePasswordMutation.isPending} />
