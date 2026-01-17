@@ -19,39 +19,7 @@
  ○ (pwa) Service worker: /teamspace/studios/this_studio/arkan/public/sw.js
  ○ (pwa)   URL: /sw.js
  ○ (pwa)   Scope: /
- ⚠ Compiled with warnings in 2.3min
-
-./src/ai/schemas/index.ts
-The requested module './project-documentation' contains conflicting star exports for the name 'ProjectTypeSchema' with the previous requested module './graduation-project'
-
-Import trace for requested module:
-./src/ai/schemas/index.ts
-./src/ai/schemas.ts
-./src/components/writing-tools/PlantUMLGeneratorTool.tsx
-
-./src/ai/schemas/index.ts
-The requested module './project-documentation' contains conflicting star exports for the names 'CitationStyleSchema', 'DiagramTypeSchema' with the previous requested module './enums'
-
-Import trace for requested module:
-./src/ai/schemas/index.ts
-./src/ai/schemas.ts
-./src/components/writing-tools/PlantUMLGeneratorTool.tsx
-
-./src/ai/schemas/index.ts
-The requested module './project-documentation' contains conflicting star exports for the name 'ProjectTypeSchema' with the previous requested module './graduation-project'
-
-Import trace for requested module:
-./src/ai/schemas/index.ts
-./src/ai/schemas.ts
-./src/components/writing-tools/PlantUMLGeneratorTool.tsx
-
-./src/ai/schemas/index.ts
-The requested module './project-documentation' contains conflicting star exports for the names 'CitationStyleSchema', 'DiagramTypeSchema' with the previous requested module './enums'
-
-Import trace for requested module:
-./src/ai/schemas/index.ts
-./src/ai/schemas.ts
-./src/components/writing-tools/PlantUMLGeneratorTool.tsx
+ ⚠ Compiled with warnings in 2.2min
 
 ./node_modules/@opentelemetry/instrumentation/build/esm/platform/node/instrumentation.js
 Critical dependency: the request of a dependency is an expression
@@ -111,53 +79,10 @@ Import trace for requested module:
 ./src/ai/index.ts
 ./src/app/api/generate/section/route.ts
 
-./src/ai/schemas/index.ts
-The requested module './project-documentation' contains conflicting star exports for the name 'ProjectTypeSchema' with the previous requested module './graduation-project'
-
-Import trace for requested module:
-./src/ai/schemas/index.ts
-./src/ai/schemas.ts
-./src/ai/flows/generate-agent-config.ts
-
-./src/ai/schemas/index.ts
-The requested module './project-documentation' contains conflicting star exports for the names 'CitationStyleSchema', 'DiagramTypeSchema' with the previous requested module './enums'
-
-Import trace for requested module:
-./src/ai/schemas/index.ts
-./src/ai/schemas.ts
-./src/ai/flows/generate-agent-config.ts
-
-./src/ai/schemas/index.ts
-The requested module './project-documentation' contains conflicting star exports for the name 'ProjectTypeSchema' with the previous requested module './graduation-project'
-
-Import trace for requested module:
-./src/ai/schemas/index.ts
-./src/ai/schemas.ts
-./src/app/api/generate/section/route.ts
-
-./src/ai/schemas/index.ts
-The requested module './project-documentation' contains conflicting star exports for the names 'CitationStyleSchema', 'DiagramTypeSchema' with the previous requested module './enums'
-
-Import trace for requested module:
-./src/ai/schemas/index.ts
-./src/ai/schemas.ts
-./src/app/api/generate/section/route.ts
-
-./src/app/api/admin/flows/execute/route.ts
-Attempted import error: 'getFlowConfigService' is not exported from '@/services/flow-config-service' (imported as 'getFlowConfigService').
-
-Import trace for requested module:
-./src/app/api/admin/flows/execute/route.ts
-
-   Linting and checking validity of types  ...
+   Linting and checking validity of types  ..
  ⚠ The Next.js plugin was not detected in your ESLint configuration. See https://nextjs.org/docs/app/api-reference/config/eslint#migrating-existing-config
 
 Failed to compile.
-
-./src/ai/__test__/tmp_rovodev_test_system.ts
-13:3  Error: 'grammarCheck' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-24:3  Error: 'professionalWritingTools' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-70:11  Error: 'paraphrase' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
 
 ./src/ai/custom-transformers.ts
 12:36  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
@@ -300,32 +225,33 @@ Failed to compile.
 352:32  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 
 ./src/ai/dynamic-flow/step-handlers.ts
-18:3  Error: 'ConditionStepConfig' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-19:3  Error: 'LoopStepConfig' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
 30:11  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 36:12  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 38:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 52:12  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+82:12  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
 99:12  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 130:20  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 146:17  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+167:12  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
 176:72  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-186:12  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+186:12  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
 220:43  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 244:12  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+263:12  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
 280:12  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 286:17  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+316:12  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
 333:12  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+351:12  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
 362:10  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 363:30  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 364:12  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 366:46  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 366:59  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 366:67  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-379:23  Error: 'params' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
-379:77  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-380:20  Error: 'params' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
-380:71  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+379:78  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+380:72  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 391:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 400:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 444:11  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
@@ -333,8 +259,11 @@ Failed to compile.
 455:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 483:11  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 485:12  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+499:12  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
+541:12  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
 556:11  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 558:12  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+580:12  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
 
 ./src/ai/dynamic-flow/template-engine.ts
 63:32  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
@@ -377,12 +306,6 @@ Failed to compile.
 281:37  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 283:34  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 
-./src/ai/flows/create-lecture-unit.ts
-10:3  Error: 'GenerateTheoreticalLectureInputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-12:8  Error: 'GenerateTheoreticalLectureOutput' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-13:3  Error: 'GenerateSessionPlanInputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-15:8  Error: 'GenerateSessionPlanOutput' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-
 ./src/ai/flows/dynamic-flow-executor.ts
 11:10  Error: 'TemplateEngine' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
 12:10  Error: 'ConditionEvaluator' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
@@ -424,21 +347,6 @@ Failed to compile.
 516:56  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 540:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 
-./src/ai/flows/generate-image.ts
-11:10  Error: 'z' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-
-./src/ai/flows/graduation-project-generator.ts
-27:10  Error: 'validateJsonOutput' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-27:30  Error: 'RECOMMENDED_TEMPERATURES' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-28:10  Error: 'z' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-178:19  Error: 'methodGenerated' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-237:19  Error: 'analysisGenerated' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-290:19  Error: 'designGenerated' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-338:19  Error: 'implGenerated' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-378:19  Error: 'testGenerated' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-431:19  Error: 'resultsGenerated' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-528:19  Error: 'recsGenerated' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-
 ./src/ai/flows/paraphrase-text.ts
 48:102  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 
@@ -451,48 +359,17 @@ Failed to compile.
 86:24  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 
 ./src/ai/model-health-check.ts
-83:13  Error: 'response' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-173:14  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+96:14  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
+132:14  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
+173:14  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
+400:14  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
 
 ./src/ai/model-request-queue.ts
 53:32  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 
 ./src/ai/prompts/index.ts
-6:5  Error: 'AiProofreadDocumentOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-8:5  Error: 'AIResearcherOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-9:5  Error: 'AnalyzeContextOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-11:5  Error: 'BiasCheckOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-13:5  Error: 'DetectAIOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-15:5  Error: 'FactCheckOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-17:5  Error: 'FactRetrievalOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-19:5  Error: 'GenerateAgentConfigOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-21:5  Error: 'GenerateChapterOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-23:5  Error: 'GenerateCitationOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-25:5  Error: 'GeneratePlantUMLOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-27:5  Error: 'GenerateProjectBlueprintOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-29:5  Error: 'GenerateQuizOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-31:5  Error: 'GenerateSectionOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-33:5  Error: 'GenerateTextOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-35:5  Error: 'GenerateTocOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-37:5  Error: 'GenerateUIDescriptionOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-39:5  Error: 'GrammarCheckOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-41:5  Error: 'HumanizeTextOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-43:5  Error: 'ImageToTextOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-45:5  Error: 'ImproveMarkdownOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-47:5  Error: 'ManipulateTextOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-49:5  Error: 'ParaphraseOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-51:5  Error: 'PlagiarismCheckOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-53:5  Error: 'QuestionAnsweringOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-55:5  Error: 'RewriteDocumentOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-57:5  Error: 'RewriteToMarkdownOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-59:5  Error: 'SentenceStructureCheckOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-61:5  Error: 'SolveAssignmentsOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-62:5  Error: 'SummarizeOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-64:5  Error: 'TopicExplainerOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-66:5  Error: 'TranslateTextOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
 68:5  Error: 'WriteDocumentOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-70:42  Error: 'GenerateSessionPlanOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-70:114  Error: 'GenerateTheoreticalLectureOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+70:115  Error: 'GenerateTheoreticalLectureOutputSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
 79:7  Error: 'styleDescriptions' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
 87:7  Error: 'lengthDescriptions' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
 93:7  Error: 'styleControls' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
@@ -505,8 +382,9 @@ Failed to compile.
 87:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 210:38  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 210:52  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-331:18  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
-434:18  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+243:14  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
+331:18  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
+434:18  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
 536:50  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 536:64  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 
@@ -517,17 +395,8 @@ Failed to compile.
 4:10  Error: 'useEffect' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
 25:13  Error: 'firebaseUser' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
 
-./src/app/admin/settings/page.tsx
-11:46  Error: 'CardFooter' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-
 ./src/app/api/__tests__/flows.test.ts
-6:34  Error: 'beforeAll' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-6:45  Error: 'afterAll' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-12:9  Error: 'baseUrl' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-17:13  Error: 'flowData' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-159:9  Error: 'baseUrl' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-197:9  Error: 'baseUrl' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-236:9  Error: 'baseUrl' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+6:46  Error: 'afterAll' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
 
 ./src/app/api/admin/document-stats/route.ts
 19:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
@@ -536,7 +405,6 @@ Failed to compile.
 104:12  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 
 ./src/app/api/admin/indexed-documents/route.ts
-14:27  Error: 'request' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
 24:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 
 ./src/app/api/admin/payments/verify/route.ts
@@ -547,9 +415,6 @@ Failed to compile.
 
 ./src/app/api/admin/sections/route.ts
 16:38  Error: 'user' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
-
-./src/app/api/admin/templates/presentation/[id]/route.ts
-5:10  Error: 'PresentationGenerationTemplateSchema' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
 
 ./src/app/api/admin/tools/route.ts
 107:12  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
@@ -570,27 +435,18 @@ Failed to compile.
 ./src/app/api/agents/route.ts
 5:15  Error: 'AgentProperties' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
 
-./src/app/api/auth/guest/route.ts
-4:28  Error: 'request' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
-
 ./src/app/api/auth/logout/route.ts
-4:28  Error: 'req' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
 26:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 
 ./src/app/api/auth/signup/route.ts
 54:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 
 ./src/app/api/creative-studio/generate-step/route.ts
-7:10  Error: 'GenerationStep' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
 17:44  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 52:58  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 
 ./src/app/api/demo/benchmark/route.ts
 9:28  Error: 'request' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
-
-./src/app/api/demo/cache-stats/route.ts
-9:27  Error: 'request' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
-25:30  Error: 'request' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
 
 ./src/app/api/export/docx/route.ts
 46:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
@@ -606,36 +462,28 @@ Failed to compile.
 34:39  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 
 ./src/app/api/notifications/route.ts
-17:14  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+17:14  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
+42:14  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
 
 ./src/app/api/project/[projectId]/upload-logo/route.ts
 7:26  Error: 'createApiResponse' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
 
 ./src/app/api/rag/health/route.ts
-14:27  Error: 'request' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
 17:69  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 18:74  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 19:69  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 81:15  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 89:49  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 
-./src/app/api/rag/stats/route.ts
-10:27  Error: 'request' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
-
 ./src/app/api/stats/route.ts
-16:14  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+16:14  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
+72:14  Error: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
 
 ./src/app/api/templates/docx/route.ts
 27:41  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 
 ./src/app/api/templates/pptx/route.ts
 27:41  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-
-./src/app/api/templates/report/apply/route.ts
-9:10  Error: 'createApiResponse' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
-
-./src/app/api/templates/report/route.ts
-4:38  Error: 'ReportTemplate' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
 
 ./src/app/api/users/[id]/reset-password/route.ts
 27:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
