@@ -48,7 +48,7 @@ export const POST = withAuth(async ({ request }) => {
             return handleApiError({ message: 'A report template with this ID already exists.' }, 409);
         }
 
-        await docRef.set(data);
+        await docRef.set({ ...data, content: data.content || [] }); // Ensure content is at least an empty array
         return createApiResponse({ id, ...data }, 201);
     } catch (error) {
         return handleApiError(error);

@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { SectionPropertiesSchema } from './section';
 import { Template, type BaseTemplateProperties } from './template';
 
-
 export const ReportTemplateChapterSchema = z.object({
   title: z.string(),
   sections: z.array(SectionPropertiesSchema),

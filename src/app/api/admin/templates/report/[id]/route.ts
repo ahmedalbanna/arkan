@@ -32,6 +32,7 @@ export const PUT = withAuth(async ({ request, params }) => {
         }
 
         let body = await request.json();
+        // The body now contains the full content structure
         let validation = UpdateReportTemplateSchema.safeParse(body);
         if (!validation.success) {
             return handleApiError(validation.error);
@@ -57,7 +58,8 @@ export const DELETE = withAuth(async ({ params }) => {
         }
         
         // Prevent deletion of default templates
-        if (['technical-report', 'simple-business-report'].includes(id)) {
+        const defaultIds = defaultReportTemplates.filter(t => t.isDefault).map(t => t.id);
+        if (defaultIds.includes(id)) {
             return handleApiError({ message: 'Default templates cannot be deleted.' }, 403);
         }
         
@@ -67,3 +69,6 @@ export const DELETE = withAuth(async ({ params }) => {
         return handleApiError(error);
     }
 }, { requireAdmin: true });
+
+// Add this import at the top
+import { defaultReportTemplates } from '@/lib/db/seed-data/report-templates';
