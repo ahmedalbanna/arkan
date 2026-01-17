@@ -32,7 +32,7 @@ export function prepareHeadersAndFooters(options: ConversionOptions): {
         watermark: {
           type: 'text',
           text: watermark,
-          color: 'D3D3D3', // Light Grey
+          color: 'E0E0E0', // Lighter grey for subtlety
           font: 'Calibri',
           angle: -45,
         },
@@ -49,13 +49,26 @@ export function prepareHeadersAndFooters(options: ConversionOptions): {
     const defaultFooterChildren = footer?.default ? [...footer.default] : [];
     if (pageNumbers) {
       const defaultFont = isRtl ? fonts?.rtl : fonts?.default;
+      
+      // Create a more professional page number format
       const pageNumberParagraph = new Paragraph({
         alignment: AlignmentType.CENTER,
         bidirectional: isRtl,
+        spacing: { before: 100 },
+        border: {
+          top: { style: 'single', size: 4, color: 'D0D0D0' }
+        },
         children: [
           new TextRun({
             rightToLeft: isRtl,
-            children: [PageNumber.CURRENT, " | ", PageNumber.TOTAL_PAGES],
+            children: [
+              isRtl ? "صفحة " : "Page ",
+              PageNumber.CURRENT, 
+              isRtl ? " من " : " of ", 
+              PageNumber.TOTAL_PAGES
+            ],
+            size: 20, // 10pt
+            color: '666666',
             ...(defaultFont && { font: { name: defaultFont } }),
           }),
         ],
@@ -112,16 +125,47 @@ export async function buildDocumentSections(
 
   // 3. Add Table of Contents to the first content chunk if requested
   if (includeToc) {
-    const toc = new TableOfContents("Table of Contents", {
+    // Create a professional TOC title
+    const tocTitle = new Paragraph({
+      text: "Table of Contents",
+      heading: "Heading1",
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 480, after: 360 },
+      border: {
+        bottom: { style: 'single', size: 12, color: '4A90E2' }
+      }
+    });
+
+    const toc = new TableOfContents("Contents", {
       hyperlink: true,
-      headingStyleRange: "1-6",
+      headingStyleRange: "1-5", // Limit to 5 levels for cleaner TOC
+      stylesWithLevels: [
+        { styleName: "Heading1", level: 1 },
+        { styleName: "Heading2", level: 2 },
+        { styleName: "Heading3", level: 3 },
+        { styleName: "Heading4", level: 4 },
+        { styleName: "Heading5", level: 5 },
+      ]
+    });
+
+    // Add spacing after TOC
+    const tocSpacer = new Paragraph({ 
+      text: "",
+      spacing: { before: 240 }
     });
 
     if (contentChunks.length > 0) {
-      contentChunks[0].children.unshift(new Paragraph({ text: "" }), toc, new Paragraph({ pageBreakBefore: true }));
+      // Insert TOC at the beginning with proper formatting
+      contentChunks[0].children.unshift(
+        tocTitle,
+        new Paragraph({ text: "" }), // Small spacer
+        toc, 
+        tocSpacer,
+        new Paragraph({ pageBreakBefore: true }) // Page break after TOC
+      );
     } else {
       contentChunks.push({
-        children: [toc],
+        children: [tocTitle, new Paragraph({ text: "" }), toc, tocSpacer, new Paragraph({ pageBreakBefore: true })],
         orientation: paper?.orientation || 'portrait'
       });
     }

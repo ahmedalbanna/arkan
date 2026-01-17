@@ -56,4 +56,5 @@ export interface ConversionOptions {
   isRtl?: boolean;
   fonts?: FontOptions;
   includeToc?: boolean;
+  selectedContent?: any; // Support for filtering project content
 }

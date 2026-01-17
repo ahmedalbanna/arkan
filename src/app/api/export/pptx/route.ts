@@ -79,6 +79,25 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('PPTX Export API Error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return new NextResponse(JSON.stringify({ message: 'Error converting to .pptx file.', error: errorMessage }), { status: 500 });
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
+    // Log detailed error for debugging
+    console.error('Error details:', {
+      message: errorMessage,
+      stack: errorStack,
+      type: error instanceof Error ? error.constructor.name : typeof error
+    });
+    
+    return new NextResponse(
+      JSON.stringify({ 
+        message: 'Error converting to .pptx file.', 
+        error: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? errorStack : undefined
+      }), 
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
   }
 }
