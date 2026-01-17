@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCacheManager } from '@/lib/rag/cache';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const cacheManager = getCacheManager();
     const stats = cacheManager.getAllStats();
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE(_request: NextRequest) {
   try {
     const cacheManager = getCacheManager();
     cacheManager.clearAll();

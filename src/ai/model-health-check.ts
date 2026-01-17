@@ -80,7 +80,7 @@ class ModelHealthMonitor {
 
     try {
       // Try to generate a simple response
-      const response = await this.testGeneration(modelName);
+      const _response = await this.testGeneration(modelName);
 
       const responseTime = Date.now() - startTime;
       const result: HealthCheckResult = {
@@ -93,7 +93,7 @@ class ModelHealthMonitor {
 
       this.healthCache.set(model, result);
       return result;
-    } catch (error) {
+    } catch (_error) {
       const result: HealthCheckResult = {
         model,
         status: HealthStatus.UNAVAILABLE,
@@ -116,7 +116,7 @@ class ModelHealthMonitor {
     const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
 
     try {
-      const response = await fetch(`${this.config.serverUrl}/api/generate`, {
+      const _response = await fetch(`${this.config.serverUrl}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -129,7 +129,7 @@ class ModelHealthMonitor {
 
       clearTimeout(timeoutId);
       return response.ok;
-    } catch (error) {
+    } catch (_error) {
       clearTimeout(timeoutId);
       throw error;
     }
@@ -161,7 +161,7 @@ class ModelHealthMonitor {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
 
-      const response = await fetch(`${this.config.serverUrl}/api/tags`, {
+      const _response = await fetch(`${this.config.serverUrl}/api/tags`, {
         method: 'GET',
         signal: controller.signal,
       });
@@ -170,7 +170,7 @@ class ModelHealthMonitor {
       this.serverOnline = response.ok;
       this.lastServerCheck = Date.now();
       return this.serverOnline;
-    } catch (error) {
+    } catch (_error) {
       this.serverOnline = false;
       this.lastServerCheck = Date.now();
       return false;
@@ -397,7 +397,7 @@ export async function executeWithFallback<T>(
       }
 
       return await operation(currentModel);
-    } catch (error) {
+    } catch (_error) {
       attempts++;
 
       if (attempts > maxRetries) {

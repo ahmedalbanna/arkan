@@ -7,7 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getVectorStore } from '@/lib/rag/vector-store';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const vectorStore = getVectorStore();
 

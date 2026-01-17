@@ -116,9 +116,9 @@ export const DocumentTemplateTypeSchema = z.enum([
 export type DocumentTemplateType = z.infer<typeof DocumentTemplateTypeSchema>;
 
 /**
- * Project types
+ * Project types for documentation
  */
-export const ProjectTypeSchema = z.enum([
+export const DocProjectTypeSchema = z.enum([
     'web_application',
     'mobile_app',
     'library',
@@ -129,12 +129,12 @@ export const ProjectTypeSchema = z.enum([
     'monorepo',
     'other'
 ]);
-export type ProjectType = z.infer<typeof ProjectTypeSchema>;
+export type DocProjectType = z.infer<typeof DocProjectTypeSchema>;
 
 /**
  * Diagram types for architecture visualization
  */
-export const DiagramTypeSchema = z.enum([
+export const DocDiagramTypeSchema = z.enum([
     'flowchart',
     'sequence',
     'class',
@@ -144,19 +144,19 @@ export const DiagramTypeSchema = z.enum([
     'architecture',
     'component'
 ]);
-export type DiagramType = z.infer<typeof DiagramTypeSchema>;
+export type DocDiagramType = z.infer<typeof DocDiagramTypeSchema>;
 
 /**
- * Citation styles
+ * Citation styles for documentation
  */
-export const CitationStyleSchema = z.enum([
+export const DocCitationStyleSchema = z.enum([
     'APA',
     'MLA',
     'Chicago',
     'Harvard',
     'IEEE'
 ]);
-export type CitationStyle = z.infer<typeof CitationStyleSchema>;
+export type DocCitationStyle = z.infer<typeof DocCitationStyleSchema>;
 
 /**
  * Report period types
@@ -195,14 +195,14 @@ export const ProjectDataSchema = z.object({
     projectDescription: z.string().describe('Detailed description of the project'),
     projectUrl: z.string().url().optional().describe('Project repository or website URL'),
     projectPath: z.string().optional().describe('Local file system path to the project'),
-    projectType: ProjectTypeSchema.optional().describe('Type of project'),
+    projectType: DocProjectTypeSchema.optional().describe('Type of project'),
 
     // Documentation Settings
     documentType: z.string().describe('Type of document to generate'),
     specialization: z.string().optional().describe('Technical specialization or domain'),
     educationalLevel: z.string().optional().describe('Educational context if applicable'),
     university: z.string().optional().describe('University affiliation if applicable'),
-    citationStyle: CitationStyleSchema.optional().describe('Citation format to use'),
+    citationStyle: DocCitationStyleSchema.optional().describe('Citation format to use'),
     language: z.string().default('en').describe('Output language (ISO code)'),
 
     // Quality & Complexity
@@ -221,7 +221,7 @@ export const ProjectDataSchema = z.object({
     includedTopics: z.string().optional().describe('Topics that must be covered'),
     tableCaption: z.string().optional().describe('Caption for tables'),
     programmingLanguage: z.string().optional().describe('Programming language for code examples'),
-    diagramType: DiagramTypeSchema.optional().describe('Type of diagrams to include'),
+    diagramType: DocDiagramTypeSchema.optional().describe('Type of diagrams to include'),
     wordCount: z.string().optional().describe('Target word count or length'),
 
     // Advanced Settings
@@ -273,7 +273,7 @@ export const ProjectStructureSchema = z.object({
     })),
     entryPoints: z.array(z.string()),
     configFiles: z.array(z.string()),
-    projectType: ProjectTypeSchema,
+    projectType: DocProjectTypeSchema,
 });
 export type ProjectStructure = z.infer<typeof ProjectStructureSchema>;
 
@@ -562,9 +562,9 @@ export const projectDocumentationSchemas = {
     CommunicationStyleSchema,
     KnowledgeHandlingSchema,
     DocumentTemplateTypeSchema,
-    ProjectTypeSchema,
-    DiagramTypeSchema,
-    CitationStyleSchema,
+    DocProjectTypeSchema,
+    DocDiagramTypeSchema,
+    DocCitationStyleSchema,
     ReportPeriodSchema,
     PresentationTypeSchema,
 

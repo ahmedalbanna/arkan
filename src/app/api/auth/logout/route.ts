@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { handleApiError } from '@/lib/utils/api-utils';
 
-export async function POST(req: Request) {
+export async function POST(_req: Request) {
   try {
     // Options to clear the session cookie
     const sessionOptions = {
