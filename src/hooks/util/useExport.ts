@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { saveAs } from 'file-saver';
 import { toast } from './use-toast';
-import type { Project, ProjectContent, Chapter } from '@/lib/models';
+import type { Project, ProjectContent } from '@/lib/models';
+import { Chapter } from '@/lib/models';
 import { templates as docxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
 import { templates as pptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 import { ConversionOptions } from '@/lib/word-converter/types';
@@ -104,16 +105,20 @@ export function useExport() {
     
     /**
      * Exports a report as a PPTX file by generating it on the client side.
+     * Note: PPTX generation must remain client-side because it uses canvas/document APIs
      * @param params - An object containing the project, export options, and selected content.
      */
     const exportPresentationPptx = async ({ project, options, selectedContent }: PptxExportParams) => {
+        // Helper function to generate markdown from content
         const generateMarkdownFromContent = (content: ProjectContent) => {
             return content.map(item => {
-                if (item instanceof Chapter) { // Chapter
+                if (item instanceof Chapter) {
                     const chapterContent = `# ${item.title}`;
-                    const sectionsContent = item.sections.map(section => `## ${section.title}\n\n${section.content || ''}`).join('\n\n');
+                    const sectionsContent = item.sections.map(section => 
+                        `## ${section.title}\n\n${section.content || ''}`
+                    ).join('\n\n');
                     return `${chapterContent}\n\n${sectionsContent}`;
-                } else { // Section
+                } else {
                     return `# ${item.title}\n\n${item.content || ''}`;
                 }
             }).join('\n\n<!-- slide-break -->\n\n');
@@ -123,6 +128,7 @@ export function useExport() {
             toast({ title: 'Export Canceled', description: 'No content selected to export.', variant: 'destructive' });
             return;
         }
+        
         setIsExporting(true);
         try {
             const templateStyles = pptxTemplates[options.template] || pptxTemplates.modern;
@@ -135,6 +141,7 @@ export function useExport() {
 
             const markdownToExport = generateMarkdownFromContent(selectedContent);
 
+            // Extract footnotes from full project content
             const fullMarkdown = project.fullMarkdownContent;
             const footnoteRegex = /^\[\^.+?\]:.+$/gm;
             const footnoteDefinitions = fullMarkdown.match(footnoteRegex);
@@ -144,7 +151,11 @@ export function useExport() {
                 finalMarkdown += '\n\n' + footnoteDefinitions.join('\n');
             }
 
-            const blob = await convertMarkdownToPptx(finalMarkdown, project.name, conversionOptions);
+            const result = await convertMarkdownToPptx(finalMarkdown, project.name, conversionOptions);
+            // Ensure result is a Blob
+            const blob = result instanceof Blob ? result : new Blob([result], { 
+                type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' 
+            });
             saveAs(blob, `${project.name.replace(/\s+/g, '_')}_presentation.pptx`);
 
             toast({ title: 'Export Successful', description: 'Presentation exported as PPTX.' });
@@ -155,7 +166,7 @@ export function useExport() {
                 title: 'Export Failed', 
                 description: errorMessage, 
                 variant: 'destructive',
-                duration: 7000 // Show error longer for user to read
+                duration: 7000
             });
         } finally {
             setIsExporting(false);

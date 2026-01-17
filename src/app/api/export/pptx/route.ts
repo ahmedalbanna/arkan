@@ -3,7 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Project, type ProjectProperties, Chapter, type ChapterProperties, Section, type SectionProperties } from '@/lib/models';
+import type { ProjectProperties } from '@/lib/models';
 import { convertMarkdownToPptx } from '@/lib/markdown-to-pptx-converter';
 import type { PptxConversionOptions } from '@/lib/markdown-to-pptx-converter';
 
@@ -21,6 +21,34 @@ const markdownExportSchema = z.object({
 
 const exportSchema = z.union([projectExportSchema, markdownExportSchema]);
 
+/**
+ * Generate markdown from content data (plain objects)
+ */
+function generateMarkdownFromContentData(content: any[]): string {
+  if (!content || !Array.isArray(content)) return '';
+  
+  return content.map(item => {
+    // Check if item has sections (Chapter-like)
+    if (item.sections && Array.isArray(item.sections)) {
+      const chapterContent = `# ${item.title || ''}`;
+      const sectionsContent = item.sections.map((section: any) => 
+        `## ${section.title || ''}\n\n${section.content || ''}`
+      ).join('\n\n');
+      return `${chapterContent}\n\n${sectionsContent}`;
+    } else { // Section-like
+      return `# ${item.title || ''}\n\n${item.content || ''}`;
+    }
+  }).join('\n\n<!-- slide-break -->\n\n');
+}
+
+/**
+ * Generate full markdown from project data
+ */
+function generateFullProjectMarkdown(project: any): string {
+  if (!project.content || !Array.isArray(project.content)) return '';
+  return generateMarkdownFromContentData(project.content);
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -35,18 +63,16 @@ export async function POST(req: NextRequest) {
 
     if ('project' in validation.data) {
       // Handle project-based export
+      // Note: We pass plain data objects instead of instantiating classes
+      // because Project/Chapter/Section are client components
       const { project: projectData, selectedContent: selectedContentData, options } = validation.data;
-      const project = new Project(projectData as ProjectProperties);
+      const project = projectData as ProjectProperties;
       
-      const markdownToExport = project.generateMarkdownFromContent(
-        selectedContentData.map(item => {
-          if ('sections' in item) return new Chapter(item as ChapterProperties);
-          return new Section(item as SectionProperties);
-        })
-      );
+      // Generate markdown from content data
+      const markdownToExport = generateMarkdownFromContentData(selectedContentData);
       
       // Extract footnotes from the full project content
-      const fullProjectMarkdown = project.fullMarkdownContent;
+      const fullProjectMarkdown = generateFullProjectMarkdown(project);
       const footnoteRegex = /^\[\^.+?\]:.+$/gm;
       const footnoteDefinitions = fullProjectMarkdown.match(footnoteRegex);
 
@@ -55,8 +81,8 @@ export async function POST(req: NextRequest) {
           finalMarkdown += '\n\n' + footnoteDefinitions.join('\n');
       }
 
-      pptxBuffer = await convertMarkdownToPptx(finalMarkdown, project.name, { ...options, title: project.name });
-      fileName = `${project.name.replace(/\s+/g, '_') || 'presentation'}.pptx`;
+      pptxBuffer = await convertMarkdownToPptx(finalMarkdown, project.name || 'Presentation', { ...options, title: project.name });
+      fileName = `${(project.name || 'presentation').replace(/\s+/g, '_')}.pptx`;
     } else {
       // Handle direct markdown export
       const { markdown, fileName: fn, options } = validation.data;
